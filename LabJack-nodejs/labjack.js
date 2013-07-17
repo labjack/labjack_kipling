@@ -77,14 +77,6 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	this.debug = new debugging(genDebuggingEnable, debugSystem);
 	this.driver = driverLib.getDriver();
 	this.handle = null;
-	this.deviceType = null;	//The integer constant describing a device
-	this.deviceName = null;
-	this.serialNumber = null;
-	this.ethernetIP = null;
-	this.wifiIP = null;
-	this.availableByUSB = null;
-
-	this.connectionType = null;
 
 	//Saves the Constants object
 	this.constants = driverLib.getConstants();
@@ -97,16 +89,27 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	{
 		console.log('initialized');
 	}
+	this.saveHandle = function(handle)
+	{
+		this.handle = handle;
+	}
 	this.checkCallback = function(args)
 	{
+		//console.log(typeof(args[args.length-1]));
+		//console.log(typeof(args[args.length-2]));
+		var bool;
 		if(args.length >= 2)
 		{
 			if((typeof(args[args.length-1])=='function')&&(typeof(args[args.length-2])=='function'))
 			{
-				return true;
+				bool = true;
+				var oE = args[args.length-2];
+				var oS = args[args.length-1];
+				return [bool, oE, oS];
 			}
 		}
-		return false;
+		bool = false;
+		return [bool, null, null];
 	}
 	/**
 	 * Opens a new devDriverInterfaceErrorice if it isn't already connected
@@ -122,19 +125,24 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	 */
 	this.open = function(dt, ct, id, onE, onS)
 	{
-		var useCallBacks = this.checkCallback(arguments);
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+		
 		var deviceType;
 		var connectionType;
 		var identifier;
-		var onError;
-		var onSuccess
+
+		//var onError;
+		//var onSuccess;
 
 		//Save callbacks if they exist
-		if(useCallBacks)
-		{
-			onError = arguments[arguments.length-2];	//Always the second to last arg.
-			onSuccess = arguments[arguments.length-1];	//Always the last argument
-		}
+		//if(useCallBacks)
+		//{
+		//	onError = arguments[arguments.length-2];	//Always the second to last arg.
+		//	onSuccess = arguments[arguments.length-1];	//Always the last argument
+		//}
 
 		//if no arguments given, open first found
 		if((arguments.length == 0)||((arguments.length == 2)&&useCallBacks))
@@ -155,14 +163,6 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		{
 			if((typeof(deviceType)=="number")&&(typeof(connectionType)=="number")&&(typeof(identifier)=="string"))
 			{
-				//INFORMATION IS READY TO BE PASSED DIRECTLY INTO THE DRIVER
-
-				//Create single dimensional array's (pointers) that .js can pass
-				//to the driver
-				//var deviceType = new ref.alloc(ref.types.int, 1);
-				//deviceType[0] = deviceType;
-				//var connectionType = new ref.alloc(ref.types.int,1);
-				//connectionType[0] = connectionType;
 				console.log('LJM_Open');
 				var aDeviceHandle = new ref.alloc(ref.types.int,1);
 				var output;
@@ -176,9 +176,20 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					if(useCallBacks)
 					{
 						//Call the driver function
-						output = this.driver.LJM_Open(deviceType, connectionType, identifier, aDeviceHandle);
-						onError("hello");
-						onSuccess("hello");
+						output = this.driver.LJM_Open.async(deviceType, connectionType, identifier, aDeviceHandle, function(err, res) {
+							if (err) throw err;
+							console.log("open call returned: " + res + ', handle: '+aDeviceHandle[0]);
+							if(res == 0)
+							{
+								//this.saveHandle(aDeviceHandle[0]);
+								//this.handle = aDeviceHandle[0];
+								onSuccess(aDeviceHandle[0]);
+							}
+							else
+							{
+								onError(res);
+							}
+						});
 					}
 					else
 					{
@@ -187,8 +198,6 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 				}
 				if(output == 0)
 				{
-					this.deviceType = deviceType;
-					this.connectionType = connectionType;
 					this.handle = aDeviceHandle[0]; 
 					if(this.debug.open==1)
 					{
@@ -202,7 +211,8 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					{
 						console.log('deviceNotOpened ' + output);
 					}
-					throw new DriverOperationError(output);
+					//throw new DriverOperationError(output);
+					return output;
 				}
 			}
 			else if((typeof(deviceType)=="string")&&(typeof(connectionType)=="string")&&(typeof(identifier)=="string"))
@@ -221,9 +231,20 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					if(useCallBacks)
 					{
 						//Call the driver function
-						output = this.driver.LJM_OpenS(deviceType, connectionType, identifier, aDeviceHandle);
-						onError("hello");
-						onSuccess("hello");
+						output = this.driver.LJM_OpenS.async(deviceType, connectionType, identifier, aDeviceHandle, function(err, res) {
+							if (err) throw err;
+							console.log("openS call returned: " + res + ', handle: '+aDeviceHandle[0]);
+							if(res == 0)
+							{
+								//this.saveHandle(aDeviceHandle[0]);
+								//this.handle = aDeviceHandle[0];
+								onSuccess(aDeviceHandle[0]);
+							}
+							else
+							{
+								onError(res);
+							}
+						});
 					}
 					else
 					{
@@ -232,8 +253,6 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 				}
 				if(output == 0)
 				{
-					this.deviceType = deviceType;
-					this.connectionType = connectionType;
 					this.handle = aDeviceHandle[0]; 
 					if(this.debug.open==1)
 					{
@@ -247,7 +266,8 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					{
 						console.log('deviceNotOpened ' + output);
 					}
-					throw new DriverOperationError(output);
+					return output;
+					//throw new DriverOperationError(output);
 				}
 			}
 			else
@@ -269,6 +289,24 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	{
 		this.checkStatus();
 	};
+	this.readRaw = function(data)
+	{
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		var aResult = new ref.alloc('char', data.length);
+
+		if(useCallBacks)
+		{
+			return 0;
+		}
+		else
+		{
+			return 0;
+		}
+	};
 	/**
 	 * Function reads a single modbus address
 	 *
@@ -278,15 +316,58 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	 */
 	this.read = function(address)
 	{
+		this.checkStatus();
+
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
 		var output;
 		var addressNum = 0;
-		this.checkStatus();
+		
 
 		if((typeof(address))=="string")
 		{
-			address = address.toNumber();
+			var errorResult;
+			var result = new ref.alloc('double',1);
+			if(useCallBacks)
+			{
+				errorResult = this.driver.LJM_eReadName.async(this.handle, address, result, function(err, res) {
+					if (err) throw err;
+					//console.log("mycall returned: " + res + ", Value: " + result.deref());
+					if(res == 0)
+					{
+						onSuccess(result.deref());
+					}
+					else
+					{
+						onError(res);
+					}
+				});
+				errorResult = 0;
+				return 0;
+			}
+			else
+			{
+				errorResult = this.driver.LJM_eReadName(this.handle, address, result);
+				//Check for an error from driver & throw error
+				if(errorResult != 0)
+				{
+					if(this.debug.fakeDevice==1)
+					{
+						output = 0;
+					}
+					else
+					{
+						throw new DriverOperationError(errorResult);
+					}
+				}
+				reading = result.deref();
+				return reading;
+			}
 		}
-		if((typeof(address))=="number")
+		else if((typeof(address))=="number")
 		{
 			//Get information necessary about the address requested
 			var info = this.constants.getAddressInfo(address, 'R');
@@ -303,27 +384,41 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 				var result = new ref.alloc('double', 1);
 
 				//According to LabJackM.h: int Handle, int Address, int Type, double * Value
-				errorResult = this.driver.LJM_eReadAddress(this.handle, address, addressType, result);
-				var aErRes = this.driver.LJM_eReadAddress.async(this.handle, address, addressType, result, function(err, res) {
-					if (err) throw err;
-					console.log("mycall returned: " + res + ", Value: " + result.deref());
-				});
-				//Check for an error from driver & throw error
-				if(errorResult != 0)
+				if(useCallBacks)
 				{
-					if(this.debug.fakeDevice==1)
-					{
-						output = 0;
-					}
-					else
-					{
-						throw new DriverOperationError(errorResult);
-					}
-
+					errorResult = this.driver.LJM_eReadAddress.async(this.handle, address, addressType, result, function(err, res) {
+						if (err) throw err;
+						//console.log("mycall returned: " + res + ", Value: " + result.deref());
+						if(res == 0)
+						{
+							onSuccess(result.deref());
+						}
+						else
+						{
+							onError(res);
+						}
+					});
+					errorResult = 0;
+					return errorResult;
 				}
-				
-				reading = result.deref();
-				return reading;
+				else
+				{
+					errorResult = this.driver.LJM_eReadAddress(this.handle, address, addressType, result);
+					//Check for an error from driver & throw error
+					if(errorResult != 0)
+					{
+						if(this.debug.fakeDevice==1)
+						{
+							output = 0;
+						}
+						else
+						{
+							throw new DriverOperationError(errorResult);
+						}
+					}
+					reading = result.deref();
+					return reading;
+				}
 			}
 			else
 			{
@@ -439,11 +534,37 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	this.write = function(address, value)
 	{
 		this.checkStatus();
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		var errorResult;
+
 		if((typeof(address))=="string")
 		{
+			if(useCallBacks)
+			{
+				errorResult = this.driver.LJM_eWriteName.async(this.handle, address, value, function(err, res){
+					if(err) throw err;
+					if(res == 0)
+					{
+						onSuccess();
+					}
+					else
+					{
+						onError(res);
+					}
+				});
+				return 0;
+			}
+			else
+			{
+				errorResult = this.driver.LJM_eWriteName(this.handle, address, value);
+			}
 			
 		}
-		if((typeof(address))=="number")
+		else if((typeof(address))=="number")
 		{
 			//Get information necessary about the address requested
 			var info = this.constants.getAddressInfo(address, 'W');
@@ -451,28 +572,26 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			//Check to see if the address requested is actually readable
 			if(info.directionValid == 1)
 			{
-				//If the address requested is readable:
-
-				var errorResult;
-
-				//According to LabJackM.h: int Handle, int Address, int Type, double * Value
-				errorResult = this.driver.LJM_eWriteAddress(this.handle, address, deviceType, value);
-
-				//Check for an error from driver & throw error
-				if(errorResult != 0)
+				if(useCallBacks)
 				{
-					if(this.debug.fakeDevice==1)
-					{
-						output = 0;
-					}
-					else
-					{
-						throw new DriverOperationError(errorResult);
-					}
+					errorResult = this.driver.LJM_eWriteAddress.async(this.handle, address, info.type, value, function(err, res){
+						if(err) throw err;
+						if(res == 0)
+						{
+							onSuccess();
+						}
+						else
+						{
+							onError(res);
+						}
+					});
+					return 0;
 				}
-
-				//Return the value written to the labjack device
-				return value;
+				else
+				{
+					//According to LabJackM.h: int Handle, int Address, int Type, double * Value
+					errorResult = this.driver.LJM_eWriteAddress(this.handle, address, info.type, value);
+				}
 			}
 			else
 			{
@@ -484,6 +603,21 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		{
 			throw new DriverInterfaceError("Invalid address type.");
 		}
+		//Check for an error from driver & throw error
+		if(errorResult != 0)
+		{
+			if(this.debug.fakeDevice==1)
+			{
+				output = 0;
+			}
+			else
+			{
+				throw new DriverOperationError(errorResult);
+			}
+		}
+
+		//Return the value written to the labjack device
+		return value;
 	};
 
 	/**
@@ -596,6 +730,11 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	this.close = function()
 	{
 		this.checkStatus();
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
 		var output;
 		if(this.debug.fakeDevice==1)
 		{
@@ -603,10 +742,33 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		}
 		else
 		{
-			output = this.driver.LJM_Close(this.handle);
+			
+			if(useCallBacks)
+			{
+				//Call the driver function
+				output = this.driver.LJM_Close.async(this.handle, function(err, res) {
+					if (err) throw err;
+					if(res == 0)
+					{
+						onSuccess();
+					}
+					else
+					{
+						onError(res);
+					}
+				});
+
+				//Declare that no caller-errors occured
+				output = 0;
+			}
+			else
+			{
+				output = this.driver.LJM_Close(this.handle);
+			}
 		}
 		if(output == 0)
 		{
+			this.handle = null;
 			//REPORT NO ERROR HAS OCCURED
 			if(this.debug.close == 1)
 			{
@@ -623,7 +785,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			}
 			throw new DriverInterfaceError("Closing Device Error");
 			return output;
-			}
+		}
 	};
 	/**
 	 * Closes the device if it is currently open

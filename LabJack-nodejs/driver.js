@@ -119,8 +119,8 @@ function reindexConstantsByRegister(constants)
 constantsFile = function(fileString)
 {
 	//Saves the JSON file object as the attribute "constants" to a constantsFile Object
-	var constants = JSON.parse(fileString);
-	this.constants = constants;
+	var constantsData = JSON.parse(fileString);
+	this.constants = constantsData;
 	//this.constants = JSON.parse(fileString);
 	//var JSONConstants = this.constants
 	//what was created??
@@ -533,8 +533,9 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
 );
 
 
-var jsonFileString = fs.readFileSync('./ljm_constants.json', 'utf8');
-constants = new constantsFile(jsonFileString)
+//var jsonFileString = fs.readFileSync('./ljm_constants.json', 'utf8');
+var jsonFileString = fs.readFileSync('/usr/local/share/LabJack/LJM/ljm_constants.json', 'utf8');
+var constants = new constantsFile(jsonFileString)
 
 exports.getDriver = function()
 {

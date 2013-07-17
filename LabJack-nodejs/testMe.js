@@ -6,41 +6,90 @@ var argv = require('optimist').argv;
 var assert = require('assert');
 assert.equal('Hello','Hello');
 
-console.log(argv.async);
-if(argv.async)
+basicTest = 
+[
+'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'read("AIN0a")',
+'write(1000, 0)',
+'read("AIN1")',
+'write("DAC0", 5)',
+'read(2)',
+'close()'
+]
+openCloseTest = 
+[
+//'open("LJM_dtANY","LJM_ctANY","LJM_idANY")',
+//'close()',
+//'open("LJM_dtT7","LJM_ctANY","LJM_idANY")',
+//'close()',
+'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'close()',
+'open("LJM_dtT7","LJM_ctETHERNET","470010642")',
+'close()',
+//'open("LJM_dtT7","LJM_ctWIFI","470010642")',
+//'close()',
+]
+
+var testArray = new Array();
+testArray[0] = basicTest;
+testArray[1] = openCloseTest;
+
+var activeTest;
+if(argv.testNum != null)
+{
+	if((parseInt(argv.testNum)>=0) && (parseInt(argv.testNum)<testArray.length))
+	{
+		activeTest = testArray[parseInt(argv.testNum)];
+	}
+	else
+	{
+		activeTest = testArray[0];
+	}
+}
+else
+{
+	activeTest = testArray[0];
+}
+
+
+//var devT = "LJM_dtT7";
+//var conT = "LJM_ctUSB";
+//var identifier = "LJM_idANY";
+//var identifier = "470010642";
+
+if(argv.async=='true')
 {
 	console.log('Testing Async Functionality');
+
+	//Load Async-Testing file
+	var asyncTest = require('./asyncTest');
+
+	//Test Async-Functionality
+	asyncTest.run(activeTest);
 }
 else
 {
 	console.log('Testing Blocking Functionality');
+
+	//Load Blocking-Testing file
+	var blockingTest = require('./blockingTest');
+
+	//Test Blocking-Functionality
+	blockingTest.run(activeTest);	
 }
-//Initialization of Driver:
-//var jsconstants = require('./driver_const');
-//var driver = require('./driver');
-var deviceManager = require('./labjack');
+
 
 //var device = new deviceManager.labjack(jsconstants.GENERAL_DEBUGGING_ENABLE,jsconstants.ENABLE_ALL_DEBUGGING);
-var device = new deviceManager.labjack();
 
-function onError(erStr)
-{
-	console.log("ERROR: "+erStr);
-}
-function onSuccess(res)
-{
-	console.log("SUCCESS: "+res);
-}
 
-var devT = "LJM_dtANY";
-var conT = "LJM_ctUSB";
-var identifier = "LJM_idANY";
-var identifier = "470010642";
+
+
+
 //var result = device.open(jsconstants.LJM_DT_T7,jsconstants.LJM_CT_USB,identifier);
 //var result = device.open(devT,conT,identifier, onError, onSuccess);
 //var result = device.open(onError, onSuccess);
 //var result = device.open();
-var result = device.open(devT,conT,identifier);
+/*var result = device.open(devT,conT,identifier);
 console.log('Open Result: ' + result);
 
 
@@ -69,7 +118,7 @@ console.log('WriteRegisters Result: ' + device.writeRegisters(writeArray, writeV
 
 result = device.close();
 console.log('Close Result: ' + result);
-
+*/
 
 /*
 var result = isNum("i");
