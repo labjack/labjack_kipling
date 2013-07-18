@@ -164,7 +164,13 @@ constantsFile = function(fileString)
 
 		//Create a deviceType Variable to save the deviceType number into
 		var validity;
-		var readWrite = regEntry.readwrite;
+		try {
+			var readWrite = regEntry.readwrite;
+		}
+		catch (e)
+		{
+			return {type: -1, directionValid: 0, typeString: "NA"};
+		}
 
 		if(regEntry.type == 'UINT16')
 		{
@@ -415,7 +421,7 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
  			'int', [
  				'int',							//Handle
  				'int',							//NumFrames (Number of Registers being accessed)
- 				ref.refType(ref.types.CString),//aNames (Registers to read from)
+ 				ref.refType(ref.types.CString),	//aNames (Registers to read from)
  				ref.refType(ref.types.double),	//aValues (Readings)
  				ref.refType(ref.types.int)		//ErrorAddress
  			]
@@ -426,7 +432,7 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
  				'int',							//NumFrames (Number of Registers being accessed)
  				ref.refType(ref.types.int),		//aAddresses (Registers to write to)
  				ref.refType(ref.types.int),		//aTypes
- 				ref.refType(ref.types.double),	//aValues (Values to write)
+ 				ref.refType('double'),	//aValues (Values to write)
  				ref.refType(ref.types.int)		//ErrorAddress
  			]
  		],
@@ -434,8 +440,8 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
  			'int', [
  				'int',							//Handle
  				'int',							//NumFrames (Number of Registers being accessed)
- 				ref.refType('string'),			//aNames (Registers to write to)
- 				ref.refType(ref.types.double),	//aValues (Values to write)
+ 				ref.refType(ref.types.CString),	//aNames (Registers to write to)
+ 				ref.refType('double'),	//aValues (Values to write)
  				ref.refType(ref.types.int)		//ErrorAddress
  			]
  		],

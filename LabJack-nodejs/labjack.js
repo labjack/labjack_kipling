@@ -311,24 +311,39 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		{
 			//Get information necessary about the address requested
 			var info = this.constants.getAddressInfo(address, 'R');
-			if(useCallBacks)
+			if(info.directionValid == 1)//Check validity to cleanly report error
 			{
-				errorResult = this.driver.LJM_eReadAddress.async(this.handle, address, info.type, result, function(err, res) {
-					if (err) throw err;
-					if(res == 0)
-					{
-						onSuccess(result.deref());
-					}
-					else
-					{
-						onError(res);
-					}
-				});
-				return 0;
+				if(useCallBacks)
+				{
+					errorResult = this.driver.LJM_eReadAddress.async(this.handle, address, info.type, result, function(err, res) {
+						if (err) throw err;
+						if(res == 0)
+						{
+							onSuccess(result.deref());
+						}
+						else
+						{
+							onError(res);
+						}
+					});
+					return 0;
+				}
+				else
+				{
+					errorResult = this.driver.LJM_eReadAddress(this.handle, address, info.type, result);
+				}
 			}
 			else
 			{
-				errorResult = this.driver.LJM_eReadAddress(this.handle, address, info.type, result);
+				if(useCallBacks)
+				{
+					onError("Invalid Address");
+					return driver_const.LJME_INVALID_ADDRESS;
+				}
+				else
+				{
+					throw new DriverInterfaceError("Invalid address");
+				}
 			}
 		}
 		else
@@ -450,19 +465,18 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 
 			//ref: http://tootallnate.github.io/ref/
 			var aNames = new Buffer(8*length);
-			console.log('here');
 			for(i = 0; i < length; i++)
 			{
-				console.log('Iteration: '+i);
+				//console.log('Iteration: '+i);
 				var buf = new Buffer(addresses[i].length+1);
 				ref.writeCString(buf,0,addresses[i]);
-				console.log('Data: '+buf);
+				//console.log('Data: '+buf);
 				ref.writePointer(aNames,i*8,buf);
 			}
 			
-			console.log('Length: '+addresses.length);
-			console.log('Length: '+addresses[0].length);
-			console.log('Length: '+aNames.length);
+			//console.log('Length: '+addresses.length);
+			//console.log('Length: '+addresses[0].length);
+			//console.log('Length: '+aNames.length);
 			//console.log('Data: '+ ref.readPointer(aNames,0));
 			
 			//console.log('Length: '+ref.readPointer(aNames,0,8);
@@ -476,9 +490,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			{
 				errorResult = this.driver.LJM_eReadNames.async(this.handle, length, aNames, results, errors, function(err, res){
 					if(err) throw err;
-					var errorOffset = 0;
-					offset = 0;
-					console.log('Err Frame Num: '+errors.deref());
+					var offset = 0;
 					for(i in addresses)
 					{
 						returnResults[i] = results.readDoubleLE(offset);
@@ -490,39 +502,32 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					}
 					else
 					{
-						console.log(returnResults);
-						onError(res);
+						onError({retError:res, errFrame:errors.deref()});
 					}
 				});
 				return 0;
 			}
 			else
 			{
-				errorResult = this.driver.LJM_eReadNames(this.handle, length, addresses, results, errors);
+				errorResult = this.driver.LJM_eReadNames(this.handle, length, aNames, results, errors);
 			}
 			
 
 			//ref.refType('string'),			//aNames (Registers to read from)
 
 		}
-		if((typeof(addresses[0]))=="number")
+		else if((typeof(addresses[0]))=="number")
 		{
 			var addrBuff = new Buffer(4*length);
 			var addrTypeBuff = new Buffer(4*length);
-			
-			
-			//clear the error array:
-			for(i=0;i<(length*4); i++)
-			{
-				errors.writeInt8(0,i);
-			}
-
 			var inValidOperation = 0;
 
 			//Integer Returned by .dll function
 			var info;
 			var offset=0;
-			for(i in addresses)
+			i = 0;
+
+			for(i = 0; i < length; i++)
 			{
 				info = this.constants.getAddressInfo(addresses[i], 'R');
 				if(info.directionValid == 1)
@@ -533,46 +538,64 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 				}
 				else
 				{
-					inValidOperation = 1;
-					throw new DriverInterfaceError("Trying to read a register that can't be read");
+					if(useCallBacks)
+					{
+						onError("Invalid Address: "+addresses[i]+", Index: "+i);
+						return driver_const.LJME_INVALID_ADDRESS;
+					}
+					else
+					{
+						throw new DriverInterfaceError("Invalid address");
+					}
 				}
 			}
-			if(inValidOperation != 1)
+			if(useCallBacks)
 			{
-				//Perform Device I/O function
-				errorResult = this.driver.LJM_eReadAddresses(this.handle, length, addrBuff, addrTypeBuff, results, errors);
-
-				//Check to see if there were any .dll errors
-				if(errorResult == 0)
-				{
-					//Now we need to check for individual address errors & save the results
-					//in a manner more sutable for javascript (make it not a type buffer)
-					var errorOffset = 0;
-					offset = 0;
+				errorResult = this.driver.LJM_eReadAddresses.async(this.handle, length, addrBuff, addrTypeBuff, results, errors, function(err, res){
+					if(err) throw err;
+					var offset = 0;
 					for(i in addresses)
 					{
 						returnResults[i] = results.readDoubleLE(offset);
-						if(errors.readInt32LE(errorOffset)!=0)
-						{
-							//console.log('Error: ' + errors.readInt32LE(errorOffset) + ' at: ' + i);
-							throw new DriverOperationError(errors.readInt32LE(errorOffset));
-						}
 						offset += 8;
-						errorOffset += 4;
 					}
-				}
-				else
-				{
-					throw new DriverOperationError(errorResult);
-				}
-					
+					if((res == 0))
+					{
+						onSuccess(returnResults);
+					}
+					else
+					{
+						onError({retError:res, errFrame:errors.deref()});
+					}
+				});
+				return 0;
 			}
-			//We have acquired the data successfully, yay! return it!
-			return returnResults;
+			else
+			{
+				//Perform Device I/O function
+				errorResult = this.driver.LJM_eReadAddresses(this.handle, length, addrBuff, addrTypeBuff, results, errors);
+			}
 		}
 		else
 		{
 			throw new DriverInterfaceError("Invalid address type.");
+		}
+		if(errorResult == 0)
+		{
+			//return Result
+			var offset = 0;
+			for(i in addresses)
+			{
+				returnResults[i] = results.readDoubleLE(offset);
+				offset += 8;
+			}
+			return returnResults;
+		}
+		else
+		{
+			//return Error
+			//throw new DriverOperationError(errorResult);
+			return {retError:errorResult, errFrame:errors.deref()}
 		}
 	};
 
@@ -620,25 +643,40 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		{
 			//Get information necessary type-info about the address requested
 			var info = this.constants.getAddressInfo(address, 'W');
-			if(useCallBacks)
+			if(info.directionValid == 1)
 			{
-				errorResult = this.driver.LJM_eWriteAddress.async(this.handle, address, info.type, value, function(err, res){
-					if(err) throw err;
-					if(res == 0)
-					{
-						onSuccess();
-					}
-					else
-					{
-						onError(res);
-					}
-				});
-				return 0;
+				if(useCallBacks)
+				{
+					errorResult = this.driver.LJM_eWriteAddress.async(this.handle, address, info.type, value, function(err, res){
+						if(err) throw err;
+						if(res == 0)
+						{
+							onSuccess();
+						}
+						else
+						{
+							onError(res);
+						}
+					});
+					return 0;
+				}
+				else
+				{
+					//According to LabJackM.h: int Handle, int Address, int Type, double * Value
+					errorResult = this.driver.LJM_eWriteAddress(this.handle, address, info.type, value);
+				}
 			}
 			else
 			{
-				//According to LabJackM.h: int Handle, int Address, int Type, double * Value
-				errorResult = this.driver.LJM_eWriteAddress(this.handle, address, info.type, value);
+				if(useCallBacks)
+				{
+					onError("Invalid Address");
+					return driver_const.LJME_INVALID_ADDRESS;
+				}
+				else
+				{
+					throw new DriverInterfaceError("Invalid address");
+				}
 			}
 		}
 		else
@@ -734,97 +772,149 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	 * @return {number} number that was read or an error message
 	 * 		NOTE: As long as the error messages are out of range +-10 this is ok.
 	 */
-	this.writeRegisters = function(addresses, values)
+	this.writeMany = function(addresses, values)
 	{
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
 		//Get the number of addresses & values and make sure they are equal
 		var length = addresses.length;
-		if(length == values.length)
+		if(length != values.length)
 		{
-			this.checkStatus();
-			if((typeof(addresses[0]))=="string")
+			if(useCallBacks)
 			{
-
+				onError("length of addresses and values arrays don't match");
+				return -1;
 			}
-			if((typeof(addresses[0]))=="number")
+			else
 			{
-				//create an array where the results can be placed
-				var returnResults = Array();
+				throw new DriverInterfaceError("length of addresses and values arrays don't match");
+			}
+		}
 
-				//Allocate buffer's that will be used to pass information to and from a labjack device
-				var addrBuff = new Buffer(4*length);
-				var addrTypeBuff = new Buffer(4*length);
-				var results = new Buffer(8*length);
-				var errors = new Buffer(4*length);
+		this.checkStatus();
 
-				//Create offset values
-				var offsetFloat = 0;
-				var offsetInt = 0;
+		var returnResults = Array();
+		var aValues = new Buffer(8*length);
+		var errors = new ref.alloc('int',1);
+		errors[0]=0;
 
-				//Create variables to get address information & check for errors
-				var info;
-				var directionTypeError = 0;
-				var errorResult = 0;
+		var errorResult;
 
-				//Initialize Array's
-				for(i in addresses)
-				{
-					info = this.constants.getAddressInfo(addresses[i], 'W');
-					if(info.directionValid == 1)
+		if((typeof(addresses[0]))=="string")
+		{
+			var i;
+			var offset = 0;
+			var aNames = new Buffer(8*length);
+			for(i = 0; i < length; i++)
+			{
+				aValues.writeDoubleLE(values[i],offset);
+				var buf = new Buffer(addresses[i].length+1);
+				ref.writeCString(buf,0,addresses[i]);
+				ref.writePointer(aNames,offset,buf);
+				offset+=8;
+			}
+			if(useCallBacks)
+			{
+				errorResult = this.driver.LJM_eWriteNames.async(this.handle, length, aNames, aValues, errors, function(err, res){
+					if(err) throw err;
+					if((res == 0))
 					{
-						addrBuff.writeInt32LE(addresses[i],offsetInt);
-						addrTypeBuff.writeInt32LE(info.type,offsetInt);
-						results.writeDoubleLE(values[i], offsetFloat);
-						errors.writeInt32LE(0,offsetInt);
-						offsetInt += 4;
-						offsetFloat += 8;
+						onSuccess();
 					}
 					else
 					{
-						directionTypeError = 1;
-						throw new DriverInterfaceError("trying to write to a register that can't be written to");
+						onError({retError:res, errFrame:errors.deref()});
 					}
-				}
-				//Array's are now initialized, they can be passed into the dll writeAddresses function now
-				if(directionTypeError != 1)
-				{
-					//Perform Device I/O function
-					errorResult = this.driver.LJM_eWriteAddresses(this.handle, length, addrBuff, addrTypeBuff, results, errors);
+				});
+				return 0;
+			}
+			else
+			{
+				//Perform Device I/O function
+				errorResult = this.driver.LJM_eWriteNames(this.handle, length, aNames, aValues, errors);
+			}
+		}
+		else if((typeof(addresses[0]))=="number")
+		{
+			var addrBuff = new Buffer(4*length);
+			var addrTypeBuff = new Buffer(4*length);
+			var inValidOperation = 0;
 
-					//Check to see if there were any .dll errors
-					if(errorResult == 0)
+			//Integer Returned by .dll function
+			var info;
+			var offset=0;
+			var offsetD = 0;
+			i = 0;
+
+			for(i = 0; i < length; i++)
+			{
+				info = this.constants.getAddressInfo(addresses[i], 'R');
+				if(info.directionValid == 1)
+				{
+					addrTypeBuff.writeInt32LE(info.type,offset);
+					addrBuff.writeInt32LE(addresses[i],offset);
+					aValues.writeDoubleLE(values[i],offsetD);
+					offset += 4;
+					offsetD+=8;
+				}
+				else
+				{
+					if(useCallBacks)
 					{
-						//Now we need to check for individual address errors & save the results
-						//in a manner more sutable for javascript (make it not a type buffer)
-						offsetInt = 0;
-						offsetFloat = 0;
-						for(i in addresses)
-						{
-							returnResults[i] = results.readDoubleLE(offsetFloat);
-							if(errors.readInt32LE(offsetInt)!=0)
-							{
-								throw new DriverOperationError(errors.readInt32LE(offsetInt));
-							}
-							offsetFloat += 8;
-							offsetInt += 4;
-						}
+						onError("Invalid Address: "+addresses[i]+", Index: "+i);
+						return driver_const.LJME_INVALID_ADDRESS;
 					}
 					else
 					{
-						throw new DriverOperationError(errorResult);
+						throw new DriverInterfaceError("Invalid address");
 					}
-						
 				}
-				//We have acquired the data successfully, yay! return it!
-				return returnResults;
+			}
+			if(useCallBacks)
+			{
+				errorResult = this.driver.LJM_eWriteAddresses.async(this.handle, length, addrBuff, addrTypeBuff, aValues, errors, function(err, res){
+					if(err) throw err;
+					if((res == 0))
+					{
+						onSuccess();
+					}
+					else
+					{
+						onError({retError:res, errFrame:errors.deref()});
+					}
+				});
+				return 0;
+			}
+			else
+			{
+				//Perform Device I/O function
+				errorResult = this.driver.LJM_eWriteAddresses(this.handle, length, addrBuff, addrTypeBuff, aValues, errors);
+			}
+		}
+		else
+		{
+			if(useCallBacks)
+			{
+				onError("Invalid address type.");
+				return -1;
 			}
 			else
 			{
 				throw new DriverInterfaceError("Invalid address type.");
 			}
 		}
+		if(errorResult == 0)
+		{
+			return 0;
+		}
 		else
 		{
-			throw new DriverInterfaceError("length of addresses and values arrays don't match");
+			//return Error
+			//throw new DriverOperationError(errorResult);
+			return {retError:errorResult, errFrame:errors.deref()}
 		}
 	};
 

@@ -14,7 +14,7 @@ function nextTest()
 }
 function onError(erStr)
 {
-	console.log("ERROR: "+erStr);
+	console.log("ERROR: ",erStr);
 	nextTest();
 }
 function onSuccess(res)

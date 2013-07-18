@@ -20,6 +20,7 @@ exports.LJM_CT_WIFI = 4;
 exports.LJM_LIST_ALL_SIZE = 128;
 
 //Library Errors:
+exports.LJME_INVALID_ADDRESS = 1250;
 exports.LJME_CANNOT_OPEN_DEVICE = 1236;
 exports.LJME_DEVICE_ALREADY_OPEN = 1229;
 
