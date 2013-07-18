@@ -6,6 +6,7 @@ var activeTest = 0;
 var numTests = 0;
 var functionList;
 var device = new deviceManager.labjack();
+var startTime=0;
 function nextTest()
 {
 	activeTest++;
@@ -18,15 +19,22 @@ function onError(erStr)
 }
 function onSuccess(res)
 {
-	console.log("SUCCESS: "+res);
+	//console.log("SUCCESS: "+res);
+	if(res != null)
+	{
+		console.log(res);
+	}
+	else
+	{
+		console.log('SUCCESS');
+	}
 	nextTest();
 }
 function onOpenSuccess(res)
 {
 	console.log("OPEN SUCCESS, handle: "+res);
-	
-	//Save the handle
-	device.saveHandle(res);
+	startTime = Date.now();
+	console.log('!TIMER STARTED!');
 	nextTest();
 }
 
@@ -39,6 +47,11 @@ function runTest()
 		{
 			var i = activeTest;
 			var len = functionList[i].length
+			if(functionList[i].search('close') != -1)
+			{
+				console.log('TimeOpen: '+ (Date.now() - startTime));
+				console.log('!TIMER FINISHED!');
+			}
 			if(functionList[i].slice(len-2, len)!='()')
 			{
 				if(functionList[i].search('open') != -1)

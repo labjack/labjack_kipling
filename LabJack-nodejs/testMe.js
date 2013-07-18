@@ -9,11 +9,18 @@ assert.equal('Hello','Hello');
 basicTest = 
 [
 'open("LJM_dtT7","LJM_ctUSB","470010642")',
-'read("AIN0a")',
+//'read("WIFI_SSID")',
+//'read(49300)',
+'read("FIO0")',
 'write(1000, 0)',
 'read("AIN1")',
 'write("DAC0", 5)',
 'read(2)',
+'writeS("WIFI_SSID_DEFAULT", "6poundbass")',
+'readS("WIFI_SSID_DEFAULT")',
+'writeS("WIFI_SSID_DEFAULT", "5poundbass")',
+'readS("WIFI_SSID_DEFAULT")',
+'readMany(["AIN1","AIN"])',
 'close()'
 ]
 openCloseTest = 

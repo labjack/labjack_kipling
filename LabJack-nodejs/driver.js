@@ -182,6 +182,10 @@ constantsFile = function(fileString)
 		{
 			deviceType = 3;
 		}
+		else if(regEntry.type == 'STRING')
+		{
+			deviceType = 98;
+		}
 		
 		if(regEntry.readwrite.indexOf(direction) != -1)
 		{
@@ -411,7 +415,7 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
  			'int', [
  				'int',							//Handle
  				'int',							//NumFrames (Number of Registers being accessed)
- 				ref.refType('string'),			//aNames (Registers to read from)
+ 				ref.refType(ref.types.CString),//aNames (Registers to read from)
  				ref.refType(ref.types.double),	//aValues (Readings)
  				ref.refType(ref.types.int)		//ErrorAddress
  			]
@@ -484,14 +488,14 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
  			'int', [
  				'int',							//Handle
  				'string',						//Name
- 				'string'						//String
+ 				ref.refType(ref.types.char)		//String
  			]
  		],
  		'LJM_eWriteString': [
  			'int', [
  				'int',							//Handle
  				'string',						//Name
- 				'string'						//String
+ 				ref.refType(ref.types.char)		//String
  			]
  		],
  		'LJM_WriteLibraryConfigS': [
@@ -531,7 +535,6 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
  		]
 	}
 );
-
 
 //var jsonFileString = fs.readFileSync('./ljm_constants.json', 'utf8');
 var jsonFileString = fs.readFileSync('/usr/local/share/LabJack/LJM/ljm_constants.json', 'utf8');
