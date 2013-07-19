@@ -344,7 +344,7 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
  		'LJM_ErrorToString': [
  			'int', [
  				'int',							//ErrCode
- 				'string'						//ErrString
+ 				ref.refType(ref.types.char)		//ErrString
  			]
  		],
  		'LJM_LoadConstants': [

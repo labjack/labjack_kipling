@@ -1,9 +1,10 @@
 //NOT SURE IF THIS IS NEEDED
 var driver_const = require('./driver_const');
-var ref = require('ref');
-var util = require('util');
+var ref = require('ref');//http://tootallnate.github.io/ref/#types-double
+var util = require('util');//
 var driverLib = require('./driver');
-var ffi = require('ffi');
+var ffi = require('ffi');//
+var ljm = require('./ljmDriver');
 
 // For problems encountered while in driver DLL
 function DriverOperationError(code)
@@ -70,6 +71,7 @@ function getTypeSize(typeName)
 };
 
 
+
 /**
  * @constructor for a LabJack device in .js
  */
@@ -78,6 +80,8 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	this.debug = new debugging(genDebuggingEnable, debugSystem);
 	this.driver = driverLib.getDriver();
 	this.handle = null;
+	this.ljmDriver = new ljm.ljmDriver();
+	console.log('!LJM_Version!'+this.ljmDriver.readLibrary('LJM_LIBRARY_VERSION'));
 
 	//Saves the Constants object
 	this.constants = driverLib.getConstants();
@@ -241,25 +245,85 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	 */
 	this.getHandleInfo = function()
 	{
-		this.checkStatus();
-	};
-	this.readRaw = function(data)
-	{
 		var ret = this.checkCallback(arguments);
 		var useCallBacks = ret[0];
 		var onError = ret[1];
 		var onSuccess = ret[2];
 
-		var aResult = new ref.alloc('char', data.length);
-
+		var errorResult;
 		if(useCallBacks)
 		{
+			errorResult = this.driver.LJM_ResetLog.async(function (err, res){
+				if(err) throw err;
+				if(res == 0)
+				{
+					onSuccess();
+				}
+				else
+				{
+					onError(res);
+				}
+			});
 			return 0;
 		}
 		else
 		{
+			errorResult = this.driver.LJM_ResetLog();
+		}
+		if(errorResult != 0)
+		{
+			return errorResult;
+		}
+		return 0;
+	};
+	this.readRaw = function(data)
+	{
+		this.checkStatus();
+
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		var errorResult;
+		try:
+		{
+			if(data[0] != "number")
+			{
+				return -1;
+			}
+		}
+		catch (e):
+		{
+			return -1;
+		}
+		var aData = new Buffer(data.length));
+		aData.fill(0);
+
+		if(useCallBacks)
+		{
+			errorResult = this.driver.LJM_ReadRaw.async(this.handle, aData, data.length, function (err, res){
+				if(err) throw err;
+				if(res == 0)
+				{
+					onSuccess(aData);
+				}
+				else
+				{
+					onError(res);
+				}
+			});
 			return 0;
 		}
+		else
+		{
+			errorResult = this.driver.LJM_ReadRaw(this.handle, aData, data.length);
+		}
+		if(errorResult != 0)
+		{
+			return errorResult;
+		}
+		return 0;
 	};
 	/**
 	 * Function reads a single modbus address
@@ -598,7 +662,59 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			return {retError:errorResult, errFrame:errors.deref()}
 		}
 	};
+	this.writeRaw = function(data)
+	{
+		this.checkStatus();
 
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		var errorResult;
+		try:
+		{
+			if(data[0] != "number")
+			{
+				return -1;
+			}
+		}
+		catch (e):
+		{
+			return -1;
+		}
+		var aData = new Buffer(data.length));
+		aData.fill(0);
+		for(var i = 0; i < data.length; i++)
+		{
+			aData.writeUInt8(data[i], i);
+		}
+
+		if(useCallBacks)
+		{
+			errorResult = this.driver.LJM_WriteRaw.async(this.handle, aData, data.length, function (err, res){
+				if(err) throw err;
+				if(res == 0)
+				{
+					onSuccess(aData);
+				}
+				else
+				{
+					onError(res);
+				}
+			});
+			return 0;
+		}
+		else
+		{
+			errorResult = this.driver.LJM_WriteRaw(this.handle, aData, data.length);
+		}
+		if(errorResult != 0)
+		{
+			return errorResult;
+		}
+		return 0;
+	}
 	/**
 	 * Function writes to a single modbus address
 	 *
@@ -970,41 +1086,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			return output;
 		}
 	};
-	/**
-	 * Closes the device if it is currently open
-	 *
-	 * @return {number} 
-	 */
-	this.readLibrary = function(parameter)
-	{
-		if((typeof(parameter))=="string")
-		{
-			var errorResult = 0;
-			//var returnVar =  new ref.alloc(ref.types.double,1);
-			var returnVar = new ref.alloc('double', 1);
-			errorResult = this.driver.LJM_ReadLibraryConfigS(parameter, returnVar);
-			//Check for an error from driver & throw error
-			if(errorResult != 0)
-			{
-				throw new DriverOperationError(errorResult);
-			}
-			return returnVar.deref();
-		}
-		else
-		{
-			throw DriverInterfaceError("Invalid Type");
-		}
-	}
-	//Read the Driver Version number
-	this.installedDriverVersion = this.readLibrary('LJM_LIBRARY_VERSION');
-	if(this.installedDriverVersion!= driver_const.LJM_JS_VERSION)
-	{
-		console.log('The Supported Version for this driver is 0.0243, you are using: ', this.installedDriverVersion);
-	}
-	//Enable Logging
-	this.driver.LJM_WriteLibraryConfigS('LJM_LOG_MODE',2);
-	this.driver.LJM_WriteLibraryConfigS('LJM_LOG_LEVEL',2);
-	this.driver.LJM_Log(2,"Hello!");
+	
 	
 	this.checkStatus = function()
 	{

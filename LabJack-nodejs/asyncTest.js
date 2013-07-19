@@ -1,11 +1,14 @@
 //Initialization of Driver:
 var deviceManager = require('./labjack');
+var ljm = require('./ljmDriver');
+var ljmDriver = new ljm.ljmDriver();
 var wait = false;
 var testComplete = false;
 var activeTest = 0;
 var numTests = 0;
 var functionList;
 var device = new deviceManager.labjack();
+
 var startTime=0;
 function nextTest()
 {
@@ -71,7 +74,19 @@ function runTest()
 
 			//Execute test-function
 			wait=true;
-			eval('device.'+functionList[i]);
+			if(functionList[i].search('listAll') != -1)
+			{
+				eval('ljmDriver.'+functionList[i]);
+			}
+			else if(functionList[i].search('errToStr') != -1)
+			{
+				eval('ljmDriver.'+functionList[i]);
+			}
+			else
+			{
+				eval('device.'+functionList[i]);
+			}
+			
 		}
 		(typeof setImmediate != 'undefined' ? setImmediate : process.nextTick)(runTest)
 	}

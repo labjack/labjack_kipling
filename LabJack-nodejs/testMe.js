@@ -9,8 +9,6 @@ assert.equal('Hello','Hello');
 basicTest = 
 [
 'open("LJM_dtT7","LJM_ctUSB","470010642")',
-//'read("WIFI_SSID")',
-//'read(49300)',
 'read("FIO0")',
 'write(1000, 0.5)',
 'read("AIN1")',
@@ -22,23 +20,32 @@ basicTest =
 'readS("WIFI_SSID_DEFAULT")',
 'writeS("WIFI_SSID_DEFAULT", "5poundbass")',
 'readS("WIFI_SSID_DEFAULT")',
-'readMany(["AIN1","AIN2"])',
+'readMany(["AIN0","AIN1","AIN2"])',
 'writeMany(["DAC0","DAC1"], [1.0, 2.0])',
-'readMany(["AIN1","AIN2"])',
+'readMany(["AIN0","AIN1","AIN2"])',
 'writeMany([1000,1002], [2.0, 1.0])',
-'readMany([2,4])',
+'readMany([0,2,4])',
 'close()'
 ]
 openCloseTest = 
 [
+//'listAll()',
+/*'listAll("LJM_dtT7","LJM_ctUSB")',
+'listAll("LJM_dtT7","LJM_ctETHERNET")',
+'listAll("LJM_dtT7","LJM_ctWIFI")',
+'listAll(7,1)',
+'listAll(7,3)',
+'listAll(7,4)',*/
+'errToStr(1268)',
+
 //'open("LJM_dtANY","LJM_ctANY","LJM_idANY")',
 //'close()',
 //'open("LJM_dtT7","LJM_ctANY","LJM_idANY")',
 //'close()',
 'open("LJM_dtT7","LJM_ctUSB","470010642")',
 'close()',
-'open("LJM_dtT7","LJM_ctETHERNET","470010642")',
-'close()',
+//'open("LJM_dtT7","LJM_ctETHERNET","470010642")',
+//'close()',
 //'open("LJM_dtT7","LJM_ctWIFI","470010642")',
 //'close()',
 ]
@@ -157,4 +164,10 @@ function isNum(o)
 	}
 }
 var result = isNumber("i");
+*/
+/*
+nt * aDeviceTypes, int * aConnectionTypes,
+ int * aSerialNumbers, int * aIPAddresses
+return [{'type': 6, 'connectionType': USB, 'serialNumber' 1231245, 'ipAddress': null}, ...]
+
 */
