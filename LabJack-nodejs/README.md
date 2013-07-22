@@ -7,7 +7,20 @@ nodejs library for using LJM driver.  Created two different objects that can be 
 ### Device (labjack.js)
 Manages the handle for you & aims to simplify the interface with the LJM driver.
 
-Note: All functions support callback functions as the last two arguments, not all examples below show this ex:
+There are two ways to call the functions made available by this wrapper supporting both functional programing and object oriented programing.
+All functions support standard object oriented calls.  Either an error code or an appropriate result is returned.  Some errors are thrown in cases when the device may become in-operable based on a bad function call.
+```javascript
+//Example with no input arguments:
+result = exampleFunction();
+
+//Example with one input argument:
+result = exampleFunction(arg1);
+
+//example with two input arguments:
+result = exampleFunction(arg1, arg2);
+
+```
+All functions support callback functions as the last two arguments, not all examples below show this ex:
 
 ```javascript
 //Example with no input arguments:
@@ -16,7 +29,7 @@ exampleFunction(function (res) {console.log('error',res);}, function (res) {cons
 //Example with one input argument:
 exampleFunction(arg1, function (res) {console.log('error',res);}, function (res) {console.log('success',res);});
 
-//example with two input arguments
+//example with two input arguments:
 exampleFunction(arg1, arg2, function (res) {console.log('error',res);}, function (res) {console.log('success',res);});
 
 ```
