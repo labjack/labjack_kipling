@@ -9,7 +9,7 @@ assert.equal('Hello','Hello');
 
 basicTest = 
 [
-'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'open("LJM_dtT7","LJM_ctWIFI","470010642")',
 'getHandleInfo()',
 'read("FIO0")',
 'write(1000, 0.5)',

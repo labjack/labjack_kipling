@@ -265,12 +265,20 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 				if(err) throw err;
 				if(res == 0)
 				{
+					var ipStr = "";
+					ipStr += ipAddr.readUInt8(3).toString();
+					ipStr += ".";
+					ipStr += ipAddr.readUInt8(2).toString();
+					ipStr += ".";
+					ipStr += ipAddr.readUInt8(1).toString();
+					ipStr += ".";
+					ipStr += ipAddr.readUInt8(0).toString();
 					onSuccess(
 						{
 							deviceType:devT.deref(),
 							connectionType:conT.deref(),
 							serialNumber:sN.deref(),
-							ipAddress:ipAddr.deref(),
+							ipAddress:ipStr,
 							port:port.deref(),
 							maxBytesPerMB:maxB.deref()
 						}
