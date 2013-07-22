@@ -251,13 +251,30 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		var onSuccess = ret[2];
 
 		var errorResult;
+
+		var devT = ref.alloc('int', 1);
+		var conT = ref.alloc('int', 1);
+		var sN = ref.alloc('int', 1);
+		var ipAddr = ref.alloc('int', 1);
+		var port = ref.alloc('int', 1);
+		var maxB = ref.alloc('int', 1);
+		
 		if(useCallBacks)
 		{
-			errorResult = this.driver.LJM_ResetLog.async(function (err, res){
+			errorResult = this.driver.LJM_GetHandleInfo.async(this.handle, devT, conT, sN, ipAddr, port, maxB, function (err, res){
 				if(err) throw err;
 				if(res == 0)
 				{
-					onSuccess();
+					onSuccess(
+						{
+							deviceType:devT.deref(),
+							connectionType:conT.deref(),
+							serialNumber:sN.deref(),
+							ipAddress:ipAddr.deref(),
+							port:port.deref(),
+							maxBytesPerMB:maxB.deref()
+						}
+					);
 				}
 				else
 				{
@@ -268,13 +285,20 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		}
 		else
 		{
-			errorResult = this.driver.LJM_ResetLog();
+			errorResult = this.driver.LJM_GetHandleInfo(this.handle, devT, conT, sN, ipAddr, port, maxB);
 		}
 		if(errorResult != 0)
 		{
 			return errorResult;
 		}
-		return 0;
+		return {
+					deviceType:devT.deref(),
+					connectionType:conT.deref(),
+					serialNumber:sN.deref(),
+					ipAddress:ipAddr.deref(),
+					port:port.deref(),
+					maxBytesPerMB:maxB.deref()
+				};
 	};
 	this.readRaw = function(data)
 	{
@@ -286,18 +310,18 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		var onSuccess = ret[2];
 
 		var errorResult;
-		try:
+		try
 		{
 			if(data[0] != "number")
 			{
 				return -1;
 			}
 		}
-		catch (e):
+		catch (e)
 		{
 			return -1;
 		}
-		var aData = new Buffer(data.length));
+		var aData = new Buffer(data.length);
 		aData.fill(0);
 
 		if(useCallBacks)
@@ -672,18 +696,18 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		var onSuccess = ret[2];
 
 		var errorResult;
-		try:
+		try
 		{
 			if(data[0] != "number")
 			{
 				return -1;
 			}
 		}
-		catch (e):
+		catch (e)
 		{
 			return -1;
 		}
-		var aData = new Buffer(data.length));
+		var aData = new Buffer(data.length);
 		aData.fill(0);
 		for(var i = 0; i < data.length; i++)
 		{
@@ -888,13 +912,44 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	 * @return {number} number that was read or an error message
 	 * 		NOTE: As long as the error messages are out of range +-10 this is ok.
 	 */
-	this.writeMany = function(addresses, values)
+	this.writeMany = function(addrs, vals)
 	{
 		var ret = this.checkCallback(arguments);
 		var useCallBacks = ret[0];
 		var onError = ret[1];
 		var onSuccess = ret[2];
-
+		var addresses;
+		var values;
+		if(((arguments.length == 1)&&(!useCallBacks)) || ((arguments.length == 3)&&(useCallBacks)))
+		{
+			try
+			{
+				var len = arguments[0].length;
+				addresses = new Array();
+				values = new Array();
+				for(var i = 0; i < len; i++)
+				{
+					addresses.push(arguments[0][i].addr);
+					values.push(arguments[0][i].val);	
+				}
+			}
+			catch (e)
+			{
+				if(useCallBacks)
+				{
+					onError("Bad input args");
+				}
+				else
+				{
+					return -1;
+				}
+			}
+		}
+		else
+		{
+			addresses = addrs;
+			values = vals;
+		}
 		//Get the number of addresses & values and make sure they are equal
 		var length = addresses.length;
 		if(length != values.length)
@@ -1033,7 +1088,42 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			return {retError:errorResult, errFrame:errors.deref()}
 		}
 	};
+	this.resetConnection = function()
+	{
+		this.checkStatus();
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
 
+		var errorResult;
+
+		if(useCallBacks)
+		{
+			errorResult = this.driver.LJM_ResetConnection.async(this.handle, function (err, res) {
+				if (err) throw err;
+				if (res == 0)
+				{
+					onSuccess();
+				}
+				else
+				{
+					onError(res);
+				}
+			});
+			return 0;
+		}
+		else
+		{
+			errorResult = this.driver.LJM_ResetConnection(this.handle);
+		}
+		if(errorResult != 0)
+		{
+			return errorResult;
+		}
+		return errorResult;
+
+	}
 	/**
 	 * Closes the device if it is currently open
 	 *
@@ -1052,7 +1142,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		if(useCallBacks)
 		{
 			//Call the driver function
-			output = this.driver.LJM_Close.async(this.handle, function(err, res) {
+			output = this.driver.LJM_Close.async(this.handle, function (err, res) {
 				if (err) throw err;
 				if(res == 0)
 				{

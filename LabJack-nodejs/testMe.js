@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+//Run: ./testMe.js --testNum = 0 --async=true
 //Requires "node-optimist" to accept commandline args: https://github.com/substack/node-optimist
 //Stuff For Testing:
 var argv = require('optimist').argv;
@@ -25,6 +26,7 @@ basicTest =
 'readMany(["AIN0","AIN1","AIN2"])',
 'writeMany([1000,1002], [2.0, 1.0])',
 'readMany([0,2,4])',
+'writeMany([{addr:1000,val:2.0},{addr:1002,val:1.0}])',
 'close()'
 ]
 openCloseTest = 
