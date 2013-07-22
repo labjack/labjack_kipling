@@ -134,7 +134,8 @@ Uses  LJM_eWriteString
 ```javascript
 errRes = device.write("WIFI_SSID_DEFAULT","MYNETWORK");//sets the network SSID to 'MYNETWORK', returns an error number
 ```
-#### writeMany(addresses array 'number' or 'string', values array 'number' or 'string') or writeMany(dict array {addr,vals}): 
+#### writeMany(addresses array 'number' or 'string', values array 'number' or 'string')
+#### writeMany(dict array {addr,vals}): 
 Uses  LJM_eWriteAddresses LJM_eWriteNames
 ```javascript
 //Can be done two ways:
