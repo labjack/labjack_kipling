@@ -10,6 +10,7 @@ assert.equal('Hello','Hello');
 basicTest = 
 [
 'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'getHandleInfo()',
 'read("FIO0")',
 'write(1000, 0.5)',
 'read("AIN1")',
@@ -26,7 +27,8 @@ basicTest =
 'readMany(["AIN0","AIN1","AIN2"])',
 'writeMany([1000,1002], [2.0, 1.0])',
 'readMany([0,2,4])',
-'writeMany([{addr:1000,val:2.0},{addr:1002,val:1.0}])',
+'writeMany([{addr:1000,val:1.0},{addr:1002,val:2.0}])',
+'readMany([0,2,4])',
 'close()'
 ]
 openCloseTest = 
