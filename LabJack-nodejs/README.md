@@ -2,7 +2,8 @@ LabJack-nodejs
 ==============
 UPDATED FOR VERSION 0.243
 
-nodejs library for using LJM driver.  Created two different objects that can be imported.  Was created to function much like our labjack python driver for our UD devices.
+nodejs library for using LJM driver.  Created two different objects that can be imported.  Was created to function much like our labjack python driver for our UD devices. For more information about what each function does please look at the libLabJackM.h file that can be downloaded & installed: 
+[http://labjack.com/support/software](http://labjack.com/support/software)
 
 ### Device (labjack.js)
 Manages the handle for you & aims to simplify the interface with the LJM driver.
@@ -82,6 +83,10 @@ devInfo = device.getHandleInfo();//return the handle info in a dict:
 //devInfo is a dictionary with attributes: deviceType, connectionType, serialNumber, ipAddress, port, maxBytesPerMB
 devInfo.deviceType;//The device type (7 for T7's)
 devInfo.connectionType;//The connection type, 1(USB), 3(ETHERNET), 4(WIFI)
+devInfo.serialNumber;//The serial number of the open device
+devInfo.ipAddress;//IP address string for the open device
+devInfo.port;
+devInfo.maxBytesPerMB;
 ```
 #### readRaw(data array): LJM_ReadRaw
 #### read(address 'number' or 'string'): LJM_eReadAddress and LJM_eReadName
@@ -169,6 +174,52 @@ All Relevant "libLabJackM" Functions:
 
 ### LJM_Driver (ljmDriver.js)
 JavaScript Wrapper for the rest of the LJM_Driver functions.
+
+### How To Use:
+Before writing any code you must create a device object:
+
+```javascript
+var ljm = require('./labjack');
+var ljmDriver = new ljm.labjack();
+```
+
+### Available Functions & what they use:
+#### listAll(deviceType 'number' or 'string', connectionType 'number' or 'string') uses LJM_ListAll and LJM_ListAllS
+
+```javascript
+foundDevices = ljmDriver.listAll();//find all T7's
+foundDevices = ljmDriver.listAll("LJM_dtANY","LJM_ctANY");//find all T7's
+foundDevices = ljmDriver.listAll("LJM_dtT7","LJM_ctUSB");//find all T7's connected via USB
+foundDevices = ljmDriver.listAll(7,1);//find all T7's connected via USB
+
+
+//using callback functions
+ljmDriver.listAll(
+	function (res) {console.log('err',res);}, 
+	function (foundDevices) {console.log('Devices Found:');console.log(foundDevices);}
+	);
+
+//Both methods return an array of dict's, ex:
+//foundDevices.length, number of devices found
+//foundDevices[0].deviceType (number)
+//foundDevices[0].connectionType (number)
+//foundDevices[0].serialNumber (number)
+//foundDevices[0].ipAddress (string)
+```
+
+#### errToStr(errorNumber): uses LJM_ErrorToString, converts an error number to a human readable string-error.  The errors can be found in the ljm_constants.json file.
+```javascript
+console.log(ljmDriver.errToStr(0));//returns the string "Num 0, LJ_SUCCESS"
+console.log(ljmDriver.errToStr(200));//returns the string "Num 200, LJME_WARNINGS_BEGIN"
+console.log(ljmDriver.errToStr(1268));//returns the string "Num 1268, LJME_INVALID_INDEX"
+```
+
+#### loadConstants(): uses LJM_LoadConstants
+#### closeAll(): uses LJM_CloseAll
+#### readLibrary('string' parameter): uses LJM_ReadLibraryConfigS, helpful for using LJM's logging features
+#### writeLibrary('string' parameter, value either 'number' or 'string'): uses LJM_WriteLibraryConfigS and LJM_WriteLibraryConfigStringS, helpful for using LJM's logging features
+#### logS('number' logLevel, 'string' message to log): uses LJM_Log
+#### resetLog(): uses LJM_ResetLog
 
 All Relevant "libLabJackM" Functions:
 - [ ] LJM_AddressesToMBFB
