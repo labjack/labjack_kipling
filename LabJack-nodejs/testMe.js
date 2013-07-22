@@ -18,9 +18,6 @@ basicTest =
 'read(2)',
 'write("DAC0", 5.0)',
 'write("DAC1", 5.0)',
-'writeS("WIFI_SSID_DEFAULT", "6poundbass")',
-'readS("WIFI_SSID_DEFAULT")',
-'writeS("WIFI_SSID_DEFAULT", "5poundbass")',
 'readS("WIFI_SSID_DEFAULT")',
 'readMany(["AIN0","AIN1","AIN2"])',
 'writeMany(["DAC0","DAC1"], [1.0, 2.0])',
@@ -33,7 +30,7 @@ basicTest =
 ]
 openCloseTest = 
 [
-//'listAll()',
+'listAll()',
 /*'listAll("LJM_dtT7","LJM_ctUSB")',
 'listAll("LJM_dtT7","LJM_ctETHERNET")',
 'listAll("LJM_dtT7","LJM_ctWIFI")',
@@ -53,10 +50,30 @@ openCloseTest =
 //'open("LJM_dtT7","LJM_ctWIFI","470010642")',
 //'close()',
 ]
+configureWifi = 
+[
+'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'write("POWER_WIFI",0)',
+'writeS("WIFI_SSID_DEFAULT", "AAA")',
+'writeS("WIFI_PASSWORD_DEFAULT", "timmarychriskevin")',
+'write("WIFI_APPLY_SETTINGS",1)',
+'write("POWER_WIFI",1)',
+'close()'
+]
+readWifiConfig = 
+[
+'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'read("POWER_WIFI")',
+'readS("WIFI_SSID_DEFAULT")',
+'read("WIFI_STATUS")',
+'close()'
+]
 
 var testArray = new Array();
 testArray[0] = basicTest;
 testArray[1] = openCloseTest;
+testArray[2] = configureWifi;
+testArray[3] = readWifiConfig;
 
 var activeTest;
 if(argv.testNum != null)
