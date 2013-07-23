@@ -132,7 +132,7 @@ errRes = device.write("DAC0",1.0,function (res) {console.log('err:',res);}, func
 #### writeS(address 'string, string 'string'): 
 Uses  LJM_eWriteString
 ```javascript
-errRes = device.write("WIFI_SSID_DEFAULT","MYNETWORK");//sets the network SSID to 'MYNETWORK', returns an error number
+errRes = device.writeS("WIFI_SSID_DEFAULT","MYNETWORK");//sets the network SSID to 'MYNETWORK', returns an error number
 ```
 #### writeMany(addresses array 'number' or 'string', values array 'number' or 'string')
 #### writeMany(dict array {addr,vals}): 
