@@ -255,7 +255,7 @@ All Relevant "libLabJackM" Functions:
 - [x] LJM_LoadConstants (NOT TESTED)
 - [x] LJM_CloseAll (NOT TESTED)
 - [x] LJM_WriteLibraryConfigS
-- [ ] LJM_WriteLibraryConfigStringS
+- [x] LJM_WriteLibraryConfigStringS
 - [x] LJM_ReadLibraryConfigS
 - [ ] LJM_ReadLibraryConfigStringS
 - [x] LJM_Log
