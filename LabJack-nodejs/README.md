@@ -2,7 +2,7 @@ LabJack-nodejs
 ==============
 UPDATED FOR VERSION 0.243
 
-nodejs library for using LJM driver.  Created two different objects that can be imported.  Was created to function much like our labjack python driver for our UD devices. For more information about what each function does please look at the libLabJackM.h file that can be downloaded & installed: 
+nodejs library for using LJM driver.  Created two different objects that can be imported.  Was created to function much like our labjack python driver for our UD devices. For more information about what each function does please look at the LabJackM.h file that can be downloaded & installed here: 
 [http://labjack.com/support/software](http://labjack.com/support/software)
 
 ### Device (labjack.js)
@@ -98,7 +98,7 @@ Uses  LJM_eReadAddress and LJM_eReadName
 value = device.read("AIN0");//returns the AIN0 channel reading
 value = device.read(0);//returns the AIN0 channel reading
 
-//eample with callback:
+//example with callback:
 value = device.read("AIN0",function (res) {console.log('err:',res);}, function (res) {console.log('ain0Reading:',res);});
 ```
 #### readS(address 'string'): 
@@ -106,7 +106,7 @@ Uses  LJM_eReadString
 ```javascript
 value = device.readS("WIFI_SSID_DEFAULT");//returns the configured wifi ssid
 
-//eample with callback:
+//example with callback:
 value = device.readS("WIFI_SSID_DEFAULT",function (res) {console.log('err:',res);}, function (res) {console.log('wifi ssid:',res);});
 ```
 
@@ -125,7 +125,7 @@ Uses  LJM_eWriteAddress, LJM_eWriteName
 errRes = device.write("DAC0",1.0);//instructs the T7 to set DAC0 analog output to 1V, returns an error number
 errRes = device.write(1000,1.0);//instructs the T7 to set DAC0 analog output to 1V, returns an error number
 
-//eample with callback:
+//example with callback:
 errRes = device.write("DAC0",1.0,function (res) {console.log('err:',res);}, function (res) {console.log('SUCCESS');});
 ```
 
@@ -156,7 +156,7 @@ Uses  LJM_Close
 ```javascript
 errRes = device.close();
 
-//eample with callback:
+//example with callback:
 device.close(function(res){console.log('Err:',res);},function(res){console.log('closed!');});
 ```
 
