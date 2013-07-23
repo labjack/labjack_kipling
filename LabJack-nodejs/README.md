@@ -189,7 +189,7 @@ All Relevant "libLabJackM" Functions:
 JavaScript Wrapper for the rest of the LJM_Driver functions.
 
 ### How To Use:
-Before writing any code you must create a device object:
+Before writing any code you must create a driver object:
 
 ```javascript
 var ljm = require('./labjack');
