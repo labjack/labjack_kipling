@@ -9,7 +9,7 @@ assert.equal('Hello','Hello');
 
 basicTest = 
 [
-'open("LJM_dtT7","LJM_ctWIFI","470010642")',
+'open("LJM_dtT7","LJM_ctUSB","470010642")',
 'getHandleInfo()',
 'read("FIO0")',
 'write(1000, 0.5)',
@@ -37,14 +37,15 @@ openCloseTest =
 'listAll(7,1)',
 'listAll(7,3)',
 'listAll(7,4)',*/
-'errToStr(1268)',
-
+//'errToStr(1268)',
+//'errToStr(0)',
+//'errToStr(200)',
 //'open("LJM_dtANY","LJM_ctANY","LJM_idANY")',
 //'close()',
 //'open("LJM_dtT7","LJM_ctANY","LJM_idANY")',
 //'close()',
-'open("LJM_dtT7","LJM_ctUSB","470010642")',
-'close()',
+//'open("LJM_dtT7","LJM_ctUSB","470010642")',
+//'close()',
 //'open("LJM_dtT7","LJM_ctETHERNET","470010642")',
 //'close()',
 //'open("LJM_dtT7","LJM_ctWIFI","470010642")',
@@ -52,21 +53,67 @@ openCloseTest =
 ]
 configureWifi = 
 [
-'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'write("POWER_WIFI",0)',
-'writeS("WIFI_SSID_DEFAULT", "AAA")',
-'writeS("WIFI_PASSWORD_DEFAULT", "timmarychriskevin")',
+'writeS("WIFI_SSID_DEFAULT", "5poundbass")',
+'writeS("WIFI_PASSWORD_DEFAULT", "smgmtbmb3cmtbc")',
 'write("WIFI_APPLY_SETTINGS",1)',
 'write("POWER_WIFI",1)',
 'close()'
 ]
 readWifiConfig = 
 [
-'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'read("POWER_WIFI")',
 'readS("WIFI_SSID_DEFAULT")',
 'read("WIFI_STATUS")',
 'close()'
+]
+
+updateFirmware=
+[
+'loadFirmwareVersionsFile("./firmwareVersions.json")',
+//'downloadAllFirmwareVersions()',
+/*'loadFiwmareFile(200,1.1617)',
+'extractLoadedFwHeaderInfo()',
+'loadFiwmareFile(200,1.1615)',
+'extractLoadedFwHeaderInfo()',
+'loadFiwmareFile(200,1.1500)',
+'extractLoadedFwHeaderInfo()',
+'loadFiwmareFile(7,0.9421)',
+'extractLoadedFwHeaderInfo()',
+'loadFiwmareFile(7,0.9420)',
+'extractLoadedFwHeaderInfo()',
+'loadFiwmareFile(7,0.9418)',
+'extractLoadedFwHeaderInfo()',*/
+'loadFiwmareFile(7,0.9416)',
+'extractLoadedFwHeaderInfo()',
+//'downloadFirmwareVersion(7,0.9421)',
+//'downloadAllFirmwareVersions()',
+'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
+'checkFirmwareCompatability()',
+'eraseFlash(1)',
+'writeBinary()',
+
+/**
+Update firmware Steps T7:
+0. Check for appropriate loaded firmware
+1. Erase flash
+2. Write to flash
+3. Re-init device
+4. Wait for re-initialization
+5. Connect & check new firmware version
+
+Update firmware Steps for Digit:
+0. Extract header
+1. Erase User Data
+2.
+**/
+//'updateFirmware(0.9421)',
+'close()'
+]
+downloadFirmware = 
+[
 ]
 
 var testArray = new Array();
@@ -74,6 +121,7 @@ testArray[0] = basicTest;
 testArray[1] = openCloseTest;
 testArray[2] = configureWifi;
 testArray[3] = readWifiConfig;
+testArray[4] = updateFirmware;
 
 var activeTest;
 if(argv.testNum != null)

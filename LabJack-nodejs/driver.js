@@ -112,6 +112,28 @@ function reindexConstantsByRegister(constants)
 
 		}
 	}
+	//Add Extra Special Registers
+	retDict[driver_const.T7_MA_EXF_KEY] = {
+		address:driver_const.T7_MA_EXF_KEY,
+		name:"T7_MA_EXF_KEY",
+		type:"UINT32",
+		devices:["DIGIT","T7"],
+		readwrite:"RW"
+	};
+	retDict[driver_const.T7_MA_EXF_WRITE] = {
+		address:driver_const.T7_MA_EXF_WRITE,
+		name:"T7_MA_EXF_WRITE",
+		type:"UINT32",
+		devices:["DIGIT","T7"],
+		readwrite:"RW"
+	};
+	retDict[driver_const.T7_MA_EXF_ERASE] = {
+		address:driver_const.T7_MA_EXF_ERASE,
+		name:"T7_MA_EXF_ERASE",
+		type:"UINT32",
+		devices:["DIGIT","T7"],
+		readwrite:"RW"
+	};
 	return retDict;
 }
 
@@ -559,7 +581,24 @@ exports.parseRegisterNameString = function (name)
 	return parseRegisterNameString(name);
 }
 
+/*
+LJM_SEND_RECEIVE_TIMEOUT_MS
+LJM_OPEN_TCP_DEVICE_TIMEOUT_MS
+LJM_LOG_MODE
+LJM_LOG_LEVEL
+LJM_LIBRARY_VERSION
+LJM_ALLOWS_AUTO_MULTIPLE_FEEDBACKS
+LJM_ALLOWS_AUTO_CONDENSE_ADDRESSES
+LJM_OPEN_MODE
+LJM_NAME_CONSTANTS_FILE
+LJM_ERROR_CONSTANTS_FILE
+LJM_LOG_FILE
+LJM_CONSTANTS_FILE
+LJM_MAX_LOG_FILE_SIZE
+LJM_STREAM_TRANSFERS_PER_SECOND
+LJM_RETRY_ON_TRANSACTION_ID_MISMATCH
 
+*/
 
 
 

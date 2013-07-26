@@ -5,6 +5,9 @@ var util = require('util');//
 var driverLib = require('./driver');
 var ffi = require('ffi');//
 var ljm = require('./ljmDriver');
+var fs = require('fs');//to load/save firmware
+var http = require('http');//to download newest firmware versions form the internet
+
 
 // For problems encountered while in driver DLL
 function DriverOperationError(code)
@@ -80,8 +83,46 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	this.debug = new debugging(genDebuggingEnable, debugSystem);
 	this.driver = driverLib.getDriver();
 	this.handle = null;
+	this.deviceType = null;
 	this.ljmDriver = new ljm.ljmDriver();
+	
 	console.log('!LJM_Version!'+this.ljmDriver.readLibrary('LJM_LIBRARY_VERSION'));
+
+	this.firmwareVersions;//for upgrading the device
+	
+	//Variables for updating the device firmware (ONLY ON A T7!!!)
+	this.firmwareFileBuffer;//buffered firmware file variable
+	this.firmwareHeaderData;
+
+	//Firmware Header Data
+	this.fwHeader = 
+	{
+		headerKey:0x4C4A4658,
+		intendedDevice:null,
+		containedVersion:null,
+		requiredUpgraderVersion:null,
+		imageNumber:null,
+		numImgInFile:null,
+		startNextImg:null,
+		lenOfImg:null,
+		imgOffset:null,
+		numBytesInSHA:null,
+		options:null,
+		encryptedSHA:null,
+		unencryptedSHA:null,
+		headerChecksum:null,
+		deviceType:null,
+		deviceTypeS:null,
+	}
+	
+	//Firmware Update Procedure Step Counter, starts at 0 & on completion returns to 0.
+	this.firmwareUpdateStep = 0;	
+
+	//1 indicates firmware header as been parsed & is ready for step 2
+	//0 indicates nothing has occured, its initialization value
+	//-1 indicates problem with checking firmware header
+	
+
 
 	//Saves the Constants object
 	this.constants = driverLib.getConstants();
@@ -180,6 +221,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 						if(res == 0)
 						{
 							self.handle = aDeviceHandle[0];
+							self.deviceType = deviceType;
 							onSuccess();//Return handle to success callback
 						}
 						else
@@ -204,6 +246,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 						if(res == 0)
 						{
 							self.handle = aDeviceHandle[0];
+							self.deviceType = deviceType;
 							onSuccess();
 						}
 						else
@@ -225,6 +268,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			if(output == 0)
 			{
 				this.handle = aDeviceHandle[0];
+				this.deviceType = deviceType;
 				return output;
 			}
 			else
@@ -1150,10 +1194,13 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		if(useCallBacks)
 		{
 			//Call the driver function
+			var self = this;
 			output = this.driver.LJM_Close.async(this.handle, function (err, res) {
 				if (err) throw err;
 				if(res == 0)
 				{
+					self.handle = null;
+					self.deviceType = null;
 					onSuccess();
 				}
 				else
@@ -1170,6 +1217,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		if(output == 0)
 		{
 			this.handle = null;
+			this.deviceType = null;
 			//REPORT NO ERROR HAS OCCURED
 			return output;
 		}
@@ -1184,17 +1232,700 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			return output;
 		}
 	};
-	
-	
+	/**
+	returns the index of the firmware constants
+	**/
+	this.getFirmwareVersionInfo = function(deviceType, versionNumber)
+	{
+		//Make sure the constants file is loaded
+		this.checkFirmwareConstants();
+
+		if((deviceType == 7) || (deviceType == "LJM_dtT7"))
+		{
+			for(var i = 0; i < this.firmwareVersions.T7.length; i++)
+			{
+				if(this.firmwareVersions.T7[i].versionNumber == versionNumber)
+				{
+					return this.firmwareVersions.T7[i];
+				}
+			}
+		}
+		else if((deviceType == 200) || (deviceType == "LJM_dtDIGIT"))
+		{
+			for(var i = 0; i < this.firmwareVersions.Digit.length; i++)
+			{
+				if(this.firmwareVersions.Digit[i].versionNumber == versionNumber)
+				{
+					return this.firmwareVersions.Digit[i];
+				}
+			}
+		}
+		return null;
+	};
+	/**
+	retuns the file path for the .bin file requested 
+	**/
+	this.getFilePath = function(deviceType, versionNumber)
+	{
+		var info = this.getFirmwareVersionInfo(deviceType, versionNumber);
+		if(info != null)
+		{
+			//Build file path
+			if((deviceType == 7) || (deviceType == "LJM_dtT7"))
+			{
+				var filePath = "./downloadedFirmware/T7/";
+				filePath += info.fileName;
+				return filePath;
+			}
+			if((deviceType == 200) || (deviceType == "LJM_dtDIGIT"))
+			{
+				var filePath = "./downloadedFirmware/Digit/";
+				filePath += info.fileName;
+				return filePath;
+			}
+		}
+		else
+		{
+			return null;
+		}
+	}
+	/**
+	This function loads the firmware versions constants file.  In it exists an array of available
+	firmware versions for download from the labjack website.  It maps the available firmware version
+	to a location where the .bin file can be downloaded.  The variable loaded here can then be used
+	later to download the file/get a file name for a local file.  
+
+	Function saves the firmware versions file to itself.  Doesn't return it to the caller.
+
+	Args:
+	(optional): filePath, a string location for the firmwareVersions.json file
+	(optional): callbacks onError & onSuccess, determines functional vs OOP.
+
+	Functional:
+	Calls onSuccess when file is successfully loaded and parsed.  Doesn't return anything.
+
+	OOP:
+	returns 0 when successful
+	returns 1 when not successful  
+	**/
+	this.loadFirmwareVersionsFile = function(filePath)
+	{
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+		var fp;
+		if(useCallBacks)
+		{
+			if(typeof(filePath)!="string")
+			{
+				fp = "./firmwareVersions.json";
+			}
+			else
+			{
+				fp = filePath;
+			}
+			var self = this;
+			fs.readFile(fp,'utf8',function (err, data){
+				if(err)
+				{
+					onError(err);
+				}
+				else
+				{
+					self.firmwareVersions = JSON.parse(data);
+					//console.log("num versions available:",self.firmwareVersions.T7.length);
+					//console.log("first versionNum:",self.firmwareVersions.T7[0].versionNumber);
+					//console.log("first fileName:",self.firmwareVersions.T7[0].fileName);
+					//console.log("first location:",self.firmwareVersions.T7[0].location);
+					onSuccess();
+				}
+			});
+			
+		}
+		if(!useCallBacks)
+		{
+			if(filePath == null)
+			{
+				fp = "./firmwareVersions.json";
+			}
+			else
+			{
+				fp = filePath;
+			}
+			try
+			{
+				var firmwareVersionsStr = fs.readFileSync(fp, 'utf8');
+				this.firmwareVersions = JSON.parse(firmwareVersionsStr);
+			}
+			catch (e)
+			{
+				return 1;
+			}
+			//console.log("num versions available:",this.firmwareVersions.T7.length);
+			//console.log("first versionNum:",this.firmwareVersions.T7[0].versionNumber);
+			//console.log("first fileName:",this.firmwareVersions.T7[0].fileName);
+			//console.log("first location:",this.firmwareVersions.T7[0].location);
+			return 0;
+		}
+	};
+	/**
+	This function loads a firmware file located in the proper directory.
+
+	Functional:
+	onSuccess is called when finished successfully
+	onError is called when failed, returns 1 or 2 based on its status
+
+	OOP:
+	Returns 0 if the file is successfully loaded
+	Returns 1 if the file is not successfully loaded because it doesn't exist
+	returns 2 if the file is not loaded because the firmwareVersion number isn't found
+
+	**/
+	this.loadFiwmareFile = function(deviceType, firmwareVersion)
+	{
+		//Make sure the constants file is loaded
+		this.checkFirmwareConstants();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		//Check to see if the requested firmware version is valid
+		var filePath = this.getFilePath(deviceType, firmwareVersion);
+
+		//Check for & report errors
+		if(filePath == null)
+		{
+			if(useCallBacks)
+			{
+				onError(2);
+				return 0;
+			}
+			else
+			{
+				return 2;
+			}
+		}
+
+		//Open/Read file into buffer using functional/OOP methods
+		if(useCallBacks)
+		{
+			var self = this;
+			fs.readFile(filePath,function(err, data){
+				if(err) 
+				{
+					onError(1);//Error for when file can't be opened because it doesn't exist
+				}
+				else
+				{
+					self.firmwareFileBuffer = data;
+					onSuccess();
+				}
+			});
+		}
+		else
+		{
+			try
+			{
+				var ret = fs.readFileSync(filePath);
+			}
+			catch (e)
+			{
+				return 1;//Error for when file can't be opened because it doesn't exist
+			}
+			this.firmwareFileBuffer = ret;
+			return 0;
+		}
+	};
+	/**
+	This function extracts the loaded firmware file info & stores the data into the fwHeader.
+	**/
+	this.extractLoadedFwHeaderInfo = function()
+	{
+		//Make sure there is a pre-buffered firmware file
+		this.checkLoadedFirmware();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		//console.log(this.fwHeader.headerKey);
+		//console.log(this.firmwareFileBuffer.slice(0,128).length);
+
+		var headerBuffer = new Buffer(this.firmwareFileBuffer.slice(0,128));
+		//console.log(headerBuffer.length);
+		//Check the header key
+		if(this.fwHeader.headerKey != headerBuffer.readUInt32BE(0))
+		{
+			//console.log("header key does not match");
+			//console.log(this.fwHeader.headerKey);
+			//console.log(headerBuffer.readUInt32BE(0));
+			onError("Header Key Does Not Match, HK-read:",headerBuffer.readUInt32BE(0));	
+		}
+		this.fwHeader.intendedDevice = headerBuffer.readUInt32BE(4);
+		this.fwHeader.containedVersion = headerBuffer.readFloatBE(8).toFixed(4);
+		this.fwHeader.requiredUpgraderVersion = headerBuffer.readFloatBE(12).toFixed(4);
+		this.fwHeader.imageNumber = headerBuffer.readUInt16BE(16);
+		this.fwHeader.numImgInFile = headerBuffer.readUInt16BE(18);
+		this.fwHeader.startNextImg = headerBuffer.readUInt32BE(20);
+		this.fwHeader.lenOfImg = headerBuffer.readUInt32BE(24);
+		this.fwHeader.imgOffset = headerBuffer.readUInt32BE(28);
+		this.fwHeader.numBytesInSHA = headerBuffer.readUInt32BE(32);
+		this.fwHeader.options = headerBuffer.readUInt32BE(72);
+		this.fwHeader.encryptedSHA = headerBuffer.readUInt32BE(76);
+		this.fwHeader.unencryptedSHA = headerBuffer.readUInt32BE(96);
+		this.fwHeader.headerChecksum = headerBuffer.readUInt32BE(124);
+
+		//console.log(this.fwHeader.intendedDevice);
+		//console.log(this.fwHeader.requiredUpgraderVersion);
+		//To Support New Device, Add It Here
+		if((this.fwHeader.intendedDevice == driver_const.T7_TARGET_OLD)||(this.fwHeader.intendedDevice == driver_const.T7_TARGET))
+		{
+			this.fwHeader.deviceType = 7;
+			this.fwHeader.deviceTypeS = "LJM_dtT7";
+		}
+		else if(this.fwHeader.intendedDevice == driver_const.DIGIT_TARGET)
+		{
+			this.fwHeader.deviceType = 200;
+			this.fwHeader.deviceTypeS = "LJM_dtDIGIT";
+		}
+		else
+		{
+			this.fwHeader.deviceType = -1;
+		}
+
+		//console.log(this.fwHeader.lenOfImg/16.0);
+		if(useCallBacks)
+		{
+			onSuccess();
+		}
+		else
+		{
+			return 0;
+		}
+	};
+	this.getFirmwareVersions = function()
+	{
+
+	};
+	this.getNewestFirmwareVersion = function()
+	{
+
+	};
+	/**
+	**/
+	this.downloadAllFirmwareVersions = function()
+	{
+		//Make sure the constants file is loaded
+		this.checkFirmwareConstants();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		var numReq = this.firmwareVersions.Digit.length + this.firmwareVersions.T7.length;
+		var doneCount = 0;
+		this.isDone = false;
+		var self = this;
+
+		//console.log(this.firmwareVersions);
+		if(useCallBacks)
+		{
+			for(var i = 0; i < this.firmwareVersions.Digit.length; i++)
+			{
+				var request = http.get(this.firmwareVersions.Digit[i].location, function(response) {
+					var strs = response.socket._httpMessage.path.split("/");
+					var file = fs.createWriteStream("./downloadedFirmware/Digit/"+strs[strs.length-1]);
+					response.pipe(file);
+					doneCount++;
+					if(doneCount == numReq)
+					{
+						onSuccess();
+					}
+				});
+			}
+			for(var i = 0; i < this.firmwareVersions.T7.length; i++)
+			{
+				var request = http.get(this.firmwareVersions.T7[i].location, function(response) {
+					var strs = response.socket._httpMessage.path.split("/");
+					var file = fs.createWriteStream("./downloadedFirmware/T7/"+strs[strs.length-1]);
+					response.pipe(file);
+					doneCount++;
+					if(doneCount == numReq)
+					{
+						onSuccess();
+					}
+				});
+			}
+		}	
+		else
+		{
+			return "ONLY SUPPORTS FUNCTIONAL METHODS";
+		}			
+	};
+	/**
+	Downloads a single registered firmware version to the appropriate directory.
+
+	returns 0 on success
+	returns 1 on invalid versionNumber/deviceType pair
+	**/
+	this.downloadFirmwareVersion = function(deviceType, versionNumber)
+	{
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		var info = this.getFirmwareVersionInfo(deviceType,versionNumber);
+		if(info == null)
+		{
+			if(useCallBacks)
+			{
+				onError(1);
+				return 1;
+			}
+			return 1;
+		}
+		if(useCallBacks)
+		{
+			var strs = info.location.split("/");
+			var file = fs.createWriteStream(this.getFilePath(deviceType,versionNumber));
+			var request = http.get(info.location, function(response) {
+				response.pipe(file);
+				if(useCallBacks)
+				{
+					onSuccess();
+				}
+			});
+		}
+		else
+		{
+			return "ONLY SUPPORTS FUNCTIONAL METHODS";
+		}
+	};
+	this.getDownloadedFirmwareVersions = function()
+	{
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+
+		fs.existsSync("./downloadedFirmware/T7/")
+	};
+	this.checkFirmwareCompatability = function()
+	{
+		//Make sure the constants file is loaded
+		this.checkFirmwareConstants();
+
+		//Make sure there is an open device
+		this.checkStatus();
+
+		//Make sure the firmware file has been loaded & parsed
+		this.checkLoadedFirmware();
+		this.checkLoadedFirmwareParsed();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		//Initialize firmware update step counter
+		this.firmwareUpdateStep = 0;
+
+		//Make sure the loaded firmware device type and currently open device type match
+		if((this.deviceType != this.fwHeader.deviceType)&&(this.deviceType != this.fwHeader.deviceTypeS))
+		{
+			if(useCallBacks)
+			{
+				console.log(this.deviceType, this.fwHeader.deviceType);
+				onError([-1,"Firmware File Does Not Match Opened Device"]);
+				return 0;
+			}
+			else
+			{
+				return -1;
+			}
+			this.firmwareUpdateStep = -1;
+		}
+
+		//Update Step Counter to indicate loaded firmware & currently open device match
+		this.firmwareUpdateStep = 1;
+
+		if(useCallBacks)
+		{
+			onSuccess();
+			return 0;
+		}
+		else
+		{
+			return 0;
+		}
+	};
+	this.eraseFlash = function(step)
+	{
+		//Make sure the constants file is loaded
+		this.checkFirmwareConstants();
+
+		//Make sure there is an open device
+		this.checkStatus();
+
+		//Make sure the firmware file has been loaded & parsed
+		this.checkLoadedFirmware();
+		this.checkLoadedFirmwareParsed();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+		
+		if(this.firmwareUpdateStep!=step)
+		{
+			if(useCallBacks)
+			{
+				onError("Skipped a Upgrade Step, err-eraseFlash");
+				return -1;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+		if(useCallBacks)
+		{
+			if(this.fwHeader.deviceType == 7)
+			{
+				//Clear Stuff for T7
+				/*
+				Erase 120 pages of flash (a page is 4096 bytes). 
+				Starting from the External Firmware Image Origin. 
+				(Found in the Flash Addresses document)
+				*/
+				/*
+				First attempt: following directly what kippling is doing....
+				*/
+				//1. Erase one page of flash
+				var self = this;
+				this.bulkEraseFlash(
+					driver_const.T7_EFkey_ExtFirmwareImgInfo, 
+					driver_const.T7_EFAdd_ExtFirmwareImgInfo, 
+					driver_const.T7_HDR_FLASH_PAGE_ERASE, 
+					function(err) //onError
+					{
+						//onError
+					},
+					function(res) //onSuccess
+					{
+						//on successful first erase, erase 120 pages.
+						self.bulkEraseFlash(
+							driver_const.T7_EFkey_ExtFirmwareImage, 
+							driver_const.T7_EFAdd_ExtFirmwareImage, 
+							driver_const.T7_IMG_FLASH_PAGE_ERASE, 
+							function(err) //onError
+							{
+								//onError
+							},
+							function(res) //onSuccess
+							{
+								//onSuccess
+								self.firmwareUpdateStep++;
+								onSuccess();
+							});
+					});
+			}
+			else if(this.fwHeader.deviceType == 200)
+			{
+				//Clear Stuff for Digit
+			}
+		}
+	};
+	this.writeBinary = function()
+	{
+		//Make sure the constants file is loaded
+		this.checkFirmwareConstants();
+
+		//Make sure there is an open device
+		this.checkStatus();
+
+		//Make sure the firmware file has been loaded & parsed
+		this.checkLoadedFirmware();
+		this.checkLoadedFirmwareParsed();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+		
+		if(this.firmwareUpdateStep!=2)
+		{
+			if(useCallBacks)
+			{
+				onError("Skipped a Upgrade Step, err-writeFlash");
+				return -1;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+		if(useCallBacks)
+		{
+			if(this.fwHeader.deviceType == 7)
+			{
+				//Clear Stuff for T7
+				//1. Write Flash
+				var self = this;
+				this.writeFlash(
+					driver_const.T7_EFkey_ExtFirmwareImgInfo,
+					driver_const.T7_EFAdd_ExtFirmwareImgInfo,
+					0,
+					driver_const.T7_IMG_HEADER_LENGTH,
+					function(err){
+						onError();
+					},
+					function(res){
+						onSuccess();
+					});
+			}
+			else if(this.fwHeader.deviceType == 200)
+			{
+				//Clear Stuff for Digit
+			}
+		}
+	};
+	this.bulkEraseFlash = function(key, address, noPages)
+	{
+		//Make sure there is an open device
+		this.checkStatus();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		this.onError = ret[1];
+		this.onSuccess = ret[2];
+		this.numCalls = 0;
+		var totalRequests = noPages;
+		this.numErrs=0;
+		var self = this;
+		//var info = this.constants.getAddressInfo(driver_const.T7_MA_EXF_KEY, 'W');
+		//console.log(info);
+		//info = this.constants.getAddressInfo(driver_const.T7_MA_EXF_ERASE, 'W');
+		//console.log(info);
+		var i;
+		console.log(key,address,noPages);
+		for(i = 0; i < noPages; i++)
+		{
+
+			this.writeMany([driver_const.T7_MA_EXF_KEY,driver_const.T7_MA_EXF_ERASE],[key,address + i * 4096],
+				function(err){//onError
+					self.numCalls++;
+					self.numErrs++;
+					if(self.numCalls == totalRequests)
+					{
+						self.onError();
+					}
+				},
+				function(res){//onSuccess
+					self.numCalls++;
+					if(self.numCalls == totalRequests)
+					{
+						if(self.numErrs != 0)
+						{
+							self.onError();
+						}
+						else
+						{
+							self.onSuccess();
+						}
+					}
+				});
+		}
+		//console.log('1');
+		//onSuccess();
+	};
+	this.writeFlash = function(flashKey, flashAdd, offset, length)
+	{
+		//Make sure firmware stuff is all loaded
+		this.checkFirmwareConstants();
+		this.checkLoadedFirmware();
+		this.checkLoadedFirmwareParsed();
+
+		//Make sure there is an open device
+		this.checkStatus();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		console.log(flashKey, flashAdd, offset, length);
+
+		onSuccess();
+
+	}
+
+	this.updateFirmware = function(versionNumber)
+	{
+		//Make sure the constants file is loaded
+		this.checkFirmwareConstants();
+
+		//Make sure there is an open device
+		this.checkStatus();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+
+		if(useCallBacks)
+		{
+			onSuccess();
+		}
+		else
+		{
+			//this.loadFiwmareFile
+		}
+
+		
+	};
 	this.checkStatus = function()
 	{
-		if(this.handle == null)
+		if((this.handle == null) && (this.deviceType == null))
 		{
-			if(this.debug.close == 1)
-			{
-				console.log('Device Handle is Null');
-			}
-			throw new DriverInterfaceError("Device Never Opened")
+			throw new DriverInterfaceError("Device Never Opened");
+		}
+	};
+	this.checkFirmwareConstants = function()
+	{
+		if(this.firmwareVersions == null)
+		{
+			throw new DriverInterfaceError("Firmware Versions File Not Loaded");
+		}
+	};
+	this.checkLoadedFirmware = function()
+	{
+		if(this.firmwareFileBuffer == null)
+		{
+			throw new DriverInterfaceError("Firmware .bin File Not Loaded");
+		}
+	}
+	this.checkLoadedFirmwareParsed = function()
+	{
+		if(this.fwHeader == null)
+		{
+			throw new DriverInterfaceError("Firmware .bin File Not Parsed");
 		}
 	}
 
