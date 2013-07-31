@@ -1462,9 +1462,9 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		//Check the header key
 		if(this.fwHeader.headerKey != headerBuffer.readUInt32BE(0))
 		{
-			//console.log("header key does not match");
-			//console.log(this.fwHeader.headerKey);
-			//console.log(headerBuffer.readUInt32BE(0));
+			console.log("header key does not match");
+			console.log(this.fwHeader.headerKey);
+			console.log(headerBuffer.readUInt32BE(0));
 			onError("Header Key Does Not Match, HK-read:",headerBuffer.readUInt32BE(0));	
 		}
 		this.fwHeader.intendedDevice = headerBuffer.readUInt32BE(4);
@@ -1541,9 +1541,12 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			for(var i = 0; i < this.firmwareVersions.Digit.length; i++)
 			{
 				var request = http.get(this.firmwareVersions.Digit[i].location, function(response) {
-					var strs = response.socket._httpMessage.path.split("/");
-					var file = fs.createWriteStream("./downloadedFirmware/Digit/"+strs[strs.length-1]);
-					response.pipe(file);
+					if(response.statusCode == 200)
+					{
+						var strs = response.socket._httpMessage.path.split("/");
+						var file = fs.createWriteStream("./downloadedFirmware/Digit/"+strs[strs.length-1]);
+						response.pipe(file);
+					}
 					doneCount++;
 					if(doneCount == numReq)
 					{
@@ -1554,9 +1557,12 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			for(var i = 0; i < this.firmwareVersions.T7.length; i++)
 			{
 				var request = http.get(this.firmwareVersions.T7[i].location, function(response) {
-					var strs = response.socket._httpMessage.path.split("/");
-					var file = fs.createWriteStream("./downloadedFirmware/T7/"+strs[strs.length-1]);
-					response.pipe(file);
+					if(response.statusCode == 200)
+					{
+						var strs = response.socket._httpMessage.path.split("/");
+						var file = fs.createWriteStream("./downloadedFirmware/T7/"+strs[strs.length-1]);
+						response.pipe(file);
+					}
 					doneCount++;
 					if(doneCount == numReq)
 					{
@@ -1595,13 +1601,24 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		}
 		if(useCallBacks)
 		{
-			var strs = info.location.split("/");
-			var file = fs.createWriteStream(this.getFilePath(deviceType,versionNumber));
+			var self = this;
 			var request = http.get(info.location, function(response) {
-				response.pipe(file);
+				if(response.statusCode==200)
+				{
+					var strs = info.location.split("/");
+					var file = fs.createWriteStream(self.getFilePath(deviceType,versionNumber));
+					response.pipe(file);
+				}
 				if(useCallBacks)
 				{
-					onSuccess();
+					if(response.statusCode==200)
+					{
+						onSuccess();
+					}
+					else
+					{
+						onError("INVALID URL");
+					}
 				}
 			});
 		}

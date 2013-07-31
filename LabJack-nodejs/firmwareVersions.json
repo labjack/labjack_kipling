@@ -1,6 +1,11 @@
 {
  "T7":
  [
+  {
+         "versionNumber":0.9500, 
+         "fileName":"T7firmware_009500_07312013.bin", 
+         "location":"http://labjack.com/sites/default/files/2013/07/T7firmware_009500_07312013.bin"
+   },
    {
    		"versionNumber":0.9421, 
    		"fileName":"T7firmware_009421_07102013.bin", 

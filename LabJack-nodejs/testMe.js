@@ -51,12 +51,22 @@ openCloseTest =
 //'open("LJM_dtT7","LJM_ctWIFI","470010642")',
 //'close()',
 ]
-configureWifi = 
+configureWifiLJ = 
 [
 'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'write("POWER_WIFI",0)',
 'writeS("WIFI_SSID_DEFAULT", "5poundbass")',
 'writeS("WIFI_PASSWORD_DEFAULT", "smgmtbmb3cmtbc")',
+'write("WIFI_APPLY_SETTINGS",1)',
+'write("POWER_WIFI",1)',
+'close()'
+]
+configureWifiHome = 
+[
+'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
+'write("POWER_WIFI",0)',
+'writeS("WIFI_SSID_DEFAULT", "AAA")',
+'writeS("WIFI_PASSWORD_DEFAULT", "timmarychriskevin")',
 'write("WIFI_APPLY_SETTINGS",1)',
 'write("POWER_WIFI",1)',
 'close()'
@@ -73,7 +83,7 @@ readWifiConfig =
 updateFirmware=
 [
 'loadFirmwareVersionsFile("./firmwareVersions.json")',
-//'downloadAllFirmwareVersions()',
+//
 /*'loadFiwmareFile(200,1.1617)',
 'extractLoadedFwHeaderInfo()',
 'loadFiwmareFile(200,1.1615)',
@@ -86,14 +96,14 @@ updateFirmware=
 'extractLoadedFwHeaderInfo()',
 'loadFiwmareFile(7,0.9418)',
 'extractLoadedFwHeaderInfo()',*/
-'loadFiwmareFile(7,0.9416)',
+'loadFiwmareFile(7,0.9421)',
 'extractLoadedFwHeaderInfo()',
-//'downloadFirmwareVersion(7,0.9421)',
+//
 //'downloadAllFirmwareVersions()',
 'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'checkFirmwareCompatability()',
 'eraseFlash(1)',
-'writeBinary()',
+//'writeBinary()',
 
 /**
 Update firmware Steps T7:
@@ -114,14 +124,27 @@ Update firmware Steps for Digit:
 ]
 downloadFirmware = 
 [
+'loadFirmwareVersionsFile("./firmwareVersions.json")',
+'downloadAllFirmwareVersions()',
+'downloadFirmwareVersion(7,0.9416)',
+'downloadFirmwareVersion(7,0.9421)',
+
+//Test LJ-Digit Firmware File Extraction
+'loadFiwmareFile(200,1.1615)',
+'extractLoadedFwHeaderInfo()',
+
+//Test T7 Firmware File Extraction
+'loadFiwmareFile(7,0.9421)',
+'extractLoadedFwHeaderInfo()',
 ]
 
 var testArray = new Array();
 testArray[0] = basicTest;
 testArray[1] = openCloseTest;
-testArray[2] = configureWifi;
-testArray[3] = readWifiConfig;
-testArray[4] = updateFirmware;
+testArray[2] = configureWifiLJ;
+testArray[3] = configureWifiHome;
+testArray[4] = readWifiConfig;
+testArray[5] = updateFirmware;
 
 var activeTest;
 if(argv.testNum != null)
