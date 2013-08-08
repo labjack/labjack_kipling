@@ -1,0 +1,4 @@
+Optimizations:
+
+- move entirety of readS into read instead of having read call readS
+- do the same for write & writeS

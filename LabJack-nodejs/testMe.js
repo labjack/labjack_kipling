@@ -34,10 +34,10 @@ writeTest =
 'read("FIO0")',
 'read("DEVICE_NAME_DEFAULT")',
 'write(1000, 0.5)',
-'readS("DEVICE_NAME_DEFAULT")',
+'read("DEVICE_NAME_DEFAULT")',
 'read(60500)',
-'writeS("DEVICE_NAME_DEFAULT","HELLO")',
-'readS("DEVICE_NAME_DEFAULT")',
+'write("DEVICE_NAME_DEFAULT","HELLOT")',
+'read("DEVICE_NAME_DEFAULT")',
 'close()'
 ]
 openCloseTest = 

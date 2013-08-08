@@ -464,6 +464,18 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					return this.readS(address);
 				}
 			}
+			else
+			{
+				if(useCallBacks)
+				{
+					onError("Invalid Address");
+					return driver_const.LJME_INVALID_ADDRESS;
+				}
+				else
+				{
+					throw new DriverInterfaceError("Invalid address");
+				}
+			}
 		}
 		else if((typeof(address))=="number")
 		{
@@ -870,31 +882,59 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 
 		if((typeof(address))=="string")
 		{
-			if(useCallBacks)
+			var info = this.constants.getAddressInfo(address, 'W');
+			if((info.directionValid == 1) && (info.type != 98))
 			{
-				errorResult = this.driver.LJM_eWriteName.async(this.handle, address, value, function(err, res){
-					if(err) throw err;
-					if(res == 0)
-					{
-						onSuccess();
-					}
-					else
-					{
-						onError(res);
-					}
-				});
-				return 0;
+				if(useCallBacks)
+				{
+					errorResult = this.driver.LJM_eWriteName.async(this.handle, address, value, function(err, res){
+						if(err) throw err;
+						if(res == 0)
+						{
+							onSuccess();
+						}
+						else
+						{
+							onError(res);
+						}
+					});
+					return 0;
+				}
+				else
+				{
+					errorResult = this.driver.LJM_eWriteName(this.handle, address, value);
+				}
+			}
+			else if((info.directionValid == 1) && (info.type == 98))
+			{
+				if(useCallBacks)
+				{
+					errorResult = this.writeS(address, value, onError, onSuccess);
+					return 0;
+				}
+				else
+				{
+					return this.writeS(address, value);
+				}
 			}
 			else
 			{
-				errorResult = this.driver.LJM_eWriteName(this.handle, address, value);
+				if(useCallBacks)
+				{
+					onError("Invalid Address");
+					return driver_const.LJME_INVALID_ADDRESS;
+				}
+				else
+				{
+					throw new DriverInterfaceError("Invalid address");
+				}
 			}
 		}
 		else if((typeof(address))=="number")
 		{
 			//Get information necessary type-info about the address requested
 			var info = this.constants.getAddressInfo(address, 'W');
-			if(info.directionValid == 1)
+			if((info.directionValid == 1) && (info.type != 98))
 			{
 				if(useCallBacks)
 				{
@@ -915,6 +955,18 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 				{
 					//According to LabJackM.h: int Handle, int Address, int Type, double * Value
 					errorResult = this.driver.LJM_eWriteAddress(this.handle, address, info.type, value);
+				}
+			}
+			else if((info.directionValid == 1) && (info.type == 98))
+			{
+				if(useCallBacks)
+				{
+					errorResult = this.writeS(address, value, onError, onSuccess);
+					return 0;
+				}
+				else
+				{
+					return this.writeS(address, value);
 				}
 			}
 			else
@@ -991,12 +1043,39 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			}
 			else
 			{
-				errorResult = this.driver.LJM_eWriteNameString(this.handle, address,strBuffer);
+				errorResult = this.driver.LJM_eWriteNameString(this.handle, address, strBuffer);
 			}
 		}
 		else if((typeof(address))=="number")
 		{
-			throw new DriverInterfaceError("NOT IMPLEMENTED");
+			if(useCallBacks)
+			{
+				errorResult = this.driver.LJM_eWriteAddressString.async(this.handle, address, strBuffer, function(err, res){
+					if (err) throw err;
+					if(res == 0)
+					{
+						//console.log('Length: '+strBuffer.length);
+						//console.log('Ans: '+strBuffer.toString());
+						//Calculate the size of the string...
+						var i = 0;
+						while(strBuffer[i] != 0)
+						{
+							i++;
+						}
+						//console.log(strBuffer.toString('utf8',0,i).length);
+						onSuccess();
+					}
+					else
+					{
+						onError(res);
+					}
+				});
+				return 0;
+			}
+			else
+			{
+				errorResult = this.driver.LJM_eWriteAddressString(this.handle, address, strBuffer);
+			}
 		}
 		else
 		{
@@ -1012,7 +1091,8 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		{
 			i++;
 		}
-		return strBuffer.toString('utf8',0,i);
+		//return strBuffer.toString('utf8',0,i);
+		return 0;
 	}
 
 	/**
