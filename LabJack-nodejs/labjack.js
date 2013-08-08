@@ -422,36 +422,54 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		
 		var errorResult;
 		var result = new ref.alloc('double',1);
+		var r
 
 
 		if((typeof(address))=="string")
 		{
-			if(useCallBacks)
+			var info = this.constants.getAddressInfo(address, 'R');
+			if((info.directionValid == 1) && (info.type != 98))
 			{
-				errorResult = this.driver.LJM_eReadName.async(this.handle, address, result, function(err, res) {
-					if (err) throw err;
-					//console.log("mycall returned: " + res + ", Value: " + result.deref());
-					if(res == 0)
-					{
-						onSuccess(result.deref());
-					}
-					else
-					{
-						onError(res);
-					}
-				});
-				return 0;
+				if(useCallBacks)
+				{
+					var self = this;
+					errorResult = this.driver.LJM_eReadName.async(this.handle, address, result, function(err, res) {
+						if (err) throw err;
+						//console.log("mycall returned: " + res + ", Value: " + result.deref());
+						if(res == 0)
+						{
+							onSuccess(result.deref());
+						}
+						else
+						{
+							onError(res);
+						}
+					});
+					return 0;
+				}
+				else
+				{
+					errorResult = this.driver.LJM_eReadName(this.handle, address, result);
+				}
 			}
-			else
+			else if((info.directionValid == 1) && (info.type == 98))
 			{
-				errorResult = this.driver.LJM_eReadName(this.handle, address, result);
+				if(useCallBacks)
+				{
+					errorResult = this.readS(address, onError, onSuccess);
+					return 0;
+				}
+				else
+				{
+					return this.readS(address);
+				}
 			}
 		}
 		else if((typeof(address))=="number")
 		{
 			//Get information necessary about the address requested
 			var info = this.constants.getAddressInfo(address, 'R');
-			if(info.directionValid == 1)//Check validity to cleanly report error
+			if((info.directionValid == 1) && (info.type != 98))//Check validity to cleanly report error
 			{
 				if(useCallBacks)
 				{
@@ -473,6 +491,18 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					errorResult = this.driver.LJM_eReadAddress(this.handle, address, info.type, result);
 				}
 			}
+			else if((info.directionValid == 1) && (info.type == 98))
+			{
+				if(useCallBacks)
+				{
+					errorResult = this.readS(address, onError, onSuccess);
+					return 0;
+				}
+				else
+				{
+					return this.readS(address);
+				}
+			}
 			else
 			{
 				if(useCallBacks)
@@ -488,6 +518,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		}
 		else
 		{
+			//console.log('Address: ', address);
 			throw new DriverInterfaceError("Invalid address type.");
 		}
 		//Check for an error from driver & throw error
@@ -521,7 +552,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		{
 			if(useCallBacks)
 			{
-				errorResult = this.driver.LJM_eReadString.async(this.handle, address,strBuffer, function(err, res){
+				errorResult = this.driver.LJM_eReadNameString.async(this.handle, address,strBuffer, function(err, res){
 					if (err) throw err;
 					if(res == 0)
 					{
@@ -545,15 +576,43 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			}
 			else
 			{
-				errorResult = this.driver.LJM_eReadString(this.handle, address,strBuffer);
+				errorResult = this.driver.LJM_eReadNameString(this.handle, address,strBuffer);
 			}
 		}
 		else if((typeof(address))=="number")
 		{
-			throw new DriverInterfaceError("NOT IMPLEMENTED");
+			if(useCallBacks)
+			{
+				errorResult = this.driver.LJM_eReadAddressString.async(this.handle, address,strBuffer, function(err, res){
+					if (err) throw err;
+					if(res == 0)
+					{
+						//console.log('Length: '+strBuffer.length);
+						//console.log('Ans: '+strBuffer.toString());
+						//Calculate the size of the string...
+						var i = 0;
+						while(strBuffer[i] != 0)
+						{
+							i++;
+						}
+						//console.log(strBuffer.toString('utf8',0,i).length);
+						onSuccess(strBuffer.toString('utf8',0,i));
+					}
+					else
+					{
+						onError(res);
+					}
+				});
+				return 0;
+			}
+			else
+			{
+				errorResult = this.driver.LJM_eReadAddressString(this.handle, address,strBuffer);
+			}
 		}
 		else
 		{
+			console.log(typeof(address));
 			throw new DriverInterfaceError("Invalid address type.");
 		}
 		//Check for an error from driver & throw error
@@ -908,7 +967,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		{
 			if(useCallBacks)
 			{
-				errorResult = this.driver.LJM_eWriteString.async(this.handle, address,strBuffer, function(err, res){
+				errorResult = this.driver.LJM_eWriteNameString.async(this.handle, address,strBuffer, function(err, res){
 					if (err) throw err;
 					if(res == 0)
 					{
@@ -932,7 +991,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			}
 			else
 			{
-				errorResult = this.driver.LJM_eWriteString(this.handle, address,strBuffer);
+				errorResult = this.driver.LJM_eWriteNameString(this.handle, address,strBuffer);
 			}
 		}
 		else if((typeof(address))=="number")

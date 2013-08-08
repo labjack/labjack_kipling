@@ -518,7 +518,7 @@ exports.ljmDriver = function()
 	this.installedDriverVersion = this.readLibrary('LJM_LIBRARY_VERSION');
 	if(this.installedDriverVersion!= driver_const.LJM_JS_VERSION)
 	{
-		console.log('The Supported Version for this driver is 0.0243, you are using: ', this.installedDriverVersion);
+		console.log('The Supported Version for this driver is: '+driver_const.LJM_JS_VERSION+', you are using: ', this.installedDriverVersion);
 	}
 	//Enable Logging
 	//this.driver.LJM_WriteLibraryConfigS('LJM_LOG_MODE',2);

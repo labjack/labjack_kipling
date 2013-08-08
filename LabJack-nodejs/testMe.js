@@ -28,6 +28,18 @@ basicTest =
 'readMany([0,2,4])',
 'close()'
 ]
+writeTest = 
+[
+'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'read("FIO0")',
+'read("DEVICE_NAME_DEFAULT")',
+'write(1000, 0.5)',
+'readS("DEVICE_NAME_DEFAULT")',
+'read(60500)',
+'writeS("DEVICE_NAME_DEFAULT","HELLO")',
+'readS("DEVICE_NAME_DEFAULT")',
+'close()'
+]
 openCloseTest = 
 [
 'listAll()',
@@ -138,13 +150,25 @@ downloadFirmware =
 'extractLoadedFwHeaderInfo()',
 ]
 
-var testArray = new Array();
+/*var testArray = new Array();
 testArray[0] = basicTest;
-testArray[1] = openCloseTest;
-testArray[2] = configureWifiLJ;
-testArray[3] = configureWifiHome;
-testArray[4] = readWifiConfig;
-testArray[5] = updateFirmware;
+testArray[1] = writeTest;
+testArray[2] = openCloseTest;
+testArray[3] = configureWifiLJ;
+testArray[4] = configureWifiHome;
+testArray[5] = readWifiConfig;
+testArray[6] = updateFirmware;*/
+
+testArray = 
+[
+basicTest, 				// 0
+writeTest,				// 1
+openCloseTest,			// 2
+configureWifiLJ,		// 3
+configureWifiHome,		// 4
+readWifiConfig,			// 5
+updateFirmware,			// 6
+]
 
 var activeTest;
 if(argv.testNum != null)

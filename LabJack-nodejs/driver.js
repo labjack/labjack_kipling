@@ -87,6 +87,7 @@ function reindexConstantsByRegister(constants)
 	var regNum;
 
 	retDict = {};
+	retDictName = {};
 
 	for(var i in constants.registers)
 	{
@@ -100,16 +101,31 @@ function reindexConstantsByRegister(constants)
 		typeSize = getTypeSizeInRegisters(regEntry.type);
 
 		//Determine how many values to add
-		numValues = (regInfo.endNum - regInfo.startNum)/2+1;
+		//numValues = (regInfo.endNum - regInfo.startNum)/2+1;
+		numValues = regInfo.endNum+1;
 
 		//The starting register number
-		regNum=regEntry.address
-
+		regNum=regEntry.address;
 		for(var j=0; j<numValues; j++)
 		{
 			retDict[regNum] = regEntry;
 			regNum += typeSize;
-
+			//retDictName[.push({
+			//				key: regEntry.name,
+			//				value: regEntry
+			//			});]
+			if(numValues > 1)
+			{
+				retDictName[regInfo.name+j.toString()+regInfo.nameEnd] = regEntry;
+			}
+			else
+			{
+				retDictName[regInfo.name+regInfo.nameEnd] = regEntry;
+			}
+			//if(numValues>1)
+			//{
+			//	console.log(regInfo.name+j.toString()+regInfo.nameEnd);
+			//}
 		}
 	}
 	//Add Extra Special Registers
@@ -134,7 +150,8 @@ function reindexConstantsByRegister(constants)
 		devices:["DIGIT","T7"],
 		readwrite:"RW"
 	};
-	return retDict;
+	//console.log(retDictName);
+	return [retDict, retDictName];
 }
 
 //create the constants object that is searchable for variables
@@ -150,8 +167,12 @@ constantsFile = function(fileString)
 	//console.log('JSON file dump: ' + JSONConstants);
 
 	//Saves the parsed JSON file object as a constantsByRegister Object (a dictionary).
-	var constantsByRegister = reindexConstantsByRegister(this.constants);
-	this.constantsByRegister = constantsByRegister;
+	//var constantsByRegister;
+	//var constantsByName;
+
+	var indexedConstants = reindexConstantsByRegister(this.constants);
+	this.constantsByRegister = indexedConstants[0];
+	this.constantsByName = indexedConstants[1];
 
 	
 	//The basic searching function (for testing)
@@ -178,12 +199,23 @@ constantsFile = function(fileString)
 		console.log('Dictionary result name: ' + this.constantsByRegister[address].readwrite);
 		*/
 	};
-
+	this.printStuff = function()
+	{
+		console.log("here");
+	}
 	this.getAddressInfo = function(address, direction)
 	{
+		var regEntry;
 		//Get the Dictionary Entry
-		var regEntry = this.constantsByRegister[address];
-
+		if(typeof(address)=="number")
+		{
+			regEntry = this.constantsByRegister[address];
+		}
+		else if(typeof(address)=="string")
+		{
+			regEntry = this.constantsByName[address];
+			//console.log(this.constantsByName);
+		}
 		//Create a deviceType Variable to save the deviceType number into
 		var validity;
 		try {
@@ -247,7 +279,7 @@ for(var i in constants.registers)
 }
 */
 //create FFI'd versions of the liblabjackLJM library
-var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
+var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-'+driver_const.LJM_DRVR_VERSION+'.dylib',
 	{
 		'LJM_AddressesToMBFB': [
 			'int', [
@@ -512,17 +544,31 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-0.2.43.dylib',
  				'int'							//Handle
  			]
  		],
- 		'LJM_eReadString': [
+ 		'LJM_eReadNameString': [
  			'int', [
  				'int',							//Handle
  				'string',						//Name
  				ref.refType(ref.types.char)		//String
  			]
  		],
- 		'LJM_eWriteString': [
+ 		'LJM_eReadAddressString': [
+ 			'int', [
+ 				'int',							//Handle
+ 				'int',							//Address
+ 				ref.refType(ref.types.char)		//String
+ 			]
+ 		],
+ 		'LJM_eWriteNameString': [
  			'int', [
  				'int',							//Handle
  				'string',						//Name
+ 				ref.refType(ref.types.char)		//String
+ 			]
+ 		],
+ 		'LJM_eWriteAddressString': [
+ 			'int', [
+ 				'int',							//Handle
+ 				'int',							//Address
  				ref.refType(ref.types.char)		//String
  			]
  		],
