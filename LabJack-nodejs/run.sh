@@ -52,6 +52,9 @@ else
 				CMD="$CMD $PROJ_DIR run.sh"
 				CMD="$CMD $PROJ_DIR testMe.js"
 				CMD="$CMD $PROJ_DIR labjack.js"
+
+				#Also open the Kippling_QT directory
+				CMD="$CMD /Users/chrisjohnson/Dropbox/git_lj/Kipling_QT"
 				$CMD
 
 				#change directories & add the current examples directory
@@ -62,6 +65,10 @@ else
 				pwd
 
 				
+			fi
+			if [ $1 = "kippling" ]
+			then
+				echo "Opening kippling related files in new window"
 			fi
 		else
 			echo "There are $# args. The Arg Str is: $*. Individually they are:"

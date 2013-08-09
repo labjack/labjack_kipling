@@ -115,7 +115,7 @@ updateFirmware=
 'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'checkFirmwareCompatability()',
 'eraseFlash(1)',
-//'writeBinary()',
+'writeBinary()',
 
 /**
 Update firmware Steps T7:
@@ -138,8 +138,8 @@ downloadFirmware =
 [
 'loadFirmwareVersionsFile("./firmwareVersions.json")',
 'downloadAllFirmwareVersions()',
-'downloadFirmwareVersion(7,0.9416)',
-'downloadFirmwareVersion(7,0.9421)',
+//'downloadFirmwareVersion(7,0.9416)',
+//'downloadFirmwareVersion(7,0.9421)',
 
 //Test LJ-Digit Firmware File Extraction
 'loadFiwmareFile(200,1.1615)',
@@ -168,6 +168,7 @@ configureWifiLJ,		// 3
 configureWifiHome,		// 4
 readWifiConfig,			// 5
 updateFirmware,			// 6
+downloadFirmware,		// 7
 ]
 
 var activeTest;

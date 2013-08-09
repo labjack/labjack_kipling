@@ -1679,7 +1679,11 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		{
 			for(var i = 0; i < this.firmwareVersions.Digit.length; i++)
 			{
+				//console.log("making Digit request");
 				var request = http.get(this.firmwareVersions.Digit[i].location, function(response) {
+					//console.log("Receiving Digit request");
+					//console.log(er);
+					//console.log(response);
 					if(response.statusCode == 200)
 					{
 						var strs = response.socket._httpMessage.path.split("/");
@@ -1691,11 +1695,22 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					{
 						onSuccess();
 					}
+				}).on('error', function(e) {
+					doneCount++;
+					//console.log("Er: Receiving Digit request");
+					if(doneCount == numReq)
+					{
+						onError("No Valid Connection:", e);
+					}
 				});
 			}
 			for(var i = 0; i < this.firmwareVersions.T7.length; i++)
 			{
+				//console.log("making T7 request");
 				var request = http.get(this.firmwareVersions.T7[i].location, function(response) {
+					//console.log("Receiving T7 request");
+					//console.log(er);
+					//console.log(response);
 					if(response.statusCode == 200)
 					{
 						var strs = response.socket._httpMessage.path.split("/");
@@ -1706,6 +1721,13 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					if(doneCount == numReq)
 					{
 						onSuccess();
+					}
+				}).on('error', function(e) {
+					doneCount++;
+					//console.log("Er: Receiving T7 request");
+					if(doneCount == numReq)
+					{
+						onError("No Valid Connection:", e);
 					}
 				});
 			}
@@ -1741,24 +1763,22 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		if(useCallBacks)
 		{
 			var self = this;
-			var request = http.get(info.location, function(response) {
+			var request = http.get(info.location, function(err, response) {
+				if(err) throw(err);
 				if(response.statusCode==200)
 				{
 					var strs = info.location.split("/");
 					var file = fs.createWriteStream(self.getFilePath(deviceType,versionNumber));
 					response.pipe(file);
+					onSuccess();
+
 				}
-				if(useCallBacks)
+				else
 				{
-					if(response.statusCode==200)
-					{
-						onSuccess();
-					}
-					else
-					{
-						onError("INVALID URL");
-					}
+					onError("INVALID URL");
 				}
+			}).on('error', function(e) {
+				onError("No Valid Connection:", e.message);
 			});
 		}
 		else
@@ -1904,61 +1924,6 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			}
 		}
 	};
-	this.writeBinary = function()
-	{
-		//Make sure the constants file is loaded
-		this.checkFirmwareConstants();
-
-		//Make sure there is an open device
-		this.checkStatus();
-
-		//Make sure the firmware file has been loaded & parsed
-		this.checkLoadedFirmware();
-		this.checkLoadedFirmwareParsed();
-
-		//Check for functional vs OOP
-		var ret = this.checkCallback(arguments);
-		var useCallBacks = ret[0];
-		var onError = ret[1];
-		var onSuccess = ret[2];
-		
-		if(this.firmwareUpdateStep!=2)
-		{
-			if(useCallBacks)
-			{
-				onError("Skipped a Upgrade Step, err-writeFlash");
-				return -1;
-			}
-			else
-			{
-				return -1;
-			}
-		}
-		if(useCallBacks)
-		{
-			if(this.fwHeader.deviceType == 7)
-			{
-				//Clear Stuff for T7
-				//1. Write Flash
-				var self = this;
-				this.writeFlash(
-					driver_const.T7_EFkey_ExtFirmwareImgInfo,
-					driver_const.T7_EFAdd_ExtFirmwareImgInfo,
-					0,
-					driver_const.T7_IMG_HEADER_LENGTH,
-					function(err){
-						onError();
-					},
-					function(res){
-						onSuccess();
-					});
-			}
-			else if(this.fwHeader.deviceType == 200)
-			{
-				//Clear Stuff for Digit
-			}
-		}
-	};
 	this.bulkEraseFlash = function(key, address, noPages)
 	{
 		//Make sure there is an open device
@@ -2009,6 +1974,62 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		//console.log('1');
 		//onSuccess();
 	};
+	this.writeBinary = function()
+	{
+		//Make sure the constants file is loaded
+		this.checkFirmwareConstants();
+
+		//Make sure there is an open device
+		this.checkStatus();
+
+		//Make sure the firmware file has been loaded & parsed
+		this.checkLoadedFirmware();
+		this.checkLoadedFirmwareParsed();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+		
+		if(this.firmwareUpdateStep!=2)
+		{
+			if(useCallBacks)
+			{
+				onError("Skipped a Upgrade Step, err-writeFlash");
+				return -1;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+		if(useCallBacks)
+		{
+			if(this.fwHeader.deviceType == 7)
+			{
+				//Clear Stuff for T7
+				//1. Write Flash
+				//(Transfer FW image to External Flash)
+				var self = this;
+				this.writeFlash(
+					driver_const.T7_EFkey_ExtFirmwareImage,
+					driver_const.T7_EFkey_ExtFirmwareImage,
+					driver_const.T7_IMG_HEADER_LENGTH,
+					10,//ImageLength - header_length
+					function(err){
+						onError();
+					},
+					function(res){
+						onSuccess();
+					});
+			}
+			else if(this.fwHeader.deviceType == 200)
+			{
+				//Clear Stuff for Digit
+			}
+		}
+	};
 	this.writeFlash = function(flashKey, flashAdd, offset, length)
 	{
 		//Make sure firmware stuff is all loaded
@@ -2026,6 +2047,60 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		var onSuccess = ret[2];
 
 		console.log(flashKey, flashAdd, offset, length);
+
+		//Preliminary Calcs
+		//Determine total number of pages, and any partial pages
+		NumPages = length / T7_FLASH_PAGE_SIZE;
+		PartPageBytes = length % T7_FLASH_PAGE_SIZE;
+		if(PartPageBytes > 0)
+		{
+			NumPages +=1;
+
+			//Verify block size divides evenly into partial page
+			if(((PartPageBytes / 4) % T7_FLASH_BLOCK_WRITE_SIZE) != 0)
+			{
+				//ERROR
+				onError("INVALID_PARTIAL_PAGE");
+			}
+		}
+
+		//Update parameter arrays and NumFrames variable?
+		NumFrames = 2;
+
+		//Write Data to FLASH
+		//Note: We write data to flash in 32-register blocks, consisting ??. 
+		//		32-bytes is arbetrary and may be changed to increase efficiency if needed
+		// 		This can be done by changing the T7_FLASH_BLOCK_WRITE constant
+		
+		var i,j;
+		for(i = 0; i < NumPages; i++)
+		{
+			//Calculate start address of current FLASH page
+			Address = FlashAdd + (i * T7_FLASH_PAGE_SIZE);
+
+			//Number of blocks to write - full and partial pages
+			if((PartPageBytes > 0) && (i == NumPages - 1))
+			{
+				NumWrites = PartPageBytes / 4 / T7_FLASH_BLOCK_WRITE_SIZE;
+			}
+			else
+			{
+				NumWrites = T7_FLASH_PAGE_SIZE / 4 / T7_FLASH_BLOCK_WRITE_SIZE;
+			}
+
+			//Build block and write to flash
+			for(j = 0; j < NumWrites; j++)
+			{
+				addresses = ["MA_EXF_KEY", "MA_EXF_WRITE"];
+				types = ["LJM_UINT32","LJM_UINT32"];
+				numValues = [1, T7_FLASH_BLOCK_WRITE_SIZE + 1];
+				values = [FlashKey, (Address + (j*T7_FLASH_BLOCK_WRITE_SIZE*4))];
+			
+				//Convert char array into uInt values??
+
+				//Execute write-command
+			}
+		}
 
 		onSuccess();
 
