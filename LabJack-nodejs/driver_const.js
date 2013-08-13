@@ -83,13 +83,16 @@ exports.T7_IMG_HEADER_LENGTH				= 128;
 exports.T7_FLASH_BLOCK_WRITE_SIZE			= 128; 
 exports.T7_FLASH_PAGE_SIZE					= 4096;
 
-// Other
+// Other aka Hidden T7-Registers, in T7_Constants.h
 exports.T7_MA_EXF_KEY						= 61800;
 exports.T7_MA_EXF_pREAD						= 61810;
 exports.T7_MA_EXF_READ						= 61812;
 exports.T7_MA_EXF_ERASE						= 61820;
 exports.T7_MA_EXF_WRITE						= 61830;
 exports.T7_REQUEST_FW_UPGRADE				= 0x4C4A0020;
+exports.T7_MA_REQ_FWUPG 					= 61996;
+exports.T7_MA_REQ_RESTART 					= 61998;
+
 
 // Header Positions
 exports.HEADER_CODE							= 0;
@@ -106,6 +109,7 @@ exports.HEADER_ENC_SHA1						= 76;
 exports.HEADER_SHA1							= 96;
 exports.HEADER_RESERVED						= 116;
 exports.HEADER_CHECKSUM						= 124;
+ 
 
 //FIRMWARE UPGRADING CONSTANTS DIGIT
 //==============================================

@@ -42,7 +42,7 @@ writeTest =
 ]
 openCloseTest = 
 [
-'listAll()',
+//'listAll()',
 /*'listAll("LJM_dtT7","LJM_ctUSB")',
 'listAll("LJM_dtT7","LJM_ctETHERNET")',
 'listAll("LJM_dtT7","LJM_ctWIFI")',
@@ -52,7 +52,9 @@ openCloseTest =
 //'errToStr(1268)',
 //'errToStr(0)',
 //'errToStr(200)',
-//'open("LJM_dtANY","LJM_ctANY","LJM_idANY")',
+'open("LJM_dtANY","LJM_ctANY","LJM_idANY")',
+'getHandleInfo()',
+'read("FIRMWARE_VERSION")',
 //'close()',
 //'open("LJM_dtT7","LJM_ctANY","LJM_idANY")',
 //'close()',
@@ -61,7 +63,7 @@ openCloseTest =
 //'open("LJM_dtT7","LJM_ctETHERNET","470010642")',
 //'close()',
 //'open("LJM_dtT7","LJM_ctWIFI","470010642")',
-//'close()',
+'close()',
 ]
 configureWifiLJ = 
 [
@@ -108,7 +110,7 @@ updateFirmware=
 'extractLoadedFwHeaderInfo()',
 'loadFiwmareFile(7,0.9418)',
 'extractLoadedFwHeaderInfo()',*/
-'loadFiwmareFile(7,0.9421)',
+'loadFiwmareFile(7,0.9418)',
 'extractLoadedFwHeaderInfo()',
 //
 //'downloadAllFirmwareVersions()',
@@ -116,6 +118,7 @@ updateFirmware=
 'checkFirmwareCompatability()',
 'eraseFlash(1)',
 'writeBinary()',
+'reInitializeDevice()',
 
 /**
 Update firmware Steps T7:

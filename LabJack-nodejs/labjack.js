@@ -2035,12 +2035,24 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					driver_const.T7_EFkey_ExtFirmwareImage,
 					driver_const.T7_IMG_HEADER_LENGTH,
 					(this.firmwareFileBuffer.length-128),//ImageLength - header_length
-					//(4096*2),
+					
 					function(err){
-						onError();
+						onError("FirstWriteError");
 					},
 					function(res){
-						onSuccess();
+						//onSuccess();
+						self.writeFlash(
+							driver_const.T7_EFkey_ExtFirmwareImgInfo	,
+							driver_const.T7_EFkey_ExtFirmwareImgInfo	,
+							0,
+							driver_const.T7_IMG_HEADER_LENGTH,
+							function(err){
+								onError("SecondWriteError");
+							},
+							function(res){
+								self.firmwareUpdateStep++;
+								onSuccess();
+							});
 					});
 			}
 			else if(this.fwHeader.deviceType == 200)
@@ -2209,7 +2221,39 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		//onSuccess();
 
 	}
+	this.reInitializeDevice = function()
+	{
+		//Make sure the constants file is loaded
+		this.checkFirmwareConstants();
 
+		//Make sure there is an open device
+		this.checkStatus();
+
+		//Make sure the firmware file has been loaded & parsed
+		this.checkLoadedFirmware();
+		this.checkLoadedFirmwareParsed();
+
+		//Check for functional vs OOP
+		var ret = this.checkCallback(arguments);
+		var useCallBacks = ret[0];
+		var onError = ret[1];
+		var onSuccess = ret[2];
+		console.log(this.firmwareUpdateStep);
+		if(this.firmwareUpdateStep!=3)
+		{
+			if(useCallBacks)
+			{
+				onError("Skipped a Upgrade Step, err-writeFlash");
+				return -1;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+
+		this.write(driver_const.T7_MA_REQ_FWUPG,driver_const.T7_REQUEST_FW_UPGRADE, onError, onSuccess);
+	}
 	this.updateFirmware = function(versionNumber)
 	{
 		//Make sure the constants file is loaded
