@@ -1111,7 +1111,17 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		var onSuccess = ret[2];
 		var addresses;
 		var values;
+		if(arguments.length == 5)
+		{
+			if(arguments[4] == 1)
+			{
 
+				console.log("Len:",vals.length,"FirstTwo",vals[0],vals[1],"StartAddr:",vals[2],vals[vals.length-1])
+				
+				arguments[3]();
+				return 0;
+			}
+		}
 		if(((arguments.length == 1)&&(!useCallBacks)) || ((arguments.length == 3)&&(useCallBacks)))
 		{
 			try
@@ -2034,8 +2044,8 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					driver_const.T7_EFkey_ExtFirmwareImage,
 					driver_const.T7_EFkey_ExtFirmwareImage,
 					driver_const.T7_IMG_HEADER_LENGTH,
-					(this.firmwareFileBuffer.length-128),//ImageLength - header_length
-					
+					(this.firmwareFileBuffer.length-driver_const.T7_IMG_HEADER_LENGTH),//ImageLength - header_length
+					driver_const.T7_IMG_HEADER_LENGTH,
 					function(err){
 						onError("FirstWriteError");
 					},
@@ -2046,6 +2056,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 							driver_const.T7_EFkey_ExtFirmwareImgInfo	,
 							0,
 							driver_const.T7_IMG_HEADER_LENGTH,
+							0,
 							function(err){
 								onError("SecondWriteError");
 							},
@@ -2061,7 +2072,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			}
 		}
 	};
-	this.writeFlash = function(flashKey, flashAdd, offset, length)
+	this.writeFlash = function(flashKey, flashAdd, offset, length, startOffset)
 	{
 		//console.log("beforeError");
 		//Make sure firmware stuff is all loaded
@@ -2163,26 +2174,33 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		var k;
 		var numLoad = 0;
 		var numLoop = 0;
-		if((self.firmwareFileBuffer.length - offset) > (driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4))
+		//Make sure that there is enough room in the firmware file
+		//if the difference between the length of the file and the current offset is greater than 
+		//the standard block-write size then write the largest-blocks
+		if((self.firmwareFileBuffer.length - offset) >= (driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4))
 		{
-			console.log("loadMax");
+			//console.log("loadMax");
 			numLoad = driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4;
 			numLoop = driver_const.T7_FLASH_BLOCK_WRITE_SIZE;
 		}
+		//otherwise, create a custom number of writes, this controls specificaly end-of file issues.
 		else
 		{
 			numLoad = self.firmwareFileBuffer.length - offset;
 			numLoop = numLoad/4;
-			console.log("LoadCustom:",numLoad);
+			console.log("LoadCustom",numLoad, numLoop);			
 		}
+		
 
+		//Create a buffer of the relevant data, this compresses the data into UInt's to be written to the device
+		//Maybe not BE?????????!?!?!?!
 		var fileBuf = new Buffer(self.firmwareFileBuffer.slice(offset,(numLoad)+offset));
 		for(k = 0; k < numLoop; k++)
 		{
 			addresses.push(driver_const.T7_MA_EXF_WRITE);
 			values.push(fileBuf.readUInt32BE((k * 4)));
 		}
-		console.log(NumWrites, offset/length*100, " len:",values.length, offset, numLoad);
+		console.log("%Complete",(offset/length*100).toFixed(3), "CurOffset:",offset, "FileLen:",self.firmwareFileBuffer.length,"inputLen",length, "BytesWritten",numLoad, "IntsWritten",numLoop);
 		//console.log("before-call", addresses, values);
 		var retVar = self.writeMany(
 			addresses, 
@@ -2197,16 +2215,17 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			function(res){
 				//Success Function
 				//console.log("oldVars", flashAdd, offset, length);
-				if(offset < length - driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4)
+				//if there is atleast one normal block that can be written, increment by full amount
+				if((length - (offset-startOffset+numLoad)) > (driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4))
 				{
 					//console.log("WriteIncNormal");
-					self.writeFlash(flashKey, flashAdd + driver_const.T7_FLASH_PAGE_SIZE, offset+(driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4), length, onError, onSuccess)
+					self.writeFlash(flashKey, flashAdd + driver_const.T7_FLASH_PAGE_SIZE, offset+(driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4), length, startOffset, onError, onSuccess)
 				}
-				else if (offset < length)
+				else if ((offset-startOffset+numLoad) < length)
 				{
 					console.log("WriteIncMini");
-					console.log('diff:',length-offset);
-					self.writeFlash(flashKey, flashAdd + driver_const.T7_FLASH_PAGE_SIZE, offset+(length-offset), length, onError, onSuccess)
+					console.log('diff:',offset+numLoad);
+					self.writeFlash(flashKey, flashAdd + driver_const.T7_FLASH_PAGE_SIZE, (offset+numLoad), length, startOffset, onError, onSuccess)
 				}
 				else
 				{
