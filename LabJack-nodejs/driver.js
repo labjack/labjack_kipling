@@ -150,6 +150,31 @@ function reindexConstantsByRegister(constants)
 		devices:["DIGIT","T7"],
 		readwrite:"RW"
 	};
+	retDictName["T7_MA_EXF_KEY"] = {
+		address:driver_const.T7_MA_EXF_KEY,
+		name:"T7_MA_EXF_KEY",
+		type:"UINT32",
+		devices:["DIGIT","T7"],
+		readwrite:"RW"
+	};
+	retDictName["T7_MA_EXF_WRITE"] = {
+		address:driver_const.T7_MA_EXF_WRITE,
+		name:"T7_MA_EXF_WRITE",
+		type:"UINT32",
+		devices:["DIGIT","T7"],
+		readwrite:"RW"
+	};
+	retDictName["T7_MA_EXF_ERASE"] = {
+		address:driver_const.T7_MA_EXF_ERASE,
+		name:"T7_MA_EXF_ERASE",
+		type:"UINT32",
+		devices:["DIGIT","T7"],
+		readwrite:"RW"
+	};
+	//"T7_MA_EXF_WRITE"
+	//"MA_EXF_KEY"
+	//"MA_EXF_WRITE"
+
 	//console.log(retDictName);
 	return [retDict, retDictName];
 }

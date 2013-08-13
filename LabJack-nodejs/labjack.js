@@ -1111,6 +1111,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		var onSuccess = ret[2];
 		var addresses;
 		var values;
+
 		if(((arguments.length == 1)&&(!useCallBacks)) || ((arguments.length == 3)&&(useCallBacks)))
 		{
 			try
@@ -1157,7 +1158,6 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		}
 
 		this.checkStatus();
-
 		var returnResults = Array();
 		var aValues = new Buffer(8*length);
 		var errors = new ref.alloc('int',1);
@@ -1599,27 +1599,43 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		var headerBuffer = new Buffer(this.firmwareFileBuffer.slice(0,128));
 		//console.log(headerBuffer.length);
 		//Check the header key
-		if(this.fwHeader.headerKey != headerBuffer.readUInt32BE(0))
+		if(this.fwHeader.headerKey != headerBuffer.readUInt32BE(driver_const.HEADER_CODE))
 		{
 			console.log("header key does not match");
 			console.log(this.fwHeader.headerKey);
 			console.log(headerBuffer.readUInt32BE(0));
-			onError("Header Key Does Not Match, HK-read:",headerBuffer.readUInt32BE(0));	
+			onError("Header Key Does Not Match, HK-read:",headerBuffer.readUInt32BE(driver_const.HEADER_CODE));	
 		}
-		this.fwHeader.intendedDevice = headerBuffer.readUInt32BE(4);
-		this.fwHeader.containedVersion = headerBuffer.readFloatBE(8).toFixed(4);
-		this.fwHeader.requiredUpgraderVersion = headerBuffer.readFloatBE(12).toFixed(4);
-		this.fwHeader.imageNumber = headerBuffer.readUInt16BE(16);
-		this.fwHeader.numImgInFile = headerBuffer.readUInt16BE(18);
-		this.fwHeader.startNextImg = headerBuffer.readUInt32BE(20);
-		this.fwHeader.lenOfImg = headerBuffer.readUInt32BE(24);
-		this.fwHeader.imgOffset = headerBuffer.readUInt32BE(28);
-		this.fwHeader.numBytesInSHA = headerBuffer.readUInt32BE(32);
+		//Save header info to variables
+		
+		/*
+		this.fwHeader.intendedDevice = headerBuffer.readUInt32BE(driver_const.HEADER_TARGET);
+		this.fwHeader.containedVersion = headerBuffer.readFloatBE(driver_const.HEADER_VERSION).toFixed(4);
+		this.fwHeader.requiredUpgraderVersion = headerBuffer.readFloatBE(driver_const.HEADER_REQ_LJSU).toFixed(4);
+		this.fwHeader.imageNumber = headerBuffer.readUInt16BE(driver_const.HEADER_IMAGE_NUM);
+		this.fwHeader.numImgInFile = headerBuffer.readUInt16BE(driver_const.HEADER_NUM_IMAGES);
+		this.fwHeader.startNextImg = headerBuffer.readUInt32BE(driver_const.HEADER_NEXT_IMG);
+		this.fwHeader.lenOfImg = headerBuffer.readUInt32BE(driver_const.HEADER_IMG_LENG);
+		this.fwHeader.imgOffset = headerBuffer.readUInt32BE(driver_const.HEADER_IMG_OFFSET);
+		this.fwHeader.numBytesInSHA = headerBuffer.readUInt32BE(driver_const.HEADER_SHA_BYTE_COUNT);
 		this.fwHeader.options = headerBuffer.readUInt32BE(72);
-		this.fwHeader.encryptedSHA = headerBuffer.readUInt32BE(76);
-		this.fwHeader.unencryptedSHA = headerBuffer.readUInt32BE(96);
-		this.fwHeader.headerChecksum = headerBuffer.readUInt32BE(124);
-
+		this.fwHeader.encryptedSHA = headerBuffer.readUInt32BE(driver_const.HEADER_ENC_SHA1);
+		this.fwHeader.unencryptedSHA = headerBuffer.readUInt32BE(driver_const.HEADER_SHA1);
+		this.fwHeader.headerChecksum = headerBuffer.readUInt32BE(driver_const.HEADER_CHECKSUM);
+		*/
+		this.fwHeader.intendedDevice = headerBuffer.readUInt32BE(driver_const.HEADER_TARGET);
+		this.fwHeader.containedVersion = headerBuffer.readFloatBE(driver_const.HEADER_VERSION).toFixed(4);
+		this.fwHeader.requiredUpgraderVersion = headerBuffer.readFloatBE(driver_const.HEADER_REQ_LJSU).toFixed(4);
+		this.fwHeader.imageNumber = headerBuffer.readUInt16BE(driver_const.HEADER_IMAGE_NUM);
+		this.fwHeader.numImgInFile = headerBuffer.readUInt16BE(driver_const.HEADER_NUM_IMAGES);
+		this.fwHeader.startNextImg = headerBuffer.readUInt32BE(driver_const.HEADER_NEXT_IMG);
+		this.fwHeader.lenOfImg = headerBuffer.readUInt32BE(driver_const.HEADER_IMG_LEN);
+		this.fwHeader.imgOffset = headerBuffer.readUInt32BE(driver_const.HEADER_IMG_OFFSET);
+		this.fwHeader.numBytesInSHA = headerBuffer.readUInt32BE(driver_const.HEADER_SHA_BYTE_COUNT);
+		this.fwHeader.options = headerBuffer.readUInt32BE(72);
+		this.fwHeader.encryptedSHA = headerBuffer.readUInt32BE(driver_const.HEADER_ENC_SHA1);
+		this.fwHeader.unencryptedSHA = headerBuffer.readUInt32BE(driver_const.HEADER_SHA1);
+		this.fwHeader.headerChecksum = headerBuffer.readUInt32BE(driver_const.HEADER_CHECKSUM);
 		//console.log(this.fwHeader.intendedDevice);
 		//console.log(this.fwHeader.requiredUpgraderVersion);
 		//To Support New Device, Add It Here
@@ -1898,6 +1914,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					function(err) //onError
 					{
 						//onError
+						onError("failed-erase1");
 					},
 					function(res) //onSuccess
 					{
@@ -1909,6 +1926,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 							function(err) //onError
 							{
 								//onError
+								onError("failed-erase2");
 							},
 							function(res) //onSuccess
 							{
@@ -2016,7 +2034,8 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					driver_const.T7_EFkey_ExtFirmwareImage,
 					driver_const.T7_EFkey_ExtFirmwareImage,
 					driver_const.T7_IMG_HEADER_LENGTH,
-					10,//ImageLength - header_length
+					(this.firmwareFileBuffer.length-128),//ImageLength - header_length
+					//(4096*2),
 					function(err){
 						onError();
 					},
@@ -2032,6 +2051,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 	};
 	this.writeFlash = function(flashKey, flashAdd, offset, length)
 	{
+		//console.log("beforeError");
 		//Make sure firmware stuff is all loaded
 		this.checkFirmwareConstants();
 		this.checkLoadedFirmware();
@@ -2040,69 +2060,153 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		//Make sure there is an open device
 		this.checkStatus();
 
+
+		//get firmware file
+		var fileBuf = new Buffer(this.firmwareFileBuffer);
 		//Check for functional vs OOP
 		var ret = this.checkCallback(arguments);
 		var useCallBacks = ret[0];
 		var onError = ret[1];
 		var onSuccess = ret[2];
+		
+		//console.log(flashKey, flashAdd, offset, length);
 
-		console.log(flashKey, flashAdd, offset, length);
+		//Variable used for retrieving data from firmware file
+		var startByte = offset;
 
 		//Preliminary Calcs
 		//Determine total number of pages, and any partial pages
-		NumPages = length / T7_FLASH_PAGE_SIZE;
-		PartPageBytes = length % T7_FLASH_PAGE_SIZE;
-		if(PartPageBytes > 0)
-		{
-			NumPages +=1;
-
-			//Verify block size divides evenly into partial page
-			if(((PartPageBytes / 4) % T7_FLASH_BLOCK_WRITE_SIZE) != 0)
-			{
-				//ERROR
-				onError("INVALID_PARTIAL_PAGE");
-			}
-		}
+		var NumPages = length / driver_const.T7_FLASH_PAGE_SIZE;
+		var PartPageBytes = length % driver_const.T7_FLASH_PAGE_SIZE;
 
 		//Update parameter arrays and NumFrames variable?
-		NumFrames = 2;
-
+		var NumFrames = 2;
+		
 		//Write Data to FLASH
 		//Note: We write data to flash in 32-register blocks, consisting ??. 
 		//		32-bytes is arbetrary and may be changed to increase efficiency if needed
 		// 		This can be done by changing the T7_FLASH_BLOCK_WRITE constant
-		
-		var i,j;
+
+		var i,j,k;
+		var numComplete = 0;
+		//var addresses = ["T7_MA_EXF_KEY", "T7_MA_EXF_WRITE"];
+		//var values = [flashKey, (Address + (j * driver_const.T7_FLASH_BLOCK_WRITE_SIZE * 4))];
+		/*
 		for(i = 0; i < NumPages; i++)
 		{
 			//Calculate start address of current FLASH page
-			Address = FlashAdd + (i * T7_FLASH_PAGE_SIZE);
+			var Address = flashAdd + (i * driver_const.T7_FLASH_PAGE_SIZE);
 
 			//Number of blocks to write - full and partial pages
 			if((PartPageBytes > 0) && (i == NumPages - 1))
 			{
-				NumWrites = PartPageBytes / 4 / T7_FLASH_BLOCK_WRITE_SIZE;
+				NumWrites = PartPageBytes / 4 / driver_const.T7_FLASH_BLOCK_WRITE_SIZE;
 			}
 			else
 			{
-				NumWrites = T7_FLASH_PAGE_SIZE / 4 / T7_FLASH_BLOCK_WRITE_SIZE;
+				NumWrites = driver_const.T7_FLASH_PAGE_SIZE / 4 / driver_const.T7_FLASH_BLOCK_WRITE_SIZE;
 			}
 
 			//Build block and write to flash
 			for(j = 0; j < NumWrites; j++)
 			{
-				addresses = ["MA_EXF_KEY", "MA_EXF_WRITE"];
-				types = ["LJM_UINT32","LJM_UINT32"];
-				numValues = [1, T7_FLASH_BLOCK_WRITE_SIZE + 1];
-				values = [FlashKey, (Address + (j*T7_FLASH_BLOCK_WRITE_SIZE*4))];
-			
-				//Convert char array into uInt values??
-
-				//Execute write-command
+				//console.log(i,j,startByte, this.firmwareFileBuffer.length);
+				for(k = 0; k < driver_const.T7_FLASH_BLOCK_WRITE_SIZE; k++)
+				{
+					addresses.push("T7_MA_EXF_WRITE");
+					values.push(fileBuf.readUInt32BE(startByte));
+					startByte += 4;//Increment by 4 bytes, size of int.
+				}
+				numComplete++;
 			}
 		}
+		*/
+		//console.log(addresses.length, values.length, (NumPages * NumWrites), numComplete);
+		//this.writeMany(addresses, values, onError, onSuccess);
 
-		onSuccess();
+
+		var curPage = 0;
+		var curWrite = 0;
+		//Configure array's for initial device-write
+		//Calculate start address of current FLASH page
+
+		var addresses = [driver_const.T7_MA_EXF_KEY,driver_const.T7_MA_EXF_WRITE];
+
+		var values = [flashKey, flashAdd];
+		var NumWrites = 0;
+
+		//Number of blocks to write - full and partial pages
+		if((PartPageBytes > 0) && (i == NumPages - 1))
+		{
+			NumWrites = PartPageBytes / 4 / driver_const.T7_FLASH_BLOCK_WRITE_SIZE;
+		}
+		else
+		{
+			NumWrites = driver_const.T7_FLASH_PAGE_SIZE / 4 / driver_const.T7_FLASH_BLOCK_WRITE_SIZE;
+		}
+		//console.log("write");
+		
+		var self = this;
+
+		var k;
+		var numLoad = 0;
+		var numLoop = 0;
+		if((self.firmwareFileBuffer.length - offset) > (driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4))
+		{
+			console.log("loadMax");
+			numLoad = driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4;
+			numLoop = driver_const.T7_FLASH_BLOCK_WRITE_SIZE;
+		}
+		else
+		{
+			numLoad = self.firmwareFileBuffer.length - offset;
+			numLoop = numLoad/4;
+			console.log("LoadCustom:",numLoad);
+		}
+
+		var fileBuf = new Buffer(self.firmwareFileBuffer.slice(offset,(numLoad)+offset));
+		for(k = 0; k < numLoop; k++)
+		{
+			addresses.push(driver_const.T7_MA_EXF_WRITE);
+			values.push(fileBuf.readUInt32BE((k * 4)));
+		}
+		console.log(NumWrites, offset/length*100, " len:",values.length, offset, numLoad);
+		//console.log("before-call", addresses, values);
+		var retVar = self.writeMany(
+			addresses, 
+			values, 
+			function(res){
+				//Error Function
+				console.log("ERROR-Case", res,typeof(onError), typeof(onSuccess));
+				console.log("blah");
+				onError(res);
+
+			},
+			function(res){
+				//Success Function
+				//console.log("oldVars", flashAdd, offset, length);
+				if(offset < length - driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4)
+				{
+					//console.log("WriteIncNormal");
+					self.writeFlash(flashKey, flashAdd + driver_const.T7_FLASH_PAGE_SIZE, offset+(driver_const.T7_FLASH_BLOCK_WRITE_SIZE*4), length, onError, onSuccess)
+				}
+				else if (offset < length)
+				{
+					console.log("WriteIncMini");
+					console.log('diff:',length-offset);
+					self.writeFlash(flashKey, flashAdd + driver_const.T7_FLASH_PAGE_SIZE, offset+(length-offset), length, onError, onSuccess)
+				}
+				else
+				{
+					console.log("Write-End");
+					onSuccess();
+				}
+				//console.log('yay, success function');
+			});
+		//console.log("Return Var",retVar);
+		
+		
+		//onSuccess();
 
 	}
 

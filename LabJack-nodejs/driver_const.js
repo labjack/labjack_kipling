@@ -76,17 +76,36 @@ exports.T7_HEAD_FIRST_FOUR_BYTES			= 0x4C4A4658;
 exports.T7_TARGET_OLD						= 100017001;
 exports.T7_TARGET							= 100007001;
 
+// Device Specific constants
 exports.T7_HDR_FLASH_PAGE_ERASE				= 1;
 exports.T7_IMG_FLASH_PAGE_ERASE				= 120;
 exports.T7_IMG_HEADER_LENGTH				= 128;
+exports.T7_FLASH_BLOCK_WRITE_SIZE			= 128; 
+exports.T7_FLASH_PAGE_SIZE					= 4096;
 
-//Other
+// Other
 exports.T7_MA_EXF_KEY						= 61800;
 exports.T7_MA_EXF_pREAD						= 61810;
 exports.T7_MA_EXF_READ						= 61812;
 exports.T7_MA_EXF_ERASE						= 61820;
 exports.T7_MA_EXF_WRITE						= 61830;
+exports.T7_REQUEST_FW_UPGRADE				= 0x4C4A0020;
 
+// Header Positions
+exports.HEADER_CODE							= 0;
+exports.HEADER_TARGET						= 4;
+exports.HEADER_VERSION						= 8;
+exports.HEADER_REQ_LJSU						= 12;
+exports.HEADER_IMAGE_NUM					= 16;
+exports.HEADER_NUM_IMAGES					= 18;
+exports.HEADER_NEXT_IMG						= 20;
+exports.HEADER_IMG_LEN						= 24;
+exports.HEADER_IMG_OFFSET					= 28;
+exports.HEADER_SHA_BYTE_COUNT				= 32;
+exports.HEADER_ENC_SHA1						= 76;
+exports.HEADER_SHA1							= 96;
+exports.HEADER_RESERVED						= 116;
+exports.HEADER_CHECKSUM						= 124;
 
 //FIRMWARE UPGRADING CONSTANTS DIGIT
 //==============================================
