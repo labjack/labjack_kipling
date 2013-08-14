@@ -25,6 +25,11 @@
    		"versionNumber":0.9416, 
    		"fileName":"T7firmware_009416_06282013.bin",
    		"location":"http://labjack.com/sites/default/files/2013/06/T7firmware_009416_06282013.bin"
+   },
+   {
+         "versionNumber":0.9308,
+         "fileName":"T7firmware_009308_04222013.bin",
+         "location":"http://labjack.com/sites/default/files/2013/04/T7firmware_009308_04222013.bin"
    }
  ],
  "Digit":

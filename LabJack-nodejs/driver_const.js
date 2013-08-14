@@ -80,7 +80,7 @@ exports.T7_TARGET							= 100007001;
 exports.T7_HDR_FLASH_PAGE_ERASE				= 1;
 exports.T7_IMG_FLASH_PAGE_ERASE				= 120;
 exports.T7_IMG_HEADER_LENGTH				= 128;
-exports.T7_FLASH_BLOCK_WRITE_SIZE			= 128; 
+exports.T7_FLASH_BLOCK_WRITE_SIZE			= 8; 
 exports.T7_FLASH_PAGE_SIZE					= 4096;
 
 // Other aka Hidden T7-Registers, in T7_Constants.h

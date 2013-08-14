@@ -55,6 +55,7 @@ openCloseTest =
 'open("LJM_dtANY","LJM_ctANY","LJM_idANY")',
 'getHandleInfo()',
 'read("FIRMWARE_VERSION")',
+'read("BOOTLOADER_VERSION")',
 //'close()',
 //'open("LJM_dtT7","LJM_ctANY","LJM_idANY")',
 //'close()',
@@ -110,12 +111,13 @@ updateFirmware=
 'extractLoadedFwHeaderInfo()',
 'loadFiwmareFile(7,0.9418)',
 'extractLoadedFwHeaderInfo()',*/
-'loadFiwmareFile(7,0.9418)',
+'loadFiwmareFile(7,0.9500)',
 'extractLoadedFwHeaderInfo()',
 //
 //'downloadAllFirmwareVersions()',
 'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'checkFirmwareCompatability()',
+//'readFirstImagePage()',
 'eraseFlash(1)',
 'writeBinary()',
 'reInitializeDevice()',
