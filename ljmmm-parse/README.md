@@ -1,6 +1,6 @@
 ljmmm-parse
 ===========
-LabJack Modbus Map Markup language parser micro-library for Node.js.  
+[LabJack Modbus Map Markup](https://bitbucket.org/labjack/ljm_constants) language parser micro-library for Node.js.  
   
 
 Installation

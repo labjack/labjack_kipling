@@ -24,9 +24,6 @@
         "url" : "http://github.com/samnsparky/ljmmm-parse.git"
     },
     "files": [
-        "LICENSE",
-        "ljmmm.js",
-        "ljmmm_test.js",
-        "README.md"
+        "lib"
     ]
 }
