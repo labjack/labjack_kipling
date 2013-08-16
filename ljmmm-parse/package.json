@@ -11,7 +11,7 @@
         "name": "Sam Pottinger",
         "url": "http://gleap.org"
     },
-    "main": "ljmmm",
+    "main": "./lib/ljmmm",
     "license": "MIT",
     "keywords": [
         "LabJack",
