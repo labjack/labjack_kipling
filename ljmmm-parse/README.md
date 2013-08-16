@@ -28,7 +28,7 @@ ljmmm_parse.expandLJMMMName('Test#(0:2)');
 
 License and Copyright
 -----------------------------
-LabJack Corp, 2013
+LabJack Corp, 2013  
 Sam Pottinger, 2013
 
 Released under the [MIT license](http://opensource.org/licenses/MIT).
