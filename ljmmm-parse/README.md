@@ -14,15 +14,24 @@ Usage
 var ljmmm_parse = require('ljmmm-parse');
 
 /**
- * Returns [
+ * Logs
+ * [
  *     {name: 'Test0', address: 0, type: 'UINT32'},
  *     {name: 'Test1', address: 2, type: 'UNIT32'}
  * ]
 **/
-ljmmm_parse.expandLJMMMEntries({name: 'Test#(0:1)', address: 0, type: 'UINT32'});
+ljmmm_parse.expandLJMMMEntry(
+    {name: 'Test#(0:1)', address: 0, type: 'UINT32'},
+    function (err) { console.log(err); },
+    function (expandedEntries) { console.log(expandedEntries); }
+);
 
-// Returns ['Test0', 'Test1', 'Test2']
-ljmmm_parse.expandLJMMMName('Test#(0:2)');
+// Logs ['Test0', 'Test1', 'Test2']
+ljmmm_parse.expandLJMMMName(
+    'Test#(0:2)',
+    function (err) { console.log(err); },
+    function (expandedNames) { console.log(expandedNames); }
+);
 ```
 
 
