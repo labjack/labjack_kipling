@@ -17,6 +17,10 @@ exports.LJM_CT_TCP = 2;
 exports.LJM_CT_ETHERNET = 3;
 exports.LJM_CT_WIFI = 4;
 
+//Read/write constants
+exports.LJM_READ = 0;
+exports.LJM_WRITE = 1;
+
 //LJM_ListAll Constants
 exports.LJM_LIST_ALL_SIZE = 128;
 
@@ -88,7 +92,9 @@ exports.T7_MA_EXF_KEY						= 61800;
 exports.T7_MA_EXF_pREAD						= 61810;
 exports.T7_MA_EXF_READ						= 61812;
 exports.T7_MA_EXF_ERASE						= 61820;
-exports.T7_MA_EXF_WRITE						= 61830;
+exports.T7_MA_EXF_pWRITE					= 61830;
+exports.T7_MA_EXF_WRITE						= 61832;
+
 exports.T7_REQUEST_FW_UPGRADE				= 0x4C4A0020;
 exports.T7_MA_REQ_FWUPG 					= 61996;
 exports.T7_MA_REQ_RESTART 					= 61998;

@@ -42,7 +42,7 @@ writeTest =
 ]
 openCloseTest = 
 [
-//'listAll()',
+'listAll("LJM_dtT7","LJM_ctUSB")',
 /*'listAll("LJM_dtT7","LJM_ctUSB")',
 'listAll("LJM_dtT7","LJM_ctETHERNET")',
 'listAll("LJM_dtT7","LJM_ctWIFI")',
@@ -112,6 +112,7 @@ updateFirmware=
 'loadFiwmareFile(7,0.9418)',
 'extractLoadedFwHeaderInfo()',*/
 'loadFiwmareFile(7,0.9500)',
+//'loadFiwmareFile(7,0.9420)',
 'extractLoadedFwHeaderInfo()',
 //
 //'downloadAllFirmwareVersions()',

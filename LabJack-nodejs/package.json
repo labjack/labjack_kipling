@@ -1,0 +1,13 @@
+{
+	"name": "labjack-nodejs",
+	"version": "0.0.1",
+	"author": {
+		"name": "Chris Johnson",
+		"url": "http://labjack.com"
+	},
+	"dependencies": {
+		"ffi": "~1",
+		"optimist": "~0",
+		"ref": "~0"
+	}
+}

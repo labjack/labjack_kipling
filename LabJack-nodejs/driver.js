@@ -133,42 +133,84 @@ function reindexConstantsByRegister(constants)
 		address:driver_const.T7_MA_EXF_KEY,
 		name:"T7_MA_EXF_KEY",
 		type:"UINT32",
-		devices:["DIGIT","T7"],
+		devices:["T7"],
 		readwrite:"RW"
 	};
 	retDict[driver_const.T7_MA_EXF_WRITE] = {
 		address:driver_const.T7_MA_EXF_WRITE,
 		name:"T7_MA_EXF_WRITE",
 		type:"UINT32",
-		devices:["DIGIT","T7"],
+		devices:["T7"],
+		readwrite:"RW"
+	};
+	retDict[driver_const.T7_MA_EXF_pWRITE] = {
+		address:driver_const.T7_MA_EXF_pWRITE,
+		name:"T7_MA_EXF_pWRITE",
+		type:"UINT32",
+		devices:["T7"],
+		readwrite:"RW"
+	};
+	retDict[driver_const.T7_MA_EXF_READ] = {
+		address:driver_const.T7_MA_EXF_READ,
+		name:"T7_MA_EXF_READ",
+		type:"UINT32",
+		devices:["T7"],
+		readwrite:"RW"
+	};
+	retDict[driver_const.T7_MA_EXF_pREAD] = {
+		address:driver_const.T7_MA_EXF_pREAD,
+		name:"T7_MA_EXF_pREAD",
+		type:"UINT32",
+		devices:["T7"],
 		readwrite:"RW"
 	};
 	retDict[driver_const.T7_MA_EXF_ERASE] = {
 		address:driver_const.T7_MA_EXF_ERASE,
 		name:"T7_MA_EXF_ERASE",
 		type:"UINT32",
-		devices:["DIGIT","T7"],
+		devices:["T7"],
 		readwrite:"RW"
 	};
 	retDictName["T7_MA_EXF_KEY"] = {
 		address:driver_const.T7_MA_EXF_KEY,
 		name:"T7_MA_EXF_KEY",
 		type:"UINT32",
-		devices:["DIGIT","T7"],
+		devices:["T7"],
 		readwrite:"RW"
 	};
 	retDictName["T7_MA_EXF_WRITE"] = {
 		address:driver_const.T7_MA_EXF_WRITE,
 		name:"T7_MA_EXF_WRITE",
 		type:"UINT32",
-		devices:["DIGIT","T7"],
+		devices:["T7"],
+		readwrite:"RW"
+	};
+	retDictName["T7_MA_EXF_pWRITE"] = {
+		address:driver_const.T7_MA_EXF_pWRITE,
+		name:"T7_MA_EXF_pWRITE",
+		type:"UINT32",
+		devices:["T7"],
+		readwrite:"RW"
+	};
+	retDictName["T7_MA_EXF_READ"] = {
+		address:driver_const.T7_MA_EXF_READ,
+		name:"T7_MA_EXF_READ",
+		type:"UINT32",
+		devices:["T7"],
+		readwrite:"RW"
+	};
+	retDictName["T7_MA_EXF_pREAD"] = {
+		address:driver_const.T7_MA_EXF_pREAD,
+		name:"T7_MA_EXF_pREAD",
+		type:"UINT32",
+		devices:["T7"],
 		readwrite:"RW"
 	};
 	retDictName["T7_MA_EXF_ERASE"] = {
 		address:driver_const.T7_MA_EXF_ERASE,
 		name:"T7_MA_EXF_ERASE",
 		type:"UINT32",
-		devices:["DIGIT","T7"],
+		devices:["T7"],
 		readwrite:"RW"
 	};
 	//"T7_MA_EXF_WRITE"
@@ -520,7 +562,7 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-'+driver_const.LJM_DRVR
  				'int',							//Handle
  				'int',							//NumFrames (Number of Registers being accessed)
  				ref.refType(ref.types.CString),	//aNames (Registers to write to)
- 				ref.refType('double'),	//aValues (Values to write)
+ 				ref.refType('double'),			//aValues (Values to write)
  				ref.refType(ref.types.int)		//ErrorAddress
  			]
  		],

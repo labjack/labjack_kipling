@@ -1939,6 +1939,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					function(err) //onError
 					{
 						//onError
+						console.log(err);
 						onError("failed-erase1");
 					},
 					function(res) //onSuccess
@@ -1998,7 +1999,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					self.numErrs++;
 					if(self.numCalls == totalRequests)
 					{
-						self.onError();
+						self.onError(err);
 					}
 				},
 				function(res){//onSuccess
@@ -2170,7 +2171,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		//Configure array's for initial device-write
 		//Calculate start address of current FLASH page
 
-		var addresses = [driver_const.T7_MA_EXF_KEY,driver_const.T7_MA_EXF_WRITE];
+		var addresses = [driver_const.T7_MA_EXF_KEY,driver_const.T7_MA_EXF_pWRITE];
 
 		var values = [flashKey, flashAdd];
 		var NumWrites = 0;
@@ -2224,7 +2225,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		var fileBuf = new Buffer(self.firmwareFileBuffer.slice(offset,(numLoad)+offset));
 		for(k = 0; k < numLoop; k++)
 		{
-			addresses.push(driver_const.T7_MA_EXF_WRITE);
+			addresses.push(driver_const.T7_MA_EXF_WRITE+k*2);
 			values.push(fileBuf.readUInt32BE((k * 4)));
 		}
 		console.log(
@@ -2276,7 +2277,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 						onSuccess();
 					}
 					//console.log('yay, success function');
-				},1);
+				});
 		}
 		else
 		{
