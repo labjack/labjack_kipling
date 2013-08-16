@@ -5,7 +5,7 @@ LabJack Modbus Map Markup language parser micro-library for Node.js.
 
 Installation
 --------------
-> npm install ljmmm-parse
+@ npm install ljmmm-parse @
   
 
 Usage
@@ -13,13 +13,15 @@ Usage
 ```javascript
 var ljmmm_parse = require('ljmmm-parse');
 
-# Returns [
-#     {name: 'Test0', address: 0, type: 'UINT32'},
-#     {name: 'Test1', address: 2, type: 'UNIT32'}
-# ]
+/**
+ * Returns [
+ *     {name: 'Test0', address: 0, type: 'UINT32'},
+ *     {name: 'Test1', address: 2, type: 'UNIT32'}
+ * ]
+**/
 ljmmm_parse.expandLJMMMEntries({name: 'Test#(0:1)', address: 0, type: 'UINT32'});
 
-# Returns ['Test0', 'Test1', 'Test2']
+// Returns ['Test0', 'Test1', 'Test2']
 ljmmm_parse.expandLJMMMName('Test#(0:2)');
 ```
 
