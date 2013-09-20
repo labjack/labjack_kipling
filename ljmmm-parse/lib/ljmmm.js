@@ -12,7 +12,6 @@
 
 var async = require('async')
 var extend = require('node.extend');
-var lazy = require('lazy');
 var sprintf = require('sprintf-js');
 
 // Sizes in number of MODBUS registers (2 bytes each).
@@ -24,6 +23,28 @@ var DATA_TYPE_SIZES = {
     UINT32: 2,
     FLOAT32: 2
 };
+
+
+// TODO: This is slow and lazy would have been preferred. However, need an
+//       alternative for those pesky synchronous options.
+/**
+ * Make a numerical range synchronously and return as an array.
+ *
+ * @param {number} startNum The first number in the range.
+ * @param {number} endNum The last number to include in the range non-inclusive.
+ *      In other words, the last number to include in the range + 1.
+ * @param {number} increment The number value to increase by in each step or,
+ *      in other words, the numerical difference between subsequent elements in
+ *      the range.
+ * @return {array} Resulting range as an array of number.
+**/
+function makeRange (startNum, endNum, increment) {
+    var retVal = [];
+    for (var i=startNum; i<endNum; i+=increment) {
+        retVal.push(i);
+    }
+    return retVal;
+}
 
 
 /**
@@ -50,11 +71,13 @@ function getTypeRegSize(typeName)
  *
  * @param {String} name The field to interpret as an LJMMM string.
  * @param {function} onError The function to call if an error is encountered
- *      during expansion. Should take string argument describing the error.
+ *      during expansion. Should take string argument describing the error. If
+ *      not provided, the corresponding error will be thrown.
  * @param {function} onSuccess The function to call after the LJMMM field has
  *      been interpreted. The callback should take a single argument which
  *      will be an Array of String or, in other words, the expansion / result of
- *      the interpretation of the LJMMM field.
+ *      the interpretation of the LJMMM field. If not provided, that argument
+ *      will be returned from this function and this acts synchronously.
 **/
 exports.expandLJMMMName = function(name, onError, onSuccess)
 {
@@ -63,7 +86,7 @@ exports.expandLJMMMName = function(name, onError, onSuccess)
 
     if(values === null) {
         onSuccess([name]);
-        return;
+        return [name];
     }
 
     var before = values[1];
@@ -72,21 +95,25 @@ exports.expandLJMMMName = function(name, onError, onSuccess)
     var increment = values[4];
     var after = values[5];
 
-    var registerRange;
+    var regNums;
 
     if (increment === undefined) {
-        registerRange = lazy.range(startNum, endNum+1);
+        regNums = makeRange(startNum, endNum+1, 1);
     } else {
         increment = Number(increment);
-        registerRange = lazy.range(startNum, endNum+1, increment);
+        regNums = makeRange(startNum, endNum+1, increment);
     }
 
-    registerRange.join(function(regNums){
-        var fullyQualifiedNames = regNums.map(function(regNum){
-            return sprintf.sprintf('%s%d%s', before, regNum, after);
-        });
-        onSuccess(fullyQualifiedNames);
+    var fullyQualifiedNames;
+
+    fullyQualifiedNames = regNums.map(function(regNum){
+        return sprintf.sprintf('%s%d%s', before, regNum, after);
     });
+
+    if (onSuccess !== undefined)
+        onSuccess(fullyQualifiedNames);
+
+    return fullyQualifiedNames;
 };
 
 
@@ -97,14 +124,14 @@ exports.expandLJMMMName = function(name, onError, onSuccess)
  *      set of registers.
  * @param {function} onError The function to call if an error is encountered
  *      during expansion. Should take a string argument describing the error.
- * @param {function} onSuccess The function to call after enumerating.
- * @return {Array} An Array of Object that results from interpreting the name
+ * @param {function} onSuccess The function to call after enumerating. Will be
+ *      given an Array of Object that results from interpreting the name
  *      of the provided entry as an LJMMM field, enumerating and creating the
  *      appropriate entries when interpreting that field.
 **/
 exports.expandLJMMMEntry = function(entry, onError, onSuccess)
 {
-    var expandedEntries = exports.expandLJMMMName(
+    exports.expandLJMMMName(
         entry.name,
         onError,
         function (names) {
@@ -113,7 +140,8 @@ exports.expandLJMMMEntry = function(entry, onError, onSuccess)
             var address = entry.address;
             var regTypeSize = getTypeRegSize(entry.type);
 
-            for (var i in names) {
+            numNames = names.length;
+            for (var i=0; i<numNames; i++) {
                 var name = names[i];
                 var newEntry = extend({}, entry);
                 newEntry.name = name;
@@ -129,14 +157,45 @@ exports.expandLJMMMEntry = function(entry, onError, onSuccess)
 
 
 /**
+ * Interpret an entry's name field as LJMMM synchronously.
+ *
+ * @param {Object} entry An Object containing information about a register or
+ *      set of registers.
+ * @return {Array} An Array of Object that results from interpreting the name
+ *      of the provided entry as an LJMMM field, enumerating and creating the
+ *      appropriate entries when interpreting that field.
+**/
+exports.expandLJMMMEntrySync = function(entry)
+{
+    var names = exports.expandLJMMMName(entry.name);
+    var expandedEntries = [];
+
+    var address = entry.address;
+    var regTypeSize = getTypeRegSize(entry.type);
+
+    var numNames = names.length;
+    for (var i=0; i<numNames; i++) {
+        var name = names[i];
+        var newEntry = extend({}, entry);
+        newEntry.name = name;
+        newEntry.address = address;
+        address += regTypeSize;
+        expandedEntries.push(newEntry);
+    }
+
+    return expandedEntries;
+};
+
+
+/**
  * Interpret an the names of entries field as LJMMM, enumerating as appropriate.
  *
  * @param {array} entry An array of objects containing information about a
  *      register or set of registers.
  * @param {function} onError The function to call if an error is encountered
  *      during expansion. Should take a string argument describing the error.
- * @param {function} onSuccess The function to call after enumerating.
- * @return {Array} An Array of Object that results from interpreting the name
+ * @param {function} onSuccess The function to call after enumerating. Will be
+ *      given an Array of Object that results from interpreting the name
  *      of the provided entry as an LJMMM field, enumerating and creating the
  *      appropriate entries when interpreting that field.
 **/
@@ -158,4 +217,28 @@ exports.expandLJMMMEntries = function(entries, onError, onSuccess)
                 onSuccess(retEntries);
         }
     );
+}
+
+
+/**
+ * Interpret an the names of entries field as LJMMM synchronously.
+ *
+ * @param {array} entry An array of objects containing information about a
+ *      register or set of registers.
+ * @return {Array} An Array of Object that results from interpreting the name
+ *      of the provided entry as an LJMMM field, enumerating and creating the
+ *      appropriate entries when interpreting that field.
+**/
+exports.expandLJMMMEntriesSync = function(entries, onError, onSuccess)
+{
+    var retEntries = [];
+
+    var numEntries = entries.length;
+    for(var i=0; i<numEntries; i++)
+    {
+        var newEntries = exports.expandLJMMMEntrySync(entries[i]);
+        retEntries.push.apply(retEntries, newEntries);
+    }
+
+    return retEntries;
 }

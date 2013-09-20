@@ -121,6 +121,26 @@ exports.testExpandLJMMMEntry = function(test)
 
 
 /**
+ * Test expanding a register entry synchronously.
+ *
+ * @param {nodeunit.test} test The nodeunit-standard test that this function's
+ *      assertions shouldmrun against and this test should report to when done.
+**/
+exports.testExpandLJMMMEntrySync = function(test)
+{
+    var testInput = {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'};
+    var expectedResult = [
+        {name: 'Test0', address: 0, type: 'TEST_TYPE'},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE'}
+    ];
+
+    var result = ljmmm.expandLJMMMEntrySync(testInput);
+    test.deepEqual(result, expectedResult);
+    test.done();
+};
+
+
+/**
  * Test expanding a many register entries.
  *
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
@@ -147,4 +167,29 @@ exports.testExpandLJMMMEntries = function(test)
             test.done();
         }
     );
+};
+
+
+/**
+ * Test expanding many register entries synchronously.
+ *
+ * @param {nodeunit.test} test The nodeunit-standard test that this function's
+ *      assertions shouldmrun against and this test should report to when done.
+**/
+exports.testExpandLJMMMEntriesSync = function(test)
+{
+    var testInput = [
+        {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'},
+        {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE'}
+    ];
+    var expectedResult = [
+        {name: 'Test0', address: 0, type: 'TEST_TYPE'},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE'},
+        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE'},
+        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE'}
+    ];
+
+    var result = ljmmm.expandLJMMMEntriesSync(testInput);
+    test.deepEqual(result, expectedResult);
+    test.done();
 };
