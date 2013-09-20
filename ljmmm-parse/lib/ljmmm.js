@@ -85,8 +85,11 @@ exports.expandLJMMMName = function(name, onError, onSuccess)
     var values = name.match(ljmmmRegex);
 
     if(values === null) {
-        onSuccess([name]);
-        return [name];
+        if (onSuccess === undefined) {
+            return [name];
+        } else {
+            onSuccess([name]);
+        }
     }
 
     var before = values[1];

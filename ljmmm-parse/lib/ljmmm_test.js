@@ -44,6 +44,21 @@ exports.testGetTypeRegSizeNotFound = function(test)
 
 
 /**
+ * Test an entry that doesn't expand in a synchronous call.
+ *
+ * @param {nodeunit.test} test The nodeunit-standard test that this function's
+ *      assertions shouldmrun against and this test should report to when done.
+**/
+exports.testExpandLJMMMNameNoExpand = function(test)
+{
+    var expectedResult = ['TestAfter'];
+    var result = ljmmm.expandLJMMMName('TestAfter');
+    test.deepEqual(expectedResult, result);
+    test.done();
+};
+
+
+/**
  * Test expanding the name of a register with the default range increment.
  *
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
