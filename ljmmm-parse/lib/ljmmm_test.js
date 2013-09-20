@@ -12,7 +12,7 @@
 var rewire = require('rewire');
 
 var ljmmm = rewire('./ljmmm');
-ljmmm.__set__('DATA_TYPE_SIZES', {TEST_TYPE: 4})
+ljmmm.__set__('DATA_TYPE_SIZES', {TEST_TYPE: 4, ANOTHER_TYPE: 2})
 
 
 /**
@@ -110,6 +110,36 @@ exports.testExpandLJMMMEntry = function(test)
     ];
 
     ljmmm.expandLJMMMEntry(
+        testInput,
+        function (error) { test.ok(false, error); test.done(); },
+        function (result) {
+            test.deepEqual(result, expectedResult);
+            test.done();
+        }
+    );
+};
+
+
+/**
+ * Test expanding a many register entries.
+ *
+ * @param {nodeunit.test} test The nodeunit-standard test that this function's
+ *      assertions shouldmrun against and this test should report to when done.
+**/
+exports.testExpandLJMMMEntries = function(test)
+{
+    var testInput = [
+        {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'},
+        {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE'}
+    ];
+    var expectedResult = [
+        {name: 'Test0', address: 0, type: 'TEST_TYPE'},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE'},
+        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE'},
+        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE'}
+    ];
+
+    ljmmm.expandLJMMMEntries(
         testInput,
         function (error) { test.ok(false, error); test.done(); },
         function (result) {

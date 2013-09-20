@@ -10,7 +10,7 @@
  * @license MIT
 **/
 
-
+var async = require('async')
 var extend = require('node.extend');
 var lazy = require('lazy');
 var sprintf = require('sprintf-js');
@@ -126,3 +126,36 @@ exports.expandLJMMMEntry = function(entry, onError, onSuccess)
         }
     );
 };
+
+
+/**
+ * Interpret an the names of entries field as LJMMM, enumerating as appropriate.
+ *
+ * @param {array} entry An array of objects containing information about a
+ *      register or set of registers.
+ * @param {function} onError The function to call if an error is encountered
+ *      during expansion. Should take a string argument describing the error.
+ * @param {function} onSuccess The function to call after enumerating.
+ * @return {Array} An Array of Object that results from interpreting the name
+ *      of the provided entry as an LJMMM field, enumerating and creating the
+ *      appropriate entries when interpreting that field.
+**/
+exports.expandLJMMMEntries = function(entries, onError, onSuccess)
+{
+    var retEntries = [];
+    async.each(
+        entries,
+        function (entry, callback) {
+            exports.expandLJMMMEntry(entry, callback, function(newEntries) {
+                retEntries.push.apply(retEntries, newEntries);
+                callback();
+            });
+        },
+        function (err) {
+            if(err !== null && err !== undefined)
+                onError(err);
+            else
+                onSuccess(retEntries);
+        }
+    );
+}

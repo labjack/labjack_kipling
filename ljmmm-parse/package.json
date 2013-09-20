@@ -3,6 +3,7 @@
     "version": "0.0.1",
     "description": "Library for parsing LabJack Modbus Map Markup documents.",
     "dependencies": {
+        "async": "~0.2",
         "node.extend": "~1",
         "lazy": "~1",
         "sprintf-js": ">=0.0.7"
