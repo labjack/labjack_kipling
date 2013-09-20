@@ -17,6 +17,24 @@ var ljmmm_parse = require('ljmmm-parse');
  * Logs
  * [
  *     {name: 'Test0', address: 0, type: 'UINT32'},
+ *     {name: 'Test1', address: 2, type: 'UNIT32'},
+ *     {name: 'Another0', address: 0, type: 'UINT32'},
+ *     {name: 'Another1', address: 2, type: 'UNIT32'}
+ * ]
+**/
+ljmmm_parse.expandLJMMMEntries(
+    [
+        {name: 'Test#(0:1)', address: 0, type: 'UINT32'},
+        {name: 'Another#(0:1)', address: 0, type: 'UINT32'}
+    ]
+    function (err) { console.log(err); },
+    function (expandedEntries) { console.log(expandedEntries); }
+);
+
+/**
+ * Logs
+ * [
+ *     {name: 'Test0', address: 0, type: 'UINT32'},
  *     {name: 'Test1', address: 2, type: 'UNIT32'}
  * ]
 **/
