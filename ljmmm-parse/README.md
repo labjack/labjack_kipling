@@ -50,6 +50,13 @@ ljmmm_parse.expandLJMMMName(
     function (err) { console.log(err); },
     function (expandedNames) { console.log(expandedNames); }
 );
+
+/**
+ * Also available:
+ * 
+ * ljmmm_parse.expandLJMMMEntriesSync(listOfEntries);
+ * ljmmm_parse.expandLJMMMEntrySync(entry);
+**/
 ```
 
 
