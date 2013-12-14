@@ -1,0 +1,7 @@
+nodejs 'ref' buffer-library:
+http://tootallnate.github.io/ref/#exports-writePointer
+
+nodejs 'nodeunit' testing library:
+https://github.com/caolan/nodeunit
+
+

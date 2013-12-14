@@ -14,8 +14,35 @@ then
 else
 	if [ $# -eq 2 ]
 	then
-		echo "./testMe.js --testNum=$2 --async=$1"
-		./testMe.js --testNum=$2 --async=$1
+		#Command for running various unit tests
+		if [ $1 = "test" ]
+		then
+			TEST_DIR="/LabJackDriver_Testing"
+			DEVICE_TEST="$TEST_DIR/device_test.js"
+			DRIVER_TEST="$TEST_DIR/driver_test.js"
+			JSON_CONSTANTS_PARSER_TEST="$TEST_DIR/json_constants_parser_test.js"
+			if [ $2 = "device" ]
+			then
+				nodeunit $DEVICE_TEST
+			fi
+			if [ $2 = "driver" ]
+			then
+				nodeunit $DRIVER_TEST
+			fi
+			if [ $2 = "constantsParser" ]
+			then
+				nodeunit $JSON_CONSTANTS_PARSER_TEST
+			fi
+			if [ $2 = "all" ]
+			then
+				nodeunit $JSON_CONSTANTS_PARSER_TEST
+				nodeunit $DEVICE_TEST
+				nodeunit $DRIVER_TEST
+			fi
+		else
+			echo "./testMe.js --testNum=$2 --async=$1"
+			./testMe.js --testNum=$2 --async=$1
+		fi
 	else
 		if [ $# -eq 1 ]
 		then
@@ -41,7 +68,7 @@ else
 				#open the main directory, LabJackM.h, ljm_constants.json, this script, and the testMe.js file in a new window
 				#subl -n -a /Users/chrisjohnson/Dropbox/git/LabJack/LabJack-nodejs/ /usr/local/include/LabJackM.h /usr/local/share/LabJack/LJM/ljm_constants.json /Users/chrisjohnson/Dropbox/git/LabJack/LabJack-nodejs/run.sh /Users/chrisjohnson/Dropbox/git/LabJack/LabJack-nodejs/testMe.js	
 				#cleaner method:
-				PROJ_DIR="/Users/chrisjohnson/Dropbox/git/LabJack/LabJack-nodejs/"
+				PROJ_DIR="/Users/chrisjohnson/Dropbox/git/LabJack/LabJack-nodejs"
 				EX_DIR="/Users/chrisjohnson/Downloads/dist\ 4/LabJackM/examples"
 				CUR_DIR=`pwd`
 
@@ -50,8 +77,11 @@ else
 				CMD="$CMD /usr/local/include/LabJackM.h"
 				CMD="$CMD /usr/local/share/LabJack/LJM/ljm_constants.json"
 				CMD="$CMD $PROJ_DIR run.sh"
-				CMD="$CMD $PROJ_DIR testMe.js"
-				CMD="$CMD $PROJ_DIR labjack.js"
+				#CMD="$CMD $PROJ_DIR testMe.js"
+				CMD="$CMD $PROJ_DIR/LabJackDriver/device.js"
+				CMD="$CMD $PROJ_DIR/LabJackDriver/driver.js"
+				CMD="$CMD $PROJ_DIR/LabJackDriver/driver_wrapper.js"
+
 
 				#Also open the Kippling_QT directory
 				CMD="$CMD /Users/chrisjohnson/Dropbox/git_lj/Kipling_QT"

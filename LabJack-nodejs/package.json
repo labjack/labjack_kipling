@@ -1,13 +1,36 @@
 {
 	"name": "labjack-nodejs",
-	"version": "0.0.1",
+	"version": "0.0.3",
 	"author": {
 		"name": "Chris Johnson",
 		"url": "http://labjack.com"
 	},
+	"contributors": {
+		"name": "Sam Pottinger",
+		"url": "http://gleap.org"
+	},
+	"main": "./lib/labjack_nodejs",
+	"license": "GNU GPL v3",
+	"keywords": [
+        "LabJack",
+        "LJMMM",
+        "MODBUS",
+        "T7"
+    ],
+    "homepage": "https://github.com/chrisJohn404/LabJack-nodejs",
+    "repository": {
+        "type" : "git",
+        "url" : "https://github.com/chrisJohn404/LabJack-nodejs.git"
+    },
+    "files": [
+        "lib"
+    ],
 	"dependencies": {
+		"async": "~0",
 		"ffi": "~1",
 		"optimist": "~0",
-		"ref": "~0"
+		"ref": "~0",
+		"rewire": "~1",
+		"ljmmm-parse": "~0.1"
 	}
 }

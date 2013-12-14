@@ -1,6 +1,8 @@
+ALL OLD DOCUMENTATION AS OF AUGUST 22, 2013
 LabJack-nodejs
 ==============
 UPDATED FOR VERSION 0.243
+
 
 nodejs library for using LJM driver.  Created two different objects that can be imported.  Was created to function much like our labjack python driver for our UD devices. For more information about what each function does please look at the LabJackM.h file that can be downloaded & installed here: 
 [http://labjack.com/support/software](http://labjack.com/support/software)
