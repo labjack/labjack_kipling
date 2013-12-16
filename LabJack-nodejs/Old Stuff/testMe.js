@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-//Run: ./testMe.js --testNum = 0 --async=true
+//Run: ./testMe.js --testNum=0 --async=true
 //Requires "node-optimist" to accept commandline args: https://github.com/substack/node-optimist
 //Stuff For Testing:
 var argv = require('optimist').argv;
@@ -9,7 +9,7 @@ assert.equal('Hello','Hello');
 
 basicTest = 
 [
-'open("LJM_dtT7","LJM_ctUSB","470010642")',
+'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'getHandleInfo()',
 'read("FIO0")',
 'write(1000, 0.5)',
@@ -42,7 +42,7 @@ writeTest =
 ]
 openCloseTest = 
 [
-'listAll("LJM_dtT7","LJM_ctUSB")',
+//'listAll("LJM_dtT7","LJM_ctUSB")',
 /*'listAll("LJM_dtT7","LJM_ctUSB")',
 'listAll("LJM_dtT7","LJM_ctETHERNET")',
 'listAll("LJM_dtT7","LJM_ctWIFI")',
@@ -52,7 +52,7 @@ openCloseTest =
 //'errToStr(1268)',
 //'errToStr(0)',
 //'errToStr(200)',
-'open("LJM_dtANY","LJM_ctANY","LJM_idANY")',
+'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'getHandleInfo()',
 'read("FIRMWARE_VERSION")',
 'read("BOOTLOADER_VERSION")',
@@ -111,8 +111,8 @@ updateFirmware=
 'extractLoadedFwHeaderInfo()',
 'loadFiwmareFile(7,0.9418)',
 'extractLoadedFwHeaderInfo()',*/
-'loadFiwmareFile(7,0.9500)',
-//'loadFiwmareFile(7,0.9420)',
+//'loadFiwmareFile(7,0.9500)',
+'loadFiwmareFile(7,0.9420)',
 'extractLoadedFwHeaderInfo()',
 //
 //'downloadAllFirmwareVersions()',
@@ -155,6 +155,10 @@ downloadFirmware =
 'loadFiwmareFile(7,0.9421)',
 'extractLoadedFwHeaderInfo()',
 ]
+LUATestScript = 
+[
+
+]
 
 /*var testArray = new Array();
 testArray[0] = basicTest;
@@ -175,11 +179,13 @@ configureWifiHome,		// 4
 readWifiConfig,			// 5
 updateFirmware,			// 6
 downloadFirmware,		// 7
+LUATestScript,			// 8
 ]
 
 var activeTest;
 if(argv.testNum != null)
 {
+	console.log('here',argv.testNum)
 	if((parseInt(argv.testNum)>=0) && (parseInt(argv.testNum)<testArray.length))
 	{
 		activeTest = testArray[parseInt(argv.testNum)];
@@ -208,6 +214,7 @@ if(argv.async=='true')
 	var asyncTest = require('./asyncTest');
 
 	//Test Async-Functionality
+	console.log(activeTest);
 	asyncTest.run(activeTest);
 }
 else

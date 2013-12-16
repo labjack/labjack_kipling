@@ -2057,6 +2057,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 				//Clear Stuff for T7
 				//1. Write Flash
 				//(Transfer FW image to External Flash)
+				console.log('Writing Image');
 				var self = this;
 				this.writeFlash(
 					driver_const.T7_EFkey_ExtFirmwareImage,
@@ -2069,6 +2070,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					},
 					function(res){
 						//onSuccess();
+						console.log('Writing ImageInfo');
 						self.writeFlash(
 							driver_const.T7_EFkey_ExtFirmwareImgInfo	,
 							driver_const.T7_EFAdd_ExtFirmwareImgInfo	,
@@ -2090,6 +2092,16 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			}
 		}
 	};
+	var printedDump = 0;
+	var keyAddresses = [
+		2564032,
+		2564064,
+		3670016,
+		3670048,
+		3670080,
+		3670112,
+
+	]
 	this.writeFlash = function(flashKey, flashAdd, offset, length, startOffset)
 	{
 		//console.log("beforeError");
@@ -2208,7 +2220,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 		{
 			numLoad = length - (offset-startOffset);
 			numLoop = numLoad/4;
-			console.log("LoadCustom",numLoad, numLoop);			
+			//console.log("LoadCustom",numLoad, numLoop);			
 		}
 		//if the current number of bytes being loaded is more than the length subtracted by the shifted offset then
 		//re-set the numLoad & numLoop variables to be proper values
@@ -2228,7 +2240,21 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			addresses.push(driver_const.T7_MA_EXF_WRITE+k*2);
 			values.push(fileBuf.readUInt32BE((k * 4)));
 		}
-		console.log(
+		if(printedDump < 0) {
+			console.log(addresses);
+			console.log(values);
+			printedDump += 1;
+		}
+		console.log('Write-Pointer',values[1]);
+		for(var pit = 0; pit < keyAddresses.length; pit++) {
+			if(values[1]==keyAddresses[pit]) {
+				console.log('Len',values.length);
+				console.log('vals',values)
+				console.log('addrs',addresses)
+			}
+
+		}
+		/*console.log(
 			"%Complete",((offset-startOffset)/length*100).toFixed(3), 
 			"\tCurOffset:",offset, 
 			"\tAddress:",flashAdd.toString(16),
@@ -2238,7 +2264,7 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 			"IntsWritten",numLoop, 
 			"Len",values.length,
 			"Line:",(offset-startOffset)*8/128+9,
-			"First:",values[2].toString(16));
+			"First:",values[2].toString(16));*/
 		//console.log("before-call", addresses, values);
 		if(numLoad > 0)
 		{
@@ -2265,8 +2291,8 @@ exports.labjack = function (genDebuggingEnable, debugSystem)
 					}
 					else if ((offset-startOffset+numLoad) < length)
 					{
-						console.log("WriteIncMini");
-						console.log('diff:',offset+numLoad);
+						//console.log("WriteIncMini");
+						//console.log('diff:',offset+num);
 						//Leave flash key un-touched, increment flashAdd by the amount written, increment the offset, & dont change the rest
 						//flashAddress & offset should be incremented byte-wise (as the unit)
 						self.writeFlash(flashKey, flashAdd + numLoad, (offset + numLoad), length, startOffset, onError, onSuccess)
