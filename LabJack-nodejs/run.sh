@@ -52,6 +52,11 @@ else
 			#-n arg opens a new window
 			#-a indicates a file/directory to be opened
 
+			if [ $1 = "install" ]
+			then
+				echo "installing npm packages"
+				npm install
+			fi
 			if [ $1 = "header" ]
 			then
 				echo "opening LabJackM.h"
