@@ -40,8 +40,10 @@ else
 				nodeunit $DRIVER_TEST
 			fi
 		else
-			echo "./testMe.js --testNum=$2 --async=$1"
-			./testMe.js --testNum=$2 --async=$1
+			#Command for quickly running pre-made program
+			#ex: './run.sh true 9'
+			echo "./UtilityPrograms/GeneralDeviceControl/testMe.js --testNum=$2 --async=$1"
+			./UtilityPrograms/GeneralDeviceControl/testMe.js --testNum=$2 --async=$1
 		fi
 	else
 		if [ $# -eq 1 ]
