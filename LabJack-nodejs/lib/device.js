@@ -1646,7 +1646,7 @@ exports.labjack = function ()
 			for(i = 0; i < values.length; i++)
 			{
 				var value = values[i];
-				if(typeof(value) == 'number') {
+				if(typeof(value) === 'number') {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
@@ -1756,7 +1756,7 @@ exports.labjack = function ()
 			for(i = 0; i < values.length; i++)
 			{
 				var value = values[i];
-				if(typeof(value) == 'number') {
+				if(typeof(value) === 'number') {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
@@ -1857,8 +1857,8 @@ exports.labjack = function ()
 			offsetD = 0;
 			for(i = 0; i < values.length; i++)
 			{
-				//var value = values[i];
-				if(typeof(value) == 'number') {
+				var value = values[i];
+				if(typeof(value) === 'number') {
 					aValues.writeDoubleLE(values,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
@@ -1955,7 +1955,7 @@ exports.labjack = function ()
 			for(i = 0; i < values.length; i++)
 			{
 				var value = values[i];
-				if(typeof(value) == 'number') {
+				if(typeof(value) === 'number') {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
