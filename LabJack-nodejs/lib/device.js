@@ -1645,8 +1645,9 @@ exports.labjack = function ()
 			offsetD = 0;
 			for(i = 0; i < values.length; i++)
 			{
+				var value = values[i];
 				if(typeof(value) == 'number') {
-					aValues.writeDoubleLE(values,offsetD);
+					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
 				}
@@ -1683,10 +1684,8 @@ exports.labjack = function ()
 			//Allocate space for the aNames array
 			var aAddresses = new Buffer(numFrames * 4);//Array of addresses
 			var aTypes = new Buffer(numFrames * 4);//Array of types
-
 			var offsetD = 0;
 			var offsetI = 0;
-
 			//Populate the array's with data
 			for(i = 0; i < numFrames; i++) {
 				//Fill aDirections array
@@ -1751,22 +1750,23 @@ exports.labjack = function ()
 				offsetD +=8;
 				offsetI += 4;
 			}
-
 			//Increment & fill the values array separately because it may be of
 			//different length then the rest.
 			offsetD = 0;
 			for(i = 0; i < values.length; i++)
 			{
+				var value = values[i];
 				if(typeof(value) == 'number') {
-					aValues.writeDoubleLE(values,offsetD);
+					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
 				}
 				offsetD += 8;
 			}
-
 			//Call the LJM function
 			var self = this;
+			console.log('Addrs',aAddresses);
+			console.log('Vals',aValues);
 			errorResult = this.ljm.LJM_eAddresses.async(
 				this.handle,
 				numFrames,
@@ -1857,6 +1857,7 @@ exports.labjack = function ()
 			offsetD = 0;
 			for(i = 0; i < values.length; i++)
 			{
+				//var value = values[i];
 				if(typeof(value) == 'number') {
 					aValues.writeDoubleLE(values,offsetD);
 				} else {
@@ -1953,8 +1954,9 @@ exports.labjack = function ()
 			offsetD = 0;
 			for(i = 0; i < values.length; i++)
 			{
+				var value = values[i];
 				if(typeof(value) == 'number') {
-					aValues.writeDoubleLE(values,offsetD);
+					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
 				}

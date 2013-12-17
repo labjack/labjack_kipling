@@ -1014,6 +1014,7 @@ module.exports = {
 			'rwMany([1000,0],[1,0],[1,1],[2.5,null])',
 			'rwMany([1000,0],[1,0],[2,1],[2.5,2.5,null])',
 			'rwMany(["DAC0","AIN0"],[1,0],[2,2],[2.5,2.5,null,null])',
+			'rwMany([5120],[1],[6],[0x11,0x00,0xDE,0xAD,0xBE,0xEF])'
 		];
 
 		//Expected info combines both sync & async
@@ -1026,6 +1027,7 @@ module.exports = {
 			'LJM_eAddresses',
 			'LJM_eAddresses',
 			'LJM_eNames',
+			'LJM_eAddresses',
 			'LJM_eAddressesAsync',
 			'LJM_eNamesAsync',
 			'LJM_eAddressesAsync',
@@ -1033,7 +1035,8 @@ module.exports = {
 			'LJM_eAddressesAsync',
 			'LJM_eAddressesAsync',
 			'LJM_eAddressesAsync',
-			'LJM_eNamesAsync'
+			'LJM_eNamesAsync',
+			'LJM_eAddressesAsync'
 		];
 		//Expected info combines both sync & async
 		var expectedResultList = [
@@ -1045,6 +1048,7 @@ module.exports = {
 			[ 8 ],
 			[ 7 ],
 			[ 7, 6 ],
+			[],
 			[ 9, 8 ],
 			[ 9, 8 ],
 			[ 9, 8 ],
@@ -1052,15 +1056,20 @@ module.exports = {
 			[ 9 ],
 			[ 8 ],
 			[ 7 ],
-			[ 7, 6 ]
+			[ 7, 6 ],
+			[]
 		];
 
 		//Run the desired comman
+		console.log('Starting Sync');
 		syncRun.run(testList);
+		console.log('Starting Async');
 		asyncRun.run(testList,
 			function(res) {
+				console.log('errorReported');
 				//Error
 			}, function(res) {
+				console.log('finisned');
 				//Success
 				var funcs = fakeDriver.getLastFunctionCall();
 				var results = asyncRun.getResults();
@@ -1070,7 +1079,13 @@ module.exports = {
 
 				// console.log("Function Calls", funcs);
 				// console.log("Results",results);
-				// console.log("Arguments",argList);
+				var tNum = 0;
+				console.log("Arguments",argList.slice(testList.length-tNum,testList.length+1-tNum));
+				console.log("Arguments",argList.slice(2*testList.length-tNum,2*testList.length+1-tNum));
+				// console.log('lenOrig',argList.length)
+				// console.log('lenNew',argList.slice(1,argList.length).length)
+				// ljmArgs = argList.slice(1+testList.length,2+testList.length);
+				//console.log('LJM-Args',argList)
 				
 				//Test to make sure the proper functions were called
 				test.deepEqual(expectedFunctionList,funcs);
