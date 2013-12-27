@@ -4,8 +4,10 @@ LabJack-nodejs
 UPDATED FOR VERSION 0.243
 
 
-nodejs library for using LJM driver.  Created two different objects that can be imported.  Was created to function much like our labjack python driver for our UD devices. For more information about what each function does please look at the LabJackM.h file that can be downloaded & installed here: 
+nodejs library for using [http://labjack.com/ljm](LJM library).  Created two different objects that can be imported.  Was created to function much like our labjack python driver for our UD devices. For more information about what each function does please look at the LabJackM.h file that can be downloaded & installed here: 
 [http://labjack.com/support/software](http://labjack.com/support/software)
+
+Currently this wrapper only supports our [http://labjack.com/t7](T7) and [http://labjack.com/t7](T7-Pro) Low Cost, High Quality Multifunction USB, Ethernet, 802.11b/g Wifi DAQ devices however [http://labjack.com/](LabJack) plans to release firmware for the [http://labjack.com/u3](U3) and [http://labjack.com/u6](U6) as time permits in the future.  
 
 ### Device (labjack.js)
 Manages the handle for you & aims to simplify the interface with the LJM driver.
