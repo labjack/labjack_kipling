@@ -54,6 +54,7 @@ openCloseTest =
 'getHandleInfo()',
 'read("FIRMWARE_VERSION")',
 'read("BOOTLOADER_VERSION")',
+'read("HARDWARE_INSTALLED")',
 //'close()',
 //'open("LJM_dtT7","LJM_ctANY","LJM_idANY")',
 //'close()',
@@ -68,7 +69,7 @@ configureWifiLJ =
 [
 'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'write("POWER_WIFI",0)',
-'write("WIFI_SSID_DEFAULT", "5poundbass")',
+'write("WIFI_SSID_DEFAULT", "5PoundBass")',
 'write("WIFI_PASSWORD_DEFAULT", "smgmtbmb3cmtbc")',
 'write("WIFI_APPLY_SETTINGS",1)',
 'write("POWER_WIFI",1)',
@@ -76,7 +77,7 @@ configureWifiLJ =
 ]
 configureWifiHome = 
 [
-'open("LJM_dtT7","LJM_ctANY","470010533")',
+'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'write("POWER_WIFI",0)',
 'write("WIFI_SSID_DEFAULT", "AAA")',
 'write("WIFI_PASSWORD_DEFAULT", "timmarychriskevin")',
@@ -86,10 +87,11 @@ configureWifiHome =
 ]
 readWifiConfig = 
 [
-'open("LJM_dtT7","LJM_ctANY","470010533")',
+'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'read("POWER_WIFI")',
 'read("WIFI_SSID_DEFAULT")',
 'read("WIFI_STATUS")',
+'read("WIFI_IP")',
 'close()'
 ]
 
@@ -159,7 +161,18 @@ LUATestScript =
 ]
 listAllTest = 
 [
-'listAll("LJM_dtT7","LJM_ctANY")',
+'listAll("LJM_dtT7","LJM_ctWiFi")',
+]
+configureWifiTJ = 
+[
+'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
+'write("POWER_WIFI",0)',
+'write("WIFI_SSID_DEFAULT", "linksys-johnson-hifi")',
+'write("WIFI_PASSWORD_DEFAULT", "timmarychriskevin")',
+'write("WIFI_DHCP_ENABLE_DEFAULT",0)',
+'write("WIFI_APPLY_SETTINGS",1)',
+'write("POWER_WIFI",1)',
+'close()'
 ]
 /*var testArray = new Array();
 testArray[0] = basicTest;
@@ -182,6 +195,7 @@ updateFirmware,			// 6
 downloadFirmware,		// 7
 LUATestScript,			// 8
 listAllTest,			// 9
+configureWifiTJ,		// 10
 ]
 
 var activeTest;

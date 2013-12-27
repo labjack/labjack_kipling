@@ -15,13 +15,23 @@ function nextTest()
 	activeTest++;
 	wait=false;
 }
-function onError(erStr)
-{
+function onError(erStr) {
 	console.log("ERROR: ",erStr);
 	nextTest();
 }
-function onSuccess(res)
-{
+function parseIP(res) {
+	ipStr = "";
+	ipStr += ((res >> 24) & 0xff).toString();
+	ipStr += ".";
+	ipStr += ((res >> 16) & 0xff).toString();
+	ipStr += ".";
+	ipStr += ((res >> 8) & 0xff).toString();
+	ipStr += ".";
+	ipStr += ((res >> 0) & 0xff).toString();
+	console.log('ipAddr:',ipStr);
+	nextTest();
+}
+function onSuccess(res) {
 	//console.log("SUCCESS: "+res);
 	if(res != null)
 	{
@@ -33,16 +43,14 @@ function onSuccess(res)
 	}
 	nextTest();
 }
-function onOpenSuccess(res)
-{
+function onOpenSuccess(res) {
 	console.log("OPEN SUCCESS, handle: "+res);
 	startTime = Date.now();
 	console.log('!TIMER STARTED!');
 	nextTest();
 }
 
-function runTest()
-{
+function runTest() {
 	if(activeTest < numTests)
 	{
 		//console.log('Running!');
@@ -63,12 +71,21 @@ function runTest()
 				}
 				else
 				{
-					functionList[i] = functionList[i].replace(')', ',onError, onSuccess)');
+					if(functionList[i].search('WIFI_IP') != -1) {
+						functionList[i] = functionList[i].replace(')', ',onError, parseIP)');
+					} else {
+						functionList[i] = functionList[i].replace(')', ',onError, onSuccess)');
+					}
 				}
 			}
 			else
 			{
-				functionList[i] = functionList[i].replace(')', 'onError, onSuccess)');
+				console.log(functionList[i].search('WIFI_IP'))
+				if(functionList[i].search('WIFI_IP') != -1) {
+					functionList[i] = functionList[i].replace(')', 'onError, onSuccess)');
+				} else {
+					functionList[i] = functionList[i].replace(')', 'onError, onSuccess)');
+				}
 			}
 			console.log(functionList[i]);
 
