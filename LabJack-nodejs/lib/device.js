@@ -457,12 +457,8 @@ exports.labjack = function ()
 		if (this.checkStatus(onError)) { return; };
 
 		//Make sure the data is valid
-		if (data instanceof Array) {
-			if (typeof(data[0]) != "number") {
-				onError("Data is not a number array");
-			}
-		} else {
-			onError("Data is not an array");
+		if (typeof(data[0]) != "number") {
+			onError("Data is not a number array");
 		}
 
 		//Create a blank array for data to be saved to & returned
@@ -498,12 +494,8 @@ exports.labjack = function ()
 		this.checkStatus();
 
 		//Make sure the data is valid, a number array
-		if (data instanceof array) {
-			if (typeof(data[0]) != "number") {
-				throw new DriverInterfaceError("Data is not a number array");
-			}
-		} else {
-			throw new DriverInterfaceError("Data is not an array");
+		if (typeof(data[0]) != "number") {
+			throw new DriverInterfaceError("Data is not a number array");
 		}
 
 		//Create a blank array for data to be saved to & returned
@@ -706,12 +698,6 @@ exports.labjack = function ()
 		//Check to make sure a device has been opened
 		if (this.checkStatus(onError)) { return; };
 
-		//Check to make sure that addresses is an Array instance
-		if(!(addresses instanceof Array)) {
-			throw new DriverInterfaceError("Addresses must be type Array");
-			onError("Addresses must be type Array");
-		}
-
 		//Get important info & allocate argument variables
 		var length = addresses.length;
 		var returnResults = Array();
@@ -795,11 +781,6 @@ exports.labjack = function ()
 	this.readManySync = function(addresses) {
 		//Check to make sure a device has been opened
 		this.checkStatus();
-
-		//Check to make sure that addresses is an Array instance
-		if(!(addresses instanceof Array)) {
-			throw new DriverInterfaceError("Addresses must be type Array");
-		}
 
 		//Get important info & allocate argument variables
 		var length = addresses.length;
@@ -922,9 +903,6 @@ exports.labjack = function ()
 		//Check to make sure a device has been opened
 		if (this.checkStatus(onError)) { return; };
 
-		if(!(data instanceof Array)) {
-			console.log('WriteRaw-Err, data not an array');
-		}
 		if(typeof(data[0]) != "number") {
 			console.log('WriteRaw-Err, data not a number-array');
 		}
@@ -964,9 +942,6 @@ exports.labjack = function ()
 		//Check to make sure a device has been opened
 		this.checkStatus();
 
-		if(!(data instanceof Array)) {
-			console.log('WriteRaw-Err, data not an array');
-		}
 		if(typeof(data[0]) != "number") {
 			console.log('WriteRaw-Err, data not a number-array');
 		}
@@ -1277,14 +1252,6 @@ exports.labjack = function ()
 		//Check to make sure a device has been opened
 		if (this.checkStatus(onError)) { return; };
 
-		if(!(addresses instanceof Array)) {
-			onError('Addresses must be of type Array');
-			return;
-		}
-		if(!(values instanceof Array)) {
-			onError('Values must be of type Array');
-			return;
-		}
 		if(addresses.length != values.length) {
 			onError('Length of addresses & values must be equal');
 			return;
@@ -1420,14 +1387,6 @@ exports.labjack = function ()
 		//Check to make sure a device has been opened.
 		this.checkStatus();
 
-		if (!(addresses instanceof Array)) {
-			throw new DriverInterfaceError('Addresses must be of type Array');
-			return 'Addresses must be of type Array';
-		}
-		if (!(values instanceof Array)) {
-			throw new DriverInterfaceError('Values must be of type Array');
-			return 'Values must be of type Array';
-		}
 		if (addresses.length != values.length) {
 			throw new DriverInterfaceError(
 				'Length of Addresses & Values must be equal'
@@ -1597,6 +1556,7 @@ exports.labjack = function ()
 
 		var i,j;
 		var numFrames = addresses.length;
+		var value;
 		
 		//Return variable
 		var errorResult;
@@ -1645,8 +1605,8 @@ exports.labjack = function ()
 			offsetD = 0;
 			for(i = 0; i < values.length; i++)
 			{
-				var value = values[i];
-				if(typeof(value) === 'number') {
+				value = values[i];
+				if(typeof(value) == 'number') {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
@@ -1684,8 +1644,10 @@ exports.labjack = function ()
 			//Allocate space for the aNames array
 			var aAddresses = new Buffer(numFrames * 4);//Array of addresses
 			var aTypes = new Buffer(numFrames * 4);//Array of types
+
 			var offsetD = 0;
 			var offsetI = 0;
+
 			//Populate the array's with data
 			for(i = 0; i < numFrames; i++) {
 				//Fill aDirections array
@@ -1750,23 +1712,23 @@ exports.labjack = function ()
 				offsetD +=8;
 				offsetI += 4;
 			}
+
 			//Increment & fill the values array separately because it may be of
 			//different length then the rest.
 			offsetD = 0;
 			for(i = 0; i < values.length; i++)
 			{
-				var value = values[i];
-				if(typeof(value) === 'number') {
+				value = values[i];
+				if(typeof(value) == 'number') {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
 				}
 				offsetD += 8;
 			}
+
 			//Call the LJM function
 			var self = this;
-			console.log('Addrs',aAddresses);
-			console.log('Vals',aValues);
 			errorResult = this.ljm.LJM_eAddresses.async(
 				this.handle,
 				numFrames,
@@ -1954,8 +1916,8 @@ exports.labjack = function ()
 			offsetD = 0;
 			for(i = 0; i < values.length; i++)
 			{
-				var value = values[i];
-				if(typeof(value) === 'number') {
+				value = values[i];
+				if(typeof(value) == 'number') {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);

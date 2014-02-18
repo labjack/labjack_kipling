@@ -11,6 +11,7 @@
 
 var fs = require('fs');				//Load File System module
 var os = require('os');				//Load OS module
+var path = require('path');
 
 var async = require('async');
 var ljmmm_parse = require('ljmmm-parse');
@@ -25,7 +26,18 @@ var driver_const = require('./driver_const');
 // console.log(os.platform());
 // console.log(os.arch());
 // console.log(os.release());
-var LJM_JSON_FILE_LOCATION = '/usr/local/share/LabJack/LJM/ljm_constants.json';
+var LJM_JSON_FILE_LOCATION;
+if (process.platform === 'win32') {
+	var modernPath = process.env.ALLUSERSPROFILE + '\\LabJack\\LJM\\ljm_constants.json';
+	var xpPath = process.env.ALLUSERSPROFILE + '\\Application Data\\LabJack\\LJM\\ljm_constants.json';
+	if (path.existsSync(modernPath))
+		LJM_JSON_FILE_LOCATION = modernPath;
+	else
+		LJM_JSON_FILE_LOCATION = xpPath;
+} else {
+	LJM_JSON_FILE_LOCATION = '/usr/local/share/LabJack/LJM/ljm_constants.json';
+}
+
 var PARSE_BETA_REGISTERS = true;
 
 var typeSizes = {
