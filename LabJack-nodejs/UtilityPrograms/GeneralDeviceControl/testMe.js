@@ -157,7 +157,7 @@ downloadFirmware =
 ]
 LUATestScript = 
 [
-
+'listAll("LJM_dtT7","LJM_ctEthernet")',
 ]
 listAllTest = 
 [
@@ -182,7 +182,18 @@ testArray[3] = configureWifiLJ;
 testArray[4] = configureWifiHome;
 testArray[5] = readWifiConfig;
 testArray[6] = updateFirmware;*/
-
+readRSSI_1 = 
+[
+'open("LJM_dtT7","LJM_ctWiFi","192.168.1.90")',
+'read("WIFI_RSSI")',
+'close()'
+]
+readRSSI_2 = 
+[
+'open("LJM_dtT7","LJM_ctWiFi","192.168.1.186")',
+'read("WIFI_RSSI")',
+'close()'
+]
 testArray = 
 [
 basicTest, 				// 0
@@ -196,6 +207,8 @@ downloadFirmware,		// 7
 LUATestScript,			// 8
 listAllTest,			// 9
 configureWifiTJ,		// 10
+readRSSI_1,				// 11
+readRSSI_2, 			// 12
 ]
 
 var activeTest;

@@ -1859,7 +1859,7 @@ exports.labjack = function ()
 			{
 				var value = values[i];
 				if(typeof(value) === 'number') {
-					aValues.writeDoubleLE(values,offsetD);
+					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
 				}

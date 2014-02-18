@@ -1006,57 +1006,61 @@ module.exports = {
 		//Create test-variables
 		//rwMany(numFrames,addresses,directions,numValues,values
 		var testList = [
-			'rwMany([0,2],[0,0],[1,1],[null,null])',
-			'rwMany(["AIN0","AIN2"],[0,0],[1,1],[null,null])',
-			'rwMany([0,2,1000],[0,0,1],[1,1,1],[null,null,2.5])',
-			'rwMany([0,1000],[0,1],[2,1],[null,null,2.5])',
-			'rwMany([0,1000],[0,1],[1,1],[null,2.5])',
-			'rwMany([1000,0],[1,0],[1,1],[2.5,null])',
-			'rwMany([1000,0],[1,0],[2,1],[2.5,2.5,null])',
-			'rwMany(["DAC0","AIN0"],[1,0],[2,2],[2.5,2.5,null,null])',
-			'rwMany([5120],[1],[6],[0x11,0x00,0xDE,0xAD,0xBE,0xEF])'
+			// 'rwMany([0,2],[0,0],[1,1],[null,null])',
+			// 'rwMany(["AIN0","AIN2"],[0,0],[1,1],[null,null])',
+			// 'rwMany([0,2,1000],[0,0,1],[1,1,1],[null,null,2.5])',
+			// 'rwMany([0,1000],[0,1],[2,1],[null,null,2.5])',
+			// 'rwMany([0,1000],[0,1],[1,1],[null,2.5])',
+			// 'rwMany([1000,0],[1,0],[1,1],[2.5,null])',
+			// 'rwMany([1000,0],[1,0],[2,1],[2.5,2.5,null])',
+			// 'rwMany(["DAC0","AIN0"],[1,0],[2,2],[2.5,2.5,null,null])',
+			'rwMany([5120],[1],[6],[0x11,0x00,0xDE,0xAD,0xBE,0xEF])',
+			'rwMany(["AIN0"],[0],[6],[0x11,0x00,0xDE,0xAD,0xBE,0xEF])'
 		];
 
 		//Expected info combines both sync & async
 		var expectedFunctionList = [ 
 			'LJM_eAddresses',
 			'LJM_eNames',
-			'LJM_eAddresses',
-			'LJM_eAddresses',
-			'LJM_eAddresses',
-			'LJM_eAddresses',
-			'LJM_eAddresses',
-			'LJM_eNames',
-			'LJM_eAddresses',
+			// 'LJM_eAddresses',
+			// 'LJM_eAddresses',
+			// 'LJM_eAddresses',
+			// 'LJM_eAddresses',
+			// 'LJM_eAddresses',
+			// 'LJM_eNames',
+			// 'LJM_eAddresses',
 			'LJM_eAddressesAsync',
 			'LJM_eNamesAsync',
-			'LJM_eAddressesAsync',
-			'LJM_eAddressesAsync',
-			'LJM_eAddressesAsync',
-			'LJM_eAddressesAsync',
-			'LJM_eAddressesAsync',
-			'LJM_eNamesAsync',
-			'LJM_eAddressesAsync'
+			// 'LJM_eAddressesAsync',
+			// 'LJM_eAddressesAsync',
+			// 'LJM_eAddressesAsync',
+			// 'LJM_eAddressesAsync',
+			// 'LJM_eAddressesAsync',
+			// 'LJM_eNamesAsync',
+			// 'LJM_eAddressesAsync',
+			// 'LJM_CloseAsync'
 		];
 		//Expected info combines both sync & async
 		var expectedResultList = [
-			[ 9, 8 ],
-			[ 9, 8 ],
-			[ 9, 8 ],
-			[ 9, 8 ],
-			[ 9 ],
-			[ 8 ],
-			[ 7 ],
-			[ 7, 6 ],
+			// [ 9, 8 ],
+			// [ 9, 8 ],
+			// [ 9, 8 ],
+			// [ 9, 8 ],
+			// [ 9 ],
+			// [ 8 ],
+			// [ 7 ],
+			// [ 7, 6 ],
 			[],
-			[ 9, 8 ],
-			[ 9, 8 ],
-			[ 9, 8 ],
-			[ 9, 8 ],
-			[ 9 ],
-			[ 8 ],
-			[ 7 ],
-			[ 7, 6 ],
+			[],
+			// [ 9, 8 ],
+			// [ 9, 8 ],
+			// [ 9, 8 ],
+			// [ 9, 8 ],
+			// [ 9 ],
+			// [ 8 ],
+			// [ 7 ],
+			// [ 7, 6 ],
+			[],
 			[]
 		];
 
@@ -1080,17 +1084,26 @@ module.exports = {
 				// console.log("Function Calls", funcs);
 				// console.log("Results",results);
 				var tNum = 0;
-				console.log("Arguments",argList.slice(testList.length-tNum,testList.length+1-tNum));
-				console.log("Arguments",argList.slice(2*testList.length-tNum,2*testList.length+1-tNum));
+				// console.log("Arguments",argList.slice(testList.length-tNum,testList.length+1-tNum));
+				// console.log("Arguments",argList.slice(2*testList.length-tNum,2*testList.length+1-tNum));
 				// console.log('lenOrig',argList.length)
 				// console.log('lenNew',argList.slice(1,argList.length).length)
 				// ljmArgs = argList.slice(1+testList.length,2+testList.length);
 				//console.log('LJM-Args',argList)
 				
 				//Test to make sure the proper functions were called
+				expectedFunctionList.forEach(function(element, index, array) {
+					console.log(element,funcs[index]);
+					test.deepEqual(element,funcs[index]);
+				});
 				test.deepEqual(expectedFunctionList,funcs);
+				
 
 				//test to make sure the proper results were acquired
+				expectedResultList.forEach(function(element, index, array) {
+					console.log(element,results[index]);
+					// test.deepEqual(element,results[index]);
+				});
 				test.deepEqual(expectedResultList,results);
 
 				test.done();
