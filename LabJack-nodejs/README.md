@@ -1,48 +1,38 @@
-ALL OLD DOCUMENTATION AS OF AUGUST 22, 2013
 LabJack-nodejs
 ==============
-UPDATED FOR VERSION 0.243
+UPDATED FOR LJM VERSION 1.03
 
 
 nodejs library for using [LJM library](http://labjack.com/ljm).  Created two different objects that can be imported.  Was created to function much like our labjack python driver for our UD devices. For more information about what each function does please look at the LabJackM.h file that can be downloaded & installed from LabJacks [Software & Driver](http://labjack.com/support/software) page.
 
 Currently this wrapper only supports our [T7](http://labjack.com/t7) and [T7-Pro](http://labjack.com/t7) Low Cost, High Quality Multifunction USB, Ethernet, 802.11b/g Wifi DAQ devices however [LabJack](http://labjack.com/) plans to release firmware for the [U3](http://labjack.com/u3) and [U6](http://labjack.com/u6) USB DAQ devices as time permits.  
 
-### Device (labjack.js)
+### Device (device.js)
 Manages the handle for you & aims to simplify the interface with the LJM driver.
 
-There are two ways to call the functions made available by this wrapper supporting both functional programing and object oriented programing.
-All functions support standard object oriented calls.  Either an error code or an appropriate result is returned.  Some errors are thrown in cases when the device may become in-operable based on a bad function call.
+This driver wrapper was created supporting both synchronous and asynchronous function calls to support both functional and object oriented programing styles.  The general format is shown below:
 ```javascript
-//Example with no input arguments:
-result = exampleFunction();
+//Synchronous Example:
+var result = exampleFunctionSync(arg1);
 
-//Example with one input argument:
-result = exampleFunction(arg1);
-
-//example with two input arguments:
-result = exampleFunction(arg1, arg2);
-
-```
-All functions support callback functions as the last two arguments, not all examples below show this ex:
-
-```javascript
-//Example with no input arguments:
-exampleFunction(function (res) {console.log('error',res);}, function (res) {console.log('success',res);});
-
-//Example with one input argument:
-exampleFunction(arg1, function (res) {console.log('error',res);}, function (res) {console.log('success',res);});
-
-//example with two input arguments:
-exampleFunction(arg1, arg2, function (res) {console.log('error',res);}, function (res) {console.log('success',res);});
-
+//Asynchronous example (requiring function callbacks):
+exampleFunction(
+	arg1,
+	function(err) {
+		console.log('error',err);
+	},
+	function(result) {
+		console.log('success',result);
+	}
+);
 ```
 
 ### How To Use:
-Before writing any code you must create a device object:
+Before writing any code you must create a device or driver object:
 
 ```javascript
-var deviceManager = require('./labjack');
+//Device Object (to control a labjack device)
+var deviceManager = require('device');
 var device = new deviceManager.labjack();
 ```
 
@@ -50,8 +40,18 @@ var device = new deviceManager.labjack();
 Now you can use any of the implemented functions by:
 
 ```javascript
-device.exampleFunction(); //not using callbacks
-device.exampleFunction(function (res) {console.log('error',res);}, function (res) {console.log('success',res);}); //using callbacks
+//not using callbacks
+device.exampleFunctionSync();
+
+//using callbacks
+device.exampleFunction(
+	function (err) {
+		console.log('error',err);
+	}, 
+	function (result) {
+		console.log('success',result);
+	}
+);
 
 //you can also use other callback handlers
 onError = function(res)
@@ -179,8 +179,8 @@ All Relevant "libLabJackM" Functions:
 - [x] LJM_eReadNames
 - [x] LJM_eWriteAddresses
 - [x] LJM_eWriteNames
-- [ ] LJM_eAddresses
-- [ ] LJM_eNames
+- [x] LJM_eAddresses
+- [x] LJM_eNames
 - [ ] LJM_eStreamStart
 - [ ] LJM_eStreamRead
 - [ ] LJM_eStreamStop
@@ -188,15 +188,16 @@ All Relevant "libLabJackM" Functions:
 - [x] LJM_eWriteString
 
 
-### LJM_Driver (ljmDriver.js)
+### LJM_Driver (driver.js)
 JavaScript Wrapper for the rest of the LJM_Driver functions.
 
 ### How To Use:
 Before writing any code you must create a driver object:
 
 ```javascript
-var ljm = require('./labjack');
-var ljmDriver = new ljm.labjack();
+//Driver Object (to gain access to more general driver related features)
+var driverManager = require('driver');
+var ljmDriver = new driverManager.ljmDriver();
 ```
 
 ### Available Functions & what they use:
@@ -255,11 +256,11 @@ All Relevant "libLabJackM" Functions:
 - [x] LJM_ListAll
 - [x] LJM_ListAllS
 - [x] LJM_ErrorToString
-- [x] LJM_LoadConstants (NOT TESTED)
-- [x] LJM_CloseAll (NOT TESTED)
+- [x] LJM_LoadConstants
+- [x] LJM_CloseAll
 - [x] LJM_WriteLibraryConfigS
 - [x] LJM_WriteLibraryConfigStringS
 - [x] LJM_ReadLibraryConfigS
-- [ ] LJM_ReadLibraryConfigStringS
+- [x] LJM_ReadLibraryConfigStringS
 - [x] LJM_Log
-- [x] LJM_ResetLog (NOT TESTED)
+- [x] LJM_ResetLog
