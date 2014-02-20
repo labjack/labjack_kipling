@@ -463,6 +463,10 @@ var LJM_eNames = createCallableObject(
 //******************************************************************************
 //*********************		Driver Specific Functions	************************
 //******************************************************************************
+
+/**
+ * Test-Function for Synchronous and Async Multiple-Operation functionality: 
+ */
 var LJM_ListAll = createCallableObject(
 	function(devT, conT, numFound, aDeviceTypes, aConnectionTypes, aSerialNumbers, aIPAddresses) {
 		lastFunctionCall.push("LJM_ListAll");
@@ -485,33 +489,142 @@ var LJM_ListAllS = createCallableObject(
 		argumentsList.push(arguments);
 		reportEnd(callback);
 	});
+
+/**
+ * Test-Function for Synchronous and Async Multiple-Operation functionality: 
+ */
+var LJM_ErrorToString = createCallableObject(
+	function(errNum, strBuff) {
+		lastFunctionCall.push("LJM_ErrorToString");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(errNum, strBuff, callback) {
+		lastFunctionCall.push("LJM_ErrorToStringAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+
+var LJM_LoadConstants = createCallableObject(
+	function() {
+		lastFunctionCall.push("LJM_LoadConstants");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(callback) {
+		lastFunctionCall.push("LJM_LoadConstantsAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+
+var LJM_CloseAll = createCallableObject(
+	function() {
+		lastFunctionCall.push("LJM_CloseAll");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(callback) {
+		lastFunctionCall.push("LJM_CloseAllAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+
+/**
+ * Test-Function for Synchronous and Async Multiple-Operation functionality:
+ * Reading numbers & strings from the LJM library 
+**/
 var LJM_ReadLibraryConfigS = createCallableObject(
 	function(parameter, returnVar) {
 		if(parameter == 'LJM_LIBRARY_VERSION') {
 			return driver_const.LJM_JS_VERSION;
 		}
-		// lastFunctionCall.push("LJM_ReadLibraryConfigS");
-		// argumentsList.push(arguments);
+		lastFunctionCall.push("LJM_ReadLibraryConfigS");
+		argumentsList.push(arguments);
 		return expectedResult;
 	},
 	function(parameter, returnVar, callback) {
-		// lastFunctionCall.push("LJM_ReadLibraryConfigSAsync");
-		// argumentsList.push(arguments);
+		lastFunctionCall.push("LJM_ReadLibraryConfigSAsync");
+		argumentsList.push(arguments);
 		reportEnd(callback);
 	});
+var LJM_ReadLibraryConfigStringS = createCallableObject(
+	function(parameter, returnVar) {
+		if(parameter == 'LJM_LIBRARY_VERSION') {
+			return driver_const.LJM_JS_VERSION;
+		}
+		lastFunctionCall.push("LJM_ReadLibraryConfigStringS");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(parameter, returnVar, callback) {
+		lastFunctionCall.push("LJM_ReadLibraryConfigStringSAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+
+/**
+ * Test-Function for Synchronous and Async Multiple-Operation functionality:
+ * Writing numbers & strings from the LJM library 
+**/
+var LJM_WriteLibraryConfigS = createCallableObject(
+	function(parameter, value) {
+		lastFunctionCall.push("LJM_WriteLibraryConfigS");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(parameter, value, callback) {
+		lastFunctionCall.push("LJM_WriteLibraryConfigSAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+var LJM_WriteLibraryConfigStringS = createCallableObject(
+	function(parameter, value) {
+		lastFunctionCall.push("LJM_WriteLibraryConfigStringS");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(parameter, value, callback) {
+		lastFunctionCall.push("LJM_WriteLibraryConfigStringSAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+
+/**
+ * Test-Function for Synchronous and Async Multiple-Operation functionality:
+ * Log-File control functions 
+**/
+var LJM_Log = createCallableObject(
+	function(level, string) {
+		lastFunctionCall.push("LJM_Log");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(level, string, callback) {
+		lastFunctionCall.push("LJM_LogAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+var LJM_ResetLog = createCallableObject(
+	function() {
+		lastFunctionCall.push("LJM_ResetLog");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(callback) {
+		lastFunctionCall.push("LJM_ResetLogAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+
 //******************************************************************************
 //*********************		Driver Dict-Object	********************************
 //******************************************************************************
 var fakeDriver = {
-	// 'LJM_ListAll': LJM_ListAll,
-	// 'LJM_ListAllS': LJM_ListAllS,
 	//Device Functions
 	'LJM_Open': LJM_Open,
 	'LJM_OpenS': LJM_OpenS,
 	'LJM_GetHandleInfo': LJM_GetHandleInfo,
-	// 'LJM_ResetConnection': LJM_ResetConnection,
 	'LJM_Close': LJM_Close,
-	// 'LJM_CloseAll': LJM_CloseAll,
 	'LJM_WriteRaw': LJM_WriteRaw,
 	'LJM_ReadRaw': LJM_ReadRaw,
 	'LJM_eWriteAddress': LJM_eWriteAddress,
@@ -532,7 +645,16 @@ var fakeDriver = {
 	//Driver Functions
 	'LJM_ListAll': LJM_ListAll,
 	'LJM_ListAllS': LJM_ListAllS,
+	'LJM_ErrorToString': LJM_ErrorToString,
+	'LJM_LoadConstants': LJM_LoadConstants,
+	'LJM_CloseAll': LJM_CloseAll,
 	'LJM_ReadLibraryConfigS': LJM_ReadLibraryConfigS,
+	'LJM_ReadLibraryConfigStringS': LJM_ReadLibraryConfigStringS,
+	'LJM_WriteLibraryConfigS': LJM_WriteLibraryConfigS,
+	'LJM_WriteLibraryConfigStringS': LJM_WriteLibraryConfigStringS,
+	'LJM_Log': LJM_Log,
+	'LJM_ResetLog': LJM_ResetLog,
+
 	
 };
 

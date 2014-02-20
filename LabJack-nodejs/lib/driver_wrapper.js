@@ -145,9 +145,7 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
             ]
         ],
         'LJM_LoadConstants': [
-            'int', [
-                'void'                          //None
-            ]
+            'int', []                           //No Args
         ],
         'LJM_Close': [
             'int', [
@@ -155,8 +153,7 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
             ]
         ],
         'LJM_CloseAll': [
-            'int', [
-            ]
+            'int', []                           //No Args
         ],
         'LJM_WriteRaw': [
             'int', [
@@ -186,7 +183,6 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
                 'int',                          //Address
                 'int',                          //Type
                 ref.refType('double')           //Value (ptr)
-                //ref.refType(ref.types.double)
             ]
         ],
         'LJM_eWriteName': [
@@ -257,7 +253,7 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
             'int', [
                 'int',                          //Handle
                 'int',                          //NumFrames
-                ref.refType('string'),          //aNames
+                ref.refType(ref.types.CString), //aNames
                 ref.refType(ref.types.int),     //aWrites (Directions)
                 ref.refType(ref.types.int),     //aNumValues
                 ref.refType(ref.types.double),  //aValues
@@ -316,14 +312,14 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
         ],
         'LJM_WriteLibraryConfigS': [
             'int', [
-                'string',                       //parameter
+                'string',                       //Parameter
                 'double'                        //Value
             ]
         ],
         'LJM_WriteLibraryConfigStringS': [
             'int', [
-                'string',
-                'string'
+                'string',                       //Parameter
+                'string'                        //String
             ]
         ],
         'LJM_ReadLibraryConfigS': [
@@ -334,8 +330,8 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
         ],
         'LJM_ReadLibraryConfigStringS': [
             'int', [
-                'string',
-                'string'
+                'string',                       //Parameter
+                'string'                        //String
             ]
         ],
         'LJM_Log': [
@@ -345,9 +341,7 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
             ]
         ],
         'LJM_ResetLog': [
-            'int', [
-                'void'                          //None
-            ]
+            'int', []                           //No Args
         ]
     }
 );

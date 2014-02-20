@@ -42,11 +42,17 @@ var testVal = 69;
 
 module.exports = {
     setUp: function(callback) {
+        fakeDriver.clearLastFunctionCall();
         callback();
 
     },
     tearDown: function (callback) {
         // clean up
+        fakeDriver.clearLastFunctionCall();
+        fakeDriver.clearArgumentsList();
+        fakeDriver.setExpectedResult(0);
+        asyncRun.clearResults();
+        syncRun.clearResults();
         callback();
     },
     testListAll: function(test) {
@@ -166,6 +172,281 @@ module.exports = {
             }
         ); 
     },
+    testErrToStr: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        //Create test-variables
+        var testList = [
+            'errToStr(1)'
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_ErrorToString',
+            'LJM_ErrorToStringAsync' 
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    },
+    testLoadConstants: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        //Create test-variables
+        var testList = [
+            'loadConstants()'
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_LoadConstants',
+            'LJM_LoadConstantsAsync' 
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    },
+    testCloseAll: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        //Create test-variables
+        var testList = [
+            'closeAll()'
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_CloseAll',
+            'LJM_CloseAllAsync' 
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    },
+    testReadLibrary: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        //Create test-variables
+        var testList = [
+            'readLibrary("TestString")'
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_ReadLibraryConfigS',
+            'LJM_ReadLibraryConfigSAsync' 
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    },
+    testReadLibraryS: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        //Create test-variables
+        var testList = [
+            'readLibraryS("TestString")'
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_ReadLibraryConfigStringS',
+            'LJM_ReadLibraryConfigStringSAsync' 
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    },
+    testWriteLibrary: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        //Create test-variables
+        var testList = [
+            'writeLibrary("TestString",1)',
+            'writeLibrary("TestString","TestString")'
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_WriteLibraryConfigS',
+            'LJM_WriteLibraryConfigStringS',
+            'LJM_WriteLibraryConfigSAsync',
+            'LJM_WriteLibraryConfigStringSAsync',
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    },
+    testLogS: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        //Create test-variables
+        var testList = [
+            'logS(1,"TestString")',
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_Log',
+            'LJM_LogAsync',
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    },
+    testResetLog: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        //Create test-variables
+        var testList = [
+            'resetLog()',
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_ResetLog',
+            'LJM_ResetLogAsync',
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    }
 };
 
 

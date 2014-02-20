@@ -7,8 +7,8 @@
  * @author Chris Johnson (chrisjohn404, LabJack Corp.)
 **/
 
-exports.LJM_JS_VERSION = 0.0245;
-exports.LJM_DRVR_VERSION = '0.2.45';
+exports.LJM_JS_VERSION = 0.0345;
+exports.LJM_DRVR_VERSION = '0.3.45';
 exports.LJM_DT_ANY = 0;
 exports.LJM_DT_UE9 = 9;
 exports.LJM_DT_U3 = 3;
@@ -16,6 +16,9 @@ exports.LJM_DT_U6 = 6;
 exports.LJM_DT_T7 = 7;
 exports.LJM_DT_SKYMOTE_BRIDGE = 1000;
 exports.LJM_DT_DIGIT = 200;
+
+//Max string size
+exports.LJM_MAX_STRING_SIZE = 50;
 
 //Connection Types
 exports.LJM_CT_ANY = 0;

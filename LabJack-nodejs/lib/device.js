@@ -14,10 +14,17 @@ var ffi = require('ffi');
 var fs = require('fs'); // To load/save firmware
 var http = require('http');// To download newest firmware versions form the
 						   // internet
+var ljmDriver = require('./driver.js');
 
 
-var INT_NUM_BYTES = 4;
-var DOUBLE_NUM_BYTES = 8;
+var ARCH_INT_NUM_BYTES = 4;
+var ARCH_DOUBLE_NUM_BYTES = 8;
+
+var ARCH_POINTER_SIZE = {
+    'ia32': 4,
+    'x64': 8,
+    'arm': 4
+}[process.arch]
 
 
 /**
@@ -548,10 +555,9 @@ exports.labjack = function ()
 				info.type, 
 				result,
 				function(err, res) {
-					if(err) throw err;
-					if(res == 0) {
+					if (err) throw err;
+					if ( res == 0 ) {
 						//Success
-						//console.log(result);
 						onSuccess(result.deref());
 					} else {
 						//Error
@@ -563,22 +569,23 @@ exports.labjack = function ()
 			//Perform a eReadAddressString operation
 			
 			//Allocate space for the result
-			var strBuffer = new Buffer(50);//max string size
+			var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 			strBuffer.fill(0);
 
+			//Perform LJM Async function call
 			this.ljm.LJM_eReadAddressString.async(
 				this.handle, 
 				resolvedAddress, 
 				strBuffer, 
 				function(err, res) {
 					if (err) throw err;
-					if(res == 0) {
+					if ( res == 0 ) {
 						//Calculate the length of the string
-						var i=0;
-						while(strBuffer[i] != 0) {
+						var i = 0;
+						while ( strBuffer[i] != 0 ) {
 							i++;
 						}
-						onSuccess(strBuffer.toString('utf8',0,i));
+						onSuccess(strBuffer.toString('utf8', 0, i));
 					} else {
 						onError(res);
 					}
@@ -637,7 +644,7 @@ exports.labjack = function ()
 			//Perform a eReadNumberString operation
 			
 			//Allocate space for the result
-			var strBuffer = new Buffer(50);//max string size
+			var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 			strBuffer.fill(0);
 
 			output = this.ljm.LJM_eReadAddressString(
@@ -696,12 +703,12 @@ exports.labjack = function ()
 		// TODO: Clean this up.
 
 		//Check to make sure a device has been opened
-		if (this.checkStatus(onError)) { return; };
+		if ( this.checkStatus(onError) ) { return; };
 
 		//Get important info & allocate argument variables
 		var length = addresses.length;
 		var returnResults = Array();
-		var results = new Buffer(DOUBLE_NUM_BYTES*length);
+		var results = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
 		var errors = new ref.alloc('int',1);
 		var addressInformation;
 		errors.fill(0);
@@ -712,22 +719,22 @@ exports.labjack = function ()
 			onError("Addresses array must contain data");
 		}
 
-		var addrBuff = new Buffer(INT_NUM_BYTES*length);
-		var addrTypeBuff = new Buffer(INT_NUM_BYTES*length);
+		var addrBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
+		var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
 		var inValidOperation = 0;
 
 		//Integer Returned by .dll function
 		var info;
 		var offset=0;
 		var constants = this.constants;
-		for (var i=0; i<length; i++) {
+		for ( var i=0; i<length; i++ ) {
 			var address = addresses[i];
 
 			info = constants.getAddressInfo(address, 'R');
 			if (info.directionValid == 1) {
 				addrTypeBuff.writeInt32LE(info.type,offset);
 				addrBuff.writeInt32LE(info.address,offset);
-				offset += INT_NUM_BYTES;
+				offset += ARCH_INT_NUM_BYTES;
 			} else {
 				if(info.type == -1) {
 					onError({retError:"Invalid Address", errFrame:i});
@@ -751,7 +758,7 @@ exports.labjack = function ()
 				var offset = 0;
 				for (i in addresses) {
 					returnResults[i] = results.readDoubleLE(offset);
-					offset += 8;
+					offset += ARCH_DOUBLE_NUM_BYTES;
 				}
 				if ((res == 0)) {
 					onSuccess(returnResults);
@@ -785,22 +792,31 @@ exports.labjack = function ()
 		//Get important info & allocate argument variables
 		var length = addresses.length;
 		var returnResults = Array();
-		var results = new Buffer(8*length);
+
+		//Define buffers
+		var results = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
 		var errors = new ref.alloc('int',1);
+
+		//Make sure buffers are empty
+		results.fill(0);
 		errors.fill(0);
+
 		var output;
 
-		if(length < 1) {
+		if ( length < 1 ) {
 			throw new DriverInterfaceError("Addresses array must contain data");
 		}
-		if(typeof(addresses[0]) == 'string') {
+		if ( typeof(addresses[0]) == 'string' ) {
 			var i;
 			//ref: http://tootallnate.github.io/ref/
-			var aNames = new Buffer(8*length);
+			var aNames = new Buffer(ARCH_POINTER_SIZE*length);
+			aNames.fill(0);
+
 			for(i = 0; i < length; i++) {
 				var buf = new Buffer(addresses[i].length+1);
+				buf.fill(0);
 				ref.writeCString(buf,0,addresses[i]);
-				ref.writePointer(aNames,i*8,buf);
+				ref.writePointer(aNames,i*ARCH_POINTER_SIZE,buf);
 			}
 
 			//Execute LJM command
@@ -812,27 +828,24 @@ exports.labjack = function ()
 				errors
 			);
 
-		} else if(typeof(addresses[0]) == 'number') {
-			var addrBuff = new Buffer(4*length);
-			var addrTypeBuff = new Buffer(4*length);
+		} else if ( typeof(addresses[0] ) == 'number') {
+			var addrBuff = new Buffer( ARCH_INT_NUM_BYTES * length);
+			var addrTypeBuff = new Buffer( ARCH_INT_NUM_BYTES * length);
 			var inValidOperation = 0;
 
 			//Integer Returned by .dll function
 			var info;
 			var offset=0;
 			i = 0;
-			for(i = 0; i < length; i++)
-			{
+			for ( i = 0; i < length; i++ ) {
 				info = this.constants.getAddressInfo(addresses[i], 'R');
-				if(info.directionValid == 1)
-				{
+				if ( info.directionValid == 1 ) {
 					addrTypeBuff.writeInt32LE(info.type,offset);
 					addrBuff.writeInt32LE(addresses[i],offset);
-					offset += 4;
+					offset += ARCH_INT_NUM_BYTES;
 				}
-				else
-				{
-					if(info.type == -1) {
+				else {
+					if ( info.type == -1 ) {
 						throw new DriverInterfaceError(
 							{
 								retError:"Invalid Address", 
@@ -875,7 +888,7 @@ exports.labjack = function ()
 			var offset = 0;
 			for(i in addresses) {
 				returnResults[i] = results.readDoubleLE(offset);
-				offset += 8;
+				offset += ARCH_DOUBLE_NUM_BYTES;
 			}
 			return returnResults;
 		} else {
@@ -901,15 +914,16 @@ exports.labjack = function ()
 	 */
 	this.writeRaw = function(data, onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if (this.checkStatus(onError)) { return; };
+		if ( this.checkStatus(onError) ) { return; };
 
-		if(typeof(data[0]) != "number") {
+		if ( typeof(data[0]) != "number" ) {
 			console.log('WriteRaw-Err, data not a number-array');
 		}
 
 		var aData = new Buffer(data.length);
 		aData.fill(0);
-		for(var i = 0; i < data.length; i++) {
+
+		for ( var i = 0; i < data.length; i++ ) {
 			aData.writeUInt8(data[i], i);
 		}
 
@@ -918,8 +932,8 @@ exports.labjack = function ()
 			aData, 
 			data.length, 
 			function (err, res){
-				if(err) throw err;
-				if(res == 0) {
+				if (err) throw err;
+				if ( res == 0 ) {
 					onSuccess(aData);
 				} else {
 					onError(res);
@@ -942,13 +956,15 @@ exports.labjack = function ()
 		//Check to make sure a device has been opened
 		this.checkStatus();
 
-		if(typeof(data[0]) != "number") {
+		if ( typeof(data[0] ) != "number" ) {
 			console.log('WriteRaw-Err, data not a number-array');
 		}
 
+		//Define data buffer
 		var aData = new Buffer(data.length);
+		//Clear data buffer
 		aData.fill(0);
-		for(var i = 0; i < data.length; i++) {
+		for ( var i = 0; i < data.length; i++ ) {
 			aData.writeUInt8(data[i], i);
 		}
 
@@ -957,7 +973,7 @@ exports.labjack = function ()
 			aData, 
 			data.length
 		);
-		if(errorResult == 0) {
+		if ( errorResult == 0 ) {
 			return aData;
 		} else {
 			throw new DriverInterfaceError(res);
@@ -982,39 +998,36 @@ exports.labjack = function ()
 	 */
 	this.write = function(address, value, onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if (this.checkStatus(onError)) { return; };
+		if ( this.checkStatus(onError) ) { return; };
 
 		//Decision making for address type (string or number)
-		if (typeof(address) == 'string') {
+		if ( typeof(address) == 'string' ) {
 			var info = this.constants.getAddressInfo(address, 'W');
 
 			//Decision making for LJM-address return type, number or string
-			if ((info.directionValid == 1) && (info.type != 98)) {
+			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
 				errorResult = this.ljm.LJM_eWriteName.async(
 					this.handle, 
 					address, 
 					value, 
-					function(err, res){
-						if(err) throw err;
-						if(res == 0)
-						{
+					function(err, res) {
+						if (err) throw err;
+						if ( res == 0 ) {
 							onSuccess();
-						}
-						else
-						{
+						} else {
 							onError(res);
 						}
 					}
 				);
 				return 0;
-			} else if ((info.directionValid == 1) && (info.type == 98)) {
+			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				var strBuffer = new Buffer(50);//max string size
+				var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 				strBuffer.fill(0);
 
 				//Fill the write-string
-				if(value.length <= 50) {
+				if ( value.length <= driver_const.LJM_MAX_STRING_SIZE ) {
 					strBuffer.write(value, 0, value.length, 'utf8');
 				} else {
 					onError("String is to long");
@@ -1028,12 +1041,9 @@ exports.labjack = function ()
 					strBuffer, 
 					function(err, res){
 						if (err) throw err;
-						if(res == 0)
-						{
+						if ( res == 0 ) {
 							onSuccess();
-						}
-						else
-						{
+						} else {
 							onError(res);
 						}
 					}
@@ -1041,7 +1051,7 @@ exports.labjack = function ()
 				return 0;
 			} else {
 				//ERROR!! address is not valid, wrong direction or invalid addr.
-				if(info.type == -1) {
+				if ( info.type == -1 ) {
 					onError("Invalid Address");
 				} else if (info.directionValid == 0) {
 					onError("Invalid Write Attempt");
@@ -1049,7 +1059,7 @@ exports.labjack = function ()
 			}
 		} else if (typeof(address) == 'number') {
 			var info = this.constants.getAddressInfo(address, 'W');
-			if((info.directionValid == 1) && (info.type != 98)) {
+			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
 				errorResult = this.ljm.LJM_eWriteAddress.async(
 					this.handle, 
@@ -1057,25 +1067,22 @@ exports.labjack = function ()
 					info.type, 
 					value, 
 					function(err, res){
-						if(err) throw err;
-						if(res == 0)
-						{
+						if (err) throw err;
+						if ( res == 0 ) {
 							onSuccess();
-						}
-						else
-						{
+						} else {
 							onError(res);
 						}
 					}
 				);
 				return 0;
-			} else if((info.directionValid == 1) && (info.type == 98)) {
+			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				var strBuffer = new Buffer(50);//max string size
+				var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 				strBuffer.fill(0);
 
 				//Fill the write-string
-				if(value.length <= 50) {
+				if(value.length <= driver_const.LJM_MAX_STRING_SIZE) {
 					strBuffer.write(value, 0, value.length, 'utf8');
 				} else {
 					onError("String is to long");
@@ -1089,12 +1096,9 @@ exports.labjack = function ()
 					strBuffer, 
 					function(err, res){
 						if (err) throw err;
-						if(res == 0)
-						{
+						if ( res == 0 ) {
 							onSuccess();
-						}
-						else
-						{
+						} else {
 							onError(res);
 						}
 					}
@@ -1137,24 +1141,24 @@ exports.labjack = function ()
 		var errorResult;
 
 		//Decision making for address type (string or number)
-		if(typeof(address) == 'string') {
+		if ( typeof(address) == 'string' ) {
 			var info = this.constants.getAddressInfo(address, 'W');
 			
 			//Decision making for LJM-address return type, number or string
-			if((info.directionValid == 1) && (info.type != 98)) {
+			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
 				errorResult = this.ljm.LJM_eWriteName(
 					this.handle, 
 					address, 
 					value
 				);
-			} else if((info.directionValid == 1) && (info.type == 98)) {
+			} else if( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				var strBuffer = new Buffer(50);//max string size
+				var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 				strBuffer.fill(0);
 
 				//Fill the write-string
-				if(value.length <= 50) {
+				if ( value.length <= driver_const.LJM_MAX_STRING_SIZE ) {
 					strBuffer.write(value, 0, value.length, 'utf8');
 				} else {
 					throw new DriverInterfaceError("String is to long");
@@ -1169,7 +1173,7 @@ exports.labjack = function ()
 				);
 			} else {
 				//ERROR!! address is not valid, wrong direction or invalid addr.
-				if(info.type == -1) {
+				if ( info.type == -1 ) {
 					throw new DriverInterfaceError("Invalid Address");
 					return "Invalid Address";
 				} else if (info.directionValid == 0) {
@@ -1179,7 +1183,7 @@ exports.labjack = function ()
 			}
 		} else if(typeof(address) == 'number') {
 			var info = this.constants.getAddressInfo(address, 'W');
-			if((info.directionValid == 1) && (info.type != 98)) {
+			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
 				errorResult = this.ljm.LJM_eWriteAddress(
 					this.handle, 
@@ -1187,13 +1191,13 @@ exports.labjack = function ()
 					info.type, 
 					value
 				);
-			} else if((info.directionValid == 1) && (info.type == 98)) {
+			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				var strBuffer = new Buffer(50);//max string size
+				var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 				strBuffer.fill(0);
 
 				//Fill the write-string
-				if(value.length <= 50) {
+				if ( value.length <= driver_const.LJM_MAX_STRING_SIZE ) {
 					strBuffer.write(value, 0, value.length, 'utf8');
 				} else {
 					throw new DriverInterfaceError("String is to long");
@@ -1208,10 +1212,10 @@ exports.labjack = function ()
 				);
 			} else {
 				//ERROR!! address is not valid, wrong direction or invalid addr.
-				if(info.type == -1) {
+				if ( info.type == -1 ) {
 					throw new DriverInterfaceError("Invalid Address");
 					return "Invalid Address";
-				} else if (info.directionValid == 0) {
+				} else if ( info.directionValid == 0 ) {
 					throw new DriverInterfaceError("Invalid Write Attempt");
 					return "Invalid Write Attempt";
 				}
@@ -1220,7 +1224,7 @@ exports.labjack = function ()
 			throw new DriverInterfaceError("Invalid Arguments");
 			return "Invalid Arguments";
 		}
-		if(errorResult == 0) {
+		if ( errorResult == 0 ) {
 			return errorResult;
 		} else {
 			throw new DriverOperationError(errorResult);
@@ -1250,36 +1254,61 @@ exports.labjack = function ()
 	 */
 	this.writeMany = function (addresses, values, onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if (this.checkStatus(onError)) { return; };
+		if ( this.checkStatus(onError) ) { return; };
 
-		if(addresses.length != values.length) {
+		//Check to make sure the two array's are of the same length
+		if ( addresses.length != values.length ) {
 			onError('Length of addresses & values must be equal');
 			return;
 		}
-		if(typeof(values[0]) != 'number') {
+
+		//Check to make sure that the values array is filled with numbers
+		if ( typeof(values[0]) != 'number' ) {
 			onError('values must be of type number-array');
 			return;
 		}
 
 		//Perform universal buffer allocations.
 		var length = addresses.length;
-		var aValues = new Buffer(8*length);
+		var aValues = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
 		var errors = new ref.alloc('int',1);
+
+		//Clear the buffers
+		aValues.fill(0);
+		errors.fill(0);
+
 		var errorResult;
 
 		//Decide whether to perform address-number or address-name operation.
-		if(typeof(addresses[0]) == 'string') {
+		if ( typeof(addresses[0]) == 'string' ) {
 			//Perform necessary string buffer allocations.
 			var i;
 			var offset = 0;
-			var aNames = new Buffer(8*length);
-			for(i = 0; i < length; i++)
-			{
-				aValues.writeDoubleLE(values[i],offset);
-				var buf = new Buffer(addresses[i].length+1);
-				ref.writeCString(buf,0,addresses[i]);
-				ref.writePointer(aNames,offset,buf);
-				offset+=8;
+
+			//Declare aNames array buffer
+			var aNames = new Buffer(ARCH_POINTER_SIZE * length);
+
+			//Clear aNames buffer
+			aNames.fill(0);
+
+			for ( i = 0; i < length; i++ ) {
+				//Append the value to the aValues array
+				aValues.writeDoubleLE(values[i], offset);
+
+				//Declare buffer for string-address
+				var buf = new Buffer(addresses[i].length + 1);
+
+				//Clear the buffer
+				buf.fill(0)
+
+				//Save the string to the buffer
+				ref.writeCString(buf, 0, addresses[i]);
+
+				//Write the pointer of the buffer to the aNames array
+				ref.writePointer(aNames, offset, buf);
+
+				//Increment the offset counter
+				offset+=ARCH_POINTER_SIZE;
 			}
 
 			//Execute LJM command.
@@ -1290,22 +1319,19 @@ exports.labjack = function ()
 				aValues, 
 				errors, 
 				function(err, res){
-					if(err) throw err;
-					if((res == 0))
-					{
+					if (err) throw err;
+					if ( (res == 0) ) {
 						onSuccess();
-					}
-					else
-					{
+					} else {
 						onError({retError:res, errFrame:errors.deref()});
 					}
 				}
 			);
 			return 0;
-		} else if(typeof(addresses[0]) == 'number') {
+		} else if ( typeof(addresses[0]) == 'number' ) {
 			//Perform necessary number buffer allocations.
-			var addrBuff = new Buffer(4*length);
-			var addrTypeBuff = new Buffer(4*length);
+			var addrBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
+			var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
 			var inValidOperation = 0;
 
 			var info;
@@ -1313,20 +1339,17 @@ exports.labjack = function ()
 			var offsetD = 0;
 			i = 0;
 
-			for(i = 0; i < length; i++)
-			{
+			for ( i = 0; i < length; i++ ) {
 				info = this.constants.getAddressInfo(addresses[i], 'W');
-				if(info.directionValid == 1)
-				{
+				if ( info.directionValid == 1 ) {
 					addrTypeBuff.writeInt32LE(info.type,offset);
 					addrBuff.writeInt32LE(addresses[i],offset);
 					aValues.writeDoubleLE(values[i],offsetD);
-					offset += 4;
-					offsetD+=8;
+					offset += ARCH_INT_NUM_BYTES;
+					offsetD += ARCH_DOUBLE_NUM_BYTES;
 				}
-				else
-				{
-					if(info.type == -1) {
+				else {
+					if ( info.type == -1 ) {
 						onError({retError:"Invalid Address", errFrame:i});
 					} else if (info.directionValid == 0) {
 						onError({retError:"Invalid Read Attempt", errFrame:i});
@@ -1346,13 +1369,11 @@ exports.labjack = function ()
 				aValues, 
 				errors, 
 				function(err, res){
-					if(err) throw err;
-					if((res == 0))
-					{
+					if ( err ) throw err;
+					if ( (res == 0) ) {
 						onSuccess();
 					}
-					else
-					{
+					else {
 						onError({retError:res, errFrame:errors.deref()});
 					}
 				}
@@ -1387,13 +1408,16 @@ exports.labjack = function ()
 		//Check to make sure a device has been opened.
 		this.checkStatus();
 
-		if (addresses.length != values.length) {
+		//Check to make sure the two array's are of the same length
+		if ( addresses.length != values.length ) {
 			throw new DriverInterfaceError(
 				'Length of Addresses & Values must be equal'
 			);
 			return 'Length of Addresses & Values must be equal';
 		}
-		if (typeof(values[0]) != 'number') {
+
+		//Check to make sure that the values array is filled with numbers
+		if ( typeof(values[0]) != 'number' ) {
 			throw new DriverInterfaceError(
 				'Values must be of type number-array'
 			);
@@ -1402,23 +1426,44 @@ exports.labjack = function ()
 
 		//Perform universal buffer allocations.
 		var length = addresses.length;
-		var aValues = new Buffer(8*length);
+		var aValues = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
 		var errors = new ref.alloc('int',1);
+
+		//Clear the buffers
+		aValues.fill(0);
+		errors.fill(0);
+
 		var errorResult;
 
 		//Decide whether to perform address-number or address-name operation.
-		if (typeof(addresses[0]) == 'string') {
+		if ( typeof(addresses[0]) == 'string' ) {
 			//Perform necessary string buffer allocations.
 			var i;
 			var offset = 0;
-			var aNames = new Buffer(8*length);
-			for(i = 0; i < length; i++)
-			{
-				aValues.writeDoubleLE(values[i],offset);
-				var buf = new Buffer(addresses[i].length+1);
-				ref.writeCString(buf,0,addresses[i]);
-				ref.writePointer(aNames,offset,buf);
-				offset+=8;
+			//Declare aNames array buffer
+			var aNames = new Buffer(ARCH_POINTER_SIZE * length);
+			
+			//Clear aNames buffer
+			aNames.fill(0);
+
+			for ( i = 0; i < length; i++ ) {
+				//Append the value to the aValues array
+				aValues.writeDoubleLE(values[i], offset);
+
+				//Declare buffer for string-address
+				var buf = new Buffer(addresses[i].length + 1);
+
+				//Clear the buffer
+				buf.fill(0)
+
+				//Save the string to the buffer
+				ref.writeCString(buf, 0, addresses[i]);
+
+				//Write the pointer of the buffer to the aNames array
+				ref.writePointer(aNames, offset, buf);
+
+				//Increment the offset counter
+				offset+=ARCH_POINTER_SIZE;
 			}
 
 			//Execute LJM function.
@@ -1432,8 +1477,8 @@ exports.labjack = function ()
 
 		} else if (typeof(addresses[0]) == 'number') {
 			//Perform necessary number buffer allocations.
-			var addrBuff = new Buffer(4*length);
-			var addrTypeBuff = new Buffer(4*length);
+			var addrBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
+			var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
 			var inValidOperation = 0;
 
 			var info;
@@ -1441,20 +1486,17 @@ exports.labjack = function ()
 			var offsetD = 0;
 			i = 0;
 
-			for(i = 0; i < length; i++)
-			{
+			for ( i = 0; i < length; i++ ) {
 				info = this.constants.getAddressInfo(addresses[i], 'W');
-				if(info.directionValid == 1)
-				{
+				if ( info.directionValid == 1 ) {
 					addrTypeBuff.writeInt32LE(info.type,offset);
 					addrBuff.writeInt32LE(addresses[i],offset);
 					aValues.writeDoubleLE(values[i],offsetD);
-					offset += 4;
-					offsetD+=8;
+					offset += ARCH_INT_NUM_BYTES;
+					offsetD += ARCH_DOUBLE_NUM_BYTES;
 				}
-				else
-				{
-					if (info.type == -1) {
+				else {
+					if ( info.type == -1 ) {
 						throw new DriverInterfaceError(
 							{
 								retError:"Invalid Address", 
@@ -1534,7 +1576,7 @@ exports.labjack = function ()
 				if (directions[i] == driver_const.LJM_READ) {
 					returnArray.push(aValues.readDoubleLE(offset));
 				}
-				offset +=8;
+				offset += ARCH_DOUBLE_NUM_BYTES;
 			}			
 		}
 		return returnArray;
@@ -1549,8 +1591,7 @@ exports.labjack = function ()
 	 * @param  {[type]} onError    [description]
 	 * @param  {[type]} onSuccess  [description]
 	 */
-	this.rwMany = function(addresses,directions,numValues,values,onError,onSuccess) 
-	{
+	this.rwMany = function(addresses,directions,numValues,values,onError,onSuccess) {
 		//Check to make sure a device has been opened
 		if (this.checkStatus(onError)) { return; };
 
@@ -1563,10 +1604,10 @@ exports.labjack = function ()
 
 
 		//Perform function wide buffer allocations:
-		var aDirections = new Buffer(numFrames * 4);//Array of directions
-		var aNumWrites = new Buffer(numFrames * 4);//Array of ops. per frame
+		var aDirections = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of directions
+		var aNumWrites = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of ops. per frame
 		var aValues = new Buffer(values.length * 8);//Array of doubles
-		var errorVal = new Buffer(4); //Array the size of one UInt32 for err
+		var errorVal = new Buffer(ARCH_INT_NUM_BYTES); //Array the size of one UInt32 for err
 
 		//Clear all the arrays
 		aDirections.fill(0);
@@ -1574,44 +1615,45 @@ exports.labjack = function ()
 		aValues.fill(0);
 		errorVal.fill(0);
 
-		if(typeof(addresses[0]) == 'string') {
-
-			
+		if ( typeof(addresses[0]) == 'string' ) {
 			//Allocate space for the aNames array
-			var aNames = new Buffer(numFrames * 8);//Array of C-String pointers
+			var aNames = new Buffer(numFrames * ARCH_POINTER_SIZE);//Array of C-String pointers
+			aNames.fill(0);
+
 			var offsetD = 0;
 			var offsetI = 0;
 			
 			//Populate the array's with data
-			for(i = 0; i < numFrames; i++) {
+			for ( i = 0; i < numFrames; i++ ) {
 				//Fill aDirections array
-				aDirections.writeUInt32LE(directions[i],offsetI);
+				aDirections.writeUInt32LE(directions[i], offsetI);
 
 				//Fill aNumWrites array
-				aNumWrites.writeUInt32LE(numValues[i],offsetI);
+				aNumWrites.writeUInt32LE(numValues[i], offsetI);
 
 				//Fill aNames array
-				var buf = new Buffer(addresses[i].length+1);
-				ref.writeCString(buf,0,addresses[i]);
-				ref.writePointer(aNames,offsetD,buf);
+				var buf = new Buffer(addresses[i].length + 1);
+				buf.fill(0);
+
+				ref.writeCString(buf, 0, addresses[i]);
+				ref.writePointer(aNames, offsetD, buf);
 
 				//Increment pointers
-				offsetD +=8;
-				offsetI += 4;
+				offsetD += ARCH_POINTER_SIZE;
+				offsetI += ARCH_INT_NUM_BYTES;
 			}
 
 			//Increment & fill the values array separately because it may be of
 			//different length then the rest.
 			offsetD = 0;
-			for(i = 0; i < values.length; i++)
-			{
-				value = values[i];
-				if(typeof(value) == 'number') {
-					aValues.writeDoubleLE(value,offsetD);
+			for ( i = 0; i < values.length; i++ ) {
+				var value = values[i];
+				if ( typeof(value) == 'number' ) {
+					aValues.writeDoubleLE(value, offsetD);
 				} else {
-					aValues.writeDoubleLE(0,offsetD);
+					aValues.writeDoubleLE(0, offsetD);
 				}
-				offsetD += 8;
+				offsetD += ARCH_DOUBLE_NUM_BYTES;
 			}
 
 			//Call the LJM function
@@ -1625,8 +1667,8 @@ exports.labjack = function ()
 				aValues,
 				errorVal,
 				function(err,res) {
-					if(err) throw err;
-					if(res == 0) {
+					if (err) throw err;
+					if ( res == 0 ) {
 						onSuccess(
 							self.populateRWManyArray(
 								numFrames, 
@@ -1642,8 +1684,8 @@ exports.labjack = function ()
 			);
 		} else if(typeof(addresses[0]) == 'number') {
 			//Allocate space for the aNames array
-			var aAddresses = new Buffer(numFrames * 4);//Array of addresses
-			var aTypes = new Buffer(numFrames * 4);//Array of types
+			var aAddresses = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of addresses
+			var aTypes = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of types
 
 			var offsetD = 0;
 			var offsetI = 0;
@@ -1709,22 +1751,21 @@ exports.labjack = function ()
 				}
 
 				//Increment pointers
-				offsetD +=8;
-				offsetI += 4;
+				offsetD +=ARCH_DOUBLE_NUM_BYTES;
+				offsetI += ARCH_INT_NUM_BYTES;
 			}
 
 			//Increment & fill the values array separately because it may be of
 			//different length then the rest.
 			offsetD = 0;
-			for(i = 0; i < values.length; i++)
-			{
-				value = values[i];
+			for ( i = 0; i < values.length; i++ ) {
+				var value = values[i];
 				if(typeof(value) == 'number') {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
 				}
-				offsetD += 8;
+				offsetD += ARCH_DOUBLE_NUM_BYTES;
 			}
 
 			//Call the LJM function
@@ -1770,8 +1811,7 @@ exports.labjack = function ()
 	 * @throws {DriverOperationError} If there is an error produced by calling 
 	 *         							the LJM driver
 	 */
-	this.rwManySync = function(addresses,directions,numValues,values) 
-	{
+	this.rwManySync = function(addresses,directions,numValues,values) {
 		var i,j;
 		var numFrames = addresses.length;
 		//Check to make sure a device has been opened.
@@ -1781,51 +1821,54 @@ exports.labjack = function ()
 		var errorResult;
 
 		//Perform function wide buffer allocations:
-		var aDirections = new Buffer(numFrames * 4);//Array of directions
-		var aNumWrites = new Buffer(numFrames * 4);//Array of ops. per frame
-		var aValues = new Buffer(values.length * 8);//Array of doubles
-		var errorVal = new Buffer(4); //Array the size of one UInt32 for err
+		var aDirections = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of directions
+		var aNumWrites = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of ops. per frame
+		var aValues = new Buffer(values.length * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
+		var errorVal = new Buffer(ARCH_INT_NUM_BYTES); 							//Array the size of one UInt32 for err
 
 		//Clear all the arrays
 		aDirections.fill(0);
 		aNumWrites.fill(0);
 		aValues.fill(0);
 		errorVal.fill(0);
-		if(typeof(addresses[0]) == 'string') {
+		if ( typeof(addresses[0]) == 'string' ) {
 			//Allocate space for the aNames array
-			var aNames = new Buffer(numFrames * 8);//Array of C-String pointers
+			var aNames = new Buffer(numFrames * ARCH_POINTER_SIZE);				//Array of C-String pointers
+			aNames.fill(0);
+
 			var offsetD = 0;
 			var offsetI = 0;
 
 			//Populate the array's with data
-			for(i = 0; i < numFrames; i++) {
+			for ( i = 0; i < numFrames; i++ ) {
 				//Fill aDirections array
-				aDirections.writeUInt32LE(directions[i],offsetI);
+				aDirections.writeUInt32LE(directions[i], offsetI);
 
 				//Fill aNumWrites array
-				aNumWrites.writeUInt32LE(numValues[i],offsetI);
+				aNumWrites.writeUInt32LE(numValues[i], offsetI);
 
 				//Fill aNames array
 				var buf = new Buffer(addresses[i].length+1);
-				ref.writeCString(buf,0,addresses[i]);
-				ref.writePointer(aNames,offsetD,buf);
+				buf.fill(0);
+
+				ref.writeCString(buf, 0, addresses[i]);
+				ref.writePointer(aNames, offsetD, buf);
 				//Increment pointers
-				offsetD +=8;
-				offsetI += 4;
+				offsetD += ARCH_POINTER_SIZE;
+				offsetI += ARCH_INT_NUM_BYTES;
 			}
 
 			//Increment & fill the values array separately because it may be of
 			//different length then the rest.
 			offsetD = 0;
-			for(i = 0; i < values.length; i++)
-			{
+			for ( i = 0; i < values.length; i++ ) {
 				var value = values[i];
-				if(typeof(value) === 'number') {
+				if ( typeof(value) === 'number' ) {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
 					aValues.writeDoubleLE(0,offsetD);
 				}
-				offsetD += 8;
+				offsetD += ARCH_DOUBLE_NUM_BYTES;
 			}
 			//Call the LJM function
 			errorResult = this.ljm.LJM_eNames(
@@ -1840,22 +1883,22 @@ exports.labjack = function ()
 
 		} else if(typeof(addresses[0]) == 'number') {
 			//Allocate space for the aNames array
-			var aAddresses = new Buffer(numFrames * 4);//Array of addresses
-			var aTypes = new Buffer(numFrames * 4);//Array of types
+			var aAddresses = new Buffer(numFrames * ARCH_INT_NUM_BYTES);		//Array of addresses
+			var aTypes = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of types
 
 			var offsetD = 0;
 			var offsetI = 0;
 
 			//Populate the array's with data
-			for(i = 0; i < numFrames; i++) {
+			for ( i = 0; i < numFrames; i++ ) {
 				//Fill aDirections array
-				aDirections.writeUInt32LE(directions[i],offsetI);
+				aDirections.writeUInt32LE(directions[i], offsetI);
 
 				//Fill aNumWrites array
-				aNumWrites.writeUInt32LE(numValues[i],offsetI);
+				aNumWrites.writeUInt32LE(numValues[i], offsetI);
 
 				//Fill aAddresses array
-				aAddresses.writeUInt32LE(addresses[i],offsetI);
+				aAddresses.writeUInt32LE(addresses[i], offsetI);
 
 				//Fill aTypes array
 				var info;
@@ -1874,12 +1917,12 @@ exports.labjack = function ()
 				}
 				if(info.directionValid == 1)
 				{
-					aTypes.writeUInt32LE(info.type,offsetI);
+					aTypes.writeUInt32LE(info.type, offsetI);
 				}
 				else
 				{
 					//Report Error:
-					if(info.type == -1) {
+					if ( info.type == -1 ) {
 						throw new DriverInterfaceError(
 							{
 								retError:"Invalid Address", 
@@ -1907,22 +1950,21 @@ exports.labjack = function ()
 				}
 
 				//Increment pointers
-				offsetD +=8;
-				offsetI += 4;
+				offsetD +=ARCH_DOUBLE_NUM_BYTES;
+				offsetI += ARCH_INT_NUM_BYTES;
 			}
 
 			//Increment & fill the values array separately because it may be of
 			//different length then the rest.
 			offsetD = 0;
-			for(i = 0; i < values.length; i++)
-			{
+			for ( i = 0; i < values.length; i++ ) {
 				value = values[i];
 				if(typeof(value) == 'number') {
-					aValues.writeDoubleLE(value,offsetD);
+					aValues.writeDoubleLE(value, offsetD);
 				} else {
-					aValues.writeDoubleLE(0,offsetD);
+					aValues.writeDoubleLE(0, offsetD);
 				}
-				offsetD += 8;
+				offsetD += ARCH_DOUBLE_NUM_BYTES;
 			}
 
 			//Call the LJM function
@@ -2013,16 +2055,13 @@ exports.labjack = function ()
 		var self = this;
 		output = this.ljm.LJM_Close.async(this.handle, function (err, res) {
 			if (err) throw err;
-			if(res == 0)
-			{
+			if ( res == 0 ) {
 				self.handle = null;
 				self.deviceType = null;
 				self.connectionType = null;
 				self.identifier = null;
 				onSuccess(true);
-			}
-			else
-			{
+			} else {
 				onError(res);
 			}
 		});
@@ -2040,7 +2079,7 @@ exports.labjack = function ()
 
 		output = this.ljm.LJM_Close(this.handle);
 
-		if(output == 0) {
+		if ( output == 0 ) {
 			//REPORT NO ERROR HAS OCCURED
 			this.handle = null;
 			this.deviceType = null;
@@ -2065,9 +2104,8 @@ exports.labjack = function ()
 	 *		has an invalid deviceType.
 	**/
 	this.checkStatus = function(onError) {
-		if((this.handle === null) && (this.deviceType === null))
-		{
-			if (onError === null) {
+		if ( (this.handle === null) && (this.deviceType === null) ) {
+			if ( onError === null ) {
 				throw new DriverInterfaceError("Device Never Opened");
 				return true;
 			} else {
@@ -2084,7 +2122,7 @@ exports.labjack = function ()
 	 *		been loaded yet.
 	**/
 	this.checkFirmwareConstants = function() {
-		if (this.firmwareVersions == null) {
+		if ( this.firmwareVersions == null ) {
 			throw new DriverInterfaceError("Firmware Versions File Not Loaded");
 		}
 	};
@@ -2096,7 +2134,7 @@ exports.labjack = function ()
 	 *		loaded, is not present, or is not accessible.
 	**/
 	this.checkLoadedFirmware = function() {
-		if (this.firmwareFileBuffer == null) {
+		if ( this.firmwareFileBuffer == null ) {
 			throw new DriverInterfaceError("Firmware .bin File Not Loaded");
 		}
 	};
@@ -2108,7 +2146,7 @@ exports.labjack = function ()
 	 *		be successfully parsed.
 	**/
 	this.checkLoadedFirmwareParsed = function() {
-		if (this.fwHeader == null) {
+		if ( this.fwHeader == null ) {
 			throw new DriverInterfaceError("Firmware .bin File Not Parsed");
 		}
 	}

@@ -79,6 +79,7 @@ var runTest = function() {
 			if(pCmd) {
 				console.log(list[funcName]+'.'+functionList[i]);
 			}
+			
 			if(funcName == 'listAll') {
 				eval(list[funcName]+'.'+functionList[i]);
 			} else if(funcName == 'errToStr') {

@@ -954,12 +954,12 @@ module.exports = {
 		var expectedResultList = [
 			{ retError: 'Invalid Write Attempt', errFrame: 0 },
 			{ retError: 'Invalid Address', errFrame: 0 },
-			{ retError: 1, errFrame: 1 },
-			{ retError: 1, errFrame: 1 },
+			{ retError: 1, errFrame: 0 },
+			{ retError: 1, errFrame: 0 },
 			{ retError: 'Invalid Read Attempt', errFrame: 0 },
 			{ retError: 'Invalid Address', errFrame: 0 },
-			{ retError: 1, errFrame: 1 },
-			{ retError: 1, errFrame: 1 }
+			{ retError: 1, errFrame: 0 },
+			{ retError: 1, errFrame: 0 }
 		];
 
 		//Run the desired commands
@@ -1006,74 +1006,81 @@ module.exports = {
 		//Create test-variables
 		//rwMany(numFrames,addresses,directions,numValues,values
 		var testList = [
-			// 'rwMany([0,2],[0,0],[1,1],[null,null])',
-			// 'rwMany(["AIN0","AIN2"],[0,0],[1,1],[null,null])',
-			// 'rwMany([0,2,1000],[0,0,1],[1,1,1],[null,null,2.5])',
-			// 'rwMany([0,1000],[0,1],[2,1],[null,null,2.5])',
-			// 'rwMany([0,1000],[0,1],[1,1],[null,2.5])',
-			// 'rwMany([1000,0],[1,0],[1,1],[2.5,null])',
-			// 'rwMany([1000,0],[1,0],[2,1],[2.5,2.5,null])',
-			// 'rwMany(["DAC0","AIN0"],[1,0],[2,2],[2.5,2.5,null,null])',
-			'rwMany([5120],[1],[6],[0x11,0x00,0xDE,0xAD,0xBE,0xEF])',
-			'rwMany(["AIN0"],[0],[6],[0x11,0x00,0xDE,0xAD,0xBE,0xEF])'
+			'rwMany([0,2],[0,0],[1,1],[null,null])',							// #1
+			'rwMany(["AIN0","AIN2"],[0,0],[1,1],[null,null])',					// #2
+			'rwMany([0,2,1000],[0,0,1],[1,1,1],[null,null,2.5])',				// #3
+			'rwMany([0,1000],[0,1],[2,1],[null,null,2.5])',						// #4
+			'rwMany([0,1000],[0,1],[1,1],[null,2.5])',							// #5
+			'rwMany([1000,0],[1,0],[1,1],[2.5,null])',							// #6
+			'rwMany([1000,0],[1,0],[2,1],[2.5,2.5,null])',						// #7
+			'rwMany(["DAC0","AIN0"],[1,0],[2,2],[2.5,2.5,null,null])',			// #8
+			'rwMany([5120],[1],[6],[0x11,0x00,0xDE,0xAD,0xBE,0xEF])',			// #9
+			'rwMany(["AIN0"],[0],[6],[0x11,0x00,0xDE,0xAD,0xBE,0xEF])'			// #10
 		];
 
 		//Expected info combines both sync & async
 		var expectedFunctionList = [ 
-			'LJM_eAddresses',
-			'LJM_eNames',
-			// 'LJM_eAddresses',
-			// 'LJM_eAddresses',
-			// 'LJM_eAddresses',
-			// 'LJM_eAddresses',
-			// 'LJM_eAddresses',
-			// 'LJM_eNames',
-			// 'LJM_eAddresses',
-			'LJM_eAddressesAsync',
-			'LJM_eNamesAsync',
-			// 'LJM_eAddressesAsync',
-			// 'LJM_eAddressesAsync',
-			// 'LJM_eAddressesAsync',
-			// 'LJM_eAddressesAsync',
-			// 'LJM_eAddressesAsync',
-			// 'LJM_eNamesAsync',
-			// 'LJM_eAddressesAsync',
-			// 'LJM_CloseAsync'
+		//Synchronous Results:
+			'LJM_eAddresses',													// #1
+			'LJM_eNames',														// #2
+			'LJM_eAddresses',													// #3
+			'LJM_eAddresses',													// #4
+			'LJM_eAddresses',													// #5
+			'LJM_eAddresses',													// #6
+			'LJM_eAddresses',													// #7
+			'LJM_eNames',														// #8
+			'LJM_eAddresses',													// #9
+			'LJM_eNames',														// #10
+			
+		//Asynchronous Results:
+			'LJM_eAddressesAsync',												// #1
+			'LJM_eNamesAsync',													// #2
+			'LJM_eAddressesAsync',												// #3
+			'LJM_eAddressesAsync',												// #4
+			'LJM_eAddressesAsync',												// #5
+			'LJM_eAddressesAsync',												// #6
+			'LJM_eAddressesAsync',												// #7
+			'LJM_eNamesAsync',													// #8
+			'LJM_eAddressesAsync',												// #9
+			'LJM_eNamesAsync',													// #10
 		];
 		//Expected info combines both sync & async
 		var expectedResultList = [
-			// [ 9, 8 ],
-			// [ 9, 8 ],
-			// [ 9, 8 ],
-			// [ 9, 8 ],
-			// [ 9 ],
-			// [ 8 ],
-			// [ 7 ],
-			// [ 7, 6 ],
+		//Synchronous Results:
+			[ 9, 8 ],
+			[ 9, 8 ],
+			[ 9, 8 ],
+			[ 9, 8 ],
+			[ 9 ],
+			[ 8 ],
+			[ 7 ],
+			[ 7, 6 ],
 			[],
+			[ 9, 8, 7, 6, 5, 4 ],
+
+		//Asynchronous Results:
+			[ 9, 8 ],
+			[ 9, 8 ],
+			[ 9, 8 ],
+			[ 9, 8 ],
+			[ 9 ],
+			[ 8 ],
+			[ 7 ],
+			[ 7, 6 ],
 			[],
-			// [ 9, 8 ],
-			// [ 9, 8 ],
-			// [ 9, 8 ],
-			// [ 9, 8 ],
-			// [ 9 ],
-			// [ 8 ],
-			// [ 7 ],
-			// [ 7, 6 ],
-			[],
-			[]
+			[ 9, 8, 7, 6, 5, 4 ]
 		];
 
 		//Run the desired comman
-		console.log('Starting Sync');
+		// console.log('Starting Sync');
 		syncRun.run(testList);
-		console.log('Starting Async');
+		// console.log('Starting Async');
 		asyncRun.run(testList,
 			function(res) {
 				console.log('errorReported');
 				//Error
 			}, function(res) {
-				console.log('finisned');
+				// console.log('finisned');
 				//Success
 				var funcs = fakeDriver.getLastFunctionCall();
 				var results = asyncRun.getResults();
@@ -1093,7 +1100,7 @@ module.exports = {
 				
 				//Test to make sure the proper functions were called
 				expectedFunctionList.forEach(function(element, index, array) {
-					console.log(element,funcs[index]);
+					// console.log(element,funcs[index]);
 					test.deepEqual(element,funcs[index]);
 				});
 				test.deepEqual(expectedFunctionList,funcs);
@@ -1101,8 +1108,8 @@ module.exports = {
 
 				//test to make sure the proper results were acquired
 				expectedResultList.forEach(function(element, index, array) {
-					console.log(element,results[index]);
-					// test.deepEqual(element,results[index]);
+					// console.log(element,results[index]);
+					test.deepEqual(element,results[index]);
 				});
 				test.deepEqual(expectedResultList,results);
 

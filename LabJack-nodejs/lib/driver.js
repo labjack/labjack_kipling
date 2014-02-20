@@ -451,7 +451,11 @@ exports.ljmDriver = function()
 	this.readLibrarySync = function(parameter) {
 		if(typeof(parameter) == 'string') {
 			var errorResult;
+			//Allocate a buffer for the result
 			var returnVar = new ref.alloc('double',1);
+
+			//Clear the buffer
+			returnVar.fill(0);
 
 			errorResult = this.ljm.LJM_ReadLibraryConfigS(
 				parameter, 
@@ -467,10 +471,61 @@ exports.ljmDriver = function()
 		}
 	}
 	this.readLibraryS = function (parameter, onError, onSuccess) {
-		throw 'NOT IMPLEMENTED';
+		if (typeof(parameter) == 'string') {
+			var errorResult;
+
+			//Allocate a buffer for the result
+			var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+			//Clear the buffer
+			strBuffer.fill(0);
+
+			errorResult = this.ljm.LJM_ReadLibraryConfigStringS.async(
+				parameter, 
+				strBuffer, 
+				function (err, res){
+					if (err) throw err;
+					if ( res == 0 ) {
+						//Calculate the length of the string
+						var i=0;
+						while(strBuffer[i] != 0) {
+							i++;
+						}
+						onSuccess(strBuffer.toString('utf8',0,i));
+					} else {
+						onError(res);
+					}
+				}
+			);
+			return 0;
+		} else {
+			onError('Invalid Input Parameter Type');
+		}
 	}
 	this.readLibrarySSync = function (parameter) {
-		throw 'NOT IMPLEMENTED';
+		if(typeof(parameter) == 'string') {
+			var errorResult;
+			//Allocate a buffer for the result
+			var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+			//Clear the buffer
+			strBuffer.fill(0);
+
+			errorResult = this.ljm.LJM_ReadLibraryConfigStringS(
+				parameter, 
+				strBuffer
+			);
+			if (errorResult != 0) {
+				//Calculate the length of the string
+				var i=0;
+				while(strBuffer[i] != 0) {
+					i++;
+				}
+				return strBuffer.toString('utf8',0,i)
+			}
+			return returnVar.deref();
+		} else {
+			throw DriverInterfaceError('Invalid Input Parameter Type');
+			return 'Invalid Input Parameter Type';
+		}
 	}
 
 	/**
@@ -484,7 +539,7 @@ exports.ljmDriver = function()
 	this.writeLibrary = function (parameter, value, onError, onSuccess) {
 		var errorResult;
 		if ((typeof(parameter) == 'string')&&(typeof(value)=='number')) {
-			errorResult = this.ljm.LJM_WriteLibraryConfigS(
+			errorResult = this.ljm.LJM_WriteLibraryConfigS.async(
 				parameter, 
 				value, 
 				function (err, res) {
@@ -498,7 +553,7 @@ exports.ljmDriver = function()
 			);
 			return 0;
 		} else if((typeof(parameter) == 'string')&&(typeof(value)=='string')) {
-			errorResult = this.ljm.LJM_WriteLibraryConfigStringS(
+			errorResult = this.ljm.LJM_WriteLibraryConfigStringS.async(
 				parameter, 
 				value, 
 				function (err, res) {
@@ -565,17 +620,13 @@ exports.ljmDriver = function()
 			return 0;
 		}
 		var errorResult;
-		var strW = new Buffer(50);
-		strW.fill(0);
-		if(str.length < 50) {
-			ref.writeCString(str);
-		} else {
+		if(str.length >= driver_const.LJM_MAX_STRING_SIZE) {
 			onError('string to long');
 			return 0;
 		}
 		errorResult = this.ljm.LJM_Log.async(
 			level, 
-			number,
+			str,
 			function (err, res) {
 				if (err) throw err;
 				if (res == 0) {
@@ -605,15 +656,11 @@ exports.ljmDriver = function()
 			return 'wrong types';
 		}
 		var errorResult;
-		var strW = new Buffer(50);
-		strW.fill(0);
-		if (str.length < 50) {
-			ref.writeCString(str);
-		} else {
+		if(str.length >= driver_const.LJM_MAX_STRING_SIZE) {
 			throw new DriverInterfaceError('string to long');
 		}
 
-		errorResult = this.ljm.LJM_Log(level, number);
+		errorResult = this.ljm.LJM_Log(level, str);
 		if (errorResult != 0) {
 			throw new DriverOperationError(errorResult);
 		}
@@ -661,7 +708,7 @@ exports.ljmDriver = function()
 
 	//Read the Driver Version number
 	this.installedDriverVersion = this.readLibrarySync('LJM_LIBRARY_VERSION');
-	if(this.installedDriverVersion!= driver_const.LJM_JS_VERSION)
+	if(this.installedDriverVersion != driver_const.LJM_JS_VERSION)
 	{
 		console.log('The Supported Version for this driver is: '+driver_const.LJM_JS_VERSION+', you are using: ', this.installedDriverVersion);
 	}

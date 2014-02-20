@@ -17,6 +17,7 @@ var functionLocation = {
 	'loadConstants': 'driver',
 	'closeAll': 'driver',
 	'readLibrary': 'driver',
+	'readLibraryS': 'driver',
 	'writeLibrary': 'driver',
 	'logS': 'driver',
 	'resetLog': 'driver',

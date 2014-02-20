@@ -194,6 +194,14 @@ readRSSI_2 =
 'read("WIFI_RSSI")',
 'close()'
 ]
+rwManyTest = 
+[
+'open("LJM_dtT7","LJM_ctEthernet","470010533")',
+'read("AIN0")',
+'rwMany(["AIN0","AIN0"],[0,0],[2,1],[-1,-1,-1])',
+'close()'
+]
+
 testArray = 
 [
 basicTest, 				// 0
@@ -209,6 +217,7 @@ listAllTest,			// 9
 configureWifiTJ,		// 10
 readRSSI_1,				// 11
 readRSSI_2, 			// 12
+rwManyTest,				// 13
 ]
 
 var activeTest;
