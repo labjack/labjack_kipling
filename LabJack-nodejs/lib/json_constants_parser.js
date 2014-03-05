@@ -30,7 +30,9 @@ var LJM_JSON_FILE_LOCATION;
 if (process.platform === 'win32') {
 	var modernPath = process.env.ALLUSERSPROFILE + '\\LabJack\\LJM\\ljm_constants.json';
 	var xpPath = process.env.ALLUSERSPROFILE + '\\Application Data\\LabJack\\LJM\\ljm_constants.json';
-	if (path.existsSync(modernPath))
+	var filePath = fs.existsSync(modernPath);
+
+	if (filePath)
 		LJM_JSON_FILE_LOCATION = modernPath;
 	else
 		LJM_JSON_FILE_LOCATION = xpPath;
