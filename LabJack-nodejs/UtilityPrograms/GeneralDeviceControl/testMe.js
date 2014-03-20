@@ -201,6 +201,13 @@ rwManyTest =
 'rwMany(["AIN0","AIN0"],[0,0],[2,1],[-1,-1,-1])',
 'close()'
 ]
+altNamesAndBeta = 
+[
+'open("LJM_dtT7","LJM_ctEthernet","470010117")',
+'read("DIO0")',
+'read("LUA_RUN")',
+'close()'
+]
 
 testArray = 
 [
@@ -218,6 +225,7 @@ configureWifiTJ,		// 10
 readRSSI_1,				// 11
 readRSSI_2, 			// 12
 rwManyTest,				// 13
+altNamesAndBeta			// 14
 ]
 
 var activeTest;

@@ -77,11 +77,21 @@ function reindexConstantsByRegister(constants)
 {
 	var numConstantsEntries = constants.length;
 	var expandedConstants = [];
+	var expandedBetaRegisters = [];
 	var entry;
 	var regAddresses;
 	var regNames;
 
+	// get registers list
 	expandedConstants = ljmmm_parse.expandLJMMMEntriesSync(constants.registers);
+
+	// get beta_registers
+	expandedBetaRegisters = ljmmm_parse.expandLJMMMEntriesSync(constants.registers_beta);
+
+	// combine beta registers into normal register list
+	expandedBetaRegisters.forEach(function(betaRegister){
+		expandedConstants.push(betaRegister);
+	});
 
 	regAddresses = expandedConstants.map(function (e) { return parseInt(e.address); });
 	regNames = expandedConstants.map(function (e) { return e.name; });
