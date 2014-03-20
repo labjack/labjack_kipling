@@ -1,6 +1,6 @@
 {
     "name": "ljmmm-parse",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Library for parsing LabJack Modbus Map Markup documents.",
     "dependencies": {
         "async": "~0.2",

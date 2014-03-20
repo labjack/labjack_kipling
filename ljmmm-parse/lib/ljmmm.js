@@ -121,6 +121,48 @@ exports.expandLJMMMName = function(name, onError, onSuccess)
 
 
 /**
+ * Expand an entry's name and alname fields as LJMMM, enumerating appropriately.
+ *
+ * @param {Object} entry An Object containing information about a register or
+ *      set of registers.
+ * @param {function} onError The function to call if an error is encountered
+ *      during expansion. Should take a string argument describing the error.
+ * @param {function} onSuccess The function to call after enumerating. Will be
+ *      given an Array of Array of String that results from interpreting the
+ *      name of the provided entry as an LJMMM field, enumerating and creating
+ *      the appropriate entries when interpreting that field. Each sub-Array is
+ *      the result of expanding an original name.
+**/
+exports.expandLJMMMNameAndAltName = function (entry, onError, onSuccess)
+{
+    var originalNames = entry.altnames;
+    if (originalNames === undefined)
+        originalNames = [];
+    
+    originalNames.push(entry.name);
+
+    async.map(
+        originalNames,
+        function (name, callback) {
+            exports.expandLJMMMName(
+                name,
+                function (err) { callback(err, null); },
+                function (names) { callback(null, names); }
+            );
+        },
+        function (err, results) {
+            if (err) {
+                onError(err);
+                return;
+            }
+
+            onSuccess(results);
+        }
+    );
+}
+
+
+/**
  * Interpret an entry's name field as LJMMM, enumerating as appropriate.
  *
  * @param {Object} entry An Object containing information about a register or
@@ -134,23 +176,32 @@ exports.expandLJMMMName = function(name, onError, onSuccess)
 **/
 exports.expandLJMMMEntry = function(entry, onError, onSuccess)
 {
-    exports.expandLJMMMName(
-        entry.name,
+    exports.expandLJMMMNameAndAltName(
+        entry,
         onError,
-        function (names) {
+        function (nameSets) {
+            var address;
+            var numNames;
+            var names;
             var expandedEntries = [];
 
-            var address = entry.address;
             var regTypeSize = getTypeRegSize(entry.type);
+            var numNameSets = nameSets.length;
 
-            numNames = names.length;
-            for (var i=0; i<numNames; i++) {
-                var name = names[i];
-                var newEntry = extend({}, entry);
-                newEntry.name = name;
-                newEntry.address = address;
-                address += regTypeSize;
-                expandedEntries.push(newEntry);
+            for (var i=0; i<numNameSets; i++) {
+                names = nameSets[i];
+                numNames = names.length;
+                address = entry.address;
+
+                for (var j=0; j<numNames; j++) {
+                    var name = names[j];
+                    var newEntry = extend({}, entry);
+                    newEntry.name = name;
+                    newEntry.address = address;
+                    address += regTypeSize;
+                    delete newEntry.altnames;
+                    expandedEntries.push(newEntry);
+                }
             }
 
             onSuccess(expandedEntries);
@@ -170,20 +221,39 @@ exports.expandLJMMMEntry = function(entry, onError, onSuccess)
 **/
 exports.expandLJMMMEntrySync = function(entry)
 {
-    var names = exports.expandLJMMMName(entry.name);
+    var names;
+    var numNameSets;
+    var numAltNames;
+    var nameSets = [];
     var expandedEntries = [];
 
     var address = entry.address;
     var regTypeSize = getTypeRegSize(entry.type);
 
-    var numNames = names.length;
-    for (var i=0; i<numNames; i++) {
-        var name = names[i];
-        var newEntry = extend({}, entry);
-        newEntry.name = name;
-        newEntry.address = address;
-        address += regTypeSize;
-        expandedEntries.push(newEntry);
+    if (entry.altnames !== undefined)
+        numAltNames = entry.altnames.length
+
+    nameSets.push(exports.expandLJMMMName(entry.name));
+    for (var i=0; i<numAltNames; i++) {
+        nameSets.push(exports.expandLJMMMName(entry.altnames[i]));
+    }
+
+    numNameSets = nameSets.length;
+    for (var i=0; i<numNameSets; i++) {
+        names = nameSets[i];
+        numNames = names.length;
+        address = entry.address;
+
+        var numNames = names.length;
+        for (var j=0; j<numNames; j++) {
+            var name = names[j];
+            var newEntry = extend({}, entry);
+            newEntry.name = name;
+            newEntry.address = address;
+            address += regTypeSize;
+            delete newEntry.altnames;
+            expandedEntries.push(newEntry);
+        }
     }
 
     return expandedEntries;

@@ -136,6 +136,39 @@ exports.testExpandLJMMMEntry = function(test)
 
 
 /**
+ * Test expanding a register entry, testing both expanded names and addresses.
+ *
+ * @param {nodeunit.test} test The nodeunit-standard test that this function's
+ *      assertions shouldmrun against and this test should report to when done.
+**/
+exports.testExpandLJMMMEntryAltNames = function(test)
+{
+    var testInput = {
+        name: 'Test#(0:1)',
+        address: 0,
+        type: 'TEST_TYPE',
+        altnames:['Again#(0:1)']
+    };
+
+    var expectedResult = [
+        {name: 'Again0', address: 0, type: 'TEST_TYPE'},
+        {name: 'Again1', address: 4, type: 'TEST_TYPE'},
+        {name: 'Test0', address: 0, type: 'TEST_TYPE'},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE'}
+    ];
+
+    ljmmm.expandLJMMMEntry(
+        testInput,
+        function (error) { test.ok(false, error); test.done(); },
+        function (result) {
+            test.deepEqual(result, expectedResult);
+            test.done();
+        }
+    );
+};
+
+
+/**
  * Test expanding a register entry synchronously.
  *
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
@@ -147,6 +180,34 @@ exports.testExpandLJMMMEntrySync = function(test)
     var expectedResult = [
         {name: 'Test0', address: 0, type: 'TEST_TYPE'},
         {name: 'Test1', address: 4, type: 'TEST_TYPE'}
+    ];
+
+    var result = ljmmm.expandLJMMMEntrySync(testInput);
+    test.deepEqual(result, expectedResult);
+    test.done();
+};
+
+
+/**
+ * Test expanding a register entry, testing both expanded names and addresses.
+ *
+ * @param {nodeunit.test} test The nodeunit-standard test that this function's
+ *      assertions shouldmrun against and this test should report to when done.
+**/
+exports.testExpandLJMMMEntryAltNamesSync = function(test)
+{
+    var testInput = {
+        name: 'Test#(0:1)',
+        address: 0,
+        type: 'TEST_TYPE',
+        altnames:['Again#(0:1)']
+    };
+
+    var expectedResult = [
+        {name: 'Test0', address: 0, type: 'TEST_TYPE'},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE'},
+        {name: 'Again0', address: 0, type: 'TEST_TYPE'},
+        {name: 'Again1', address: 4, type: 'TEST_TYPE'}
     ];
 
     var result = ljmmm.expandLJMMMEntrySync(testInput);
