@@ -8,7 +8,16 @@ var activeTest = 0;
 var numTests = 0;
 var functionList;
 var device = new deviceManager.labjack();
+var PRINT_INCREMENTAL_STEP = true;
 
+function printAlways(data) {
+	console.log(data);
+}
+function printInfo(data) {
+	if(PRINT_INCREMENTAL_STEP) {
+		console.log(data);
+	}
+}
 var startTime=0;
 function nextTest()
 {
@@ -35,11 +44,11 @@ function onSuccess(res) {
 	//console.log("SUCCESS: "+res);
 	if(res != null)
 	{
-		console.log(res);
+		printInfo(res);
 	}
 	else
 	{
-		console.log('SUCCESS');
+		printInfo('SUCCESS');
 	}
 	nextTest();
 }
@@ -80,14 +89,14 @@ function runTest() {
 			}
 			else
 			{
-				console.log(functionList[i].search('WIFI_IP'))
+				printInfo(functionList[i].search('WIFI_IP'))
 				if(functionList[i].search('WIFI_IP') != -1) {
 					functionList[i] = functionList[i].replace(')', 'onError, onSuccess)');
 				} else {
 					functionList[i] = functionList[i].replace(')', 'onError, onSuccess)');
 				}
 			}
-			console.log(functionList[i]);
+			printInfo(functionList[i]);
 
 			//Execute test-function
 			wait=true;
@@ -150,4 +159,7 @@ exports.run = function(testList)
 		console.log(eval('device.'+functionList[i]));
 	}	
 	*/
+}
+exports.printData = function(choice) {
+	PRINT_INCREMENTAL_STEP = choice;
 }
