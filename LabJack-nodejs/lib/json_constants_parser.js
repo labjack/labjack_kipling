@@ -198,6 +198,7 @@ var parseConstants = function(LJMJSONFileLocation) {
 	var indexedConstants = reindexConstantsByRegister(constantsData);
 	this.constantsByRegister = indexedConstants[0];
 	this.constantsByName = indexedConstants[1];
+	this.origConstants = constantsData;
 
 	//console.log("JSON-CONSTANTS-PARSER");
 	this.getAddressInfo = function(address, direction)
