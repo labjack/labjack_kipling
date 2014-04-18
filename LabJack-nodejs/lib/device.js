@@ -1284,6 +1284,7 @@ exports.labjack = function ()
 			//Perform necessary string buffer allocations.
 			var i;
 			var offset = 0;
+			var dataOffset = 0;
 
 			//Declare aNames array buffer
 			var aNames = new Buffer(ARCH_POINTER_SIZE * length);
@@ -1293,7 +1294,7 @@ exports.labjack = function ()
 
 			for ( i = 0; i < length; i++ ) {
 				//Append the value to the aValues array
-				aValues.writeDoubleLE(values[i], offset);
+				aValues.writeDoubleLE(values[i], dataOffset);
 
 				//Declare buffer for string-address
 				var buf = new Buffer(addresses[i].length + 1);
@@ -1309,6 +1310,7 @@ exports.labjack = function ()
 
 				//Increment the offset counter
 				offset+=ARCH_POINTER_SIZE;
+				dataOffset+=ARCH_DOUBLE_NUM_BYTES;
 			}
 
 			//Execute LJM command.
@@ -1440,15 +1442,17 @@ exports.labjack = function ()
 			//Perform necessary string buffer allocations.
 			var i;
 			var offset = 0;
+			var dataOffset = 0;
+
 			//Declare aNames array buffer
 			var aNames = new Buffer(ARCH_POINTER_SIZE * length);
-			
+
 			//Clear aNames buffer
 			aNames.fill(0);
 
 			for ( i = 0; i < length; i++ ) {
 				//Append the value to the aValues array
-				aValues.writeDoubleLE(values[i], offset);
+				aValues.writeDoubleLE(values[i], dataOffset);
 
 				//Declare buffer for string-address
 				var buf = new Buffer(addresses[i].length + 1);
@@ -1464,6 +1468,7 @@ exports.labjack = function ()
 
 				//Increment the offset counter
 				offset+=ARCH_POINTER_SIZE;
+				dataOffset+=ARCH_DOUBLE_NUM_BYTES;
 			}
 
 			//Execute LJM function.
@@ -1620,6 +1625,7 @@ exports.labjack = function ()
 			var aNames = new Buffer(numFrames * ARCH_POINTER_SIZE);//Array of C-String pointers
 			aNames.fill(0);
 
+			var offsetP = 0;
 			var offsetD = 0;
 			var offsetI = 0;
 			
@@ -1636,10 +1642,10 @@ exports.labjack = function ()
 				buf.fill(0);
 
 				ref.writeCString(buf, 0, addresses[i]);
-				ref.writePointer(aNames, offsetD, buf);
+				ref.writePointer(aNames, offsetP, buf);
 
 				//Increment pointers
-				offsetD += ARCH_POINTER_SIZE;
+				offsetP += ARCH_POINTER_SIZE;
 				offsetI += ARCH_INT_NUM_BYTES;
 			}
 
@@ -1836,6 +1842,7 @@ exports.labjack = function ()
 			var aNames = new Buffer(numFrames * ARCH_POINTER_SIZE);				//Array of C-String pointers
 			aNames.fill(0);
 
+			var offsetP = 0;
 			var offsetD = 0;
 			var offsetI = 0;
 
@@ -1852,9 +1859,9 @@ exports.labjack = function ()
 				buf.fill(0);
 
 				ref.writeCString(buf, 0, addresses[i]);
-				ref.writePointer(aNames, offsetD, buf);
+				ref.writePointer(aNames, offsetP, buf);
 				//Increment pointers
-				offsetD += ARCH_POINTER_SIZE;
+				offsetP += ARCH_POINTER_SIZE;
 				offsetI += ARCH_INT_NUM_BYTES;
 			}
 
