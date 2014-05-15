@@ -446,6 +446,48 @@ module.exports = {
                 test.done();
             },false,false
         );
+    },
+    LJM_ListAllExtended: function(test) {
+        var addrListN = [0,49100,49200,60500];
+        var addrListS = ['AIN0','ETHERNET_IP','WIFI_IP','DEVICE_NAME_DEFAULT'];
+
+        var convertData = function(list) {
+            var retStr = '[';
+            list.forEach(function(listEl){
+                retStr += '\"' + listEl.toString() + '\",';
+            });
+            retStr = retStr.slice(0,retStr.length-1);
+            retStr += ']';
+            return retStr;
+        }
+        var numString = convertData(addrListN);
+        var nameString = convertData(addrListS);
+        console.log('Number List:',numString);
+        console.log('Name List:',nameString);
+
+        var testList = [
+            // 'listAllExtended()',
+            // 'listAllExtended("LJM_dtANY","LJM_ctANY")',
+            // 'listAllExtended("LJM_dtT7","LJM_ctUSB")',
+            // 'listAllExtended(7,1)',
+            'listAllExtended(7,1,[])',
+            'listAllExtended("LJM_dtANY","LJM_ctANY",[])',
+            'listAllExtended(7,1,'+numString+')',
+            'listAllExtended("LJM_dtANY","LJM_ctANY",'+nameString+')',
+        ];
+        //Run the desired commands
+        syncRun.run(testList,false,true);
+        asyncRun.run(testList,
+            function(res) {
+                console.log('Error',res);
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+            },false,true
+        );
     }
 };
 

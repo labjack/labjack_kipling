@@ -38,7 +38,7 @@ var onSuccess = function(res) {
 		if(res != null) {
 			console.log(res);
 		} else {
-			console.log('Sync-ERROR:');
+			console.log('Sync-Success');
 		}
 	}
 	nextStep();

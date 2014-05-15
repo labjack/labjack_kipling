@@ -10,6 +10,8 @@ var util = require('util');//
 var driverLib = require('./driver_wrapper');
 var ffi = require('ffi');//
 
+var LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = 128;
+
 
 // For problems encountered while in driver DLL
 function DriverOperationError(code)
@@ -263,6 +265,104 @@ exports.ljmDriver = function()
 			return errorResult;
 		}
 
+	}
+
+	/**
+	 * Performs a special LJM list all command that gets extra information from 
+	 * every device that is found before returning data to the user.
+	 * 
+	 * @param  {[type]} deviceType     [description]
+	 * @param  {[type]} connectionType [description]
+	 * @param  {[type]} addresses      [description]
+	 * @param {string} deviceType String describing what type of device to
+	 *		open. Examples include 'LJM_dtT7'. May also be an integer constant
+	 *		corresponding to the device type.
+	 * @param {string} connectionType connectionType String describing what
+	 *		type of connection to open. Examples include 'LJM_ctUSB' and
+	 *		'LJM_ctANY'. May also be an integer constant corresponding to the
+	 *		appropriate connection medium to use.
+	 * @param {function} onError Function to call if an error is encoutnered
+	 *		while enumerating available devices. Must take a single parameter
+	 *		(either an integer or string) describing the error encountered.
+	 * @param {function} onSuccess Function to call with the resulting
+	 *		enumeration. Should take a single argument: the listing of
+	 *		avilable devices as an array of object.
+	 */
+	this.listAllExtended = function(deviceType, connectionType, registers, onError, onSuccess) {
+		// Compensate for Auto-
+		var devT;
+		var conT;
+		var regs;
+		var onErr;
+		var onSuc;
+
+		// Intelligently parse the input arguments
+		if(arguments.length == 2) {
+			devT = "LJM_dtANY";
+			conT = "LJM_ctANY";
+			regs = [];
+			onErr = arguments[0];
+			onSuc = arguments[1];
+		} else if(arguments.length == 3) {
+			devT = "LJM_dtANY";
+			conT = "LJM_ctANY";
+			regs = arguments[0];
+			onErr = arguments[1];
+			onSuc = arguments[2];
+		} else if (arguments.length == 4) {
+			devT = arguments[0];
+			conT = arguments[1];
+			regs = [];
+			onErr = arguments[2];
+			onSuc = arguments[3];
+		} else if (arguments.length == 5) {
+			devT = arguments[0];
+			conT = arguments[1];
+			regs = arguments[2];
+			onErr = arguments[3];
+			onSuc = arguments[4];
+		} else {
+			var message = 'Invalid number of arguments passed to listAllExtra';
+			throw new DriverInterfaceError(message);
+		}
+
+		if(typeof(regs) !== 'object') {
+			var message = 'Invalid Argument parsed as desired read registers';
+			throw new DriverInterfaceError(message);
+		}
+
+		
+
+		// Save the maximum number of devices to be found
+		var maxNumDevices = LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
+
+		// Values to be interpreted by function
+		var NumAddresses = regs.length;
+		var aAddresses = [];
+		var aNumRegs = [];
+
+		regs.forEach(function(reg,index){
+			var info = this.constants.getAddressInfo(reg, 'R');
+		});
+
+
+
+
+		var numFound =  new ref.alloc('int',1);
+		var aDeviceTypes = new Buffer(4*maxNumDevices);
+		aDeviceTypes.fill(0);
+		var aConnectionTypes = new Buffer(4*maxNumDevices);
+		aConnectionTypes.fill(0);
+		var aSerialNumbers = new Buffer(4*maxNumDevices);
+		aSerialNumbers.fill(0);
+		var aIPAddresses = new Buffer(4*maxNumDevices);
+		aIPAddresses.fill(0);
+
+		onSuc();
+	};
+	this.listAllExtendedSync = function(deviceType, connectionType, registers) {
+		var listAllData = null;
+		return listAllData;
 	}
 
 	/**

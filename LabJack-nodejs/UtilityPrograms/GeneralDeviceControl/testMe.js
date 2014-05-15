@@ -5,7 +5,7 @@
 
 var argv = require('optimist').argv;
 
-basicTest = 
+var basicTest = 
 [
 'open("LJM_dtANY","LJM_ctANY","LJM_idANY")',
 'getHandleInfo()',
@@ -26,7 +26,7 @@ basicTest =
 'readMany([0,2,4])',
 'close()'
 ]
-writeTest = 
+var writeTest = 
 [
 'open("LJM_dtT7","LJM_ctUSB","470010642")',
 'read("FIO0")',
@@ -38,7 +38,7 @@ writeTest =
 'read("DEVICE_NAME_DEFAULT")',
 'close()'
 ]
-openCloseTest = 
+var openCloseTest = 
 [
 //'listAll("LJM_dtT7","LJM_ctUSB")',
 /*'listAll("LJM_dtT7","LJM_ctUSB")',
@@ -50,7 +50,7 @@ openCloseTest =
 //'errToStr(1268)',
 //'errToStr(0)',
 //'errToStr(200)',
-'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
+'open("LJM_dtT7","LJM_ctWIFI","172.20.8.106")',
 'getHandleInfo()',
 'read("FIRMWARE_VERSION")',
 'read("BOOTLOADER_VERSION")',
@@ -65,7 +65,7 @@ openCloseTest =
 //'open("LJM_dtT7","LJM_ctWIFI","470010642")',
 'close()',
 ]
-configureWifiLJ = 
+var configureWifiLJ = 
 [
 'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'write("POWER_WIFI",0)',
@@ -75,7 +75,7 @@ configureWifiLJ =
 'write("POWER_WIFI",1)',
 'close()'
 ]
-configureWifiHome = 
+var configureWifiHome = 
 [
 'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'write("POWER_WIFI",0)',
@@ -85,7 +85,7 @@ configureWifiHome =
 'write("POWER_WIFI",1)',
 'close()'
 ]
-readWifiConfig = 
+var readWifiConfig = 
 [
 'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'read("POWER_WIFI")',
@@ -95,7 +95,7 @@ readWifiConfig =
 'close()'
 ]
 
-updateFirmware=
+var updateFirmware=
 [
 'loadFirmwareVersionsFile("./firmwareVersions.json")',
 //
@@ -140,7 +140,7 @@ Update firmware Steps for Digit:
 //'updateFirmware(0.9421)',
 'close()'
 ]
-downloadFirmware = 
+var downloadFirmware = 
 [
 'loadFirmwareVersionsFile("./firmwareVersions.json")',
 'downloadAllFirmwareVersions()',
@@ -155,15 +155,15 @@ downloadFirmware =
 'loadFiwmareFile(7,0.9421)',
 'extractLoadedFwHeaderInfo()',
 ]
-LUATestScript = 
+var LUATestScript = 
 [
 'listAll("LJM_dtT7","LJM_ctEthernet")',
 ]
-listAllTest = 
+var listAllTest = 
 [
 'listAll("LJM_dtT7","LJM_ctWiFi")',
 ]
-configureWifiTJ = 
+var configureWifiTJ = 
 [
 'open("LJM_dtT7","LJM_ctUSB","LJM_idANY")',
 'write("POWER_WIFI",0)',
@@ -182,35 +182,35 @@ testArray[3] = configureWifiLJ;
 testArray[4] = configureWifiHome;
 testArray[5] = readWifiConfig;
 testArray[6] = updateFirmware;*/
-readRSSI_1 = 
+var readRSSI_1 = 
 [
 'open("LJM_dtT7","LJM_ctWiFi","192.168.1.90")',
 'read("WIFI_RSSI")',
 'close()'
 ]
-readRSSI_2 = 
+var readRSSI_2 = 
 [
 'open("LJM_dtT7","LJM_ctWiFi","192.168.1.186")',
 'read("WIFI_RSSI")',
 'close()'
 ]
-rwManyTest = 
+var rwManyTest = 
 [
 'open("LJM_dtT7","LJM_ctEthernet","470010533")',
 'read("AIN0")',
 'rwMany(["AIN0","AIN0"],[0,0],[2,1],[-1,-1,-1])',
 'close()'
 ]
-altNamesAndBeta = 
+var altNamesAndBeta = 
 [
 'open("LJM_dtT7","LJM_ctEthernet","470010117")',
 'read("DIO0")',
 'read("LUA_RUN")',
 'close()'
 ]
-speedTest = 
+var speedTest = 
 [
-'open("LJM_dtT7","LJM_ctEthernet","470010117")',
+'open("LJM_dtT7","LJM_ctEthernet","470010548")',
 ]
 var i;
 for(i = 0; i < 500; i++) {
@@ -218,6 +218,71 @@ for(i = 0; i < 500; i++) {
 }
 speedTest.push('close()');
 
+// 'readMany(["AIN0","AIN1","AIN2"])',
+var buildReadManySpeedTest = function() {
+	var cmdList = [
+		'open("LJM_dtT7","LJM_ctEthernet","192.168.1.106")',
+		'getHandleInfo()',
+		'write("AIN_ALL_RANGE",0.01)',
+		'write("AIN_ALL_RESOLUTION_INDEX",1)',
+		'writeLibrary("LJM_SEND_RECEIVE_TIMEOUT_MS",5000)',
+	];
+	var numChannels = 14;
+	var numReads = 1000;
+	var baseChannels = [];
+	var base="AIN";
+	var startString = "readMany([\"";
+	var separator = "\",\"";
+	var endString = "\"])";
+	var numReadManyChannels
+	var i;
+	var cmdStr = "";
+	for(i = 0; i < numChannels; i++) {
+		baseChannels.push(base+i.toString());
+	}
+	cmdStr += startString;
+	baseChannels.forEach(function(chName){
+		cmdStr += chName;
+		cmdStr += separator;
+	});
+	cmdStr = cmdStr.slice(0,cmdStr.length-3);
+	cmdStr += endString + '#PRINTTIME';
+	console.log('Resulting Command:',cmdStr);
+	for(i = 0; i < numReads; i++) {
+		cmdList.push(cmdStr);
+	}
+	// cmdList.push('close()'+ '#PRINTTIME');
+	cmdList.push('#PRINTTIME');
+	cmdList.push('close()');
+	console.log('Command List:',cmdList)
+	return cmdList
+}
+var readManySpeedTest = buildReadManySpeedTest();
+
+var buildBreakEthernetConnectionTest = function() {
+	var cmdList = [
+		'open("LJM_dtT7","LJM_ctEthernet","470010604")',
+		'getHandleInfo()',
+		'read("POWER_WIFI")',
+		'read("POWER_WIFI_DEFAULT")'
+	];
+	var i;
+	var numWait=10;
+	for(i=0;i<numWait;i++) {
+		cmdList.push('read("WIFI_STATUS")');
+	}
+	cmdList.push('write("POWER_WIFI_DEFAULT",0)');
+	for(i=0;i<numWait;i++) {
+		cmdList.push('read("WIFI_STATUS")');
+	}
+	cmdList.push('write("POWER_WIFI",0)');
+	for(i=0;i<numWait;i++) {
+		cmdList.push('read("WIFI_STATUS")');
+	}
+	cmdList.push('close()');
+	return cmdList;
+}
+var breakEthernetConnectionTest = buildBreakEthernetConnectionTest();
 testArray = 
 [
 basicTest, 				// 0
@@ -235,7 +300,9 @@ readRSSI_1,				// 11
 readRSSI_2, 			// 12
 rwManyTest,				// 13
 altNamesAndBeta,		// 14
-speedTest				// 15
+speedTest,				// 15
+readManySpeedTest,		// 16
+breakEthernetConnectionTest // 17
 ]
 
 var activeTest;
@@ -271,7 +338,7 @@ if(argv.async=='true')
 	//Test Async-Functionality
 	console.log('Starting Async-Test');
 	console.log(activeTest);
-	asyncTest.printData(false);
+	asyncTest.printData(true);
 	asyncTest.run(activeTest);
 }
 else

@@ -41,7 +41,7 @@ var onSuccess = function(res) {
 		if(res != null) {
 			console.log(res);
 		} else {
-			console.log('Sync-ERROR:');
+			console.log('Async-Success');
 		}
 	}
 	nextStep();

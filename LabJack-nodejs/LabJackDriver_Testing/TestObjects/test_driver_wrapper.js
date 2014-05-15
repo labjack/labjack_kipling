@@ -489,6 +489,17 @@ var LJM_ListAllS = createCallableObject(
 		argumentsList.push(arguments);
 		reportEnd(callback);
 	});
+var LJM_ListAllExtended = createCallableObject(
+	function(DeviceType, ConnectionType, NumAddresses, aAddresses, aNumRegs, MaxNumFound, NumFound, aDeviceTypes, aConnectionTypes, aSerialNumbers, aIPAddresses, aBytes) {
+		lastFunctionCall.push("LJM_ListAllExtended");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(DeviceType, ConnectionType, NumAddresses, aAddresses, aNumRegs, MaxNumFound, NumFound, aDeviceTypes, aConnectionTypes, aSerialNumbers, aIPAddresses, aBytes, callback) {
+		lastFunctionCall.push("LJM_ListAllExtendedAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
 
 /**
  * Test-Function for Synchronous and Async Multiple-Operation functionality: 

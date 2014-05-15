@@ -83,11 +83,12 @@ else
 				CMD="$CMD $PROJ_DIR"
 				CMD="$CMD /usr/local/include/LabJackM.h"
 				CMD="$CMD /usr/local/share/LabJack/LJM/ljm_constants.json"
+				CMD="$CMD /usr/local/share/LabJack/LJM/ljm_startup_config.json"
 				CMD="$CMD $PROJ_DIR run.sh"
 				#CMD="$CMD $PROJ_DIR testMe.js"
-				CMD="$CMD $PROJ_DIR/LabJackDriver/device.js"
-				CMD="$CMD $PROJ_DIR/LabJackDriver/driver.js"
-				CMD="$CMD $PROJ_DIR/LabJackDriver/driver_wrapper.js"
+				#CMD="$CMD $PROJ_DIR/lib/device.js"
+				#CMD="$CMD $PROJ_DIR/lib/driver.js"
+				#CMD="$CMD $PROJ_DIR/lib/driver_wrapper.js"
 
 
 				#Also open the Kippling_QT directory
