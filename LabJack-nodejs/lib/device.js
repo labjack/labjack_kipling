@@ -17,14 +17,17 @@ var http = require('http');// To download newest firmware versions form the
 var ljmDriver = require('./driver.js');
 
 
-var ARCH_INT_NUM_BYTES = 4;
-var ARCH_DOUBLE_NUM_BYTES = 8;
+// var ARCH_INT_NUM_BYTES = 4;
+// var ARCH_DOUBLE_NUM_BYTES = 8;
 
-var ARCH_POINTER_SIZE = {
-    'ia32': 4,
-    'x64': 8,
-    'arm': 4
-}[process.arch]
+// var ARCH_POINTER_SIZE = {
+//     'ia32': 4,
+//     'x64': 8,
+//     'arm': 4
+// }[process.arch]
+var ARCH_INT_NUM_BYTES = driver_const.ARCH_INT_NUM_BYTES;
+var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
+var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 
 
 /**

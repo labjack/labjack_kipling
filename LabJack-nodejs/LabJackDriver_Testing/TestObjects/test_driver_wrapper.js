@@ -656,6 +656,7 @@ var fakeDriver = {
 	//Driver Functions
 	'LJM_ListAll': LJM_ListAll,
 	'LJM_ListAllS': LJM_ListAllS,
+	'LJM_ListAllExtended': LJM_ListAllExtended,
 	'LJM_ErrorToString': LJM_ErrorToString,
 	'LJM_LoadConstants': LJM_LoadConstants,
 	'LJM_CloseAll': LJM_CloseAll,

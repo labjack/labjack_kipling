@@ -431,6 +431,22 @@ var liblabjack = ffi.Library('/usr/local/lib/libLabJackM-'+driver_const.LJM_DRVR
  				ref.refType(ref.types.int)		//aIPAddresses
  			]
  		],
+ 		'LJM_ListAllExtended': [
+            'int', [
+                'int',                          //DeviceType
+                'int',                          //Connection Type
+                'int',                          //NumAddresses
+                ref.refType(ref.types.int),     //aAddresses
+                ref.refType(ref.types.int),     //aNumRegs
+                'int',                          //MaxNumFound
+                ref.refType(ref.types.int),     //NumFound
+                ref.refType(ref.types.int),     //aDeviceTypes
+                ref.refType(ref.types.int),     //aConnectionTypes
+                ref.refType(ref.types.int),     //aSerialNumbers
+                ref.refType(ref.types.int),     //aIPAddresses
+                ref.refType(ref.types.char)     //aAddresses
+            ]
+        ],
  		'LJM_Open': [
  			'int', [
  				'int',							//DeviceType

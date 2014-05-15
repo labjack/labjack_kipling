@@ -10,8 +10,11 @@ var util = require('util');//
 var driverLib = require('./driver_wrapper');
 var ffi = require('ffi');//
 
-var LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = 128;
+var LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = driver_const.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
 
+var ARCH_INT_NUM_BYTES = driver_const.ARCH_INT_NUM_BYTES;
+var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
+var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 
 // For problems encountered while in driver DLL
 function DriverOperationError(code)
@@ -140,7 +143,7 @@ exports.ljmDriver = function()
 				aIPAddresses, 
 				function (err, res) {
 					if (err) throw err;
-					if (res == 0) {						
+					if (res === 0) {						
 						var devArray = self.buildListAllArray(
 							numFound,
 							aDeviceTypes,
@@ -166,7 +169,7 @@ exports.ljmDriver = function()
 				aIPAddresses, 
 				function (err, res){
 					if(err) throw err;
-					if(res == 0) {
+					if(res === 0) {
 						var devArray = self.buildListAllArray(
 							numFound,
 							aDeviceTypes,
@@ -251,7 +254,7 @@ exports.ljmDriver = function()
 			throw new DriverInterfaceError("Weird-Error, listAll");
 			return "Weird-Error, listAll";
 		}
-		if (errorResult == 0) {
+		if (errorResult === 0) {
 			var devArray = this.buildListAllArray(
 				numFound,
 				aDeviceTypes,
@@ -297,13 +300,13 @@ exports.ljmDriver = function()
 		var onSuc;
 
 		// Intelligently parse the input arguments
-		if(arguments.length == 2) {
+		if (arguments.length == 2) {
 			devT = "LJM_dtANY";
 			conT = "LJM_ctANY";
 			regs = [];
 			onErr = arguments[0];
 			onSuc = arguments[1];
-		} else if(arguments.length == 3) {
+		} else if (arguments.length == 3) {
 			devT = "LJM_dtANY";
 			conT = "LJM_ctANY";
 			regs = arguments[0];
@@ -326,42 +329,152 @@ exports.ljmDriver = function()
 			throw new DriverInterfaceError(message);
 		}
 
-		if(typeof(regs) !== 'object') {
+		if (typeof(regs) !== 'object') {
 			var message = 'Invalid Argument parsed as desired read registers';
 			throw new DriverInterfaceError(message);
 		}
 
-		
+		if(isNaN(devT)) {
+			devT = driver_const.deviceTypes[devT];
+			if(typeof(devT) === 'undefined') {
+				devT = 0;
+			}
+		}
+		if(isNaN(conT)) {
+			conT = driver_const.connectionTypes[conT];
+			if(typeof(conT) === 'undefined') {
+				conT = 0;
+			}
+		}
 
 		// Save the maximum number of devices to be found
 		var maxNumDevices = LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
 
 		// Values to be interpreted by function
-		var NumAddresses = regs.length;
 		var aAddresses = [];
+		var addressNames = [];
+		var numBytes = [];
 		var aNumRegs = [];
+		var types = [];
+		var numRecvRegs = 0;
+		
+		// Values to be sent to C call
+		var C_DeviceType = devT;			// Device type to search for
+		var C_ConnectionType = conT;		// Connection type to search for
+		var C_NumAddresses = regs.length;	// Number of registers to read
+		var C_aAddresses;					// integer array of addresses;
+		var C_aNumRegs;						// integer array of sizes
+		var C_MaxNumFound = maxNumDevices;	// integer
+		var C_NumFound;						// integer pointer to be populated with num found
+		var C_aDeviceTypes;					// integer array to be populated with deviceTypes
+		var C_aConnectionTypes;				// integer array to be populated with connectionTypes
+		var C_aSerialNumbers;				// integer array to be populated with serialNumbers
+		var C_aIPAddresses;					// integer array to be populated with ipAddresses
+		var C_aBytes;						// byte (char) buffer filled with read-data
+		var errorResult=0;
 
+		// Calculate buffer sizes
+		var addrBuffSize = 4*C_NumAddresses;
+		var searchBuffSize = 4*maxNumDevices;
+		// Allocate buffers for variables that are already known
+		C_aAddresses = new Buffer(addrBuffSize);
+		C_aNumRegs = new Buffer(addrBuffSize);
+
+		C_NumFound =  new ref.alloc('int',1);
+		C_aDeviceTypes = new Buffer(searchBuffSize);
+		C_aDeviceTypes.fill(0);
+		C_aConnectionTypes = new Buffer(searchBuffSize);
+		C_aConnectionTypes.fill(0);
+		C_aSerialNumbers = new Buffer(searchBuffSize);
+		C_aSerialNumbers.fill(0);
+		C_aIPAddresses = new Buffer(searchBuffSize);
+		C_aIPAddresses.fill(0);
+
+		var bytesPerRegister = driver_const.LJM_BYTES_PER_REGISTER;
 		regs.forEach(function(reg,index){
 			var info = this.constants.getAddressInfo(reg, 'R');
+			var numRegs = Math.ceil(info.size/bytesPerRegister);
+			aAddresses.push(info.address);
+			aNumRegs.push(numRegs);
+			numBytes.push(numRegs+numRegs);
+			types.push(info.typeString)
+			addressNames.push(info.data.name)
+			// console.log(info)
+			numRecvRegs += numRegs;
 		});
 
+		// Allocate the receive buffer LJM will use to save extra read data
+		var aBytesSize = maxNumDevices * numRecvRegs * bytesPerRegister;
+		C_aBytes = new Buffer(aBytesSize);
+		C_aBytes.fill(0);
 
+		// Save register data to buffers (filling C_aAddresses and C_aNumRegs)
+		var i;
+		var bufIndex = 0;
+		for (i=0; i < aAddresses.length; i++) {
+			C_aAddresses.writeInt32LE(aAddresses[i],bufIndex);
+			C_aNumRegs.writeInt32LE(aAddresses[i],bufIndex);
+			bufIndex += ARCH_INT_NUM_BYTES;
+		}
 
-
-		var numFound =  new ref.alloc('int',1);
-		var aDeviceTypes = new Buffer(4*maxNumDevices);
-		aDeviceTypes.fill(0);
-		var aConnectionTypes = new Buffer(4*maxNumDevices);
-		aConnectionTypes.fill(0);
-		var aSerialNumbers = new Buffer(4*maxNumDevices);
-		aSerialNumbers.fill(0);
-		var aIPAddresses = new Buffer(4*maxNumDevices);
-		aIPAddresses.fill(0);
-
-		onSuc();
+		// console.log(aAddresses, aNumRegs, aBytesSize);
+		var self = this;
+		errorResult = this.ljm.LJM_ListAllExtended.async(
+			C_DeviceType, 
+			C_ConnectionType, 
+			C_NumAddresses,
+			C_aAddresses,
+			C_aNumRegs,
+			C_MaxNumFound,
+			C_NumFound,
+			C_aDeviceTypes,
+			C_aConnectionTypes,
+			C_aSerialNumbers,
+			C_aIPAddresses,
+			C_aBytes,
+			function (err, res){
+				if (err) throw err;
+				if (res === 0) {
+					var retData = {};
+					var dataArray = [];
+					var readDataArray = [];
+					regs.forEach(function(reg,index) {
+						var readData = '';
+						var data = {
+							register: reg,
+							name: addressNames[index],
+							address: aAddresses[index],
+							val: ''
+						}
+						dataArray.push(data);
+					});
+					retData = {
+						results: dataArray,
+						registers: regs,
+						addresses: aAddresses,
+						names: addressNames,
+						values: readDataArray
+					}
+					console.log('LJM_ListAllExtended Success');
+					console.log(aBytesSize,numBytes,types,aAddresses,regs);
+					var devArray = self.buildListAllArray(
+						C_NumFound,
+						C_aDeviceTypes,
+						C_aConnectionTypes,
+						C_aSerialNumbers,
+						C_aIPAddresses
+					);
+					devArray.data = retData;
+					onSuc(devArray);
+				} else {
+					console.log('LJM_ListAllExtended Err');
+					onErr('Data');
+				}
+			}
+		);
 	};
 	this.listAllExtendedSync = function(deviceType, connectionType, registers) {
-		var listAllData = null;
+		var listAllData = 'Not-Implemented';
 		return listAllData;
 	}
 
@@ -383,7 +496,7 @@ exports.ljmDriver = function()
 			strRes, 
 			function (err, res){
 				if (err) throw err;
-				if (res == 0) {
+				if (res === 0) {
 					//console.log('strRes: ',ref.readCString(strRes,0));
 					onSuccess('Num: '+errNum+', '+ref.readCString(strRes,0));
 				} else {
@@ -412,7 +525,7 @@ exports.ljmDriver = function()
 		strRes.fill(0);
 
 		errorResult = this.ljm.LJM_ErrorToString(errNum, strRes);
-		if (errorResult != 0) {
+		if (errorResult !== 0) {
 			return 'Num: '+errNum+', '+ref.readCString(strRes,0);
 		} else {
 			return 'Num: '+errNum+', '+ref.readCString(strRes,0);
@@ -433,7 +546,7 @@ exports.ljmDriver = function()
 		errorResult = this.ljm.LJM_LoadConstants.async(
 			function (err, res){
 				if (err) throw err;
-				if (res == 0) {
+				if (res === 0) {
 					onSuccess();
 				} else {
 					onError(res);
@@ -452,7 +565,7 @@ exports.ljmDriver = function()
 	this.loadConstantsSync = function() {
 		var errorResult;
 		errorResult = this.ljm.LJM_LoadConstants();
-		if (errorResult != 0) {
+		if (errorResult !== 0) {
 			throw new DriverOperationError(errorResult);
 		} else {
 			return 0;
@@ -474,7 +587,7 @@ exports.ljmDriver = function()
 		errorResult = this.ljm.LJM_CloseAll.async(
 			function (err, res){
 				if (err) throw err;
-				if (res == 0) {
+				if (res === 0) {
 					onSuccess();
 				} else {
 					onError(res);
@@ -495,7 +608,7 @@ exports.ljmDriver = function()
 	this.closeAllSync = function() {
 		var errorResult;
 		errorResult = this.ljm.LJM_CloseAll();
-		if (errorResult != 0) {
+		if (errorResult !== 0) {
 			return errorResult;
 		} else {
 			return 0;
@@ -525,7 +638,7 @@ exports.ljmDriver = function()
 				returnVar, 
 				function (err, res){
 					if (err) throw err;
-					if (res == 0) {
+					if (res === 0) {
 						onSuccess(returnVar.deref())
 					} else {
 						onError(res);
@@ -561,7 +674,7 @@ exports.ljmDriver = function()
 				parameter, 
 				returnVar
 			);
-			if (errorResult != 0) {
+			if (errorResult !== 0) {
 				return errorResult
 			}
 			return returnVar.deref();
@@ -584,10 +697,10 @@ exports.ljmDriver = function()
 				strBuffer, 
 				function (err, res){
 					if (err) throw err;
-					if ( res == 0 ) {
+					if ( res === 0 ) {
 						//Calculate the length of the string
 						var i=0;
-						while(strBuffer[i] != 0) {
+						while(strBuffer[i] !== 0) {
 							i++;
 						}
 						onSuccess(strBuffer.toString('utf8',0,i));
@@ -613,10 +726,10 @@ exports.ljmDriver = function()
 				parameter, 
 				strBuffer
 			);
-			if (errorResult != 0) {
+			if (errorResult !== 0) {
 				//Calculate the length of the string
 				var i=0;
-				while(strBuffer[i] != 0) {
+				while(strBuffer[i] !== 0) {
 					i++;
 				}
 				return strBuffer.toString('utf8',0,i)
@@ -644,7 +757,7 @@ exports.ljmDriver = function()
 				value, 
 				function (err, res) {
 					if (err) throw err;
-					if (res == 0) {
+					if (res === 0) {
 						onSuccess();
 					} else {
 						onError(res);
@@ -658,7 +771,7 @@ exports.ljmDriver = function()
 				value, 
 				function (err, res) {
 					if (err) throw err;
-					if (res == 0) {
+					if (res === 0) {
 						onSuccess();
 					} else {
 						onError(res);
@@ -694,7 +807,7 @@ exports.ljmDriver = function()
 			return 'Invalid Input Parameter Types';
 		}
 		//Check for an error from driver & throw error
-		if (errorResult != 0) {
+		if (errorResult !== 0) {
 			throw new DriverOperationError(errorResult);
 			return errorResult;
 		} else {
@@ -729,7 +842,7 @@ exports.ljmDriver = function()
 			str,
 			function (err, res) {
 				if (err) throw err;
-				if (res == 0) {
+				if (res === 0) {
 					onSuccess();
 				} else {
 					onError(res);
@@ -761,7 +874,7 @@ exports.ljmDriver = function()
 		}
 
 		errorResult = this.ljm.LJM_Log(level, str);
-		if (errorResult != 0) {
+		if (errorResult !== 0) {
 			throw new DriverOperationError(errorResult);
 		}
 	}
@@ -780,7 +893,7 @@ exports.ljmDriver = function()
 		errorResult = this.ljm.LJM_ResetLog.async(
 			function (err, res) {
 				if (err) throw err;
-				if (res == 0) {
+				if (res === 0) {
 					onSuccess();
 				} else {
 					onError(res);
@@ -800,7 +913,7 @@ exports.ljmDriver = function()
 	this.resetLogSync = function() {
 		var errorResult;
 		errorResult = this.ljm.LJM_ResetLog();
-		if (errorResult != 0) {
+		if (errorResult !== 0) {
 			return errorResult;
 		}
 		return 0;

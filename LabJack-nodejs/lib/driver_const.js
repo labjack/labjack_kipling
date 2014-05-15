@@ -143,9 +143,36 @@ exports.typeSizes = {
 	UINT32: 4,
 	FLOAT32: 4
 };
+exports.LJM_BYTES_PER_REGISTER = 2;
+exports.deviceTypes = {
+	LJM_dtANY: 0,
+	LJM_dtUE9: 9,
+	LJM_dtU3: 3,
+	LJM_dtU6: 6,
+	LJM_dtT7: 7,
+	LJM_dtSKYMOTE_BRIDGE: 1000,
+	LJM_dtDIGIT: 200
+};
+exports.connectionTypes = {
+	LJM_ctANY: 0,
+	LJM_ctUSB: 1,
+	LJM_ctTCP: 2,
+	LJM_ctETHERNET: 3,
+	LJM_ctWIFI: 4
+}
 exports.LJM_UINT16 = 0; 			                 // C type of unsigned short
 exports.LJM_UINT32 = 1; 			                 // C type of unsigned int
 exports.LJM_INT32 = 2; 				                 // C type of int
 exports.LJM_FLOAT32 = 3; 			                 // C type of float
 exports.LJM_STRING = 98;                             // C type of c-String
 exports.LJM_BYTE = 99;                               // C type of unsigned char
+
+exports.ARCH_INT_NUM_BYTES = 4;
+exports.ARCH_DOUBLE_NUM_BYTES = 8;
+
+exports.ARCH_POINTER_SIZE = {
+    'ia32': 4,
+    'x64': 8,
+    'arm': 4
+}[process.arch]
+exports.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = 128;

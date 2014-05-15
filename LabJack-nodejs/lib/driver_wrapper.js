@@ -361,7 +361,6 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
         ]
     }
 );
-
 exports.getDriver = function()
 {
     return liblabjack;

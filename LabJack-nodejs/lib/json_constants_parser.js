@@ -60,8 +60,7 @@ function JSONParsingError(description) {
 	this.description = description;
 };
 
-function zipArraysToObject(keys, values)
-{
+function zipArraysToObject(keys, values) {
 	var retObj = {};
 	var numKeys = keys.length;
 	
@@ -73,8 +72,7 @@ function zipArraysToObject(keys, values)
 }
 
 //Function that re-indexes the .json File Constants by their register
-function reindexConstantsByRegister(constants)
-{
+function reindexConstantsByRegister(constants) {
 	var numConstantsEntries = constants.length;
 	var expandedConstants = [];
 	var expandedBetaRegisters = [];
@@ -201,18 +199,14 @@ var parseConstants = function(LJMJSONFileLocation) {
 	this.origConstants = constantsData;
 
 	//console.log("JSON-CONSTANTS-PARSER");
-	this.getAddressInfo = function(address, direction)
-	{
+	this.getAddressInfo = function(address, direction) {
 
 		var regEntry;
 		//Get the Dictionary Entry
-		if(typeof(address)=="number")
-		{
+		if(!isNaN(address)) {
 			regEntry = this.constantsByRegister[address];
 			resolvedAddress = address;
-		}
-		else if(typeof(address)=="string")
-		{
+		} else if(isNaN(address)) {
 			regEntry = this.constantsByName[address];
 			try {
 				resolvedAddress = regEntry.address;
@@ -226,43 +220,40 @@ var parseConstants = function(LJMJSONFileLocation) {
 		var validity;
 		try {
 			var readWrite = regEntry.readwrite;
-		}
-		catch (e)
-		{
+		} catch (e) {
 			return {type: -1, directionValid: 0, typeString: "NA"};
 		}
 
-		if(regEntry.type == 'UINT16')
-		{
+		if(regEntry.type == 'UINT16') {
 			deviceType = 0;
-		}
-		else if(regEntry.type == 'UINT32')
-		{
+		} else if(regEntry.type == 'UINT32') {
 			deviceType = 1;
-		}
-		else if(regEntry.type == 'INT32')
-		{
+		} else if(regEntry.type == 'INT32') {
 			deviceType = 2;
-		}
-		else if(regEntry.type == 'FLOAT32')
-		{
+		} else if(regEntry.type == 'FLOAT32') {
 			deviceType = 3;
-		}
-		else if(regEntry.type == 'STRING')
-		{
+		} else if(regEntry.type == 'STRING') {
 			deviceType = 98;
 		}
 		
-		if(regEntry.readwrite.indexOf(direction) != -1)
-		{
+		if(regEntry.readwrite.indexOf(direction) != -1) {
 			validity = 1;
-		}
-		else
-		{
+		} else {
 			validity = 0;
 		}
+		var size = typeSizes[regEntry.type];
+		if(typeof(size) === 'undefined') {
+			size = 0;
+		}
 		
-		return {type: deviceType, directionValid: validity, typeString: regEntry.type, address: resolvedAddress};
+		return {
+			type: deviceType, 
+			directionValid: validity, 
+			typeString: regEntry.type, 
+			address: resolvedAddress, 
+			size: size,
+			data: regEntry
+		};
 	}
 }
 
