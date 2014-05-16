@@ -455,7 +455,11 @@ module.exports = {
         var convertData = function(list) {
             var retStr = '[';
             list.forEach(function(listEl){
-                retStr += '\"' + listEl.toString() + '\",';
+                if(isNaN(listEl)){
+                    retStr += '\"' + listEl.toString() + '\",';
+                } else {
+                    retStr += listEl.toString() + ',';
+                }
             });
             retStr = retStr.slice(0,retStr.length-1);
             retStr += ']';
@@ -467,14 +471,14 @@ module.exports = {
         // console.log('Name List:',nameString);
 
         var testList = [
-            // 'listAllExtended()',
-            // 'listAllExtended("LJM_dtANY","LJM_ctANY")',
-            // 'listAllExtended("LJM_dtT7","LJM_ctUSB")',
-            // 'listAllExtended(7,1)',
+            'listAllExtended()',
+            'listAllExtended("LJM_dtANY","LJM_ctANY")',
+            'listAllExtended("LJM_dtT7","LJM_ctUSB")',
+            'listAllExtended(7,1)',
             'listAllExtended(7,1,[0])',
             'listAllExtended("LJM_dtANY","LJM_ctANY",["DEVICE_NAME_DEFAULT"])',
-            // 'listAllExtended(7,1,'+numString+')',
-            // 'listAllExtended("LJM_dtANY","LJM_ctANY",'+nameString+')',
+            'listAllExtended(7,1,'+numString+')',
+            'listAllExtended("LJM_dtANY","LJM_ctANY",'+nameString+')',
         ];
         var syncObjNums = ['0','1','2','3','4','5','6','7','8','9','10','11'];
         var asyncObjNums = ['0','1','2','3','4','5','6','7','8','9','10','11','12'];
@@ -498,36 +502,62 @@ module.exports = {
             var argType = [];
             var argSize = [];
             var argumentStr = cmdStr.split('listAllExtended')[1].split('(')[1].split(')')[0];
-            var funcArgs = argumentStr.split(',');
-            var addrListStr = '';
-            var addressList = [];
-            var addrNumList = [];
-            var numRegsList = [];
-            if(funcArgs.length === 3) {
-                addrListStr = funcArgs[2];
-                addressList = addrListStr.slice(1,addrListStr.length-1).split(',');
-            }
-            var numRegsRead = 0;
-            var aBytesSize = 0;
-            addressList.forEach(function(address){
-                var addr;
-                var addrA = address.split('"');
-                if (addrA.length == 1) {
-                    addr = parseInt(addrA[0]);
-                } else {
-                    addr = addrA[1];
+            if(argumentStr.length === 0) {
+                var funcArgs = [];
+                var addrNumList = [];
+                var numRegsList = [];
+                var numRegsRead = 0;
+                var argType = [];
+                var argSize = [];
+                var namesList = [];
+            } else if (argumentStr === 2) {
+                var funcArgs = [];
+                var addrNumList = [];
+                var numRegsList = [];
+                var numRegsRead = 0;
+                var argType = [];
+                var argSize = [];
+                var namesList = [];
+
+                var devSearchArgs = argumentStr.split(',');
+                funcArgs = devSearchArgs;
+            } else {
+                var addrListStr = '';
+                var addressList = [];
+                var addrNumList = [];
+                var numRegsList = [];
+                var namesList = [];
+                var numRegsRead = 0;
+                var aBytesSize = 0;
+                var funcArgs = argumentStr.split(',');
+                if(funcArgs.length >2) {
+                    argList = argumentStr.split(',[')[0].split(',');
+                    addressList = argumentStr.split(',[')[1].split(']')[0].split(',');
+                    var funcArgs = argList + addressList;
+                    // console.log('argList',argList)
+                    // console.log('addressList',addressList)
+                    // console.log('funcArgs',funcArgs)
+                    
+                    
+                    addressList.forEach(function(address){
+                        var addr;
+                        var addrA = address.split('"');
+                        if (addrA.length == 1) {
+                            addr = parseInt(addrA[0]);
+                        } else {
+                            addr = addrA[1];
+                        }
+                        var info = constants.getAddressInfo(addr, 'R');
+                        var numRegs = Math.ceil(info.size/driver_const.LJM_BYTES_PER_REGISTER);
+                        addrNumList.push(info.address);
+                        numRegsList.push(numRegs);
+                        argType.push(info.data.type);
+                        namesList.push(info.data.name);
+                        argSize.push(info.size);
+                        numRegsRead += numRegs;
+                    });
+                    numRegsRead *= driver_const.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
                 }
-                var info = constants.getAddressInfo(addr, 'R');
-                var numRegs = Math.ceil(info.size/driver_const.LJM_BYTES_PER_REGISTER);
-                addrNumList.push(info.address);
-                numRegsList.push(numRegs);
-                numRegsRead += numRegs;
-            });
-            numRegsRead *= driver_const.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
-            
-            if(funcArgs.length === 3) {
-                addrListStr = funcArgs[2];
-                addressList = addrListStr.slice(1,addrListStr.length-1).split(',');
             }
             return {
                 numArgs:funcArgs.length,
@@ -535,7 +565,8 @@ module.exports = {
                 numRegs: numRegsList,
                 aBufSize: numRegsRead * driver_const.LJM_BYTES_PER_REGISTER,
                 types:argType,
-                sizees:argSize
+                sizes:argSize,
+                namesList: namesList
             };
         }
         //Expected function list & argument info:
@@ -553,7 +584,7 @@ module.exports = {
         });
 
         //Run the desired commands
-        syncRun.run(testList,false,true);
+        syncRun.run(testList,false,false);
         asyncRun.run(testList,
             function(res) {
                 console.log('Error',res);
@@ -562,9 +593,9 @@ module.exports = {
                 var funcs = fakeDriver.getLastFunctionCall();
                 var results = asyncRun.getResults();
                 var argList = fakeDriver.getArgumentsList();
-                console.log('LJM_ListAllExtended RESULTS')
+                // console.log('LJM_ListAllExtended RESULTS')
                 // console.log('Function Calls:',funcs);
-                console.log('Results:',results);
+                // console.log('Results:',results);
                 // console.log('Arguments List:',argList);
                 var numSync = 0;
                 var numAsync = 0;
@@ -594,10 +625,12 @@ module.exports = {
                             if(ljmArgName === 'aAddresses') {
                                 var expectedSize = expectedInfo[execNum].addresses.length;
                                 expectedSize *= driver_const.ARCH_INT_NUM_BYTES;
+                                // console.log(argument.length,expectedSize,expectedInfo);
                                 test.strictEqual(argument.length,expectedSize,'badArg: '+ljmArgName);
                             } else if (ljmArgName === 'aNumRegs') {
                                 var expectedSize = expectedInfo[execNum].addresses.length;
                                 expectedSize *= driver_const.ARCH_INT_NUM_BYTES;
+                                // console.log(argument.length,expectedSize);
                                 test.strictEqual(argument.length,expectedSize,'badArg: '+ljmArgName);
                             } else if (ljmArgName === 'aBytes') {
                                 var info = expectedInfo[execNum];
@@ -608,10 +641,35 @@ module.exports = {
                         }
                     });
                 });
+                var numSync = 0;
+                var numAsync = 0;
+                results.forEach(function(result,index){
+                    result.forEach(function(foundDevice,deviceNum){
+                        var expectedInfo = {};
+                        var objectNumbers = [];
+                        var execNum = 0;
+                        if (funcs[index].search('Async') < 0){
+                            objectNumbers = syncObjNums;
+                            expectedInfo = expectedSyncInfo;
+                            execNum = numSync;
+                            numSync += 1;
+                        } else {
+                            objectNumbers = asyncObjNums;
+                            expectedInfo = expectedAsyncInfo;
+                            execNum = numAsync;
+                            numAsync += 1;
+                        }
+                        test.strictEqual(expectedInfo[execNum].addresses.length,foundDevice.data.length,'unexpected number of results');
+                        foundDevice.data.forEach(function(devData,devDataIndex){
+                            var expectedName = expectedInfo[execNum].namesList[devDataIndex];
+                            test.strictEqual(devData.name,expectedName,'bad Returned name')
+                        });
+                    });
+                });
 
                 //Report that test finished
                 test.done();
-            },false,true
+            },false,false
         );
     }
 };
