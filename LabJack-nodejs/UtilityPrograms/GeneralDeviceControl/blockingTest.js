@@ -20,52 +20,40 @@ function printInfo(data) {
 exports.printData = function(choice) {
 	PRINT_INCREMENTAL_STEP = choice;
 }
-exports.run = function(functionList)
-{
+exports.run = function(functionList) {
 	console.log('Starting Blocking-Test');
 	
 	var device = new deviceManager.labjack();
 	var ljmDriver = new ljm.ljmDriver();
 	var err;
-	for(var i = 0; i < functionList.length; i++)
-	{
-		try
-		{
+	for(var i = 0; i < functionList.length; i++) {
+		try {
 			printInfo(functionList[i]);
-			if(functionList[i].search('close') != -1)
-			{
+			if(functionList[i].search('close') != -1) {
 				console.log('Time Open: '+(Date.now() - startTime));
 				console.log('!TIMER FINISHED!');
 			}
 			//Execute test-function
-			if(functionList[i].search('listAll') != -1)
-			{
-				err=eval('ljmDriver.'+functionList[i]);
+			var execStr = functionList[i].split("(")[0]+'Sync('+functionList[i].split("(")[1];
+			console.log(execStr);
+			if(functionList[i].search('listAll') != -1) {
+				err=eval('ljmDriver.'+execStr);
+			} else if(functionList[i].search('errToStr') != -1) {
+				err=eval('ljmDriver.'+execStr);
+			} else {
+				err=eval('device.'+execStr);
 			}
-			else if(functionList[i].search('errToStr') != -1)
-			{
-				err=eval('ljmDriver.'+functionList[i]);
-			}
-			else
-			{
-				err=eval('device.'+functionList[i]);
-			}
-			if(((err != null)&&(err != 0))||(typeof(err)=="string"))
-			{
+			if(((err != null)&&(err != 0))||(typeof(err)=="string")) {
 				console.log(err);
-			}
-			else
-			{
+			} else {
 				printInfo('SUCCESS');
 			}
-			if(functionList[i].search('open') != -1)
-			{
+			if(functionList[i].search('open') != -1) {
 				startTime = Date.now();
 				console.log('!TIMER STARTED!');
 			}
 		}
-		catch (e)
-		{
+		catch (e) {
 			console.log(e);
 		}
 	}

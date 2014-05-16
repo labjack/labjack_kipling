@@ -161,7 +161,9 @@ var LUATestScript =
 ]
 var listAllTest = 
 [
-'listAll("LJM_dtT7","LJM_ctWiFi")',
+// 'listAll("LJM_dtT7","LJM_ctEthernet")',
+'listAllExtended("LJM_dtT7","LJM_ctEthernet",["AIN0","DAC0","DEVICE_NAME_DEFAULT","FIRMWARE_VERSION"])',
+'listAllExtended("LJM_dtT7","LJM_ctWifi",["AIN0","DAC0","DEVICE_NAME_DEFAULT","FIRMWARE_VERSION"])',
 ]
 var configureWifiTJ = 
 [
@@ -210,7 +212,7 @@ var altNamesAndBeta =
 ]
 var speedTest = 
 [
-'open("LJM_dtT7","LJM_ctEthernet","470010548")',
+'open("LJM_dtT7","LJM_ctUSB","ANY")',
 ]
 var i;
 for(i = 0; i < 500; i++) {
@@ -247,14 +249,14 @@ var buildReadManySpeedTest = function() {
 	});
 	cmdStr = cmdStr.slice(0,cmdStr.length-3);
 	cmdStr += endString + '#PRINTTIME';
-	console.log('Resulting Command:',cmdStr);
+	// console.log('Resulting Command:',cmdStr);
 	for(i = 0; i < numReads; i++) {
 		cmdList.push(cmdStr);
 	}
 	// cmdList.push('close()'+ '#PRINTTIME');
 	cmdList.push('#PRINTTIME');
 	cmdList.push('close()');
-	console.log('Command List:',cmdList)
+	// console.log('Command List:',cmdList)
 	return cmdList
 }
 var readManySpeedTest = buildReadManySpeedTest();

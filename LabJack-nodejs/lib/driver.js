@@ -17,9 +17,11 @@ var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
 var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 
 // For problems encountered while in driver DLL
-function DriverOperationError(code)
+function DriverOperationError(code,description)
 {
 	this.code = code;
+	this.description = description;
+	console.log('in DriverOperationError',code,description)
 };
 
 
@@ -269,7 +271,63 @@ exports.ljmDriver = function()
 		}
 
 	}
-
+	this.interpretResult = function(buffer,type,index) {
+		var retVar;
+		var strInterpret = function(input) {
+			var output = '';
+			var i = 0;
+			while(input.charCodeAt(i) !== 0) {
+				output += input[i];
+				i += 1;
+			}
+			return output;
+		};
+		var numInterpret = function(input) {return input;};
+		var bufFuncs = {
+			'STRING': {func:'toString',argA:'utf8',argB:index,argC:index+50,intFunc:strInterpret},
+			// 'UINT64': {func:'readFloatLE',argA:index,argB:undefined,argC:undefined},
+			'FLOAT32': {func:'readFloatBE',argA:index,argB:undefined,argC:undefined,intFunc:numInterpret},
+			'INT32': {func:'readInt32BE',argA:index,argB:undefined,argC:undefined,intFunc:numInterpret},
+			'UINT32': {func:'readUInt32BE',argA:index,argB:undefined,argC:undefined,intFunc:numInterpret},
+			'UINT16': {func:'readUInt16BE',argA:index,argB:undefined,argC:undefined,intFunc:numInterpret},
+			'BYTE': {func:'readUInt8',argA:index,argB:undefined,argC:undefined,intFunc:numInterpret},
+		}
+		var funcStr = bufFuncs[type].func;
+		var argA = bufFuncs[type].argA;
+		var argB = bufFuncs[type].argB;
+		var argC = bufFuncs[type].argC;
+		var intFunc = bufFuncs[type].intFunc;
+		retVar = intFunc(buffer[funcStr](argA,argB,argC));
+		return retVar;
+	};
+	this.buildListAllExtendedArray = function(context,deviceData,registers,addresses,names,types,numBytes,buffer) {
+		var retData = {};
+		var bufferOffset = 0;
+		// console.log('Raw Data',C_aBytes);
+		deviceData.forEach(function(devObj,devObjIndex){
+			var dataArray = [];
+			var readDataArray = [];
+			registers.forEach(function(reg,index) {
+				var readData = context.interpretResult(buffer,types[index],bufferOffset);
+				// console.log('Result',types[index],bufferOffset,typeof(readData),readData);
+				var data = {
+					register: reg,
+					name: names[index],
+					address: addresses[index],
+					val: readData
+				}
+				dataArray.push(data);
+				readDataArray.push(readData);
+				bufferOffset += numBytes[index];
+			});
+			deviceData[devObjIndex].data = dataArray;
+			deviceData[devObjIndex].registers = registers;
+			deviceData[devObjIndex].addresses = addresses;
+			deviceData[devObjIndex].names = names;
+			deviceData[devObjIndex].values = readDataArray;
+		});
+		return deviceData;
+	};
 	/**
 	 * Performs a special LJM list all command that gets extra information from 
 	 * every device that is found before returning data to the user.
@@ -413,11 +471,10 @@ exports.ljmDriver = function()
 		var bufIndex = 0;
 		for (i=0; i < aAddresses.length; i++) {
 			C_aAddresses.writeInt32LE(aAddresses[i],bufIndex);
-			C_aNumRegs.writeInt32LE(aAddresses[i],bufIndex);
+			C_aNumRegs.writeInt32LE(aNumRegs[i],bufIndex);
 			bufIndex += ARCH_INT_NUM_BYTES;
 		}
 
-		// console.log(aAddresses, aNumRegs, aBytesSize);
 		var self = this;
 		errorResult = this.ljm.LJM_ListAllExtended.async(
 			C_DeviceType, 
@@ -435,28 +492,6 @@ exports.ljmDriver = function()
 			function (err, res){
 				if (err) throw err;
 				if (res === 0) {
-					var retData = {};
-					var dataArray = [];
-					var readDataArray = [];
-					regs.forEach(function(reg,index) {
-						var readData = '';
-						var data = {
-							register: reg,
-							name: addressNames[index],
-							address: aAddresses[index],
-							val: ''
-						}
-						dataArray.push(data);
-					});
-					retData = {
-						results: dataArray,
-						registers: regs,
-						addresses: aAddresses,
-						names: addressNames,
-						values: readDataArray
-					}
-					console.log('LJM_ListAllExtended Success');
-					console.log(aBytesSize,numBytes,types,aAddresses,regs);
 					var devArray = self.buildListAllArray(
 						C_NumFound,
 						C_aDeviceTypes,
@@ -464,18 +499,169 @@ exports.ljmDriver = function()
 						C_aSerialNumbers,
 						C_aIPAddresses
 					);
-					devArray.data = retData;
-					onSuc(devArray);
+					var retArray = self.buildListAllExtendedArray(
+						self,devArray,regs,aAddresses,addressNames,types,
+						numBytes,C_aBytes);
+					
+					onSuc(retArray);
 				} else {
 					console.log('LJM_ListAllExtended Err');
-					onErr('Data');
+					console.log(self.errToStrSync(res));
+					onErr(res);
 				}
 			}
 		);
 	};
 	this.listAllExtendedSync = function(deviceType, connectionType, registers) {
-		var listAllData = 'Not-Implemented';
-		return listAllData;
+		var listAllData;
+		// Compensate for Auto-
+		var devT;
+		var conT;
+		var regs;
+
+		// Intelligently parse the input arguments
+		if (arguments.length == 0) {
+			devT = "LJM_dtANY";
+			conT = "LJM_ctANY";
+			regs = [];
+		} else if (arguments.length == 1) {
+			devT = "LJM_dtANY";
+			conT = "LJM_ctANY";
+			regs = arguments[0];
+		} else if (arguments.length == 2) {
+			devT = arguments[0];
+			conT = arguments[1];
+			regs = [];
+		} else if (arguments.length == 3) {
+			devT = arguments[0];
+			conT = arguments[1];
+			regs = arguments[2];
+		} else {
+			var message = 'Invalid number of arguments passed to listAllExtendedSync';
+			throw new DriverInterfaceError(message);
+		}
+
+		if (typeof(regs) !== 'object') {
+			console.log(regs,typeof(regs));
+			var message = 'Invalid Argument parsed as desired read registers-listAllExtendedSync';
+			throw new DriverInterfaceError(message);
+		}
+
+		if(isNaN(devT)) {
+			devT = driver_const.deviceTypes[devT];
+			if(typeof(devT) === 'undefined') {
+				devT = 0;
+			}
+		}
+		if(isNaN(conT)) {
+			conT = driver_const.connectionTypes[conT];
+			if(typeof(conT) === 'undefined') {
+				conT = 0;
+			}
+		}
+
+		// Save the maximum number of devices to be found
+		var maxNumDevices = LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
+
+		// Values to be interpreted by function
+		var aAddresses = [];
+		var addressNames = [];
+		var numBytes = [];
+		var aNumRegs = [];
+		var types = [];
+		var numRecvRegs = 0;
+		
+		// Values to be sent to C call
+		var C_DeviceType = devT;			// Device type to search for
+		var C_ConnectionType = conT;		// Connection type to search for
+		var C_NumAddresses = regs.length;	// Number of registers to read
+		var C_aAddresses;					// integer array of addresses;
+		var C_aNumRegs;						// integer array of sizes
+		var C_MaxNumFound = maxNumDevices;	// integer
+		var C_NumFound;						// integer pointer to be populated with num found
+		var C_aDeviceTypes;					// integer array to be populated with deviceTypes
+		var C_aConnectionTypes;				// integer array to be populated with connectionTypes
+		var C_aSerialNumbers;				// integer array to be populated with serialNumbers
+		var C_aIPAddresses;					// integer array to be populated with ipAddresses
+		var C_aBytes;						// byte (char) buffer filled with read-data
+		var errorResult=0;
+
+		// Calculate buffer sizes
+		var addrBuffSize = 4*C_NumAddresses;
+		var searchBuffSize = 4*maxNumDevices;
+		// Allocate buffers for variables that are already known
+		C_aAddresses = new Buffer(addrBuffSize);
+		C_aNumRegs = new Buffer(addrBuffSize);
+
+		C_NumFound =  new ref.alloc('int',1);
+		C_aDeviceTypes = new Buffer(searchBuffSize);
+		C_aDeviceTypes.fill(0);
+		C_aConnectionTypes = new Buffer(searchBuffSize);
+		C_aConnectionTypes.fill(0);
+		C_aSerialNumbers = new Buffer(searchBuffSize);
+		C_aSerialNumbers.fill(0);
+		C_aIPAddresses = new Buffer(searchBuffSize);
+		C_aIPAddresses.fill(0);
+
+		var bytesPerRegister = driver_const.LJM_BYTES_PER_REGISTER;
+		regs.forEach(function(reg,index){
+			var info = this.constants.getAddressInfo(reg, 'R');
+			var numRegs = Math.ceil(info.size/bytesPerRegister);
+			aAddresses.push(info.address);
+			aNumRegs.push(numRegs);
+			numBytes.push(numRegs+numRegs);
+			types.push(info.typeString)
+			addressNames.push(info.data.name)
+			// console.log(info)
+			numRecvRegs += numRegs;
+		});
+
+		// Allocate the receive buffer LJM will use to save extra read data
+		var aBytesSize = maxNumDevices * numRecvRegs * bytesPerRegister;
+		C_aBytes = new Buffer(aBytesSize);
+		C_aBytes.fill(0);
+
+		// Save register data to buffers (filling C_aAddresses and C_aNumRegs)
+		var i;
+		var bufIndex = 0;
+		for (i=0; i < aAddresses.length; i++) {
+			C_aAddresses.writeInt32LE(aAddresses[i],bufIndex);
+			C_aNumRegs.writeInt32LE(aNumRegs[i],bufIndex);
+			bufIndex += ARCH_INT_NUM_BYTES;
+		}
+
+		var self = this;
+		errorResult = this.ljm.LJM_ListAllExtended(
+			C_DeviceType, 
+			C_ConnectionType, 
+			C_NumAddresses,
+			C_aAddresses,
+			C_aNumRegs,
+			C_MaxNumFound,
+			C_NumFound,
+			C_aDeviceTypes,
+			C_aConnectionTypes,
+			C_aSerialNumbers,
+			C_aIPAddresses,
+			C_aBytes
+		);
+		if (errorResult === 0) {
+			var devArray = self.buildListAllArray(
+				C_NumFound,
+				C_aDeviceTypes,
+				C_aConnectionTypes,
+				C_aSerialNumbers,
+				C_aIPAddresses
+			);
+			var retArray = self.buildListAllExtendedArray(
+				self,devArray,regs,aAddresses,addressNames,types,
+				numBytes,C_aBytes);
+			return retArray;
+		} else {
+			throw new DriverOperationError(errorResult,self.errToStrSync(errorResult));
+			return 'DriverOperationError: ' + errorResult.toString() + ', ' + self.errToStrSync(errorResult);
+		}
+		
 	}
 
 	/**
