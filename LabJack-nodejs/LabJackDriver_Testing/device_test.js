@@ -1116,6 +1116,31 @@ module.exports = {
 				test.done();
 			});	
 	},
+    readUINT64: function(test){
+        // asyncRun.config(dev, driver,driver_const);
+        // syncRun.config(dev, driver,driver_const);
+        
+        //Create test-variables
+        var testList = [
+            'readUINT64("WIFI_MAC")',
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'readUINT64',
+            'readUINT64',
+        ];
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                console.log('Error',res);
+            }, function(res) {
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    }
 
 	/**
 	 * This test tests the  asynchronous function call of LJM.

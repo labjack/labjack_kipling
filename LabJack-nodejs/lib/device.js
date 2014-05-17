@@ -1623,7 +1623,7 @@ exports.labjack = function ()
 		aValues.fill(0);
 		errorVal.fill(0);
 
-		if ( typeof(addresses[0]) == 'string' ) {
+		if (isNaN(addresses[0])) {
 			//Allocate space for the aNames array
 			var aNames = new Buffer(numFrames * ARCH_POINTER_SIZE);//Array of C-String pointers
 			aNames.fill(0);
@@ -1691,7 +1691,7 @@ exports.labjack = function ()
 					}
 				}
 			);
-		} else if(typeof(addresses[0]) == 'number') {
+		} else if(!isNaN(addresses[0])) {
 			//Allocate space for the aNames array
 			var aAddresses = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of addresses
 			var aTypes = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of types
@@ -1699,13 +1699,13 @@ exports.labjack = function ()
 			var offsetD = 0;
 			var offsetI = 0;
 
+			var overwriteNumValues = false;
+			var newNumValues;
+
 			//Populate the array's with data
 			for(i = 0; i < numFrames; i++) {
 				//Fill aDirections array
 				aDirections.writeUInt32LE(directions[i],offsetI);
-
-				//Fill aNumWrites array
-				aNumWrites.writeUInt32LE(numValues[i],offsetI);
 
 				//Fill aAddresses array
 				aAddresses.writeUInt32LE(addresses[i],offsetI);
@@ -1727,7 +1727,13 @@ exports.labjack = function ()
 				}
 				if(info.directionValid == 1)
 				{
-					aTypes.writeUInt32LE(info.type,offsetI);
+					if(info.type !== driver_const.LJM_UINT64) {
+						aTypes.writeUInt32LE(info.type, offsetI);
+					} else {
+						aTypes.writeUInt32LE(driver_const.LJM_BYTE, offsetI);
+						overwriteNumValues = true;
+						newNumValues = info.size;
+					}
 				}
 				else
 				{
@@ -1757,6 +1763,13 @@ exports.labjack = function ()
 						);
 						return {retError:"Weird-Error", errFrame:i};
 					}
+				}
+
+				//Fill aNumWrites array
+				if(overwriteNumValues){
+					aNumWrites.writeUInt32LE(newNumValues, offsetI);
+				} else {
+					aNumWrites.writeUInt32LE(numValues[i], offsetI);
 				}
 
 				//Increment pointers
@@ -1840,7 +1853,8 @@ exports.labjack = function ()
 		aNumWrites.fill(0);
 		aValues.fill(0);
 		errorVal.fill(0);
-		if ( typeof(addresses[0]) == 'string' ) {
+
+		if ( isNaN(addresses[0]) ) {
 			//Allocate space for the aNames array
 			var aNames = new Buffer(numFrames * ARCH_POINTER_SIZE);				//Array of C-String pointers
 			aNames.fill(0);
@@ -1891,7 +1905,7 @@ exports.labjack = function ()
 				errorVal
 			);
 
-		} else if(typeof(addresses[0]) == 'number') {
+		} else if(!isNaN(addresses[0])) {
 			//Allocate space for the aNames array
 			var aAddresses = new Buffer(numFrames * ARCH_INT_NUM_BYTES);		//Array of addresses
 			var aTypes = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of types
@@ -1899,13 +1913,13 @@ exports.labjack = function ()
 			var offsetD = 0;
 			var offsetI = 0;
 
+			var overwriteNumValues = false;
+			var newNumValues;
+
 			//Populate the array's with data
 			for ( i = 0; i < numFrames; i++ ) {
 				//Fill aDirections array
 				aDirections.writeUInt32LE(directions[i], offsetI);
-
-				//Fill aNumWrites array
-				aNumWrites.writeUInt32LE(numValues[i], offsetI);
 
 				//Fill aAddresses array
 				aAddresses.writeUInt32LE(addresses[i], offsetI);
@@ -1927,7 +1941,13 @@ exports.labjack = function ()
 				}
 				if(info.directionValid == 1)
 				{
-					aTypes.writeUInt32LE(info.type, offsetI);
+					if(info.type !== driver_const.LJM_UINT64) {
+						aTypes.writeUInt32LE(info.type, offsetI);
+					} else {
+						aTypes.writeUInt32LE(driver_const.LJM_BYTE, offsetI);
+						overwriteNumValues = true;
+						newNumValues = info.size;
+					}
 				}
 				else
 				{
@@ -1957,6 +1977,13 @@ exports.labjack = function ()
 						);
 						return {retError:"Weird-Error", errFrame:i};
 					}
+				}
+
+				//Fill aNumWrites array
+				if(overwriteNumValues){
+					aNumWrites.writeUInt32LE(newNumValues, offsetI);
+				} else {
+					aNumWrites.writeUInt32LE(numValues[i], offsetI);
 				}
 
 				//Increment pointers
@@ -1994,13 +2021,201 @@ exports.labjack = function ()
 			);
 			return "Address is not a number or string array";
 		}
-		if(errorResult == 0) {
+		if(errorResult === 0) {
 			return this.populateRWManyArray(
 						numFrames, 
 						numValues, 
 						directions, 
 						aValues
 					);
+		} else {
+			throw new DriverOperationError(errorResult);
+			return errorResult;
+		}
+	}
+
+	this.readUINT64 = function(type, onError, onSuccess) {
+		var regType = {
+			ethernet:0,
+			ETHERNET:0,
+			Ethernet:0,
+			ETHERNET_MAC:0,
+			wifi:1,
+			WiFi:1,
+			Wifi:1,
+			WIFI_MAC:1
+		};
+		//Check to make sure a device has been opened.
+		if(this.checkStatus(onError)) {return;};
+
+		//Return variable
+		var errorResult;
+
+		//Perform function wide buffer allocations:
+		var aAddresses = new Buffer(1 * ARCH_INT_NUM_BYTES);
+		var aTypes = new Buffer(1 * ARCH_INT_NUM_BYTES)
+		var aWrites = new Buffer(1 * ARCH_INT_NUM_BYTES);			//Array of directions
+		var aNumValues = new Buffer(1 * ARCH_INT_NUM_BYTES);		//Array of ops. per frame
+		var aValues = new Buffer(8 * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
+		var errorVal = new Buffer(ARCH_INT_NUM_BYTES); 				//Array the size of one UInt32 for err
+
+		//Clear all the arrays
+		aAddresses.fill(0);
+		aTypes.fill(0);
+		aWrites.fill(0);
+		aNumValues.fill(0);
+		aValues.fill(0);
+		errorVal.fill(0);
+
+
+		var numFrames = 1;
+		var numValues = 8;
+		var direction = [0];
+
+		var macAddress = 0;
+		if(regType[type] === 0) {
+			macAddress = 60020;
+		} else if (regType[type] === 1) {
+			macAddress = 60024;
+		}
+		aAddresses.writeInt32LE(macAddress,0);
+		aTypes.writeInt32LE(driver_const.LJM_BYTE,0)
+		aNumValues.writeInt32LE(driver_const.typeSizes.UINT64,0);
+		// console.log('in rwManySync, eAddress Data:');
+		// console.log('NumFrames',numFrames);
+		// console.log('aAddresses',aAddresses);
+		// console.log('aTypes',aTypes);
+		// console.log('aWrites',aWrites);
+		// console.log('aNumValues',aNumValues);
+		// console.log('aValues',aValues);
+
+		//Call the LJM function
+		var self = this;
+		errorResult = this.ljm.LJM_eAddresses.async(
+			this.handle,
+			numFrames,
+			aAddresses,
+			aTypes,
+			aWrites,
+			aNumValues,
+			aValues,
+			errorVal,
+			function(err,res) {
+				if(err) throw err;
+				if(res === 0) {
+					// console.log('readMac Async Success',aValues);
+					var i;
+					var macStr = '';
+					var tVar;
+					for(i = 2; i < driver_const.typeSizes.UINT64-1; i++) {
+						tVar = aValues.readDoubleLE(i*driver_const.typeSizes.UINT64).toString(16);
+						if(tVar.length < 2) {
+							tVar = '0' + tVar;
+						}
+						macStr += tVar;
+						macStr += ':';
+					}
+					tVar = aValues.readDoubleLE(7*driver_const.typeSizes.UINT64).toString(16);
+					if(tVar.length < 2) {
+						tVar = '0' + tVar;
+					}
+					macStr += tVar;
+					// console.log('mac address:',macStr);
+					onSuccess(macStr);
+				} else {
+					onError(res);
+				}
+			}
+		);
+	};
+	this.readUINT64Sync = function(type) {
+		var regType = {
+			ethernet:0,
+			ETHERNET:0,
+			Ethernet:0,
+			ETHERNET_MAC:0,
+			wifi:1,
+			WiFi:1,
+			Wifi:1,
+			WIFI_MAC:1
+		};
+		//Check to make sure a device has been opened.
+		// this.checkStatus();
+
+		//Return variable
+		var errorResult;
+
+		//Perform function wide buffer allocations:
+		var aAddresses = new Buffer(1 * ARCH_INT_NUM_BYTES);
+		var aTypes = new Buffer(1 * ARCH_INT_NUM_BYTES)
+		var aWrites = new Buffer(1 * ARCH_INT_NUM_BYTES);			//Array of directions
+		var aNumValues = new Buffer(1 * ARCH_INT_NUM_BYTES);		//Array of ops. per frame
+		var aValues = new Buffer(8 * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
+		var errorVal = new Buffer(ARCH_INT_NUM_BYTES); 				//Array the size of one UInt32 for err
+
+		//Clear all the arrays
+		aAddresses.fill(0);
+		aTypes.fill(0);
+		aWrites.fill(0);
+		aNumValues.fill(0);
+		aValues.fill(0);
+		errorVal.fill(0);
+
+
+		var numFrames = 1;
+		var numValues = 8;
+		var direction = [0];
+
+		var macAddress = 0;
+		if(regType[type] === 0) {
+			macAddress = 60020;
+		} else if (regType[type] === 1) {
+			macAddress = 60024;
+		}
+		aAddresses.writeInt32LE(macAddress,0);
+		aTypes.writeInt32LE(driver_const.LJM_BYTE,0)
+		aNumValues.writeInt32LE(driver_const.typeSizes.UINT64,0);
+		// console.log('in rwManySync, eAddress Data:');
+		// console.log('NumFrames',numFrames);
+		// console.log('aAddresses',aAddresses);
+		// console.log('aTypes',aTypes);
+		// console.log('aWrites',aWrites);
+		// console.log('aNumValues',aNumValues);
+		// console.log('aValues',aValues);
+
+		//Call the LJM function
+		var self = this;
+		errorResult = this.ljm.LJM_eAddresses(
+			this.handle,
+			numFrames,
+			aAddresses,
+			aTypes,
+			aWrites,
+			aNumValues,
+			aValues,
+			errorVal
+		);
+		if(errorResult === 0) {
+			// console.log('readMac Async Success',aValues);
+			var i;
+			var macStr = '';
+			var tVar;
+
+			for(i = 2; i < driver_const.typeSizes.UINT64-1; i++) {
+				tVar = aValues.readDoubleLE(i*driver_const.typeSizes.UINT64).toString(16);
+				if(tVar.length < 2) {
+					tVar = '0' + tVar;
+				}
+				macStr += tVar;
+				macStr += ':';
+			}
+			tVar = aValues.readDoubleLE(7*driver_const.typeSizes.UINT64).toString(16);
+			if(tVar.length < 2) {
+				tVar = '0' + tVar;
+			}
+			macStr += tVar;
+			// console.log('mac address:',macStr);
+			return macStr;
 		} else {
 			throw new DriverOperationError(errorResult);
 			return errorResult;

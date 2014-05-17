@@ -10,6 +10,7 @@ var functionLocation = {
 	'getHandleInfo': 'device',
 	'close': 'device',
 	'rwMany': 'device',
+	'readUINT64': 'device',
 
 	//Driver Functions
 	'listAll': 'driver',

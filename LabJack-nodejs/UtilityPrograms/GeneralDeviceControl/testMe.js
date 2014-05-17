@@ -284,6 +284,16 @@ var buildBreakEthernetConnectionTest = function() {
 	cmdList.push('close()');
 	return cmdList;
 }
+var readMacTest = 
+[
+// 'open("LJM_dtT7","LJM_ctUSB","ANY")',
+'open("LJM_dtT7","LJM_ctWifi","192.168.1.29")',
+// Addresses, directions, numValues, values(empty for write)
+'readUINT64("ethernet")',
+'readUINT64("wifi")',
+'close()'
+]
+
 var breakEthernetConnectionTest = buildBreakEthernetConnectionTest();
 testArray = 
 [
@@ -304,7 +314,8 @@ rwManyTest,				// 13
 altNamesAndBeta,		// 14
 speedTest,				// 15
 readManySpeedTest,		// 16
-breakEthernetConnectionTest // 17
+breakEthernetConnectionTest, // 17
+readMacTest			// 18
 ]
 
 var activeTest;

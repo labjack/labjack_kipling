@@ -200,7 +200,6 @@ var parseConstants = function(LJMJSONFileLocation) {
 
 	//console.log("JSON-CONSTANTS-PARSER");
 	this.getAddressInfo = function(address, direction) {
-
 		var regEntry;
 		//Get the Dictionary Entry
 		if(!isNaN(address)) {
@@ -225,15 +224,19 @@ var parseConstants = function(LJMJSONFileLocation) {
 		}
 
 		if(regEntry.type == 'UINT16') {
-			deviceType = 0;
+			deviceType = driver_const.LJM_UINT16;
 		} else if(regEntry.type == 'UINT32') {
-			deviceType = 1;
+			deviceType = driver_const.LJM_UINT32;
 		} else if(regEntry.type == 'INT32') {
-			deviceType = 2;
+			deviceType = driver_const.LJM_INT32;
 		} else if(regEntry.type == 'FLOAT32') {
-			deviceType = 3;
+			deviceType = driver_const.LJM_FLOAT32;
 		} else if(regEntry.type == 'STRING') {
-			deviceType = 98;
+			deviceType = driver_const.LJM_STRING;
+		} else if(regEntry.type == 'BYTE') {
+			deviceType = driver_const.LJM_BYTE;
+		} else if(regEntry.type == 'UINT64') {
+			deviceType = driver_const.LJM_UINT64;
 		}
 		
 		if(regEntry.readwrite.indexOf(direction) != -1) {

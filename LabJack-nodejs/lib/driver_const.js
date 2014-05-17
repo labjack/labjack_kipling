@@ -207,6 +207,7 @@ exports.connectionTypes = {
 	Wifi: 4,
 	wifi: 4
 }
+exports.LJM_UINT64 = 69;							 // Un-supported C type of UINT64/mac addresses
 exports.LJM_UINT16 = 0; 			                 // C type of unsigned short
 exports.LJM_UINT32 = 1; 			                 // C type of unsigned int
 exports.LJM_INT32 = 2; 				                 // C type of int
