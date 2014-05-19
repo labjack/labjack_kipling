@@ -146,9 +146,25 @@ exports.labjack = function ()
 			var output;
 
 			//Get the type's of the inputs
-			var dtType = typeof(deviceType);
-			var ctType = typeof(connectionType);
-			var idType = typeof(identifier);
+			var dtType = isNaN(deviceType);
+			var ctType = isNaN(connectionType);
+			var idType = isNaN(identifier);
+
+			if(dtType) {
+				dtType = "string";
+			} else {
+				dtType = "number";
+			}
+			if(ctType) {
+				ctType = "string";
+			} else {
+				ctType = "number";
+			}
+			if(idType) {
+				idType = "string";
+			} else {
+				idType = "number";
+			}
 
 			var self = this;
 			//Function for handling the ffi callback
@@ -248,9 +264,25 @@ exports.labjack = function ()
 			var output;
 
 			//Get the type's of the inputs
-			var dtType = typeof(deviceType);
-			var ctType = typeof(connectionType);
-			var idType = typeof(identifier);
+			var dtType = isNaN(deviceType);
+			var ctType = isNaN(connectionType);
+			var idType = isNaN(identifier);
+
+			if(dtType) {
+				dtType = "string";
+			} else {
+				dtType = "number";
+			}
+			if(ctType) {
+				ctType = "string";
+			} else {
+				ctType = "number";
+			}
+			if(idType) {
+				idType = "string";
+			} else {
+				idType = "number";
+			}
 
 			//Determine which LJM function to call
 			if((dtType=="number")&&(ctType=="number")&&(idType=="string")) {
@@ -809,7 +841,7 @@ exports.labjack = function ()
 		if ( length < 1 ) {
 			throw new DriverInterfaceError("Addresses array must contain data");
 		}
-		if ( typeof(addresses[0]) == 'string' ) {
+		if ( isNaN(addresses[0]) ) {
 			var i;
 			//ref: http://tootallnate.github.io/ref/
 			var aNames = new Buffer(ARCH_POINTER_SIZE*length);
@@ -831,7 +863,7 @@ exports.labjack = function ()
 				errors
 			);
 
-		} else if ( typeof(addresses[0] ) == 'number') {
+		} else if ( !isNaN(addresses[0]) ) {
 			var addrBuff = new Buffer( ARCH_INT_NUM_BYTES * length);
 			var addrTypeBuff = new Buffer( ARCH_INT_NUM_BYTES * length);
 			var inValidOperation = 0;
@@ -1004,7 +1036,7 @@ exports.labjack = function ()
 		if ( this.checkStatus(onError) ) { return; };
 
 		//Decision making for address type (string or number)
-		if ( typeof(address) == 'string' ) {
+		if ( isNaN(address) ) {
 			var info = this.constants.getAddressInfo(address, 'W');
 
 			//Decision making for LJM-address return type, number or string
@@ -1060,7 +1092,7 @@ exports.labjack = function ()
 					onError("Invalid Write Attempt");
 				}
 			}
-		} else if (typeof(address) == 'number') {
+		} else if (!isNaN(address)) {
 			var info = this.constants.getAddressInfo(address, 'W');
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
@@ -1144,7 +1176,7 @@ exports.labjack = function ()
 		var errorResult;
 
 		//Decision making for address type (string or number)
-		if ( typeof(address) == 'string' ) {
+		if ( isNaN(address) ) {
 			var info = this.constants.getAddressInfo(address, 'W');
 			
 			//Decision making for LJM-address return type, number or string
@@ -1184,7 +1216,7 @@ exports.labjack = function ()
 					return "Invalid Write Attempt";
 				}
 			}
-		} else if(typeof(address) == 'number') {
+		} else if( !isNaN(address) ) {
 			var info = this.constants.getAddressInfo(address, 'W');
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
@@ -1283,7 +1315,7 @@ exports.labjack = function ()
 		var errorResult;
 
 		//Decide whether to perform address-number or address-name operation.
-		if ( typeof(addresses[0]) == 'string' ) {
+		if ( isNaN(addresses[0]) ) {
 			//Perform necessary string buffer allocations.
 			var i;
 			var offset = 0;
@@ -1333,7 +1365,7 @@ exports.labjack = function ()
 				}
 			);
 			return 0;
-		} else if ( typeof(addresses[0]) == 'number' ) {
+		} else if ( !isNaN(addresses[0]) ) {
 			//Perform necessary number buffer allocations.
 			var addrBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
 			var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
@@ -1441,7 +1473,7 @@ exports.labjack = function ()
 		var errorResult;
 
 		//Decide whether to perform address-number or address-name operation.
-		if ( typeof(addresses[0]) == 'string' ) {
+		if ( isNaN(addresses[0]) ) {
 			//Perform necessary string buffer allocations.
 			var i;
 			var offset = 0;
@@ -1483,7 +1515,7 @@ exports.labjack = function ()
 				errors
 			);
 
-		} else if (typeof(addresses[0]) == 'number') {
+		} else if (!isNaN(addresses[0])) {
 			//Perform necessary number buffer allocations.
 			var addrBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
 			var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES * length);

@@ -134,7 +134,7 @@ exports.ljmDriver = function()
 		}
 
 		var self = this;
-		if ((typeof(devT) == "string") && (typeof(conT) == "string")) {
+		if ((isNaN(devT)) && (isNaN(conT))) {
 			errorResult = this.ljm.LJM_ListAllS.async(
 				devT, 
 				conT, 
@@ -160,7 +160,7 @@ exports.ljmDriver = function()
 				}
 			);
 			return 0;
-		} else if ((typeof(devT)=="number")&&(typeof(conT)=="number")) {
+		} else if ((!isNaN(devT))&&(!isNaN(conT))) {
 			errorResult = this.ljm.LJM_ListAll.async(
 				devT, 
 				conT, 
@@ -232,7 +232,7 @@ exports.ljmDriver = function()
 			conT = connectionType;
 		}
 
-		if ((typeof(devT) == "string") && (typeof(conT) == "string")) {
+		if ((isNaN(devT)) && (isNaN(conT))) {
 			errorResult = this.ljm.LJM_ListAllS(
 				devT, 
 				conT, 
@@ -242,7 +242,7 @@ exports.ljmDriver = function()
 				aSerialNumbers, 
 				aIPAddresses
 			);
-		} else if ((typeof(devT)=="number")&&(typeof(conT)=="number")) {
+		} else if ((!isNaN(devT)) && (!isNaN(conT))) {
 			errorResult = this.ljm.LJM_ListAll(
 				devT, 
 				conT, 
@@ -815,7 +815,7 @@ exports.ljmDriver = function()
 	 *		of the configuration setting as read from LJM.
 	 */
 	this.readLibrary = function(parameter, onError, onSuccess) {
-		if (typeof(parameter) == 'string') {
+		if (isNaN(parameter)) {
 			var errorResult;
 			var returnVar = new ref.alloc('double',1);
 
@@ -848,7 +848,7 @@ exports.ljmDriver = function()
 	 *		the LJM driver itself.
 	 */
 	this.readLibrarySync = function(parameter) {
-		if(typeof(parameter) == 'string') {
+		if(isNaN(parameter)) {
 			var errorResult;
 			//Allocate a buffer for the result
 			var returnVar = new ref.alloc('double',1);
@@ -870,7 +870,7 @@ exports.ljmDriver = function()
 		}
 	}
 	this.readLibraryS = function (parameter, onError, onSuccess) {
-		if (typeof(parameter) == 'string') {
+		if (isNaN(parameter)) {
 			var errorResult;
 
 			//Allocate a buffer for the result
@@ -901,7 +901,7 @@ exports.ljmDriver = function()
 		}
 	}
 	this.readLibrarySSync = function (parameter) {
-		if(typeof(parameter) == 'string') {
+		if(isNaN(parameter)) {
 			var errorResult;
 			//Allocate a buffer for the result
 			var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
@@ -937,7 +937,7 @@ exports.ljmDriver = function()
 	 */
 	this.writeLibrary = function (parameter, value, onError, onSuccess) {
 		var errorResult;
-		if ((typeof(parameter) == 'string')&&(typeof(value)=='number')) {
+		if ((isNaN(parameter))&&(!isNaN(value))) {
 			errorResult = this.ljm.LJM_WriteLibraryConfigS.async(
 				parameter, 
 				value, 
@@ -951,7 +951,7 @@ exports.ljmDriver = function()
 				}
 			);
 			return 0;
-		} else if((typeof(parameter) == 'string')&&(typeof(value)=='string')) {
+		} else if((isNaN(parameter))&&(isNaN(value))) {
 			errorResult = this.ljm.LJM_WriteLibraryConfigStringS.async(
 				parameter, 
 				value, 
@@ -978,12 +978,12 @@ exports.ljmDriver = function()
 	 */
 	this.writeLibrarySync = function (parameter, value) {
 		var errorResult;
-		if ((typeof(parameter)=='string')&&(typeof(value)=='number')) {
+		if ((isNaN(parameter))&&(!isNaN(value))) {
 			errorResult = this.ljm.LJM_WriteLibraryConfigS(
 				parameter, 
 				value
 			);
-		} else if ((typeof(parameter)=='string')&&(typeof(value)=='string')) {
+		} else if ((isNaN(parameter))&&(isNaN(value))) {
 			errorResult = this.ljm.LJM_WriteLibraryConfigStringS(
 				parameter, 
 				value
@@ -1014,7 +1014,7 @@ exports.ljmDriver = function()
 	 *		logged successfully.
 	 */
 	this.logS = function(level, str, onError, onSuccess) {
-		if ((typeof(level)!= 'number')||(typeof(str)!='string')) {
+		if ((isNaN(level))||(!isNaN(str))) {
 			onError('wrong types');
 			return 0;
 		}
@@ -1050,7 +1050,7 @@ exports.ljmDriver = function()
 	 *		the LJM driver itself.
 	**/
 	this.logSSync = function(level, str) {
-		if ((typeof(level)!= 'number')||(typeof(str)!='string')) {
+		if ((isNaN(level))||(!isNaN(str))) {
 			throw new DriverInterfaceError('wrong types');
 			return 'wrong types';
 		}
