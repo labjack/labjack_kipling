@@ -145,9 +145,9 @@ exports.typeSizes = {
 };
 exports.LJM_BYTES_PER_REGISTER = 2;
 exports.deviceTypes = {
-	LJM_ctANY: 0,
-	LJM_ctAny: 0,
-	LJM_ctany: 0,
+	LJM_dtANY: 0,
+	LJM_dtAny: 0,
+	LJM_dtany: 0,
 	ANY: 0,
 	Any: 0,
 	any: 0,

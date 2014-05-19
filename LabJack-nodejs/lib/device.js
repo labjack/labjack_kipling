@@ -45,7 +45,7 @@ function DriverOperationError(code)
     this.message = code;
 };
 util.inherits(DriverOperationError, Error);
-DriverOperationError.prototype.name = 'Driver Operation Error';
+DriverOperationError.prototype.name = 'Driver Operation Error - device';
 
 
 /**
@@ -64,7 +64,7 @@ function DriverInterfaceError(description)
 	this.message = description;
 };
 util.inherits(DriverInterfaceError, Error);
-DriverInterfaceError.prototype.name = 'Driver Interface Error';
+DriverInterfaceError.prototype.name = 'Driver Interface Error - device';
 
 
 
@@ -163,7 +163,9 @@ exports.labjack = function ()
 			if(idType) {
 				idType = "string";
 			} else {
-				idType = "number";
+				// Handle the serial number being parsed as a number
+				identifier = identifier.toString();
+				idType = "string";
 			}
 
 			var self = this;
@@ -200,9 +202,29 @@ exports.labjack = function ()
 					refDeviceHandle, 
 					handleResponse
 				);
-			}
-			else if((dtType=="string")&&(ctType=="string")&&(idType=="string"))
-			{
+			} else if((dtType=="number")&&(ctType=="string")&&(idType=="string")) {
+				// convert connectionType to a number
+				var connectionType = driver_const.connectionTypes[connectionType];
+				//call LJM_OpenS() using the ffi async call
+				output = this.ljm.LJM_Open.async(
+					deviceType, 
+					connectionType, 
+					identifier, 
+					refDeviceHandle, 
+					handleResponse
+				);
+			} else if((dtType=="string")&&(ctType=="number")&&(idType=="string")) {
+				// convert deviceType to a number
+				var deviceType = driver_const.deviceTypes[deviceType];
+				//call LJM_OpenS() using the ffi async call
+				output = this.ljm.LJM_Open.async(
+					deviceType, 
+					connectionType, 
+					identifier, 
+					refDeviceHandle, 
+					handleResponse
+				);
+			} else if((dtType=="string")&&(ctType=="string")&&(idType=="string")) {
 				//call LJM_OpenS() using the ffi async call
 				output = this.ljm.LJM_OpenS.async(
 					deviceType, 
@@ -213,7 +235,7 @@ exports.labjack = function ()
 				);
 			} else {
 				//If there were no applicable LJM function calls, throw an error
-				throw new DriverInterfaceError("Un-Handled Variable Types");
+				throw new DriverInterfaceError("Un-Handled Variable Types: "+dtType+ctType+idType+deviceType.toString()+connectionType.toString()+identifier.toString());
 			}
 		}
 	};
@@ -281,7 +303,9 @@ exports.labjack = function ()
 			if(idType) {
 				idType = "string";
 			} else {
-				idType = "number";
+				// Handle the serial number being parsed as a number
+				identifier = identifier.toString();
+				idType = "string";
 			}
 
 			//Determine which LJM function to call
@@ -293,9 +317,29 @@ exports.labjack = function ()
 					identifier,
 					refDeviceHandle
 				);
-			}
-			else if((dtType=="string")&&(ctType=="string")&&(idType=="string")) 
-			{
+			} else if((dtType=="number")&&(ctType=="string")&&(idType=="string")) {
+				// Convert connectionType to a number
+				var connectionType = driver_const.connectionTypes[connectionType];
+				//call LJM_OpenS() using the ffi async call
+				output = this.ljm.LJM_Open(
+					deviceType, 
+					connectionType, 
+					identifier, 
+					refDeviceHandle, 
+					handleResponse
+				);
+			} else if((dtType=="string")&&(ctType=="number")&&(idType=="string")) {
+				// convert deviceType to a number
+				var deviceType = driver_const.deviceTypes[deviceType];
+				//call LJM_OpenS() using the ffi async call
+				output = this.ljm.LJM_Open(
+					deviceType, 
+					connectionType, 
+					identifier, 
+					refDeviceHandle, 
+					handleResponse
+				);
+			} else if((dtType=="string")&&(ctType=="string")&&(idType=="string"))  {
 				//call LJM_OpenS() using the ffi async call
 				output = this.ljm.LJM_OpenS(
 					deviceType,
@@ -305,7 +349,7 @@ exports.labjack = function ()
 				);
 			} else {
 				//If there were no applicable LJM function calls, throw an error
-				throw new DriverInterfaceError("Un-Handled Variable Types");
+				throw new DriverInterfaceError("Un-Handled Variable Types: "+dtType+ctType+idType+deviceType.toString()+connectionType.toString()+identifier.toString());
 			}
 
 			//Determine whether or not the Open call was successful
