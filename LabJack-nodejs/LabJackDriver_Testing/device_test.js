@@ -212,6 +212,91 @@ module.exports = {
 				});
 		});
 	},
+	testOpenWeirdC: function(test) {
+		var device = new deviceManager.labjack();
+		var param = "0";
+		var paramB = param;
+		device.open(
+			paramB,	//Will be converted to an integer
+			driver_const.LJM_CT_ANY,
+			"LJM_idANY",
+		function(res) {
+			console.log("Opening Error");
+		},
+		function(res) {
+			//get the handle & make sure it isn't zero
+			test.notStrictEqual(device.handle, null);
+			test.notEqual(device.handle, 0);
+
+			//Make sure that LJM_OpenSAsync was called
+			test.equal(fakeDriver.getLastFunctionCall().length,1);
+			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
+
+			//Make sure that dtAny, ctAny, and idAny were used as variables
+			test.equal(device.deviceType,driver_const.LJM_DT_ANY);
+			test.equal(device.connectionType,driver_const.LJM_CT_ANY);
+			test.equal(device.identifier,"LJM_idANY");
+			
+			//Close the Device
+			device.close(
+				function(res) {
+					console.log("Closing Error");
+				},
+				function(res) {
+					test.strictEqual(device.handle, null);
+					test.strictEqual(device.deviceType,null);
+					test.strictEqual(device.connectionType,null);
+					test.strictEqual(device.identifier,null);
+					test.equal(
+						fakeDriver.getLastFunctionCall()[1],
+						"LJM_CloseAsync"
+					);
+					test.done();
+				});
+		});
+	},
+	testOpenWeirdD: function(test) {
+		var device = new deviceManager.labjack();
+		var param = "0";
+		device.open(
+			driver_const.LJM_DT_ANY,	
+			param,	//Will be converted to an integer
+			"LJM_idANY",
+		function(res) {
+			console.log("Opening Error");
+		},
+		function(res) {
+			//get the handle & make sure it isn't zero
+			test.notStrictEqual(device.handle, null);
+			test.notEqual(device.handle, 0);
+
+			//Make sure that LJM_OpenSAsync was called
+			test.equal(fakeDriver.getLastFunctionCall().length,1);
+			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
+
+			//Make sure that dtAny, ctAny, and idAny were used as variables
+			test.equal(device.deviceType,driver_const.LJM_DT_ANY);
+			test.equal(device.connectionType,driver_const.LJM_CT_ANY);
+			test.equal(device.identifier,"LJM_idANY");
+			
+			//Close the Device
+			device.close(
+				function(res) {
+					console.log("Closing Error");
+				},
+				function(res) {
+					test.strictEqual(device.handle, null);
+					test.strictEqual(device.deviceType,null);
+					test.strictEqual(device.connectionType,null);
+					test.strictEqual(device.identifier,null);
+					test.equal(
+						fakeDriver.getLastFunctionCall()[1],
+						"LJM_CloseAsync"
+					);
+					test.done();
+				});
+		});
+	},
 
 	/**
 	 * Tests the string-open feature of the device class. 

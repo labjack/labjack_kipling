@@ -153,11 +153,13 @@ exports.labjack = function ()
 			if(dtType) {
 				dtType = "string";
 			} else {
+				deviceType = parseInt(deviceType);
 				dtType = "number";
 			}
 			if(ctType) {
 				ctType = "string";
 			} else {
+				connectionType = parseInt(connectionType);
 				ctType = "number";
 			}
 			if(idType) {
@@ -293,11 +295,13 @@ exports.labjack = function ()
 			if(dtType) {
 				dtType = "string";
 			} else {
+				deviceType = parseInt(deviceType);
 				dtType = "number";
 			}
 			if(ctType) {
 				ctType = "string";
 			} else {
+				connectionType = parseInt(connectionType);
 				ctType = "number";
 			}
 			if(idType) {
