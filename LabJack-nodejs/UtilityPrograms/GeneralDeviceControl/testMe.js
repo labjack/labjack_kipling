@@ -294,6 +294,13 @@ var readMacTest =
 'readUINT64("wifi")',
 'close()'
 ]
+var listAllExtTest = [
+'writeLibrary("LJM_DEBUG_LOG_LEVEL",2)',
+'writeLibrary("LJM_DEBUG_LOG_MODE",2)'
+];
+for(i = 0; i < 30; i++) {
+	listAllExtTest.push('listAllExtended("LJM_dtT7","LJM_ctANY",["AIN0","DAC0","DEVICE_NAME_DEFAULT","FIRMWARE_VERSION"])');
+}
 
 var breakEthernetConnectionTest = buildBreakEthernetConnectionTest();
 testArray = 
@@ -316,7 +323,8 @@ altNamesAndBeta,		// 14
 speedTest,				// 15
 readManySpeedTest,		// 16
 breakEthernetConnectionTest, // 17
-readMacTest			// 18
+readMacTest,			// 18
+listAllExtTest			// 19
 ]
 
 var activeTest;

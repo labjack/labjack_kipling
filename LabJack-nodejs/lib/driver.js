@@ -153,9 +153,9 @@ exports.ljmDriver = function()
 							aSerialNumbers,
 							aIPAddresses
 							);
-						onSuccess(devArray);
+						return onSuccess(devArray);
 					} else {
-						onError(res);
+						return onError(res);
 					}
 				}
 			);
@@ -179,15 +179,15 @@ exports.ljmDriver = function()
 							aSerialNumbers,
 							aIPAddresses
 							);
-						onSuccess(devArray);
+						return onSuccess(devArray);
 					} else {
-						onError(res);
+						return onError(res);
 					}
 				}
 			);
 			return 0;
 		} else {
-			onError("Weird-Error, listAll");
+			return onError("Weird-Error, listAll");
 		}
 	}
 
@@ -389,7 +389,7 @@ exports.ljmDriver = function()
 
 		if (typeof(regs) !== 'object') {
 			var message = 'Invalid Argument parsed as desired read registers';
-			throw new DriverInterfaceError(message);
+			return onErr(message);
 		}
 
 		if(isNaN(devT)) {
@@ -503,11 +503,11 @@ exports.ljmDriver = function()
 						self,devArray,regs,aAddresses,addressNames,types,
 						numBytes,C_aBytes);
 					
-					onSuc(retArray);
+					return onSuc(retArray);
 				} else {
 					console.log('LJM_ListAllExtended Err');
 					console.log(self.errToStrSync(res));
-					onErr(res);
+					return onErr(res);
 				}
 			}
 		);
@@ -684,10 +684,10 @@ exports.ljmDriver = function()
 				if (err) throw err;
 				if (res === 0) {
 					//console.log('strRes: ',ref.readCString(strRes,0));
-					onSuccess('Num: '+errNum+', '+ref.readCString(strRes,0));
+					return onSuccess('Num: '+errNum+', '+ref.readCString(strRes,0));
 				} else {
 					//console.log('BAD!',ref.readCString(strRes,0));
-					onError('Num: '+errNum+', '+ref.readCString(strRes,0));
+					return onError('Num: '+errNum+', '+ref.readCString(strRes,0));
 				}
 			}
 		);
@@ -733,9 +733,9 @@ exports.ljmDriver = function()
 			function (err, res){
 				if (err) throw err;
 				if (res === 0) {
-					onSuccess();
+					return onSuccess();
 				} else {
-					onError(res);
+					return onError(res);
 				}
 			}
 		);
@@ -774,9 +774,9 @@ exports.ljmDriver = function()
 			function (err, res){
 				if (err) throw err;
 				if (res === 0) {
-					onSuccess();
+					return onSuccess();
 				} else {
-					onError(res);
+					return onError(res);
 				}
 			}
 		);
@@ -825,15 +825,15 @@ exports.ljmDriver = function()
 				function (err, res){
 					if (err) throw err;
 					if (res === 0) {
-						onSuccess(returnVar.deref())
+						return onSuccess(returnVar.deref())
 					} else {
-						onError(res);
+						return onError(res);
 					}
 				}
 			);
 			return 0;
 		} else {
-			onError('Invalid Input Parameter Type');
+			return onError('Invalid Input Parameter Type');
 		}
 	}
 	
@@ -889,15 +889,15 @@ exports.ljmDriver = function()
 						while(strBuffer[i] !== 0) {
 							i++;
 						}
-						onSuccess(strBuffer.toString('utf8',0,i));
+						return onSuccess(strBuffer.toString('utf8',0,i));
 					} else {
-						onError(res);
+						return onError(res);
 					}
 				}
 			);
 			return 0;
 		} else {
-			onError('Invalid Input Parameter Type');
+			return onError('Invalid Input Parameter Type');
 		}
 	}
 	this.readLibrarySSync = function (parameter) {
@@ -944,9 +944,9 @@ exports.ljmDriver = function()
 				function (err, res) {
 					if (err) throw err;
 					if (res === 0) {
-						onSuccess();
+						return onSuccess();
 					} else {
-						onError(res);
+						return onError(res);
 					}
 				}
 			);
@@ -958,15 +958,15 @@ exports.ljmDriver = function()
 				function (err, res) {
 					if (err) throw err;
 					if (res === 0) {
-						onSuccess();
+						return onSuccess();
 					} else {
-						onError(res);
+						return onError(res);
 					}
 				}
 			);
 			return 0;
 		} else {
-			onError('Invalid Input Parameter Types');
+			return onError('Invalid Input Parameter Types');
 		}
 	}
 
@@ -1029,9 +1029,9 @@ exports.ljmDriver = function()
 			function (err, res) {
 				if (err) throw err;
 				if (res === 0) {
-					onSuccess();
+					return onSuccess();
 				} else {
-					onError(res);
+					return onError(res);
 				}
 			}
 		);
@@ -1080,9 +1080,9 @@ exports.ljmDriver = function()
 			function (err, res) {
 				if (err) throw err;
 				if (res === 0) {
-					onSuccess();
+					return onSuccess();
 				} else {
-					onError(res);
+					return onError(res);
 				}
 			}
 		);

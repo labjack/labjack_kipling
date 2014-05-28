@@ -182,7 +182,7 @@ exports.labjack = function ()
 					self.deviceType = deviceType;
 					self.connectionType = connectionType;
 					self.identifier = identifier;
-					onSuccess();
+					return onSuccess();
 				} else {
 					//Make sure that the handle, deviceType 
 					//		& connectionType are still null
@@ -190,7 +190,7 @@ exports.labjack = function ()
 					self.deviceType = null;
 					self.connectionType = null;
 					self.identifier = null;
-					onError(res);
+					return onError(res);
 				}
 			};
 
@@ -447,7 +447,7 @@ exports.labjack = function ()
 					ipStr += ".";
 					ipStr += ipAddr.readUInt8(0).toString();
 					
-					onSuccess(
+					return onSuccess(
 						{
 							deviceType: deviceType.deref(),
 							connectionType: connectionType.deref(),
@@ -458,7 +458,7 @@ exports.labjack = function ()
 						}
 					);
 				} else {
-					onError(res);
+					return onError(res);
 				}
 			}
 		);
@@ -548,7 +548,7 @@ exports.labjack = function ()
 
 		//Make sure the data is valid
 		if (typeof(data[0]) != "number") {
-			onError("Data is not a number array");
+			return onError("Data is not a number array");
 		}
 
 		//Create a blank array for data to be saved to & returned
@@ -562,9 +562,9 @@ exports.labjack = function ()
 			function (err, res) {
 				if (err) throw err;
 				if (res == 0) {
-					onSuccess(aData);
+					return onSuccess(aData);
 				} else {
-					onError(res);
+					return onError(res);
 				}
 		});
 	};
@@ -641,10 +641,10 @@ exports.labjack = function ()
 					if (err) throw err;
 					if ( res == 0 ) {
 						//Success
-						onSuccess(result.deref());
+						return onSuccess(result.deref());
 					} else {
 						//Error
-						onError(res);
+						return onError(res);
 					}
 				});
 		
@@ -668,9 +668,9 @@ exports.labjack = function ()
 						while ( strBuffer[i] != 0 ) {
 							i++;
 						}
-						onSuccess(strBuffer.toString('utf8', 0, i));
+						return onSuccess(strBuffer.toString('utf8', 0, i));
 					} else {
-						onError(res);
+						return onError(res);
 					}
 				}
 			);
@@ -798,8 +798,8 @@ exports.labjack = function ()
 		var output;
 
 		if(length < 1) {
-			throw new DriverInterfaceError("Addresses array must contain data");
-			onError("Addresses array must contain data");
+			// throw new DriverInterfaceError("Addresses array must contain data");
+			return onError("Addresses array must contain data");
 		}
 
 		var addrBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
@@ -844,9 +844,9 @@ exports.labjack = function ()
 					offset += ARCH_DOUBLE_NUM_BYTES;
 				}
 				if ((res == 0)) {
-					onSuccess(returnResults);
+					return onSuccess(returnResults);
 				} else {
-					onError({retError:res, errFrame:errors.deref()});
+					return onError({retError:res, errFrame:errors.deref()});
 				}
 			}
 		);
@@ -1017,9 +1017,9 @@ exports.labjack = function ()
 			function (err, res){
 				if (err) throw err;
 				if ( res == 0 ) {
-					onSuccess(aData);
+					return onSuccess(aData);
 				} else {
-					onError(res);
+					return onError(res);
 				}
 			}
 		);
@@ -1097,9 +1097,9 @@ exports.labjack = function ()
 					function(err, res) {
 						if (err) throw err;
 						if ( res == 0 ) {
-							onSuccess();
+							return onSuccess();
 						} else {
-							onError(res);
+							return onError(res);
 						}
 					}
 				);
@@ -1125,9 +1125,9 @@ exports.labjack = function ()
 					function(err, res){
 						if (err) throw err;
 						if ( res == 0 ) {
-							onSuccess();
+							return onSuccess();
 						} else {
-							onError(res);
+							return onError(res);
 						}
 					}
 				);
@@ -1135,9 +1135,9 @@ exports.labjack = function ()
 			} else {
 				//ERROR!! address is not valid, wrong direction or invalid addr.
 				if ( info.type == -1 ) {
-					onError("Invalid Address");
+					return onError("Invalid Address");
 				} else if (info.directionValid == 0) {
-					onError("Invalid Write Attempt");
+					return onError("Invalid Write Attempt");
 				}
 			}
 		} else if (!isNaN(address)) {
@@ -1152,9 +1152,9 @@ exports.labjack = function ()
 					function(err, res){
 						if (err) throw err;
 						if ( res == 0 ) {
-							onSuccess();
+							return onSuccess();
 						} else {
-							onError(res);
+							return onError(res);
 						}
 					}
 				);
@@ -1180,9 +1180,9 @@ exports.labjack = function ()
 					function(err, res){
 						if (err) throw err;
 						if ( res == 0 ) {
-							onSuccess();
+							return onSuccess();
 						} else {
-							onError(res);
+							return onError(res);
 						}
 					}
 				);
@@ -1190,13 +1190,13 @@ exports.labjack = function ()
 			} else {
 				//ERROR!! address is not valid, wrong direction or invalid addr.
 				if(info.type == -1) {
-					onError("Invalid Address");
+					return onError("Invalid Address");
 				} else if (info.directionValid == 0) {
-					onError("Invalid Write Attempt");
+					return onError("Invalid Write Attempt");
 				}
 			}
 		} else {
-			onError("Invalid Arguments");
+			return onError("Invalid Arguments");
 		}
 	};
 
@@ -1406,9 +1406,9 @@ exports.labjack = function ()
 				function(err, res){
 					if (err) throw err;
 					if ( (res == 0) ) {
-						onSuccess();
+						return onSuccess();
 					} else {
-						onError({retError:res, errFrame:errors.deref()});
+						return onError({retError:res, errFrame:errors.deref()});
 					}
 				}
 			);
@@ -1456,10 +1456,10 @@ exports.labjack = function ()
 				function(err, res){
 					if ( err ) throw err;
 					if ( (res == 0) ) {
-						onSuccess();
+						return onSuccess();
 					}
 					else {
-						onError({retError:res, errFrame:errors.deref()});
+						return onError({retError:res, errFrame:errors.deref()});
 					}
 				}
 			);
@@ -1758,7 +1758,7 @@ exports.labjack = function ()
 				function(err,res) {
 					if (err) throw err;
 					if ( res == 0 ) {
-						onSuccess(
+						return onSuccess(
 							self.populateRWManyArray(
 								numFrames, 
 								numValues, 
@@ -1767,7 +1767,7 @@ exports.labjack = function ()
 							)
 						);
 					} else {
-						onError(res);
+						return onError(res);
 					}
 				}
 			);
@@ -1798,7 +1798,7 @@ exports.labjack = function ()
 					info = this.constants.getAddressInfo(addresses[i], 'W');
 				} else {
 					//Report Error:
-					throw new DriverInterfaceError(
+					return onError(
 						{
 							retError:"Invalid Direction", 
 							errFrame:i
@@ -1819,29 +1819,26 @@ exports.labjack = function ()
 				{
 					//Report Error:
 					if(info.type == -1) {
-						throw new DriverInterfaceError(
+						return onError(
 							{
 								retError:"Invalid Address", 
 								errFrame:i
 							}
 						);
-						return {retError:"Invalid Address", errFrame:i};
 					} else if (info.directionValid == 0) {
-						throw new DriverInterfaceError(
+						return onError(
 							{
 								retError:"Invalid Write Attempt", 
 								errFrame:i
 							}
 						);
-						return {retError:"Invalid Write Attempt", errFrame:i};
 					} else {
-						throw new DriverInterfaceError(
+						return onError(
 							{
 								retError:"Weird-Error", 
 								errFrame:i
 							}
 						);
-						return {retError:"Weird-Error", errFrame:i};
 					}
 				}
 
@@ -1884,7 +1881,7 @@ exports.labjack = function ()
 				function(err,res) {
 					if(err) throw err;
 					if(res == 0) {
-						onSuccess(
+						return onSuccess(
 							self.populateRWManyArray(
 								numFrames, 
 								numValues, 
@@ -1893,12 +1890,12 @@ exports.labjack = function ()
 							)
 						);
 					} else {
-						onError(res);
+						return onError(res);
 					}
 				}
 			);
 		} else {
-			onError("Address is not a number or string array");
+			return onError("Address is not a number or string array");
 		}
 	}
 	/**
@@ -2201,9 +2198,9 @@ exports.labjack = function ()
 					}
 					macStr += tVar;
 					// console.log('mac address:',macStr);
-					onSuccess(macStr);
+					return onSuccess(macStr);
 				} else {
-					onError(res);
+					return onError(res);
 				}
 			}
 		);
@@ -2365,9 +2362,9 @@ exports.labjack = function ()
 				self.deviceType = null;
 				self.connectionType = null;
 				self.identifier = null;
-				onSuccess(true);
+				return onSuccess(true);
 			} else {
-				onError(res);
+				return onError(res);
 			}
 		});
 	}
