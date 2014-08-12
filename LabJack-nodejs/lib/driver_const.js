@@ -9,6 +9,7 @@
 
 exports.LJM_JS_VERSION = 1.0000;
 exports.LJM_DRVR_VERSION = '1.0.0';
+exports.LJM_MAX_SUPPORTED_VERSION = 3.0000;
 exports.LJM_DT_ANY = 0;
 exports.LJM_DT_UE9 = 9;
 exports.LJM_DT_U3 = 3;

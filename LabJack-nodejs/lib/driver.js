@@ -1107,9 +1107,13 @@ exports.ljmDriver = function()
 
 	//Read the Driver Version number
 	this.installedDriverVersion = this.readLibrarySync('LJM_LIBRARY_VERSION');
-	if(this.installedDriverVersion != driver_const.LJM_JS_VERSION)
+	if(this.installedDriverVersion < driver_const.LJM_JS_VERSION)
 	{
-		console.log('The Supported Version for this driver is: '+driver_const.LJM_JS_VERSION+', you are using: ', this.installedDriverVersion);
+		console.error('The Supported Version for this driver is: '+driver_const.LJM_JS_VERSION+', you are using: ', this.installedDriverVersion);
+	} else {
+		if(this.installedDriverVersion > driver_const.LJM_MAX_SUPPORTED_VERSION) {
+			console.warn('The Supported Version for this driver is: '+driver_const.LJM_JS_VERSION+', you are using: ', this.installedDriverVersion);
+		}
 	}
 	//Enable Logging
 	//this.driver.LJM_WriteLibraryConfigS('LJM_LOG_MODE',2);
