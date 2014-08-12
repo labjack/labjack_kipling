@@ -35,7 +35,7 @@ exports.run = function(functionList) {
 			}
 			//Execute test-function
 			var execStr = functionList[i].split("(")[0]+'Sync('+functionList[i].split("(")[1];
-			console.log(execStr);
+			printInfo(execStr);
 			if(functionList[i].search('listAll') != -1) {
 				err=eval('ljmDriver.'+execStr);
 			} else if(functionList[i].search('errToStr') != -1) {
@@ -44,7 +44,7 @@ exports.run = function(functionList) {
 				err=eval('device.'+execStr);
 			}
 			if(((err != null)&&(err != 0))||(typeof(err)=="string")) {
-				console.log(err);
+				printInfo(err);
 			} else {
 				printInfo('SUCCESS');
 			}

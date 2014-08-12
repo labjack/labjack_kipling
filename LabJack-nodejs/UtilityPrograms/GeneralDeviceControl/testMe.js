@@ -57,13 +57,7 @@ var openCloseTest =
 //'close()',
 //'open("LJM_dtT7","LJM_ctETHERNET","470010642")',
 //'close()',
-'open("LJM_dtANY","0","LJM_idANY")',
-'close()',
-'open("0","LJM_ctANY","LJM_idANY")',
-'close()',
-'open("LJM_dtANY",0,"LJM_idANY")',
-'close()',
-'open(0,"LJM_ctANY","LJM_idANY")',
+'open("LJM_dtANY","LJM_ctANY","470010604")',
 'close()',
 ]
 var configureWifiLJ = 
@@ -163,8 +157,11 @@ var LUATestScript =
 var listAllTest = 
 [
 // 'listAll("LJM_dtT7","LJM_ctEthernet")',
-'listAllExtended("LJM_dtT7","LJM_ctEthernet",["AIN0","DAC0","DEVICE_NAME_DEFAULT","FIRMWARE_VERSION"])',
-'listAllExtended("LJM_dtT7","LJM_ctWifi",["AIN0","DAC0","DEVICE_NAME_DEFAULT","FIRMWARE_VERSION"])',
+'writeLibrary("LJM_OLD_FIRMWARE_CHECK",0)',
+// 'listAllExtended("LJM_dtT7","LJM_ctANY",["SERIAL_NUMBER","DEVICE_NAME_DEFAULT","FIRMWARE_VERSION"])',
+'listAllExtended("LJM_dtT7","LJM_ctANY",["DEVICE_NAME_DEFAULT","HARDWARE_INSTALLED","WIFI_STATUS","WIFI_RSSI"])',
+// 'listAllExtended("LJM_dtT7","LJM_ctANY",["DEVICE_NAME_DEFAULT","HARDWARE_INSTALLED","ETHERNET_IP","WIFI_STATUS","WIFI_IP","WIFI_RSSI"])',
+//'listAllExtended("LJM_dtT7","LJM_ctWifi",["AIN0","DAC0","DEVICE_NAME_DEFAULT","FIRMWARE_VERSION"])',
 ]
 var configureWifiTJ = 
 [
@@ -213,7 +210,7 @@ var altNamesAndBeta =
 ]
 var speedTest = 
 [
-'open("LJM_dtT7","LJM_ctUSB","ANY")',
+'open("LJM_dtT7","LJM_ctEthernet","ANY")',
 ]
 var i;
 for(i = 0; i < 500; i++) {
@@ -288,7 +285,7 @@ var buildBreakEthernetConnectionTest = function() {
 var readMacTest = 
 [
 // 'open("LJM_dtT7","LJM_ctUSB","ANY")',
-'open("LJM_dtT7","LJM_ctWifi","192.168.1.29")',
+'open("LJM_dtT7","LJM_ctEthernet",470010604)',
 // Addresses, directions, numValues, values(empty for write)
 'readUINT64("ethernet")',
 'readUINT64("wifi")',
@@ -298,6 +295,11 @@ var listAllExtTest = [
 'writeLibrary("LJM_DEBUG_LOG_LEVEL",2)',
 'writeLibrary("LJM_DEBUG_LOG_MODE",2)'
 ];
+var crashStream = [
+'open("LJM_dtT7","LJM_ctEthernet",470010604)',
+'read("WIFI_IP_DEFAULT")',
+'close()'
+]
 for(i = 0; i < 30; i++) {
 	listAllExtTest.push('listAllExtended("LJM_dtT7","LJM_ctANY",["AIN0","DAC0","DEVICE_NAME_DEFAULT","FIRMWARE_VERSION"])');
 }
@@ -324,7 +326,8 @@ speedTest,				// 15
 readManySpeedTest,		// 16
 breakEthernetConnectionTest, // 17
 readMacTest,			// 18
-listAllExtTest			// 19
+listAllExtTest,			// 19
+crashStream				// 20
 ]
 
 var activeTest;

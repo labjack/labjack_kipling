@@ -4,6 +4,7 @@ clear #clears the command line screen
 #Accepts Two args & executes the testMe.js node program:
 #Arg1: true/false.  true=async, false=blocking
 #Arg2: test number, see testMe.js for test descriptions
+#ex: "./run.sh true 0" executes the first mini-script in async mode
 
 #First perform logic to check the number of command line arguments, do something different if there are 0 args
 if [ $# -eq 0 ]
