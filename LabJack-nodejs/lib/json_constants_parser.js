@@ -20,24 +20,32 @@ var utilities = require('./utils');	//Load module for sscanf
 var driver_const = require('./driver_const');
 
 
-//Important constants:
+// Important constants:
 // console.log(os.hostname());
 // console.log(os.type());
 // console.log(os.platform());
 // console.log(os.arch());
 // console.log(os.release());
 var LJM_JSON_FILE_LOCATION;
+var LJ_TEMPORARY_FILE_LOCATION;
 if (process.platform === 'win32') {
+	var tFileModernPath = process.env.ALLUSERSPROFILE + '\\LabJack\\K3';
+	var tFileXPPath = process.env.ALLUSERSPROFILE + '\\Application Data\\LabJack\\K3';
 	var modernPath = process.env.ALLUSERSPROFILE + '\\LabJack\\LJM\\ljm_constants.json';
 	var xpPath = process.env.ALLUSERSPROFILE + '\\Application Data\\LabJack\\LJM\\ljm_constants.json';
 	var filePath = fs.existsSync(modernPath);
 
-	if (filePath)
+	if (filePath) {
 		LJM_JSON_FILE_LOCATION = modernPath;
-	else
+		LJ_TEMPORARY_FILE_LOCATION = tFileModernPath;
+	}
+	else {
 		LJM_JSON_FILE_LOCATION = xpPath;
+		LJ_TEMPORARY_FILE_LOCATION = tFileXPPath;
+	}
 } else {
 	LJM_JSON_FILE_LOCATION = '/usr/local/share/LabJack/LJM/ljm_constants.json';
+	LJ_TEMPORARY_FILE_LOCATION = '/usr/local/share/LabJack/K3';
 }
 
 var PARSE_BETA_REGISTERS = true;
@@ -50,7 +58,7 @@ var typeSizes = {
 	BYTE: 1,
 	UINT32: 4,
 	FLOAT32: 4
-}
+};
 
 /**
  * Error-reporting mechanism.
@@ -58,7 +66,7 @@ var typeSizes = {
  */
 function JSONParsingError(description) {
 	this.description = description;
-};
+}
 
 function zipArraysToObject(keys, values) {
 	var retObj = {};
@@ -250,15 +258,15 @@ var parseConstants = function(LJMJSONFileLocation) {
 		}
 		
 		return {
-			type: deviceType, 
-			directionValid: validity, 
-			typeString: regEntry.type, 
-			address: resolvedAddress, 
+			type: deviceType,
+			directionValid: validity,
+			typeString: regEntry.type,
+			address: resolvedAddress,
 			size: size,
 			data: regEntry
 		};
-	}
-}
+	};
+};
 
 constants = new parseConstants(LJM_JSON_FILE_LOCATION);
 /**
@@ -267,4 +275,4 @@ constants = new parseConstants(LJM_JSON_FILE_LOCATION);
  */
 exports.getConstants = function() {
 	return constants;
-}
+};
