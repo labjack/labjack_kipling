@@ -7,8 +7,8 @@
  * @author Chris Johnson (chrisjohn404, LabJack Corp.)
 **/
 
-exports.LJM_JS_VERSION = 0.0245;
-exports.LJM_DRVR_VERSION = '0.2.45';
+exports.LJM_JS_VERSION = 1.0000;
+exports.LJM_DRVR_VERSION = '1.0.0';
 exports.LJM_DT_ANY = 0;
 exports.LJM_DT_UE9 = 9;
 exports.LJM_DT_U3 = 3;
