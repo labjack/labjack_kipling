@@ -2,6 +2,14 @@ LabJack-nodejs
 ==============
 UPDATED FOR LJM VERSION 1.03
 
+Installation notes for windows:
+Make sure that [node-gyp is properlly installed](http://stackoverflow.com/questions/21365714/nodejs-error-installing-with-npm).
+Peforming the standard npm install command will fail on windows.  It will hopefully complain about not having proper "TargetFrameworkVersion or PlatformToolset variables not being set.  If this is true, set them:
+"npm install --msvs_version=2012" or 2013.
+
+This hint came from someone building [couchbase](http://www.bitcrunch.de/install-couchbase-node-js-windows-8-machine/)
+
+
 
 nodejs library for using [LJM library](http://labjack.com/ljm).  Created two different objects that can be imported.  Was created to function much like our labjack python driver for our UD devices. For more information about what each function does please look at the LabJackM.h file that can be downloaded & installed from LabJacks [Software & Driver](http://labjack.com/support/software) page.
 
