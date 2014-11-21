@@ -1,0 +1,32 @@
+{
+	"name": "LabJack-process_manager",
+	"version": "0.0.1",
+	"author": {
+		"name": "Chris Johnson",
+		"url": "http://labjack.com"
+	},
+	"main": "./lib/labjack_nodejs",
+	"license": {
+		"type": "MIT",
+		"url": "https://raw.githubusercontent.com/chrisJohn404/LabJack-process_manager/master/LICENSE"
+	},
+	"keywords": [
+        "LabJack",
+        "Child Process Management",
+        "IPC Messaging"
+    ],
+    "homepage": "https://github.com/chrisJohn404/LabJack-process_manager",
+    "repository": {
+        "type" : "git",
+        "url" : "https://github.com/chrisJohn404/LabJack-process_manager.git"
+    },
+    "main": "lib/process_manager.js",
+    "files": [
+        "lib"
+    ],
+	"dependencies": {
+		"async": "~0",
+		"dict": "1.4.0",
+		"q": "~0"
+	}
+}
