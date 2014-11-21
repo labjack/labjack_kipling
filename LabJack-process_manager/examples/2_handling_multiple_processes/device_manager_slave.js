@@ -1,15 +1,8 @@
-var ljm = require('labjack-nodejs');
 var dict = require('dict');
 var q = require('q');
 
-// var ljm_manager = require('ljm_manager');
-// var ljm_listeners = ljm_manager.getListeners();
-// var logger = require('logger');
 
-
-
-
-var process_manager = require('./process_manager');
+var process_manager = require('LabJack-process_manager');
 var slave_process = process_manager.slave_process;
 
 var LJM_Manager_Listeners = function(messageBundle) {

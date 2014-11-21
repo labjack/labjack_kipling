@@ -2,7 +2,7 @@ var dict = require('dict');
 var q = require('q');
 var async = require('async');
 
-var process_manager = require('./process_manager');
+var process_manager = require('LabJack-process_manager');
 var managedProcess;
 
 
@@ -16,16 +16,16 @@ var managedProcess;
 exports.createManager = function() {
     // deviceManager = new createNewDeviceManager();
     managedProcess = new process_manager.master_process();
-    process_manager.init();
+    managedProcess.init();
     
-    return process_manager.startChildProcess('./device_manager_slave',{'title': 'AA_T1'});
+    return managedProcess.qStart('./slave');
 };
 exports.sendReceive = function(m) {
-    return process_manager.sendReceive(m);
+    return managedProcess.sendReceive(m);
 };
 exports.sendTestMessage = function() {
     var sendTestMessageDefered = q.defer();
-    process_manager.qSendMessage({'arbitraryData': 'testMessage from master'})
+    managedProcess.sendReceive({'arbitraryData': 'testMessage from master'})
     .then(function(res) {
         print('sendTestMessage success', res);
         sendTestMessageDefered.resolve(res);
@@ -36,5 +36,5 @@ exports.sendTestMessage = function() {
     return sendTestMessageDefered.promise;
 };
 exports.stopManager = function() {
-    return process_manager.qStop();
+    return managedProcess.qStop();
 };

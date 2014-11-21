@@ -1,4 +1,4 @@
-var dmm = require('./device_manager_master');
+var dmm = require('./master');
 var q = require('q');
 
 
@@ -39,6 +39,7 @@ function createTester() {
 	};
 
 	this.run = function() {
+		console.log('HERE');
 		var defered = q.defer();
 		startTime = process.hrtime();
 		var runNext = function() {
@@ -110,9 +111,9 @@ var tester = new createTester();
 
 dmm.createManager()
 .then(dmm.sendTestMessage)
-.then(pResp)
-.then(tester.run)
-.then(tester.testResults)
+// .then(pResp)
+// .then(tester.run)
+// .then(tester.testResults)
 .then(dmm.stopManager,dmm.stopManager)
 .then(function() {
 	console.log('M: Finished!');
