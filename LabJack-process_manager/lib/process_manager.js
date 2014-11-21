@@ -8,7 +8,9 @@ var master_process = require('./master_process');
 var slave_process = require('./slave_process');
 
 exports.master_process = master_process.createNewMasterProcess;
-exports.slave_process = slave_process;
+exports.slave_process = function() {
+	return slave_process;
+};
 
 exports.getStats = function() {
 	return {
