@@ -40,7 +40,7 @@ var print = function(argA, argB) {
  * Possible events that the process manager can emit:
 **/
 var PM_MESSAGE_BUFFER_FULL = 'messageBufferFull';
-var PM_RECEIVED_MESSAGE_INVALID = 'ReceivedMessageinvalid';
+var PM_RECEIVED_MESSAGE_INVALID = 'ReceivedInvalidMessage';
 var PM_CRITICAL_ERROR = 'criticalError';
 
 // Some debugging constants
@@ -271,10 +271,12 @@ function createNewProcessManager() {
         var deviceManagerSlaveArgs = [];
         var isSilent = false;
         
-        var deviceManagerSlaveOptions = {
-            'silent': isSilent
-        };
+        var deviceManagerSlaveOptions = {};
         if(options) {
+            if(options.silent) {
+                deviceManagerSlaveOptions.silent = options.silent;
+                isSilent = options.silent;
+            }
 	        var envVars = process.env;
 	        envVars.slave_process_env = JSON.stringify(options);
 	        deviceManagerSlaveOptions.env = envVars;
@@ -313,22 +315,28 @@ function createNewProcessManager() {
         .then(defered.resolve, defered.reject);
         return defered.promise;
     };
-    this.qSendMessage = function(m) {
+    this.qSendReceiveMessage = function(m) {
         var defered = q.defer();
         sendReceive(m, PM_MESSAGE)
         .then(defered.resolve, defered.reject);
         return defered.promise;
     };
-    this.sendMessage = function(m, onError, onSuccess) {
+    this.sendReceiveMessage = function(m, onError, onSuccess) {
         var saveFunc = function(func) {
             return func;
         };
         self.qSendMessage(m)
         .then(saveFunc(onSuccess), saveFunc(onError));
     };
-    this.send = function(m) {
+    this.sendMessage = function(m) {
         var defered = q.defer();
-        sendEmitMessage(m)
+        sendEmitMessage(PM_EMIT_MESSAGE, m)
+        .then(defered.resolve, defered.reject);
+        return defered.promise;
+    };
+    this.emitMessage = function(type, m) {
+        var defered = q.defer();
+        sendEmitMessage(type.toString(), m)
         .then(defered.resolve, defered.reject);
         return defered.promise;
     };
@@ -366,12 +374,12 @@ function createNewProcessManager() {
         // return promise
         return childProcessMessage.promise;
     };
-    var sendEmitMessage = function(m) {
+    var sendEmitMessage = function(type, m) {
         var defered = q.defer();
         var newMessage = {};
         newMessage.id = PM_EMIT_MESSAGE;
         newMessage.responseRequired = false;
-        newMessage.type = PM_EMIT_MESSAGE;
+        newMessage.type = type;
         newMessage.data = m;
 
         // send the newMessage object to the child process
@@ -454,10 +462,13 @@ function createNewMasterProcess() {
 	};
 
 	this.sendReceive = function(m) {
-	    return self.masterProcess.qSendMessage(m);
+	    return self.masterProcess.qSendReceiveMessage(m);
 	};
-    this.send = function(m) {
-        return self.masterProcess.send(m);
+    this.sendMessage = function(m) {
+        return self.masterProcess.sendMessage(m);
+    };
+    this.emit = function(type, m) {
+        return self.masterProcess.emitMessage(type, m);
     };
 
     this.getProcessInfo = function() {

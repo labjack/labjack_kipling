@@ -27,10 +27,8 @@ exports.sendTestMessage = function() {
     var sendTestMessageDefered = q.defer();
     managedProcess.sendReceive({'arbitraryData': 'testMessage from master'})
     .then(function(res) {
-        print('sendTestMessage success', res);
         sendTestMessageDefered.resolve(res);
     }, function(err) {
-        print('sendTestMessage error', err);
         sendTestMessageDefered.reject(err);
     });
     return sendTestMessageDefered.promise;

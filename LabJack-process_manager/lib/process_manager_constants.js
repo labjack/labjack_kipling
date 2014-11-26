@@ -20,7 +20,7 @@ exports.getProcessInfo = 'getProcessInfo';
  */
 // internal child-emitted messages (send only)
 exports.childProcessStarted = 'childProcessStarted';
-exports.emitMessage = 'emit';
+exports.emitMessage = 'message';
 
 
 /**

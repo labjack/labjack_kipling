@@ -1,5 +1,5 @@
 /**
- * This test makes sure that multiple processes can be created, managed, and 
+ * This example makes sure that multiple processes can be created, managed, and 
  * destroyed using the process_manager library.
 **/
 

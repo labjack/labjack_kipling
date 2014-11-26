@@ -194,7 +194,7 @@ function createNewMessageManager(listeners) {
 					throw new error('savedListener.type not valid, slave_process, OUCH!', savedListener.type);
 				}
 			} else {
-				self.emit('message', bundle.message.data);
+				self.emit(bundle.message.type, bundle.message.data);
 				defered.resolve(bundle);
 			}
 		} else {
@@ -271,21 +271,21 @@ function createNewMessageManager(listeners) {
 		.then(respondToMessage, handleMessageError)
 		.then(cleanupMessage, cleanupMessage);
 	};
-	var setupProcessStartedMessage = function() {
+	var setupProcessStartedMessage = function(retData) {
 		var defered = q.defer();
 		var data = {
 			'id': PM_CHILD_PROCESS_STARTED,
         	'message': {'type': PM_CHILD_PROCESS_STARTED},
         	'returnError': false,
-        	'successData': PM_CHILD_PROCESS_STARTED
+        	'successData': retData
 		};
 		defered.resolve(data);
 		return defered.promise;
 	};
 
-	this.finishSetup = function() {
+	this.finishSetup = function(retData) {
 		var defered = q.defer();
-		setupProcessStartedMessage()
+		setupProcessStartedMessage(retData)
 		.then(respond)
 		.then(cleanupMessage)
         .then(defered.resolve, defered.reject);
@@ -350,12 +350,16 @@ exports.init = function(listener) {
 
     return messageManager;
 };
-exports.finishedInit = function() {
+exports.finishedInit = function(retData) {
 	var defered = q.defer();
 	// Indicate that this process is ready to receive messages
-	messageManager.finishSetup()
+	messageManager.finishSetup(retData)
 	.then(defered.resolve, defered.reject);
     return defered.promise;
+};
+
+exports.getSlaveProcessInfo = function() {
+	return slave_process_env;
 };
 
 exports.getStats = function() {
