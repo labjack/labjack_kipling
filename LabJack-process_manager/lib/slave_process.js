@@ -365,6 +365,15 @@ exports.getSlaveProcessInfo = function() {
 exports.getStats = function() {
 	return {};
 };
+exports.emitMessage = function(data) {
+	if((typeof(type) !== 'undefined') && (typeof(data) !== 'undefined')) {
+		var message = {
+			'eventType': PM_EMIT_MESSAGE,
+			'data': data
+		};
+		return messageManager.emitMessage(message);
+	}
+};
 exports.emit = function(type, data) {
 	if((typeof(type) !== 'undefined') && (typeof(data) !== 'undefined')) {
 		var message = {
@@ -373,5 +382,4 @@ exports.emit = function(type, data) {
 		};
 		return messageManager.emitMessage(message);
 	}
-	
 };
