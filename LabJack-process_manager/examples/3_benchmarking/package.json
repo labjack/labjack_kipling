@@ -1,0 +1,14 @@
+{
+	"name": "basic-example",
+	"version": "0.0.1",
+	"author": {
+		"name": "Chris Johnson",
+		"url": "http://labjack.com"
+	},
+    "main": "main.js",
+	"dependencies": {
+		"async": "~0",
+		"dict": "1.4.0",
+		"q": "~0"
+	}
+}
