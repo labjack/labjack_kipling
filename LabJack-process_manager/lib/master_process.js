@@ -467,7 +467,7 @@ function createNewMasterProcess() {
     this.sendMessage = function(m) {
         return self.masterProcess.sendMessage(m);
     };
-    this.emit = function(type, m) {
+    this.send = function(type, m) {
         return self.masterProcess.emitMessage(type, m);
     };
 

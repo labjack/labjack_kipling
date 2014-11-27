@@ -365,7 +365,7 @@ exports.getSlaveProcessInfo = function() {
 exports.getStats = function() {
 	return {};
 };
-exports.emitMessage = function(data) {
+exports.sendMessage = function(data) {
 	if((typeof(type) !== 'undefined') && (typeof(data) !== 'undefined')) {
 		var message = {
 			'eventType': PM_EMIT_MESSAGE,
@@ -374,7 +374,7 @@ exports.emitMessage = function(data) {
 		return messageManager.emitMessage(message);
 	}
 };
-exports.emit = function(type, data) {
+exports.send = function(type, data) {
 	if((typeof(type) !== 'undefined') && (typeof(data) !== 'undefined')) {
 		var message = {
 			'eventType': type,
