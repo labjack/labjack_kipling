@@ -13,6 +13,22 @@ var getExecution;
 var mp;
 var mpEventEmitter;
 
+var DEBUG_TEST = false;
+var print = function(argA, argB) {
+    if(DEBUG_TEST) {
+        var msg = 'BT:';
+        if(argA) {
+            if(argB) {
+                console.log(msg, argA, argB);
+            } else {
+                console.log(msg, argA);
+            }
+        } else {
+            console.log(msg);
+        }
+    }
+};
+
 var createMasterProcess = function() {
 	var defered = q.defer();
 	mp = new process_manager.master_process();
@@ -24,14 +40,14 @@ var initializeMasterProcess = function(eventTitle) {
 	var defered = q.defer();
 	mpEventEmitter = mp.init();
 	mpEventEmitter.on(eventTitle, function(data) {
-		console.log('M: Received slave_process \'test\' emit', eventTitle, data);
+		print('Received slave_process \'test\' emit', eventTitle, data);
 		receivedTestEvents.push(data);
 	});
 	defered.resolve(mpEventEmitter);
 	return defered.promise;
 };
 
-
+var returnedData = [];
 var run = function() {
 	var defered = q.defer();
 	// Generic Procedure after initialization
@@ -41,9 +57,8 @@ var run = function() {
 
 	// The child process to create
 	var childProcessToFork = './test/basic_test_slave.js';
-	var returnedData = [];
 
-	console.log('M: Starting Basic Example');
+	print('Starting Basic Example');
 	getExecution(mp, 'qStart', childProcessToFork, {'startupInfo': 'aa'})(returnedData)
 	.then(getExecution(mp, 'sendMessage', {'dataMessage': 'aB'}))
 	.then(getExecution(mp, 'send', 'message', {'dataMessage': 'aB'}))
@@ -52,7 +67,7 @@ var run = function() {
 	// .then(getExecution(mp, 'getProcessInfo'))
 	.then(getExecution(mp, 'qStop'))
 	.then(function(bundle) {
-		console.log('M: Received Data');
+		print('Received Data');
 		bundle.forEach(function(data) {
 			var pData;
 			if(data.retData) {
@@ -60,9 +75,11 @@ var run = function() {
 			} else {
 				pData = data.errData;
 			}
-			console.log('\t- ' + data.functionCall + ':', pData);
+			if(DEBUG_TEST) {
+				console.log('\t- ' + data.functionCall + ':', pData);
+			}
 		});
-		console.log('M: Finished Basic Example');
+		print('Finished Basic Example');
 		defered.resolve();
 	});
 	return defered.promise;
@@ -151,9 +168,36 @@ exports.tests = {
 		test.done();
 	},
 	'basic_execution': function(test) {
+		var expectedTestEvents = [
+			'Test Data',
+			'Test Data'
+		];
+
+		var expectedReturnData = [
+			{
+				'functionCall': 'qStart',
+				'retData': { 'startupInfo': 'aa' }
+			}, {
+				'functionCall': 'sendMessage',
+				'retData': undefined
+			}, {
+				'functionCall': 'send',
+				'retData': undefined
+			}, {
+				'functionCall': 'sendReceive',
+				'retData': {
+					'arbitraryData': 'Arbitrary data from basic_test_slave.js'
+				}
+			}, {
+				'functionCall': 'qStop',
+				'retData': { 'numLostMessages': 0 }
+			}
+		];
 		run()
 		.then(function(data) {
 			test.ok(true);
+			test.deepEqual(receivedTestEvents, expectedTestEvents, 'Issue with event messaging');
+			test.deepEqual(returnedData, expectedReturnData, 'Issue with send receive messaging');
 			test.done();
 		});
 	}

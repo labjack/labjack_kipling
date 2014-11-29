@@ -105,7 +105,7 @@ function createNewProcessManager() {
     var checkMessageId = function(messageId) {
         if (messageBuffer.has(messageId)) {
             console.error('in checkMessageId', PM_MESSAGE_BUFFER_FULL);
-            var emitResult = self.emit(PM_MESSAGE_BUFFER_FULL);
+            var emitResult = self.emit(PM_MESSAGE_BUFFER_FULL, messageId);
             if(!emitResult) {
                 throw new error(PM_MESSAGE_BUFFER_FULL);
             }
@@ -225,18 +225,22 @@ function createNewProcessManager() {
     //
     var errorListener = function(err) {
         print('errorListener', err);
+        self.emit('error', err);
     };
     // exitListener takes one argument, it is the exit code of the child process.
     var exitListener = function(code) {
         print('exitListener', code);
         receivedExitMessage = true;
+        self.emit('exit', code);
     };
     var closeListener = function(data) {
         print('closeListener', data);
+        self.emit('close', data);
     };
     var disconnectListener = function(data) {
         print('disconnectListener', data);
         receivedDisconnectMessage = true;
+        self.emit('disconnect', data);
     };
     var messageListener = function(data) {
         print('messageListener', data);
