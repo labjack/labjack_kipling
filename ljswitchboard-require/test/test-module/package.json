@@ -1,0 +1,11 @@
+{
+  "name": "test-module",
+  "version": "1.0.0",
+  "description": "a test module for ljswitchboard-require",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "chrisjohn404",
+  "license": "MIT"
+}
