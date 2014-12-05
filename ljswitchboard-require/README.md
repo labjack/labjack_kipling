@@ -16,3 +16,7 @@ If the file at '/home/ry/projects/foo.js' called ljswitchboard-require.require('
  * /home/node_modules/bar.js
  * /node_modules/bar.js
  * /yourDirectory/bar.js
+ * /process.cwd()/bar.js
+
+ NOTE:
+ The one flaw of this library as of right now is that require doesn't get executed from the path of the caller and I am not sure how it will perform when multiple modules start to use it.  The fix for this may be to switch to using rekuire instead of require but I am avoiding this right now for speed purposes.

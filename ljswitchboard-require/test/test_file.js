@@ -1,8 +1,8 @@
-// console.log('   - in sub_test.js', process.cwd());
+// console.log('   - ljswitchboard-require.js test-file, test-file.js');
 
-var localRequire = require('../../lib/ljswitchboard-require');
+var localRequire = require('../lib/ljswitchboard-require');
 
-exports.testVar = 'sub_test.js';
+exports.testVar = 'test-file.js';
 exports.tFunc = function() {
 	var isFound = false;
 	try {

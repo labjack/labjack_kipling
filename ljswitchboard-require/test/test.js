@@ -1,15 +1,20 @@
 
-var rek = require('rekuire');
-var ljs_req = rek('ljswitchboard-require');
+// Just to make sure that the package.json is created properly, navigate to one 
+// folder above this packages directory.
+var ljs_req = require('../../ljswitchboard-require');
 var req = ljs_req.require;
 var path = require('path');
 
-var testDirectory = process.cwd().split(path.sep).join('/') + '/test';
-var expectedDirectories = [''];
+var rootDirectory = process.cwd().split(path.sep).join('/');
+var testDirectory = rootDirectory + '/test';
+var expectedDirectories = ['', '.', testDirectory];
+
+var expectedTestObjKeys = ['testVar', 'tFunc', 'req'];
+
 exports.basic_test = {
 	'add a directory': function(test) {
-		expectedDirectories.push(testDirectory);
-		ljs_req.addDirectory(testDirectory);
+		expectedDirectories.push(rootDirectory);
+		ljs_req.addDirectory(rootDirectory);
 
 		// Test the directory addition
 		var msg = 'ljs-req search directories var is invalid';
@@ -17,6 +22,7 @@ exports.basic_test = {
 		test.done();
 	},
 	'add multiple directories': function(test) {
+		
 		var directories = ['dir_a','dir_b'];
 		for(var i = 0; i < directories.length; i++) {
 			directories[i] = testDirectory + '/' + directories[i];
@@ -30,15 +36,86 @@ exports.basic_test = {
 		test.deepEqual(ljs_req.getDirectories(), expectedDirectories, msg);
 		test.done();
 	},
-	'require "sub_test"': function(test) {
-
+	'require "test-module"': function(test) {
 		try {
-			var sub_test = req('sub_test.js');
-			console.log('sub_test module:', sub_test);
+			var test_module = req('test-module');
+
+			var msgs = [
+				'Required object has invalid keys',
+				'Required object returned an invalid result'
+			];
+			var foundKeys = Object.keys(test_module);
+			test.deepEqual(foundKeys, expectedTestObjKeys, msgs[0]);
+			var expectedTestVar = 'test-module: index.js';
+			test.strictEqual(test_module.testVar, expectedTestVar, msgs[1]);
+			test.ok(true);
 		} catch (err) {
-			console.log(err);
+			console.log('ERROR',err);
+			test.ok(false);
 		}
-		
 		test.done();
-	}
+	},
+	'require "sub_test.js"': function(test) {
+		try {
+			var test_module = req('sub_test.js');
+
+			var msgs = [
+				'Required object has invalid keys',
+				'Required object returned an invalid result'
+			];
+			var foundKeys = Object.keys(test_module);
+			test.deepEqual(foundKeys, expectedTestObjKeys, msgs[0]);
+			var expectedTestVar = 'sub_test.js';
+			test.strictEqual(test_module.testVar, expectedTestVar, msgs[1]);
+			test.ok(true);
+		} catch (err) {
+			console.log('ERROR',err);
+			test.ok(false);
+		}
+		test.done();
+	},
+	'require "test-file.js"': function(test) {
+		try {
+			var tM = require('./test_File.js');
+			var tMa = require('C:/Users/chris/git/LabJack/Kipling/ljswitchboard-require/test/test_File.js');
+			// console.log(" - tM", tM, tMa);
+		} catch(err) {
+			console.log(" * tM Err", err);
+		}
+		try {
+			var test_module = req('test_file.js');
+
+			var msgs = [
+				'Required object has invalid keys',
+				'Required object returned an invalid result'
+			];
+			var foundKeys = Object.keys(test_module);
+			test.deepEqual(foundKeys, expectedTestObjKeys, msgs[0]);
+			var expectedTestVar = 'test-file.js';
+			test.strictEqual(test_module.testVar, expectedTestVar, msgs[1]);
+			test.ok(true);
+		} catch (err) {
+			console.log('ERROR',err);
+			test.ok(false);
+		}
+		test.done();
+	},
+	'require an invalid module': function(test) {
+		try {
+			var test_module = req('test-modulea');
+			console.log('Module some how found', test_module);
+			test.ok(false);
+		} catch (err) {
+			var expectedMessage = "Can not find module 'test-modulea'";
+			var msgs = [
+				'Invalid err.message returned',
+				'Invalid err.code returned'
+			];
+
+			test.strictEqual(err.message, expectedMessage, msgs[0]);
+			test.strictEqual(err.code, 'MODULE_NOT_FOUND', msgs[1]);
+			test.ok(true);
+		}
+		test.done();
+	},
 };
