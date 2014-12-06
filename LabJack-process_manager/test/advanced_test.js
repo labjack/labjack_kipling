@@ -30,7 +30,8 @@ exports.tests = {
 	'check for binaries': function(test) {
 		var platform = process.platform;
 		var exeName = {
-			'win32': 'node.exe'
+			'win32': 'node.exe',
+			'darwin': 'node'
 		}[platform];
 		var arch = process.arch;
 		var rootDir = process.cwd();
