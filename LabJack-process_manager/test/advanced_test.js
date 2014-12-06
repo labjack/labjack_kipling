@@ -42,17 +42,10 @@ exports.tests = {
 			binaryPaths.push({'path':fullPath,'exists': false});
 		});
 
-		console.log('Binaries', binaryPaths);
-		binaryPaths.forEach(function(binaryPath) {
-			var doesExist = fs.existsSync(binaryPath.path);
-			console.log("Res:", doesExist);
-		});
 		async.map(
 			binaryPaths,
 			function(binaryPath, callback) {
-				console.log("HERE", binaryPath.path);
 				fs.exists(binaryPath.path, function(res) {
-					console.log("HERE2", res);
 					binaryPath.exists = res;
 					callback(null, binaryPath);
 				});
@@ -62,7 +55,9 @@ exports.tests = {
 					test.ok(false);
 					console.log('Binaries results', err, results);
 				} else {
-					console.log('Binaries results', results);
+					results.forEach(function(result) {
+						test.ok(result.exists);
+					});
 				}
 				test.done();
 			});
