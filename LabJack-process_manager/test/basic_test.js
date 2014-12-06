@@ -90,6 +90,9 @@ var run = function() {
 
 
 exports.tests = {
+	/**
+	 * Creating a new master_process instance.  Is a synchronous function.
+	 */
 	'create_master_process': function(test) {
 		var expectedFunctionList = [
 			'init',
@@ -118,6 +121,10 @@ exports.tests = {
 			test.done();
 		});
 	},
+	/**
+	 * Initialize the master_process instance, this will spin up a new 
+	 * child_process that is ready to start sending & receiving messages.
+	 */
 	'initialize_master_process': function(test) {
 		var eventTitle = 'test';
 		initializeMasterProcess(eventTitle)
