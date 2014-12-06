@@ -7,4 +7,7 @@ basicTest.setImports({
 	'utils': utils
 });
 
+var advancedTest = require('./test/advanced_test');
+
 exports.basic_test = basicTest.tests;
+exports.advanced_test = advancedTest.tests;

@@ -59,7 +59,10 @@ var run = function() {
 	var childProcessToFork = './test/basic_test_slave.js';
 
 	print('Starting Basic Example');
-	getExecution(mp, 'qStart', childProcessToFork, {'startupInfo': 'aa'})(returnedData)
+	getExecution(mp, 'qStart', childProcessToFork, {
+		'startupInfo': 'aa',
+		'DEBUG_MODE': false
+	})(returnedData)
 	.then(getExecution(mp, 'sendMessage', {'dataMessage': 'aB'}))
 	.then(getExecution(mp, 'send', 'message', {'dataMessage': 'aB'}))
 	.then(getExecution(mp, 'sendReceive', {'dataMessage': 'aa'}))
@@ -176,7 +179,7 @@ exports.tests = {
 		var expectedReturnData = [
 			{
 				'functionCall': 'qStart',
-				'retData': { 'startupInfo': 'aa' }
+				'retData': { 'startupInfo': 'aa', 'DEBUG_MODE': false }
 			}, {
 				'functionCall': 'sendMessage',
 				'retData': undefined
@@ -196,7 +199,11 @@ exports.tests = {
 		run()
 		.then(function(data) {
 			test.ok(true);
+			// Check to make sure that the testEvents were fired
 			test.deepEqual(receivedTestEvents, expectedTestEvents, 'Issue with event messaging');
+
+			// Check to make sure that the the sendReceive/master_process 
+			// functions were called properly
 			test.deepEqual(returnedData, expectedReturnData, 'Issue with send receive messaging');
 			test.done();
 		});
