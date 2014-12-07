@@ -8,6 +8,7 @@ var q = require('q');
 var process_manager;
 var utils;
 var getExecution;
+var node_binary;
 
 // master_process object
 var mp;
@@ -48,7 +49,7 @@ var initializeMasterProcess = function(eventTitle) {
 };
 
 var returnedData = [];
-var run = function() {
+var run = function(cwd, execPath) {
 	var defered = q.defer();
 	// Generic Procedure after initialization
 	// 1. Starting slave process
@@ -59,10 +60,15 @@ var run = function() {
 	var childProcessToFork = './test/basic_test_slave.js';
 
 	print('Starting Basic Example');
-	getExecution(mp, 'qStart', childProcessToFork, {
+	var qStartOptions = {
 		'startupInfo': 'aa',
-		'DEBUG_MODE': false
-	})(returnedData)
+		'DEBUG_MODE': false,
+	}
+	if(execPath !== '') {
+		qStartOptions.cwd = cwd;
+		qStartOptions.execPath = execPath;
+	}
+	getExecution(mp, 'qStart', childProcessToFork, qStartOptions)(returnedData)
 	.then(getExecution(mp, 'sendMessage', {'dataMessage': 'aB'}))
 	.then(getExecution(mp, 'send', 'message', {'dataMessage': 'aB'}))
 	.then(getExecution(mp, 'sendReceive', {'dataMessage': 'aa'}))
@@ -186,7 +192,12 @@ exports.tests = {
 		var expectedReturnData = [
 			{
 				'functionCall': 'qStart',
-				'retData': { 'startupInfo': 'aa', 'DEBUG_MODE': false }
+				'retData': {
+					'startupInfo': 'aa',
+					'DEBUG_MODE': false,
+					'cwd': process.cwd(),
+					'execPath': node_binary
+				}
 			}, {
 				'functionCall': 'sendMessage',
 				'retData': undefined
@@ -203,7 +214,7 @@ exports.tests = {
 				'retData': { 'numLostMessages': 0 }
 			}
 		];
-		run()
+		run(process.cwd(), node_binary)
 		.then(function(data) {
 			test.ok(true);
 			// Check to make sure that the testEvents were fired
@@ -220,4 +231,5 @@ exports.setImports = function(imports) {
 	process_manager = imports.process_manager;
 	utils = imports.utils;
 	getExecution = utils.getExecution;
+	node_binary = imports.node_binary;
 };

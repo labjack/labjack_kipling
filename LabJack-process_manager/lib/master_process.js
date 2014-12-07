@@ -281,6 +281,12 @@ function createNewProcessManager() {
                 deviceManagerSlaveOptions.silent = options.silent;
                 isSilent = options.silent;
             }
+            if(options.cwd) {
+                deviceManagerSlaveOptions.cwd = options.cwd;
+            }
+            if(options.execPath) {
+                deviceManagerSlaveOptions.execPath = options.execPath;
+            }
 	        var envVars = process.env;
 	        envVars.slave_process_env = JSON.stringify(options);
 	        deviceManagerSlaveOptions.env = envVars;
