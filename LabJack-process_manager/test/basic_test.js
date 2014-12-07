@@ -128,8 +128,9 @@ exports.tests = {
 		});
 	},
 	/**
-	 * Initialize the master_process instance, this will spin up a new 
-	 * child_process that is ready to start sending & receiving messages.
+	 * Initialize the master_process instance, this test makes sure that 
+	 * initializing the master process returns an event listener.  this process 
+	 * can be done synchronously but is wrapped by a promise to make it async.
 	 */
 	'initialize_master_process': function(test) {
 		var eventTitle = 'test';
@@ -183,6 +184,12 @@ exports.tests = {
 		test.deepEqual(foundEventListeners, expectedListeners, msg);
 		test.done();
 	},
+	/**
+	 * This test starts a new process and performs some IO to the process and
+	 * checks the results of the sendReceive message as well as the send & 
+	 * sendMessage functions.  The one way messages get handled by the 
+	 * previously established event listeners.
+	 */
 	'basic_execution': function(test) {
 		var expectedTestEvents = [
 			'Test Data',
