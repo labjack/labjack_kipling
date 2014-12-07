@@ -22,7 +22,8 @@
   },
   "files": [
     "lib",
-    "LICENSE"
+    "LICENSE",
+    "node_modules"
   ],
   "dependencies": {
     "async": "~0",
@@ -36,6 +37,7 @@
     "nodeunit": "0.9.x"
   },
   "directories": {
+    "lib": "./lib",
   	"test": "test"
   }
 }
