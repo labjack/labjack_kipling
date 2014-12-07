@@ -12,6 +12,8 @@ var device_manager = require('./managers/device_manager');
 var logger_manager = require('./managers/logger_manager');
 var file_io_manager = require('./managers/file_io_manager');
 
+var ioDelegatorPath = './lib/io_delegator.js';
+
 
 function createIOInterface() {
 	this.mp = null;
@@ -55,16 +57,28 @@ function createIOInterface() {
 
 		self.mp = new process_manager.master_process();
 		self.mp_event_emitter = self.mp.init();
-		self.mp.qStart()
-		.then(defered.resolve);
 
+		self.mp.qStart(ioDelegatorPath)
+		.then(function(res) {
+			console.log("Success!", res);
+			defered.resolve();
+		}, function(err) {
+			console.log("Error :(", err);
+			defered.reject();
+		}, function(err) {
+			console.log("BIG ERROR!", err);
+			defered.reject();
+		});
+		// defered.resolve();
 		return defered.promise;
 	};
 
 	this.destroy = function() {
 		var defered = q.defer();
 
-		defered.resolve();
+		self.mp.qStop()
+		.then(defered.resolve);
+
 		return defered.promise;
 	};
 
