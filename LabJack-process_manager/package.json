@@ -1,6 +1,6 @@
 {
   "name": "process_manager",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": {
     "name": "Chris Johnson",
     "url": "http://labjack.com"
@@ -21,7 +21,8 @@
     "url": "https://github.com/chrisJohn404/LabJack-process_manager.git"
   },
   "files": [
-    "lib"
+    "lib",
+    "LICENSE"
   ],
   "dependencies": {
     "async": "~0",
