@@ -27,7 +27,9 @@ var qListener = function(message) {
 		retData = '';
 	} else if(message === 'generic') {
 		retData = 'generic';
-	} else {
+	} else if (message.dataMessage === 'returnUndefined') {
+		retData = undefined;
+	}else {
 		retData = {'arbitraryData': 'Arbitrary data from basic_test_slave.js'};//,'pid':process.pid};
 	}
 	defered.resolve(retData);

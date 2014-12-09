@@ -62,8 +62,8 @@ var run = function(cwd, execPath) {
 	print('Starting Basic Example');
 	var qStartOptions = {
 		'startupInfo': 'aa',
-		'DEBUG_MODE': false,
-	}
+		'DEBUG_MODE': true,
+	};
 	if(execPath !== '') {
 		qStartOptions.cwd = cwd;
 		qStartOptions.execPath = execPath;
@@ -72,6 +72,7 @@ var run = function(cwd, execPath) {
 	.then(getExecution(mp, 'sendMessage', {'dataMessage': 'aB'}))
 	.then(getExecution(mp, 'send', 'message', {'dataMessage': 'aB'}))
 	.then(getExecution(mp, 'sendReceive', {'dataMessage': 'aa'}))
+	.then(getExecution(mp, 'sendReceive', {'dataMessage': 'returnUndefined'}))
 	
 	// .then(getExecution(mp, 'getProcessInfo'))
 	.then(getExecution(mp, 'qStop'))
@@ -201,7 +202,7 @@ exports.tests = {
 				'functionCall': 'qStart',
 				'retData': {
 					'startupInfo': 'aa',
-					'DEBUG_MODE': false,
+					'DEBUG_MODE': true,
 					'cwd': process.cwd(),
 					'execPath': node_binary
 				}
@@ -216,6 +217,9 @@ exports.tests = {
 				'retData': {
 					'arbitraryData': 'Arbitrary data from basic_test_slave.js'
 				}
+			}, {
+				'functionCall': 'sendReceive',
+				'retData': undefined
 			}, {
 				'functionCall': 'qStop',
 				'retData': { 'numLostMessages': 0 }
