@@ -347,7 +347,7 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
         'LJM_ReadLibraryConfigStringS': [
             'int', [
                 'string',                       //Parameter
-                'string'                        //String
+                ref.refType(ref.types.char)     //String
             ]
         ],
         'LJM_Log': [

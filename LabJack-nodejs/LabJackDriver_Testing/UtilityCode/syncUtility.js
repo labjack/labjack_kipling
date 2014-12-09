@@ -66,13 +66,11 @@ var runTest = function() {
 			console.log(list[funcName]+'.'+funcArray[0]+'Sync('+funcArray[1]);
 		}
 		//Execute test-function
-		try
-		{
-			output = eval(list[funcName]+'.'+funcArray[0]+'Sync('+funcArray[1]);
+		try {
+			var evalStr = list[funcName]+'.'+funcArray[0]+'Sync('+funcArray[1];
+			output = eval(evalStr);
 			onSuccess(output);
-		}
-		catch (e)
-		{
+		} catch (e) {
 			if(e.description != null) {
 				onError(e.description);
 			} else if(e.code != null) {

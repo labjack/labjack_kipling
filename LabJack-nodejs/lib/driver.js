@@ -870,7 +870,7 @@ exports.ljmDriver = function() {
         }
     };
     this.readLibraryS = function (parameter, onError, onSuccess) {
-        if (!isNaN(parameter)) {
+        if (isNaN(parameter)) {
             var errorResult;
 
             //Allocate a buffer for the result
@@ -879,8 +879,8 @@ exports.ljmDriver = function() {
             strBuffer.fill(0);
 
             errorResult = this.ljm.LJM_ReadLibraryConfigStringS.async(
-                parameter, 
-                strBuffer, 
+                parameter,
+                strBuffer,
                 function (err, res){
                     if (err) throw err;
                     if ( res === 0 ) {
@@ -901,7 +901,7 @@ exports.ljmDriver = function() {
         }
     };
     this.readLibrarySSync = function (parameter) {
-        if(!isNaN(parameter)) {
+        if(isNaN(parameter)) {
             var errorResult;
             //Allocate a buffer for the result
             var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
@@ -909,7 +909,7 @@ exports.ljmDriver = function() {
             strBuffer.fill(0);
 
             errorResult = this.ljm.LJM_ReadLibraryConfigStringS(
-                parameter, 
+                parameter,
                 strBuffer
             );
             if (errorResult !== 0) {
@@ -920,7 +920,7 @@ exports.ljmDriver = function() {
                 }
                 return strBuffer.toString('utf8',0,i);
             }
-            return returnVar.deref();
+            return strBuffer.toString('utf8',0,i);
         } else {
             throw DriverInterfaceError('Invalid Input Parameter Type');
             return 'Invalid Input Parameter Type';

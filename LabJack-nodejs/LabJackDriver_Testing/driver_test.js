@@ -319,9 +319,9 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_ReadLibraryConfigStringS',
-            'LJM_ReadLibraryConfigStringSAsync' 
+            'LJM_ReadLibraryConfigStringSAsync'
         ];
 
         //Run the desired commands
