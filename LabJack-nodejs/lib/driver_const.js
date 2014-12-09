@@ -230,7 +230,7 @@ exports.connectionTypes = {
 	Wifi: 4,
 	wifi: 4,
 	4:4
-}
+};
 exports.LJM_UINT64 = 69;							 // Un-supported C type of UINT64/mac addresses
 exports.LJM_UINT16 = 0; 			                 // C type of unsigned short
 exports.LJM_UINT32 = 1; 			                 // C type of unsigned int
@@ -246,5 +246,40 @@ exports.ARCH_POINTER_SIZE = {
     'ia32': 4,
     'x64': 8,
     'arm': 4
-}[process.arch]
+}[process.arch];
 exports.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = 128;
+
+exports.LJM_LIBRARY_CONSTANTS = {
+	'LJM_DEBUG_LOG_MODE': {
+		'LJM_DEBUG_LOG_MODE_NEVER': 1,
+		'LJM_DEBUG_LOG_MODE_CONTINUOUS': 2,
+		'LJM_DEBUG_LOG_MODE_ON_ERROR': 3
+	},
+	'LJM_DEBUG_LOG_LEVEL': {
+		'LJM_STREAM_PACKET': 1,
+		'LJM_TRACE': 2,
+		'LJM_DEBUG': 4,
+		'LJM_INFO': 6,
+		'LJM_PACKET': 7,
+		'LJM_WARNING': 8,
+		'LJM_USER': 9,
+		'LJM_ERROR': 10,
+		'LJM_FATAL': 12
+	},
+	'LJM_OPEN_MODE': {
+		'LJM_KEEP_OPEN': 1,
+		'LJM_OPEN_CLOSE': 2
+	},
+	'LJM_STREAM_SCANS_RETURN': {
+		'LJM_STREAM_SCANS_RETURN_ALL': 1,
+		'LJM_STREAM_SCANS_RETURN_ALL_OR_NONE': 2
+	},
+	'LJM_STREAM_RECEIVE_TIMEOUT_MODE': {
+		'LJM_STREAM_RECEIVE_TIMEOUT_MODE_CALCULATED': 1,
+		'LJM_STREAM_RECEIVE_TIMEOUT_MODE_MANUAL': 2
+	},
+	'LJM_ZERO_LENGTH_ARRAY_MODE': {
+		'LJM_ZERO_LENGTH_ARRAY_ERROR': 1,
+		'LJM_ZERO_LENGTH_ARRAY_IGNORE_OPERATION': 2
+	}
+};

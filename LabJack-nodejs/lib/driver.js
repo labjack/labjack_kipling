@@ -937,6 +937,16 @@ exports.ljmDriver = function() {
      */
     this.writeLibrary = function (parameter, value, onError, onSuccess) {
         var errorResult;
+        if((isNaN(parameter))&&(isNaN(value))) {
+            var enums = driver_const.LJM_LIBRARY_CONSTANTS;
+            var isValid = typeof(enums[parameter]); 
+            if ( isValid !== 'undefined') {
+                isValid = typeof(enums[parameter][value]);
+                if ( isValid !== 'undefined') {
+                    value = enums[parameter][value];
+                }
+            }
+        }
         if ((isNaN(parameter))&&(!isNaN(value))) {
             errorResult = this.ljm.LJM_WriteLibraryConfigS.async(
                 parameter, 
@@ -952,6 +962,7 @@ exports.ljmDriver = function() {
             );
             return 0;
         } else if((isNaN(parameter))&&(isNaN(value))) {
+
             errorResult = this.ljm.LJM_WriteLibraryConfigStringS.async(
                 parameter, 
                 value, 
