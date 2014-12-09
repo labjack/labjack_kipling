@@ -31,7 +31,7 @@ module.exports = {
     var info = [
       constants.getAddressInfo(0,'R'),
       constants.getAddressInfo(1000,'R'),
-    ]
+    ];
     var tests = [
       {type: 3, directionValid: 1, typeString: 'FLOAT32'},
       {type: 3, directionValid: 1, typeString: 'FLOAT32'},
@@ -58,7 +58,7 @@ module.exports = {
       constants.getAddressInfo("DAC0",'W'),
       constants.getAddressInfo("AIN0",'R'),
       constants.getAddressInfo("AIN0",'W'),
-    ]
+    ];
     var tests = [
       {type: 3, directionValid: 1, typeString: 'FLOAT32'},
       {type: 3, directionValid: 1, typeString: 'FLOAT32'},
@@ -74,4 +74,4 @@ module.exports = {
     }
     test.done();
   },
-}
+};

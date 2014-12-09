@@ -464,7 +464,7 @@ module.exports = {
 		testBuf.fill(testVal);//Fill buffer with success data
 		dev.readRaw(data,function(res) {
 			//Error
-			console.log("!!!!ReadRaw ERROR!!!!")
+			console.log("!!!!ReadRaw ERROR!!!!");
 		},
 		function(res) {
 			//Success

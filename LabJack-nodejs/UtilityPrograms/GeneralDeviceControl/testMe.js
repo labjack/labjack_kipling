@@ -281,8 +281,8 @@ var buildBreakEthernetConnectionTest = function() {
 	}
 	cmdList.push('close()');
 	return cmdList;
-}
-var readMacTest = 
+};
+var readMacTest =
 [
 // 'open("LJM_dtT7","LJM_ctUSB","ANY")',
 'open("LJM_dtT7","LJM_ctEthernet",470010604)',
@@ -290,22 +290,27 @@ var readMacTest =
 'readUINT64("ethernet")',
 'readUINT64("wifi")',
 'close()'
-]
+];
 var listAllExtTest = [
+'writeLibrary("LJM_OLD_FIRMWARE_CHECK",0)',
 'writeLibrary("LJM_DEBUG_LOG_LEVEL",2)',
-'writeLibrary("LJM_DEBUG_LOG_MODE",2)'
+'writeLibrary("LJM_DEBUG_LOG_MODE",2)',
+'listAllExtended("LJM_dtT7","LJM_ctANY",["DEVICE_NAME_DEFAULT","HARDWARE_INSTALLED","ETHERNET_IP","WIFI_STATUS","WIFI_RSSI"])',
+'listAllExtended("LJM_dtDIGIT","LJM_ctUSB",["DEVICE_NAME_DEFAULT","DGT_INSTALLED_OPTIONS"])'
 ];
 var crashStream = [
 'open("LJM_dtT7","LJM_ctEthernet",470010604)',
 'read("WIFI_IP_DEFAULT")',
 'close()'
-]
-for(i = 0; i < 30; i++) {
-	listAllExtTest.push('listAllExtended("LJM_dtT7","LJM_ctANY",["AIN0","DAC0","DEVICE_NAME_DEFAULT","FIRMWARE_VERSION"])');
+];
+
+
+for(i = 0; i < 0; i++) {
+	listAllExtTest.push('listAllExtended("LJM_dtT7","LJM_ctTCP",["DEVICE_NAME_DEFAULT","HARDWARE_INSTALLED","ETHERNET_IP","WIFI_STATUS","WIFI_IP","WIFI_RSSI"])');
 }
 
 var breakEthernetConnectionTest = buildBreakEthernetConnectionTest();
-testArray = 
+testArray =
 [
 basicTest, 				// 0
 writeTest,				// 1
@@ -328,7 +333,7 @@ breakEthernetConnectionTest, // 17
 readMacTest,			// 18
 listAllExtTest,			// 19
 crashStream				// 20
-]
+];
 
 var activeTest;
 if(argv.testNum != null)

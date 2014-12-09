@@ -464,7 +464,7 @@ module.exports = {
             retStr = retStr.slice(0,retStr.length-1);
             retStr += ']';
             return retStr;
-        }
+        };
         var numString = convertData(addrListN);
         var nameString = convertData(addrListS);
         // console.log('Number List:',numString);
@@ -496,59 +496,44 @@ module.exports = {
             '10': {argType: 'object', argName: 'aIPAddresses'},
             '11': {argType: 'object', argName: 'aBytes'},
             '12': {argType: 'function', argName: 'retFunc'},
-        }
+        };
 
         var getArgInfo = function(cmdStr) {
+            var funcArgs = [];
+            var addrNumList = [];
+            var numRegsList = [];
+            var numRegsRead = 0;
             var argType = [];
             var argSize = [];
+            var namesList = [];
+            var addrListStr = '';
+            var addressList = [];
+            var aBytesSize = 0;
+            var addr, addrA, info, numRegs;
             var argumentStr = cmdStr.split('listAllExtended')[1].split('(')[1].split(')')[0];
             if(argumentStr.length === 0) {
-                var funcArgs = [];
-                var addrNumList = [];
-                var numRegsList = [];
-                var numRegsRead = 0;
-                var argType = [];
-                var argSize = [];
-                var namesList = [];
             } else if (argumentStr === 2) {
-                var funcArgs = [];
-                var addrNumList = [];
-                var numRegsList = [];
-                var numRegsRead = 0;
-                var argType = [];
-                var argSize = [];
-                var namesList = [];
-
-                var devSearchArgs = argumentStr.split(',');
-                funcArgs = devSearchArgs;
+                funcArgs = argumentStr.split(',');
             } else {
-                var addrListStr = '';
-                var addressList = [];
-                var addrNumList = [];
-                var numRegsList = [];
-                var namesList = [];
-                var numRegsRead = 0;
-                var aBytesSize = 0;
-                var funcArgs = argumentStr.split(',');
+                funcArgs = argumentStr.split(',');
                 if(funcArgs.length >2) {
                     argList = argumentStr.split(',[')[0].split(',');
                     addressList = argumentStr.split(',[')[1].split(']')[0].split(',');
-                    var funcArgs = argList + addressList;
+                    funcArgs = argList + addressList;
                     // console.log('argList',argList)
                     // console.log('addressList',addressList)
                     // console.log('funcArgs',funcArgs)
                     
                     
                     addressList.forEach(function(address){
-                        var addr;
-                        var addrA = address.split('"');
+                        addrA = address.split('"');
                         if (addrA.length == 1) {
                             addr = parseInt(addrA[0]);
                         } else {
                             addr = addrA[1];
                         }
-                        var info = constants.getAddressInfo(addr, 'R');
-                        var numRegs = Math.ceil(info.size/driver_const.LJM_BYTES_PER_REGISTER);
+                        info = constants.getAddressInfo(addr, 'R');
+                        numRegs = Math.ceil(info.size/driver_const.LJM_BYTES_PER_REGISTER);
                         addrNumList.push(info.address);
                         numRegsList.push(numRegs);
                         argType.push(info.data.type);
@@ -568,7 +553,7 @@ module.exports = {
                 sizes:argSize,
                 namesList: namesList
             };
-        }
+        };
         //Expected function list & argument info:
         var expectedFunctionList = [];
         var expectedSyncInfo = [];
@@ -620,20 +605,21 @@ module.exports = {
                         var ljmArgName = argumentTypes[argName].argName;
                         var type = typeof(arg[argName]);
                         var argument = arg[argName];
+                        var expectedSize, info;
                         test.deepEqual(expectedType,type);
                         if(expectedType === 'object') {
                             if(ljmArgName === 'aAddresses') {
-                                var expectedSize = expectedInfo[execNum].addresses.length;
+                                expectedSize = expectedInfo[execNum].addresses.length;
                                 expectedSize *= driver_const.ARCH_INT_NUM_BYTES;
                                 // console.log(argument.length,expectedSize,expectedInfo);
                                 test.strictEqual(argument.length,expectedSize,'badArg: '+ljmArgName);
                             } else if (ljmArgName === 'aNumRegs') {
-                                var expectedSize = expectedInfo[execNum].addresses.length;
+                                expectedSize = expectedInfo[execNum].addresses.length;
                                 expectedSize *= driver_const.ARCH_INT_NUM_BYTES;
                                 // console.log(argument.length,expectedSize);
                                 test.strictEqual(argument.length,expectedSize,'badArg: '+ljmArgName);
                             } else if (ljmArgName === 'aBytes') {
-                                var info = expectedInfo[execNum];
+                                info = expectedInfo[execNum];
                                 expectedSize *= driver_const.ARCH_INT_NUM_BYTES;
                                 test.strictEqual(argument.length,info.aBufSize,'badArg: '+ljmArgName);
                             } 
@@ -641,8 +627,9 @@ module.exports = {
                         }
                     });
                 });
-                var numSync = 0;
-                var numAsync = 0;
+
+                numSync = 0;
+                numAsync = 0;
                 results.forEach(function(result,index){
                     result.forEach(function(foundDevice,deviceNum){
                         var expectedInfo = {};
@@ -662,7 +649,7 @@ module.exports = {
                         test.strictEqual(expectedInfo[execNum].addresses.length,foundDevice.data.length,'unexpected number of results');
                         foundDevice.data.forEach(function(devData,devDataIndex){
                             var expectedName = expectedInfo[execNum].namesList[devDataIndex];
-                            test.strictEqual(devData.name,expectedName,'bad Returned name')
+                            test.strictEqual(devData.name,expectedName,'bad Returned name');
                         });
                     });
                 });
