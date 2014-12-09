@@ -221,6 +221,9 @@ function createNewMessageManager(listeners) {
         // increment response counter
         self.numResponces += 1;
 
+        // Print Debug message
+        print('Responding to message', newMessage);
+        
         // send the newMessage object to the child process
         process.send(newMessage);
         

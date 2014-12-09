@@ -189,6 +189,7 @@ function createNewProcessManager() {
         
         if(!bundle.isHandled) {
             var savedCallback = messageBuffer.get(getMessageId(bundle));
+            print('Executing Message Callback', bundle);
             if(bundle.message.isError) {
                 if(bundle.message.errorType === 'userError') {
                     savedCallback.reject(bundle.data);
