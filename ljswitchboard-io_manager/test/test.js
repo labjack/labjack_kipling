@@ -1,8 +1,19 @@
 
+
+var utils = require('./utils/utils');
+var qRunner = utils.qRunner;
+var qExec = utils.qExec;
+var pResults = utils.pResults;
 var q = require('q');
 
 var io_manager;
 var io_interface;
+
+// Managers
+var driver_controller;
+var device_controller;
+var file_io_controller;
+var logger_controller;
 
 var criticalError = false;
 var stopTest = function(test, err) {
@@ -11,28 +22,8 @@ var stopTest = function(test, err) {
 	test.done();
 };
 
-var qRunner = function(test, func) {
-	var defered = q.defer();
-	try {
-		func()
-		.then(function(res) {
-			defered.resolve(res);
-		}, function(err) {
-			console.log('qRunner defered error err', err);
-			test.ok(false, err);
-			test.done();
-		}, function(err) {
-			console.log('qRunner syntax error err', err);
-			test.ok(false, err);
-			test.done();
-		});
-	} catch(err) {
-			console.log('qRunner critical error err', err);
-			test.ok(false, err);
-			test.done();
-		}
-	return defered.promise;
-};
+
+
 
 exports.basic_test = {
 	'setUp': function(callback) {
@@ -63,10 +54,10 @@ exports.basic_test = {
 
 		var keys = Object.keys(io_interface);
 		var requiredKeys = [
-			'driver_manager',
-			'device_manager',
-			'logger_manager',
-			'file_io_manager'
+			'driver_controller',
+			'device_controller',
+			'logger_controller',
+			'file_io_controller'
 		];
 		var foundRequiredKeys = true;
 		requiredKeys.forEach(function(requiredKey) {
@@ -84,11 +75,62 @@ exports.basic_test = {
 		test.done();
 	},
 	'initialize io_interface': function(test) {
-			qRunner(test, io_interface.initialize)
-			.then(function(res) {
-				test.ok(true, res);
-				setTimeout(test.done, 5000);
-			});	
+		qRunner(test, io_interface.initialize)
+		.then(function(res) {
+			test.ok(true, res);
+			test.done();
+		});	
+	},
+	'check driver_manager': function(test) {
+		driver_manager = io_interface.getDriverController();
+
+		var keys = Object.keys(driver_manager);
+		var requiredKeys = [
+			'init',
+			'listAll',
+			'listAllExtended',
+			'errToStr',
+			'printErrToStr',
+			'loadConstants',
+			'readLibrary',
+			'readLibraryS',
+			'writeLibrary',
+			'logS',
+			'resetLog',
+			'driverVersion'
+		];
+		var foundRequiredKeys = true;
+		requiredKeys.forEach(function(requiredKey) {
+			if (keys.indexOf(requiredKey) < 0) {
+				foundRequiredKeys = false;
+				var mesg = 'io_interface missing required key: ' + requiredKey;
+				test.ok(false, mesg);
+				process.exit(1);
+			} else {
+				test.ok(true);
+			}
+		});
+
+		var bundle = [];
+		qExec(driver_manager, 'listAll')(bundle)
+		.then(qExec(driver_manager, 'listAllExtended', null, null, ["AIN0"]))
+		.then(qExec(driver_manager, 'errToStr', 1269))
+		.then(qExec(driver_manager, 'readLibrary', 'LJM_LIBRARY_VERSION'))
+		.then(qExec(driver_manager, 'readLibraryS', 'LJM_MODBUS_MAP_CONSTANTS_FILE'))
+		.then(qExec(driver_manager, 'writeLibrary', 'LJM_DEBUG_LOG_MODE', 'default'))
+		.then(qExec(driver_manager, 'logS', 'BLA'))
+		.then(qExec(driver_manager, 'resetLog'))
+		.then(qExec(driver_manager, 'driverVersion'))
+		.then(function(results) {
+			var printIndividualResults = false;
+			pResults(results, printIndividualResults)
+			.then(function(results){
+				test.done();
+			});
+		}, function(err) {
+			console.log('ERROR!', err);
+			test.done();
+		});
 	},
 	'destroy io_interface': function(test) {
 		qRunner(test, io_interface.destroy)

@@ -33,7 +33,8 @@
     "async": "~0",
     "dict": "1.4.0",
     "q": "~0",
-    "process_manager": "0.0.x"
+    "process_manager": "0.0.x",
+    "labjack-nodejs": "0.0.14"
   },
   "devDependencies": {
     "nodeunit": "0.9.x"
