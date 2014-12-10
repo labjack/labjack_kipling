@@ -1118,7 +1118,7 @@ exports.ljmDriver = function() {
 
     //Read the Driver Version number
     this.installedDriverVersion = this.readLibrarySync('LJM_LIBRARY_VERSION');
-    if(this.installedDriverVersion != driver_const.LJM_JS_VERSION)
+    if(this.installedDriverVersion < driver_const.LJM_JS_VERSION)
     {
         console.log('The Supported Version for this driver is: '+driver_const.LJM_JS_VERSION+', you are using: ', this.installedDriverVersion);
     }
