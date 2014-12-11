@@ -1,0 +1,41 @@
+{
+  "name": "ljswitchboard-ljm_device_curator",
+  "version": "0.0.1",
+  "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
+  "main": "/lib/device_curator.js",
+  "scripts": {
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+    "package": "echo \"Error: no package command specified\" && exit 1"
+  },
+  "packagesDirectory": "/packages",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_curator"
+  },
+  "keywords": [
+    "LabJack",
+    "LJM",
+    "T7"
+  ],
+  "author": {
+    "name": "Chris Johnson",
+    "url": "http://labjack.com"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "https://raw.githubusercontent.com/chrisJohn404/ljswitchboard-ljm_device_curator/master/LICENSE"
+  },
+  "bugs": {
+    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_curator/issues"
+  },
+  "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_curator",
+  "dependencies": {
+    "async": "~0",
+    "dict": "1.4.0",
+    "q": "~0",
+    "labjack-nodejs": "0.0.16"
+  },
+  "devDependencies": {
+    "nodeunit": "0.9.x"
+  }
+}
