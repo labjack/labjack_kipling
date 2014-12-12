@@ -133,7 +133,7 @@ exports.labjack = function () {
 
 		//Complete Asynchronous function-call,
 		//Make sure we aren't already connected to a device
-		if(this.handle === null) {
+		if(self.handle === null) {
 			//Create variables for the ffi call
 			var refDeviceHandle = new ref.alloc(ref.types.int,1);
 			var output;
@@ -163,7 +163,6 @@ exports.labjack = function () {
 				idType = "string";
 			}
 
-			var self = this;
 			//Function for handling the ffi callback
 			var handleResponse = function(err, res) {
 				if (err) throw err;
@@ -190,7 +189,7 @@ exports.labjack = function () {
 			//Determine which LJM function to call
 			if((dtType=="number")&&(ctType=="number")&&(idType=="string")) {
 				//call LJM_Open() using the ffi async call
-				output = this.ljm.LJM_Open.async(
+				output = self.ljm.LJM_Open.async(
 					deviceType, 
 					connectionType, 
 					identifier, 
@@ -201,7 +200,7 @@ exports.labjack = function () {
 				// convert connectionType to a number
 				connectionType = driver_const.connectionTypes[connectionType];
 				//call LJM_OpenS() using the ffi async call
-				output = this.ljm.LJM_Open.async(
+				output = self.ljm.LJM_Open.async(
 					deviceType, 
 					connectionType, 
 					identifier, 
@@ -212,7 +211,7 @@ exports.labjack = function () {
 				// convert deviceType to a number
 				deviceType = driver_const.deviceTypes[deviceType];
 				//call LJM_OpenS() using the ffi async call
-				output = this.ljm.LJM_Open.async(
+				output = self.ljm.LJM_Open.async(
 					deviceType, 
 					connectionType, 
 					identifier, 
@@ -221,7 +220,7 @@ exports.labjack = function () {
 				);
 			} else if((dtType=="string")&&(ctType=="string")&&(idType=="string")) {
 				//call LJM_OpenS() using the ffi async call
-				output = this.ljm.LJM_OpenS.async(
+				output = self.ljm.LJM_OpenS.async(
 					deviceType, 
 					connectionType, 
 					identifier, 
@@ -272,7 +271,7 @@ exports.labjack = function () {
 
 		//Complete Synchronous function-call,
 		//Make sure we aren't already connected to a device
-		if(this.handle === null) {
+		if(self.handle === null) {
 			//Create variables for the ffi call
 			var refDeviceHandle = new ref.alloc(ref.types.int,1);
 			var output;
@@ -305,7 +304,7 @@ exports.labjack = function () {
 			//Determine which LJM function to call
 			if((dtType=="number")&&(ctType=="number")&&(idType=="string")) {
 				//call LJM_Open() using the ffi async call
-				output = this.ljm.LJM_Open(
+				output = self.ljm.LJM_Open(
 					deviceType,
 					connectionType,
 					identifier,
@@ -315,7 +314,7 @@ exports.labjack = function () {
 				// Convert connectionType to a number
 				connectionType = driver_const.connectionTypes[connectionType];
 				//call LJM_OpenS() using the ffi async call
-				output = this.ljm.LJM_Open(
+				output = self.ljm.LJM_Open(
 					deviceType, 
 					connectionType, 
 					identifier, 
@@ -326,7 +325,7 @@ exports.labjack = function () {
 				// convert deviceType to a number
 				deviceType = driver_const.deviceTypes[deviceType];
 				//call LJM_OpenS() using the ffi async call
-				output = this.ljm.LJM_Open(
+				output = self.ljm.LJM_Open(
 					deviceType, 
 					connectionType, 
 					identifier, 
@@ -335,7 +334,7 @@ exports.labjack = function () {
 				);
 			} else if((dtType=="string")&&(ctType=="string")&&(idType=="string"))  {
 				//call LJM_OpenS() using the ffi async call
-				output = this.ljm.LJM_OpenS(
+				output = self.ljm.LJM_OpenS(
 					deviceType,
 					connectionType,
 					identifier,
@@ -350,18 +349,18 @@ exports.labjack = function () {
 			if(output === 0) {
 				//Save the handle & other information to the 
 				//	device class
-				this.handle = refDeviceHandle[0];
-				this.deviceType = deviceType;
-				this.connectionType = connectionType;
-				this.identifier = identifier;
+				self.handle = refDeviceHandle[0];
+				self.deviceType = deviceType;
+				self.connectionType = connectionType;
+				self.identifier = identifier;
 				return output;
 			} else {
 				//Make sure that the handle, deviceType 
 				//		& connectionType are still null
-				this.handle = null;
-				this.deviceType = null;
-				this.connectionType = null;
-				this.identifier = null;
+				self.handle = null;
+				self.deviceType = null;
+				self.connectionType = null;
+				self.identifier = null;
 
 				//Report an error
 				throw new DriverOperationError(output);
@@ -405,7 +404,7 @@ exports.labjack = function () {
 	**/
 	this.getHandleInfo = function(onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if(this.checkStatus(onError)) { return 1;}
+		if(self.checkStatus(onError)) { return 1;}
 
 		var errorResult;
 
@@ -416,8 +415,8 @@ exports.labjack = function () {
 		var port = ref.alloc('int', 1);
 		var maxBytesPerMessage = ref.alloc('int', 1);
 
-		errorResult = this.ljm.LJM_GetHandleInfo.async(
-			this.handle, 
+		errorResult = self.ljm.LJM_GetHandleInfo.async(
+			self.handle, 
 			deviceType, 
 			connectionType, 
 			serialNumber, 
@@ -483,7 +482,7 @@ exports.labjack = function () {
 	**/
 	this.getHandleInfoSync = function() {
 		//Check to make sure a device has been opened
-		this.checkStatus();
+		self.checkStatus();
 
 		var errorResult;
 
@@ -495,8 +494,8 @@ exports.labjack = function () {
 		var maxB = ref.alloc('int', 1);
 
 		//Perform device I/O Operation
-		errorResult = this.ljm.LJM_GetHandleInfo(
-			this.handle, 
+		errorResult = self.ljm.LJM_GetHandleInfo(
+			self.handle, 
 			devT, 
 			conT, 
 			sN,
@@ -534,7 +533,7 @@ exports.labjack = function () {
 	**/
 	this.readRaw = function(data, onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if (this.checkStatus(onError)) { return; }
+		if (self.checkStatus(onError)) { return; }
 
 		//Make sure the data is valid
 		if (typeof(data[0]) != "number") {
@@ -545,8 +544,8 @@ exports.labjack = function () {
 		var aData = new Buffer(data.length);
 		aData.fill(0);
 
-		errorResult = this.ljm.LJM_ReadRaw.async(
-			this.handle, 
+		errorResult = self.ljm.LJM_ReadRaw.async(
+			self.handle, 
 			aData, 
 			data.length, 
 			function (err, res) {
@@ -571,7 +570,7 @@ exports.labjack = function () {
 	 */
 	this.readRawSync = function(data) {
 		//Check to make sure a device has been opened
-		this.checkStatus();
+		self.checkStatus();
 
 		//Make sure the data is valid, a number array
 		if (typeof(data[0]) != "number") {
@@ -582,7 +581,7 @@ exports.labjack = function () {
 		var bufferData = new Buffer(data.length);
 		bufferData.fill(0);
 
-		errorResult = this.ljm.LJM_ReadRaw(this.handle, bufferData,
+		errorResult = self.ljm.LJM_ReadRaw(self.handle, bufferData,
 			data.length);
 
 		//Check for an error
@@ -607,11 +606,11 @@ exports.labjack = function () {
 	this.read = function(address, onError, onSuccess) {
 
 		//Check to make sure a device has been opened
-		if (this.checkStatus(onError)) { return; }
+		if (self.checkStatus(onError)) { return; }
 
 		var output;
 		var addressNum = 0;
-		var info = this.constants.getAddressInfo(address, 'R');
+		var info = self.constants.getAddressInfo(address, 'R');
 		var expectedReturnType = info.type;
 		var isReturningString = expectedReturnType == driver_const.LJM_STRING;
 		var isDirectionValid = info.directionValid == 1;
@@ -621,8 +620,8 @@ exports.labjack = function () {
 			
 			//Allocate space for a read value
 			var result = new ref.alloc('double',1);
-			this.ljm.LJM_eReadAddress.async(
-				this.handle, 
+			self.ljm.LJM_eReadAddress.async(
+				self.handle, 
 				resolvedAddress, 
 				info.type, 
 				result,
@@ -645,8 +644,8 @@ exports.labjack = function () {
 			strBuffer.fill(0);
 
 			//Perform LJM Async function call
-			this.ljm.LJM_eReadAddressString.async(
-				this.handle, 
+			self.ljm.LJM_eReadAddressString.async(
+				self.handle, 
 				resolvedAddress, 
 				strBuffer, 
 				function(err, res) {
@@ -654,7 +653,7 @@ exports.labjack = function () {
 					if ( res === 0 ) {
 						//Calculate the length of the string
 						var i = 0;
-						while ( strBuffer[i] != 0 ) {
+						while ( strBuffer[i] !== 0 ) {
 							i++;
 						}
 						return onSuccess(strBuffer.toString('utf8', 0, i));
@@ -685,9 +684,9 @@ exports.labjack = function () {
 	this.readSync = function(address) {
 
 		//Check to make sure a device has been opened
-		this.checkStatus();
+		self.checkStatus();
 
-		var info = this.constants.getAddressInfo(address, 'R');
+		var info = self.constants.getAddressInfo(address, 'R');
 		var expectedReturnType = info.type;
 		var isReturningString = expectedReturnType == driver_const.LJM_STRING;
 		var isDirectionValid = info.directionValid == 1;
@@ -702,13 +701,13 @@ exports.labjack = function () {
 			
 			//Allocate space for a read value
 			result = new ref.alloc('double',1);
-			output = this.ljm.LJM_eReadAddress(
-				this.handle, 
+			output = self.ljm.LJM_eReadAddress(
+				self.handle, 
 				resolvedAddress, 
 				info.type, 
 				result
 			);
-			if(output === 0) {
+			if (output === 0) {
 				result = result.deref();
 			}
 
@@ -719,21 +718,21 @@ exports.labjack = function () {
 			var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 			strBuffer.fill(0);
 
-			output = this.ljm.LJM_eReadAddressString(
-				this.handle, 
+			output = self.ljm.LJM_eReadAddressString(
+				self.handle, 
 				resolvedAddress, 
 				strBuffer
 			);
-			if(output === 0) {
-				var i=0;
-				while(strBuffer[i] != 0) {
+			if (output === 0) {
+				var i = 0;
+				while(strBuffer[i] !== 0) {
 					i++;
 				}
 				result = strBuffer.toString('utf8',0,i);
 			}
 		
 		} else {
-			if(info.type == -1) {
+			if (info.type == -1) {
 				throw new DriverInterfaceError('Invalid Address');
 			} else if (info.directionValid === 0) {
 				throw new DriverInterfaceError('Invalid Read Attempt');
@@ -775,7 +774,7 @@ exports.labjack = function () {
 		// TODO: Clean this up.
 
 		//Check to make sure a device has been opened
-		if ( this.checkStatus(onError) ) { return; }
+		if ( self.checkStatus(onError) ) { return; }
 
 		//Get important info & allocate argument variables
 		var length = addresses.length;
@@ -798,7 +797,7 @@ exports.labjack = function () {
 		//Integer Returned by .dll function
 		var info;
 		var offset=0;
-		var constants = this.constants;
+		var constants = self.constants;
 		for ( var i=0; i<length; i++ ) {
 			var address = addresses[i];
 
@@ -818,8 +817,8 @@ exports.labjack = function () {
 				return -1;
 			}
 		}
-		errorResult = this.ljm.LJM_eReadAddresses.async(
-			this.handle, 
+		errorResult = self.ljm.LJM_eReadAddresses.async(
+			self.handle, 
 			length, 
 			addrBuff, 
 			addrTypeBuff, 
@@ -859,7 +858,7 @@ exports.labjack = function () {
 	**/
 	this.readManySync = function(addresses) {
 		//Check to make sure a device has been opened
-		this.checkStatus();
+		self.checkStatus();
 
 		//Get important info & allocate argument variables
 		var length = addresses.length;
@@ -874,12 +873,14 @@ exports.labjack = function () {
 		errors.fill(0);
 
 		var output;
+		var i = 0;
+		var offset = 0;
 
 		if ( length < 1 ) {
 			throw new DriverInterfaceError("Addresses array must contain data");
 		}
 		if ( isNaN(addresses[0]) ) {
-			var i;
+			i = 0;
 			//ref: http://tootallnate.github.io/ref/
 			var aNames = new Buffer(ARCH_POINTER_SIZE*length);
 			aNames.fill(0);
@@ -892,8 +893,8 @@ exports.labjack = function () {
 			}
 
 			//Execute LJM command
-			errorResult = this.ljm.LJM_eReadNames(
-				this.handle, 
+			errorResult = self.ljm.LJM_eReadNames(
+				self.handle, 
 				length, 
 				aNames, 
 				results, 
@@ -907,10 +908,10 @@ exports.labjack = function () {
 
 			//Integer Returned by .dll function
 			var info;
-			var offset=0;
+			offset=0;
 			i = 0;
 			for ( i = 0; i < length; i++ ) {
-				info = this.constants.getAddressInfo(addresses[i], 'R');
+				info = self.constants.getAddressInfo(addresses[i], 'R');
 				if ( info.directionValid == 1 ) {
 					addrTypeBuff.writeInt32LE(info.type,offset);
 					addrBuff.writeInt32LE(addresses[i],offset);
@@ -924,7 +925,7 @@ exports.labjack = function () {
 								errFrame:i
 							}
 						);
-					} else if (info.directionValid == 0) {
+					} else if (info.directionValid === 0) {
 						throw new DriverInterfaceError(
 							{
 								retError:"Invalid Read Attempt", 
@@ -943,8 +944,8 @@ exports.labjack = function () {
 			}
 
 			//Execute LJM command
-			errorResult = this.ljm.LJM_eReadAddresses(
-				this.handle, 
+			errorResult = self.ljm.LJM_eReadAddresses(
+				self.handle, 
 				length, 
 				addrBuff, 
 				addrTypeBuff, 
@@ -955,9 +956,9 @@ exports.labjack = function () {
 			//Error!! input arguments aren't of proper type.
 			throw new DriverInterfaceError("Invalid Arguments");
 		}
-		if(errorResult == 0) {
-			var i;
-			var offset = 0;
+		if(errorResult === 0) {
+			offset = 0;
+			i = 0;
 			for(i in addresses) {
 				returnResults[i] = results.readDoubleLE(offset);
 				offset += ARCH_DOUBLE_NUM_BYTES;
@@ -986,7 +987,7 @@ exports.labjack = function () {
 	 */
 	this.writeRaw = function(data, onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if ( this.checkStatus(onError) ) { return; };
+		if ( self.checkStatus(onError) ) { return; }
 
 		if ( typeof(data[0]) != "number" ) {
 			console.log('WriteRaw-Err, data not a number-array');
@@ -999,13 +1000,13 @@ exports.labjack = function () {
 			aData.writeUInt8(data[i], i);
 		}
 
-		errorResult = this.ljm.LJM_WriteRaw.async(
-			this.handle, 
+		errorResult = self.ljm.LJM_WriteRaw.async(
+			self.handle, 
 			aData, 
 			data.length, 
 			function (err, res){
 				if (err) throw err;
-				if ( res == 0 ) {
+				if ( res === 0 ) {
 					return onSuccess(aData);
 				} else {
 					return onError(res);
@@ -1026,7 +1027,7 @@ exports.labjack = function () {
 	 */
 	this.writeRawSync = function(data) {
 		//Check to make sure a device has been opened
-		this.checkStatus();
+		self.checkStatus();
 
 		if ( typeof(data[0] ) != "number" ) {
 			console.log('WriteRaw-Err, data not a number-array');
@@ -1040,12 +1041,12 @@ exports.labjack = function () {
 			aData.writeUInt8(data[i], i);
 		}
 
-		errorResult = this.ljm.LJM_WriteRaw(
-			this.handle, 
+		errorResult = self.ljm.LJM_WriteRaw(
+			self.handle, 
 			aData, 
 			data.length
 		);
-		if ( errorResult == 0 ) {
+		if ( errorResult === 0 ) {
 			return aData;
 		} else {
 			throw new DriverInterfaceError(res);
@@ -1070,22 +1071,25 @@ exports.labjack = function () {
 	 */
 	this.write = function(address, value, onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if ( this.checkStatus(onError) ) { return; };
+		if ( self.checkStatus(onError) ) { return; }
+
+		var strBuffer;
+		var info;
 
 		//Decision making for address type (string or number)
 		if ( isNaN(address) ) {
-			var info = this.constants.getAddressInfo(address, 'W');
+			info = self.constants.getAddressInfo(address, 'W');
 
 			//Decision making for LJM-address return type, number or string
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
-				errorResult = this.ljm.LJM_eWriteName.async(
-					this.handle, 
+				errorResult = self.ljm.LJM_eWriteName.async(
+					self.handle, 
 					address, 
 					value, 
 					function(err, res) {
 						if (err) throw err;
-						if ( res == 0 ) {
+						if ( res === 0 ) {
 							return onSuccess();
 						} else {
 							return onError(res);
@@ -1095,7 +1099,7 @@ exports.labjack = function () {
 				return 0;
 			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+				strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 				strBuffer.fill(0);
 
 				//Fill the write-string
@@ -1107,13 +1111,13 @@ exports.labjack = function () {
 				}
 
 				//Execute LJM command
-				errorResult = this.ljm.LJM_eWriteNameString.async(
-					this.handle, 
+				errorResult = self.ljm.LJM_eWriteNameString.async(
+					self.handle, 
 					address,
 					strBuffer, 
 					function(err, res){
 						if (err) throw err;
-						if ( res == 0 ) {
+						if ( res === 0 ) {
 							return onSuccess();
 						} else {
 							return onError(res);
@@ -1125,22 +1129,22 @@ exports.labjack = function () {
 				//ERROR!! address is not valid, wrong direction or invalid addr.
 				if ( info.type == -1 ) {
 					return onError("Invalid Address");
-				} else if (info.directionValid == 0) {
+				} else if (info.directionValid === 0) {
 					return onError("Invalid Write Attempt");
 				}
 			}
 		} else if (!isNaN(address)) {
-			var info = this.constants.getAddressInfo(address, 'W');
+			info = self.constants.getAddressInfo(address, 'W');
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
-				errorResult = this.ljm.LJM_eWriteAddress.async(
-					this.handle, 
+				errorResult = self.ljm.LJM_eWriteAddress.async(
+					self.handle, 
 					address, 
 					info.type, 
 					value, 
 					function(err, res){
 						if (err) throw err;
-						if ( res == 0 ) {
+						if ( res === 0 ) {
 							return onSuccess();
 						} else {
 							return onError(res);
@@ -1150,7 +1154,7 @@ exports.labjack = function () {
 				return 0;
 			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+				strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 				strBuffer.fill(0);
 
 				//Fill the write-string
@@ -1162,13 +1166,13 @@ exports.labjack = function () {
 				}
 
 				//Execute LJM command
-				errorResult = this.ljm.LJM_eWriteAddressString.async(
-					this.handle, 
+				errorResult = self.ljm.LJM_eWriteAddressString.async(
+					self.handle, 
 					address,
 					strBuffer, 
 					function(err, res){
 						if (err) throw err;
-						if ( res == 0 ) {
+						if ( res === 0 ) {
 							return onSuccess();
 						} else {
 							return onError(res);
@@ -1180,7 +1184,7 @@ exports.labjack = function () {
 				//ERROR!! address is not valid, wrong direction or invalid addr.
 				if(info.type == -1) {
 					return onError("Invalid Address");
-				} else if (info.directionValid == 0) {
+				} else if (info.directionValid === 0) {
 					return onError("Invalid Write Attempt");
 				}
 			}
@@ -1208,25 +1212,25 @@ exports.labjack = function () {
 	 */
 	this.writeSync = function (address, value) {
 		//Check to make sure a device has been opened
-		this.checkStatus();
+		self.checkStatus();
 
 		var errorResult;
-
+		var strBuffer;
 		//Decision making for address type (string or number)
 		if ( isNaN(address) ) {
-			var info = this.constants.getAddressInfo(address, 'W');
+			var info = self.constants.getAddressInfo(address, 'W');
 			
 			//Decision making for LJM-address return type, number or string
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
-				errorResult = this.ljm.LJM_eWriteName(
-					this.handle, 
+				errorResult = self.ljm.LJM_eWriteName(
+					self.handle, 
 					address, 
 					value
 				);
 			} else if( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+				strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 				strBuffer.fill(0);
 
 				//Fill the write-string
@@ -1238,8 +1242,8 @@ exports.labjack = function () {
 				}
 				
 				//Execute LJM command
-				errorResult = this.ljm.LJM_eWriteNameString(
-					this.handle, 
+				errorResult = self.ljm.LJM_eWriteNameString(
+					self.handle, 
 					address,
 					strBuffer
 				);
@@ -1254,18 +1258,18 @@ exports.labjack = function () {
 				}
 			}
 		} else if( !isNaN(address) ) {
-			var info = this.constants.getAddressInfo(address, 'W');
+			var info = self.constants.getAddressInfo(address, 'W');
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
-				errorResult = this.ljm.LJM_eWriteAddress(
-					this.handle, 
+				errorResult = self.ljm.LJM_eWriteAddress(
+					self.handle, 
 					address, 
 					info.type, 
 					value
 				);
 			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+				strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 				strBuffer.fill(0);
 
 				//Fill the write-string
@@ -1277,8 +1281,8 @@ exports.labjack = function () {
 				}
 
 				//Execute LJM command
-				errorResult = this.ljm.LJM_eWriteAddressString(
-					this.handle, 
+				errorResult = self.ljm.LJM_eWriteAddressString(
+					self.handle, 
 					address,
 					strBuffer
 				);
@@ -1287,7 +1291,7 @@ exports.labjack = function () {
 				if ( info.type == -1 ) {
 					throw new DriverInterfaceError("Invalid Address");
 					return "Invalid Address";
-				} else if ( info.directionValid == 0 ) {
+				} else if ( info.directionValid === 0 ) {
 					throw new DriverInterfaceError("Invalid Write Attempt");
 					return "Invalid Write Attempt";
 				}
@@ -1296,7 +1300,7 @@ exports.labjack = function () {
 			throw new DriverInterfaceError("Invalid Arguments");
 			return "Invalid Arguments";
 		}
-		if ( errorResult == 0 ) {
+		if ( errorResult === 0 ) {
 			return errorResult;
 		} else {
 			throw new DriverOperationError(errorResult);
@@ -1326,7 +1330,7 @@ exports.labjack = function () {
 	 */
 	this.writeMany = function (addresses, values, onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if ( this.checkStatus(onError) ) { return; };
+		if ( self.checkStatus(onError) ) { return; };
 
 		//Check to make sure the two array's are of the same length
 		if ( addresses.length != values.length ) {
@@ -1350,11 +1354,11 @@ exports.labjack = function () {
 		errors.fill(0);
 
 		var errorResult;
+		var i = 0;
 
 		//Decide whether to perform address-number or address-name operation.
 		if ( isNaN(addresses[0]) ) {
 			//Perform necessary string buffer allocations.
-			var i;
 			var offset = 0;
 			var dataOffset = 0;
 
@@ -1372,7 +1376,7 @@ exports.labjack = function () {
 				var buf = new Buffer(addresses[i].length + 1);
 
 				//Clear the buffer
-				buf.fill(0)
+				buf.fill(0);
 
 				//Save the string to the buffer
 				ref.writeCString(buf, 0, addresses[i]);
@@ -1386,15 +1390,15 @@ exports.labjack = function () {
 			}
 
 			//Execute LJM command.
-			errorResult = this.ljm.LJM_eWriteNames.async(
-				this.handle, 
+			errorResult = self.ljm.LJM_eWriteNames.async(
+				self.handle, 
 				length, 
 				aNames, 
 				aValues, 
 				errors, 
 				function(err, res){
 					if (err) throw err;
-					if ( (res == 0) ) {
+					if ( (res === 0) ) {
 						return onSuccess();
 					} else {
 						return onError({retError:res, errFrame:errors.deref()});
@@ -1409,12 +1413,11 @@ exports.labjack = function () {
 			var inValidOperation = 0;
 
 			var info;
-			var offset=0;
+			var offset = 0;
 			var offsetD = 0;
-			i = 0;
 
 			for ( i = 0; i < length; i++ ) {
-				info = this.constants.getAddressInfo(addresses[i], 'W');
+				info = self.constants.getAddressInfo(addresses[i], 'W');
 				if ( info.directionValid == 1 ) {
 					addrTypeBuff.writeInt32LE(info.type,offset);
 					addrBuff.writeInt32LE(addresses[i],offset);
@@ -1425,7 +1428,7 @@ exports.labjack = function () {
 				else {
 					if ( info.type == -1 ) {
 						onError({retError:"Invalid Address", errFrame:i});
-					} else if (info.directionValid == 0) {
+					} else if (info.directionValid === 0) {
 						onError({retError:"Invalid Read Attempt", errFrame:i});
 					} else {
 						onError({retError:"Unexpected Error", errFrame:i});
@@ -1435,8 +1438,8 @@ exports.labjack = function () {
 			}
 
 			//Execute LJM command.
-			errorResult = this.ljm.LJM_eWriteAddresses.async(
-				this.handle, 
+			errorResult = self.ljm.LJM_eWriteAddresses.async(
+				self.handle, 
 				length, 
 				addrBuff, 
 				addrTypeBuff, 
@@ -1480,7 +1483,7 @@ exports.labjack = function () {
 	 */
 	this.writeManySync = function (addresses, values) {
 		//Check to make sure a device has been opened.
-		this.checkStatus();
+		self.checkStatus();
 
 		//Check to make sure the two array's are of the same length
 		if ( addresses.length != values.length ) {
@@ -1544,8 +1547,8 @@ exports.labjack = function () {
 			}
 
 			//Execute LJM function.
-			errorResult = this.ljm.LJM_eWriteNames(
-				this.handle, 
+			errorResult = self.ljm.LJM_eWriteNames(
+				self.handle, 
 				length, 
 				aNames, 
 				aValues, 
@@ -1564,7 +1567,7 @@ exports.labjack = function () {
 			i = 0;
 
 			for ( i = 0; i < length; i++ ) {
-				info = this.constants.getAddressInfo(addresses[i], 'W');
+				info = self.constants.getAddressInfo(addresses[i], 'W');
 				if ( info.directionValid == 1 ) {
 					addrTypeBuff.writeInt32LE(info.type,offset);
 					addrBuff.writeInt32LE(addresses[i],offset);
@@ -1602,8 +1605,8 @@ exports.labjack = function () {
 			}
 
 			//Execute LJM command.
-			errorResult = this.ljm.LJM_eWriteAddresses(
-				this.handle, 
+			errorResult = self.ljm.LJM_eWriteAddresses(
+				self.handle, 
 				length, 
 				addrBuff, 
 				addrTypeBuff, 
@@ -1670,7 +1673,7 @@ exports.labjack = function () {
 	 */
 	this.rwMany = function(addresses,directions,numValues,values,onError,onSuccess) {
 		//Check to make sure a device has been opened
-		if (this.checkStatus(onError)) { return; };
+		if (self.checkStatus(onError)) { return; };
 
 		var i,j;
 		var numFrames = addresses.length;
@@ -1735,9 +1738,8 @@ exports.labjack = function () {
 			}
 
 			//Call the LJM function
-			var self = this;
-			errorResult = this.ljm.LJM_eNames.async(
-				this.handle,
+			errorResult = self.ljm.LJM_eNames.async(
+				self.handle,
 				numFrames,
 				aNames,
 				aDirections,
@@ -1782,9 +1784,9 @@ exports.labjack = function () {
 				//Fill aTypes array
 				var info;
 				if(directions[i] == driver_const.LJM_READ) {
-					info = this.constants.getAddressInfo(addresses[i], 'R');
+					info = self.constants.getAddressInfo(addresses[i], 'R');
 				} else if (directions[i] == driver_const.LJM_WRITE) {
-					info = this.constants.getAddressInfo(addresses[i], 'W');
+					info = self.constants.getAddressInfo(addresses[i], 'W');
 				} else {
 					//Report Error:
 					return onError(
@@ -1857,9 +1859,8 @@ exports.labjack = function () {
 			}
 
 			//Call the LJM function
-			var self = this;
-			errorResult = this.ljm.LJM_eAddresses.async(
-				this.handle,
+			errorResult = self.ljm.LJM_eAddresses.async(
+				self.handle,
 				numFrames,
 				aAddresses,
 				aTypes,
@@ -1903,7 +1904,7 @@ exports.labjack = function () {
 		var i,j;
 		var numFrames = addresses.length;
 		//Check to make sure a device has been opened.
-		this.checkStatus();
+		self.checkStatus();
 
 		//Return variable
 		var errorResult;
@@ -1920,14 +1921,18 @@ exports.labjack = function () {
 		aValues.fill(0);
 		errorVal.fill(0);
 
+		var offsetP = 0;
+		var offsetD = 0;
+		var offsetI = 0;
+
 		if ( isNaN(addresses[0]) ) {
 			//Allocate space for the aNames array
 			var aNames = new Buffer(numFrames * ARCH_POINTER_SIZE);				//Array of C-String pointers
 			aNames.fill(0);
 
-			var offsetP = 0;
-			var offsetD = 0;
-			var offsetI = 0;
+			offsetP = 0;
+			offsetD = 0;
+			offsetI = 0;
 
 			//Populate the array's with data
 			for ( i = 0; i < numFrames; i++ ) {
@@ -1961,8 +1966,8 @@ exports.labjack = function () {
 				offsetD += ARCH_DOUBLE_NUM_BYTES;
 			}
 			//Call the LJM function
-			errorResult = this.ljm.LJM_eNames(
-				this.handle,
+			errorResult = self.ljm.LJM_eNames(
+				self.handle,
 				numFrames,
 				aNames,
 				aDirections,
@@ -1976,8 +1981,8 @@ exports.labjack = function () {
 			var aAddresses = new Buffer(numFrames * ARCH_INT_NUM_BYTES);		//Array of addresses
 			var aTypes = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of types
 
-			var offsetD = 0;
-			var offsetI = 0;
+			offsetD = 0;
+			offsetI = 0;
 
 			var overwriteNumValues = false;
 			var newNumValues;
@@ -1993,9 +1998,9 @@ exports.labjack = function () {
 				//Fill aTypes array
 				var info;
 				if(directions[i] == driver_const.LJM_READ) {
-					info = this.constants.getAddressInfo(addresses[i], 'R');
+					info = self.constants.getAddressInfo(addresses[i], 'R');
 				} else if (directions[i] == driver_const.LJM_WRITE) {
-					info = this.constants.getAddressInfo(addresses[i], 'W');
+					info = self.constants.getAddressInfo(addresses[i], 'W');
 				} else {
 					//Report Error:
 					throw new DriverInterfaceError(
@@ -2071,8 +2076,8 @@ exports.labjack = function () {
 			}
 
 			//Call the LJM function
-			errorResult = this.ljm.LJM_eAddresses(
-				this.handle,
+			errorResult = self.ljm.LJM_eAddresses(
+				self.handle,
 				numFrames,
 				aAddresses,
 				aTypes,
@@ -2088,7 +2093,7 @@ exports.labjack = function () {
 			return "Address is not a number or string array";
 		}
 		if(errorResult === 0) {
-			return this.populateRWManyArray(
+			return self.populateRWManyArray(
 						numFrames, 
 						numValues, 
 						directions, 
@@ -2112,7 +2117,7 @@ exports.labjack = function () {
 			WIFI_MAC:1
 		};
 		//Check to make sure a device has been opened.
-		if(this.checkStatus(onError)) {return;};
+		if(self.checkStatus(onError)) {return;};
 
 		//Return variable
 		var errorResult;
@@ -2156,9 +2161,8 @@ exports.labjack = function () {
 		// console.log('aValues',aValues);
 
 		//Call the LJM function
-		var self = this;
-		errorResult = this.ljm.LJM_eAddresses.async(
-			this.handle,
+		errorResult = self.ljm.LJM_eAddresses.async(
+			self.handle,
 			numFrames,
 			aAddresses,
 			aTypes,
@@ -2206,7 +2210,7 @@ exports.labjack = function () {
 			WIFI_MAC:1
 		};
 		//Check to make sure a device has been opened.
-		// this.checkStatus();
+		self.checkStatus();
 
 		//Return variable
 		var errorResult;
@@ -2250,9 +2254,8 @@ exports.labjack = function () {
 		// console.log('aValues',aValues);
 
 		//Call the LJM function
-		var self = this;
-		errorResult = this.ljm.LJM_eAddresses(
-			this.handle,
+		errorResult = self.ljm.LJM_eAddresses(
+			self.handle,
 			numFrames,
 			aAddresses,
 			aTypes,
@@ -2321,14 +2324,13 @@ exports.labjack = function () {
 	 */
 	this.close = function(onError, onSuccess) {
 		//Make sure that a device is open
-		if(this.checkStatus(onError)) { 
+		if(self.checkStatus(onError)) { 
 			//onSuccess(false);
 			return;
 		};
 
 		//Call the driver function
-		var self = this;
-		output = this.ljm.LJM_Close.async(this.handle, function (err, res) {
+		output = self.ljm.LJM_Close.async(self.handle, function (err, res) {
 			if (err) throw err;
 			if ( res == 0 ) {
 				self.handle = null;
@@ -2352,7 +2354,7 @@ exports.labjack = function () {
 		//Make sure that a device is open
 		self.checkStatus();
 
-		output = self.ljm.LJM_Close(this.handle);
+		output = self.ljm.LJM_Close(self.handle);
 
 		if ( output == 0 ) {
 			//REPORT NO ERROR HAS OCCURED
