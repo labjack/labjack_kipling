@@ -1024,7 +1024,9 @@ exports.ljmDriver = function() {
      * @param {function} onSuccess Function to call after the event has been
      *      logged successfully.
      */
-    this.logS = function(level, str, onError, onSuccess) {
+
+    this.log = function(level, str, onError, onSuccess) {
+        str = str.toString();
         if ((isNaN(level))||(!isNaN(str))) {
             onError('wrong types');
             return 0;
@@ -1048,9 +1050,10 @@ exports.ljmDriver = function() {
         );
         return 0;
     };
+    this.logS = this.log;
 
     /**
-     * Synchronous version of logS.
+     * Synchronous version of log.
      *
      * @param {number} level The severity of the event to report. Should
      *      correspond to a driver severity level constant.
@@ -1060,7 +1063,8 @@ exports.ljmDriver = function() {
      * @throws {DriverOperationError} Thrown if an exception is encountered in
      *      the LJM driver itself.
     **/
-    this.logSSync = function(level, str) {
+    this.logSync = function(level, str) {
+        str = str.toString();
         if ((isNaN(level))||(!isNaN(str))) {
             throw new DriverInterfaceError('wrong types');
             return 'wrong types';
@@ -1075,6 +1079,7 @@ exports.ljmDriver = function() {
             throw new DriverOperationError(errorResult);
         }
     };
+    this.logSSync = this.logSync;
 
     /**
      * Reset LJM's internall logging system.

@@ -31,12 +31,19 @@
         "ffi": "1.2.7",
         "optimist": "~0",
         "ref": "~0",
-        "rewire": "~1",
         "ljmmm-parse": "~0.1",
         "q": "~0"
     },
     "devDependencies": {
+        "rewire": "~1",
         "nodeunit": "~0.9.0",
         "jshint": "~2.5.6"
+    },
+    "script_notes": "to run a script w/o using npm test, use npm run [script name]",
+    "scripts": {
+        "test_driver": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/driver_test.js",
+        "test_device": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/device_test.js",
+        "test_constantsParser": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/json_constants_parser_test.js",
+        "test": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/test.js"
     }
 }

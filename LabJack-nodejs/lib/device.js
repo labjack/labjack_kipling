@@ -4,16 +4,12 @@
  * @author Chris Johnson (chrisjohn404, LabJack Corp.)
 **/
 
-//NOT SURE IF THIS IS NEEDED
 var driver_const = require('./driver_const');
 var ref = require('ref');// http://tootallnate.github.io/ref/#types-double
 var util = require('util');
 var driverLib = require('./driver_wrapper');
 var ffi = require('ffi');
 //var ljm = require('./ljmDriver');
-var fs = require('fs'); // To load/save firmware
-var http = require('http');// To download newest firmware versions form the
-						   // internet
 var ljmDriver = require('./driver.js');
 
 
@@ -43,7 +39,7 @@ function DriverOperationError(code)
 {
     this.code = code;
     this.message = code;
-};
+}
 util.inherits(DriverOperationError, Error);
 DriverOperationError.prototype.name = 'Driver Operation Error - device';
 
@@ -58,11 +54,10 @@ DriverOperationError.prototype.name = 'Driver Operation Error - device';
  * @param {String/Number} description The integer error code or string
  *		description of the error encountered.
 **/
-function DriverInterfaceError(description)
-{
+function DriverInterfaceError(description) {
 	this.description = description;
 	this.message = description;
-};
+}
 util.inherits(DriverInterfaceError, Error);
 DriverInterfaceError.prototype.name = 'Driver Interface Error - device';
 
@@ -73,8 +68,7 @@ DriverInterfaceError.prototype.name = 'Driver Interface Error - device';
  *
  * @constructor for a LabJack device in .js
  */
-exports.labjack = function ()
-{
+exports.labjack = function () {
 	this.ljm = driverLib.getDriver();
 	this.handle = null;
 	this.deviceType = null;
@@ -104,8 +98,7 @@ exports.labjack = function ()
 	 * @param {function} onSuccess function Callback for success-case.
 	 * @throws {DriverInterfaceError} if there are any un-recoverable errors
 	**/
-	this.open = function()
-	{	
+	this.open = function() {	
 		//Variables to save information to allowing for open(onError, onSuccess)
 		var deviceType, connectionType, identifier, onError, onSuccess;
 
@@ -140,7 +133,7 @@ exports.labjack = function ()
 
 		//Complete Asynchronous function-call,
 		//Make sure we aren't already connected to a device
-		if(this.handle == null) {
+		if(this.handle === null) {
 			//Create variables for the ffi call
 			var refDeviceHandle = new ref.alloc(ref.types.int,1);
 			var output;
@@ -175,7 +168,7 @@ exports.labjack = function ()
 			var handleResponse = function(err, res) {
 				if (err) throw err;
 				//Check for no errors
-				if(res == 0) {
+				if(res === 0) {
 					//Save the handle & other information to the 
 					//	device class
 					self.handle = refDeviceHandle[0];
@@ -206,7 +199,7 @@ exports.labjack = function ()
 				);
 			} else if((dtType=="number")&&(ctType=="string")&&(idType=="string")) {
 				// convert connectionType to a number
-				var connectionType = driver_const.connectionTypes[connectionType];
+				connectionType = driver_const.connectionTypes[connectionType];
 				//call LJM_OpenS() using the ffi async call
 				output = this.ljm.LJM_Open.async(
 					deviceType, 
@@ -217,7 +210,7 @@ exports.labjack = function ()
 				);
 			} else if((dtType=="string")&&(ctType=="number")&&(idType=="string")) {
 				// convert deviceType to a number
-				var deviceType = driver_const.deviceTypes[deviceType];
+				deviceType = driver_const.deviceTypes[deviceType];
 				//call LJM_OpenS() using the ffi async call
 				output = this.ljm.LJM_Open.async(
 					deviceType, 
@@ -260,13 +253,10 @@ exports.labjack = function ()
 	 * @throws {DriverInterfaceError} If there is a driver wrapper-error
 	 * @throws {DriverOperationError} If there is an LJM reported error
 	**/
-	this.openSync = function(deviceType, connectionType, identifier)
-	{
-		//Variables to save information to allowing for open()
-		var deviceType, connectionType, identifier;
+	this.openSync = function(deviceType, connectionType, identifier) {
 
 		//Determine how open() was used
-		if(arguments.length == 0) {
+		if(arguments.length === 0) {
 			//If there are two args, aka open() call
 			deviceType = "LJM_dtANY";
 			connectionType = "LJM_ctANY";
@@ -282,7 +272,7 @@ exports.labjack = function ()
 
 		//Complete Synchronous function-call,
 		//Make sure we aren't already connected to a device
-		if(this.handle == null) {
+		if(this.handle === null) {
 			//Create variables for the ffi call
 			var refDeviceHandle = new ref.alloc(ref.types.int,1);
 			var output;
@@ -323,7 +313,7 @@ exports.labjack = function ()
 				);
 			} else if((dtType=="number")&&(ctType=="string")&&(idType=="string")) {
 				// Convert connectionType to a number
-				var connectionType = driver_const.connectionTypes[connectionType];
+				connectionType = driver_const.connectionTypes[connectionType];
 				//call LJM_OpenS() using the ffi async call
 				output = this.ljm.LJM_Open(
 					deviceType, 
@@ -334,7 +324,7 @@ exports.labjack = function ()
 				);
 			} else if((dtType=="string")&&(ctType=="number")&&(idType=="string")) {
 				// convert deviceType to a number
-				var deviceType = driver_const.deviceTypes[deviceType];
+				deviceType = driver_const.deviceTypes[deviceType];
 				//call LJM_OpenS() using the ffi async call
 				output = this.ljm.LJM_Open(
 					deviceType, 
@@ -357,7 +347,7 @@ exports.labjack = function ()
 			}
 
 			//Determine whether or not the Open call was successful
-			if(output == 0) {
+			if(output === 0) {
 				//Save the handle & other information to the 
 				//	device class
 				this.handle = refDeviceHandle[0];
@@ -415,7 +405,7 @@ exports.labjack = function ()
 	**/
 	this.getHandleInfo = function(onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if(this.checkStatus(onError)) { return 1;};
+		if(this.checkStatus(onError)) { return 1;}
 
 		var errorResult;
 
@@ -436,7 +426,7 @@ exports.labjack = function ()
 			maxBytesPerMessage, 
 			function (err, res) {
 				if (err) throw err;
-				if (res == 0) {
+				if (res === 0) {
 					var ipStr = "";
 					
 					ipStr += ipAddr.readUInt8(3).toString();
@@ -516,7 +506,7 @@ exports.labjack = function ()
 		);
 		
 		//Check to see if there were any errors
-		if (errorResult != 0) {
+		if (errorResult !== 0) {
 			throw new DriverOperationError(errorResult);
 		}
 
@@ -544,7 +534,7 @@ exports.labjack = function ()
 	**/
 	this.readRaw = function(data, onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if (this.checkStatus(onError)) { return; };
+		if (this.checkStatus(onError)) { return; }
 
 		//Make sure the data is valid
 		if (typeof(data[0]) != "number") {
@@ -561,7 +551,7 @@ exports.labjack = function ()
 			data.length, 
 			function (err, res) {
 				if (err) throw err;
-				if (res == 0) {
+				if (res === 0) {
 					return onSuccess(aData);
 				} else {
 					return onError(res);
@@ -596,7 +586,7 @@ exports.labjack = function ()
 			data.length);
 
 		//Check for an error
-		if (errorResult != 0) {
+		if (errorResult !== 0) {
 			throw new DriverOperationError(errorResult);
 		}
 		return bufferData;
@@ -617,11 +607,10 @@ exports.labjack = function ()
 	this.read = function(address, onError, onSuccess) {
 
 		//Check to make sure a device has been opened
-		if (this.checkStatus(onError)) { return; };
+		if (this.checkStatus(onError)) { return; }
 
 		var output;
 		var addressNum = 0;
-		var result = new ref.alloc('double',1);
 		var info = this.constants.getAddressInfo(address, 'R');
 		var expectedReturnType = info.type;
 		var isReturningString = expectedReturnType == driver_const.LJM_STRING;
@@ -639,7 +628,7 @@ exports.labjack = function ()
 				result,
 				function(err, res) {
 					if (err) throw err;
-					if ( res == 0 ) {
+					if ( res === 0 ) {
 						//Success
 						return onSuccess(result.deref());
 					} else {
@@ -651,7 +640,7 @@ exports.labjack = function ()
 		} else if (isDirectionValid && isReturningString) {
 			//Perform a eReadAddressString operation
 			
-			//Allocate space for the result
+			//Allocate space for the string-result
 			var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
 			strBuffer.fill(0);
 
@@ -662,7 +651,7 @@ exports.labjack = function ()
 				strBuffer, 
 				function(err, res) {
 					if (err) throw err;
-					if ( res == 0 ) {
+					if ( res === 0 ) {
 						//Calculate the length of the string
 						var i = 0;
 						while ( strBuffer[i] != 0 ) {
@@ -678,7 +667,7 @@ exports.labjack = function ()
 		} else {
 			if (info.type == -1) {
 				onError('Invalid Address');
-			} else if (info.directionValid == 0) {
+			} else if (info.directionValid === 0) {
 				onError('Invalid Read Attempt');
 			}
 			return -1;
@@ -719,7 +708,7 @@ exports.labjack = function ()
 				info.type, 
 				result
 			);
-			if(output == 0) {
+			if(output === 0) {
 				result = result.deref();
 			}
 
@@ -735,7 +724,7 @@ exports.labjack = function ()
 				resolvedAddress, 
 				strBuffer
 			);
-			if(output == 0) {
+			if(output === 0) {
 				var i=0;
 				while(strBuffer[i] != 0) {
 					i++;
@@ -746,14 +735,14 @@ exports.labjack = function ()
 		} else {
 			if(info.type == -1) {
 				throw new DriverInterfaceError('Invalid Address');
-			} else if (info.directionValid == 0) {
+			} else if (info.directionValid === 0) {
 				throw new DriverInterfaceError('Invalid Read Attempt');
 			}
 			
 			throw new DriverInterfaceError('Unexpected error.');
 		}
 
-		if (output == 0) {
+		if (output === 0) {
 			return result;
 		} else {
 			throw new DriverOperationError(output);
@@ -786,7 +775,7 @@ exports.labjack = function ()
 		// TODO: Clean this up.
 
 		//Check to make sure a device has been opened
-		if ( this.checkStatus(onError) ) { return; };
+		if ( this.checkStatus(onError) ) { return; }
 
 		//Get important info & allocate argument variables
 		var length = addresses.length;
@@ -821,7 +810,7 @@ exports.labjack = function ()
 			} else {
 				if(info.type == -1) {
 					onError({retError:"Invalid Address", errFrame:i});
-				} else if (info.directionValid == 0) {
+				} else if (info.directionValid === 0) {
 					onError({retError:"Invalid Read Attempt", errFrame:i});
 				} else {
 					onError({retError:"Unexpected error", errFrame:i});
@@ -843,7 +832,7 @@ exports.labjack = function ()
 					returnResults[i] = results.readDoubleLE(offset);
 					offset += ARCH_DOUBLE_NUM_BYTES;
 				}
-				if ((res == 0)) {
+				if ((res === 0)) {
 					return onSuccess(returnResults);
 				} else {
 					return onError({retError:res, errFrame:errors.deref()});
@@ -2298,44 +2287,28 @@ exports.labjack = function ()
 			return errorResult;
 		}
 	}
-	/**
-	 * Read and write many addresses in a single driver call.
-	 *
-	 * @param {array} addresses Array of registers to write to. This function
-	 *		interprets a collection of numbers as a collection of addresses
-	 *		but interprets a string as a collection of register names.
-	 * @param {array} directions Array of read/write directions. Each element
-	 *		should be a number indicating the direction of the operation (read
-	 *		or write).
-	 * @param {array} values An array of values to send to the device. The array
-	 *		size should be the size of the addresses array. The input data type
-	 *		of each value is a double (number), and they will be converted into
-	 *		the data type passed in types.
-	 * @param {fuction} onError Function to call if an error is encountered
-	 *		during this operation.
-	 * @param {funcion} onSuccess Function to call after this operation
-	 *		completes.
-	 */
-	
-	/**
-	 * Synchronous version of rwMany.
-	 *
-	 * @param {array} addresses Array of registers to write to. This function
-	 *		interprets a collection of numbers as a collection of addresses
-	 *		but interprets a string as a collection of register names.
-	 * @param {array} directions Array of read/write directions. Each element
-	 *		should be a number indicating the direction of the operation (read
-	 *		or write).
-	 * @param {array} values An array of values to send to the device. The array
-	 *		size should be the size of the addresses array. The input data type
-	 *		of each value is a double (number), and they will be converted into
-	 *		the data type passed in types.
-	 * @throws {DriverOperationError} If there is an error produced by calling 
-	 * 		the LJM driver
-	 * @return {array} Array of number read from the device during this
-	 *		operation. While floating point values are interepreted, string
-	 *		values are not.
-	 */
+
+	var streamSettings = {};
+	this.streamStart = function(scansPerRead, numChannels, scanList, scanRate, onError, onSuccess) {
+
+	};
+	this.streamStartSync = function(scansPerRead, numChannels, scanList, scanRate) {
+
+	};
+
+	this.streamRead = function(onError, onSuccess) {
+
+	};
+	this.streamReadSync = function() {
+
+	};
+
+	this.streamStop = function(onError, onSuccess) {
+
+	};
+	this.streamStopSync = function() {
+
+	};
 	
 
 	/**
@@ -2377,16 +2350,16 @@ exports.labjack = function ()
 	 */
 	this.closeSync = function() {
 		//Make sure that a device is open
-		this.checkStatus();
+		self.checkStatus();
 
-		output = this.ljm.LJM_Close(this.handle);
+		output = self.ljm.LJM_Close(this.handle);
 
 		if ( output == 0 ) {
 			//REPORT NO ERROR HAS OCCURED
-			this.handle = null;
-			this.deviceType = null;
-			this.connectionType = null;
-			this.identifier = null;
+			self.handle = null;
+			self.deviceType = null;
+			self.connectionType = null;
+			self.identifier = null;
 		} else {
 			//REPORT CLOSING ERROR HAS OCCURED
 			throw new DriverOperationError("Closing Device Error", output);
@@ -2406,7 +2379,7 @@ exports.labjack = function ()
 	 *		has an invalid deviceType.
 	**/
 	this.checkStatus = function(onError) {
-		if ( (this.handle === null) && (this.deviceType === null) ) {
+		if ( (self.handle === null) && (self.deviceType === null) ) {
 			if ( onError === null ) {
 				throw new DriverInterfaceError("Device Never Opened");
 				return true;
@@ -2417,43 +2390,8 @@ exports.labjack = function ()
 		}
 	};
 
-	/**
-	 * Check that firmware constants have been loaded.
-	 *
-	 * @throws DriverInterfaceError: Thrown if the firmware constants have not
-	 *		been loaded yet.
-	**/
-	this.checkFirmwareConstants = function() {
-		if ( this.firmwareVersions == null ) {
-			throw new DriverInterfaceError("Firmware Versions File Not Loaded");
-		}
-	};
-
-	/**
-	 * Check that a firmware binary is present and accessbile.
-	 *
-	 * @throws DriverInterfaceError: Thrown if the firmware binary has not been
-	 *		loaded, is not present, or is not accessible.
-	**/
-	this.checkLoadedFirmware = function() {
-		if ( this.firmwareFileBuffer == null ) {
-			throw new DriverInterfaceError("Firmware .bin File Not Loaded");
-		}
-	};
-
-	/**
-	 * Check that a firmware binary has been parsed successfully.
-	 *
-	 * @throws DriverInterfaceError: Thrown if the fimware binary could not
-	 *		be successfully parsed.
-	**/
-	this.checkLoadedFirmwareParsed = function() {
-		if ( this.fwHeader == null ) {
-			throw new DriverInterfaceError("Firmware .bin File Not Parsed");
-		}
-	}
 
 	//********************* EXTRA ACCESSORY FUNCTIONS ********************
 
-
+	var self = this;
 };
