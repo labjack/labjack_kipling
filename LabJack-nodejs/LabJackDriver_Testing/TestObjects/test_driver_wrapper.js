@@ -627,6 +627,43 @@ var LJM_ResetLog = createCallableObject(
 		reportEnd(callback);
 	});
 
+/**
+ * Test-Function for Synchronous and Async Streaming
+**/
+var LJM_eStreamStart = createCallableObject(
+	function(handle, scansPerRead, numAddresses, aScanList, scanRate) {
+		lastFunctionCall.push("LJM_eStreamStart");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(handle, scansPerRead, numAddresses, aScanList, scanRate, callback) {
+		lastFunctionCall.push("LJM_eStreamStartAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+var LJM_eStreamRead = createCallableObject(
+	function(handle, aData, deviceScanBacklog, ljmScanBacklog) {
+		lastFunctionCall.push("LJM_eStreamRead");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(handle, aData, deviceScanBacklog, ljmScanBacklog, callback) {
+		lastFunctionCall.push("LJM_eStreamReadAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+var LJM_eStreamStop = createCallableObject(
+	function(handle) {
+		lastFunctionCall.push("LJM_eStreamStop");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(handle, callback) {
+		lastFunctionCall.push("LJM_eStreamStopAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+
 //******************************************************************************
 //*********************		Driver Dict-Object	********************************
 //******************************************************************************
@@ -652,6 +689,9 @@ var fakeDriver = {
 	'LJM_eReadAddressString': LJM_eReadAddressString,
 	'LJM_eWriteNameString': LJM_eWriteNameString,
 	'LJM_eWriteAddressString': LJM_eWriteAddressString,
+	'LJM_eStreamStart': LJM_eStreamStart,
+	'LJM_eStreamRead': LJM_eStreamRead,
+	'LJM_eStreamStop': LJM_eStreamStop,
 
 	//Driver Functions
 	'LJM_ListAll': LJM_ListAll,

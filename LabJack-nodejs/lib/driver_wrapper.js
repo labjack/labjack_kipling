@@ -280,16 +280,16 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
             'int', [
                 'int',                          //Handle
                 'int',                          //ScansPerRead
-                'int',                          //NumChannels
-                ref.refType(ref.types.double),  //aScanList_Pos
-                ref.refType(ref.types.int)      //ScanRate
+                'int',                          //NumAddresses
+                ref.refType(ref.types.int),     //aScanList
+                ref.refType(ref.types.double)   //ScanRate
             ]
         ],
         'LJM_eStreamRead': [
             'int', [
                 'int',                          //Handle
-                ref.refType(ref.types.int),     //aData
-                ref.refType(ref.types.double),  //DeviceScanBacklog (ptr)
+                ref.refType(ref.types.double),  //aData
+                ref.refType(ref.types.int),     //DeviceScanBacklog (ptr)
                 ref.refType(ref.types.int)      //LJMScanBacklog (ptr)
             ]
         ],

@@ -165,7 +165,9 @@ exports.labjack = function () {
 
 			//Function for handling the ffi callback
 			var handleResponse = function(err, res) {
-				if (err) throw err;
+				if(err) {
+					return onError('Weird Error open', err);
+				}
 				//Check for no errors
 				if(res === 0) {
 					//Save the handle & other information to the 
@@ -424,7 +426,9 @@ exports.labjack = function () {
 			port, 
 			maxBytesPerMessage, 
 			function (err, res) {
-				if (err) throw err;
+				if(err) {
+					return onError('Weird Error getHandleInfo', err);
+				}
 				if (res === 0) {
 					var ipStr = "";
 					
@@ -549,7 +553,9 @@ exports.labjack = function () {
 			aData, 
 			data.length, 
 			function (err, res) {
-				if (err) throw err;
+				if(err) {
+					return onError('Weird Error readRaw', err);
+				}
 				if (res === 0) {
 					return onSuccess(aData);
 				} else {
@@ -626,7 +632,9 @@ exports.labjack = function () {
 				info.type, 
 				result,
 				function(err, res) {
-					if (err) throw err;
+					if(err) {
+						return onError('Weird Error read', err);
+					}
 					if ( res === 0 ) {
 						//Success
 						return onSuccess(result.deref());
@@ -649,7 +657,9 @@ exports.labjack = function () {
 				resolvedAddress, 
 				strBuffer, 
 				function(err, res) {
-					if (err) throw err;
+					if(err) {
+						return onError('Weird Error read', err);
+					}
 					if ( res === 0 ) {
 						//Calculate the length of the string
 						var i = 0;
@@ -825,7 +835,9 @@ exports.labjack = function () {
 			results, 
 			errors, 
 			function(err, res) {
-				if (err) throw err;
+				if(err) {
+					return onError('Weird Error readMany', err);
+				}
 				var offset = 0;
 				for (i in addresses) {
 					returnResults[i] = results.readDoubleLE(offset);
@@ -1005,7 +1017,9 @@ exports.labjack = function () {
 			aData, 
 			data.length, 
 			function (err, res){
-				if (err) throw err;
+				if(err) {
+					return onError('Weird Error writeRaw', err);
+				}
 				if ( res === 0 ) {
 					return onSuccess(aData);
 				} else {
@@ -1088,7 +1102,9 @@ exports.labjack = function () {
 					address, 
 					value, 
 					function(err, res) {
-						if (err) throw err;
+						if(err) {
+							return onError('Weird Error write-1', err);
+						}
 						if ( res === 0 ) {
 							return onSuccess();
 						} else {
@@ -1116,7 +1132,9 @@ exports.labjack = function () {
 					address,
 					strBuffer, 
 					function(err, res){
-						if (err) throw err;
+						if(err) {
+							return onError('Weird Error write-2', err);
+						}
 						if ( res === 0 ) {
 							return onSuccess();
 						} else {
@@ -1143,7 +1161,9 @@ exports.labjack = function () {
 					info.type, 
 					value, 
 					function(err, res){
-						if (err) throw err;
+						if(err) {
+							return onError('Weird Error write-3', err);
+						}
 						if ( res === 0 ) {
 							return onSuccess();
 						} else {
@@ -1171,7 +1191,9 @@ exports.labjack = function () {
 					address,
 					strBuffer, 
 					function(err, res){
-						if (err) throw err;
+						if(err) {
+							return onError('Weird Error write', err);
+						}
 						if ( res === 0 ) {
 							return onSuccess();
 						} else {
@@ -1397,7 +1419,9 @@ exports.labjack = function () {
 				aValues, 
 				errors, 
 				function(err, res){
-					if (err) throw err;
+					if(err) {
+						return onError('Weird Error writeMany-1', err);
+					}
 					if ( (res === 0) ) {
 						return onSuccess();
 					} else {
@@ -1446,7 +1470,9 @@ exports.labjack = function () {
 				aValues, 
 				errors, 
 				function(err, res){
-					if ( err ) throw err;
+					if(err) {
+						return onError('Weird Error writeMany-2', err);
+					}
 					if ( (res == 0) ) {
 						return onSuccess();
 					}
@@ -1747,7 +1773,9 @@ exports.labjack = function () {
 				aValues,
 				errorVal,
 				function(err,res) {
-					if (err) throw err;
+					if(err) {
+						return onError('Weird Error rwMany-1', err);
+					}
 					if ( res == 0 ) {
 						return onSuccess(
 							self.populateRWManyArray(
@@ -1869,7 +1897,9 @@ exports.labjack = function () {
 				aValues,
 				errorVal,
 				function(err,res) {
-					if(err) throw err;
+					if(err) {
+						return onError('Weird Error rwMany-2', err);
+					}
 					if(res == 0) {
 						return onSuccess(
 							self.populateRWManyArray(
@@ -2171,7 +2201,9 @@ exports.labjack = function () {
 			aValues,
 			errorVal,
 			function(err,res) {
-				if(err) throw err;
+				if(err) {
+					return onError('Weird Error readUINT64', err);
+				}
 				if(res === 0) {
 					// console.log('readMac Async Success',aValues);
 					var i;
@@ -2291,26 +2323,179 @@ exports.labjack = function () {
 		}
 	}
 
-	var streamSettings = {};
-	this.streamStart = function(scansPerRead, numChannels, scanList, scanRate, onError, onSuccess) {
+	this.streamSettings = {};
+	this.streamStart = function(scansPerRead, scanList, scanRate, onError, onSuccess) {
+		//Check to make sure a device has been opened.
+		if(self.checkStatus(onError)) {return;}
 
+		var numAddresses = scanList.length;
+
+		// Allocate buffer space:
+		var aScanList = new Buffer(numAddresses * ARCH_INT_NUM_BYTES);	//Array of integers
+		var pScanRate = new Buffer(ARCH_DOUBLE_NUM_BYTES);			//Pointer to a double
+
+		// Clear the buffers
+		aScanList.fill(0);
+		pScanRate.fill(0);
+
+		//Write data to the buffers
+		var i = 0;
+		var offsetD = 0;
+		var isScanListInvalid = false;
+		var scanListAddresses = [];
+		var invalidRegisters = [];
+
+		// Parse the scanList for numeric addresses to allow for names and 
+		// populate the aScanList buffer
+		for(i = 0; i < numAddresses; i++) {
+			var info = self.constants.getAddressInfo(scanList[i], 'R');
+			var expectedReturnType = info.type;
+			var resolvedAddress = info.address;
+
+			// Make sure the registers are streamable
+			isScanListInvalid = isScanListInvalid || (!info.data.streamable);
+
+			// If they aren't add the data to the array
+			if(!info.data.streamable) {
+				invalidRegisters.push({
+					'address': resolvedAddress,
+					'name': info.name
+				});
+			}
+
+			scanListAddresses.push(resolvedAddress);
+			aScanList.writeInt32LE(resolvedAddress, offsetD);
+			offsetD += ARCH_INT_NUM_BYTES;
+		}
+
+		// Populate the pScanRate buffer
+		pScanRate.writeDoubleLE(scanRate, 0);
+
+		
+		if(isScanListInvalid) {
+			// Report errors
+			onError({
+				'message': 'Not all registers are streamable',
+				'info': invalidRegisters
+			});
+		} else {
+			// Save the stream settings & calculate how much data to receive on
+			// during each read.
+			self.streamSettings = {
+				'scanRate': scanRate,
+				'scansPerRead': scansPerRead,
+				'numValues': scansPerRead * numAddresses,
+				'readBufferSize': scansPerRead * numAddresses * ARCH_DOUBLE_NUM_BYTES,
+				'scanList': scanList,
+				'aScanList': scanListAddresses,
+				'actualScanRate': null,
+				'streamActive': false
+			};
+
+			self.ljm.LJM_eStreamStart.async(
+				self.handle,
+				scansPerRead,
+				numAddresses,
+				aScanList,
+				pScanRate,
+				function(err,res) {
+					if(err) {
+						return onError('Weird Error streamStart', err);
+					}
+					if(res === 0) {
+						var actualScanRate = pScanRate.readDoubleLE(0);
+						self.streamSettings.actualScanRate = actualScanRate;
+						self.streamActive = true;
+						return onSuccess(self.streamSettings);
+					} else {
+						return onError(res);
+					}
+				}
+			);
+		}
+		
+		// self.ljm.LJM_eStreamStart(
+		// 	self.handle,
+		// 	scansPerRead,
+		// 	numChannels
+		// );
 	};
 	this.streamStartSync = function(scansPerRead, numChannels, scanList, scanRate) {
-
+		//Check to make sure a device has been opened.
+		self.checkStatus();
+		throw new DriverOperationError("Closing Device Error", 'Not Implemented');
 	};
 
 	this.streamRead = function(onError, onSuccess) {
+		//Check to make sure a device has been opened.
+		if(self.checkStatus(onError)) {return;}
 
+		var readBufferSize = self.streamSettings.readBufferSize;
+
+		// Allocate buffer space:
+		var aData = new Buffer(readBufferSize);					//Array of integers
+		var deviceScanBacklog = new Buffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
+		var ljmScanBacklog = new Buffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
+
+		// Clear the buffers
+		aData.fill(0);
+		deviceScanBacklog.fill(0);
+		ljmScanBacklog.fill(0);
+
+		// Call the ljm eStreamRead function
+		self.ljm.LJM_eStreamRead.async(
+			self.handle,
+			aData,
+			deviceScanBacklog,
+			ljmScanBacklog,
+			function(err,res) {
+				if(err) {
+					return onError('Weird Error streamStart', err);
+				}
+				if(res === 0) {
+					var deviceBacklog = deviceScanBacklog.readInt32LE(0);
+					var ljmBacklog = ljmScanBacklog.readInt32LE(0);
+					return onSuccess({
+						'data': aData,
+						'deviceBacklog': deviceBacklog,
+						'ljmBacklog': ljmBacklog
+					});
+				} else {
+					return onError(res);
+				}
+			}
+		);
 	};
 	this.streamReadSync = function() {
-
+		//Check to make sure a device has been opened.
+		self.checkStatus();
+		throw new DriverOperationError("Closing Device Error", 'Not Implemented');
 	};
 
 	this.streamStop = function(onError, onSuccess) {
+		//Check to make sure a device has been opened.
+		if(self.checkStatus(onError)) {return;}
 
+		// Call the ljm eStreamStop function
+		self.ljm.LJM_eStreamStop.async(
+			self.handle,
+			function(err, res) {
+				if(err) {
+					return onError('Weird Error streamStart', err);
+				}
+				if(res === 0) {
+					// Clear the stream settings:
+					self.streamSettings = {};
+					return onSuccess(true);
+				} else {
+					return onError(res);
+				}
+			});
 	};
 	this.streamStopSync = function() {
-
+		//Check to make sure a device has been opened.
+		self.checkStatus();
+		throw new DriverOperationError("Closing Device Error", 'Not Implemented');
 	};
 	
 
@@ -2327,11 +2512,13 @@ exports.labjack = function () {
 		if(self.checkStatus(onError)) { 
 			//onSuccess(false);
 			return;
-		};
+		}
 
 		//Call the driver function
 		output = self.ljm.LJM_Close.async(self.handle, function (err, res) {
-			if (err) throw err;
+			if(err) {
+				return onError('Weird Error close', err);
+			}
 			if ( res == 0 ) {
 				self.handle = null;
 				self.deviceType = null;

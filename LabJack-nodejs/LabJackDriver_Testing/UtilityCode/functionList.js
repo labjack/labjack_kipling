@@ -11,6 +11,9 @@ var functionLocation = {
 	'close': 'device',
 	'rwMany': 'device',
 	'readUINT64': 'device',
+	'streamStart': 'device',
+	'streamRead': 'device',
+	'streamStop': 'device',
 
 	//Driver Functions
 	'listAll': 'driver',

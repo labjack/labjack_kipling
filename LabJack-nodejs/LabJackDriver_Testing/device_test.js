@@ -1307,6 +1307,83 @@ module.exports = {
                 test.done();
             },false,false
         );
+    },
+    'streaming': function(test) {
+    	//Configure running-engines
+		asyncRun.config(dev, null);
+		syncRun.config(dev, null);
+
+    	var testList = [
+    		'streamStart(100, ["AIN0"], 1000)',
+    		'streamRead()',
+    		'streamStop()'
+    	];
+
+    	var callbackIndex = [4,5,4,1];
+    	var bufferIndicies = [
+    		null,
+    		[3,4],
+    		[1,2,3],
+    		null
+    	];
+    	var resultBufferLength = 100 * 8;
+    	var bufferSizes = [
+    		null,
+    		[4,8],
+    		[resultBufferLength,4,4],
+    		null
+    	];
+
+    	var expectedFunctionList = [
+    		'LJM_eStreamStartAsync',
+    		'LJM_eStreamReadAsync',
+    		'LJM_eStreamStopAsync',
+    		// 'LJM_CloseAsync'
+    	];
+
+    	asyncRun.run(testList,
+    		function(err) {
+    			console.log('Error', err);
+    		}, function(res) {
+    			// Test to make sure the appropriate LJM functions were called
+    			var funcs = fakeDriver.getLastFunctionCall();
+    			test.deepEqual(funcs, expectedFunctionList);
+
+    			// Test to make sure that the functions were called with the
+    			// appropriate arguments
+    			var argList = fakeDriver.getArgumentsList();
+    			var msg = 'argument descrepency, console.log(argList) for details.';
+    			argList.forEach(function(argI, i) {
+    				// Test for callback function locations
+    				test.strictEqual(typeof(argI[callbackIndex[i]]), 'function', msg);
+    			
+    				// Test for buffer indicies
+    				if(bufferIndicies[i]) {
+    					bufferIndicies[i].forEach(function(bufferIndicy, j) {
+
+    						var type = Buffer.isBuffer(argI[bufferIndicy]);
+    						test.strictEqual(type, true, msg);
+
+    						var size = argI[bufferIndicy].length;
+    						var expectedSize = bufferSizes[i][j];
+    						test.strictEqual(size, expectedSize, msg);
+    					});
+    				}
+    			});
+
+				var results = asyncRun.getResults();
+				msg = 'results descrepency';
+				test.strictEqual(results.length, 3, msg);
+				var tRes = results[1];
+				var tResKeys = ['data','deviceBacklog','ljmBacklog'];
+				test.deepEqual(Object.keys(tRes), tResKeys, msg);
+				test.strictEqual(tRes.data.length, resultBufferLength, msg);
+
+    // 			console.log("HERE!");
+				// console.log(results);
+				// console.log(argList);
+    			test.done();
+    		}, false, false);
     }
 
 	/**

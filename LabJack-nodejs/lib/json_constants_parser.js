@@ -256,7 +256,6 @@ var parseConstants = function(LJMJSONFileLocation) {
 		if(typeof(size) === 'undefined') {
 			size = 0;
 		}
-		
 		return {
 			type: deviceType,
 			directionValid: validity,
