@@ -1,11 +1,12 @@
 var dict = require('dict');
 var q = require('q');
+var buffer = require('buffer');
 
 
 var process_manager = require('../lib/process_manager.js');
 var slave_process = process_manager.slave_process();
 
-var DEBUG = true;
+var DEBUG = false;
 var startupInfo = slave_process.getSlaveProcessInfo();
 if(typeof(startupInfo.DEBUG_MODE) !== 'undefined') {
 	DEBUG = startupInfo.DEBUG_MODE;
@@ -29,7 +30,14 @@ var qListener = function(message) {
 		retData = 'generic';
 	} else if (message.dataMessage === 'returnUndefined') {
 		retData = undefined;
-	}else {
+	} else if (message.dataMessage === 'returnBuffer') {
+		var data = [0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF];
+		var retBuffer = new Buffer(data.length);	// to create a hex 0xDEADBEEF
+		data.forEach(function(val, i) {
+			retBuffer.writeUInt8(val, i);
+		});
+		retData = retBuffer;
+	} else {
 		retData = {'arbitraryData': 'Arbitrary data from basic_test_slave.js'};//,'pid':process.pid};
 	}
 	defered.resolve(retData);

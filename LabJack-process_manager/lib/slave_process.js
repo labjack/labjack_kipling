@@ -9,6 +9,8 @@ var dict = require('dict');
 var q = require('q');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var net = require('net');
+var fs = require('fs');
 
 // include various constants from the constants file
 var pm_constants = require('./process_manager_constants');
@@ -17,6 +19,7 @@ var PM_STOP_CHILD_PROCESS = pm_constants.stopChildProcess;
 var PM_CHILD_PROCESS_STARTED = pm_constants.childProcessStarted;
 var PM_GET_PROCESS_INFO = pm_constants.getProcessInfo;
 var PM_EMIT_MESSAGE = pm_constants.emitMessage;
+
 
 
 // valid user listener types
@@ -38,6 +41,62 @@ var print = function(argA, argB) {
 	    }
 	}
 };
+
+var readStream = null;
+var writeStream = null;
+var createStreamInterface = false;
+if(createStreamInterface) {
+	try {
+		readStream = fs.createReadStream(null, {fd: 4});
+		writeStream = fs.createReadStream(null, {fd: 5, flags: 'r+', 'encoding': 'ascii'});
+		// readStreamB = fs.createReadStream(null, {fd: 5});
+		readStream.on('readable', function() {
+			console.log("S: my piped data 0");
+			var chunk;
+			while (null !== (chunk = readStream.read())) {
+				console.log('S: got %d bytes of data', chunk.length, ':', chunk.toString('ascii'));
+			}
+			// .write(Buffer('awesome'));
+		});
+		// readStream.on('data', function(buff) {
+		// 	console.log("my piped data 1", buff);
+		// });
+		readStream.on('end', function() {
+			console.log("S: readStream Ended");
+		});
+		readStream.on('error', function(err) {
+			console.log("S: readStream Error", err);
+		});
+		console.log("S: hh", writeStream.push);
+		console.log("S: here", writeStream);
+		// writeStream.push(new Buffer("HERE"));
+		
+		writeStream.on('open', function() {
+			console.log("* S: Writing Data");
+			var succ = writeStream.write('awesome','ascii', function(err) {
+				console.log('* S: Write Stream Callback', err);
+			});
+			console.log("* S: Write Success", succ);
+		});
+		fs.write(5, 'Start Pipe', function(err) {
+			console.log("* S: Write Callback", err);
+		});
+		// writeStream.write(Buffer('awesome'));
+
+	} catch(err) {
+		console.log("ERR", err);
+	}
+	// var pipe = new net.Socket({ fd: 1, readable: true });
+	// pipe.on('data', function(buf) {
+	// 	console.log("my piped data", buf);
+	// });
+	// print(fs.fstatSync(0));
+	// print(fs.fstatSync(1));
+	// print(fs.fstatSync(2));
+	// print(fs.fstatSync(3));
+	// print(fs.fstatSync('4'));
+	// console.log("pInfo", process.stdio);
+}
 var slave_process_env;
 if(process.env.slave_process_env) {
 	slave_process_env = JSON.parse(process.env.slave_process_env);
@@ -84,7 +143,18 @@ function createNewMessageManager(listeners) {
 		defered.resolve(bundle);
 		return defered.promise;
 	};
+	var stopChildprocess = function(bundle) {
+		var defered = q.defer();
+
+		console.log("S: in stopChildprocess");
+		retData = 1;
+		bundle.successData = retData;
+		bundle.isHandled = true;
+		defered.resolve(bundle);
+		return defered.promise;
+	};
 	var internalMessageBindings = {};
+	internalMessageBindings[PM_STOP_CHILD_PROCESS] = stopChildprocess;
 	internalMessageBindings[PM_GET_PROCESS_INFO] = getProcessInfo;
 
 	var isInternalMessage = function(messageType) {
@@ -125,6 +195,7 @@ function createNewMessageManager(listeners) {
 				internalMessageBindings[bundle.message.type](bundle)
 				.then(defered.resolve, defered.reject);
 			} else {
+				console.log("Internal Message Type Encountered", bundle.message);
 				print('internal message type encountered', bundle.message);
 				bundle.successData = 'internal message handled';
 				bundle.isHandled = true;

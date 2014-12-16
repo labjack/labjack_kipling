@@ -10,6 +10,8 @@ var dict = require('dict');
 var q = require('q');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var stream = require('stream');
+var fs = require('fs');
 
 // include various constants from the constants file
 var pm_constants = require('./process_manager_constants');
@@ -18,6 +20,8 @@ var PM_STOP_CHILD_PROCESS = pm_constants.stopChildProcess;
 var PM_GET_PROCESS_INFO = pm_constants.getProcessInfo;
 var PM_CHILD_PROCESS_STARTED = pm_constants.childProcessStarted;
 var PM_EMIT_MESSAGE = pm_constants.emitMessage;
+
+var createStreamInterface = false;
 
 var IS_DEBUG = false;
 var print = function(argA, argB) {
@@ -58,6 +62,10 @@ function createNewProcessManager() {
         PM_CHILD_PROCESS_STARTED,
         PM_GET_PROCESS_INFO
     ];
+
+    this.getSubprocess = function() {
+        return subProcess;
+    };
     var isInternalMessage = function(messageType) {
         var isInternalMessage = false;
         if(internalMessages.indexOf(messageType) >= 0) {
@@ -297,11 +305,106 @@ function createNewProcessManager() {
         initializeMessageManaggement();
 
         // start the childProcess via forking a new process
-        subProcess = child_process.fork(
-            deviceManagerSlaveLocation,
-            deviceManagerSlaveArgs,
-            deviceManagerSlaveOptions
-        );
+        var validExecPath = false;
+        if(typeof(options.execPath) !== 'undefined') {
+            if(options.execPath !== '') {
+                validExecPath = true;
+            }
+        }
+        if(options.spawnChildProcess && (validExecPath)) {
+            // console.log("calling child_process.spawn");
+
+            // Instruct the new node process to execute the defined .js file
+            deviceManagerSlaveArgs.push(deviceManagerSlaveLocation);
+
+            // append the stdio array to the options object
+            deviceManagerSlaveOptions.stdio = [
+                process.stdin,
+                process.stdout,
+                process.stderr,
+                'ipc',
+                'pipe',
+                'pipe'
+            ];
+            subProcess = child_process.spawn(
+                options.execPath,
+                deviceManagerSlaveArgs,
+                deviceManagerSlaveOptions
+            );
+            
+            if(createStreamInterface) {
+                // console.log("HERE", subProcess.stdio);
+                self.subProcessPipe = subProcess.stdio[4];
+                self.subProcessPipe.write(Buffer('awesome'));
+                // console.log('here!', Object.keys(self.subProcessPipe));
+
+                // trying to read data from a subprocess
+                // console.log('here1', subProcess.stdio[5]);
+                // console.log('here2', Object.keys(subProcess.stdio[5]));
+
+                // var readStream = fs.createReadStream(null, {fd: 5});
+                // console.log("hereA", readStream);
+                // console.log("hereB", Object.keys(readStream));
+                // console.log("hereC", readStream._events);
+
+                var readStream = subProcess.stdio[5];
+                readStream.on('readable', function() {
+                    console.log("-! M: my piped data 0");
+                    var chunk;
+                    while (null !== (chunk = readStream.read())) {
+                        console.log('-! got %d bytes of data', chunk.length, ':', chunk.toString('ascii'));
+                    }
+                });
+                // readStream.on('readable', function() {
+                //     console.log("my piped data 0");
+                //     var chunk;
+                //     while (null !== (chunk = readStream.read())) {
+                //         console.log('got %d bytes of data', chunk.length);
+                //     }
+                // });
+                // readStream.on('end', function() {
+                //     console.log("readStream Ended");
+                // });
+                // readStream.on('error', function(err) {
+                //     console.log("readStream Error", err);
+                // });
+                // self.bufferStream.pipe(pipe);
+            }
+        } else {
+            subProcess = child_process.fork(
+                deviceManagerSlaveLocation,
+                deviceManagerSlaveArgs,
+                deviceManagerSlaveOptions
+            );
+        }
+        
+
+        /*
+        Spawn parameters:
+        command
+        args
+        options {
+            cwd
+            stdio
+            customFds (deprecated)
+            env
+            detached
+            uid
+            gid
+        }
+
+        Fork parameters:
+        modulePath
+        args
+        options {
+            cwd
+            env
+            encoding
+            execPath
+            execArgv
+            silent
+        }
+        */
 
         // Attach a wide variety of event listeners
         subProcess.on('error', errorListener);
@@ -400,12 +503,24 @@ function createNewProcessManager() {
         return defered.promise;
     };
 
-    this.qStopChildProcess = function() {
+    this.stopChildProcess = function() {
         var defered = q.defer();
-        self.stopChildProcess(defered.reject, defered.resolve);
+        stopOpenStreams()
+        .then(innerStopChildProcess)
+        .then(defered.resolve, defered.reject);
         return defered.promise;
     };
-    this.stopChildProcess = function(onError, onSuccess) {
+    var stopOpenStreams = function() {
+        var stopStreams = q.defer();
+        if(self.subProcessPipe) {
+            console.log("Closing subProcessPipe");
+            self.subProcessPipe.end();
+        }
+        stopStreams.resolve();
+        return stopStreams.promise;
+    };
+    var innerStopChildProcess = function() {
+        var stopDefered = q.defer();
         print('in stopChildProcess');
         subProcess.disconnect();
         var numIterations = 0;
@@ -413,16 +528,17 @@ function createNewProcessManager() {
         var loopTillSubprocessEnded = function() {
             if(receivedExitMessage && receivedDisconnectMessage) {
                 print('Lost Messages due to stoppingChildProcess', messageBuffer.size);
-                onSuccess({'numLostMessages': messageBuffer.size});
+                stopDefered.resolve({'numLostMessages': messageBuffer.size});
             } else {
                 if(numIterations < maxIterations) {
                     setTimeout(loopTillSubprocessEnded, 10);
                 } else {
-                    onError('Failed to verify that subProcess was ended');
+                    stopDefered.reject('Failed to verify that subProcess was ended');
                 }
             }
         };
         setTimeout(loopTillSubprocessEnded, 10);
+        return stopDefered.promise;
     };
 
     EventEmitter.call(this);
@@ -464,12 +580,13 @@ function createNewMasterProcess() {
 	    return self.masterProcess.startChildProcess(processName, options);
 	};
 	this.stop = function(onError, onSuccess) {
-	    print('in stop');
-	    self.masterProcess.stopChildProcess(onError, onSuccess);
+        print('in stop');
+        self.masterprocess.stopChildProcess()
+        .then(onError, onSuccess);
 	};
 	this.qStop = function() {
 	    print('in qStop');
-	    return self.masterProcess.qStopChildProcess();
+	    return self.masterProcess.stopChildProcess();
 	};
 
 	this.sendReceive = function(m) {

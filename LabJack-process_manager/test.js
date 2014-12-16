@@ -20,11 +20,13 @@ nodeBinaryPath = path.join(process.cwd(), 'node_binaries', process.platform, pro
 var process_manager = require('./lib/process_manager');
 var utils = require('./examples/common/utils');
 
-var basicTest = require('./test/basic_test');
-basicTest.setImports({
+var basic_test = require('./test/basic_test');
+var basicTest = new basic_test.createBasicTest({
 	'process_manager': process_manager,
 	'utils': utils,
-	'node_binary': nodeBinaryPath
+	'node_binary': nodeBinaryPath,
+	'spawnChildProcess': true,
+	'debug_mode': false
 });
 
 var advancedTest = require('./test/advanced_test');
