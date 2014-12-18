@@ -41,7 +41,7 @@
     },
     "script_notes": "to run a script w/o using npm test, use npm run [script name]",
     "scripts": {
-        "test_stream_integration": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/driver_test.js",
+        "test_stream_integration": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/stream_integration_test.js",
         "test_driver": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/driver_test.js",
         "test_device": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/device_test.js",
         "test_constantsParser": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/json_constants_parser_test.js",

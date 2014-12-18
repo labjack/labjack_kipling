@@ -2328,6 +2328,36 @@ exports.labjack = function () {
 		//Check to make sure a device has been opened.
 		if(self.checkStatus(onError)) {return;}
 
+		var argsValid = true;
+		if((typeof(scansPerRead) === 'undefined') || (typeof(scansPerRead) === 'null')) {
+			argsValid = false;
+		}
+		if((typeof(scanList) === 'undefined') || (typeof(scanList) === 'null')) {
+			argsValid = false;
+		}
+		if((typeof(scanRate) === 'undefined') || (typeof(scanRate) === 'null')) {
+			argsValid = false;
+		}
+		if((typeof(onError) === 'undefined') || (typeof(onError) === 'null')) {
+			argsValid = false;
+		}
+		if((typeof(onSuccess) === 'undefined') || (typeof(onSuccess) === 'null')) {
+			argsValid = false;
+		}
+		if(!argsValid) {
+			if(onError) {
+				onError('streamStart function call invalid args');
+			} else {
+				throw new DriverInterfaceError('streamStart function call invalid args');
+			}
+			return;
+		}
+		// Check to see if a stream is already running
+		if(Object.keys(self.streamSettings).length > 0) {
+			onError('streamStart: stream already running');
+			return;
+		}
+
 		var numAddresses = scanList.length;
 
 		// Allocate buffer space:
