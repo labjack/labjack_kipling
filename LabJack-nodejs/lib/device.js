@@ -2324,6 +2324,12 @@ exports.labjack = function () {
 	}
 
 	this.streamSettings = {};
+	var getHRDiff = function(starting, ending) {
+		var res = [0,0];
+		startMS = starting[0] * 1000 + starting[1]/1000000;
+		endMS = ending[0] * 1000 + ending[1]/1000000;
+		return (endMS - startMS).toFixed(3);
+	};
 	this.streamStart = function(scansPerRead, scanList, scanRate, onError, onSuccess) {
 		//Check to make sure a device has been opened.
 		if(self.checkStatus(onError)) {return;}
@@ -2419,9 +2425,15 @@ exports.labjack = function () {
 				'scanList': scanList,
 				'aScanList': scanListAddresses,
 				'actualScanRate': null,
-				'streamActive': false
+				'streamActive': false,
+				'startingDate': null,
+				'startingHRTime': null,
+				'startedHRTime': null,
+				'startupDuration': null,
+				'numReads': 0,
 			};
-
+			self.streamSettings.startingDate = new Date();
+			self.streamSettings.startingHRTime = process.hrtime();
 			self.ljm.LJM_eStreamStart.async(
 				self.handle,
 				scansPerRead,
@@ -2433,9 +2445,14 @@ exports.labjack = function () {
 						return onError('Weird Error streamStart', err);
 					}
 					if(res === 0) {
+						self.streamSettings.startedHRTime = process.hrtime();
+						self.streamSettings.startupDuration = getHRDiff(
+							self.streamSettings.startingHRTime,
+							self.streamSettings.startedHRTime
+						);
 						var actualScanRate = pScanRate.readDoubleLE(0);
 						self.streamSettings.actualScanRate = actualScanRate;
-						self.streamActive = true;
+						self.streamSettings.streamActive = true;
 						return onSuccess(self.streamSettings);
 					} else {
 						return onError(res);
@@ -2483,12 +2500,15 @@ exports.labjack = function () {
 					return onError('Weird Error streamStart', err);
 				}
 				if(res === 0) {
+					var numReads = self.streamSettings.numReads;
+					self.streamSettings.numReads += 1;
 					var deviceBacklog = deviceScanBacklog.readInt32LE(0);
 					var ljmBacklog = ljmScanBacklog.readInt32LE(0);
 					return onSuccess({
 						'data': aData,
 						'deviceBacklog': deviceBacklog,
-						'ljmBacklog': ljmBacklog
+						'ljmBacklog': ljmBacklog,
+						'dataOffset': numReads
 					});
 				} else {
 					return onError(res);
