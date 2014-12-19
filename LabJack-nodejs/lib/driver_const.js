@@ -283,3 +283,53 @@ exports.LJM_LIBRARY_CONSTANTS = {
 		'LJM_ZERO_LENGTH_ARRAY_IGNORE_OPERATION': 2
 	}
 };
+
+exports.DEVICE_TYPE_NAMES = {
+    '3': 'U3',
+    '6': 'U6',
+    '7': 'T7',
+    '9': 'UE9',
+    '200': 'Digit'
+};
+exports.DRIVER_DEVICE_TYPE_NAMES = {
+    '3': 'LJM_dtU3',
+    '6': 'LJM_dtU6',
+    '7': 'LJM_dtT7',
+    '9': 'LJM_dtUE9',
+    '200': 'LJM_dtDIGIT'
+};
+
+exports.DEVICE_TYPE_NAMES_BY_DRIVER_NAME = {
+    'LJM_dtU3': 'U3',
+    'LJM_dtU6': 'U6',
+    'LJM_dtT7': 'T7',
+    'LJM_dtUE9': 'UE9',
+    'LJM_dtDIGIT': 'Digit'
+};
+
+exports.DRIVER_CONNECTION_TYPE_NAMES = {
+    '0': 'LJM_ctANY',
+    '1': 'LJM_ctUSB',
+    '2': 'LJM_ctTCP',
+    '3': 'LJM_ctETHERNET',
+    '4': 'LJM_ctWIFI'
+};
+exports.CONNECTION_TYPE_NAMES = {
+    '0': 'Any',
+    '1': 'USB',
+    '2': 'TCP',
+    '3': 'Ethernet',
+    '4': 'Wifi'
+};
+exports.WIFI_STATUS_DISPLAY_DATA = {
+    2900: {'display':true,'str':'Associated'},
+    2901: {'display':true,'str':'Associating'},
+    2902: {'display':true,'str':'Association Failed'},
+    2903: {'display':false,'str':'Un-Powered'},
+    2904: {'display':true,'str':'Booting Up'},
+    2905: {'display':true,'str':'Could Not Start'},
+    2906: {'display':true,'str':'Applying Settings'},
+    2907: {'display':true,'str':'DHCP Started'},
+    2908: {'display':true,'str':'Unknown'},
+    2909: {'display':true,'str':'Other'}
+};
