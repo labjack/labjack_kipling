@@ -24,7 +24,7 @@ var LIBRARY_LOC = {
     'darwin': 'libLabJackM.dylib',
     'mac': 'libLabJackM.dylib',
     'win32': 'LabJackM.dll'
-}[process.platform]
+}[process.platform];
 
 //create FFI'd versions of the liblabjackLJM library
 var liblabjack = ffi.Library(LIBRARY_LOC,
@@ -361,18 +361,15 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
         ]
     }
 );
-exports.getDriver = function()
-{
+exports.getDriver = function() {
     return liblabjack;
-}
-exports.getConstants = function()
-{
+};
+exports.getConstants = function() {
     return jsonConstants.getConstants();
-}
-exports.parseRegisterNameString = function (name)
-{
+};
+exports.parseRegisterNameString = function (name) {
     return parseRegisterNameString(name);
-}
+};
 
 /*
 LJM_SEND_RECEIVE_TIMEOUT_MS

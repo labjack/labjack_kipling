@@ -148,13 +148,13 @@ var getParseStreamData = function(options) {
 
 
 
-var streamScansPerRead = 2000;
-var streamScanRate = 1000;
+var streamScansPerRead = 20000;
+var streamScanRate = 10000;
 var refreshDelay = streamScansPerRead/streamScanRate;
 var refreshRate = streamScanRate/streamScansPerRead;
-console.log("refreshRate", refreshDelay, refreshRate);
 var startHRTime = null;
 var endHRTime = null;
+
 var getHRDiff = function(starting, ending) {
 	var res = [0,0];
 	startMS = starting[0] * 1000 + starting[1]/1000000;
@@ -226,7 +226,7 @@ exports.basic_test = {
 	'streamReadx3': function(test) {
 		// Delay read for two time periods to make sure that +- 1 interval's
 		// worth of data has been stored by LJM.
-		var delay = 3 * refreshDelay * 1000;
+		var delay = 3.5 * refreshDelay * 1000;
 		setTimeout(function() {
 			tFunc(test, device, 'streamRead', {
 				'pRes': false,
@@ -236,7 +236,7 @@ exports.basic_test = {
 					var isBacklogExpected = false;
 
 					// TODO: Changing to "2 * " will sometimes break test b/c ljmBacklog doesn't get filled enough during the delay period
-					if(res.ljmBacklog > (1 * streamScansPerRead)) {				
+					if(res.ljmBacklog > (2 * streamScansPerRead)) {				
 						isBacklogExpected = true;
 					} else {
 						console.log("ljmBacklog is to low");
@@ -275,13 +275,13 @@ exports.basic_test = {
 	 * Time for 2k: 4.79ms | 5.08ms | 4.76ms | 4.96ms
 	**/
 	'streamReadx4': function(test) {
-		tFunc(test, device, 'streamRead', {
+		tFunc(test, device, 'flotStreamRead', {
 			'pRes': false,
 			'pErr': true,
 			'onSucc': getParseStreamData({'callback': function(test, res) {
 				endHRTime = process.hrtime();
 				var diff = getHRDiff(startHRTime, endHRTime);
-				console.log('streamReadx4', diff);
+				// console.log('streamReadx4', diff);
 				// console.log('streamReadx4', res);
 				var isTimeDiffValid = false;
 				if(diff < (refreshDelay * 1000 / 2)) {

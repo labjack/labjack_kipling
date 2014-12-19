@@ -11,6 +11,7 @@ var driverLib = require('./driver_wrapper');
 var ffi = require('ffi');
 //var ljm = require('./ljmDriver');
 var ljmDriver = require('./driver.js');
+var jsonConstants = require('./json_constants_parser');
 
 
 // var ARCH_INT_NUM_BYTES = 4;
@@ -74,7 +75,7 @@ exports.labjack = function () {
 	this.deviceType = null;
 
 	//Saves the Constants object
-	this.constants = driverLib.getConstants();
+	this.constants = jsonConstants.getConstants();
 
 //******************************************************************************
 //************************* Opening A Device ***********************************
@@ -2427,12 +2428,20 @@ exports.labjack = function () {
 				'actualScanRate': null,
 				'streamActive': false,
 				'startingDate': null,
+				'startingTime': null,
+				'timeIncrement': null,
+				'blockTimeIncrement': null,
 				'startingHRTime': null,
 				'startedHRTime': null,
 				'startupDuration': null,
+				'calculatedStartTime': null,
 				'numReads': 0,
+				'currentReadTime': null,
 			};
-			self.streamSettings.startingDate = new Date();
+			var newDate = new Date();
+			self.streamSettings.startingDate = newDate;
+			self.streamSettings.startingTime = newDate.getTime();
+			self.streamSettings.currentReadTime = newDate.getTime();
 			self.streamSettings.startingHRTime = process.hrtime();
 			self.ljm.LJM_eStreamStart.async(
 				self.handle,
@@ -2446,11 +2455,17 @@ exports.labjack = function () {
 					}
 					if(res === 0) {
 						self.streamSettings.startedHRTime = process.hrtime();
-						self.streamSettings.startupDuration = getHRDiff(
+						var startupDuration = getHRDiff(
 							self.streamSettings.startingHRTime,
 							self.streamSettings.startedHRTime
 						);
+						self.streamSettings.startupDuration = startupDuration;
 						var actualScanRate = pScanRate.readDoubleLE(0);
+						var timeIncrement = 1/actualScanRate*1000;
+						self.streamSettings.timeIncrement  = timeIncrement;
+						self.streamSettings.blockTimeIncrement = timeIncrement * scansPerRead;
+						self.streamSettings.currentReadTime += startupDuration/2;
+						self.streamSettings.calculatedStartTime = self.streamSettings.currentReadTime;
 						self.streamSettings.actualScanRate = actualScanRate;
 						self.streamSettings.streamActive = true;
 						return onSuccess(self.streamSettings);
@@ -2460,12 +2475,6 @@ exports.labjack = function () {
 				}
 			);
 		}
-		
-		// self.ljm.LJM_eStreamStart(
-		// 	self.handle,
-		// 	scansPerRead,
-		// 	numChannels
-		// );
 	};
 	this.streamStartSync = function(scansPerRead, numChannels, scanList, scanRate) {
 		//Check to make sure a device has been opened.
@@ -2500,6 +2509,10 @@ exports.labjack = function () {
 					return onError('Weird Error streamStart', err);
 				}
 				if(res === 0) {
+					var curReadTime = self.streamSettings.currentReadTime;
+					var numVals = self.streamSettings.numValues;
+					var newReadTime = curReadTime + self.streamSettings.blockTimeIncrement;
+					self.streamSettings.currentReadTime = newReadTime;
 					var numReads = self.streamSettings.numReads;
 					self.streamSettings.numReads += 1;
 					var deviceBacklog = deviceScanBacklog.readInt32LE(0);
@@ -2508,13 +2521,23 @@ exports.labjack = function () {
 						'data': aData,
 						'deviceBacklog': deviceBacklog,
 						'ljmBacklog': ljmBacklog,
-						'dataOffset': numReads
+						'dataOffset': numReads,
+						'time': curReadTime,
+						'timeIncrement': self.streamSettings.timeIncrement
 					});
 				} else {
 					return onError(res);
 				}
 			}
 		);
+	};
+	this.flotStreamRead = function(onError, onSuccess) {
+		self.streamRead(onError, function(data) {
+			var dBuffer = data.data;
+			var elapsedTime = data.time - self.streamSettings.calculatedStartTime;
+			console.log("HERE!", data.time, elapsedTime, data.ljmBacklog);
+			onSuccess(data);
+		});
 	};
 	this.streamReadSync = function() {
 		//Check to make sure a device has been opened.

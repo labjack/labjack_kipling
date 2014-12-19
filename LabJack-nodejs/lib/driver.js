@@ -8,6 +8,7 @@ var driver_const = require('./driver_const');
 var ref = require('ref');//http://tootallnate.github.io/ref/#types-double
 var util = require('util');//
 var driverLib = require('./driver_wrapper');
+var jsonConstants = require('./json_constants_parser');
 var ffi = require('ffi');//
 
 var LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = driver_const.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
@@ -35,7 +36,7 @@ function DriverInterfaceError(description) {
  */
 exports.ljmDriver = function() {
     this.ljm = driverLib.getDriver();
-    this.constants = driverLib.getConstants();
+    this.constants = jsonConstants.getConstants();
 
     /**
      * Dereferences buffers and zips arrays in building listAll return values.
