@@ -2531,14 +2531,14 @@ exports.labjack = function () {
 			}
 		);
 	};
-	this.flotStreamRead = function(onError, onSuccess) {
-		self.streamRead(onError, function(data) {
-			var dBuffer = data.data;
-			var elapsedTime = data.time - self.streamSettings.calculatedStartTime;
-			console.log("HERE!", data.time, elapsedTime, data.ljmBacklog);
-			onSuccess(data);
-		});
-	};
+	// this.flotStreamRead = function(onError, onSuccess) {
+	// 	self.streamRead(onError, function(data) {
+	// 		var dBuffer = data.data;
+	// 		var elapsedTime = data.time - self.streamSettings.calculatedStartTime;
+	// 		console.log("HERE!", data.time, elapsedTime, data.ljmBacklog);
+	// 		onSuccess(data);
+	// 	});
+	// };
 	this.streamReadSync = function() {
 		//Check to make sure a device has been opened.
 		self.checkStatus();

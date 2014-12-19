@@ -1375,7 +1375,14 @@ module.exports = {
 				msg = 'results descrepency';
 				test.strictEqual(results.length, 3, msg);
 				var tRes = results[1];
-				var tResKeys = ['data','deviceBacklog','ljmBacklog'];
+				var tResKeys = [
+					'data',
+					'deviceBacklog',
+					'ljmBacklog',
+					'dataOffset',
+					'time',
+					'timeIncrement'
+				];
 				test.deepEqual(Object.keys(tRes), tResKeys, msg);
 				test.strictEqual(tRes.data.length, resultBufferLength, msg);
 

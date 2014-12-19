@@ -3,6 +3,7 @@ var labjack_nodejs = require('../lib/labjack_nodejs');
 var device = new labjack_nodejs.device();
 
 
+
 var tFunc = function(test, obj, func, options) {
 	var args;
 	var pRes;
@@ -275,7 +276,7 @@ exports.basic_test = {
 	 * Time for 2k: 4.79ms | 5.08ms | 4.76ms | 4.96ms
 	**/
 	'streamReadx4': function(test) {
-		tFunc(test, device, 'flotStreamRead', {
+		tFunc(test, device, 'streamRead', {
 			'pRes': false,
 			'pErr': true,
 			'onSucc': getParseStreamData({'callback': function(test, res) {
