@@ -1,6 +1,6 @@
 {
     "name": "labjack-nodejs",
-    "version": "0.0.18",
+    "version": "0.0.19",
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
@@ -32,7 +32,7 @@
         "optimist": "~0",
         "ref": "~0",
         "ljmmm-parse": "~0.1",
-        "q": "~0"
+        "q": "~1"
     },
     "devDependencies": {
         "rewire": "~1",
