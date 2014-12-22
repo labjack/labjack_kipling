@@ -218,10 +218,15 @@ exports.tests = {
 		var results = [];
 		qExec(device, 'digitRead', 'DGT_HUMIDITY_RAW')(results)
 		.then(qExec(device, 'digitRead', 'DGT_HUMIDITY_RAW'))
+		.then(qExec(device, 'updateFirmware', 'testURL'))
 		.then(function(res) {
 			var expectedResult = [
 				{'functionCall': 'digitRead', 'retData': 0},
-				{'functionCall': 'digitRead', 'retData': 0}
+				{'functionCall': 'digitRead', 'retData': 0},
+				{
+					'functionCall': 'updateFirmware', 
+					'errData': 'Function not supported for deviceType: 200'
+				},
 			];
 			var msg = 'mock device not working (digitRead)';
 			test.deepEqual(res, expectedResult, msg);
