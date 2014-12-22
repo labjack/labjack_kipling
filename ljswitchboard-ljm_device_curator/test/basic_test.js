@@ -1,6 +1,9 @@
 
 var q = require('q');
 var device_curator = require('../lib/device_curator');
+var utils = require('./utils/utils');
+var qExec = utils.qExec;
+
 
 var device;
 
@@ -26,8 +29,7 @@ exports.tests = {
 	},
 	'createDevice': function(test) {
 		try {
-			device = new device_curator.device();
-			console.log(Object.keys(device));
+			device = new device_curator.device(true);
 		} catch(err) {
 			stopTest(test, err);
 		}
@@ -48,10 +50,126 @@ exports.tests = {
 			test.done();
 		});
 	},
+	'checkDeviceInfo': function(test) {
+		device.getDeviceAttributes()
+		.then(function(res) {
+			// console.log('Device Attributes', res);
+			test.done();
+		});
+	},
+	'performTestRead': function(test) {
+		if(device.isMockDevice) {
+			var dev = device.getDevice();
+			dev.clearCalledFunctions();
+
+			// Add expected results
+			dev.pushResult('read', false, 'testData');
+
+			// Setup and call functions
+			var results = [];
+			qExec(device, 'read', 'AIN0')(results)
+			.then(qExec(device, 'read', 'AIN0'))
+			.then(function(res) {
+				var expectedResult = [
+					{'functionCall': 'read', 'retData': 'testData'},
+					{'functionCall': 'read', 'retData': 0}
+				];
+				var msg = 'mock device not working (read)';
+				test.deepEqual(expectedResult, res, msg);
+				test.done();
+			});
+		} else {
+			test.done();
+		}
+	},
+	'performTestqRead': function(test) {
+		if(device.isMockDevice) {
+			var dev = device.getDevice();
+			dev.clearCalledFunctions();
+
+			// Add expected results (force two 2358 failures)
+			var i = 0;
+			for(i = 0; i < 1; i ++) {
+				dev.pushResult('read', true, 2358);
+			}
+
+			// Setup and call functions
+			var results = [];
+			qExec(device, 'qRead', 'AIN0')(results)
+			.then(qExec(device, 'read', 'AIN0'))
+			.then(function(res) {
+				var expectedResult = [
+					{'functionCall': 'qRead', 'retData': 0},
+					{'functionCall': 'read', 'retData': 0}
+				];
+				var msg = 'mock device not working (read)';
+				test.deepEqual(res, expectedResult, msg);
+
+				msg = 'message re-try scheme failed';
+				var functionList = dev.getCalledFunctions();
+				test.strictEqual(functionList.length, 3, msg);
+				test.done();
+			});
+		} else {
+			console.log("* Skipping Test");
+			test.done();
+		}
+	},
+	'performTestReadMultiple': function(test) {
+		if(device.isMockDevice) {
+			var dev = device.getDevice();
+			dev.clearCalledFunctions();
+
+			// Add expected results (force one 2358 failures)
+			var i = 0;
+			for(i = 0; i < 1; i ++) {
+				dev.pushResult('read', true, 2358);
+			}
+
+			var results = [];
+			qExec(device, 'readMultiple', ['AIN0','AIN0'])(results)
+			.then(function(res) {
+				var expectedRes = [
+					{
+						'functionCall': 'readMultiple',
+						'retData': [
+							{'address': 'AIN0', 'isErr': false, 'data': 0},
+							{'address': 'AIN0', 'isErr': false, 'data': 0}
+						]
+					}
+				];
+				var msg = 'mock readMultiple failed';
+				test.deepEqual(res, expectedRes, msg);
+				// console.log("readMultiple res", res[0].retData);
+				// console.log("readMultiple funcs", dev.getCalledFunctions());
+				
+				var functionList = dev.getCalledFunctions();
+				msg = 'did not call proper functions';
+				test.strictEqual(functionList.length, 3, msg);
+				test.done();
+			});
+		} else {
+			console.log("* Skipping Test");
+			test.done();
+		}
+	},
+	// 'upgradeFirmware': function(test) {
+	// 	var fwURL = 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin';
+	// 	device.updateFirmware(fwURL)
+	// 	.then(
+	// 		function(res) {
+	// 			// The result is a new device object
+	// 			console.log("Finished Upgrading!");
+	// 			test.done();
+	// 		}, function(err) {
+	// 			console.log("Failed to upgrade", err);
+	// 			test.done();
+	// 		}
+	// 	);
+	// },
 	'closeDevice': function(test) {
 		device.close()
-		.then(function(res) {
-			console.log('closed device', res);
+		.then(function() {
 			test.done();
 		});
 	}

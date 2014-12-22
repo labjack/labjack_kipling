@@ -32,8 +32,9 @@
   "dependencies": {
     "async": "~0",
     "dict": "1.4.0",
-    "q": "~0",
-    "labjack-nodejs": "0.0.16"
+    "q": "~1",
+    "labjack-nodejs": "0.0.20",
+    "request": "~2"
   },
   "devDependencies": {
     "nodeunit": "0.9.x"
