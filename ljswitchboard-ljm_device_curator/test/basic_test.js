@@ -53,7 +53,7 @@ exports.tests = {
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
-			// console.log('Device Attributes', res);
+			console.log('Device Attributes', res);
 			test.done();
 		});
 	},

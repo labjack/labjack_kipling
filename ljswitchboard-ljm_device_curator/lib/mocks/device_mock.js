@@ -3,7 +3,7 @@
 var q = require('q');
 var ljm = require('labjack-nodejs');
 var constants = ljm.driver_const;
-var modbusMap = ljm.modbusMap;
+var modbusMap = ljm.modbusMap.getConstants();
 
 var NUM_OPEN_DEVICES = 0;
 var FAKE_IP_ADDRESS = '192.168.1.12';
@@ -18,6 +18,10 @@ function device() {
 
 	// Device Attributes:
 	this.devAttr = {};
+
+	this.responses = {
+		'HARDWARE_INSTALLED': 7,
+	};
 
 	this.calledFunctions = [];
 	var saveCall = function(name, args) {
@@ -123,10 +127,20 @@ function device() {
 		aData.fill(0);
 		finishCall('readRaw', aData).then(onSucc, onErr);
 	};
-
+	this.getResult = function(address) {
+		var result = 0;
+		if(self.responses[address]) {
+			if(typeof(self.responses[address]) === 'function') {
+				result = self.responses[address](address);
+			} else {
+				result = self.responses[address];
+			}
+		}
+		return result;
+	};
 	this.read = function(address, onErr, onSucc) {
 		saveCall('read', arguments);
-		var result = 0;
+		var result = self.getResult(address);
 		finishCall('read', result).then(onSucc, onErr);
 	};
 

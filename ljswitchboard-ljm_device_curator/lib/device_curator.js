@@ -22,7 +22,7 @@ function device(useMockDevice) {
 	};
 
 	var constants = ljm.driver_const;
-	var modbusMap = ljm.modbusMap;
+	var modbusMap = ljm.modbusMap.getConstants();
 
 	this.savedAttributes = {};
 
@@ -37,8 +37,79 @@ function device(useMockDevice) {
 		);
 		return defered.promise;
 	};
+	var customAttributes = {
+		'BOOTLOADER_VERSION': null,
+		'DEVICE_NAME_DEFAULT': null,
+		'FIRMWARE_VERSION': null,
+	};
+	var deviceCustomAttributes = {
+		'7': {
+			'WIFI_VERSION': null,
+			'HARDWARE_INSTALLED': function(res, isErr) {
+				// Deconstruct the HARDWARE_INSTALLED bitmask
+				var highResADC = (res & 0x1) > 0;
+				var wifi = (res & 0x2) > 0;
+				var rtc = (res & 0x3) > 0;
+				var sdCard = (res & 0x4) > 0;
+
+				self.savedAttributes.subclass = '';
+				self.savedAttributes.isPro = false;
+				if(highResADC && wifi && rtc) {
+					self.savedAttributes.subclass = '-Pro';
+					self.savedAttributes.isPro = true;
+				}
+				return {
+					'highResADC': highResADC,
+					'wifi': wifi,
+					'rtc': rtc,
+					'sdCard': sdCard,
+					'res': res
+				};
+			},
+		},
+		'200': {
+			'DGT_INSTALLED_OPTIONS': function(res, isErr) {
+
+			}, 'DGT_BATTERY_INSTALL_DATE': function(res, isErr) {
+
+			}
+		}
+	};
+	var saveCustomAttributes = function(addresses, dt, formatters) {
+		var defered = q.defer();
+		console.log("Formatters", formatters);
+		self.readMultiple(addresses)
+		.then(function(results) {
+			results.forEach(function(res) {
+				var hasFormatter = false;
+				if(formatters[res.address]) {
+					hasFormatter = true;
+				}
+				var info = modbusMap.getAddressInfo(res.address);
+				// to get IF-STRING, info.typeString
+				if(hasFormatter) {
+					var output = formatters[res.address](res.data, res.isErr);
+					self.savedAttributes[res.address] = output;
+				} else {
+					if(res.isErr) {
+						if(info.typeString === 'STRING') {
+							self.savedAttributes[res.address] = '';
+						} else {
+							self.savedAttributes[res.address] = 0;
+						}
+					} else {
+						self.savedAttributes[res.address] = res.data;
+					}
+				}
+			});
+			defered.resolve(self.savedAttributes);
+		}, function(err) {
+			defered.resolve(self.savedAttributes);
+		});
+		return defered.promise;
+	};
 	var saveAndLoadAttributes = function(openParameters) {
-		return function() {
+		var saveAndLoad = function() {
 			var defered = q.defer();
 			self.savedAttributes = {};
 
@@ -65,10 +136,26 @@ function device(useMockDevice) {
 				}
 				self.savedAttributes.identifierString = ids;
 
-				defered.resolve(self.savedAttributes);
+				var otherAttributeKeys = [];
+				var customAttributeKeys = Object.keys(customAttributes);
+				var devCustKeys;
+				var formatters = {};
+				customAttributeKeys.forEach(function(key) {
+					formatters[key] = customAttributes[key];
+				});
+				if(deviceCustomAttributes[dt]) {
+					devCustKeys = Object.keys(deviceCustomAttributes[dt]);
+					otherAttributeKeys = customAttributeKeys.concat(devCustKeys);
+					devCustKeys.forEach(function(key) {
+						formatters[key] = deviceCustomAttributes[dt][key];
+					});
+				}
+				saveCustomAttributes(otherAttributeKeys, dt, formatters)
+				.then(defered.resolve);
 			}, defered.reject);
 			return defered.promise;
 		};
+		return saveAndLoad;
 	};
 	this.open = function(deviceType, connectionType, identifier) {
 		var defered = q.defer();
