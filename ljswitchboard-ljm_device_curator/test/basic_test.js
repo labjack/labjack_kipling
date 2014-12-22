@@ -53,7 +53,12 @@ exports.tests = {
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
-			console.log('Device Attributes', res);
+			var keys = Object.keys(res);
+
+			test.strictEqual(res.deviceType, 7);
+			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			test.strictEqual(res.connectionType, 1);
+			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
 			test.done();
 		});
 	},
@@ -172,5 +177,61 @@ exports.tests = {
 		.then(function() {
 			test.done();
 		});
-	}
+	},
+	'createDigitDevice': function(test) {
+		try {
+			device = new device_curator.device(true);
+		} catch(err) {
+			stopTest(test, err);
+		}
+		test.done();
+	},
+	'openDigit': function(test) {
+		var td = {
+			'dt': 'LJM_dtDIGIT',
+			'ct': 'LJM_ctUSB',
+			'id': 'LJM_idANY'
+		};
+
+		device.open(td.dt, td.ct, td.id)
+		.then(function(res) {
+			deviceFound = true;
+			test.done();
+		}, function(err) {
+			test.done();
+		});
+	},
+	'checkDigitDeviceInfo': function(test) {
+		device.getDeviceAttributes()
+		.then(function(res) {
+			test.strictEqual(res.deviceType, 200);
+			test.strictEqual(res.deviceTypeString, 'LJM_dtDIGIT');
+			test.strictEqual(res.connectionType, 1);
+			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			test.done();
+		});
+	},
+	'readTemp': function(test) {
+		var dev = device.getDevice();
+		dev.clearCalledFunctions();
+
+		var results = [];
+		qExec(device, 'digitRead', 'DGT_HUMIDITY_RAW')(results)
+		.then(qExec(device, 'digitRead', 'DGT_HUMIDITY_RAW'))
+		.then(function(res) {
+			var expectedResult = [
+				{'functionCall': 'digitRead', 'retData': 0},
+				{'functionCall': 'digitRead', 'retData': 0}
+			];
+			var msg = 'mock device not working (digitRead)';
+			test.deepEqual(res, expectedResult, msg);
+			test.done();
+		});
+	},
+	'closeDigit': function(test) {
+		device.close()
+		.then(function() {
+			test.done();
+		});
+	},
 };

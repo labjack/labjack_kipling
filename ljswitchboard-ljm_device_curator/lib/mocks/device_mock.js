@@ -21,6 +21,7 @@ function device() {
 
 	this.responses = {
 		'HARDWARE_INSTALLED': 7,
+		'DEVICE_NAME_DEFAULT': 'TEST_DEVICE'
 	};
 
 	this.calledFunctions = [];
@@ -94,8 +95,10 @@ function device() {
 		}
 		// Assign an IP?
 		var ipAddr;
+		var port = 0;
 		var isIP = identifier.split('.').length === 3;
 		if((conTNum === 3) || (conTNum === 4)) {
+			port = 502;
 			if(isIP) {
 				ipAddr = identifier;
 			} else {
@@ -109,7 +112,7 @@ function device() {
 		self.devAttr.connectionType = conTNum;
 		self.devAttr.serialNumber = TEST_SERIAL_NUMBER;
 		self.devAttr.ip = ipAddr;
-		self.devAttr.port = 502;
+		self.devAttr.port = port;
 		self.devAttr.maxBytesPerMB = 32;
 
 		// Finish:

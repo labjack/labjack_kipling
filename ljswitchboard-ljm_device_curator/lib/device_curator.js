@@ -45,7 +45,7 @@ function device(useMockDevice) {
 	var deviceCustomAttributes = {
 		'7': {
 			'WIFI_VERSION': null,
-			'HARDWARE_INSTALLED': function(res, isErr) {
+			'HARDWARE_INSTALLED': function(res, isErr, errData) {
 				// Deconstruct the HARDWARE_INSTALLED bitmask
 				var highResADC = (res & 0x1) > 0;
 				var wifi = (res & 0x2) > 0;
@@ -68,16 +68,18 @@ function device(useMockDevice) {
 			},
 		},
 		'200': {
-			'DGT_INSTALLED_OPTIONS': function(res, isErr) {
-
-			}, 'DGT_BATTERY_INSTALL_DATE': function(res, isErr) {
-
-			}
+			'DGT_INSTALLED_OPTIONS': function(res, isErr, errData) {
+				if(res === 2) {
+					self.savedAttributes.subclass = '-TL';
+				} else if (res === 3) {
+					self.savedAttributes.subclass = '-TLH';
+				}
+			},
+			'DGT_BATTERY_INSTALL_DATE':null
 		}
 	};
 	var saveCustomAttributes = function(addresses, dt, formatters) {
 		var defered = q.defer();
-		console.log("Formatters", formatters);
 		self.readMultiple(addresses)
 		.then(function(results) {
 			results.forEach(function(res) {
@@ -88,7 +90,18 @@ function device(useMockDevice) {
 				var info = modbusMap.getAddressInfo(res.address);
 				// to get IF-STRING, info.typeString
 				if(hasFormatter) {
-					var output = formatters[res.address](res.data, res.isErr);
+					var output;
+					if(res.isErr) {
+						var argA;
+						if(info.typeString === 'STRING') {
+							argA = '';
+						} else {
+							argA = 0;
+						}
+						output = formatters[res.address](argA, res.isErr, res.data);
+					} else {
+						output = formatters[res.address](res.data, res.isErr);
+					}
 					self.savedAttributes[res.address] = output;
 				} else {
 					if(res.isErr) {
@@ -489,15 +502,46 @@ function device(useMockDevice) {
                 callback();
         };
     };
+    var getDeviceTypeMessage = function(dt) {
+    	return "Function not supported for deviceType: " + dt.toString();
+    };
 	this.updateFirmware = function(firmwareFileLocation) {
-		var progressListener = new UpgradeProgressListener();
-		return lj_t7_upgrader.updateFirmware(
-			self,
-			ljmDevice,
-			firmwareFileLocation,
-			self.savedAttributes.connectionTypeString,
-			progressListener
-		);
+		var dt = self.savedAttributes.deviceType;
+		if(dt === 7) {
+			var progressListener = new UpgradeProgressListener();
+			return lj_t7_upgrader.updateFirmware(
+				self,
+				ljmDevice,
+				firmwareFileLocation,
+				self.savedAttributes.connectionTypeString,
+				progressListener
+			);
+		} else {
+			var defered = q.defer();
+			defered.reject(getDeviceTypeMessage(dt));
+			return defered.promise;
+		}
+	};
+
+	/**
+	 * Digit Specific functions:
+	**/
+	this.digitRead = function(address) {
+		var dt = self.savedAttributes.deviceType;
+		var defered = q.defer();
+		if(dt === 200) {
+			var calibrateVal = function(res) {
+				defered.resolve(res);
+			};
+			self.read(address)
+			.then(calibrateVal, defered.reject);
+		} else {
+			defered.reject(getDeviceTypeMessage(dt));
+		}
+		return defered.promise;
+	};
+	this.readHumidity = function() {
+		return self.digitRead('DGT_HUMIDITY_RAW');
 	};
 
 	var self = this;
