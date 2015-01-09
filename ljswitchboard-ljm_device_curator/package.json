@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_device_curator",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
   "main": "/lib/device_curator.js",
   "scripts": {
@@ -33,7 +33,7 @@
     "async": "~0",
     "dict": "1.4.0",
     "q": "~1",
-    "labjack-nodejs": "0.0.20",
+    "labjack-nodejs": "0.0.x",
     "request": "~2"
   },
   "devDependencies": {
