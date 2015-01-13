@@ -19,7 +19,7 @@ exports.device = function() {
 };
 exports.driver = function() {
 	driver = require('./driver');
-	return driver.ljmDriver();
+	return new driver.ljmDriver();
 };
 // exports.driver_const = function() {
 // 	driver_const = 
