@@ -234,6 +234,10 @@ exports.labjack = function () {
 				//If there were no applicable LJM function calls, throw an error
 				throw new DriverInterfaceError("Un-Handled Variable Types: "+dtType+ctType+idType+deviceType.toString()+connectionType.toString()+identifier.toString());
 			}
+		} else {
+			setImmediate(function() {
+				onError(driver_const.LJME_DEVICE_ALREADY_OPEN);
+			});
 		}
 	};
 
