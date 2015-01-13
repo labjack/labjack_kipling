@@ -173,7 +173,7 @@ exports.labjack = function () {
 				if(res === 0) {
 					//Save the handle & other information to the 
 					//	device class
-					self.handle = refDeviceHandle[0];
+					self.handle = refDeviceHandle.readInt32LE(0);
 					self.deviceType = deviceType;
 					self.connectionType = connectionType;
 					self.identifier = identifier;
@@ -352,7 +352,7 @@ exports.labjack = function () {
 			if(output === 0) {
 				//Save the handle & other information to the 
 				//	device class
-				self.handle = refDeviceHandle[0];
+				self.handle = refDeviceHandle.readInt32LE(0);
 				self.deviceType = deviceType;
 				self.connectionType = connectionType;
 				self.identifier = identifier;
