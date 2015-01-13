@@ -8,6 +8,7 @@
 var fs = require('fs');
 var async = require('async');
 var labjack_nodejs = require('labjack-nodejs');
+var ljmDriver = new labjack_nodejs.driver();
 var q = require('q');
 var request = require('request');
 
@@ -1040,7 +1041,6 @@ exports.restartAndUpgrade = function(bundle)
 {
     var deferred = q.defer();
     var device = bundle.getDevice();
-    var ljmDriver = new labjack_nodejs.driver();
     var self = this;
     device.write(
         driver_const.T7_MA_REQ_FWUPG,
@@ -1060,7 +1060,7 @@ exports.closeDevice = function(bundle) {
     console.log(
         'Closing Device',
         device.handle,
-        Object.keys(attributes),
+        // Object.keys(attributes),
         attributes.identifierString,
         attributes.deviceTypeString,
         attributes.connectionTypeString
@@ -1125,10 +1125,9 @@ exports.pauseForClose = function(bundle) {
 exports.waitForEnumeration = function(bundle)
 {
     var deferred = q.defer();
-    var ljmDriver = new labjack_nodejs.driver();
     var targetSerial = bundle.getSerialNumber();
     this.targetSerial = targetSerial;
-    console.log('t7_upgrade.js-Bundle...',bundle,targetSerial);
+    // console.log('t7_upgrade.js-Bundle...',bundle,targetSerial);
     
     function getCheckForDevice (bundle) {
         this.bundle = bundle;
@@ -1136,14 +1135,14 @@ exports.waitForEnumeration = function(bundle)
         this.connectionType = bundle.getConnectionType();
         var getAllConnectedSerials = function () {
             var innerDeferred = q.defer();
-            ljmDriver.listAll("LJM_dtT7", bundle.getConnectionType(),
+            ljmDriver.listAll("LJM_dtT7", 
+                self.bundle.getConnectionType(),
                 createSafeReject(innerDeferred),
                 function (devicesInfo) {
-                    
                     var serials = devicesInfo.map(function (e) {
                         return e.serialNumber;
                     });
-                    console.log('Found Devices-A',devicesInfo.length,serials);
+                    // console.log('Found Devices-A',devicesInfo.length,serials);
                     innerDeferred.resolve(serials);
                 }
             );
@@ -1152,23 +1151,23 @@ exports.waitForEnumeration = function(bundle)
         };
         this.getAllConnectedSerials = getAllConnectedSerials;
         var checkForDevice = function () {
-            console.log('Bundle Info:',self.bundle,self.targetSerial,self.connectionType);
+            // console.log('Bundle Info:',self.bundle,self.targetSerial,self.connectionType);
             self.getAllConnectedSerials().then(function (serialNumbers) {
-                console.log('t7_upgrade.js-Check Scan Results',self.targetSerial,self.connectionType,serialNumbers);
+                // console.log('t7_upgrade.js-Check Scan Results',self.targetSerial,self.connectionType,serialNumbers);
                 if (serialNumbers.indexOf(targetSerial) != -1) {
                     var newDevice = new labjack_nodejs.device();
-                    console.log('t7_upgrade.js-Trying to open device',self.targetSerial,self.connectionType);
+                    // console.log('t7_upgrade.js-Trying to open device',self.targetSerial,self.connectionType);
                     newDevice.open(
                         "LJM_dtT7",
                         self.connectionType,
                         self.targetSerial,
                         function(err){
-                            console.log('t7_upgrade.js-Open Error',err);
+                            console.log('t7_upgrade.js - Open Error',err);
                             // console.log('t7_upgrade.js-Failed to connect',bundle.getConnectionType(),targetSerial.toString());
                             setTimeout(checkForDevice, EXPECTED_REBOOT_WAIT);
                         },
                         function(succ){
-                            console.log('t7_upgrade.js-Open Success',self.targetSerial);
+                            console.log('t7_upgrade.js - Open Success',self.targetSerial);
                             // console.log('t7_upgrade.js-Bundle...',bundle.getConnectionType(),targetSerial.toString());
                             bundle.setDevice(newDevice);
                             deferred.resolve(bundle);
@@ -1206,7 +1205,7 @@ exports.checkNewFirmware = function(bundle)
     bundle.getDevice().read('FIRMWARE_VERSION',
         createSafeReject(deferred),
         function (firmwareVersion) {
-            console.log('Reported Firmware Version',firmwareVersion);
+            console.log('t7_upgrade.js - Reported Firmware Version', firmwareVersion.toFixed(4));
             var dif = bundle.getFirmwareVersion() - firmwareVersion;
             if(Math.abs(dif) > 0.0001) {
                 var errorMsg = 'New firmware version does not reflect upgrade.';

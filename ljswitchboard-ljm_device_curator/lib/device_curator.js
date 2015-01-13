@@ -58,6 +58,9 @@ function device(useMockDevice) {
 					self.savedAttributes.subclass = '-Pro';
 					self.savedAttributes.isPro = true;
 				}
+				var dc = self.savedAttributes.deviceClass;
+				var sc = self.savedAttributes.subclass;
+				self.savedAttributes.productType = dc + sc;
 				return {
 					'highResADC': highResADC,
 					'wifi': wifi,
@@ -69,11 +72,16 @@ function device(useMockDevice) {
 		},
 		'200': {
 			'DGT_INSTALLED_OPTIONS': function(res, isErr, errData) {
+				self.savedAttributes.subclass = '';
 				if(res === 2) {
 					self.savedAttributes.subclass = '-TL';
+					
 				} else if (res === 3) {
 					self.savedAttributes.subclass = '-TLH';
 				}
+				var dc = self.savedAttributes.deviceClass;
+				var sc = self.savedAttributes.subclass;
+				self.savedAttributes.productType = dc + sc;
 			},
 			'DGT_BATTERY_INSTALL_DATE':null
 		}
@@ -137,9 +145,14 @@ function device(useMockDevice) {
 				var dt = self.savedAttributes.deviceType;
 				var ct = self.savedAttributes.connectionType;
 				var dts = constants.DRIVER_DEVICE_TYPE_NAMES[dt];
+				var deviceClass = constants.DEVICE_TYPE_NAMES[dt];
 				var cts = constants.DRIVER_CONNECTION_TYPE_NAMES[ct];
+				var connectionTypeName = constants.CONNECTION_TYPE_NAMES[ct];
 				self.savedAttributes.deviceTypeString = dts;
+				self.savedAttributes.deviceClass = deviceClass;
 				self.savedAttributes.connectionTypeString = cts;
+				self.savedAttributes.connectionTypeName = connectionTypeName;
+
 
 				var ids = null;
 				if(cts === 'LJM_ctUSB') {
@@ -149,6 +162,7 @@ function device(useMockDevice) {
 				}
 				self.savedAttributes.identifierString = ids;
 
+				// Get and save device specific attributes
 				var otherAttributeKeys = [];
 				var customAttributeKeys = Object.keys(customAttributes);
 				var devCustKeys;
@@ -180,8 +194,13 @@ function device(useMockDevice) {
 		};
 
 		privateOpen(openParameters)
-		.then(saveAndLoadAttributes(openParameters), defered.reject)
-		.then(defered.resolve);
+		.then(saveAndLoadAttributes(openParameters), function(err) {
+			var innerDefered = q.defer();
+			// console.log("device_curator.js - Open Failed", err);
+			innerDefered.reject(err);
+			return innerDefered.promise;
+		})
+		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
 	this.getHandleInfo = function() {
@@ -481,7 +500,7 @@ function device(useMockDevice) {
 	/**
 	 * Begin T7 specific functions:
 	**/
-	var UpgradeProgressListener = function () {
+	var UpgradeProgressListener = function (listener) {
 
 		// Function gets updated and has a percentage value.
         this.update = function (value, callback) {
@@ -489,8 +508,10 @@ function device(useMockDevice) {
             // $('#device-upgrade-progress-indicator-bar').css(
             //     {'width': value.toString() + '%'}
             // );
-            if (callback !== undefined)
-                callback();
+            if (callback !== undefined) {
+            	listener(value)
+            	.then(callback);
+            }
         };
 
         // Function gets updated during various steps of the update procedure.
@@ -505,22 +526,39 @@ function device(useMockDevice) {
     var getDeviceTypeMessage = function(dt) {
     	return "Function not supported for deviceType: " + dt.toString();
     };
-	this.updateFirmware = function(firmwareFileLocation) {
+	this.updateFirmware = function(firmwareFileLocation, listener) {
 		var dt = self.savedAttributes.deviceType;
+		var listenerObj;
+		if(listener) {
+			listenerObj = listener;
+		} else {
+			listenerObj = function(value) {
+				var defered = q.defer();
+				// console.log("Default Listener", value);
+				defered.resolve();
+				return defered.promise;
+			};
+		}
+		var defered = q.defer();
 		if(dt === 7) {
-			var progressListener = new UpgradeProgressListener();
-			return lj_t7_upgrader.updateFirmware(
+			var progressListener = new UpgradeProgressListener(listenerObj);
+			console.log("Starting Handle", ljmDevice.handle);
+			lj_t7_upgrader.updateFirmware(
 				self,
 				ljmDevice,
 				firmwareFileLocation,
 				self.savedAttributes.connectionTypeString,
 				progressListener
-			);
+			).then(function(results){
+				console.log("Upgrade Finished", results);
+				console.log("New Handle", results.getDevice().handle);
+				ljmDevice.handle = results.getDevice().handle;
+				defered.resolve(results);
+			}, defered.reject);
 		} else {
-			var defered = q.defer();
 			defered.reject(getDeviceTypeMessage(dt));
-			return defered.promise;
 		}
+		return defered.promise;
 	};
 
 	/**

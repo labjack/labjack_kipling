@@ -28,6 +28,8 @@ exports.tests = {
 		callback();
 	},
 	'createDevice': function(test) {
+		console.log('');
+		console.log('**** mock_device_test ****');
 		try {
 			device = new device_curator.device(true);
 		} catch(err) {
