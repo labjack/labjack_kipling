@@ -2526,6 +2526,7 @@ exports.labjack = function () {
 						'rawData': aData,
 						'deviceBacklog': deviceBacklog,
 						'ljmBacklog': ljmBacklog,
+						'numVals': numVals,
 						'dataOffset': numReads,
 						'time': curReadTime,
 						'timeIncrement': self.streamSettings.timeIncrement,

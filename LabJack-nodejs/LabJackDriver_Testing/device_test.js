@@ -1379,6 +1379,7 @@ module.exports = {
 					'rawData',
 					'deviceBacklog',
 					'ljmBacklog',
+					'numVals',
 					'dataOffset',
 					'time',
 					'timeIncrement',
