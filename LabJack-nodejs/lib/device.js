@@ -2523,7 +2523,7 @@ exports.labjack = function () {
 					var deviceBacklog = deviceScanBacklog.readInt32LE(0);
 					var ljmBacklog = ljmScanBacklog.readInt32LE(0);
 					return onSuccess({
-						'data': aData,
+						'rawData': aData,
 						'deviceBacklog': deviceBacklog,
 						'ljmBacklog': ljmBacklog,
 						'dataOffset': numReads,

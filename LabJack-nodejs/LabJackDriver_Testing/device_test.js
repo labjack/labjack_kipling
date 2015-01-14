@@ -1376,7 +1376,7 @@ module.exports = {
 				test.strictEqual(results.length, 3, msg);
 				var tRes = results[1];
 				var tResKeys = [
-					'data',
+					'rawData',
 					'deviceBacklog',
 					'ljmBacklog',
 					'dataOffset',
@@ -1386,7 +1386,7 @@ module.exports = {
 					'scanList'
 				];
 				test.deepEqual(Object.keys(tRes), tResKeys, msg);
-				test.strictEqual(tRes.data.length, resultBufferLength, msg);
+				test.strictEqual(tRes.rawData.length, resultBufferLength, msg);
 
     // 			console.log("HERE!");
 				// console.log(results);
