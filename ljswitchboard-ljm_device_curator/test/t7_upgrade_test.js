@@ -72,14 +72,30 @@ var device_tests = {
 	},
 	'upgradeFirmware': function(test) {
 		var fwURL = 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin';
-		device.updateFirmware(fwURL)
+		var lastPercent = 0;
+		var percentListener = function(value) {
+			var defered = q.defer();
+			// console.log("  - ", value.toString() + '%');
+			lastPercent = value;
+			defered.resolve();
+			return defered.promise;
+		};
+		var stepListener = function(value) {
+			var defered = q.defer();
+			console.log("  - ", value);
+			defered.resolve();
+			return defered.promise;
+		};
+		device.updateFirmware(fwURL, percentListener, stepListener)
 		.then(
 			function(res) {
 				// The result is a new device object
-				console.log("Finished Upgrading!");
+				console.log("  - Finished Upgrading!");
+				test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
 				test.done();
 			}, function(err) {
 				console.log("Failed to upgrade", err);
+				test.ok(false, 'Failed to upgrade device: ' + JSON.stringify(err));
 				test.done();
 			}
 		);

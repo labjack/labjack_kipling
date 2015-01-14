@@ -16,6 +16,7 @@ var driver_const = labjack_nodejs.driver_const;
 
 var DEBUG_CHECK_ERASE = true;
 var DEBUG_CHECK_WRITE = true;
+var DEBUG_FIRMWARE_UPGRADE_PROCESS = false;
 var ALLOWED_IMAGE_INFO_DEVICE_TYPES = [
     driver_const.T7_TARGET_OLD,
     driver_const.T7_TARGET
@@ -36,10 +37,11 @@ var curScaling = 0;
 var shouldUpdateProgressBar = false;
 var globalProgressListener;
 
+var nop = function(){};
 function updateProgressScaled (value) {
     if (shouldUpdateProgressBar) {
         var scaledValue = curScaling * value + curOffset;
-        globalProgressListener.update(scaledValue, function () {});
+        globalProgressListener.updatePercentage(scaledValue, nop);
     }
 }
 
@@ -1057,14 +1059,16 @@ exports.closeDevice = function(bundle) {
     var device = bundle.getDevice();
     var curatedDevice = bundle.getCuratedDevice();
     var attributes = curatedDevice.savedAttributes;
-    console.log(
-        'Closing Device',
-        device.handle,
-        // Object.keys(attributes),
-        attributes.identifierString,
-        attributes.deviceTypeString,
-        attributes.connectionTypeString
-    );
+    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+        console.log(
+            'Closing Device',
+            device.handle,
+            // Object.keys(attributes),
+            attributes.identifierString,
+            attributes.deviceTypeString,
+            attributes.connectionTypeString
+        );
+    }
     device.close(function(err) {
         deferred.reject(bundle);
     }, function() {
@@ -1086,14 +1090,16 @@ exports.forceClose = function(bundle) {
     );
     var deferred = q.defer();
     var device = bundle.getDevice();
-    console.log(
-        'Device Info',
-        device.handle,
-        attributes,
-        attributes.identifierString,
-        attributes.deviceTypeString,
-        attributes.connectionTypeString
-    );
+    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+        console.log(
+            'Device Info',
+            device.handle,
+            attributes,
+            attributes.identifierString,
+            attributes.deviceTypeString,
+            attributes.connectionTypeString
+        );
+    }
     device.close(function(err) {
         deferred.resolve(bundle);
     }, function() {
@@ -1162,12 +1168,16 @@ exports.waitForEnumeration = function(bundle)
                         self.connectionType,
                         self.targetSerial,
                         function(err){
-                            console.log('t7_upgrade.js - Open Error',err);
+                            if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+                                console.log('t7_upgrade.js - Open Error',err);
+                            }
                             // console.log('t7_upgrade.js-Failed to connect',bundle.getConnectionType(),targetSerial.toString());
                             setTimeout(checkForDevice, EXPECTED_REBOOT_WAIT);
                         },
                         function(succ){
-                            console.log('t7_upgrade.js - Open Success',self.targetSerial);
+                            if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+                               console.log('t7_upgrade.js - Open Success',self.targetSerial);
+                            }
                             // console.log('t7_upgrade.js-Bundle...',bundle.getConnectionType(),targetSerial.toString());
                             bundle.setDevice(newDevice);
                             deferred.resolve(bundle);
@@ -1205,7 +1215,9 @@ exports.checkNewFirmware = function(bundle)
     bundle.getDevice().read('FIRMWARE_VERSION',
         createSafeReject(deferred),
         function (firmwareVersion) {
-            console.log('t7_upgrade.js - Reported Firmware Version', firmwareVersion.toFixed(4));
+            if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+                console.log('t7_upgrade.js - Reported Firmware Version', firmwareVersion.toFixed(4));
+            }
             var dif = bundle.getFirmwareVersion() - firmwareVersion;
             if(Math.abs(dif) > 0.0001) {
                 var errorMsg = 'New firmware version does not reflect upgrade.';
@@ -1274,7 +1286,7 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     var updateProgress = function (value) {
         return function (bundle) {
             var innerDeferred = q.defer();
-            progressListener.update(value, function () {
+            progressListener.updatePercentage(value, function () {
                 innerDeferred.resolve(bundle);
             });
             return innerDeferred.promise;
@@ -1282,9 +1294,8 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     };
     var updateStatusText = function (value) {
         return function (bundle) {
-            console.log('Updating Status...',value);
             var innerDeferred = q.defer();
-            progressListener.displayStatusText(value, function () {
+            progressListener.updateStepName(value, function () {
                 innerDeferred.resolve(bundle);
             });
             return innerDeferred.promise;
@@ -1317,7 +1328,7 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     .then(updateStatusText('Restarting...'), reportError('updateProgress'))
     .then(exports.restartAndUpgrade, reportError('updateStatusText'))
     .then(exports.closeDevice, exports.forceClose)
-    .then(updateStatusText('<br>Waiting for device(s)...'), reportError('restartAndUpgrade'))
+    .then(updateStatusText('<br>Reconnecting to device(s)...'), reportError('restartAndUpgrade'))
     .then(exports.pauseForClose, reportError('updateStatusText'))
     .then(exports.waitForEnumeration, reportError('pauseForClose'))
     .then(exports.checkNewFirmware, reportError('waitForEnumeration'))

@@ -500,49 +500,58 @@ function device(useMockDevice) {
 	/**
 	 * Begin T7 specific functions:
 	**/
-	var UpgradeProgressListener = function (listener) {
-
+	var UpgradeProgressListener = function (percentListener, stepListener) {
+		this.previousPercent = 0;
 		// Function gets updated and has a percentage value.
-        this.update = function (value, callback) {
-        	// console.log("in progressListener - update", value);
-            // $('#device-upgrade-progress-indicator-bar').css(
-            //     {'width': value.toString() + '%'}
-            // );
-            if (callback !== undefined) {
-            	listener(value)
-            	.then(callback);
-            }
+        this.updatePercentage = function (value, callback) {
+        	var newVal = Math.floor(parseFloat(value.toFixed(1)));
+        	if(newVal !== self.previousPercent) {
+        		if (callback !== undefined) {
+	            	percentListener(newVal)
+	            	.then(callback);
+	            }
+	            self.previousPercent = newVal;
+        	}
         };
 
         // Function gets updated during various steps of the update procedure.
         // Text: 1. "", "", ""
-        this.displayStatusText = function (value, callback) {
-        	// console.log("in progressListener - displayStatusText", value);
-            // $('#device-upgrade-progress-status').html(value);
-            if (callback !== undefined)
-                callback();
+        this.updateStepName = function (value, callback) {
+            if (callback !== undefined) {
+                stepListener(value)
+            	.then(callback);
+            }
         };
+        var self = this;
     };
     var getDeviceTypeMessage = function(dt) {
     	return "Function not supported for deviceType: " + dt.toString();
     };
-	this.updateFirmware = function(firmwareFileLocation, listener) {
+	this.updateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
 		var dt = self.savedAttributes.deviceType;
-		var listenerObj;
-		if(listener) {
-			listenerObj = listener;
+		var percentListenerObj;
+		var stepListenerObj;
+		var defaultListener = function(value) {
+			var defered = q.defer();
+			defered.resolve();
+			return defered.promise;
+		};
+		if(percentListener) {
+			percentListenerObj = percentListener;
 		} else {
-			listenerObj = function(value) {
-				var defered = q.defer();
-				// console.log("Default Listener", value);
-				defered.resolve();
-				return defered.promise;
-			};
+			percentListenerObj = defaultListener;
+		}
+		if(stepListener) {
+			stepListenerObj = stepListener;
+		} else {
+			stepListenerObj = defaultListener;
 		}
 		var defered = q.defer();
 		if(dt === 7) {
-			var progressListener = new UpgradeProgressListener(listenerObj);
-			console.log("Starting Handle", ljmDevice.handle);
+			var progressListener = new UpgradeProgressListener(
+				percentListenerObj, 
+				stepListenerObj
+			);
 			lj_t7_upgrader.updateFirmware(
 				self,
 				ljmDevice,
@@ -550,8 +559,6 @@ function device(useMockDevice) {
 				self.savedAttributes.connectionTypeString,
 				progressListener
 			).then(function(results){
-				console.log("Upgrade Finished", results);
-				console.log("New Handle", results.getDevice().handle);
 				ljmDevice.handle = results.getDevice().handle;
 				defered.resolve(results);
 			}, defered.reject);
