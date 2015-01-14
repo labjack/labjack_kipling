@@ -2456,7 +2456,7 @@ exports.labjack = function () {
 				pScanRate,
 				function(err,res) {
 					if(err) {
-						return onError('Weird Error streamStart', err);
+						return onError('Weird Error streamStart' + JSON.stringify(err), err);
 					}
 					if(res === 0) {
 						self.streamSettings.startedHRTime = process.hrtime();
@@ -2511,7 +2511,7 @@ exports.labjack = function () {
 			ljmScanBacklog,
 			function(err,res) {
 				if(err) {
-					return onError('Weird Error streamStart', err);
+					return onError('Weird Error streamRead' + JSON.stringify(err), err);
 				}
 				if(res === 0) {
 					var curReadTime = self.streamSettings.currentReadTime;
@@ -2561,12 +2561,22 @@ exports.labjack = function () {
 			self.handle,
 			function(err, res) {
 				if(err) {
-					return onError('Weird Error streamStart', err);
+					return onError('Weird Error streamStop: ' + JSON.stringify(err), err);
 				}
 				if(res === 0) {
+					// Save indication that stream stopped
+					self.streamSettings.streamActive = false;
+
+					// Save the stream settings to a new variable
+					var finalSettings = {};
+					var keys = Object.keys(self.streamSettings);
+					keys.forEach(function(key) {
+						finalSettings[key] = self.streamSettings[key];
+					});
+
 					// Clear the stream settings:
 					self.streamSettings = {};
-					return onSuccess(true);
+					return onSuccess(finalSettings);
 				} else {
 					return onError(res);
 				}
