@@ -2429,6 +2429,7 @@ exports.labjack = function () {
 				'readBufferSize': scansPerRead * numAddresses * ARCH_DOUBLE_NUM_BYTES,
 				'scanList': scanList,
 				'aScanList': scanListAddresses,
+				'numAddresses': scanList.length,
 				'actualScanRate': null,
 				'streamActive': false,
 				'startingDate': null,
@@ -2527,7 +2528,9 @@ exports.labjack = function () {
 						'ljmBacklog': ljmBacklog,
 						'dataOffset': numReads,
 						'time': curReadTime,
-						'timeIncrement': self.streamSettings.timeIncrement
+						'timeIncrement': self.streamSettings.timeIncrement,
+						'numAddresses': self.streamSettings.numAddresses,
+						'scanList': self.streamSettings.scanList
 					});
 				} else {
 					return onError(res);

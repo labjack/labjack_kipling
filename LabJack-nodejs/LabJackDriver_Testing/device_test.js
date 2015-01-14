@@ -1381,7 +1381,9 @@ module.exports = {
 					'ljmBacklog',
 					'dataOffset',
 					'time',
-					'timeIncrement'
+					'timeIncrement',
+					'numAddresses',
+					'scanList'
 				];
 				test.deepEqual(Object.keys(tRes), tResKeys, msg);
 				test.strictEqual(tRes.data.length, resultBufferLength, msg);
