@@ -2527,6 +2527,7 @@ exports.labjack = function () {
 						'deviceBacklog': deviceBacklog,
 						'ljmBacklog': ljmBacklog,
 						'numVals': numVals,
+						'scansPerRead': self.streamSettings.scansPerRead,
 						'dataOffset': numReads,
 						'time': curReadTime,
 						'timeIncrement': self.streamSettings.timeIncrement,

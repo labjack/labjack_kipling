@@ -1380,6 +1380,7 @@ module.exports = {
 					'deviceBacklog',
 					'ljmBacklog',
 					'numVals',
+					'scansPerRead',
 					'dataOffset',
 					'time',
 					'timeIncrement',
