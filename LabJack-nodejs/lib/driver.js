@@ -131,7 +131,6 @@ exports.ljmDriver = function() {
             conT = connectionType;
         }
 
-        var self = this;
         if ((isNaN(devT)) && (isNaN(conT))) {
             errorResult = this.ljm.LJM_ListAllS.async(
                 devT, 
@@ -475,7 +474,7 @@ exports.ljmDriver = function() {
             bufIndex += ARCH_INT_NUM_BYTES;
         }
 
-        var self = this;
+        
         errorResult = this.ljm.LJM_ListAllExtended.async(
             C_DeviceType, 
             C_ConnectionType, 
@@ -631,7 +630,6 @@ exports.ljmDriver = function() {
             bufIndex += ARCH_INT_NUM_BYTES;
         }
 
-        var self = this;
         errorResult = this.ljm.LJM_ListAllExtended(
             C_DeviceType, 
             C_ConnectionType, 
@@ -1122,6 +1120,74 @@ exports.ljmDriver = function() {
         return 0;
     };
 
+    /**
+    Helpful snippit of code from the LabJackM.h file:
+    static const char * const LJM_DEBUG_LOG_MODE = "LJM_DEBUG_LOG_MODE";
+    enum {
+        LJM_DEBUG_LOG_MODE_NEVER = 1,
+        LJM_DEBUG_LOG_MODE_CONTINUOUS = 2,
+        LJM_DEBUG_LOG_MODE_ON_ERROR = 3
+    };
+    static const char * const LJM_DEBUG_LOG_LEVEL = "LJM_DEBUG_LOG_LEVEL";
+    enum {
+        LJM_STREAM_PACKET = 1,
+        LJM_TRACE = 2,
+        LJM_DEBUG = 4,
+        LJM_INFO = 6,
+        LJM_PACKET = 7,
+        LJM_WARNING = 8,
+        LJM_USER = 9,
+        LJM_ERROR = 10,
+        LJM_FATAL = 12
+    };
+    **/
+
+    this.controlLog = function(mode, level, onError, onSuccess) {
+        self.writeLibrary('LJM_DEBUG_LOG_MODE', mode, onError, function(res) {
+            self.writeLibrary('LJM_DEBUG_LOG_LEVEL', level, onError, onSuccess);
+        });
+    };
+    this.controlLogSync = function(mode, level) {
+        var err = 0;
+        var errA = self.writeLibrarySync('LJM_DEBUG_LOG_MODE', mode);
+        var errB = self.writeLibrarySync('LJM_DEBUG_LOG_LEVEL', level);
+        if(errA !== 0) {
+            err = errA;
+        }
+        if(errB !== 0) {
+            err = errB;
+        }
+        return err;
+    };
+    /**
+     * Asynchronously enable logging
+    **/
+    this.enableLog = function(onError, onSuccess) {
+        self.controlLog(2, 2, onError, onSuccess);
+    };
+
+    /**
+     * Synchronously enable logging
+    **/
+    this.enableLogSync = function() {
+        return self.controlLogSync(2,2);
+    };
+
+    /**
+     * Asynchronously disable logging
+    **/
+    this.disableLog = function(onError, onSuccess) {
+        self.controlLog(1, 10, onError, onSuccess);
+    };
+
+    /**
+     * Synchronously disable logging
+    **/
+    this.disableLogSync = function() {
+        return self.controlLogSync(1, 10);
+    };
+
+
     //Read the Driver Version number
     this.installedDriverVersion = this.readLibrarySync('LJM_LIBRARY_VERSION');
     if(this.installedDriverVersion < driver_const.LJM_JS_VERSION)
@@ -1132,4 +1198,6 @@ exports.ljmDriver = function() {
     //this.driver.LJM_WriteLibraryConfigS('LJM_LOG_MODE',2);
     //this.driver.LJM_WriteLibraryConfigS('LJM_LOG_LEVEL',2);
     //this.driver.LJM_Log(2,"LabJack-Device Enabled");
+
+    var self = this;
 };

@@ -448,6 +448,47 @@ module.exports = {
             },false,false
         );
     },
+    testToggleLog: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        //Create test-variables
+        var testList = [
+            'enableLog()',
+            'disableLog()'
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_WriteLibraryConfigS',
+            'LJM_WriteLibraryConfigS',
+            'LJM_WriteLibraryConfigS',
+            'LJM_WriteLibraryConfigS',
+            'LJM_WriteLibraryConfigSAsync',
+            'LJM_WriteLibraryConfigSAsync',
+            'LJM_WriteLibraryConfigSAsync',
+            'LJM_WriteLibraryConfigSAsync',
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    },
     LJM_ListAllExtended: function(test) {
         var addrListN = [0,49100,49200,60500];
         var addrListS = ['AIN0','ETHERNET_IP','WIFI_IP','DEVICE_NAME_DEFAULT'];

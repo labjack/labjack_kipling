@@ -26,6 +26,9 @@ var functionLocation = {
 	'writeLibrary': 'driver',
 	'logS': 'driver',
 	'resetLog': 'driver',
+	'controlLog': 'driver',
+	'enableLog': 'driver',
+	'disableLog': 'driver',
 };
 exports.getList = function() {
 	return functionLocation
