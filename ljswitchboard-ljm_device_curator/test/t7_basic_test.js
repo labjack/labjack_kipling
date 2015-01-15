@@ -17,6 +17,8 @@ var stopTest = function(test, err) {
 var deviceFound = false;
 var performTests = true;
 
+var DEBUG_TEST = false;
+
 var device_tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
@@ -47,12 +49,14 @@ var device_tests = {
 
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
-			console.log(
-				"  - Opened T7:",
-				res.productType,
-				res.connectionTypeName,
-				res.serialNumber
-			);
+			if(DEBUG_TEST) {
+				console.log(
+					"  - Opened T7:",
+					res.productType,
+					res.connectionTypeName,
+					res.serialNumber
+				);
+			}
 			deviceFound = true;
 			test.done();
 		}, function(err) {

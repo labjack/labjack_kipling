@@ -3,6 +3,13 @@ var q = require('q');
 var async = require('async');
 var ljm = require('labjack-nodejs');
 var lj_t7_upgrader = require('./labjack_t7_upgrade');
+var driver_const = ljm.driver_const;
+
+// Break out various buffer constants to make them easier to use
+// for buffer manipulation.
+var ARCH_INT_NUM_BYTES = driver_const.ARCH_INT_NUM_BYTES;
+var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
+var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 
 var ljmMockDevice;
 var use_mock_device = true;
@@ -331,7 +338,73 @@ function device(useMockDevice) {
 		);
 		return defered.promise;
 	};
+	/**
+	 * The goal of this function is to transpose & pull out information, and 
+	 * calculate a timestamp for each stream data point given that the buffer
+	 * object that gets populated by the streamRead function as "rawData"
+	 * in the format:
+	 *     [x1, y1, x2, y2, ... ]
+	 * to:
+	 *     [[timeStamp, x1, y1], [timeStamp, x2, y2], ... ]
+	 * and save that new javascript object to the data object as "data".
+	 * 
+	 * This format was chosen because the created "data_buffer.js" file in 
+	 * Kipling and the "flot" graphing program prefer data to be organized in
+	 * similar ways to this.  It also cut down on the number of loops required
+	 * to parse the data into one full pass-through of the data.
+	**/
+	var parseStreamData = function(data) {
+		var defered = q.defer();
+		
+		var numValues = data.numVals;
+		var numAddresses = data.numAddresses;
+		var numResults = data.scansPerRead;
+
+		data.data = [];
+		var i, j = 0;
+
+		// Initialize variables to build a timestamp.
+		var time = data.time;
+		var timeIncrement = data.timeIncrement;
+
+		// Initialize variables to control a data pointer.
+		var pointerIncrement = ARCH_DOUBLE_NUM_BYTES;
+		var pointer = 0;
+
+		// Read and save data from the strea data (dta.rawData) buffer object.
+		for (i = 0; i < numResults; i++) {
+			var dataStore = [];
+			dataStore.push(time);
+			time += timeIncrement;
+			for (j = 0; j < numAddresses; j++) {
+				var val = data.rawData.readDoubleLE(pointer);
+				dataStore.push(val);
+				pointer += pointerIncrement;
+			}
+			data.data.push(dataStore);
+		}
+		data.rawData = null;
+		delete data.rawData;
+
+		defered.resolve(data);
+		return defered.promise;
+	};
 	this.streamRead = function() {
+		var defered = q.defer();
+		ljmDevice.streamRead( 
+			defered.reject,
+			function(data) {
+				try {
+					parseStreamData(data)
+					.then(defered.resolve, defered.reject);
+				} catch(err) {
+					defered.reject('Error parsing stream data');
+				}
+			}
+		);
+		return defered.promise;
+	};
+	this.streamReadRaw = function() {
 		var defered = q.defer();
 		ljmDevice.streamRead(
 			defered.reject,
@@ -365,8 +438,8 @@ function device(useMockDevice) {
 	this.qReadMany = function(addresses) {
 		return self.retryFlashError('qReadMany', addresses);
 	};
-	this.qWWrite = function(address, value) {
-		return self.retryFlashError('qWWrite', address, value);
+	this.qWrite = function(address, value) {
+		return self.retryFlashError('qWrite', address, value);
 	};
 	this.qWriteMany = function(addresses, values) {
 		return self.retryFlashError('qWriteMany', addresses, values);
