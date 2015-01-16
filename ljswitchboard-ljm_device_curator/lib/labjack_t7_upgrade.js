@@ -61,7 +61,6 @@ function updateProgressScaled (value) {
 **/
 function safelyReject (deferred, error, prefix) {
     var errorMsg;
-
     if (error.retError === undefined) {
         errorMsg = error.toString();
     } else {
@@ -319,7 +318,6 @@ exports.readFirmwareFile = function(fileSrc)
     var bundle = new DeviceFirmwareBundle();
     var urlComponents;
     var fileName;
-
     var parseFile = function (err, data) {
         if (err) {
             deferred.reject('Could not read firmware file: ' + err.toString());
@@ -368,7 +366,6 @@ exports.readFirmwareFile = function(fileSrc)
         }
 
         bundle.setFirmwareImageInformation(imageInformation);
-
         try {
             bundle.setFirmwareImage(imageFile.slice(128, imageFile.length));    
         } catch (e) {
@@ -382,7 +379,6 @@ exports.readFirmwareFile = function(fileSrc)
 
         var versionStr = fileName.split('_');
         versionStr = versionStr[1];
-
         try {
             bundle.setFirmwareVersion(Number(versionStr)/10000);
         } catch (e) {
@@ -393,7 +389,6 @@ exports.readFirmwareFile = function(fileSrc)
             );
             return;
         }
-        
         deferred.resolve(bundle);
     };
 
@@ -500,7 +495,7 @@ exports.eraseFlash = function(bundle, startAddress, numPages, key)
 **/
 exports.eraseImage = function(bundle)
 {
-    var deferred = q.defer();
+    var eraseImageDefered = q.defer();
 
     exports.eraseFlash(
         bundle,
@@ -508,11 +503,14 @@ exports.eraseImage = function(bundle)
         driver_const.T7_IMG_FLASH_PAGE_ERASE,
         driver_const.T7_EFkey_ExtFirmwareImage
     ).then(
-        function() { deferred.resolve(bundle); },
-        createSafeReject(deferred)
+        function(bundle) {
+            eraseImageDefered.resolve(bundle);
+        }, function(bundle) {
+            createSafeReject(eraseImageDefered)(bundle);
+        }
     );
 
-    return deferred.promise;
+    return eraseImageDefered.promise;
 };
 
 
@@ -529,7 +527,7 @@ exports.eraseImage = function(bundle)
 **/
 exports.eraseImageInformation = function(bundle)
 {
-    var deferred = q.defer();
+    var eraseImageInformationDefered = q.defer();
 
     exports.eraseFlash(
         bundle,
@@ -537,11 +535,14 @@ exports.eraseImageInformation = function(bundle)
         driver_const.T7_HDR_FLASH_PAGE_ERASE,
         driver_const.T7_EFkey_ExtFirmwareImgInfo
     ).then(
-        function() { deferred.resolve(bundle); },
-        createSafeReject(deferred)
+        function(bundle) {
+            eraseImageInformationDefered.resolve(bundle);
+        }, function(bundle) {
+            createSafeReject(eraseImageInformationDefered)(bundle);
+        }
     );
 
-    return deferred.promise;
+    return eraseImageInformationDefered.promise;
 };
 
 
@@ -1254,6 +1255,7 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     connectionType, progressListener)
 {
     var deferred = q.defer();
+    var initialWiFiStatus = 0;
 
     var injectDevice = function (bundle) {
         var innerDeferred = q.defer();
@@ -1270,6 +1272,7 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     };
     var reportError = function(message) {
         var reportErrorFunc = function(error) {
+            var reportErrorDefered = q.defer();
             if(message !== 'finishingUpdate') {
                 safelyReject(deferred, error);
             } else {
@@ -1278,7 +1281,8 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
             if(typeof(message) !== 'undefined') {
                 console.log('throwing error...',message);
             }
-            throw error;
+            // throw error;
+            return reportErrorDefered.promise;
         };
         return reportErrorFunc;
     };
@@ -1302,12 +1306,73 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
         };
     };
 
+    var saveWiFiStatus = function() {
+        return function (bundle) {
+            var innerDeferred = q.defer();
+            device.read('POWER_WIFI', function(err) {
+                    // console.log('Failed to Read WiFi Status', err);
+                    innerDeferred.reject(err);
+                }, function(res) {
+                    initialWiFiStatus = res;
+                    innerDeferred.resolve(bundle);
+                });
+            return innerDeferred.promise;
+        };
+    };
+    var toggleWiFi = function(operation) {
+        return function (bundle) {
+            var innerDeferred = q.defer();
+            var conT = bundle.getConnectionType();
+            conT = driver_const.connectionTypes[conT];
+
+            if (conT != driver_const.LJM_CT_WIFI) {
+                if(initialWiFiStatus === 1) {
+                    var device = bundle.getDevice();
+                    var val;
+                    var updateMessage = '';
+
+                    if(operation === 'enable') {
+                        updateMessage = 'Enabling WiFi';
+                        val = 1;
+                    } else {
+                        updateMessage = 'Disabling WiFi';
+                        val = 0;
+                    }
+                    var getFinishFunc = function(msg) {
+                        return function() {
+                            progressListener.updateStepName(
+                                msg,
+                                function() {
+                                    innerDeferred.resolve(bundle);
+                                }
+                            );
+                        };
+                    };
+                    device.write('POWER_WIFI', val, function(err) {
+                        // console.log('Failed to Disable WiFi');
+                        innerDeferred.reject(err);
+                    }, function(res) {
+                        // console.log('Disabled WiFi');
+                        setTimeout(getFinishFunc(updateMessage), 2000);
+                    });
+                } else {
+                    innerDeferred.resolve(bundle);
+                }
+            } else {
+                innerDeferred.resolve(bundle);
+            }
+            return innerDeferred.promise;
+        };
+    };
+
     globalProgressListener = progressListener;
 
     // 12 steps
     exports.readFirmwareFile(firmwareFileLocation, reportError('readingFirmwareFile'))
     .then(injectDevice, reportError('readingFirmwareFile'))
-    .then(exports.checkCompatibility, reportError('injectDevice'))
+    .then(saveWiFiStatus(), reportError('injectDevice'))
+    .then(toggleWiFi('disable'), reportError('readWiFiStatus'))
+    .then(exports.checkCompatibility, reportError('disablingWiFi'))
     .then(updateProgress(CHECKPOINT_ONE_PERCENT), reportError('checkCompatibility'))
     .then(updateStatusText('Erasing image...'), reportError('updateProgress'))
     .then(exports.eraseImage, reportError('updateStatusText'))
@@ -1332,7 +1397,8 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     .then(exports.pauseForClose, reportError('updateStatusText'))
     .then(exports.waitForEnumeration, reportError('pauseForClose'))
     .then(exports.checkNewFirmware, reportError('waitForEnumeration'))
-    .then(updateProgress(CHECKPOINT_FIVE_PERCENT), reportError('checkNewFirmware'))
+    .then(toggleWiFi('enable'), reportError('checkNewFirmware'))
+    .then(updateProgress(CHECKPOINT_FIVE_PERCENT), reportError('enablingWiFi'))
     .then(deferred.resolve, reportError('finishingUpdate'));
 
     return deferred.promise;
@@ -1340,3 +1406,4 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
 
 
 var updateFirmware = exports.updateFirmware;
+

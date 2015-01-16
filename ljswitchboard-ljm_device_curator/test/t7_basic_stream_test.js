@@ -21,7 +21,7 @@ var deviceFound = false;
 var performTests = true;
 var settings;
 
-var DEBUG_TEST = true;
+var DEBUG_TEST = false;
 
 var device_tests = {
 	'setUp': function(callback) {
@@ -47,7 +47,7 @@ var device_tests = {
 	'openDevice': function(test) {
 		var td = {
 			'dt': 'LJM_dtT7',
-			'ct': 'LJM_ctANY',
+			'ct': 'LJM_ctUSB',
 			'id': 'LJM_idANY'
 		};
 

@@ -361,6 +361,7 @@ function device(useMockDevice) {
 		var numResults = data.scansPerRead;
 
 		data.data = [];
+		data.autoRecoveryDetected = false;
 		var i, j = 0;
 
 		// Initialize variables to build a timestamp.
@@ -378,6 +379,9 @@ function device(useMockDevice) {
 			time += timeIncrement;
 			for (j = 0; j < numAddresses; j++) {
 				var val = data.rawData.readDoubleLE(pointer);
+				if(val == -9999) {
+					data.autoRecoveryDetected = true;
+				}
 				dataStore.push(val);
 				pointer += pointerIncrement;
 			}

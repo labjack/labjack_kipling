@@ -17,6 +17,11 @@ var stopTest = function(test, err) {
 var deviceFound = false;
 var performTests = true;
 
+var fws = {
+	'1.0135': 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin',
+	'1.0144': 'http://labjack.com/sites/default/files/2015/01/T7firmware_010144_2015-01-08.bin'
+};
+
 var device_tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
@@ -44,6 +49,8 @@ var device_tests = {
 			'ct': 'LJM_ctANY',
 			'id': 'LJM_idANY'
 		};
+		td.ct = 'LJM_ctWIFI';
+		td.id = 470010548;
 
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
@@ -64,14 +71,13 @@ var device_tests = {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-
 			test.strictEqual(res.deviceType, 7);
 			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
 			test.done();
 		});
 	},
 	'upgradeFirmware': function(test) {
-		var fwURL = 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin';
+		var fwURL = fws['1.0144'];
 		var lastPercent = 0;
 		var percentListener = function(value) {
 			var defered = q.defer();
@@ -82,7 +88,7 @@ var device_tests = {
 		};
 		var stepListener = function(value) {
 			var defered = q.defer();
-			console.log("  - ", value);
+			console.log("  - " + value.toString());
 			defered.resolve();
 			return defered.promise;
 		};
@@ -96,7 +102,14 @@ var device_tests = {
 			}, function(err) {
 				console.log("Failed to upgrade", err);
 				test.ok(false, 'Failed to upgrade device: ' + JSON.stringify(err));
-				test.done();
+				device.read('AIN0')
+				.then(function(res) {
+					console.log('Device is still responding to messages');
+					test.done();
+				}, function(err) {
+					console.log('Device is not responding anymore');
+					test.done();
+				});
 			}
 		);
 	},
