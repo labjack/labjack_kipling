@@ -21,13 +21,17 @@ var digit_basic_test = require('./digit_basic_test');
 
 // Perform T7 related tests
 // exports.t7_basic_test = t7_basic_test.tests;
-exports.t7_upgrade_test = t7_upgrade_test.tests;
+// exports.t7_upgrade_test = t7_upgrade_test.tests;
 // exports.t7_open_close_test = t7_open_close_test.tests;
-// exports.t7_basic_stream_test = t7_basic_stream_test.tests;
-// exports.t7_single_channel_speed_test = t7_single_channel_speed_test.tests;
+exports.t7_basic_stream_test = t7_basic_stream_test.tests;
+exports.t7_single_channel_speed_test = t7_single_channel_speed_test.tests;
 // exports.t7_single_channel_speed_testA = t7_single_channel_speed_test.tests;
 // exports.t7_single_channel_speed_testB = t7_single_channel_speed_test.tests;
 // exports.t7_single_channel_speed_testC = t7_single_channel_speed_test.tests;
+// exports.t7_single_channel_speed_testD = t7_single_channel_speed_test.tests;
+// exports.t7_single_channel_speed_testE = t7_single_channel_speed_test.tests;
+// exports.t7_single_channel_speed_testF = t7_single_channel_speed_test.tests;
+// exports.t7_single_channel_speed_testG = t7_single_channel_speed_test.tests;
 
 // Perform Digit related tests
 // exports.digit_basic_test = digit_basic_test.tests;
