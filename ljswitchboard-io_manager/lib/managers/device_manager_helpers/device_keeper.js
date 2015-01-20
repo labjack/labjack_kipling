@@ -1,6 +1,7 @@
 
 var process_manager = require('process_manager');
 var q = require('q');
+var async = require('async');
 
 
 // var device_interface = require('../../single_device_interface');
@@ -14,7 +15,7 @@ function createDeviceKeeper(io_delegator, link) {
 	var send = link.send;
 	var sendMessage = link.sendMessage;
 
-	var devices;
+	this.devices;
 	var currentDeviceKey;
 
 	var getDeviceKey = function() {
@@ -30,7 +31,7 @@ function createDeviceKeeper(io_delegator, link) {
 	this.init = function() {
 		var defered = q.defer();
 
-		devices = {};
+		self.devices = {};
 		currentDeviceKey = 0;
 
 		defered.resolve();
@@ -95,9 +96,9 @@ function createDeviceKeeper(io_delegator, link) {
 		var errorFunc = function(err) {
 			// The device failed to open, therefore remove it from the list of
 			// open devices.
-			devices[err.device_comm_key] = null;
-			devices[err.device_comm_key] = undefined;
-			delete devices[err.device_comm_key];
+			self.devices[err.device_comm_key] = null;
+			self.devices[err.device_comm_key] = undefined;
+			delete self.devices[err.device_comm_key];
 			defered.reject(err.err);
 		};
 
@@ -116,7 +117,7 @@ function createDeviceKeeper(io_delegator, link) {
 		var newKey = getDeviceKey();
 		
 		// Make sure that the new key is unique
-		while(devices[newKey]) {
+		while(self.devices[newKey]) {
 			console.log('Making another unique key');
 			newKey = getDeviceKey();
 		}
@@ -125,11 +126,11 @@ function createDeviceKeeper(io_delegator, link) {
 		newDevice.device_comm_key = newKey;
 
 		// Save the new device to the device list
-		devices[newKey] = newDevice;
+		self.devices[newKey] = newDevice;
 
 		// Call the LJM open command to open the desired device
 		try {
-			devices[newKey].open(deviceType, connectionType, identifier)
+			self.devices[newKey].open(deviceType, connectionType, identifier)
 			.then(successFunc, errorFunc);
 		} catch(err) {
 			defered.reject({
@@ -140,12 +141,78 @@ function createDeviceKeeper(io_delegator, link) {
 		return defered.promise;
 	};
 
+	var createCloseOp = function(comKey) {
+		var closeOp = function() {
+			var innerDefered = q.defer();
+			self.devices[comKey].close()
+			.then(function(res) {
+				var newInfo = {};
+				newInfo.isError = false;
+				newInfo.comKey = comKey;
+
+				// if the device closed successfully, delete all references.
+				self.devices[comKey] = null;
+				self.devices[comKey] = undefined;
+				delete self.devices[comKey];
+				innerDefered.resolve(newInfo);
+			}, function(err) {
+				// Save the error information
+				var newInfo = {};
+				newInfo.isError = true;
+				newInfo.err = err;
+
+				// if there is an error still delete all data
+				self.devices[comKey] = null;
+				self.devices[comKey] = undefined;
+				delete self.devices[comKey];
+				innerDefered.resolve(newInfo);
+			});
+			return innerDefered.promise;
+		};
+		return closeOp;
+	};
+
 	this.closeAllDevices = function() {
+		var defered = q.defer();
 		var numDevicesClosed = 0;
+
+		var comKeys = Object.keys(self.devices);
+
+		var closeOps = [];
+		for(var i = 0; i < comKeys.length; i++) {
+			closeOps.push(createCloseOp(comKeys[i]));
+		}
+
+		var bundle = [];
+		async.each(
+			closeOps,
+			function(closeOp, callback) {
+				closeOp()
+				.then(function(res) {
+					bundle.push(res);
+					callback();
+				}, function(err) {
+					bundle.push(err);
+					callback();
+				});
+			}, function(err) {
+				if(err) {
+					defered.reject(err);
+				} else {
+					// console.log("All Closed!", bundle);
+					var retData = {
+						'numClosed': bundle.length,
+						'data': bundle
+					};
+					defered.resolve(retData);
+				}
+			});
+		
+		return defered.promise;
 	};
 	this.getNumDevices = function() {
 		var defered = q.defer();
-		var numDevices = Object.keys(devices).length;
+		var numDevices = Object.keys(self.devices).length;
 		defered.resolve(numDevices);
 		return defered.promise;
 	};

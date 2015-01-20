@@ -6,7 +6,6 @@ var device_delegator_path = './lib/delegators/single_device_delegator.js';
 var constants = require('../../common/constants');
 
 function newDevice(newProcess, mockDevice) {
-	console.log("Creating new device");
 	this.curatedDevice = null;
 
 	this.newProcess = newProcess;
@@ -20,7 +19,7 @@ function newDevice(newProcess, mockDevice) {
 		if(self.newProcess) {
 			defered.reject('devices in sub-processes are currently not supported');
 		} else {
-			curatedDevice = new device_curator.device();
+			curatedDevice = new device_curator.device(self.mockDevice);
 			// console.log("HERE", Object.keys(curatedDevice));
 			curatedDevice.open(deviceType, connectionType, identifier)
 			.then(function(res) {

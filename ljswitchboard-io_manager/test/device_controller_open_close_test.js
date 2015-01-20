@@ -58,7 +58,7 @@ exports.tests = {
 			// console.log('Created New Device Object', newDevice);
 			device_controller.getNumDevices()
 			.then(function(res) {
-				console.log('Number of open devices', res);
+				test.strictEqual(res, 1, 'wrong number of devices are open');
 				test.done();
 			});
 		}, function(err) {
@@ -70,7 +70,8 @@ exports.tests = {
 	'close all devices': function(test) {
 		device_controller.closeAllDevices()
 		.then(function(res) {
-			console.log('Num Devices Closed', res);
+			// console.log('Num Devices Closed', res);
+			test.strictEqual(res.numClosed, 1, 'wrong number of devices closed');
 			test.done();
 		}, function(err) {
 			console.log('Error closing all devices', err);

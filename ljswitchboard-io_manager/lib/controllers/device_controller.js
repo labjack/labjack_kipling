@@ -7,20 +7,32 @@ var io_endpoint_key = constants.device_endpoint_key;
 
 function createDeviceController(io_interface) {
 
-	var callFunc = null;
+	var innerCallFunc = null;
 	var sendReceive = null;
 	var sendMessage = null;
 	var send = null;
 
 	var deviceKeeper = null;
-
+	var callFunc = function(func, args) {
+		return innerCallFunc({
+			'func': func,
+			'isDeviceFunc': false
+		}, args);
+	};
+	var callDeviceFunc = function(deviceKey, func, args) {
+		return innerCallFunc({
+			'func': func,
+			'isDeviceFunc': true,
+			'deviceKey': deviceKey
+		}, args);
+	};
 	var listener = function(m) {
 		console.log('in driver_controller.js-listener', m);
 	};
 	var saveLink = function(link) {
 		var defered = q.defer();
 
-		callFunc = link.callFunc;
+		innerCallFunc = link.callFunc;
 		sendReceive = link.sendReceive;
 		sendMessage = link.sendMessage;
 		send = link.send;

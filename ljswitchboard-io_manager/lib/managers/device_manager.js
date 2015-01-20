@@ -33,31 +33,50 @@ function createDeviceManager(io_delegator) {
 		};
 
 		// Execute deviceKeeper functions:
-		var func = m.func;
+		var route = m.func;
+		var func = route.func;
+		var isDeviceFunc = route.isDeviceFunc;
+
+		var deviceKey;
+		var isValidFunc = false;
+		var caller;
+
+		// Switch logic to either call a function in the device_keeper object
+		// or if it it needs to be directed at a currently open device.
+		if(isDeviceFunc) {
+			if(route.deviceKey) {
+				deviceKey = route.deviceKey;
+				if(deviceKeeper.devices[deviceKey]) {
+					isValidFunc = true;
+					caller = deviceKeeper.devices[deviceKey];
+				}
+			}
+		} else {
+			caller = deviceKeeper;
+			isValidFunc = true;
+		}
 		var numArgs;
 		var args;
-
-		// console.log('in dev_man.js args', m.args);
-		if(typeof(deviceKeeper[func]) === 'function') {
+		if ((typeof(caller[func]) === 'function') && isValidFunc) {
 			numArgs = m.args.length;
 			args = m.args;
 			if(numArgs === 0) {
-				deviceKeeper[func]()
+				caller[func]()
 				.then(success, error);
 			} else if(numArgs === 1) {
-				deviceKeeper[func](args[0])
+				caller[func](args[0])
 				.then(success, error);
 			} else if(numArgs === 2) {
-				deviceKeeper[func](args[0], args[1])
+				caller[func](args[0], args[1])
 				.then(success, error);
 			} else if(numArgs === 3) {
-				deviceKeeper[func](args[0], args[1], args[2])
+				caller[func](args[0], args[1], args[2])
 				.then(success, error);
 			} else if(numArgs === 4) {
-				deviceKeeper[func](args[0], args[1], args[2], args[3])
+				caller[func](args[0], args[1], args[2], args[3])
 				.then(success, error);
 			} else {
-				deviceKeeper[func](args)
+				caller[func](args)
 				.then(success, error);
 			}
 		} else {
