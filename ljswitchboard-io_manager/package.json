@@ -23,7 +23,7 @@
   },
   "license": {
     "type": "MIT",
-    "url": "https://raw.githubusercontent.com/chrisJohn404/LabJack-process_manager/master/LICENSE"
+    "url": "https://raw.githubusercontent.com/chrisJohn404/ljswitchboard-io_manager/master/LICENSE"
   },
   "bugs": {
     "url": "https://github.com/chrisJohn404/ljswitchboard-io_manager/issues"
@@ -32,9 +32,10 @@
   "dependencies": {
     "async": "~0",
     "dict": "1.4.0",
-    "q": "~0",
+    "q": "~1",
     "process_manager": "0.0.x",
-    "labjack-nodejs": "0.0.14"
+    "labjack-nodejs": "0.0.x",
+    "ljswitchboard-ljm_device_curator": "0.0.x"
   },
   "devDependencies": {
     "nodeunit": "0.9.x"

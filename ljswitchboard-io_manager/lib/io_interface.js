@@ -6,7 +6,7 @@
 var process_manager = require('process_manager');
 var q = require('q');
 
-// Include the io_managers
+// Include the io controllers
 var driver_controller = require('./controllers/driver_controller');
 var device_controller = require('./controllers/device_controller');
 var logger_controller = require('./controllers/logger_controller');
@@ -14,6 +14,8 @@ var file_io_controller = require('./controllers/file_io_controller');
 
 var ioDelegatorPath = './lib/io_delegator.js';
 
+var constants = require('./common/constants');
+var io_endpoint_key = constants.io_manager_endpoint_key;
 
 function createIOInterface() {
 	this.mp = null;
@@ -27,15 +29,67 @@ function createIOInterface() {
 		self.driver_controller = new driver_controller.createNewDriverController(self);
 	};
 	var createDeviceController = function() {
-		self.device_controller = new device_mcontroller.createNewDeviceController(self);
+		self.device_controller = new device_controller.createNewDeviceController(self);
 	};
 	var createLoggerController = function() {
-		self.logger_controller = new logger_mcontroller.createNewLoggerController(self);
+		self.logger_controller = new logger_controller.createNewLoggerController(self);
 	};
 	var createFileIOController = function() {
-		self.file_io_controller = new file_io_mcontroller.createNewFileIOController(self);
+		self.file_io_controller = new file_io_controller.createNewFileIOController(self);
 	};
 
+	var getDriverConstants = function(bundle) {
+		var defered = q.defer();
+		var onSucc = function() {
+			defered.resolve(bundle);
+		};
+		var onErr = function() {
+			defered.reject(bundle);
+		};
+
+		saveDriverConstants()
+		.then(onSucc, onErr);
+		return defered.promise;
+	};
+	var saveDriverConstants = function(driverConstants) {
+		var defered = q.defer();
+		defered.resolve();
+		return defered.promise;
+	};
+
+	var callFunc = null;
+	var sendReceive = null;
+	var sendMessage = null;
+	var send = null;
+
+	var internalListener = function(m) {
+		console.log("* io_interface internalListener:", m);
+	};
+
+	var saveLink = function(link) {
+		var defered = q.defer();
+
+		callFunc = link.callFunc;
+		sendReceive = link.sendReceive;
+		sendMessage = link.sendMessage;
+		send = link.send;
+
+		defered.resolve();
+		return defered.promise;
+	};
+
+	var initInternalMessenger = function() {
+		var defered = q.defer();
+		self.establishLink(io_endpoint_key, internalListener)
+		.then(saveLink)
+		.then(defered.resolve);
+		return defered.promise;
+	};
+
+	this.getRegisteredEndpoints = function() {
+		send("poke io_delegator");
+		return callFunc('getRegisteredEndpoints');
+	};
 	/**
 	 * Initializing the io_interface will initialize a new master_process
 	 * instance (as mp), save it as well as its event_emitter and start a new
@@ -56,15 +110,17 @@ function createIOInterface() {
 
 		// Create Controllers
 		createDriverController();
-		// createDeviceController();
+		createDeviceController();
 		// createLoggerController();
 		// createFileIOController();
 
 		self.mp.qStart(ioDelegatorPath)
+		.then(initInternalMessenger)
+		.then(getDriverConstants)
 		.then(function(res) {
 			// Initialize Controllers
 			self.driver_controller.init()
-			// .then(self.device_controller.init)
+			.then(self.device_controller.init)
 			// .then(self.logger_controller.init)
 			// .then(self.file_io_controller.init)
 			.then(defered.resolve);
@@ -125,7 +181,7 @@ function createIOInterface() {
 		var send = function(m) {
 			return self.mp.send(endpoint, m);
 		};
-		var callFunc = function(name, argList) {
+		var callFunc = function(name, argList, options) {
 			var funcName = '';
 			var funcArgs = [];
 			if(name) {
@@ -136,7 +192,8 @@ function createIOInterface() {
 			}
 			return sendReceive({
 				'func': funcName,
-				'args': funcArgs
+				'args': funcArgs,
+				'options': options
 			});
 		};
 

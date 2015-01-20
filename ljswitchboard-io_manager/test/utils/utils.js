@@ -44,7 +44,7 @@ var qExec = function(obj, func, argA, argB, argC) {
 };
 exports.qExec = qExec;
 
-var pResults = function(results, pIndividual) {
+var pResults = function(results, pIndividual, expectedErrorsList) {
 	var defered = q.defer();
 	var numSuccess = 0;
 	var numFail = 0;
@@ -54,14 +54,22 @@ var pResults = function(results, pIndividual) {
 	results.forEach(function(result) {
 		var message = '   - ';
 		var data;
-		if(typeof(result.retData) !== 'undefined') {
+		var keys = Object.keys(result);
+		if(keys.indexOf('retData') >= 0) {
 			message += 'Success: ';
 			data = result.retData;
 			numSuccess += 1;
 		} else {
-			message += 'Error: ';
-			data = result.errData;
-			numFail += 1;
+			if(expectedErrorsList.indexOf(result.functionCall) < 0) {
+				message += 'Error: ';
+				data = result.errData;
+				numFail += 1;
+			} else {
+				message += 'Expected Error: ';
+				data = result.errData;
+				numSuccess += 1;
+			}
+			
 		}
 		message += result.functionCall;
 		if(pIndividual) {
@@ -71,7 +79,7 @@ var pResults = function(results, pIndividual) {
 
 	if(!pIndividual) {
 		var num = results.length;
-		var ratio = (numSuccess/num).toFixed(3);
+		var ratio = (numSuccess/num*100).toFixed(3);
 		console.log(' - Num Results %d, %d% successful', num, ratio);
 	}
 	

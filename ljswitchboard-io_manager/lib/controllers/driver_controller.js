@@ -20,7 +20,6 @@ function createDriverController(io_interface) {
 		sendReceive = link.sendReceive;
 		sendMessage = link.sendMessage;
 		send = link.send;
-
 		defered.resolve();
 		return defered.promise;
 	};
@@ -43,13 +42,26 @@ function createDriverController(io_interface) {
 		);
 	};
 	this.errToStr = function(errNum) {
-		return callFunc('errToStr', [errNum]);
+		var defered = q.defer();
+		// errToStr is a special function that should always resolve and not 
+		// reject because it is making sense of errors, not making errors out of
+		// errors.
+		callFunc('errToStr', [errNum])
+		.then(function(res) {
+			defered.resolve(res);
+		}, function(err) {
+			defered.resolve(err);
+		});
+		return defered.promise;
 	};
 	this.printErrToStr = function(errNum) {
+		var defered = q.defer();
 		self.errToStr(errNum)
 		.then(function(str) {
 			console.log('Error Number:', errNum, 'is', str);
+			defered.resolve(str);
 		});
+		return defered.promise;
 	};
 	this.loadConstants = function() {
 		return callFunc('loadConstants');
@@ -69,9 +81,22 @@ function createDriverController(io_interface) {
 	this.resetLog = function() {
 		return callFunc('resetLog');
 	};
+	this.controlLog = function(mode, level) {
+		return callFunc('controlLog', [mode, level]);
+	};
+	this.enableLog = function() {
+		return callFunc('enableLog');
+	};
+	this.disableLog = function() {
+		return callFunc('disableLog');
+	};
+	this.getFuncs = function() {
+		return callFunc('getFuncs');
+	};
 	this.driverVersion = function() {
 		return self.readLibrary('LJM_LIBRARY_VERSION');
 	};
+
 	
 	var self = this;
 }

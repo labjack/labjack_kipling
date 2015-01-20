@@ -6,6 +6,18 @@ var io_endpoint_key = constants.driver_endpoint_key;
 
 function createDriverManager(io_delegator) {
 	var ljm_driver = null;
+	var custom_functions = {
+		'getFuncs': function(onError, onSuccess) {
+			var functionList = Object.keys(ljm_driver);
+			setImmediate(function() {
+				onSuccess(functionList);
+			});
+		}
+	};
+	var customNumArgs = {
+		'getFuncs': 0
+	};
+
 	var sendMessage = null;
 	var send = null;
 
@@ -26,9 +38,11 @@ function createDriverManager(io_delegator) {
 		};
 
 		var func = m.func;
-		if(typeof(ljm_driver[func]) !== 'undefined') {
-			var numArgs = self.numArgs[func];
-			var args = m.args;
+		var numArgs;
+		var args;
+		if(typeof(ljm_driver[func]) === 'function') {
+			numArgs = self.numArgs[func];
+			args = m.args;
 			if (numArgs === 0) {
 				ljm_driver[func](error, success);
 			} else if (numArgs === 1) {
@@ -37,6 +51,15 @@ function createDriverManager(io_delegator) {
 				ljm_driver[func](args[0], args[1], error, success);
 			} else if (numArgs === 3) {
 				ljm_driver[func](args[0], args[1], args[2], error, success);
+			} else {
+				console.error("in driver_manager.js-mR func argLength invalid", m, self.numArgs);
+				error(m);
+			}
+		} else if (typeof(custom_functions[func]) === 'function') {
+			numArgs = customNumArgs[func];
+			args = m.args;
+			if (numArgs === 0) {
+				custom_functions[func](error, success);
 			} else {
 				console.error("in driver_manager.js-mR func argLength invalid", m, self.numArgs);
 				error(m);
@@ -78,8 +101,11 @@ function createDriverManager(io_delegator) {
 		'readLibrary': 1,
 		'readLibraryS': 1,
 		'writeLibrary': 2,
-		'logS': 1,
+		'logS': 2,
 		'resetLog': 0,
+		'controlLog': 2,
+		'enableLog': 0,
+		'disableLog': 0,
 		'driverVersion': 0
 	};
 

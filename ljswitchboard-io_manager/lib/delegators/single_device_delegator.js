@@ -1,25 +1,21 @@
 
+console.log("in single_device_delegator.js");
 
 var dict = require('dict');
 var q = require('q');
-var constants = require('./common/constants');
+var constants = require('../common/constants');
 var io_endpoint_key = constants.io_manager_endpoint_key;
 
 var process_manager = require('process_manager');
 var slave_process = process_manager.slave_process();
 
-// Include the io_managers
-var driver_manager = require('./managers/driver_manager');
-var device_manager = require('./managers/device_manager');
-var logger_manager = require('./managers/logger_manager');
-var file_io_manager = require('./managers/file_io_manager');
-
+var single_device_manager = require('../managers/single_device_manager');
 
 var DEBUG = true;
 var startupInfo = slave_process.getSlaveProcessInfo();
 var print = function(argA, argB) {
     if(DEBUG) {
-        var msg = '* io_d:';
+        var msg = '* sd_d:';
         if(argA) {
             if(argB) {
                 console.log(msg, argA, argB);
@@ -32,22 +28,12 @@ var print = function(argA, argB) {
     }
 };
 
-var receivers = [
-	'driver_manager',
-	'device_manager',
-	'logger_manager',
-	'file_io_manager'
-];
-
-function createIODelegator(slave_process) {
+function createSingleDeviceDelegator(slave_process) {
 	this.sp = slave_process;
 	this.sp_event_emitter = null;
 
 	// Define manager objects to be created during the init process
-	this.driver_manager = null;
-	this.device_manager = null;
-	this.logger_manager = null;
-	this.file_io_manager = null;
+	this.single_device_manager = null;
 
 	// Define the endpoints object to be used for routing messages by the
 	// messageDelegator
@@ -104,22 +90,11 @@ function createIODelegator(slave_process) {
 	};
 
 	// Define functions to initialize the manager objects
-	var createDriverManager = function() {
-		var key = constants.driver_endpoint_key;
-		self.driver_manager = new driver_manager.createNewDriverManager(self);
-	};
-	var createDeviceManager = function() {
+	var createSingleDeviceManager = function() {
 		var key = constants.device_endpoint_key;
-		self.device_manager = new device_manager.createNewDeviceManager(self);
+		self.single_device_manager = new single_device_manager.createSingleDeviceManager(self);
 	};
-	var createLoggerManager = function() {
-		var key = constants.logger_endpoint_key;
-		self.logger_manager = new logger_manager.createNewLoggerManager(self);
-	};
-	var createFileIOManager = function() {
-		var key = constants.file_io_endpoint_key;
-		self.file_io_manager = new file_io_manager.createNewFileIOManager(self);
-	};
+
 
 	/**
 	 * The establishLink function gets called by a manager in order to connect
@@ -175,7 +150,7 @@ function createIODelegator(slave_process) {
 	 * master_process.sendMessage function.
 	 */
 	this.listener = function(data) {
-		print('basic_test_slave.js eventMessageReceived', data);
+		print('single_device_delegator.js eventMessageReceived', data);
 		self.sp.send('test','Test Data');
 	};
 
@@ -200,92 +175,46 @@ function createIODelegator(slave_process) {
 		self.sp_event_emitter.on('message', self.listener);
 
 		// Create Managers
-		createDriverManager();
-		createDeviceManager();
-		// createLoggerManager();
-		// createFileIOManager();
+		createSingleDeviceManager();
 
-		initInternals()
-		.then(initManager(self.driver_manager, 'dm'))
-		.then(initManager(self.device_manager, 'de'))
+		initManager(self.single_device_manager, 'sd')()
 		.then(defered.resolve);
 		return defered.promise;
 	};
-	var pError = function(defered, name) {
+	var pError = function(defered, debugTxt) {
 		return function(err) {
-			console.log('io_delegator init error', name);
+			console.log('io_delegator init error', debugTxt);
 			defered.resolve();
 		};
 	};
-	var initManager = function(manager, name) {
+	var initManager = function(manager, debugTxt) {
 		return function() {
 			var defered = q.defer();
 			try {
 				manager.init()
 				.then(
 					defered.resolve, 
-					pError(defered, name + '-1'), 
-					pError(defered, name + '-2')
+					pError(defered, debugTxt + '-1'), 
+					pError(defered, debugTxt + '-2')
 				);
 			} catch (err) {
-				pError(defered, name + '-3')(err);
+				pError(defered, debugTxt + '-3')(err);
 			}
 
 			return defered.promise;
 		};
 	};
 
-	this.getRegisteredEndpoints = function(args) {
-		var defered = q.defer();
-		defered.resolve(Object.keys(self.endpoints));
-		return defered.promise;
-	};
-	var exposedFunctions = {
-		'getRegisteredEndpoints': this.getRegisteredEndpoints
-	};
-
-	var internalListener = function(m) {
-		console.log('* io_delegator internalListener:', m);
-		send("Poke Response from io_delegator!");
-	};
-	var internalMessageReceiver = function(m) {
-		var defered = q.defer();
-		if(exposedFunctions[m.func]) {
-			exposedFunctions[m.func](m.args)
-			.then(defered.resolve, defered.reject);
-		} else {
-			defered.reject('Invalid Function Called: ' + m.func);
-		}
-		return defered.promise;
-	};
-	var saveLink = function(link) {
-		var defered = q.defer();
-
-		sendMessage = link.sendMessage;
-		send = link.send;
-
-		defered.resolve();
-		return defered.promise;
-	};
-	var initInternals = function() {
-		var defered = q.defer();
-
-		self.establishLink(io_endpoint_key, internalMessageReceiver, internalListener)
-		.then(saveLink)
-		.then(defered.resolve);
-		return defered.promise;
-	};
-
 	var self = this;
 }
 
 // Create a new io_delegator object
-var io_delegator = new createIODelegator(slave_process);
+var single_device_delegator = new createSingleDeviceDelegator(slave_process);
 
 // Initialize the io_delegator
-io_delegator.init()
+single_device_delegator.init()
 .then(function(res) {
 	return slave_process.finishedInit(slave_process.getSlaveProcessInfo());
 }).then(function() {
-	// print('Ready to do things....');
+	print('Ready to do things....');
 });
