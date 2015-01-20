@@ -1,8 +1,8 @@
 {
   "name": "ljswitchboard-ljm_device_curator",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
-  "main": "/lib/device_curator.js",
+  "main": "./lib/device_curator.js",
   "scripts": {
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
     "package": "echo \"Error: no package command specified\" && exit 1"
