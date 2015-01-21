@@ -41,14 +41,13 @@ function createDeviceKeeper(io_delegator, link) {
 
 
 	/********************* Exposed Functions **********************************/
-	this.createDeviceFunc = function(sameProcess, mockDevice) {
-		var defered = q.defer();
 
-		console.log('in dev_keeper - createDeviceObject, args:', sameProcess);
-		defered.resolve('New Object Key');
-		return defered.promise;
-	};
-
+	/**
+	 *	Function that gets called to open a new device.  It uses the 
+	 *	accessory device_generator.js file to create device objects and abstract
+	 *	the differences between devices opened in the same process vs opening
+	 *	them in a subprocess.
+	 */
 	this.openDevice = function(options) {
 		var deviceType;
 		var connectionType;
@@ -106,7 +105,10 @@ function createDeviceKeeper(io_delegator, link) {
 		// create new device object:
 		var newDevice;
 		try {
-			newDevice = new device_generator.newDevice(spinupProcess, mockDevice);
+			newDevice = new device_generator.newDevice(
+				spinupProcess, 
+				mockDevice
+			);
 		} catch (err) {
 			defered.reject({
 				'message': 'Failed to create device obj, device_keeper.js',
@@ -142,6 +144,51 @@ function createDeviceKeeper(io_delegator, link) {
 		return defered.promise;
 	};
 
+	/**
+	 *	The close command in combination with the removeDeviceReference 
+	 * 	functions properly close devices and remove them from the local listing
+	 *	of devices.
+	 */
+	var removeDeviceReference = function(comKey) {
+		self.devices[comKey] = null;
+		self.devices[comKey] = undefined;
+		delete self.devices[comKey];
+	};
+	this.close = function(comKey) {
+		var defered = q.defer();
+
+		if(self.devices[comKey]) {
+			// If the device is in the local listing of devices close it.
+			self.devices[comKey].close()
+			.then(function(res) {
+				var newInfo = {};
+				newInfo.isError = false;
+				newInfo.comKey = comKey;
+
+				// if the device closed successfully, delete all references.
+				removeDeviceReference(comKey);
+				defered.resolve(newInfo);
+			}, function(err) {
+				var newInfo = {};
+				newInfo.isError = true;
+				newInfo.comKey = comKey;
+				newInfo.err = err;
+
+				// if there is an error still delete all data
+				removeDeviceReference(comKey);
+				defered.resolve(newInfo);
+			});
+		} else {
+			defered.reject('in dev_keeper close func, invalid comKey', comKey);
+		}
+		return defered.promise;
+	};
+
+	/**
+	 * 	Close all devices that are in the self.devices object.  The 
+	 *	closeAllDevices function makes an array of closeOps that get called
+	 *	in parallel hence the necessity of the secondary createCloseOp function.
+	 */
 	var createCloseOp = function(comKey) {
 		var closeOp = function() {
 			var innerDefered = q.defer();
@@ -152,27 +199,23 @@ function createDeviceKeeper(io_delegator, link) {
 				newInfo.comKey = comKey;
 
 				// if the device closed successfully, delete all references.
-				self.devices[comKey] = null;
-				self.devices[comKey] = undefined;
-				delete self.devices[comKey];
+				removeDeviceReference(comKey);
 				innerDefered.resolve(newInfo);
 			}, function(err) {
 				// Save the error information
 				var newInfo = {};
 				newInfo.isError = true;
 				newInfo.err = err;
+				newInfo.comKey = comKey;
 
 				// if there is an error still delete all data
-				self.devices[comKey] = null;
-				self.devices[comKey] = undefined;
-				delete self.devices[comKey];
+				removeDeviceReference(comKey);
 				innerDefered.resolve(newInfo);
 			});
 			return innerDefered.promise;
 		};
 		return closeOp;
 	};
-
 	this.closeAllDevices = function() {
 		var defered = q.defer();
 		var numDevicesClosed = 0;
@@ -211,6 +254,11 @@ function createDeviceKeeper(io_delegator, link) {
 		
 		return defered.promise;
 	};
+
+	/**
+	 *	Return the number of devices that the device_keeper is currently
+	 *	managing.
+	 */
 	this.getNumDevices = function() {
 		var defered = q.defer();
 		var numDevices = Object.keys(self.devices).length;

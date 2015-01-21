@@ -1,10 +1,11 @@
 
 var q = require('q');
 
-function createDevice(savedAttributes, deviceCallFunc) {
+function createDevice(savedAttributes, deviceCallFunc, closeDeviceFunc) {
 	this.savedAttributes = savedAttributes;
 	this.device_comm_key = savedAttributes.device_comm_key;
 	this.deviceCallFunc = deviceCallFunc;
+	this.closeDeviceFunc = closeDeviceFunc;
 
 	this.callFunc = function(func, args) {
 		return self.deviceCallFunc(self.device_comm_key, func, args);
@@ -17,15 +18,7 @@ function createDevice(savedAttributes, deviceCallFunc) {
 		return self.callFunc('readRaw', [data]);
 	};
 	this.read = function(address) {
-		var defered = q.defer();
-		self.callFunc('read', [address])
-		.then(function(res) {
-			defered.resolve(res);
-		}, function(err) {
-			console.log('ljm_device read error detected', err);
-			defered.reject(err);
-		});
-		return defered.promise;
+		return self.callFunc('read', [address]);
 	};
 	this.readMany = function(addresses) {
 		return self.callFunc('readMany', [addresses]);
@@ -44,6 +37,21 @@ function createDevice(savedAttributes, deviceCallFunc) {
 	};
 	this.readUINT64 = function(type) {
 		return self.callFunc('readUINT64', [type]);
+	};
+
+	/**
+	 *	The close function calls the previously passed in close function of the
+	 *	device_controller object to instruct the sub-process to delete the 
+	 *	close & delete the device and remove it from the device_controller's 
+	 *	local listing of devices.
+	 */
+	this.close = function() {
+		var defered = q.defer();
+
+		// Inform sub-process that the device should be closed
+		self.closeDeviceFunc(self.device_comm_key)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
 	};
 	
 	var self = this;

@@ -48,11 +48,14 @@ function createDeviceManager(io_delegator) {
 				deviceKey = route.deviceKey;
 				if(deviceKeeper.devices[deviceKey]) {
 					isValidFunc = true;
-
-					if((func !== 'open') && (func !== 'close')) {
-						caller = deviceKeeper.devices[deviceKey].curatedDevice;
+					// Intercept device-centric close comands and re-route them
+					// to the deviceKeeper and add their deviceKey as an 
+					// argument.
+					if(func === 'close') {
+						caller = deviceKeeper;
+						m.args.push(deviceKey);
 					} else {
-						caller = deviceKeeper.devices[deviceKey];
+						caller = deviceKeeper.devices[deviceKey].device;
 					}
 				}
 			}
@@ -87,12 +90,12 @@ function createDeviceManager(io_delegator) {
 					.then(success, error);
 				}
 			} else {
-				console.error('device_manager.js - function not found...', Object.keys(caller));
-				defered.reject('function not found in device_manager.js');
+				// console.error('device_manager.js - function not found...', Object.keys(caller));
+				defered.reject('function not found in device_manager.js: ' + JSON.stringify(Object.keys(caller)));
 			}
 		} else {
-			console.error('device_manager.js - invalid function detected');
-			defered.reject('invalid function detected in device_manager.js');
+			// console.error('device_manager.js - invalid function detected');
+			defered.reject('invalid function detected in device_manager.js, message: '+JSON.stringify(m));
 		}
 		return defered.promise;
 	};

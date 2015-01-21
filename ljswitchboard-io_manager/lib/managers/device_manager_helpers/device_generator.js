@@ -6,7 +6,7 @@ var device_delegator_path = './lib/delegators/single_device_delegator.js';
 var constants = require('../../common/constants');
 
 function newDevice(newProcess, mockDevice) {
-	this.curatedDevice = null;
+	this.device = null;
 
 	this.isNewProcess = newProcess;
 	this.isMockDevice = mockDevice;
@@ -19,8 +19,8 @@ function newDevice(newProcess, mockDevice) {
 		if(self.isNewProcess) {
 			defered.reject('devices in sub-processes are currently not supported');
 		} else {
-			self.curatedDevice = new device_curator.device(self.isMockDevice);
-			self.curatedDevice.open(deviceType, connectionType, identifier)
+			self.device = new device_curator.device(self.isMockDevice);
+			self.device.open(deviceType, connectionType, identifier)
 			.then(function(res) {
 				res.device_comm_key = self.device_comm_key;
 				defered.resolve(res);
@@ -41,10 +41,10 @@ function newDevice(newProcess, mockDevice) {
 		if(self.newProcess) {
 			defered.reject('devices in sub-processes are currently not supported');
 		} else {
-			self.curatedDevice.close()
+			self.device.close()
 			.then(function(res) {
-				this.curatedDevice = null;
-				defered.resolve(res);
+				this.device = null;
+				defered.resolve(self.device_comm_key);
 			}, defered.reject);
 		}
 		return defered.promise;

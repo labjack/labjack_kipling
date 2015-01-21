@@ -20,6 +20,8 @@ var device_controller;
 var file_io_controller;
 var logger_controller;
 
+var device;
+
 exports.tests = {
 	'initialization': function(test) {
 		// Require the io_manager library
@@ -55,20 +57,9 @@ exports.tests = {
 
 		device_controller.openDevice(params)
 		.then(function(newDevice) {
-			// console.log('Created New Device Object', newDevice);
-			newDevice.read('AIN0')
-			.then(function(res) {
-				var defered = q.defer();
-				console.log('AIN read result', res);
-				defered.resolve();
-				return defered.promise;
-			}, function(err) {
-				var defered = q.defer();
-				console.log('AIN read error', err);
-				defered.resolve();
-				return defered.promise;
-			})
-			.then(device_controller.getNumDevices)
+			// save device reference
+			device = newDevice;
+			device_controller.getNumDevices()
 			.then(function(res) {
 				test.strictEqual(res, 1, 'wrong number of devices are open');
 				test.done();
@@ -79,11 +70,46 @@ exports.tests = {
 			test.done();
 		});
 	},
+	'read AIN0': function(test) {
+		device.read('AIN0')
+		.then(function(res) {
+			var isOk = true;
+			if((res > 11) || (res < -11)) {
+				isOk = false;
+			}
+			test.ok(isOk, 'AIN0 read result is out of range');
+			test.done();
+		}, function(err) {
+			test.ok(false, 'AIN0 read result returned an error');
+			test.done();
+		});
+	},
+	'close mock device': function(test) {
+		device.close()
+		.then(function(res) {
+			test.strictEqual(res.comKey, 0, 'expected to receive a different comKey');
+			test.done();
+		}, function(err) {
+			console.log('Failed to close mock device', err);
+			test.ok(false, 'Failed to close mock device');
+			test.done();
+		});
+	},
+	'verify device closure': function(test) {
+		device.read('AIN0')
+		.then(function(res) {
+			console.log('read returned', res);
+			test.ok(false, 'should have caused an error');
+			test.done();
+		}, function(err) {
+			test.done();
+		});
+	},
 	'close all devices': function(test) {
 		device_controller.closeAllDevices()
 		.then(function(res) {
 			// console.log('Num Devices Closed', res);
-			test.strictEqual(res.numClosed, 1, 'wrong number of devices closed');
+			test.strictEqual(res.numClosed, 0, 'wrong number of devices closed');
 			test.done();
 		}, function(err) {
 			console.log('Error closing all devices', err);

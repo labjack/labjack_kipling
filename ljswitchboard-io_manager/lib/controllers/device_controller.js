@@ -23,7 +23,8 @@ function createDeviceController(io_interface) {
 	var sendMessage = null;
 	var send = null;
 
-	var deviceKeeper = null;
+	this.devices = null;
+
 	var callFunc = function(func, args) {
 		return innerCallFunc({
 			'func': func,
@@ -57,6 +58,7 @@ function createDeviceController(io_interface) {
 
 		// Initialize the device keeper
 		// deviceKeeper = new device_keeper.createDeviceKeeper();
+		self.devices = {};
 
 		io_interface.establishLink(io_endpoint_key, listener)
 		.then(saveLink)
@@ -147,6 +149,8 @@ function createDeviceController(io_interface) {
 	var createDeviceObject = function(deviceInfo) {
 		var defered = q.defer();
 
+		var comKey = deviceInfo.device_comm_key;
+
 		var newDevice;
 		var deviceCreator;
 
@@ -162,11 +166,11 @@ function createDeviceController(io_interface) {
 
 		newDevice = new deviceCreator.createDevice(
 			deviceInfo,
-			deviceCallFunc
+			deviceCallFunc,
+			self.closeDevice
 		);
-		console.log("New Device", Object.keys(newDevice));
-		// console.log("New Device", newDevice);
 
+		self.devices[comKey] = newDevice;
 		defered.resolve(newDevice);
 		return defered.promise;
 	};
@@ -188,22 +192,41 @@ function createDeviceController(io_interface) {
 
 		callFunc('openDevice', [options])
 		.then(createDeviceObject, handleError)
-		// .then(createDeviceObject, defered.reject)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
 
 	/**
-	 * Close a connection to a device, pass an options object containing:
-	 * @options {object} 
-	 *          'deviceType': 'LJM_dtANY', 
-	 *          'connectionType': 'LJM_ctANY', 
-	 *          'identifier': 'LJM_idANY'
+	 * Close a connection to a device. Uses deleteDeviceReference helper 
+	 * function to do the actual deleting of the device reference.
 	 */
-	this.closeDevice = function(options) {
-		callFunc('openDevice', [options])
-		.then(defered.resolve, defered.reject);
-		return;
+	var deleteDeviceReference = function(closeResult) {
+		var defered = q.defer();
+		var device_comm_key = closeResult.comKey;
+		if(self.devices[device_comm_key]) {
+			// Delete the device reference from the local devices listing.
+			self.devices[device_comm_key] = null;
+			self.devices[device_comm_key] = undefined;
+			delete self.devices[device_comm_key];
+			defered.resolve(closeResult);
+		} else {
+			defered.reject('invalid device_comm_key dev_con dDR');
+		}
+		return defered.promise;
+	};
+	this.closeDevice = function(device_comm_key) {
+		var defered = q.defer();
+
+		// Make sure that the device being closed is actually a device.
+		if(self.devices[device_comm_key]) {
+			// Send the close command to the sub-process.
+			deviceCallFunc(device_comm_key, 'close')
+			.then(deleteDeviceReference, deleteDeviceReference)
+			.then(defered.resolve, defered.reject);
+		} else {
+			defered.reject('invalid device_comm_key dev_con cD');
+		}
+		return defered.promise;
 	};
 
 	/**
