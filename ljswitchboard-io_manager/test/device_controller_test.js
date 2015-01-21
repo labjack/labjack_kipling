@@ -57,27 +57,20 @@ exports.tests = {
 	'check device_controller': function(test) {
 		device_controller = io_interface.getDeviceController();
 
-		var keys = Object.keys(device_controller);
-		console.log('Keys', keys);
-
-		var testDeviceAttributes = {
-			'deviceType': 'LJM_dtANY',
-			'connectionType': 'LJM_ctANY',
-			'identifier': 'LJM_idANY'
-		};
-
 		var bundle = [];
 		qExec(io_interface, 'getRegisteredEndpoints')(bundle)
-		.then(qExec(device_controller, 'createDeviceObject', true))
+		.then(qExec(device_controller, 'testSendMessage'))
+		.then(qExec(device_controller, 'testSend'))
 		.then(function(results) {
-			var printIndividualResults = true;
-			var expectedErrorsList = [
-				'errToStr'
-			];
-			pResults(results, printIndividualResults, expectedErrorsList)
-			.then(function(results){
+			setTimeout(function() {
 				test.done();
-			});
+			}, 1000);
+			// var printIndividualResults = false;
+			// var expectedErrorsList = [];
+			// pResults(results, printIndividualResults, expectedErrorsList)
+			// .then(function(results){
+			// 	test.done();
+			// });
 		}, function(err) {
 			console.log('ERROR!', err);
 			test.done();

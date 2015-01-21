@@ -52,6 +52,7 @@ function createIODelegator(slave_process) {
 	// Define the endpoints object to be used for routing messages by the
 	// messageDelegator
 	this.endpoints = {};
+	this.oneWayEndpoints = {};
 
 	// Define function objects for sending internal messages 
 	var sendMessage = null;
@@ -131,6 +132,7 @@ function createIODelegator(slave_process) {
 	this.establishLink = function(name, messageReceiver, listener) {
 		var elDefered = q.defer();
 		self.endpoints[name] = messageReceiver;
+		self.oneWayEndpoints[name] = listener;
 		var endpoint = name;
 		var createMessage = function(m) {
 			var cmDefered = q.defer();
@@ -167,17 +169,63 @@ function createIODelegator(slave_process) {
 	 * @type {[type]}
 	 */
 	this.destroyLink = function(name) {
+		self.endpoints[name] = null;
+		self.endpoints[name] = undefined;
+		self.oneWayEndpoints[name] = null;
+		self.oneWayEndpoints[name] = undefined;
 		delete self.endpoints[name];
+		delete self.oneWayEndpoints[name];
 		self.sp_event_emitter.removeAllListeners(name);
 	};
 
 	/**
+	 * the function "delegateOneWayMessage" directs incomming one-way messages
+	 * toward registered & valid endpoints.
+	 */
+	var delegateOneWayMessage = function(m) {
+		var defered = q.defer();
+		self.oneWayEndpoints[m.endpoint](m.message);
+		defered.resolve();
+		return defered.promise;
+		// return self.endpoints[m.endpoint](m.message);
+	};
+	/**
+	 * A helper function for the messageDelegator that checks to see if the
+	 * messages endpoint is valid.
+	 */
+	var checkOneWayEndpoint = function(m) {
+		var defered = q.defer();
+		if(self.oneWayEndpoints[m.endpoint]) {
+			m.isValidEndpoint = true;
+			defered.resolve(m);
+		} else {
+			print('sendReceive message sent to invalid endpoint', m.endpoint);
+			print('valid endpoints', self.oneWayEndpoints);
+			defered.reject(m);
+		}
+		return defered.promise;
+	};
+	/**
 	 * The listener function handles one-way slave messages transfered by the
 	 * master_process.sendMessage function.
 	 */
-	this.listener = function(data) {
-		print('basic_test_slave.js eventMessageReceived', data);
-		self.sp.send('test','Test Data');
+	this.listener = function(m) {
+		var defered = q.defer();
+		var errFunc = function(err) {
+			print('listener errFunc', err);
+			defered.reject(err);
+		};
+		var message = {
+			'isValidEndpoint': false,
+			'message': m.data,
+			'endpoint': m.endpoint
+		};
+
+		checkOneWayEndpoint(message)
+		.then(delegateOneWayMessage, errFunc)
+		.then(defered.resolve, errFunc);
+		return defered.promise;
+		
 	};
 
 	/**
@@ -189,6 +237,7 @@ function createIODelegator(slave_process) {
 
 		// Clear the registered endpoints
 		self.endpoints = {};
+		self.oneWayEndpoints = {};
 
 		// Register the messageDelegator as a 'q' function with the slave 
 		// process and save the returned event_emitter object

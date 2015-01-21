@@ -20,6 +20,7 @@ var io_endpoint_key = constants.io_manager_endpoint_key;
 function createIOInterface() {
 	this.mp = null;
 	this.mp_event_emitter = null;
+	this.oneWayMessageListeners = {};
 
 	this.driver_controller = null;
 	this.device_controller = null;
@@ -65,6 +66,38 @@ function createIOInterface() {
 	var internalListener = function(m) {
 		console.log("* io_interface internalListener:", m);
 	};
+	var checkOneWayEndpoint = function(m) {
+		var defered = q.defer();
+		if(self.oneWayMessageListeners[m.endpoint]) {
+			defered.resolve(m);
+		} else {
+			defered.reject(m);
+		}
+		return defered.promise;
+	};
+	var handleOneWayMessageErrors = function(m) {
+		var defered = q.defer();
+		var msg = '* io_interface oneWayMessageError: ' + JSON.stringify(m);
+		console.error(msg);
+		defered.reject(msg);
+		return defered.promise;
+	};
+	var delegateOneWayMessage = function(m) {
+		var defered = q.defer();
+		try {
+			self.oneWayMessageListeners[m.endpoint](m.data);
+			defered.resolve();
+		} catch(err) {
+			var msg = '* io_interface oneWayMessageError: ' + JSON.stringify(m);
+			console.error(msg);
+			defered.reject(msg);
+		}
+		return defered.promise;
+	};
+	var oneWayMessageListener = function(m) {
+		checkOneWayEndpoint(m)
+		.then(delegateOneWayMessage, handleOneWayMessageErrors);
+	};
 
 	var saveLink = function(link) {
 		var defered = q.defer();
@@ -97,17 +130,20 @@ function createIOInterface() {
 	 * various manager processes that make up the io_interface.
 	**/
 	this.initialize = function() {
+
 		var defered = q.defer();
 
 		self.mp = null;
 		self.mp_event_emitter = null;
+		self.oneWayMessageListeners = null;
 
 		delete self.mp;
 		delete self.mp_event_emitter;
+		delete self.oneWayMessageListeners;
 
 		self.mp = new process_manager.master_process();
-		self.mp_event_emitter = self.mp.init();
-
+		self.mp_event_emitter = self.mp.init(oneWayMessageListener);
+		self.oneWayMessageListeners = {};
 		// Create Controllers
 		createDriverController();
 		createDeviceController();
@@ -175,8 +211,11 @@ function createIOInterface() {
 			return defered.promise;
 		};
 		var sendMessage = function(m) {
-			return createMessage(m)
-			.then(executeSendMessage);
+			var defered = q.defer();
+			createMessage(m)
+			.then(executeSendMessage)
+			.then(defered.resolve, defered.reject);
+			return defered.promise;
 		};
 		var send = function(m) {
 			return self.mp.send(endpoint, m);
@@ -198,6 +237,7 @@ function createIOInterface() {
 		};
 
 		self.mp_event_emitter.on(name, listener);
+		self.oneWayMessageListeners[name] = listener;
 		var defered = q.defer();
 
 		var link = {

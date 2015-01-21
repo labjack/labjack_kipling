@@ -9,11 +9,14 @@ var q = require('q');
 // enable/disable tests
 var ENABLE_BASIC_TEST = false;						// Passing
 var ENABLE_SIMPLE_TEST = false;						// Passing
-var TEST_DRIVER_CONTROLLER = false;
+var TEST_DRIVER_CONTROLLER = false;					// Passing
+
+// Tests the creation of a sub-sub process (for each device being its own process)
 var TEST_SINGLE_DEVICE_CONTROLLER = false;
-var TEST_DEVICE_CONTROLLER = false;
+
+var TEST_DEVICE_CONTROLLER = true;
 var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing
-var TEST_DEVICE_CONTROLLER_LIVE_DEVICE = true;
+var TEST_DEVICE_CONTROLLER_LIVE_DEVICE = false;		// Passing
 
 
 if(ENABLE_BASIC_TEST) {

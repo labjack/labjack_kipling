@@ -16,7 +16,12 @@ function createDeviceManager(io_delegator) {
 	var deviceKeeper = null;
 
 	var listener = function(m) {
-		console.log('in device_manager.js-listener', m);
+		// send responses to messaged
+		if(m.indexOf('testSendMessage') >= 0) {
+			sendMessage('Responding via sendMessage');
+		} else {
+			send('Responding via send');
+		}
 	};
 
 	var ipcMessageReceiver = function(m) {

@@ -40,7 +40,7 @@ function createDeviceController(io_interface) {
 		}, args);
 	};
 	var listener = function(m) {
-		console.log('in driver_controller.js-listener', m);
+		console.log('- driver_controller in listener, message:', m);
 	};
 	var saveLink = function(link) {
 		var defered = q.defer();
@@ -66,12 +66,15 @@ function createDeviceController(io_interface) {
 		return defered.promise;
 	};
 
-	this.createDeviceObject = function(sameProcess, mockDevice) {
-		return callFunc('createDeviceObject', [sameProcess, mockDevice]);
+	this.testSendMessage = function() {
+		console.log('- driver_controller in testSendMessage');
+		return sendMessage('device_controller sending test message via testSendMessage');
 	};
-	this.destroyDeviceObject = function() {
-		return callFunc('destroyDeviceObject');
+	this.testSend = function() {
+		console.log('- driver_controller in testSend');
+		return send('device_controller sending test message via testSend');
 	};
+
 
 	/**
 	 * Return a commonly acquired set of device attributes commonly used to
