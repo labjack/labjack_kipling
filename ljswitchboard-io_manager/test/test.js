@@ -7,12 +7,13 @@ var pResults = utils.pResults;
 var q = require('q');
 
 // enable/disable tests
-var ENABLE_BASIC_TEST = true;
-var ENABLE_SIMPLE_TEST = true;
+var ENABLE_BASIC_TEST = false;						// Passing
+var ENABLE_SIMPLE_TEST = false;						// Passing
 var TEST_DRIVER_CONTROLLER = false;
 var TEST_SINGLE_DEVICE_CONTROLLER = false;
 var TEST_DEVICE_CONTROLLER = false;
-var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = true;
+var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing
+var TEST_DEVICE_CONTROLLER_LIVE_DEVICE = true;
 
 
 if(ENABLE_BASIC_TEST) {
@@ -42,4 +43,9 @@ if(TEST_DEVICE_CONTROLLER_OPEN_CLOSE) {
 	var device_controller_open_close_test = require('./device_controller_open_close_test');
 	exports.device_controller_open_close_test = device_controller_open_close_test.tests;
 }
+if(TEST_DEVICE_CONTROLLER_LIVE_DEVICE) {
+	var device_controller_live_test = require('./device_controller_live_test');
+	exports.device_controller_live_test = device_controller_live_test.tests;
+}
+
 
