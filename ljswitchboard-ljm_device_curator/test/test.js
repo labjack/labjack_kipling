@@ -17,14 +17,14 @@ var digit_basic_test = require('./digit_basic_test');
 
 /********************** Perform tests *****************************************/
 // Perform Generic tests on mock devices
-// exports.mock_device_test = mock_device_test.tests;
+exports.mock_device_test = mock_device_test.tests;
 
 // Perform T7 related tests
 // exports.t7_basic_test = t7_basic_test.tests;
 // exports.t7_upgrade_test = t7_upgrade_test.tests;
 // exports.t7_open_close_test = t7_open_close_test.tests;
-exports.t7_basic_stream_test = t7_basic_stream_test.tests;
-exports.t7_single_channel_speed_test = t7_single_channel_speed_test.tests;
+// exports.t7_basic_stream_test = t7_basic_stream_test.tests;
+// exports.t7_single_channel_speed_test = t7_single_channel_speed_test.tests;
 // exports.t7_single_channel_speed_testA = t7_single_channel_speed_test.tests;
 // exports.t7_single_channel_speed_testB = t7_single_channel_speed_test.tests;
 // exports.t7_single_channel_speed_testC = t7_single_channel_speed_test.tests;

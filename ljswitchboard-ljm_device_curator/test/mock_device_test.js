@@ -71,6 +71,7 @@ exports.tests = {
 
 			// Add expected results
 			dev.pushResult('read', false, 'testData');
+			dev.pushResult('read', false, 0);
 
 			// Setup and call functions
 			var results = [];
@@ -89,6 +90,20 @@ exports.tests = {
 			test.done();
 		}
 	},
+	'performTestAnalogRead': function(test) {
+		var results = [];
+		// Setup and call functions
+		qExec(device, 'read', 'AIN0')(results)
+		.then(qExec(device, 'read', 'AIN0'))
+		.then(function(res) {
+			var expectedResult = [
+				{'functionCall': 'read', 'type': 'range', 'min': -11, 'max': 11},
+				{'functionCall': 'read', 'type': 'range', 'min': -11, 'max': 11}
+			];
+			utils.testResults(test, expectedResult, res);
+			test.done();
+		});
+	},
 	'performTestqRead': function(test) {
 		if(device.isMockDevice) {
 			var dev = device.getDevice();
@@ -99,6 +114,8 @@ exports.tests = {
 			for(i = 0; i < 1; i ++) {
 				dev.pushResult('read', true, 2358);
 			}
+			dev.pushResult('read', false, 0);
+			dev.pushResult('read', false, 0);
 
 			// Setup and call functions
 			var results = [];
@@ -132,6 +149,8 @@ exports.tests = {
 			for(i = 0; i < 1; i ++) {
 				dev.pushResult('read', true, 2358);
 			}
+			dev.pushResult('read', false, 0);
+			dev.pushResult('read', false, 0);
 
 			var results = [];
 			qExec(device, 'readMultiple', ['AIN0','AIN0'])(results)

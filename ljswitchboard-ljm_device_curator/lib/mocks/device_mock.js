@@ -21,7 +21,26 @@ function device() {
 
 	this.responses = {
 		'HARDWARE_INSTALLED': 7,
-		'DEVICE_NAME_DEFAULT': 'TEST_DEVICE'
+		'DEVICE_NAME_DEFAULT': 'TEST_DEVICE',
+		'WIFI_VERSION': 3.12,
+		'BOOTLOADER_VERSION': 0.9400,
+		'FIRMWARE_VERSION': 1.0144
+	};
+
+	/**
+	 * Analog input generation code:
+	**/
+	var randomAnalogReading = function(min, max) {
+		return Math.random() * (max - min) + min;
+	};
+	var analogInputRanges = {};
+	this.getAINReading = function(channelNum) {
+		var resultRange = 10;
+		if(analogInputRanges[channelNum]) {
+			resultRange = analogInputRanges[channelNum];
+		}
+
+		return randomAnalogReading(resultRange, resultRange * -1);
 	};
 
 	this.calledFunctions = [];
@@ -130,6 +149,9 @@ function device() {
 		aData.fill(0);
 		finishCall('readRaw', aData).then(onSucc, onErr);
 	};
+
+	var getChannelNum = new RegExp("[0-9]{1,}");
+	var isAnalogInput = new RegExp("^AIN[0-9]{1,}$");
 	this.getResult = function(address) {
 		var result = 0;
 		if(self.responses[address]) {
@@ -137,6 +159,12 @@ function device() {
 				result = self.responses[address](address);
 			} else {
 				result = self.responses[address];
+			}
+		} else {
+			var channelNum;
+			if(isAnalogInput.test(address)) {
+				channelNum = getChannelNum.exec(address)[0];
+				result = self.getAINReading(channelNum);
 			}
 		}
 		return result;
