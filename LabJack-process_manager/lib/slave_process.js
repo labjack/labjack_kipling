@@ -370,7 +370,7 @@ function createNewMessageManager(listeners) {
 		var defered = q.defer();
 		var data = {
 			'id': PM_EMIT_MESSAGE,
-        	'message': {'type': PM_EMIT_MESSAGE},
+        	'message': {'type': m.eventType},
         	'returnError': false,
         	'successData': m
 		};
@@ -440,7 +440,7 @@ exports.getStats = function() {
 	return {};
 };
 exports.sendMessage = function(data) {
-	if((typeof(type) !== 'undefined') && (typeof(data) !== 'undefined')) {
+	if((typeof(data) !== 'undefined')) {
 		var message = {
 			'eventType': PM_EMIT_MESSAGE,
 			'data': data

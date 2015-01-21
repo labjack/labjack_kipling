@@ -135,7 +135,6 @@ function createNewProcessManager() {
         var defered = q.defer();
         var messageId = getMessageId(bundle);
         if(messageId === PM_EMIT_MESSAGE) {
-            
             var eventType = bundle.message.data.eventType;
             var eventData = bundle.message.data.data;
             var listeners = self.listeners(eventType);
@@ -561,7 +560,7 @@ function createNewMasterProcess() {
 	    print('invalid message received', err);
 	};
 
-	this.init = function() {
+	this.init = function(messageReceiver) {
 		self.masterProcess = undefined;
 		self.masterProcess = new createNewProcessManager();
 
@@ -570,6 +569,11 @@ function createNewMasterProcess() {
 	    self.masterProcess.on(PM_MESSAGE_BUFFER_FULL, messageBufferFullListener);
 	    self.masterProcess.on(PM_RECEIVED_MESSAGE_INVALID, receivedInvalidMessage);
 
+        // If a messageReceiver was given, assign it to listen to the PM_EMIT_MESSAGE event
+        if(messageReceiver) {
+            self.masterProcess.on(PM_EMIT_MESSAGE, messageReceiver);
+        }
+        
         return self.masterProcess;
 	};
 	this.start = function(processName, options, onError, onSuccess) {

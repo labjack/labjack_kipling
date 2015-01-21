@@ -52,7 +52,12 @@ eventListener.on('message', function(data) {
 	if(DEBUG) {
 		console.log('S: basic_test_slave.js eventMessageReceived', data);
 	}
-	slave_process.send('test','Test Data');
+	if(data.dataMessage.indexOf('sendMessage') >= 0) {
+		slave_process.sendMessage('Test Data');
+	} else {
+		slave_process.send('test','Test Data');
+	}
+	
 });
 
 slave_process.finishedInit(slave_process.getSlaveProcessInfo())

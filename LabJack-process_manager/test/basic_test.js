@@ -10,11 +10,13 @@ function createBasicTest(imports) {
 	var utils;
 	var getExecution;
 	var node_binary;
+	var constants;
 
 	process_manager = imports.process_manager;
 	utils = imports.utils;
 	getExecution = utils.getExecution;
 	node_binary = imports.node_binary;
+	constants = process_manager.constants;
 
 	// master_process object
 	var mp;
@@ -43,11 +45,15 @@ function createBasicTest(imports) {
 		return defered.promise;
 	};
 	var receivedTestEvents = [];
+	var basicOneWayReceiver = function(data) {
+		print("Received slave_process \'message\' or constants.emitMessage type (via sendMessage)", data);
+		receivedTestEvents.push(data);
+	};
 	var initializeMasterProcess = function(eventTitle) {
 		var defered = q.defer();
-		mpEventEmitter = mp.init();
+		mpEventEmitter = mp.init(basicOneWayReceiver);
 		mpEventEmitter.on(eventTitle, function(data) {
-			print('Received slave_process \'test\' emit', eventTitle, data);
+			print('Received slave_process \'test\' emit (via send)', eventTitle, data);
 			receivedTestEvents.push(data);
 		});
 		defered.resolve(mpEventEmitter);
@@ -76,8 +82,8 @@ function createBasicTest(imports) {
 			qStartOptions.execPath = execPath;
 		}
 		getExecution(mp, 'qStart', childProcessToFork, qStartOptions)(returnedData)
-		.then(getExecution(mp, 'sendMessage', {'dataMessage': 'aB'}))
-		.then(getExecution(mp, 'send', 'message', {'dataMessage': 'aB'}))
+		.then(getExecution(mp, 'sendMessage', {'dataMessage': 'aB-sendMessage'}))
+		.then(getExecution(mp, 'send', 'message', {'dataMessage': 'aB-send'}))
 		.then(getExecution(mp, 'sendReceive', {'dataMessage': 'aa'}))
 		.then(getExecution(mp, 'sendReceive', {'dataMessage': 'returnUndefined'}))
 		.then(getExecution(mp, 'sendReceive', {'dataMessage': 'returnBuffer'}))
@@ -176,6 +182,7 @@ function createBasicTest(imports) {
 				'criticalError',
 				'messageBufferFull',
 				'ReceivedInvalidMessage',
+				constants.emitMessage,
 				'test'
 			];
 
