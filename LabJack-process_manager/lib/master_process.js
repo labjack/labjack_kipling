@@ -284,6 +284,7 @@ function createNewProcessManager() {
         var isSilent = false;
         
         var deviceManagerSlaveOptions = {};
+        var validExecPath = false;
         if(options) {
             if(options.silent) {
                 deviceManagerSlaveOptions.silent = options.silent;
@@ -293,7 +294,13 @@ function createNewProcessManager() {
                 deviceManagerSlaveOptions.cwd = options.cwd;
             }
             if(options.execPath) {
-                deviceManagerSlaveOptions.execPath = options.execPath;
+                if(options.execPath !== '') {
+                    validExecPath = true;
+                    deviceManagerSlaveOptions.execPath = options.execPath;
+                }
+            }
+            if(options.spawnChildProcess) {
+                deviceManagerSlaveOptions.spawnChildProcess = options.spawnChildProcess;
             }
 	        var envVars = process.env;
 	        envVars.slave_process_env = JSON.stringify(options);
@@ -303,14 +310,7 @@ function createNewProcessManager() {
         // reset the messageCounter back to 0
         initializeMessageManaggement();
 
-        // start the childProcess via forking a new process
-        var validExecPath = false;
-        if(typeof(options.execPath) !== 'undefined') {
-            if(options.execPath !== '') {
-                validExecPath = true;
-            }
-        }
-        if(options.spawnChildProcess && (validExecPath)) {
+        if(deviceManagerSlaveOptions.spawnChildProcess && (validExecPath)) {
             // console.log("calling child_process.spawn");
 
             // Instruct the new node process to execute the defined .js file
@@ -573,7 +573,7 @@ function createNewMasterProcess() {
         if(messageReceiver) {
             self.masterProcess.on(PM_EMIT_MESSAGE, messageReceiver);
         }
-        
+
         return self.masterProcess;
 	};
 	this.start = function(processName, options, onError, onSuccess) {
