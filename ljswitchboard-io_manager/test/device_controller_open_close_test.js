@@ -45,7 +45,7 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'open device (succes)': function(test) {
+	'open mock device': function(test) {
 		var params = {
 			'deviceType': 'LJM_dtT7',
 			'connectionType': 'LJM_ctUSB',
@@ -56,7 +56,19 @@ exports.tests = {
 		device_controller.openDevice(params)
 		.then(function(newDevice) {
 			// console.log('Created New Device Object', newDevice);
-			device_controller.getNumDevices()
+			newDevice.read('AIN0')
+			.then(function(res) {
+				var defered = q.defer();
+				console.log('AIN read result', res);
+				defered.resolve();
+				return defered.promise;
+			}, function(err) {
+				var defered = q.defer();
+				console.log('AIN read error', err);
+				defered.resolve();
+				return defered.promise;
+			})
+			.then(device_controller.getNumDevices)
 			.then(function(res) {
 				test.strictEqual(res, 1, 'wrong number of devices are open');
 				test.done();

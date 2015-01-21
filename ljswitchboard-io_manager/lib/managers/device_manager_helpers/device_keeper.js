@@ -15,7 +15,8 @@ function createDeviceKeeper(io_delegator, link) {
 	var send = link.send;
 	var sendMessage = link.sendMessage;
 
-	this.devices;
+	this.devices = {};
+
 	var currentDeviceKey;
 
 	var getDeviceKey = function() {

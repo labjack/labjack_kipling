@@ -68,6 +68,7 @@ function createIODelegator(slave_process) {
 			defered.resolve(m);
 		} else {
 			print('sendReceive message sent to invalid endpoint', m.endpoint);
+			print('valid endpoints', self.endpoints)
 			defered.reject(m);
 		}
 		return defered.promise;

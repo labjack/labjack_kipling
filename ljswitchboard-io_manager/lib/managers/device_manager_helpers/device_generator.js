@@ -8,20 +8,19 @@ var constants = require('../../common/constants');
 function newDevice(newProcess, mockDevice) {
 	this.curatedDevice = null;
 
-	this.newProcess = newProcess;
-	this.mockDevice = mockDevice;
+	this.isNewProcess = newProcess;
+	this.isMockDevice = mockDevice;
 
 	this.device_comm_key = null;
 
 	this.open = function(deviceType, connectionType, identifier) {
 		var defered = q.defer();
 		
-		if(self.newProcess) {
+		if(self.isNewProcess) {
 			defered.reject('devices in sub-processes are currently not supported');
 		} else {
-			curatedDevice = new device_curator.device(self.mockDevice);
-			// console.log("HERE", Object.keys(curatedDevice));
-			curatedDevice.open(deviceType, connectionType, identifier)
+			self.curatedDevice = new device_curator.device(self.isMockDevice);
+			self.curatedDevice.open(deviceType, connectionType, identifier)
 			.then(function(res) {
 				res.device_comm_key = self.device_comm_key;
 				defered.resolve(res);
@@ -42,7 +41,7 @@ function newDevice(newProcess, mockDevice) {
 		if(self.newProcess) {
 			defered.reject('devices in sub-processes are currently not supported');
 		} else {
-			curatedDevice.close()
+			self.curatedDevice.close()
 			.then(function(res) {
 				this.curatedDevice = null;
 				defered.resolve(res);

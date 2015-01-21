@@ -44,44 +44,55 @@ function createDeviceManager(io_delegator) {
 		// Switch logic to either call a function in the device_keeper object
 		// or if it it needs to be directed at a currently open device.
 		if(isDeviceFunc) {
-			if(route.deviceKey) {
+			if(typeof(route.deviceKey) !== 'undefined') {
 				deviceKey = route.deviceKey;
 				if(deviceKeeper.devices[deviceKey]) {
 					isValidFunc = true;
-					caller = deviceKeeper.devices[deviceKey];
+
+					if((func !== 'open') && (func !== 'close')) {
+						caller = deviceKeeper.devices[deviceKey].curatedDevice;
+					} else {
+						caller = deviceKeeper.devices[deviceKey];
+					}
 				}
 			}
 		} else {
 			caller = deviceKeeper;
 			isValidFunc = true;
 		}
+
 		var numArgs;
 		var args;
-		if ((typeof(caller[func]) === 'function') && isValidFunc) {
-			numArgs = m.args.length;
-			args = m.args;
-			if(numArgs === 0) {
-				caller[func]()
-				.then(success, error);
-			} else if(numArgs === 1) {
-				caller[func](args[0])
-				.then(success, error);
-			} else if(numArgs === 2) {
-				caller[func](args[0], args[1])
-				.then(success, error);
-			} else if(numArgs === 3) {
-				caller[func](args[0], args[1], args[2])
-				.then(success, error);
-			} else if(numArgs === 4) {
-				caller[func](args[0], args[1], args[2], args[3])
-				.then(success, error);
+		if(isValidFunc) {
+			if (typeof(caller[func]) === 'function') {
+				numArgs = m.args.length;
+				args = m.args;
+				if(numArgs === 0) {
+					caller[func]()
+					.then(success, error);
+				} else if(numArgs === 1) {
+					caller[func](args[0])
+					.then(success, error);
+				} else if(numArgs === 2) {
+					caller[func](args[0], args[1])
+					.then(success, error);
+				} else if(numArgs === 3) {
+					caller[func](args[0], args[1], args[2])
+					.then(success, error);
+				} else if(numArgs === 4) {
+					caller[func](args[0], args[1], args[2], args[3])
+					.then(success, error);
+				} else {
+					caller[func](args)
+					.then(success, error);
+				}
 			} else {
-				caller[func](args)
-				.then(success, error);
+				console.error('device_manager.js - function not found...', Object.keys(caller));
+				defered.reject('function not found in device_manager.js');
 			}
 		} else {
-			console.error('device_manager.js - function not found...');
-			defered.reject('function not found in device_manager.js');
+			console.error('device_manager.js - invalid function detected');
+			defered.reject('invalid function detected in device_manager.js');
 		}
 		return defered.promise;
 	};

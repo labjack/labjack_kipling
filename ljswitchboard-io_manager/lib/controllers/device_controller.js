@@ -1,7 +1,18 @@
 
 var constants = require('../common/constants');
 var q = require('q');
+
+var labjack_nodejs = require('labjack-nodejs');
+var driver_constants = labjack_nodejs.driver_const;
+var ljmConstants = labjack_nodejs.modbusMap.getConstants();
+
 var io_endpoint_key = constants.device_endpoint_key;
+
+// device creators:
+var ljm_device_creator = require('./device_helpers/ljm_device');
+var t7_device_creator = require('./device_helpers/t7_device');
+var digit_device_creator = require('./device_helpers/digit_device');
+
 // var ljm_device_controller = require('./device_helpers/ljm_device');
 // var device_keeper = require('./device_helpers/device_keeper');
 
@@ -19,7 +30,8 @@ function createDeviceController(io_interface) {
 			'isDeviceFunc': false
 		}, args);
 	};
-	var callDeviceFunc = function(deviceKey, func, args) {
+	var deviceCallFunc = function(deviceKey, func, args) {
+		var defered = q.defer();
 		return innerCallFunc({
 			'func': func,
 			'isDeviceFunc': true,
@@ -129,6 +141,36 @@ function createDeviceController(io_interface) {
 	};
 
 	/**
+	 * This function creates a new device object (T7/Digit) and adds it to the
+	 * device_controller device management system.
+	**/
+	var createDeviceObject = function(deviceInfo) {
+		var defered = q.defer();
+
+		var newDevice;
+		var deviceCreator;
+
+		// Create device object based on what type of device we just opened
+		if(deviceInfo.deviceType == driver_constants.deviceTypes.t7) {
+			deviceCreator = t7_device_creator;
+		} else if (deviceInfo.deviceType == driver_constants.deviceTypes.digit) {
+			deviceCreator = digit_device_creator;
+		} else {
+			console.warn('Creating a non-standard ljm device object', deviceInfo);
+			deviceCreator = ljm_device_creator;
+		}
+
+		newDevice = new deviceCreator.createDevice(
+			deviceInfo,
+			deviceCallFunc
+		);
+		console.log("New Device", Object.keys(newDevice));
+		// console.log("New Device", newDevice);
+
+		defered.resolve(newDevice);
+		return defered.promise;
+	};
+	/**
 	 * Open a connection to a device, pass an options object containing:
 	 * @options {object} 
 	 *          'deviceType': 'LJM_dtANY', 
@@ -137,7 +179,15 @@ function createDeviceController(io_interface) {
 	 */
 	this.openDevice = function(options) {
 		var defered = q.defer();
+
+		var handleError = function(err) {
+			var innerDefered = q.defer();
+			innerDefered.reject(err);
+			return innerDefered.promise;
+		};
+
 		callFunc('openDevice', [options])
+		.then(createDeviceObject, handleError)
 		// .then(createDeviceObject, defered.reject)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
