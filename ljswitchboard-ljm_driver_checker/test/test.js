@@ -43,7 +43,21 @@ exports.ljm_installation = {
 				} else {
 					test.ok(false, msg + ', missing key: ' + key);
 				}
+
+				// As an extra sanity check, the following tests should pass on
+				// machines if LJM is installed properly and the ljm_driver_checker
+				// is working properly.  The only key that should be excluded is the
+				// test for the ljm_startup_configs.json which isn't a valid .json file.
+				if(key !== 'LJM startup configs file') {
+					if(res[key].exists) {
+						test.ok(res[key].exists, 'ljm is likely not installed properly or test is broken');
+					}
+					if(res[key].isValid) {
+						test.ok(res[key].isValid, 'ljm is likely not installed properly or test is broken');
+					}
+				}
 			});
+
 			test.ok(res.overallResult, 'ljm not installed properly');
 			test.done();
 		}, function(err) {

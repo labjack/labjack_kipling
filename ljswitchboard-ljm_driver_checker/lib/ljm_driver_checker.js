@@ -229,18 +229,18 @@ var optionalRequirements = {
         },
         'linux': {
             'ia32': [
-                '/usr/local/share/LabJack/LJM/ljm_startup_configs'
+                '/usr/local/share/LabJack/LJM/ljm_startup_configs.json'
             ],
             'x64': [
-                '/usr/local/share/LabJack/LJM/ljm_startup_configs'
+                '/usr/local/share/LabJack/LJM/ljm_startup_configs.json'
             ]
         },
         'darwin': {
             'ia32': [
-                '/usr/local/share/LabJack/LJM/ljm_startup_configs'
+                '/usr/local/share/LabJack/LJM/ljm_startup_configs.json'
             ],
             'x64': [
-                '/usr/local/share/LabJack/LJM/ljm_startup_configs'
+                '/usr/local/share/LabJack/LJM/ljm_startup_configs.json'
             ]
         }
     },
