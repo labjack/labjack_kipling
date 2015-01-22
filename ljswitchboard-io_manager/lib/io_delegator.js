@@ -9,11 +9,20 @@ var process_manager = require('process_manager');
 var slave_process = process_manager.slave_process();
 
 // Include the io_managers
-var driver_manager = require('./managers/driver_manager');
-var device_manager = require('./managers/device_manager');
-var logger_manager = require('./managers/logger_manager');
-var file_io_manager = require('./managers/file_io_manager');
-
+var driver_manager;
+var device_manager;
+var logger_manager;
+var file_io_manager;
+try {
+	driver_manager = require('./managers/driver_manager');
+	device_manager = require('./managers/device_manager');
+	logger_manager = require('./managers/logger_manager');
+	file_io_manager = require('./managers/file_io_manager');
+} catch(err) {
+	// console.log('Error Requiring Library:');
+	console.log(err);
+	process.exit(8);
+}
 
 var DEBUG = true;
 var startupInfo = slave_process.getSlaveProcessInfo();
@@ -38,6 +47,8 @@ var receivers = [
 	'logger_manager',
 	'file_io_manager'
 ];
+
+console.log('* io_delegator arch:', process.arch);
 
 function createIODelegator(slave_process) {
 	this.sp = slave_process;

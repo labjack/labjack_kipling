@@ -5,6 +5,8 @@
 
 var process_manager = require('process_manager');
 var q = require('q');
+var fs = require('fs');
+var path = require('path');
 
 // Include the io controllers
 var driver_controller = require('./controllers/driver_controller');
@@ -129,9 +131,62 @@ function createIOInterface() {
 	 * child process.  Once this is done it will create and initialize the
 	 * various manager processes that make up the io_interface.
 	**/
-	this.initialize = function() {
-
+	var innerGetNodePath = function() {
 		var defered = q.defer();
+		// Collect information about the process
+		var isValidInstance = true;
+		var platform = process.platform;
+		var exeName = {
+			'win32': 'node.exe',
+			'darwin': 'node'
+		}[platform];
+		if(typeof(exeName) === 'undefined') {
+			isValidInstance = false;
+		}
+		
+		var arch = process.arch;
+		// arch = 'x64';
+		var rootDir = process.cwd();
+		var version = '0_10_33';
+		var binariesDir = 'node_binaries';
+
+		var callerPath = process.execPath;
+		var callerName = path.basename(callerPath);
+
+		var nodeBinaryPath = path.join(
+			rootDir,
+			binariesDir,
+			platform,
+			arch,
+			version,
+			exeName
+		);
+
+		var retData = {
+			'path': nodeBinaryPath,
+			'cwd': rootDir,
+			// 'callerPath': callerPath,
+			'callerName': callerName
+		};
+
+		fs.exists(nodeBinaryPath, function(exists) {
+			retData.exists = exists;
+			if(exists) {
+				defered.resolve(retData);
+			} else {
+				defered.reject(retData);
+			}
+			
+		});
+		return defered.promise;
+	};
+	var innerInitialize = function(info) {
+		var defered = q.defer();
+		console.log('  - Initialize Data:');
+		var infoKeys = Object.keys(info);
+		infoKeys.forEach(function(key) {
+			console.log('    - ' + key + ': ' + JSON.stringify(info[key]));
+		});
 
 		self.mp = null;
 		self.mp_event_emitter = null;
@@ -143,6 +198,22 @@ function createIOInterface() {
 
 		self.mp = new process_manager.master_process();
 		self.mp_event_emitter = self.mp.init(oneWayMessageListener);
+
+		// Attach a variety of event listeners to verify that the sub-process
+		// starts properly.
+		self.mp_event_emitter.on('error', function(data) {
+			console.log('Error Received', data);
+		});
+		self.mp_event_emitter.on('exit', function(data) {
+			console.log('exit Received', data);
+		});
+		self.mp_event_emitter.on('close', function(data) {
+			console.log('close Received', data);
+		});
+		self.mp_event_emitter.on('disconnect', function(data) {
+			console.log('disconnect Received', data);
+		});
+
 		self.oneWayMessageListeners = {};
 		// Create Controllers
 		createDriverController();
@@ -150,7 +221,14 @@ function createIOInterface() {
 		// createLoggerController();
 		// createFileIOController();
 
-		self.mp.qStart(ioDelegatorPath)
+		var options = {
+			'execPath': info.path,
+			'cwd': info.cwd,
+			'spawnChildProcess': false,
+			'debug_mode': false,
+		};
+			
+		self.mp.qStart(ioDelegatorPath, options)
 		.then(initInternalMessenger)
 		.then(getDriverConstants)
 		.then(function(res) {
@@ -169,6 +247,16 @@ function createIOInterface() {
 			console.log("BIG ERROR!", err);
 			defered.reject();
 		});
+
+		return defered.promise;
+	};
+	this.initialize = function() {
+		var defered = q.defer();
+		console.log("Initializing the io_interface");
+
+		innerGetNodePath()
+		.then(innerInitialize, defered.reject)
+		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
 
