@@ -4,8 +4,7 @@
   "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
   "main": "./lib/device_curator.js",
   "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
-    "package": "echo \"Error: no package command specified\" && exit 1"
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "packagesDirectory": "/packages",
   "repository": {
@@ -38,5 +37,8 @@
   },
   "devDependencies": {
     "nodeunit": "0.9.x"
+  },
+  "directories": {
+    "lib": "./lib"
   }
 }
