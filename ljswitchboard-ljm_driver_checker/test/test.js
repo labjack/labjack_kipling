@@ -57,10 +57,11 @@ exports.ljm_installation = {
 					}
 				}
 			});
-
 			test.ok(res.overallResult, 'ljm not installed properly');
 			test.done();
 		}, function(err) {
+			console.log('HERE!!!');
+			test.ok(false, 'LJM not installed properly');
 			test.done();
 		});
 	}

@@ -293,18 +293,22 @@ var validDirectory = function(directories) {
                 callback();
             });
         }, function(err) {
+            
             if(err) {
                 defered.reject(err);
             } else {
-                var retData = {
-                    'exists': directoryExists,
-                    'path': validDirectory
-                };
+                var retData = {};
+                retData.exists = directoryExists;
+                retData.path = validDirectory;
+                if(!directoryExists) {
+                    retData.testedPaths = directories;
+                }
                 defered.resolve(retData);
             }
         });
     return defered.promise;
 };
+
 var findVersionString = new RegExp("(?:(\\#define\\sLJM_VERSION\\s))[0-9]\\.[0-9]{1,}");
 var findVersionNum = new RegExp("[0-9]\\.[0-9]{1,}");
 var checkHeaderFile = function(directoryInfo) {
@@ -443,15 +447,25 @@ exports.verifyLJMInstallation = function() {
     var defered = q.defer();
 
     var results = {'overallResult': true,'ljmVersion': ''};
-    return ops.reduce(function(current, next) {
-        if(next) {
-            return current.then(next, next);
+
+    // Execute functions in parallel
+    var promises = [];
+    ops.forEach(function(op) {
+        promises.push(op(results));
+    });
+
+    // Wait for all of the operations to complete
+    q.allSettled(promises)
+    .then(function(res) {
+        // console.log('Finished Test Res', results.overallResult);
+        if(results.overallResult) {
+            defered.resolve(results);
         } else {
-            return current.then(function(res) {
-                defered.resolve(res);
-            }, function(err) {
-                defered.reject(err);
-            });
+            defered.reject(results);
         }
-    }, q(results));
+    }, function(err) {
+        // console.log('Finished Test Err', err);
+        defered.reject(results);
+    });
+    return defered.promise;
 };
