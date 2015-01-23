@@ -243,6 +243,18 @@ function createNewProcessManager() {
     };
     var closeListener = function(data) {
         print('closeListener', data);
+
+        // If this event was thrown while the process hasn't been confirmed as
+        // started then return an error.
+        if(messageBuffer.has(PM_CHILD_PROCESS_STARTED)) {
+            var startMessage = messageBuffer.get(PM_CHILD_PROCESS_STARTED);
+            var info = {
+                'message': 'Child process failed to start',
+                'error': data
+            };
+            startMessage.reject(info);
+        }
+
         self.emit('close', data);
     };
     var disconnectListener = function(data) {
