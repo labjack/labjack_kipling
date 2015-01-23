@@ -47,15 +47,13 @@ var requirements = {
     'Driver': {
         'win32': {
             'ia32': [
-                'C:\\Windows\\SysWOW64\\LabJackM.dll',
                 'C:\\Windows\\System32\\LabJackM.dll',
-                SystemRoot + '\\SysWOW64\\LabJackM.dll',
                 SystemRoot + '\\System32\\LabJackM.dll',
             ],
             'x64': [
-                'C:\\Windows\\SysWOW64\\LabJackM.dll',
+                // 'C:\\Windows\\SysWOW64\\LabJackM.dll',
                 'C:\\Windows\\System32\\LabJackM.dll',
-                SystemRoot + '\\SysWOW64\\LabJackM.dll',
+                // SystemRoot + '\\SysWOW64\\LabJackM.dll',
                 SystemRoot + '\\System32\\LabJackM.dll',
             ]
         },
