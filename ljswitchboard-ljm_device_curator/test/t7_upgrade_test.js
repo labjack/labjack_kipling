@@ -3,6 +3,7 @@ var q = require('q');
 var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');
 var qExec = utils.qExec;
+var ljm = require('labjack-nodejs').driver();
 
 
 var device;
@@ -49,8 +50,8 @@ var device_tests = {
 			'ct': 'LJM_ctANY',
 			'id': 'LJM_idANY'
 		};
-		td.ct = 'LJM_ctWIFI';
-		td.id = 470010548;
+		// td.ct = 'LJM_ctWIFI';
+		// td.id = 470010548;
 
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
@@ -63,6 +64,7 @@ var device_tests = {
 			deviceFound = true;
 			test.done();
 		}, function(err) {
+			console.log("  - Failed to open device", ljm.errToStrSync(err));
 			performTests = false;
 			test.done();
 		});
