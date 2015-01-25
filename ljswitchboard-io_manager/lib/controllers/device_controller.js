@@ -39,8 +39,22 @@ function createDeviceController(io_interface) {
 			'deviceKey': deviceKey
 		}, args);
 	};
+	var deviceSendFunc = function(deviceKey, message) {
+		send({
+			'deviceKey': deviceKey,
+			'message': message
+		});
+	};
 	var listener = function(m) {
-		console.log('- driver_controller in listener, message:', m);
+		
+
+		if(typeof(m.deviceKey) !== 'undefined'){
+			if(self.devices[m.deviceKey]) {
+				self.devices[m.deviceKey].oneWayListener(m.message);
+			}
+		} else {
+			console.log('- device_controller in listener, message:', m);
+		}
 	};
 	var saveLink = function(link) {
 		var defered = q.defer();
@@ -67,11 +81,11 @@ function createDeviceController(io_interface) {
 	};
 
 	this.testSendMessage = function() {
-		console.log('- driver_controller in testSendMessage');
+		console.log('- device_controller in testSendMessage');
 		return sendMessage('device_controller sending test message via testSendMessage');
 	};
 	this.testSend = function() {
-		console.log('- driver_controller in testSend');
+		console.log('- device_controller in testSend');
 		return send('device_controller sending test message via testSend');
 	};
 
@@ -170,6 +184,7 @@ function createDeviceController(io_interface) {
 		newDevice = new deviceCreator.createDevice(
 			deviceInfo,
 			deviceCallFunc,
+			deviceSendFunc,
 			self.closeDevice
 		);
 

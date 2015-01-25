@@ -3,11 +3,12 @@
 var util = require('util');
 var ljm_device = require('./ljm_device');
 
-function createDevice(savedAttributes, deviceCallFunc, closeDeviceFunc) {
+function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDeviceFunc) {
 
 	var ljmDevice = new ljm_device.createDevice(
 		savedAttributes, 
 		deviceCallFunc,
+		deviceSendFunc,
 		closeDeviceFunc
 	);
 	var ljmDeviceKeys = Object.keys(ljmDevice);

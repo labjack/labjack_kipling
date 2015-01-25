@@ -14,9 +14,11 @@ var TEST_DRIVER_CONTROLLER = false;					// Passing
 // Tests the creation of a sub-sub process (for each device being its own process)
 var TEST_SINGLE_DEVICE_CONTROLLER = false;
 
-var TEST_DEVICE_CONTROLLER = true;
+var TEST_DEVICE_CONTROLLER = false;					// incomplete
 var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing
 var TEST_DEVICE_CONTROLLER_LIVE_DEVICE = false;		// Passing
+var TEST_UPDATE_MOCK_DEVICE = false;				// Passing
+var TEST_UPDATE_USB_DEVICE = true;
 
 
 if(ENABLE_BASIC_TEST) {
@@ -51,4 +53,13 @@ if(TEST_DEVICE_CONTROLLER_LIVE_DEVICE) {
 	exports.device_controller_live_test = device_controller_live_test.tests;
 }
 
+if(TEST_UPDATE_MOCK_DEVICE) {
+	var update_mock_device_test = require('./update_mock_device_test');
+	exports.update_mock_device_test = update_mock_device_test.tests;
+}
+
+if(TEST_UPDATE_USB_DEVICE) {
+	var update_usb_device_test = require('./update_usb_device_test');
+	exports.update_usb_device_test = update_usb_device_test.tests;
+}
 

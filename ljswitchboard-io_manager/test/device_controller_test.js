@@ -75,6 +75,15 @@ exports.tests = {
 		.then(qExec(device_controller, 'testSendMessage'))
 		.then(qExec(device_controller, 'testSend'))
 		.then(function(results) {
+			// console.log('Results', results);
+
+			// Verify the getRegisteredEndpoints results:
+			var expectedEndpointsResults = {
+				'functionCall': 'getRegisteredEndpoints',
+				'retData': ['io_manager', 'driver_manager', 'device_manager']
+			};
+			var endpointsMsg = 'The resulting endpoints were not expected';
+			test.deepEqual(results[0], expectedEndpointsResults, endpointsMsg);
 			setTimeout(function() {
 				test.done();
 			}, 1000);

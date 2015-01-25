@@ -15,6 +15,13 @@ function createDeviceKeeper(io_delegator, link) {
 	var send = link.send;
 	var sendMessage = link.sendMessage;
 
+	var deviceSendMessage = function(deviceKey, message) {
+		send({
+			'deviceKey': deviceKey,
+			'message': message
+		});
+	};
+	
 	this.devices = {};
 
 	var currentDeviceKey;
@@ -107,7 +114,8 @@ function createDeviceKeeper(io_delegator, link) {
 		try {
 			newDevice = new device_generator.newDevice(
 				spinupProcess, 
-				mockDevice
+				mockDevice,
+				deviceSendMessage
 			);
 		} catch (err) {
 			defered.reject({

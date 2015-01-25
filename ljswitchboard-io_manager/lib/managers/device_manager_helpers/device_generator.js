@@ -5,13 +5,21 @@ var device_interface = require('../../single_device_interface');
 var device_delegator_path = './lib/delegators/single_device_delegator.js';
 var constants = require('../../common/constants');
 
-function newDevice(newProcess, mockDevice) {
+function newDevice(newProcess, mockDevice, sendFunc) {
 	this.device = null;
 
 	this.isNewProcess = newProcess;
 	this.isMockDevice = mockDevice;
+	
+	var send = function(message) {
+		return sendFunc(self.device_comm_key, message);
+	};
 
 	this.device_comm_key = null;
+
+	this.oneWayListener = function(m) {
+		console.log('device_generator oneWayListener', self.device_comm_key, m);
+	};
 
 	this.open = function(deviceType, connectionType, identifier) {
 		var defered = q.defer();
@@ -32,6 +40,51 @@ function newDevice(newProcess, mockDevice) {
 				defered.reject(intErr);
 			});
 		}
+		return defered.promise;
+	};
+
+	this.updateFirmware = function(firmwareFileLocation) {
+
+		var percentListener = function(percent) {
+			var percentDefered = q.defer();
+			send({
+				'func': 'updateFirmware',
+				'data': {
+					'type': 'percent',
+					'data': percent
+				}
+			});
+			percentDefered.resolve();
+			return percentDefered.promise;
+		};
+		var stepListener = function(step) {
+			var stepDefered = q.defer();
+			send({
+				'func': 'updateFirmware',
+				'data': {
+					'type': 'step',
+					'data': step
+				}
+			});
+			stepDefered.resolve();
+			return stepDefered.promise;
+		};
+		var defered = q.defer();
+
+		if(self.isMockDevice) {
+			percentListener(100);
+			stepListener('finished');
+			setTimeout(function() {
+				defered.resolve('Yay');
+			}, 1000);
+		} else {
+			self.device.updateFirmware(
+				firmwareFileLocation,
+				percentListener,
+				stepListener
+			).then(defered.resolve, defered.reject);
+		}
+		
 		return defered.promise;
 	};
 

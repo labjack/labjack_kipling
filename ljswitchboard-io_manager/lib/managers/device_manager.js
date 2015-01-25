@@ -15,6 +15,7 @@ function createDeviceManager(io_delegator) {
 
 	var deviceKeeper = null;
 
+	
 	var listener = function(m) {
 		// send responses to messaged
 		if(m.indexOf('testSendMessage') >= 0) {
@@ -59,6 +60,8 @@ function createDeviceManager(io_delegator) {
 					if(func === 'close') {
 						caller = deviceKeeper;
 						m.args.push(deviceKey);
+					} else if (func === 'updateFirmware') {
+						caller = deviceKeeper.devices[deviceKey];
 					} else {
 						caller = deviceKeeper.devices[deviceKey].device;
 					}

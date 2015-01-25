@@ -1,12 +1,32 @@
 
 var q = require('q');
 
-function createDevice(savedAttributes, deviceCallFunc, closeDeviceFunc) {
+function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDeviceFunc) {
 	this.savedAttributes = savedAttributes;
 	this.device_comm_key = savedAttributes.device_comm_key;
 	this.deviceCallFunc = deviceCallFunc;
+	this.deviceSendFunc = deviceSendFunc;
 	this.closeDeviceFunc = closeDeviceFunc;
 
+	this.internalListeners = {};
+
+	this.addInternalListener = function(funcName, func) {
+		self.internalListeners[funcName] = func;
+	};
+	this.removeInternalListener = function(funcName) {
+		if(self.internalListeners[funcName]) {
+			self.internalListeners[funcName] = null;
+			self.internalListeners[funcName] = undefined;
+			delete self.internalListeners[funcName];
+		}
+	};
+	this.oneWayListener = function(m) {
+		if(self.internalListeners[m.func]) {
+			self.internalListeners[m.func](m.data);
+		} else {
+			console.log('In Device oneWayListener', self.device_comm_key, m);
+		}
+	};
 	this.callFunc = function(func, args) {
 		return self.deviceCallFunc(self.device_comm_key, func, args);
 	};
@@ -70,7 +90,25 @@ function createDevice(savedAttributes, deviceCallFunc, closeDeviceFunc) {
 	 * Upgrade Function
 	 */
 	this.updateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
+		var defered = q.defer();
 
+		self.addInternalListener('updateFirmware', function(m) {
+			if(m.type === 'percent') {
+				percentListener(m.data);
+			} else {
+				stepListener(m.data);
+			}
+		});
+		self.callFunc('updateFirmware', [firmwareFileLocation])
+		.then(function(res) {
+			self.removeInternalListener('updateFirmware');
+			defered.resolve(res);
+		}, function(err) {
+			self.removeInternalListener('updateFirmware');
+			defered.reject(err);
+		});
+
+		return defered.promise;
 	};
 	
 
