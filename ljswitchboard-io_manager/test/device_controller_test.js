@@ -23,6 +23,7 @@ exports.tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
 			process.exit(1);
+			callback();
 		} else {
 			callback();
 		}
@@ -48,10 +49,22 @@ exports.tests = {
 		test.done();
 	},
 	'initialize io_interface': function(test) {
-		qRunner(test, io_interface.initialize)
+		// io_interface.initialize('testCWD')
+		io_interface.initialize(process.cwd())
 		.then(function(res) {
 			test.ok(true, res);
 			test.done();
+		}, function(err) {
+			console.log('******');
+			console.log('io_interface failed to initialize:');
+			console.log(err);
+			console.log('******');
+			// console.log('** io_interface failed to initialize:');
+			// var infoKeys = Object.keys(err);
+			// infoKeys.forEach(function(key) {
+			// 	console.log('    - ' + key + ': ' + JSON.stringify(err[key]));
+			// });
+			stopTest(test, 'io_interface failed to initialize');
 		});	
 	},
 	'check device_controller': function(test) {

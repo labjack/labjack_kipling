@@ -4,7 +4,7 @@ var dict = require('dict');
 var q = require('q');
 var constants = require('./common/constants');
 var io_endpoint_key = constants.io_manager_endpoint_key;
-
+var io_error_constants = require('./io_error_constants').errors;
 var process_manager = require('process_manager');
 var slave_process = process_manager.slave_process();
 
@@ -20,8 +20,8 @@ try {
 	file_io_manager = require('./managers/file_io_manager');
 } catch(err) {
 	// console.log('Error Requiring Library:');
-	console.log(err);
-	process.exit(8);
+	// console.log(err);
+	process.exit(io_error_constants.REQUIRE_REF_OR_FFI_ERROR.code);
 }
 
 var DEBUG = true;
@@ -47,8 +47,6 @@ var receivers = [
 	'logger_manager',
 	'file_io_manager'
 ];
-
-console.log('* io_delegator arch:', process.arch);
 
 function createIODelegator(slave_process) {
 	this.sp = slave_process;

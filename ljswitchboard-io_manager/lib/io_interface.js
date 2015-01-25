@@ -7,12 +7,19 @@ var process_manager = require('process_manager');
 var q = require('q');
 var fs = require('fs');
 var path = require('path');
+var io_error_constants = require('./io_error_constants');
 
 // Include the io controllers
 var driver_controller = require('./controllers/driver_controller');
 var device_controller = require('./controllers/device_controller');
 var logger_controller = require('./controllers/logger_controller');
 var file_io_controller = require('./controllers/file_io_controller');
+
+// Include the LJM installation verification function
+var ljmCheck = require('ljswitchboard-ljm_driver_checker');
+
+// Include the checkRequirements function
+var npm_build_check = require('./common/npm_build_check');
 
 var ioDelegatorPath = './lib/io_delegator.js';
 
@@ -125,29 +132,192 @@ function createIOInterface() {
 		send("poke io_delegator");
 		return callFunc('getRegisteredEndpoints');
 	};
+
+	/**
+	 * qExec is a function that aids in initializing the io_interface.  It saves
+	 * the results from each function call and allows each function call to be
+	 * passed data from a previously called function.  This allows for a final
+	 * 'defered' function call to return a plethora of error/debugging 
+	 * information.
+	 */
+	var qExec = function(func, name, passResults) {
+		var execFunc = function(results) {
+			var defered = q.defer();
+			var keys = Object.keys(results);
+			
+			// Get previous function call's results & pass them along if 
+			// necessary
+			var inputData;
+			if(passResults) {
+				if(passResults !== '') {
+					if(keys.indexOf(passResults) >= 0) {
+						inputData = results[passResults].result;
+					}
+				}
+			}
+
+			// Execute the function
+			func(inputData, results)
+			.then(function(res) {
+				var result = {
+					'name': name,
+					'isError': false,
+					'result': res
+				};
+				results[name] = result;
+				defered.resolve(results);
+			}, function(err) {
+				var result = {
+					'name': name,
+					'isError': true,
+					'result': err
+				};
+				results[name] = result;
+				results.failedStep = name;
+				results.faildStepData = result.result;
+				defered.reject(results);
+			});
+			return defered.promise;
+		};
+		return execFunc;
+	};
+
+	/**
+	 * The checkLabJackM function verifies that the LabJack LJM driver is 
+	 * properly installed on a users machine.  If the driver isn't installed
+	 * properly the initialization routine for the io_interface will fail.
+	 */
+	var checkLabJackM = function() {
+		var defered = q.defer();
+		ljmCheck.verifyLJMInstallation()
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+
+	/**
+	 * The checkRequirements function verifies that the labjack-nodejs library
+	 * has been properly included by npm and has been built for the proper os.  
+	 * It also verifies that the proper node_binary is going to be executed.  
+	 * If anything isn't configured/installed properly the initialization 
+	 * routine for the io_interface will fail.
+	 */
+	var checkRequirements = function(passedRequirement, passedRequirements) {
+		var defered = q.defer();
+		npm_build_check.checkRequirements(passedRequirement, passedRequirements)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+
 	/**
 	 * Initializing the io_interface will initialize a new master_process
 	 * instance (as mp), save it as well as its event_emitter and start a new
 	 * child process.  Once this is done it will create and initialize the
 	 * various manager processes that make up the io_interface.
 	**/
-	var innerGetNodePath = function() {
+	var innerGetNodePath = function(passedResult, passedResults) {
 		var defered = q.defer();
+
 		// Collect information about the process
+		var isOkToRun = true;
 		var isValidInstance = true;
 		var platform = process.platform;
+		var errors = [];
+
+		var os = {
+		    'win32': 'win32',
+		    'darwin': 'darwin',
+		    'linux': 'linux',
+		    'freebsd': 'linux',
+		    'sunos': 'linux'
+		}[platform];
+
 		var exeName = {
 			'win32': 'node.exe',
 			'darwin': 'node'
-		}[platform];
+		}[os];
+		// If a defined exeName has not been found, prevent the subprocess from
+		// starting.
 		if(typeof(exeName) === 'undefined') {
 			isValidInstance = false;
+			isOkToRun = false;
+			errors.push('No suitable executable name found');
 		}
 		
+		// If the os that the labjack-nodejs library was built for isn't
+		// the current platform, prevent the subprocess from starting.
+		if(os != passedResult.os) {
+			isOkToRun = false;
+			errors.push('Wrong OS detected');
+			console.log(os, passedResult);
+		}
+
+		// If the detected architecture is ia32 and the sub-process is x64 then
+		// prevent the subprocess from starting as there will likely be issues.
 		var arch = process.arch;
 		// arch = 'x64';
-		var rootDir = process.cwd();
+		if(arch === 'ia32') {
+			if(passedResult.arch === 'x64') {
+				// If the labjack-nodejs library is built for x64 and we are a
+				// x64 machine, AND we started as a 32bit instance of node, then
+				// over-write the arch to be x64.  Otherwise there is nothing we
+				// can do but force an error. (Fix only for win32 OS, not sure 
+				// how to detect this on mac/linux).
+				if(os === 'win32') {
+					if(process.env['PROGRAMFILES(x86)']) {
+						arch = 'x64';
+						console.error(
+							'**** forcing sub-process to run in 64bit mode ****'
+						);
+					} else {
+						isOkToRun = false;
+						errors.push(
+							'Wrong architecture detected, current arch is: ' +
+							arch +
+							', lj-nodejs is built for: ' +
+							passedResult.arch
+						);
+					}
+				} else {
+					isOkToRun = false;
+					errors.push(
+						'Wrong architecture detected, current arch is: ' +
+						arch +
+						', lj-nodejs is built for: ' +
+						passedResult.arch
+					);
+				}
+				
+			}
+		}
+
+		// Save the root directory of the io_manager library
+		var rootDir;
+		if(passedResults.cwdOverride) {
+			rootDir = passedResults.cwdOverride;
+		} else {
+			rootDir = process.cwd();
+		}
+
+		// Define the version of the node binary to look for
 		var version = '0_10_33';
+		// Force execution of node 0_10_35
+		// version = '0_10_35';
+
+		// If the labjack-nodejs lib`rary isn't built for the version defined
+		// then prevent the subprocess from starting.
+		if(version != passedResult.node_version) {
+			console.warn(
+				'**** The node version being started does not match the ' +
+				'one that the labjack-nodejs library was built for. ****'
+			);
+			console.warn('**** Executed version', version, '****');
+			console.warn('**** Built for version', passedResult.node_version, '****');
+			// Disable for now, Chris: 01/23/2015
+			// isOkToRun = false;
+			// errors.push('Wrong node_version detected');
+		}
+
+		// Define the base directory to look for the node binaries in
 		var binariesDir = 'node_binaries';
 
 		var callerPath = process.execPath;
@@ -165,28 +335,42 @@ function createIOInterface() {
 		var retData = {
 			'path': nodeBinaryPath,
 			'cwd': rootDir,
-			// 'callerPath': callerPath,
 			'callerName': callerName
 		};
 
 		fs.exists(nodeBinaryPath, function(exists) {
 			retData.exists = exists;
 			if(exists) {
-				defered.resolve(retData);
+				if(isOkToRun) {
+					defered.resolve(retData);
+				} else {
+					retData.errors = errors;
+					defered.reject(retData);
+				}
 			} else {
+				errors.push('Node binary does not exist');
+				retData.errors = errors;
 				defered.reject(retData);
 			}
-			
 		});
 		return defered.promise;
 	};
+
+	/**
+	 * the innerInitialize function only gets executed when all 
+	 * checks/verifications have passed.  It starts the sub-process and reports
+	 * an error code with a result message if the the sub-process fails to start
+	 * properly.  It is still possible for this function to fail, this will 
+	 * happen in there is a syntax error/require error somewhere in the 
+	 * io_delegator.js file/its requirements.
+	 */
 	var innerInitialize = function(info) {
 		var defered = q.defer();
-		console.log('  - Initialize Data:');
-		var infoKeys = Object.keys(info);
-		infoKeys.forEach(function(key) {
-			console.log('    - ' + key + ': ' + JSON.stringify(info[key]));
-		});
+		// console.log('  - Initialize Data:');
+		// var infoKeys = Object.keys(info);
+		// infoKeys.forEach(function(key) {
+		// 	console.log('    - ' + key + ': ' + JSON.stringify(info[key]));
+		// });
 
 		self.mp = null;
 		self.mp_event_emitter = null;
@@ -202,16 +386,16 @@ function createIOInterface() {
 		// Attach a variety of event listeners to verify that the sub-process
 		// starts properly.
 		self.mp_event_emitter.on('error', function(data) {
-			console.log('Error Received', data);
+			// console.log('Error Received', data);
 		});
 		self.mp_event_emitter.on('exit', function(data) {
-			console.log('exit Received', data);
+			// console.log('exit Received', data);
 		});
 		self.mp_event_emitter.on('close', function(data) {
-			console.log('close Received', data);
+			// console.log('close Received', data);
 		});
 		self.mp_event_emitter.on('disconnect', function(data) {
-			console.log('disconnect Received', data);
+			// console.log('disconnect Received', data);
 		});
 
 		self.oneWayMessageListeners = {};
@@ -229,7 +413,12 @@ function createIOInterface() {
 		};
 			
 		self.mp.qStart(ioDelegatorPath, options)
-		.then(initInternalMessenger)
+		.then(initInternalMessenger, function(err) {
+			var code = err.error;
+			var msg = io_error_constants.parseError(code);
+			err.errorMessage = msg;
+			defered.reject(err);
+		})
 		.then(getDriverConstants)
 		.then(function(res) {
 			// Initialize Controllers
@@ -250,13 +439,36 @@ function createIOInterface() {
 
 		return defered.promise;
 	};
-	this.initialize = function() {
+	this.initialize = function(cwdOverride) {
 		var defered = q.defer();
-		console.log("Initializing the io_interface");
 
-		innerGetNodePath()
-		.then(innerInitialize, defered.reject)
-		.then(defered.resolve, defered.reject);
+		var results = {};
+
+		// Check to see if the cwd is being over-ridden.  If so, save it into
+		// the results object for the initialization functions to use.
+		if(cwdOverride) {
+			results.cwdOverride = cwdOverride;
+		}
+
+		var errFunc = function(err) {
+			// console.log('io_interface error', err);
+			defered.reject(err);
+		};
+
+		// Check to make sure labjackm is properly installed
+		qExec(checkLabJackM,'checkLabJackM')(results)
+
+		// Check to make sure that the io_manager has been built for this os/node arch. etc.
+		.then(qExec(checkRequirements,'checkRequirements', 'cwdOverride'), errFunc)
+
+		// Get various parameters required to start the subprocess
+		.then(qExec(innerGetNodePath,'innerGetNodePath', 'checkRequirements'), errFunc)
+
+		// Initialize the subprocess
+		.then(qExec(innerInitialize,'innerInitialize', 'innerGetNodePath'), errFunc)
+
+		// Resolve the initialize function
+		.then(defered.resolve, errFunc);
 		return defered.promise;
 	};
 
