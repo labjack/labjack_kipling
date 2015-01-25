@@ -1364,6 +1364,13 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
             return innerDeferred.promise;
         };
     };
+    var finishedUpgrade = function(res) {
+        var finishedDefered = q.defer();
+        setImmediate(function() {
+            finishedDefered.resolve(res);
+        });
+        return finishedDefered.promise;
+    }
 
     globalProgressListener = progressListener;
 
@@ -1399,7 +1406,8 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     .then(exports.checkNewFirmware, reportError('waitForEnumeration'))
     .then(toggleWiFi('enable'), reportError('checkNewFirmware'))
     .then(updateProgress(CHECKPOINT_FIVE_PERCENT), reportError('enablingWiFi'))
-    .then(deferred.resolve, reportError('finishingUpdate'));
+    .then(finishedUpgrade, reportError('finishingUpdate'))
+    .then(deferred.resolve);
 
     return deferred.promise;
 };
