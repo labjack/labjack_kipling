@@ -3,7 +3,13 @@ var q = require('q');
 var async = require('async');
 var ljm = require('labjack-nodejs');
 var lj_t7_upgrader = require('./labjack_t7_upgrade');
+var lj_t7_flash_operations = require('./t7_flash_operations');
+lj_t7_flash_operations.setDriverConst(ljm.driver_const);
+
+var lj_t7_cal_operations = require('./t7_calibration_operations');
 var driver_const = ljm.driver_const;
+
+
 
 // Break out various buffer constants to make them easier to use
 // for buffer manipulation.
@@ -191,9 +197,30 @@ function device(useMockDevice) {
 		};
 		return saveAndLoad;
 	};
+	var getAndSaveCalibration = function(bundle) {
+		var defered = q.defer();
+
+		// console.log('Open Data', bundle);
+		self.getCalibrationStatus()
+		.then(function(res) {
+			self.savedAttributes.calibrationStatus = res;
+			defered.resolve(self.savedAttributes);
+		}, function(err) {
+			self.savedAttributes.calibrationStatus = err;
+			defered.resolve(self.savedAttributes);
+		});
+		return defered.promise;
+	};
 	this.open = function(deviceType, connectionType, identifier) {
 		var defered = q.defer();
-		
+		var getOnError = function(msg) {
+			return function(err) {
+				var innerDefered = q.defer();
+				// console.log("device_curator.js - Open Failed", err);
+				innerDefered.reject(err);
+				return innerDefered.promise;
+			};
+		};
 		var openParameters = {
 			'deviceType': deviceType,
 			'connectionType': connectionType,
@@ -201,12 +228,8 @@ function device(useMockDevice) {
 		};
 
 		privateOpen(openParameters)
-		.then(saveAndLoadAttributes(openParameters), function(err) {
-			var innerDefered = q.defer();
-			// console.log("device_curator.js - Open Failed", err);
-			innerDefered.reject(err);
-			return innerDefered.promise;
-		})
+		.then(saveAndLoadAttributes(openParameters), getOnError('openStep'))
+		.then(getAndSaveCalibration, getOnError('saveAndLoadAttrs'))
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
@@ -434,8 +457,73 @@ function device(useMockDevice) {
 	};
 
 	/**
-	 * Begin _DEFAULT safe functions
+	 * Begin _DEFAULT safe and _DEFAULT status-saving functions
 	**/
+	var unsavedDefaults = {};
+
+	this.getUnsavedDefaults = function() {
+		var defered = q.defer();
+		defered.resolve(unsavedDefaults);
+		return defered.promise;
+	};
+	
+	this.clearUnsavedDefaults = function() {
+		var defered = q.defer();
+		unsavedDefaults = {};
+		defered.resolve();
+		return defered.promise;
+	};
+
+	var checkSingleAddressForDefaults = function(address, val) {
+		try {
+			var addr = modbusMap.getAddressInfo(address).data.name;
+			if(addr.indexOf('_DEFAULT') >= 0) {
+				unsavedDefaults[addr] = val;
+			}
+		} catch(err) {
+			console.error('Dev_curator checkSingleAddressForDefaults', err);
+		}
+	};
+
+	var checkManyAddressesForDefaults = function(addresses, values) {
+		try {
+			var i;
+			var numAddresses = addresses.length;
+			var addr;
+			var searchTerm = '_DEFAULT';
+			for(i = 0; i < numAddresses; i ++) {
+				addr = modbusMap.getAddressInfo(addresses[i]).data.name;
+				if(addr.indexOf(searchTerm) >= 0) {
+					unsavedDefaults[addr] = values[i];
+				}
+			}
+		} catch(err) {
+			console.error('Dev_curator checkMultipleAddressesForDefaults', err);
+		}
+	};
+	var checkRWManyForDefaults = function(addresses, directions, numValues, values) {
+		try {
+			var i;
+			var numAddresses = addresses.length;
+			var addr;
+			var searchTerm = '_DEFAULT';
+			var valOffset = 0;
+			for(i = 0; i < numAddresses; i ++) {
+				if(directions[i] == driver_const.LJM_WRITE) {
+					addr = modbusMap.getAddressInfo(addresses[i]).data.name;
+					if(addr.indexOf(searchTerm) >= 0) {
+						unsavedDefaults[addr] = values[valOffset];
+					}
+				}
+				valOffset += numValues[i];
+			}
+		} catch(err) {
+			console.error('Dev_curator checkRWManyForDefaults', err);
+		}
+	};
+
+
+
 	this.qRead = function(address) {
 		return self.retryFlashError('qRead', address);
 	};
@@ -443,12 +531,15 @@ function device(useMockDevice) {
 		return self.retryFlashError('qReadMany', addresses);
 	};
 	this.qWrite = function(address, value) {
+		checkSingleAddressForDefaults(address, value);
 		return self.retryFlashError('qWrite', address, value);
 	};
 	this.qWriteMany = function(addresses, values) {
+		checkManyAddressesForDefaults(addresses, values);
 		return self.retryFlashError('qWriteMany', addresses, values);
 	};
 	this.qrwMany = function(addresses, directions, numValues, values) {
+		checkRWManyForDefaults(addresses, directions, numValues, values);
 		return self.retryFlashError('qrwMany', addresses, directions, numValues, values);
 	};
 	this.qReadUINT64 = function(type) {
@@ -470,7 +561,8 @@ function device(useMockDevice) {
             'qWriteMany':'writeMany',
             'qrwMany':'rwMany',
             'qReadUINT64':'readUINT64',
-            'qReadFlash':'readFlash'
+            'readFlash':'internalReadFlash',
+            'updateFirmware': 'internalUpdateFirmware'
         }[cmdType];
         var supportedFunctions = [
             'qRead',
@@ -479,7 +571,8 @@ function device(useMockDevice) {
             'qWriteMany',
             'qrwMany',
             'qReadUINT64',
-            // 'readFlash'
+            'readFlash',
+            'updateFirmware'
         ];
         var control = function() {
             // console.log('in dRead.read');
@@ -582,12 +675,12 @@ function device(useMockDevice) {
 		// Function gets updated and has a percentage value.
         this.updatePercentage = function (value, callback) {
         	var newVal = Math.floor(parseFloat(value.toFixed(1)));
-        	if(newVal !== self.previousPercent) {
+        	if(newVal !== upgradeProgressListener.previousPercent) {
         		if (callback !== undefined) {
 	            	percentListener(newVal)
 	            	.then(callback);
 	            }
-	            self.previousPercent = newVal;
+	            upgradeProgressListener.previousPercent = newVal;
         	}
         };
 
@@ -599,12 +692,15 @@ function device(useMockDevice) {
             	.then(callback);
             }
         };
-        var self = this;
+        var upgradeProgressListener = this;
     };
     var getDeviceTypeMessage = function(dt) {
     	return "Function not supported for deviceType: " + dt.toString();
     };
-	this.updateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
+    this.updateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
+    	return self.retryFlashError('updateFirmware', firmwareFileLocation, percentListener, stepListener);
+    };
+	this.internalUpdateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
 		var dt = self.savedAttributes.deviceType;
 		var percentListenerObj;
 		var stepListenerObj;
@@ -643,6 +739,33 @@ function device(useMockDevice) {
 			defered.reject(getDeviceTypeMessage(dt));
 		}
 		return defered.promise;
+	};
+	this.readFlash = function(startAddress, length) {
+		return self.retryFlashError('readFlash', startAddress, length);
+	};
+	this.internalReadFlash = function(startAddress, length) {
+		return lj_t7_flash_operations.readFlash(ljmDevice, startAddress, length);
+	};
+
+	this.getCalibrationStatus = function() {
+		var dt = self.savedAttributes.deviceType;
+		var defered = q.defer();
+		if(self.isMockDevice) {
+			defered.resolve({
+                'overall': true,
+                'flashVerification': true,
+                'ainVerification': false
+            });
+			return defered.promise;
+		} else {
+			if(dt === 7) {
+				return lj_t7_cal_operations.getDeviceCalibrationStatus(self);
+			} else {
+				defered.resolve({'overall': false});
+				return defered.promise;
+			}
+		}
+
 	};
 
 	/**

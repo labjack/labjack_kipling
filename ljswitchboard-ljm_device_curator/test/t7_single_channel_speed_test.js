@@ -39,6 +39,10 @@ var settings = {
 	'duration': 40,			// Num seconds to stream for 
 };
 
+// Over write settings to make the test pass
+settings.testRate = 70000;
+settings.duration = 10;
+
 // Over write settings to test ethernet speeds:
 // td.ct = 'LJM_ctEthernet';
 // td.id = '470010548';

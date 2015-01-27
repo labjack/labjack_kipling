@@ -1370,7 +1370,7 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
             finishedDefered.resolve(res);
         });
         return finishedDefered.promise;
-    }
+    };
 
     globalProgressListener = progressListener;
 

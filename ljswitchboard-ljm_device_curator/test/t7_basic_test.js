@@ -60,6 +60,7 @@ var device_tests = {
 			deviceFound = true;
 			test.done();
 		}, function(err) {
+			console.log('Failed to open device', err);
 			performTests = false;
 			test.done();
 		});
