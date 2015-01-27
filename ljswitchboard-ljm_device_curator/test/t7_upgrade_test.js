@@ -20,7 +20,8 @@ var performTests = true;
 
 var fws = {
 	'1.0135': 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin',
-	'1.0144': 'http://labjack.com/sites/default/files/2015/01/T7firmware_010144_2015-01-08.bin'
+	'1.0144': 'http://labjack.com/sites/default/files/2015/01/T7firmware_010144_2015-01-08.bin',
+	'1.0146': 'http://labjack.com/sites/default/files/2015/01/T7firmware_010146_2015-01-19.bin'
 };
 
 var device_tests = {
@@ -79,7 +80,8 @@ var device_tests = {
 		});
 	},
 	'upgradeFirmware': function(test) {
-		var fwURL = fws['1.0144'];
+		var fwVersionNum = 1.0146;
+		var fwURL = fws[fwVersionNum.toString()];
 		var lastPercent = 0;
 		var percentListener = function(value) {
 			var defered = q.defer();
@@ -98,18 +100,22 @@ var device_tests = {
 		.then(
 			function(res) {
 				// The result is a new device object
-				console.log("  - Finished Upgrading!");
+				// console.log('Upgrade Success', res);
 				test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
-				test.done();
-			}, function(err) {
-				console.log("Failed to upgrade", err);
-				test.ok(false, 'Failed to upgrade device: ' + JSON.stringify(err));
-				device.read('AIN0')
+				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
-					console.log('Device is still responding to messages');
+					test.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
+					test.done();
+				});
+			}, function(err) {
+				console.log("Failed to upgrade (upgrade test)", err);
+				test.ok(false, 'Failed to upgrade device: ' + JSON.stringify(err));
+				device.read('DEVICE_NAME_DEFAULT')
+				.then(function(res) {
+					console.log('Device is still responding to messages', res);
 					test.done();
 				}, function(err) {
-					console.log('Device is not responding anymore');
+					console.log('Device is not responding anymore', err);
 					test.done();
 				});
 			}

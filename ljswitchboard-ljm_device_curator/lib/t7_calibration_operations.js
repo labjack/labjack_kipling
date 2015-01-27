@@ -3,7 +3,7 @@
 var async = require('async');
 var dict = require('dict');
 var q = require('q');
-
+var driver_const = require('labjack-nodejs').driver_const;
 
 var T7_NominalCalValues = [
     {"name": "HS 10.0V PSlope", "nominal": 0.000315805780, "variance": 0.05},
@@ -152,30 +152,58 @@ var getAndInterpretAINResults = function(curatedDevice) {
         return defered.promise;
     };
     var configInitial = function() {
-        return curatedDevice.qWriteMany(
-            ['AIN0_RANGE', 'AIN0_RESOLUTION_INDEX', 'AIN0_SETTLING_US'],
-            [10, 1, 0]
-        );
+        if(curatedDevice.savedAttributes.FIRMWARE_VERSION > driver_const.T7_LIMITED_FW_VERSION) {
+            return curatedDevice.qWriteMany(
+                ['AIN0_RANGE', 'AIN0_RESOLUTION_INDEX', 'AIN0_SETTLING_US'],
+                [10, 1, 0]
+                );
+        } else {
+            return curatedDevice.writeMultiple(
+                ['AIN0_RANGE', 'AIN0_RESOLUTION_INDEX', 'AIN0_SETTLING_US'],
+                [10,1, 0]
+                );
+        }
     };
     var getInitial = function() {
         var defered = q.defer();
-        curatedDevice.readMany(ainList)
-        .then(function(res) {
-            res.forEach(function(reading) {
-                if(reading !== 0) {
-                    highSpeedStatus = true;
-                }
-            });
-            defered.resolve();
-        }, defered.reject);
+        if(curatedDevice.savedAttributes.FIRMWARE_VERSION > driver_const.T7_LIMITED_FW_VERSION) {
+            curatedDevice.readMany(ainList)
+            .then(function(res) {
+                res.forEach(function(reading) {
+                    if(reading !== 0) {
+                        highSpeedStatus = true;
+                    }
+                });
+                defered.resolve();
+            }, defered.reject);
+        } else {
+            curatedDevice.readMultiple(ainList)
+            .then(function(res) {
+                res.forEach(function(reading) {
+                    if(!reading.isErr) {
+                        if(reading.data !== 0) {
+                            highSpeedStatus = true;
+                        }
+                    }
+                });
+                defered.resolve();
+            }, defered.reject);
+        }
         return defered.promise;
     };
     var configSecondary = function() {
         if(curatedDevice.savedAttributes.isPro) {
-            return curatedDevice.qWriteMany(
-                ['AIN0_RANGE', 'AIN0_RESOLUTION_INDEX', 'AIN0_SETTLING_US'],
-                [10, 9, 0]
-            );
+            if(curatedDevice.savedAttributes.FIRMWARE_VERSION > driver_const.T7_LIMITED_FW_VERSION) {
+                return curatedDevice.qWriteMany(
+                    ['AIN0_RANGE', 'AIN0_RESOLUTION_INDEX', 'AIN0_SETTLING_US'],
+                    [10, 9, 0]
+                    );
+            } else {
+                return curatedDevice.writeMultiple(
+                    ['AIN0_RANGE', 'AIN0_RESOLUTION_INDEX', 'AIN0_SETTLING_US'],
+                    [10, 9, 0]
+                    );
+            }
         } else {
             var defered = q.defer();
             defered.resolve();
@@ -185,17 +213,30 @@ var getAndInterpretAINResults = function(curatedDevice) {
     };
     var getSecondary = function() {
         var defered = q.defer();
-
         if(curatedDevice.savedAttributes.isPro) {
-            curatedDevice.readMany(ainList)
-            .then(function(res) {
-                res.forEach(function(reading) {
-                    if(reading !== 0) {
-                        highResStatus = true;
-                    }
-                });
-                defered.resolve();
-            }, defered.reject);
+            if(curatedDevice.savedAttributes.FIRMWARE_VERSION > driver_const.T7_LIMITED_FW_VERSION) {
+                curatedDevice.readMany(ainList)
+                .then(function(res) {
+                    res.forEach(function(reading) {
+                        if(reading !== 0) {
+                            highResStatus = true;
+                        }
+                    });
+                    defered.resolve();
+                }, defered.reject);
+            } else {
+                curatedDevice.readMultiple(ainList)
+                .then(function(res) {
+                    res.forEach(function(reading) {
+                        if(!reading.isErr) {
+                            if(reading.data !== 0) {
+                                highResStatus = true;
+                            }
+                        }
+                    });
+                    defered.resolve();
+                }, defered.reject);
+            }
         } else {
             defered.resolve();
         }
@@ -203,42 +244,63 @@ var getAndInterpretAINResults = function(curatedDevice) {
 
     };
     var restoreConfig = function() {
-        return curatedDevice.qWriteMany(
-            ['AIN0_RANGE', 'AIN0_RESOLUTION_INDEX', 'AIN0_SETTLING_US'],
-            [
-                currentAINConfig.AIN0_RANGE,
-                currentAINConfig.AIN0_RESOLUTION_INDEX,
-                currentAINConfig.AIN0_SETTLING_US
-            ]
-        );
+        if(curatedDevice.savedAttributes.FIRMWARE_VERSION > driver_const.T7_LIMITED_FW_VERSION) {
+            return curatedDevice.qWriteMany(
+                ['AIN0_RANGE', 'AIN0_RESOLUTION_INDEX', 'AIN0_SETTLING_US'],
+                [
+                    currentAINConfig.AIN0_RANGE,
+                    currentAINConfig.AIN0_RESOLUTION_INDEX,
+                    currentAINConfig.AIN0_SETTLING_US
+                ]
+            );
+        } else {
+            return curatedDevice.writeMultiple(
+                ['AIN0_RANGE', 'AIN0_RESOLUTION_INDEX', 'AIN0_SETTLING_US'],
+                [
+                    currentAINConfig.AIN0_RANGE,
+                    currentAINConfig.AIN0_RESOLUTION_INDEX,
+                    currentAINConfig.AIN0_SETTLING_US
+                ]
+            );
+        }
     };
 
     var getAndInterpret = function(calibrationStatus) {
-       var defered = q.defer();
-
-       saveCurrentConfig()
-       .then(configInitial)
-       .then(getInitial)
-       .then(configSecondary)
-       .then(getSecondary)
-       .then(restoreConfig)
-       .then(function() {
-            var isValid = true;
-            if(!highSpeedStatus) {
-                isValid = false;
-            }
-            if(curatedDevice.savedAttributes.isPro) {
-                if(!highResStatus) {
+        var defered = q.defer();
+        if(curatedDevice.savedAttributes.FIRMWARE_VERSION > driver_const.T7_LIMITED_FW_VERSION) {
+            
+            var getErr = function(msg) {
+                return function(err) {
+                    console.log('AIN Cal Check Error', msg, err);
+                    defered.reject(calibrationStatus);
+                };
+            };
+            saveCurrentConfig()
+            .then(configInitial, getErr('saveCurrentConfig'))
+            .then(getInitial, getErr('configInitial'))
+            .then(configSecondary, getErr('getInitial'))
+            .then(getSecondary, getErr('configSecondary'))
+            .then(restoreConfig, getErr('getSecondary'))
+            .then(function() {
+                var isValid = true;
+                if(!highSpeedStatus) {
                     isValid = false;
                 }
-            }
-            if(isValid) {
-                calibrationStatus.overall = true;
-            }
-            calibrationStatus.ainVerification = isValid;
+                if(curatedDevice.savedAttributes.isPro) {
+                    if(!highResStatus) {
+                        isValid = false;
+                    }
+                }
+                if(isValid) {
+                    calibrationStatus.overall = true;
+                }
+                calibrationStatus.ainVerification = isValid;
 
+                defered.resolve(calibrationStatus);
+            }, getErr('restoreConfig'));
+        } else {
             defered.resolve(calibrationStatus);
-       });
+        }
         return defered.promise; 
     };
     return getAndInterpret;

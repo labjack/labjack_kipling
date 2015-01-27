@@ -398,7 +398,14 @@ exports.readFirmwareFile = function(fileSrc)
         request(
             {url: fileSrc, encoding: null},
             function (error, response, body) {
-                parseFile(error, body);
+                // Catch statusCode's that aren't 200 (http: OK)
+                if(response.statusCode == 200) {
+                    parseFile(error, body);
+                } else {
+                    deferred.reject(
+                        'Failed to query URL, status code: ' + response.statusCode.toString()
+                    );
+                }
             }
         );
     } else {
@@ -1078,34 +1085,49 @@ exports.closeDevice = function(bundle) {
     return deferred.promise;
 };
 exports.forceClose = function(bundle) {
-    var curatedDevice = bundle.getCuratedDevice();
-    var attributes = curatedDevice.getDeviceAttributes();
-    console.error(
-        'Force Closing Device',
-        device,
-        device.handle,
-        attributes,
-        attributes.identifierString,
-        attributes.deviceTypeString,
-        attributes.connectionTypeString
-    );
     var deferred = q.defer();
-    var device = bundle.getDevice();
-    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
-        console.log(
-            'Device Info',
+
+    var executeCode = true;
+    if(typeof(bundle) === 'object') {
+        var keys = Object.keys(bundle);
+        if(keys.length == 2) {
+            if(keys[0] === 'message', keys[1] === 'error') {
+                executeCode = false;
+            }
+        }
+    }
+    if(executeCode) {
+        var curatedDevice = bundle.getCuratedDevice();
+        var attributes = curatedDevice.getDeviceAttributes();
+        console.error(
+            'Force Closing Device',
+            device,
             device.handle,
             attributes,
             attributes.identifierString,
             attributes.deviceTypeString,
             attributes.connectionTypeString
         );
+        
+        var device = bundle.getDevice();
+        if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+            console.log(
+                'Device Info',
+                device.handle,
+                attributes,
+                attributes.identifierString,
+                attributes.deviceTypeString,
+                attributes.connectionTypeString
+            );
+        }
+        device.close(function(err) {
+            deferred.resolve(bundle);
+        }, function() {
+            deferred.resolve(bundle);
+        });
+    } else {
+        deferred.reject(bundle);
     }
-    device.close(function(err) {
-        deferred.resolve(bundle);
-    }, function() {
-        deferred.resolve(bundle);
-    });
     return deferred.promise;
 };
 exports.pauseForClose = function(bundle) {
@@ -1251,12 +1273,13 @@ exports.checkNewFirmware = function(bundle)
  *      firmware from.
  * @return {q.promise} Promise that resolves after the build process completes.
 **/
-exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
+var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocation,
     connectionType, progressListener)
 {
     var deferred = q.defer();
     var initialWiFiStatus = 0;
-
+    var initialStartupConfigs = 0;
+    var errorEncountered = false;
     var injectDevice = function (bundle) {
         var innerDeferred = q.defer();
         try {
@@ -1273,14 +1296,19 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     var reportError = function(message) {
         var reportErrorFunc = function(error) {
             var reportErrorDefered = q.defer();
-            if(message !== 'finishingUpdate') {
-                safelyReject(deferred, error);
+            
+            if(errorEncountered) {
+                reportErrorDefered.reject(error);
             } else {
-                console.log('Ignoring last error... finishingUpdate');
+                var err;
+                err = {
+                    'step': message,
+                    'error': error,
+                };
+                errorEncountered = true;
+                reportErrorDefered.reject(err);
             }
-            if(typeof(message) !== 'undefined') {
-                console.log('throwing error...',message);
-            }
+
             // throw error;
             return reportErrorDefered.promise;
         };
@@ -1305,12 +1333,54 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
             return innerDeferred.promise;
         };
     };
+    var saveStartupConfigsFWCheck = function() {
+        return function(bundle) {
+            var innerDeferred = q.defer();
+            var param = 'LJM_OLD_FIRMWARE_CHECK';
+            ljmDriver.readLibrary(param, function(err) {
+                console.error('Error Reading param', param, err);
+                innerDeferred.reject(err);
+            }, function(res) {
+                initialStartupConfigs = res;
+                innerDeferred.resolve(bundle);
+            });
+            return innerDeferred.promise;
+        };
+    };
+    var disableStartupConfigsFWCheck = function() {
+        return function(bundle) {
+            var innerDeferred = q.defer();
+            var param = 'LJM_OLD_FIRMWARE_CHECK';
+            ljmDriver.writeLibrary(param, 0, function(err) {
+                console.error('Error Writing param', param, err);
+                innerDeferred.reject(err);
+            }, function(res) {
+                innerDeferred.resolve(bundle);
+            });
+            return innerDeferred.promise;
+        };
+    };
+    var restoreStartupConfigsFWCheck = function() {
+        return function(bundle) {
+            var innerDeferred = q.defer();
+            var param = 'LJM_OLD_FIRMWARE_CHECK';
+            ljmDriver.writeLibrary(param, initialStartupConfigs, function(err) {
+                console.error('Error Writing param', param, err);
+                innerDeferred.reject(err);
+            }, function(res) {
+                innerDeferred.resolve(bundle);
+            });
+            return innerDeferred.promise;
+        };
+    };
 
     var saveWiFiStatus = function() {
         return function (bundle) {
             var innerDeferred = q.defer();
+            var fwVer = curatedDevice.savedAttributes.FIRMWARE_VERSION;
+
             device.read('POWER_WIFI', function(err) {
-                    // console.log('Failed to Read WiFi Status', err);
+                    console.log('Failed to Read WiFi Status', err);
                     innerDeferred.reject(err);
                 }, function(res) {
                     initialWiFiStatus = res;
@@ -1374,10 +1444,12 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
 
     globalProgressListener = progressListener;
 
-    // 12 steps
+    //
     exports.readFirmwareFile(firmwareFileLocation, reportError('readingFirmwareFile'))
     .then(injectDevice, reportError('readingFirmwareFile'))
-    .then(saveWiFiStatus(), reportError('injectDevice'))
+    .then(saveStartupConfigsFWCheck(), reportError('injectDevice'))
+    .then(disableStartupConfigsFWCheck(), reportError('saveStartupConfigsFWCheck'))
+    .then(saveWiFiStatus(), reportError('disableStartupConfigsFWCheck'))
     .then(toggleWiFi('disable'), reportError('readWiFiStatus'))
     .then(exports.checkCompatibility, reportError('disablingWiFi'))
     .then(updateProgress(CHECKPOINT_ONE_PERCENT), reportError('checkCompatibility'))
@@ -1406,12 +1478,23 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     .then(exports.checkNewFirmware, reportError('waitForEnumeration'))
     .then(toggleWiFi('enable'), reportError('checkNewFirmware'))
     .then(updateProgress(CHECKPOINT_FIVE_PERCENT), reportError('enablingWiFi'))
-    .then(finishedUpgrade, reportError('finishingUpdate'))
-    .then(deferred.resolve);
+    .then(disableStartupConfigsFWCheck(), reportError('updateStatusText'))
+    .then(finishedUpgrade, reportError('disableStartupConfigsFWCheck'))
+    .then(deferred.resolve, deferred.reject);
 
     return deferred.promise;
 };
 
 
-var updateFirmware = exports.updateFirmware;
+exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
+    connectionType, progressListener) {
+    var defered = q.defer();
+    internalUpdateFirmware(curatedDevice, device, firmwareFileLocation, connectionType, progressListener)
+    .then(function(res) {
+        defered.resolve(res);
+    }, function(err) {
+        defered.reject(err);
+    });
+    return defered.promise;
+};
 

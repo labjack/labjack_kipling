@@ -101,6 +101,7 @@ function device(useMockDevice) {
 	};
 	var saveCustomAttributes = function(addresses, dt, formatters) {
 		var defered = q.defer();
+
 		self.readMultiple(addresses)
 		.then(function(results) {
 			results.forEach(function(res) {
@@ -200,12 +201,12 @@ function device(useMockDevice) {
 	var getAndSaveCalibration = function(bundle) {
 		var defered = q.defer();
 
-		// console.log('Open Data', bundle);
 		self.getCalibrationStatus()
 		.then(function(res) {
 			self.savedAttributes.calibrationStatus = res;
 			defered.resolve(self.savedAttributes);
 		}, function(err) {
+			console.error('failed to get Calibration', res);
 			self.savedAttributes.calibrationStatus = err;
 			defered.resolve(self.savedAttributes);
 		});
@@ -326,6 +327,37 @@ function device(useMockDevice) {
 			values,
 			defered.reject,
 			defered.resolve
+		);
+		return defered.promise;
+	};
+	/**
+	 * Performs several single reads to get individual error codes.
+	**/
+	this.writeMultiple = function(addresses, values) {
+		var defered = q.defer();
+		var write = [];
+		var i;
+		for(i = 0; i < addresses.length; i ++) {
+			write.push({'address': addresses[i],'val':values[i]});
+		}
+		var results = [];
+		var performWrite = function(writeData, callback) {
+			self.qWrite(writeData.address,writeData.val)
+			.then(function(res) {
+				results.push({'address': writeData.address, 'isErr': false, 'data': res});
+				callback();
+			}, function(err) {
+				results.push({'address': writeData.address, 'isErr': true, 'data': err});
+				callback();
+			});
+		};
+		var finishWrite = function(err) {
+			defered.resolve(results);
+		};
+		async.each(
+			write,
+			performWrite, 
+			finishWrite
 		);
 		return defered.promise;
 	};
@@ -562,7 +594,17 @@ function device(useMockDevice) {
             'qrwMany':'rwMany',
             'qReadUINT64':'readUINT64',
             'readFlash':'internalReadFlash',
-            'updateFirmware': 'internalUpdateFirmware'
+            // 'updateFirmware': 'internalUpdateFirmware'
+        }[cmdType];
+        var errType = {
+        	'qRead': 'value',
+        	'qReadMany': 'object',
+        	'qWrite':'value',
+            'qWriteMany':'object',
+            'qrwMany':'object',
+            'qReadUINT64':'value',
+            'readFlash':'value',
+            // 'updateFirmware': 'value'
         }[cmdType];
         var supportedFunctions = [
             'qRead',
@@ -572,7 +614,7 @@ function device(useMockDevice) {
             'qrwMany',
             'qReadUINT64',
             'readFlash',
-            'updateFirmware'
+            // 'updateFirmware'
         ];
         var control = function() {
             // console.log('in dRead.read');
@@ -643,13 +685,23 @@ function device(useMockDevice) {
                 // success case for calling function
                 rqControlDeferred.resolve(res.val);
             },function(res) {
+            	// console.log('in retryFlashError', errType, res, cmdType, arg0, arg1)
                 // error case for calling function
                 var innerDeferred = q.defer();
-                if(res.val == 2358) {
-                    delayAndRead()
-                    .then(innerDeferred.resolve,innerDeferred.reject);
-                } else {
-                    innerDeferred.resolve(res.val);
+                if(errType === 'value') {
+                	if(res.val == 2358) {
+	                    delayAndRead()
+	                    .then(innerDeferred.resolve,innerDeferred.reject);
+	                } else {
+	                    innerDeferred.reject(res.val);
+	                }
+                } else if(errType === 'object') {
+                	if(res.val.retError == 2358) {
+	                    delayAndRead()
+	                    .then(innerDeferred.resolve,innerDeferred.reject);
+	                } else {
+	                    innerDeferred.reject(res.val);
+	                }
                 }
                 return innerDeferred.promise;
             })
@@ -657,7 +709,7 @@ function device(useMockDevice) {
                 // console.log('Read-Really-Finished',arg0,res);
                 rqControlDeferred.resolve(res);
             },function(err) {
-                console.error('DC rqControl',err);
+                // console.error('DC rqControl',err);
                 rqControlDeferred.reject(err);
             });
         } else {
@@ -698,7 +750,9 @@ function device(useMockDevice) {
     	return "Function not supported for deviceType: " + dt.toString();
     };
     this.updateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
-    	return self.retryFlashError('updateFirmware', firmwareFileLocation, percentListener, stepListener);
+    	// TODO: Not using retryFlashError for updater atm.  Need to handle errors better.
+    	// return self.retryFlashError('updateFirmware', firmwareFileLocation, percentListener, stepListener);
+    	return self.internalUpdateFirmware(firmwareFileLocation, percentListener, stepListener);
     };
 	this.internalUpdateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
 		var dt = self.savedAttributes.deviceType;
@@ -734,7 +788,9 @@ function device(useMockDevice) {
 			).then(function(results){
 				ljmDevice.handle = results.getDevice().handle;
 				defered.resolve(results);
-			}, defered.reject);
+			}, function(err) {
+				defered.reject(err);
+			});
 		} else {
 			defered.reject(getDeviceTypeMessage(dt));
 		}
