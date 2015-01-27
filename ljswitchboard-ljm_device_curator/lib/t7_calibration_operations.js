@@ -50,6 +50,7 @@ var T7_NominalCalValues = [
 ];
 
 var T7_HIGH_RESOLUTION_START_INDEX = 16;
+var T7_HIGH_RESOLUTION_END_INDEX = 31;
 
 
 var getInvalidCalibrationValues = function (subclass, calValues) {
@@ -68,55 +69,59 @@ var getInvalidCalibrationValues = function (subclass, calValues) {
     var badCals = [];
     T7_NominalCalValues.forEach(function(nominalVal, index) {
         var min, max, absPlusMinus;
-        var isPro = (subclass === 'Pro');
-        if (!isPro && (index >= T7_HIGH_RESOLUTION_START_INDEX)) {
-            return badCals;
-        }
+        var isPro = (subclass === '-Pro');
+        
+        if (!isPro && (index >= T7_HIGH_RESOLUTION_START_INDEX) && (index <= T7_HIGH_RESOLUTION_END_INDEX)) {
+            // console.log('Skipping', isPro, index, nominalVal.name);
+        } else {
+            // console.log('Checking', isPro, index, nominalVal.name);
+           absPlusMinus = Math.abs(nominalVal.nominal * nominalVal.variance);
+            min = nominalVal.nominal - absPlusMinus;
+            max = nominalVal.nominal + absPlusMinus;
 
-        absPlusMinus = Math.abs(nominalVal.nominal * nominalVal.variance);
-        min = nominalVal.nominal - absPlusMinus;
-        max = nominalVal.nominal + absPlusMinus;
-
-        if (!withinRange(calValues[index], min, max)) {
-            badCals.push(nominalVal.name);
+            if (!withinRange(calValues[index], min, max)) {
+                badCals.push(nominalVal.name);
+            } 
         }
     });
 
     return badCals;
 };
+var getInterpretFlashResults = function(curatedDevice) {
+    var interpretFlashResults = function(data) {
+        var defered = q.defer();
+        // Convert the read calibration data to floating point values
+        var floatingPointData = [];
+        data.results.forEach(function(result){
+            var buf = new Buffer(4);
+            buf.writeUInt32BE(result,0);
+            var floatVal = buf.readFloatBE(0);
+            floatingPointData.push(floatVal);
+        });
 
-var interpretFlashResults = function(data) {
-    var defered = q.defer();
-    // Convert the read calibration data to floating point values
-    var floatingPointData = [];
-    data.results.forEach(function(result){
-        var buf = new Buffer(4);
-        buf.writeUInt32BE(result,0);
-        var floatVal = buf.readFloatBE(0);
-        floatingPointData.push(floatVal);
-    });
-
-    // Check the values to see if they are valid
-    var deviceSubClass = 'Pro';
-    var calCheckResult = getInvalidCalibrationValues(deviceSubClass, floatingPointData);
-    var calibrationStatus;
-    // If there are any invalid values set calibration validity to be false
-    if(calCheckResult.length > 0) {
-        calibrationStatus = {
-            'overall': false,
-            'flashVerification': false,
-            'ainVerification': false
-        };
-    } else {
-        calibrationStatus = {
-            'overall': true,
-            'flashVerification': true,
-            'ainVerification': false
-        };
-    }
-    // return the device object
-    defered.resolve(calibrationStatus);
-    return defered.promise;
+        // Check the values to see if they are valid
+        var deviceSubClass = curatedDevice.savedAttributes.subclass;
+        var calCheckResult = getInvalidCalibrationValues(deviceSubClass, floatingPointData);
+        var calibrationStatus;
+        // If there are any invalid values set calibration validity to be false
+        if(calCheckResult.length > 0) {
+            calibrationStatus = {
+                'overall': false,
+                'flashVerification': false,
+                'ainVerification': false
+            };
+        } else {
+            calibrationStatus = {
+                'overall': true,
+                'flashVerification': true,
+                'ainVerification': false
+            };
+        }
+        // return the device object
+        defered.resolve(calibrationStatus);
+        return defered.promise;
+    };
+    return interpretFlashResults;
 };
 
 
@@ -259,7 +264,7 @@ exports.getDeviceCalibrationStatus = function(curatedDevice) {
     // and reading 41*4 bytes of data.  Aka read 41 integers (4 bytes each) 
     // worth of data.
     curatedDevice.readFlash(0x3C4000, 41)
-    .then( interpretFlashResults, getErrFunc('readingFlash'))
+    .then(getInterpretFlashResults(curatedDevice), getErrFunc('readingFlash'))
     .then(getAndInterpretAINResults(curatedDevice), getErrFunc('interpretingFlashResults'))
     .then(defered.resolve, defered.reject);
     return defered.promise;

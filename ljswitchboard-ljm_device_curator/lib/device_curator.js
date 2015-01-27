@@ -744,7 +744,18 @@ function device(useMockDevice) {
 		return self.retryFlashError('readFlash', startAddress, length);
 	};
 	this.internalReadFlash = function(startAddress, length) {
-		return lj_t7_flash_operations.readFlash(ljmDevice, startAddress, length);
+		var dt = self.savedAttributes.deviceType;
+		if(dt === driver_const.LJM_DT_T7) {
+			return lj_t7_flash_operations.readFlash(ljmDevice, startAddress, length);
+		} else if(dt === driver_const.LJM_DT_DIGIT) {
+			var digitDefered = q.defer();
+			digitDefered.resolve();
+			return digitDefered.promise;
+		} else {
+			var defered = q.defer();
+			defered.resolve();
+			return defered.promise;
+		}
 	};
 
 	this.getCalibrationStatus = function() {

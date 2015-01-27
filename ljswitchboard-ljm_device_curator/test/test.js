@@ -6,6 +6,7 @@ var mock_device_test = require('./mock_device_test');
 
 // Require T7 related tests
 var t7_basic_test = require('./t7_basic_test');
+var t7_check_calibration_test = require('./t7_check_calibration_test');
 var t7_upgrade_test = require('./t7_upgrade_test');
 var t7_open_close_test = require('./t7_open_close_test');
 var t7_basic_stream_test = require('./t7_basic_stream_test');
@@ -23,6 +24,7 @@ exports.mock_device_defaults_cache_test = mock_device_defaults_cache_test.tests;
 
 // Perform T7 related tests
 exports.t7_basic_test = t7_basic_test.tests;									// Passing
+exports.t7_check_calibration_test = t7_check_calibration_test.tests;			// Passing
 // exports.t7_upgrade_test = t7_upgrade_test.tests;								// Passing
 // exports.t7_open_close_test = t7_open_close_test.tests;						// Passing
 // exports.t7_basic_stream_test = t7_basic_stream_test.tests;						// Passing
