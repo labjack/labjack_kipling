@@ -154,14 +154,11 @@ var getAndInterpretAINResults = function(curatedDevice) {
     };
     var getInitial = function() {
         var defered = q.defer();
-        curatedDevice.readMultiple(ainList)
+        curatedDevice.readMany(ainList)
         .then(function(res) {
-
             res.forEach(function(reading) {
-                if(!reading.isErr) {
-                    if(reading.data !== 0) {
-                        highSpeedStatus = true;
-                    }
+                if(reading !== 0) {
+                    highSpeedStatus = true;
                 }
             });
             defered.resolve();
@@ -185,13 +182,11 @@ var getAndInterpretAINResults = function(curatedDevice) {
         var defered = q.defer();
 
         if(curatedDevice.savedAttributes.isPro) {
-            curatedDevice.readMultiple(ainList)
+            curatedDevice.readMany(ainList)
             .then(function(res) {
                 res.forEach(function(reading) {
-                    if(!reading.isErr) {
-                        if(reading.data !== 0) {
-                            highResStatus = true;
-                        }
+                    if(reading !== 0) {
+                        highResStatus = true;
                     }
                 });
                 defered.resolve();
