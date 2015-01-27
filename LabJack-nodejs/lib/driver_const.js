@@ -46,6 +46,9 @@ exports.OPEN_CALL_DEBUGGING_ENABLE = 1;
 exports.CLOSE_CALL_DEBUGGING_ENABLE = 2;
 exports.ENABLE_ALL_DEBUGGING = 255;
 
+// Constant for determining REALLY old T7 fw versions.  Before readAddresses support
+exports.T7_LIMITED_FW_VERSION				= 0.8;
+
 //FIRMWARE UPGRADING CONSTANTS T7
 //==============================================
 // Codes
