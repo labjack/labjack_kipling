@@ -124,6 +124,19 @@ exports.tests = {
 			test.done();
 		}
 	},
+	'clear defaults cache': function(test) {
+		if(device.isMockDevice) {
+			device.clearUnsavedDefaults()
+			.then(device.getUnsavedDefaults)
+			.then(function(res) {
+				var expectedRes = {};
+				test.deepEqual(res, expectedRes);
+				test.done();
+			});
+		} else {
+			test.done();
+		}
+	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
