@@ -37,7 +37,9 @@ function device(useMockDevice) {
 	var constants = ljm.driver_const;
 	var modbusMap = ljm.modbusMap.getConstants();
 
-	this.savedAttributes = {};
+	this.savedAttributes = {
+		'isMockDevice': this.isMockDevice
+	};
 
 	var privateOpen = function(openParameters) {
 		var defered = q.defer();
