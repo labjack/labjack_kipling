@@ -267,7 +267,7 @@ var parseConstants = function(LJMJSONFileLocation) {
 	};
 };
 
-constants = new parseConstants(LJM_JSON_FILE_LOCATION);
+var constants = new parseConstants(LJM_JSON_FILE_LOCATION);
 /**
  * Makes the constants object available to other files
  * @return {constants-object} link to the constants object
