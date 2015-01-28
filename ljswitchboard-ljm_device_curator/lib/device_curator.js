@@ -149,6 +149,7 @@ function device(useMockDevice) {
 		var saveAndLoad = function() {
 			var defered = q.defer();
 			self.savedAttributes = {};
+			self.savedAttributes.isMockDevice = self.isMockDevice;
 
 			self.getHandleInfo()
 			.then(function(info) {
