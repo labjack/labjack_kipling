@@ -96,6 +96,8 @@ function device() {
 	this.open = function(deviceType, connectionType, identifier, onErr, onSucc) {
 		saveCall('open', arguments);
 
+		identifier = identifier.toString();
+
 		self.handle = NUM_OPEN_DEVICES;
 		NUM_OPEN_DEVICES += 1;
 
@@ -112,6 +114,7 @@ function device() {
 		if(conTNum === constants.connectionTypes.any) {
 			conTNum = constants.connectionTypes.usb;
 		}
+
 		// Assign an IP?
 		var ipAddr;
 		var port = 0;
@@ -127,9 +130,21 @@ function device() {
 			ipAddr = NO_IP_ADDRESS;
 		}
 
+		// Assign a serial number?
+		var serialNum;
+		if(!isIP) {
+			if(!isNaN(identifier)) {
+				serialNum = parseInt(identifier);
+			} else {
+				serialNum = TEST_SERIAL_NUMBER;
+			}
+		} else {
+			serialNum = TEST_SERIAL_NUMBER;
+		}
+
 		self.devAttr.deviceType = devTNum;
 		self.devAttr.connectionType = conTNum;
-		self.devAttr.serialNumber = TEST_SERIAL_NUMBER;
+		self.devAttr.serialNumber = serialNum;
 		self.devAttr.ip = ipAddr;
 		self.devAttr.port = port;
 		self.devAttr.maxBytesPerMB = 32;
