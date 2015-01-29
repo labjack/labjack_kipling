@@ -132,7 +132,7 @@ exports.ljmDriver = function() {
         }
 
         if ((isNaN(devT)) && (isNaN(conT))) {
-            errorResult = this.ljm.LJM_ListAllS.async(
+            errorResult = self.ljm.LJM_ListAllS.async(
                 devT, 
                 conT, 
                 numFound, 
@@ -158,7 +158,7 @@ exports.ljmDriver = function() {
             );
             return 0;
         } else if ((!isNaN(devT))&&(!isNaN(conT))) {
-            errorResult = this.ljm.LJM_ListAll.async(
+            errorResult = self.ljm.LJM_ListAll.async(
                 devT, 
                 conT, 
                 numFound, 
@@ -230,7 +230,7 @@ exports.ljmDriver = function() {
         }
 
         if ((isNaN(devT)) && (isNaN(conT))) {
-            errorResult = this.ljm.LJM_ListAllS(
+            errorResult = self.ljm.LJM_ListAllS(
                 devT, 
                 conT, 
                 numFound, 
@@ -240,7 +240,7 @@ exports.ljmDriver = function() {
                 aIPAddresses
             );
         } else if ((!isNaN(devT)) && (!isNaN(conT))) {
-            errorResult = this.ljm.LJM_ListAll(
+            errorResult = self.ljm.LJM_ListAll(
                 devT, 
                 conT, 
                 numFound, 
@@ -254,7 +254,7 @@ exports.ljmDriver = function() {
             return "Weird-Error, listAll";
         }
         if (errorResult === 0) {
-            var devArray = this.buildListAllArray(
+            var devArray = self.buildListAllArray(
                 numFound,
                 aDeviceTypes,
                 aConnectionTypes,
@@ -449,7 +449,7 @@ exports.ljmDriver = function() {
 
         var bytesPerRegister = driver_const.LJM_BYTES_PER_REGISTER;
         regs.forEach(function(reg,index){
-            var info = this.constants.getAddressInfo(reg, 'R');
+            var info = self.constants.getAddressInfo(reg, 'R');
             var numRegs = Math.ceil(info.size/bytesPerRegister);
             aAddresses.push(info.address);
             aNumRegs.push(numRegs);
@@ -475,7 +475,7 @@ exports.ljmDriver = function() {
         }
 
         
-        errorResult = this.ljm.LJM_ListAllExtended.async(
+        errorResult = self.ljm.LJM_ListAllExtended.async(
             C_DeviceType, 
             C_ConnectionType, 
             C_NumAddresses,
@@ -605,7 +605,7 @@ exports.ljmDriver = function() {
 
         var bytesPerRegister = driver_const.LJM_BYTES_PER_REGISTER;
         regs.forEach(function(reg,index){
-            var info = this.constants.getAddressInfo(reg, 'R');
+            var info = self.constants.getAddressInfo(reg, 'R');
             var numRegs = Math.ceil(info.size/bytesPerRegister);
             aAddresses.push(info.address);
             aNumRegs.push(numRegs);
@@ -630,7 +630,7 @@ exports.ljmDriver = function() {
             bufIndex += ARCH_INT_NUM_BYTES;
         }
 
-        errorResult = this.ljm.LJM_ListAllExtended(
+        errorResult = self.ljm.LJM_ListAllExtended(
             C_DeviceType, 
             C_ConnectionType, 
             C_NumAddresses,
@@ -676,7 +676,7 @@ exports.ljmDriver = function() {
         var errorResult=0;
         var strRes = new Buffer(50);
         strRes.fill(0);
-        errorResult = this.ljm.LJM_ErrorToString.async(
+        errorResult = self.ljm.LJM_ErrorToString.async(
             errNum, 
             strRes, 
             function (err, res){
@@ -709,7 +709,7 @@ exports.ljmDriver = function() {
         var strRes = new Buffer(50);
         strRes.fill(0);
 
-        errorResult = this.ljm.LJM_ErrorToString(errNum, strRes);
+        errorResult = self.ljm.LJM_ErrorToString(errNum, strRes);
         if (errorResult !== 0) {
             return 'Num: '+errNum+', '+ref.readCString(strRes,0);
         } else {
@@ -728,7 +728,7 @@ exports.ljmDriver = function() {
      */
     this.loadConstants = function(onError, onSuccess) {
         var errorResult;
-        errorResult = this.ljm.LJM_LoadConstants.async(
+        errorResult = self.ljm.LJM_LoadConstants.async(
             function (err, res){
                 if (err) throw err;
                 if (res === 0) {
@@ -749,7 +749,7 @@ exports.ljmDriver = function() {
      */
     this.loadConstantsSync = function() {
         var errorResult;
-        errorResult = this.ljm.LJM_LoadConstants();
+        errorResult = self.ljm.LJM_LoadConstants();
         if (errorResult !== 0) {
             throw new DriverOperationError(errorResult);
         } else {
@@ -769,7 +769,7 @@ exports.ljmDriver = function() {
      */
     this.closeAll = function(onError, onSuccess) {
         var errorResult;
-        errorResult = this.ljm.LJM_CloseAll.async(
+        errorResult = self.ljm.LJM_CloseAll.async(
             function (err, res){
                 if (err) throw err;
                 if (res === 0) {
@@ -792,7 +792,7 @@ exports.ljmDriver = function() {
      */
     this.closeAllSync = function() {
         var errorResult;
-        errorResult = this.ljm.LJM_CloseAll();
+        errorResult = self.ljm.LJM_CloseAll();
         if (errorResult !== 0) {
             return errorResult;
         } else {
@@ -818,7 +818,7 @@ exports.ljmDriver = function() {
             var errorResult;
             var returnVar = new ref.alloc('double',1);
 
-            errorResult = this.ljm.LJM_ReadLibraryConfigS.async(
+            errorResult = self.ljm.LJM_ReadLibraryConfigS.async(
                 parameter, 
                 returnVar, 
                 function (err, res){
@@ -854,8 +854,7 @@ exports.ljmDriver = function() {
 
             //Clear the buffer
             returnVar.fill(0);
-
-            errorResult = this.ljm.LJM_ReadLibraryConfigS(
+            errorResult = self.ljm.LJM_ReadLibraryConfigS(
                 parameter, 
                 returnVar
             );
@@ -877,7 +876,7 @@ exports.ljmDriver = function() {
             //Clear the buffer
             strBuffer.fill(0);
 
-            errorResult = this.ljm.LJM_ReadLibraryConfigStringS.async(
+            errorResult = self.ljm.LJM_ReadLibraryConfigStringS.async(
                 parameter,
                 strBuffer,
                 function (err, res){
@@ -907,7 +906,7 @@ exports.ljmDriver = function() {
             //Clear the buffer
             strBuffer.fill(0);
 
-            errorResult = this.ljm.LJM_ReadLibraryConfigStringS(
+            errorResult = self.ljm.LJM_ReadLibraryConfigStringS(
                 parameter,
                 strBuffer
             );
@@ -947,7 +946,7 @@ exports.ljmDriver = function() {
             }
         }
         if ((isNaN(parameter))&&(!isNaN(value))) {
-            errorResult = this.ljm.LJM_WriteLibraryConfigS.async(
+            errorResult = self.ljm.LJM_WriteLibraryConfigS.async(
                 parameter, 
                 value, 
                 function (err, res) {
@@ -962,7 +961,7 @@ exports.ljmDriver = function() {
             return 0;
         } else if((isNaN(parameter))&&(isNaN(value))) {
 
-            errorResult = this.ljm.LJM_WriteLibraryConfigStringS.async(
+            errorResult = self.ljm.LJM_WriteLibraryConfigStringS.async(
                 parameter, 
                 value, 
                 function (err, res) {
@@ -989,12 +988,12 @@ exports.ljmDriver = function() {
     this.writeLibrarySync = function (parameter, value) {
         var errorResult;
         if ((isNaN(parameter))&&(!isNaN(value))) {
-            errorResult = this.ljm.LJM_WriteLibraryConfigS(
+            errorResult = self.ljm.LJM_WriteLibraryConfigS(
                 parameter, 
                 value
             );
         } else if ((isNaN(parameter))&&(isNaN(value))) {
-            errorResult = this.ljm.LJM_WriteLibraryConfigStringS(
+            errorResult = self.ljm.LJM_WriteLibraryConfigStringS(
                 parameter, 
                 value
             );
@@ -1035,7 +1034,7 @@ exports.ljmDriver = function() {
             onError('string to long');
             return 0;
         }
-        errorResult = this.ljm.LJM_Log.async(
+        errorResult = self.ljm.LJM_Log.async(
             level, 
             str,
             function (err, res) {
@@ -1073,7 +1072,7 @@ exports.ljmDriver = function() {
             throw new DriverInterfaceError('string to long');
         }
 
-        errorResult = this.ljm.LJM_Log(level, str);
+        errorResult = self.ljm.LJM_Log(level, str);
         if (errorResult !== 0) {
             throw new DriverOperationError(errorResult);
         }
@@ -1091,7 +1090,7 @@ exports.ljmDriver = function() {
      */
     this.resetLog = function(onError, onSuccess) {
         var errorResult;
-        errorResult = this.ljm.LJM_ResetLog.async(
+        errorResult = self.ljm.LJM_ResetLog.async(
             function (err, res) {
                 if (err) throw err;
                 if (res === 0) {
@@ -1113,7 +1112,7 @@ exports.ljmDriver = function() {
      */
     this.resetLogSync = function() {
         var errorResult;
-        errorResult = this.ljm.LJM_ResetLog();
+        errorResult = self.ljm.LJM_ResetLog();
         if (errorResult !== 0) {
             return errorResult;
         }
@@ -1187,6 +1186,7 @@ exports.ljmDriver = function() {
         return self.controlLogSync(1, 10);
     };
 
+    var self = this;
 
     //Read the Driver Version number
     this.installedDriverVersion = this.readLibrarySync('LJM_LIBRARY_VERSION');
@@ -1199,5 +1199,5 @@ exports.ljmDriver = function() {
     //this.driver.LJM_WriteLibraryConfigS('LJM_LOG_LEVEL',2);
     //this.driver.LJM_Log(2,"LabJack-Device Enabled");
 
-    var self = this;
+    
 };
