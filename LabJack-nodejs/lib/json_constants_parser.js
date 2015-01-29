@@ -211,8 +211,8 @@ var parseConstants = function(LJMJSONFileLocation) {
 	var i;
 	var numErrors = constantsData.errors.length;
 	for(i = 0; i < numErrors; i ++) {
-		this.errorsByNumber[constantsData.errors[i].error] = constantsData.errors[i].string;
-		this.errorsByName[constantsData.errors[i].string] = constantsData.errors[i].error;
+		this.errorsByNumber[constantsData.errors[i].error] = constantsData.errors[i];
+		this.errorsByName[constantsData.errors[i].string] = constantsData.errors[i];
 	}
 
 	this.getAddressInfo = function(address, direction) {
