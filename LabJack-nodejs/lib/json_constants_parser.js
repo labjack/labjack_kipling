@@ -214,6 +214,21 @@ var parseConstants = function(LJMJSONFileLocation) {
 		this.errorsByNumber[constantsData.errors[i].error] = constantsData.errors[i];
 		this.errorsByName[constantsData.errors[i].string] = constantsData.errors[i];
 	}
+	this.getErrorInfo = function(err) {
+		var result;
+		if(isNaN(err)) {
+			result = this.errorsByName[err];
+		} else {
+			result = this.errorsByNumber[err];
+		}
+		if(typeof(result) === 'undefined') {
+			result = {
+				'error': -1,
+				'string': 'Unknown Error Numer'
+			};
+		}
+		return result;
+	};
 
 	this.getAddressInfo = function(address, direction) {
 		var regEntry;
