@@ -336,3 +336,6 @@ exports.WIFI_STATUS_DISPLAY_DATA = {
     2908: {'display':true,'str':'Unknown'},
     2909: {'display':true,'str':'Other'}
 };
+
+// Error codes for the device_curator:
+exports.LJN_DEVICE_NOT_CONNECTED = 99999;

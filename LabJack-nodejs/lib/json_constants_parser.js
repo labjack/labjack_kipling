@@ -208,6 +208,12 @@ var parseConstants = function(LJMJSONFileLocation) {
 	this.errorsByNumber = {};
 	this.errorsByName = {};
 
+	// Append custom "forcing error b/c device not connected" error
+	constantsData.errors.push({
+		'error': driver_const.LJN_DEVICE_NOT_CONNECTED,
+		'string': 'LJN_DEVICE_NOT_CONNECTED',
+		'description': 'The device is no longer connected, trying to reconnect'
+	});
 	var i;
 	var numErrors = constantsData.errors.length;
 	for(i = 0; i < numErrors; i ++) {
