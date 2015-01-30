@@ -1,5 +1,5 @@
 {
-    "name": "ljswitchboard-driver_constants",
+    "name": "ljswitchboard-ljm_driver_constants",
     "version": "0.0.01",
     "description": "Library dedicated only to storing important LJM constants",
     "author": {
