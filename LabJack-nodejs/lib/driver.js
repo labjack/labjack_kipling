@@ -4,11 +4,12 @@
  * @author Chris Johnson (chrisjohn404, LabJack Corp.)
 **/
 
-var driver_const = require('./driver_const');
 var ref = require('ref');//http://tootallnate.github.io/ref/#types-double
 var util = require('util');//
 var driverLib = require('./driver_wrapper');
-var jsonConstants = require('./json_constants_parser');
+
+var jsonConstants = require('ljswitchboard-modbus_map');
+var driver_const = require('ljswitchboard-ljm_driver_constants');
 var ffi = require('ffi');//
 
 var LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = driver_const.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;

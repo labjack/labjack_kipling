@@ -1,6 +1,6 @@
 {
     "name": "labjack-nodejs",
-    "version": "0.0.35",
+    "version": "0.0.36",
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
@@ -32,6 +32,8 @@
         "optimist": "~0",
         "ref": "~0",
         "ljmmm-parse": "~0.1",
+        "ljswitchboard-modbus_map":"0.0.x",
+        "ljswitchboard-ljm_driver_constants":"0.0.x",
         "q": "~1"
     },
     "devDependencies": {

@@ -12,7 +12,8 @@ var fs = require('fs');			//Load File System module
 /**
  * Global Variables:
  */
-var driver_const = require('./driver_const');
+var driver_const = require('ljswitchboard-ljm_driver_constants');
+
 var device = require('./labjack');
 var utilities = require('./utils');
 

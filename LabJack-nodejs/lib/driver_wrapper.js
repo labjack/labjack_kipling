@@ -7,12 +7,13 @@
 var ffi = require('ffi');       //load _______ module 
 var ref = require('ref');       //Load variable type module
 var fs = require('fs');         //Load File System module
-var jsonConstants = require('./json_constants_parser');
+var jsonConstants = require('ljswitchboard-modbus_map');
+var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 /**
  * Global Variables:
  */
-var driver_const = require('./driver_const');
+
 
 var LIBRARY_LOC = {
     'linux': 'libLabJackM.so',

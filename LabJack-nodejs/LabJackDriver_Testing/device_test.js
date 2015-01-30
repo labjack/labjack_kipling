@@ -22,7 +22,7 @@ var driver_wrapper = rewire('../lib/driver_wrapper');
 var deviceManager = rewire('../lib/device');
 deviceManager.__set__('driverLib',fakeDriver);
 
-var driver_const = require('../lib/driver_const');
+var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 var asyncRun = require('./UtilityCode/asyncUtility');
 var syncRun = require('./UtilityCode/syncUtility');

@@ -4,14 +4,13 @@
  * @author Chris Johnson (chrisjohn404, LabJack Corp.)
 **/
 
-var driver_const = require('./driver_const');
 var ref = require('ref');// http://tootallnate.github.io/ref/#types-double
 var util = require('util');
 var driverLib = require('./driver_wrapper');
 var ffi = require('ffi');
-//var ljm = require('./ljmDriver');
-var ljmDriver = require('./driver.js');
-var jsonConstants = require('./json_constants_parser');
+
+var jsonConstants = require('ljswitchboard-modbus_map');
+var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 
 // var ARCH_INT_NUM_BYTES = 4;

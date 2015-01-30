@@ -8,8 +8,8 @@
  * 		"./LabJackDriver/json_constants_parser"
  */
 
-var ljmJsonManager = require('../../lib/json_constants_parser');
-var driver_const = require('../../lib/driver_const');
+var ljmJsonManager = require('ljswitchboard-modbus_map');
+var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 var fakeDriverB
 {
