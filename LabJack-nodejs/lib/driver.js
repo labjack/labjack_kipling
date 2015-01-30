@@ -505,8 +505,8 @@ exports.ljmDriver = function() {
                     
                     return onSuc(retArray);
                 } else {
-                    console.log('LJM_ListAllExtended Err');
-                    console.log(self.errToStrSync(res));
+                    // console.log('LJM_ListAllExtended Err');
+                    // console.log(self.errToStrSync(res));
                     return onErr(res);
                 }
             }
