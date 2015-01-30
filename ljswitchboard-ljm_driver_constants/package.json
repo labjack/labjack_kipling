@@ -1,0 +1,33 @@
+{
+    "name": "ljswitchboard-driver_constants",
+    "version": "0.0.01",
+    "description": "Library dedicated only to storing important LJM constants",
+    "author": {
+        "name": "Chris Johnson",
+        "url": "http://labjack.com"
+    },
+    "main": "./lib/driver_constants",
+    "license": "MIT",
+    "keywords": [
+        "LabJack",
+        "LJMMM",
+        "MODBUS",
+        "T7"
+    ],
+    "homepage": "https://github.com/chrisJohn404/ljswitchboard-driver_constants",
+    "repository": {
+        "type" : "git",
+        "url" : "https://github.com/chrisJohn404/ljswitchboard-driver_constants.git"
+    },
+    "files": [
+        "lib"
+    ],
+    "dependencies": {},
+    "devDependencies": {
+        "nodeunit": "~0.9.0"
+    },
+    "script_notes": "to run a script w/o using npm test, use npm run [script name]",
+    "scripts": {
+        "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+    }
+}
