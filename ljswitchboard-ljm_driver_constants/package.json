@@ -12,7 +12,8 @@
         "LabJack",
         "LJMMM",
         "MODBUS",
-        "T7"
+        "T7",
+        "ljswitchboard"
     ],
     "homepage": "https://github.com/chrisJohn404/ljswitchboard-driver_constants",
     "repository": {
