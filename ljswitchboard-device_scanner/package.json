@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-device_scanning",
+  "name": "ljswitchboard-device_scanner",
   "version": "0.0.1",
   "description": "A node project dedicated to finding ALL labjack devices that are able to be connected to.",
   "main": "./lib/device_scanning",
