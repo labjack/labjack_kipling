@@ -1,0 +1,44 @@
+{
+  "name": "ljswitchboard-device_scanning",
+  "version": "0.0.1",
+  "description": "A node project dedicated to finding ALL labjack devices that are able to be connected to.",
+  "main": "./lib/device_scanning",
+  "scripts": {
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+  },
+  "homepage": "https://github.com/chrisJohn404/ljswitchboard-device_scanning",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-device_scanning"
+  },
+  "keywords": [
+    "LabJack",
+    "LJM",
+    "T7",
+    "ljswitchboard"
+  ],
+  "author": {
+    "name": "Chris Johnson",
+    "url": "http://labjack.com"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "https://raw.githubusercontent.com/chrisJohn404/ljswitchboard-ljm_device_curator/master/LICENSE"
+  },
+  "bugs": {
+    "url": "https://github.com/chrisJohn404/ljswitchboard-device_scanning/issues"
+  },
+  "dependencies": {
+    "async": "~0",
+    "q": "~1",
+    "labjack-nodejs": "0.0.x",
+    "ljswitchboard-ljm_driver_constants": "0.0.x",
+    "ljswitchboard-modbus_map": "0.0.x"
+  },
+  "devDependencies": {
+    "nodeunit": "0.9.x"
+  },
+  "directories": {
+    "lib": "./lib"
+  }
+}
