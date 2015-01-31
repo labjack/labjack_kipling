@@ -1,0 +1,40 @@
+{
+  "name": "ljswitchboard-package_loader",
+  "version": "0.0.1",
+  "description": "A small node/node-webkit project loader for ljswitchboard that loads files into the global.ljswitchboard namespace",
+  "author": {
+    "name": "Chris Johnson",
+    "url": "http://labjack.com"
+  },
+  "main": "./lib/ljswitchboard-package_loader",
+  "homepage": "https://github.com/chrisJohn404/ljswitchboard-package_loader",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-package_loader"
+  },
+  "keywords": [
+    "LabJack",
+    "LJM",
+    "T7",
+    "ljswitchboard"
+  ],
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-package_loader/master/LICENSE"
+  },
+  "bugs": {
+    "url": "https://github.com/chrisJohn404/ljswitchboard-package_loader/issues"
+  },
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "nodeunit": "0.9.x"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+  }
+}
