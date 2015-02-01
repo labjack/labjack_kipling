@@ -79,12 +79,12 @@ var requirements = {
             'ia32': [
                 ALLUSERSPROFILE + '\\LabJack',
                 'C:\\ProgramData\\LabJack',
-                'C:\\Documents and Settings\\All Users\\Application Data\\LabJack',
+                'C:\\"Documents and Settings"\\"All Users"\\"Application Data"\\LabJack',
             ],
             'x64': [
                 ALLUSERSPROFILE + '\\LabJack',
                 'C:\\ProgramData\\LabJack',
-                'C:\\Documents and Settings\\All Users\\Application Data\\LabJack',
+                'C:\\"Documents and Settings"\\"All Users"\\"Application Data"\\LabJack',
             ]
         },
         'linux': {
@@ -109,12 +109,12 @@ var requirements = {
             'ia32': [
                 ALLUSERSPROFILE + '\\LabJack\\LJM',
                 'C:\\ProgramData\\LabJack\\LJM',
-                'C:\\Documents and Settings\\All Users\\Application Data\\LabJack\\LJM',
+                'C:\\"Documents and Settings"\\"All Users"\\"Application Data"\\LabJack\\LJM',
             ],
             'x64': [
                 ALLUSERSPROFILE + '\\LabJack\\LJM',
                 'C:\\ProgramData\\LabJack\\LJM',
-                'C:\\Documents and Settings\\All Users\\Application Data\\LabJack\\LJM',
+                'C:\\"Documents and Settings"\\"All Users"\\"Application Data"\\LabJack\\LJM',
             ]
         },
         'linux': {
@@ -139,12 +139,12 @@ var requirements = {
             'ia32': [
                 ALLUSERSPROFILE + '\\LabJack\\LJM\\ljm_constants.json',
                 'C:\\ProgramData\\LabJack\\LJM\\ljm_constants.json',
-                'C:\\Documents and Settings\\All Users\\Application Data\\LabJack\\LJM\\ljm_constants.json',
+                'C:\\"Documents and Settings"\\"All Users"\\"Application Data"\\LabJack\\LJM\\ljm_constants.json',
             ],
             'x64': [
                 ALLUSERSPROFILE + '\\LabJack\\LJM\\ljm_constants.json',
                 'C:\\ProgramData\\LabJack\\LJM\\ljm_constants.json',
-                'C:\\Documents and Settings\\All Users\\Application Data\\LabJack\\LJM\\ljm_constants.json',
+                'C:\\"Documents and Settings"\\"All Users"\\"Application Data"\\LabJack\\LJM\\ljm_constants.json',
             ]
         },
         'linux': {
@@ -172,13 +172,13 @@ var optionalRequirements = {
             'ia32': [
                 PROGRAMFILES + '\\LabJack\\Drivers\\LabJackM.h',
                 PROGRAMFILES86 + '\\LabJack\\Drivers\\LabJackM.h',
-                'C:\\Program Files\\LabJack\\Drivers\\LabJackM.h',
+                'C:\\"Program Files"\\LabJack\\Drivers\\LabJackM.h',
             ],
             'x64': [
                 PROGRAMFILES + '\\LabJack\\Drivers\\LabJackM.h',
                 PROGRAMFILES86 + '\\LabJack\\Drivers\\LabJackM.h',
-                'C:\\Program Files\\LabJack\\Drivers\\LabJackM.h',
-                'C:\\Program Files (x86)\\LabJack\\Drivers\\LabJackM.h',
+                'C:\\"Program Files"\\LabJack\\Drivers\\LabJackM.h',
+                'C:\\"Program Files (x86)"\\LabJack\\Drivers\\LabJackM.h',
             ]
         },
         'linux': {
@@ -203,12 +203,12 @@ var optionalRequirements = {
             'ia32': [
                 PROGRAMFILES + '\\LabJack\\Drivers\\LabJackM.lib',
                 PROGRAMFILES86 + '\\LabJack\\Drivers\\LabJackM.lib',
-                'C:\\Program Files\\LabJack\\Drivers\\LabJackM.lib',
+                'C:\\"Program Files"\\LabJack\\Drivers\\LabJackM.lib',
             ],
             'x64': [
                 PROGRAMFILES + '\\LabJack\\Drivers\\LabJackM.lib',
                 PROGRAMFILES86 + '\\LabJack\\Drivers\\LabJackM.lib',
-                'C:\\Program Files\\LabJack\\Drivers\\LabJackM.lib',
+                'C:\\"Program Files"\\LabJack\\Drivers\\LabJackM.lib',
             ]
         },
     },
@@ -217,12 +217,12 @@ var optionalRequirements = {
             'ia32': [
                 ALLUSERSPROFILE + '\\LabJack\\LJM\\ljm_startup_configs.json',
                 'C:\\ProgramData\\LabJack\\LJM\\ljm_startup_configs.json',
-                'C:\\Documents and Settings\\All Users\\Application Data\\LabJack\\LJM\\ljm_startup_configs.json',
+                'C:\\"Documents and Settings"\\"All Users"\\"Application Data"\\LabJack\\LJM\\ljm_startup_configs.json',
             ],
             'x64': [
                 ALLUSERSPROFILE + '\\LabJack\\LJM\\ljm_startup_configs.json',
                 'C:\\ProgramData\\LabJack\\LJM\\ljm_startup_configs.json',
-                'C:\\Documents and Settings\\All Users\\Application Data\\LabJack\\LJM\\ljm_startup_configs.json',
+                'C:\\"Documents and Settings"\\"All Users"\\"Application Data"\\LabJack\\LJM\\ljm_startup_configs.json',
             ]
         },
         'linux': {
