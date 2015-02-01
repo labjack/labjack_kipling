@@ -248,9 +248,13 @@ var optionalRequirements = {
 
 var osRequirements = {};
 var osOptionalRequirements = {};
+var coreRequirements = {};
 
 var requirementKeys = Object.keys(requirements);
 var optionalRequirementKeys = Object.keys(optionalRequirements);
+var coreKeys = [
+    'LabJack folder'
+];
 
 
 // Add valid requirements to the osRequirements object
@@ -271,6 +275,17 @@ optionalRequirementKeys.forEach(function(key) {
         // If the OS/arch pair has a requirement
         if(optionalRequirements[key][os][arch]) {
             osOptionalRequirements[key] = optionalRequirements[key][os][arch];
+        }
+    }
+});
+
+// Copy over the core requirements to the coreRequirements object
+coreKeys.forEach(function(key) {
+    // Switch on OS
+    if(requirements[key][os]) {
+        // Switch on OS/Arch pair
+        if(requirements[key][os][arch]) {
+            coreRequirements[key] = requirements[key][os][arch];
         }
     }
 });
@@ -441,6 +456,8 @@ var ops = getOperations(osRequirements, true);
 var nonReqOps = getOperations(osOptionalRequirements, false);
 ops = ops.concat(nonReqOps);
 
+
+
 exports.verifyLJMInstallation = function() {
     var defered = q.defer();
 
@@ -449,6 +466,34 @@ exports.verifyLJMInstallation = function() {
     // Execute functions in parallel
     var promises = [];
     ops.forEach(function(op) {
+        promises.push(op(results));
+    });
+
+    // Wait for all of the operations to complete
+    q.allSettled(promises)
+    .then(function(res) {
+        // console.log('Finished Test Res', results.overallResult);
+        if(results.overallResult) {
+            defered.resolve(results);
+        } else {
+            defered.reject(results);
+        }
+    }, function(err) {
+        // console.log('Finished Test Err', err);
+        defered.reject(results);
+    });
+    return defered.promise;
+};
+
+var coreOps = getOperations(coreRequirements, true);
+exports.verifyCoreInstall = function() {
+    var defered = q.defer();
+
+    var results = {'overallResult': true};
+
+    // Execute functions in parallel
+    var promises = [];
+    coreOps.forEach(function(op) {
         promises.push(op(results));
     });
 

@@ -65,6 +65,33 @@ exports.ljm_installation = {
 			test.ok(false, 'LJM not installed properly');
 			test.done();
 		});
+	},
+	'check core requirements': function(test) {
+		driver_checker.verifyCoreInstall()
+		.then(function(res) {
+			var requiredKeys = [
+				'overallResult',
+				'LabJack folder'
+			];
+
+			var resKeys = Object.keys(res);
+			var msg = 'Required Keys does not match result keys';
+			test.strictEqual(resKeys.length, requiredKeys.length, msg);
+			requiredKeys.forEach(function(key) {
+				if(resKeys.indexOf(key) >= 0) {
+					test.ok(true);
+				} else {
+					test.ok(false, msg + ', missing key: ' + key);
+				}
+			});
+			test.ok(res.overallResult, 'core requirements not met');
+			test.done();
+		}, function(err) {
+			console.log('LJM not installed properly');
+			console.log(err);
+			test.ok(false, 'LJM not installed properly');
+			test.done();
+		});
 	}
 };
 
