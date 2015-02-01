@@ -1,0 +1,358 @@
+body {
+    line-height: normal;
+}
+#versionNumbers {
+    position: absolute;
+    top: 7px;
+    right: 10px;
+    width: 150px;
+}
+#lvm_upgrade_box {
+    position: absolute;
+    top: 7px;
+    right: 10px;
+    width: 175px;
+    display:none;
+}
+.labjackVersions {
+    height: 110px;
+}
+.labjackVersions table {
+    width: 100%;
+}
+.labjackVersions h4 {
+    font-weight: 500;
+    font-size: 11px;
+    line-height: normal;
+    padding-left:25%;
+}
+.labjackVersions .ljVersionNumbers {
+    font-weight: 200;
+    font-size: 10px;
+    line-height: normal;
+    padding: 1px 0px;
+}
+
+.labjackVersions .lvm_link {
+    display: block;
+    padding: 0;
+    height: 14px;
+    width: 96%;
+    margin-top: 2px;
+}
+.labjackVersions .lvm_status {
+    width: 0;
+}
+.labjackVersions .lvm_status .lvm_update_icon {
+    position: relative;
+    top:-1000px;
+}
+.labjackVersions .lvm_name {
+    text-align: left;
+    width: 120px;
+    margin: 0;
+    padding-left:5%;
+}
+.labjackVersions .lvm_version {
+    text-align: right;
+    width: 60px;
+    margin: 0;
+    padding-right:5%;
+}
+.labjackVersions .lvm_upgrade_link {
+    position:absolute;
+    width:100px;
+    height:80px;
+}
+.ljVersionNumbers .lvm_versionLink {
+    text-align: right;
+}
+.labjackVersions .upgradeGuiControlButton {
+    font-size: 10px;
+    padding: 3px;
+    line-height: 10px;
+    position: absolute;
+    bottom: 20px;
+    right: 10px;
+    width: 105px;
+    /*-webkit-animation-name: upgradeButton;
+    -webkit-animation-duration: 2s;
+    -webkit-animation-iteration-count: infinite;*/
+}
+.labjackVersions .upgradeButton {
+    font-size: 10px;
+    line-height: 12px;
+    padding: 0;
+    margin: 0;
+}
+.labjackVersions #showUpgradeLinks {
+    float: right;
+}
+.connection-buttons-holder {
+    vertical-align: top;
+    padding: 0 10px;
+    width: 110px;
+}
+
+.current-connection-indicator {
+    width: 110px;
+}
+
+.device-attribute-label {
+    padding: 0 6px;
+    vertical-align: top;
+    text-align: right;
+    font-weight: bold;
+}
+
+.device-selector-holder
+{
+    margin-left: 50px;
+    margin-top: 10px;
+
+    /*height: 685px;
+    margin-bottom: 20px;*/
+}
+.devices-enumeration-scroller {
+    width: 100%;
+    height: 100%;
+}
+.devices-enumeration-scroller .well {
+    border: none;
+    margin-bottom: 0;
+    padding-right: 0;
+}
+.header
+{
+    margin-bottom: 10px;
+}
+
+.device-pane
+{
+    background-color: white;
+    -moz-box-shadow: 0 0 10px #000000;
+    -webkit-box-shadow: 0 0 10px #000000;
+    box-shadow: 0 0 10px #000000;
+    height: 580px;
+    overflow: auto;
+}
+.device-pane-section {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.device-type
+{
+    height: 175px;
+}
+
+.devices-enumeration
+{
+    /*overflow: auto;
+    width: 90%;
+    border-color: #E3E3E3;
+    border-width: 1px;
+    border-style: solid;
+    position: absolute;
+    right: 40px;
+    left: 140px;*/
+}
+
+.devices-enumeration .tall
+{
+    /*height: 500px;*/
+}
+
+.devices-enumeration .short
+{
+    height: 100px;
+}
+
+.device-pane-popover
+{
+    text-align: right;
+    width: 100px;
+    height: 10px;
+    z-index: 99;
+    position: relative;
+    top: 50px;
+    left: -107px;
+}
+
+.device-pane-popover .arrow
+{
+    width: 0;
+    margin-top: 4px;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid #999999;
+    float: right;
+}
+
+.device-pane-popover .label
+{
+    float: right;
+}
+
+.device #image
+{
+    vertical-align: top;
+    padding: 0 2px;
+}
+
+.device
+{
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    display: inline-block;
+    width: 475px;
+    padding-right: 10px;
+    vertical-align: top;
+    border: 1px solid #ddd;
+    padding: 3px;
+}
+
+.device #image img
+{
+    width: 100px;
+}
+
+.device #name
+{
+    max-width:185px;
+    word-break:break-all;
+}
+
+.device #info-holder
+{
+    display: inline-block;
+    font-size: 12px;
+}
+.wifiIPAddressText {
+    width: 85px;
+    display: inline-block;
+}
+.wifiRSSIImage {
+    position: relative;
+    width: 30px;
+    margin-left: -30px;
+    padding-right: 6px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    left: 99px;
+    top: -3px;
+}
+#refresh-button
+{
+    margin-right: 10px;
+}
+
+#finish-button
+{
+    display: none;
+    -webkit-animation-name: pulse;
+    -webkit-animation-duration: 2s;
+    -webkit-animation-iteration-count: infinite;
+}
+
+.lvm_version_warning {
+    /*color: #FFF;*/
+    /*color: #2D89F0;*/
+    /*-webkit-animation-name: versionWarning;
+    -webkit-animation-duration: 2s;
+    -webkit-animation-iteration-count: infinite;*/
+}
+.lvm_version_error {
+    /*color: #FFF;*/
+    /*color: #DA4F49;*/
+    /*-webkit-animation-name: versionError;
+    -webkit-animation-duration: 2s;
+    -webkit-animation-iteration-count: infinite;*/
+}
+
+#alert-message {
+    display: none;
+}
+
+#logo-holder {
+    text-align: center;
+    margin-bottom: 0;
+}
+#lj-link-holder {
+    text-align: center;
+    margin-bottom: 10px;
+}
+#lj-link-text {
+    cursor:pointer;
+}
+.connect-button
+{
+    margin-bottom: 1px;
+    width: 110px;
+}
+
+.disconnect-button {
+    width: 110px;
+    padding: 5px;
+    text-align: center;
+}
+
+.device-load-progress
+{
+    display: none;
+}
+
+.hidden-button-holder
+{
+    display: none;
+}
+.win-command {
+    cursor:default;
+    position: absolute;
+    /*margin-left: 250px;
+    margin-top: -35px;*/
+    margin-left: 185px;
+    margin-top: -28px;
+}
+.win-command:hover {
+    cursor:default;
+}
+.win-command.green .win-commandring {
+    border-color:#5bb75b;
+    color:#5bb75b;
+}
+.win-command.green .win-commandicon {
+    border-color:#5bb75b;
+    color:#5bb75b;
+}
+.win-command.red .win-commandring {
+    border-color:#da4f49;
+    color:#da4f49;
+}
+.win-command.red .win-commandicon {
+    border-color:#da4f49;
+    color:#da4f49;
+}
+
+@-webkit-keyframes pulse {
+    from { background-color: #49025D; -webkit-box-shadow: 0 0 9px #333; border-color: #49025D;}
+    50% { background-color: #872EA0; -webkit-box-shadow: 0 0 18px #000; border-color: #872EA0;}
+    to { background-color: #49025D; -webkit-box-shadow: 0 0 9px #333; border-color: #49025D;}
+}
+
+@-webkit-keyframes versionWarning {
+    from { background-color: #2D89F0; -webkit-box-shadow: 0 0 3px #333; border-color: #2D89F0;}
+    50% { background-color: #0F6BD2; -webkit-box-shadow: 0 0 6px #000; border-color: #0F6BD2;}
+    to { background-color: #2D89F0; -webkit-box-shadow: 0 0 3px #333; border-color: #2D89F0;}
+}
+@-webkit-keyframes versionError {
+    from { background-color: #DA4F49; -webkit-box-shadow: 0 0 3px #333; border-color: #DA4F49;}
+    50% { background-color: #BD362F; -webkit-box-shadow: 0 0 6px #000; border-color: #BD362F;}
+    to { background-color: #DA4F49; -webkit-box-shadow: 0 0 3px #333; border-color: #DA4F49;}
+}
+@-webkit-keyframes upgradeButton {
+    from { background-color: #49AFCD; -webkit-box-shadow: 0 0 3px #333; border-color: #49AFCD;}
+    50% { background-color: #115A8F; -webkit-box-shadow: 0 0 6px #000; border-color: #115A8F;}
+    to { background-color: #49AFCD; -webkit-box-shadow: 0 0 3px #333; border-color: #49AFCD;}
+}

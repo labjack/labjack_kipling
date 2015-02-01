@@ -1,0 +1,248 @@
+body,html
+{
+    height:100%;
+}
+
+.no-space [class*="span"] {
+    margin-left: 0;
+}
+
+.no-space {
+    margin-left: 0;
+}
+
+.row-fluid .span9NoGutter { width: 76.9% }
+
+#module-list
+{
+    list-style-type: none;
+}
+
+#module-list li
+{
+    background-color: #E0E0E0;
+    color: black;
+    padding: 10px;
+    margin-bottom: 2px;
+    cursor: pointer;
+    -webkit-user-select: none;
+}
+#module-list li:active {
+    cursor: pointer;
+}
+
+#module-list li:hover
+{
+    background-color: #888888;
+    color: white;
+}
+#module-list li a
+{
+    cursor: pointer;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.unselectable {
+    cursor: default;
+   -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    user-select: none; 
+}
+p, h1, h2, h3 {
+    cursor: default;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.selectableText {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+#module-list .selected
+{
+    background-color: #999999;
+    color: white;
+}
+
+#device-display
+{
+    background-color: #666666;
+    color:white;
+    padding: 10px;
+}
+
+#device-display a
+{
+    color: white;
+    text-decoration: underline;
+}
+
+#device-display a:hover
+{
+    color: #E0E0E0;
+}
+#device-selector td {
+    padding: 2px;
+}
+#device-selector th {
+    padding: 2px;
+}
+#module-chrome-contents-holder {
+    background-color: white;
+
+    padding: 9px 20px 20px 20px;
+    /*padding-right:5px;
+    -moz-box-shadow: 0 0 5px #000000;
+    -webkit-box-shadow: 0 0 5px #000000;
+    box-shadow: 0 0 5px #000000;*/
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: auto;
+    height:100%;
+}
+#module-chrome-contents
+{
+    height:100%;
+    width:100%;
+    /*background-color: white;
+
+    padding: 20px;
+    padding-right:5px;
+    -moz-box-shadow: 0 0 5px #000000;
+    -webkit-box-shadow: 0 0 5px #000000;
+    box-shadow: 0 0 5px #000000;
+
+    height:100%;*/
+}
+
+#alert-message
+{
+    display: none;
+}
+
+.nav-dock-component
+{
+    background-color: #999999;
+    color: white;
+}
+
+.nav-dock-component a
+{
+    color: white;
+    text-decoration: underline;
+}
+
+.nav-dock-component a:hover
+{
+    color: #E0E0E0;
+}
+.caret {
+    min-height:14px;
+}
+#module-chrome-block {
+    position:absolute;
+    display: inline-block;
+    height: 100%;
+    background-color: white;
+    -moz-box-shadow: 0 0 5px #000000;
+    -webkit-box-shadow: 0 0 5px #000000;
+    box-shadow: 0 0 5px #000000;
+}
+#module-chrome-contents-footer {
+    position: absolute;
+    bottom: 0;
+    background-color: white;
+}
+@media screen and (min-width: 968px) {
+    /*#module-chrome-contents-holder{
+        position:absolute;
+        left: 0;
+        right: 0;
+        width: auto;
+    }*/
+    #module-chrome-contents-footer {
+        /*left:220px;
+        right:20px;*/
+    }
+    #module-chrome-block {
+        right:20px;
+        left:220px;
+    }
+}
+@media screen and (max-width: 967px) {
+    /*#module-chrome-contents-holder{
+        position: relative;
+        width:76%;
+    }*/
+    #module-chrome-contents-footer {
+        /*left: 22.65%;
+        right: 19px;*/
+    }
+    #module-chrome-block {
+        right:20px;
+        left:23%;
+    }
+}
+@media screen and (min-width: 768px) {
+    #content-holder{
+        margin-left: -20px;
+        margin-right: -10px;
+    }
+    #module-chrome-contents-holder{
+        overflow: auto;
+    }
+    #system-navigation {
+        max-width:220px;
+    }
+    #module-chrome-contents-footer {
+        
+    }
+    #module-chrome-block {
+        position:absolute;
+        display: inline-block;
+        width: auto;
+    }
+}
+@media screen and (max-width: 767px) {
+    #content-holder{
+        margin-left: -20px;
+        margin-right: -20px;
+    }
+    #system-navigation {
+        width: 100%;
+    }
+    #module-chrome-contents-holder {
+        width: 100%;
+    }
+    #system-navigation {
+        max-width:100%;
+    }
+    #module-chrome-contents-footer {
+        left: 0;
+        right: 0;
+        margin-left:0;
+    }
+    #module-chrome-block {
+        right:0;
+        left:0;
+        display: inline-block;
+        position: relative;
+        width: 100%;
+    }
+}
+
+
+

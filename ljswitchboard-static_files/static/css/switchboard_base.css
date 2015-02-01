@@ -1,0 +1,148 @@
+html
+{
+    background-image:url('../img/background.png');
+    min-width: 500px;
+}
+
+body
+{
+    background-image:url('../img/background.png');
+    font-size: 14px;
+}
+
+.unselectable {
+    cursor: default;
+   -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    user-select: none; 
+}
+p, h1, h2, h3 {
+    cursor: default;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.selectableText {
+    user-select: initial;
+    -webkit-user-select: initial;
+}
+#device-search-msg
+{
+    background-color: white;
+    padding: 20px;
+    position: relative;
+    left: 40%;
+    right: 40%;
+    -moz-box-shadow: 0 0 10px #000000;
+    -webkit-box-shadow: 0 0 10px #000000;
+    box-shadow: 0 0 10px #000000;
+    width: 150px;
+}
+
+#premature-error-holder
+{
+    display: none;
+}
+#content-holder{
+    margin: 0px;
+}
+#lvmDownloadBox {
+    background-color: white;
+    -moz-box-shadow: 0 0 10px #000000;
+    -webkit-box-shadow: 0 0 10px #000000;
+    box-shadow: 0 0 10px #000000;
+    left: 25%;
+    right: 25%;
+    position: absolute;
+    padding: 20px;
+    z-index: 1;
+}
+
+/* Some basic text & background coloring classes */
+.isa_info {
+    color: #00529B;
+    background-color: #BDE5F8;
+}
+.isa_success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+}
+.isa_warning {
+    color: #9F6000;
+    background-color: #FEEFB3;
+}
+.isa_error {
+    color: #D8000C;
+    background-color: #FFBABA;
+}
+/*@media screen and (min-width: 768px) {
+    
+}
+
+@media screen and (max-width: 767px) {
+
+}*/
+@media screen and (min-width: 768px) {
+    body {
+        padding-left:20px;
+        padding-right:20px;
+        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: hidden;
+    }
+    #module-list
+    {
+        height: 657px;
+        overflow: auto;
+    }
+    #module-chrome-contents
+    {
+        width: 76%;
+    }
+    #device-display
+    {
+        position: fixed;
+        bottom: 0px;
+    }
+    .nav-dock-component
+    {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    body {
+        padding-left:20px;
+        padding-right:20px;
+        overflow: auto;
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+    #module-list {
+        margin: 0px;
+        display: none;
+    }
+    #device-display
+    {
+        margin-bottom: 10px;
+    }
+    #device-nav-dock
+    {
+        display: block;
+    }
+    #close-nav-dock
+    {
+        display: none;
+    }
+    .nav-dock-component
+    {
+        margin: 10px 0;
+        padding: 10px;
+    }
+}

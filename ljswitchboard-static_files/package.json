@@ -26,6 +26,7 @@
     "url": "https://github.com/chrisJohn404/ljswitchboard-static_files/issues"
   },
   "directories": {
-    "lib": "./lib"
+    "lib": "./lib",
+    "static": "./static"
   }
 }
