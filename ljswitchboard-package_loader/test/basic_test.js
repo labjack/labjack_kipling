@@ -31,5 +31,28 @@ exports.tests = {
 		keys = Object.keys(global.ljswitchboardData);
 		test.deepEqual(keys, ['nodeunit']);
 		test.done();
+	},
+	'check version number parser': function(test) {
+		var versions = [
+			['0.0.1','0.0'],
+			['0.0', '0.0.1']
+		];
+
+		var results = [
+			true,
+			false
+		];
+
+		versions.forEach(function(version, i) {
+			console.log('res', packageLoader.satisfiesVersionCheck(
+					version[0],
+					version[1]))
+			test.strictEqual(
+				packageLoader.satisfiesVersionCheck(
+					version[0],
+					version[1]),
+				results[i]);
+		});
+		test.done();
 	}
 };
