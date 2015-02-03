@@ -26,47 +26,22 @@ exports.setNameSpace = function(namespace) {
 	gns = namespace;
 };
 
-var satisfiesVersionCheck = function(requiredVersion, givenVersion) {
-	// var i;
-	// var numToAdd;
-	// var aPartials;
-	// var bPartials;
-	// var numAPartials;
-	// var numBPartials;
-	// var populateData = function() {
-	// 	aPartials = versionA.split('.');
-	// 	bPartials = versionB.split('.');
-	// 	numAPartials = aPartials.length;
-	// 	numBPartials = bPartials.length;
-	// };
-	// populateData();
-	// console.log('First', versionA, versionB);
-	// if(numBPartials > numAPartials) {
-	// 	numToAdd = numBPartials - numAPartials;
-	// 	for(i = 0; i < numToAdd; i++) {
-	// 		versionA = '0.' + versionA;
-	// 	}
-	// } else if(numBPartials < numAPartials) {
-	// 	numToAdd = numAPartials - numBPartials;
-	// 	for(i = 0; i < numToAdd; i++) {
-	// 		versionB = '0.' + versionB;
-	// 	}
-	// }
-	// console.log('First', versionA, versionB);
-	// console.log(numAPartials, numBPartials);
-	// populateData();
-	// console.log(numAPartials, numBPartials);
-	// var versionNum = 0;
-
-	requiredVersion = semver.clean(requiredVersion);
-	givenVersion = semver.clean(givenVersion);
-	return semver.satisfies(requiredVersion, givenVersion);
-};
-exports.satisfiesVersionCheck = satisfiesVersionCheck;
-
 function createPackageLoader() {
 	this.extractionPath = '';
 	this.managedPackages = {};
+	this.dependencyData = {};
+
+	// Load the package.json of the current module (ljswitchboard-package_loader)
+	// to save its information in the dependencyData object incase other modules
+	// require it as a dependency.
+	var packageLoaderPackageInfo = require('../package.json');
+	var selfName = packageLoaderPackageInfo.name;
+	var selfVersion = packageLoaderPackageInfo.version;
+	this.dependencyData[selfName] = {
+		'name': selfName,
+		'version': selfVersion
+	};
+
 
 	var startNWApp = function(packageInfo, info) {
 		// console.log('nwApp detected', packageInfo, info);
@@ -174,6 +149,7 @@ function createPackageLoader() {
 			// console.log('Adding a managed package', name);
 		}
 		self.managedPackages[name] = packageInfo;
+		self.managedPackages[name].version = '';
 	};
 
 
@@ -250,7 +226,6 @@ function createPackageLoader() {
 
 	var getPackageVersionOfDirectory = function(packageInfo) {
 		var defered = q.defer();
-		console.log('Checking Directory');
 
 		var packageDataDir = path.join(packageInfo.location, 'package.json');
 		fs.exists(packageDataDir, function(exists) {
@@ -262,7 +237,12 @@ function createPackageLoader() {
 						try {
 							var packageData = JSON.parse(data);
 							if(packageData.version) {
-								packageInfo.version = packageData.version;
+								if(semver.valid(packageData.version)) {
+									packageInfo.version = packageData.version;
+								}
+							}
+							if(packageData.ljswitchboardDependencies) {
+								packageInfo.dependencies = packageData.ljswitchboardDependencies;
 							}
 							defered.resolve(packageInfo);
 						} catch(jsonParseError) {
@@ -301,7 +281,12 @@ function createPackageLoader() {
 		var finishedReadingPackageData = function() {
 			var data = JSON.parse(packageString);
 			if(data.version) {
-				packageInfo.version = data.version;
+				if(semver.valid(data.version)) {
+					packageInfo.version = data.version;
+				}
+			}
+			if(data.ljswitchboardDependencies) {
+				packageInfo.dependencies = data.ljswitchboardDependencies;
 			}
 			defered.resolve(packageInfo);
 		};
@@ -324,7 +309,6 @@ function createPackageLoader() {
 			}
 		});
 		parseZipStream.on('close', function() {
-			console.log('.zip parsing finished');
 			if(!foundPackageJsonFile) {
 				defered.resolve(packageInfo);
 			}
@@ -374,7 +358,8 @@ function createPackageLoader() {
 			'exists': null,
 			'version': null,
 			'type': null,
-			'isValid': false
+			'isValid': false,
+			'dependencies': {}
 		};
 
 		checkforExistingDirectory(packageInfo)
@@ -398,25 +383,20 @@ function createPackageLoader() {
 
 		// Wait for all of the operations to complete
 	    q.allSettled(checkDirOps)
-	    .then(function(res) {
-	        var data = {
-	        	'exists': false,
-	        	'location': '',
-	        	'type': '',
-	        	'version': ''
-	        };
-	        var isFound = res.some(function(re) {
-	        	if(re.value.exists) {
-	        		data = re.value;
-	        	}
-	        	return re.value.exists;
-	        });
-	        bundle.availableUpgrade = data;
-	  		// bundle.upgradeOptionExists = isFound;
-			// bundle.foundUpgradeLocation = data.location;
-			// bundle.foundUpgradeType = data.type;
-			// bundle.foundUpgradeVersion = data.version;
+	    .then(function(opgradeOptions) {
+	    	var validUpgrades = [];
 
+	    	// Loop through and pick out the valid upgrades
+	    	opgradeOptions.forEach(function(opgradeOption) {
+	    		if(opgradeOption.value) {
+	    			if(opgradeOption.value.isValid) {
+	    				validUpgrades.push(opgradeOption.value);
+	    			}
+	    		}
+	    	});
+
+	    	// Save the information about the currently available upgrades
+	        bundle.availableUpgrades = validUpgrades;
 	        defered.resolve(bundle);
 
 	    }, function(err) {
@@ -425,7 +405,6 @@ function createPackageLoader() {
 	    });
 		return defered.promise;
 	};
-
 	
 
 	var checkForExistingPackage = function(bundle) {
@@ -434,10 +413,22 @@ function createPackageLoader() {
 		
 		checkForValidPackage(dirToCheck)
 		.then(function(currentPackage) {
+			// Save the information about the currently installed package
 			bundle.currentPackage = currentPackage;
-			// bundle.packageExists = currentPackage.exists;
-			// bundle.existingPackageLocation = currentPackage.location;
-			// bundle.existingPackageVersion = currentPackage.version;
+
+			// Also save the found version number to the managed packages
+			// object and the dependencyData object.  (create it if it doesn't
+			// exist).
+			self.managedPackages[bundle.name].version = currentPackage.version;
+
+			if(self.dependencyData[bundle.name]) {
+				self.dependencyData[bundle.name].version = currentPackage.version;
+				self.dependencyData[bundle.name].name = bundle.name;
+			} else {
+				self.dependencyData[bundle.name] = {};
+				self.dependencyData[bundle.name].version = currentPackage.version;
+				self.dependencyData[bundle.name].name = bundle.name;
+			}
 
 			defered.resolve(bundle);
 		});
@@ -445,6 +436,262 @@ function createPackageLoader() {
 		return defered.promise;
 	};
 
+	var chooseValidUpgrade = function(bundle) {
+		var defered = q.defer();
+
+		var chosenUpgrade;
+		// Pick the first-found package whose dependencies are met
+        var foundValidUpgrade = bundle.availableUpgrades.some(function(upgrade) {
+        	var isValid = true;
+
+        	// Check to see if its dependencies are met by the objects currently
+        	// managed by the package_loader, aka is the data in 
+        	// the self.dependencyData object and are the versions compatable.
+        	var requirementKeys = Object.keys(upgrade.dependencies);
+        	requirementKeys.forEach(function(key) {
+        		// Check to see if the dependency is found
+        		if(self.dependencyData[key]) {
+        			// Make sure that the dependency has a valid version number
+        			if(self.dependencyData[key].version) {
+
+        				var satisfies = semver.satisfies(
+        					self.dependencyData[key].version,
+        					upgrade.dependencies[key]
+        					);
+        				if(satisfies) {
+        					isValid = true;
+        				} else {
+        					isValid = false;
+        				}
+        			} else {
+        				isValid = false;
+        			}
+        		} else {
+        			isValid = false;
+        		}
+        	});
+        	// Check to make sure that the available upgrade has a valid type
+        	if(isValid) {
+        	  	if(upgrade.type) {
+	        		if(upgrade.type === 'directory') {
+	        			isValid = true;
+	        		} else if (upgrade.type === '.zip') {
+	        			isValid = true;
+	        		} else {
+	        			isValid = false;
+	        		}
+	        	} else {
+	        		isValid = false;
+	        	}
+	        }
+        	if(isValid) {
+        		chosenUpgrade = upgrade;
+        	}
+        	return isValid;
+        });
+		bundle.chosenUpgrade = chosenUpgrade;
+		defered.resolve(bundle);
+		return defered.promise;
+	};
+	var determineRequiredOperations = function(bundle) {
+		var defered = q.defer();
+		var isCurrentValid = bundle.currentPackage.isValid;
+		var isUpgradeAvailable = false;
+		if(bundle.chosenUpgrade) {
+			if(bundle.chosenUpgrade.isValid) {
+				isUpgradeAvailable = true;
+			}
+		}
+
+		// If there is a valid current installation then see if it needs to be
+		// upgraded.
+		if(isCurrentValid) {
+			// Check to see if the upgrade version is newer than what is 
+			// installed.
+			var performUpgrade = semver.lt(
+				bundle.currentPackage.version,
+				bundle.chosenUpgrade.version
+			);
+			if(performUpgrade) {
+				bundle.resetPackage = true;
+				bundle.performUpgrade = true;
+			}
+		} else {
+			// If the current installation isn't valid then force it to be
+			// upgraded.
+			bundle.resetPackage = true;
+			bundle.performUpgrade = true;
+
+		}
+		defered.resolve(bundle);
+		return defered.promise;
+	};
+	var resetPackageDirectory = function(bundle) {
+		var defered = q.defer();
+		if(bundle.resetPackage) {
+			fs.exists(bundle.currentPackage.location, function(exists) {
+				if(exists) {
+					fs.rmrf(bundle.currentPackage.location, function(err) {
+						if(err) {
+							console.error('Error resetPackageDirectory', err);
+							var msg = 'Error resetting the package-cache, try' +
+								'manually deleting the folder:' +
+								bundle.currentPackage.location;
+							bundle.resultMessages.push({
+								'step': 'resetPackageDirectory',
+								'message': msg,
+								'isError': true,
+								'error': JSON.stringify(err)
+							});
+							bundle.overallResult = false;
+							bundle.isError = true;
+							defered.resolve(bundle);
+						} else {
+							defered.resolve(bundle);
+						}
+					});
+				} else {
+					bundle.resultMessages.push({
+						'step': 'resetPackageDirectory',
+						'message': 'Package directory not deleted b/c it does not exist'
+					});
+					// The folder doesn't exist so don't remove it
+					defered.resolve(bundle);
+				}
+			});
+		} else {
+			console.log('Skipping package-reset');
+			defered.resolve(bundle);
+		}
+		return defered.promise;
+	};
+
+	var performDirectoryUpgrade = function(bundle) {
+		var defered = q.defer();
+		// Save info to shorter variables
+		var destinationPath = bundle.currentPackage.location;
+		var upgradeFilesPath = bundle.chosenUpgrade.location;
+
+		fs.copyRecursive(upgradeFilesPath, destinationPath, function(err) {
+			if(err) {
+				console.error('Error performDirectoryUpgrade', err);
+				var msg = 'Error performing a directory upgrade.  Verify' +
+				'the user-permissions for the two directories: ' + 
+				upgradeFilesPath + ', and ' + destinationPath;
+				bundle.resultMessages.push({
+					'step': 'performDirectoryUpgrade-copyRecursive',
+					'message': msg,
+					'isError': true,
+					'error': JSON.stringify(err)
+				});
+				bundle.overallResult = false;
+				bundle.isError = true;
+				defered.resolve(bundle);
+			} else {
+				defered.resolve(bundle);
+			}
+		});
+		return defered.promise;
+	};
+	var performZipFileUpgrade = function(bundle) {
+		var defered = q.defer();
+		var destinationPath = bundle.currentPackage.location;
+		var upgradeZipFilePath = bundle.chosenUpgrade.location;
+
+		var archiveStream = fs.createReadStream(upgradeZipFilePath);
+		var unzipExtractor = unzip.Extract({ path: destinationPath });
+
+		unzipExtractor.on('error', function(err) {
+			console.error('Error performZipFileUpgrade', err);
+			var msg = 'Error performing a .zip file upgrade.  Verify ' +
+			'the user-permissions for the directory and .zip file: ' + 
+			upgradeZipFilePath + ', and ' + destinationPath;
+			bundle.resultMessages.push({
+				'step': 'performDirectoryUpgrade-copyRecursive',
+				'message': msg,
+				'isError': true,
+				'error': JSON.stringify(err)
+			});
+			bundle.overallResult = false;
+			bundle.isError = true;
+			defered.resolve(bundle);
+		});
+
+		unzipExtractor.on('close', function() {
+			defered.resolve(bundle);
+		});
+		archiveStream.pipe(unzipExtractor);
+		return defered.promise;
+	};
+	var performUpgrade = function(bundle) {
+		var defered = q.defer();
+		if(bundle.performUpgrade) {
+			// Save info to shorter variables
+			var destination = bundle.currentPackage.location;
+			var upgradePath = bundle.chosenUpgrade.location;
+			var upgradeType = bundle.chosenUpgrade.type;
+
+			// Determine what kind of upgrade process we need to perform
+			if(upgradeType === 'directory') {
+				performDirectoryUpgrade(bundle)
+				.then(defered.resolve, defered.reject);
+			} else if(upgradeType === '.zip') {
+				performZipFileUpgrade(bundle)
+				.then(defered.resolve, defered.reject);
+			} else {
+				var msg = 'Failed to perform upgrade, invalid upgradeType ' + 
+				'detected: ' + upgradeType;
+				bundle.resultMessages.push({
+					'step': 'performUpgrade',
+					'message': msg
+				});
+
+				// If the current installation isn't valid and we reset the
+				// package directory, we have issues because we can't 
+				// load/upgrade/install this library...
+				var isCurrentValid = bundle.currentPackage.isValid;
+				if((!isCurrentValid) && (bundle.resetPackage)) {
+					bundle.overallResult = false;
+					bundle.isError = true;
+				}
+				defered.resolve(bundle);
+			}
+		} else {
+			console.log('Skipping upgrade');
+			defered.resolve(bundle);
+		}
+		
+		return defered.promise;
+	};
+
+	var verifyPackageUpgrade = function(bundle) {
+		var defered = q.defer();
+		var dirToCheck = path.join(self.extractionPath, bundle.packageInfo.folderName);
+		
+		checkForValidPackage(dirToCheck)
+		.then(function(upgradedPackage) {
+			// Save the information about the currently installed package
+			bundle.upgradedPackage = upgradedPackage;
+
+			// Also save the found version number to the managed packages
+			// object and the dependencyData object.  (create it if it doesn't
+			// exist).
+			self.managedPackages[bundle.name].version = upgradedPackage.version;
+
+			if(self.dependencyData[bundle.name]) {
+				self.dependencyData[bundle.name].version = upgradedPackage.version;
+				self.dependencyData[bundle.name].name = bundle.name;
+			} else {
+				self.dependencyData[bundle.name] = {};
+				self.dependencyData[bundle.name].version = upgradedPackage.version;
+				self.dependencyData[bundle.name].name = bundle.name;
+			}
+
+			defered.resolve(bundle);
+		});
+
+		return defered.promise;
+	};
 	var manageSinglePackage = function(bundle) {
 		var defered = q.defer();
 
@@ -459,6 +706,11 @@ function createPackageLoader() {
 
 		checkForExistingPackage(bundle)
 		.then(checkForUpgradeOptions, getOnErr('checkingForExistingPackage'))
+		.then(chooseValidUpgrade, getOnErr('checkForUpgradeOptions'))
+		.then(determineRequiredOperations, getOnErr('chooseValidUpgrade'))
+		.then(resetPackageDirectory, getOnErr('determineRequiredOperations'))
+		.then(performUpgrade, getOnErr('resetPackageDirectory'))
+		.then(verifyPackageUpgrade, getOnErr('performUpgrade'))
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
@@ -485,14 +737,14 @@ function createPackageLoader() {
 				'name': packageName,
 				'packageInfo': self.managedPackages[packageName],
 				'currentPackage': null,
-				// 'packageExists': null,
-				// 'existingPackageVersion': null,
-				// 'existingPackageLocation': null,
-				'availableUpgrade': null,
-				// 'upgradeOptionExists': false,
-				// 'foundUpgradeLocation': null,
-				// 'foundUpgradeType': null,
-				// 'foundUpgradeVersion': null
+				'availableUpgrades': null,
+				'upgradedPackage': null,
+				'resetPackage': false,
+				'performUpgrade': false,
+				'chosenUpgrade': null,
+				'overallResult': false,
+				'resultMessages': [],
+				'isError': false
 			};
 			manageOps.push(manageSinglePackage(bundle));
 		});

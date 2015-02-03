@@ -45,12 +45,13 @@ var testPackages = {
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
-			path.join(process.cwd(), '..', 'ljswitchboard-static_filesa'),
+			path.join(process.cwd(), '..', 'ljswitchboard-static_files'),
 			path.join(process.cwd(), 'test_extraction_data', 'ljswitchboard-static_files.zip'),
 			path.join(process.cwd(), '..', 'ljswitchboard-static_files'),
 		]
 	}
 };
+
 exports.tests = {
 	'configure the extraction path': function(test) {
 		directory = path.join(process.cwd(), localFolder);
@@ -65,6 +66,7 @@ exports.tests = {
 		} catch(err) {
 			console.log('Non-Critical error, please restart test', err);
 			test.ok(false, 'Failed to initialize directory, restart test');
+			process.exit();
 		}
 
 		package_loader.setExtractionPath(directory);
@@ -81,7 +83,7 @@ exports.tests = {
 		);
 		package_loader.runPackageManager()
 		.then(function(updatedPackages) {
-			// console.log('Updated Packages', updatedPackages);
+			console.log('Updated Packages', updatedPackages);
 			test.done();
 		}, function(err) {
 			test.done();
