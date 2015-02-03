@@ -12,6 +12,41 @@ var fs = require('fs.extra');
 var gns = 'ljswitchboard';
 global[gns] = {};
 
+var EVENTS = {
+	// Events emitted during the loadPackage function, they all return the
+	// name of the package being handled.
+	OPENED_WINDOW: 'opened_window',
+	LOADED_PACKAGE: 'loaded_package',
+	SET_PACKAGE: 'set_package',
+
+	// Events emitted during the runPackageManager function, they all return the
+	// 'bundle' object which is all of the data currently extracted/collected 
+	// for an individual packaged being managed.  Within is a packageInfo object
+	// that is +- what was passed to the package_loader in the loadPackage
+	// function.
+	VALID_UPGRADE_DETECTED: 'valid_upgrade_detected',
+	DETECTED_UNINITIALIZED_PACKAGE: 'detected_uninitialized_package',
+	
+	RESETTING_PACKAGE: 'resetting_package',
+	FINISHED_RESETTING_PACKAGE: 'finished_resetting_package',
+	FINISHED_RESETTING_PACKAGE_ERROR: 'finished_resetting_package_error',
+
+	STARTING_EXTRACTION: 'starting_extraction',
+	STARTING_ZIP_FILE_EXTRACTION: 'starting_zip_file_extraction',
+	STARTING_DIRECTORY_EXTRACTION: 'starting_directory_extraction',
+	
+	FINISHED_EXTRACTION: 'finished_extraction',
+	FINISHED_ZIP_FILE_EXTRACTION: 'finished_zip_file_extraction',
+	FINISHED_DIRECTORY_EXTRACTION: 'finished_directory_extraction',
+	
+	FINISHED_EXTRACTION_ERROR: 'finished_extraction_error',
+	FINISHED_ZIP_FILE_EXTRACTION_ERROR: 'finished_zip_file_extraction_error',
+	FINISHED_DIRECTORY_EXTRACTION_ERROR: 'finished_directory_extraction_error',
+};
+exports.eventList = EVENTS;
+
+
+
 exports.setNameSpace = function(namespace) {
 	global[namespace] = {};
 	var curKeys = Object.keys(global[gns]);
@@ -24,6 +59,9 @@ exports.setNameSpace = function(namespace) {
 	delete global[gns];
 
 	gns = namespace;
+};
+exports.getNameSpace = function() {
+	return gns;
 };
 
 function createPackageLoader() {
@@ -68,7 +106,7 @@ function createPackageLoader() {
 			);
 
 			// Emit an event indicating that a new window has been opened.
-			self.emit('opened_window', packageInfo.name);
+			self.emit(EVENTS.OPENED_WINDOW, packageInfo.name);
 		}
 	};
 
@@ -83,7 +121,7 @@ function createPackageLoader() {
 					var moduleData = require(moduleDataPath);
 					global[gns][name].data = moduleData;
 				} catch(err) {
-					console.error('Failed to load package data');
+					console.error('Failed to load package data', err);
 				}
 				
 				if(global[gns][name].info.type) {
@@ -100,6 +138,7 @@ function createPackageLoader() {
 	};
 
 	var requirePackage = function(packageInfo) {
+		console.log('Requiring Package', packageInfo);
 		var name = packageInfo.name;
 		var location;
 		var requireStr;
@@ -111,20 +150,16 @@ function createPackageLoader() {
 			} else {
 				requireStr = location;
 			}
-			try {
-				if(global.require) {
-					global[gns][name] = global.require(requireStr);
-					startPackage(packageInfo, name);
-				} else {
+			if(global.require) {
+				global[gns][name] = global.require(requireStr);
+				startPackage(packageInfo, name);
+			} else {
 
-					global[gns][name] = require(requireStr);
-					startPackage(packageInfo, name);
-				}
-				global[gns][name].packageInfo = packageInfo;
-				self.emit('loaded_package', name);
-			} catch (err) {
-				console.error('package_loader: Failed to load package', err);
+				global[gns][name] = require(requireStr);
+				startPackage(packageInfo, name);
 			}
+			global[gns][name].packageInfo = packageInfo;
+			self.emit(EVENTS.LOADED_PACKAGE, packageInfo);	
 		}
 	};
 	var setPackage = function(packageInfo) {
@@ -134,7 +169,8 @@ function createPackageLoader() {
 
 		if(packageInfo.ref) {
 			global[gns][name] = packageInfo.ref;
-			self.emit('set_package', name);
+			self.emit(EVENTS.SET_PACKAGE, name);
+			self.emit(EVENTS.LOADED_PACKAGE, packageInfo);
 		}
 	};
 	var managePackage = function(packageInfo) {
@@ -150,6 +186,7 @@ function createPackageLoader() {
 		}
 		self.managedPackages[name] = packageInfo;
 		self.managedPackages[name].version = '';
+		self.managedPackages[name].location = '';
 	};
 
 
@@ -170,7 +207,11 @@ function createPackageLoader() {
 			}
 			
 			if(method === 'require') {
-				requirePackage(packageInfo);
+				try {
+					requirePackage(packageInfo);
+				} catch (err) {
+					console.error('package_loader: Failed to require package', err);
+				}
 			} else if (method === 'set') {
 				setPackage(packageInfo);
 			} else if (method === 'managed') {
@@ -303,7 +344,7 @@ function createPackageLoader() {
 			}
 		});
 		parseZipStream.on('error', function(err) {
-			console.error('.zip parsing finished with error');
+			console.error('.zip parsing finished with error', err);
 			if(!foundPackageJsonFile) {
 				defered.resolve(packageInfo);
 			}
@@ -485,7 +526,12 @@ function createPackageLoader() {
 	        	}
 	        }
         	if(isValid) {
+        		// Save the selected upgrade option
         		chosenUpgrade = upgrade;
+
+        		// Emit an event indicating that a valid upgrade has been
+        		// detected.
+				self.emit(EVENTS.VALID_UPGRADE_DETECTED, bundle);
         	}
         	return isValid;
         });
@@ -522,6 +568,9 @@ function createPackageLoader() {
 			bundle.resetPackage = true;
 			bundle.performUpgrade = true;
 
+			// Emit an event indicating that an unitialized package has been 
+			// detected
+			self.emit(EVENTS.DETECTED_UNINITIALIZED_PACKAGE, bundle);
 		}
 		defered.resolve(bundle);
 		return defered.promise;
@@ -531,6 +580,8 @@ function createPackageLoader() {
 		if(bundle.resetPackage) {
 			fs.exists(bundle.currentPackage.location, function(exists) {
 				if(exists) {
+					// Emit an event indicating that the package is being reset.
+					self.emit(EVENTS.RESETTING_PACKAGE, bundle);
 					fs.rmrf(bundle.currentPackage.location, function(err) {
 						if(err) {
 							console.error('Error resetPackageDirectory', err);
@@ -545,8 +596,16 @@ function createPackageLoader() {
 							});
 							bundle.overallResult = false;
 							bundle.isError = true;
+
+							// Emit an event indicating that the package is 
+							// finished being reset with an error.
+							self.emit(EVENTS.FINISHED_RESETTING_PACKAGE_ERROR, bundle);
+							
 							defered.resolve(bundle);
 						} else {
+							// Emit an event indicating that the package is 
+							// finished being reset.
+							self.emit(EVENTS.FINISHED_RESETTING_PACKAGE, bundle);
 							defered.resolve(bundle);
 						}
 					});
@@ -572,6 +631,10 @@ function createPackageLoader() {
 		var destinationPath = bundle.currentPackage.location;
 		var upgradeFilesPath = bundle.chosenUpgrade.location;
 
+		// Emit events indicating that a directory extraction has started
+		self.emit(EVENTS.STARTING_EXTRACTION, bundle);
+		self.emit(EVENTS.STARTING_DIRECTORY_EXTRACTION, bundle);
+
 		fs.copyRecursive(upgradeFilesPath, destinationPath, function(err) {
 			if(err) {
 				console.error('Error performDirectoryUpgrade', err);
@@ -586,13 +649,22 @@ function createPackageLoader() {
 				});
 				bundle.overallResult = false;
 				bundle.isError = true;
+				// Emit events indicating that a zip file extraction has 
+				// finished w/ an error
+				self.emit(EVENTS.FINISHED_EXTRACTION_ERROR, bundle);
+				self.emit(EVENTS.FINISHED_DIRECTORY_EXTRACTION_ERROR, bundle);
 				defered.resolve(bundle);
 			} else {
+				// Emit events indicating that a directory extraction has finished
+				self.emit(EVENTS.FINISHED_EXTRACTION, bundle);
+				self.emit(EVENTS.FINISHED_DIRECTORY_EXTRACTION, bundle);
+				
 				defered.resolve(bundle);
 			}
 		});
 		return defered.promise;
 	};
+	
 	var performZipFileUpgrade = function(bundle) {
 		var defered = q.defer();
 		var destinationPath = bundle.currentPackage.location;
@@ -601,6 +673,10 @@ function createPackageLoader() {
 		var archiveStream = fs.createReadStream(upgradeZipFilePath);
 		var unzipExtractor = unzip.Extract({ path: destinationPath });
 
+		// Emit events indicating that a zip file extraction has started
+		self.emit(EVENTS.STARTING_EXTRACTION, bundle);
+		self.emit(EVENTS.STARTING_ZIP_FILE_EXTRACTION, bundle);
+		
 		unzipExtractor.on('error', function(err) {
 			console.error('Error performZipFileUpgrade', err);
 			var msg = 'Error performing a .zip file upgrade.  Verify ' +
@@ -614,15 +690,24 @@ function createPackageLoader() {
 			});
 			bundle.overallResult = false;
 			bundle.isError = true;
+
+			// Emit events indicating that a zip file extraction has finished
+			// w/ an error
+			self.emit(EVENTS.FINISHED_EXTRACTION_ERROR, bundle);
+			self.emit(EVENTS.FINISHED_ZIP_FILE_EXTRACTION_ERROR, bundle);
 			defered.resolve(bundle);
 		});
 
 		unzipExtractor.on('close', function() {
+			// Emit events indicating that a zip file extraction has finished
+			self.emit(EVENTS.FINISHED_EXTRACTION, bundle);
+			self.emit(EVENTS.FINISHED_ZIP_FILE_EXTRACTION, bundle);
 			defered.resolve(bundle);
 		});
 		archiveStream.pipe(unzipExtractor);
 		return defered.promise;
 	};
+
 	var performUpgrade = function(bundle) {
 		var defered = q.defer();
 		if(bundle.performUpgrade) {
@@ -669,27 +754,83 @@ function createPackageLoader() {
 		var dirToCheck = path.join(self.extractionPath, bundle.packageInfo.folderName);
 		
 		checkForValidPackage(dirToCheck)
-		.then(function(upgradedPackage) {
+		.then(function(managedPackage) {
 			// Save the information about the currently installed package
-			bundle.upgradedPackage = upgradedPackage;
+			bundle.managedPackage = managedPackage;
 
 			// Also save the found version number to the managed packages
 			// object and the dependencyData object.  (create it if it doesn't
 			// exist).
-			self.managedPackages[bundle.name].version = upgradedPackage.version;
+			self.managedPackages[bundle.name].version = managedPackage.version;
+			self.managedPackages[bundle.name].location = managedPackage.location;
+
+			// Also save that information to the local packageInfo object
+			bundle.packageInfo.version = managedPackage.version;
+			bundle.packageInfo.location = managedPackage.location;
 
 			if(self.dependencyData[bundle.name]) {
-				self.dependencyData[bundle.name].version = upgradedPackage.version;
+				self.dependencyData[bundle.name].version = managedPackage.version;
 				self.dependencyData[bundle.name].name = bundle.name;
 			} else {
 				self.dependencyData[bundle.name] = {};
-				self.dependencyData[bundle.name].version = upgradedPackage.version;
+				self.dependencyData[bundle.name].version = managedPackage.version;
 				self.dependencyData[bundle.name].name = bundle.name;
 			}
 
 			defered.resolve(bundle);
 		});
 
+		return defered.promise;
+	};
+	var loadManagedPackage = function(bundle) {
+		var defered = q.defer();
+		// Verify that the packageManagement process went smoothly
+		if(!bundle.isError) {
+			if(bundle.managedPackage.isValid) {
+				// If process succeeded load the package
+				try {
+					requirePackage(bundle.packageInfo);
+					bundle.packageLoaded = true;
+				} catch(err) {
+					console.error('Error in loadManagedPackage', err);
+					var errMsg = 'Error requiring managedPackage during the ' +
+					'loadManagedPackage step.';
+					bundle.resultMessages.push({
+						'step': 'loadManagedPackage',
+						'message': errMsg,
+						'isError': true,
+						'error': JSON.stringify(err)
+					});
+					bundle.overallResult = false;
+					bundle.isError = true;
+				}
+			} else {
+				console.error('Error requiring package');
+				var isValidMsg = 'Error requiring managedPackage during the ' +
+				'loadManagedPackage step. managedPackage is not valid';
+				bundle.resultMessages.push({
+					'step': 'loadManagedPackage',
+					'message': isValidMsg,
+					'isError': true,
+					'error': 'bundle.managedPackage.isValid is not true'
+				});
+				bundle.overallResult = false;
+				bundle.isError = true;
+			}
+		} else {
+			console.error('Error requiring package');
+			var isErrorMsg = 'Error requiring managedPackage during the ' +
+			'loadManagedPackage step. Previous error detected';
+			bundle.resultMessages.push({
+				'step': 'loadManagedPackage',
+				'message': isErrorMsg,
+				'isError': true,
+				'error': 'bundle.isError is true, previous error detected'
+			});
+			bundle.overallResult = false;
+			bundle.isError = true;
+		}
+		defered.resolve(bundle);
 		return defered.promise;
 	};
 	var manageSinglePackage = function(bundle) {
@@ -711,6 +852,7 @@ function createPackageLoader() {
 		.then(resetPackageDirectory, getOnErr('determineRequiredOperations'))
 		.then(performUpgrade, getOnErr('resetPackageDirectory'))
 		.then(verifyPackageUpgrade, getOnErr('performUpgrade'))
+		.then(loadManagedPackage, getOnErr('verifyPackageUpgrade'))
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
@@ -738,13 +880,14 @@ function createPackageLoader() {
 				'packageInfo': self.managedPackages[packageName],
 				'currentPackage': null,
 				'availableUpgrades': null,
-				'upgradedPackage': null,
+				'managedPackage': null,
 				'resetPackage': false,
 				'performUpgrade': false,
 				'chosenUpgrade': null,
 				'overallResult': false,
 				'resultMessages': [],
-				'isError': false
+				'isError': false,
+				'packageLoaded': false
 			};
 			manageOps.push(manageSinglePackage(bundle));
 		});

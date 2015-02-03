@@ -8,24 +8,15 @@ var saveEvent = function(name, info) {
 	capturedEvents.push({'eventName': name, 'data': info});
 };
 
-// Attach various event listeners
-package_loader.on('opened_window', function(packageName) {
-	saveEvent('opened_window', packageName);
-});
-package_loader.on('loaded_package', function(packageName) {
-	// console.log('Loaded New Package', packageName);
-	saveEvent('loaded_package', packageName);
-});
-package_loader.on('set_package', function(packageName) {
-	// console.log('Saved New Package', packageName);
-	saveEvent('set_package', packageName);
-});
-package_loader.on('starting_extraction', function(packageName) {
-	// console.log('Extracting package', packageName);
-	saveEvent('starting_extraction', packageName);
-});
-package_loader.on('finished_extraction', function(packageName) {
-	saveEvent('finished_extraction', packageName);
+// Attach listeners to all of the events defined by the package_loader
+var eventList = package_loader.eventList;
+var eventListKeys = Object.keys(eventList);
+eventListKeys.forEach(function(eventKey) {
+	var eventName = package_loader.eventList[eventKey];
+	package_loader.on(eventName, function(data) {
+		// console.log('Event Fired', eventName);
+		saveEvent(eventName, data);
+	});
 });
 
 
@@ -73,6 +64,9 @@ exports.tests = {
 		test.done();
 	}, 
 	'start extraction': function(test){
+		// Clear the fired-events list
+		capturedEvents = [];
+
 		// add the staticFiles package to the packageManager
 		package_loader.loadPackage(testPackages.staticFiles);
 
@@ -81,12 +75,54 @@ exports.tests = {
 			package_loader.getManagedPackages(),
 			[testPackages.staticFiles.name]
 		);
+
+		console.log('  - Running the Package Manager');
 		package_loader.runPackageManager()
 		.then(function(updatedPackages) {
-			console.log('Updated Packages', updatedPackages);
+
+			var requiredEvents = [
+				eventList.VALID_UPGRADE_DETECTED,
+				eventList.DETECTED_UNINITIALIZED_PACKAGE,
+				eventList.STARTING_EXTRACTION,
+				eventList.STARTING_DIRECTORY_EXTRACTION,
+				eventList.FINISHED_EXTRACTION,
+				eventList.FINISHED_DIRECTORY_EXTRACTION,
+				eventList.LOADED_PACKAGE,
+			];
+
+			var emittedEvents = [];
+			capturedEvents.forEach(function(capturedEvent) {
+				emittedEvents.push(capturedEvent.eventName);
+			});
+			var msg = 'Required events not fired';
+			test.deepEqual(emittedEvents, requiredEvents, msg);
+			// console.log('Updated Packages', updatedPackages);
+
+			var cns = package_loader.getNameSpace();
+			// Check to make sure that the library was properly loaded
+			var loadedLibKeys = Object.keys(global[cns]);
+			console.log('Loaded Libraries', loadedLibKeys);
+			
+			// Test to make sure that the package has been loaded into memory
 			test.done();
 		}, function(err) {
 			test.done();
 		});
-	}
+	},
+	'check for valid events being fired': function(test) {
+		test.done();
+	},
+	'execution w/ existing data and same version upgrade': function(test) {
+		test.done();
+	},
+	'execution w/ existing data and older upgrade': function(test) {
+		test.done();
+	},
+	'execution w/ existing data and newer upgrade': function(test) {
+		test.done();
+	},
+	// Clear the saved files and do the same for .zip files
+	// Make tests where files have dependencies
+	// Make tests where multiple packages are managed and one depends on a version
+	//     of another that is currently being upgraded.  (de-async package-loading front-end).
 };
