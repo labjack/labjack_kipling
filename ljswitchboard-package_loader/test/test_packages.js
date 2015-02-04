@@ -10,6 +10,15 @@ var testPackages = {
 			path.join(process.cwd(), 'test_extraction_data', 'ljswitchboard-core'),
 		]
 	},
+	'forceRefreshCore': {
+		'name': 'ljswitchboard-core',
+		'folderName': 'ljswitchboard-core',
+		'loadMethod': 'managed',
+		'forceRefresh': true,
+		'locations': [
+			path.join(process.cwd(), 'test_extraction_data', 'ljswitchboard-core'),
+		]
+	},
 	'invalidCore': {
 		'name': 'ljswitchboard-core',
 		'folderName': 'ljswitchboard-core',

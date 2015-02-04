@@ -630,6 +630,7 @@ function createPackageLoader() {
 			}
 		}
 
+
 		// If there is a valid current installation then see if it needs to be
 		// upgraded.
 		if(isCurrentValid) {
@@ -640,6 +641,11 @@ function createPackageLoader() {
 					bundle.currentPackage.version,
 					bundle.chosenUpgrade.version
 				);
+				// If the package indicates that it should be forced to refresh
+				// then handle that flag here.
+				if(bundle.packageInfo.forceRefresh) {
+					performUpgrade = true;
+				}
 				if(performUpgrade) {
 					bundle.resetPackage = true;
 					bundle.performUpgrade = true;
@@ -709,6 +715,7 @@ function createPackageLoader() {
 							defered.resolve(bundle);
 						}
 					});
+					
 				} else {
 					bundle.resultMessages.push({
 						'step': 'resetPackageDirectory',
