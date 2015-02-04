@@ -51,7 +51,7 @@ var reInitializeTest = function(test) {
 	.then(function(updatedPackages) {
 		// Define the required event list
 		var requiredEvents = [
-			eventList.OVERWRITING_MANAGED_PACKAGE,
+			eventList.PACKAGE_MANAGEMENT_STARTED,
 			eventList.VALID_UPGRADE_DETECTED,
 			eventList.DETECTED_UNINITIALIZED_PACKAGE,
 			eventList.STARTING_EXTRACTION,
@@ -89,6 +89,7 @@ var tests = {
 			'endTime': endTime,
 			'duration': duration
 		});
+		package_loader.deleteAllManagedPackages();
 		callback();
 	},
 	'configure the extraction path': function(test) {
@@ -114,7 +115,7 @@ var tests = {
 		.then(function(updatedPackages) {
 			// Define the required event list
 			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.PACKAGE_MANAGEMENT_STARTED,
 				eventList.VALID_UPGRADE_DETECTED,
 				eventList.RESETTING_PACKAGE,
 				eventList.FINISHED_RESETTING_PACKAGE,
@@ -152,7 +153,7 @@ var tests = {
 			// console.log('Results', updatedPackages);
 			// Define the required event list
 			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.PACKAGE_MANAGEMENT_STARTED,
 				eventList.VALID_UPGRADE_DETECTED,
 				eventList.RESETTING_PACKAGE,
 				eventList.FINISHED_RESETTING_PACKAGE,
@@ -191,7 +192,7 @@ var tests = {
 		.then(function(updatedPackages) {
 			// Define the required event list
 			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.PACKAGE_MANAGEMENT_STARTED,
 				eventList.VALID_UPGRADE_DETECTED,
 				eventList.DETECTED_UNINITIALIZED_PACKAGE,
 				eventList.STARTING_EXTRACTION,
@@ -226,7 +227,7 @@ var tests = {
 		.then(function(updatedPackages) {
 			// Define the required event list
 			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.PACKAGE_MANAGEMENT_STARTED,
 				eventList.NO_VALID_UPGRADE_DETECTED,
 				eventList.DETECTED_UP_TO_DATE_PACKAGE,
 				eventList.SKIPPING_PACKAGE_RESET,
@@ -260,7 +261,7 @@ var tests = {
 		.then(function(updatedPackages) {
 			// Define the required event list
 			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.PACKAGE_MANAGEMENT_STARTED,
 				eventList.NO_VALID_UPGRADE_DETECTED,
 				eventList.DETECTED_UP_TO_DATE_PACKAGE,
 				eventList.SKIPPING_PACKAGE_RESET,
@@ -294,7 +295,7 @@ var tests = {
 		.then(function(updatedPackages) {
 			// Define the required event list
 			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.PACKAGE_MANAGEMENT_STARTED,
 				eventList.NO_VALID_UPGRADE_DETECTED,
 				eventList.DETECTED_UP_TO_DATE_PACKAGE,
 				eventList.SKIPPING_PACKAGE_RESET,
@@ -330,7 +331,7 @@ var tests = {
 		.then(function(updatedPackages) {
 			// Define the required event list
 			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.PACKAGE_MANAGEMENT_STARTED,
 				eventList.NO_VALID_UPGRADE_DETECTED,
 				eventList.SKIPPING_PACKAGE_RESET,
 				eventList.SKIPPING_PACKAGE_UPGRADE,
@@ -365,7 +366,7 @@ var tests = {
 		.then(function(updatedPackages) {
 			// Define the required event list
 			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.PACKAGE_MANAGEMENT_STARTED,
 				eventList.NO_VALID_UPGRADE_DETECTED,
 				eventList.SKIPPING_PACKAGE_RESET,
 				eventList.SKIPPING_PACKAGE_UPGRADE,
@@ -400,7 +401,7 @@ var tests = {
 		.then(function(updatedPackages) {
 			// Define the required event list
 			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.PACKAGE_MANAGEMENT_STARTED,
 				eventList.NO_VALID_UPGRADE_DETECTED,
 				eventList.SKIPPING_PACKAGE_RESET,
 				eventList.SKIPPING_PACKAGE_UPGRADE,

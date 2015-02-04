@@ -21,9 +21,13 @@ var cleanExtractionPath = function(test, directory) {
 };
 exports.cleanExtractionPath = cleanExtractionPath;
 
-var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType, requiredEvents, capturedEvents) {
+var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType, requiredEvents, capturedEvents, index) {
+	var i = 0;
+	if(typeof(index) !== 'undefined') {
+		i = index;
+	}
 	var packageKeys = Object.keys(updatedPackages);
-	var packageData = updatedPackages[packageKeys[0]];
+	var packageData = updatedPackages[packageKeys[i]];
 	var startingPackageInfo = packageData.currentPackage;
 	var chosenUpgrade = packageData.chosenUpgrade;
 
@@ -51,7 +55,7 @@ var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType,
 		testConditions.upgradedPackage = false;
 		testConditions.shouldHaveFailed = true;
 	}
-
+	
 	var isVersionValid;
 	if(testConditions.semverValidity) {
 		// Verify that the packageInfo object has a valid semver version
@@ -67,7 +71,7 @@ var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType,
 		test.ok(!isVersionValid, 'invalid initial version detected');
 		test.ok(!startingPackageInfo.isValid, 'initial package should not exist');
 	}
-
+	
 	// Verify upgrade choice & actions
 	if(testConditions.validUpgradeObj) {
 		test.strictEqual(chosenUpgrade.type, testConditions.upgradeType, 'Chosen upgrade is not a directory');
@@ -76,7 +80,7 @@ var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType,
 		test.strictEqual(typeof(chosenUpgrade), 'undefined', 'chosenUpgrade should not be defined');
 		
 	}
-
+	
 	// Verify operation conditions
 	if(testConditions.upgradedPackage) {
 		test.ok(packageData.resetPackage, 'Should have chosen to reset the package');
@@ -86,7 +90,7 @@ var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType,
 		test.ok(!packageData.resetPackage, 'Should have chosen not to reset the package');
 		test.ok(!packageData.performUpgrade, 'Should have chosen not to upgrade the package');
 	}
-
+	
 	// Check overall errors
 	if(testConditions.shouldHaveFailed) {
 		test.ok(packageData.isError, 'Should have an error');
@@ -95,21 +99,28 @@ var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType,
 		test.ok(!packageData.isError, 'Should not have an error');
 		test.ok(packageData.overallResult, 'Should have passed');
 	}
-
+	
 	var emittedEvents = [];
 	capturedEvents.forEach(function(capturedEvent) {
 		emittedEvents.push(capturedEvent.eventName);
 	});
+	
+	// console.log(emittedEvents.length, requiredEvents.length);
+	// emittedEvents.forEach(function(emittedEvent, i) {
+	// 	console.log(emittedEvent,' : ', requiredEvents[i]);
+	// });
 	var msg = 'Required events not fired';
 	test.deepEqual(emittedEvents, requiredEvents, msg);
-
+	
 	// Check to make sure that the library was properly loaded into the
 	// global[cns] aka global.labjackswitchboardData name space.
 	var cns = package_loader.getNameSpace();
 	var loadedLibKeys = Object.keys(global[cns]);
-	var requiredLibKeys = [
-		'ljswitchboard_static_files'
-	];
+
+	var requiredLibKeys = [];
+	if(!testConditions.shouldHaveFailed) {
+		requiredLibKeys.push('ljswitchboard-static_files');
+	}
 	requiredLibKeys.forEach(function(requiredLibKey) {
 		if(loadedLibKeys.indexOf(requiredLibKey) >= 0) {
 			test.ok(true, 'found required key');
@@ -117,7 +128,7 @@ var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType,
 		} else {
 			test.ok(false, 'did not find required key: ' + requiredLibKey);
 		}
-	});
+	});	
 };
 exports.testSinglePackageUpdate = testSinglePackageUpdate;
 

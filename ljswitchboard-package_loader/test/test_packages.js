@@ -3,12 +3,23 @@ var path = require('path');
 
 var testPackages = {
 	'core': {
-		'name': 'ljswitchboard_core',
-		'loadMethod': 'require', 
-		'location': path.join(process.cwd(), '..', 'ljswitchboard-core')
+		'name': 'ljswitchboard-core',
+		'folderName': 'ljswitchboard-core',
+		'loadMethod': 'managed',
+		'locations': [
+			path.join(process.cwd(), 'test_extraction_data', 'ljswitchboard-core'),
+		]
+	},
+	'invalidCore': {
+		'name': 'ljswitchboard-core',
+		'folderName': 'ljswitchboard-core',
+		'loadMethod': 'managed',
+		'locations': [
+			path.join(process.cwd(), 'test_extraction_data', 'ljswitchboard-core_invalidDep'),
+		]
 	},
 	'staticFiles_Long': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
@@ -18,7 +29,7 @@ var testPackages = {
 		]
 	},
 	'staticFiles': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
@@ -28,7 +39,7 @@ var testPackages = {
 		]
 	},
 	'staticFilesOldOnly': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
@@ -36,7 +47,7 @@ var testPackages = {
 		]
 	},
 	'staticFilesNew': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
@@ -44,7 +55,7 @@ var testPackages = {
 		]
 	},
 	'staticFilesOldBeforeNew': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
@@ -54,7 +65,7 @@ var testPackages = {
 		]
 	},
 	'staticFilesStdDirBeforeNewZip': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
@@ -64,7 +75,7 @@ var testPackages = {
 		]
 	},
 	'staticFilesNewBeforeOld': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
@@ -74,7 +85,7 @@ var testPackages = {
 		]
 	},
 	'staticFilesZipTest': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
@@ -83,13 +94,13 @@ var testPackages = {
 		]
 	},
 	'staticFilesNoUpgrades': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': []
 	},
 	'staticFilesNotFoundUpgrades': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
@@ -98,7 +109,7 @@ var testPackages = {
 		]
 	},
 	'staticFilesInvalidDeps': {
-		'name': 'ljswitchboard_static_files',
+		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [

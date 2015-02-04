@@ -17,6 +17,7 @@ var EVENTS = {
 	// name of the package being handled.
 	OPENED_WINDOW: 'opened_window',
 	LOADED_PACKAGE: 'loaded_package',
+	NOT_LOADING_PACKAGE: 'not_loading_package',
 	SET_PACKAGE: 'set_package',
 	OVERWRITING_MANAGED_PACKAGE: 'overwriting_managed_package',
 
@@ -25,6 +26,7 @@ var EVENTS = {
 	// for an individual packaged being managed.  Within is a packageInfo object
 	// that is +- what was passed to the package_loader in the loadPackage
 	// function.
+	PACKAGE_MANAGEMENT_STARTED: 'package_management_started',
 	VALID_UPGRADE_DETECTED: 'valid_upgrade_detected',
 	NO_VALID_UPGRADE_DETECTED: 'no_valid_upgrade_detected',
 	DETECTED_UNINITIALIZED_PACKAGE: 'detected_uninitialized_package',
@@ -75,6 +77,7 @@ exports.getNameSpace = function() {
 function createPackageLoader() {
 	this.extractionPath = '';
 	this.managedPackages = {};
+	this.managedPackagesList = [];
 	this.dependencyData = {};
 
 	// Load the package.json of the current module (ljswitchboard-package_loader)
@@ -129,7 +132,7 @@ function createPackageLoader() {
 					var moduleData = require(moduleDataPath);
 					global[gns][name].data = moduleData;
 				} catch(err) {
-					console.error('  - Failed to load package data', err);
+					console.error('  - Failed to load package data', err, name);
 				}
 				
 				if(global[gns][name].info.type) {
@@ -141,7 +144,7 @@ function createPackageLoader() {
 				// console.warn('Info Object does not exist, not doing anything special');
 			}
 		} catch (err) {
-			console.error('  - package_loader: startPackage Error', err);
+			console.error('  - package_loader: startPackage Error', err, name);
 		}
 	};
 
@@ -149,24 +152,30 @@ function createPackageLoader() {
 		var name = packageInfo.name;
 		var location;
 		var requireStr;
+		var loadedPackages = Object.keys(global[gns]);
+		// Make sure that we aren't over-writing a global variable by requiring
+		// the new lib.
+		if(loadedPackages.indexOf(name) < 0) {
+			if(packageInfo.location) {
+				location = packageInfo.location;
+				if(packageInfo.requireStr) {
+					requireStr = packageInfo.requireStr;
+				} else {
+					requireStr = location;
+				}
+				if(global.require) {
+					global[gns][name] = global.require(requireStr);
+					startPackage(packageInfo, name);
+				} else {
 
-		if(packageInfo.location) {
-			location = packageInfo.location;
-			if(packageInfo.requireStr) {
-				requireStr = packageInfo.requireStr;
-			} else {
-				requireStr = location;
+					global[gns][name] = require(requireStr);
+					startPackage(packageInfo, name);
+				}
+				global[gns][name].packageInfo = packageInfo;
+				self.emit(EVENTS.LOADED_PACKAGE, packageInfo);	
 			}
-			if(global.require) {
-				global[gns][name] = global.require(requireStr);
-				startPackage(packageInfo, name);
-			} else {
-
-				global[gns][name] = require(requireStr);
-				startPackage(packageInfo, name);
-			}
-			global[gns][name].packageInfo = packageInfo;
-			self.emit(EVENTS.LOADED_PACKAGE, packageInfo);	
+		} else {
+			self.emit(EVENTS.NOT_LOADING_PACKAGE, packageInfo);	
 		}
 	};
 	var setPackage = function(packageInfo) {
@@ -189,6 +198,7 @@ function createPackageLoader() {
 		if(self.managedPackages[name]) {
 			self.emit(EVENTS.OVERWRITING_MANAGED_PACKAGE, packageInfo);
 		} else {
+			self.managedPackagesList.push(name);
 			// console.log('Adding a managed package', name);
 		}
 		self.managedPackages[name] = packageInfo;
@@ -233,7 +243,50 @@ function createPackageLoader() {
 	 * Returns a list of the packages managed by the package_loader
 	 */
 	this.getManagedPackages = function() {
-		return Object.keys(self.managedPackages);
+		return self.managedPackagesList;
+	};
+	this.getDependencyList = function() {
+		return Object.keys(self.dependencyData);
+	};
+	this.deleteManagedPackage = function(name) {
+		var isValid = false;
+		if(self.managedPackages[name]) {
+			// Delete the item from the managedPackagesList
+			var newList = [];
+			self.managedPackagesList.forEach(function(item) {
+				if(item !== name) {
+					newList.push(item);
+				}
+			});
+			self.managedPackagesList = newList;
+
+			self.managedPackages[name] = null;
+			self.managedPackages[name] = undefined;
+			delete self.managedPackages[name];
+
+			isValid = true;
+		}
+		// Only delete managedObjects from the global scope & dependency obj.
+		if(isValid) {
+			if(self.dependencyData[name]) {
+				self.dependencyData[name] = null;
+				self.dependencyData[name] = undefined;
+				delete self.dependencyData[name];
+			}
+			if(global[gns][name]) {
+				global[gns][name] = null;
+				global[gns][name] = undefined;
+				delete global[gns][name];
+			}
+		}
+	};
+	this.deleteAllManagedPackages = function() {
+		var packagesToDelete = [];
+		self.managedPackagesList.forEach(function(packageToDelete) {
+			packagesToDelete.push(packageToDelete);
+		});
+
+		packagesToDelete.forEach(self.deleteManagedPackage);
 	};
 
 	var checkforExistingDirectory = function(packageInfo) {
@@ -448,7 +501,7 @@ function createPackageLoader() {
 	        defered.resolve(bundle);
 
 	    }, function(err) {
-	        console.error('  - Finished Managing err', err);
+	        console.error('  - Finished Managing err', err, bundle.name);
 	        defered.reject(err);
 	    });
 		return defered.promise;
@@ -496,9 +549,9 @@ function createPackageLoader() {
         	// managed by the package_loader, aka is the data in 
         	// the self.dependencyData object and are the versions compatable.
         	var requirementKeys = Object.keys(upgrade.dependencies);
-        	requirementKeys.forEach(function(key) {
+        	requirementKeys.every(function(key) {
         		// Check to see if the dependency is found
-        		if(self.dependencyData[key]) {
+        		if(typeof(self.dependencyData[key]) !== 'undefined') {
         			// Make sure that the dependency has a valid version number
         			if(self.dependencyData[key].version) {
         				var satisfies = semver.satisfies(
@@ -516,6 +569,7 @@ function createPackageLoader() {
         		} else {
         			isValid = false;
         		}
+        		return isValid;
         	});
         	// Check to make sure that the available upgrade has a valid type
         	if(isValid) {
@@ -604,7 +658,7 @@ function createPackageLoader() {
 				// detected
 				self.emit(EVENTS.DETECTED_UNINITIALIZED_PACKAGE, bundle);
 			} else {
-				console.error('  - Detected uninitialized package w/ no upgrade options');
+				console.error('  - Detected uninitialized package w/ no upgrade options', bundle.name);
 				var msg = 'Detected an uninitialized package with no upgrade ' +
 				'options';
 				bundle.resultMessages.push({
@@ -628,7 +682,7 @@ function createPackageLoader() {
 					self.emit(EVENTS.RESETTING_PACKAGE, bundle);
 					fs.rmrf(bundle.currentPackage.location, function(err) {
 						if(err) {
-							console.error('  - Error resetPackageDirectory', err);
+							console.error('  - Error resetPackageDirectory', err, bundle.name);
 							var msg = 'Error resetting the package-cache, try' +
 								'manually deleting the folder:' +
 								bundle.currentPackage.location;
@@ -681,7 +735,7 @@ function createPackageLoader() {
 
 		fs.copyRecursive(upgradeFilesPath, destinationPath, function(err) {
 			if(err) {
-				console.error('  - Error performDirectoryUpgrade', err);
+				console.error('  - Error performDirectoryUpgrade', err, bundle.name);
 				var msg = 'Error performing a directory upgrade.  Verify' +
 				'the user-permissions for the two directories: ' + 
 				upgradeFilesPath + ', and ' + destinationPath;
@@ -722,7 +776,7 @@ function createPackageLoader() {
 		self.emit(EVENTS.STARTING_ZIP_FILE_EXTRACTION, bundle);
 		
 		unzipExtractor.on('error', function(err) {
-			console.error('  - Error performZipFileUpgrade', err);
+			console.error('  - Error performZipFileUpgrade', err, bundle.name);
 			var msg = 'Error performing a .zip file upgrade.  Verify ' +
 			'the user-permissions for the directory and .zip file: ' + 
 			upgradeZipFilePath + ', and ' + destinationPath;
@@ -775,7 +829,7 @@ function createPackageLoader() {
 				performZipFileUpgrade(bundle)
 				.then(defered.resolve, defered.reject);
 			} else {
-				console.error('  - in performUpgrade, invalid upgradeType detected');
+				console.error('  - in performUpgrade, invalid upgradeType detected', bundle.name);
 				var msg = 'Failed to perform upgrade, invalid upgradeType ' + 
 				'detected: ' + upgradeType;
 				bundle.resultMessages.push({
@@ -804,7 +858,6 @@ function createPackageLoader() {
 	var verifyPackageUpgrade = function(bundle) {
 		var defered = q.defer();
 		var dirToCheck = path.join(self.extractionPath, bundle.packageInfo.folderName);
-		
 		checkForValidPackage(dirToCheck)
 		.then(function(managedPackage) {
 			// Save the information about the currently installed package
@@ -845,7 +898,7 @@ function createPackageLoader() {
 					bundle.packageLoaded = true;
 					bundle.overallResult = true;
 				} catch(err) {
-					console.error('  - Error in loadManagedPackage', err);
+					console.error('  - Error in loadManagedPackage', err, bundle.name);
 					var errMsg = 'Error requiring managedPackage during the ' +
 					'loadManagedPackage step.';
 					bundle.resultMessages.push({
@@ -859,7 +912,7 @@ function createPackageLoader() {
 					self.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
 				}
 			} else {
-				console.error('  - Error requiring package, detected an error via isValid');
+				console.error('  - Error requiring package, detected an error via isValid', bundle.name);
 				var isValidMsg = 'Error requiring managedPackage during the ' +
 				'loadManagedPackage step. managedPackage is not valid';
 				bundle.resultMessages.push({
@@ -873,7 +926,7 @@ function createPackageLoader() {
 				self.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
 			}
 		} else {
-			console.error('  - Error requiring package, detected an error via isError');
+			console.error('  - Error requiring package, detected an error via isError', bundle.name);
 			var isErrorMsg = 'Error requiring managedPackage during the ' +
 			'loadManagedPackage step. Previous error detected';
 			bundle.resultMessages.push({
@@ -889,28 +942,37 @@ function createPackageLoader() {
 		defered.resolve(bundle);
 		return defered.promise;
 	};
-	var manageSinglePackage = function(bundle) {
-		var defered = q.defer();
-
-		var getOnErr = function(msg) {
-			return function(err) {
-				var innerDefered = q.defer();
-				console.log('manageSinglePackage err', msg, err, bundle);
-				innerDefered.reject(err);
-				return innerDefered.promise;
+	var getManageSinglePackage = function(bundle) {
+		var manageSinglePackage = function(results) {
+			var defered = q.defer();
+			var getOnErr = function(msg) {
+				return function(err) {
+					var innerDefered = q.defer();
+					console.log('manageSinglePackage err', msg, err, bundle);
+					innerDefered.reject(err);
+					return innerDefered.promise;
+				};
 			};
-		};
 
-		checkForExistingPackage(bundle)
-		.then(checkForUpgradeOptions, getOnErr('checkingForExistingPackage'))
-		.then(chooseValidUpgrade, getOnErr('checkForUpgradeOptions'))
-		.then(determineRequiredOperations, getOnErr('chooseValidUpgrade'))
-		.then(resetPackageDirectory, getOnErr('determineRequiredOperations'))
-		.then(performUpgrade, getOnErr('resetPackageDirectory'))
-		.then(verifyPackageUpgrade, getOnErr('performUpgrade'))
-		.then(loadManagedPackage, getOnErr('verifyPackageUpgrade'))
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+			// Event a message indicating that we are starting to manage a
+			// package.
+			self.emit(EVENTS.PACKAGE_MANAGEMENT_STARTED, bundle);
+
+			checkForExistingPackage(bundle)
+			.then(checkForUpgradeOptions, getOnErr('checkingForExistingPackage'))
+			.then(chooseValidUpgrade, getOnErr('checkForUpgradeOptions'))
+			.then(determineRequiredOperations, getOnErr('chooseValidUpgrade'))
+			.then(resetPackageDirectory, getOnErr('determineRequiredOperations'))
+			.then(performUpgrade, getOnErr('resetPackageDirectory'))
+			.then(verifyPackageUpgrade, getOnErr('performUpgrade'))
+			.then(loadManagedPackage, getOnErr('verifyPackageUpgrade'))
+			.then(function(res) {
+				results[res.name] = res;
+				defered.resolve(results);
+			}, defered.reject);
+			return defered.promise;
+		};
+		return manageSinglePackage;
 	};
 
 	/**
@@ -931,35 +993,58 @@ function createPackageLoader() {
 
 		var manageOps = [];
 		packageNames.forEach(function(packageName) {
-			var bundle = {
-				'name': packageName,
-				'packageInfo': self.managedPackages[packageName],
-				'currentPackage': null,
-				'availableUpgrades': null,
-				'managedPackage': null,
-				'resetPackage': false,
-				'performUpgrade': false,
-				'chosenUpgrade': null,
-				'overallResult': false,
-				'resultMessages': [],
-				'isError': false,
-				'packageLoaded': false
-			};
-			manageOps.push(manageSinglePackage(bundle));
+			// Only add packages that aren't in the global name space;
+			var gnsObjs = Object.keys(global[gns]);
+			if(gnsObjs.indexOf(packageName) < 0) {
+				var bundle = {
+					'name': packageName,
+					'packageInfo': self.managedPackages[packageName],
+					'currentPackage': null,
+					'availableUpgrades': null,
+					'managedPackage': null,
+					'resetPackage': false,
+					'performUpgrade': false,
+					'chosenUpgrade': null,
+					'overallResult': false,
+					'resultMessages': [],
+					'isError': false,
+					'packageLoaded': false
+				};
+				// Commented out async operation
+				// manageOps.push(manageSinglePackage(bundle));
+				manageOps.push(getManageSinglePackage(bundle));
+			}
 		});
 
 		// Wait for all of the operations to complete
-	    q.allSettled(manageOps)
-	    .then(function(res) {
-	        var results = {};
-	        res.forEach(function(re) {
-	        	results[re.value.name] = re.value;
-	        });
-	        defered.resolve(results);
-	    }, function(err) {
-	        console.log('Finished Managing err', err);
-	        defered.reject(err);
-	    });
+	    // q.allSettled(manageOps)
+	    // .then(function(res) {
+	    //     var results = {};
+	    //     res.forEach(function(re) {
+	    //     	results[re.value.name] = re.value;
+	    //     });
+	    //     defered.resolve(results);
+	    // }, function(err) {
+	    //     console.log('Finished Managing err', err);
+	    //     defered.reject(err);
+	    // });
+		
+		// Execute each operation one at a time
+		if(manageOps.length > 0) {
+			var results = {};
+			manageOps.reduce(function(soFar, f) {
+				 return soFar.then(f);
+			}, q(results))
+			.then(function(res) {
+				// console.log('Finished Managing success!', res);
+				defered.resolve(res);
+			}, function(err) {
+				console.log('Finished managing err', err);
+				defered.reject(err);
+			});
+		} else {
+			defered.resolve({});
+		}
 	    return defered.promise;
 	};
 
@@ -991,4 +1076,7 @@ exports.loadPackage = PACKAGE_LOADER.loadPackage;
 exports.setExtractionPath = PACKAGE_LOADER.setExtractionPath;
 exports.getExtractionPath = PACKAGE_LOADER.getExtractionPath;
 exports.getManagedPackages = PACKAGE_LOADER.getManagedPackages;
+exports.getDependencyList = PACKAGE_LOADER.getDependencyList;
+exports.deleteManagedPackage = PACKAGE_LOADER.deleteManagedPackage;
+exports.deleteAllManagedPackages = PACKAGE_LOADER.deleteAllManagedPackages;
 exports.runPackageManager = PACKAGE_LOADER.runPackageManager;

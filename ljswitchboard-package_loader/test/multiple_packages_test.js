@@ -36,6 +36,46 @@ var testSinglePackageUpdate = testUtils.testSinglePackageUpdate;
 
 var testDurationTimes = [];
 var currentTestStartTime;
+
+var reInitializeTest = function(test) {
+	// Erase the current data
+	cleanExtractionPath(test, directory);
+
+	// Clear the fired-events list
+	capturedEvents = [];
+
+	// add the staticFiles package to the packageManager
+	package_loader.loadPackage(testPackages.staticFiles);
+
+	package_loader.runPackageManager()
+	.then(function(updatedPackages) {
+		// Define the required event list
+		var requiredEvents = [
+			eventList.OVERWRITING_MANAGED_PACKAGE,
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.DETECTED_UNINITIALIZED_PACKAGE,
+			eventList.STARTING_EXTRACTION,
+			eventList.STARTING_DIRECTORY_EXTRACTION,
+			eventList.FINISHED_EXTRACTION,
+			eventList.FINISHED_DIRECTORY_EXTRACTION,
+			eventList.LOADED_PACKAGE,
+		];
+
+		testSinglePackageUpdate(
+			test,
+			updatedPackages,
+			'initialize',
+			'directory',
+			requiredEvents,
+			capturedEvents
+		);
+		test.done();
+	}, function(err) {
+		test.ok(false, 'failed to run the packageManager');
+		test.done();
+	});
+};
 var tests = {
 	'setUp': function(callback) {
 		currentTestStartTime = new Date();
@@ -59,20 +99,83 @@ var tests = {
 		cleanExtractionPath(test, directory);
 
 		package_loader.setExtractionPath(directory);
+		
 		test.done();
 	}, 
-	'start extraction': function(test){
+	
+	'Initialize directory with two dependent packages': function(test) {
+		// Erase the current data
+		cleanExtractionPath(test, directory);
+
 		// Clear the fired-events list
 		capturedEvents = [];
 
 		// add the staticFiles package to the packageManager
 		package_loader.loadPackage(testPackages.staticFiles);
 
-		// Verify that the package was added to the managed packages list
-		test.deepEqual(
-			package_loader.getManagedPackages(),
-			[testPackages.staticFiles.name]
-		);
+		// Also add the core package to the packageManager
+		package_loader.loadPackage(testPackages.core);
+
+		package_loader.runPackageManager()
+		.then(function(updatedPackages) {
+			// Define the required event list
+			var requiredEvents = [
+			];
+			var singleProcessEvents = [
+				eventList.PACKAGE_MANAGEMENT_STARTED,
+				eventList.VALID_UPGRADE_DETECTED,
+				eventList.DETECTED_UNINITIALIZED_PACKAGE,
+				eventList.STARTING_EXTRACTION,
+				eventList.STARTING_DIRECTORY_EXTRACTION,
+				eventList.FINISHED_EXTRACTION,
+				eventList.FINISHED_DIRECTORY_EXTRACTION,
+				eventList.LOADED_PACKAGE,
+			];
+			singleProcessEvents.forEach(function(singleEvent) {
+				requiredEvents.push(singleEvent);
+			});
+			singleProcessEvents.forEach(function(singleEvent) {
+				requiredEvents.push(singleEvent);
+			});
+
+			// Test first package being extracted properly
+			testSinglePackageUpdate(
+				test,
+				updatedPackages,
+				'initialize',
+				'directory',
+				requiredEvents,
+				capturedEvents
+			);
+
+			// Test second package being extracted properly
+			testSinglePackageUpdate(
+				test,
+				updatedPackages,
+				'initialize',
+				'directory',
+				requiredEvents,
+				capturedEvents,
+				1
+			);
+			test.done();
+		}, function(err) {
+			test.ok(false, 'failed to run the packageManager');
+			test.done();
+		});
+	},
+	'Initialize directory with two dependent packages, 2nd fails': function(test) {
+		// Erase the current data
+		cleanExtractionPath(test, directory);
+
+		// Clear the fired-events list
+		capturedEvents = [];
+
+		// add the staticFiles package to the packageManager
+		package_loader.loadPackage(testPackages.staticFiles);
+
+		// Also add the core package to the packageManager
+		package_loader.loadPackage(testPackages.invalidCore);
 
 		package_loader.runPackageManager()
 		.then(function(updatedPackages) {
@@ -86,8 +189,15 @@ var tests = {
 				eventList.FINISHED_EXTRACTION,
 				eventList.FINISHED_DIRECTORY_EXTRACTION,
 				eventList.LOADED_PACKAGE,
+
+				eventList.PACKAGE_MANAGEMENT_STARTED,
+				eventList.NO_VALID_UPGRADE_DETECTED,
+				eventList.SKIPPING_PACKAGE_RESET,
+				eventList.SKIPPING_PACKAGE_UPGRADE,
+				eventList.FAILED_TO_LOAD_MANAGED_PACKAGE,
 			];
 
+			// Test first package being extracted properly
 			testSinglePackageUpdate(
 				test,
 				updatedPackages,
@@ -96,109 +206,17 @@ var tests = {
 				requiredEvents,
 				capturedEvents
 			);
-			test.done();
-		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
-		});
-	},
-	'execution w/ existing data and same version upgrade': function(test) {
-		// Clear the fired-events list
-		capturedEvents = [];
 
-		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFiles);
-
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UP_TO_DATE_PACKAGE,
-				eventList.SKIPPING_PACKAGE_RESET,
-				eventList.SKIPPING_PACKAGE_UPGRADE,
-				eventList.LOADED_PACKAGE,
-			];
-
+			// Test second package being extracted properly
+			// console.log(updatedPackages['ljswitchboard-core']);
 			testSinglePackageUpdate(
 				test,
 				updatedPackages,
-				'existingSkipUpgrade',
+				'upgradeFailed',
 				'directory',
 				requiredEvents,
-				capturedEvents
-			);
-
-			test.done();
-		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
-		});
-	},
-	'execution w/ existing data and older upgrade': function(test) {
-		// Clear the fired-events list
-		capturedEvents = [];
-
-		// Overwrite the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFilesOldOnly);
-
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UP_TO_DATE_PACKAGE,
-				eventList.SKIPPING_PACKAGE_RESET,
-				eventList.SKIPPING_PACKAGE_UPGRADE,
-				eventList.LOADED_PACKAGE,
-			];
-
-			testSinglePackageUpdate(
-				test,
-				updatedPackages,
-				'existingSkipUpgrade',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
-
-			test.done();
-		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
-		});
-	},
-	'execution w/ existing data and newer upgrade': function(test) {
-		// Clear the fired-events list
-		capturedEvents = [];
-
-		// Overwrite the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFilesNew);
-
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.RESETTING_PACKAGE,
-				eventList.FINISHED_RESETTING_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-			];
-
-			testSinglePackageUpdate(
-				test,
-				updatedPackages,
-				'existingPerformUpgrade',
-				'directory',
-				requiredEvents,
-				capturedEvents
+				capturedEvents,
+				1
 			);
 			test.done();
 		}, function(err) {
@@ -206,6 +224,7 @@ var tests = {
 			test.done();
 		});
 	},
+	
 	'check test durations': function(test) {
 		// console.log('Durations:', testDurationTimes);
 		var testSteps = Object.keys(tests);
@@ -216,9 +235,6 @@ var tests = {
 		}
 		test.done();
 	}
-	// Check to make sure that the NEWEST valid upgrade option is selected, not just 'the first found'
-	// Clear the saved files and do the same for .zip files
-	// Make tests where files have dependencies
 	// Make tests where multiple packages are managed and one depends on a version
 	//     of another that is currently being upgraded.  (de-async package-loading front-end).
 };
