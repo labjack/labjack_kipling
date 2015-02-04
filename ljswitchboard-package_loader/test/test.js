@@ -1,7 +1,7 @@
 
 
 var BASIC_TEST = true;
-var EXTRACTION_TEST = false;
+var EXTRACTION_TEST = true;
 var ADVANCED_EXTRACTION_TEST = true;
 
 if(BASIC_TEST) {
