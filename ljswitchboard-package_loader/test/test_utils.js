@@ -1,7 +1,10 @@
 
 var fs = require('fs.extra');
 var path = require('path');
-var semver = require('semver');
+// Switch to using a local minified version of semver
+// var semver = require('semver');
+var semver = require('../lib/semver_min');
+
 var package_loader = require('../lib/ljswitchboard-package_loader');
 
 var cleanExtractionPath = function(test, directory) {

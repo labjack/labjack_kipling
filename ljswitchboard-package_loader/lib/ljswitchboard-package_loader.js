@@ -5,7 +5,9 @@ var path = require('path');
 var q = require('q');
 
 var unzip = require('unzip');
-var semver = require('semver');
+// Switch to using a minified local version of semver
+// var semver = require('semver');
+var semver = require('./semver_min');
 
 var fs = require('fs.extra');
 

@@ -24,7 +24,9 @@ var fs = require('fs.extra');
 var path = require('path');
 var localFolder = 'test_extraction_folder';
 var directory = '';
-var semver = require('semver');
+// Switch to using a local minified version of semver
+// var semver = require('semver');
+var semver = require('../lib/semver_min');
 
 var testPackages = require('./test_packages').testPackages;
 var testUtils = require('./test_utils');

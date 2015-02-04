@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-package_loader",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A small node/node-webkit project loader for ljswitchboard that loads files into the global.ljswitchboard namespace",
   "author": {
     "name": "Chris Johnson",
@@ -28,7 +28,9 @@
   "dependencies": {
     "fs.extra": "1.3.x",
     "q": "~1",
-    "unzip": "0.1.11",
+    "unzip": "0.1.11"
+  },
+  "old-dependencies": {
     "semver": "4.2.0"
   },
   "devDependencies": {
@@ -37,6 +39,10 @@
   "directories": {
     "lib": "./lib"
   },
+  "files": [
+    "lib",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   }
