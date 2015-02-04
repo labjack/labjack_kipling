@@ -18,6 +18,7 @@ var EVENTS = {
 	OPENED_WINDOW: 'opened_window',
 	LOADED_PACKAGE: 'loaded_package',
 	SET_PACKAGE: 'set_package',
+	OVERWRITING_MANAGED_PACKAGE: 'overwriting_managed_package',
 
 	// Events emitted during the runPackageManager function, they all return the
 	// 'bundle' object which is all of the data currently extracted/collected 
@@ -25,11 +26,16 @@ var EVENTS = {
 	// that is +- what was passed to the package_loader in the loadPackage
 	// function.
 	VALID_UPGRADE_DETECTED: 'valid_upgrade_detected',
+	NO_VALID_UPGRADE_DETECTED: 'no_valid_upgrade_detected',
 	DETECTED_UNINITIALIZED_PACKAGE: 'detected_uninitialized_package',
 	
 	RESETTING_PACKAGE: 'resetting_package',
 	FINISHED_RESETTING_PACKAGE: 'finished_resetting_package',
 	FINISHED_RESETTING_PACKAGE_ERROR: 'finished_resetting_package_error',
+
+	DETECTED_UP_TO_DATE_PACKAGE: 'detected_up_to_date_package',
+	SKIPPING_PACKAGE_RESET: 'skipping_package_reset',
+	SKIPPING_PACKAGE_UPGRADE: 'skipping_package_upgrade',
 
 	STARTING_EXTRACTION: 'starting_extraction',
 	STARTING_ZIP_FILE_EXTRACTION: 'starting_zip_file_extraction',
@@ -42,6 +48,8 @@ var EVENTS = {
 	FINISHED_EXTRACTION_ERROR: 'finished_extraction_error',
 	FINISHED_ZIP_FILE_EXTRACTION_ERROR: 'finished_zip_file_extraction_error',
 	FINISHED_DIRECTORY_EXTRACTION_ERROR: 'finished_directory_extraction_error',
+
+	FAILED_TO_LOAD_MANAGED_PACKAGE: 'failed_to_load_managed_package',
 };
 exports.eventList = EVENTS;
 
@@ -121,7 +129,7 @@ function createPackageLoader() {
 					var moduleData = require(moduleDataPath);
 					global[gns][name].data = moduleData;
 				} catch(err) {
-					console.error('Failed to load package data', err);
+					console.error('  - Failed to load package data', err);
 				}
 				
 				if(global[gns][name].info.type) {
@@ -133,12 +141,11 @@ function createPackageLoader() {
 				// console.warn('Info Object does not exist, not doing anything special');
 			}
 		} catch (err) {
-			console.error('package_loader: startPackage Error', err);
+			console.error('  - package_loader: startPackage Error', err);
 		}
 	};
 
 	var requirePackage = function(packageInfo) {
-		console.log('Requiring Package', packageInfo);
 		var name = packageInfo.name;
 		var location;
 		var requireStr;
@@ -180,7 +187,7 @@ function createPackageLoader() {
 
 		
 		if(self.managedPackages[name]) {
-			console.warn('Replacing a managed package', name);
+			self.emit(EVENTS.OVERWRITING_MANAGED_PACKAGE, packageInfo);
 		} else {
 			// console.log('Adding a managed package', name);
 		}
@@ -210,7 +217,7 @@ function createPackageLoader() {
 				try {
 					requirePackage(packageInfo);
 				} catch (err) {
-					console.error('package_loader: Failed to require package', err);
+					console.error('  - package_loader: Failed to require package', err);
 				}
 			} else if (method === 'set') {
 				setPackage(packageInfo);
@@ -218,7 +225,7 @@ function createPackageLoader() {
 				managePackage(packageInfo);
 			}
 		} catch (err) {
-			console.error('package_loader: loadPackage Error', err);
+			console.error('  - package_loader: loadPackage Error', err);
 		}
 	};
 
@@ -344,7 +351,7 @@ function createPackageLoader() {
 			}
 		});
 		parseZipStream.on('error', function(err) {
-			console.error('.zip parsing finished with error', err);
+			console.error('  - .zip parsing finished with error', err);
 			if(!foundPackageJsonFile) {
 				defered.resolve(packageInfo);
 			}
@@ -441,7 +448,7 @@ function createPackageLoader() {
 	        defered.resolve(bundle);
 
 	    }, function(err) {
-	        console.log('Finished Managing err', err);
+	        console.error('  - Finished Managing err', err);
 	        defered.reject(err);
 	    });
 		return defered.promise;
@@ -482,7 +489,7 @@ function createPackageLoader() {
 
 		var chosenUpgrade;
 		// Pick the first-found package whose dependencies are met
-        var foundValidUpgrade = bundle.availableUpgrades.some(function(upgrade) {
+        var foundValidUpgrade = bundle.availableUpgrades.forEach(function(upgrade) {
         	var isValid = true;
 
         	// Check to see if its dependencies are met by the objects currently
@@ -494,7 +501,6 @@ function createPackageLoader() {
         		if(self.dependencyData[key]) {
         			// Make sure that the dependency has a valid version number
         			if(self.dependencyData[key].version) {
-
         				var satisfies = semver.satisfies(
         					self.dependencyData[key].version,
         					upgrade.dependencies[key]
@@ -523,18 +529,36 @@ function createPackageLoader() {
 	        		}
 	        	} else {
 	        		isValid = false;
-	        	}
+	        	} 
 	        }
         	if(isValid) {
-        		// Save the selected upgrade option
-        		chosenUpgrade = upgrade;
+        		if(typeof(chosenUpgrade) === 'undefined') {
+        			// Save the selected upgrade option
+        			chosenUpgrade = upgrade;
+        		} else {
+        			// Only replace the chosenUpgrade obj if the newer one has a
+        			// newer verion number
 
-        		// Emit an event indicating that a valid upgrade has been
-        		// detected.
-				self.emit(EVENTS.VALID_UPGRADE_DETECTED, bundle);
+        			var isNewer = semver.lt(
+        				chosenUpgrade.version,
+        				upgrade.version
+        			);
+        			// console.log(isNewer, chosenUpgrade.version, upgrade.version, upgrade.type);
+        			if(isNewer) {
+        				chosenUpgrade = upgrade;
+        			}
+        		}
         	}
-        	return isValid;
         });
+		if(typeof(chosenUpgrade) === 'undefined') {
+			// Emit an event indicating that a valid upgrade has been
+    		// detected.
+			self.emit(EVENTS.NO_VALID_UPGRADE_DETECTED, bundle);
+		} else {
+			// Emit an event indicating that a valid upgrade has been
+    		// detected.
+			self.emit(EVENTS.VALID_UPGRADE_DETECTED, bundle);
+		}
 		bundle.chosenUpgrade = chosenUpgrade;
 		defered.resolve(bundle);
 		return defered.promise;
@@ -542,6 +566,7 @@ function createPackageLoader() {
 	var determineRequiredOperations = function(bundle) {
 		var defered = q.defer();
 		var isCurrentValid = bundle.currentPackage.isValid;
+		var isUpgradeValid = false;
 		var isUpgradeAvailable = false;
 		if(bundle.chosenUpgrade) {
 			if(bundle.chosenUpgrade.isValid) {
@@ -554,23 +579,42 @@ function createPackageLoader() {
 		if(isCurrentValid) {
 			// Check to see if the upgrade version is newer than what is 
 			// installed.
-			var performUpgrade = semver.lt(
-				bundle.currentPackage.version,
-				bundle.chosenUpgrade.version
-			);
-			if(performUpgrade) {
-				bundle.resetPackage = true;
-				bundle.performUpgrade = true;
+			if(isUpgradeAvailable) {
+				var performUpgrade = semver.lt(
+					bundle.currentPackage.version,
+					bundle.chosenUpgrade.version
+				);
+				if(performUpgrade) {
+					bundle.resetPackage = true;
+					bundle.performUpgrade = true;
+				} else {
+					self.emit(EVENTS.DETECTED_UP_TO_DATE_PACKAGE, bundle);
+				}
+			} else {
+				self.emit(EVENTS.DETECTED_UP_TO_DATE_PACKAGE, bundle);
 			}
 		} else {
 			// If the current installation isn't valid then force it to be
-			// upgraded.
-			bundle.resetPackage = true;
-			bundle.performUpgrade = true;
+			// upgraded. unless there are no valid upgrades.
+			if(isUpgradeAvailable) {
+				bundle.resetPackage = true;
+				bundle.performUpgrade = true;
 
-			// Emit an event indicating that an unitialized package has been 
-			// detected
-			self.emit(EVENTS.DETECTED_UNINITIALIZED_PACKAGE, bundle);
+				// Emit an event indicating that an unitialized package has been 
+				// detected
+				self.emit(EVENTS.DETECTED_UNINITIALIZED_PACKAGE, bundle);
+			} else {
+				console.error('  - Detected uninitialized package w/ no upgrade options');
+				var msg = 'Detected an uninitialized package with no upgrade ' +
+				'options';
+				bundle.resultMessages.push({
+					'step': 'resetPackageDirectory',
+					'message': msg,
+					'isError': true,
+				});
+				bundle.overallResult = false;
+				bundle.isError = true;
+			}
 		}
 		defered.resolve(bundle);
 		return defered.promise;
@@ -584,7 +628,7 @@ function createPackageLoader() {
 					self.emit(EVENTS.RESETTING_PACKAGE, bundle);
 					fs.rmrf(bundle.currentPackage.location, function(err) {
 						if(err) {
-							console.error('Error resetPackageDirectory', err);
+							console.error('  - Error resetPackageDirectory', err);
 							var msg = 'Error resetting the package-cache, try' +
 								'manually deleting the folder:' +
 								bundle.currentPackage.location;
@@ -619,7 +663,7 @@ function createPackageLoader() {
 				}
 			});
 		} else {
-			console.log('Skipping package-reset');
+			self.emit(EVENTS.SKIPPING_PACKAGE_RESET, bundle);
 			defered.resolve(bundle);
 		}
 		return defered.promise;
@@ -637,7 +681,7 @@ function createPackageLoader() {
 
 		fs.copyRecursive(upgradeFilesPath, destinationPath, function(err) {
 			if(err) {
-				console.error('Error performDirectoryUpgrade', err);
+				console.error('  - Error performDirectoryUpgrade', err);
 				var msg = 'Error performing a directory upgrade.  Verify' +
 				'the user-permissions for the two directories: ' + 
 				upgradeFilesPath + ', and ' + destinationPath;
@@ -678,7 +722,7 @@ function createPackageLoader() {
 		self.emit(EVENTS.STARTING_ZIP_FILE_EXTRACTION, bundle);
 		
 		unzipExtractor.on('error', function(err) {
-			console.error('Error performZipFileUpgrade', err);
+			console.error('  - Error performZipFileUpgrade', err);
 			var msg = 'Error performing a .zip file upgrade.  Verify ' +
 			'the user-permissions for the directory and .zip file: ' + 
 			upgradeZipFilePath + ', and ' + destinationPath;
@@ -710,11 +754,18 @@ function createPackageLoader() {
 
 	var performUpgrade = function(bundle) {
 		var defered = q.defer();
+
 		if(bundle.performUpgrade) {
 			// Save info to shorter variables
 			var destination = bundle.currentPackage.location;
-			var upgradePath = bundle.chosenUpgrade.location;
-			var upgradeType = bundle.chosenUpgrade.type;
+			var upgradePath = '';
+			var upgradeType = '';
+			if(bundle.chosenUpgrade) {
+				upgradePath = bundle.chosenUpgrade.location;
+				upgradeType = bundle.chosenUpgrade.type;
+			}
+			
+			
 
 			// Determine what kind of upgrade process we need to perform
 			if(upgradeType === 'directory') {
@@ -724,6 +775,7 @@ function createPackageLoader() {
 				performZipFileUpgrade(bundle)
 				.then(defered.resolve, defered.reject);
 			} else {
+				console.error('  - in performUpgrade, invalid upgradeType detected');
 				var msg = 'Failed to perform upgrade, invalid upgradeType ' + 
 				'detected: ' + upgradeType;
 				bundle.resultMessages.push({
@@ -742,7 +794,7 @@ function createPackageLoader() {
 				defered.resolve(bundle);
 			}
 		} else {
-			console.log('Skipping upgrade');
+			self.emit(EVENTS.SKIPPING_PACKAGE_UPGRADE, bundle);
 			defered.resolve(bundle);
 		}
 		
@@ -791,8 +843,9 @@ function createPackageLoader() {
 				try {
 					requirePackage(bundle.packageInfo);
 					bundle.packageLoaded = true;
+					bundle.overallResult = true;
 				} catch(err) {
-					console.error('Error in loadManagedPackage', err);
+					console.error('  - Error in loadManagedPackage', err);
 					var errMsg = 'Error requiring managedPackage during the ' +
 					'loadManagedPackage step.';
 					bundle.resultMessages.push({
@@ -803,9 +856,10 @@ function createPackageLoader() {
 					});
 					bundle.overallResult = false;
 					bundle.isError = true;
+					self.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
 				}
 			} else {
-				console.error('Error requiring package');
+				console.error('  - Error requiring package, detected an error via isValid');
 				var isValidMsg = 'Error requiring managedPackage during the ' +
 				'loadManagedPackage step. managedPackage is not valid';
 				bundle.resultMessages.push({
@@ -816,9 +870,10 @@ function createPackageLoader() {
 				});
 				bundle.overallResult = false;
 				bundle.isError = true;
+				self.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
 			}
 		} else {
-			console.error('Error requiring package');
+			console.error('  - Error requiring package, detected an error via isError');
 			var isErrorMsg = 'Error requiring managedPackage during the ' +
 			'loadManagedPackage step. Previous error detected';
 			bundle.resultMessages.push({
@@ -829,6 +884,7 @@ function createPackageLoader() {
 			});
 			bundle.overallResult = false;
 			bundle.isError = true;
+			self.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
 		}
 		defered.resolve(bundle);
 		return defered.promise;
@@ -839,7 +895,7 @@ function createPackageLoader() {
 		var getOnErr = function(msg) {
 			return function(err) {
 				var innerDefered = q.defer();
-				console.log('manageSinglePackage err', msg, err);
+				console.log('manageSinglePackage err', msg, err, bundle);
 				innerDefered.reject(err);
 				return innerDefered.promise;
 			};

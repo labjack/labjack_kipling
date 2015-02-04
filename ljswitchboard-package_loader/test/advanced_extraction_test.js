@@ -36,6 +36,45 @@ var testSinglePackageUpdate = testUtils.testSinglePackageUpdate;
 
 var testDurationTimes = [];
 var currentTestStartTime;
+
+var reInitializeTest = function(test) {
+	// Erase the current data
+	cleanExtractionPath(test, directory);
+
+	// Clear the fired-events list
+	capturedEvents = [];
+
+	// add the staticFiles package to the packageManager
+	package_loader.loadPackage(testPackages.staticFiles);
+
+	package_loader.runPackageManager()
+	.then(function(updatedPackages) {
+		// Define the required event list
+		var requiredEvents = [
+			eventList.OVERWRITING_MANAGED_PACKAGE,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.DETECTED_UNINITIALIZED_PACKAGE,
+			eventList.STARTING_EXTRACTION,
+			eventList.STARTING_DIRECTORY_EXTRACTION,
+			eventList.FINISHED_EXTRACTION,
+			eventList.FINISHED_DIRECTORY_EXTRACTION,
+			eventList.LOADED_PACKAGE,
+		];
+
+		testSinglePackageUpdate(
+			test,
+			updatedPackages,
+			'initialize',
+			'directory',
+			requiredEvents,
+			capturedEvents
+		);
+		test.done();
+	}, function(err) {
+		test.ok(false, 'failed to run the packageManager');
+		test.done();
+	});
+};
 var tests = {
 	'setUp': function(callback) {
 		currentTestStartTime = new Date();
@@ -58,118 +97,18 @@ var tests = {
 		cleanExtractionPath(test, directory);
 
 		package_loader.setExtractionPath(directory);
+
+		// add the staticFiles package to the packageManager
+		package_loader.loadPackage(testPackages.staticFiles);
 		test.done();
 	}, 
-	'start extraction': function(test){
+	're-initialize extracted data to std option': reInitializeTest,
+	'Run old before new test': function(test) {
 		// Clear the fired-events list
 		capturedEvents = [];
 
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFiles);
-
-		// Verify that the package was added to the managed packages list
-		test.deepEqual(
-			package_loader.getManagedPackages(),
-			[testPackages.staticFiles.name]
-		);
-
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UNINITIALIZED_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-			];
-
-			testSinglePackageUpdate(
-				test,
-				updatedPackages,
-				'initialize',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
-			test.done();
-		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
-		});
-	},
-	'execution w/ existing data and same version upgrade': function(test) {
-		// Clear the fired-events list
-		capturedEvents = [];
-
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UP_TO_DATE_PACKAGE,
-				eventList.SKIPPING_PACKAGE_RESET,
-				eventList.SKIPPING_PACKAGE_UPGRADE,
-				eventList.LOADED_PACKAGE,
-			];
-
-			testSinglePackageUpdate(
-				test,
-				updatedPackages,
-				'existingSkipUpgrade',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
-
-			test.done();
-		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
-		});
-	},
-	'execution w/ existing data and older upgrade': function(test) {
-		// Clear the fired-events list
-		capturedEvents = [];
-
-		// Overwrite the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFilesOldOnly);
-
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.OVERWRITING_MANAGED_PACKAGE,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UP_TO_DATE_PACKAGE,
-				eventList.SKIPPING_PACKAGE_RESET,
-				eventList.SKIPPING_PACKAGE_UPGRADE,
-				eventList.LOADED_PACKAGE,
-			];
-
-			testSinglePackageUpdate(
-				test,
-				updatedPackages,
-				'existingSkipUpgrade',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
-
-			test.done();
-		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
-		});
-	},
-	'execution w/ existing data and newer upgrade': function(test) {
-		// Clear the fired-events list
-		capturedEvents = [];
-
-		// Overwrite the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFilesNew);
+		package_loader.loadPackage(testPackages.staticFilesOldBeforeNew);
 
 		package_loader.runPackageManager()
 		.then(function(updatedPackages) {
@@ -200,6 +139,150 @@ var tests = {
 			test.done();
 		});
 	},
+	're-initialize data for stdDir-newZip': reInitializeTest,
+	'Run std before new test': function(test) {
+		// Clear the fired-events list
+		capturedEvents = [];
+
+		// add the staticFiles package to the packageManager
+		package_loader.loadPackage(testPackages.staticFilesStdDirBeforeNewZip);
+
+		package_loader.runPackageManager()
+		.then(function(updatedPackages) {
+			// console.log('Results', updatedPackages);
+			// Define the required event list
+			var requiredEvents = [
+				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.VALID_UPGRADE_DETECTED,
+				eventList.RESETTING_PACKAGE,
+				eventList.FINISHED_RESETTING_PACKAGE,
+				eventList.STARTING_EXTRACTION,
+				eventList.STARTING_ZIP_FILE_EXTRACTION,
+				eventList.FINISHED_EXTRACTION,
+				eventList.FINISHED_ZIP_FILE_EXTRACTION,
+				eventList.LOADED_PACKAGE,
+			];
+
+			testSinglePackageUpdate(
+				test,
+				updatedPackages,
+				'existingPerformUpgrade',
+				'.zip',
+				requiredEvents,
+				capturedEvents
+			);
+			test.done();
+		}, function(err) {
+			test.ok(false, 'failed to run the packageManager');
+			test.done();
+		});
+	},
+	're-initialize data with zip': function(test) {
+		// Erase the current data
+		cleanExtractionPath(test, directory);
+
+		// Clear the fired-events list
+		capturedEvents = [];
+
+		// add the staticFiles package to the packageManager
+		package_loader.loadPackage(testPackages.staticFilesZipTest);
+
+		package_loader.runPackageManager()
+		.then(function(updatedPackages) {
+			// Define the required event list
+			var requiredEvents = [
+				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.VALID_UPGRADE_DETECTED,
+				eventList.DETECTED_UNINITIALIZED_PACKAGE,
+				eventList.STARTING_EXTRACTION,
+				eventList.STARTING_ZIP_FILE_EXTRACTION,
+				eventList.FINISHED_EXTRACTION,
+				eventList.FINISHED_ZIP_FILE_EXTRACTION,
+				eventList.LOADED_PACKAGE,
+			];
+
+			testSinglePackageUpdate(
+				test,
+				updatedPackages,
+				'initialize',
+				'.zip',
+				requiredEvents,
+				capturedEvents
+			);
+			test.done();
+		}, function(err) {
+			test.ok(false, 'failed to run the packageManager');
+			test.done();
+		});
+	},
+	'No-Upgrades test': function(test) {
+		// Clear the fired-events list
+		capturedEvents = [];
+
+		// add the staticFiles package to the packageManager
+		package_loader.loadPackage(testPackages.staticFilesNoUpgrades);
+
+		package_loader.runPackageManager()
+		.then(function(updatedPackages) {
+			// Define the required event list
+			var requiredEvents = [
+				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.NO_VALID_UPGRADE_DETECTED,
+				eventList.DETECTED_UP_TO_DATE_PACKAGE,
+				eventList.SKIPPING_PACKAGE_RESET,
+				eventList.SKIPPING_PACKAGE_UPGRADE,
+				eventList.LOADED_PACKAGE,
+			];
+
+			testSinglePackageUpdate(
+				test,
+				updatedPackages,
+				'noUpgradeOptions',
+				'.zip',
+				requiredEvents,
+				capturedEvents
+			);
+			test.done();
+		}, function(err) {
+			test.ok(false, 'failed to run the packageManager');
+			test.done();
+		});
+	},
+	'No-Upgrades test w/ bad initialization': function(test) {
+		// Erase the current data
+		cleanExtractionPath(test, directory);
+
+		// Clear the fired-events list
+		capturedEvents = [];
+
+		// add the staticFiles package to the packageManager
+		package_loader.loadPackage(testPackages.staticFilesNoUpgrades);
+
+		package_loader.runPackageManager()
+		.then(function(updatedPackages) {
+			// Define the required event list
+			var requiredEvents = [
+				eventList.OVERWRITING_MANAGED_PACKAGE,
+				eventList.NO_VALID_UPGRADE_DETECTED,
+				eventList.SKIPPING_PACKAGE_RESET,
+				eventList.SKIPPING_PACKAGE_UPGRADE,
+				eventList.FAILED_TO_LOAD_MANAGED_PACKAGE,
+			];
+
+			testSinglePackageUpdate(
+				test,
+				updatedPackages,
+				'upgradeFailed',
+				'.zip',
+				requiredEvents,
+				capturedEvents
+			);
+			test.done();
+		}, function(err) {
+			test.ok(false, 'failed to run the packageManager');
+			test.done();
+		});
+	},
 	'check test durations': function(test) {
 		// console.log('Durations:', testDurationTimes);
 		var testSteps = Object.keys(tests);
@@ -210,8 +293,6 @@ var tests = {
 		}
 		test.done();
 	}
-	// Check to make sure that the NEWEST valid upgrade option is selected, not just 'the first found'
-	// Clear the saved files and do the same for .zip files
 	// Make tests where files have dependencies
 	// Make tests where multiple packages are managed and one depends on a version
 	//     of another that is currently being upgraded.  (de-async package-loading front-end).
