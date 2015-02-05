@@ -18,6 +18,7 @@ var EVENTS = {
 	// Events emitted during the loadPackage function, they all return the
 	// name of the package being handled.
 	OPENED_WINDOW: 'opened_window',
+	NOT_STARTING_NW_APP: 'not_starting_nw_app',
 	LOADED_PACKAGE: 'loaded_package',
 	NOT_LOADING_PACKAGE: 'not_loading_package',
 	SET_PACKAGE: 'set_package',
@@ -139,7 +140,18 @@ function createPackageLoader() {
 				
 				if(global[gns][name].info.type) {
 					if(global[gns][name].info.type === 'nwApp') {
-						startNWApp(packageInfo, global[gns][name].info);
+						if(typeof(packageInfo.startApp) !== 'undefined') {
+							if(packageInfo.startApp) {
+								startNWApp(packageInfo, global[gns][name].info);
+							} else {
+								// Emit an event indicating that we aren't
+								// starting the detected nwApp
+								self.emit(EVENTS.NOT_STARTING_NW_APP, packageInfo.name);
+							}
+						} else {
+							startNWApp(packageInfo, global[gns][name].info);
+						}
+						
 					}
 				}
 			} else {
