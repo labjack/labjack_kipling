@@ -5,6 +5,17 @@
  * @author Chris Johnson (LabJack Corp.)
 **/
 
+// Enable to print out important processor debugging data
+if(false) {
+	console.log('');
+	console.log('*********************');
+	console.log('Subprocess Started!');
+	console.log('Node Version', process.versions.node);
+	console.log('Exec Path', process.execPath);
+	console.log('*********************');
+	console.log('');
+
+}
 var dict = require('dict');
 var q = require('q');
 var EventEmitter = require('events').EventEmitter;

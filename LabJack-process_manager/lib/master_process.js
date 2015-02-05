@@ -281,9 +281,11 @@ function createNewProcessManager() {
         .then(cleanupMessage, cleanupMessage);
     };
     var stdinListener = function(data) {
+        console.log('in mp-stdinListener:', data.toString());
         print('stdinListener', data);
     };
     var stderrListener = function(data) {
+        console.log('in mp-stderrListener:', data.toString());
         print('stderrListener', data);
     };
 
@@ -314,10 +316,10 @@ function createNewProcessManager() {
             if(options.spawnChildProcess) {
                 deviceManagerSlaveOptions.spawnChildProcess = options.spawnChildProcess;
             }
-	        var envVars = process.env;
-	        envVars.slave_process_env = JSON.stringify(options);
-	        deviceManagerSlaveOptions.env = envVars;
-	    }
+            var envVars = process.env;
+            envVars.slave_process_env = JSON.stringify(options);
+            deviceManagerSlaveOptions.env = envVars;
+        }
 
         // reset the messageCounter back to 0
         initializeMessageManaggement();
@@ -382,6 +384,17 @@ function createNewProcessManager() {
                 // self.bufferStream.pipe(pipe);
             }
         } else {
+            // Enable to print out important just-before starting subprocess info
+            if(false) {
+                console.log('');
+                console.log('Forking child_process');
+                console.log('cwd', process.cwd());
+                console.log('Starting Library', deviceManagerSlaveLocation);
+                // console.log('Args', deviceManagerSlaveArgs);
+                console.log('Starting cwd', deviceManagerSlaveOptions.cwd);
+                console.log('Starting execPath', deviceManagerSlaveOptions.execPath);
+                // deviceManagerSlaveArgs = {};
+            }
             subProcess = child_process.fork(
                 deviceManagerSlaveLocation,
                 deviceManagerSlaveArgs,
@@ -424,8 +437,16 @@ function createNewProcessManager() {
         subProcess.on('disconnect', disconnectListener);
         subProcess.on('message', messageListener);
         if(isSilent) {
-            subProcess.stdout.on('data', stdinListener);
-            subProcess.stderr.on('data', stderrListener);
+            if(options.stdinListener) {
+                subProcess.stdout.on('data', options.stdinListener);
+            } else {
+                subProcess.stdout.on('data', stdinListener);
+            }
+            if(options.stderrListener) {
+                subProcess.stderr.on('data', options.stderrListener);
+            } else {
+                subProcess.stderr.on('data', stderrListener);
+            }
         }  
         receivedDisconnectMessage = false;
         receivedExitMessage = false;
@@ -560,26 +581,26 @@ util.inherits(createNewProcessManager, EventEmitter);
 function createNewMasterProcess() {
     NUM_MASTER_PROCESSES_CREATED += 1;
 
-	this.masterProcess = undefined;
+    this.masterProcess = undefined;
 
-	var criticalErrorListener = function(err) {
-	    print('criticalError encountered', err);
-	};
-	var messageBufferFullListener = function(err) {
-	    print('messagebufferFull', err);
-	};
-	var receivedInvalidMessage = function(err) {
-	    print('invalid message received', err);
-	};
+    var criticalErrorListener = function(err) {
+        print('criticalError encountered', err);
+    };
+    var messageBufferFullListener = function(err) {
+        print('messagebufferFull', err);
+    };
+    var receivedInvalidMessage = function(err) {
+        print('invalid message received', err);
+    };
 
-	this.init = function(messageReceiver) {
-		self.masterProcess = undefined;
-		self.masterProcess = new createNewProcessManager();
+    this.init = function(messageReceiver) {
+        self.masterProcess = undefined;
+        self.masterProcess = new createNewProcessManager();
 
-		// Attach some event listeners to the self.masterProcess
-	    self.masterProcess.on(PM_CRITICAL_ERROR, criticalErrorListener);
-	    self.masterProcess.on(PM_MESSAGE_BUFFER_FULL, messageBufferFullListener);
-	    self.masterProcess.on(PM_RECEIVED_MESSAGE_INVALID, receivedInvalidMessage);
+        // Attach some event listeners to the self.masterProcess
+        self.masterProcess.on(PM_CRITICAL_ERROR, criticalErrorListener);
+        self.masterProcess.on(PM_MESSAGE_BUFFER_FULL, messageBufferFullListener);
+        self.masterProcess.on(PM_RECEIVED_MESSAGE_INVALID, receivedInvalidMessage);
 
         // If a messageReceiver was given, assign it to listen to the PM_EMIT_MESSAGE event
         if(messageReceiver) {
@@ -587,27 +608,27 @@ function createNewMasterProcess() {
         }
 
         return self.masterProcess;
-	};
-	this.start = function(processName, options, onError, onSuccess) {
-	    processManager.startChildProcess(processName, options)
-	    .then(onSuccess, onError);
-	};
-	this.qStart = function(processName, options) {
-	    return self.masterProcess.startChildProcess(processName, options);
-	};
-	this.stop = function(onError, onSuccess) {
+    };
+    this.start = function(processName, options, onError, onSuccess) {
+        processManager.startChildProcess(processName, options)
+        .then(onSuccess, onError);
+    };
+    this.qStart = function(processName, options) {
+        return self.masterProcess.startChildProcess(processName, options);
+    };
+    this.stop = function(onError, onSuccess) {
         print('in stop');
         self.masterprocess.stopChildProcess()
         .then(onError, onSuccess);
-	};
-	this.qStop = function() {
-	    print('in qStop');
-	    return self.masterProcess.stopChildProcess();
-	};
+    };
+    this.qStop = function() {
+        print('in qStop');
+        return self.masterProcess.stopChildProcess();
+    };
 
-	this.sendReceive = function(m) {
-	    return self.masterProcess.qSendReceiveMessage(m);
-	};
+    this.sendReceive = function(m) {
+        return self.masterProcess.qSendReceiveMessage(m);
+    };
     this.sendMessage = function(m) {
         return self.masterProcess.sendMessage(m);
     };
@@ -623,7 +644,7 @@ function createNewMasterProcess() {
         return self.masterProcess;
     };
 
-	var self = this;
+    var self = this;
 }
 
 
