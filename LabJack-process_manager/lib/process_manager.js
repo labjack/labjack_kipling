@@ -5,11 +5,11 @@
 **/
 
 var master_process = require('./master_process');
-var slave_process = require('./slave_process');
 var constants = require('./process_manager_constants');
 
 exports.master_process = master_process.createNewMasterProcess;
 exports.slave_process = function() {
+	var slave_process = require('./slave_process');
 	return slave_process;
 };
 
