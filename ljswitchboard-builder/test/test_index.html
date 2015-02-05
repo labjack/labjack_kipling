@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html id="mainHTMLWindow" style="overflow:hidden">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <title>LabJack Kipling</title>
+        <link rel="stylesheet" href="node_modules/nodeunit/share/nodeunit.css" type="text/css" />
+    	<script src="node_modules/nodeunit/lib/nodeunit.js"></script>
+        <script src="test/test_ljswitchboard.js"></script>
+    </head>
+    <body>
+    	<p>Testing ljswitchboard<p>
+    		<h1 id="nodeunit-header">Example Test Suite</h1>
+			<script>
+				nodeunit.run({
+				'Test LJSwitchboard': test_ljswitchboard,
+				});
+			</script>
+    	 <!-- Perform other script includes -->
+        <!-- <script type="text/javascript" src="test_ljswitchboard.js"></script>-->
+    </body>
+</html>
