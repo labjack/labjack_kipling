@@ -2,7 +2,8 @@
  * This file defines the public interface to the io_manager.  It provides object
  * references that allow programs to communicate with the io_manager_process
  */
-
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var process_manager = require('process_manager');
 var q = require('q');
 var fs = require('fs');
@@ -104,6 +105,7 @@ function createIOInterface() {
 		return defered.promise;
 	};
 	var oneWayMessageListener = function(m) {
+		console.log('io_interface, oneWayMessageListener', m);
 		checkOneWayEndpoint(m)
 		.then(delegateOneWayMessage, handleOneWayMessageErrors);
 	};
@@ -129,9 +131,16 @@ function createIOInterface() {
 	};
 
 	this.getRegisteredEndpoints = function() {
-		send("poke io_delegator");
 		return callFunc('getRegisteredEndpoints');
 	};
+	this.testOneWayMessage = function() {
+		var defered = q.defer();
+		send("poke io_delegator");
+		setImmediate(function() {
+			defered.resolve();
+		});
+		return defered.promise;
+	}
 
 	/**
 	 * qExec is a function that aids in initializing the io_interface.  It saves
@@ -189,6 +198,7 @@ function createIOInterface() {
 	 */
 	var checkLabJackM = function() {
 		var defered = q.defer();
+		console.log('in checkLabJackM');
 		ljmCheck.verifyLJMInstallation()
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
@@ -203,6 +213,7 @@ function createIOInterface() {
 	 */
 	var checkRequirements = function(passedRequirement, passedRequirements) {
 		var defered = q.defer();
+		console.log('in checkRequirements');
 		npm_build_check.checkRequirements(passedRequirement, passedRequirements)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
@@ -217,6 +228,7 @@ function createIOInterface() {
 	var innerGetNodePath = function(passedResult, passedResults) {
 		var defered = q.defer();
 
+		console.log('in innerGetNodePath');
 		// Collect information about the process
 		var isOkToRun = true;
 		var isValidInstance = true;
@@ -366,6 +378,7 @@ function createIOInterface() {
 	 */
 	var innerInitialize = function(info) {
 		var defered = q.defer();
+		console.log('in innerInitialize');
 		// console.log('  - Initialize Data:');
 		// var infoKeys = Object.keys(info);
 		// infoKeys.forEach(function(key) {
@@ -411,7 +424,8 @@ function createIOInterface() {
 			'spawnChildProcess': false,
 			'debug_mode': false,
 		};
-			
+		
+		console.log('Starting subprocess');
 		self.mp.qStart(ioDelegatorPath, options)
 		.then(initInternalMessenger, function(err) {
 			var code = err.error;
@@ -455,6 +469,7 @@ function createIOInterface() {
 			defered.reject(err);
 		};
 
+		console.log('Initializing sub-process');
 		// Check to make sure labjackm is properly installed
 		qExec(checkLabJackM,'checkLabJackM')(results)
 
@@ -576,6 +591,7 @@ function createIOInterface() {
 
 	var self = this;
 }
+util.inherits(createIOInterface, EventEmitter);
 
 exports.createIOInterface = function() {
 	return new createIOInterface();

@@ -46,12 +46,12 @@ exports.basic_test = {
 		
 
 		var keys = Object.keys(io_manager);
-		test.deepEqual(keys, ['io_interface'], 'io_manager not required properly');
+		test.deepEqual(keys, ['io_interface', 'include_type', 'testFunc'], 'io_manager not required properly');
 		test.done();
 	},
 	'create new io_interface': function(test) {
 		io_interface = io_manager.io_interface();
-
+		
 		var keys = Object.keys(io_interface);
 		var requiredKeys = [
 			'driver_controller',

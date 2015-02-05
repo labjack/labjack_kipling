@@ -10,6 +10,7 @@ var qRunner = utils.qRunner;
 var qExec = utils.qExec;
 var pResults = utils.pResults;
 var q = require('q');
+var constants = require('../lib/common/constants');
 
 var io_manager;
 var io_interface;
@@ -20,6 +21,10 @@ var device_controller;
 var file_io_controller;
 var logger_controller;
 
+var device;
+
+var capturedEvents = [];
+
 exports.tests = {
 	'initialization': function(test) {
 		// Require the io_manager library
@@ -29,6 +34,7 @@ exports.tests = {
 		// device controller, logger, and file_io_controller objects.
 		io_interface = io_manager.io_interface();
 
+
 		// Initialize the io_interface
 		io_interface.initialize()
 		.then(function(res) {
@@ -37,6 +43,19 @@ exports.tests = {
 			// Save local pointers to the created objects
 			driver_controller = io_interface.getDriverController();
 			device_controller = io_interface.getDeviceController();
+
+			// Attach event listener to the device_controller object to detect
+			// when a device is opened.
+			var newDevEvent = constants.DEVICE_CONTROLLER_DEVICE_OPENED;
+			device_controller.on(newDevEvent, function(data) {
+				capturedEvents.push({'eventName':newDevEvent,'data':data});
+				// console.log('Device Opened event:', data.serialNumber);
+			});
+			var closedDevEvent = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
+			device_controller.on(closedDevEvent, function(data) {
+				capturedEvents.push({'eventName':closedDevEvent,'data':data});
+				// console.log('Device Closed event:', data);
+			});
 
 			test.ok(true);
 			test.done();
@@ -64,34 +83,60 @@ exports.tests = {
 			test.done();
 		});
 	},
-	// 'use_device_controller (mock device)': function(test) {
-	// 	var params = {
-	// 		'deviceType': 'LJM_dtT7',
-	// 		'connectionType': 'LJM_ctUSB',
-	// 		'identifier': 'LJM_idANY',
-	// 		'mockDevice': true
-	// 	};
+	'open mock device': function(test) {
+		var params = {
+			'deviceType': 'LJM_dtT7',
+			'connectionType': 'LJM_ctUSB',
+			'identifier': 'LJM_idANY',
+			'mockDevice': true
+		};
 
-	// 	device_controller.openDevice(params)
-	// 	.then(function(newDevice) {
-	// 		console.log('Created New Device Object', newDevice);
-	// 		test.done();
-	// 	}, function(err) {
-	// 		console.log("Error opening device", err);
-	// 		test.ok(false, 'failed to create new device object');
-	// 		test.done();
-	// 	});
-	// },
-
-	'destruction': function(test) {
-		io_interface.destroy()
-		.then(function(res) {
-			// io_interface process has been shut down
-			test.ok(true);
-			test.done();
+		device_controller.openDevice(params)
+		.then(function(newDevice) {
+			device = newDevice;
+			setTimeout(function() {
+				if(capturedEvents.length != 1) {
+					test.ok(false, 'unexpected number of events triggered.');
+				} else {
+					test.ok(true);
+				}
+				test.done();
+			},50);
 		}, function(err) {
-			test.ok(false, 'io_interface failed to shut down' + JSON.stringify(err));
+			console.log("Error opening device", err);
+			test.ok(false, 'failed to create new device object');
 			test.done();
 		});
+	},
+	'close mock device': function(test) {
+		device.close()
+		.then(function(res) {
+			setTimeout(function() {
+				if(capturedEvents.length != 2) {
+					test.ok(false, 'unexpected number of events triggered.');
+				} else {
+					test.ok(true);
+				}
+				test.done();
+			},50);
+		}, function(err) {
+			console.log('Failed to close', err);
+			test.ok(false);
+			test.done();
+		});
+	},
+	'destruction': function(test) {
+		setImmediate(function() {
+			io_interface.destroy()
+			.then(function(res) {
+				// io_interface process has been shut down
+				test.ok(true);
+				test.done();
+			}, function(err) {
+				test.ok(false, 'io_interface failed to shut down' + JSON.stringify(err));
+				test.done();
+			});
+		});
+		
 	}
 };

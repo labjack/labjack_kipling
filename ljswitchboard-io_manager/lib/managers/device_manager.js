@@ -3,6 +3,7 @@
 var labjack_nodejs = require('labjack-nodejs');
 var q = require('q');
 var constants = require('../common/constants');
+
 var io_endpoint_key = constants.device_endpoint_key;
 
 var device_keeper = require('./device_manager_helpers/device_keeper');
@@ -14,7 +15,6 @@ function createDeviceManager(io_delegator) {
 	var send = null;
 
 	var deviceKeeper = null;
-
 	
 	var listener = function(m) {
 		// send responses to messaged
@@ -27,6 +27,13 @@ function createDeviceManager(io_delegator) {
 
 	var ipcMessageReceiver = function(m) {
 		var defered = q.defer();
+
+		// Define syntax error handling function
+		var syntaxError = function(err) {
+			var msg = 'device_manager.js Syntax Error: ' + JSON.stringify(err);
+			console.error(msg, err);
+			defered.reject(msg);
+		};
 
 		// Define Error Handling Function
 		var error = function(err) {
@@ -76,26 +83,31 @@ function createDeviceManager(io_delegator) {
 		var args;
 		if(isValidFunc) {
 			if (typeof(caller[func]) === 'function') {
-				numArgs = m.args.length;
-				args = m.args;
-				if(numArgs === 0) {
-					caller[func]()
-					.then(success, error);
-				} else if(numArgs === 1) {
-					caller[func](args[0])
-					.then(success, error);
-				} else if(numArgs === 2) {
-					caller[func](args[0], args[1])
-					.then(success, error);
-				} else if(numArgs === 3) {
-					caller[func](args[0], args[1], args[2])
-					.then(success, error);
-				} else if(numArgs === 4) {
-					caller[func](args[0], args[1], args[2], args[3])
-					.then(success, error);
-				} else {
-					caller[func](args)
-					.then(success, error);
+				try {
+					numArgs = m.args.length;
+					args = m.args;
+					if(numArgs === 0) {
+						caller[func]()
+						.then(success, error, syntaxError);
+					} else if(numArgs === 1) {
+						caller[func](args[0])
+						.then(success, error, syntaxError);
+					} else if(numArgs === 2) {
+						caller[func](args[0], args[1])
+						.then(success, error, syntaxError);
+					} else if(numArgs === 3) {
+						caller[func](args[0], args[1], args[2])
+						.then(success, error, syntaxError);
+					} else if(numArgs === 4) {
+						caller[func](args[0], args[1], args[2], args[3])
+						.then(success, error, syntaxError);
+					} else {
+						caller[func](args)
+						.then(success, error, syntaxError);
+					}
+				} catch(err) {
+					console.error('device_manager.js error calling func', func, args);
+					defered.reject('Syntax Error Calling Function');
 				}
 			} else {
 				// console.error('device_manager.js - function not found...', Object.keys(caller));

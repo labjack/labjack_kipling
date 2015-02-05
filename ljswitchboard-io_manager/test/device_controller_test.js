@@ -12,6 +12,10 @@ var io_interface;
 // Managers
 var device_controller;
 
+// device object
+var device;
+var deviceB;
+
 var criticalError = false;
 var stopTest = function(test, err) {
 	test.ok(false, err);
@@ -72,8 +76,11 @@ exports.tests = {
 
 		var bundle = [];
 		qExec(io_interface, 'getRegisteredEndpoints')(bundle)
-		.then(qExec(device_controller, 'testSendMessage'))
-		.then(qExec(device_controller, 'testSend'))
+
+		// calls to execute various oneWay messages that print results.
+		// .then(qExec(io_interface, 'testOneWayMessage'))
+		// .then(qExec(device_controller, 'testSendMessage'))
+		// .then(qExec(device_controller, 'testSend'))
 		.then(function(results) {
 			// console.log('Results', results);
 
@@ -87,14 +94,84 @@ exports.tests = {
 			setTimeout(function() {
 				test.done();
 			}, 1000);
-			// var printIndividualResults = false;
-			// var expectedErrorsList = [];
-			// pResults(results, printIndividualResults, expectedErrorsList)
-			// .then(function(results){
-			// 	test.done();
-			// });
 		}, function(err) {
 			console.log('ERROR!', err);
+			test.done();
+		});
+	},
+	'open mock device': function(test) {
+		var params = {
+			'deviceType': 'LJM_dtT7',
+			'connectionType': 'LJM_ctUSB',
+			'identifier': '470010549',
+			'mockDevice': true
+		};
+
+		device_controller.openDevice(params)
+		.then(function(newDevice) {
+			// save device reference
+			device = newDevice;
+			device_controller.getNumDevices()
+			.then(function(res) {
+				test.strictEqual(res, 1, 'wrong number of devices are open');
+				test.done();
+			});
+		}, function(err) {
+			console.log("Error opening device", err);
+			test.ok(false, 'failed to create new device object');
+			test.done();
+		});
+	},
+	'open mock deviceB': function(test) {
+		var params = {
+			'deviceType': 'LJM_dtT7',
+			'connectionType': 'LJM_ctUSB',
+			'identifier': '470010548',
+			'mockDevice': true
+		};
+
+		device_controller.openDevice(params)
+		.then(function(newDevice) {
+			// save device reference
+			deviceB = newDevice;
+			device_controller.getNumDevices()
+			.then(function(res) {
+				test.strictEqual(res, 2, 'wrong number of devices are open');
+				test.done();
+			});
+		}, function(err) {
+			console.log("Error opening device", err);
+			test.ok(false, 'failed to create new device object');
+			test.done();
+		});
+	},
+	'get device attributes': function(test) {
+		// Perform the first query with no filters enabled.  By default, no 
+		// mock devices are enabled.
+		device_controller.getDeviceListing()
+		.then(function(res) {
+			test.deepEqual(res,[],'Device listing should be empty, only mockDevices are open');
+			test.done();
+		});
+	},
+	'get device attributes (2)': function(test) {
+		// Perform the first query with
+		device_controller.getDeviceListing([{'enableMockDevices': true}])
+		.then(function(res) {
+			test.strictEqual(res.length,2,'Device listing should not be empty');
+			test.strictEqual(res[0].serialNumber, 470010549, 'Wrong Serial Number');
+			test.strictEqual(res[1].serialNumber, 470010548, 'Wrong Serial Number');
+			test.done();
+		});
+	},
+	'close mock device': function(test) {
+		device.close()
+		.then(function(res) {
+			test.strictEqual(res.comKey, 0, 'expected to receive a different comKey');
+			test.done();
+		}, function(err) {
+			console.log('Failed to close mock device', err);
+			test.ok(false, 'Failed to close mock device');
 			test.done();
 		});
 	},

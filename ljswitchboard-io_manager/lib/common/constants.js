@@ -8,3 +8,6 @@ exports.file_io_endpoint_key = "file_io_manager";
 
 // Secondary Interface
 exports.single_device_endpoint_key = "single_device_manager";
+
+exports.DEVICE_CONTROLLER_DEVICE_OPENED = 'OPENED_DEVICE';
+exports.DEVICE_CONTROLLER_DEVICE_CLOSED = 'CLOSED_DEVICE';

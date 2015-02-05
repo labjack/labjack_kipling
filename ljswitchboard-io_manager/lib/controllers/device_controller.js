@@ -1,5 +1,13 @@
 
+
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var constants = require('../common/constants');
+
+// Save event emitter variables for easy access.
+var DEVICE_CONTROLLER_DEVICE_OPENED = constants.DEVICE_CONTROLLER_DEVICE_OPENED;
+var DEVICE_CONTROLLER_DEVICE_CLOSED = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
+
 var q = require('q');
 
 var labjack_nodejs = require('labjack-nodejs');
@@ -46,13 +54,14 @@ function createDeviceController(io_interface) {
 		});
 	};
 	var listener = function(m) {
-		
-
 		if(typeof(m.deviceKey) !== 'undefined'){
 			if(self.devices[m.deviceKey]) {
 				self.devices[m.deviceKey].oneWayListener(m.message);
 			}
-		} else {
+		} if(typeof(m.eventName) !== 'undefined') {
+			self.emit(m.eventName, m.data);
+		}else {
+			// self.emit(DEVICE_CONTROLLER_DEVICE_OPENED, newDevice.savedAttributes);
 			console.log('- device_controller in listener, message:', m);
 		}
 	};
@@ -103,8 +112,13 @@ function createDeviceController(io_interface) {
 	 *     firmwareVersion
 	 *     handleInfo (from getHandleInfo)
 	 */
-	this.getDeviceAttributes = function() {
-		return callFunc('getDeviceAttributes');
+	this.getDeviceListing = function(reqFilters, requestdAttributes) {
+		var defered = q.defer();
+		callFunc('getDeviceListing', [reqFilters, requestdAttributes])
+		.then(function(res) {
+			defered.resolve(res);
+		}, defered.reject);
+		return defered.promise;
 	};
 
 	/**
@@ -189,6 +203,7 @@ function createDeviceController(io_interface) {
 		);
 
 		self.devices[comKey] = newDevice;
+
 		defered.resolve(newDevice);
 		return defered.promise;
 	};
@@ -294,5 +309,6 @@ function createDeviceController(io_interface) {
 
 	var self = this;
 }
+util.inherits(createDeviceController, EventEmitter);
 
 exports.createNewDeviceController = createDeviceController;

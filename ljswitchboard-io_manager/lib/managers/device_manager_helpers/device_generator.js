@@ -30,6 +30,8 @@ function newDevice(newProcess, mockDevice, sendFunc) {
 			self.device = new device_curator.device(self.isMockDevice);
 			self.device.open(deviceType, connectionType, identifier)
 			.then(function(res) {
+				self.device.savedAttributes['isSelected-Radio'] = false;
+				self.device.savedAttributes['isSelected-CheckBox'] = true;
 				res.device_comm_key = self.device_comm_key;
 				defered.resolve(res);
 			}, function(err) {

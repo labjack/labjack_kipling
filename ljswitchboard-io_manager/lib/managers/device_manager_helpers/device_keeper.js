@@ -3,11 +3,18 @@ var process_manager = require('process_manager');
 var q = require('q');
 var async = require('async');
 
+var constants = require('../../common/constants');
+
+// Save event emitter variables for easy access.
+var DEVICE_CONTROLLER_DEVICE_OPENED = constants.DEVICE_CONTROLLER_DEVICE_OPENED;
+var DEVICE_CONTROLLER_DEVICE_CLOSED = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
+
 
 // var device_interface = require('../../single_device_interface');
 // var device_delegator_path = './lib/delegators/single_device_delegator.js';
 
 var labjack_nodejs = require('labjack-nodejs');
+var driver_const = labjack_nodejs.driver_const;
 var constants = require('../../common/constants');
 var device_generator = require('./device_generator');
 
@@ -21,7 +28,13 @@ function createDeviceKeeper(io_delegator, link) {
 			'message': message
 		});
 	};
-	
+	var sendEvent = function(eventName, data) {
+		send({
+			'eventName': eventName,
+			'data': data
+		});
+	};
+
 	this.devices = {};
 
 	var currentDeviceKey;
@@ -98,6 +111,7 @@ function createDeviceKeeper(io_delegator, link) {
 
 		// Define onSuccess and onError functions
 		var successFunc = function(res) {
+			sendEvent(DEVICE_CONTROLLER_DEVICE_OPENED, res);
 			defered.resolve(res);
 		};
 		var errorFunc = function(err) {
@@ -169,6 +183,10 @@ function createDeviceKeeper(io_delegator, link) {
 			// If the device is in the local listing of devices close it.
 			self.devices[comKey].close()
 			.then(function(res) {
+				sendEvent(
+					DEVICE_CONTROLLER_DEVICE_CLOSED,
+					self.devices[comKey].device.savedAttributes
+				);
 				var newInfo = {};
 				newInfo.isError = false;
 				newInfo.comKey = comKey;
@@ -271,6 +289,145 @@ function createDeviceKeeper(io_delegator, link) {
 		var defered = q.defer();
 		var numDevices = Object.keys(self.devices).length;
 		defered.resolve(numDevices);
+		return defered.promise;
+	};
+
+
+	/**
+	 * Accessory function for getDeviceListing that filters out devices from the
+	 * listing.
+	 */
+	var supportedDeviceFilters = {
+		'type': function (param, attrs) {
+			var res = false;
+			if(driver_const.deviceTypes[param] == attrs.deviceType) {
+				res = true;
+			}
+			return res;
+		},
+		'minFW': function (param, attrs) {
+			var res = false;
+			if(parseFloat(param) >= attrs.FIRMWARE_VERSION) {
+				res = true;
+			}
+			return res;
+		},
+		'subClass': function (params, attrs) {
+			var res = false;
+			if(Array.isArray(params)) {
+				params.forEach(function(param) {
+					if(attrs.subclass.indexOf(param) >= 0) {
+						res = true;
+					}
+				});
+			}
+			return res;
+		},
+		'hasSDCard': function (param, attrs) {
+			var res = false;
+			if(attrs.HARDWARE_INSTALLED) {
+				if(attrs.HARDWARE_INSTALLED.sdCard == param) {
+					res = true;
+				}
+			}
+			return res;
+		},
+		'hasWiFi': function (param, attrs) {
+			var res = false;
+			if(attrs.HARDWARE_INSTALLED) {
+				if(attrs.HARDWARE_INSTALLED.wifi == param) {
+					res = true;
+				}
+			}
+			return res;
+		},
+		'enableMockDevices': function(param, attrs) {
+			var res = false;
+			if(attrs.isMockDevice == param) {
+				res = true;
+			}
+			return res;
+		}
+	};
+	var supportedDeviceFilterKeys = Object.keys(supportedDeviceFilters);
+	var passesDeviceFilters = function(filters, attrs) {
+		var passes = true;
+		if(typeof(filters) !== 'undefined') {
+			var keys = Object.keys(filters);
+			keys.forEach(function(key) {
+				if(supportedDeviceFilterKeys.indexOf(key) >= 0) {
+					if(!supportedDeviceFilters[key](filters[key], attrs)) {
+						passes = false;
+					}
+				}
+			});
+		}
+		return passes;
+	};
+
+	/**
+	 * Get various attributes about the currently open devices.  Should be used
+	 * when each tab in kipling starts to retrieve easy to parse & display data
+	 * about each connected device.
+	 */
+	this.getDeviceListing = function(reqFilters, requestdAttributes) {
+		var defered = q.defer();
+		var filters = {'enableMockDevices': false};
+		if(reqFilters) {
+			if(Array.isArray(reqFilters)) {
+				reqFilters.forEach(function(reqFilter) {
+					var filterKeys = Object.keys(reqFilter);
+					filterKeys.forEach(function(key) {
+						filters[key] = reqFilter[key];
+					});
+				});
+			} else {
+				var filterKeys = Object.keys(reqFilter);
+				filterKeys.forEach(function(key) {
+					filters[key] = reqFilter[key];
+				});
+			}
+		}
+		var attributes = [
+			'serialNumber',
+			'FIRMWARE_VERSION',
+			'WIFI_VERSION',
+			'productType',
+			'BOOTLOADER_VERSION',
+			'connectionTypeName',
+			'ip',
+			'DEVICE_NAME_DEFAULT',
+			'isSelected-Radio',
+			'isSelected-CheckBox',
+			'device_comm_key'
+		];
+		if(requestdAttributes) {
+			if(Array.isArray(requestdAttributes)) {
+				requestdAttributes.forEach(function(requestedAttribute) {
+					if(attributes.indexOf(requestedAttribute) < 0) {
+						attributes.push(requestedAttribute);
+					}
+				});
+			}
+		}
+
+		var listing = [];
+		var deviceKeys = Object.keys(self.devices);
+		deviceKeys.forEach(function(deviceKey) {
+			var dev = self.devices[deviceKey].device.savedAttributes;
+			if(passesDeviceFilters(filters, dev)) {
+				var devListing = {};
+				attributes.forEach(function(attribute) {
+					if(typeof(dev[attribute]) !== 'undefined') {
+						devListing[attribute] = dev[attribute];
+					} else {
+						devListing[attribute] = 'N/A';
+					}
+				});
+				listing.push(devListing);
+			}
+		});
+		defered.resolve(listing);
 		return defered.promise;
 	};
 
