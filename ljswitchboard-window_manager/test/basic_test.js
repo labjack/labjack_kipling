@@ -1,7 +1,7 @@
 
 
 var window_manager = require('../lib/window_manager');
-var mock_window = require('./mock_window');
+var mock_window = require('../lib/mock_window');
 
 var eventList = mock_window.eventList;
 
@@ -9,7 +9,7 @@ var windows = {};
 
 var tests = {
 	'create new window': function(test) {
-		var newWindow = mock_window.createNewWindow();
+		var newWindow = mock_window.open();
 		newWindow.on(eventList.LOADED, function() {
 			// console.log('Window Loaded', Object.keys(this));
 			test.done();
@@ -20,7 +20,7 @@ var tests = {
 	// 	test.done();
 	// },
 	'insert window into window_manager': function(test) {
-		var primaryWindow = mock_window.createNewWindow();
+		var primaryWindow = mock_window.open();
 		windows.primary = primaryWindow;
 		window_manager.addWindow({
 			'name': 'main',
@@ -28,7 +28,7 @@ var tests = {
 			'initialVisibility': false,
 			'title': 'mainWindow'
 		});
-		var newWindow = mock_window.createNewWindow();
+		var newWindow = mock_window.open();
 		windows.first = newWindow;
 		window_manager.addWindow({
 			'name': 'firstWindow',
@@ -60,7 +60,7 @@ var tests = {
 		});
 		windows.first.on(eventList.CLOSED, function() {
 			events.push(eventList.CLOSED);
-			console.log('Window Closed', this.title, events);
+			console.log('  - Window Closed', this.title, events);
 			test.deepEqual(
 				events,
 				['hidden', 'close', 'closed'],
@@ -72,6 +72,24 @@ var tests = {
 		// setTimeout(function() {
 		// 	test.done();
 		// }, 200);
+	},
+	'open window test': function(test) {
+		var packageInfo = {
+			'location': '',
+		};
+		var requiredInfo = {
+			'main': '',
+		};
+		var appData = {};
+		var openedWindow = window_manager.open(
+			packageInfo,
+			requiredInfo,
+			appData
+		);
+		openedWindow.on(eventList.LOADED, function() {
+			console.log('Window Opened!!');
+			test.done();
+		});
 	},
 	'delay for output': function(test) {
 		setTimeout(function() {

@@ -53,7 +53,7 @@ var createNewWindow = function(options) {
 util.inherits(createNewWindow, EventEmitter);
 
 exports.eventList = eventList;
-exports.createNewWindow = function() {
+exports.open = function() {
 	var newWindow = new createNewWindow();
 	setTimeout(function() {
 		// console.log('firing loaded event');
