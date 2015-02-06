@@ -1,0 +1,42 @@
+{
+  "name": "ljswitchboard-window_manager",
+  "version": "0.0.1",
+  "description": "A library that assists the ljswitchboard in managing multiple windows and exiting when they are all closed.",
+  "author": {
+    "name": "Chris Johnson",
+    "url": "http://labjack.com"
+  },
+  "main": "./lib/window_manager",
+  "homepage": "https://github.com/chrisJohn404/ljswitchboard-window_manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-window_manager"
+  },
+  "keywords": [
+    "LabJack",
+    "LJM",
+    "T7",
+    "ljswitchboard"
+  ],
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-window_manager/master/LICENSE"
+  },
+  "bugs": {
+    "url": "https://github.com/chrisJohn404/ljswitchboard-window_manager/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "nodeunit": "0.9.x"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "files": [
+    "lib",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+  }
+}
