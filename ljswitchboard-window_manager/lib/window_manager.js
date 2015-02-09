@@ -2,7 +2,7 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
-var mock_window = require('./mock_window');
+
 var path = require('path');
 
 var eventList = {
@@ -10,17 +10,20 @@ var eventList = {
 	LOADED_WINDOW: 'loaded_window',
 	ALL_WINDOWS_CLOSED: 'all_windows_closed',
 	PREVENTING_WINDOW_FROM_CLOSING: 'preventing_window_from_closing',
+	ALL_WINDOWS_ARE_HIDDEN: 'all_windows_are_hidden',
+	QUITTING_APPLICATION: 'quitting_application',
 	CLOSED_PRIMARY_WINDOW: 'closed_primary_window'
 };
+
+var DEBUG_WINDOW_EVENT_LISTENERS = false;
+var DEBUG_WINDOW_MANAGER = false;
 
 function createWindowManager() {
 	// Define default options
 	this.options = {
 		'allowWindowlessApp': false,
 		'primaryWindowName': 'main',
-		'gui': {
-			'Window': mock_window
-		}
+		'gui': undefined
 	};
 
 	this.configure = function(options) {
@@ -59,6 +62,7 @@ function createWindowManager() {
 				areWindowsVisible = true;
 			}
 		});
+		return areWindowsVisible;
 	};
 	this.numVisibleWindows = function() {
 		var num = 0;
@@ -69,6 +73,7 @@ function createWindowManager() {
 				num += 1;
 			}
 		});
+		return num;
 	};
 	this.areAnyWindowsOpen = function() {
 		var areWindowsOpen = false;
@@ -79,6 +84,7 @@ function createWindowManager() {
 				areWindowsOpen = true;
 			}
 		});
+		return areWindowsOpen;
 	};
 	this.numOpenWindows = function() {
 		var num = false;
@@ -89,12 +95,27 @@ function createWindowManager() {
 				num += 1;
 			}
 		});
+		return num;
+	};
+	this.getOpenWindows = function() {
+		var openWindows = [];
+		var managedWindowKeys = Object.keys(self.managedWindows);
+		managedWindowKeys.forEach(function(managedWindowKey) {
+			var managedWindow = self.managedWindows[managedWindowKey];
+			if(managedWindow.isOpen) {
+				openWindows.push(managedWindowKey);
+			}
+		});
+		return openWindows;
 	};
 
 	var getLoadedListener = function(windowInfo) {
 		var windowName = windowInfo.name;
 
 		var onLoadedListener = function() {
+			if(DEBUG_WINDOW_EVENT_LISTENERS) {
+				console.log('  * Window Loaded', windowName);
+			}
 
 			// Set the window's title from the window's package.json reference.
 			var win = self.managedWindows[windowName].win;
@@ -117,27 +138,33 @@ function createWindowManager() {
 		var windowName = windowInfo.name;
 
 		var onCloseListener = function() {
-			self.managedWindows[windowName].win.hide();
+			if(DEBUG_WINDOW_EVENT_LISTENERS) {
+				console.log('  * Closing Window', windowName);
+			}
 
-			// console.log('Closing Window...', this.title, 'aka', windowName);
+			// Immediately hide the window for better user expereince.
+			self.managedWindows[windowName].win.hide();
 
 			// Manage the other window attributes
 			self.managedWindows[windowName].isVisible = false;
 			
-
-			if(self.managedWindows[windowName].isPrimary) {
-				if(self.numOpenWindows() === 1) {
-					console.log('Only one window left');
-					if(!self.options.allowWindowlessApp) {
-						self.managedWindows[windowName].status = 'closing';
-						self.emit(eventList.CLOSING_WINDOW, windowInfo);
-						self.managedWindows[windowName].win.close(true);
-					} else {
-						self.emit(eventList.PREVENTING_WINDOW_FROM_CLOSING, windowInfo);
-					}
-				} else {
-					self.emit(eventList.PREVENTING_WINDOW_FROM_CLOSING, windowInfo);
-				}
+			// If the window is enabled to run in the background, hide it and
+			// prevent it from closing.
+			if(self.managedWindows[windowName].runInBackground) {
+				self.emit(eventList.PREVENTING_WINDOW_FROM_CLOSING, windowInfo);
+				
+				// if(self.numOpenWindows() === 1) {
+				// 	console.log('Only one window left');
+				// 	if(!self.options.allowWindowlessApp) {
+				// 		self.managedWindows[windowName].status = 'closing';
+				// 		self.emit(eventList.CLOSING_WINDOW, windowInfo);
+				// 		self.managedWindows[windowName].win.close(true);
+				// 	} else {
+				// 		self.emit(eventList.PREVENTING_WINDOW_FROM_CLOSING, windowInfo);
+				// 	}
+				// } else {
+				// 	self.emit(eventList.PREVENTING_WINDOW_FROM_CLOSING, windowInfo);
+				// }
 			} else {
 				self.managedWindows[windowName].status = 'closing';
 				self.emit(eventList.CLOSING_WINDOW, windowInfo);
@@ -150,7 +177,9 @@ function createWindowManager() {
 		var windowName = windowInfo.name;
 
 		var onClosedListener = function() {
-
+			if(DEBUG_WINDOW_EVENT_LISTENERS) {
+				console.log('  * Window Closed', windowName);
+			}
 			// console.log('Closed Window...', this.title, 'aka', windowName);
 			self.managedWindows[windowName].isOpen = false;
 			self.managedWindows[windowName].status = 'closed';
@@ -160,6 +189,28 @@ function createWindowManager() {
 				self.emit(eventList.CLOSED_WINDOW, windowInfo);
 			} else {
 				self.emit(eventList.CLOSED_WINDOW, windowInfo);
+			}
+
+			// Check to see if there aren't any more visible windows after
+			// closing the window to see if the application should be allowed to
+			// run in the background.  If not, exit the program
+			if(self.numVisibleWindows() === 0) {
+				if(self.options.allowWindowlessApp) {
+					self.emit(eventList.ALL_WINDOWS_ARE_HIDDEN);
+				} else {
+					self.emit(eventList.QUITTING_APPLICATION);
+
+					// TODO: Not sure why but in the basic test which does a 
+					// crude timeout to check for the window exiting, it 
+					// finishes b/c this function gets called to early.  The
+					// event emitter for QUITTING_APPLICATION works but this one
+					// doesn't.  Also, it may be a good idea to let the app run 
+					// for a few ms after the last window closes anyways.  
+					setTimeout(function() {
+						self.options.gui.App.quit();
+					}, 10);
+					
+				}
 			}
 		};
 		return onClosedListener;
@@ -172,6 +223,7 @@ function createWindowManager() {
 		'win': windowObject,
 		'initialVisibility': initialVisibilityState,
 		'title': 'myWindowTitle',
+		'runInBackground': defaults to false.
 
 		// Appended to object
 		'isPrimary': undefined,
@@ -190,7 +242,9 @@ function createWindowManager() {
 	this.addWindow = function(windowInfo) {
 		var windowName = windowInfo.name;
 
-		console.log('  - Adding new window', windowName);
+		if(DEBUG_WINDOW_MANAGER) {
+			console.log('  - Adding new window', windowName);
+		}
 		self.managedWindows[windowName] = windowInfo;
 		self.managedWindows[windowName].status = 'loading';
 		self.managedWindows[windowName].isOpen = false;
@@ -199,6 +253,12 @@ function createWindowManager() {
 			self.managedWindows[windowName].isPrimary = true;
 		} else {
 			self.managedWindows[windowName].isPrimary = false;
+		}
+
+		if(windowInfo.runInBackground) {
+			self.managedWindows[windowName].runInBackground = true;
+		} else {
+			self.managedWindows[windowName].runInBackground = false;
 		}
 
 
@@ -258,13 +318,24 @@ function createWindowManager() {
 	ljswitchboard-package_loader project.
 	*/
 	this.openWindow = function(packageInfo, info, appData) {
-		// Local reference to nw.gui
+		// Make sure that the gui object is defined
+		if(typeof(self.options.gui) === 'undefined') {
+			throw new Error('Must configure the module_manager, gui is not defined');
+		}
+		if(typeof(self.options.gui.Window) === 'undefined') {
+			throw new Error('Must configure the module_manager, gui.Window is not defined');
+		}
+
+		// Save a local reference to nw.gui
 		var gui = self.options.gui;
 
-		console.log('Reference to gui', Object.keys(gui));
+		if(DEBUG_WINDOW_MANAGER) {
+			console.log('Reference to gui', Object.keys(gui));
+		}
+		
 
 		// Get the module's data that should be used when opening the new window
-		var newWindowData;
+		var newWindowData = {};
 		if(appData.window) {
 			newWindowData = appData.window;
 		}
@@ -272,12 +343,34 @@ function createWindowManager() {
 		// Build the url and moduleData path
 		var windowPath = 'file:///' + path.join(packageInfo.location, info.main);
 
+		// Add a conditional debug message
+		if(DEBUG_WINDOW_MANAGER) {
+			console.log('Reference to gui.Window', Object.keys(gui.Window));
+		}
 		// Open a new window and save its reference
-		console.log('Reference to gui', Object.keys(gui.Window));
 		var newWindow = gui.Window.open(
 			windowPath,
 			newWindowData
 		);
+
+		var initialVisibilityState = true;
+		var windowTitle = '';
+
+		if(newWindowData.title) {
+			windowTitle = newWindowData.title;
+		}
+		if(typeof(newWindowData.show) !== 'undefined') {
+			initialVisibilityState = newWindowData.show;
+		}
+
+		// Build the windowInfo object to be passed to the self.addWindow function
+		windowInfo = {
+			'name': packageInfo.name,
+			'win': newWindow,
+			'initialVisibility': initialVisibilityState,
+			'title': windowTitle
+		};
+		self.addWindow(windowInfo);
 
 		// Emit an event indicating that a new window has been opened.
 		self.emit(eventList.OPENED_WINDOW, packageInfo.name);
@@ -299,5 +392,11 @@ exports.isManagedWindow = WINDOW_MANAGER.isManagedWindow;
 exports.hideWindow = WINDOW_MANAGER.hideWindow;
 exports.showWindow = WINDOW_MANAGER.showWindow;
 exports.closeWindow = WINDOW_MANAGER.closeWindow;
+exports.numVisibleWindows = WINDOW_MANAGER.numVisibleWindows;
+exports.numOpenWindows = WINDOW_MANAGER.numOpenWindows;
+exports.getOpenWindows = WINDOW_MANAGER.getOpenWindows;
+exports.on = function(eventName, func) {
+	WINDOW_MANAGER.on(eventName, func);
+};
 
 exports.eventList = eventList;

@@ -6,8 +6,40 @@ var mock_window = require('../lib/mock_window');
 var eventList = mock_window.eventList;
 
 var windows = {};
-
+var guiAppQuitDetected = false;
 var tests = {
+	'verify lack of configuration': function(test) {
+		var packageInfo = {
+			'location': '',
+		};
+		var requiredInfo = {
+			'main': '',
+		};
+		var appData = {};
+		try {
+			var openedWindow = window_manager.open(
+				packageInfo,
+				requiredInfo,
+				appData
+			);
+			test.ok(false, 'An error should have been thrown');
+		} catch(err) {
+			test.done();
+		}
+	},
+	'configure window_manager': function(test) {
+		window_manager.configure({
+			'gui': {
+				'Window': mock_window,
+				'App': {
+					'quit': function() {
+						guiAppQuitDetected = true;
+					}
+				}
+			}
+		});
+		test.done();
+	},
 	'create new window': function(test) {
 		var newWindow = mock_window.open();
 		newWindow.on(eventList.LOADED, function() {
@@ -60,7 +92,16 @@ var tests = {
 		});
 		windows.first.on(eventList.CLOSED, function() {
 			events.push(eventList.CLOSED);
-			console.log('  - Window Closed', this.title, events);
+			// make sure the "firstWindow" title is passed back.
+			test.strictEqual(this.title, 'firstWindowTitle', 'wrong window title');
+
+			// Make sure that the window has been hidden, issued a close req. 
+			// and ultimately closed via the events list.
+			test.deepEqual(
+				events,
+				['hidden', 'close', 'closed']
+			);
+			
 			test.deepEqual(
 				events,
 				['hidden', 'close', 'closed'],
@@ -68,13 +109,14 @@ var tests = {
 				);
 			test.done();
 		});
+
+		// Close the first window and let  the event listener detect & finish 
+		// the test.
 		window_manager.closeWindow('firstWindow');
-		// setTimeout(function() {
-		// 	test.done();
-		// }, 200);
 	},
 	'open window test': function(test) {
 		var packageInfo = {
+			'name': 'MyWindow',
 			'location': '',
 		};
 		var requiredInfo = {
@@ -86,15 +128,59 @@ var tests = {
 			requiredInfo,
 			appData
 		);
+		// Wait for the on LOADED event to finish the test indicating that a 
+		// new window has opened.
 		openedWindow.on(eventList.LOADED, function() {
-			console.log('Window Opened!!');
 			test.done();
 		});
 	},
+	'check the number of visible and open windows': function(test) {
+		// make sure the main window can be shown and have the results indicate
+		// it.
+		test.strictEqual(window_manager.numVisibleWindows(), 1);
+		test.strictEqual(window_manager.numOpenWindows(), 2);
+		window_manager.showWindow('main');
+		test.strictEqual(window_manager.numVisibleWindows(), 2);
+		test.strictEqual(window_manager.numOpenWindows(), 2);
+		
+		// Establish a quitting_application event listener to save results.
+		var receivedQuitEvent = false;
+		var quitListener = function() {
+			receivedQuitEvent = true;
+		};
+		
+		// Register the QUIT_APPLICATION event listener
+		window_manager.on(eventList.QUITTING_APPLICATION, quitListener);
+
+		// Hide the main window and close the secondary window
+		window_manager.hideWindow('main');
+		window_manager.closeWindow('MyWindow');
+
+		// Right after these functions are called, the window should be hidden
+		// but it takes a few loops in the event loop for the window to be
+		// closed.
+		test.strictEqual(window_manager.numVisibleWindows(), 1, 'visible');
+		test.strictEqual(window_manager.numOpenWindows(), 2, 'open');
+		
+		// Wait for app to exit:
+		var waitForQuit = function() {
+			if(guiAppQuitDetected) {
+				test.ok(receivedQuitEvent, 'did not receive the QUITTING_APPLICATION event');
+				test.strictEqual(window_manager.numVisibleWindows(), 0);
+				test.strictEqual(window_manager.numOpenWindows(), 1);
+				test.deepEqual(window_manager.getOpenWindows(), ['main']);
+				test.done();
+			} else {
+				setTimeout(waitForQuit, 10);
+			}
+		};
+		setTimeout(waitForQuit, 10);
+	},
 	'delay for output': function(test) {
-		setTimeout(function() {
-			test.done();
-		}, 2000);
+		// setTimeout(function() {
+		// 	test.done();
+		// }, 2000);
+		test.done();
 	}
 };
 
