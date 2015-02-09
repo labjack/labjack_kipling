@@ -94,6 +94,8 @@ function createPackageLoader() {
 		'version': selfVersion
 	};
 
+	var packageInfoFileName = 'package_loader_data.json';
+
 
 	var startNWApp = function(packageInfo, info) {
 		// console.log('nwApp detected', packageInfo, info);
@@ -119,6 +121,11 @@ function createPackageLoader() {
 				newWindowData
 			);
 
+			// If desired, open the window's devTools
+			if(packageInfo.showDevTools) {
+				curApp.win.showDevTools();
+			}
+
 			// Emit an event indicating that a new window has been opened.
 			self.emit(EVENTS.OPENED_WINDOW, packageInfo.name);
 		}
@@ -140,18 +147,24 @@ function createPackageLoader() {
 				
 				if(global[gns][name].info.type) {
 					if(global[gns][name].info.type === 'nwApp') {
+						// Determine if the app should be started.
+						var startApp = false;
 						if(typeof(packageInfo.startApp) !== 'undefined') {
 							if(packageInfo.startApp) {
-								startNWApp(packageInfo, global[gns][name].info);
-							} else {
-								// Emit an event indicating that we aren't
-								// starting the detected nwApp
-								self.emit(EVENTS.NOT_STARTING_NW_APP, packageInfo.name);
+								startApp = true;
 							}
 						} else {
-							startNWApp(packageInfo, global[gns][name].info);
+							startApp = true;
 						}
-						
+
+						// If desired, start the application.
+						if(startApp) {
+							startNWApp(packageInfo, global[gns][name].info);
+						} else {
+							// Emit an event indicating that we aren't
+							// starting the detected nwApp
+							self.emit(EVENTS.NOT_STARTING_NW_APP, packageInfo.name);
+						}
 					}
 				}
 			} else {
@@ -186,10 +199,10 @@ function createPackageLoader() {
 					startPackage(packageInfo, name);
 				}
 				global[gns][name].packageInfo = packageInfo;
-				self.emit(EVENTS.LOADED_PACKAGE, packageInfo);	
+				self.emit(EVENTS.LOADED_PACKAGE, packageInfo);
 			}
 		} else {
-			self.emit(EVENTS.NOT_LOADING_PACKAGE, packageInfo);	
+			self.emit(EVENTS.NOT_LOADING_PACKAGE, packageInfo);
 		}
 	};
 	var setPackage = function(packageInfo) {
@@ -303,6 +316,166 @@ function createPackageLoader() {
 		packagesToDelete.forEach(self.deleteManagedPackage);
 	};
 
+	var initializeInfoFile = function(bundle) {
+		var defered = q.defer();
+		var filePath = path.normalize(path.join(
+			self.extractionPath,
+			packageInfoFileName
+		));
+		fs.writeFile(filePath, JSON.stringify({}), function(err) {
+			if(err) {
+				console.error('Error Initializing package_loader info file', err);
+				defered.resolve(bundle);
+			} else {
+				defered.resolve(bundle);
+			}
+		});
+		return defered.promise;
+	};
+	var readInfoFile = function(bundle) {
+		console.log('in readInfoFile');
+		var defered = q.defer();
+		var filePath = path.normalize(path.join(
+			self.extractionPath,
+			packageInfoFileName
+		));
+		fs.exists(filePath, function(exists) {
+			if(exists) {
+				fs.readFile(filePath, function(fileData) {
+					var parsedFileData = {};
+					try {
+						parsedFileData = JSON.parse(fileData);
+						defered.resolve(parsedFileData);
+					} catch(err) {
+						// Error parsing the JSON file so it should be 
+						// re-initialized and assume data is invalid/what was
+						// passed into the function.
+						initializeInfoFile(bundle)
+						.then(defered.resolve);
+					}
+				});
+			} else {
+				// Error finding the file so try to re-initialize it and assume 
+				// data is invalid/what was passed into the function.
+				initializeInfoFile(bundle)
+				.then(defered.resolve);
+			}
+		});
+		return defered.promise;
+	};
+	var writeInfoFile = function(dataToWrite) {
+		var defered = q.defer();
+		var filePath = path.normalize(path.join(
+			self.extractionPath,
+			packageInfoFileName
+		));
+		fs.exists(filePath, function(exists) {
+			if(exists) {
+				fs.writeFile(filePath, dataToWrite, function(fileData) {
+					if(err) {
+						initializeInfoFile({})
+						.then(defered.resolve);
+					} else {
+						defered.resolve({});
+					}
+				});
+			} else {
+				// Error finding the file so try to re-initialize it and assume 
+				// data is invalid/what was passed into the function.
+				initializeInfoFile({})
+				.then(defered.resolve);
+			}
+		});
+		return defered.promise;
+	};
+
+	var getPackageNameFromLocation = function(packageLocation) {
+		var packageName = '';
+		var basename = path.basename(packageLocation);
+		var extname = path.extname(packageLocation);
+		if(extname === '') {
+			packageName = basename;
+		} else {
+			packageName = basename.split(extname)[0];
+		}
+		return packageName;
+	};
+
+	var declarePackageInvalid = function(packageInfo) {
+		var defered = q.defer();
+		var defaultData = {};
+		var packageName = getPackageNameFromLocation(packageInfo.location);
+
+		// Read the existing file contents
+		readInfoFile(defaultData)
+		.then(function(data) {
+			// If the packageInfo.name object dats is already there, declare the
+			// validity attribute to be false.
+			if(data[packageName]) {
+				data[packageName].isValid = false;
+			} else {
+				// Otherwise, initialize it to be false.
+				data[packageName] = {
+					'isValid': false,
+				};
+			}
+			// Write the data back to the file.
+			writeInfoFile(data)
+			.then(function(res) {
+				defered.resolve(packageInfo);
+			});
+		});
+		return defered.promise;
+	};
+	var declarePackageValid = function(packageInfo) {
+		var defered = q.defer();
+		var defaultData = {};
+		var packageName = getPackageNameFromLocation(packageInfo.location);
+
+		// Read the existing file contents
+		readInfoFile(defaultData)
+		.then(function(data) {
+			// If the packageInfo.name object dats is already there, declare the
+			// validity attribute to be false.
+			if(data[packageName]) {
+				data[packageName].isValid = true;
+			} else {
+				// Otherwise, initialize it to be false.
+				data[packageName] = {
+					'isValid': true,
+				};
+			}
+			// Write the data back to the file.
+			writeInfoFile(data)
+			.then(function(res) {
+				defered.resolve(packageInfo);
+			});
+		});
+		return defered.promise;
+	};
+
+	var checkForExtractionErrors = function(packageInfo) {
+		var defered = q.defer();
+		var defaultData = {};
+		var packageName = getPackageNameFromLocation(packageInfo.location);
+
+		console.log('in checkForExtractionErrors', packageName);
+
+		// Read the existing file contents
+		readInfoFile(defaultData)
+		.then(function(data) {
+			console.log('Read Data', data);
+			// If the packageInfo.name object data is there then read the
+			// isValid attribute, otherwise say that there are extraction errors.
+			if(data) {
+				// packageInfo.isValid = data[packageName].isValid;
+			} else {
+				// packageInfo.isValid = false;
+			}
+			defered.resolve(packageInfo);
+		});
+		return defered.promise;
+	};
 	var checkforExistingDirectory = function(packageInfo) {
 		var defered = q.defer();
 		fs.exists(packageInfo.location, function(exists) {
@@ -982,7 +1155,8 @@ function createPackageLoader() {
 			checkForExistingPackage(bundle)
 			.then(checkForUpgradeOptions, getOnErr('checkingForExistingPackage'))
 			.then(chooseValidUpgrade, getOnErr('checkForUpgradeOptions'))
-			.then(determineRequiredOperations, getOnErr('chooseValidUpgrade'))
+			.then(checkForExtractionErrors, getOnErr('chooseValidUpgrade'))
+			.then(determineRequiredOperations, getOnErr('checkForExtractionErrors'))
 			.then(resetPackageDirectory, getOnErr('determineRequiredOperations'))
 			.then(performUpgrade, getOnErr('resetPackageDirectory'))
 			.then(verifyPackageUpgrade, getOnErr('performUpgrade'))
