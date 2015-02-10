@@ -134,17 +134,9 @@ function createPackageLoader() {
 	var startPackage = function(packageInfo, name) {
 		try {
 			if(global[gns][name].info) {
-				try {
-					// Build package.json path
-					var moduleDataPath = path.join(packageInfo.location, 'package.json');
-
-					// Load the moduleData (its package.json file) & save it to info.data;
-					var moduleData = require(moduleDataPath);
-					global[gns][name].data = moduleData;
-				} catch(err) {
-					console.error('  - Failed to load package data', err, name);
-				}
-				
+				// Load the moduleData (its package.json file) & save it to info.data;
+				var moduleData = getRequiredPackageData(packageInfo.location);
+				global[gns][name].data = moduleData;
 				if(global[gns][name].info.type) {
 					if(global[gns][name].info.type === 'nwApp') {
 						// Determine if the app should be started.
@@ -174,7 +166,19 @@ function createPackageLoader() {
 			console.error('  - package_loader: startPackage Error', err, name);
 		}
 	};
+	var getRequiredPackageData = function(moduleLocation) {
+		var moduleData = {};
+		try {
+			// Build package.json path
+			var moduleDataPath = path.join(moduleLocation, 'package.json');
 
+			// Load the moduleData (its package.json file) & save it to info.data;
+			moduleData = require(moduleDataPath);
+		} catch(err) {
+			console.error('  - Failed to load package data', err, name);
+		}
+		return moduleData;
+	};
 	var requirePackage = function(packageInfo) {
 		var name = packageInfo.name;
 		var location;
@@ -1161,6 +1165,9 @@ function createPackageLoader() {
 				// If process succeeded load the package
 				try {
 					requirePackage(bundle.packageInfo);
+					bundle.packageData = getRequiredPackageData(
+						bundle.packageInfo.location
+					);
 					bundle.packageLoaded = true;
 					bundle.overallResult = true;
 				} catch(err) {
@@ -1266,6 +1273,7 @@ function createPackageLoader() {
 				var bundle = {
 					'name': packageName,
 					'packageInfo': self.managedPackages[packageName],
+					'packageData': null,
 					'currentPackage': null,
 					'availableUpgrades': null,
 					'managedPackage': null,
