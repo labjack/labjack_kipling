@@ -1157,6 +1157,15 @@ function createPackageLoader() {
 
 		return defered.promise;
 	};
+	var extendedLoadManagedPackage = function(bundle) {
+		requirePackage(bundle.packageInfo);
+		bundle.packageData = getRequiredPackageData(
+			bundle.packageInfo.location
+		);
+		bundle.packageLoaded = true;
+		bundle.overallResult = true;
+		return bundle;
+	};
 	var loadManagedPackage = function(bundle) {
 		var defered = q.defer();
 		// Verify that the packageManagement process went smoothly
@@ -1164,12 +1173,15 @@ function createPackageLoader() {
 			if(bundle.managedPackage.isValid) {
 				// If process succeeded load the package
 				try {
-					requirePackage(bundle.packageInfo);
-					bundle.packageData = getRequiredPackageData(
-						bundle.packageInfo.location
-					);
-					bundle.packageLoaded = true;
-					bundle.overallResult = true;
+					if(bundle.packageInfo.directLoad) {
+						if(bundle.chosenUpgrade.type === 'directory') {
+							if(bundle.chosenUpgrade.exists && bundle.chosenUpgrade.isValid) {
+								bundle.packageInfo.location = bundle.chosenUpgrade.location;
+							}
+						}	
+					}
+					bundle = extendedLoadManagedPackage(bundle);
+					
 				} catch(err) {
 					console.error('  - Error in loadManagedPackage', err, bundle.name);
 					var errMsg = 'Error requiring managedPackage during the ' +
