@@ -17,6 +17,8 @@ var eventList = {
 
 var DEBUG_WINDOW_EVENT_LISTENERS = false;
 var DEBUG_WINDOW_MANAGER = false;
+var DEBUG_WINDOW_EVENT_LIST = false;
+var DEBUG_PRINT_WINDOW_EVENT_DATA = false;
 
 function createWindowManager() {
 	// Define default options
@@ -87,7 +89,7 @@ function createWindowManager() {
 		return areWindowsOpen;
 	};
 	this.numOpenWindows = function() {
-		var num = false;
+		var num = 0;
 		var managedWindowKeys = Object.keys(self.managedWindows);
 		managedWindowKeys.forEach(function(managedWindowKey) {
 			var managedWindow = self.managedWindows[managedWindowKey];
@@ -198,18 +200,42 @@ function createWindowManager() {
 				if(self.options.allowWindowlessApp) {
 					self.emit(eventList.ALL_WINDOWS_ARE_HIDDEN);
 				} else {
-					self.emit(eventList.QUITTING_APPLICATION);
-
-					// TODO: Not sure why but in the basic test which does a 
-					// crude timeout to check for the window exiting, it 
-					// finishes b/c this function gets called to early.  The
-					// event emitter for QUITTING_APPLICATION works but this one
-					// doesn't.  Also, it may be a good idea to let the app run 
-					// for a few ms after the last window closes anyways.  
-					setTimeout(function() {
-						self.options.gui.App.quit();
-					}, 10);
+					try {
+						self.emit(eventList.QUITTING_APPLICATION);
+					} catch(err) {
+						// Error telling emitters that we are quitting.
+					}
 					
+					setImmediate(function() {
+						try {
+							var openWindows = self.getOpenWindows();
+							openWindows.forEach(function(openWindow) {
+								self.managedWindows[openWindow].win.close();
+							});
+						} catch(err) {
+							// Error informing each window to quit
+						}
+
+						try {
+							self.options.gui.App.quit();
+						} catch(err) {
+							// Error quitting the application
+						}
+
+
+						// try {
+						// 	process.exit();
+						// } catch(err) {
+						// 	// Error telling the process to exit.
+						// }
+					});
+					// // TODO: Not sure why but in the basic test which does a 
+					// // crude timeout to check for the window exiting, it 
+					// // finishes b/c this function gets called to early.  The
+					// // event emitter for QUITTING_APPLICATION works but this one
+					// // doesn't.  Also, it may be a good idea to let the app run 
+					// // for a few ms after the last window closes anyways. 
+					// // self.options.gui.App.quit(); 
 				}
 			}
 		};
@@ -382,6 +408,22 @@ function createWindowManager() {
 util.inherits(createWindowManager, EventEmitter);
 
 var WINDOW_MANAGER = new createWindowManager();
+
+if(DEBUG_WINDOW_EVENT_LIST) {
+	var eventKeys = Object.keys(eventList);
+	eventKeys.forEach(function(key) {
+		WINDOW_MANAGER.on(eventList[key], function(data) {
+			if(DEBUG_PRINT_WINDOW_EVENT_DATA) {
+				console.log(
+					'  ! Event: ' + key + ', data: ' +
+					JSON.stringify(data, null, 2)
+				);
+			} else {
+				console.log('  ! Event: ' + key);
+			}
+		});
+	});
+}
 
 exports.windowManager = WINDOW_MANAGER;
 exports.open = WINDOW_MANAGER.openWindow;

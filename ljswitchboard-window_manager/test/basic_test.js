@@ -57,7 +57,7 @@ var tests = {
 		window_manager.addWindow({
 			'name': 'main',
 			'win': primaryWindow,
-			'initialVisibility': false,
+			'initialVisibility': true,
 			'title': 'mainWindow'
 		});
 		var newWindow = mock_window.open();
@@ -92,6 +92,7 @@ var tests = {
 		});
 		windows.first.on(eventList.CLOSED, function() {
 			events.push(eventList.CLOSED);
+
 			// make sure the "firstWindow" title is passed back.
 			test.strictEqual(this.title, 'firstWindowTitle', 'wrong window title');
 
@@ -137,6 +138,7 @@ var tests = {
 	'check the number of visible and open windows': function(test) {
 		// make sure the main window can be shown and have the results indicate
 		// it.
+		window_manager.hideWindow('main');
 		test.strictEqual(window_manager.numVisibleWindows(), 1);
 		test.strictEqual(window_manager.numOpenWindows(), 2);
 		window_manager.showWindow('main');
@@ -166,15 +168,15 @@ var tests = {
 		var waitForQuit = function() {
 			if(guiAppQuitDetected) {
 				test.ok(receivedQuitEvent, 'did not receive the QUITTING_APPLICATION event');
-				test.strictEqual(window_manager.numVisibleWindows(), 0);
-				test.strictEqual(window_manager.numOpenWindows(), 1);
-				test.deepEqual(window_manager.getOpenWindows(), ['main']);
+				test.strictEqual(window_manager.numVisibleWindows(), 0, 'visible');
+				test.strictEqual(window_manager.numOpenWindows(), 0, 'numOpenWindows');
+				test.deepEqual(window_manager.getOpenWindows(), []);
 				test.done();
 			} else {
-				setTimeout(waitForQuit, 10);
+				setTimeout(waitForQuit, 100);
 			}
 		};
-		setTimeout(waitForQuit, 10);
+		setTimeout(waitForQuit, 100);
 	},
 	'delay for output': function(test) {
 		// setTimeout(function() {
