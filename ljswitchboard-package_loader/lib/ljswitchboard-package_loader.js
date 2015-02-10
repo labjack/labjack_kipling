@@ -332,8 +332,7 @@ function createPackageLoader() {
 		});
 		return defered.promise;
 	};
-	var readInfoFile = function(bundle) {
-		console.log('in readInfoFile');
+	var readInfoFile = function(defaultData) {
 		var defered = q.defer();
 		var filePath = path.normalize(path.join(
 			self.extractionPath,
@@ -341,23 +340,34 @@ function createPackageLoader() {
 		));
 		fs.exists(filePath, function(exists) {
 			if(exists) {
-				fs.readFile(filePath, function(fileData) {
-					var parsedFileData = {};
-					try {
-						parsedFileData = JSON.parse(fileData);
-						defered.resolve(parsedFileData);
-					} catch(err) {
-						// Error parsing the JSON file so it should be 
-						// re-initialized and assume data is invalid/what was
-						// passed into the function.
-						initializeInfoFile(bundle)
+				fs.readFile(filePath, function(err, fileData) {
+					if(err) {
+						initializeInfoFile(defaultData)
 						.then(defered.resolve);
+					} else {
+						var parsedFileData = {};
+						try {
+							parsedFileData = JSON.parse(
+								fileData.toString('ascii'));
+							// If the file is only "{}" the obj will be 'null'.
+							// force it to be an object.
+							if(parsedFileData === null) {
+								parsedFileData = {};
+							}
+							defered.resolve(parsedFileData);
+						} catch(jsonParseError) {
+							// Error parsing the JSON file so it should be 
+							// re-initialized and assume data is invalid/what was
+							// passed into the function.
+							initializeInfoFile(defaultData)
+							.then(defered.resolve);
+						}
 					}
 				});
 			} else {
 				// Error finding the file so try to re-initialize it and assume 
 				// data is invalid/what was passed into the function.
-				initializeInfoFile(bundle)
+				initializeInfoFile(defaultData)
 				.then(defered.resolve);
 			}
 		});
@@ -369,9 +379,11 @@ function createPackageLoader() {
 			self.extractionPath,
 			packageInfoFileName
 		));
+		// Create a string that is readable.
+		dataToWrite = JSON.stringify(dataToWrite, null, 2);
 		fs.exists(filePath, function(exists) {
 			if(exists) {
-				fs.writeFile(filePath, dataToWrite, function(fileData) {
+				fs.writeFile(filePath, dataToWrite, function(err) {
 					if(err) {
 						initializeInfoFile({})
 						.then(defered.resolve);
@@ -389,48 +401,47 @@ function createPackageLoader() {
 		return defered.promise;
 	};
 
-	var getPackageNameFromLocation = function(packageLocation) {
-		var packageName = '';
-		var basename = path.basename(packageLocation);
-		var extname = path.extname(packageLocation);
-		if(extname === '') {
-			packageName = basename;
-		} else {
-			packageName = basename.split(extname)[0];
-		}
-		return packageName;
-	};
-
-	var declarePackageInvalid = function(packageInfo) {
+	var declarePackageInvalid = function(bundle) {
 		var defered = q.defer();
 		var defaultData = {};
-		var packageName = getPackageNameFromLocation(packageInfo.location);
+
+		// Store information about packages by their folderName
+		var packageName = bundle.packageInfo.folderName;
 
 		// Read the existing file contents
 		readInfoFile(defaultData)
 		.then(function(data) {
 			// If the packageInfo.name object dats is already there, declare the
 			// validity attribute to be false.
+			
 			if(data[packageName]) {
 				data[packageName].isValid = false;
+				data[packageName].version = bundle.currentPackage.version;
 			} else {
 				// Otherwise, initialize it to be false.
-				data[packageName] = {
+				var initData = {
 					'isValid': false,
+					'name': packageName,
+					'location': bundle.currentPackage.location,
+					'version': bundle.currentPackage.version
 				};
+				data[packageName] = initData;
 			}
+			
 			// Write the data back to the file.
 			writeInfoFile(data)
 			.then(function(res) {
-				defered.resolve(packageInfo);
+				defered.resolve(bundle);
 			});
 		});
 		return defered.promise;
 	};
-	var declarePackageValid = function(packageInfo) {
+	var declarePackageValid = function(bundle) {
 		var defered = q.defer();
 		var defaultData = {};
-		var packageName = getPackageNameFromLocation(packageInfo.location);
+
+		// Store information about packages by their folderName
+		var packageName = bundle.packageInfo.folderName;
 
 		// Read the existing file contents
 		readInfoFile(defaultData)
@@ -439,40 +450,89 @@ function createPackageLoader() {
 			// validity attribute to be false.
 			if(data[packageName]) {
 				data[packageName].isValid = true;
+				data[packageName].version = bundle.managedPackage.version;
 			} else {
-				// Otherwise, initialize it to be false.
-				data[packageName] = {
+				// Otherwise, initialize it to be true.
+				var initData = {
 					'isValid': true,
+					'name': packageName,
+					'location': bundle.currentPackage.location,
+					'version': bundle.managedPackage.version
 				};
+				data[packageName] = initData;
 			}
 			// Write the data back to the file.
 			writeInfoFile(data)
 			.then(function(res) {
-				defered.resolve(packageInfo);
+				defered.resolve(bundle);
 			});
 		});
 		return defered.promise;
 	};
 
-	var checkForExtractionErrors = function(packageInfo) {
+	var checkForExtractionErrors = function(bundle) {
 		var defered = q.defer();
 		var defaultData = {};
-		var packageName = getPackageNameFromLocation(packageInfo.location);
 
-		console.log('in checkForExtractionErrors', packageName);
+		// Information about packages is stored by their folderName.
+		var packageName = bundle.packageInfo.folderName;
 
+		// console.log('currentPackage', bundle.currentPackage)
 		// Read the existing file contents
 		readInfoFile(defaultData)
 		.then(function(data) {
-			console.log('Read Data', data);
+			// console.log('Read Data', data);
 			// If the packageInfo.name object data is there then read the
 			// isValid attribute, otherwise say that there are extraction errors.
 			if(data) {
-				// packageInfo.isValid = data[packageName].isValid;
+				if(data[packageName]) {
+					if(data[packageName].isValid) {
+						// Current Package is valid (should already be true).
+					} else {
+						// Current package isn't valid.
+						bundle.currentPackage.isValid = false;
+					}
+				} else {
+					// Current package isn't valid.
+					bundle.currentPackage.isValid = false;
+				}
 			} else {
-				// packageInfo.isValid = false;
+				bundle.currentPackage.isValid = false;
 			}
-			defered.resolve(packageInfo);
+			defered.resolve(bundle);
+		});
+		return defered.promise;
+	};
+	var checkForManagedPackageExtractionErrors = function(bundle) {
+		var defered = q.defer();
+		var defaultData = {};
+
+		// Information about packages is stored by their folderName.
+		var packageName = bundle.packageInfo.folderName;
+
+		// console.log('currentPackage', bundle.currentPackage)
+		// Read the existing file contents
+		readInfoFile(defaultData)
+		.then(function(data) {
+			// console.log('Read Data', data);
+			// If the packageInfo.name object data is there then read the
+			// isValid attribute, otherwise say that there are extraction errors.
+			if(data) {
+				if(data[packageName]) {
+					if(data[packageName].isValid) {
+						// Current Package is valid (should already be true).
+					} else {
+						// Current package isn't valid.
+						bundle.managedPackage.isValid = false;
+					}
+				} else {
+					// Current package isn't valid.
+					bundle.managedPackage.isValid = false;
+				}
+			} else {
+				bundle.managedPackage.isValid = false;
+			}
+			defered.resolve(bundle);
 		});
 		return defered.promise;
 	};
@@ -866,50 +926,58 @@ function createPackageLoader() {
 		defered.resolve(bundle);
 		return defered.promise;
 	};
-	var resetPackageDirectory = function(bundle) {
+	var performPackageReset = function(bundle) {
 		var defered = q.defer();
-		if(bundle.resetPackage) {
-			fs.exists(bundle.currentPackage.location, function(exists) {
-				if(exists) {
-					// Emit an event indicating that the package is being reset.
-					self.emit(EVENTS.RESETTING_PACKAGE, bundle);
-					fs.rmrf(bundle.currentPackage.location, function(err) {
-						if(err) {
-							console.error('  - Error resetPackageDirectory', err, bundle.name);
-							var msg = 'Error resetting the package-cache, try' +
-								'manually deleting the folder:' +
-								bundle.currentPackage.location;
-							bundle.resultMessages.push({
-								'step': 'resetPackageDirectory',
-								'message': msg,
-								'isError': true,
-								'error': JSON.stringify(err)
-							});
-							bundle.overallResult = false;
-							bundle.isError = true;
-
-							// Emit an event indicating that the package is 
-							// finished being reset with an error.
-							self.emit(EVENTS.FINISHED_RESETTING_PACKAGE_ERROR, bundle);
-							
-							defered.resolve(bundle);
-						} else {
-							// Emit an event indicating that the package is 
-							// finished being reset.
-							self.emit(EVENTS.FINISHED_RESETTING_PACKAGE, bundle);
-							defered.resolve(bundle);
-						}
-					});
-					
-				} else {
+		fs.exists(bundle.currentPackage.location, function(exists) {
+		if(exists) {
+			// Emit an event indicating that the package is being reset.
+			self.emit(EVENTS.RESETTING_PACKAGE, bundle);
+			fs.rmrf(bundle.currentPackage.location, function(err) {
+				if(err) {
+					console.error('  - Error resetPackageDirectory', err, bundle.name);
+					var msg = 'Error resetting the package-cache, try' +
+						'manually deleting the folder:' +
+						bundle.currentPackage.location;
 					bundle.resultMessages.push({
 						'step': 'resetPackageDirectory',
-						'message': 'Package directory not deleted b/c it does not exist'
+						'message': msg,
+						'isError': true,
+						'error': JSON.stringify(err)
 					});
-					// The folder doesn't exist so don't remove it
+					bundle.overallResult = false;
+					bundle.isError = true;
+
+					// Emit an event indicating that the package is 
+					// finished being reset with an error.
+					self.emit(EVENTS.FINISHED_RESETTING_PACKAGE_ERROR, bundle);
+					
+					defered.resolve(bundle);
+				} else {
+					// Emit an event indicating that the package is 
+					// finished being reset.
+					self.emit(EVENTS.FINISHED_RESETTING_PACKAGE, bundle);
 					defered.resolve(bundle);
 				}
 			});
+			
+		} else {
+			bundle.resultMessages.push({
+				'step': 'resetPackageDirectory',
+				'message': 'Package directory not deleted b/c it does not exist'
+			});
+			// The folder doesn't exist so don't remove it
+			defered.resolve(bundle);
+		}
+	});
+		return defered.promise;
+	};
+
+	var resetPackageDirectory = function(bundle) {
+		var defered = q.defer();
+		if(bundle.resetPackage) {
+			declarePackageInvalid(bundle)
+			.then(performPackageReset)
+			.then(defered.resolve, defered.reject);
 		} else {
 			self.emit(EVENTS.SKIPPING_PACKAGE_RESET, bundle);
 			defered.resolve(bundle);
@@ -1017,10 +1085,12 @@ function createPackageLoader() {
 
 			// Determine what kind of upgrade process we need to perform
 			if(upgradeType === 'directory') {
-				performDirectoryUpgrade(bundle)
+				declarePackageInvalid(bundle)
+				.then(performDirectoryUpgrade)
 				.then(defered.resolve, defered.reject);
 			} else if(upgradeType === '.zip') {
-				performZipFileUpgrade(bundle)
+				declarePackageInvalid(bundle)
+				.then(performZipFileUpgrade)
 				.then(defered.resolve, defered.reject);
 			} else {
 				console.error('  - in performUpgrade, invalid upgradeType detected', bundle.name);
@@ -1076,7 +1146,9 @@ function createPackageLoader() {
 				self.dependencyData[bundle.name].name = bundle.name;
 			}
 
-			defered.resolve(bundle);
+			declarePackageValid(bundle)
+			.then(checkForManagedPackageExtractionErrors)
+			.then(defered.resolve, defered.reject);
 		});
 
 		return defered.promise;

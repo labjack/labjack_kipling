@@ -1,10 +1,14 @@
 
 
-var BASIC_TEST = false;
-var EXTRACTION_TEST = false;
-var ADVANCED_EXTRACTION_TEST = false;
-var MULTIPLE_PACKAGES_TEST = false;
+var BASIC_TEST = true;
+var EXTRACTION_TEST = true;
+var ADVANCED_EXTRACTION_TEST = true;
+var MULTIPLE_PACKAGES_TEST = true;
 var FORCE_REFRESH_TEST = true;
+
+// This test requires manual execution & verification.  Test has to be started
+// and canceled before completion and started again to test the refresh abilities.
+var HUGE_PACKAGE_TEST = false;
 
 if(BASIC_TEST) {
 	var basic_test = require('./basic_test');
@@ -30,5 +34,10 @@ if(MULTIPLE_PACKAGES_TEST) {
 if(FORCE_REFRESH_TEST) {
 	var force_refresh_test = require('./force_refresh_test');
 	exports.force_refresh_test = force_refresh_test.tests;
+}
+
+if(HUGE_PACKAGE_TEST) {
+	var huge_package_test = require('./huge_package_test');
+	exports.huge_package_test = huge_package_test.tests;
 }
 

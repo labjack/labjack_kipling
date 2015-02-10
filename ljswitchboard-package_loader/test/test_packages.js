@@ -32,8 +32,6 @@ var testPackages = {
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
 		'locations': [
-			path.join(process.cwd(), 'test_extraction_data', 'ljswitchboard-static_files'),
-			path.join(process.cwd(), 'test_extraction_data', 'ljswitchboard-static_files.zip'),
 			path.join(process.cwd(), '..', 'ljswitchboard-static_files'),
 		]
 	},
