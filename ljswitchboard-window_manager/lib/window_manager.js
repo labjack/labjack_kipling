@@ -415,6 +415,34 @@ function createWindowManager() {
 
 		return newWindow;
 	};
+	this.openManagedApps = function(packages) {
+		var keys = Object.keys(packages);
+		keys.forEach(function(key) {
+			try {
+				// Open the found nwApp libraries
+				console.log('checking App (window_manager)', packages[key].packageData);
+				if(packages[key].packageData) {
+					var loadedAppData = packages[key].packageData;
+					if(loadedAppData['ljswitchboard-main']) {
+						var appFile = loadedAppData['ljswitchboard-main'];
+						var appType = path.extname(appFile);
+						if(appType === '.html') {
+							var requiredInfo = {
+								'main': appFile
+							};
+							var openedWindow = self.openWindow(
+								packages[key].packageInfo,
+								requiredInfo,
+								packages[key].packageData
+							);
+						} 
+					}
+				}
+			} catch (err) {
+				console.error('Error Opening App', key, err);
+			}
+		});
+	};
 	var self = this;
 }
 util.inherits(createWindowManager, EventEmitter);
@@ -439,6 +467,7 @@ if(DEBUG_WINDOW_EVENT_LIST) {
 
 exports.windowManager = WINDOW_MANAGER;
 exports.open = WINDOW_MANAGER.openWindow;
+exports.openManagedApps = WINDOW_MANAGER.openManagedApps;
 exports.addWindow = WINDOW_MANAGER.addWindow;
 exports.configure = WINDOW_MANAGER.configure;
 exports.getWindows = WINDOW_MANAGER.getWindows;
