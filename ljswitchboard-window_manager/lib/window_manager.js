@@ -420,7 +420,7 @@ function createWindowManager() {
 		keys.forEach(function(key) {
 			try {
 				// Open the found nwApp libraries
-				console.log('checking App (window_manager)', packages[key].packageData);
+				// console.log('checking App (window_manager)', packages[key].packageData);
 				if(packages[key].packageData) {
 					var loadedAppData = packages[key].packageData;
 					if(loadedAppData['ljswitchboard-main']) {
