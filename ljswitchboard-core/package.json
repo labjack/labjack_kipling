@@ -1,0 +1,53 @@
+{
+  "name": "ljswitchboard-core",
+  "version": "0.0.1",
+  "description": "One of the nw applications that gets launched by ljswitchboard",
+  "author": {
+    "name": "Chris Johnson",
+    "url": "http://labjack.com"
+  },
+  "main": "./lib/ljswitchboard-core.js",
+  "ljswitchboard-type": "nwApp",
+  "ljswitchboard-main": "lib/index.html",
+  "homepage": "https://github.com/chrisJohn404/ljswitchboard-core",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-core"
+  },
+  "keywords": [
+    "LabJack",
+    "LJM",
+    "T7",
+    "ljswitchboard"
+  ],
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-core/master/LICENSE"
+  },
+  "bugs": {
+    "url": "https://github.com/chrisJohn404/ljswitchboard-core/issues"
+  },
+  "dependencies": {
+    "async": "~0",
+    "q": "~1"
+  },
+  "devDependencies": {
+    "nodeunit": "0.9.x"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+  },
+  "window": {
+    "title": "ljswitchboard-core",
+    "toolbar": true,
+    "width": 1120,
+    "height": 730,
+    "min_width":600,
+    "a-min_width":785,
+    "min_height":400,
+    "show": true
+  }
+}
