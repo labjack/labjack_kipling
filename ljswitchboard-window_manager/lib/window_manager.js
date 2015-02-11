@@ -131,6 +131,12 @@ function createWindowManager() {
 			self.managedWindows[windowName].status = 'loaded';
 			self.managedWindows[windowName].isOpen = true;
 			self.managedWindows[windowName].isVisible = initialVisibility;
+
+			// Determine if we should auto-show the window
+			if(self.managedWindows[windowName].autoShow) {
+				self.showWindow(windowName);
+			}
+			
 			// console.log('Finished Loading Window', this.title, 'aka', windowName);
 			self.emit(eventList.LOADED_WINDOW, windowInfo);
 		};
@@ -285,6 +291,12 @@ function createWindowManager() {
 			self.managedWindows[windowName].runInBackground = true;
 		} else {
 			self.managedWindows[windowName].runInBackground = false;
+		}
+
+		if(windowInfo.autoShow) {
+			self.managedWindows[windowName].autoShow = true;
+		} else {
+			self.managedWindows[windowName].autoShow = false;
 		}
 
 
