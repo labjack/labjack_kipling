@@ -28,5 +28,8 @@
   "directories": {
     "lib": "./lib",
     "static": "./static"
+  },
+  "ljswitchboardDependencies": {
+    "ljswitchboard-package_loader": "0.0.x"
   }
 }
