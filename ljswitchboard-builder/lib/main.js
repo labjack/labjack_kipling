@@ -1,10 +1,5 @@
 
-console.log('in main.js');
-var me = function() {
-	// console.log('in main.js');
 
-};
-exports.me = me;
 
 
 var startupAttributes = {
@@ -12,12 +7,12 @@ var startupAttributes = {
 	'execPath': process.execPath,
 };
 exports.info = startupAttributes;
-// var catchUncaughtExceptions = function(err) {
-// 	console.log('in catchUncaughtExceptions');
-// };
-// var catchWindowErrors = function(err) {
-// 	console.log('in catchWindowErrors');
-// };
+var catchUncaughtExceptions = function(err) {
+	console.error('in catchUncaughtExceptions', err);
+};
+var catchWindowErrors = function(err) {
+	console.error('in catchWindowErrors', err);
+};
 
 // process.on('exit', function() {
 // 	console.log('Goodbye!');
@@ -25,5 +20,5 @@ exports.info = startupAttributes;
 // process.on('SIGINT', function() {
 // 	console.log('Got SIGINT.  Press Control-D to exit');
 // });
-// process.on('uncaughtException', catchUncaughtExceptions);
-// window.addEventListener('error' ,catchWindowErrors);
+process.on('uncaughtException', catchUncaughtExceptions);
+window.addEventListener('error' ,catchWindowErrors);

@@ -52,12 +52,12 @@ function initIOManager() {
 	});
 }
 // Require the package loader
-// Load the local repository for development
+// Load the local repository for development purposes
 // console.log('Loading Dev version of the package_loader');
 // var package_loader = require('../../ljswitchboard-package_loader');
-// Load the node_module:
+// Load the library from the node_module dirctory:
 var package_loader = require('ljswitchboard-package_loader');
-
+var gns = package_loader.getNameSpace();
 
 
 
@@ -66,13 +66,34 @@ var persistent_data_manager = require('./persistent_data_manager');
 var persistentDataManager;
 
 // Require and initialize the window_manager
-var window_manager = require('./window_manager');
-var windowManager = new window_manager.createWindowManager(win);
+var window_manager = require('ljswitchboard-window_manager');
+// Pass the window_manager a reference to the gui object
+window_manager.configure({
+	'gui': require('nw.gui')
+});
+
+// Add the -builder window to the window_manager to have it be managed.
+var initialAppVisibility = false;
+if(gui.App.manifest.window.show) {
+	initialAppVisibility = true;
+}
+window_manager.addWindow({
+	'name': 'main',
+	'win': win,
+	'initialVisibility': initialAppVisibility,
+	'title': 'mainWindow'
+});
+
+// Attach to the "Quitting Application" event
+window_manager.on(window_manager.eventList.QUITTING_APPLICATION, function() {
+	console.log('Quitting Application');
+	gui.App.quit();
+});
 
 var plEvents = package_loader.eventList;
 
 // Attach various event listeners
-package_loader.on('opened_window', windowManager.addWindow);
+// package_loader.on('opened_window', windowManager.addWindow);
 package_loader.on('loaded_package', function(packageName) {
 	// console.log('Loaded New Package', packageName);
 });
@@ -103,12 +124,47 @@ var rootPackages = [{
 		'name': 'gui',
 		'loadMethod': 'set',
 		'ref': require('nw.gui')
+	}, {
+		'name': 'window_manager',
+		'loadMethod': 'set',
+		'ref': window_manager
 	}
 ];
 
-var startDir = path.dirname(process.execPath);
-var cwd = process.cwd();
-startDir = cwd;
+var execDir = path.normalize(path.dirname(process.execPath));
+var derivedCWD = path.resolve(path.join(execDir, '..','..','..'));
+var cwd = path.normalize(process.cwd());
+var startMethod = '';
+var isCompressed = false;
+var startDir = cwd;
+if(cwd === derivedCWD) {
+	console.log('Project was started via npm start');
+	startMethod = 'npm start';
+	startDir = cwd;
+}
+
+if(cwd === execDir) {
+	console.log('Project was started via un-packed .exe');
+	startDir = cwd;
+	startMethod = 'un-packed exe';
+} else {
+	if(startMethod === '') {
+		console.log('Project was started via compressed .exe');
+		isCompressed = true;
+		startDir = execDir;
+		startMethod = 'packed exe';
+	}
+}
+
+console.log('Started project via: ' + startMethod);
+var startInfo = {
+	'isCompressed': isCompressed,
+	'startDir': startDir,
+	'execDir': execDir,
+	'derivedCWD': derivedCWD,
+	'cwd': cwd
+};
+console.log('Start info', startInfo);
 
 var secondaryPackages = [
 	{
@@ -116,18 +172,49 @@ var secondaryPackages = [
 		'name': 'static_files',
 		'folderName': 'ljswitchboard-static_files',
 		'loadMethod': 'managed',
+		'forceRefresh': false,
+		'directLoad': true,
 		'locations': [
-			path.join(startDir, '..', 'ljswitchboard-static_files')
+			// Add path to files for development purposes, out of a repo.
+			path.join(startDir, '..', 'ljswitchboard-static_files'),
+
+			// If those files aren't found, check the node_modules directory of
+			// the current application for upgrades.
+			path.join(startDir, 'node_modules', 'ljswitchboard-static_files'),
+
+			// For non-development use, check the LabJack folder/K3/downloads
+			// file for upgrades.
+			// TODO: Add this directory
+
+			// If all fails, check the starting directory of the process for the
+			// zipped files originally distributed with the application.
+			path.join(startDir, 'ljswitchboard-static_files.zip')
 		]
 	},
 	{
 		// 'name': 'ljswitchboard-core',
 		'name': 'core',
 		'folderName': 'ljswitchboard-core',
-		'loadMethod': 'managed', 
-		'forceRefresh': true,
+		'loadMethod': 'managed',
+		'forceRefresh': false,
+		'startApp': false,
+		'showDevTools': true,
+		'directLoad': true,
 		'locations': [
-			path.join(startDir, '..', 'ljswitchboard-core')
+			// Add path to files for development purposes, out of a repo.
+			path.join(startDir, '..', 'ljswitchboard-core'),
+
+			// If those files aren't found, check the node_modules directory of
+			// the current application for upgrades.
+			path.join(startDir, 'node_modules', 'ljswitchboard-core'),
+
+			// For non-development use, check the LabJack folder/K3/downloads
+			// file for upgrades.
+			// TODO: Add this directory
+
+			// If all fails, check the starting directory of the process for the
+			// zipped files originally distributed with the application.
+			path.join(startDir, 'ljswitchboard-core.zip')
 		]
 	}
 ];
@@ -148,8 +235,10 @@ var errorHandler = function(err) {
 var initializeProgram = function() {
 	var defered = q.defer();
 
-	// Perform synchronous operations:
-	gui.Window.get().showDevTools();
+	// Show the window's dev tools
+	win.showDevTools();
+
+	// Perform synchronous loading of modules:
 	rootPackages.forEach(function(packageInfo) {
 		package_loader.loadPackage(packageInfo);
 	});
@@ -160,12 +249,12 @@ var initializeProgram = function() {
 		console.log('Core Req Check', res);
 		// Make sure that the LabJack directory has been created
 		if(res.overallResult) {
-			var path = res['LabJack folder'].path;
+			var lj_folder_path = res['LabJack folder'].path;
 
 			// Save to the global scope
-			global.ljswitchboard.labjackFolderPath = path;
+			global.ljswitchboard.labjackFolderPath = lj_folder_path;
 			persistentDataManager = new persistent_data_manager.create(
-				path,
+				lj_folder_path,
 				gui.App.manifest.persistentDataFolderName,
 				gui.App.manifest.persistentDataVersion
 			);
@@ -193,22 +282,56 @@ var loadSecondaryPackages = function() {
 	console.log('Loading Secondary Packages');
 
 	// Get the appDataPath
-	var path = global.ljswitchboard.appDataPath;
+	var appDataPath = global.ljswitchboard.appDataPath;
 
 	// Configure the package_loader with this path
-	package_loader.setExtractionPath(path);
+	package_loader.setExtractionPath(appDataPath);
 
 	secondaryPackages.forEach(function(packageInfo) {
 		package_loader.loadPackage(packageInfo);
 	});
 	package_loader.runPackageManager()
-	.then(function(res) {
-		var managedPackages = Object.keys(res);
-		managedPackages.forEach(function(managedPackageKey) {
+	.then(function(packages) {
+		console.log('Managed Packages', packages);
+		var managedPackageKeyss = Object.keys(packages);
+		managedPackageKeyss.forEach(function(managedPackageKey) {
 			// Add the managed packages root locations to the req library.
-			var dirToAdd = res[managedPackageKey].packageInfo.location;
+			var dirToAdd = packages[managedPackageKey].packageInfo.location;
 			global.ljswitchboard.req.addDirectory(dirToAdd);
+
+			try {
+				// Open the found nwApp libraries
+				console.log('HH', packages[managedPackageKey].packageData);
+				if(packages[managedPackageKey].packageData) {
+					var loadedAppData = packages[managedPackageKey].packageData;
+					if(loadedAppData['ljswitchboard-main']) {
+						var appFile = loadedAppData['ljswitchboard-main'];
+						var appType = path.extname(appFile);
+						if(appType === '.html') {
+							console.log('Opening .html', appFile, appType);
+							var requiredInfo = {
+								'main': appFile
+							};
+							console.log(packages[managedPackageKey].packageInfo,
+								requiredInfo,
+								packages[managedPackageKey].packageData
+							);
+							var openedWindow = window_manager.open(
+								packages[managedPackageKey].packageInfo,
+								requiredInfo,
+								packages[managedPackageKey].packageData
+							);
+						}
+					}
+				}
+			} catch(err) {
+				console.log('Error...', err);
+			}
 		});
+
+		// Execute test function to proove that io_manager can be used.
+		// global.require('../../test.js').runProgram();
+
 	});
 
 	return defered.promise;

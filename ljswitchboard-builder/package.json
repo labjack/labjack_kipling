@@ -22,6 +22,7 @@
 		"ljswitchboard-package_loader": "0.0.x",
 		"ljswitchboard-require": "0.0.x",
 		"ljswitchboard-ljm_driver_checker": "0.0.x",
+		"ljswitchboard-window_manager": "0.0.x",
 		"rimraf": "2.2.x"
 	},
 	"un-managed-dependencies": {
@@ -37,13 +38,14 @@
 	},
   	"devDependencies": {
 	    "nodeunit": "~0.9.0",
-	    "rewire": "2.1.4"
+	    "rewire": "2.1.4",
+	    "ljswitchboard-core": "0.0.x"
 	},
 	"script_notes": "to run a script w/o using npm test, use npm run [script name]",
 	"scripts": {
-		"start": "nodewebkit",
-		"start-via-nodewebkit": "nodewebkit",
-		"start-via-nw": "nw",
+		"start": "npm run nodewebkit",
+		"nodewebkit": "nodewebkit",
+		"nw": "nw",
 	    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
 	},
 	"enableStartupConfig":false,
