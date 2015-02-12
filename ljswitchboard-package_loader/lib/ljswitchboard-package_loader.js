@@ -139,9 +139,7 @@ function createPackageLoader() {
 
 				// Add module path to the global.module.paths index
 				var extraPaths = [
-					'',
 					'node_modules',
-					'lib'
 				];
 				extraPaths.forEach(function(extraPath) {
 					var dirToAdd = packageInfo.location;
