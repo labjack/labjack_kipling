@@ -136,6 +136,19 @@ function createPackageLoader() {
 			if(global[gns][name].info) {
 				// Load the moduleData (its package.json file) & save it to info.data;
 				var moduleData = getRequiredPackageData(packageInfo.location);
+
+				// Add module path to the global.module.paths index
+				var extraPaths = [
+					'',
+					'node_modules',
+					'lib'
+				];
+				extraPaths.forEach(function(extraPath) {
+					var dirToAdd = packageInfo.location;
+					var modulesDirToAdd = path.join(dirToAdd, extraPath);
+					global.module.paths.splice(2,0,modulesDirToAdd);
+				});
+				
 				global[gns][name].data = moduleData;
 				if(global[gns][name].info.type) {
 					if(global[gns][name].info.type === 'nwApp') {
