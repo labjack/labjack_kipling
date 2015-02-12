@@ -26,27 +26,47 @@
             console.log('Loading Page Resources');
 
             var resourceList = [
-                // CSS for twbsPagination
-                'css/bootstrap.min.css',
-                'css/bootstrap-3.2.0.css',
-                'css/twbsPagination.css',
+                // CSS for bootmetro
+                'libs/bootmetro/css/bootmetro.min.css',
+                'libs/bootmetro/css/bootmetro-icons.min.css',
+                'libs/bootmetro/css/bootmetro-responsive.min.css',
+                'libs/bootmetro/css/bootmetro-ui-light.min.css',
 
-                // Base CSS
-                'css/bootmetro.min.css',
+                // CSS for bootstrap
+                'libs/bootstrap/css/bootstrap.docs.min.css',
+                'libs/bootstrap/css/bootstrap.min.css',
 
-                // Base .js
-                'js/jquery-1.10.2.min.js',
-                'js/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js',
-                'js/jquery-ui-1.10.4.custom/development-bundle/external/jquery.mousewheel.js'
+                // CSS for fixes to bootmetro & bootstrap
+                'css/bootmetro.fix.css',
+
+                // ------------------ Require js files -----------------------//
+                // JS for jQuery
+                'libs/jquery/jquery-1.10.2.min.js',
+
+                // JS for bootmetro
+                'libs/bootmetro/js/bootmetro.min.js',
+
+                // JS for bootstrap
+                'libs/bootstrap/js/bootstrap.min.js',
+
+                // custom jquery ui stuff
+                'libs/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js',
             ];
             loadResources(resourceList);
         </script>
     </head>
     <body>
-    	<p id="tt">ljswitchboard-core .html</p>
-    	<script>
-    	console.log("ljswitchboard-core");
-    	console.log(process.cwd());
-    	</script>
+        <h1>Loading Progress</h1>
+        <!--
+    	<p id="loadingStatusMessage">ljswitchboard-core .html</p>
+        <div class="bs-callout bs-callout-info" id="callout-modal-youtube">
+            <h4>Embedding YouTube videos</h4>
+            <p>Embedding YouTube videos in modals requires additional JavaScript not in Bootstrap to automatically stop playback and more. <a href="http://stackoverflow.com/questions/18622508/bootstrap-3-and-youtube-in-modal">See this helpful Stack Overflow post</a> for more information.</p>
+        </div>
+        -->
+        <div id="loadSteps"></div>
+        <div class="progress progress-indeterminate">
+            <div class="bar"></div>
+        </div>
     </body>
 </html>
