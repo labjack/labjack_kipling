@@ -1,0 +1,70 @@
+<div class="module-chrome unselectable fullPage">
+    <div id="module-chrome-header">
+        <input style="display:none;" id="file-dialog-hidden" type="file" />
+        <input style="display:none;" id="file-save-dialog-hidden" type="file" nwsaveas="luaScript.lua" accept=".lua"/>
+        <div id="alert-message" class="alert" style="display:none;">
+          <button type="button" class="close close-alert-button"></button>
+          <div id="error-display"></div>
+        </div>
+    </div>
+    <div id="module-chrome-tab-holder" class="module-chrome-tabs module-chrome-tab fullPage">
+        <div class="fullPage">
+            <div id="system-navigation" class="unselectable fullPage">
+                <div id="header-modules" class="module-tab-holder module-chrome-header-tabs">
+                    <ul class="module-chrome-header-tab-list module-list">
+                        {{#header_modules}}
+                        <li class="header-tab"><a id="{{name}}" class="module-chrome-tab" href="#">{{humanName}}</a></li>
+                        {{/header_modules}}
+                    </ul>
+                </div>
+                <div id="body-modules" class="module-tab-holder module-chrome-body-tabs">
+                    <ul class="module-chrome-body-tab-list module-list">
+                        {{#modules}}
+                        <li class="body-tab"><a id="{{name}}" class="module-chrome-tab" href="#">{{humanName}}</a></li>
+                        {{/modules}}
+                    </ul>
+                </div>
+                <div id="footer-modules" class="module-tab-holder module-chrome-footer-tabs">
+                    <ul class="module-chrome-footer-tab-list module-list">
+                        {{#footer_modules}}
+                        <li class="footer-tab"><a id="{{name}}" class="module-chrome-tab" href="#">{{humanName}}</a></li>
+                        {{/footer_modules}}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="module-chrome-body-holder" class="fullPage module-chrome-body">
+        <div id="module-chrome-block" class="fullPage">
+            <div id="module-chrome-contents-holder" class="fullPage">
+                <div id="module-chrome-contents" class="fullPage unselectable">
+                    <div id="test_module">
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                        <p>Text...</p>
+                    </div>
+                </div>
+            </div>
+            <div id="module-chrome-contents-footer" class="span12 unselectable" style="display:none;">
+            </div>
+        </div>
+    </div>
+</div>

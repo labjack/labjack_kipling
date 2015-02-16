@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html id="mainHTMLWindow" style="overflow:hidden" class="fullPage">
+    <head>
+    	<script type='text/javascript' src="index.js"></script>
+        <script>
+            console.log('Loading Page Resources');
+
+            // Resources located in the -static_files directory
+            var resourceList = [
+                // CSS for bootmetro
+                'libs/bootmetro/css/bootmetro.min.css',
+                'libs/bootmetro/css/bootmetro-icons.min.css',
+                'libs/bootmetro/css/bootmetro-responsive.min.css',
+                'libs/bootmetro/css/bootmetro-ui-light.min.css',
+
+                // CSS for bootstrap
+                'libs/bootstrap/css/bootstrap.docs.min.css',
+                'libs/bootstrap/css/bootstrap.min.css',
+
+                // CSS for fixes to bootmetro & bootstrap
+                'css/bootmetro.fix.css',
+
+                // CSS for the switchboard base
+                'css/switchboard_base.css',
+
+                // ------------------ Require js files -----------------------//
+                // JS for jQuery
+                'libs/jquery/jquery-1.10.2.min.js',
+
+                // JS for bootmetro
+                'libs/bootmetro/js/bootmetro.min.js',
+
+                // JS for bootstrap
+                'libs/bootstrap/js/bootstrap.min.js',
+
+                // custom jquery ui stuff
+                'libs/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js',
+            ];
+            loadResources(resourceList);
+
+            // Resources located in the local directory
+            var localResourceList = [
+                // CSS for the module_chrome
+                'css/module_chrome.css',
+
+                // JS for loading & manipulating the module_chrome
+                'js/module_chrome.js',
+            ];
+            loadLocalResources(localResourceList);
+            
+        </script>
+    </head>
+    <body class="fullPage">
+        <div id="module_chrome_holder" class="fullPage"></div>
+    </body>
+</html>
