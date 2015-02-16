@@ -4,6 +4,7 @@ var fs = require('fs');
 var q = require('q');
 var async = require('async');
 var jsonParser = require('json-parser');
+var get_cwd = require('./get_cwd');
 
 var arch = process.arch;
 var platform = process.platform;
@@ -14,8 +15,6 @@ var os = {
     'freebsd': 'linux',
     'sunos': 'linux'
 }[platform];
-
-var cwd = process.cwd();
 
 var validDirectory = function(directories) {
     var defered = q.defer();
@@ -206,13 +205,18 @@ var getOperations = function(requirements, isRequired) {
 
 var checkRequirements = function(passedResult, passedResults) {
 	var defered = q.defer();
-
 	var rootDir;
+    // Because the get_cwd file was first required in the io_interface.js file
+    // the reported path doesn't need to get fixed.  It can be used directly.  
+    // It reports the path of the caller who originally included the file via
+    // "module.parent.filename".
+    var cwd = get_cwd.getCWD();
 	if(passedResults.cwdOverride) {
 		rootDir = passedResults.cwdOverride;
 	} else {
-		rootDir = process.cwd();
-	}
+		rootDir = cwd;
+    }
+    
 
 	var res = {
 		'overallResult': true

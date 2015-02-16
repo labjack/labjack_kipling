@@ -149,7 +149,7 @@ exports.tests = {
 					'functionCall': 'readMultiple',
 					'retData': [
 						{'address': 'AIN0', 'isErr': false, 'type': 'range', 'min': -11, 'max': 11},
-						{'address': 'DAC0', 'isErr': false, 'type': 'range', 'min': 0, 'max': 6}
+						{'address': 'DAC0', 'isErr': false, 'type': 'range', 'min': -0.1, 'max': 6}
 					]
 				}
 			];

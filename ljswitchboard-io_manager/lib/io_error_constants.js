@@ -1,8 +1,11 @@
 
-
+/*
+Some common exit codes are documented here:
+https://github.com/joyent/node/blob/master/doc/api/process.markdown#exit-codes
+*/
 var errors = {
 	'REQUIRE_REF_OR_FFI_ERROR': {
-		'code': 11,
+		'code': 20,
 		'message': 'Likely failed to require the REF or FFI libraries.  Failed to require the initial managers.'
 	}
 };

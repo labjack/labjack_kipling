@@ -9,6 +9,7 @@ var q = require('q');
 var fs = require('fs');
 var path = require('path');
 var io_error_constants = require('./io_error_constants');
+var get_cwd = require('./common/get_cwd');
 
 // Include the io controllers
 var driver_controller = require('./controllers/driver_controller');
@@ -22,8 +23,8 @@ var ljmCheck = require('ljswitchboard-ljm_driver_checker');
 // Include the checkRequirements function
 var npm_build_check = require('./common/npm_build_check');
 
-var ioDelegatorPath = './lib/io_delegator.js';
-
+var ioDelegatorPathFromRoot = 'lib/io_delegator.js';
+var ioDelegatorPath = './' + ioDelegatorPathFromRoot;
 var constants = require('./common/constants');
 var io_endpoint_key = constants.io_manager_endpoint_key;
 
@@ -140,7 +141,7 @@ function createIOInterface() {
 			defered.resolve();
 		});
 		return defered.promise;
-	}
+	};
 
 	/**
 	 * qExec is a function that aids in initializing the io_interface.  It saves
@@ -148,6 +149,11 @@ function createIOInterface() {
 	 * passed data from a previously called function.  This allows for a final
 	 * 'defered' function call to return a plethora of error/debugging 
 	 * information.
+	 * func: function, The function that should be called.
+	 * name: string, The name of the function that should be called.  Also used
+	 *     to store the function call's results to the results object.
+	 * passResults: string, The name of the previously called function's results
+	 *     that need to get passed into the function being executed. 
 	 */
 	var qExec = function(func, name, passResults) {
 		var execFunc = function(results) {
@@ -198,7 +204,6 @@ function createIOInterface() {
 	 */
 	var checkLabJackM = function() {
 		var defered = q.defer();
-		console.log('in checkLabJackM');
 		ljmCheck.verifyLJMInstallation()
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
@@ -210,11 +215,15 @@ function createIOInterface() {
 	 * It also verifies that the proper node_binary is going to be executed.  
 	 * If anything isn't configured/installed properly the initialization 
 	 * routine for the io_interface will fail.
+	 * 
+	 * cwdOverride: object, The current working directory override object.
+	 * passedRequirements: object, An object passed into the function by the  
+	 *     qExec function that contains all of the previous results from the 
+	 *     io_interface initialization routine.
 	 */
-	var checkRequirements = function(passedRequirement, passedRequirements) {
+	var checkRequirements = function(cwdOverride, passedRequirements) {
 		var defered = q.defer();
-		console.log('in checkRequirements');
-		npm_build_check.checkRequirements(passedRequirement, passedRequirements)
+		npm_build_check.checkRequirements(cwdOverride, passedRequirements)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
@@ -228,13 +237,13 @@ function createIOInterface() {
 	var innerGetNodePath = function(passedResult, passedResults) {
 		var defered = q.defer();
 
-		console.log('in innerGetNodePath');
 		// Collect information about the process
 		var isOkToRun = true;
 		var isValidInstance = true;
 		var platform = process.platform;
 		var errors = [];
 
+		// Determine what OS is being used.
 		var os = {
 		    'win32': 'win32',
 		    'darwin': 'darwin',
@@ -243,13 +252,23 @@ function createIOInterface() {
 		    'sunos': 'linux'
 		}[platform];
 
+		// Determine the exeName that should be executed vased off the OS
+		// selection.  TODO:
 		var exeName = {
 			'win32': 'node.exe',
 			'darwin': 'node'
 		}[os];
+
+
 		// If a defined exeName has not been found, prevent the subprocess from
 		// starting.
 		if(typeof(exeName) === 'undefined') {
+			console.error(
+				'OS:',
+				os,
+				'is not currently supported by the io_manager.  ' +
+				'Should be a simple fix for linux computers.'
+			);
 			isValidInstance = false;
 			isOkToRun = false;
 			errors.push('No suitable executable name found');
@@ -302,13 +321,17 @@ function createIOInterface() {
 			}
 		}
 
+		
+
 		// Save the root directory of the io_manager library
+		var resolvedCWD = get_cwd.getCWD();
 		var rootDir;
 		if(passedResults.cwdOverride) {
 			rootDir = passedResults.cwdOverride;
 		} else {
-			rootDir = process.cwd();
+			rootDir = resolvedCWD;
 		}
+
 
 		// Define the version of the node binary to look for
 		var version = '0_10_33';
@@ -376,14 +399,18 @@ function createIOInterface() {
 	 * happen in there is a syntax error/require error somewhere in the 
 	 * io_delegator.js file/its requirements.
 	 */
-	var innerInitialize = function(info) {
+	var innerInitialize = function(info, passedResults) {
 		var defered = q.defer();
-		console.log('in innerInitialize');
-		// console.log('  - Initialize Data:');
-		// var infoKeys = Object.keys(info);
-		// infoKeys.forEach(function(key) {
-		// 	console.log('    - ' + key + ': ' + JSON.stringify(info[key]));
-		// });
+
+		// If debugging is enabled, print out information about that process
+		// that is about to start.
+		if(passedResults.debugProcess) {
+			console.log('  - Initialize Data:');
+			var infoKeys = Object.keys(info);
+			infoKeys.forEach(function(key) {
+				console.log('    - ' + key + ': ' + JSON.stringify(info[key]));
+			});
+	}
 
 		self.mp = null;
 		self.mp_event_emitter = null;
@@ -397,21 +424,26 @@ function createIOInterface() {
 		self.mp_event_emitter = self.mp.init(oneWayMessageListener);
 
 		// Attach a variety of event listeners to verify that the sub-process
-		// starts properly.
-		self.mp_event_emitter.on('error', function(data) {
-			// console.log('Error Received', data);
-		});
-		self.mp_event_emitter.on('exit', function(data) {
-			// console.log('exit Received', data);
-		});
-		self.mp_event_emitter.on('close', function(data) {
-			// console.log('close Received', data);
-		});
-		self.mp_event_emitter.on('disconnect', function(data) {
-			// console.log('disconnect Received', data);
-		});
+		// starts properly. If a user enables debugging.
+		if(passedResults.debugProcess) {
+			self.mp_event_emitter.on('error', function(data) {
+				console.log('Error Received', data);
+			});
+			self.mp_event_emitter.on('exit', function(data) {
+				console.log('exit Received', data);
+			});
+			self.mp_event_emitter.on('close', function(data) {
+				console.log('close Received', data);
+			});
+			self.mp_event_emitter.on('disconnect', function(data) {
+				console.log('disconnect Received', data);
+			});
+		}
 
+		// Clear the one-way-listeners object that is used for routing
+		// one-way messages via send or sendMessage to the controllers.
 		self.oneWayMessageListeners = {};
+
 		// Create Controllers
 		createDriverController();
 		createDeviceController();
@@ -422,12 +454,48 @@ function createIOInterface() {
 			'execPath': info.path,
 			'cwd': info.cwd,
 			'spawnChildProcess': false,
-			'debug_mode': false,
+			'debug_mode': false
 		};
+
+		// Detect if the current process is node-webkit or node via checking for
+		// a declared version of node-webkit.
+		if(process.versions['node-webkit']) {
+			options.silent = true;
+			if(passedResults.stdinListener) {
+				options.stdinListener = passedResults.stdinListener;
+			} else {
+				options.stdinListener = function(data) {
+					console.log(data.toString());
+				};
+			}
+			if(passedResults.stderrListener) {
+				options.stderrListener = passedResults.stderrListener;
+			} else {
+				options.stderrListener = function(data) {
+					console.error(data.toString());
+				};
+			}
+		} else {
+			if(passedResults.silent) {
+				options.silent = passedResults.silent;
+			}
+			if(passedResults.stdinListener) {
+				options.stdinListener = passedResults.stdinListener;
+			}
+			if(passedResults.stderrListener) {
+				options.stderrListener = passedResults.stderrListener;
+			}
+		}
 		
-		console.log('Starting subprocess');
-		self.mp.qStart(ioDelegatorPath, options)
+		// Build a direct-path reference for the io_delegator.js file.  Relative
+		// path's don't work very well when starting from node-webkit and the
+		// ljswitchboard project.
+		var filetoStart = path.join(info.cwd, ioDelegatorPathFromRoot);
+
+		// Start the subprocess.
+		self.mp.qStart(filetoStart, options)
 		.then(initInternalMessenger, function(err) {
+			console.error('Failed to start subprocess', err);
 			var code = err.error;
 			var msg = io_error_constants.parseError(code);
 			err.errorMessage = msg;
@@ -453,23 +521,48 @@ function createIOInterface() {
 
 		return defered.promise;
 	};
-	this.initialize = function(cwdOverride) {
+	this.initialize = function(options) {
 		var defered = q.defer();
 
 		var results = {};
 
 		// Check to see if the cwd is being over-ridden.  If so, save it into
 		// the results object for the initialization functions to use.
-		if(cwdOverride) {
-			results.cwdOverride = cwdOverride;
+		if(options) {
+			// If the options argument was supplied copy over any relevant
+			// options to the results object.
+			if(options.cwdOverride) {
+				results.cwdOverride = cwdOverride;
+			}
+			if(options.silent) {
+				results.silent = options.silent;
+			}
+			if(options.stdinListener) {
+				results.stdinListener = options.stdinListener;
+			}
+			if(options.stderrListener) {
+				results.stderrListener = options.stderrListener;
+			}
+
+			// If a user defined the debug flag print out information about the
+			// currently running process.
+			if(options.debugProcess) {
+				console.log('Initializing sub-process');
+				console.log('Node Version', process.versions.node);
+				console.log('Exec Path', process.execPath);
+				console.log('');
+			}
 		}
 
 		var errFunc = function(err) {
 			// console.log('io_interface error', err);
 			defered.reject(err);
 		};
+		
+		// For reference, qExec is in charge of passing the results object to
+		// each of the functions that get called and any required results to
+		// functions after the initial function.
 
-		console.log('Initializing sub-process');
 		// Check to make sure labjackm is properly installed
 		qExec(checkLabJackM,'checkLabJackM')(results)
 
@@ -593,6 +686,12 @@ function createIOInterface() {
 }
 util.inherits(createIOInterface, EventEmitter);
 
+var IO_INTERFACE;
 exports.createIOInterface = function() {
-	return new createIOInterface();
+	if(IO_INTERFACE) {
+		return IO_INTERFACE;
+	} else {
+		IO_INTERFACE = new createIOInterface();
+		return IO_INTERFACE;
+	}
 };
