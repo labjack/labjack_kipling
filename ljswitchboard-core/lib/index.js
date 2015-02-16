@@ -6,13 +6,8 @@ var q = require('q');
 var win = gui.Window.get();
 
 
-// Require the ljm_driver_checker
-
-
 // Show the window's dev tools
-win.showDevTools();
-
-console.log('Checking shared object', typeof(win.shared));
+// win.showDevTools();
 
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
@@ -34,7 +29,7 @@ var loadResources = function(resources) {
 		console.error('Error Loading resources', err);
 	});
 };
-var startDir = global.ljswitchboard.info.startDir;
+var startDir = global[gns].info.startDir;
 var corePackages = [
 	{
 		// 'name': 'ljswitchboard-static_files',
@@ -58,6 +53,30 @@ var corePackages = [
 			// If all fails, check the starting directory of the process for the
 			// zipped files originally distributed with the application.
 			path.join(startDir, 'ljswitchboard-io_manager.zip')
+		]
+	},
+	{
+		// 'name': 'ljswitchboard-static_files',
+		'name': 'module_manager',
+		'folderName': 'ljswitchboard-module_manager',
+		'loadMethod': 'managed',
+		'forceRefresh': false,
+		'directLoad': true,
+		'locations': [
+			// Add path to files for development purposes, out of a repo.
+			path.join(startDir, '..', 'ljswitchboard-module_manager'),
+
+			// If those files aren't found, check the node_modules directory of
+			// the current application for upgrades.
+			path.join(startDir, 'node_modules', 'ljswitchboard-module_manager'),
+
+			// For non-development use, check the LabJack folder/K3/downloads
+			// file for upgrades.
+			// TODO: Add this directory
+
+			// If all fails, check the starting directory of the process for the
+			// zipped files originally distributed with the application.
+			path.join(startDir, 'ljswitchboard-module_manager.zip')
 		]
 	},
 	{
@@ -114,7 +133,7 @@ var checkRequirements = function() {
 		// Display that the window has been initialized
 		message_formatter.renderTemplate({
 			'result': resultText,
-			'step': 'Verified LJM Installation',
+			'step': 'Verifying LJM Installation',
 			'message': 'LJM Version: ' + err.ljmVersion,
 			'code': JSON.stringify(err, undefined, 2)
 		});
@@ -146,7 +165,7 @@ var loadCorePackages = function() {
 
 			message_formatter.renderTemplate({
 				'result': resultText,
-				'step': 'Loading: ' + curPackage.name,
+				'step': 'Loading ' + curPackage.name,
 				'messages': [
 					'Version: ' + curPackage.packageInfo.version,
 					'Location: ' + curPackage.packageInfo.location
@@ -155,8 +174,9 @@ var loadCorePackages = function() {
 			});
 		});
 		global[gns].splash_screen.update('Launching Kipling');
+		
 		// Instruct the window_manager to open any managed nwApps
-		// window_manager.openManagedApps(managedPackages);
+		window_manager.openManagedApps(managedPackages);
 		defered.resolve();
 	});
 	return defered.promise;

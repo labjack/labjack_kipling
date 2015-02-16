@@ -34,14 +34,21 @@ var loadTemplateFile = function() {
 var renderTemplate = function(context) {
 	var defered = q.defer();
 	var compiledData;
-	textStyling = {
+	var textStyling = {
 		'passed': 'bs-callout-success',
 		'failed': 'bs-callout-danger'
 	}[context.result];
+	var stepAppend = {
+		'passed': '',
+		'failed': 'Error '
+	}[context.result];
 
+	if(context.result === 'failed') {
+		global.ljswitchboard.window_manager.showWindow('core');
+	}
 	var builtContext = {
 		'styling': textStyling,
-		'step': context.step,
+		'step': stepAppend + context.step,
 		'title': context.step.split(' ').join('_'),
 		'message': context.message,
 		'messages': context.messages,
