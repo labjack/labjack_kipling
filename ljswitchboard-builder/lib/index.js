@@ -92,7 +92,36 @@ window_manager.on(window_manager.eventList.QUITTING_APPLICATION, function() {
 
 var plEvents = package_loader.eventList;
 
-// Attach various event listeners
+
+// Define the splash screen updater
+var createSplashScreenUpdater = function() {
+	this.splashScreenObj = null;
+	this.titleTextObj = null;
+
+	this.saveDocumentReference = function(innerDocument) {
+		self.splashScreenObj = innerDocument;
+		var bodyEl = self.splashScreenObj.body;
+		var splashScreenObj = bodyEl.children[0];
+		var bottomLeftObj = splashScreenObj.children[0];
+		self.titleTextObj = bottomLeftObj.children[0];
+	};
+
+	this.update = function(message) {
+		console.log('Updating message to:', message);
+		try {
+			self.titleTextObj.textContent = message.toString();
+		} catch(err) {
+			// Error setting the item's message.
+			console.error('Error setting splash screen message', err);
+		}
+	};
+	var self = this;
+};
+var splashScreenUpdater = new createSplashScreenUpdater();
+
+
+
+// Attach various event listeners to the package_loader
 // package_loader.on('opened_window', windowManager.addWindow);
 package_loader.on('loaded_package', function(packageName) {
 	// console.log('Loaded New Package', packageName);
@@ -102,11 +131,17 @@ package_loader.on('set_package', function(packageName) {
 });
 
 package_loader.on('starting_extraction', function(packageInfo) {
-	console.log('Extracting package', packageInfo.name);
+	console.log('Extracting package', packageInfo.name, splashScreenUpdater);
+	splashScreenUpdater.update('Extracting ' + packageInfo.name);
 });
 package_loader.on('finished_extraction', function(packageInfo) {
-	console.log('Finished Extracting package', packageInfo.name);
+	console.log('Finished Extracting package', packageInfo.name, splashScreenUpdater);
+	splashScreenUpdater.update('Finished Extracting ' + packageInfo.name);
 });
+
+
+var startDir = require('./get_cwd').startDir;
+var startInfo = require('./get_cwd').startInfo;
 
 var rootPackages = [{
 		'name': 'req',
@@ -128,43 +163,18 @@ var rootPackages = [{
 		'name': 'window_manager',
 		'loadMethod': 'set',
 		'ref': window_manager
+	}, {
+		'name': 'splash_screen',
+		'loadMethod': 'set',
+		'ref': splashScreenUpdater
+	}, {
+		'name': 'info',
+		'loadMethod': 'set',
+		'ref': require('./get_cwd')
 	}
 ];
 
-var execDir = path.normalize(path.dirname(process.execPath));
-var derivedCWD = path.resolve(path.join(execDir, '..','..','..'));
-var cwd = path.normalize(process.cwd());
-var startMethod = '';
-var isCompressed = false;
-var startDir = cwd;
-if(cwd === derivedCWD) {
-	console.log('Project was started via npm start');
-	startMethod = 'npm start';
-	startDir = cwd;
-}
 
-if(cwd === execDir) {
-	console.log('Project was started via un-packed .exe');
-	startDir = cwd;
-	startMethod = 'un-packed exe';
-} else {
-	if(startMethod === '') {
-		console.log('Project was started via compressed .exe');
-		isCompressed = true;
-		startDir = execDir;
-		startMethod = 'packed exe';
-	}
-}
-
-console.log('Started project via: ' + startMethod);
-var startInfo = {
-	'isCompressed': isCompressed,
-	'startDir': startDir,
-	'execDir': execDir,
-	'derivedCWD': derivedCWD,
-	'cwd': cwd
-};
-console.log('Start info', startInfo);
 
 var secondaryPackages = [
 	{
@@ -235,8 +245,11 @@ var errorHandler = function(err) {
 var initializeProgram = function() {
 	var defered = q.defer();
 
+	// Configure the splashScreenUpdater
+	splashScreenUpdater.saveDocumentReference(document);
+
 	// Show the window's dev tools
-	win.showDevTools();
+	// win.showDevTools();
 
 	// Perform synchronous loading of modules:
 	rootPackages.forEach(function(packageInfo) {
@@ -296,39 +309,21 @@ var loadSecondaryPackages = function() {
 		var managedPackageKeyss = Object.keys(packages);
 		managedPackageKeyss.forEach(function(managedPackageKey) {
 			// Add the managed packages root locations to the req library.
-			var dirToAdd = packages[managedPackageKey].packageInfo.location;
-			global.ljswitchboard.req.addDirectory(dirToAdd);
-
-			try {
-				// Open the found nwApp libraries
-				console.log('HH', packages[managedPackageKey].packageData);
-				if(packages[managedPackageKey].packageData) {
-					var loadedAppData = packages[managedPackageKey].packageData;
-					if(loadedAppData['ljswitchboard-main']) {
-						var appFile = loadedAppData['ljswitchboard-main'];
-						var appType = path.extname(appFile);
-						if(appType === '.html') {
-							console.log('Opening .html', appFile, appType);
-							var requiredInfo = {
-								'main': appFile
-							};
-							console.log(packages[managedPackageKey].packageInfo,
-								requiredInfo,
-								packages[managedPackageKey].packageData
-							);
-							var openedWindow = window_manager.open(
-								packages[managedPackageKey].packageInfo,
-								requiredInfo,
-								packages[managedPackageKey].packageData
-							);
-						}
-					}
-				}
-			} catch(err) {
-				console.log('Error...', err);
-			}
+			var baseDir = packages[managedPackageKey].packageInfo.location;
+			var extraPaths = [
+				'',
+				'node_modules',
+				'lib',
+				path.join('lib', 'node_modules')
+			];
+			extraPaths.forEach(function(extraPath) {
+				var modulesDirToAdd = path.normalize(path.join(baseDir, extraPath));
+				global.ljswitchboard.req.addDirectory(modulesDirToAdd);
+			});
 		});
 
+		// Instruct the window_manager to open any managed nwApps
+		window_manager.openManagedApps(packages);
 		// Execute test function to proove that io_manager can be used.
 		// global.require('../../test.js').runProgram();
 
@@ -343,6 +338,8 @@ win.on('loaded', function() {
 	initializeProgram()
 	.then(loadSecondaryPackages, errorHandler);
 });
+
+
 
 
 

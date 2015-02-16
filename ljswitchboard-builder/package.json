@@ -23,7 +23,8 @@
 		"ljswitchboard-require": "0.0.x",
 		"ljswitchboard-ljm_driver_checker": "0.0.x",
 		"ljswitchboard-window_manager": "0.0.x",
-		"rimraf": "2.2.x"
+		"rimraf": "2.2.x",
+		"underscore": "1.7.0"
 	},
 	"un-managed-dependencies": {
 		"semver": "4.2.0",
@@ -43,7 +44,7 @@
 	},
 	"script_notes": "to run a script w/o using npm test, use npm run [script name]",
 	"scripts": {
-		"start": "npm run nodewebkit",
+		"start": "npm run nw",
 		"nodewebkit": "nodewebkit",
 		"nw": "nw",
 	    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
