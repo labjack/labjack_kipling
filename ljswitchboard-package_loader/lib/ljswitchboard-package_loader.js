@@ -1192,10 +1192,12 @@ function createPackageLoader() {
 				// If process succeeded load the package
 				try {
 					if(bundle.packageInfo.directLoad) {
-						if(bundle.chosenUpgrade.type) {
-							if(bundle.chosenUpgrade.type === 'directory') {
-								if(bundle.chosenUpgrade.exists && bundle.chosenUpgrade.isValid) {
-									bundle.packageInfo.location = bundle.chosenUpgrade.location;
+						if(bundle.chosenUpgrade) {
+							if(bundle.chosenUpgrade.type) {
+								if(bundle.chosenUpgrade.type === 'directory') {
+									if(bundle.chosenUpgrade.exists && bundle.chosenUpgrade.isValid) {
+										bundle.packageInfo.location = bundle.chosenUpgrade.location;
+									}
 								}
 							}
 						}
