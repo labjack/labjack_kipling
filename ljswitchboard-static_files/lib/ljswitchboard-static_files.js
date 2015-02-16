@@ -66,11 +66,16 @@ var loadjscssfile = function(doc, filename, filetype){
 	return defered.promise;
 };
 
-var getLoadResouce = function(doc, resourceLink) {
+var getLoadResouce = function(doc, resourceLink, isLocal) {
 	var loadResource = function(results) {
 		// console.log('Loading...', resourceLink, typeof(jQuery));
 		var defered = q.defer();
-		var link = resolveLink(resourceLink);
+		var link;
+		if(isLocal) {
+			link = resourceLink;
+		} else {
+			link = resolveLink(resourceLink);
+		}
 		var filetype = path.extname(resourceLink);
 		loadjscssfile(doc, link, filetype)
 		.then(defered.resolve, defered.reject);
@@ -79,12 +84,12 @@ var getLoadResouce = function(doc, resourceLink) {
 	return loadResource;
 };
 // Asynchronously load a list of resources
-var loadResources = function(doc, resources) {
+var loadResources = function(doc, resources, isLocal) {
 	var defered = q.defer();
 	var loadingOps = [];
 	resources.forEach(function(resource) {
 		// console.log('Loading...', resource, typeof(jQuery));
-		loadingOps.push(getLoadResouce(doc, resource));
+		loadingOps.push(getLoadResouce(doc, resource, isLocal));
 	});
 
 	if(loadingOps.length > 0) {

@@ -1,13 +1,16 @@
-html
-{
+.fullPage {
+    height:100%;
+}
+html {
     background-image:url('../img/background.png');
     min-width: 500px;
 }
 
-body
-{
+body {
     background-image:url('../img/background.png');
     font-size: 14px;
+    padding-left:0px;
+    padding-right:0px;
 }
 
 .unselectable {
@@ -32,8 +35,7 @@ p, h1, h2, h3 {
     user-select: initial;
     -webkit-user-select: initial;
 }
-#device-search-msg
-{
+#device-search-msg {
     background-color: white;
     padding: 20px;
     position: relative;
@@ -45,8 +47,7 @@ p, h1, h2, h3 {
     width: 150px;
 }
 
-#premature-error-holder
-{
+#premature-error-holder {
     display: none;
 }
 #content-holder{
@@ -89,9 +90,7 @@ p, h1, h2, h3 {
 
 }*/
 @media screen and (min-width: 768px) {
-    body {
-        padding-left:20px;
-        padding-right:20px;
+   /* body {
         overflow: hidden;
         overflow-x: hidden;
         overflow-y: hidden;
@@ -100,26 +99,11 @@ p, h1, h2, h3 {
     {
         height: 657px;
         overflow: auto;
-    }
-    #module-chrome-contents
-    {
-        width: 76%;
-    }
-    #device-display
-    {
-        position: fixed;
-        bottom: 0px;
-    }
-    .nav-dock-component
-    {
-        display: none;
-    }
+    }*/
 }
 
 @media screen and (max-width: 767px) {
-    body {
-        padding-left:20px;
-        padding-right:20px;
+    /*body {
         overflow: auto;
         overflow-x: auto;
         overflow-y: auto;
@@ -127,22 +111,39 @@ p, h1, h2, h3 {
     #module-list {
         margin: 0px;
         display: none;
-    }
-    #device-display
-    {
-        margin-bottom: 10px;
-    }
-    #device-nav-dock
-    {
-        display: block;
-    }
-    #close-nav-dock
-    {
-        display: none;
-    }
-    .nav-dock-component
-    {
-        margin: 10px 0;
-        padding: 10px;
-    }
+    }*/
+}
+
+/**
+Configure the scroll bars of the program:
+http://trac.webkit.org/export/41842/trunk/LayoutTests/scrollbars/overflow-scrollbar-combinations.html
+http://css-tricks.com/custom-scrollbars-in-webkit/
+https://www.webkit.org/blog/363/styling-scrollbars/
+http://css-tricks.com/examples/WebKitScrollbars/
+
+Either define scroll bars for each os or add os switches to add
+padding to allow proper styling for scroll bars.
+**/
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+    background: #f3f3f3;
+}
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+    
+    background:#A3A3A4;
+    background:#BABABA;
+}
+::-webkit-scrollbar-thumb:hover {
+    background:#8C8B8D;
+    background:#939393;
+}
+::-webkit-scrollbar-thumb:active {
+    background:#7B7A7E;
 }
