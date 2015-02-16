@@ -142,9 +142,15 @@ function createPackageLoader() {
 					'node_modules',
 					path.join('lib', 'node_modules')
 				];
+				if(global[gns][name].info.type) {
+					if(global[gns][name].info.type === 'library') {
+						extraPaths.push('..');
+					}
+				}
 				extraPaths.forEach(function(extraPath) {
 					var dirToAdd = packageInfo.location;
 					var modulesDirToAdd = path.join(dirToAdd, extraPath);
+					modulesDirToAdd = path.normalize(modulesDirToAdd);
 					global.module.paths.splice(2,0,modulesDirToAdd);
 				});
 				
@@ -172,7 +178,7 @@ function createPackageLoader() {
 					}
 				}
 			} else {
-				// console.warn('Info Object does not exist, not doing anything special');
+				console.warn('Info Object does not exist, not doing anything special', packageInfo, name);
 			}
 		} catch (err) {
 			console.error('  - package_loader: startPackage Error', err, name);
