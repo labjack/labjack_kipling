@@ -130,13 +130,34 @@ var checkLoadedModuleData = function(test, moduleData) {
 			var isValid = Array.isArray(htmlFiles);
 			test.ok(isValid,'htmlFiles should be an array');
 			var foundCoreHTMLFile = false;
+			var htmlFilePaths = [];
 			htmlFiles.forEach(function(htmlFile) {
 				checkLoadedFiles(test, htmlFile);
 				if(htmlFile.fileName === 'view.html') {
 					foundCoreHTMLFile = true;
+
+					// If the found module declares the use of a framework
+					if(moduleData.data.framework) {
+						var fwType = moduleData.data.framework;
+						// If that framework is supported
+						if(FRAMEWORK_ADDITIONS[fwType]) {
+							// Make sure that the view.html file is loaded out
+							// of the framework folder
+							var splitPath = htmlFile.filePath.split(path.sep);
+							var index = splitPath.indexOf('framework');
+							if(index < 0) {
+								test.ok(false, 'File not properly loaded');
+							} else {
+								test.ok(true, 'File properly loaded');
+							}
+						} else {
+							test.ok(false, 'Unsupported framework type');
+						}
+					}
 				}
+				htmlFilePaths.push(htmlFile.filePath);
 			});
-			test.ok(foundCoreHTMLFile, 'did not find style.css file');
+			test.ok(foundCoreHTMLFile, 'did not find view.html file');
 		}
 	};
 
@@ -185,30 +206,30 @@ var tests = {
 			test.done();
 		});
 	},
-	'loadAllModulesByName': function(test) {
-		var promises = [];
-		var loadModule = function(moduleName) {
-			var defered = q.defer();
-			module_manager.loadModuleDataByName(moduleName)
-			.then(function(moduleData) {
-				checkLoadedModuleData(test, moduleData);
-				defered.resolve();
-			});
-			return defered.promise;
-		};
-		moduleNames.forEach(function(moduleName) {
-			promises.push(loadModule(moduleName));
-		});
+	// 'loadAllModulesByName': function(test) {
+	// 	var promises = [];
+	// 	var loadModule = function(moduleName) {
+	// 		var defered = q.defer();
+	// 		module_manager.loadModuleDataByName(moduleName)
+	// 		.then(function(moduleData) {
+	// 			checkLoadedModuleData(test, moduleData);
+	// 			defered.resolve();
+	// 		});
+	// 		return defered.promise;
+	// 	};
+	// 	moduleNames.forEach(function(moduleName) {
+	// 		promises.push(loadModule(moduleName));
+	// 	});
 
-		q.allSettled(promises)
-		.then(function(collectedData) {
-			test.ok(true, 'test finished');
-			test.done();
-		}, function(err) {
-			test.ok(false, 'test failed');
-			test.done();
-		});
-	}
+	// 	q.allSettled(promises)
+	// 	.then(function(collectedData) {
+	// 		test.ok(true, 'test finished');
+	// 		test.done();
+	// 	}, function(err) {
+	// 		test.ok(false, 'test failed');
+	// 		test.done();
+	// 	});
+	// }
 };
 
 exports.tests = tests;
