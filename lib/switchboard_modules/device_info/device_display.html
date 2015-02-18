@@ -1,0 +1,156 @@
+<div class="row-fluid">
+    {{#device}}
+    <div class="span7">
+        <div class="info-section" id="general-section">
+            <div class="pane-popover">
+                General
+            </div>
+            <div class="important-info">
+                <div class="device-detail">
+                    Serial Number:
+                    <span id="serial-number-display" class="selectableText">{{getSerial}}</span>
+                </div>
+                <div class="device-detail">
+                    Model:
+                    <span id="type-display" class="selectableText">{{getDeviceType}}{{../specialText}}</span>
+                </div>
+                <div id="name-display-holder" class="device-detail">
+                    Name:
+                    <span id="name-display">
+                        <span id="current-name-display" class="selectableText">{{getName}}</span>
+                        <button id="change-name-link" class="icon-pencil btn btn-link" title="Edit Device Name"></button>
+                        {{!--<div><button id="change-name-link" class="btn">Change Name</button></div>--}}
+                        <div id="change-name-controls">
+                            <div><input type="text" id="new-name-input" placeholder="new name"></div>
+                            <div>
+                                <button id="change-name-button" class="btn">Change Name</button>
+                                <button id="cancel-change-name-button" class="btn">Cancel</button>
+                            </div>
+                        </div>
+                    </span>
+                </div>
+            </div>
+            <div class="device-detail">
+                Ethernet Mac Address: 
+                <span id="wifi-version-display" class="selectableText">
+                    {{../ethernetMac}}
+                </span>
+            </div>
+            {{#if ../isPro }}
+            <div class="device-detail">
+                WiFi Mac Address: 
+                <span id="wifi-version-display" class="selectableText">
+                    {{../../wifiMac}}
+                </span>
+            </div>
+            {{/if}}
+            <div class="device-detail">
+                200 uA Current Source Cal: 
+                <span id="wifi-version-display" class="selectableText">
+                    {{../currentSourceA}} uA
+                </span>
+            </div>
+            <div class="device-detail">
+                10 uA Current Source Cal: 
+                <span id="wifi-version-display" class="selectableText">
+                    {{../currentSourceB}} uA
+                </span>
+            </div>
+            <div class="device-detail">
+                Calibration Status: 
+                <span id="calibration-status-display" class="calibration-message selectableText {{#if ../isCalibrationValid}}isa_success{{else}}isa_error{{/if}}" title="{{../deviceCalibrationLongMessage}}">
+                    {{../deviceCalibrationMessage}}&nbsp;&nbsp;<span class="{{#if ../isCalibrationValid}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
+                </span>
+            </div>
+            <div class="block-separator"/>
+            <div class="pane-popover">
+                Versions
+            </div>
+            <div id="firmware-display-holder" class="device-detail">
+                Firmware Version: 
+                <span id="firmware-display" class="selectableText">
+                    {{../firmware}}
+                </span>
+            </div>
+            <div id="bootloader-display-holder" class="device-detail">
+                Bootloader Version: 
+                <span id="bootloader-display" class="selectableText">
+                    {{../bootloader}}
+                </span>
+            </div>
+            {{#if ../isPro }}
+            <div id="wifi-firmware-display-holder" class="device-detail">
+                WiFi Firmware Version: 
+                <span id="bootloader-display" class="selectableText">
+                    {{../../wifiFirmware}}
+                </span>
+            </div>
+            {{/if}}
+            <div class="block-separator"/>
+            <div class="pane-popover">
+                Current Status
+            </div>
+            <div class="device-detail">
+                Ethernet IP Address: 
+                <span id="wifi-version-display" class="selectableText">
+                    {{../ethernetIP}}
+                </span>
+            </div>
+            {{#if ../isPro }}
+            <div class="device-detail">
+                WiFi IP Address: 
+                <span id="wifi-version-display" class="selectableText">
+                    {{../../wifiIP}}
+                </span>
+            </div>
+            {{/if}}
+            <div class="device-detail">
+                Device Temperature:
+                <span id="wifi-version-display" class="selectableText">
+                    {{../internalTemp}} K
+                </span>
+            </div>
+            <div id="power-overview">
+                <div><span class="power-indicator {{#if ../powerEthernet }}powered{{/if}}"></span> Ethernet {{#if ../powerEthernet }}Powered{{/if}} {{#unless ../powerEthernet}}Not Powered{{/unless}}</div>
+                <div><span class="power-indicator {{#if ../powerWifi }}powered{{/if}}"></span> WiFi {{#if ../powerWifi }}Powered{{/if}} {{#unless ../powerWifi}}Not Powered{{/unless}}</div>
+                <div><span class="power-indicator {{#if ../powerAin }}powered{{/if}}"></span> Analog Input Module {{#if ../powerAin }}Powered{{/if}} {{#unless ../powerAin}}Not Powered{{/unless}}</div>
+                <div><span class="power-indicator {{#if ../powerWatchdog }}powered{{/if}}"></span> Watchdog {{#if ../powerWatchdog }}Enabled{{/if}} {{#unless ../powerWatchdog}}Disabled{{/unless}}</div>
+                <div><span class="power-indicator {{#if ../powerLed }}powered{{/if}}"></span> Device LED {{#if ../powerLed }}Powered{{/if}} {{#unless ../powerLed}}Not Powered{{/unless}}</div>
+            </div>
+        </div>
+    </div>
+    <div class="span5">
+        <img id="device-image" src="static/img/devices/{{getDeviceType}}{{../specialImageSuffix}}.png">
+        <p/>
+        <h3>Important Device Links</h3>
+        <ul>
+            <li><div id="lj-link-holder-productPage" class="lj-link-holder" title="Open the {{getDeviceType}} product page in your default browser"><a>Product Page</a></div></li>
+            <li><div id="lj-link-holder-datasheet" class="lj-link-holder" title="Open the {{getDeviceType}} datasheet in your default browser"><a>Datasheet</a></div></li>
+            <li><div id="lj-link-holder-supportPage" class="lj-link-holder" title="Open the {{getDeviceType}} Support Homepage in your default browser"><a>Support Homepage</a></div></li>
+        </ul>
+        <script>
+            $('#lj-link-holder-productPage').unbind();
+            $('#lj-link-holder-productPage').bind('click',function(){
+                if(typeof(gui) === 'undefined') {
+                    gui = require('nw.gui');
+                }
+                gui.Shell.openExternal("http://labjack.com/{{getDeviceType}}");
+            });
+            $('#lj-link-holder-datasheet').unbind();
+            $('#lj-link-holder-datasheet').bind('click',function(){
+                if(typeof(gui) === 'undefined') {
+                    gui = require('nw.gui');
+                }
+                gui.Shell.openExternal("http://labjack.com/support/datasheets/{{getDeviceType}}");
+            });
+            $('#lj-link-holder-supportPage').unbind();
+            $('#lj-link-holder-supportPage').bind('click',function(){
+                if(typeof(gui) === 'undefined') {
+                    gui = require('nw.gui');
+                }
+                gui.Shell.openExternal("http://labjack.com/support/{{getDeviceType}}");
+            });
+        </script>
+    </div>
+    {{/device}}
+</div>

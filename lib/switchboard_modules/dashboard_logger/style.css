@@ -1,0 +1,79 @@
+.pane-popover
+{
+    text-align: right;
+    height: 10px;
+    margin-right: 10px;
+    float: right;
+}
+
+.pane-popover .arrow
+{
+    width: 0; 
+    margin-top: 4px;
+    height: 0; 
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid #999999;
+    float: right;
+}
+
+.pane-popover .label
+{
+    float: right;
+    min-width: 60px;
+}
+
+.dashboard-section
+{
+    margin-bottom: 50px;
+}
+
+.btn-toolbar
+{
+    margin-top: 0px;
+}
+
+.selected-option-display
+{
+    display: none;
+}
+
+.channel-select-control
+{
+    height: 170px;
+    padding: 5px;
+    border-color: #CCCCCC;
+    border-style: solid;
+    border-width: 1px;
+    overflow: auto;
+}
+
+.remove-from-watchlist-link:hover
+{
+    color: #888;
+}
+
+#name-input
+{
+    width: 100%;
+}
+
+#polling-input-add-on
+{
+    height: 18px;
+}
+
+#name-section
+{
+    margin-bottom: 10px;
+}
+
+#selected-register-table
+{
+    margin-bottom: 20px;
+}
+
+#register-watch-table
+{
+    display: none;
+}

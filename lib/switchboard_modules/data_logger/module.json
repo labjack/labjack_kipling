@@ -1,0 +1,14 @@
+{
+    "name": "lua_script_debugger",
+    "humanName": "Lua Script Debugger",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "third_party_code":
+    	[
+    		"ace-builds/src-noconflict/ace.js"
+    	],
+    "third_party_code_unload":
+    	[
+    		"window.ace"
+    	]
+}

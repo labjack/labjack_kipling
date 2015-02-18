@@ -1,0 +1,24 @@
+{{#currentRegisters}}
+<tr class="register-row big-table-row register-overview-row">
+    <td class="selectableText">{{address}}</td>
+    <td class="selectableText">{{name}}</td>
+    <td>{{type}}</td>
+    <td>{{relevantFwmin}}</td>
+    <td>{{readwrite}}</td>
+    <td id="{{address}}-toggle-button" class="icon-plus toggle-info-button expand"></td>
+    <td>
+        <div id="{{address}}-add-to-list-button" class="add-to-list-button icon-add-to-list"></div>
+    </td>
+</tr>
+<tr id="{{address}}-description-display" class="register-row big-table-row register-description">
+    <td colspan="7">
+        <div class="description-section">
+            <span class="description-header">Tags:</span> {{flatTagStr}}
+        </div>
+        <div class="description-section">
+            <span class="description-header">Description:</span>
+            <span class="selectableText">{{description}}</span>
+        </div>
+    </td>
+</tr>
+{{/currentRegisters}}

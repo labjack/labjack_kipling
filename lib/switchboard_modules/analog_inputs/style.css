@@ -1,0 +1,161 @@
+#device-selector
+{
+    max-height: 150px;
+    overflow: auto;
+    font-size: 16px;
+    padding: 20px;
+}
+
+#all-device-configuration-controls
+{
+    display: none;
+}
+
+#individual-device-configuration-controls
+{
+    display: none;
+}
+
+#range-dropdown-holder .btn-group
+{
+    margin-right: 15px;
+}
+
+.span-dropdown
+{
+    width: 87%;
+}
+
+.span-dropdown .btn-group
+{
+    width: 87%;
+}
+
+.dropdown-toggle
+{
+    width: 87%;
+}
+
+.subsection
+{
+    margin: 50px 0 50px 0;
+}
+
+.subsection .controls
+{
+    margin-top: 10px;
+}
+
+.centered-right
+{
+    padding: 15px 10px 0 0;
+    text-align: right;
+}
+
+.input-row:nth-child(odd)
+{
+    background: #F0F0F0;
+}
+
+.input-display
+{
+    margin-top: 12px;
+}
+
+.input-bar
+{
+    background-color: black;
+    height: 3px;
+    width: 3px;
+}
+
+.dropdown-span
+{
+    padding-right: 9px;
+    text-align: center;
+}
+
+.caret
+{
+    margin-top: 3px !important;
+}
+
+@media screen and (max-width: 767px) {
+    .non-responsive-row .span2
+    {
+        width: 14%;
+        float: left;
+    }
+
+    .non-responsive-row .span3
+    {
+        width: 24%;
+        float: left;
+    }
+
+    .non-responsive-row .span7
+    {
+        width: 37%;
+        float: left;
+    }
+
+    .span-dropdown
+    {
+        width: 78%;
+    }
+
+    .span-dropdown .btn-group
+    {
+        width: 77%;
+    }
+
+    .dropdown-toggle
+    {
+        width: 77%;
+    }
+
+    #range-dropdown-holder .btn-group
+    {
+        margin-right: 8px;
+    }
+}
+
+@media screen and (min-width: 1100px) {
+    .non-responsive-row .span2
+    {
+        width: 7%;
+        float: left;
+    }
+
+    .non-responsive-row .span3
+    {
+        width: 20%;
+        float: left;
+    }
+
+    .span-dropdown
+    {
+        width: 99%;
+    }
+
+    .span-dropdown .btn-group
+    {
+        width: 99%;
+    }
+
+    .dropdown-toggle
+    {
+        width: 99%;
+    }
+
+    #range-dropdown-holder .btn-group
+    {
+        margin-right: 25px;
+    }
+
+    .dropdown-span
+    {
+        padding-right: 10px;
+        text-align: center;
+    }
+}

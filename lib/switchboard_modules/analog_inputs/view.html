@@ -1,0 +1,67 @@
+<div id="analog-inputs-configuration">
+    <table class="table table-striped" {{#unless hasMultipleDevices}}style="display:none"{{/unless}} id="device-selector">
+        <thead>
+            <tr>
+                <th>select</th>
+                <th>device type</th>
+                <th>serial number</th>
+                <th>name</th>
+            <tr>
+        </thead>
+        <tbody>
+            {{#devices}}
+            <tr>
+                <td>
+                    <label class="radio">
+                        <input name="selected-device" class="device-selection-radio" id="{{getSerial}}-selector" type="radio" value="{{getSerial}}">
+                        <span class="metro-radio"></span>
+                    </label>
+                </td>
+                <td>
+                    {{getDeviceType}}
+                </td>
+                <td>
+                    {{getSerial}}
+                </td>
+                <td>
+                    {{getName}}
+                </td>
+            </tr>
+            {{/devices}}
+        </tbody>
+    </table>
+    <div id="configuration-pane">
+        <div id="loading-ranges-display" class="progress progress-indeterminate">
+            <div>loading ranges and configuring device</div>
+            <div><img src="static/img/progress-indeterminate.gif"></div>
+        </div>
+        <div class="subsection" id="all-device-configuration-controls">
+            <h3>configure all inputs</h3>
+            <div>
+                <div class="btn-toolbar" id="range-dropdown-holder">
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                            <span class="selected-all-range-display">select range</span>
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu range-list">
+                        </ul>
+                    </div>
+                    <div class="btn-group">
+                        <button id="write-defaults-button">Save Power-Up Default</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="subsection" id="individual-device-configuration-controls">
+            <h3>individual input configuration</h3>
+            <div id="controls-matrix">
+                <div id="loading-inputs-display" class="progress progress-indeterminate">
+                    <div>loading inputs</div>
+                    <div><img src="static/img/progress-indeterminate.gif"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

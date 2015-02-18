@@ -1,0 +1,42 @@
+#device-upgrade-progress-status {
+	position: relative;
+	left: 0;
+	top: 0;
+}
+
+#firmware-select
+{
+    display: none;
+}
+
+#working-status-pane
+{
+    display: none;
+}
+
+#browse-button-holder
+{
+    margin-bottom: 10px;
+}
+
+#cur-version-info {
+    margin-bottom: 30px;
+}
+
+#no-internet-message
+{
+    display: none;
+}
+
+#flash-notice
+{
+    margin: 5px;
+    border: solid 1px #C0C0C0;
+    padding: 20px;
+    display: none;
+}
+
+.firmware-source-option
+{
+    margin-bottom: 40px;
+}

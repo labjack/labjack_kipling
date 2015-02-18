@@ -1,0 +1,6 @@
+{
+    "name": "thermocouple_simple",
+    "humanName": "Thermocouple Readout",
+    "version": "0.0.1",
+    "framework":"singleDevice"
+}

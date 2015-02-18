@@ -1,0 +1,95 @@
+<div id="set-defaults-module">
+    <table class="table table-striped" id="device-selector" {{#unless hasMultipleDevices}}style="display:none"{{/unless}}>
+        <thead>
+            <tr>
+                <th>select</th>
+                <th>device type</th>
+                <th>serial number</th>
+                <th>name</th>
+            <tr>
+        </thead>
+        <tbody>
+            {{#devices}}
+            <tr>
+                <td>
+                    <label class="checkbox">
+                        <input class="device-selection-checkbox" id="{{getSerial}}-selector" type="checkbox" value="{{getSerial}}">
+                        <span class="metro-checkbox"></span>
+                    </label>
+                </td>
+                <td>
+                    {{getDeviceType}} {{getSubclass}}
+                </td>
+                <td>
+                    {{getSerial}}
+                </td>
+                <td>
+                    {{getName}}
+                </td>
+            </tr>
+            {{/devices}}
+        </tbody>
+    </table>
+    <div id="defaults-holder">
+        <div class="section">
+            <h3>Introduction</h3>
+            <div>
+                <p>
+                    Control how the device is configured after any reboot, power-up, or reset condition.  This uses the T7's I/O configuration system to configure registers including but not limited to:
+                </p>
+                <ul>
+                    <li>Digital I/O directions and states</li>
+                    <li>Analog input configuration options (Range, Resolution, etc.)</li>
+                    <li>Analog input extended features (AINx_EF)</li>
+                    <li>Analog output (DAC) channel values</li>
+                </ul>
+                <p>Refer to the <a class="lj-link-holder" id="io-config-datasheet-link">"IO Config" section of the datasheet</a> for more information.</p>
+                <script>
+                    $('#io-config-datasheet-link').unbind();
+                    $('#io-config-datasheet-link').bind('click',function(){
+                        if(typeof(gui) === 'undefined') {
+                            gui = require('nw.gui');
+                        }
+                        gui.Shell.openExternal("http://labjack.com/support/datasheets/t7/io-config-default");
+                    });
+                </script>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Select Defaults Source</h3>
+            <div>
+                <label class="radio">
+                    <input type="radio" name="source" value="current" checked>
+                    <span class="metro-radio">Current Device Settings</span>
+                    <div class="option-description">
+                        Take a snapshot of the settings the device has right now
+                        and use that snapshot of settings after the device is
+                        rebooted.
+                    </div>
+                </label>
+            </div>
+            <div>
+                <label class="radio">
+                    <input type="radio" name="source" value="factory">
+                    <span class="metro-radio">Factory Defaults</span>
+                    <div class="option-description">
+                        Configure the device to use the factory settings after the device is rebooted.
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="section">
+            <a id="reset-button" class="btn">Save Defaults</a>
+            <div class="saving-notice" id="saving-indicator">Saving...</div>
+            <div class="saving-notice" id="saved-indicator">Saved.</div>
+            <div class="flash-notice" id="flash-read-notice">
+                <div><img src="static/img/progress-indeterminate-ring-light.gif"></div>
+                <div>
+                    Whoops! This will just take a minute. Device flash memory is not ready (code 2358). This likely means that the WiFi / Ethernet module is initializing. Please wait...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,38 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>configure</th>
+            <th>device type</th>
+            <th>serial number</th>
+            <th>name</th>
+            <th>network</th>
+            <th>ip address</th>
+            <th>status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#devices}}
+        <tr>
+            <td>
+                <label class="radio">
+                <input name="device-selected" class="device-selection-checkbox" id="{{getSerial}}-selector" type="radio" value="{{getSerial}}">
+                    <span class="metro-radio"></span>
+                </label>
+            </td>
+            <td>{{getDeviceType}}</td>
+            <td>{{getSerial}}</td>
+            <td>{{getName}}</td>
+            <td>{{getNetwork}}</td>
+            <td>{{getIPAddress}}</td>
+            <td>
+                {{#getConnectionStatus}}
+                connected
+                {{/getConnectionStatus}}
+                {{^getConnectionStatus}}
+                not connected
+                {{/getConnectionStatus}}
+            </td>
+        </tr>
+        {{/devices}}
+    </tbody>
+</table>

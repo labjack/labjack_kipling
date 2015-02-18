@@ -1,0 +1,75 @@
+<div id="reset-module">
+    <table class="table table-striped" id="device-selector" {{#unless hasMultipleDevices}}style="display:none"{{/unless}}>
+        <thead>
+            <tr>
+                <th>select</th>
+                <th>device type</th>
+                <th>serial number</th>
+                <th>name</th>
+            <tr>
+        </thead>
+        <tbody>
+            {{#devices}}
+            <tr>
+                <td>
+                    <label class="checkbox">
+                        <input class="device-selection-checkbox" id="{{getSerial}}-selector" type="checkbox" value="{{getSerial}}">
+                        <span class="metro-checkbox"></span>
+                    </label>
+                </td>
+                <td>
+                    {{getDeviceType}} {{getSubclass}}
+                </td>
+                <td>
+                    {{getSerial}}
+                </td>
+                <td>
+                    {{getName}}
+                </td>
+            </tr>
+            {{/devices}}
+        </tbody>
+    </table>
+    <div id="reset-holder">
+        <div class="section">
+            <h3>Introduction</h3>
+            <div>
+                This module configures the current settings of the selected devices.  The settings can be configured to be either the device's saved power-up defaults or factory defaults.  This feature is useful if you want to restore device settings without power cycling a device.
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Select Configuration Source</h3>
+            <div>
+                <label class="radio">
+                    <input type="radio" name="source" value="powerup">
+                    <span class="metro-radio">Power-Up Defaults</span>
+                    <div class="option-description">
+                        Load the configuration the device uses when it is rebooted as the device's current settings.
+                    </div>
+                </label>
+            </div>
+            <div>
+                <label class="radio">
+                    <input type="radio" name="source" value="factory" checked>
+                    <span class="metro-radio">Factory Defaults</span>
+                    <div class="option-description">
+                        Load the configuration the device had when purchased as the device's current settings.
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="section">
+            <a id="reset-button" class="btn">Configure</a>
+            <div class="saving-notice" id="saving-indicator">Saving...</div>
+            <div class="saving-notice" id="saved-indicator">Saved.</div>
+            <div class="flash-notice" id="flash-read-notice">
+                <div><img src="static/img/progress-indeterminate-ring-light.gif"></div>
+                <div>
+                    Whoops! This will just take a minute. Device flash memory is not ready (code 2358). This likely means that the WiFi / Ethernet module is initializing. Please wait...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

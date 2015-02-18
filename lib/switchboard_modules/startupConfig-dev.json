@@ -1,0 +1,74 @@
+{
+    "autoConnectToDevices": false,
+    "_Comment": "connectionType choices are: 'USB', 'Wifi', or 'Ethernet'",
+    "ljmDeviceParameters":
+    [
+        {
+            "serialNumber":"470010610",
+            "connectionType":"USB"
+        },{
+            "serialNumber":"470010414",
+            "connectionType":"Ethernet"
+        },{
+            "serialNumber":"470010548",
+            "connectionType":"Ethernet"
+        },{
+            "serialNumber":"470011064",
+            "connectionType":"Ethernet"
+        },{
+            "serialNumber":"470010604",
+            "connectionType":"Ethernet"
+        },{
+            "serialNumber":"470010563",
+            "connectionType":"Ethernet"
+        }
+    ],
+    "Labjack-T7s":
+    [
+        {
+            "serialNumber":"470010533",
+            "connectionType":"Ethernet"
+        },
+        {
+            "serialNumber":"470010117",
+            "connectionType":"Ethernet"
+        }
+    ],
+    "Boulder-T7s":
+    [
+        {
+            "serialNumber":"470010620",
+            "connectionType":"Ethernet"
+        },
+        {
+            "serialNumber":"470010533",
+            "connectionType":"Ethernet"
+        }
+    ],
+    "Other-ljmDeviceParameters":
+    [
+        {
+            "serialNumber":"470010117",
+            "connectionType":"Ethernet"
+        },
+        {
+            "serialNumber":"470010117",
+            "connectionType":"USB"
+        },
+        {
+            "serialNumber":"470010604",
+            "connectionType":"Ethernet"
+        },
+        {
+            "serialNumber":"470010610",
+            "connectionType":"USB"
+        },
+        {
+            "serialNumber":"470010548",
+            "connectionType":"USB"
+        }
+    ],
+    "displayDevTools": false,
+    "overrideAutoModuleLoad": true,
+    "moduleName": "lua_script_debugger"
+}

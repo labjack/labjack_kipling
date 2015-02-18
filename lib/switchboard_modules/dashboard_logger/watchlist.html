@@ -1,0 +1,22 @@
+<table class="table table-striped" id="selected-register-table">
+    <thead>
+        <tr>
+            <th>Device</th>
+            <th>Serial</th>
+            <th>Register</th>
+            <th>Address</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#channels}}
+        <tr>
+            <td>{{device.getName}}</td>
+            <td>{{device.getSerial}}</td>
+            <td>{{register.name}}</td>
+            <td>{{register.address}}</td>
+            <td><div class="icon-trash remove-from-watchlist-link" id="{{register.name}}-{{register.address}}-{{device.getSerial}}-remove-reg-watch-list"></div></td>
+        </tr>
+        {{/channels}}
+    </tbody>
+</table>

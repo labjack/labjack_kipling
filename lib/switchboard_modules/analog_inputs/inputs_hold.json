@@ -1,0 +1,1277 @@
+[
+    {
+        "name": "AIN0",
+        "value_register": 0,
+        "range_register": 4000
+    },
+    {
+        "name": "AIN1",
+        "value_register": 2,
+        "range_register": 4002
+    },
+    {
+        "name": "AIN2",
+        "value_register": 4,
+        "range_register": 4004
+    },
+    {
+        "name": "AIN3",
+        "value_register": 6,
+        "range_register": 4006
+    },
+    {
+        "name": "AIN4",
+        "value_register": 8,
+        "range_register": 4008
+    },
+    {
+        "name": "AIN5",
+        "value_register": 10,
+        "range_register": 4010
+    },
+    {
+        "name": "AIN6",
+        "value_register": 12,
+        "range_register": 4012
+    },
+    {
+        "name": "AIN7",
+        "value_register": 14,
+        "range_register": 4014
+    },
+    {
+        "name": "AIN8",
+        "value_register": 16,
+        "range_register": 4016
+    },
+    {
+        "name": "AIN9",
+        "value_register": 18,
+        "range_register": 4018
+    },
+    {
+        "name": "AIN10",
+        "value_register": 20,
+        "range_register": 4020
+    },
+    {
+        "name": "AIN11",
+        "value_register": 22,
+        "range_register": 4022
+    },
+    {
+        "name": "AIN12",
+        "value_register": 24,
+        "range_register": 4024
+    },
+    {
+        "name": "AIN13",
+        "value_register": 26,
+        "range_register": 4026
+    },
+    {
+        "name": "AIN14",
+        "value_register": 28,
+        "range_register": 4028
+    },
+    {
+        "name": "AIN15",
+        "value_register": 30,
+        "range_register": 4030
+    },
+    {
+        "name": "AIN16",
+        "value_register": 32,
+        "range_register": 4032
+    },
+    {
+        "name": "AIN17",
+        "value_register": 34,
+        "range_register": 4034
+    },
+    {
+        "name": "AIN18",
+        "value_register": 36,
+        "range_register": 4036
+    },
+    {
+        "name": "AIN19",
+        "value_register": 38,
+        "range_register": 4038
+    },
+    {
+        "name": "AIN20",
+        "value_register": 40,
+        "range_register": 4040
+    },
+    {
+        "name": "AIN21",
+        "value_register": 42,
+        "range_register": 4042
+    },
+    {
+        "name": "AIN22",
+        "value_register": 44,
+        "range_register": 4044
+    },
+    {
+        "name": "AIN23",
+        "value_register": 46,
+        "range_register": 4046
+    },
+    {
+        "name": "AIN24",
+        "value_register": 48,
+        "range_register": 4048
+    },
+    {
+        "name": "AIN25",
+        "value_register": 50,
+        "range_register": 4050
+    },
+    {
+        "name": "AIN26",
+        "value_register": 52,
+        "range_register": 4052
+    },
+    {
+        "name": "AIN27",
+        "value_register": 54,
+        "range_register": 4054
+    },
+    {
+        "name": "AIN28",
+        "value_register": 56,
+        "range_register": 4056
+    },
+    {
+        "name": "AIN29",
+        "value_register": 58,
+        "range_register": 4058
+    },
+    {
+        "name": "AIN30",
+        "value_register": 60,
+        "range_register": 4060
+    },
+    {
+        "name": "AIN31",
+        "value_register": 62,
+        "range_register": 4062
+    },
+    {
+        "name": "AIN32",
+        "value_register": 64,
+        "range_register": 4064
+    },
+    {
+        "name": "AIN33",
+        "value_register": 66,
+        "range_register": 4066
+    },
+    {
+        "name": "AIN34",
+        "value_register": 68,
+        "range_register": 4068
+    },
+    {
+        "name": "AIN35",
+        "value_register": 70,
+        "range_register": 4070
+    },
+    {
+        "name": "AIN36",
+        "value_register": 72,
+        "range_register": 4072
+    },
+    {
+        "name": "AIN37",
+        "value_register": 74,
+        "range_register": 4074
+    },
+    {
+        "name": "AIN38",
+        "value_register": 76,
+        "range_register": 4076
+    },
+    {
+        "name": "AIN39",
+        "value_register": 78,
+        "range_register": 4078
+    },
+    {
+        "name": "AIN40",
+        "value_register": 80,
+        "range_register": 4080
+    },
+    {
+        "name": "AIN41",
+        "value_register": 82,
+        "range_register": 4082
+    },
+    {
+        "name": "AIN42",
+        "value_register": 84,
+        "range_register": 4084
+    },
+    {
+        "name": "AIN43",
+        "value_register": 86,
+        "range_register": 4086
+    },
+    {
+        "name": "AIN44",
+        "value_register": 88,
+        "range_register": 4088
+    },
+    {
+        "name": "AIN45",
+        "value_register": 90,
+        "range_register": 4090
+    },
+    {
+        "name": "AIN46",
+        "value_register": 92,
+        "range_register": 4092
+    },
+    {
+        "name": "AIN47",
+        "value_register": 94,
+        "range_register": 4094
+    },
+    {
+        "name": "AIN48",
+        "value_register": 96,
+        "range_register": 4096
+    },
+    {
+        "name": "AIN49",
+        "value_register": 98,
+        "range_register": 4098
+    },
+    {
+        "name": "AIN50",
+        "value_register": 100,
+        "range_register": 4100
+    },
+    {
+        "name": "AIN51",
+        "value_register": 102,
+        "range_register": 4102
+    },
+    {
+        "name": "AIN52",
+        "value_register": 104,
+        "range_register": 4104
+    },
+    {
+        "name": "AIN53",
+        "value_register": 106,
+        "range_register": 4106
+    },
+    {
+        "name": "AIN54",
+        "value_register": 108,
+        "range_register": 4108
+    },
+    {
+        "name": "AIN55",
+        "value_register": 110,
+        "range_register": 4110
+    },
+    {
+        "name": "AIN56",
+        "value_register": 112,
+        "range_register": 4112
+    },
+    {
+        "name": "AIN57",
+        "value_register": 114,
+        "range_register": 4114
+    },
+    {
+        "name": "AIN58",
+        "value_register": 116,
+        "range_register": 4116
+    },
+    {
+        "name": "AIN59",
+        "value_register": 118,
+        "range_register": 4118
+    },
+    {
+        "name": "AIN60",
+        "value_register": 120,
+        "range_register": 4120
+    },
+    {
+        "name": "AIN61",
+        "value_register": 122,
+        "range_register": 4122
+    },
+    {
+        "name": "AIN62",
+        "value_register": 124,
+        "range_register": 4124
+    },
+    {
+        "name": "AIN63",
+        "value_register": 126,
+        "range_register": 4126
+    },
+    {
+        "name": "AIN64",
+        "value_register": 128,
+        "range_register": 4128
+    },
+    {
+        "name": "AIN65",
+        "value_register": 130,
+        "range_register": 4130
+    },
+    {
+        "name": "AIN66",
+        "value_register": 132,
+        "range_register": 4132
+    },
+    {
+        "name": "AIN67",
+        "value_register": 134,
+        "range_register": 4134
+    },
+    {
+        "name": "AIN68",
+        "value_register": 136,
+        "range_register": 4136
+    },
+    {
+        "name": "AIN69",
+        "value_register": 138,
+        "range_register": 4138
+    },
+    {
+        "name": "AIN70",
+        "value_register": 140,
+        "range_register": 4140
+    },
+    {
+        "name": "AIN71",
+        "value_register": 142,
+        "range_register": 4142
+    },
+    {
+        "name": "AIN72",
+        "value_register": 144,
+        "range_register": 4144
+    },
+    {
+        "name": "AIN73",
+        "value_register": 146,
+        "range_register": 4146
+    },
+    {
+        "name": "AIN74",
+        "value_register": 148,
+        "range_register": 4148
+    },
+    {
+        "name": "AIN75",
+        "value_register": 150,
+        "range_register": 4150
+    },
+    {
+        "name": "AIN76",
+        "value_register": 152,
+        "range_register": 4152
+    },
+    {
+        "name": "AIN77",
+        "value_register": 154,
+        "range_register": 4154
+    },
+    {
+        "name": "AIN78",
+        "value_register": 156,
+        "range_register": 4156
+    },
+    {
+        "name": "AIN79",
+        "value_register": 158,
+        "range_register": 4158
+    },
+    {
+        "name": "AIN80",
+        "value_register": 160,
+        "range_register": 4160
+    },
+    {
+        "name": "AIN81",
+        "value_register": 162,
+        "range_register": 4162
+    },
+    {
+        "name": "AIN82",
+        "value_register": 164,
+        "range_register": 4164
+    },
+    {
+        "name": "AIN83",
+        "value_register": 166,
+        "range_register": 4166
+    },
+    {
+        "name": "AIN84",
+        "value_register": 168,
+        "range_register": 4168
+    },
+    {
+        "name": "AIN85",
+        "value_register": 170,
+        "range_register": 4170
+    },
+    {
+        "name": "AIN86",
+        "value_register": 172,
+        "range_register": 4172
+    },
+    {
+        "name": "AIN87",
+        "value_register": 174,
+        "range_register": 4174
+    },
+    {
+        "name": "AIN88",
+        "value_register": 176,
+        "range_register": 4176
+    },
+    {
+        "name": "AIN89",
+        "value_register": 178,
+        "range_register": 4178
+    },
+    {
+        "name": "AIN90",
+        "value_register": 180,
+        "range_register": 4180
+    },
+    {
+        "name": "AIN91",
+        "value_register": 182,
+        "range_register": 4182
+    },
+    {
+        "name": "AIN92",
+        "value_register": 184,
+        "range_register": 4184
+    },
+    {
+        "name": "AIN93",
+        "value_register": 186,
+        "range_register": 4186
+    },
+    {
+        "name": "AIN94",
+        "value_register": 188,
+        "range_register": 4188
+    },
+    {
+        "name": "AIN95",
+        "value_register": 190,
+        "range_register": 4190
+    },
+    {
+        "name": "AIN96",
+        "value_register": 192,
+        "range_register": 4192
+    },
+    {
+        "name": "AIN97",
+        "value_register": 194,
+        "range_register": 4194
+    },
+    {
+        "name": "AIN98",
+        "value_register": 196,
+        "range_register": 4196
+    },
+    {
+        "name": "AIN99",
+        "value_register": 198,
+        "range_register": 4198
+    },
+    {
+        "name": "AIN100",
+        "value_register": 200,
+        "range_register": 4200
+    },
+    {
+        "name": "AIN101",
+        "value_register": 202,
+        "range_register": 4202
+    },
+    {
+        "name": "AIN102",
+        "value_register": 204,
+        "range_register": 4204
+    },
+    {
+        "name": "AIN103",
+        "value_register": 206,
+        "range_register": 4206
+    },
+    {
+        "name": "AIN104",
+        "value_register": 208,
+        "range_register": 4208
+    },
+    {
+        "name": "AIN105",
+        "value_register": 210,
+        "range_register": 4210
+    },
+    {
+        "name": "AIN106",
+        "value_register": 212,
+        "range_register": 4212
+    },
+    {
+        "name": "AIN107",
+        "value_register": 214,
+        "range_register": 4214
+    },
+    {
+        "name": "AIN108",
+        "value_register": 216,
+        "range_register": 4216
+    },
+    {
+        "name": "AIN109",
+        "value_register": 218,
+        "range_register": 4218
+    },
+    {
+        "name": "AIN110",
+        "value_register": 220,
+        "range_register": 4220
+    },
+    {
+        "name": "AIN111",
+        "value_register": 222,
+        "range_register": 4222
+    },
+    {
+        "name": "AIN112",
+        "value_register": 224,
+        "range_register": 4224
+    },
+    {
+        "name": "AIN113",
+        "value_register": 226,
+        "range_register": 4226
+    },
+    {
+        "name": "AIN114",
+        "value_register": 228,
+        "range_register": 4228
+    },
+    {
+        "name": "AIN115",
+        "value_register": 230,
+        "range_register": 4230
+    },
+    {
+        "name": "AIN116",
+        "value_register": 232,
+        "range_register": 4232
+    },
+    {
+        "name": "AIN117",
+        "value_register": 234,
+        "range_register": 4234
+    },
+    {
+        "name": "AIN118",
+        "value_register": 236,
+        "range_register": 4236
+    },
+    {
+        "name": "AIN119",
+        "value_register": 238,
+        "range_register": 4238
+    },
+    {
+        "name": "AIN120",
+        "value_register": 240,
+        "range_register": 4240
+    },
+    {
+        "name": "AIN121",
+        "value_register": 242,
+        "range_register": 4242
+    },
+    {
+        "name": "AIN122",
+        "value_register": 244,
+        "range_register": 4244
+    },
+    {
+        "name": "AIN123",
+        "value_register": 246,
+        "range_register": 4246
+    },
+    {
+        "name": "AIN124",
+        "value_register": 248,
+        "range_register": 4248
+    },
+    {
+        "name": "AIN125",
+        "value_register": 250,
+        "range_register": 4250
+    },
+    {
+        "name": "AIN126",
+        "value_register": 252,
+        "range_register": 4252
+    },
+    {
+        "name": "AIN127",
+        "value_register": 254,
+        "range_register": 4254
+    },
+    {
+        "name": "AIN128",
+        "value_register": 256,
+        "range_register": 4256
+    },
+    {
+        "name": "AIN129",
+        "value_register": 258,
+        "range_register": 4258
+    },
+    {
+        "name": "AIN130",
+        "value_register": 260,
+        "range_register": 4260
+    },
+    {
+        "name": "AIN131",
+        "value_register": 262,
+        "range_register": 4262
+    },
+    {
+        "name": "AIN132",
+        "value_register": 264,
+        "range_register": 4264
+    },
+    {
+        "name": "AIN133",
+        "value_register": 266,
+        "range_register": 4266
+    },
+    {
+        "name": "AIN134",
+        "value_register": 268,
+        "range_register": 4268
+    },
+    {
+        "name": "AIN135",
+        "value_register": 270,
+        "range_register": 4270
+    },
+    {
+        "name": "AIN136",
+        "value_register": 272,
+        "range_register": 4272
+    },
+    {
+        "name": "AIN137",
+        "value_register": 274,
+        "range_register": 4274
+    },
+    {
+        "name": "AIN138",
+        "value_register": 276,
+        "range_register": 4276
+    },
+    {
+        "name": "AIN139",
+        "value_register": 278,
+        "range_register": 4278
+    },
+    {
+        "name": "AIN140",
+        "value_register": 280,
+        "range_register": 4280
+    },
+    {
+        "name": "AIN141",
+        "value_register": 282,
+        "range_register": 4282
+    },
+    {
+        "name": "AIN142",
+        "value_register": 284,
+        "range_register": 4284
+    },
+    {
+        "name": "AIN143",
+        "value_register": 286,
+        "range_register": 4286
+    },
+    {
+        "name": "AIN144",
+        "value_register": 288,
+        "range_register": 4288
+    },
+    {
+        "name": "AIN145",
+        "value_register": 290,
+        "range_register": 4290
+    },
+    {
+        "name": "AIN146",
+        "value_register": 292,
+        "range_register": 4292
+    },
+    {
+        "name": "AIN147",
+        "value_register": 294,
+        "range_register": 4294
+    },
+    {
+        "name": "AIN148",
+        "value_register": 296,
+        "range_register": 4296
+    },
+    {
+        "name": "AIN149",
+        "value_register": 298,
+        "range_register": 4298
+    },
+    {
+        "name": "AIN150",
+        "value_register": 300,
+        "range_register": 4300
+    },
+    {
+        "name": "AIN151",
+        "value_register": 302,
+        "range_register": 4302
+    },
+    {
+        "name": "AIN152",
+        "value_register": 304,
+        "range_register": 4304
+    },
+    {
+        "name": "AIN153",
+        "value_register": 306,
+        "range_register": 4306
+    },
+    {
+        "name": "AIN154",
+        "value_register": 308,
+        "range_register": 4308
+    },
+    {
+        "name": "AIN155",
+        "value_register": 310,
+        "range_register": 4310
+    },
+    {
+        "name": "AIN156",
+        "value_register": 312,
+        "range_register": 4312
+    },
+    {
+        "name": "AIN157",
+        "value_register": 314,
+        "range_register": 4314
+    },
+    {
+        "name": "AIN158",
+        "value_register": 316,
+        "range_register": 4316
+    },
+    {
+        "name": "AIN159",
+        "value_register": 318,
+        "range_register": 4318
+    },
+    {
+        "name": "AIN160",
+        "value_register": 320,
+        "range_register": 4320
+    },
+    {
+        "name": "AIN161",
+        "value_register": 322,
+        "range_register": 4322
+    },
+    {
+        "name": "AIN162",
+        "value_register": 324,
+        "range_register": 4324
+    },
+    {
+        "name": "AIN163",
+        "value_register": 326,
+        "range_register": 4326
+    },
+    {
+        "name": "AIN164",
+        "value_register": 328,
+        "range_register": 4328
+    },
+    {
+        "name": "AIN165",
+        "value_register": 330,
+        "range_register": 4330
+    },
+    {
+        "name": "AIN166",
+        "value_register": 332,
+        "range_register": 4332
+    },
+    {
+        "name": "AIN167",
+        "value_register": 334,
+        "range_register": 4334
+    },
+    {
+        "name": "AIN168",
+        "value_register": 336,
+        "range_register": 4336
+    },
+    {
+        "name": "AIN169",
+        "value_register": 338,
+        "range_register": 4338
+    },
+    {
+        "name": "AIN170",
+        "value_register": 340,
+        "range_register": 4340
+    },
+    {
+        "name": "AIN171",
+        "value_register": 342,
+        "range_register": 4342
+    },
+    {
+        "name": "AIN172",
+        "value_register": 344,
+        "range_register": 4344
+    },
+    {
+        "name": "AIN173",
+        "value_register": 346,
+        "range_register": 4346
+    },
+    {
+        "name": "AIN174",
+        "value_register": 348,
+        "range_register": 4348
+    },
+    {
+        "name": "AIN175",
+        "value_register": 350,
+        "range_register": 4350
+    },
+    {
+        "name": "AIN176",
+        "value_register": 352,
+        "range_register": 4352
+    },
+    {
+        "name": "AIN177",
+        "value_register": 354,
+        "range_register": 4354
+    },
+    {
+        "name": "AIN178",
+        "value_register": 356,
+        "range_register": 4356
+    },
+    {
+        "name": "AIN179",
+        "value_register": 358,
+        "range_register": 4358
+    },
+    {
+        "name": "AIN180",
+        "value_register": 360,
+        "range_register": 4360
+    },
+    {
+        "name": "AIN181",
+        "value_register": 362,
+        "range_register": 4362
+    },
+    {
+        "name": "AIN182",
+        "value_register": 364,
+        "range_register": 4364
+    },
+    {
+        "name": "AIN183",
+        "value_register": 366,
+        "range_register": 4366
+    },
+    {
+        "name": "AIN184",
+        "value_register": 368,
+        "range_register": 4368
+    },
+    {
+        "name": "AIN185",
+        "value_register": 370,
+        "range_register": 4370
+    },
+    {
+        "name": "AIN186",
+        "value_register": 372,
+        "range_register": 4372
+    },
+    {
+        "name": "AIN187",
+        "value_register": 374,
+        "range_register": 4374
+    },
+    {
+        "name": "AIN188",
+        "value_register": 376,
+        "range_register": 4376
+    },
+    {
+        "name": "AIN189",
+        "value_register": 378,
+        "range_register": 4378
+    },
+    {
+        "name": "AIN190",
+        "value_register": 380,
+        "range_register": 4380
+    },
+    {
+        "name": "AIN191",
+        "value_register": 382,
+        "range_register": 4382
+    },
+    {
+        "name": "AIN192",
+        "value_register": 384,
+        "range_register": 4384
+    },
+    {
+        "name": "AIN193",
+        "value_register": 386,
+        "range_register": 4386
+    },
+    {
+        "name": "AIN194",
+        "value_register": 388,
+        "range_register": 4388
+    },
+    {
+        "name": "AIN195",
+        "value_register": 390,
+        "range_register": 4390
+    },
+    {
+        "name": "AIN196",
+        "value_register": 392,
+        "range_register": 4392
+    },
+    {
+        "name": "AIN197",
+        "value_register": 394,
+        "range_register": 4394
+    },
+    {
+        "name": "AIN198",
+        "value_register": 396,
+        "range_register": 4396
+    },
+    {
+        "name": "AIN199",
+        "value_register": 398,
+        "range_register": 4398
+    },
+    {
+        "name": "AIN200",
+        "value_register": 400,
+        "range_register": 4400
+    },
+    {
+        "name": "AIN201",
+        "value_register": 402,
+        "range_register": 4402
+    },
+    {
+        "name": "AIN202",
+        "value_register": 404,
+        "range_register": 4404
+    },
+    {
+        "name": "AIN203",
+        "value_register": 406,
+        "range_register": 4406
+    },
+    {
+        "name": "AIN204",
+        "value_register": 408,
+        "range_register": 4408
+    },
+    {
+        "name": "AIN205",
+        "value_register": 410,
+        "range_register": 4410
+    },
+    {
+        "name": "AIN206",
+        "value_register": 412,
+        "range_register": 4412
+    },
+    {
+        "name": "AIN207",
+        "value_register": 414,
+        "range_register": 4414
+    },
+    {
+        "name": "AIN208",
+        "value_register": 416,
+        "range_register": 4416
+    },
+    {
+        "name": "AIN209",
+        "value_register": 418,
+        "range_register": 4418
+    },
+    {
+        "name": "AIN210",
+        "value_register": 420,
+        "range_register": 4420
+    },
+    {
+        "name": "AIN211",
+        "value_register": 422,
+        "range_register": 4422
+    },
+    {
+        "name": "AIN212",
+        "value_register": 424,
+        "range_register": 4424
+    },
+    {
+        "name": "AIN213",
+        "value_register": 426,
+        "range_register": 4426
+    },
+    {
+        "name": "AIN214",
+        "value_register": 428,
+        "range_register": 4428
+    },
+    {
+        "name": "AIN215",
+        "value_register": 430,
+        "range_register": 4430
+    },
+    {
+        "name": "AIN216",
+        "value_register": 432,
+        "range_register": 4432
+    },
+    {
+        "name": "AIN217",
+        "value_register": 434,
+        "range_register": 4434
+    },
+    {
+        "name": "AIN218",
+        "value_register": 436,
+        "range_register": 4436
+    },
+    {
+        "name": "AIN219",
+        "value_register": 438,
+        "range_register": 4438
+    },
+    {
+        "name": "AIN220",
+        "value_register": 440,
+        "range_register": 4440
+    },
+    {
+        "name": "AIN221",
+        "value_register": 442,
+        "range_register": 4442
+    },
+    {
+        "name": "AIN222",
+        "value_register": 444,
+        "range_register": 4444
+    },
+    {
+        "name": "AIN223",
+        "value_register": 446,
+        "range_register": 4446
+    },
+    {
+        "name": "AIN224",
+        "value_register": 448,
+        "range_register": 4448
+    },
+    {
+        "name": "AIN225",
+        "value_register": 450,
+        "range_register": 4450
+    },
+    {
+        "name": "AIN226",
+        "value_register": 452,
+        "range_register": 4452
+    },
+    {
+        "name": "AIN227",
+        "value_register": 454,
+        "range_register": 4454
+    },
+    {
+        "name": "AIN228",
+        "value_register": 456,
+        "range_register": 4456
+    },
+    {
+        "name": "AIN229",
+        "value_register": 458,
+        "range_register": 4458
+    },
+    {
+        "name": "AIN230",
+        "value_register": 460,
+        "range_register": 4460
+    },
+    {
+        "name": "AIN231",
+        "value_register": 462,
+        "range_register": 4462
+    },
+    {
+        "name": "AIN232",
+        "value_register": 464,
+        "range_register": 4464
+    },
+    {
+        "name": "AIN233",
+        "value_register": 466,
+        "range_register": 4466
+    },
+    {
+        "name": "AIN234",
+        "value_register": 468,
+        "range_register": 4468
+    },
+    {
+        "name": "AIN235",
+        "value_register": 470,
+        "range_register": 4470
+    },
+    {
+        "name": "AIN236",
+        "value_register": 472,
+        "range_register": 4472
+    },
+    {
+        "name": "AIN237",
+        "value_register": 474,
+        "range_register": 4474
+    },
+    {
+        "name": "AIN238",
+        "value_register": 476,
+        "range_register": 4476
+    },
+    {
+        "name": "AIN239",
+        "value_register": 478,
+        "range_register": 4478
+    },
+    {
+        "name": "AIN240",
+        "value_register": 480,
+        "range_register": 4480
+    },
+    {
+        "name": "AIN241",
+        "value_register": 482,
+        "range_register": 4482
+    },
+    {
+        "name": "AIN242",
+        "value_register": 484,
+        "range_register": 4484
+    },
+    {
+        "name": "AIN243",
+        "value_register": 486,
+        "range_register": 4486
+    },
+    {
+        "name": "AIN244",
+        "value_register": 488,
+        "range_register": 4488
+    },
+    {
+        "name": "AIN245",
+        "value_register": 490,
+        "range_register": 4490
+    },
+    {
+        "name": "AIN246",
+        "value_register": 492,
+        "range_register": 4492
+    },
+    {
+        "name": "AIN247",
+        "value_register": 494,
+        "range_register": 4494
+    },
+    {
+        "name": "AIN248",
+        "value_register": 496,
+        "range_register": 4496
+    },
+    {
+        "name": "AIN249",
+        "value_register": 498,
+        "range_register": 4498
+    },
+    {
+        "name": "AIN250",
+        "value_register": 500,
+        "range_register": 4500
+    },
+    {
+        "name": "AIN251",
+        "value_register": 502,
+        "range_register": 4502
+    },
+    {
+        "name": "AIN252",
+        "value_register": 504,
+        "range_register": 4504
+    },
+    {
+        "name": "AIN253",
+        "value_register": 506,
+        "range_register": 4506
+    },
+    {
+        "name": "AIN254",
+        "value_register": 508,
+        "range_register": 4508
+    }
+]

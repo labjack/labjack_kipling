@@ -1,0 +1,9 @@
+{
+    "name": "network_settings",
+    "humanName": "Network Settings",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "third_party_code":[],
+    "supportedDevices": [{"type":"T7","subclass":["Pro",""],"minFW":"0.5"}],
+    "third_party_code_unload":[]
+}

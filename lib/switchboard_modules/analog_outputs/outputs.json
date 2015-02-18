@@ -1,0 +1,4 @@
+[
+    {"name": "DAC0", "register": 1000},
+    {"name": "DAC1", "register": 1002}
+]

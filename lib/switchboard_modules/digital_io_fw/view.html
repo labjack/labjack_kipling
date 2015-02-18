@@ -1,0 +1,93 @@
+<div id="advanced-dio-readout">
+	<div id="advanced-dio-measurement-obj">
+		<div id="configure-all-inputs-options" class="span12">
+			<h3>Configure All Digital I/O</h3>
+			<table class="table table-striped" id="All-device-config-options-table">
+				<thead>
+					<tr class="table-dataHeader">
+						<th>Direction</th>
+						<th>State</th>
+						{{#if custom.showEFSystemStatusWarning}}
+						<th>EF System Status</th>
+						{{/if}}
+					</tr>
+				</thead>
+				<tbody style="background-color:transparent">
+					<tr>
+						<td>
+							<select id="all-dio-direction-select" class="wrap-select" title="Set Register: DIO_DIRECTION">
+								{{#each custom.dioDirectionMenuOptionsAll}}
+								<option {{#if disp}}title="Set DIO_DIRECTION to {{value}}"{{/if}} value="{{value}}" style="{{style}}" {{selected}}>{{name}}</option>
+								{{/each}}
+							</select>
+						</td>
+						<td>
+							<select id="all-dio-state-select" class="wrap-select" title="Set Register: DIO_STATE">
+								{{#each custom.dioStateMenuOptionsAll}}
+								<option {{#if disp}}title="Set DIO_STATE to {{value}}"{{/if}} value="{{value}}" style="{{style}}" {{selected}}>{{name}}</option>
+								{{/each}}
+							</select>
+						</td>
+						{{#if custom.showEFSystemStatusWarning}}
+						<td>
+							<i id="DIO_EF_general-status-icon" class="displayed-icon text-warning icon-warning" title="A Digital Input/Output pin is configured for use by the DIO_EF system"></i>
+						</td>
+						{{/if}}
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div id="dio-data-section" class="span12">
+			<h3>Analog Inputs</h3>
+			<table class="table table-striped" id="device-selector-table">
+				<thead>
+					<tr class="table-dataHeader">
+						<th class="span2">Channel</th>
+						<th class="span2">Direction</th>
+						<th class="span2">State</th>
+						<th class="span1">Options</th>
+					</tr>
+				</thead>
+				<tbody>
+				{{#each custom.dio}}
+					<tr id="{{name}}-table-data" class="table-dataRow">
+						<td>
+							<p id="{{name}}-channel-name">{{name}}</p>
+						</td>
+						<td>
+							<span id="{{name}}{{bit}}-directions-select" class="wrap-select" title="Set Register: {{name}}-{{bit}}">
+								{{#each dioDirectionsMenuOptions}}
+								<option title="Set {{name}}{{bit}} to {{value}}" value="{{value}}" {{selected}}>{{name}}</option>
+								{{/each}}
+							</span>
+						</td>
+						<td>
+							<span id="{{name}}-options-toggle-button" class="displayed-icon options-toggle-button expand icon-plus"></span>
+							{{#if efSystemStatus.showWarning}}
+							<i id="{{name}}-ef-status-icon" class="displayed-icon text-warning icon-warning" title="{{name}} is configured for use by the DIO_EF system"></i>
+							{{/if}}
+						</td>
+					</tr>
+					<tr style="display:none"></tr>
+					<tr id="{{name}}-options-toggle-button-options" class="ain-config-options">
+						<td colspan="7">
+							<table class="table" id="device-config-options-table">
+								<thead>
+									<tr class="table-dataHeader">
+										<th>EF Status</th>
+									</tr>
+								</thead>
+								<tbody style="background-color:transparent">
+									<td title="Register: {{name}}_EF_INDEX">
+										<p class="{{efSystemStatus.class}}">{{efSystemStatus.message}}</p>
+									</td>
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				{{/each}}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,201 @@
+<div id="advanced-ain-readout">
+	<div id="advanced-ain-measurement-obj">
+		<div id="configure-all-inputs-options" class="span12">
+			<h3>Configure All Inputs</h3>
+			{{#each custom.analogInputsDict}}
+				<p>{{name}}</p>
+				<p>Dict:</p>
+				<ul>
+					{{#eachDict optionsDict}}
+					<li>{{menuTitle}}</li>
+					<li>{{testObj.test}}</li>
+					{{#each testArr}}
+						<li>{{test}}</li>
+					{{/each}}
+
+					{{/eachDict}}
+				</ul>
+			{{/each}}
+			<table class="table table-non-striped ainConfigTable" id="All-device-config-options-table">
+				<thead>
+					<tr class="table-dataHeader">
+						{{#eachDict custom.configRegistersDict}}
+							<th class="{{cssClass}}-header">{{name}}</th>
+						{{/eachDict}}
+						{{!--<th>Range</th>
+						<th>Resolution Index</th>
+						<th>Settling</th>
+						<th>Negative Channel</th>
+						<th>EF Status</th>--}}
+						{{!--<th>Options</th>--}}
+						<th></th>
+					</tr>
+				</thead>
+				<tbody style="background-color:transparent">
+					<tr>
+						{{#eachDict custom.configRegistersDict}}
+						<td>
+							<div id="{{reg}}-SELECT" class="btn-group ainConfigReg {{cssClass}}">
+								<a style="font-size:12px;" class="btn dropdown-toggle {{cssClass}}-LINK" data-toggle="dropdown"title="Set Register: {{reg}}"><span class="currentValue" title="{{reg}} is set to {{curVal}}">{{curStr}}</span><span class="caret"></span>
+								</a>
+								<ul class="dropdown-menu">
+									{{#each menuOptions}}
+									<li>
+										<a style="font-size:12px;" class="menuOption" title="Set {{../reg}} to {{value}}" value="{{value}}">{{name}}</a>
+									</li>
+									{{/each}}
+								</ul>
+							</div>
+						</td>
+						{{/eachDict}}
+					</tr>
+					<tr style="display:none"></tr>
+					<tr id="module-options-toggle-button-options" class="ain-config-options">
+						<td colspan="7">
+							<table class="table" id="device-config-options-table">
+								<thead>
+									<tr class="table-dataHeader">
+										<th>Override Graph Bounds</th>
+										<th>Lower Bound</th>
+										<th>Upper Bound</th>
+									</tr>
+								</thead>
+								<tbody style="background-color:transparent">
+									<tr>
+										<td title="Configure Graph Min & Max Ranges">
+											<select id="module-options-range-override" class="wrap-select">
+												<option title="Use Default Ranges" value="0" selected>Default</option>
+												<option title="Use Custom Ranges" value="1">Custom</option>
+											</select>
+											{{!--<input type="checkbox" id="Graph-Range-Options0" value="option1">
+											<select id="module-options-range-override" class="wrap-select">
+												{{#each custom.graphRangeOverrideMenuOptions}}
+												<option title="{{optionDesc}}" value="{{value}}" {{selected}}>{{name}}</option>
+												{{/each}}
+											</select>--}}
+										</td>
+										<td title="Configure Graph Min Ranges">
+											<input type="number" id="Graph-Range-Options1" value="-10">
+										</td>
+										<td title="Configure Graph Max Ranges">
+											<input type="number" id="Graph-Range-Options2" value="10">
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div id="ain-inputs-data-section" class="span12" style="float:none;">
+			<h3>Analog Inputs</h3>
+			<table class="table table-striped" id="device-selector-table">
+				<thead>
+					<tr class="table-dataHeader">
+						<th class="span2"></th>
+						<th class="span9"></th>
+						<th class="span1">Options</th>
+					</tr>
+				</thead>
+				<tbody>
+				{{#eachDict custom.analogInputsDict}}
+					<tr id="{{name}}-table-data" class="table-dataRow">
+						<td>
+							<ul id="{{name}}-original-channel-names" class="channelNamesList">
+								<li id="{{name}}-channel-name">{{name}}</li>
+							</ul>
+							<ul id="{{name}}-original-channel-names" class="efTypeName channelNamesList">
+								<li><span class=" icon-arrow-2"></span></li>
+							</ul>
+						</td>
+						<td>
+							<table style="width: 100%;margin-bottom: -14px;" id="output-data-table" class="table table-non-striped">
+								<tbody style="background-color:transparent">
+									<tr>
+										<td class="result-text" style="font-size:13px;">
+											<p class="result-value" title="Register: {{name}}"><span id="{{name}}">0.000000</span> V</p>
+										</td>
+										<td class="graphRange">
+											<div class="ain-range-text-left" title="{{rangeStr}}">-<span class="ain-range-val" id="{{name}}-min-range-val">{{rangeVal}}</span>V</div>
+										</td>
+										<td class="graphSlider">
+											<div>
+												<svg class="analog-input-graph" id="{{name}}-graph"></svg>
+											</div>
+										</td>
+										<td class="graphRange">
+											<div class="ain-range-text-right" title="{{rangeStr}}">+<span class="ain-range-val" id="{{name}}-max-range-val">{{rangeVal}}</span>V</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+							<table  style="width: 100%;margin-top: 14px;margin-bottom: -14px;" id="output-data-table" class="table table-non-striped">
+								<tbody id="{{name}}-ef-readings" class="efPrimaryReading">
+									<tr class="primary-ef-readings">
+										<td class="result-text" style="font-size:13px;">
+											<p class="result-value" title="Register: "><span id="">0.000000</span> V</p>
+										</td>
+										<td class="graphRange"></td>
+										<td class="graphSlider"></td>
+										<td class="graphRange"></td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+						<td>
+							<span id="{{name}}-options-toggle-button" class="displayed-icon options-toggle-button expand icon-plus" title="Show Options"></span>
+							{{#if efSystemStatus.showWarning}}
+							<i id="{{name}}-ef-status-icon" class="displayed-icon text-warning icon-warning" title="{{name}} is configured for use by the AIN_EF system"></i>
+							{{/if}}
+						</td>
+					</tr>
+					<tr style="display:none"></tr>
+					<tr id="{{name}}-options-toggle-button-options" class="ain-config-options">
+						<td colspan="7">
+							<table class="optionsConfigTable table-non-striped ainConfigTable" id="{{name}}-device-config-options-table">
+								<thead>
+									<tr class="table-dataHeader">
+										{{#eachDict optionsDict}}
+											<th class="{{cssClass}}-header">{{menuTitle}}</th>
+										{{/eachDict}}
+									</tr>
+								</thead>
+								<tbody style="background-color:transparent">
+									<tr style="background-color:transparent">
+									{{#eachDict optionsDict}}
+										<td style="background-color:transparent">
+											<div id="{{reg}}-SELECT" class="btn-group ainConfigReg">
+												<a style="font-size:12px;"class="btn dropdown-toggle {{cssClass}}-LINK" data-toggle="dropdown"title="Set Register: {{reg}}"><span class="currentValue" title="{{reg}} is set to {{curVal}}">{{curStr}}</span><span class="caret"></span>
+												</a>
+												<ul class="dropdown-menu">
+													{{#each menuOptions}}
+													<li>
+														<a style="font-size:12px;" class="menuOption" title="Set {{../reg}} to {{value}}" value="{{value}}">{{name}}</a>
+													</li>
+													{{/each}}
+												</ul>
+											</div>
+										</td>
+									{{/eachDict}}
+									</tr>
+								</tbody>
+							</table>
+							<div id="{{name}}-ainEFExtendedInfo" class="ainEFExtendedInfo">
+								<ul id="{{name}}-ainEFConfigs" class="efExtendedInfo ainEFConfigs">
+									<li>HERE-A</li>
+								</ul>
+								<ul id="{{name}}-ainEFSecondaryReadRegisters" class="efExtendedInfo ainEFSecondaryReadRegisters">
+									<li>HERE-B</li>
+								</ul>
+							</div>
+							<hr>
+						</td>
+					</tr>
+				{{/eachDict}}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div style="height: 1px;"></div>
+</div>

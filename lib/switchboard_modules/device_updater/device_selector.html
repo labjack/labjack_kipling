@@ -1,0 +1,45 @@
+<table id="device-selector" class="table table-striped">
+    {{!--{{#hasMultipleDevices}}--}}
+    <thead>
+        <tr>
+            {{#hasMultipleDevices}}<th>update</th>{{/hasMultipleDevices}}
+            <th>device type</th>
+            <th>serial number</th>
+            <th>name</th>
+            <th>firmware version</th>
+            <th>bootloader version</th>
+            <th>wifi version<th>
+        </tr>
+    </thead>
+    {{#devices}}
+    <tr>
+        {{#../hasMultipleDevices}}
+            <td>
+                <label class="checkbox">
+                <input class="device-selection-checkbox" id="{{getSerial}}-selector" type="checkbox" value="{{getSerial}}" checked>
+                    <span class="metro-checkbox"></span>
+                </label>
+            </td>
+        {{/../hasMultipleDevices}}
+        <td>{{getDeviceType}} {{getSubclass}}</td>
+        <td>{{getSerial}}</td>
+        <td>{{getName}}</td>
+        <td id="{{getSerial}}-firmware-display">{{getFirmwareVersion}}</td>
+        <td>{{getBootloaderVersion}}</td>
+        <td>{{#if getSubclass }}{{getWifiFirmwareVersion}}{{/if}}</td>
+    </tr>
+    {{/devices}}
+    {{!--{{/hasMultipleDevices}}--}}
+    {{!--{{^hasMultipleDevices}}
+    {{#devices}}
+    <div id="cur-version-info">
+        <h3>Current Device Information</h3>
+        <div>Firmware version: <span id="{{getSerial}}-firmware-display">{{getFirmwareVersion}}</span></div>
+        <div>Bootloader version: {{getBootloaderVersion}}</div>
+        {{#if getSubclass }}
+        <div>WiFi version: {{getWifiFirmwareVersion}}</div>
+        {{/if}}
+    </div>
+    {{/devices}}
+    {{/hasMultipleDevices}}--}}
+</table>

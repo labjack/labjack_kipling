@@ -1,0 +1,9 @@
+.selector-holder
+{
+    padding: 5px;
+}
+
+.selector-holder:nth-child(odd)
+{
+    background-color: #E0E0E0;
+}

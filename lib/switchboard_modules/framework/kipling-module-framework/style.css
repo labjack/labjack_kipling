@@ -1,0 +1,98 @@
+#single-device-framework-obj {
+    width:100%;
+}
+#single-device-framework-obj #device-selector
+{
+    /*max-height: 150px;
+    overflow: auto;*/
+    font-size: 16px;
+    padding: 0px;
+}
+#single-device-framework-obj #device-selector th p {
+    margin:0px;
+}
+
+.subsection
+{
+    margin: 50px 0 50px 0;
+}
+
+.subsection .controls
+{
+    margin-top: 10px;
+}
+
+.centered-right
+{
+    padding: 15px 10px 0 0;
+    text-align: right;
+}
+.centered-left
+{
+    padding: 15px 10px 0 0;
+    text-align: left;
+}
+
+.input-row:nth-child(odd)
+{
+    background: #F0F0F0;
+}
+
+.input-display
+{
+    margin-top: 12px;
+}
+
+.input-bar
+{
+    background-color: black;
+    height: 3px;
+    width: 3px;
+}
+
+.dropdown-span
+{
+    padding-left: 0px;
+    text-align: left;
+}
+
+.caret
+{
+    margin-top: 3px !important;
+}
+.table-dataHeader th {
+    text-transform: none;
+}
+.table-dataRow th {
+    color:black;
+    text-transform: none;
+}
+.table th, .table td {
+    padding:2px;
+}
+.options-toggle-button {
+    cursor:pointer;
+}
+.options-toggle-button:hover {
+    color:grey;
+}
+.wrap-select {
+    width: inherit;
+    margin-bottom: 0px;
+} 
+.table-non-striped td {
+    background-color: transparent;
+}
+#single-device-framework-obj #device-selector-table td p {
+    font-size:14px;
+}
+#single-device-framework-obj #device-selector-table td {
+    line-height: 15px;
+}
+#single-device-framework-obj .device-selector-table-device-type p {
+    margin-bottom: 0px;
+    line-height: 20px;
+}
+#single-device-framework-obj #device-selector-table label .radio{
+    margin-top: -2px;
+}

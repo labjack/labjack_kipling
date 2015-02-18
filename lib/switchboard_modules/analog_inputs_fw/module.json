@@ -1,0 +1,7 @@
+{
+    "name": "analog_inputs_fw",
+    "humanName": "Analog Inputs",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "supportedDevices": [{"type":"T7","minFW":"0.5"}]
+}
