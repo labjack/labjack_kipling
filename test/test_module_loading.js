@@ -4,6 +4,7 @@ var module_manager = require('../lib/ljswitchboard-module_manager');
 
 var moduleNames = [];
 var savedModules = {};
+var loadTimes = {};
 
 var checkLoadedFiles = function(test, fileObj) {
 	var fileObjkeys = Object.keys(fileObj);
@@ -12,6 +13,11 @@ var checkLoadedFiles = function(test, fileObj) {
 };
 var FRAMEWORK_ADDITIONS = {
 	'singleDevice': {
+		'css': {
+			'prepend': [
+				'style.css',
+			],
+		},
 		'js': {
 			'prepend': [
 				'device_constants.js',
@@ -71,14 +77,31 @@ var checkLoadedModuleData = function(test, moduleData) {
 		'css': function(cssFiles) {
 			var isValid = Array.isArray(cssFiles);
 			test.ok(isValid,'cssFiles should be an array');
-			var foundCoreCSSFile = false;
+			var loadedCSSFiles = [];
+			var loadedEmptyFile = false;
 			cssFiles.forEach(function(cssFile) {
 				checkLoadedFiles(test, cssFile);
-				if(cssFile.fileName === 'style.css') {
-					foundCoreCSSFile = true;
+				loadedCSSFiles.push(cssFile.fileName);
+				if(cssFile.fileData.length === 0) {
+					loadedEmptyFile = true;
 				}
 			});
-			test.ok(foundCoreCSSFile, 'did not find style.css file');
+
+			var requiredCSSFiles = [
+				'style.css'
+			];
+			if(moduleData.data.framework) {
+				requiredCSSFiles = addFrameworkFiles(
+					'css',
+					moduleData.data.framework,
+					requiredCSSFiles
+				);
+			}
+
+			if(unfinishedModules.indexOf(moduleData.name) < 0) {
+				test.ok(!loadedEmptyFile, 'a loaded file was empty');
+			}
+			test.deepEqual(loadedCSSFiles, requiredCSSFiles, 'all js files not loaded: ' + moduleData.name);
 		},
 		'js': function(jsFiles) {
 			var isValid = Array.isArray(jsFiles);
@@ -206,30 +229,76 @@ var tests = {
 			test.done();
 		});
 	},
-	// 'loadAllModulesByName': function(test) {
-	// 	var promises = [];
-	// 	var loadModule = function(moduleName) {
-	// 		var defered = q.defer();
-	// 		module_manager.loadModuleDataByName(moduleName)
-	// 		.then(function(moduleData) {
-	// 			checkLoadedModuleData(test, moduleData);
-	// 			defered.resolve();
-	// 		});
-	// 		return defered.promise;
-	// 	};
-	// 	moduleNames.forEach(function(moduleName) {
-	// 		promises.push(loadModule(moduleName));
-	// 	});
+	'loadAllModulesByName': function(test) {
+		loadTimes.byName = {
+			'start': new Date(),
+			'end': null,
+			'duration': null
+		};
+		var promises = [];
+		var loadModule = function(moduleName) {
+			var defered = q.defer();
+			module_manager.loadModuleDataByName(moduleName)
+			.then(function(moduleData) {
+				checkLoadedModuleData(test, moduleData);
+				defered.resolve();
+			});
+			return defered.promise;
+		};
+		moduleNames.forEach(function(moduleName) {
+			promises.push(loadModule(moduleName));
+		});
 
-	// 	q.allSettled(promises)
-	// 	.then(function(collectedData) {
-	// 		test.ok(true, 'test finished');
-	// 		test.done();
-	// 	}, function(err) {
-	// 		test.ok(false, 'test failed');
-	// 		test.done();
-	// 	});
-	// }
+		q.allSettled(promises)
+		.then(function(collectedData) {
+			test.ok(true, 'test finished');
+			loadTimes.byName.end = new Date();
+			loadTimes.byName.duration = loadTimes.byName.end - loadTimes.byName.start;
+			test.done();
+		}, function(err) {
+			test.ok(false, 'test failed');
+			test.done();
+		});
+	},
+	'loadAllModulesByObject': function(test) {
+		loadTimes.byObject = {
+			'start': new Date(),
+			'end': null,
+			'duration': null
+		};
+		var promises = [];
+		var loadModule = function(moduleObj) {
+			var defered = q.defer();
+			module_manager.loadModuleData(moduleObj)
+			.then(function(moduleData) {
+				checkLoadedModuleData(test, moduleData);
+				defered.resolve();
+			});
+			return defered.promise;
+		};
+		var moduleKeys = Object.keys(savedModules);
+		moduleKeys.forEach(function(moduleKey) {
+			promises.push(loadModule(savedModules[moduleKey]));
+		});
+
+		q.allSettled(promises)
+		.then(function(collectedData) {
+			test.ok(true, 'test finished');
+			loadTimes.byObject.end = new Date();
+			loadTimes.byObject.duration = loadTimes.byObject.end - loadTimes.byObject.start;
+			test.done();
+		}, function(err) {
+			test.ok(false, 'test failed');
+			test.done();
+		});
+	},
+	'check cached files': function(test) {
+		var cachedFiles = module_manager.getFileCache();
+		var cachedFileKeys = Object.keys(cachedFiles);
+		console.log('Number of cached files', cachedFileKeys.length);
+		console.log(JSON.stringify(loadTimes, null, 2));
+		test.done();
+	}
 };
 
 exports.tests = tests;
