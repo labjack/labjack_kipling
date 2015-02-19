@@ -6,9 +6,12 @@ var moduleNames = [];
 var savedModules = {};
 var loadTimes = {};
 
+var loadedFiles = {};
+
 var checkLoadedFiles = function(test, fileObj) {
 	var fileObjkeys = Object.keys(fileObj);
-	var expectedKeys = ['fileName', 'filePath', 'fileData'];
+	var expectedKeys = ['fileName', 'filePath', 'fileData', 'lintResult'];
+	loadedFiles[fileObj.filePath] = fileObj;
 	test.deepEqual(fileObjkeys, expectedKeys, 'invalid cssFile keys');
 };
 var FRAMEWORK_ADDITIONS = {
@@ -196,6 +199,23 @@ var checkLoadedModuleData = function(test, moduleData) {
 	});
 	// console.log('loaded data keys', moduleDataKeys);
 };
+
+var printLintError = function(lintResult) {
+	console.log(
+		'Num:', lintResult.messages.length,
+		'Error:', lintResult.isError,
+		'Warning:', lintResult.isWarning
+	);
+	lintResult.messages.forEach(function(message, i) {
+		var str = i.toString() + '. ';
+		str += '(' + message.type +'): ' + message.message + '\r\n   ';
+		str += '(line: '+message.location.line+', char: ';
+		str += message.location.character+'): ';
+		str += message.evidence;
+		console.log(str);
+	});
+};
+
 var tests = {
 	'getModuleNames': function(test) {
 		module_manager.getModulesList()
@@ -223,8 +243,11 @@ var tests = {
 	},
 	'loadModuleDataByName': function(test) {
 		// console.log('Modules...', moduleNames);
-		module_manager.loadModuleDataByName(moduleNames[2])
+		var startTime = new Date();
+		module_manager.loadModuleDataByName('reset')
 		.then(function(moduleData) {
+			var endTime = new Date();
+			console.log('loadModule duration', endTime - startTime);
 			checkLoadedModuleData(test, moduleData);
 			test.done();
 		});
@@ -297,6 +320,45 @@ var tests = {
 		var cachedFileKeys = Object.keys(cachedFiles);
 		console.log('Number of cached files', cachedFileKeys.length);
 		console.log(JSON.stringify(loadTimes, null, 2));
+		test.done();
+	},
+	'check for lint errors': function(test) {
+		var loadedFileKeys = Object.keys(loadedFiles);
+		console.log('');
+		console.log('Num Checked Files', loadedFileKeys.length);
+		console.log('');
+		var numLintedFiles = 0;
+		var warnings = [];
+		var errors = [];
+		loadedFileKeys.forEach(function(loadedFileKey) {
+			var loadedFile = loadedFiles[loadedFileKey];
+			if(loadedFile.lintResult) {
+				numLintedFiles += 1;
+				if(loadedFile.lintResult.isWarning) {
+					warnings.push(loadedFile);
+				}
+				if(loadedFile.lintResult.isError) {
+					errors.push(loadedFile);
+				}
+
+				if(!loadedFile.lintResult.overallResult) {
+					console.log(
+						'-------------------',
+						'Lint Error Detected: ' + loadedFile.fileName,
+						'-------------------'
+					);
+					console.log(loadedFile.fileName);
+					console.log(loadedFile.filePath);
+					printLintError(loadedFile.lintResult);
+					console.log('');
+				}
+			}
+		});
+
+		console.log('Number of linted files', numLintedFiles);
+		console.log('Number of warnings', warnings.length);
+		console.log('Number of errors', errors.length);
+
 		test.done();
 	}
 };

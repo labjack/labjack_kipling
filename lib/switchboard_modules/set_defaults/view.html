@@ -62,20 +62,20 @@
                 <label class="radio">
                     <input type="radio" name="source" value="current" checked>
                     <span class="metro-radio">Current Device Settings</span>
-                    <div class="option-description">
+                    <p class="option-description">
                         Take a snapshot of the settings the device has right now
                         and use that snapshot of settings after the device is
                         rebooted.
-                    </div>
+                    </p>
                 </label>
             </div>
             <div>
                 <label class="radio">
                     <input type="radio" name="source" value="factory">
                     <span class="metro-radio">Factory Defaults</span>
-                    <div class="option-description">
+                    <p class="option-description">
                         Configure the device to use the factory settings after the device is rebooted.
-                    </div>
+                    </p>
                 </label>
             </div>
         </div>
@@ -85,7 +85,7 @@
             <div class="saving-notice" id="saving-indicator">Saving...</div>
             <div class="saving-notice" id="saved-indicator">Saved.</div>
             <div class="flash-notice" id="flash-read-notice">
-                <div><img src="static/img/progress-indeterminate-ring-light.gif"></div>
+                <div><img src="static/img/progress-indeterminate-ring-light.gif" alt="Loading"></div>
                 <div>
                     Whoops! This will just take a minute. Device flash memory is not ready (code 2358). This likely means that the WiFi / Ethernet module is initializing. Please wait...
                 </div>
