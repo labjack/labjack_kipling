@@ -36,7 +36,7 @@
                 // custom jquery ui stuff
                 'libs/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js',
             ];
-            loadResources(resourceList);
+            loadCoreResources(resourceList);
 
             // Resources located in the local directory
             var localResourceList = [
@@ -44,7 +44,12 @@
                 'css/module_chrome.css',
 
                 // JS for loading & manipulating the module_chrome
+                // Creates a window-wide element "MODULE_CHROME"
                 'js/module_chrome.js',
+
+                // JS for loading & manipulating modules
+                // Creates a window-wide element "MODULE_LOADER"
+                'js/module_loader.js',
             ];
             loadLocalResources(localResourceList);
             

@@ -11,9 +11,13 @@ var gns = package_loader.getNameSpace();
 var window_manager = require('ljswitchboard-window_manager');
 var startDir = global[gns].info.startDir;
 
+/*
+	Function called to load the application's core resources.
+	The resources are loaded from the ljswitchboard-static_files/static
+	directory.
+*/
 var coreResourcesLoaded = false;
-var localResourcesLoaded = false;
-var loadResources = function(resources) {
+var loadCoreResources = function(resources) {
 	global[gns].static_files.loadResources(document, resources)
 	.then(function(res) {
 		coreResourcesLoaded = true;
@@ -21,6 +25,13 @@ var loadResources = function(resources) {
 		console.error('Error Loading resources', err);
 	});
 };
+
+/*
+	Function called to load the application's local resources.
+	The resources are loaded starting from the directory of the 
+	index.html/index.js file aka the cwd of the window.
+*/
+var localResourcesLoaded = false;
 var loadLocalResources = function(resources) {
 	global[gns].static_files.loadResources(document, resources, true)
 	.then(function(res) {
@@ -30,9 +41,18 @@ var loadLocalResources = function(resources) {
 	});
 };
 
-// setInterval(function(){
-//	console.log(process.uptime());
-// }, 2000);
+var loadResources = function(resources, isLocal) {
+	var defered = q.defer();
+	global[gns].static_files.loadResources(document, resources, isLocal)
+	.then(function(res) {
+		defered.resolve();
+	}, function(err) {
+		console.error('Error Loading resources', err);
+		defered.reject(err);
+	});
+	return defered.promise;
+};
+
 
 var startIOManager = function(){
 	var defered = q.defer();
@@ -60,10 +80,16 @@ var startCoreApp = function() {
 		win.showDevTools();
 		// Start the application
 		global[gns].splash_screen.update('Starting IO Manager');
+
+		// Start the  IO Manager
 		startIOManager()
+
+		// Render the module chrome window
 		.then(MODULE_CHROME.loadModuleChrome)
+
+		// Hide the splash screen & core windows & display the kipling window
 		.then(showKiplingWindow);
-		// .then(loadCorePackages);
+		
 	} else {
 		numLoadDelay += 1;
 		if(numLoadDelay > 5) {
@@ -76,6 +102,13 @@ var startCoreApp = function() {
 	}
 };
 
+/*
+	When the window finishes loading start the core application.
+
+	The application is started in a timeout-loop because some of the resources
+	are asynchronously loaded upon start.  The application attempts to start
+	every 10ms until those resources are loaded.
+*/
 window.onload = function(e) {
 	setTimeout(startCoreApp, 10);
 };

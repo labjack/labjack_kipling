@@ -27,12 +27,11 @@
   "bugs": {
     "url": "https://github.com/chrisJohn404/ljswitchboard-kipling/issues"
   },
-  "dependencies": {
-    "async": "~0",
-    "q": "~1"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "nodeunit": "0.9.x"
+    "nodeunit": "0.9.x",
+    "q": "~1",
+    "csslint": "0.10.0"
   },
   "directories": {
     "lib": "./lib"

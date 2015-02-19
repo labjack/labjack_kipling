@@ -7,28 +7,37 @@
           <div id="error-display"></div>
         </div>
     </div>
-    <div id="module-chrome-tab-holder" class="module-chrome-tabs module-chrome-tab fullPage">
+    <div id="module-chrome-tab-holder" class="module-chrome-tabs fullPage">
         <div class="fullPage">
             <div id="system-navigation" class="unselectable fullPage">
                 <div id="header-modules" class="module-tab-holder module-chrome-header-tabs">
-                    <ul class="module-chrome-header-tab-list module-list">
-                        {{#header_modules}}
-                        <li class="header-tab"><a id="{{name}}" class="module-chrome-tab" href="#">{{humanName}}</a></li>
-                        {{/header_modules}}
+                    <ul id="header_tabs" class="module-chrome-header-tab-list module-list">
+                        {{!--
+                            Logic moved to module_tab.html template.
+                            {{#header_modules}}
+                            <li class="header-tab"><span id="{{name}}" class="module-chrome-tab">{{humanName}}</span></li>
+                            {{/header_modules}}
+                        --}}
                     </ul>
                 </div>
                 <div id="body-modules" class="module-tab-holder module-chrome-body-tabs">
-                    <ul class="module-chrome-body-tab-list module-list">
-                        {{#modules}}
-                        <li class="body-tab"><a id="{{name}}" class="module-chrome-tab" href="#">{{humanName}}</a></li>
-                        {{/modules}}
+                    <ul id="body_tabs" class="module-chrome-body-tab-list module-list">
+                        {{!--
+                            Logic moved to module_tab.html template.
+                            {{#modules}}
+                            <li class="body-tab"><span id="{{name}}" class="module-chrome-tab">{{humanName}}</span></li>
+                            {{/modules}}
+                        --}}
                     </ul>
                 </div>
                 <div id="footer-modules" class="module-tab-holder module-chrome-footer-tabs">
-                    <ul class="module-chrome-footer-tab-list module-list">
-                        {{#footer_modules}}
-                        <li class="footer-tab"><a id="{{name}}" class="module-chrome-tab" href="#">{{humanName}}</a></li>
-                        {{/footer_modules}}
+                    <ul id="footer_tabs" class="module-chrome-footer-tab-list module-list">
+                        {{!--
+                            Logic moved to module_tab.html template.
+                            {{#footer_modules}}
+                            <li class="footer-tab"><span id="{{name}}" class="module-chrome-tab">{{humanName}}</span></li>
+                            {{/footer_modules}}
+                        --}}
                     </ul>
                 </div>
             </div>
@@ -38,28 +47,32 @@
         <div id="module-chrome-block" class="fullPage">
             <div id="module-chrome-contents-holder" class="fullPage">
                 <div id="module-chrome-contents" class="fullPage unselectable">
-                    <div id="test_module">
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
-                        <p>Text...</p>
+                    <div id="module-chrome-loaded-module-css"></div>
+                    <div id="module-chrome-loaded-module-js"></div>
+                    <div id="module-chrome-loaded-module-view">
+                        <div id="test_module">
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                            <p>Text...</p>
+                        </div>
                     </div>
                 </div>
             </div>

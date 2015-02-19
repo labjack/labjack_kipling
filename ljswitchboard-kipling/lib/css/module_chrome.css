@@ -3,9 +3,9 @@
 
 .module-chrome-tabs {
     float:left;
+    width:150px;
 }
 .module-chrome-tab {
-    width:150px;
 }
 .module-tab-holder {
     width:150px;
