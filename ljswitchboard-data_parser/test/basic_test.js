@@ -1,5 +1,7 @@
 
 var data_parser = require('../lib/data_parser');
+var modbus_map = require('ljswitchboard-modbus_map');
+var constants = modbus_map.getConstants();
 
 
 exports.tests = {
@@ -113,6 +115,7 @@ exports.tests = {
 		test.done();
 	},
 	'check undefined register': function(test) {
+		// Make sure that no parsers get run but some basic information is added
 		var cmds = [
 			{'reg': 'DAC0', 'val': 2.123},
 			{'reg': 1000, 'val': 2.123},
@@ -122,8 +125,17 @@ exports.tests = {
 		var results = cmds.map(function(cmd) {
 			return data_parser.parseResult(cmd.reg, cmd.val);
 		});
+		var reqResults = cmds.map(function(cmd) {
+			return {
+				'register': cmd.reg,
+				'name': constants.getAddressInfo(cmd.reg).data.name,
+				'address': constants.getAddressInfo(cmd.reg).data.address,
+				'res': cmd.val
+			};
+		});
 
-		console.log('Results', results);
+		// console.log('Results', results);
+		test.deepEqual(results, reqResults);
 		test.done();
 	}
 };
