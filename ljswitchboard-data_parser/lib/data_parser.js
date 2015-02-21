@@ -15,7 +15,9 @@ var parseResult = function(address, result, deviceType) {
 	var regInfo = constants.getAddressInfo(address);
 	var regName = regInfo.data.name;
 	var retData = {
-		'address': regName,
+		'register': address,
+		'name': regName,
+		'address': regInfo.data.address,
 		'res': result,
 	};
 	var parsedData;

@@ -26,24 +26,30 @@ exports.tests = {
 		test.done();
 	},
 	'check IP registers - decode': function(test) {
-		var results = [
-			data_parser.parseResult('WIFI_IP', 0),
-			data_parser.parseResult('WIFI_IP', 1),
-			data_parser.parseResult('WIFI_IP', 256),
-			data_parser.parseResult('WIFI_IP', 65536),
-			data_parser.parseResult('WIFI_IP', 16777216),
-			data_parser.parseResult('WIFI_IP', 3232235983),
-			data_parser.parseResult('WIFI_IP', 4294967295),
+		var testVals = [
+			{'val': 0, 'ip': '0.0.0.0'},
+			{'val': 0, 'ip': '0.0.0.0'},
+			{'val': 1, 'ip': '0.0.0.1'},
+			{'val': 256, 'ip': '0.0.1.0'},
+			{'val': 65536, 'ip': '0.1.0.0'},
+			{'val': 16777216, 'ip': '1.0.0.0'},
+			{'val': 3232235983, 'ip': '192.168.1.207'},
+			{'val': 4294967295, 'ip': '255.255.255.255'},
 		];
-		var reqResults = [
-			{'address': 'WIFI_IP', 'res': 0, 'str': '0.0.0.0'},
-			{'address': 'WIFI_IP', 'res': 1, 'str': '0.0.0.1'},
-			{'address': 'WIFI_IP', 'res': 256, 'str': '0.0.1.0'},
-			{'address': 'WIFI_IP', 'res': 65536, 'str': '0.1.0.0'},
-			{'address': 'WIFI_IP', 'res': 16777216, 'str': '1.0.0.0'},
-			{'address': 'WIFI_IP', 'res': 3232235983, 'str': '192.168.1.207'},
-			{'address': 'WIFI_IP', 'res': 4294967295, 'str': '255.255.255.255'},
-		];
+
+		var results = [];
+		var reqResults = [];
+
+		testVals.forEach(function(testVal) {
+			results.push(data_parser.parseResult('WIFI_IP', testVal.val));
+			reqResults.push({
+				'register': 'WIFI_IP',
+				'name': 'WIFI_IP',
+				'address': 49200,
+				'res': testVal.val,
+				'str': testVal.ip
+			});
+		});
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
@@ -75,7 +81,13 @@ exports.tests = {
 		});
 
 		var reqResults = vals.map(function(val) {
-			return {'address': 'WIFI_STATUS', 'res': parseInt(val,10), 'str': wifiData[val]};
+			return {
+				'register': 'WIFI_STATUS',
+				'name': 'WIFI_STATUS',
+				'address': 49450,
+				'res': parseInt(val,10),
+				'str': wifiData[val]
+			};
 		});
 		test.deepEqual(results, reqResults);
 
@@ -98,6 +110,20 @@ exports.tests = {
 		test.done();
 	},
 	'check POWER_ registers for text output': function(test) {
+		test.done();
+	},
+	'check undefined register': function(test) {
+		var cmds = [
+			{'reg': 'DAC0', 'val': 2.123},
+			{'reg': 1000, 'val': 2.123},
+		];
+
+
+		var results = cmds.map(function(cmd) {
+			return data_parser.parseResult(cmd.reg, cmd.val);
+		});
+
+		console.log('Results', results);
 		test.done();
 	}
 };
