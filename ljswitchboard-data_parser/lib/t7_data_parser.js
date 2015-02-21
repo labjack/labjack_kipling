@@ -101,7 +101,7 @@ var T7_LIST = {
 				var subclass = '';
 				var isPro = false;
 				var productType = 'T7';
-				if(highResADC && wifi && rtc) {
+				if(highResADC || wifi || rtc) {
 					subclass = '-Pro';
 					isPro = true;
 					productType += subclass;

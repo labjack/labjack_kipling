@@ -119,6 +119,7 @@ exports.tests = {
 		var cmds = [
 			{'reg': 'DAC0', 'val': 2.123},
 			{'reg': 1000, 'val': 2.123},
+			{'reg': 'DEVICE_NAME_DEFAULT', 'val': 'MY TEST STRING'},
 		];
 
 
