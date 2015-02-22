@@ -196,6 +196,7 @@ exports.tests = {
 		var vals = [
 			{'reg': 'FIRMWARE_VERSION', 'val': 1.01234567, 'res': 1.0123},
 			{'reg': 'BOOTLOADER_VERSION', 'val': 1.01234567, 'res': 1.0123},
+			{'reg': 'WIFI_VERSION', 'val': 1.01234567, 'res': 1.0123},
 		];
 		var results = [];
 		var reqResults = [];

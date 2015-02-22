@@ -139,6 +139,9 @@ var T7_LIST = {
 	'BOOTLOADER_VERSION': {
 		'decode': firmwareVersionRounder,
 	},
+	'WIFI_VERSION': {
+		'decode': firmwareVersionRounder,
+	},
 	'HARDWARE_INSTALLED': {
 		'decode': function(res) {
 				// Deconstruct the HARDWARE_INSTALLED bitmask
