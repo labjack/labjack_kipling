@@ -124,7 +124,10 @@ var T7_LIST = {
 	},
 	'FIRMWARE_VERSION': {
 		'decode': function(res) {
-			return parseFloat(res.toFixed(4));
+			return {
+				'val': parseFloat(res.toFixed(4)),
+				'str': res.toFixed(4)
+			};
 		}
 	},
 	'HARDWARE_INSTALLED': {

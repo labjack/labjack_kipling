@@ -148,6 +148,29 @@ exports.tests = {
 		// console.log('Results', results);
 		test.done();
 	},
+	'check FIRMWARE_VERSION': function(test) {
+		var vals = [
+			{'val': 1.01234567, 'res': 1.0123},
+		];
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			var reg = 'FIRMWARE_VERSION';
+			results.push(data_parser.parseResult(reg, val.val));
+			reqResults.push({
+				'register': reg,
+				'name': constants.getAddressInfo(reg).data.name,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.res,
+				'str': val.res.toString()
+			});
+		});
+
+		console.log('Results', results);
+		test.deepEqual(results, reqResults);
+		test.done();
+	},
 	'check POWER_ registers for text output': function(test) {
 		test.done();
 	},
