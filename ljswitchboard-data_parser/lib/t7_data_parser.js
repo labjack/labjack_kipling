@@ -46,6 +46,13 @@ var ipDataType = {
 	'encode': encodeIP
 };
 
+var firmwareVersionRounder = function(res) {
+	return {
+		'val': parseFloat(res.toFixed(4)),
+		'str': res.toFixed(4)
+	};
+};
+
 var T7_LIST = {
 	'AIN#(0:254)': {
 		'decode': function(val) {
@@ -127,12 +134,10 @@ var T7_LIST = {
 		}
 	},
 	'FIRMWARE_VERSION': {
-		'decode': function(res) {
-			return {
-				'val': parseFloat(res.toFixed(4)),
-				'str': res.toFixed(4)
-			};
-		}
+		'decode': firmwareVersionRounder
+	},
+	'BOOTLOADER_VERSION': {
+		'decode': firmwareVersionRounder,
 	},
 	'HARDWARE_INSTALLED': {
 		'decode': function(res) {

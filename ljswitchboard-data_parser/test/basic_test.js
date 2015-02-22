@@ -192,14 +192,15 @@ exports.tests = {
 		// console.log('Results', results);
 		test.done();
 	},
-	'check FIRMWARE_VERSION': function(test) {
+	'check _VERSION Parsers': function(test) {
 		var vals = [
-			{'val': 1.01234567, 'res': 1.0123},
+			{'reg': 'FIRMWARE_VERSION', 'val': 1.01234567, 'res': 1.0123},
+			{'reg': 'BOOTLOADER_VERSION', 'val': 1.01234567, 'res': 1.0123},
 		];
 		var results = [];
 		var reqResults = [];
 		vals.forEach(function(val) {
-			var reg = 'FIRMWARE_VERSION';
+			var reg = val.reg;
 			results.push(data_parser.parseResult(reg, val.val));
 			reqResults.push({
 				'register': reg,
