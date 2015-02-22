@@ -142,6 +142,11 @@ var T7_LIST = {
 				var rtc = ((res & 0xFF) >> 2) & 0x1;
 				var sdCard = ((res & 0xFF) >> 3) & 0x1;
 
+				highResADC = highResADC == 1;
+				wifi = wifi == 1;
+				rtc = rtc == 1;
+				sdCard = sdCard == 1;
+				
 				var subclass = '';
 				var isPro = false;
 				var productType = 'T7';

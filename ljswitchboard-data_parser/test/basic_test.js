@@ -61,11 +61,50 @@ exports.tests = {
 		test.done();
 	},
 	'check HARDWARE_INSTALLED -decode': function(test) {
-		var res = data_parser.parseResult('HARDWARE_INSTALLED', 3);
-		// console.log('Result', res);
-		test.done();
-	},
-	'check FIRMWARE_VERSION - decode': function(test) {
+		var vals = [
+			{'val': 1, 'sdCard': false, 'rtc': false, 'wifi': false, 'adc': true, 'isPro': true},
+			{'val': 2, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': false, 'isPro': true},
+			{'val': 3, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': true, 'isPro': true},
+			{'val': 4, 'sdCard': false, 'rtc': true, 'wifi': false, 'adc': false, 'isPro': true},
+			{'val': 8, 'sdCard': true, 'rtc': false, 'wifi': false, 'adc': false, 'isPro': false},
+			{'val': 9, 'sdCard': true, 'rtc': false, 'wifi': false, 'adc': true, 'isPro': true},
+		];
+		var results = [];
+		var reqResults = [];
+
+		vals.forEach(function(val) {
+			var reg = 'HARDWARE_INSTALLED';
+			var dt = 'T7';
+			var subClass = '';
+			if(val.isPro) {
+				subClass = '-Pro';
+			}
+			results.push(data_parser.parseResult(reg, val.val));
+			reqResults.push({
+				'register': reg,
+				'name': constants.getAddressInfo(reg).data.name,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'highResADC': val.adc,
+				'wifi': val.wifi,
+				'rtc': val.rtc,
+				'sdCard': val.sdCard,
+				'subclass': subClass,
+				'isPro': val.isPro,
+				'productType': dt+subClass,
+			});
+		});
+
+		var resKeys = Object.keys(results[0]);
+		var reqKeys = Object.keys(reqResults[0]);
+		var i;
+		for(i = 0; i < resKeys.length; i++) {
+			if(resKeys[i] !== reqKeys[i]) {
+				console.log('HERE', i, resKeys[i], reqKeys[i]);
+			}
+		}
+		test.deepEqual(resKeys, reqKeys);
+		test.deepEqual(results, reqResults);
 		test.done();
 	},
 	'check WIFI_STATUS - decode': function(test) {
@@ -172,7 +211,7 @@ exports.tests = {
 			});
 		});
 
-		console.log('Results', results);
+		// console.log('Results', results);
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
