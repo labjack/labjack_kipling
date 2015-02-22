@@ -85,6 +85,43 @@ var T7_LIST = {
 			return {'str': str};
 		},
 	},
+	'WIFI_RSSI': {
+		'images': [
+			{'val':-45,'img':'wifiRSSI-4'},
+			{'val':-60,'img':'wifiRSSI-3'},
+			{'val':-65,'img':'wifiRSSI-2'},
+			{'val':-75,'img':'wifiRSSI-1'},
+			{'val':-80,'img':'wifiRSSI-0'},
+			{'val':-200,'img':'wifiRSSI-0'},
+		],
+		'decode': function(res) {
+			var unit = 'dB';
+			var imgName = '';
+			var str = res.toString() + ' dB';
+			var WIFI_RSSI_IMAGES = T7_LIST.WIFI_RSSI.images;
+
+			if(res < WIFI_RSSI_IMAGES[0].val) {
+				WIFI_RSSI_IMAGES.some(function(rssiData){
+					if(res < rssiData.val) {
+					} else {
+						imgName = rssiData.img;
+						return true;
+					}
+				});
+			} else {
+				imgName = WIFI_RSSI_IMAGES[0].img;
+			}
+
+			if(imgName === '') {
+				imgName = WIFI_RSSI_IMAGES[WIFI_RSSI_IMAGES.length-1].img;
+			}
+			return {
+				'unit': unit,
+				'imageName': imgName,
+				'str': str
+			};
+		}
+	},
 	'FIRMWARE_VERSION': {
 		'decode': function(res) {
 			return parseFloat(res.toFixed(4));

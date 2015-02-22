@@ -95,6 +95,43 @@ exports.tests = {
 
 		test.done();
 	},
+	'check WIFI_RSSI': function(test) {
+		var imgs = [
+			'wifiRSSI-0',
+			'wifiRSSI-1',
+			'wifiRSSI-2',
+			'wifiRSSI-3',
+			'wifiRSSI-4',
+		];
+		var vals = [
+			{'val': -40, 'img': imgs[4]},
+			{'val': -45, 'img': imgs[4]},
+			{'val': -48, 'img': imgs[3]},
+			{'val': -62, 'img': imgs[2]},
+			{'val': -70, 'img': imgs[1]},
+			{'val': -78, 'img': imgs[0]},
+			{'val': -85, 'img': imgs[0]},
+			{'val': -201, 'img': imgs[0]},
+		];
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			var reg = 'WIFI_RSSI';
+			results.push(data_parser.parseResult(reg, val.val));
+			reqResults.push({
+				'register': reg,
+				'name': constants.getAddressInfo(reg).data.name,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'unit': 'dB',
+				'imageName': val.img,
+				'str': val.val.toString() + ' dB',
+			});
+		});
+
+		test.deepEqual(results, reqResults);
+		test.done();
+	},
 	'check FLOAT32 registers for rounding': function(test) {
 		test.done();
 	},
