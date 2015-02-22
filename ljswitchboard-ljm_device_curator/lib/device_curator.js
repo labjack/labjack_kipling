@@ -1,13 +1,27 @@
 
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var q = require('q');
 var async = require('async');
+
+var data_parser = require('ljswitchboard-data_parser');
+
+// Requires & definitions involving the labjack-nodejs library
 var ljm = require('labjack-nodejs');
+var modbusMap = ljm.modbusMap.getConstants();
+var driver_const = ljm.driver_const;
+
 var lj_t7_upgrader = require('./labjack_t7_upgrade');
 var lj_t7_flash_operations = require('./t7_flash_operations');
 lj_t7_flash_operations.setDriverConst(ljm.driver_const);
+var lj_t7_get_recovery_fw_version = require('./t7_get_recovery_fw_version');
 
 var lj_t7_cal_operations = require('./t7_calibration_operations');
-var driver_const = ljm.driver_const;
+
+var device_events = driver_const.device_curator_constants;
+
+var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
+var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;
 
 
 
@@ -23,6 +37,8 @@ var use_mock_device = true;
 function device(useMockDevice) {
 	var ljmDevice;
 	this.isMockDevice = false;
+	this.allowReconnectManager = false;
+
 	if(useMockDevice) {
 		ljmMockDevice = require('./mocks/device_mock');
 		ljmDevice = new ljmMockDevice.device();
@@ -34,12 +50,65 @@ function device(useMockDevice) {
 		return ljmDevice;
 	};
 
-	var constants = ljm.driver_const;
-	var modbusMap = ljm.modbusMap.getConstants();
-
-	this.savedAttributes = {
-		'isMockDevice': this.isMockDevice
+	var allowExecution = function() {
+		var res = true;
+		if(self.allowReconnectManager) {
+			if(self.savedAttributes) {
+				if(!self.savedAttributes.isConnected) {
+					res = false;
+				}
+			}
+		}
+		return res;
 	};
+
+	var refreshDeviceConnectionStatus = function() {
+		var refreshDefered = q.defer();
+		ljmDevice.read(
+			'PRODUCT_ID',
+			function(err) {
+				captureDeviceError('read', err);
+				refreshDefered.reject(err);
+			},
+			refreshDefered.resolve
+		);
+		return refreshDefered.promise;
+	};
+	var reconnectManager = function() {
+		if(self.allowReconnectManager) {
+			if(!self.savedAttributes.isConnected) {
+				refreshDeviceConnectionStatus()
+				.then(
+					function() {
+						self.savedAttributes.isConnected = true;
+						self.emit(DEVICE_RECONNECTED, self.savedAttributes);
+					}, function() {
+						setTimeout(reconnectManager, 1000);
+					});
+			}
+		}
+	};
+
+	var captureDeviceError = function(funcName, err) {
+		// console.log('device_curator error detected', funcName, err);
+		var errCode;
+		if(isNaN(err)) {
+			errCode = err.retError;
+		} else {
+			errCode = err;
+		}
+
+		if(errCode === 1239) {
+			if(self.savedAttributes.isConnected) {
+				console.log('  - device_curator: Device Disconnected');
+				self.savedAttributes.isConnected = false;
+				self.emit(DEVICE_DISCONNECTED, self.savedAttributes);
+				setImmediate(reconnectManager);
+			}
+		}
+	};
+
+	this.savedAttributes = {};
 
 	var privateOpen = function(openParameters) {
 		var defered = q.defer();
@@ -52,37 +121,38 @@ function device(useMockDevice) {
 		);
 		return defered.promise;
 	};
+	var getVersionNumberParser = function(reg) {
+		var parser = function(res, isErr, errData) {
+			var dt = self.savedAttributes.deviceType;
+			return data_parser.parseResult(reg, res, dt).val;
+		};
+		return parser;
+	};
+
 	var customAttributes = {
-		'BOOTLOADER_VERSION': null,
+		'BOOTLOADER_VERSION': getVersionNumberParser('BOOTLOADER_VERSION'),
 		'DEVICE_NAME_DEFAULT': null,
-		'FIRMWARE_VERSION': null,
+		'FIRMWARE_VERSION': getVersionNumberParser('FIRMWARE_VERSION'),
 	};
 	var deviceCustomAttributes = {
 		'7': {
-			'WIFI_VERSION': null,
+			'WIFI_VERSION': getVersionNumberParser('WIFI_VERSION'),
 			'HARDWARE_INSTALLED': function(res, isErr, errData) {
-				// Deconstruct the HARDWARE_INSTALLED bitmask
-				var highResADC = (res & 0x1) > 0;
-				var wifi = (res & 0x2) > 0;
-				var rtc = (res & 0x3) > 0;
-				var sdCard = (res & 0x4) > 0;
+				var retResult = {};
+				var dt = self.savedAttributes.deviceType;
+				var parsedResult = data_parser.parseResult('HARDWARE_INSTALLED', res, dt);
 
-				self.savedAttributes.subclass = '';
-				self.savedAttributes.isPro = false;
-				if(highResADC && wifi && rtc) {
-					self.savedAttributes.subclass = '-Pro';
-					self.savedAttributes.isPro = true;
-				}
-				var dc = self.savedAttributes.deviceClass;
-				var sc = self.savedAttributes.subclass;
-				self.savedAttributes.productType = dc + sc;
-				return {
-					'highResADC': highResADC,
-					'wifi': wifi,
-					'rtc': rtc,
-					'sdCard': sdCard,
-					'res': res
-				};
+				// Save results
+				retResult.highResADC = parsedResult.highResADC;
+				retResult.wifi = parsedResult.wifi;
+				retResult.rtc = parsedResult.rtc;
+				retResult.sdCard = parsedResult.sdCard;
+
+				self.savedAttributes.subclass = parsedResult.subclass;
+				self.savedAttributes.isPro = parsedResult.isPro;
+				self.savedAttributes.productType = parsedResult.productType;
+
+				return retResult;
 			},
 		},
 		'200': {
@@ -150,6 +220,8 @@ function device(useMockDevice) {
 			var defered = q.defer();
 			self.savedAttributes = {};
 			self.savedAttributes.isMockDevice = self.isMockDevice;
+			self.savedAttributes.isConnected = true;
+			this.allowReconnectManager = false;
 
 			self.getHandleInfo()
 			.then(function(info) {
@@ -161,10 +233,10 @@ function device(useMockDevice) {
 
 				var dt = self.savedAttributes.deviceType;
 				var ct = self.savedAttributes.connectionType;
-				var dts = constants.DRIVER_DEVICE_TYPE_NAMES[dt];
-				var deviceClass = constants.DEVICE_TYPE_NAMES[dt];
-				var cts = constants.DRIVER_CONNECTION_TYPE_NAMES[ct];
-				var connectionTypeName = constants.CONNECTION_TYPE_NAMES[ct];
+				var dts = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
+				var deviceClass = driver_const.DEVICE_TYPE_NAMES[dt];
+				var cts = driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct];
+				var connectionTypeName = driver_const.CONNECTION_TYPE_NAMES[ct];
 				self.savedAttributes.deviceTypeString = dts;
 				self.savedAttributes.deviceClass = deviceClass;
 				self.savedAttributes.connectionTypeString = cts;
@@ -215,6 +287,12 @@ function device(useMockDevice) {
 		});
 		return defered.promise;
 	};
+	var finalizeOpenProcedure = function(bundle) {
+		var defered = q.defer();
+		self.allowReconnectManager = true;
+		defered.resolve(bundle);
+		return defered.promise;
+	};
 	this.open = function(deviceType, connectionType, identifier) {
 		var defered = q.defer();
 		var getOnError = function(msg) {
@@ -234,12 +312,46 @@ function device(useMockDevice) {
 		privateOpen(openParameters)
 		.then(saveAndLoadAttributes(openParameters), getOnError('openStep'))
 		.then(getAndSaveCalibration, getOnError('saveAndLoadAttrs'))
+		.then(finalizeOpenProcedure, getOnError('getAndSaveCalibration'))
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	this.simpleOpen = function(deviceTYpe, connectionType, identifier) {
+		var defered = q.defer();
+		var getOnError = function(msg) {
+			return function(err) {
+				var innerDefered = q.defer();
+				// console.log("device_curator.js - Open Failed", err);
+				innerDefered.reject(err);
+				return innerDefered.promise;
+			};
+		};
+		var openParameters = {
+			'deviceType': deviceType,
+			'connectionType': connectionType,
+			'identifier': identifier
+		};
+
+		privateOpen(openParameters)
+		.then(saveAndLoadAttributes(openParameters), getOnError('openStep'))
+		.then(finalizeOpenProcedure, getOnError('saveAndLoadAttrs'))
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
 	this.getHandleInfo = function() {
 		var defered = q.defer();
-		ljmDevice.getHandleInfo(defered.reject, defered.resolve);
+		if(allowExecution()) {
+			ljmDevice.getHandleInfo(
+			function(err) {
+				captureDeviceError('getHandleInfo', err);
+				defered.reject(err);
+			}, defered.resolve);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
+		
 		return defered.promise;
 	};
 	this.getDeviceAttributes = function() {
@@ -249,20 +361,38 @@ function device(useMockDevice) {
 	};
 	this.readRaw = function(data) {
 		var defered = q.defer();
-		ljmDevice.readRaw(
-			data,
-			defered.reject,
-			defered.resolve
-		);
+		if(allowExecution()) {
+			ljmDevice.readRaw(
+				data,
+				function(err) {
+					captureDeviceError('readRaw', err);
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
 		return defered.promise;
 	};
 	this.read = function(address) {
 		var defered = q.defer();
-		ljmDevice.read(
-			address,
-			defered.reject,
-			defered.resolve
-		);
+		if(allowExecution()) {
+			ljmDevice.read(
+				address,
+				function(err) {
+					captureDeviceError('read', err);
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
 		return defered.promise;
 	};
 	/**
@@ -297,40 +427,82 @@ function device(useMockDevice) {
 	**/
 	this.readMany = function(addresses) {
 		var defered = q.defer();
-		ljmDevice.readMany(
-			addresses,
-			defered.reject,
-			defered.resolve
-		);
+		if(allowExecution()) {
+			ljmDevice.readMany(
+				addresses,
+				function(err) {
+					captureDeviceError('readMany', err);
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject({
+					retError:driver_const.LJN_DEVICE_NOT_CONNECTED,
+					errFrame:0}
+				);
+			});
+		}
 		return defered.promise;
 	};
 	this.writeRaw = function(data) {
 		var defered = q.defer();
-		ljmDevice.writeRaw(
-			data,
-			defered.reject,
-			defered.resolve
-		);
+		if(allowExecution()) {
+			ljmDevice.writeRaw(
+				data,
+				function(err) {
+					captureDeviceError('writeRaw', err);
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
 		return defered.promise;
 	};
 	this.write = function(address, value) {
 		var defered = q.defer();
-		ljmDevice.write(
-			address,
-			value,
-			defered.reject,
-			defered.resolve
-		);
+		if(allowExecution()) {
+			ljmDevice.write(
+				address,
+				value,
+				function(err) {
+					captureDeviceError('write', err);
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
 		return defered.promise;
 	};
 	this.writeMany = function(addresses, values) {
 		var defered = q.defer();
+		if(allowExecution()) {
 		ljmDevice.writeMany(
 			addresses,
 			values,
-			defered.reject,
+			function(err) {
+				captureDeviceError('writeMany', err);
+				defered.reject(err);
+			},
 			defered.resolve
 		);
+		} else {
+			setImmediate(function() {
+				defered.reject({
+					retError:driver_const.LJN_DEVICE_NOT_CONNECTED,
+					errFrame:0}
+				);
+			});
+		}
 		return defered.promise;
 	};
 	/**
@@ -371,29 +543,50 @@ function device(useMockDevice) {
 			directions,
 			numValues,
 			values,
-			defered.reject,
+			function(err) {
+				captureDeviceError('rwMany', err);
+				defered.reject(err);
+			},
 			defered.resolve
 		);
 		return defered.promise;
 	};
 	this.readUINT64 = function(type) {
 		var defered = q.defer();
-		ljmDevice.readUINT64(
-			type,
-			defered.reject,
-			defered.resolve
-		);
+		if(allowExecution()) {
+			ljmDevice.readUINT64(
+				type,
+				function(err) {
+					captureDeviceError('readUINT64', err);
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
 		return defered.promise;
 	};
 	this.streamStart = function(scansPerRead, scanList, scanRate) {
 		var defered = q.defer();
-		ljmDevice.streamStart(
-			scansPerRead,
-			scanList,
-			scanRate,
-			defered.reject,
-			defered.resolve
-		);
+		if(allowExecution()) {
+			ljmDevice.streamStart(
+				scansPerRead,
+				scanList,
+				scanRate,
+				function(err) {
+					captureDeviceError('streamStart', err);
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
 		return defered.promise;
 	};
 	/**
@@ -453,40 +646,72 @@ function device(useMockDevice) {
 	};
 	this.streamRead = function() {
 		var defered = q.defer();
-		ljmDevice.streamRead( 
-			defered.reject,
-			function(data) {
-				try {
-					parseStreamData(data)
-					.then(defered.resolve, defered.reject);
-				} catch(err) {
-					defered.reject('Error parsing stream data');
+		if(allowExecution()) {
+			ljmDevice.streamRead( 
+				function(err) {
+					captureDeviceError('streamRead', err);
+					defered.reject(err);
+				},
+				function(data) {
+					try {
+						parseStreamData(data)
+						.then(defered.resolve, defered.reject);
+					} catch(err) {
+						defered.reject('Error parsing stream data');
+					}
 				}
-			}
-		);
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
 		return defered.promise;
 	};
 	this.streamReadRaw = function() {
 		var defered = q.defer();
-		ljmDevice.streamRead(
-			defered.reject,
-			defered.resolve
-		);
+		if(allowExecution()) {
+			ljmDevice.streamRead(
+				function(err) {
+					captureDeviceError('streamReadRaw', err);
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
 		return defered.promise;
 	};
 	this.streamStop = function() {
 		var defered = q.defer();
-		ljmDevice.streamStop(
-			defered.reject,
-			defered.resolve
-		);
+		if(allowExecution()) {
+			ljmDevice.streamStop(
+				function(err) {
+					captureDeviceError('streamStop', err);
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
 		return defered.promise;
 	};
 	this.close = function() {
 		var defered = q.defer();
 		ljmDevice.close(
-			defered.reject,
-			defered.resolve
+			function(err) {
+				self.allowReconnectManager = false;
+				defered.reject(err);
+			}, function(res) {
+				self.allowReconnectManager = false;
+				defered.resolve(res);
+			}
 		);
 		return defered.promise;
 	};
@@ -817,6 +1042,9 @@ function device(useMockDevice) {
 		}
 	};
 
+	this.getRecoveryFirmwareVersion = function() {
+		return lj_t7_get_recovery_fw_version.getVersion(self);
+	};
 	this.getCalibrationStatus = function() {
 		var dt = self.savedAttributes.deviceType;
 		var defered = q.defer();
@@ -861,5 +1089,6 @@ function device(useMockDevice) {
 
 	var self = this;
 }
+util.inherits(device, EventEmitter);
 
 exports.device = device;

@@ -637,12 +637,17 @@ var createFlashOperation = function (bundle, startAddress, lengthInts, sizeInts,
 
             numValues.push(innerSize);
 
+            // console.log(' calling rwMany', isReadOp, addresses, directions, numValues, values);
             device.rwMany(
                 addresses,
                 directions,
                 numValues,
                 values,
-                createSafeReject(innerDeferred),
+                function(err) {
+                    console.log('t7_upgrade: calling rwMany', isReadOp, addresses, directions, numValues, values);
+                    console.log('t7_upgrade: rwMany Error', err);
+                    var callFunc = createSafeReject(innerDeferred);
+                },
                 function (newResults) { 
                     lastResults.push.apply(lastResults, newResults);
                     innerDeferred.resolve(lastResults);
@@ -1156,7 +1161,6 @@ exports.waitForEnumeration = function(bundle)
     var deferred = q.defer();
     var targetSerial = bundle.getSerialNumber();
     this.targetSerial = targetSerial;
-    // console.log('t7_upgrade.js-Bundle...',bundle,targetSerial);
     
     function getCheckForDevice (bundle) {
         this.bundle = bundle;
@@ -1171,7 +1175,6 @@ exports.waitForEnumeration = function(bundle)
                     var serials = devicesInfo.map(function (e) {
                         return e.serialNumber;
                     });
-                    // console.log('Found Devices-A',devicesInfo.length,serials);
                     innerDeferred.resolve(serials);
                 }
             );

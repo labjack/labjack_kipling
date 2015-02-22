@@ -53,7 +53,7 @@ var T7_HIGH_RESOLUTION_START_INDEX = 16;
 var T7_HIGH_RESOLUTION_END_INDEX = 31;
 
 
-var getInvalidCalibrationValues = function (subclass, calValues) {
+var getInvalidCalibrationValues = function (checkHighRes, calValues) {
     var withinRange = function(calValue, min, max) {
         if (isNaN(calValue)) {
             return false;
@@ -69,9 +69,8 @@ var getInvalidCalibrationValues = function (subclass, calValues) {
     var badCals = [];
     T7_NominalCalValues.forEach(function(nominalVal, index) {
         var min, max, absPlusMinus;
-        var isPro = (subclass === '-Pro');
         
-        if (!isPro && (index >= T7_HIGH_RESOLUTION_START_INDEX) && (index <= T7_HIGH_RESOLUTION_END_INDEX)) {
+        if (!checkHighRes && (index >= T7_HIGH_RESOLUTION_START_INDEX) && (index <= T7_HIGH_RESOLUTION_END_INDEX)) {
             // console.log('Skipping', isPro, index, nominalVal.name);
         } else {
             // console.log('Checking', isPro, index, nominalVal.name);
@@ -81,7 +80,7 @@ var getInvalidCalibrationValues = function (subclass, calValues) {
 
             if (!withinRange(calValues[index], min, max)) {
                 badCals.push(nominalVal.name);
-            } 
+            }
         }
     });
 
@@ -100,8 +99,8 @@ var getInterpretFlashResults = function(curatedDevice) {
         });
 
         // Check the values to see if they are valid
-        var deviceSubClass = curatedDevice.savedAttributes.subclass;
-        var calCheckResult = getInvalidCalibrationValues(deviceSubClass, floatingPointData);
+        var checkHighRes = curatedDevice.savedAttributes.HARDWARE_INSTALLED.highResADC;
+        var calCheckResult = getInvalidCalibrationValues(checkHighRes, floatingPointData);
         var calibrationStatus;
         // If there are any invalid values set calibration validity to be false
         if(calCheckResult.length > 0) {
@@ -301,7 +300,7 @@ var getAndInterpretAINResults = function(curatedDevice) {
         } else {
             defered.resolve(calibrationStatus);
         }
-        return defered.promise; 
+        return defered.promise;
     };
     return getAndInterpret;
 };

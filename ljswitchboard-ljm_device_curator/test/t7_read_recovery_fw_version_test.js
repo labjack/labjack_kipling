@@ -60,9 +60,9 @@ var device_tests = {
 				"  - Opened T7:",
 				res.productType,
 				res.connectionTypeName,
-				res.serialNumber,
-				parseFloat(res.FIRMWARE_VERSION.toFixed(4))
+				res.serialNumber
 			);
+			console.log('Current Fw Version:', res.FIRMWARE_VERSION);
 			deviceFound = true;
 			test.done();
 		}, function(err) {
@@ -80,47 +80,15 @@ var device_tests = {
 			test.done();
 		});
 	},
-	'upgradeFirmware': function(test) {
-		var fwVersionNum = 1.0146;
-		var fwURL = fws[fwVersionNum.toString()];
-		var lastPercent = 0;
-		var percentListener = function(value) {
-			var defered = q.defer();
-			// console.log("  - ", value.toString() + '%');
-			lastPercent = value;
-			defered.resolve();
-			return defered.promise;
-		};
-		var stepListener = function(value) {
-			var defered = q.defer();
-			console.log("  - " + value.toString());
-			defered.resolve();
-			return defered.promise;
-		};
-		device.updateFirmware(fwURL, percentListener, stepListener)
-		.then(
-			function(res) {
-				// The result is a new device object
-				// console.log('Upgrade Success', res);
-				test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
-				device.read('FIRMWARE_VERSION')
-				.then(function(res) {
-					test.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
-					test.done();
-				});
-			}, function(err) {
-				console.log("Failed to upgrade (upgrade test)", err);
-				test.ok(false, 'Failed to upgrade device: ' + JSON.stringify(err));
-				device.read('DEVICE_NAME_DEFAULT')
-				.then(function(res) {
-					console.log('Device is still responding to messages', res);
-					test.done();
-				}, function(err) {
-					console.log('Device is not responding anymore', err);
-					test.done();
-				});
-			}
-		);
+	'get recovery fw version': function(test) {
+		device.getRecoveryFirmwareVersion()
+		.then(function(res) {
+			console.log('Succ', res);
+			test.done();
+		}, function(err) {
+			console.log('Error', err);
+			test.done();
+		});
 	},
 	'closeDevice': function(test) {
 		device.close()

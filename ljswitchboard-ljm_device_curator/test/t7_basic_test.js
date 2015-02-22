@@ -6,6 +6,7 @@ var qExec = utils.qExec;
 
 
 var device;
+var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
@@ -43,7 +44,7 @@ var device_tests = {
 	'openDevice': function(test) {
 		var td = {
 			'dt': 'LJM_dtT7',
-			'ct': 'LJM_ctANY',
+			'ct': 'LJM_ctUSB',
 			'id': 'LJM_idANY'
 		};
 
@@ -57,6 +58,7 @@ var device_tests = {
 					res.serialNumber
 				);
 			}
+			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
 			test.done();
 		}, function(err) {
