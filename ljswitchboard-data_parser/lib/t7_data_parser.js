@@ -9,6 +9,10 @@ var checkStr = function(str) {
 };
 
 var parseIP = function(ipNum) {
+	var isReal = false;
+	if(ipNum !== 0) {
+		isReal = true;
+	}
 	var ipStr = "";
 	var ipAddr = new Buffer(4);
 	ipAddr.writeUInt32LE(ipNum, 0);
@@ -19,7 +23,7 @@ var parseIP = function(ipNum) {
 	ipStr += ipAddr.readUInt8(1).toString();
 	ipStr += ".";
 	ipStr += ipAddr.readUInt8(0).toString();
-	return {'str': ipStr};
+	return {'str': ipStr, 'isReal':isReal};
 };
 var encodeIP = function(ipStr) {
 	var ipBuf = new Buffer(4);

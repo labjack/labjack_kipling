@@ -43,13 +43,18 @@ exports.tests = {
 		var reqResults = [];
 
 		testVals.forEach(function(testVal) {
+			var isReal = false;
+			if(testVal.val !== 0) {
+				isReal = true;
+			}
 			results.push(data_parser.parseResult('WIFI_IP', testVal.val));
 			reqResults.push({
 				'register': 'WIFI_IP',
 				'name': 'WIFI_IP',
 				'address': 49200,
 				'res': testVal.val,
-				'str': testVal.ip
+				'str': testVal.ip,
+				'isReal': isReal
 			});
 		});
 		test.deepEqual(results, reqResults);
