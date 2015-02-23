@@ -17,10 +17,13 @@ var labjack_nodejs = require('labjack-nodejs');
 var driver_const = labjack_nodejs.driver_const;
 var constants = require('../../common/constants');
 var device_generator = require('./device_generator');
+var device_scanner = require('ljswitchboard-device_scanner');
+
 
 function createDeviceKeeper(io_delegator, link) {
 	var send = link.send;
 	var sendMessage = link.sendMessage;
+	var deviceScanner = new device_scanner.deviceScanner();
 
 	var deviceSendMessage = function(deviceKey, message) {
 		send({
@@ -428,6 +431,14 @@ function createDeviceKeeper(io_delegator, link) {
 			}
 		});
 		defered.resolve(listing);
+		return defered.promise;
+	};
+
+	this.listAllDevices = function() {
+		var defered = q.defer();
+		self.getDeviceListing()
+		.then(deviceScanner.findAllDevices)
+		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
 

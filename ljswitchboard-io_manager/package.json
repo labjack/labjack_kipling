@@ -41,6 +41,7 @@
     "labjack-nodejs": "0.0.x",
     "ljswitchboard-ljm_device_curator": "0.0.x",
     "ljswitchboard-ljm_driver_checker": "0.0.x",
+    "ljswitchboard-device_scanner": "0.0.x",
     "json-parser": "0.2.4"
   },
   "devDependencies": {
