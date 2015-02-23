@@ -316,7 +316,7 @@ function device(useMockDevice) {
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
-	this.simpleOpen = function(deviceTYpe, connectionType, identifier) {
+	this.simpleOpen = function(deviceType, connectionType, identifier) {
 		var defered = q.defer();
 		var getOnError = function(msg) {
 			return function(err) {
