@@ -30,6 +30,9 @@ var REQUIRED_INFO_BY_DEVICE = {
         'FIRMWARE_VERSION'
 	]
 };
+
+exports.REQUIRED_INFO_BY_DEVICE = REQUIRED_INFO_BY_DEVICE;
+
 var SCAN_REQUEST_LIST = [
 	// {
  //        'deviceType': 'LJM_dtDIGIT',
