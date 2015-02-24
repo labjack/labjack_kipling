@@ -107,7 +107,7 @@ var deviceScanner = function() {
 			'verified': isVerified,
 			'verificationAttempted': verificationAttempted,
 			'verifying': false,
-			'isActive': false,
+			'isActive': isActive,
 			'foundByAttribute': foundByAttribute,
 			'insertionMethod': insertionMethod
 		};
