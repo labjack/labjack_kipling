@@ -34,11 +34,11 @@ var REQUIRED_INFO_BY_DEVICE = {
 exports.REQUIRED_INFO_BY_DEVICE = REQUIRED_INFO_BY_DEVICE;
 
 var SCAN_REQUEST_LIST = [
-	// {
- //        'deviceType': 'LJM_dtDIGIT',
- //        'connectionType': 'LJM_ctUSB',
- //        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtDIGIT
- //    },
+	{
+        'deviceType': 'LJM_dtDIGIT',
+        'connectionType': 'LJM_ctUSB',
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtDIGIT
+    },
     {
         'deviceType': 'LJM_dtT7',
         'connectionType': 'LJM_ctUSB',
