@@ -3,7 +3,7 @@ var device_scanner = require('../lib/ljswitchboard-device_scanner').getDeviceSca
 
 exports.tests = {
 	'basic test': function(test) {
-		var currentDeviceList = [];
+		var currentDeviceList = {};
 		var startTime = new Date();
 		var deviceScanner = new device_scanner.deviceScanner();
 		deviceScanner.findAllDevices(currentDeviceList)

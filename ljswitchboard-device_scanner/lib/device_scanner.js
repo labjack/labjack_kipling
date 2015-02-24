@@ -764,7 +764,7 @@ var deviceScanner = function() {
 			var defered = q.defer();
 			var promises = SCAN_REQUEST_LIST.map(scanForDevices);
 			if(currentDevices) {
-				if(currentDevices.length > 0) {
+				if(Object.keys(currentDevices).length > 0) {
 					// Add task that queries currently connected devices for their data.
 					promises.push(getCurrentDeviceListing(currentDevices));
 				}
