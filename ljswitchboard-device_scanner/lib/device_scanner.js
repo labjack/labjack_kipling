@@ -850,6 +850,25 @@ var deviceScanner = function() {
 		return defered.promise;
 	};
 
+	var markActiveDevices = function() {
+		var defered = q.defer();
+		var i, j;
+		for(i = 0; i < self.scanResults.length; i++) {
+			var scanResult = self.scanResults[i];
+			var connectionTypes = scanResult.connectionTypes;
+			self.scanResults[i].isActive = false;
+			for(j = 0; j < connectionTypes.length; j++) {
+				var connectionType = connectionTypes[j];
+				if(connectionType.isActive) {
+					// Mark the device as active
+					self.scanResults[i].isActive = true;
+				}
+			}
+		}
+		defered.resolve();
+		return defered.promise;
+	};
+
 	var returnResults = function() {
 		var defered = q.defer();
 		defered.resolve(self.scanResults);
@@ -876,7 +895,8 @@ var deviceScanner = function() {
 			.then(getFindAllDevices(currentDevices), getOnError('disableDriverOldfwState'))
 			.then(restoreDriverOldfwState, getOnError('getFindAllDevices'))
 			.then(populateMissingScanData, getOnError('restoreDriverOldfwState'))
-			.then(returnResults, getOnError('populateMissingScanData'))
+			.then(markActiveDevices, getOnError('populateMissingScanData'))
+			.then(returnResults, getOnError('markActiveDevices'))
 			.then(defered.resolve, defered.reject);
 		} else {
 			defered.reject('Scan in progress');
