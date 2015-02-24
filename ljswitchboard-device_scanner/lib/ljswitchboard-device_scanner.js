@@ -9,4 +9,4 @@ exports.getDeviceScanner = function() {
 	return device_scanner;
 };
 
-exports.eventList = require('./event_list');
+exports.eventList = require('./event_list').eventList;
