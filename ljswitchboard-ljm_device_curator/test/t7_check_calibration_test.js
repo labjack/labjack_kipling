@@ -32,7 +32,7 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t7_basic_test ****');
+		console.log('**** t7_check_calibration_test ****');
 		try {
 			device = new device_curator.device();
 		} catch(err) {

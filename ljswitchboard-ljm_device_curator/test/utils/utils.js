@@ -89,7 +89,7 @@ var pResults = function(results, pIndividual, expectedErrorsList) {
 };
 exports.pResults = pResults;
 
-var testResults = function(test, expectedResults, results) {
+var testResults = function(test, expectedResults, results, resultKey) {
 	if(results.length !== expectedResults.length) {
 		test.ok(false, 'num results does not match');
 	}
@@ -105,27 +105,45 @@ var testResults = function(test, expectedResults, results) {
 		}
 		if(type === 'value') {
 			var datamsg = 'bad value detected';
-			test.strictEqual(expectedResult.retData, result.retData, datamsg);
+			if(resultKey) {
+				test.strictEqual(expectedResult.retData, result.retData[resultKey], datamsg);
+			} else {
+				test.strictEqual(expectedResult.retData, result.retData, datamsg);
+			}
 		} else if (type === 'range') {
 			var rangemsg = 'value out of range';
 			var valueInRange = true;
-			if(result.retData < expectedResult.min) {
-				valueInRange = false;
-				rangemsg += ': value to low, val: ' + result.retData.toString();
-				rangemsg += ', minVal: ' + expectedResult.min.toString();
+			if(resultKey) {
+				if(result.retData[resultKey] < expectedResult.min) {
+					valueInRange = false;
+					rangemsg += ': value to low, val: ' + result.retData[resultKey].toString();
+					rangemsg += ', minVal: ' + expectedResult.min.toString();
+				}
+				if(result.retData[resultKey] > expectedResult.max) {
+					valueInRange = false;
+					rangemsg += ': value to high, val: ' + result.retData[resultKey].toString();
+					rangemsg += ', maxVal: ' + expectedResult.max.toString();
+				}
+				test.ok(valueInRange, rangemsg);
+			} else {
+				if(result.retData < expectedResult.min) {
+					valueInRange = false;
+					rangemsg += ': value to low, val: ' + result.retData.toString();
+					rangemsg += ', minVal: ' + expectedResult.min.toString();
+				}
+				if(result.retData > expectedResult.max) {
+					valueInRange = false;
+					rangemsg += ': value to high, val: ' + result.retData.toString();
+					rangemsg += ', maxVal: ' + expectedResult.max.toString();
+				}
+				test.ok(valueInRange, rangemsg);
 			}
-			if(result.retData > expectedResult.max) {
-				valueInRange = false;
-				rangemsg += ': value to high, val: ' + result.retData.toString();
-				rangemsg += ', maxVal: ' + expectedResult.max.toString();
-			}
-			test.ok(valueInRange, rangemsg);
 		}
 	}
 };
 exports.testResults = testResults;
 
-var testResultsArray = function(test, expectedResults, results) {
+var testResultsArray = function(test, expectedResults, results, resultKey) {
 	if(results.length !== expectedResults.length) {
 		test.ok(false, 'num results does not match');
 	}
@@ -144,9 +162,18 @@ var testResultsArray = function(test, expectedResults, results) {
 			var res = result.retData[j];
 			var expectedRes = expectedResult.retData[j];
 			var addrmsg = 'Wrong address read';
-			test.strictEqual(expectedRes.address, res.address, addrmsg);
-			var errmsg = 'wrong error boolean result';
-			test.strictEqual(expectedRes.isErr, res.isErr, errmsg);
+			// Perform switch to compensate for iRead commands
+			if(isNaN(res.address)) {
+				test.strictEqual(expectedRes.address, res.address, addrmsg);
+			} else {
+				test.strictEqual(expectedRes.address, res.name, addrmsg);
+			}
+			
+			if(res.isErr) {
+				var errmsg = 'wrong error boolean result';
+				test.strictEqual(expectedRes.isErr, res.isErr, errmsg);
+			}
+			
 
 			var type = 'value';
 			if(expectedRes.type) {
@@ -154,19 +181,40 @@ var testResultsArray = function(test, expectedResults, results) {
 			}
 			if(type === 'value') {
 				var datamsg = 'bad value detected';
-				test.strictEqual(expectedRes.data, res.data, datamsg);
+				if(resultKey) {
+					test.strictEqual(expectedRes.data, res.data[resultKey], datamsg);
+				} else {
+					test.strictEqual(expectedRes.data, res.data, datamsg);
+				}
 			} else if (type === 'range') {
 				var rangemsg = 'value out of range';
 				var valueInRange = true;
-				if(res.data < expectedRes.min) {
-					valueInRange = false;
-					rangemsg += ': value to low, val: ' + res.data.toString();
-					rangemsg += ', minVal: ' + expectedRes.min.toString();
+				var testVal = res;
+				if(res.data) {
+					testVal = res.data;
 				}
-				if(res.data > expectedRes.max) {
-					valueInRange = false;
-					rangemsg += ': value to high, val: ' + res.data.toString();
-					rangemsg += ', maxVal: ' + expectedRes.max.toString();
+				if(resultKey) {
+					if(testVal[resultKey] < expectedRes.min) {
+						valueInRange = false;
+						rangemsg += ': value to low, val: ' + testVal[resultKey].toString();
+						rangemsg += ', minVal: ' + expectedRes.min.toString();
+					}
+					if(testVal[resultKey] > expectedRes.max) {
+						valueInRange = false;
+						rangemsg += ': value to high, val: ' + testVal[resultKey].toString();
+						rangemsg += ', maxVal: ' + expectedRes.max.toString();
+					}
+				} else {
+					if(testVal < expectedRes.min) {
+						valueInRange = false;
+						rangemsg += ': value to low, val: ' + testVal.toString();
+						rangemsg += ', minVal: ' + expectedRes.min.toString();
+					}
+					if(testVal > expectedRes.max) {
+						valueInRange = false;
+						rangemsg += ': value to high, val: ' + testVal.toString();
+						rangemsg += ', maxVal: ' + expectedRes.max.toString();
+					}
 				}
 				test.ok(valueInRange, rangemsg);
 			}

@@ -782,7 +782,58 @@ function device(useMockDevice) {
 		}
 	};
 
-
+	/*
+	Intelligent Read/Write Functions.  These functions have automatic parsing/
+	encoding/caching additions and all use the q functions for stability & 
+	reliability.
+	*/
+	this.iRead = function(address) {
+		var defered = q.defer();
+		self.qRead(address)
+		.then(function(res) {
+			defered.resolve(data_parser.parseResult(address, res));
+		}, function(err) {
+			defered.reject(err);
+		});
+		return defered.promise;
+	};
+	this.iReadMany = function(addresses) {
+		var defered = q.defer();
+		self.qReadMany(addresses)
+		.then(function(res) {
+			// defered.resolve(data_parser.parseResult(address, res));
+			var results = data_parser.parseResults(
+				addresses,
+				res,
+				self.savedAttributes.deviceType
+			);
+			defered.resolve(results);
+		}, function(err) {
+			defered.reject(err);
+		});
+		return defered.promise;
+	};
+	this.iReadMultiple = function(addresses) {
+		var defered = q.defer();
+		self.readMultiple(addresses)
+		.then(function(results) {
+			// defered.resolve(data_parser.parseResult(address, res));
+			var i;
+			for(i = 0; i < results.length; i ++) {
+				if(!results[i].isErr) {
+					results[i].data = data_parser.parseResult(
+						results[i].address,
+						results[i].data,
+						self.savedAttributes.deviceType
+					);
+				}
+			}
+			defered.resolve(results);
+		}, function(err) {
+			defered.reject(err);
+		});
+		return defered.promise;
+	};
 
 	this.qRead = function(address) {
 		return self.retryFlashError('qRead', address);

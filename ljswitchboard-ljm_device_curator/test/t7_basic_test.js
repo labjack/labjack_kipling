@@ -140,6 +140,75 @@ var device_tests = {
 			test.done();
 		});
 	},
+	'performTest iRead': function(test) {
+		var results = [];
+		qExec(device, 'iRead', 'AIN0')(results)
+		.then(function(res) {
+			var expectedResults = [
+				{
+					'functionCall': 'iRead',
+					'type': 'range',
+					'min': -11,
+					'max': 11
+				}
+			];
+			utils.testResults(test, expectedResults, res, 'res');
+			test.done();
+		});
+	},
+	'performTest iReadMany': function(test) {
+		var results = [];
+		var addresses = ['AIN0','AIN0'];
+		qExec(device, 'iReadMany', addresses)(results)
+		.then(function(res) {
+			var expectedResults = [
+				{
+					'functionCall': 'iReadMany',
+					'retData': [
+						{'address': 'AIN0', 'isErr': false, 'type': 'range', 'min': -11, 'max': 11},
+						{'address': 'AIN0', 'isErr': false, 'type': 'range', 'min': -11, 'max': 11}
+					]
+				}
+			];
+			var receivedResults = [];
+			var i;
+			for(i = 0; i < res.length; i++) {
+				receivedResults.push({
+					'retData': [{
+						'address': addresses[i],
+						'isErr': false,
+						'data': res[i]
+					}]
+				});
+			}
+			utils.testResultsArray(test, expectedResults, res, 'res');
+			test.done();
+		});
+	},
+	'performTest iReadMultiple': function(test) {
+		var results = [];
+		qExec(device, 'iReadMultiple', ['AIN0','AIN0'])(results)
+		.then(function(res) {
+			var expectedResults = [
+				{
+					'functionCall': 'iReadMultiple',
+					'retData': [
+						{'address': 'AIN0', 'isErr': false, 'type': 'range', 'min': -11, 'max': 11},
+						{'address': 'AIN0', 'isErr': false, 'type': 'range', 'min': -11, 'max': 11}
+					]
+				}
+			];
+			utils.testResultsArray(test, expectedResults, res, 'res');
+			test.done();
+		});
+	},
+	'call iReadMultiple': function(test) {
+		device.iReadMultiple(['AIN0', 'ETHERNET_IP'])
+		.then(function(res) {
+			console.log('iReadMultiple res', res);
+			test.done();
+		});
+	},
 	// 'upgradeFirmware': function(test) {
 	// 	var fwURL = 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin';
 	// 	device.updateFirmware(fwURL)
