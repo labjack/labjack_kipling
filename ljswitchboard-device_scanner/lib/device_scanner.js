@@ -13,7 +13,7 @@ var constants = modbus_map.getConstants();
 
 var requiredInformation = {};
 
-var DEVICE_FOUND_EVENT = 'DEVICE_FOUND';
+var eventList = require('./event_list').eventList;
 
 var REQUIRED_INFO_BY_DEVICE = {
 	'LJM_dtDIGIT': [
@@ -57,7 +57,7 @@ var SCAN_REQUEST_LIST = [
 ];
 
 var scanStrategies = [
-	// {'type': 'listAllExtended', 'enabled': true},
+	{'type': 'listAllExtended', 'enabled': true},
 	// {'type': 'listAllExtended', 'enabled': true},
 	// {'type': 'listAllExtended', 'enabled': true},
 	{'type': 'listAll', 'enabled': true},
@@ -67,6 +67,7 @@ var scanStrategies = [
 var deviceScanner = function() {
 
 	this.scanResults = [];
+	this.activeDeviceResults = [];
 	this.currentDeviceList = null;
 	this.scanInProgress = false;
 
@@ -82,10 +83,18 @@ var deviceScanner = function() {
 	var getInitialConnectionTypeData = function(dt, ct, ip, method) {
 		var insertionMethod = 'scan';
 		var foundByAttribute = false;
+		var isActive = false;
+		var isVerified = false;
+		var verificationAttempted = false;
 		if(method) {
 			if(method === 'attribute') {
 				insertionMethod = 'attribute';
 				foundByAttribute = true;
+			} else if(method === 'connected') {
+				insertionMethod = 'connected';
+				isActive = true;
+				isVerified = true;
+				verificationAttempted = true;
 			}
 		}
 		return {
@@ -95,9 +104,10 @@ var deviceScanner = function() {
 			'str': driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct],
 			'name': driver_const.CONNECTION_TYPE_NAMES[ct],
 			'ipAddress': ip,
-			'verified': false,
-			'verificationAttempted': false,
+			'verified': isVerified,
+			'verificationAttempted': verificationAttempted,
 			'verifying': false,
+			'isActive': false,
 			'foundByAttribute': foundByAttribute,
 			'insertionMethod': insertionMethod
 		};
@@ -113,10 +123,11 @@ var deviceScanner = function() {
 			ip = newScanResult.ipAddress;
 			var deviceInfo = {
 				'deviceType': dt,
-				'deviceTypeName': driver_const.DEVICE_TYPE_NAMES[dt],
+				'deviceTypeString': driver_const.DEVICE_TYPE_NAMES[dt],
 				'serialNumber': newScanResult.serialNumber,
 				'acquiredRequiredData': false,
 				'connectionTypes': [getInitialConnectionTypeData(dt, ct, ip)],
+				'isMockDevice': false,
 			};
 			deviceInfo.acquiredRequiredData = false;
 			if(newScanResult.data) {
@@ -149,7 +160,7 @@ var deviceScanner = function() {
 				}
 			}
 			
-
+			self.emit(eventList.DISCOVERED_DEVICE, deviceInfo);
 			self.scanResults.push(deviceInfo);
 		} else {
 			// If the device already exists then add information to the
@@ -240,7 +251,7 @@ var deviceScanner = function() {
 		var defered = q.defer();
 		var serialNumber = data.scanResult.serialNumber;
 		var connectionType = data.connectionType.str;
-		var deviceType = data.scanResult.deviceTypeName;
+		var deviceType = data.scanResult.deviceTypeString;
 		var ipAddress = data.connectionType.ipAddress;
 		var openParameters = {
 			'dt': deviceType,
@@ -264,6 +275,7 @@ var deviceScanner = function() {
 			instead of created every time as well.
 			*/
 			// console.log('Opening Device', serialNumber, openParameters.ct, openParameters.id);
+			self.emit(eventList.VERIFYING_DEVICE_CONNECTION, openParameters);
 			data.device.simpleOpen(
 				openParameters.dt,
 				openParameters.ct,
@@ -276,6 +288,7 @@ var deviceScanner = function() {
 				defered.resolve(data);
 			}, function(err) {
 					console.log('!! Failed to open Device', serialNumber, openParameters.ct, err);
+					self.emit(eventList.FAILED_DEVICE_CONNECTION_VERIFICATION, openParameters);
 					defered.resolve(data);
 			});
 		});
@@ -286,6 +299,7 @@ var deviceScanner = function() {
 		if(true) {
 			if(data.openedDevice) {
 				if(data.registers.length > 0) {
+					self.emit(eventList.COLLECTING_REMAINING_DEVICE_INFO, data.openParameters);
 					data.device.readMultiple(data.registers)
 					.then(function(results) {
 						// console.log('!! Collected Info !!', data.scanResult.serialNumber, data.openParameters.ct);
@@ -360,6 +374,7 @@ var deviceScanner = function() {
 		if(data.openedDevice) {
 			// If the device is opened, try to close the device at most 2x
 			// and then return.
+			self.emit(eventList.CLOSING_FOUND_DEVICE, data.openParameters);
 			data.device.close()
 			.then(function(res) {
 				defered.resolve(data.scanResult);
@@ -469,6 +484,7 @@ var deviceScanner = function() {
 		var addresses = scanRequest.addresses;
 		scanRequest.startTime = new Date();
 		setImmediate(function() {
+			self.emit(eventList.PERFORMING_LIST_ALL_EXTENDED, scanRequest);
 			driver.listAllExtended(
 				deviceType,
 				connectionType,
@@ -480,6 +496,7 @@ var deviceScanner = function() {
 					scanRequest.stopTime = new Date();
 					saveResults(scanRequest, res);
 					scanRequest.scanNum += 1;
+					self.emit(eventList.FINISHED_LIST_ALL_EXTENDED, scanRequest);
 					finalizeScanResults(scanRequest)
 					.then(finalizeScanResults)
 					.then(defered.resolve, defered.reject);
@@ -494,6 +511,7 @@ var deviceScanner = function() {
 		var connectionType = scanRequest.connectionType;
 		scanRequest.startTime = new Date();
 		setImmediate(function() {
+			self.emit(eventList.PERFORMING_LIST_ALL, scanRequest);
 			driver.listAll(
 				deviceType,
 				connectionType,
@@ -503,6 +521,7 @@ var deviceScanner = function() {
 					scanRequest.stopTime = new Date();
 					saveResults(scanRequest, res);
 					scanRequest.scanNum += 1;
+					self.emit(eventList.FINISHED_LIST_ALL, scanRequest);
 					finalizeScanResults(scanRequest)
 					.then(finalizeScanResults)
 					.then(defered.resolve, defered.reject);
@@ -574,14 +593,188 @@ var deviceScanner = function() {
 		});
 		return defered.promise;
 	};
-	var getFindAllDevices = function(currentDeviceList) {
+
+	var combineScanResults = function() {
+		var defered = q.defer();
+		var i, j, k;
+		
+		for(i = 0; i < self.activeDeviceResults.length; i++) {
+			var activeDevice = self.activeDeviceResults[i];
+			var addDevice = true;
+			for(j = 0; j < self.scanResults.length; j++) {
+				var curDev = self.scanResults[j];
+				var foundSN = curDev.serialNumber;
+
+				// Check to see if the active device was found by the scanner.
+				if(activeDevice.serialNumber == foundSN) {
+					// Make sure that the device doesn't get added.
+					addDevice = false;
+					var connectionTypes = curDev.connectionTypes;
+					var addCT = true;
+					for(k = 0; k < connectionTypes.length; k++) {
+						if(addDevice.connectionType.ct == connectionTypes[k].ct) {
+							addCT = false;
+							// Mark CT as active
+							self.scanResults[j].connectionTypes[k].isActive = true;
+						}
+					}
+
+					// If the CT wasn't already there, add it
+					if(addCT) {
+						self.scanResults[j].connectionTypes.push(
+							addDevice.connectionType
+						);
+					}
+				}
+			}
+
+			// If the device wasn't found by the scan, then add it
+			if(addDevice) {
+				// Add the connectionTypes key
+				activeDevice.connectionTypes = [
+					activeDevice.connectionType
+				];
+
+				// Add the device to the self.scanResults object
+				self.scanResults.push(activeDevice);
+			}
+		}
+
+		defered.resolve(self.scanResults);
+		return defered.promise;
+	};
+
+	var populateDeviceInfo = function(deviceAttributes, currentDevices) {
+		var defered = q.defer();
+
+		var deviceKey = deviceAttributes.key;
+		var dev = currentDevices[deviceKey].device;
+		var attrs = dev.savedAttributes;
+		var attrKeys = Object.keys(attrs);
+		var dt = dev.savedAttributes.deviceType;
+		var dtStr = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
+		var reqKeys = REQUIRED_INFO_BY_DEVICE[dtStr];
+		
+		// Add flag indicating whether or not device data has been acquired
+		deviceAttributes.acquiredRequiredData = false;
+
+		// Save any immediately available data from cached device values and
+		// create a list of missing information.
+		var missingKeys = [];
+		reqKeys.forEach(function(reqKey) {
+			if(attrKeys.indexOf(reqKey) < 0) {
+				missingKeys.push(reqKey);
+			} else {
+				deviceAttributes[reqKey] = data_parser.parseResult(
+					reqKey,
+					attrs[reqKey],
+					dt
+				);
+			}
+		});
+
+		// Also get & save custom attributes that the "deviceScanner.findAllDevices" adds
+		// deviceType, deviceTypeName, serialNumber, acquiredRequiredData, connectionTypes
+		var availableKeys = [
+			'deviceType', 'deviceTypeString', 'serialNumber'
+		];
+		availableKeys.forEach(function(availableKey) {
+			deviceAttributes[availableKey] = attrs[availableKey];
+		});
+
+		// Save the connected devices deivce type.
+		deviceAttributes.connectionType = getInitialConnectionTypeData(
+			attrs.deviceType,
+			attrs.connectionType,
+			attrs.ip,
+			'connected'
+		);
+
+		// Save mock-device flag
+		deviceAttributes.isMockDevice = dev.isMockDevice;
+
+		// If there is any missing information, query the device for the data.
+		if(missingKeys.length > 0) {
+			self.emit(eventList.COLLECTING_DATA_FROM_CONNECTED_DEVICE, {
+				'serialNumber': attrs.serialNumber,
+				'deviceType': attrs.deviceType,
+				'deviceTypeString': attrs.deviceTypeString,
+				'connectionType': attrs.connectionType,
+				'ip': attrs.ip,
+				'missingKeys': missingKeys
+			});
+
+			dev.iReadMultiple(missingKeys)
+			.then(function(missingVals) {
+				var i;
+				for(i = 0; i < missingVals.length; i++) {
+					var addr = missingVals[i].address;
+					if(!missingVals[i].isErr) {
+						deviceAttributes[addr] = missingVals[i].data;
+					} else {
+						var info = ljmConstants.getAddressInfo(addr);
+						var val;
+						if(info.typeString === 'STRING') {
+							val = data_parser.parseResult(addr, 'Unknown');
+						} else {
+							val = data_parser.parseResult(addr, 0);
+						}
+						val.isError = true;
+						deviceAttributes[addr] = val;
+					}
+					
+				}
+				deviceAttributes.acquiredRequiredData = true;
+				defered.resolve(deviceAttributes);
+			});
+		} else {
+			deviceAttributes.acquiredRequiredData = true;
+			defered.resolve(deviceAttributes);
+			defered.resolve();
+		}
+		return defered.promise;
+	};
+	
+	var getCurrentDeviceListing = function(currentDevices) {
+		var defered = q.defer();
+		self.activeDeviceResults = [];
+		var currentDeviceListing = [];
+		var promises = [];
+		var deviceKeys = Object.keys(currentDevices);
+		deviceKeys.forEach(function(deviceKey) {
+			var devInfo = {
+				'key': deviceKey
+			};
+			currentDeviceListing.push(devInfo);
+			promises.push(populateDeviceInfo(devInfo, currentDevices));
+		});
+
+		q.allSettled(promises)
+		.then(function(res) {
+			self.activeDeviceResults = currentDeviceListing;
+			defered.resolve();
+		}, function(err) {
+			console.log('Error finalizeScanResult');
+			defered.reject();
+		});
+		return defered.promise;
+	};
+	var getFindAllDevices = function(currentDevices) {
 		var findAllDevices = function() {
 			var defered = q.defer();
 			var promises = SCAN_REQUEST_LIST.map(scanForDevices);
+			if(currentDevices) {
+				if(currentDevices.length > 0) {
+					// Add task that queries currently connected devices for their data.
+					promises.push(getCurrentDeviceListing(currentDevices));
+				}
+			}
 
 			q.allSettled(promises)
 			.then(function(res) {
-				defered.resolve(self.scanResults);
+				self.emit(eventList.COMBINING_SCAN_RESULTS);
+				combineScanResults()
+				.then(defered.resolve, defered.reject);
 			}, function(err) {
 				// console.log("scan error", err);
 				defered.reject(self.scanResults);
@@ -663,11 +856,12 @@ var deviceScanner = function() {
 		self.scanInProgress = false;
 		return defered.promise;
 	};
-	this.findAllDevices = function(currentDeviceList) {
+	this.findAllDevices = function(currentDevices) {
 		var defered = q.defer();
 		if(!self.scanInProgress) {
 			self.scanInProgress = true;
 			self.scanResults = [];
+			self.activeDeviceResults = [];
 
 			var getOnError = function(msg) {
 				return function(err) {
@@ -679,7 +873,7 @@ var deviceScanner = function() {
 			};
 			saveDriverOldfwState()
 			.then(disableDriverOldfwState, getOnError('saveDriverOldfwState'))
-			.then(getFindAllDevices(currentDeviceList), getOnError('disableDriverOldfwState'))
+			.then(getFindAllDevices(currentDevices), getOnError('disableDriverOldfwState'))
 			.then(restoreDriverOldfwState, getOnError('getFindAllDevices'))
 			.then(populateMissingScanData, getOnError('restoreDriverOldfwState'))
 			.then(returnResults, getOnError('populateMissingScanData'))

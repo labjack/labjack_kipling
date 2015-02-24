@@ -1,5 +1,5 @@
 
-var device_scanner = require('../lib/device_scanner');
+var device_scanner = require('../lib/ljswitchboard-device_scanner').getDeviceScanner();
 
 exports.tests = {
 	'basic test': function(test) {
