@@ -128,6 +128,9 @@ function createDeviceController(io_interface) {
 	this.listAllDevices = function() {
 		return callFunc('listAllDevices');
 	};
+	this.getCachedListAllDevices = function() {
+		return callFunc('getCachedListAllDevice');
+	};
 
 	/**
 	 * Get the device_manager's handle for a connected device.

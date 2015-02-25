@@ -461,6 +461,13 @@ function createDeviceKeeper(io_delegator, link) {
 		return defered.promise;
 	};
 
+	this.getCachedListAllDevice = function() {
+		var defered = q.defer();
+		deviceScanner.getLastFoundDevices()
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+
 	var self = this;
 }
 
