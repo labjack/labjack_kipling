@@ -107,6 +107,44 @@ exports.tests = {
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
+	'check DGT_INSTALLED_OPTIONS -decode': function(test) {
+		var vals = [
+			{'val': 2, 'temperature': true, 'light': true, 'humidity': false, 'subclass': '-TL'},
+			{'val': 3, 'temperature': true, 'light': true, 'humidity': true, 'subclass': '-TLH'},
+		];
+		var results = [];
+		var reqResults = [];
+
+		vals.forEach(function(val) {
+			var reg = 'DGT_INSTALLED_OPTIONS';
+			var dt = 'Digit';
+			var subClass = val.subclass;
+			results.push(data_parser.parseResult(reg, val.val));
+			reqResults.push({
+				'register': reg,
+				'name': constants.getAddressInfo(reg).data.name,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'temperature': val.temperature,
+				'light': val.light,
+				'humidity': val.humidity,
+				'subclass': subClass,
+				'productType': dt+subClass,
+			});
+		});
+
+		var resKeys = Object.keys(results[0]);
+		var reqKeys = Object.keys(reqResults[0]);
+		var i;
+		for(i = 0; i < resKeys.length; i++) {
+			if(resKeys[i] !== reqKeys[i]) {
+				console.log('HERE', i, resKeys[i], reqKeys[i]);
+			}
+		}
+		test.deepEqual(resKeys, reqKeys, 'Keys are not equal');
+		test.deepEqual(results, reqResults, 'results are not equal');
+		test.done();
+	},
 	'check WIFI_STATUS - decode': function(test) {
 		var wifiData = {
 			2900: 'Associated',

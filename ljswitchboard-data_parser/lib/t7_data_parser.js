@@ -1,5 +1,5 @@
 
-
+var shared_data_parser = require('./shared_data_parser');
 var checkStr = function(str) {
 	if(str) {
 		return str;
@@ -46,12 +46,7 @@ var ipDataType = {
 	'encode': encodeIP
 };
 
-var firmwareVersionRounder = function(res) {
-	return {
-		'val': parseFloat(res.toFixed(4)),
-		'str': res.toFixed(4)
-	};
-};
+var firmwareVersionRounder = shared_data_parser.firmwareVersionRounder;
 
 var T7_LIST = {
 	'AIN#(0:254)': {
@@ -98,6 +93,7 @@ var T7_LIST = {
 	},
 	'WIFI_RSSI': {
 		'images': [
+			{'val':  0,'img':'wifiRSSI-0'},
 			{'val':-45,'img':'wifiRSSI-4'},
 			{'val':-60,'img':'wifiRSSI-3'},
 			{'val':-65,'img':'wifiRSSI-2'},
@@ -132,12 +128,6 @@ var T7_LIST = {
 				'str': str
 			};
 		}
-	},
-	'FIRMWARE_VERSION': {
-		'decode': firmwareVersionRounder
-	},
-	'BOOTLOADER_VERSION': {
-		'decode': firmwareVersionRounder,
 	},
 	'WIFI_VERSION': {
 		'decode': firmwareVersionRounder,
