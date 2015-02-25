@@ -12,7 +12,12 @@ exports.tests = {
 			console.log('Finished Scanning');
 			console.log('Number of Devices', res.length);
 			res.forEach(function(device) {
-				console.log('Connection Types', device.connectionTypes.length);
+				console.log(
+					'Connection Types',
+					device.connectionTypes.length,
+					device.deviceType,
+					device.productType
+				);
 				device.connectionTypes.forEach(function(connectionType) {
 					console.log('  - ', connectionType.name, connectionType.insertionMethod, connectionType.verified);
 				});

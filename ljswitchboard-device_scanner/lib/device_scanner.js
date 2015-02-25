@@ -30,6 +30,24 @@ var REQUIRED_INFO_BY_DEVICE = {
         'FIRMWARE_VERSION'
 	]
 };
+var getProductType = {
+	'LJM_dtDIGIT': function(attrs) {
+		var name = 'Digit-Variant';
+		if(attrs.DGT_INSTALLED_OPTIONS) {
+			name = attrs.DGT_INSTALLED_OPTIONS.productType;
+		}
+		return name;
+	},
+	'LJM_dtT7': function(attrs) {
+		var name = 'T7-Variant';
+		if(attrs.HARDWARE_INSTALLED) {
+			if(attrs.HARDWARE_INSTALLED.productType) {
+				name = attrs.HARDWARE_INSTALLED.productType;
+			}
+		}
+		return name;
+	}
+};
 
 exports.REQUIRED_INFO_BY_DEVICE = REQUIRED_INFO_BY_DEVICE;
 
@@ -123,7 +141,8 @@ var deviceScanner = function() {
 			ip = newScanResult.ipAddress;
 			var deviceInfo = {
 				'deviceType': dt,
-				'deviceTypeString': driver_const.DEVICE_TYPE_NAMES[dt],
+				'deviceTypeString': driver_const.DRIVER_DEVICE_TYPE_NAMES[dt],
+				'deviceTypeName': driver_const.DEVICE_TYPE_NAMES[dt],
 				'serialNumber': newScanResult.serialNumber,
 				'acquiredRequiredData': false,
 				'connectionTypes': [getInitialConnectionTypeData(dt, ct, ip)],
@@ -287,7 +306,7 @@ var deviceScanner = function() {
 				data.openedDevice = true;
 				defered.resolve(data);
 			}, function(err) {
-					console.log('!! Failed to open Device', serialNumber, openParameters.ct, err);
+					console.info('!! Device Scanner Failed to open Device', serialNumber, openParameters.ct, err);
 					self.emit(eventList.FAILED_DEVICE_CONNECTION_VERIFICATION, openParameters);
 					defered.resolve(data);
 			});
@@ -353,7 +372,7 @@ var deviceScanner = function() {
 						}
 						defered.resolve(data);
 					}, function(err) {
-						console.log('!! Error collecting info!!');
+						console.warn('!! Error collecting info!!');
 						defered.resolve(data);
 					});
 				} else {
@@ -363,7 +382,7 @@ var deviceScanner = function() {
 				defered.resolve(data);
 			}
 		} else {
-			console.log('Skipping Collect', data.scanResult.serialNumber, data.openParameters.ct);
+			console.info('Skipping Collect', data.scanResult.serialNumber, data.openParameters.ct);
 			data.scanResult.acquiredRequiredData = true;
 			defered.resolve(data);
 		}
@@ -450,7 +469,7 @@ var deviceScanner = function() {
 			.then(function(res) {
 				defered.resolve(scanResult);
 			}, function(err) {
-				console.log('Error finalizeScanResult');
+				console.error('Error finalizeScanResult');
 				defered.reject(scanResult);
 			});
 		}
@@ -490,7 +509,7 @@ var deviceScanner = function() {
 				connectionType,
 				addresses,
 				function(err) {
-					console.log('listAllExtended err', err);
+					console.warn('listAllExtended err', err);
 					defered.reject(err);
 				}, function(res) {
 					scanRequest.stopTime = new Date();
@@ -588,7 +607,7 @@ var deviceScanner = function() {
 		.then(function(results) {
 			defered.resolve();
 		}, function(err) {
-			console.log("singleScan error", err);
+			console.error("singleScan error", err);
 			defered.reject();
 		});
 		return defered.promise;
@@ -754,7 +773,7 @@ var deviceScanner = function() {
 			self.activeDeviceResults = currentDeviceListing;
 			defered.resolve();
 		}, function(err) {
-			console.log('Error finalizeScanResult');
+			console.error('Error finalizeScanResult');
 			defered.reject();
 		});
 		return defered.promise;
@@ -830,6 +849,9 @@ var deviceScanner = function() {
 			var ljmDT = driver_const.DRIVER_DEVICE_TYPE_NAMES[deviceType];
 			var requiredKeys = REQUIRED_INFO_BY_DEVICE[ljmDT];
 			var availableKeys = Object.keys(scanResult);
+			var productType = getProductType[ljmDT](scanResult);
+			scanResult.productType = productType;
+			// console.log('scan result device name', deviceName);
 			var missingKeys = [];
 			requiredKeys.forEach(function(requiredKey) {
 				if(availableKeys.indexOf(requiredKey) < 0) {
@@ -884,7 +906,7 @@ var deviceScanner = function() {
 
 			var getOnError = function(msg) {
 				return function(err) {
-					console.log('An Error', err, msg);
+					console.error('An Error', err, msg);
 					var errDefered = q.defer();
 					errDefered.reject(err);
 					return errDefered.promise;
