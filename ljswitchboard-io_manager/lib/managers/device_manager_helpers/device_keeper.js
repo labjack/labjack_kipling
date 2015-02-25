@@ -461,7 +461,7 @@ function createDeviceKeeper(io_delegator, link) {
 		return defered.promise;
 	};
 
-	this.getCachedListAllDevice = function() {
+	this.getCachedListAllDevices = function() {
 		var defered = q.defer();
 		deviceScanner.getLastFoundDevices()
 		.then(defered.resolve, defered.reject);

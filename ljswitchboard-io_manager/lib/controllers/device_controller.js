@@ -129,7 +129,7 @@ function createDeviceController(io_interface) {
 		return callFunc('listAllDevices');
 	};
 	this.getCachedListAllDevices = function() {
-		return callFunc('getCachedListAllDevice');
+		return callFunc('getCachedListAllDevices');
 	};
 
 	/**

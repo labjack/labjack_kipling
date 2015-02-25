@@ -100,6 +100,15 @@ exports.tests = {
 			test.done();
 		});
 	},
+	'cached listAllDevices - empty': function(test) {
+		device_controller.getCachedListAllDevices()
+		.then(function(res) {
+			// This result should be an empty array because the listAllDevices
+			// function hasn't been called yet.
+			test.deepEqual(res, [], 'array should be empty');
+			test.done();
+		});
+	},
 	'list all devices': function(test) {
 		// Mocking out the listAllDevices function call sounds like a night mare
 		// Therefore, the solution to verifying its functionality will be to 
@@ -126,6 +135,20 @@ exports.tests = {
 				console.log('isMockDevice', device.isMockDevice);
 				console.log('isActive', device.isActive);
 			});
+			test.done();
+		});
+	},
+	'cached listAllDevices - populated': function(test) {
+		device_controller.getCachedListAllDevices()
+		.then(function(res) {
+			// This result should not be an empty array because the 
+			// listAllDevices function has been called.
+			var len = res.length;
+			if(len > 0) {
+				test.ok(true);
+			} else {
+				test.ok(false, 'array should not be empty');
+			}
 			test.done();
 		});
 	},
