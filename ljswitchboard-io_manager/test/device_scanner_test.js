@@ -25,6 +25,14 @@ var device;
 
 var capturedEvents = [];
 
+var getDeviceControllerEventListener = function(eventKey) {
+	var deviceControllerEventListener = function(eventData) {
+		console.log('Captured an event', eventKey);
+		capturedEvents.push({'eventName': eventKey, 'data': eventData});
+	};
+	return deviceControllerEventListener;
+};
+
 exports.tests = {
 	'initialization': function(test) {
 		// Require the io_manager library
@@ -44,17 +52,13 @@ exports.tests = {
 			driver_controller = io_interface.getDriverController();
 			device_controller = io_interface.getDeviceController();
 
-			// Attach event listener to the device_controller object to detect
-			// when a device is opened.
-			var newDevEvent = constants.DEVICE_CONTROLLER_DEVICE_OPENED;
-			device_controller.on(newDevEvent, function(data) {
-				capturedEvents.push({'eventName':newDevEvent,'data':data});
-				// console.log('Device Opened event:', data.serialNumber);
-			});
-			var closedDevEvent = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
-			device_controller.on(closedDevEvent, function(data) {
-				capturedEvents.push({'eventName':closedDevEvent,'data':data});
-				// console.log('Device Closed event:', data);
+			var eventKeys = Object.keys(constants.deviceControllerEvents);
+			eventKeys.forEach(function(eventKey) {
+				var eventName = constants.deviceControllerEvents[eventKey];
+				device_controller.on(
+					eventName,
+					getDeviceControllerEventListener(eventName)
+				);
 			});
 
 			test.ok(true);
@@ -64,26 +68,82 @@ exports.tests = {
 			test.done();
 		});
 	},
+	'open mock device': function(test) {
+		var params = {
+			'deviceType': 'LJM_dtT7',
+			'connectionType': 'LJM_ctUSB',
+			'identifier': 'LJM_idANY',
+			'mockDevice': true
+		};
+
+		device_controller.openDevice(params)
+		.then(function(newDevice) {
+			device = newDevice;
+			setTimeout(function() {
+				if(capturedEvents.length != 1) {
+					test.ok(false, 'unexpected number of events triggered.');
+				} else {
+					test.ok(true);
+				}
+				test.done();
+			},50);
+		}, function(err) {
+			console.log("Error opening device", err);
+			test.ok(false, 'failed to create new device object');
+			test.done();
+		});
+	},
 	'get device listing': function(test) {
 		device_controller.getDeviceListing()
-		.then(function(res) {
-			console.log('Current Listing', res);
+		.then(function(foundDevices) {
+			test.strictEqual(foundDevices.length, 1);
 			test.done();
 		});
 	},
 	'list all devices': function(test) {
-		console.log('Need to integrate the getDeviceListing function with the listAllDevices function');
-		console.log('In the device_keeper.js file.  use the 1st func to apply data to the secondary one regarding "already open" and add any un-found devices...');
+		// Mocking out the listAllDevices function call sounds like a night mare
+		// Therefore, the solution to verifying its functionality will be to 
+		// check for a properly formatted & discovered mock-device.
 		device_controller.listAllDevices()
 		.then(function(res) {
 			console.log('Number of Devices', res.length);
 			res.forEach(function(device) {
-				console.log('Connection Types', device.connectionTypes.length);
+				console.log(
+					'Connection Types',
+					device.connectionTypes.length,
+					device.deviceTypeString,
+					device.productType
+				);
 				device.connectionTypes.forEach(function(connectionType) {
-					console.log('  - ', connectionType.name, connectionType.insertionMethod, connectionType.verified);
+					console.log(
+						'  - ',
+						connectionType.name,
+						connectionType.insertionMethod,
+						connectionType.verified,
+						connectionType.isActive);
 				});
 				// console.log('Available Data', Object.keys(device));
+				console.log('isMockDevice', device.isMockDevice);
+				console.log('isActive', device.isActive);
 			});
+			test.done();
+		});
+	},
+	'close mock device': function(test) {
+		capturedEvents = [];
+		device.close()
+		.then(function(res) {
+			setTimeout(function() {
+				if(capturedEvents.length != 1) {
+					test.ok(false, 'unexpected number of events triggered.');
+				} else {
+					test.ok(true);
+				}
+				test.done();
+			},50);
+		}, function(err) {
+			console.log('Failed to close', err);
+			test.ok(false);
 			test.done();
 		});
 	},

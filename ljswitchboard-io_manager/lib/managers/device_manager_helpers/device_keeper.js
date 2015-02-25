@@ -15,15 +15,20 @@ var DEVICE_CONTROLLER_DEVICE_CLOSED = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
 
 var labjack_nodejs = require('labjack-nodejs');
 var driver_const = labjack_nodejs.driver_const;
-var constants = require('../../common/constants');
 var device_generator = require('./device_generator');
-var device_scanner = require('ljswitchboard-device_scanner');
+var device_scanner_obj = require('ljswitchboard-device_scanner');
+var device_scanner = device_scanner_obj.getDeviceScanner();
+var device_scanner_events = device_scanner_obj.eventList;
+var data_parser = require('ljswitchboard-data_parser');
+var modbus_map = require('ljswitchboard-modbus_map');
+var ljmConstants = modbus_map.getConstants();
 
 
 function createDeviceKeeper(io_delegator, link) {
 	var send = link.send;
 	var sendMessage = link.sendMessage;
 	var deviceScanner = new device_scanner.deviceScanner();
+
 
 	var deviceSendMessage = function(deviceKey, message) {
 		send({
@@ -37,6 +42,20 @@ function createDeviceKeeper(io_delegator, link) {
 			'data': data
 		});
 	};
+
+	// Attach to deviceScanner events
+	var getDeviceScannerEventListener = function(eventKey) {
+		var deviceScannerEventListener = function(data) {
+			// console.log('Device Keeper, deviceScanner event', eventKey);
+			sendEvent(eventKey, data);
+		};
+		return deviceScannerEventListener;
+	};
+
+	var eventKeys = Object.keys(device_scanner_events);
+	eventKeys.forEach(function(eventKey) {
+		deviceScanner.on(eventKey, getDeviceScannerEventListener(eventKey));
+	});
 
 	this.devices = {};
 
@@ -375,7 +394,7 @@ function createDeviceKeeper(io_delegator, link) {
 	 */
 	this.getDeviceListing = function(reqFilters, requestdAttributes) {
 		var defered = q.defer();
-		var filters = {'enableMockDevices': false};
+		var filters = {'enableMockDevices': true};
 		if(reqFilters) {
 			if(Array.isArray(reqFilters)) {
 				reqFilters.forEach(function(reqFilter) {
@@ -433,11 +452,11 @@ function createDeviceKeeper(io_delegator, link) {
 		defered.resolve(listing);
 		return defered.promise;
 	};
-
+	
 	this.listAllDevices = function() {
 		var defered = q.defer();
-		self.getDeviceListing()
-		.then(deviceScanner.findAllDevices)
+
+		deviceScanner.findAllDevices(self.devices)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
