@@ -925,6 +925,15 @@ var deviceScanner = function() {
 		}
 		return defered.promise;
 	};
+	this.getLastFoundDevices = function() {
+		var defered = q.defer();
+		if(!self.scanInProgress) {
+			defered.resolve(self.scanResults);
+		} else {
+			defered.resolve([]);
+		}
+		return defered.promise;
+	}
 
 	var self = this;
 };
