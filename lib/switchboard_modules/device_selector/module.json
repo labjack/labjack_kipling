@@ -1,5 +1,8 @@
 {
     "name": "device_selector",
     "humanName": "Device Selector",
-    "version": "0.0.1"
+    "version": "0.0.1",
+    "jsFiles": [
+    	"view_generator.js"
+    ]
 }

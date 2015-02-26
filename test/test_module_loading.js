@@ -1,5 +1,6 @@
 var q = require('q');
 var path = require('path');
+var fs = require('fs.extra');
 var module_manager = require('../lib/ljswitchboard-module_manager');
 
 var moduleNames = [];
@@ -34,7 +35,19 @@ var FRAMEWORK_ADDITIONS = {
 };
 
 var unfinishedModules = ['device_selector', 'settings'];
-
+var cwd = process.cwd();
+var testDir = 'test_persistent_data_dir';
+var testPath = path.normalize(path.join(cwd, testDir));
+var testPersistentDataFilePath = testPath;
+var clearPersistentTestData = function(test) {
+	fs.rmrf(testPersistentDataFilePath, function(err) {
+		if(err) {
+			test.ok(false, 'failed to clear test_persistent_data_dir');
+		}
+		// setTimeout(test.done, 3000);
+		test.done();
+	});
+};
 var addFrameworkFiles = function(fileType, frameworkType, origFiles) {
 	var outputData = [];
 	var isValidFramework = false;
@@ -104,7 +117,11 @@ var checkLoadedModuleData = function(test, moduleData) {
 			if(unfinishedModules.indexOf(moduleData.name) < 0) {
 				test.ok(!loadedEmptyFile, 'a loaded file was empty');
 			}
-			test.deepEqual(loadedCSSFiles, requiredCSSFiles, 'all js files not loaded: ' + moduleData.name);
+			test.deepEqual(
+				loadedCSSFiles,
+				requiredCSSFiles,
+				'all js files not loaded: ' + moduleData.name
+			);
 		},
 		'js': function(jsFiles) {
 			var isValid = Array.isArray(jsFiles);
@@ -150,7 +167,11 @@ var checkLoadedModuleData = function(test, moduleData) {
 			if(unfinishedModules.indexOf(moduleData.name) < 0) {
 				test.ok(!loadedEmptyFile, 'a loaded file was empty');
 			}
-			test.deepEqual(loadedJSFiles, requiredJSFiles, 'all js files not loaded: ' + moduleData.name);
+			test.deepEqual(
+				loadedJSFiles,
+				requiredJSFiles,
+				'all js files not loaded: ' + moduleData.name
+			);
 		},
 		'html': function(htmlFiles) {
 			var isValid = Array.isArray(htmlFiles);
@@ -216,6 +237,9 @@ var printLintError = function(lintResult) {
 	});
 };
 
+
+var testModuleName = 'device_selector';
+
 var tests = {
 	'getModuleNames': function(test) {
 		module_manager.getModulesList()
@@ -241,126 +265,177 @@ var tests = {
 			test.done();
 		});
 	},
+	'clearPersistentTestData - initial': clearPersistentTestData,
 	'loadModuleDataByName': function(test) {
 		// console.log('Modules...', moduleNames);
 		var startTime = new Date();
-		module_manager.loadModuleDataByName('reset')
+		// disable module linting.
+		module_manager.disableLinting();
+		
+		// Configure the persistent data directory
+		module_manager.configurePersistentDataPath(testPersistentDataFilePath);
+
+		module_manager.loadModuleDataByName(testModuleName)
 		.then(function(moduleData) {
 			var endTime = new Date();
-			console.log('loadModule duration', endTime - startTime);
+			console.log('  - loadModule duration', endTime - startTime);
+			if(moduleData.json.data_init) {
+				test.deepEqual(
+					moduleData.startupData,
+					moduleData.json.data_init,
+					'startup data data did not load'
+				);
+			}
 			checkLoadedModuleData(test, moduleData);
 			test.done();
 		});
 	},
-	'loadAllModulesByName': function(test) {
-		loadTimes.byName = {
-			'start': new Date(),
-			'end': null,
-			'duration': null
-		};
-		var promises = [];
-		var loadModule = function(moduleName) {
-			var defered = q.defer();
-			module_manager.loadModuleDataByName(moduleName)
-			.then(function(moduleData) {
-				checkLoadedModuleData(test, moduleData);
-				defered.resolve();
+	'readWriteReadModuleStartupData': function(test) {
+		var originalStartupData = {};
+		module_manager.getModuleStartupData(testModuleName)
+		.then(function(startupData) {
+			// Save the startup data to a different object
+			Object.keys(startupData).forEach(function(key) {
+				originalStartupData[key] = startupData[key];
 			});
-			return defered.promise;
-		};
-		moduleNames.forEach(function(moduleName) {
-			promises.push(loadModule(moduleName));
-		});
+			// Add data to the object & save/re-read it.
+			startupData.myNewAttr = 'abab';
+			module_manager.saveModuleStartupData(testModuleName, startupData)
+			.then(module_manager.getModuleStartupData)
+			.then(function(newStartupData) {
+				// Make sure the file has changed appropriately
+				test.deepEqual(
+					startupData,
+					newStartupData,
+					'startup data did not change'
+				);
+				startupData.myNewAttr = 'abab';
 
-		q.allSettled(promises)
-		.then(function(collectedData) {
-			test.ok(true, 'test finished');
-			loadTimes.byName.end = new Date();
-			loadTimes.byName.duration = loadTimes.byName.end - loadTimes.byName.start;
-			test.done();
-		}, function(err) {
-			test.ok(false, 'test failed');
-			test.done();
-		});
-	},
-	'loadAllModulesByObject': function(test) {
-		loadTimes.byObject = {
-			'start': new Date(),
-			'end': null,
-			'duration': null
-		};
-		var promises = [];
-		var loadModule = function(moduleObj) {
-			var defered = q.defer();
-			module_manager.loadModuleData(moduleObj)
-			.then(function(moduleData) {
-				checkLoadedModuleData(test, moduleData);
-				defered.resolve();
+				// Return it back to its original state
+				module_manager.revertModuleStartupData(testModuleName)
+				.then(module_manager.getModuleStartupData)
+				.then(function(finalStartupData) {
+					// Make sure that the file has changed back to its original 
+					// state.
+					test.deepEqual(
+						finalStartupData,
+						originalStartupData,
+						'startup data did not revert');
+					test.done();
+				});
 			});
-			return defered.promise;
-		};
-		var moduleKeys = Object.keys(savedModules);
-		moduleKeys.forEach(function(moduleKey) {
-			promises.push(loadModule(savedModules[moduleKey]));
-		});
-
-		q.allSettled(promises)
-		.then(function(collectedData) {
-			test.ok(true, 'test finished');
-			loadTimes.byObject.end = new Date();
-			loadTimes.byObject.duration = loadTimes.byObject.end - loadTimes.byObject.start;
-			test.done();
-		}, function(err) {
-			test.ok(false, 'test failed');
-			test.done();
 		});
 	},
-	'check cached files': function(test) {
-		var cachedFiles = module_manager.getFileCache();
-		var cachedFileKeys = Object.keys(cachedFiles);
-		console.log('Number of cached files', cachedFileKeys.length);
-		console.log(JSON.stringify(loadTimes, null, 2));
-		test.done();
-	},
-	'check for lint errors': function(test) {
-		var loadedFileKeys = Object.keys(loadedFiles);
-		console.log('');
-		console.log('Num Checked Files', loadedFileKeys.length);
-		console.log('');
-		var numLintedFiles = 0;
-		var warnings = [];
-		var errors = [];
-		loadedFileKeys.forEach(function(loadedFileKey) {
-			var loadedFile = loadedFiles[loadedFileKey];
-			if(loadedFile.lintResult) {
-				numLintedFiles += 1;
-				if(loadedFile.lintResult.isWarning) {
-					warnings.push(loadedFile);
-				}
-				if(loadedFile.lintResult.isError) {
-					errors.push(loadedFile);
-				}
+	// 'loadAllModulesByName': function(test) {
+	// 	loadTimes.byName = {
+	// 		'start': new Date(),
+	// 		'end': null,
+	// 		'duration': null
+	// 	};
+	// 	var promises = [];
+	// 	var loadModule = function(moduleName) {
+	// 		var defered = q.defer();
+	// 		module_manager.loadModuleDataByName(moduleName)
+	// 		.then(function(moduleData) {
+	// 			checkLoadedModuleData(test, moduleData);
+	// 			defered.resolve();
+	// 		});
+	// 		return defered.promise;
+	// 	};
+	// 	moduleNames.forEach(function(moduleName) {
+	// 		promises.push(loadModule(moduleName));
+	// 	});
 
-				if(!loadedFile.lintResult.overallResult) {
-					console.log(
-						'-------------------',
-						'Lint Error Detected: ' + loadedFile.fileName,
-						'-------------------'
-					);
-					console.log(loadedFile.fileName);
-					console.log(loadedFile.filePath);
-					printLintError(loadedFile.lintResult);
-					console.log('');
-				}
-			}
-		});
+	// 	q.allSettled(promises)
+	// 	.then(function(collectedData) {
+	// 		test.ok(true, 'test finished');
+	// 		loadTimes.byName.end = new Date();
+	// 		loadTimes.byName.duration = loadTimes.byName.end - loadTimes.byName.start;
+	// 		test.done();
+	// 	}, function(err) {
+	// 		test.ok(false, 'test failed');
+	// 		test.done();
+	// 	});
+	// },
+	// 'loadAllModulesByObject': function(test) {
+	// 	loadTimes.byObject = {
+	// 		'start': new Date(),
+	// 		'end': null,
+	// 		'duration': null
+	// 	};
+	// 	var promises = [];
+	// 	var loadModule = function(moduleObj) {
+	// 		var defered = q.defer();
+	// 		module_manager.loadModuleData(moduleObj)
+	// 		.then(function(moduleData) {
+	// 			checkLoadedModuleData(test, moduleData);
+	// 			defered.resolve();
+	// 		});
+	// 		return defered.promise;
+	// 	};
+	// 	var moduleKeys = Object.keys(savedModules);
+	// 	moduleKeys.forEach(function(moduleKey) {
+	// 		promises.push(loadModule(savedModules[moduleKey]));
+	// 	});
 
-		console.log('Number of linted files', numLintedFiles);
-		console.log('Number of warnings', warnings.length);
-		console.log('Number of errors', errors.length);
+	// 	q.allSettled(promises)
+	// 	.then(function(collectedData) {
+	// 		test.ok(true, 'test finished');
+	// 		loadTimes.byObject.end = new Date();
+	// 		loadTimes.byObject.duration = loadTimes.byObject.end - loadTimes.byObject.start;
+	// 		test.done();
+	// 	}, function(err) {
+	// 		test.ok(false, 'test failed');
+	// 		test.done();
+	// 	});
+	// },
+	// 'check cached files': function(test) {
+	// 	var cachedFiles = module_manager.getFileCache();
+	// 	var cachedFileKeys = Object.keys(cachedFiles);
+	// 	console.log('Number of cached files', cachedFileKeys.length);
+	// 	console.log(JSON.stringify(loadTimes, null, 2));
+	// 	test.done();
+	// },
+	// 'check for lint errors': function(test) {
+	// 	var loadedFileKeys = Object.keys(loadedFiles);
+	// 	console.log('');
+	// 	console.log('Num Checked Files', loadedFileKeys.length);
+	// 	console.log('');
+	// 	var numLintedFiles = 0;
+	// 	var warnings = [];
+	// 	var errors = [];
+	// 	loadedFileKeys.forEach(function(loadedFileKey) {
+	// 		var loadedFile = loadedFiles[loadedFileKey];
+	// 		if(loadedFile.lintResult) {
+	// 			numLintedFiles += 1;
+	// 			if(loadedFile.lintResult.isWarning) {
+	// 				warnings.push(loadedFile);
+	// 			}
+	// 			if(loadedFile.lintResult.isError) {
+	// 				errors.push(loadedFile);
+	// 			}
 
-		test.done();
-	}
+	// 			if(!loadedFile.lintResult.overallResult) {
+	// 				console.log(
+	// 					'-------------------',
+	// 					'Lint Error Detected: ' + loadedFile.fileName,
+	// 					'-------------------'
+	// 				);
+	// 				console.log(loadedFile.fileName);
+	// 				console.log(loadedFile.filePath);
+	// 				printLintError(loadedFile.lintResult);
+	// 				console.log('');
+	// 			}
+	// 		}
+	// 	});
+
+	// 	console.log('Number of linted files', numLintedFiles);
+	// 	console.log('Number of warnings', warnings.length);
+	// 	console.log('Number of errors', errors.length);
+
+	// 	test.done();
+	// },
+	'clearPersistentTestData - final': clearPersistentTestData,
 };
 
 exports.tests = tests;
