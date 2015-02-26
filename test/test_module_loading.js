@@ -39,13 +39,19 @@ var cwd = process.cwd();
 var testDir = 'test_persistent_data_dir';
 var testPath = path.normalize(path.join(cwd, testDir));
 var testPersistentDataFilePath = testPath;
+// disable module linting.
+module_manager.disableLinting();
+
+// Configure the persistent data directory
+module_manager.configurePersistentDataPath(testPersistentDataFilePath);
 var clearPersistentTestData = function(test) {
-	fs.rmrf(testPersistentDataFilePath, function(err) {
-		if(err) {
-			test.ok(false, 'failed to clear test_persistent_data_dir');
-		}
-		// setTimeout(test.done, 3000);
+	module_manager.resetModuleStartupData(
+		'I am self aware and will be deleting a LOT of things'
+	)
+	.then(function(res) {
 		test.done();
+	}, function(err) {
+		test.ok(false, 'failed to reset the persistent data dir');
 	});
 };
 var addFrameworkFiles = function(fileType, frameworkType, origFiles) {
@@ -269,11 +275,6 @@ var tests = {
 	'loadModuleDataByName': function(test) {
 		// console.log('Modules...', moduleNames);
 		var startTime = new Date();
-		// disable module linting.
-		module_manager.disableLinting();
-		
-		// Configure the persistent data directory
-		module_manager.configurePersistentDataPath(testPersistentDataFilePath);
 
 		module_manager.loadModuleDataByName(testModuleName)
 		.then(function(moduleData) {
