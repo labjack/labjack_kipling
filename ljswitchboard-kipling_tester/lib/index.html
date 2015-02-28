@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html id="mainHTMLWindow" style="overflow:hidden" class="fullPage">
+    <head>
+    	<script type='text/javascript' src="index.js"></script>
+        <script>
+            console.log('Loading Page Resources');
+
+            // Resources located in the -static_files directory
+            var resourceList = [
+                // CSS for bootstrap
+                'libs/bootstrap/css/bootstrap.docs.min.css',
+                'libs/bootstrap/css/bootstrap.min.css',
+
+                // CSS for bootmetro
+                'libs/bootmetro/css/bootmetro.min.css',
+                'libs/bootmetro/css/bootmetro-icons.min.css',
+                'libs/bootmetro/css/bootmetro-responsive.min.css',
+                'libs/bootmetro/css/bootmetro-ui-light.min.css',
+
+                // CSS for fixes to bootmetro & bootstrap
+                'css/bootmetro.fix.css',
+
+                // CSS for fixes to bootmetro & bootstrap
+                'css/bootmetro.fix.css',
+
+                // CSS for the switchboard base
+                'css/switchboard_base.css',
+
+                // ------------------ Require js files -----------------------//
+                // JS for jQuery
+                'libs/jquery/jquery-1.10.2.min.js',
+
+                // JS for bootmetro
+                'libs/bootmetro/js/bootmetro.min.js',
+
+                // JS for bootstrap
+                'libs/bootstrap/js/bootstrap.min.js',
+
+                // custom jquery ui stuff
+                'libs/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js',
+            ];
+            loadCoreResources(resourceList);
+
+            // Resources located in the local directory
+            var localResourceList = [
+
+            ];
+            loadLocalResources(localResourceList);
+            
+        </script>
+        <link rel="stylesheet" href="../node_modules/nodeunit/share/nodeunit.css" type="text/css" />
+    	<!--<script type='text/javascript' src="node_modules/nodeunit/lib/nodeunit.js"></script>
+        <script src="test/test_ljswitchboard.js"></script>-->
+    </head>
+    <body class="fullPage">
+        <div id="nodeunit_test_results" class="fullPage" style="overflow:auto">
+            <h1 id="nodeunit-header">Kipling Test Results</h1>
+        </div>
+		<script>
+			// nodeunit.run({
+			// 'Test LJSwitchboard': test_ljswitchboard,
+			// });
+		</script>
+
+		<!-- Perform other script includes -->
+        <!-- <script type="text/javascript" src="test_ljswitchboard.js"></script>-->
+    </body>
+</html>
+
