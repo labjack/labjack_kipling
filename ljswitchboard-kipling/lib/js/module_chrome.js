@@ -234,14 +234,16 @@ function createModuleChrome() {
 			MODULE_LOADER.loadModule(res.data)
 			.then(function(res) {
 				self.allowModuleToLoad = true;
-				// console.log('Finished Loading Module', res.name);
-				var keys = Object.keys(res);
-				var i;
-				for(i = 0; i < keys.length; i++) {
-					res[keys[i]] = null;
-					res[keys[i]] = undefined;
-					delete res[keys[i]];
-				}
+				// // console.log('Finished Loading Module', res.name);
+
+				// Delete loaded data (commented out to let gc handle it)
+				// var keys = Object.keys(res);
+				// var i;
+				// for(i = 0; i < keys.length; i++) {
+				// res[keys[i]] = null;
+				// res[keys[i]] = undefined;
+				// delete res[keys[i]];
+				// }
 			}, function(err) {
 				self.allowModuleToLoad = true;
 				console.error('Error loading module');

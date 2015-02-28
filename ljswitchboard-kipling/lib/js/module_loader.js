@@ -17,6 +17,15 @@ var fs = require('fs');
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
 
+// Configure the module_manager persistent data path.
+var kiplingExtractionPath = package_loader.getExtractionPath();
+var moduleDataPath = path.normalize(path.join(
+	kiplingExtractionPath,
+	'module_data'
+));
+module_manager.configurePersistentDataPath(moduleDataPath);
+module_manager.disableLinting();
+
 
 function createModuleLoader() {
 	this.stats = {
@@ -174,6 +183,33 @@ function createModuleLoader() {
 	};
 	var loadHTMLFiles = function(newModule) {
 		var defered = q.defer();
+		console.log('here', newModule.htmlFiles);
+	// 	try {
+	// 	if(newModule.htmlFiles.view) {
+	// 		var htmlFile = newModule.htmlFiles.view;
+	// 		var template = handlebars.compile(htmlFile);
+	// 		var data = template(newModule.context);
+	// 		data = MODULE_LOADER_VIEW_TEMPLATE({
+	// 			'numLoaded': newModule.context.stats.numLoaded,
+	// 			'viewData': data,
+	// 		});
+	// 		newModule.outputLocation.view.append(data);
+
+	// 		var elementID = MODULE_LOADER_VIEW_ID_TEMPLATE({
+	// 			'numLoaded': newModule.context.stats.numLoaded
+	// 		});
+	// 		$(elementID).ready(function() {
+	// 			defered.resolve(newModule);
+	// 			self.emit(eventList.VIEW_READY, {
+	// 				'name': newModule.name,
+	// 				'id': elementID,
+	// 				'data': newModule,
+	// 			});
+	// 		});
+	// 	}
+	// } catch(err) {
+	// 	console.log('err', err);
+	// }
 		newModule.html.forEach(function(htmlFile) {
 			if(htmlFile.fileName === 'view.html') {
 				var template = handlebars.compile(htmlFile.fileData);
@@ -191,7 +227,8 @@ function createModuleLoader() {
 					defered.resolve(newModule);
 					self.emit(eventList.VIEW_READY, {
 						'name': newModule.name,
-						'id': elementID
+						'id': elementID,
+						'data': newModule,
 					});
 				});
 			}

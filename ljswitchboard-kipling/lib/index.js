@@ -68,8 +68,27 @@ var showKiplingWindow = function() {
 	var defered = q.defer();
 	global[gns].splash_screen.update('Finished');
 	global[gns].window_manager.hideWindow('core');
+	// global[gns].window_manager.showWindow('core');
 	global[gns].window_manager.hideWindow('main');
 	global[gns].window_manager.showWindow('kipling');
+
+	// Try and execute tests
+	var isKiplingTester = false;
+	var windows = global[gns].window_manager.getWindows();
+	windows.forEach(function(win) {
+		if(win === 'kipling_tester') {
+			isKiplingTester = true;
+		}
+	});
+	if(isKiplingTester) {
+		global[gns].window_manager.showWindow('kipling_tester');
+		var testerWin = global[gns].window_manager.windowManager.managedWindows.kipling_tester;
+		testerWin = testerWin.win;
+		testerWin.focus();
+		var testerWindow = testerWin.window;
+		testerWindow.runTests();
+	}
+
 	defered.resolve();
 	return defered.promise;
 };

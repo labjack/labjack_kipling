@@ -7,15 +7,18 @@
 
             // Resources located in the -static_files directory
             var resourceList = [
+                // CSS for bootstrap
+                'libs/bootstrap/css/bootstrap.docs.min.css',
+                'libs/bootstrap/css/bootstrap.min.css',
+
                 // CSS for bootmetro
                 'libs/bootmetro/css/bootmetro.min.css',
                 'libs/bootmetro/css/bootmetro-icons.min.css',
                 'libs/bootmetro/css/bootmetro-responsive.min.css',
                 'libs/bootmetro/css/bootmetro-ui-light.min.css',
 
-                // CSS for bootstrap
-                'libs/bootstrap/css/bootstrap.docs.min.css',
-                'libs/bootstrap/css/bootstrap.min.css',
+                // CSS for fixes to bootmetro & bootstrap
+                'css/bootmetro.fix.css',
 
                 // CSS for fixes to bootmetro & bootstrap
                 'css/bootmetro.fix.css',
@@ -50,6 +53,9 @@
                 // JS for loading & manipulating modules
                 // Creates a window-wide element "MODULE_LOADER"
                 'js/module_loader.js',
+
+                // JS with convenient helper functions.
+                'js/module_utils.js',
             ];
             loadLocalResources(localResourceList);
             
