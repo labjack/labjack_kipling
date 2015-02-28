@@ -81,6 +81,19 @@ var corePackages = [
 	},
 	{
 		// 'name': 'ljswitchboard-core',
+		'name': 'kipling_tester',
+		'folderName': 'ljswitchboard-kipling_tester',
+		'loadMethod': 'managed',
+		'forceRefresh': false,
+		'startApp': false,
+		'directLoad': true,
+		'locations': [
+			// Add path to files for development purposes, out of a repo.
+			path.join(startDir, '..', 'ljswitchboard-kipling_tester')
+		]
+	},
+	{
+		// 'name': 'ljswitchboard-core',
 		'name': 'kipling',
 		'folderName': 'ljswitchboard-kipling',
 		'loadMethod': 'managed',
@@ -111,6 +124,7 @@ var checkRequirements = function() {
 	global[gns].splash_screen.update('Verifing LJM Installation');
 	global[gns].ljm_driver_checker.verifyLJMInstallation()
 	.then(function(res) {
+		global[gns].splash_screen.update('Finished Verifying LJM Installation');
 		console.log('result...', res);
 		var resultText = 'failed';
 		if(res.overallResult) {
@@ -146,6 +160,7 @@ var checkRequirements = function() {
 var mp = package_loader.getManagedPackages();
 var loadCorePackages = function() {
 	var defered = q.defer();
+	global[gns].splash_screen.update('Loading Packages');
 	
 	corePackages.forEach(function(corePackage) {
 		package_loader.loadPackage(corePackage);
