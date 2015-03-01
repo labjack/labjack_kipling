@@ -123,6 +123,7 @@ var deviceScanner = function() {
 			'str': driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct],
 			'name': driver_const.CONNECTION_TYPE_NAMES[ct],
 			'ipAddress': ip,
+			'safeIP': ip.split('.').join('_'),
 			'verified': isVerified,
 			'verificationAttempted': verificationAttempted,
 			'verifying': false,
