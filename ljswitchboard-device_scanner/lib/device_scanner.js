@@ -510,7 +510,8 @@ var deviceScanner = function() {
 				connectionType,
 				addresses,
 				function(err) {
-					console.warn('listAllExtended err', err);
+					// console.warn('listAllExtended err', err);
+					self.emit(eventList.LIST_ALL_EXTENDED_ERROR, err);
 					defered.reject(err);
 				}, function(res) {
 					scanRequest.stopTime = new Date();
