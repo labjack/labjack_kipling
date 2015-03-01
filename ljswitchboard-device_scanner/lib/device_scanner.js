@@ -30,7 +30,7 @@ var REQUIRED_INFO_BY_DEVICE = {
         'FIRMWARE_VERSION'
 	]
 };
-var getProductType = {
+var getModelType = {
 	'LJM_dtDIGIT': function(attrs) {
 		var name = 'Digit-Variant';
 		if(attrs.DGT_INSTALLED_OPTIONS) {
@@ -40,6 +40,24 @@ var getProductType = {
 	},
 	'LJM_dtT7': function(attrs) {
 		var name = 'T7-Variant';
+		if(attrs.HARDWARE_INSTALLED) {
+			if(attrs.HARDWARE_INSTALLED.productType) {
+				name = attrs.HARDWARE_INSTALLED.productType;
+			}
+		}
+		return name;
+	}
+};
+var getProductType = {
+	'LJM_dtDIGIT': function(attrs) {
+		var name = 'Digit';
+		if(attrs.DGT_INSTALLED_OPTIONS) {
+			name = attrs.DGT_INSTALLED_OPTIONS.productType;
+		}
+		return name;
+	},
+	'LJM_dtT7': function(attrs) {
+		var name = 'T7';
 		if(attrs.HARDWARE_INSTALLED) {
 			if(attrs.HARDWARE_INSTALLED.productType) {
 				name = attrs.HARDWARE_INSTALLED.productType;
@@ -853,7 +871,9 @@ var deviceScanner = function() {
 			var requiredKeys = REQUIRED_INFO_BY_DEVICE[ljmDT];
 			var availableKeys = Object.keys(scanResult);
 			var productType = getProductType[ljmDT](scanResult);
+			var modelType = getModelType[ljmDT](scanResult);
 			scanResult.productType = productType;
+			scanResult.modelType = modelType;
 			// console.log('scan result device name', deviceName);
 			var missingKeys = [];
 			requiredKeys.forEach(function(requiredKey) {
