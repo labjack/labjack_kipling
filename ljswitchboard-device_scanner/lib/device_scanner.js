@@ -88,6 +88,7 @@ var deviceScanner = function() {
 	this.activeDeviceResults = [];
 	this.currentDeviceList = null;
 	this.scanInProgress = false;
+	this.sortedResults = [];
 
 	var isNewDevice = function(newScanResult) {
 		var isNew = true;
@@ -894,7 +895,6 @@ var deviceScanner = function() {
 		var defered = q.defer();
 		var tmpSortedResults = {};
 		var i;
-		console.log('here');
 		for(i = 0; i < self.scanResults.length; i++) {
 			var str = self.scanResults[i].deviceTypeString;
 			if(tmpSortedResults[str]) {
@@ -909,14 +909,12 @@ var deviceScanner = function() {
 			}
 			
 		}
-		console.log('here');
 		var keys = Object.keys(tmpSortedResults);
 		for(i = 0; i < keys.length; i++) {
 			if(tmpSortedResults[keys[i]].devices.length > 0) {
 				self.sortedResults.push(tmpSortedResults[keys[i]]);
 			}
 		}
-		console.log('here');
 		defered.resolve();
 		return defered.promise;
 	};
