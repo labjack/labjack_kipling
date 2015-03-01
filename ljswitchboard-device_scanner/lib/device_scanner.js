@@ -890,10 +890,39 @@ var deviceScanner = function() {
 		defered.resolve();
 		return defered.promise;
 	};
-
+	var sortScanResults = function() {
+		var defered = q.defer();
+		var tmpSortedResults = {};
+		var i;
+		console.log('here');
+		for(i = 0; i < self.scanResults.length; i++) {
+			var str = self.scanResults[i].deviceTypeString;
+			if(tmpSortedResults[str]) {
+				tmpSortedResults[str].devices.push(self.scanResults[i]);
+			} else {
+				tmpSortedResults[str] = {
+					'deviceTypeString': self.scanResults[i].deviceTypeString,
+					'deviceTypeName': self.scanResults[i].deviceTypeName,
+					'devices': [],
+				};
+				tmpSortedResults[str].devices.push(self.scanResults[i]);
+			}
+			
+		}
+		console.log('here');
+		var keys = Object.keys(tmpSortedResults);
+		for(i = 0; i < keys.length; i++) {
+			if(tmpSortedResults[keys[i]].devices.length > 0) {
+				self.sortedResults.push(tmpSortedResults[keys[i]]);
+			}
+		}
+		console.log('here');
+		defered.resolve();
+		return defered.promise;
+	};
 	var returnResults = function() {
 		var defered = q.defer();
-		defered.resolve(self.scanResults);
+		defered.resolve(self.sortedResults);
 		self.scanInProgress = false;
 		return defered.promise;
 	};
@@ -903,6 +932,7 @@ var deviceScanner = function() {
 			self.scanInProgress = true;
 			self.scanResults = [];
 			self.activeDeviceResults = [];
+			self.sortedResults = [];
 
 			var getOnError = function(msg) {
 				return function(err) {
@@ -918,7 +948,8 @@ var deviceScanner = function() {
 			.then(restoreDriverOldfwState, getOnError('getFindAllDevices'))
 			.then(populateMissingScanData, getOnError('restoreDriverOldfwState'))
 			.then(markActiveDevices, getOnError('populateMissingScanData'))
-			.then(returnResults, getOnError('markActiveDevices'))
+			.then(sortScanResults, getOnError('markActiveDevices'))
+			.then(returnResults, getOnError('sortScanResults'))
 			.then(defered.resolve, defered.reject);
 		} else {
 			defered.reject('Scan in progress');
@@ -928,12 +959,12 @@ var deviceScanner = function() {
 	this.getLastFoundDevices = function() {
 		var defered = q.defer();
 		if(!self.scanInProgress) {
-			defered.resolve(self.scanResults);
+			defered.resolve(self.sortedResults);
 		} else {
 			defered.resolve([]);
 		}
 		return defered.promise;
-	}
+	};
 
 	var self = this;
 };
