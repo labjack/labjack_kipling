@@ -88,7 +88,11 @@ var T7_LIST = {
 		},
 		'decode': function(res) {
 			var str = checkStr(T7_LIST.WIFI_STATUS.valToString[res]);
-			return {'str': str};
+			var isConnected = false;
+			if(res === 2900) {
+				isConnected = true;
+			}
+			return {'str': str, 'isConnected': isConnected};
 		},
 	},
 	'WIFI_RSSI': {
@@ -152,6 +156,11 @@ var T7_LIST = {
 					subclass = '-Pro';
 					isPro = true;
 					productType += subclass;
+				}
+
+				// Wifi bit-fix, (if isPro, then wifi is installed)
+				if(isPro) {
+					wifi = true;
 				}
 				return {
 					'highResADC': highResADC,
