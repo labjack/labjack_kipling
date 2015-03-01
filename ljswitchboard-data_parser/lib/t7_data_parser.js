@@ -104,11 +104,12 @@ var T7_LIST = {
 			{'val':-75,'img':'wifiRSSI-1'},
 			{'val':-80,'img':'wifiRSSI-0'},
 			{'val':-200,'img':'wifiRSSI-0'},
+			{'val':-201,'img':'wifiRSSI-not-active'},
 		],
 		'decode': function(res) {
 			var unit = 'dB';
 			var imgName = '';
-			var str = res.toString() + ' dB';
+			var str = res.toString() + 'dB';
 			var WIFI_RSSI_IMAGES = T7_LIST.WIFI_RSSI.images;
 
 			if(res < WIFI_RSSI_IMAGES[0].val) {

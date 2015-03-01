@@ -201,6 +201,7 @@ exports.tests = {
 			'wifiRSSI-2',
 			'wifiRSSI-3',
 			'wifiRSSI-4',
+			'wifiRSSI-not-active'
 		];
 		var vals = [
 			{'val': -40, 'img': imgs[4]},
@@ -210,7 +211,7 @@ exports.tests = {
 			{'val': -70, 'img': imgs[1]},
 			{'val': -78, 'img': imgs[0]},
 			{'val': -85, 'img': imgs[0]},
-			{'val': -201, 'img': imgs[0]},
+			{'val': -201, 'img': imgs[5]},
 		];
 		var results = [];
 		var reqResults = [];
@@ -224,7 +225,7 @@ exports.tests = {
 				'res': val.val,
 				'unit': 'dB',
 				'imageName': val.img,
-				'str': val.val.toString() + ' dB',
+				'str': val.val.toString() + 'dB',
 			});
 		});
 
