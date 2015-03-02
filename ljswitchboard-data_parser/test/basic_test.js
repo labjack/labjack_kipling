@@ -41,23 +41,51 @@ exports.tests = {
 
 		var results = [];
 		var reqResults = [];
+		var ipRegisters = [
+			'WIFI_IP',
+			'WIFI_SUBNET',
+			'WIFI_GATEWAY',
+			'WIFI_IP_DEFAULT',
+			'WIFI_SUBNET_DEFAULT',
+			'WIFI_GATEWAY_DEFAULT',
+			'ETHERNET_IP',
+			'ETHERNET_SUBNET',
+			'ETHERNET_GATEWAY',
+			'ETHERNET_DNS',
+			'ETHERNET_ALTDNS',
+			'ETHERNET_IP_DEFAULT',
+			'ETHERNET_SUBNET_DEFAULT',
+			'ETHERNET_GATEWAY_DEFAULT',
+			'ETHERNET_DNS_DEFAULT',
+			'ETHERNET_ALTDNS_DEFAULT',
+
+		];
 
 		testVals.forEach(function(testVal) {
-			var isReal = false;
-			if(testVal.val !== 0) {
-				isReal = true;
-			}
-			results.push(data_parser.parseResult('WIFI_IP', testVal.val));
-			reqResults.push({
-				'register': 'WIFI_IP',
-				'name': 'WIFI_IP',
-				'address': 49200,
-				'res': testVal.val,
-				'str': testVal.ip,
-				'isReal': isReal
+			ipRegisters.forEach(function(ipRegister) {
+				var isReal = false;
+				if(testVal.val !== 0) {
+					isReal = true;
+				}
+				results.push(data_parser.parseResult(ipRegister, testVal.val));
+				reqResults.push({
+					'register': ipRegister,
+					'name': constants.getAddressInfo(ipRegister).data.name,
+					'address': constants.getAddressInfo(ipRegister).data.address,
+					'res': testVal.val,
+					'str': testVal.ip,
+					'isReal': isReal
+				});
 			});
 		});
 		test.deepEqual(results, reqResults);
+		var resultsLength = results.length;
+		var reqResultsLength = reqResults.length;
+		test.strictEqual(resultsLength, reqResultsLength, 'Lengths must be equal');
+		var i;
+		for(i = 0; i < results.length; i++) {
+			test.deepEqual(results[i], reqResults[i], 'result: ' + i.toString() + 'failed');
+		}
 		test.done();
 	},
 	'check HARDWARE_INSTALLED -decode': function(test) {
@@ -79,6 +107,7 @@ exports.tests = {
 			{'val': 4, 'sdCard': false, 'rtc': true, 'wifi': true, 'adc': false, 'isPro': true},
 			{'val': 8, 'sdCard': true, 'rtc': false, 'wifi': false, 'adc': false, 'isPro': false},
 			{'val': 9, 'sdCard': true, 'rtc': false, 'wifi': true, 'adc': true, 'isPro': true},
+			{'val': 15, 'sdCard': true, 'rtc': true, 'wifi': true, 'adc': true, 'isPro': true},
 		];
 
 		var results = [];
