@@ -19,6 +19,7 @@ var parseResult = function(address, result, deviceType) {
 		'name': regName,
 		'address': regInfo.data.address,
 		'res': result,
+		'val': result,
 	};
 	var parsedData;
 	var keys;

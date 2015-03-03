@@ -23,7 +23,7 @@ var parseIP = function(ipNum) {
 	ipStr += ipAddr.readUInt8(1).toString();
 	ipStr += ".";
 	ipStr += ipAddr.readUInt8(0).toString();
-	return {'str': ipStr, 'isReal':isReal};
+	return {'str': ipStr, 'isReal':isReal, 'val': ipStr};
 };
 exports.parseIP = parseIP;
 

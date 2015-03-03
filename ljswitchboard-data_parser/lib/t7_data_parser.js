@@ -23,7 +23,7 @@ var parseIP = function(ipNum) {
 	ipStr += ipAddr.readUInt8(1).toString();
 	ipStr += ".";
 	ipStr += ipAddr.readUInt8(0).toString();
-	return {'str': ipStr, 'isReal':isReal};
+	return {'str': ipStr, 'isReal':isReal, 'val': ipStr};
 };
 var encodeIP = function(ipStr) {
 	var ipBuf = new Buffer(4);
@@ -92,7 +92,7 @@ var T7_LIST = {
 			if(res === 2900) {
 				isConnected = true;
 			}
-			return {'str': str, 'isConnected': isConnected};
+			return {'str': str, 'isConnected': isConnected, 'val': str};
 		},
 	},
 	'WIFI_RSSI': {

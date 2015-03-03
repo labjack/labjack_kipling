@@ -74,6 +74,7 @@ exports.tests = {
 					'address': constants.getAddressInfo(ipRegister).data.address,
 					'res': testVal.val,
 					'str': testVal.ip,
+					'val': testVal.ip,
 					'isReal': isReal
 				});
 			});
@@ -126,6 +127,7 @@ exports.tests = {
 				'name': constants.getAddressInfo(reg).data.name,
 				'address': constants.getAddressInfo(reg).data.address,
 				'res': val.val,
+				'val': val.val,
 				'highResADC': val.adc,
 				'wifi': val.wifi,
 				'rtc': val.rtc,
@@ -166,6 +168,7 @@ exports.tests = {
 				'name': constants.getAddressInfo(reg).data.name,
 				'address': constants.getAddressInfo(reg).data.address,
 				'res': val.val,
+				'val': val.val,
 				'temperature': val.temperature,
 				'light': val.light,
 				'humidity': val.humidity,
@@ -215,6 +218,7 @@ exports.tests = {
 				'name': 'WIFI_STATUS',
 				'address': 49450,
 				'res': parseInt(val,10),
+				'val': wifiData[val],
 				'str': wifiData[val],
 				'isConnected': isConnected
 			};
@@ -252,6 +256,7 @@ exports.tests = {
 				'name': constants.getAddressInfo(reg).data.name,
 				'address': constants.getAddressInfo(reg).data.address,
 				'res': val.val,
+				'val': val.val,
 				'unit': 'dB',
 				'imageName': val.img,
 				'str': val.val.toString() + 'dB',
@@ -322,7 +327,8 @@ exports.tests = {
 				'register': cmd.reg,
 				'name': constants.getAddressInfo(cmd.reg).data.name,
 				'address': constants.getAddressInfo(cmd.reg).data.address,
-				'res': cmd.val
+				'res': cmd.val,
+				'val': cmd.val
 			};
 		});
 
