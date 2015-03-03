@@ -23,12 +23,12 @@ function device() {
 	this.devAttr = {};
 
 	this.responses = {
-		'HARDWARE_INSTALLED': 7,
+		'HARDWARE_INSTALLED': 15,// Force recognized T7 to be a -Pro
 		'DEVICE_NAME_DEFAULT': 'TEST_DEVICE',
 		'WIFI_VERSION': 3.12,
 		'BOOTLOADER_VERSION': 0.9400,
 		'FIRMWARE_VERSION': 1.0144,
-		'DGT_INSTALLED_OPTIONS': 2,
+		'DGT_INSTALLED_OPTIONS': 3,// Force recognized Digit to be a -TLH
 		'SERIAL_NUMBER': function() {
 			if(self.devAttr.serialNumber) {
 				return self.devAttr.serialNumber;
