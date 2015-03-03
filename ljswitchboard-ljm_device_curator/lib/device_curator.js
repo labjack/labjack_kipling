@@ -154,10 +154,15 @@ function device(useMockDevice) {
 				var parsedResult = data_parser.parseResult('HARDWARE_INSTALLED', res, dt);
 
 				// Save results
-				retResult.highResADC = parsedResult.highResADC;
-				retResult.wifi = parsedResult.wifi;
-				retResult.rtc = parsedResult.rtc;
-				retResult.sdCard = parsedResult.sdCard;
+				var parsedResultKeys = Object.keys(parsedResult);
+				parsedResultKeys.forEach(function(key) {
+					retResult[key] = parsedResult[key];
+				});
+				// Save results
+				// retResult.highResADC = parsedResult.highResADC;
+				// retResult.wifi = parsedResult.wifi;
+				// retResult.rtc = parsedResult.rtc;
+				// retResult.sdCard = parsedResult.sdCard;
 
 				self.savedAttributes.subclass = parsedResult.subclass;
 				self.savedAttributes.isPro = parsedResult.isPro;

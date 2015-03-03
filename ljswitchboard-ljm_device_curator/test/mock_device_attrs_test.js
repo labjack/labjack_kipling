@@ -203,6 +203,7 @@ exports.tests = {
 			test.strictEqual(res.connectionTypeString, 'LJM_ctWIFI');
 			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
 			test.strictEqual(res.ip, deviceInfo.ipAddress);
+			// console.log('device attributes', res);
 			test.done();
 		});
 	},
