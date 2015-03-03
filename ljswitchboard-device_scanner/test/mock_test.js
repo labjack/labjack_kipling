@@ -1,11 +1,43 @@
 
 var device_scanner = require('../lib/ljswitchboard-device_scanner').getDeviceScanner();
 
+var deviceScanner;
 exports.tests = {
-	'basic test': function(test) {
+	'create device scanner': function(test) {
+		deviceScanner = new device_scanner.deviceScanner();
+		test.done();
+	},
+	'disable device scanning': function(test) {
+		deviceScanner.disableDeviceScanning()
+		.then(function() {
+			test.done();
+		});
+	},
+	'Add mock devices': function(test) {
+		deviceScanner.addMockDevices([
+			{
+				'deviceType': 'LJM_dtT7',
+				'connectionType': 'LJM_ctUSB',
+				'serialNumber': 1,
+			},
+			{
+				'deviceType': 'LJM_dtT7',
+				'connectionType': 'LJM_ctETHERNET',
+				'serialNumber': 1,
+			},
+			{
+				'deviceType': 'LJM_dtDIGIT',
+				'connectionType': 'LJM_ctUSB'
+			}
+		])
+		.then(function() {
+			test.done();
+		});
+	},
+	'mock test': function(test) {
 		var currentDeviceList = {};
 		var startTime = new Date();
-		var deviceScanner = new device_scanner.deviceScanner();
+		
 		deviceScanner.findAllDevices(currentDeviceList)
 		.then(function(res) {
 			var endTime = new Date();

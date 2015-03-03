@@ -10,10 +10,10 @@ var data_parser = require('ljswitchboard-data_parser');
 var curatedDevice = require('ljswitchboard-ljm_device_curator');
 var modbus_map = require('ljswitchboard-modbus_map');
 var constants = modbus_map.getConstants();
-
 var requiredInformation = {};
 
 var eventList = require('./event_list').eventList;
+var mock_device_scanner = require('./mock_device_scanner');
 
 var REQUIRED_INFO_BY_DEVICE = {
 	'LJM_dtDIGIT': [
@@ -108,6 +108,27 @@ var deviceScanner = function() {
 	this.scanInProgress = false;
 	this.sortedResults = [];
 
+	this.mockDeviceScanner = new mock_device_scanner.createMockDeviceScanner();
+
+	var deviceScanningEnabled = true;
+	this.disableDeviceScanning = function() {
+		var defered = q.defer();
+		deviceScanningEnabled = false;
+		defered.resolve();
+		return defered.promise;
+	};
+	this.enableDeviceScanning = function() {
+		var defered = q.defer();
+		deviceScanningEnabled = true;
+		defered.resolve();
+		return defered.promise;
+	};
+	this.getDeviceScanningState = function() {
+		var defered = q.defer();
+		defered.resolve(deviceScanningEnabled);
+		return defered.promise;
+	};
+
 	var isNewDevice = function(newScanResult) {
 		var isNew = true;
 		self.scanResults.forEach(function(scanResult) {
@@ -155,10 +176,14 @@ var deviceScanner = function() {
 		var ip;
 		var dt;
 		var virtualCT;
+		var isMockDevice = false;
 		if(isNewDevice(newScanResult)) {
 			ct = newScanResult.connectionType;
 			dt = newScanResult.deviceType;
 			ip = newScanResult.ipAddress;
+			if(newScanResult.isMockDevice) {
+				isMockDevice = true;
+			}
 			var deviceInfo = {
 				'deviceType': dt,
 				'deviceTypeString': driver_const.DRIVER_DEVICE_TYPE_NAMES[dt],
@@ -166,7 +191,7 @@ var deviceScanner = function() {
 				'serialNumber': newScanResult.serialNumber,
 				'acquiredRequiredData': false,
 				'connectionTypes': [getInitialConnectionTypeData(dt, ct, ip)],
-				'isMockDevice': false,
+				'isMockDevice': isMockDevice,
 			};
 			deviceInfo.acquiredRequiredData = false;
 			if(newScanResult.data) {
@@ -286,6 +311,37 @@ var deviceScanner = function() {
 		);
 	};
 
+	var configureScannedMockDevice = function(data) {
+		var defered = q.defer();
+		var configData = {};
+		var ignoredScanResultKeys = [
+			'acquiredRequiredData',
+			'connectionTypes',
+			'isMockDevice'
+		];
+		var scanKeys = Object.keys(data.scanResult);
+		scanKeys.forEach(function(key) {
+			if(ignoredScanResultKeys.indexOf(key) < 0) {
+				configData[key] = data.scanResult[key];
+			}
+		});
+		configData.ipAddress = data.connectionType.ipAddress;
+		self.mockDeviceScanner.getMockDeviceData(
+			data.scanResult.serialNumber,
+			data.registers
+		).then(function(mockDeviceData) {
+			var keys = Object.keys(mockDeviceData);
+			keys.forEach(function(key) {
+				configData[key] = mockDeviceData[key];
+			});
+			data.device.configureMockDevice(configData)
+			.then(function(res) {
+				defered.resolve(data);
+			});
+		});
+		
+		return defered.promise;
+	};
 	var openScannedDevice = function(data) {
 		var defered = q.defer();
 		var serialNumber = data.scanResult.serialNumber;
@@ -335,66 +391,73 @@ var deviceScanner = function() {
 	};
 	var collectDeviceData = function(data) {
 		var defered = q.defer();
+		var parseResults = function(results) {
+			// console.log('!! Collected Info !!', data.scanResult.serialNumber, data.openParameters.ct);
+			data.scanResult.acquiredRequiredData = true;
+			var i;
+			for(i = 0; i < results.length; i++) {
+				var address = results[i].address;
+				var isErr = results[i].isErr;
+				var val = results[i].data;
+				var res = data_parser.parseResult(address, val);
+				data.scanResult[results[i].address] = res;
+			}
+			var addCT;
+			var cts = data.scanResult.connectionTypes;
+			var dt = data.scanResult.deviceType;
+			if(data.scanResult.ETHERNET_IP) {
+				if(data.scanResult.ETHERNET_IP.isReal) {
+					addCT = true;
+					for(i = 0; i < cts.length; i++) {
+						if(cts[i].ct == driver_const.connectionTypes.ethernet) {
+							addCT = false;
+						}
+					}
+					if(addCT) {
+						data.scanResult.connectionTypes.push(
+							getInitialConnectionTypeData(
+								dt,
+								driver_const.connectionTypes.ethernet,
+								data.scanResult.ETHERNET_IP.str,
+								'attribute'
+							)
+						);
+					}
+				}
+			}
+			if(data.scanResult.WIFI_IP) {
+				if(data.scanResult.WIFI_IP.isReal) {
+					addCT = true;
+					for(i = 0; i < cts.length; i++) {
+						if(cts[i].ct == driver_const.connectionTypes.wifi) {
+							addCT = false;
+						}
+					}
+					if(addCT) {
+						data.scanResult.connectionTypes.push(
+							getInitialConnectionTypeData(
+								dt,
+								driver_const.connectionTypes.wifi,
+								data.scanResult.WIFI_IP.str,
+								'attribute'
+							)
+						);
+					}
+				}
+			}
+			defered.resolve(data);
+		};
 		if(true) {
 			if(data.openedDevice) {
 				if(data.registers.length > 0) {
 					self.emit(eventList.COLLECTING_REMAINING_DEVICE_INFO, data.openParameters);
 					data.device.readMultiple(data.registers)
-					.then(function(results) {
-						// console.log('!! Collected Info !!', data.scanResult.serialNumber, data.openParameters.ct);
-						data.scanResult.acquiredRequiredData = true;
-						var i;
-						for(i = 0; i < results.length; i++) {
-							var address = results[i].address;
-							var isErr = results[i].isErr;
-							var val = results[i].data;
-							var res = data_parser.parseResult(address, val);
-							data.scanResult[results[i].address] = res;
-						}
-						var addCT;
-						var cts = data.scanResult.connectionTypes;
-						var dt = data.scanResult.deviceType;
-						if(data.scanResult.ETHERNET_IP.isReal) {
-							addCT = true;
-							for(i = 0; i < cts.length; i++) {
-								if(cts[i].ct == driver_const.connectionTypes.ethernet) {
-									addCT = false;
-								}
-							}
-							if(addCT) {
-								data.scanResult.connectionTypes.push(
-									getInitialConnectionTypeData(
-										dt,
-										driver_const.connectionTypes.ethernet,
-										data.scanResult.ETHERNET_IP.str,
-										'attribute'
-									)
-								);
-							}
-						}
-						if(data.scanResult.WIFI_IP.isReal) {
-							addCT = true;
-							for(i = 0; i < cts.length; i++) {
-								if(cts[i].ct == driver_const.connectionTypes.wifi) {
-									addCT = false;
-								}
-							}
-							if(addCT) {
-								data.scanResult.connectionTypes.push(
-									getInitialConnectionTypeData(
-										dt,
-										driver_const.connectionTypes.wifi,
-										data.scanResult.WIFI_IP.str,
-										'attribute'
-									)
-								);
-							}
-						}
-						defered.resolve(data);
-					}, function(err) {
-						console.warn('!! Error collecting info!!');
-						defered.resolve(data);
-					});
+					.then(
+						parseResults,
+						function(err) {
+							console.warn('!! Error collecting info!!');
+							defered.resolve(data);
+						});
 				} else {
 					defered.resolve(data);
 				}
@@ -432,8 +495,8 @@ var deviceScanner = function() {
 	};
 	var verifyConnectionType = function(scanResult, connectionType, registers) {
 		var defered = q.defer();
-		var createVerifierObject = function() {
-			this.device = new curatedDevice.device();
+		var createVerifierObject = function(isMockDevice) {
+			this.device = new curatedDevice.device(isMockDevice);
 			this.openedDevice = false;
 			this.openParameters = {};
 		};
@@ -441,18 +504,34 @@ var deviceScanner = function() {
 			if(!connectionType.verifying) {
 				connectionType.verificationAttempted = true;
 				connectionType.verifying = true;
-				var data = new createVerifierObject();
+
+				var data = new createVerifierObject(scanResult.isMockDevice);
 				data.scanResult = scanResult;
 				data.connectionType = connectionType;
 				data.registers = registers;
 
-				openScannedDevice(data)
-				.then(collectDeviceData)
-				.then(closeScannedDevice)
-				.then(function(res) {
-					connectionType.verifying = false;
-					defered.resolve(scanResult);
-				});
+				if(scanResult.isMockDevice) {
+					// If we are using a mock device we need to configure the
+					// device which requires performing an async call.
+					configureScannedMockDevice(data)
+					.then(openScannedDevice)
+					.then(collectDeviceData)
+					.then(closeScannedDevice)
+					.then(function(res) {
+						connectionType.verifying = false;
+						defered.resolve(scanResult);
+					});
+				} else {
+					// otherwise we don't need to configure the device and can
+					// just start using it.
+					openScannedDevice(data)
+					.then(collectDeviceData)
+					.then(closeScannedDevice)
+					.then(function(res) {
+						connectionType.verifying = false;
+						defered.resolve(scanResult);
+					});
+				}
 			} else {
 				defered.resolve(scanResult);
 			}
@@ -752,7 +831,7 @@ var deviceScanner = function() {
 					if(!missingVals[i].isErr) {
 						deviceAttributes[addr] = missingVals[i].data;
 					} else {
-						var info = ljmConstants.getAddressInfo(addr);
+						var info = constants.getAddressInfo(addr);
 						var val;
 						if(info.typeString === 'STRING') {
 							val = data_parser.parseResult(addr, 'Unknown');
@@ -962,15 +1041,25 @@ var deviceScanner = function() {
 					return errDefered.promise;
 				};
 			};
-			saveDriverOldfwState()
-			.then(disableDriverOldfwState, getOnError('saveDriverOldfwState'))
-			.then(getFindAllDevices(currentDevices), getOnError('disableDriverOldfwState'))
-			.then(restoreDriverOldfwState, getOnError('getFindAllDevices'))
-			.then(populateMissingScanData, getOnError('restoreDriverOldfwState'))
-			.then(markActiveDevices, getOnError('populateMissingScanData'))
-			.then(sortScanResults, getOnError('markActiveDevices'))
-			.then(returnResults, getOnError('sortScanResults'))
-			.then(defered.resolve, defered.reject);
+
+			if(deviceScanningEnabled) {
+				saveDriverOldfwState()
+				.then(disableDriverOldfwState, getOnError('saveDriverOldfwState'))
+				.then(getFindAllDevices(currentDevices), getOnError('disableDriverOldfwState'))
+				.then(restoreDriverOldfwState, getOnError('getFindAllDevices'))
+				.then(populateMissingScanData, getOnError('restoreDriverOldfwState'))
+				.then(markActiveDevices, getOnError('populateMissingScanData'))
+				.then(sortScanResults, getOnError('markActiveDevices'))
+				.then(returnResults, getOnError('sortScanResults'))
+				.then(defered.resolve, defered.reject);
+			} else {
+				getFindMockDevices(currentDevices)()
+				.then(populateMissingScanData, getOnError('getFindAllDevices'))
+				.then(markActiveDevices, getOnError('populateMissingScanData'))
+				.then(sortScanResults, getOnError('markActiveDevices'))
+				.then(returnResults, getOnError('sortScanResults'))
+				.then(defered.resolve, defered.reject);
+			}
 		} else {
 			defered.reject('Scan in progress');
 		}
@@ -985,6 +1074,107 @@ var deviceScanner = function() {
 		}
 		return defered.promise;
 	};
+
+	this.addMockDevice = function(device) {
+		return self.mockDeviceScanner.addDevice(device);
+	};
+	this.addMockDevices = function(devices) {
+		return self.mockDeviceScanner.addDevices(devices);
+	};
+	var scanForMockDevices = function(scanRequest) {
+		var defered = q.defer();
+		var promises = [];
+		scanRequest.scanNum = 0;
+		scanRequest.scanTypes = [];
+		scanStrategies.forEach(function(scanStrategy) {
+			if(scanStrategy.enabled) {
+				if(scanStrategy.type === 'listAllExtended') {
+					scanRequest.scanTypes.push('listAllExtended');
+					promises.push(
+						self.mockDeviceScanner.listAllExtended(scanRequest)
+					);
+				} else if(scanStrategy.type === 'listAll') {
+					scanRequest.scanTypes.push('listAll');
+					promises.push(
+						self.mockDeviceScanner.listAll(scanRequest)
+					);
+				}
+			}
+		});
+
+		q.allSettled(promises)
+		.then(function(results) {
+			results.forEach(function(result, i) {
+				var scanResults = result.value;
+				var scanType = scanRequest.scanTypes[i];
+				// console.log('Scan type:', scanType, 'finished');
+				// console.log(scanType, 'data', JSON.stringify(scanResults, null, 2));
+
+				saveResults(scanRequest, scanResults);
+				scanRequest.scanNum += 1;
+				self.emit(eventList.FINISHED_MOCK_LIST_ALL, scanRequest);
+				finalizeScanResults(scanRequest)
+				.then(finalizeScanResults)
+				.then(defered.resolve, defered.reject);
+			});
+		}, function(err) {
+			console.error("singleScan error", err);
+			defered.reject();
+		});
+		return defered.promise;
+	};
+	var getFindMockDevices = function(currentDevices) {
+		var findMockDevices = function() {
+			var defered = q.defer();
+			var promises = SCAN_REQUEST_LIST.map(scanForMockDevices);
+			if(currentDevices) {
+				if(Object.keys(currentDevices).length > 0) {
+					// Add task that queries currently connected devices for their data.
+					promises.push(getCurrentDeviceListing(currentDevices));
+				}
+			}
+
+			q.allSettled(promises)
+			.then(function(res) {
+				self.emit(eventList.COMBINING_SCAN_RESULTS);
+				combineScanResults()
+				.then(defered.resolve, defered.reject);
+			}, function(err) {
+				// console.log("scan error", err);
+				defered.reject(self.scanResults);
+			});
+			
+			return defered.promise;
+		};
+		return findMockDevices;
+	};
+
+	/*
+	var defered = q.defer();
+	var promises = [];
+	scanRequest.scanNum = 0;
+	scanRequest.scanTypes = [];
+	scanStrategies.forEach(function(scanStrategy) {
+		if(scanStrategy.enabled) {
+			if(scanStrategy.type === 'listAllExtended') {
+				scanRequest.scanTypes.push('listAllExtended');
+				promises.push(listAllExtended(scanRequest));
+			} else if(scanStrategy.type === 'listAll') {
+				scanRequest.scanTypes.push('listAll');
+				promises.push(listAll(scanRequest));
+			}
+		}
+	});
+
+	q.allSettled(promises)
+	.then(function(results) {
+		defered.resolve();
+	}, function(err) {
+		console.error("singleScan error", err);
+		defered.reject();
+	});
+	return defered.promise;
+	*/
 
 	var self = this;
 };
