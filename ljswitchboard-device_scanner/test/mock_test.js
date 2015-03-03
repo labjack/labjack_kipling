@@ -38,26 +38,53 @@ exports.tests = {
 		var currentDeviceList = {};
 		var startTime = new Date();
 		
+		var expectedData = {
+			'T7': {
+				'devices': [
+					{
+						'connectionTypes': [{},{},{}]
+					},
+				]
+			},
+			'Digit': {
+				'devices': [
+					{
+						'connectionTypes': [{}]
+					},
+				]
+			},
+		};
 		deviceScanner.findAllDevices(currentDeviceList)
 		.then(function(res) {
 			var endTime = new Date();
 			console.log('Finished Scanning');
 			console.log('Number of Device Types', res.length);
+			test.strictEqual(res.length, 2, 'Should have found some T7s and Digits');
 			res.forEach(function(deviceType) {
-				console.log('Number of', deviceType.deviceTypeName, 'Devices:', deviceType.devices.length);
-				deviceType.devices.forEach(function(device) {
+				var numDevicesFound = deviceType.devices.length;
+				var deviceTypeName = deviceType.deviceTypeName;
+				var expectedDevicesData = expectedData[deviceTypeName].devices;
+				console.log('Number of', deviceTypeName, 'Devices:', numDevicesFound);
+				expectedNumDevices = expectedData[deviceTypeName].devices.length;
+				test.strictEqual(numDevicesFound, expectedNumDevices, 'Unexpected number of found devices');
+				deviceType.devices.forEach(function(device, i) {
+					var expectedDeviceData = expectedDevicesData[i];
+					var numConnectionTypes = device.connectionTypes.length;
+					var expectedNumCTs = expectedDeviceData.connectionTypes.length;
+					test.strictEqual(numConnectionTypes, expectedNumCTs, 'Unexpected number of connection types');
 					console.log(
 						'Connection Types',
 						device.connectionTypes.length,
 						device.deviceType,
 						device.productType
 					);
+
 					device.connectionTypes.forEach(function(connectionType) {
 						console.log('  - ', connectionType.name, connectionType.insertionMethod, connectionType.verified);
 					});
 					console.log('Available Data:');
 					var ignoredData = [
-						'connectionTypes'
+						'connectionTypes',
 					];
 					var availableKeys = Object.keys(device);
 					availableKeys.forEach(function(key) {

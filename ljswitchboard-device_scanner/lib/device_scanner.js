@@ -174,8 +174,9 @@ var deviceScanner = function() {
 	var saveResult = function(newScanResult) {
 		var ct;
 		var ip;
-		var dt;
+		var dt = newScanResult.deviceType;
 		var virtualCT;
+		var i;
 		var isMockDevice = false;
 		if(isNewDevice(newScanResult)) {
 			ct = newScanResult.connectionType;
@@ -202,21 +203,20 @@ var deviceScanner = function() {
 						res.val
 					);
 				});
-
 				// Add extra connection types based off attributes.
-				if(newScanResult.data.ETHERNET_IP) {
-					if(newScanResult.data.ETHERNET_IP.str) {
-						virtualCT = driver_const.connectionTypes('Ethernet');
-						ip = newScanResult.data.ETHERNET_IP.str;
+				if(deviceInfo.ETHERNET_IP) {
+					if(deviceInfo.ETHERNET_IP.isReal) {
+						virtualCT = driver_const.connectionTypes.Ethernet;
+						ip = deviceInfo.ETHERNET_IP.str;
 						deviceInfo.connectionTypes.push(
 							getInitialConnectionTypeData(dt, virtualCT, ip, 'attribute')
 						);
 					}
 				}
-				if(newScanResult.data.WIFI_IP) {
-					if(newScanResult.data.WIFI_IP.str) {
-						virtualCT = driver_const.connectionTypes('Wifi');
-						ip = newScanResult.data.WIFI_IP.str;
+				if(deviceInfo.WIFI_IP) {
+					if(deviceInfo.WIFI_IP.isReal) {
+						virtualCT = driver_const.connectionTypes.Wifi;
+						ip = deviceInfo.WIFI_IP.str;
 						deviceInfo.connectionTypes.push(
 							getInitialConnectionTypeData(dt, virtualCT, ip, 'attribute')
 						);
@@ -229,7 +229,6 @@ var deviceScanner = function() {
 		} else {
 			// If the device already exists then add information to the
 			// object.
-			var i;
 			for(i = 0; i < self.scanResults.length; i++) {
 				var sr = self.scanResults[i];
 				if(sr.serialNumber == newScanResult.serialNumber) {
@@ -265,8 +264,8 @@ var deviceScanner = function() {
 
 							// Add extra connection types based off attributes.
 							if(newScanResult.data.ETHERNET_IP) {
-								if(newScanResult.data.ETHERNET_IP.str) {
-									virtualCT = driver_const.connectionTypes('Ethernet');
+								if(newScanResult.data.ETHERNET_IP.isReal) {
+									virtualCT = driver_const.connectionTypes.Ethernet;
 									ip = newScanResult.data.ETHERNET_IP.str;
 									sr.connectionTypes.push(
 										getInitialConnectionTypeData(dt, virtualCT, ip, 'attribute')
@@ -274,8 +273,8 @@ var deviceScanner = function() {
 								}
 							}
 							if(newScanResult.data.WIFI_IP) {
-								if(newScanResult.data.WIFI_IP.str) {
-									virtualCT = driver_const.connectionTypes('Wifi');
+								if(newScanResult.data.WIFI_IP.isReal) {
+									virtualCT = driver_const.connectionTypes.Wifi;
 									ip = newScanResult.data.WIFI_IP.str;
 									sr.connectionTypes.push(
 										getInitialConnectionTypeData(dt, virtualCT, ip, 'attribute')
@@ -383,6 +382,7 @@ var deviceScanner = function() {
 				defered.resolve(data);
 			}, function(err) {
 					console.info('!! Device Scanner Failed to open Device', serialNumber, openParameters.ct, err);
+					
 					self.emit(eventList.FAILED_DEVICE_CONNECTION_VERIFICATION, openParameters);
 					defered.resolve(data);
 			});
