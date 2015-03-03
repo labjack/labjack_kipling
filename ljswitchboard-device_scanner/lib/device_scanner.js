@@ -386,6 +386,7 @@ var deviceScanner = function() {
 				data.connectionType.verified = true;
 				data.openedDevice = true;
 				defered.resolve(data);
+				self.emit(eventList.VERIFIED_DEVICE_CONNECTION, openParameters);
 			}, function(err) {
 				console.info('!! Device Scanner Failed to open Device', serialNumber, openParameters.ct, err);
 				
