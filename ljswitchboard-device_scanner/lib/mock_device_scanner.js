@@ -13,12 +13,13 @@ function createMockDeviceScanner() {
 		var ip = 0;
 		var sn = deviceInfo.serialNumber;
 		var ct;
+		var dt = deviceInfo.deviceType;
 		if(address === 'ETHERNET_IP') {
 			ct = driver_const.LJM_CT_ETHERNET;
 		} else if(address === 'WIFI_IP') {
 			ct = driver_const.LJM_CT_WIFI;
 		}
-		ip = getDeviceIPAddress(ct, sn);
+		ip = getDeviceIPAddress(dt, ct, sn);
 		return ip;
 	};
 	var defaultFakeResults = {
@@ -61,6 +62,7 @@ function createMockDeviceScanner() {
 	var getSerialNumberOffset = function(dt) {
 		var dts = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
 		var baseSN = 0;
+		console.log('here', driver_const.serialNumberOffsets, dts, dt);
 		if(driver_const.serialNumberOffsets) {
 			if(driver_const.serialNumberOffsets[dts]) {
 				baseSN = driver_const.serialNumberOffsets[dts];
@@ -71,15 +73,15 @@ function createMockDeviceScanner() {
 	var getDeviceSerialNumber = function(deviceType) {
 		var serialNumber = 0;
 		var dt = driver_const.deviceTypes[deviceType];
-		var baseSN = getSerialNumberOffset();
+		var baseSN = getSerialNumberOffset(dt);
 		
 		serialNumber = baseSN + self.devices.length;
 		return serialNumber;
 	};
-	var getDeviceIPAddress = function(connectionType, sn) {
+	var getDeviceIPAddress = function(dt, connectionType, sn) {
 		// From: http://www.aboutmyip.com/AboutMyXApp/IP2Integer.jsp?ipAddress=192.168.1.2
 		var ipOffset = 3232235778;
-		var baseSN = getSerialNumberOffset();
+		var baseSN = getSerialNumberOffset(dt);
 		var snDifference = sn - baseSN;
 
 		var ipNum = 0;
@@ -123,7 +125,7 @@ function createMockDeviceScanner() {
 		if(deviceInfo.ipAddress) {
 			ipAddress = deviceInfo.ipAddress;
 		} else {
-			ipAddress = getDeviceIPAddress(ct, serialNumber);
+			ipAddress = getDeviceIPAddress(dt, ct, serialNumber);
 		}
 		
 
