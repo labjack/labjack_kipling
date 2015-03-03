@@ -27,7 +27,15 @@ function device() {
 		'DEVICE_NAME_DEFAULT': 'TEST_DEVICE',
 		'WIFI_VERSION': 3.12,
 		'BOOTLOADER_VERSION': 0.9400,
-		'FIRMWARE_VERSION': 1.0144
+		'FIRMWARE_VERSION': 1.0144,
+		'SERIAL_NUMBER': function() {
+			if(self.devAttr.serialNumber) {
+				return self.devAttr.serialNumber;
+			} else {
+				return TEST_SERIAL_NUMBER;
+			}
+			
+		}
 	};
 
 	this.configureMockDevice = function(deviceInfo) {
@@ -138,13 +146,14 @@ function device() {
 				}
 			}
 		}
-		defered.resolve(data);
+		setImmediate(function() {
+			defered.resolve(data);
+		});
 		return defered.promise;
 	};
 
 	this.open = function(deviceType, connectionType, identifier, onErr, onSucc) {
 		saveCall('open', arguments);
-
 		identifier = identifier.toString();
 
 		self.handle = NUM_OPEN_DEVICES;

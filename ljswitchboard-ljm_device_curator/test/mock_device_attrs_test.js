@@ -21,6 +21,14 @@ var deviceInfo = {
 	'ipAddress': '192.168.1.101',
 	'ETHERNET_IP': '192.168.1.101',
 };
+var infoMapping = {
+	'SERIAL_NUMBER': 'serialNumber',
+};
+var appropriateResultMap = {
+	'ETHERNET_IP': 'str',
+	'WIFI_IP': 'str',
+	'SERIAL_NUMBER': 'res',
+};
 deviceFound = false;
 
 exports.tests = {
@@ -198,20 +206,31 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'Read ETHERNET_IP': function(test) {
+	'Read Device Attributes': function(test) {
 		var results = [];
 		// Setup and call functions
 		qExec(device, 'iRead', 'ETHERNET_IP')(results)
 		.then(qExec(device, 'iRead', 'WIFI_IP'))
+		.then(qExec(device, 'iRead', 'SERIAL_NUMBER'))
+		.then(qExec(device, 'iRead', 'HARDWARE_INSTALLED'))
 		.then(function(res) {
 			// console.log('Res', res);
 			res.forEach(function(readRes) {
 				var readData = readRes.retData;
 				var name = readData.name;
-				var ipStr = readData.str;
-				if(deviceInfo[name]) {
-					test.strictEqual(ipStr, deviceInfo[name]);
+				var resData;
+				if(appropriateResultMap[name]) {
+					resData = readData[appropriateResultMap[name]];
+				} else {
+					resData = readData.res;
 				}
+
+				if(deviceInfo[name]) {
+					test.strictEqual(resData, deviceInfo[name]);
+				} else if(infoMapping[name]) {
+					test.strictEqual(resData, deviceInfo[infoMapping[name]]);
+				}
+				// console.log(name, resData);
 			});
 			test.done();
 		});
