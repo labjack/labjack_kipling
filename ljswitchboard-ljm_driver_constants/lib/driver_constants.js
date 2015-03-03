@@ -337,9 +337,20 @@ exports.WIFI_STATUS_DISPLAY_DATA = {
     2909: {'display':true,'str':'Other'}
 };
 
+exports.serialNumberOffsets = {
+	'LJM_dtT7': 470010000,
+	'LJM_dtDIGIT': 220010000,
+};
+
 // Error codes for the device_curator:
 exports.LJN_DEVICE_NOT_CONNECTED = 99999;
 exports.device_curator_constants = {
 	'LJN_DEVICE_DISCONNECTED': 'DEVICE_DISCONNECTED',
 	'LJN_DEVICE_RECONNECTED': 'DEVICE_RECONNECTED',
+};
+
+
+// Event codes for the device_scanner, ljswitchboard-device_scanner
+exports.device_scanner = {
+	'DEVICE_FOUND': 'DEVICE_FOUND'
 };
