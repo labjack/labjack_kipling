@@ -341,6 +341,11 @@ var deviceScanner = function() {
 		
 		return defered.promise;
 	};
+	var delayProcessViaSetImmediate = function() {
+		var defered = q.defer();
+		setImmediate(defered.resolve);
+		return defered.promise;
+	};
 	var openScannedDevice = function(data) {
 		var defered = q.defer();
 		var serialNumber = data.scanResult.serialNumber;
@@ -357,7 +362,8 @@ var deviceScanner = function() {
 			openParameters.id = ipAddress;
 		}
 		data.openParameters = openParameters;
-		setImmediate(function() {
+		delayProcessViaSetImmediate()
+		.then(function() {
 			/* Added a simpleOpen function call to the device_curator that 
 			doesn't perform the calibration check, consider adding an even less
 			device-intrusive open command.
@@ -381,10 +387,10 @@ var deviceScanner = function() {
 				data.openedDevice = true;
 				defered.resolve(data);
 			}, function(err) {
-					console.info('!! Device Scanner Failed to open Device', serialNumber, openParameters.ct, err);
-					
-					self.emit(eventList.FAILED_DEVICE_CONNECTION_VERIFICATION, openParameters);
-					defered.resolve(data);
+				console.info('!! Device Scanner Failed to open Device', serialNumber, openParameters.ct, err);
+				
+				self.emit(eventList.FAILED_DEVICE_CONNECTION_VERIFICATION, openParameters);
+				defered.resolve(data);
 			});
 		});
 		return defered.promise;
@@ -500,6 +506,10 @@ var deviceScanner = function() {
 			this.openedDevice = false;
 			this.openParameters = {};
 		};
+		var finishVerification = function(res) {
+			connectionType.verifying = false;
+			defered.resolve(scanResult);
+		};
 		if(!connectionType.verificationAttempted) {
 			if(!connectionType.verifying) {
 				connectionType.verificationAttempted = true;
@@ -517,20 +527,14 @@ var deviceScanner = function() {
 					.then(openScannedDevice)
 					.then(collectDeviceData)
 					.then(closeScannedDevice)
-					.then(function(res) {
-						connectionType.verifying = false;
-						defered.resolve(scanResult);
-					});
+					.then(finishVerification);
 				} else {
 					// otherwise we don't need to configure the device and can
 					// just start using it.
 					openScannedDevice(data)
 					.then(collectDeviceData)
 					.then(closeScannedDevice)
-					.then(function(res) {
-						connectionType.verifying = false;
-						defered.resolve(scanResult);
-					});
+					.then(finishVerification);
 				}
 			} else {
 				defered.resolve(scanResult);
@@ -1104,7 +1108,9 @@ var deviceScanner = function() {
 
 		q.allSettled(promises)
 		.then(function(results) {
-			results.forEach(function(result, i) {
+			var innerDefered = q.defer();
+			var innerPromises = [];
+			innerPromises = results.map(function(result, i) {
 				var scanResults = result.value;
 				var scanType = scanRequest.scanTypes[i];
 				// console.log('Scan type:', scanType, 'finished');
@@ -1113,9 +1119,12 @@ var deviceScanner = function() {
 				saveResults(scanRequest, scanResults);
 				scanRequest.scanNum += 1;
 				self.emit(eventList.FINISHED_MOCK_LIST_ALL, scanRequest);
-				finalizeScanResults(scanRequest)
-				.then(finalizeScanResults)
-				.then(defered.resolve, defered.reject);
+				return finalizeScanResults(scanRequest)
+				.then(finalizeScanResults);
+			});
+			q.allSettled(innerPromises)
+			.then(function() {
+				defered.resolve(scanRequest);
 			});
 		}, function(err) {
 			console.error("singleScan error", err);
