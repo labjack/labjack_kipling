@@ -131,6 +131,19 @@ function createDeviceController(io_interface) {
 	this.getCachedListAllDevices = function() {
 		return callFunc('getCachedListAllDevices');
 	};
+	this.enableMockDeviceScanning = function() {
+		return callFunc('enableMockDeviceScanning');
+	};
+	this.disableMockDeviceScanning = function() {
+		return callFunc('disableMockDeviceScanning');
+	};
+	this.addMockDevices = function(deviceInfoArray) {
+		return callFunc('addMockDevices', [deviceInfoArray]);
+	};
+	this.addMockDevice = function(deviceInfo) {
+		return callFunc('addMockDevice', [deviceInfo]);
+	};
+
 
 	/**
 	 * Get the device_manager's handle for a connected device.

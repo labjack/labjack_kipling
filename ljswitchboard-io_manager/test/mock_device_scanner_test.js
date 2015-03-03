@@ -27,7 +27,7 @@ var capturedEvents = [];
 
 var getDeviceControllerEventListener = function(eventKey) {
 	var deviceControllerEventListener = function(eventData) {
-		console.log('Captured an event', eventKey);
+		// console.log('Captured an event', eventKey);
 		capturedEvents.push({'eventName': eventKey, 'data': eventData});
 	};
 	return deviceControllerEventListener;
@@ -75,6 +75,10 @@ exports.tests = {
 			'identifier': 'LJM_idANY',
 			'mockDevice': true
 		};
+		var mockData = {
+			'serialNumber': 1010,
+			'HARDWARE_INSTALLED': 15,
+		};
 
 		device_controller.openDevice(params)
 		.then(function(newDevice) {
@@ -85,11 +89,70 @@ exports.tests = {
 				} else {
 					test.ok(true);
 				}
-				test.done();
+				device.configureMockDevice(mockData)
+				.then(function(res) {
+					test.done();
+				});
 			},50);
 		}, function(err) {
 			console.log("Error opening device", err);
 			test.ok(false, 'failed to create new device object');
+			test.done();
+		});
+	},
+	'get mock device attributes': function(test) {
+		device.getDeviceAttributes()
+		.then(function(res) {
+			// Test to make sure that there are a few key attributes.
+			var requiredAttributes = [
+				'deviceType',
+				'connectionType',
+				'serialNumber',
+				'ip',
+				'port',
+				'maxBytesPerMB',
+				'deviceTypeString',
+				'deviceClass',
+				'openParameters',
+				'subclass',
+				'isPro',
+				'productType'
+			];
+			var givenAttributes = Object.keys(res);
+			requiredAttributes.forEach(function(requiredAttribute) {
+				var msg = 'Required key does not exist: ' + requiredAttribute;
+				test.ok((givenAttributes.indexOf(requiredAttribute) >= 0), msg);
+			});
+			test.done();
+		}, function(err) {
+			test.ok(false, 'read should not have returned an error: ' + JSON.stringify(err));
+			test.done();
+		});
+	},
+	'disable device scanning': function(test) {
+		device_controller.enableMockDeviceScanning()
+		.then(function() {
+			test.done();
+		});
+	},
+	'Add mock devices': function(test) {
+		device_controller.addMockDevices([
+			// {
+			// 	'deviceType': 'LJM_dtT7',
+			// 	'connectionType': 'LJM_ctUSB',
+			// 	'serialNumber': 1,
+			// },
+			// {
+			// 	'deviceType': 'LJM_dtT7',
+			// 	'connectionType': 'LJM_ctETHERNET',
+			// 	'serialNumber': 1,
+			// },
+			// {
+			// 	'deviceType': 'LJM_dtDIGIT',
+			// 	'connectionType': 'LJM_ctUSB'
+			// }
+		])
+		.then(function() {
 			test.done();
 		});
 	},
@@ -105,7 +168,6 @@ exports.tests = {
 		.then(function(res) {
 			// This result should be an empty array because the listAllDevices
 			// function hasn't been called yet.
-			console.log('Result', res);
 			test.deepEqual(res, [], 'array should be empty');
 
 			test.done();
@@ -136,8 +198,30 @@ exports.tests = {
 							connectionType.verified,
 							connectionType.isActive);
 					});
-					// console.log('Available Data', Object.keys(device));
+					console.log('Available Data:');
+					var ignoredData = [
+						'connectionType',
+						'connectionTypes'
+					];
+					var availableKeys = Object.keys(device);
+					availableKeys.forEach(function(key) {
+						if(ignoredData.indexOf(key) < 0) {
+							if(typeof(device[key].res) !== 'undefined') {
+								console.log('  - ', key, '>>', device[key].val);
+							} else {
+								console.log('  - ', key, '>>', device[key]);
+							}
+						} else {
+							if(Array.isArray(device[key])) {
+								console.log('  - ', key, '... length:', device[key].length);
+							} else {
+								console.log('  - ', key, '...');
+							}
+						}
+					});
+
 					console.log('isMockDevice', device.isMockDevice);
+					test.strictEqual(device.isMockDevice, true, 'all found devices should be mock devices');
 					console.log('isActive', device.isActive);
 				});
 			});

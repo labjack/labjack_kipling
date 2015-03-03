@@ -401,7 +401,6 @@ function createIOInterface() {
 	 */
 	var innerInitialize = function(info, passedResults) {
 		var defered = q.defer();
-
 		// If debugging is enabled, print out information about that process
 		// that is about to start.
 		if(passedResults.debugProcess) {

@@ -86,6 +86,27 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 	this.qReadUINT64 = function(type) {
 		return self.callFunc('qReadUINT64', [type]);
 	};
+
+	/**
+	 * Special intelligent functions that automatically integrate the
+	 * data_parser.
+	 */
+	this.iRead = function(address) {
+		return self.callFunc('iRead', [address]);
+	};
+	this.iReadMany = function(addresses) {
+		return self.callFunc('iReadMany', [addresses]);
+	};
+	this.iReadMultiple = function(addresses) {
+		return self.callFunc('iReadMultiple', [addresses]);
+	};
+
+	/**
+	 * Special functions to configure created mock devices
+	 */
+	this.configureMockDevice = function(deviceInfo) {
+		return self.callFunc('configureMockDevice', [deviceInfo]);
+	};
 	/**
 	 * Upgrade Function
 	 */

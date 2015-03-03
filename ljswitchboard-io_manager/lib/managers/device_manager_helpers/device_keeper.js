@@ -467,6 +467,30 @@ function createDeviceKeeper(io_delegator, link) {
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
+	this.enableMockDeviceScanning = function() {
+		var defered = q.defer();
+		deviceScanner.disableDeviceScanning()
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	this.disableMockDeviceScanning = function() {
+		var defered = q.defer();
+		deviceScanner.enableDeviceScanning()
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	this.addMockDevices = function(deviceInfoArray) {
+		var defered = q.defer();
+		deviceScanner.addMockDevices(deviceInfoArray)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	this.addMockDevice = function(deviceInfo) {
+		var defered = q.defer();
+		deviceScanner.addMockDevice(deviceInfo)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
 
 	var self = this;
 }
