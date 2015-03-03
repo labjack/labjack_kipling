@@ -27,6 +27,28 @@ exports.tests = {
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
+	'check IP registers (fail) - encode': function(test) {
+		var results = [
+			data_parser.encodeValue('WIFI_IP', 0),
+			data_parser.encodeValue('WIFI_IP', 1),
+			data_parser.encodeValue('WIFI_IP', 256),
+			data_parser.encodeValue('WIFI_IP', 65536),
+			data_parser.encodeValue('WIFI_IP', 16777216),
+			data_parser.encodeValue('WIFI_IP', 3232235983),
+			data_parser.encodeValue('WIFI_IP', 4294967295),
+		];
+		var reqResults = [
+			0,
+			1,
+			256,
+			65536,
+			16777216,
+			3232235983,
+			4294967295
+		];
+		test.deepEqual(results, reqResults);
+		test.done();
+	},
 	'check IP registers - decode': function(test) {
 		var testVals = [
 			{'val': 0, 'ip': '0.0.0.0'},
@@ -350,7 +372,7 @@ exports.tests = {
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
-	'check undefined register - encode': function(test) {
+	'check undefined register (b) - encode': function(test) {
 		var cmds = [
 			{'reg': 'HARDWARE_INSTALLED', 'val': 15},
 			{'reg': 'DEVICE_NAME_DEFAULT', 'val': '1'},

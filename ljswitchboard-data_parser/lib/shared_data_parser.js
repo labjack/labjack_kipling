@@ -7,6 +7,7 @@ var checkStr = function(str) {
 		return '';
 	}
 };
+exports.checkStr = checkStr;
 
 var parseIP = function(ipNum) {
 	var isReal = false;
@@ -28,10 +29,11 @@ var parseIP = function(ipNum) {
 exports.parseIP = parseIP;
 
 var encodeIP = function(ipStr) {
-	var ipBuf = new Buffer(4);
-	var i;
-	ipBuf.fill(0);
+	var retData = ipStr;
 	if(ipStr.split) {
+		var ipBuf = new Buffer(4);
+		var i;
+		ipBuf.fill(0);
 		var ipVals = ipStr.split('.');
 		if(ipVals.length == 4) {
 			for(i = 0; i < 4; i ++) {
@@ -40,8 +42,9 @@ var encodeIP = function(ipStr) {
 				}
 			}
 		}
+		retData = ipBuf.readUInt32BE(0);
 	}
-	return ipBuf.readUInt32BE(0);
+	return retData;
 };
 exports.encodeIP = encodeIP;
 
