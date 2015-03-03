@@ -76,20 +76,19 @@ var encodeValue = function(address, value, deviceType) {
 	}
 
 	var regName = regInfo.data.name;
+	var formattedResult = false;
 	if(deviceType) {
 		dt = driver_const.deviceTypes[deviceType];
 		if(formatters[dt]) {
 			if(formatters[dt][regName]) {
 				if(formatters[dt][regName].encode) {
+					formattedResult = true;
 					retData = formatters[dt][regName].encode(value);
 				}
 			}
-		} else {
-			retData = value;
 		}
 	} else {
 		var i;
-		var formattedResult = false;
 		for(i = 0; i < numFormatterKeys; i++) {
 			dt = formatterKeys[i];
 			if(formatters[dt][regName]) {
@@ -99,10 +98,10 @@ var encodeValue = function(address, value, deviceType) {
 				}
 			}
 		}
-		if(!formattedResult) {
+	}
+	if(!formattedResult) {
 			retData = value;
 		}
-	}
 	if(isString) {
 		retData = retData.toString();
 	}

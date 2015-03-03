@@ -350,4 +350,18 @@ exports.tests = {
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
+	'check undefined register - encode': function(test) {
+		var cmds = [
+			{'reg': 'HARDWARE_INSTALLED', 'val': 15},
+			{'reg': 'DEVICE_NAME_DEFAULT', 'val': '1'},
+		];
+		var results = cmds.map(function(cmd) {
+			return data_parser.encodeValue(cmd.reg, cmd.val, 7);
+		});
+		var reqResults = cmds.map(function(cmd) {
+			return cmd.val;
+		});
+		test.deepEqual(results, reqResults);
+		test.done();
+	},
 };
