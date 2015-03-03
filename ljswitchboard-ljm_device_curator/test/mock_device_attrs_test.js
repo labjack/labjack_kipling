@@ -25,9 +25,9 @@ var infoMapping = {
 	'SERIAL_NUMBER': 'serialNumber',
 };
 var appropriateResultMap = {
-	'ETHERNET_IP': 'str',
-	'WIFI_IP': 'str',
-	'SERIAL_NUMBER': 'res',
+	// 'ETHERNET_IP': 'str',
+	// 'WIFI_IP': 'str',
+	// 'SERIAL_NUMBER': 'res',
 };
 deviceFound = false;
 
@@ -222,7 +222,7 @@ exports.tests = {
 				if(appropriateResultMap[name]) {
 					resData = readData[appropriateResultMap[name]];
 				} else {
-					resData = readData.res;
+					resData = readData.val;
 				}
 
 				if(deviceInfo[name]) {
