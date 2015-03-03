@@ -28,6 +28,7 @@ function device() {
 		'WIFI_VERSION': 3.12,
 		'BOOTLOADER_VERSION': 0.9400,
 		'FIRMWARE_VERSION': 1.0144,
+		'DGT_INSTALLED_OPTIONS': 2,
 		'SERIAL_NUMBER': function() {
 			if(self.devAttr.serialNumber) {
 				return self.devAttr.serialNumber;
