@@ -2,8 +2,11 @@
 // This is a mock device to use when no actual devices are present.
 var q = require('q');
 var ljm = require('labjack-nodejs');
-var constants = ljm.driver_const;
-var modbusMap = ljm.modbusMap.getConstants();
+var constants = require('ljswitchboard-ljm_driver_constants');
+var modbus_map = require('ljswitchboard-modbus_map');
+var modbusMap = modbus_map.getConstants();
+var data_parser = require('ljswitchboard-data_parser');
+
 
 var NUM_OPEN_DEVICES = 0;
 var FAKE_IP_ADDRESS = '192.168.1.12';
@@ -25,6 +28,52 @@ function device() {
 		'WIFI_VERSION': 3.12,
 		'BOOTLOADER_VERSION': 0.9400,
 		'FIRMWARE_VERSION': 1.0144
+	};
+
+	this.configureMockDevice = function(deviceInfo) {
+		var defered = q.defer();
+		// device attribute key mapping
+		var devAttrKeys = {
+			'serialNumber': 'serialNumber',
+			'ip': 'ip',
+			'ipAddress': 'ip',
+			'port': 'port',
+			'deviceType': 'deviceType',
+			'connectionType': 'connectionType',
+			'maxBytesPerMB': 'maxBytesPerMB',
+		};
+		var keys = Object.keys(deviceInfo);
+		keys.forEach(function(key) {
+			// Check to see if the deviceInfo data should be saved as a device
+			// attribute.
+			var info = modbusMap.getAddressInfo(key);
+			var newData;
+			var dt = constants.LJM_DT_ANY;
+			if(self.devAttr.deviceType) {
+				dt = self.devAttr.deviceType;
+			}
+			if(devAttrKeys[key]) {
+				self.devAttr[devAttrKeys[key]] = deviceInfo[key];
+			} else if(info.type !== -1) {
+				if(typeof(deviceInfo[key].res) !== 'undefined') {
+					newData = data_parser.encodeValue(
+						key,
+						deviceInfo[key].res,
+						dt
+					);
+					self.responses[key] = newData;
+				} else {
+					newData = data_parser.encodeValue(
+						key,
+						deviceInfo[key],
+						dt
+					);
+					self.responses[key] = newData;
+				}
+			}
+		});
+		defered.resolve();
+		return defered.promise;
 	};
 
 	/**
@@ -116,32 +165,48 @@ function device() {
 		}
 
 		// Assign an IP?
-		var ipAddr;
+		var ipAddr = NO_IP_ADDRESS;
 		var port = 0;
-		var isIP = identifier.split('.').length === 3;
-		if((conTNum === 3) || (conTNum === 4)) {
-			port = 502;
-			if(isIP) {
-				ipAddr = identifier;
+		var isIP;
+		if(self.devAttr.ip) {
+			// Do stuff...
+			if((conTNum === 3) || (conTNum === 4)) {
+				port = 502;
+				ipAddr = self.devAttr.ip;
 			} else {
-				ipAddr = FAKE_IP_ADDRESS;
+				ipAddr = NO_IP_ADDRESS;
 			}
 		} else {
-			ipAddr = NO_IP_ADDRESS;
+			isIP = identifier.split('.').length === 3;
+			if((conTNum === 3) || (conTNum === 4)) {
+				port = 502;
+				if(isIP) {
+					ipAddr = identifier;
+				} else {
+					ipAddr = FAKE_IP_ADDRESS;
+				}
+			} else {
+				ipAddr = NO_IP_ADDRESS;
+			}
 		}
+		
 
 		// Assign a serial number?
-		var serialNum;
-		if(!isIP) {
-			if(!isNaN(identifier)) {
-				serialNum = parseInt(identifier);
+		var serialNum = TEST_SERIAL_NUMBER;
+		if(self.devAttr.serialNumber) {
+			serialNum = self.devAttr.serialNumber;
+		} else {
+			if(!isIP) {
+				if(!isNaN(identifier)) {
+					serialNum = parseInt(identifier, 10);
+				} else {
+					serialNum = TEST_SERIAL_NUMBER;
+				}
 			} else {
 				serialNum = TEST_SERIAL_NUMBER;
 			}
-		} else {
-			serialNum = TEST_SERIAL_NUMBER;
 		}
-
+		
 		self.devAttr.deviceType = devTNum;
 		self.devAttr.connectionType = conTNum;
 		self.devAttr.serialNumber = serialNum;
@@ -246,6 +311,7 @@ function device() {
 
 	this.close = function(onErr, onSucc) {
 		saveCall('close', arguments);
+		self.devAttr = {};
 		var result = 0;
 		finishCall('close', result).then(onSucc, onErr);
 	};

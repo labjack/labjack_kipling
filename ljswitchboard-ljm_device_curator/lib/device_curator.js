@@ -46,6 +46,17 @@ function device(useMockDevice) {
 	} else {
 		ljmDevice = new ljm.device();
 	}
+
+	this.configureMockDevice = function(deviceInfo) {
+		var defered = q.defer();
+		if(self.isMockDevice) {
+			ljmDevice.configureMockDevice(deviceInfo)
+			.then(defered.resolve);
+		} else {
+			defered.resolve();
+		}
+		return defered.promise;
+	};
 	this.getDevice = function() {
 		return ljmDevice;
 	};
