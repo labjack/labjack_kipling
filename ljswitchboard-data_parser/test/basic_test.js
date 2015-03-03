@@ -305,7 +305,7 @@ exports.tests = {
 	'check POWER_ registers for text output': function(test) {
 		test.done();
 	},
-	'check undefined register': function(test) {
+	'check undefined register - parse': function(test) {
 		// Make sure that no parsers get run but some basic information is added
 		var cmds = [
 			{'reg': 'DAC0', 'val': 2.123},
@@ -329,5 +329,19 @@ exports.tests = {
 		// console.log('Results', results);
 		test.deepEqual(results, reqResults);
 		test.done();
-	}
+	},
+	'check undefined register - encode': function(test) {
+		var cmds = [
+			{'reg': 'HARDWARE_INSTALLED', 'val': 15},
+			{'reg': 'DEVICE_NAME_DEFAULT', 'val': '1'},
+		];
+		var results = cmds.map(function(cmd) {
+			return data_parser.encodeValue(cmd.reg, cmd.val);
+		});
+		var reqResults = cmds.map(function(cmd) {
+			return cmd.val;
+		});
+		test.deepEqual(results, reqResults);
+		test.done();
+	},
 };
