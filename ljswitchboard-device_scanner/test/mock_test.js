@@ -42,14 +42,25 @@ exports.tests = {
 			'T7': {
 				'devices': [
 					{
-						'connectionTypes': [{},{},{}]
+						'connectionTypes': [{
+							'name': 'USB',
+							'insertionMethod': 'scan',
+						},{
+							'name': 'Ethernet',
+							'insertionMethod': 'scan',
+						},{
+							'name': 'Wifi'
+						}]
 					},
 				]
 			},
 			'Digit': {
 				'devices': [
 					{
-						'connectionTypes': [{}]
+						'connectionTypes': [{
+							'name': 'USB',
+							'insertionMethod': 'scan',
+						}]
 					},
 				]
 			},
@@ -79,8 +90,18 @@ exports.tests = {
 						device.productType
 					);
 
-					device.connectionTypes.forEach(function(connectionType) {
+					device.connectionTypes.forEach(function(connectionType, i) {
+						var expectedConnectionType = expectedDeviceData.connectionTypes[i];
+						var expectedKeys = Object.keys(expectedConnectionType);
+
 						console.log('  - ', connectionType.name, connectionType.insertionMethod, connectionType.verified);
+						// console.log('    - ', expectedConnectionType);
+						expectedKeys.forEach(function(key) {
+							test.strictEqual(
+								connectionType[key],
+								expectedConnectionType[key],
+								'Unexpected connectionType Data');
+						})
 					});
 					console.log('Available Data:');
 					var ignoredData = [

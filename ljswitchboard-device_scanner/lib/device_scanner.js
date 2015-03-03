@@ -240,8 +240,12 @@ var deviceScanner = function() {
 					dt = newScanResult.deviceType;
 					var addCT = true;
 					for(j = 0; j < sr.connectionTypes.length; j++) {
+						// Check to see if the connection type already exists
 						if(ct == sr.connectionTypes[j].ct) {
 							addCT = false;
+							// Declare the connection type insertion method to 
+							// be from a scan.
+							sr.connectionTypes[j].insertionMethod = 'scan';
 						}
 					}
 					if(addCT) {
