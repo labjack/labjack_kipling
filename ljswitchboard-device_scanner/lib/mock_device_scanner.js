@@ -62,7 +62,6 @@ function createMockDeviceScanner() {
 	var getSerialNumberOffset = function(dt) {
 		var dts = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
 		var baseSN = 0;
-		console.log('here', driver_const.serialNumberOffsets, dts, dt);
 		if(driver_const.serialNumberOffsets) {
 			if(driver_const.serialNumberOffsets[dts]) {
 				baseSN = driver_const.serialNumberOffsets[dts];
@@ -83,7 +82,14 @@ function createMockDeviceScanner() {
 		var ipOffset = 3232235778;
 		var baseSN = getSerialNumberOffset(dt);
 		var snDifference = sn - baseSN;
-
+		if(snDifference < 0) {
+			baseSN = 0;
+			snDifference = sn - baseSN;
+		}
+		if(snDifference > 10000) {
+			baseSN = 0;
+			snDifference = sn - baseSN;
+		}
 		var ipNum = 0;
 		if(connectionType == driver_const.LJM_CT_ETHERNET) {
 			ipNum = ipOffset + snDifference;

@@ -1,6 +1,6 @@
 
 
-var BASIC_TEST = false;
+var BASIC_TEST = true;
 var MOCK_TEST = true;
 
 

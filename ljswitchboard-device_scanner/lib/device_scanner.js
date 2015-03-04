@@ -15,6 +15,9 @@ var requiredInformation = {};
 var eventList = require('./event_list').eventList;
 var mock_device_scanner = require('./mock_device_scanner');
 
+var DEBUG_CONNECTION_TYPE_SORTING = false;
+var DEBUG_DEVICE_SCAN_RESULT_SAVING = false;
+
 var REQUIRED_INFO_BY_DEVICE = {
 	'LJM_dtDIGIT': [
 		'DEVICE_NAME_DEFAULT',
@@ -85,17 +88,10 @@ var SCAN_REQUEST_LIST = [
         'connectionType': 'LJM_ctTCP',
         'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7
     },
-    // {
-    //     'deviceType': 'LJM_dtANY',
-    //     'connectionType': 'LJM_ctANY',
-    //     'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7
-    // }
 ];
 
 var scanStrategies = [
 	{'type': 'listAllExtended', 'enabled': true},
-	// {'type': 'listAllExtended', 'enabled': true},
-	// {'type': 'listAllExtended', 'enabled': true},
 	{'type': 'listAll', 'enabled': true},
 ];
 
@@ -171,6 +167,15 @@ var deviceScanner = function() {
 			'insertionMethod': insertionMethod
 		};
 	};
+	var isNewConnectionType = function(currentList, newCT) {
+		var isNew = true;
+		currentList.forEach(function(connectionType) {
+			if(newCT == connectionType.ct) {
+				isNew = false;
+			}
+		});
+		return isNew;
+	};
 	var saveResult = function(newScanResult) {
 		var ct;
 		var ip;
@@ -178,12 +183,17 @@ var deviceScanner = function() {
 		var virtualCT;
 		var i;
 		var isMockDevice = false;
+		var isNewCT;
 		if(isNewDevice(newScanResult)) {
 			ct = newScanResult.connectionType;
 			dt = newScanResult.deviceType;
 			ip = newScanResult.ipAddress;
 			if(newScanResult.isMockDevice) {
 				isMockDevice = true;
+			}
+
+			if(DEBUG_DEVICE_SCAN_RESULT_SAVING) {
+				console.log('New Device Found', dt, ct, ip);
 			}
 			var deviceInfo = {
 				'deviceType': dt,
@@ -208,18 +218,40 @@ var deviceScanner = function() {
 					if(deviceInfo.ETHERNET_IP.isReal) {
 						virtualCT = driver_const.connectionTypes.Ethernet;
 						ip = deviceInfo.ETHERNET_IP.str;
-						deviceInfo.connectionTypes.push(
-							getInitialConnectionTypeData(dt, virtualCT, ip, 'attribute')
+						isNewCT = isNewConnectionType(
+							deviceInfo.connectionTypes,
+							virtualCT
 						);
+						if(isNewCT) {
+							deviceInfo.connectionTypes.push(
+								getInitialConnectionTypeData(
+									dt,
+									virtualCT,
+									ip,
+									'attribute'
+								)
+							);
+						}
 					}
 				}
 				if(deviceInfo.WIFI_IP) {
 					if(deviceInfo.WIFI_IP.isReal) {
 						virtualCT = driver_const.connectionTypes.Wifi;
 						ip = deviceInfo.WIFI_IP.str;
-						deviceInfo.connectionTypes.push(
-							getInitialConnectionTypeData(dt, virtualCT, ip, 'attribute')
+						isNewCT = isNewConnectionType(
+							deviceInfo.connectionTypes,
+							virtualCT
 						);
+						if(isNewCT) {
+							deviceInfo.connectionTypes.push(
+								getInitialConnectionTypeData(
+									dt,
+									virtualCT,
+									ip,
+									'attribute'
+								)
+							);
+						}
 					}
 				}
 			}
@@ -249,6 +281,16 @@ var deviceScanner = function() {
 						}
 					}
 					if(addCT) {
+						
+						if(DEBUG_DEVICE_SCAN_RESULT_SAVING) {
+							console.log(
+								'Adding already found device',
+								dt,
+								ct,
+								ip,
+								sr.connectionTypes.length
+							);
+						}
 						sr.connectionTypes.push(
 							getInitialConnectionTypeData(dt, ct, ip)
 						);
@@ -271,18 +313,40 @@ var deviceScanner = function() {
 								if(newScanResult.data.ETHERNET_IP.isReal) {
 									virtualCT = driver_const.connectionTypes.Ethernet;
 									ip = newScanResult.data.ETHERNET_IP.str;
-									sr.connectionTypes.push(
-										getInitialConnectionTypeData(dt, virtualCT, ip, 'attribute')
+									isNewCT = isNewConnectionType(
+										sr.connectionTypes,
+										virtualCT
 									);
+									if(isNewCT) {
+										sr.connectionTypes.push(
+											getInitialConnectionTypeData(
+												dt,
+												virtualCT,
+												ip,
+												'attribute'
+											)
+										);
+									}
 								}
 							}
 							if(newScanResult.data.WIFI_IP) {
 								if(newScanResult.data.WIFI_IP.isReal) {
 									virtualCT = driver_const.connectionTypes.Wifi;
 									ip = newScanResult.data.WIFI_IP.str;
-									sr.connectionTypes.push(
-										getInitialConnectionTypeData(dt, virtualCT, ip, 'attribute')
+									isNewCT = isNewConnectionType(
+										sr.connectionTypes,
+										virtualCT
 									);
+									if(isNewCT) {
+										sr.connectionTypes.push(
+											getInitialConnectionTypeData(
+												dt,
+												virtualCT,
+												ip,
+												'attribute'
+											)
+										);
+									}
 								}
 							}
 						}
@@ -809,7 +873,6 @@ var deviceScanner = function() {
 		availableKeys.forEach(function(availableKey) {
 			deviceAttributes[availableKey] = attrs[availableKey];
 		});
-
 		// Save the connected devices deivce type.
 		deviceAttributes.connectionType = getInitialConnectionTypeData(
 			attrs.deviceType,
@@ -1001,6 +1064,47 @@ var deviceScanner = function() {
 		defered.resolve();
 		return defered.promise;
 	};
+	var sortResultConnectionTypes = function() {
+		var defered = q.defer();
+		var compare = function(a,b) {
+			var usbCT = driver_const.connectionTypes.usb;
+			var ethCT = driver_const.connectionTypes.ethernet;
+			var wifiCT = driver_const.connectionTypes.wifi;
+			// Define connection type weights;
+			var weight = {};
+			weight[driver_const.CONNECTION_TYPE_NAMES[usbCT]] = 1;
+			weight[driver_const.CONNECTION_TYPE_NAMES[ethCT]] = 2;
+			weight[driver_const.CONNECTION_TYPE_NAMES[wifiCT]] = 3;
+
+			if(weight[a.name] < weight[b.name]) {
+				return -1;
+			}
+			if(weight[a.name] > weight[b.name]) {
+				return 1;
+			}
+			return 0;
+		};
+
+		self.scanResults.forEach(function(scanResult) {
+			if(DEBUG_CONNECTION_TYPE_SORTING) {
+				console.log('Before Sort');
+				scanResult.connectionTypes.forEach(function(ct) {
+					console.log('  - Type:', ct.name, ct.insertionMethod);
+				});
+			}
+			// Sort the connection types so that the order is USB, Ethernet, 
+			// Wifi and not the arbitrary order that they were found in.
+			scanResult.connectionTypes.sort(compare);
+			if(DEBUG_CONNECTION_TYPE_SORTING) {
+				console.log('After Sort');
+				scanResult.connectionTypes.forEach(function(ct) {
+					console.log('  - Type:', ct.name, ct.insertionMethod);
+				});
+			}
+		});
+		defered.resolve();
+		return defered.promise;
+	};
 	var sortScanResults = function() {
 		var defered = q.defer();
 		var tmpSortedResults = {};
@@ -1058,14 +1162,16 @@ var deviceScanner = function() {
 				.then(restoreDriverOldfwState, getOnError('getFindAllDevices'))
 				.then(populateMissingScanData, getOnError('restoreDriverOldfwState'))
 				.then(markActiveDevices, getOnError('populateMissingScanData'))
-				.then(sortScanResults, getOnError('markActiveDevices'))
+				.then(sortResultConnectionTypes, getOnError('markActiveDevices'))
+				.then(sortScanResults, getOnError('sortResultConnectionTypes'))
 				.then(returnResults, getOnError('sortScanResults'))
 				.then(defered.resolve, defered.reject);
 			} else {
 				getFindMockDevices(currentDevices)()
 				.then(populateMissingScanData, getOnError('getFindAllDevices'))
 				.then(markActiveDevices, getOnError('populateMissingScanData'))
-				.then(sortScanResults, getOnError('markActiveDevices'))
+				.then(sortResultConnectionTypes, getOnError('markActiveDevices'))
+				.then(sortScanResults, getOnError('sortResultConnectionTypes'))
 				.then(returnResults, getOnError('sortScanResults'))
 				.then(defered.resolve, defered.reject);
 			}
