@@ -322,7 +322,7 @@ exports.CONNECTION_TYPE_NAMES = {
     '1': 'USB',
     '2': 'TCP',
     '3': 'Ethernet',
-    '4': 'Wifi'
+    '4': 'WiFi'
 };
 exports.WIFI_STATUS_DISPLAY_DATA = {
     2900: {'display':true,'str':'Associated'},
