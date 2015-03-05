@@ -76,6 +76,29 @@ exports.labjack = function () {
 	//Saves the Constants object
 	this.constants = jsonConstants.getConstants();
 
+	this.isHandleValid = false;
+
+	var wrapUserFunction = function(userFunction) {
+		var persistentFunction = function(a, b, c, d) {
+			if(self.isHandleValid) {
+				if(userFunction) {
+					userFunction(a, b, c, d);
+				}
+			} else {
+				console.error('Preventing execution of callback when handle is not valid');
+			}
+		};
+		return persistentFunction;
+	};
+	var wrapOpenCloseCallbacks = function(userFunction) {
+		var persistentFunction = function(a, b, c, d) {
+			if(userFunction) {
+				userFunction(a, b, c, d);
+			}
+		};
+		return persistentFunction;
+	};
+
 //******************************************************************************
 //************************* Opening A Device ***********************************
 //******************************************************************************
@@ -91,14 +114,14 @@ exports.labjack = function () {
 	 *		the device (ex: USB, Ethernet, WiFi). If not specified, defaults to
 	 *		"LJ_ctANY".
 	 * @param {String} identifier Optional parameter that allows selective
-	 * 		opening of a device based on a unique identifier (either string IP
+	 *		opening of a device based on a unique identifier (either string IP
 	 *		address or integer serialNumber). If not specified, defaults to
 	 *		"LJM_idANY".
 	 * @param {function} onError function Callback for error-case.
 	 * @param {function} onSuccess function Callback for success-case.
 	 * @throws {DriverInterfaceError} if there are any un-recoverable errors
 	**/
-	this.open = function() {	
+	this.open = function() {
 		//Variables to save information to allowing for open(onError, onSuccess)
 		var deviceType, connectionType, identifier, onError, onSuccess;
 
@@ -131,6 +154,9 @@ exports.labjack = function () {
 			throw new DriverInterfaceError("Invalid Open Call");
 		}
 
+		onError = wrapOpenCloseCallbacks(onError);
+		onSuccess = wrapOpenCloseCallbacks(onSuccess);
+
 		//Complete Asynchronous function-call,
 		//Make sure we aren't already connected to a device
 		if(self.handle === null) {
@@ -146,13 +172,13 @@ exports.labjack = function () {
 			if(dtType) {
 				dtType = "string";
 			} else {
-				deviceType = parseInt(deviceType);
+				deviceType = parseInt(deviceType, 10);
 				dtType = "number";
 			}
 			if(ctType) {
 				ctType = "string";
 			} else {
-				connectionType = parseInt(connectionType);
+				connectionType = parseInt(connectionType, 10);
 				ctType = "number";
 			}
 			if(idType) {
@@ -176,6 +202,7 @@ exports.labjack = function () {
 					self.deviceType = deviceType;
 					self.connectionType = connectionType;
 					self.identifier = identifier;
+					self.isHandleValid = true;
 					return onSuccess();
 				} else {
 					//Make sure that the handle, deviceType 
@@ -192,10 +219,10 @@ exports.labjack = function () {
 			if((dtType=="number")&&(ctType=="number")&&(idType=="string")) {
 				//call LJM_Open() using the ffi async call
 				output = self.ljm.LJM_Open.async(
-					deviceType, 
-					connectionType, 
-					identifier, 
-					refDeviceHandle, 
+					deviceType,
+					connectionType,
+					identifier,
+					refDeviceHandle,
 					handleResponse
 				);
 			} else if((dtType=="number")&&(ctType=="string")&&(idType=="string")) {
@@ -203,10 +230,10 @@ exports.labjack = function () {
 				connectionType = driver_const.connectionTypes[connectionType];
 				//call LJM_OpenS() using the ffi async call
 				output = self.ljm.LJM_Open.async(
-					deviceType, 
-					connectionType, 
-					identifier, 
-					refDeviceHandle, 
+					deviceType,
+					connectionType,
+					identifier,
+					refDeviceHandle,
 					handleResponse
 				);
 			} else if((dtType=="string")&&(ctType=="number")&&(idType=="string")) {
@@ -214,19 +241,19 @@ exports.labjack = function () {
 				deviceType = driver_const.deviceTypes[deviceType];
 				//call LJM_OpenS() using the ffi async call
 				output = self.ljm.LJM_Open.async(
-					deviceType, 
-					connectionType, 
-					identifier, 
-					refDeviceHandle, 
+					deviceType,
+					connectionType,
+					identifier,
+					refDeviceHandle,
 					handleResponse
 				);
 			} else if((dtType=="string")&&(ctType=="string")&&(idType=="string")) {
 				//call LJM_OpenS() using the ffi async call
 				output = self.ljm.LJM_OpenS.async(
-					deviceType, 
-					connectionType, 
-					identifier, 
-					refDeviceHandle, 
+					deviceType,
+					connectionType,
+					identifier,
+					refDeviceHandle,
 					handleResponse
 				);
 			} else {
@@ -251,7 +278,7 @@ exports.labjack = function () {
 	 *		the device (ex: USB, Ethernet, WiFi). If not specified, defaults to
 	 *		"LJ_ctANY".
 	 * @param {String} identifier Optional parameter that allows selective
-	 * 		opening of a device based on a unique identifier (either string IP
+	 *		opening of a device based on a unique identifier (either string IP
 	 *		address or integer serialNumber). If not specified, defaults to
 	 *		"LJM_idANY".
 	 * @return {number} 0 on success, LJM_ Error Number on error.
@@ -290,13 +317,13 @@ exports.labjack = function () {
 			if(dtType) {
 				dtType = "string";
 			} else {
-				deviceType = parseInt(deviceType);
+				deviceType = parseInt(deviceType, 10);
 				dtType = "number";
 			}
 			if(ctType) {
 				ctType = "string";
 			} else {
-				connectionType = parseInt(connectionType);
+				connectionType = parseInt(connectionType, 10);
 				ctType = "number";
 			}
 			if(idType) {
@@ -321,10 +348,10 @@ exports.labjack = function () {
 				connectionType = driver_const.connectionTypes[connectionType];
 				//call LJM_OpenS() using the ffi async call
 				output = self.ljm.LJM_Open(
-					deviceType, 
-					connectionType, 
-					identifier, 
-					refDeviceHandle, 
+					deviceType,
+					connectionType,
+					identifier,
+					refDeviceHandle,
 					handleResponse
 				);
 			} else if((dtType=="string")&&(ctType=="number")&&(idType=="string")) {
@@ -332,10 +359,10 @@ exports.labjack = function () {
 				deviceType = driver_const.deviceTypes[deviceType];
 				//call LJM_OpenS() using the ffi async call
 				output = self.ljm.LJM_Open(
-					deviceType, 
-					connectionType, 
-					identifier, 
-					refDeviceHandle, 
+					deviceType,
+					connectionType,
+					identifier,
+					refDeviceHandle,
 					handleResponse
 				);
 			} else if((dtType=="string")&&(ctType=="string")&&(idType=="string"))  {
@@ -359,6 +386,7 @@ exports.labjack = function () {
 				self.deviceType = deviceType;
 				self.connectionType = connectionType;
 				self.identifier = identifier;
+				self.isHandleValid = true;
 				return output;
 			} else {
 				//Make sure that the handle, deviceType 
@@ -388,16 +416,16 @@ exports.labjack = function () {
 	 * structure:
 	 * 
 	 * { 
-	 * 		deviceType {number} A device model type corresponding to a constant
+	 *		deviceType {number} A device model type corresponding to a constant
 	 *			in LabJackM.h. 
-	 * 		connectionType {number} A constant from LabJackM.h that defines
+	 *		connectionType {number} A constant from LabJackM.h that defines
 	 *			connection medium the driver is using to communicate with the
 	 *			device.
-	 * 		serialNumber {number} The device unique integer serial number.
-	 * 		ipAddress {string} The IP address the device is located at. Defaults
+	 *		serialNumber {number} The device unique integer serial number.
+	 *		ipAddress {string} The IP address the device is located at. Defaults
 	 *			to all zeros if not connected by the network (0.0.0.0).
-	 * 		port {number} The port at which the device is connected.
-	 * 		maxBytesPerMB {number} The maximum payload in bytes that the
+	 *		port {number} The port at which the device is connected.
+	 *		maxBytesPerMB {number} The maximum payload in bytes that the
 	 *			driver can send to the device over the current connection
 	 *			medium.
 	 * }
@@ -411,6 +439,11 @@ exports.labjack = function () {
 	this.getHandleInfo = function(onError, onSuccess) {
 		//Check to make sure a device has been opened
 		if(self.checkStatus(onError)) { return 1;}
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+		
 
 		var errorResult;
 
@@ -422,13 +455,13 @@ exports.labjack = function () {
 		var maxBytesPerMessage = ref.alloc('int', 1);
 
 		errorResult = self.ljm.LJM_GetHandleInfo.async(
-			self.handle, 
-			deviceType, 
-			connectionType, 
-			serialNumber, 
-			ipAddr, 
-			port, 
-			maxBytesPerMessage, 
+			self.handle,
+			deviceType,
+			connectionType,
+			serialNumber,
+			ipAddr,
+			port,
+			maxBytesPerMessage,
 			function (err, res) {
 				if(err) {
 					return onError('Weird Error getHandleInfo', err);
@@ -470,16 +503,16 @@ exports.labjack = function () {
 	 * structure:
      * 
 	 * { 
-	 * 		deviceType {number} A device model type corresponding to a constant
+	 *		deviceType {number} A device model type corresponding to a constant
 	 *			in LabJackM.h. 
-	 * 		connectionType {number} A constant from LabJackM.h that defines
+	 *		connectionType {number} A constant from LabJackM.h that defines
 	 *			connection medium the driver is using to communicate with the
 	 *			device.
-	 * 		serialNumber {number} The device unique integer serial number.
-	 * 		ipAddress {string} The IP address the device is located at. Defaults
+	 *		serialNumber {number} The device unique integer serial number.
+	 *		ipAddress {string} The IP address the device is located at. Defaults
 	 *			to all zeros if not connected by the network (0.0.0.0).
-	 * 		port {number} The port at which the device is connected.
-	 * 		maxBytesPerMB {number} The maximum payload in bytes that the
+	 *		port {number} The port at which the device is connected.
+	 *		maxBytesPerMB {number} The maximum payload in bytes that the
 	 *			driver can send to the device over the current connection
 	 *			medium.
 	 * }
@@ -503,12 +536,12 @@ exports.labjack = function () {
 
 		//Perform device I/O Operation
 		errorResult = self.ljm.LJM_GetHandleInfo(
-			self.handle, 
-			devT, 
-			conT, 
+			self.handle,
+			devT,
+			conT,
 			sN,
-			ipAddr, 
-			port, 
+			ipAddr,
+			port,
 			maxB
 		);
 		
@@ -542,6 +575,10 @@ exports.labjack = function () {
 	this.readRaw = function(data, onError, onSuccess) {
 		//Check to make sure a device has been opened
 		if (self.checkStatus(onError)) { return; }
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
 
 		//Make sure the data is valid
 		if (typeof(data[0]) != "number") {
@@ -553,9 +590,9 @@ exports.labjack = function () {
 		aData.fill(0);
 
 		errorResult = self.ljm.LJM_ReadRaw.async(
-			self.handle, 
-			aData, 
-			data.length, 
+			self.handle,
+			aData,
+			data.length,
 			function (err, res) {
 				if(err) {
 					return onError('Weird Error readRaw', err);
@@ -614,9 +651,12 @@ exports.labjack = function () {
 	 * @throws {DriverInterfaceError} If the input args aren't correct.
 	 */
 	this.read = function(address, onError, onSuccess) {
-
 		//Check to make sure a device has been opened
 		if (self.checkStatus(onError)) { return; }
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
 
 		var output;
 		var addressNum = 0;
@@ -631,9 +671,9 @@ exports.labjack = function () {
 			//Allocate space for a read value
 			var result = new ref.alloc('double',1);
 			self.ljm.LJM_eReadAddress.async(
-				self.handle, 
-				resolvedAddress, 
-				info.type, 
+				self.handle,
+				resolvedAddress,
+				info.type,
 				result,
 				function(err, res) {
 					if(err) {
@@ -657,9 +697,9 @@ exports.labjack = function () {
 
 			//Perform LJM Async function call
 			self.ljm.LJM_eReadAddressString.async(
-				self.handle, 
-				resolvedAddress, 
-				strBuffer, 
+				self.handle,
+				resolvedAddress,
+				strBuffer,
 				function(err, res) {
 					if(err) {
 						return onError('Weird Error read', err);
@@ -716,9 +756,9 @@ exports.labjack = function () {
 			//Allocate space for a read value
 			result = new ref.alloc('double',1);
 			output = self.ljm.LJM_eReadAddress(
-				self.handle, 
-				resolvedAddress, 
-				info.type, 
+				self.handle,
+				resolvedAddress,
+				info.type,
 				result
 			);
 			if (output === 0) {
@@ -733,8 +773,8 @@ exports.labjack = function () {
 			strBuffer.fill(0);
 
 			output = self.ljm.LJM_eReadAddressString(
-				self.handle, 
-				resolvedAddress, 
+				self.handle,
+				resolvedAddress,
 				strBuffer
 			);
 			if (output === 0) {
@@ -786,9 +826,12 @@ exports.labjack = function () {
 	**/
 	this.readMany = function(addresses, onError, onSuccess) {
 		// TODO: Clean this up.
-
 		//Check to make sure a device has been opened
 		if ( self.checkStatus(onError) ) { return; }
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
 
 		//Get important info & allocate argument variables
 		var length = addresses.length;
@@ -812,7 +855,8 @@ exports.labjack = function () {
 		var info;
 		var offset=0;
 		var constants = self.constants;
-		for ( var i=0; i<length; i++ ) {
+		var i;
+		for ( i=0; i<length; i++ ) {
 			var address = addresses[i];
 
 			info = constants.getAddressInfo(address, 'R');
@@ -832,18 +876,18 @@ exports.labjack = function () {
 			}
 		}
 		errorResult = self.ljm.LJM_eReadAddresses.async(
-			self.handle, 
-			length, 
-			addrBuff, 
-			addrTypeBuff, 
-			results, 
-			errors, 
+			self.handle,
+			length,
+			addrBuff,
+			addrTypeBuff,
+			results,
+			errors,
 			function(err, res) {
 				if(err) {
 					return onError('Weird Error readMany', err);
 				}
 				var offset = 0;
-				for (i in addresses) {
+				for (i = 0; i < addresses.length; i++) {
 					returnResults[i] = results.readDoubleLE(offset);
 					offset += ARCH_DOUBLE_NUM_BYTES;
 				}
@@ -910,10 +954,10 @@ exports.labjack = function () {
 
 			//Execute LJM command
 			errorResult = self.ljm.LJM_eReadNames(
-				self.handle, 
-				length, 
-				aNames, 
-				results, 
+				self.handle,
+				length,
+				aNames,
+				results,
 				errors
 			);
 
@@ -937,21 +981,21 @@ exports.labjack = function () {
 					if ( info.type == -1 ) {
 						throw new DriverInterfaceError(
 							{
-								retError:"Invalid Address", 
+								retError:"Invalid Address",
 								errFrame:i
 							}
 						);
 					} else if (info.directionValid === 0) {
 						throw new DriverInterfaceError(
 							{
-								retError:"Invalid Read Attempt", 
+								retError:"Invalid Read Attempt",
 								errFrame:i
 							}
 						);
 					} else {
 						throw new DriverInterfaceError(
 							{
-								retError:"Unexpected Error", 
+								retError:"Unexpected Error",
 								errFrame:i
 							}
 						);
@@ -961,11 +1005,11 @@ exports.labjack = function () {
 
 			//Execute LJM command
 			errorResult = self.ljm.LJM_eReadAddresses(
-				self.handle, 
-				length, 
-				addrBuff, 
-				addrTypeBuff, 
-				results, 
+				self.handle,
+				length,
+				addrBuff,
+				addrTypeBuff,
+				results,
 				errors
 			);
 		} else {
@@ -983,7 +1027,7 @@ exports.labjack = function () {
 		} else {
 			throw new DriverInterfaceError(
 				{
-					retError:errorResult, 
+					retError:errorResult,
 					errFrame:errors.deref()
 				}
 			);
@@ -996,7 +1040,7 @@ exports.labjack = function () {
 	 * 
 	 * @param {Array} data The data (Array of double) to write to the device.
 	 * @param {function} onError Function to call if an error is encountered
-	 * 		during operation. Should take a single parameter describing the
+	 *		during operation. Should take a single parameter describing the
 	 *		error encountered.
 	 * @param {function} onSuccess Function tao call after the operation
 	 *		finishes. Called with a single parameter: Buffer of double.
@@ -1004,7 +1048,11 @@ exports.labjack = function () {
 	this.writeRaw = function(data, onError, onSuccess) {
 		//Check to make sure a device has been opened
 		if ( self.checkStatus(onError) ) { return; }
-
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+		
 		if ( typeof(data[0]) != "number" ) {
 			console.log('WriteRaw-Err, data not a number-array');
 		}
@@ -1017,9 +1065,9 @@ exports.labjack = function () {
 		}
 
 		errorResult = self.ljm.LJM_WriteRaw.async(
-			self.handle, 
-			aData, 
-			data.length, 
+			self.handle,
+			aData,
+			data.length,
 			function (err, res){
 				if(err) {
 					return onError('Weird Error writeRaw', err);
@@ -1060,8 +1108,8 @@ exports.labjack = function () {
 		}
 
 		errorResult = self.ljm.LJM_WriteRaw(
-			self.handle, 
-			aData, 
+			self.handle,
+			aData,
 			data.length
 		);
 		if ( errorResult === 0 ) {
@@ -1090,7 +1138,11 @@ exports.labjack = function () {
 	this.write = function(address, value, onError, onSuccess) {
 		//Check to make sure a device has been opened
 		if ( self.checkStatus(onError) ) { return; }
-
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+		
 		var strBuffer;
 		var info;
 
@@ -1102,9 +1154,9 @@ exports.labjack = function () {
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
 				errorResult = self.ljm.LJM_eWriteName.async(
-					self.handle, 
-					address, 
-					value, 
+					self.handle,
+					address,
+					value,
 					function(err, res) {
 						if(err) {
 							return onError('Weird Error write-1', err);
@@ -1132,9 +1184,9 @@ exports.labjack = function () {
 
 				//Execute LJM command
 				errorResult = self.ljm.LJM_eWriteNameString.async(
-					self.handle, 
+					self.handle,
 					address,
-					strBuffer, 
+					strBuffer,
 					function(err, res){
 						if(err) {
 							return onError('Weird Error write-2', err);
@@ -1160,10 +1212,10 @@ exports.labjack = function () {
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
 				errorResult = self.ljm.LJM_eWriteAddress.async(
-					self.handle, 
-					address, 
-					info.type, 
-					value, 
+					self.handle,
+					address,
+					info.type,
+					value,
 					function(err, res){
 						if(err) {
 							return onError('Weird Error write-3', err);
@@ -1191,9 +1243,9 @@ exports.labjack = function () {
 
 				//Execute LJM command
 				errorResult = self.ljm.LJM_eWriteAddressString.async(
-					self.handle, 
+					self.handle,
 					address,
-					strBuffer, 
+					strBuffer,
 					function(err, res){
 						if(err) {
 							return onError('Weird Error write', err);
@@ -1242,16 +1294,17 @@ exports.labjack = function () {
 
 		var errorResult;
 		var strBuffer;
+		var info;
 		//Decision making for address type (string or number)
 		if ( isNaN(address) ) {
-			var info = self.constants.getAddressInfo(address, 'W');
+			info = self.constants.getAddressInfo(address, 'W');
 			
 			//Decision making for LJM-address return type, number or string
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
 				errorResult = self.ljm.LJM_eWriteName(
-					self.handle, 
-					address, 
+					self.handle,
+					address,
 					value
 				);
 			} else if( (info.directionValid == 1) && (info.type == 98) ) {
@@ -1269,7 +1322,7 @@ exports.labjack = function () {
 				
 				//Execute LJM command
 				errorResult = self.ljm.LJM_eWriteNameString(
-					self.handle, 
+					self.handle,
 					address,
 					strBuffer
 				);
@@ -1278,19 +1331,19 @@ exports.labjack = function () {
 				if ( info.type == -1 ) {
 					throw new DriverInterfaceError("Invalid Address");
 					return "Invalid Address";
-				} else if (info.directionValid == 0) {
+				} else if (info.directionValid === 0) {
 					throw new DriverInterfaceError("Invalid Write Attempt");
 					return "Invalid Write Attempt";
 				}
 			}
 		} else if( !isNaN(address) ) {
-			var info = self.constants.getAddressInfo(address, 'W');
+			info = self.constants.getAddressInfo(address, 'W');
 			if ( (info.directionValid == 1) && (info.type != 98) ) {
 				//Execute LJM command
 				errorResult = self.ljm.LJM_eWriteAddress(
-					self.handle, 
-					address, 
-					info.type, 
+					self.handle,
+					address,
+					info.type,
 					value
 				);
 			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
@@ -1308,7 +1361,7 @@ exports.labjack = function () {
 
 				//Execute LJM command
 				errorResult = self.ljm.LJM_eWriteAddressString(
-					self.handle, 
+					self.handle,
 					address,
 					strBuffer
 				);
@@ -1356,8 +1409,12 @@ exports.labjack = function () {
 	 */
 	this.writeMany = function (addresses, values, onError, onSuccess) {
 		//Check to make sure a device has been opened
-		if ( self.checkStatus(onError) ) { return; };
-
+		if ( self.checkStatus(onError) ) { return; }
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+		
 		//Check to make sure the two array's are of the same length
 		if ( addresses.length != values.length ) {
 			onError('Length of addresses & values must be equal');
@@ -1381,12 +1438,14 @@ exports.labjack = function () {
 
 		var errorResult;
 		var i = 0;
+		var offset;
+		var dataOffset;
 
 		//Decide whether to perform address-number or address-name operation.
 		if ( isNaN(addresses[0]) ) {
 			//Perform necessary string buffer allocations.
-			var offset = 0;
-			var dataOffset = 0;
+			offset = 0;
+			dataOffset = 0;
 
 			//Declare aNames array buffer
 			var aNames = new Buffer(ARCH_POINTER_SIZE * length);
@@ -1417,11 +1476,11 @@ exports.labjack = function () {
 
 			//Execute LJM command.
 			errorResult = self.ljm.LJM_eWriteNames.async(
-				self.handle, 
-				length, 
-				aNames, 
-				aValues, 
-				errors, 
+				self.handle,
+				length,
+				aNames,
+				aValues,
+				errors,
 				function(err, res){
 					if(err) {
 						return onError('Weird Error writeMany-1', err);
@@ -1441,7 +1500,7 @@ exports.labjack = function () {
 			var inValidOperation = 0;
 
 			var info;
-			var offset = 0;
+			offset = 0;
 			var offsetD = 0;
 
 			for ( i = 0; i < length; i++ ) {
@@ -1467,17 +1526,17 @@ exports.labjack = function () {
 
 			//Execute LJM command.
 			errorResult = self.ljm.LJM_eWriteAddresses.async(
-				self.handle, 
-				length, 
-				addrBuff, 
-				addrTypeBuff, 
-				aValues, 
-				errors, 
+				self.handle,
+				length,
+				addrBuff,
+				addrTypeBuff,
+				aValues,
+				errors,
 				function(err, res){
 					if(err) {
 						return onError('Weird Error writeMany-2', err);
 					}
-					if ( (res == 0) ) {
+					if ( (res === 0) ) {
 						return onSuccess();
 					}
 					else {
@@ -1507,7 +1566,7 @@ exports.labjack = function () {
 	 *		write / writeSync if needing to write a String.
 	 * @return {number/String} 0 on success, string on error.
 	 * @throws {DriverInterfaceError} Thrown if there is an error produced 
-	 * 		before calling the LJM function.
+	 *		before calling the LJM function.
 	 * @throws {DriverOperationError} Thrown if there is an error produced
 	 *		during the LJM driver function.
 	 */
@@ -1541,12 +1600,14 @@ exports.labjack = function () {
 		errors.fill(0);
 
 		var errorResult;
+		var i;
+		var offset;
 
 		//Decide whether to perform address-number or address-name operation.
 		if ( isNaN(addresses[0]) ) {
 			//Perform necessary string buffer allocations.
-			var i;
-			var offset = 0;
+			i = 0;
+			offset = 0;
 			var dataOffset = 0;
 
 			//Declare aNames array buffer
@@ -1563,7 +1624,7 @@ exports.labjack = function () {
 				var buf = new Buffer(addresses[i].length + 1);
 
 				//Clear the buffer
-				buf.fill(0)
+				buf.fill(0);
 
 				//Save the string to the buffer
 				ref.writeCString(buf, 0, addresses[i]);
@@ -1578,10 +1639,10 @@ exports.labjack = function () {
 
 			//Execute LJM function.
 			errorResult = self.ljm.LJM_eWriteNames(
-				self.handle, 
-				length, 
-				aNames, 
-				aValues, 
+				self.handle,
+				length,
+				aNames,
+				aValues,
 				errors
 			);
 
@@ -1592,7 +1653,7 @@ exports.labjack = function () {
 			var inValidOperation = 0;
 
 			var info;
-			var offset=0;
+			offset=0;
 			var offsetD = 0;
 			i = 0;
 
@@ -1609,15 +1670,15 @@ exports.labjack = function () {
 					if ( info.type == -1 ) {
 						throw new DriverInterfaceError(
 							{
-								retError:"Invalid Address", 
+								retError:"Invalid Address",
 								errFrame:i
 							}
 						);
 						return {retError:"Invalid Address", errFrame:i};
-					} else if (info.directionValid == 0) {
+					} else if (info.directionValid === 0) {
 						throw new DriverInterfaceError(
 							{
-								retError:"Invalid Write Attempt", 
+								retError:"Invalid Write Attempt",
 								errFrame:i
 							}
 						);
@@ -1625,7 +1686,7 @@ exports.labjack = function () {
 					} else {
 						throw new DriverInterfaceError(
 							{
-								retError:"Unexpected Error", 
+								retError:"Unexpected Error",
 								errFrame:i
 							}
 						);
@@ -1636,11 +1697,11 @@ exports.labjack = function () {
 
 			//Execute LJM command.
 			errorResult = self.ljm.LJM_eWriteAddresses(
-				self.handle, 
-				length, 
-				addrBuff, 
-				addrTypeBuff, 
-				aValues, 
+				self.handle,
+				length,
+				addrBuff,
+				addrTypeBuff,
+				aValues,
 				errors
 			);
 		} else {
@@ -1649,17 +1710,17 @@ exports.labjack = function () {
 			);
 			return 'Invalid Array-type, must be number-array or string-array';
 		}
-		if(errorResult == 0) {
+		if(errorResult === 0) {
 			return errorResult;
 		} else {
 			throw new DriverOperationError(
 				{
-					retError:errorResult, 
+					retError:errorResult,
 					errFrame:errors.deref()}
 			);
 			return {retError:errorResult, errFrame:errors.deref()};
 		}
-	}
+	};
 
 	/**
 	 * Helper function for building an array of data read from the driver.
@@ -1687,11 +1748,12 @@ exports.labjack = function () {
 					returnArray.push(aValues.readDoubleLE(offset));
 				}
 				offset += ARCH_DOUBLE_NUM_BYTES;
-			}			
+			}
 		}
 		return returnArray;
-	}
-/**
+	};
+
+	/**
 	 * [rwMany description]
 	 * @param  {[type]} numFrames  [description]
 	 * @param  {[type]} addresses  [description]
@@ -1703,11 +1765,16 @@ exports.labjack = function () {
 	 */
 	this.rwMany = function(addresses,directions,numValues,values,onError,onSuccess) {
 		//Check to make sure a device has been opened
-		if (self.checkStatus(onError)) { return; };
-
+		if (self.checkStatus(onError)) { return; }
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+		
 		var i,j;
 		var numFrames = addresses.length;
 		var value;
+		var offsetD, offsetI;
 		
 		//Return variable
 		var errorResult;
@@ -1731,8 +1798,8 @@ exports.labjack = function () {
 			aNames.fill(0);
 
 			var offsetP = 0;
-			var offsetD = 0;
-			var offsetI = 0;
+			offsetD = 0;
+			offsetI = 0;
 			
 			//Populate the array's with data
 			for ( i = 0; i < numFrames; i++ ) {
@@ -1758,7 +1825,7 @@ exports.labjack = function () {
 			//different length then the rest.
 			offsetD = 0;
 			for ( i = 0; i < values.length; i++ ) {
-				var value = values[i];
+				value = values[i];
 				if ( typeof(value) == 'number' ) {
 					aValues.writeDoubleLE(value, offsetD);
 				} else {
@@ -1780,12 +1847,12 @@ exports.labjack = function () {
 					if(err) {
 						return onError('Weird Error rwMany-1', err);
 					}
-					if ( res == 0 ) {
+					if ( res === 0 ) {
 						return onSuccess(
 							self.populateRWManyArray(
-								numFrames, 
-								numValues, 
-								directions, 
+								numFrames,
+								numValues,
+								directions,
 								aValues
 							)
 						);
@@ -1799,8 +1866,8 @@ exports.labjack = function () {
 			var aAddresses = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of addresses
 			var aTypes = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of types
 
-			var offsetD = 0;
-			var offsetI = 0;
+			offsetD = 0;
+			offsetI = 0;
 
 			var overwriteNumValues = false;
 			var newNumValues;
@@ -1823,7 +1890,7 @@ exports.labjack = function () {
 					//Report Error:
 					return onError(
 						{
-							retError:"Invalid Direction", 
+							retError:"Invalid Direction",
 							errFrame:i
 						}
 					);
@@ -1844,21 +1911,21 @@ exports.labjack = function () {
 					if(info.type == -1) {
 						return onError(
 							{
-								retError:"Invalid Address", 
+								retError:"Invalid Address",
 								errFrame:i
 							}
 						);
-					} else if (info.directionValid == 0) {
+					} else if (info.directionValid === 0) {
 						return onError(
 							{
-								retError:"Invalid Write Attempt", 
+								retError:"Invalid Write Attempt",
 								errFrame:i
 							}
 						);
 					} else {
 						return onError(
 							{
-								retError:"Weird-Error", 
+								retError:"Weird-Error",
 								errFrame:i
 							}
 						);
@@ -1881,7 +1948,7 @@ exports.labjack = function () {
 			//different length then the rest.
 			offsetD = 0;
 			for ( i = 0; i < values.length; i++ ) {
-				var value = values[i];
+				value = values[i];
 				if(typeof(value) == 'number') {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
@@ -1904,12 +1971,12 @@ exports.labjack = function () {
 					if(err) {
 						return onError('Weird Error rwMany-2', err);
 					}
-					if(res == 0) {
+					if(res === 0) {
 						return onSuccess(
 							self.populateRWManyArray(
-								numFrames, 
-								numValues, 
-								directions, 
+								numFrames,
+								numValues,
+								directions,
 								aValues
 							)
 						);
@@ -1921,7 +1988,8 @@ exports.labjack = function () {
 		} else {
 			return onError("Address is not a number or string array");
 		}
-	}
+	};
+
 	/**
 	 * [rwManySync description]
 	 * @param  {[type]} numFrames  [description]
@@ -1930,9 +1998,9 @@ exports.labjack = function () {
 	 * @param  {[type]} numValues  [description]
 	 * @param  {[type]} values     [description]
 	 * @return {[type]}            [description]
-	 *         							LJM driver
+	 *								LJM driver
 	 * @throws {DriverOperationError} If there is an error produced by calling 
-	 *         							the LJM driver
+	 *								the LJM driver
 	 */
 	this.rwManySync = function(addresses,directions,numValues,values) {
 		var i,j;
@@ -1947,7 +2015,7 @@ exports.labjack = function () {
 		var aDirections = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of directions
 		var aNumWrites = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of ops. per frame
 		var aValues = new Buffer(values.length * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
-		var errorVal = new Buffer(ARCH_INT_NUM_BYTES); 							//Array the size of one UInt32 for err
+		var errorVal = new Buffer(ARCH_INT_NUM_BYTES);							//Array the size of one UInt32 for err
 
 		//Clear all the arrays
 		aDirections.fill(0);
@@ -1958,6 +2026,9 @@ exports.labjack = function () {
 		var offsetP = 0;
 		var offsetD = 0;
 		var offsetI = 0;
+
+		// Declare other variables
+		var value;
 
 		if ( isNaN(addresses[0]) ) {
 			//Allocate space for the aNames array
@@ -1991,7 +2062,7 @@ exports.labjack = function () {
 			//different length then the rest.
 			offsetD = 0;
 			for ( i = 0; i < values.length; i++ ) {
-				var value = values[i];
+				value = values[i];
 				if ( typeof(value) === 'number' ) {
 					aValues.writeDoubleLE(value,offsetD);
 				} else {
@@ -2039,7 +2110,7 @@ exports.labjack = function () {
 					//Report Error:
 					throw new DriverInterfaceError(
 						{
-							retError:"Invalid Direction", 
+							retError:"Invalid Direction",
 							errFrame:i
 						}
 					);
@@ -2060,15 +2131,15 @@ exports.labjack = function () {
 					if ( info.type == -1 ) {
 						throw new DriverInterfaceError(
 							{
-								retError:"Invalid Address", 
+								retError:"Invalid Address",
 								errFrame:i
 							}
 						);
 						return {retError:"Invalid Address", errFrame:i};
-					} else if (info.directionValid == 0) {
+					} else if (info.directionValid === 0) {
 						throw new DriverInterfaceError(
 							{
-								retError:"Invalid Write Attempt", 
+								retError:"Invalid Write Attempt",
 								errFrame:i
 							}
 						);
@@ -2076,7 +2147,7 @@ exports.labjack = function () {
 					} else {
 						throw new DriverInterfaceError(
 							{
-								retError:"Weird-Error", 
+								retError:"Weird-Error",
 								errFrame:i
 							}
 						);
@@ -2128,18 +2199,25 @@ exports.labjack = function () {
 		}
 		if(errorResult === 0) {
 			return self.populateRWManyArray(
-						numFrames, 
-						numValues, 
-						directions, 
+						numFrames,
+						numValues,
+						directions,
 						aValues
 					);
 		} else {
 			throw new DriverOperationError(errorResult);
 			return errorResult;
 		}
-	}
+	};
 
 	this.readUINT64 = function(type, onError, onSuccess) {
+		//Check to make sure a device has been opened.
+		if(self.checkStatus(onError)) {return;}
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+
 		var regType = {
 			ethernet:0,
 			ETHERNET:0,
@@ -2150,19 +2228,17 @@ exports.labjack = function () {
 			Wifi:1,
 			WIFI_MAC:1
 		};
-		//Check to make sure a device has been opened.
-		if(self.checkStatus(onError)) {return;};
-
+		
 		//Return variable
 		var errorResult;
 
 		//Perform function wide buffer allocations:
 		var aAddresses = new Buffer(1 * ARCH_INT_NUM_BYTES);
-		var aTypes = new Buffer(1 * ARCH_INT_NUM_BYTES)
+		var aTypes = new Buffer(1 * ARCH_INT_NUM_BYTES);
 		var aWrites = new Buffer(1 * ARCH_INT_NUM_BYTES);			//Array of directions
 		var aNumValues = new Buffer(1 * ARCH_INT_NUM_BYTES);		//Array of ops. per frame
 		var aValues = new Buffer(8 * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
-		var errorVal = new Buffer(ARCH_INT_NUM_BYTES); 				//Array the size of one UInt32 for err
+		var errorVal = new Buffer(ARCH_INT_NUM_BYTES);				//Array the size of one UInt32 for err
 
 		//Clear all the arrays
 		aAddresses.fill(0);
@@ -2184,7 +2260,7 @@ exports.labjack = function () {
 			macAddress = 60024;
 		}
 		aAddresses.writeInt32LE(macAddress,0);
-		aTypes.writeInt32LE(driver_const.LJM_BYTE,0)
+		aTypes.writeInt32LE(driver_const.LJM_BYTE,0);
 		aNumValues.writeInt32LE(driver_const.typeSizes.UINT64,0);
 		// console.log('in rwManySync, eAddress Data:');
 		// console.log('NumFrames',numFrames);
@@ -2235,6 +2311,9 @@ exports.labjack = function () {
 		);
 	};
 	this.readUINT64Sync = function(type) {
+		//Check to make sure a device has been opened.
+		self.checkStatus();
+
 		var regType = {
 			ethernet:0,
 			ETHERNET:0,
@@ -2245,19 +2324,17 @@ exports.labjack = function () {
 			Wifi:1,
 			WIFI_MAC:1
 		};
-		//Check to make sure a device has been opened.
-		self.checkStatus();
 
 		//Return variable
 		var errorResult;
 
 		//Perform function wide buffer allocations:
 		var aAddresses = new Buffer(1 * ARCH_INT_NUM_BYTES);
-		var aTypes = new Buffer(1 * ARCH_INT_NUM_BYTES)
+		var aTypes = new Buffer(1 * ARCH_INT_NUM_BYTES);
 		var aWrites = new Buffer(1 * ARCH_INT_NUM_BYTES);			//Array of directions
 		var aNumValues = new Buffer(1 * ARCH_INT_NUM_BYTES);		//Array of ops. per frame
 		var aValues = new Buffer(8 * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
-		var errorVal = new Buffer(ARCH_INT_NUM_BYTES); 				//Array the size of one UInt32 for err
+		var errorVal = new Buffer(ARCH_INT_NUM_BYTES);				//Array the size of one UInt32 for err
 
 		//Clear all the arrays
 		aAddresses.fill(0);
@@ -2279,7 +2356,7 @@ exports.labjack = function () {
 			macAddress = 60024;
 		}
 		aAddresses.writeInt32LE(macAddress,0);
-		aTypes.writeInt32LE(driver_const.LJM_BYTE,0)
+		aTypes.writeInt32LE(driver_const.LJM_BYTE,0);
 		aNumValues.writeInt32LE(driver_const.typeSizes.UINT64,0);
 		// console.log('in rwManySync, eAddress Data:');
 		// console.log('NumFrames',numFrames);
@@ -2325,7 +2402,7 @@ exports.labjack = function () {
 			throw new DriverOperationError(errorResult);
 			return errorResult;
 		}
-	}
+	};
 
 	this.streamSettings = {};
 	var getHRDiff = function(starting, ending) {
@@ -2337,7 +2414,11 @@ exports.labjack = function () {
 	this.streamStart = function(scansPerRead, scanList, scanRate, onError, onSuccess) {
 		//Check to make sure a device has been opened.
 		if(self.checkStatus(onError)) {return;}
-
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+		
 		var argsValid = true;
 		if((typeof(scansPerRead) === 'undefined') || (typeof(scansPerRead) === 'null')) {
 			argsValid = false;
@@ -2489,7 +2570,11 @@ exports.labjack = function () {
 	this.streamRead = function(onError, onSuccess) {
 		//Check to make sure a device has been opened.
 		if(self.checkStatus(onError)) {return;}
-
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+		
 		var readBufferSize = self.streamSettings.readBufferSize;
 
 		// Allocate buffer space:
@@ -2540,12 +2625,12 @@ exports.labjack = function () {
 		);
 	};
 	// this.flotStreamRead = function(onError, onSuccess) {
-	// 	self.streamRead(onError, function(data) {
-	// 		var dBuffer = data.data;
-	// 		var elapsedTime = data.time - self.streamSettings.calculatedStartTime;
-	// 		console.log("HERE!", data.time, elapsedTime, data.ljmBacklog);
-	// 		onSuccess(data);
-	// 	});
+	//	self.streamRead(onError, function(data) {
+	//		var dBuffer = data.data;
+	//		var elapsedTime = data.time - self.streamSettings.calculatedStartTime;
+	//		console.log("HERE!", data.time, elapsedTime, data.ljmBacklog);
+	//		onSuccess(data);
+	//	});
 	// };
 	this.streamReadSync = function() {
 		//Check to make sure a device has been opened.
@@ -2556,7 +2641,11 @@ exports.labjack = function () {
 	this.streamStop = function(onError, onSuccess) {
 		//Check to make sure a device has been opened.
 		if(self.checkStatus(onError)) {return;}
-
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+		
 		// Call the ljm eStreamStop function
 		self.ljm.LJM_eStreamStop.async(
 			self.handle,
@@ -2600,17 +2689,18 @@ exports.labjack = function () {
 	 */
 	this.close = function(onError, onSuccess) {
 		//Make sure that a device is open
-		if(self.checkStatus(onError)) { 
-			//onSuccess(false);
-			return;
-		}
+		if(self.checkStatusCloseOnly(onError)) {return;}
+
+		// After calling close, calling any other function will result in an
+		// error until a device is re-opened, even if the close fails.
+		self.isHandleValid = false;
 
 		//Call the driver function
 		output = self.ljm.LJM_Close.async(self.handle, function (err, res) {
 			if(err) {
 				return onError('Weird Error close', err);
 			}
-			if ( res == 0 ) {
+			if ( res === 0 ) {
 				self.handle = null;
 				self.deviceType = null;
 				self.connectionType = null;
@@ -2620,7 +2710,7 @@ exports.labjack = function () {
 				return onError(res);
 			}
 		});
-	}
+	};
 
 	/**
 	 * Closes the device if it is currently open synchronously.
@@ -2630,11 +2720,15 @@ exports.labjack = function () {
 	 */
 	this.closeSync = function() {
 		//Make sure that a device is open
-		self.checkStatus();
+		self.checkStatusCloseOnly();
+
+		// After calling close, calling any other function will result in an
+		// error until a device is re-opened, even if the close fails.
+		self.isHandleValid = false;
 
 		output = self.ljm.LJM_Close(self.handle);
 
-		if ( output == 0 ) {
+		if ( output === 0 ) {
 			//REPORT NO ERROR HAS OCCURED
 			self.handle = null;
 			self.deviceType = null;
@@ -2644,7 +2738,7 @@ exports.labjack = function () {
 			//REPORT CLOSING ERROR HAS OCCURED
 			throw new DriverOperationError("Closing Device Error", output);
 		}
-	}
+	};
 	
 	/**
 	 * Check if a device has basic information loaded.
@@ -2659,6 +2753,19 @@ exports.labjack = function () {
 	 *		has an invalid deviceType.
 	**/
 	this.checkStatus = function(onError) {
+		if (self.isHandleValid) {
+			if ( (self.handle === null) && (self.deviceType === null) ) {
+				if ( onError === null ) {
+					throw new DriverInterfaceError("Device Never Opened");
+					return true;
+				} else {
+					onError("Device Never Opened");
+					return true;
+				}
+			}
+		}
+	};
+	this.checkStatusCloseOnly = function(onError) {
 		if ( (self.handle === null) && (self.deviceType === null) ) {
 			if ( onError === null ) {
 				throw new DriverInterfaceError("Device Never Opened");
@@ -2669,6 +2776,7 @@ exports.labjack = function () {
 			}
 		}
 	};
+
 
 
 	//********************* EXTRA ACCESSORY FUNCTIONS ********************

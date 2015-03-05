@@ -1287,6 +1287,10 @@ module.exports = {
         // asyncRun.config(dev, driver,driver_const);
         // syncRun.config(dev, driver,driver_const);
         
+        //Configure running-engines
+		asyncRun.config(dev, null);
+		syncRun.config(dev, null);
+        
         //Create test-variables
         var testList = [
             'readUINT64("WIFI_MAC")',
