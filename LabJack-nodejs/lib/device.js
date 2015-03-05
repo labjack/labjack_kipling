@@ -2765,9 +2765,30 @@ exports.labjack = function () {
 	**/
 	this.checkStatus = function(onError) {
 		if (!self.isHandleValid) {
-			console.trace('here', self.isHandleValid, self.handle, self.deviceType);
-			onError("Device Handle not valid Opened");
-			return true;
+			if ( (self.handle === null) && (self.deviceType === null) ) {
+				if ( onError === null ) {
+					throw new DriverInterfaceError("Device Never Opened");
+					return true;
+				} else {
+					onError("Device Never Opened");
+					return true;
+				}
+			} else {
+				console.trace(
+					'Weird labjack-nodejs state',
+					self.isHandleValid,
+					self.handle,
+					self.deviceType
+				);
+				if(onError) {
+					onError("Weird labjack-nodejs state");
+					return true;
+				} else {
+					throw new DriverInterfaceError("Device Never Opened");
+					return true;
+				}
+			}
+			
 		} else {
 			if ( (self.handle === null) && (self.deviceType === null) ) {
 				if ( onError === null ) {
