@@ -1,7 +1,7 @@
 
 
-var BASIC_TEST = false;
-var MOCK_TEST = false;
+var BASIC_TEST = true;
+var MOCK_TEST = true;
 var CRAZY_TEST = true;
 
 

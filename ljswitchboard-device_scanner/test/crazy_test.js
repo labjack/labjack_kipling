@@ -125,7 +125,7 @@ var tests = {
 	},
 };
 
-var numScans = 20;
+var numScans = 2;
 var i;
 for(i = 0; i < numScans; i++) {
 	var testName = 'Performing scan number:' + i.toString();
