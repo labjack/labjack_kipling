@@ -83,6 +83,8 @@ exports.labjack = function () {
 			if(self.isHandleValid) {
 				if(userFunction) {
 					userFunction(a, b, c, d);
+				} else {
+					console.error('function not defined', arguments);
 				}
 			} else {
 				console.error('Preventing execution of callback when handle is not valid');
@@ -94,6 +96,8 @@ exports.labjack = function () {
 		var persistentFunction = function(a, b, c, d) {
 			if(userFunction) {
 				userFunction(a, b, c, d);
+			} else {
+				console.error('function not defined', arguments);
 			}
 		};
 		return persistentFunction;
