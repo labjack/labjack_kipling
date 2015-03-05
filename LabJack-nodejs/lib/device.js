@@ -62,6 +62,11 @@ util.inherits(DriverInterfaceError, Error);
 DriverInterfaceError.prototype.name = 'Driver Interface Error - device';
 
 
+// A numeric that keeps track of the number of devices that have been created;
+var numCreatedDevices = 0;
+exports.getNumCreatedDevices = function() {
+	return numCreatedDevices;
+};
 
 /**
  * Create a new LabJack device handle wrapper.
@@ -69,6 +74,7 @@ DriverInterfaceError.prototype.name = 'Driver Interface Error - device';
  * @constructor for a LabJack device in .js
  */
 exports.labjack = function () {
+	numCreatedDevices += 1;
 	this.ljm = driverLib.getDriver();
 	this.handle = null;
 	this.deviceType = null;
@@ -87,7 +93,8 @@ exports.labjack = function () {
 					console.error('function not defined', arguments);
 				}
 			} else {
-				console.error('Preventing execution of callback when handle is not valid');
+				console.error('Preventing execution of callback when handle is not valid,', typeof(userFunction));
+				console.trace();
 			}
 		};
 		return persistentFunction;
@@ -2757,7 +2764,11 @@ exports.labjack = function () {
 	 *		has an invalid deviceType.
 	**/
 	this.checkStatus = function(onError) {
-		if (self.isHandleValid) {
+		if (!self.isHandleValid) {
+			console.trace('here', self.isHandleValid, self.handle, self.deviceType);
+			onError("Device Handle not valid Opened");
+			return true;
+		} else {
 			if ( (self.handle === null) && (self.deviceType === null) ) {
 				if ( onError === null ) {
 					throw new DriverInterfaceError("Device Never Opened");

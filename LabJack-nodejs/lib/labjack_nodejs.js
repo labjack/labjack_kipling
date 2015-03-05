@@ -37,6 +37,14 @@ exports.getDevice = function() {
 		return device.labjack;
 	}
 };
+exports.getDeviceRef = function() {
+	if(device) {
+		return device;
+	} else {
+		device = require('./device');
+		return device;
+	}
+};
 exports.getDriver = function() {
 	if(driver) {
 		return driver.ljmDriver();

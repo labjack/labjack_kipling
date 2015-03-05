@@ -1,6 +1,6 @@
 {
     "name": "labjack-nodejs",
-    "version": "0.0.43",
+    "version": "0.0.44",
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
