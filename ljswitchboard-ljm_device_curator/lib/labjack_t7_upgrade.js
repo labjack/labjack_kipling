@@ -1237,8 +1237,16 @@ exports.waitForEnumeration = function(bundle)
 exports.checkNewFirmware = function(bundle)
 {
     var deferred = q.defer();
-
-    bundle.getDevice().read('FIRMWARE_VERSION',
+    var device = bundle.getDevice();
+    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+        console.log(
+            'Reading device FW version',
+            device.handle,
+            device.deviceType,
+            device.isHandleValid
+        );
+    }
+    device.read('FIRMWARE_VERSION',
         createSafeReject(deferred),
         function (firmwareVersion) {
             if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {

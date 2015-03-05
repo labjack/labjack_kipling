@@ -40,7 +40,7 @@ var settings = {
 };
 
 // Over write settings to make the test pass
-settings.testRate = 70000;
+settings.testRate = 40000;
 settings.duration = 10;
 
 // Over write settings to test ethernet speeds:
@@ -134,7 +134,8 @@ var streamTest = function(settings) {
 			'  - scansPerRead:',
 			settings.scansPerRead,
 			'scanRate:',
-			settings.scanRate
+			settings.scanRate,
+			settings.scanList
 		);
 		console.log(
 			'  - Num Required Reads:',

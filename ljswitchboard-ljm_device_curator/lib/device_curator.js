@@ -8,6 +8,7 @@ var data_parser = require('ljswitchboard-data_parser');
 
 // Requires & definitions involving the labjack-nodejs library
 var ljm = require('labjack-nodejs');
+var ljmDeviceReference = ljm.getDevice();
 var modbusMap = ljm.modbusMap.getConstants();
 var driver_const = ljm.driver_const;
 
@@ -44,7 +45,7 @@ function device(useMockDevice) {
 		ljmDevice = new ljmMockDevice.device();
 		this.isMockDevice = true;
 	} else {
-		ljmDevice = new ljm.device();
+		ljmDevice = new ljmDeviceReference();
 	}
 
 	this.configureMockDevice = function(deviceInfo) {
@@ -432,7 +433,7 @@ function device(useMockDevice) {
 		};
 		async.each(
 			addresses,
-			performRead, 
+			performRead,
 			finishRead
 		);
 		return defered.promise;
@@ -547,7 +548,7 @@ function device(useMockDevice) {
 		};
 		async.each(
 			write,
-			performWrite, 
+			performWrite,
 			finishWrite
 		);
 		return defered.promise;
@@ -663,7 +664,7 @@ function device(useMockDevice) {
 	this.streamRead = function() {
 		var defered = q.defer();
 		if(allowExecution()) {
-			ljmDevice.streamRead( 
+			ljmDevice.streamRead(
 				function(err) {
 					captureDeviceError('streamRead', err);
 					defered.reject(err);
@@ -874,144 +875,144 @@ function device(useMockDevice) {
 	};
 	this.retryFlashError = function(cmdType, arg0, arg1, arg2, arg3, arg4) {
 		var rqControlDeferred = q.defer();
-        var device = self;
-        var numRetries = 0;
-        var ioNumRetry = 50;
-        var ioDelay = 100;
+		var device = self;
+		var numRetries = 0;
+		var ioNumRetry = 50;
+		var ioDelay = 100;
 
-        // Associate functions to the functions that should be re-tried
-        // on flash error.
-        var type={
-            'qRead':'read',
-            'qReadMany':'readMany',
-            'qWrite':'write',
-            'qWriteMany':'writeMany',
-            'qrwMany':'rwMany',
-            'qReadUINT64':'readUINT64',
-            'readFlash':'internalReadFlash',
-            // 'updateFirmware': 'internalUpdateFirmware'
-        }[cmdType];
-        var errType = {
-        	'qRead': 'value',
-        	'qReadMany': 'object',
-        	'qWrite':'value',
-            'qWriteMany':'object',
-            'qrwMany':'object',
-            'qReadUINT64':'value',
-            'readFlash':'value',
-            // 'updateFirmware': 'value'
-        }[cmdType];
-        var supportedFunctions = [
-            'qRead',
-            'qReadMany',
-            'qWrite',
-            'qWriteMany',
-            'qrwMany',
-            'qReadUINT64',
-            'readFlash',
-            // 'updateFirmware'
-        ];
-        var control = function() {
-            // console.log('in dRead.read');
-            var ioDeferred = q.defer();
-            device[type](arg0,arg1,arg2,arg3)
-            .then(function(result){
-                // console.log('Read Succeded',result);
-                ioDeferred.resolve({isErr: false, val:result});
-            }, function(err) {
-                // console.log('Read Failed',err);
-                ioDeferred.reject({isErr: true, val:err});
-            });
-            return ioDeferred.promise;
-        };
-        var delayAndRead = function() {
-            var iotimerDeferred = q.defer();
-            var innerControl = function() {
-                // console.log('in dRead.read');
-                var innerIODeferred = q.defer();
-                device[type](arg0,arg1,arg2,arg3)
-                .then(function(result){
-                    // console.log('Read Succeded',result);
-                    innerIODeferred.resolve({isErr: false, val:result});
-                }, function(err) {
-                    // console.log('Read Failed',err);
-                    innerIODeferred.reject({isErr: true, val:err});
-                });
-                return innerIODeferred.promise;
-            };
-            var qDelayErr = function() {
-                var eTimerDeferred = q.defer();
-                eTimerDeferred.resolve('read-timeout occured');
-                return eTimerDeferred.promise;
-            };
-            var qDelay = function() {
-                // console.log('in dRead.qDelay');
-                var timerDeferred = q.defer();
-                if(numRetries < ioNumRetry) {
-                    // console.log('Re-trying');
-                    setTimeout(timerDeferred.resolve,1000);
-                } else {
-                    timerDeferred.reject();
-                }
-                return timerDeferred.promise;
-            };
-            // console.log('in delayAndRead');
-            if(arg4) {
-                console.log('Attempting to Recover from 2358 Error');
-                console.log('Function Arguments',type,arg0,arg1,arg2,arg3);
-            }
-            qDelay()
-            .then(innerControl,qDelayErr)
-            .then(function(res){
-                if(!res.isErr) {
-                    iotimerDeferred.resolve(res.val);
-                } else {
-                    iotimerDeferred.reject(res.val);
-                }
-            },delayAndRead)
-            .then(iotimerDeferred.resolve,iotimerDeferred.reject);
-            return iotimerDeferred.promise;
-        };
+		// Associate functions to the functions that should be re-tried
+		// on flash error.
+		var type={
+			'qRead':'read',
+			'qReadMany':'readMany',
+			'qWrite':'write',
+			'qWriteMany':'writeMany',
+			'qrwMany':'rwMany',
+			'qReadUINT64':'readUINT64',
+			'readFlash':'internalReadFlash',
+			// 'updateFirmware': 'internalUpdateFirmware'
+		}[cmdType];
+		var errType = {
+			'qRead': 'value',
+			'qReadMany': 'object',
+			'qWrite':'value',
+			'qWriteMany':'object',
+			'qrwMany':'object',
+			'qReadUINT64':'value',
+			'readFlash':'value',
+			// 'updateFirmware': 'value'
+		}[cmdType];
+		var supportedFunctions = [
+			'qRead',
+			'qReadMany',
+			'qWrite',
+			'qWriteMany',
+			'qrwMany',
+			'qReadUINT64',
+			'readFlash',
+			// 'updateFirmware'
+		];
+		var control = function() {
+			// console.log('in dRead.read');
+			var ioDeferred = q.defer();
+			device[type](arg0,arg1,arg2,arg3)
+			.then(function(result){
+				// console.log('Read Succeded',result);
+				ioDeferred.resolve({isErr: false, val:result});
+			}, function(err) {
+				// console.log('Read Failed',err);
+				ioDeferred.reject({isErr: true, val:err});
+			});
+			return ioDeferred.promise;
+		};
+		var delayAndRead = function() {
+			var iotimerDeferred = q.defer();
+			var innerControl = function() {
+				// console.log('in dRead.read');
+				var innerIODeferred = q.defer();
+				device[type](arg0,arg1,arg2,arg3)
+				.then(function(result){
+					// console.log('Read Succeded',result);
+					innerIODeferred.resolve({isErr: false, val:result});
+				}, function(err) {
+					// console.log('Read Failed',err);
+					innerIODeferred.reject({isErr: true, val:err});
+				});
+				return innerIODeferred.promise;
+			};
+			var qDelayErr = function() {
+				var eTimerDeferred = q.defer();
+				eTimerDeferred.resolve('read-timeout occured');
+				return eTimerDeferred.promise;
+			};
+			var qDelay = function() {
+				// console.log('in dRead.qDelay');
+				var timerDeferred = q.defer();
+				if(numRetries < ioNumRetry) {
+					// console.log('Re-trying');
+					setTimeout(timerDeferred.resolve,1000);
+				} else {
+					timerDeferred.reject();
+				}
+				return timerDeferred.promise;
+			};
+			// console.log('in delayAndRead');
+			if(arg4) {
+				console.log('Attempting to Recover from 2358 Error');
+				console.log('Function Arguments',type,arg0,arg1,arg2,arg3);
+			}
+			qDelay()
+			.then(innerControl,qDelayErr)
+			.then(function(res){
+				if(!res.isErr) {
+					iotimerDeferred.resolve(res.val);
+				} else {
+					iotimerDeferred.reject(res.val);
+				}
+			},delayAndRead)
+			.then(iotimerDeferred.resolve,iotimerDeferred.reject);
+			return iotimerDeferred.promise;
+		};
 
 
-        if(supportedFunctions.indexOf(cmdType) >= 0) {
-            control()
-            .then(function(res) {
-                // success case for calling function
-                rqControlDeferred.resolve(res.val);
-            },function(res) {
-            	// console.log('in retryFlashError', errType, res, cmdType, arg0, arg1)
-                // error case for calling function
-                var innerDeferred = q.defer();
-                if(errType === 'value') {
-                	if(res.val == 2358) {
-	                    delayAndRead()
-	                    .then(innerDeferred.resolve,innerDeferred.reject);
-	                } else {
-	                    innerDeferred.reject(res.val);
-	                }
-                } else if(errType === 'object') {
-                	if(res.val.retError == 2358) {
-	                    delayAndRead()
-	                    .then(innerDeferred.resolve,innerDeferred.reject);
-	                } else {
-	                    innerDeferred.reject(res.val);
-	                }
-                }
-                return innerDeferred.promise;
-            })
-            .then(function(res) {
-                // console.log('Read-Really-Finished',arg0,res);
-                rqControlDeferred.resolve(res);
-            },function(err) {
-                // console.error('DC rqControl',err);
-                rqControlDeferred.reject(err);
-            });
-        } else {
-            console.log(cmdType,type,supportedFunctions.indexOf(type));
-            throw 'device_controller.rqControl Error!';
-        }
-        return rqControlDeferred.promise;
+		if(supportedFunctions.indexOf(cmdType) >= 0) {
+			control()
+			.then(function(res) {
+				// success case for calling function
+				rqControlDeferred.resolve(res.val);
+			},function(res) {
+				// console.log('in retryFlashError', errType, res, cmdType, arg0, arg1)
+				// error case for calling function
+				var innerDeferred = q.defer();
+				if(errType === 'value') {
+					if(res.val == 2358) {
+						delayAndRead()
+						.then(innerDeferred.resolve,innerDeferred.reject);
+					} else {
+						innerDeferred.reject(res.val);
+					}
+				} else if(errType === 'object') {
+					if(res.val.retError == 2358) {
+						delayAndRead()
+						.then(innerDeferred.resolve,innerDeferred.reject);
+					} else {
+						innerDeferred.reject(res.val);
+					}
+				}
+				return innerDeferred.promise;
+			})
+			.then(function(res) {
+				// console.log('Read-Really-Finished',arg0,res);
+				rqControlDeferred.resolve(res);
+			},function(err) {
+				// console.error('DC rqControl',err);
+				rqControlDeferred.reject(err);
+			});
+		} else {
+			console.log(cmdType,type,supportedFunctions.indexOf(type));
+			throw 'device_controller.rqControl Error!';
+		}
+		return rqControlDeferred.promise;
 	};
 
 	/**
@@ -1020,35 +1021,35 @@ function device(useMockDevice) {
 	var UpgradeProgressListener = function (percentListener, stepListener) {
 		this.previousPercent = 0;
 		// Function gets updated and has a percentage value.
-        this.updatePercentage = function (value, callback) {
-        	var newVal = Math.floor(parseFloat(value.toFixed(1)));
-        	if(newVal !== upgradeProgressListener.previousPercent) {
-        		if (callback !== undefined) {
-	            	percentListener(newVal)
-	            	.then(callback);
-	            }
-	            upgradeProgressListener.previousPercent = newVal;
-        	}
-        };
+		this.updatePercentage = function (value, callback) {
+			var newVal = Math.floor(parseFloat(value.toFixed(1)));
+			if(newVal !== upgradeProgressListener.previousPercent) {
+				if (callback !== undefined) {
+					percentListener(newVal)
+					.then(callback);
+				}
+				upgradeProgressListener.previousPercent = newVal;
+			}
+		};
 
-        // Function gets updated during various steps of the update procedure.
-        // Text: 1. "", "", ""
-        this.updateStepName = function (value, callback) {
-            if (callback !== undefined) {
-                stepListener(value)
-            	.then(callback);
-            }
-        };
-        var upgradeProgressListener = this;
-    };
-    var getDeviceTypeMessage = function(dt) {
-    	return "Function not supported for deviceType: " + dt.toString();
-    };
-    this.updateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
-    	// TODO: Not using retryFlashError for updater atm.  Need to handle errors better.
-    	// return self.retryFlashError('updateFirmware', firmwareFileLocation, percentListener, stepListener);
-    	return self.internalUpdateFirmware(firmwareFileLocation, percentListener, stepListener);
-    };
+		// Function gets updated during various steps of the update procedure.
+		// Text: 1. "", "", ""
+		this.updateStepName = function (value, callback) {
+			if (callback !== undefined) {
+				stepListener(value)
+				.then(callback);
+			}
+		};
+		var upgradeProgressListener = this;
+	};
+	var getDeviceTypeMessage = function(dt) {
+		return "Function not supported for deviceType: " + dt.toString();
+	};
+	this.updateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
+		// TODO: Not using retryFlashError for updater atm.  Need to handle errors better.
+		// return self.retryFlashError('updateFirmware', firmwareFileLocation, percentListener, stepListener);
+		return self.internalUpdateFirmware(firmwareFileLocation, percentListener, stepListener);
+	};
 	this.internalUpdateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
 		var dt = self.savedAttributes.deviceType;
 		var percentListenerObj;
@@ -1071,7 +1072,7 @@ function device(useMockDevice) {
 		var defered = q.defer();
 		if(dt === 7) {
 			var progressListener = new UpgradeProgressListener(
-				percentListenerObj, 
+				percentListenerObj,
 				stepListenerObj
 			);
 			lj_t7_upgrader.updateFirmware(
@@ -1081,7 +1082,10 @@ function device(useMockDevice) {
 				self.savedAttributes.connectionTypeString,
 				progressListener
 			).then(function(results){
-				ljmDevice.handle = results.getDevice().handle;
+				var resultDevice = results.getDevice();
+				ljmDevice.handle = resultDevice.handle;
+				ljmDevice.deviceType = resultDevice.deviceType;
+				ljmDevice.isHandleValid = resultDevice.isHandleValid;
 				defered.resolve(results);
 			}, function(err) {
 				defered.reject(err);
@@ -1117,10 +1121,10 @@ function device(useMockDevice) {
 		var defered = q.defer();
 		if(self.isMockDevice) {
 			defered.resolve({
-                'overall': true,
-                'flashVerification': true,
-                'ainVerification': false
-            });
+				'overall': true,
+				'flashVerification': true,
+				'ainVerification': false
+			});
 			return defered.promise;
 		} else {
 			if(dt === 7) {

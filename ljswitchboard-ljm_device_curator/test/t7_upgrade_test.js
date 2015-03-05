@@ -3,7 +3,9 @@ var q = require('q');
 var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');
 var qExec = utils.qExec;
-var ljm = require('labjack-nodejs').driver();
+var labjack_nodejs = require('labjack-nodejs');
+var ljDevice = labjack_nodejs.getDeviceRef();
+var ljm = labjack_nodejs.driver();
 
 
 var device;
@@ -102,7 +104,15 @@ var device_tests = {
 			function(res) {
 				// The result is a new device object
 				// console.log('Upgrade Success', res);
+				// console.log('Number of created devices', ljDevice.getNumCreatedDevices());
 				test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
+				var ljmDevice = device.getDevice();
+				// console.log(
+				// 	'Reading device FW version',
+				// 	ljmDevice.handle,
+				// 	ljmDevice.deviceType,
+				// 	ljmDevice.isHandleValid
+				// );
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
 					test.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');

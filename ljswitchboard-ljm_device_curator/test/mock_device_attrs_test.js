@@ -53,7 +53,7 @@ exports.tests = {
 		test.done();
 	},
 	'configure mock device': function(test) {
-		device.configureMockDevice(deviceInfo, 'data')
+		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
 			test.done();
 		});
@@ -93,7 +93,7 @@ exports.tests = {
 		});
 	},
 	'configure mock device - USB': function(test) {
-		device.configureMockDevice(deviceInfo, 'data')
+		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
 			test.done();
 		});
@@ -133,7 +133,7 @@ exports.tests = {
 		});
 	},
 	'configure mock device - Ethernet': function(test) {
-		device.configureMockDevice(deviceInfo, 'data')
+		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
 			test.done();
 		});
@@ -173,7 +173,7 @@ exports.tests = {
 		});
 	},
 	'configure mock device - WiFi': function(test) {
-		device.configureMockDevice(deviceInfo, 'data')
+		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
 			test.done();
 		});
