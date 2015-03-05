@@ -40,7 +40,8 @@ exports.tests = {
 		deviceScanner.findAllDevices(currentDeviceList)
 		.then(function(deviceTypes) {
 			var endTime = new Date();
-			testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
+			var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
+			test.ok(testStatus, 'Unexpected test result');
 			console.log('Duration', (endTime - startTime)/1000);
 			test.done();
 		}, function(err) {

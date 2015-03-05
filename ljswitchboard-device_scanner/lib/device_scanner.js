@@ -18,6 +18,9 @@ var mock_device_scanner = require('./mock_device_scanner');
 var DEBUG_CONNECTION_TYPE_SORTING = false;
 var DEBUG_DEVICE_SCAN_RESULT_SAVING = false;
 
+var reportAsyncError = function(err) {
+	console.log('device_scanner.js reportAsyncError', err, err.stack);
+};
 var REQUIRED_INFO_BY_DEVICE = {
 	'LJM_dtDIGIT': [
 		'DEVICE_NAME_DEFAULT',
@@ -70,6 +73,15 @@ var getProductType = {
 	}
 };
 
+var CONNECTED_DEVICE_INFO_COPY_STRATEGY = {
+	'HARDWARE_INSTALLED': function(origin, destination, key) {
+		var HARDWARE_INSTALLED = origin.HARDWARE_INSTALLED;
+		destination[key] = origin[key];
+
+		destination.productType = HARDWARE_INSTALLED.productType;
+		destination.modelType = HARDWARE_INSTALLED.productType;
+	},
+};
 exports.REQUIRED_INFO_BY_DEVICE = REQUIRED_INFO_BY_DEVICE;
 
 var SCAN_REQUEST_LIST = [
@@ -804,7 +816,7 @@ var deviceScanner = function() {
 					var connectionTypes = curDev.connectionTypes;
 					var addCT = true;
 					for(k = 0; k < connectionTypes.length; k++) {
-						if(addDevice.connectionType.ct == connectionTypes[k].ct) {
+						if(activeDevice.connectionType.ct == connectionTypes[k].ct) {
 							addCT = false;
 							// Mark CT as active
 							self.scanResults[j].connectionTypes[k].isActive = true;
@@ -814,7 +826,7 @@ var deviceScanner = function() {
 					// If the CT wasn't already there, add it
 					if(addCT) {
 						self.scanResults[j].connectionTypes.push(
-							addDevice.connectionType
+							activeDevice.connectionType
 						);
 					}
 				}
@@ -850,18 +862,39 @@ var deviceScanner = function() {
 		// Add flag indicating whether or not device data has been acquired
 		deviceAttributes.acquiredRequiredData = false;
 
+		// Indicate that the device is an active device.
+		deviceAttributes.isActive = true;
+
 		// Save any immediately available data from cached device values and
 		// create a list of missing information.
 		var missingKeys = [];
 		reqKeys.forEach(function(reqKey) {
+
 			if(attrKeys.indexOf(reqKey) < 0) {
 				missingKeys.push(reqKey);
 			} else {
-				deviceAttributes[reqKey] = data_parser.parseResult(
-					reqKey,
-					attrs[reqKey],
-					dt
-				);
+				if(CONNECTED_DEVICE_INFO_COPY_STRATEGY[reqKey]) {
+					CONNECTED_DEVICE_INFO_COPY_STRATEGY[reqKey](
+						attrs, deviceAttributes, reqKey
+					);
+				} else {
+					// check to see if the value has already been parsed.
+					if((attrs[reqKey].val) !== 'undefined') {
+						deviceAttributes[reqKey] = data_parser.parseResult(
+							reqKey,
+							attrs[reqKey],
+							dt
+						);
+					} else {
+						deviceAttributes[reqKey] = data_parser.parseResult(
+							reqKey,
+							attrs[reqKey].res,
+							dt
+						);
+					}
+					
+				}
+				
 			}
 		});
 
@@ -874,12 +907,16 @@ var deviceScanner = function() {
 			deviceAttributes[availableKey] = attrs[availableKey];
 		});
 		// Save the connected devices deivce type.
-		deviceAttributes.connectionType = getInitialConnectionTypeData(
+		
+		var newConnectionInfo = getInitialConnectionTypeData(
 			attrs.deviceType,
 			attrs.connectionType,
 			attrs.ip,
 			'connected'
 		);
+		// deviceAttributes.connectionTypes = [];
+		// deviceAttributes.connectionTypes.push(newConnectionInfo);
+		deviceAttributes.connectionType = newConnectionInfo;
 
 		// Save mock-device flag
 		deviceAttributes.isMockDevice = dev.isMockDevice;
@@ -916,6 +953,7 @@ var deviceScanner = function() {
 					
 				}
 				deviceAttributes.acquiredRequiredData = true;
+
 				defered.resolve(deviceAttributes);
 			});
 		} else {
@@ -933,10 +971,14 @@ var deviceScanner = function() {
 		var promises = [];
 		var deviceKeys = Object.keys(currentDevices);
 		deviceKeys.forEach(function(deviceKey) {
+			// Create an object that will get populated with device info
 			var devInfo = {
 				'key': deviceKey
 			};
+			// Save a reference of the object to the currentDeviceListing array
 			currentDeviceListing.push(devInfo);
+			// Pass the object reference to the populateDeviceInfo function to
+			// have it populated with data.
 			promises.push(populateDeviceInfo(devInfo, currentDevices));
 		});
 
@@ -1148,7 +1190,7 @@ var deviceScanner = function() {
 
 			var getOnError = function(msg) {
 				return function(err) {
-					console.error('An Error', err, msg);
+					console.error('An Error', err, msg, err.stack);
 					var errDefered = q.defer();
 					errDefered.reject(err);
 					return errDefered.promise;

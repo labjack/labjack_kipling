@@ -1,22 +1,26 @@
 var printAvailableDeviceData = function(device) {
-	console.log(
-		'Connection Types',
-		device.connectionTypes.length,
-		device.deviceType,
-		device.productType
-	);
-	device.connectionTypes.forEach(function(connectionType, i) {
+	if(device.connectionTypes) {
 		console.log(
-			'  - ',
-			connectionType.name,
-			connectionType.insertionMethod,
-			connectionType.verified
+			'Connection Types',
+			device.connectionTypes.length,
+			device.deviceType,
+			device.productType
 		);
-		// console.log('    - ', expectedConnectionType);
-	});
+		device.connectionTypes.forEach(function(connectionType, i) {
+			console.log(
+				'  - ',
+				connectionType.name,
+				connectionType.insertionMethod,
+				connectionType.verified,
+				connectionType.isActive
+			);
+			// console.log('    - ', expectedConnectionType);
+		});
+	}
 	console.log('Available Data:');
 	var ignoredData = [
 		'connectionTypes',
+		'connectionType',
 	];
 	var availableKeys = Object.keys(device);
 	availableKeys.forEach(function(key) {
@@ -33,6 +37,7 @@ var printAvailableDeviceData = function(device) {
 };
 exports.printAvailableDeviceData = printAvailableDeviceData;
 
+var suppressTestingErrors = false;
 var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) {
 	var debug;
 	var performTests = true;
@@ -58,6 +63,15 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 			numExpDeviceTypes,
 			'Unexpected number of device types found'
 		);
+	} else {
+		if(numDeviceTypes != numExpDeviceTypes) {
+			suppressTestingErrors = true;
+			console.log(
+				'Warning, unexpected number of device types',
+				numDeviceTypes,
+				numExpDeviceTypes
+			);
+		}
 	}
 
 	// For each found device type, verify their results.
@@ -87,19 +101,51 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 				expNumDevices,
 				'Unexpected number of found devices'
 			);
+		} else {
+			if(numDevices != expNumDevices) {
+				suppressTestingErrors = true;
+				console.log(
+					'Warning, unexpected number of devices',
+					numDevices,
+					expNumDevices
+				);
+			}
 		}
 
 		// For each found device check their expected results & connection types
 		devices.forEach(function(device, i) {
+			var expDevice = expDevices[i];
+			var verifyConnectionTypeInfo = function(connectionType, expConnectionType) {
+				var expectedKeys = Object.keys(expConnectionType);
+				// Check each expected key.
+				expectedKeys.forEach(function(key) {
+					if(performTests) {
+						test.strictEqual(
+							connectionType[key],
+							expConnectionType[key],
+							'Unexpected connectionType Data'
+						);
+					}
+				});
+			};
 			// Organize device results.
 			var connectionTypes = device.connectionTypes;
 			var numConnectionTypes = connectionTypes.length;
 
 			// Get and organize expected device results.
-			var expDevice = expDevices[i];
 			var expConnectionTypes = expDevice.connectionTypes;
 			var expNumConnectionTypes = expConnectionTypes.length;
 
+			if(device.isActive) {
+				if(debug) {
+					console.log(
+						'Found Active Device',
+						device.productType,
+						device.serialNumber,
+						numConnectionTypes
+					);
+				}
+			}
 			// Test to make sure the proper number of connection types were
 			// found.
 			if(performTests) {
@@ -115,31 +161,28 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 				// Organize device connection type results.
 				// Get and organize expected connection type results.
 				var expConnectionType = expConnectionTypes[j];
-				var expectedKeys = Object.keys(expConnectionType);
-
-				// Check each expected key.
-				expectedKeys.forEach(function(key) {
-					if(performTests) {
-						test.strictEqual(
-							connectionType[key],
-							expConnectionType[key],
-							'Unexpected connectionType Data'
-						);
-					}
-				});
+				verifyConnectionTypeInfo(connectionType, expConnectionType);
 			});
-
 			if(debug) {
 				printAvailableDeviceData(device);
 			}
+			
 		});
 	});
 };
 var testScanResults = function(deviceTypes, expDeviceTypes, test, debug) {
 	try {
+		suppressTestingErrors = false;
 		innerTestScanResults(deviceTypes, expDeviceTypes, test, debug);
+		return true;
 	} catch(err) {
-		console.log('Error testing results', err);
+		if(suppressTestingErrors) {
+			console.log('Error being suppressed');
+			return true;
+		} else {
+			console.log('Error testing results', err, err.stack);
+			return false;
+		}
 	}
 };
 exports.testScanResults = testScanResults;

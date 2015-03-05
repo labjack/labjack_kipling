@@ -78,7 +78,7 @@ exports.tests = {
 			var endTime = new Date();
 			var debug = false;
 
-			testScanResults(deviceTypes, expectedData, test, debug);
+			testScanResults(deviceTypes, expectedData, test, {'debug': false});
 			
 			if(debug) {
 				console.log('  - Duration', (endTime - startTime)/1000);
