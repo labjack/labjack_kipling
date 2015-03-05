@@ -15,13 +15,29 @@ var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 exports.device = function() {
 	if(device) {
-		return device.labjack();
+		return new device.labjack();
 	} else {
 		device = require('./device');
-		return device.labjack();
+		return new device.labjack();
 	}
 };
 exports.driver = function() {
+	if(driver) {
+		return new driver.ljmDriver();
+	} else {
+		driver = require('./driver');
+		return new driver.ljmDriver();
+	}
+};
+exports.getDevice = function() {
+	if(device) {
+		return device.labjack;
+	} else {
+		device = require('./device');
+		return device.labjack;
+	}
+};
+exports.getDriver = function() {
 	if(driver) {
 		return driver.ljmDriver();
 	} else {
