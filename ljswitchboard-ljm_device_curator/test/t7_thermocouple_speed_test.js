@@ -96,7 +96,7 @@ var device_tests = {
 		// Setup and call functions
 		qExec(device, 'writeMultiple', regs, vals)(results)
 		.then(function(res) {
-			console.log('Configured Device');
+			console.log('  - Configured Device');
 			test.done();
 		});
 	},
@@ -112,225 +112,7 @@ var device_tests = {
 			// console.log('Config', results);
 			test.done();
 		});
-	},
-
-	// 'configure thermocouples - medium res': function(test) {
-	// 	var results = [];
-	// 	var writes = [
-	// 		{'reg': 'AIN0_RESOLUTION_INDEX', 'val': 8},
-	// 	];
-	// 	var regs = [];
-	// 	var vals = [];
-	// 	writes.forEach(function(write) {
-	// 		regs.push(write.reg);
-	// 		vals.push(write.val);
-	// 	});
-
-	// 	// Setup and call functions
-	// 	qExec(device, 'writeMultiple', regs, vals)(results)
-	// 	.then(function(res) {
-	// 		console.log('Config medium res', res[0].retData);
-	// 		test.done();
-	// 	});
-	// },
-	// 'Establish baseline speed - medium res': function(test) {
-	// 	var results = [];
-	// 	var numThermocoupleReads = 1000;
-	// 	var reads = [];
-	// 	for(var i = 0; i < numThermocoupleReads; i++) {
-	// 		reads.push('AIN0');
-	// 	}
-	// 	var startTime = new Date();
-	// 	qExec(device, 'readMultiple', reads)(results)
-	// 	.then(function(res) {
-	// 		var stopTime = new Date();
-	// 		var results = res[0].retData;
-	// 		var isError = false;
-	// 		results.forEach(function(result) {
-	// 			// console.log('result', result);
-	// 			if(result.isErr) {
-	// 				isError = true;
-	// 			}
-	// 		});
-	// 		var duration = (stopTime - startTime) / 1000;
-	// 		// console.log('Encountered Error', isError);
-	// 		// console.log('Num', results.length);
-	// 		console.log('Duration', duration);
-	// 		console.log('Rate', (duration/numThermocoupleReads).toFixed(4)*1000, 'ms');
-	// 		test.done();
-	// 	});
-	// },
-	// 'read thermocouples - medium res': function(test) {
-	// 	var results = [];
-	// 	var numThermocoupleReads = 1000;
-	// 	var reads = [];
-	// 	for(var i = 0; i < numThermocoupleReads; i++) {
-	// 		reads.push('AIN0_EF_READ_A');
-	// 	}
-	// 	var startTime = new Date();
-	// 	qExec(device, 'readMultiple', reads)(results)
-	// 	.then(function(res) {
-	// 		var stopTime = new Date();
-	// 		var results = res[0].retData;
-	// 		var isError = false;
-	// 		results.forEach(function(result) {
-	// 			// console.log('result', result);
-	// 			if(result.isErr) {
-	// 				isError = true;
-	// 			}
-	// 		});
-	// 		var duration = (stopTime - startTime) / 1000;
-	// 		// console.log('Encountered Error', isError);
-	// 		// console.log('Num', results.length);
-	// 		console.log('Duration', duration);
-	// 		console.log('Rate', (duration/numThermocoupleReads).toFixed(4)*1000, 'ms');
-	// 		test.done();
-	// 	});
-	// },
-	// 'configure thermocouples - high res': function(test) {
-	// 	var results = [];
-	// 	var writes = [
-	// 		{'reg': 'AIN0_RESOLUTION_INDEX', 'val': 9},
-	// 	];
-	// 	var regs = [];
-	// 	var vals = [];
-	// 	writes.forEach(function(write) {
-	// 		regs.push(write.reg);
-	// 		vals.push(write.val);
-	// 	});
-
-	// 	// Setup and call functions
-	// 	qExec(device, 'writeMultiple', regs, vals)(results)
-	// 	.then(function(res) {
-	// 		test.done();
-	// 	});
-	// },
-	// 'Establish baseline speed - high res': function(test) {
-	// 	var results = [];
-	// 	var numThermocoupleReads = 1000;
-	// 	var reads = [];
-	// 	for(var i = 0; i < numThermocoupleReads; i++) {
-	// 		reads.push('AIN0');
-	// 	}
-	// 	var startTime = new Date();
-	// 	qExec(device, 'readMultiple', reads)(results)
-	// 	.then(function(res) {
-	// 		var stopTime = new Date();
-	// 		var results = res[0].retData;
-	// 		var isError = false;
-	// 		results.forEach(function(result) {
-	// 			// console.log('result', result);
-	// 			if(result.isErr) {
-	// 				isError = true;
-	// 			}
-	// 		});
-	// 		var duration = (stopTime - startTime) / 1000;
-	// 		// console.log('Encountered Error', isError);
-	// 		// console.log('Num', results.length);
-	// 		console.log('Duration', duration);
-	// 		console.log('Rate', (duration/numThermocoupleReads).toFixed(4)*1000, 'ms');
-	// 		test.done();
-	// 	});
-	// },
-	// 'read thermocouples - high res': function(test) {
-	// 	var results = [];
-	// 	var numThermocoupleReads = 1000;
-	// 	var reads = [];
-	// 	for(var i = 0; i < numThermocoupleReads; i++) {
-	// 		reads.push('AIN0_EF_READ_A');
-	// 	}
-	// 	var startTime = new Date();
-	// 	qExec(device, 'readMultiple', reads)(results)
-	// 	.then(function(res) {
-	// 		var stopTime = new Date();
-	// 		var results = res[0].retData;
-	// 		var isError = false;
-	// 		results.forEach(function(result) {
-	// 			// console.log('result', result);
-	// 			if(result.isErr) {
-	// 				isError = true;
-	// 			}
-	// 		});
-	// 		var duration = (stopTime - startTime) / 1000;
-	// 		// console.log('Encountered Error', isError);
-	// 		// console.log('Num', results.length);
-	// 		console.log('Duration', duration);
-	// 		console.log('Rate', (duration/numThermocoupleReads).toFixed(4)*1000, 'ms');
-	// 		test.done();
-	// 	});
-	// },
-	// 'configure thermocouples - slow': function(test) {
-	// 	var results = [];
-	// 	var writes = [
-	// 		{'reg': 'AIN0_RESOLUTION_INDEX', 'val': 12},
-	// 	];
-	// 	var regs = [];
-	// 	var vals = [];
-	// 	writes.forEach(function(write) {
-	// 		regs.push(write.reg);
-	// 		vals.push(write.val);
-	// 	});
-
-	// 	// Setup and call functions
-	// 	qExec(device, 'writeMultiple', regs, vals)(results)
-	// 	.then(function(res) {
-	// 		test.done();
-	// 	});
-	// },
-	// 'Establish baseline speed - slow': function(test) {
-	// 	var results = [];
-	// 	var numThermocoupleReads = 10;
-	// 	var reads = [];
-	// 	for(var i = 0; i < numThermocoupleReads; i++) {
-	// 		reads.push('AIN0');
-	// 	}
-	// 	var startTime = new Date();
-	// 	qExec(device, 'readMultiple', reads)(results)
-	// 	.then(function(res) {
-	// 		var stopTime = new Date();
-	// 		var results = res[0].retData;
-	// 		var isError = false;
-	// 		results.forEach(function(result) {
-	// 			// console.log('result', result);
-	// 			if(result.isErr) {
-	// 				isError = true;
-	// 			}
-	// 		});
-	// 		var duration = (stopTime - startTime) / 1000;
-	// 		// console.log('Encountered Error', isError);
-	// 		// console.log('Num', results.length);
-	// 		console.log('Duration', duration);
-	// 		console.log('Rate', (duration/numThermocoupleReads).toFixed(4)*1000, 'ms');
-	// 		test.done();
-	// 	});
-	// },
-	// 'read thermocouples - slow': function(test) {
-	// 	var results = [];
-	// 	var numThermocoupleReads = 10;
-	// 	var reads = [];
-	// 	for(var i = 0; i < numThermocoupleReads; i++) {
-	// 		reads.push('AIN0_EF_READ_A');
-	// 	}
-	// 	var startTime = new Date();
-	// 	qExec(device, 'readMultiple', reads)(results)
-	// 	.then(function(res) {
-	// 		var stopTime = new Date();
-	// 		var results = res[0].retData;
-	// 		var isError = false;
-	// 		results.forEach(function(result) {
-	// 			// console.log('result', result);
-	// 			if(result.isErr) {
-	// 				isError = true;
-	// 			}
-	// 		});
-	// 		var duration = (stopTime - startTime) / 1000;
-	// 		// console.log('Encountered Error', isError);
-	// 		// console.log('Num', results.length);
-	// 		console.log('Duration', duration);
-	// 		console.log('Rate', (duration/numThermocoupleReads).toFixed(4)*1000, 'ms');
-	// 		test.done();
-	// 	});
-	// },
+	}
 };
 
 var getTCTest = function(name, resolution, numSamples) {
@@ -380,7 +162,7 @@ var getTCTest = function(name, resolution, numSamples) {
 			// console.log('Encountered Error', isError);
 			// console.log('Num', results.length);
 			// console.log('Duration', duration);
-			console.log('Rate', rate, 'ms');
+			console.log('  - Rate', rate, 'ms');
 			test.done();
 		});
 	};
@@ -408,8 +190,8 @@ var getTCTest = function(name, resolution, numSamples) {
 			// console.log('Encountered Error', isError);
 			// console.log('Num', results.length);
 			// console.log('Duration', duration);
-			console.log('Rate', rate, 'ms');
-			console.log('Thermocouple Overhead', parseFloat((rate - baselineRate).toFixed(4)), 'ms');
+			console.log('  - Rate', rate, 'ms');
+			console.log('  - Thermocouple Overhead', parseFloat((rate - baselineRate).toFixed(4)), 'ms');
 			test.done();
 		});
 	};
