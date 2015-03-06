@@ -431,11 +431,46 @@ function device(useMockDevice) {
 		var finishRead = function(err) {
 			defered.resolve(results);
 		};
-		async.each(
+		async.eachSeries(
 			addresses,
 			performRead,
 			finishRead
 		);
+		return defered.promise;
+	};
+	// An experimental implementation of the readMultiple function that doesn't
+	// use the async library.
+	var performMultipleReads = function(addresses) {
+		var defered = q.defer();
+		var currentStep = 0;
+		var numSteps = addresses.length;
+		var results = [];
+
+		var handleReadSuccess = function(res) {
+			results.push({'address': addresses[currentStep], 'isErr': false, 'data': res});
+			if(currentStep < numSteps) {
+				currentStep += 1;
+				performRead();
+			} else {
+				defered.resolve(results);
+			}
+		};
+		var handleReadError = function(err) {
+			results.push({'address': addresses[currentStep], 'isErr': true, 'data': err});
+			if(currentStep < numSteps) {
+				currentStep += 1;
+				performRead();
+			} else {
+				defered.resolve(results);
+			}
+		};
+		var performRead = function() {
+			self.qRead(addresses[currentStep])
+			.then(handleReadSuccess, handleReadError);
+		};
+
+		performRead();
+
 		return defered.promise;
 	};
 
@@ -527,11 +562,17 @@ function device(useMockDevice) {
 	**/
 	this.writeMultiple = function(addresses, values) {
 		var defered = q.defer();
-		var write = [];
+		var writes = [];
 		var i;
 		for(i = 0; i < addresses.length; i ++) {
-			write.push({'address': addresses[i],'val':values[i]});
+			writes.push({'address': addresses[i],'val':values[i]});
 		}
+		self.performMultipleWrites(writes)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	this.performMultipleWrites = function(writeRequests) {
+		var defered = q.defer();
 		var results = [];
 		var performWrite = function(writeData, callback) {
 			self.qWrite(writeData.address,writeData.val)
@@ -546,13 +587,14 @@ function device(useMockDevice) {
 		var finishWrite = function(err) {
 			defered.resolve(results);
 		};
-		async.each(
-			write,
+		async.eachSeries(
+			writeRequests,
 			performWrite,
 			finishWrite
 		);
 		return defered.promise;
 	};
+
 	this.rwMany = function(addresses, directions, numValues, values) {
 		var defered = q.defer();
 		ljmDevice.rwMany(
@@ -753,12 +795,13 @@ function device(useMockDevice) {
 
 	var checkSingleAddressForDefaults = function(address, val) {
 		try {
-			var addr = modbusMap.getAddressInfo(address).data.name;
+			var info = modbusMap.getAddressInfo(address);
+			var addr = info.data.name;
 			if(addr.indexOf('_DEFAULT') >= 0) {
 				unsavedDefaults[addr] = val;
 			}
 		} catch(err) {
-			console.error('Dev_curator checkSingleAddressForDefaults', err);
+			console.error('Dev_curator checkSingleAddressForDefaults', err, address, info);
 		}
 	};
 
