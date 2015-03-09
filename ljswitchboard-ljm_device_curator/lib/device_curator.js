@@ -251,10 +251,12 @@ function device(useMockDevice) {
 				var dt = self.savedAttributes.deviceType;
 				var ct = self.savedAttributes.connectionType;
 				var dts = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
+				var dtn = driver_const.DEVICE_TYPE_NAMES[dt];
 				var deviceClass = driver_const.DEVICE_TYPE_NAMES[dt];
 				var cts = driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct];
 				var connectionTypeName = driver_const.CONNECTION_TYPE_NAMES[ct];
 				self.savedAttributes.deviceTypeString = dts;
+				self.savedAttributes.deviceTypeName = dtn;
 				self.savedAttributes.deviceClass = deviceClass;
 				self.savedAttributes.connectionTypeString = cts;
 				self.savedAttributes.connectionTypeName = connectionTypeName;
