@@ -113,12 +113,12 @@ function createDeviceController(io_interface) {
 	 *     handleInfo (from getHandleInfo)
 	 */
 	this.getDeviceListing = function(reqFilters, requestdAttributes) {
-		var defered = q.defer();
-		callFunc('getDeviceListing', [reqFilters, requestdAttributes])
-		.then(function(res) {
-			defered.resolve(res);
-		}, defered.reject);
-		return defered.promise;
+		// var defered = q.defer();
+		return callFunc('getDeviceListing', [reqFilters, requestdAttributes])
+		// .then(function(res) {
+		// 	defered.resolve(res);
+		// }, defered.reject);
+		// return defered.promise;
 	};
 
 	/**
@@ -144,28 +144,110 @@ function createDeviceController(io_interface) {
 		return callFunc('addMockDevice', [deviceInfo]);
 	};
 
+	var getCachedDeviceObject = function(key) {
+		var defered = q.defer();
+		defered.resolve(self.devices[key]);
+		return defered.promise;
+	};
+	var getDeviceObject = function(deviceAttributes) {
+		var defered = q.defer();
+		if(deviceAttributes.length > 0) {
+			var key = deviceAttributes[0].device_comm_key;
 
-	/**
-	 * Get the device_manager's handle for a connected device.
-	 */
-	var getDeviceHandle = function(options) {
-		return callFunc('getDeviceHandle', [options]);
+			// Return the first found device;
+			if(self.devices[key]) {
+				return getCachedDeviceObject(key);
+			} else {
+				return createDeviceObject(key);
+			}
+		} else {
+			defered.resolve();
+			return defered.promise;
+		}
+	};
+	var getDeviceObjects = function(deviceAttributes) {
+		var defered = q.defer();
+		var keys = Object.keys(deviceAttributes);
+
+		// Construct an array of devices
+		var promises = deviceAttributes.map(function(device) {
+			var key = device.device_comm_key;
+			if(self.devices[key]) {
+				return getCachedDeviceObject(key);
+			} else {
+				return createDeviceObject(deviceAttributes[keys[0]]);
+			}
+		});
+		q.allSettled(promises)
+		.then(function(results) {
+			var devices = [];
+			results.forEach(function(result) {
+				if(result.value) {
+					devices.push(result.value);
+				}
+			});
+			defered.resolve(devices);
+		});
+		return defered.promise;
 	};
 
 	/**
-	 * Gets handles for all of the connected devices.
+	 * Get first found active device.
 	 */
-	var getDeviceHandles = function() {
-		return callFunc('getDeviceHandles');
+	this.getSelectedDevice = function(options) {
+		var defered = q.defer();
+		options['isSelected-Radio'] = true;
+		self.getDeviceListing(options)
+		.then(getDeviceObject)
+		.then(function(res) {
+			if(res.length > 0) {
+				defered.resolve(res);
+			} else {
+				self.getDeviceListing()
+				.then(getDeviceObjects)
+				.then(function(res) {
+					if(res.length > 0) {
+						// Mark first device as current/active
+					} else {
+						// No connected devices
+						defered.resolve([]);
+					}
+				});
+			}
+		}, defered.reject);
+		return defered.promise;
+	};
+	this.getSelectedDevices = function(options) {
+		var defered = q.defer();
+		options['isSelected-CheckBox'] = true;
+		self.getDeviceListing(options)
+		.then(getDeviceObject)
+		.then(function(res) {
+			if(res.length > 0) {
+				defered.resolve(res);
+			} else {
+				self.getDeviceListing()
+				.then(getDeviceObjects)
+				.then(function(res) {
+					if(res.length > 0) {
+						// Mark first device as current/active
+					} else {
+						// No connected devices
+						defered.resolve([]);
+					}
+				});
+			}
+		}, defered.reject);
+		return defered.promise;
 	};
 
 	/**
-	 * Create a device object that can be used to talk with the device manager's
-	 * device.
+	 * Gets the first found device that meets the filters.
 	 */
 	this.getDevice = function(options) {
 		var defered = q.defer();
-		getDeviceHandle()
+		self.getDeviceListing(options)
+		.then(getDeviceObject)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
@@ -175,9 +257,10 @@ function createDeviceController(io_interface) {
 	 * Create several device objects that can be used to talk with the device 
 	 * manager.
 	 */
-	this.getDevices = function() {
+	this.getDevices = function(options) {
 		var defered = q.defer();
-		getDeviceHandles()
+		self.getDeviceListing(options)
+		.then(getDeviceObjects)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
@@ -263,6 +346,13 @@ function createDeviceController(io_interface) {
 		}
 		return defered.promise;
 	};
+	this.closeDeviceRef = function(device) {
+		var defered = q.defer();
+		var comKey = device.savedAttributes.device_comm_key;
+		self.closeDevice(comKey)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
 	this.closeDevice = function(device_comm_key) {
 		var defered = q.defer();
 
@@ -282,7 +372,14 @@ function createDeviceController(io_interface) {
 	 * Closes all connected devices.
 	 */
 	this.closeAllDevices = function() {
-		return callFunc('closeAllDevices');
+		var defered = q.defer();
+		callFunc('closeAllDevices')
+		.then(function(res) {
+			var keys = Object.keys(self.devices);
+			keys.forEach(deleteDeviceReference);
+		});
+		defered.resolve();
+		return defered.promise;
 	};
 
 	

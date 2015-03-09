@@ -27,7 +27,13 @@ var capturedEvents = [];
 
 var getDeviceControllerEventListener = function(eventKey) {
 	var deviceControllerEventListener = function(eventData) {
-		console.log('Captured an event', eventKey);
+		// console.log('Captured an event', eventKey);
+		if(eventKey === 'VERIFYING_DEVICE_CONNECTION') {
+			console.log('Captured an event', eventKey, eventData);
+		}
+		if(eventKey === 'CLOSING_FOUND_DEVICE') {
+			console.log('Captured an event', eventKey);
+		}
 		capturedEvents.push({'eventName': eventKey, 'data': eventData});
 	};
 	return deviceControllerEventListener;

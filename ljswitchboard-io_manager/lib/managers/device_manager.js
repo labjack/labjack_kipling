@@ -106,7 +106,7 @@ function createDeviceManager(io_delegator) {
 						.then(success, error, syntaxError);
 					}
 				} catch(err) {
-					console.error('device_manager.js error calling func', func, args);
+					console.error('device_manager.js error calling func', func, args, err.stack);
 					defered.reject('Syntax Error Calling Function');
 				}
 			} else {

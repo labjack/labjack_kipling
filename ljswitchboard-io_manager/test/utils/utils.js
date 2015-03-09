@@ -173,3 +173,60 @@ var testResultsArray = function(test, expectedResults, results) {
 	}
 };
 exports.testResultsArray = testResultsArray;
+
+var testDeviceObject = function(test, device, expDevice) {
+	var savedAttributes = device.savedAttributes;
+	var expSavedAttributes = expDevice.mockDeviceConfig;
+
+	var expKeys = Object.keys(expSavedAttributes);
+	var keyTransforms = {
+		'ipAddress': 'ipAddress',
+		'ip': 'ipAddress',
+	};
+
+	expKeys.forEach(function(expKey) {
+		var resKey = expKey;
+		if(keyTransforms[expKey]) {
+			resKey = keyTransforms[expKey];
+		}
+
+		var expRes = expSavedAttributes[expKey];
+		var res = savedAttributes[resKey];
+		if(res) {
+			if(res.val) {
+				test.strictEqual(res.val, expRes, 'Key: '+resKey+', wrong val');
+			} else {
+				if(res !== expRes) {
+					console.log('Looking for', resKey);
+					console.log('Expected Val', expRes);
+					console.log('Actual Result', res);
+					// console.log(
+					// 	'Available Data',
+					// 	Object.keys(savedAttributes),
+					// 	savedAttributes
+					// );
+				}
+				test.strictEqual(res, expRes, 'Key: '+expKey+', wrong val');
+			}
+		} else {
+			console.log('(no-res) Looking for', expKey);
+			console.log('Expected Val', expRes);
+			console.log('Available Data', Object.keys(savedAttributes));
+			test.ok(false, 'Expected key: '+expKey+', not found.');
+		}
+	});
+};
+exports.testDeviceObject = testDeviceObject;
+
+var testDeviceObjects = function(test, devices, expDevices) {
+	test.strictEqual(devices.length, expDevices.length, 'Num Devices not correct');
+	expDevices.forEach(function(expDevice, i) {
+		var device = devices[i];
+		testDeviceObject(
+			test,
+			device,
+			expDevice
+		);
+	});
+};
+exports.testDeviceObjects = testDeviceObjects;

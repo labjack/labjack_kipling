@@ -5,11 +5,16 @@ var device_interface = require('../../single_device_interface');
 var device_delegator_path = './lib/delegators/single_device_delegator.js';
 var constants = require('../../common/constants');
 
-function newDevice(newProcess, mockDevice, sendFunc) {
+function newDevice(newProcess, mockDevice, mockDeviceConfig, sendFunc) {
 	this.device = null;
 
 	this.isNewProcess = newProcess;
 	this.isMockDevice = mockDevice;
+
+	var configureMockDevice = false;
+	if(mockDeviceConfig) {
+		configureMockDevice = true;
+	}
 	
 	var send = function(message) {
 		return sendFunc(self.device_comm_key, message);
@@ -23,24 +28,36 @@ function newDevice(newProcess, mockDevice, sendFunc) {
 
 	this.open = function(deviceType, connectionType, identifier) {
 		var defered = q.defer();
-		
-		if(self.isNewProcess) {
-			defered.reject('devices in sub-processes are currently not supported');
-		} else {
-			self.device = new device_curator.device(self.isMockDevice);
+		var performOpenDevice = function() {
+			var innerDefered = q.defer();
 			self.device.open(deviceType, connectionType, identifier)
 			.then(function(res) {
 				self.device.savedAttributes['isSelected-Radio'] = false;
 				self.device.savedAttributes['isSelected-CheckBox'] = true;
 				res.device_comm_key = self.device_comm_key;
-				defered.resolve(res);
+				innerDefered.resolve(res);
 			}, function(err) {
 				var intErr = {
 					'err': err,
 					'device_comm_key': self.device_comm_key
 				};
-				defered.reject(intErr);
+				innerDefered.reject(intErr);
 			});
+			return innerDefered.promise;
+		};
+		if(self.isNewProcess) {
+			defered.reject('devices in sub-processes are currently not supported');
+		} else {
+			self.device = new device_curator.device(self.isMockDevice);
+			if(configureMockDevice) {
+				self.device.configureMockDevice(mockDeviceConfig)
+				.then(performOpenDevice)
+				.then(defered.resolve, defered.reject);
+			} else {
+				performOpenDevice()
+				.then(defered.resolve, defered.reject);
+			}
+			
 		}
 		return defered.promise;
 	};

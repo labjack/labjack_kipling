@@ -37,6 +37,13 @@ function createIOInterface() {
 	this.device_controller = null;
 	this.logger_controller = null;
 	this.file_io_controller = null;
+
+	this.eventList = {
+		'PROCESS_ERROR': 'PROCESS_ERROR',
+		'PROCESS_DISCONNECT': 'PROCESS_DISCONNECT',
+		'PROCESS_EXIT': 'PROCESS_EXIT',
+		'PROCESS_CLOSE': 'PROCESS_CLOSE',
+	};
 	var createDriverController = function() {
 		self.driver_controller = new driver_controller.createNewDriverController(self);
 	};
@@ -424,20 +431,30 @@ function createIOInterface() {
 
 		// Attach a variety of event listeners to verify that the sub-process
 		// starts properly. If a user enables debugging.
-		if(passedResults.debugProcess) {
-			self.mp_event_emitter.on('error', function(data) {
+		self.mp_event_emitter.on('error', function(data) {
+			if(passedResults.debugProcess || false) {
 				console.log('Error Received', data);
-			});
-			self.mp_event_emitter.on('exit', function(data) {
+			}
+			self.emit(self.eventList.PROCESS_ERROR, data);
+		});
+		self.mp_event_emitter.on('exit', function(data) {
+			if(passedResults.debugProcess || false) {
 				console.log('exit Received', data);
-			});
-			self.mp_event_emitter.on('close', function(data) {
+			}
+			self.emit(self.eventList.PROCESS_EXIT, data);
+		});
+		self.mp_event_emitter.on('close', function(data) {
+			if(passedResults.debugProcess || false) {
 				console.log('close Received', data);
-			});
-			self.mp_event_emitter.on('disconnect', function(data) {
+			}
+			self.emit(self.eventList.PROCESS_CLOSE, data);
+		});
+		self.mp_event_emitter.on('disconnect', function(data) {
+			if(passedResults.debugProcess || false) {
 				console.log('disconnect Received', data);
-			});
-		}
+			}
+			self.emit(self.eventList.PROCESS_DISCONNECT, data);
+		});
 
 		// Clear the one-way-listeners object that is used for routing
 		// one-way messages via send or sendMessage to the controllers.

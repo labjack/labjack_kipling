@@ -16,11 +16,14 @@ var TEST_SINGLE_DEVICE_CONTROLLER = false;
 
 // Tests the scanning for devices
 var TEST_DEVICE_SCANNER = false;
-var TEST_MOCK_DEVICE_SCANNER = true;
+var TEST_MOCK_DEVICE_SCANNER = false;
 
 var TEST_DEVICE_CONTROLLER = false;					// incomplete
 var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing
 var TEST_DEVICE_CONTROLLER_LIVE_DEVICE = false;		// Passing
+var TEST_DEVICE_CONTROLLER_OPEN_ADVANCED = false;	//
+var TEST_DEVICE_KEEPER = true;
+var TEST_DEVICE_KEEPER_LIVE = true;
 var TEST_UPDATE_MOCK_DEVICE = false;				// Passing
 var TEST_UPDATE_USB_DEVICE = false;					// Failing, bad URL
 
@@ -63,7 +66,19 @@ if(TEST_DEVICE_CONTROLLER_LIVE_DEVICE) {
 	var device_controller_live_test = require('./device_controller_live_test');
 	exports.device_controller_live_test = device_controller_live_test.tests;
 }
+if(TEST_DEVICE_CONTROLLER_OPEN_ADVANCED) {
+	var device_controller_open_advanced_test = require('./device_controller/open_advanced_test');
+	exports.device_controller_open_advanced_test = device_controller_open_advanced_test.tests;
+}
+if(TEST_DEVICE_KEEPER) {
+	var device_keeper_test = require('./device_controller/device_keeper_test');
+	exports.device_keeper_test = device_keeper_test.tests;
+}
 
+if(TEST_DEVICE_KEEPER_LIVE) {
+	var device_keeper_live_test = require('./device_controller/device_keeper_live_test');
+	exports.device_keeper_live_test = device_keeper_live_test.tests;
+}
 if(TEST_UPDATE_MOCK_DEVICE) {
 	var update_mock_device_test = require('./update_mock_device_test');
 	exports.update_mock_device_test = update_mock_device_test.tests;

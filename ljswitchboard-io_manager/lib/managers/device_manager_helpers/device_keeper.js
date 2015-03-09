@@ -96,6 +96,7 @@ function createDeviceKeeper(io_delegator, link) {
 		var identifier;
 		var newProcess;
 		var mockDevice;
+		var mockDeviceConfig;
 
 		if(options.deviceType) {
 			deviceType = options.deviceType;
@@ -121,6 +122,9 @@ function createDeviceKeeper(io_delegator, link) {
 			mockDevice = options.mockDevice;
 		} else {
 			mockDevice = false;
+		}
+		if(options.mockDeviceConfig) {
+			mockDeviceConfig = options.mockDeviceConfig;
 		}
 
 		var defered = q.defer();
@@ -149,14 +153,16 @@ function createDeviceKeeper(io_delegator, link) {
 		var newDevice;
 		try {
 			newDevice = new device_generator.newDevice(
-				spinupProcess, 
+				spinupProcess,
 				mockDevice,
+				mockDeviceConfig,
 				deviceSendMessage
 			);
 		} catch (err) {
 			defered.reject({
 				'message': 'Failed to create device obj, device_keeper.js',
-				'info': JSON.stringify(err)
+				'info': JSON.stringify(err),
+				'stack': JSON.stringify(err.stack),
 			});
 		}
 
@@ -182,7 +188,8 @@ function createDeviceKeeper(io_delegator, link) {
 		} catch(err) {
 			defered.reject({
 				'message': 'Failed to initialize device obj, device_keeper.js',
-				'info': JSON.stringify(err)
+				'info': JSON.stringify(err),
+				'stack': JSON.stringify(err.stack),
 			});
 		}
 		return defered.promise;
@@ -319,7 +326,7 @@ function createDeviceKeeper(io_delegator, link) {
 	 * Accessory function for getDeviceListing that filters out devices from the
 	 * listing.
 	 */
-	var supportedDeviceFilters = {
+	var specialDeviceFilters = {
 		'type': function (param, attrs) {
 			var res = false;
 			if(driver_const.deviceTypes[param] == attrs.deviceType) {
@@ -364,23 +371,31 @@ function createDeviceKeeper(io_delegator, link) {
 			return res;
 		},
 		'enableMockDevices': function(param, attrs) {
-			var res = false;
-			if(attrs.isMockDevice == param) {
-				res = true;
+			var res = true;
+			if(param) {
+				if(attrs.isMockDevice === true) {
+					res = true;
+				}
+			} else {
+				if(attrs.isMockDevice === true) {
+					res = false;
+				}
 			}
 			return res;
 		}
 	};
-	var supportedDeviceFilterKeys = Object.keys(supportedDeviceFilters);
+	var specialDeviceFilterKeys = Object.keys(specialDeviceFilters);
 	var passesDeviceFilters = function(filters, attrs) {
 		var passes = true;
 		if(typeof(filters) !== 'undefined') {
 			var keys = Object.keys(filters);
 			keys.forEach(function(key) {
-				if(supportedDeviceFilterKeys.indexOf(key) >= 0) {
-					if(!supportedDeviceFilters[key](filters[key], attrs)) {
+				if(specialDeviceFilterKeys.indexOf(key) >= 0) {
+					if(!specialDeviceFilters[key](filters[key], attrs)) {
 						passes = false;
 					}
+				} else if(filters[key] !== attrs[key]) {
+					passes = false;
 				}
 			});
 		}
@@ -394,62 +409,71 @@ function createDeviceKeeper(io_delegator, link) {
 	 */
 	this.getDeviceListing = function(reqFilters, requestdAttributes) {
 		var defered = q.defer();
-		var filters = {'enableMockDevices': true};
-		if(reqFilters) {
-			if(Array.isArray(reqFilters)) {
-				reqFilters.forEach(function(reqFilter) {
-					var filterKeys = Object.keys(reqFilter);
-					filterKeys.forEach(function(key) {
-						filters[key] = reqFilter[key];
-					});
-				});
-			} else {
-				var filterKeys = Object.keys(reqFilter);
-				filterKeys.forEach(function(key) {
-					filters[key] = reqFilter[key];
-				});
-			}
-		}
-		var attributes = [
-			'serialNumber',
-			'FIRMWARE_VERSION',
-			'WIFI_VERSION',
-			'productType',
-			'BOOTLOADER_VERSION',
-			'connectionTypeName',
-			'ip',
-			'DEVICE_NAME_DEFAULT',
-			'isSelected-Radio',
-			'isSelected-CheckBox',
-			'device_comm_key'
-		];
-		if(requestdAttributes) {
-			if(Array.isArray(requestdAttributes)) {
-				requestdAttributes.forEach(function(requestedAttribute) {
-					if(attributes.indexOf(requestedAttribute) < 0) {
-						attributes.push(requestedAttribute);
-					}
-				});
-			}
-		}
-
 		var listing = [];
-		var deviceKeys = Object.keys(self.devices);
-		deviceKeys.forEach(function(deviceKey) {
-			var dev = self.devices[deviceKey].device.savedAttributes;
-			if(passesDeviceFilters(filters, dev)) {
-				var devListing = {};
-				attributes.forEach(function(attribute) {
-					if(typeof(dev[attribute]) !== 'undefined') {
-						devListing[attribute] = dev[attribute];
-					} else {
-						devListing[attribute] = 'N/A';
-					}
-				});
-				listing.push(devListing);
+		try {
+			var filters = {'enableMockDevices': true};
+			if(reqFilters) {
+				if(Array.isArray(reqFilters)) {
+					reqFilters.forEach(function(reqFilter) {
+						var filterKeys = Object.keys(reqFilter);
+						filterKeys.forEach(function(key) {
+							filters[key] = reqFilter[key];
+						});
+					});
+				} else {
+					var filterKeys = Object.keys(reqFilters);
+					filterKeys.forEach(function(key) {
+						filters[key] = reqFilters[key];
+					});
+				}
 			}
-		});
-		defered.resolve(listing);
+			var attributes = [
+				'serialNumber',
+				'FIRMWARE_VERSION',
+				'WIFI_VERSION',
+				'productType',
+				'BOOTLOADER_VERSION',
+				'connectionTypeName',
+				'ipAddress',
+				'DEVICE_NAME_DEFAULT',
+				'isSelected-Radio',
+				'isSelected-CheckBox',
+				'device_comm_key'
+			];
+			if(requestdAttributes) {
+				if(Array.isArray(requestdAttributes)) {
+					requestdAttributes.forEach(function(requestedAttribute) {
+						if(attributes.indexOf(requestedAttribute) < 0) {
+							attributes.push(requestedAttribute);
+						}
+					});
+				}
+			}
+
+			
+			var deviceKeys = Object.keys(self.devices);
+			deviceKeys.forEach(function(deviceKey) {
+				var added = false;
+				var dev = self.devices[deviceKey].device.savedAttributes;
+				if(passesDeviceFilters(filters, dev)) {
+					added = true;
+					var devListing = {};
+					attributes.forEach(function(attribute) {
+						if(typeof(dev[attribute]) !== 'undefined') {
+							devListing[attribute] = dev[attribute];
+						} else {
+							devListing[attribute] = 'N/A';
+						}
+					});
+					listing.push(devListing);
+				} else {
+				}
+			});
+			defered.resolve(listing);
+		} catch(err) {
+			console.log('Error in getDeviceListing', err, err.stack);
+		}
+		
 		return defered.promise;
 	};
 	
