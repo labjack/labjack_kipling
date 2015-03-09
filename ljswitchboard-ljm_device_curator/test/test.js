@@ -28,9 +28,9 @@ var digit_basic_test = require('./digit_basic_test');
 
 /********************** Perform tests *****************************************/
 // Perform Generic tests on mock devices
-// exports.mock_device_test = mock_device_test.tests;								// Passing
-// exports.mock_device_defaults_cache_test = mock_device_defaults_cache_test.tests;// Passing
-// exports.mock_device_attrs_test = mock_device_attrs_test.tests;
+exports.mock_device_test = mock_device_test.tests;								// Passing
+exports.mock_device_defaults_cache_test = mock_device_defaults_cache_test.tests;// Passing
+exports.mock_device_attrs_test = mock_device_attrs_test.tests;
 
 // Perform T7 related tests
 // exports.t7_basic_test = t7_basic_test.tests;									// Passing
@@ -53,7 +53,7 @@ var digit_basic_test = require('./digit_basic_test');
 // exports.t7_raw_test = t7_raw_test.tests;
 
 // Thermocouple Tests
-exports.t7_thermocouple_speed_test = t7_thermocouple_speed_test.tests;
+// exports.t7_thermocouple_speed_test = t7_thermocouple_speed_test.tests;
 
 // Perform Digit related tests
 // exports.digit_basic_test = digit_basic_test.tests;

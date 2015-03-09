@@ -221,6 +221,7 @@ function device() {
 		self.devAttr.connectionType = conTNum;
 		self.devAttr.serialNumber = serialNum;
 		self.devAttr.ip = ipAddr;
+		self.devAttr.ipAddress = ipAddr;
 		self.devAttr.port = port;
 		self.devAttr.maxBytesPerMB = 32;
 

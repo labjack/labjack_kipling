@@ -83,6 +83,7 @@ exports.tests = {
 			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
 			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
 			test.strictEqual(res.ip, '0.0.0.0');
+			test.strictEqual(res.ipAddress, '0.0.0.0');
 			test.done();
 		});
 	},
