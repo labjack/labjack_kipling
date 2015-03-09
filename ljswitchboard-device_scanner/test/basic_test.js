@@ -5,6 +5,8 @@ var test_util = require('./test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var testScanResults = test_util.testScanResults;
 
+
+
 exports.tests = {
 	'Starting Basic Test': function(test) {
 		console.log('');

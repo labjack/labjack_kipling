@@ -2,7 +2,7 @@
 
 var BASIC_TEST = true;
 var MOCK_TEST = true;
-var CRAZY_TEST = true;
+var CRAZY_TEST = false;
 
 
 if(BASIC_TEST) {

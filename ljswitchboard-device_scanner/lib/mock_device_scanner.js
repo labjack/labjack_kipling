@@ -34,7 +34,13 @@ function createMockDeviceScanner() {
 			return 2900;
 		},
 		'WIFI_RSSI': function(deviceInfo, address) {
-			return -30;
+			var rssi = 0;
+			if(deviceInfo.WIFI_RSSI) {
+				rssi = deviceInfo.WIFI_RSSI;
+			} else {
+				rssi = -30;
+			}
+			return rssi;
 		},
 		'FIRMWARE_VERSION': function(deviceInfo, address) {
 			return 1.5000;

@@ -911,7 +911,7 @@ var deviceScanner = function() {
 		var newConnectionInfo = getInitialConnectionTypeData(
 			attrs.deviceType,
 			attrs.connectionType,
-			attrs.ip,
+			attrs.ipAddress,
 			'connected'
 		);
 		// deviceAttributes.connectionTypes = [];
