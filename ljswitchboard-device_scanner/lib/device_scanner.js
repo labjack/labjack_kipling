@@ -873,35 +873,39 @@ var deviceScanner = function() {
 			if(attrKeys.indexOf(reqKey) < 0) {
 				missingKeys.push(reqKey);
 			} else {
-				if(CONNECTED_DEVICE_INFO_COPY_STRATEGY[reqKey]) {
-					CONNECTED_DEVICE_INFO_COPY_STRATEGY[reqKey](
-						attrs, deviceAttributes, reqKey
-					);
-				} else {
-					// check to see if the value has already been parsed.
-					if((attrs[reqKey].val) !== 'undefined') {
-						deviceAttributes[reqKey] = data_parser.parseResult(
-							reqKey,
-							attrs[reqKey],
-							dt
+				if(attrs[reqKey]) {
+					if(CONNECTED_DEVICE_INFO_COPY_STRATEGY[reqKey]) {
+						CONNECTED_DEVICE_INFO_COPY_STRATEGY[reqKey](
+							attrs, deviceAttributes, reqKey
 						);
 					} else {
-						deviceAttributes[reqKey] = data_parser.parseResult(
-							reqKey,
-							attrs[reqKey].res,
-							dt
-						);
+						// check to see if the value has already been parsed.
+						if((attrs[reqKey].val) !== 'undefined') {
+							deviceAttributes[reqKey] = data_parser.parseResult(
+								reqKey,
+								attrs[reqKey],
+								dt
+							);
+						} else {
+							deviceAttributes[reqKey] = data_parser.parseResult(
+								reqKey,
+								attrs[reqKey].res,
+								dt
+							);
+						}
+						
 					}
-					
+				} else {
+					console.log('device_scanner.js, why???', attrs[reqKey], attrKeys, reqKey);
+					missingKeys.push(reqKey);
 				}
-				
 			}
 		});
 
 		// Also get & save custom attributes that the "deviceScanner.findAllDevices" adds
 		// deviceType, deviceTypeName, serialNumber, acquiredRequiredData, connectionTypes
 		var availableKeys = [
-			'deviceType', 'deviceTypeString', 'serialNumber'
+			'deviceType', 'deviceTypeName', 'deviceTypeString', 'serialNumber'
 		];
 		availableKeys.forEach(function(availableKey) {
 			deviceAttributes[availableKey] = attrs[availableKey];
