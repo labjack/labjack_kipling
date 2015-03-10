@@ -1,5 +1,6 @@
 {
     "name": "device_updater",
     "humanName": "Device Updater",
-    "version": "0.0.1"
+    "version": "0.0.1",
+    "supportedDevices": [{"type":"T7"}]
 }
