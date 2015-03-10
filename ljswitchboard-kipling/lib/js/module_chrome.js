@@ -7,8 +7,18 @@ var module_manager = require('ljswitchboard-module_manager');
 var fs = require('fs');
 
 
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 
 function createModuleChrome() {
+	this.moduleChromeStarted = false;
+
+	this.eventList = {
+		MODULE_CHROME_STARTED: 'MODULE_CHROME_STARTED',
+		LOADING_MODULE: 'LOADING_MODULE',
+		MODULE_LOADED: 'MODULE_LOADED',
+		DEVICE_LIST_UPDATED: 'DEVICE_LIST_UPDATED',
+	};
 
 	var MODULE_CHROME_HOLDER_ID = '#module_chrome_holder';
 	var MODULE_CHROME_HEADER_TABS_ID = '#header_tabs';
@@ -37,8 +47,20 @@ function createModuleChrome() {
 	var moduleChromeTemplateName = 'module_chrome.html';
 	var moduleChromeTabTemplateName = 'module_tab.html';
 	var moduleChromeTemplatesDir = 'templates';
+
+	var sliderTabsClass = '.body-tab';
 	
 	var cachedTemplates = {};
+
+	// Initialize variables for communicating with the driver.
+	this.io_manager = undefined;
+	this.io_interface = undefined;
+	this.device_controller = undefined;
+	this.device_controller_events = undefined;
+
+	this.cachedDeviceListing = [];
+
+	this.debugFilters = false;
 
 	var loadTemplateFile = function(name) {
 		var defered = q.defer();
@@ -72,14 +94,47 @@ function createModuleChrome() {
 		return defered.promise;
 	};
 
-	
+	var enableTabSliding = false;
 	var renderTemplate = function(location, name, context) {
 		var defered = q.defer();
 		compileTemplate(name, context)
 		.then(function(compiledData) {
-			location.empty();
-			location.append($(compiledData));
-			defered.resolve(context);
+			var bodyTabs;
+			if(enableTabSliding) {
+				bodyTabs = location.find(sliderTabsClass);
+				if(bodyTabs.length > 0) {
+					// Perform cool slide affects
+					bodyTabs.slideUp(
+						function() {
+							console.log('Finished Sliding Up');
+							location.empty();
+							location.append($(compiledData));
+							bodyTabs = location.find(sliderTabsClass);
+							console.log('Num Found', bodyTabs.length);
+							bodyTabs.slideDown(200,
+								function() {
+								});
+							defered.resolve(context);
+						});
+				} else {
+					// Empty & replace
+					location.empty();
+					location.append($(compiledData));
+					bodyTabs = location.find(sliderTabsClass);
+					if(bodyTabs.length > 0) {
+						bodyTabs.slideDown(200);
+					}
+					defered.resolve(context);
+				}
+			} else {
+				location.empty();
+				location.append($(compiledData));
+				bodyTabs = location.find(sliderTabsClass);
+					if(bodyTabs.length > 0) {
+						bodyTabs.show();
+					}
+					defered.resolve(context);
+			}
 		});
 		return defered.promise;
 	};
@@ -204,10 +259,128 @@ function createModuleChrome() {
 		return internalUpdateModuleListing(tabSections)
 		.then(attachTabClickHandlers);
 	};
+	var filterOperations = {
+		'minFW': function(filterValue, deviceAttributes) {
+			if(self.debugFilters) {
+				console.log('Checking minFW', filterValue, deviceAttributes.FIRMWARE_VERSION);
+			}
+			if(deviceAttributes.FIRMWARE_VERSION) {
+				if(filterValue < deviceAttributes.FIRMWARE_VERSION) {
+					return true;
+				} else {
+					self.filterFlags.isOld = true;
+					return false;
+				}
+			} else {
+				console.error('Firmware Version not found');
+				return false;
+			}
+		},
+		'subclass': function(filterValues, deviceAttributes) {
+			var isMet = true;
+			if(self.debugFilters) {
+				console.log('Checking subclass', filterValues, deviceAttributes.productType);
+			}
+			filterValues.forEach(function(filterValue) {
+				if(deviceAttributes.productType.indexOf(filterValue) < 0) {
+					isMet = false;
+				}
+			});
+			return isMet;
+		},
+		'type': function(filterValue, deviceAttributes) {
+			if(self.debugFilters) {
+				console.log('Checking type', filterValue, deviceAttributes.productType);
+			}
+			var isMet = true;
+			if(deviceAttributes.productType.indexOf(filterValue) < 0) {
+				isMet = false;
+			}
+			return isMet;
+		}
+	};
+	var checkDeviceForSupport = function(filters, deviceListing) {
+		var passedFilters = filters.some(function(filter) {
+			var isSupportedDevice = true;
+			var keys = Object.keys(filter);
+			
+			// Check each filter to see if the current device meets all filter
+			// requirements.
+			keys.every(function(key) {
+				
+				if(typeof(filterOperations[key]) === 'function') {
+					if(self.debugFilters) {
+						console.log(
+							'Checking Filter - func - Key',
+							key,
+							filter[key]
+						);
+					}
+					if(!filterOperations[key](filter[key], deviceListing)) {
+						isSupportedDevice = false;
+						return false;
+					}
+				} else if(typeof(deviceListing[key]) !== 'undefined') {
+					console.log(
+						'Checking Filter - attr - Key',
+						key,
+						deviceListing[key],
+						filter[key]
+					);
+				} else {
+					console.log('Checking Filter', key, 'unfound...');
+				}
+				return true;
+			});
+			return isSupportedDevice;
+		});
+		return passedFilters;
+	};
+	var filterBodyModules = function(module) {
+		var showModule = true;
+		var isSupportedDevice;
+		// If there aren't any connected devices, make sure that no modules are
+		// shown.
+		if(self.cachedDeviceListing.length === 0) {
+			showModule = false;
+		} else {
+			// If the loaded module has the supportedDevices attribute, execute
+			// the filters.
+			if(module.supportedDevices) {
+				showModule = self.cachedDeviceListing.some(
+					function(deviceListing) {
+						return checkDeviceForSupport(
+							module.supportedDevices,
+							deviceListing
+						);
+					});
+			} else {
+				if(self.debugFilters || true) {
+					console.log('Not Filtering Module', module.humanName, module.name);
+				}
+			}
+		}
+		return showModule;
+	};
+	this.filterFlags = {};
+	var filterModulesList = function(modules) {
+		var defered = q.defer();
+		if(self.debugFilters) {
+			console.log('Filtering Secondary modules', modules.body);
+			console.log('Device Listing', self.cachedDeviceListing);
+		}
+
+		self.filterFlags = {};
+		modules.body = modules.body.filter(filterBodyModules);
+		defered.resolve(modules);
+		return defered.promise;
+	};
+
 	this.updateSecondaryModuleListing = function() {
 		// Get the list of modules and have the inner-function perform logic on
 		// acquired data.
 		return module_manager.getModulesList()
+		.then(filterModulesList)
 		.then(internalUpdateSecondaryModuleListing);
 	};
 	this.updateModuleListing = function() {
@@ -231,8 +404,10 @@ function createModuleChrome() {
 		// console.log('Clicked Tab', res.data.name);
 		if(self.allowModuleToLoad) {
 			self.allowModuleToLoad = false;
+			self.emit(self.eventList.LOADING_MODULE, res);
 			MODULE_LOADER.loadModule(res.data)
 			.then(function(res) {
+				self.emit(self.eventList.MODULE_LOADED, res);
 				self.allowModuleToLoad = true;
 				// // console.log('Finished Loading Module', res.name);
 
@@ -256,6 +431,56 @@ function createModuleChrome() {
 		// module_manager.loadModuleData(res.data);
 	};
 
+	var saveDeviceListingData = function(deviceInfoArray) {
+		var defered = q.defer();
+		// console.log('Updated Device Listing', deviceInfoArray);
+		self.cachedDeviceListing = deviceInfoArray;
+		defered.resolve();
+		return defered.promise;
+	};
+	var devlceControllerDeviceListChanged = function() {
+		var defered = q.defer();
+
+		// Get updated device listing from the device controller
+		self.device_controller.getDeviceListing()
+		.then(saveDeviceListingData)
+		.then(self.updateSecondaryModuleListing)
+		.then(defered.resolve);
+		return defered.promise;
+	};
+	var deviceControllerEventListeners = {
+		'DEVICE_CONTROLLER_DEVICE_OPENED': function(eventData) {
+			// console.log('MODULE_CHROME, Device List Changed');
+
+			// self.updateSecondaryModuleListing()
+			devlceControllerDeviceListChanged();
+		},
+		'DEVICE_CONTROLLER_DEVICE_CLOSED': function(eventData) {
+			// console.log('MODULE_CHROME, Device List Changed');
+
+			// self.updateSecondaryModuleListing()
+			devlceControllerDeviceListChanged();
+		},
+	};
+	var attachToDeviceControllerEvents = function(bundle) {
+		var defered = q.defer();
+		self.io_manager = global.require('ljswitchboard-io_manager');
+		self.io_interface = self.io_manager.io_interface();
+		self.device_controller = self.io_interface.getDeviceController();
+		self.device_controller_events = self.device_controller.eventList;
+
+		var listenerKeys = Object.keys(deviceControllerEventListeners);
+		listenerKeys.forEach(function(key) {
+			self.device_controller.on(
+				self.device_controller_events[key],
+				deviceControllerEventListeners[key]
+			);
+		});
+
+		defered.resolve(bundle);
+		return defered.promise;
+	};
+
 	this.loadStartupModule = function() {
 		var defered = q.defer();
 
@@ -264,7 +489,15 @@ function createModuleChrome() {
 		return defered.promise;
 	};
 
-	this.loadModuleChrome = function() {
+	var reportModuleChromeStarted = function(res) {
+		var defered = q.defer();
+		self.emit(self.eventList.MODULE_CHROME_STARTED, res);
+		self.moduleChromeStarted = true;
+		defered.resolve(res);
+		return defered.promise;
+	};
+
+	var internalLoadModuleChrome = function() {
 		var defered = q.defer();
 		var context = {};
 
@@ -278,11 +511,52 @@ function createModuleChrome() {
 		// Update the module chrome window with applicable modules
 		.then(self.updateModuleListing)
 
+		// Attach to important device_controller events.
+		.then(attachToDeviceControllerEvents)
+
 		// Instruct the startup module to load, aka the device_selector
 		.then(self.loadStartupModule)
 		
+		// Report that the module chrome has started
+		.then(reportModuleChromeStarted)
+
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
+	};
+	// Almost identical to the "internalLoadModuleChrome", however it doesn't 
+	// start the device_selector module.
+	var loadTestModuleChrome = function() {
+		var defered = q.defer();
+		var context = {};
+
+		// Render the module chrome template
+		renderTemplate(
+			$(MODULE_CHROME_HOLDER_ID),
+			moduleChromeTemplateName,
+			context
+		)
+
+		// Update the module chrome window with applicable modules
+		.then(self.updateModuleListing)
+
+		// Attach to important device_controller events.
+		.then(attachToDeviceControllerEvents)
+		
+		// Report that the module chrome has started
+		.then(reportModuleChromeStarted)
+
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	this.reloadModuleChrome = function() {
+		return internalLoadModuleChrome();
+	};
+	this.loadModuleChrome = function() {
+		if(gui.App.manifest.test) {
+			return loadTestModuleChrome();
+		} else {
+			return internalLoadModuleChrome();
+		}
 	};
 
 	this.testLoad = function() {
@@ -293,5 +567,6 @@ function createModuleChrome() {
 	};
 	var self = this;
 }
+util.inherits(createModuleChrome, EventEmitter);
 
 var MODULE_CHROME = new createModuleChrome();

@@ -53,18 +53,32 @@ var loadResources = function(resources, isLocal) {
 	return defered.promise;
 };
 
+var ioManagerMonitor = function(data) {
+	console.log('io_manager Close Event detected, restarting', data);
+	if(MODULE_LOADER) {
+		MODULE_LOADER.loadModuleByName('crash_module');
+	}
+	global[gns].ljm.io_interface.initialize()
+	.then(MODULE_CHROME.reloadModuleChrome);
+};
+
 
 var startIOManager = function(){
 	var defered = q.defer();
 	var io_interface = global[gns].io_manager.io_interface();
 	global[gns].ljm = {};
 	global[gns].ljm.io_interface = io_interface;
+
+	// Attach monitor
+	io_interface.on(io_interface.eventList.PROCESS_CLOSE, ioManagerMonitor);
+
 	io_interface.initialize()
 	.then(defered.resolve, defered.reject);
 	return defered.promise;
 };
 
 var showKiplingWindow = function() {
+	console.log('showing window');
 	var defered = q.defer();
 	global[gns].splash_screen.update('Finished');
 	global[gns].window_manager.hideWindow('core');

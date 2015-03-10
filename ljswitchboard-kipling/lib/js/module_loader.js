@@ -16,6 +16,7 @@ var module_manager = require('ljswitchboard-module_manager');
 var fs = require('fs');
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
+var static_files = require('ljswitchboard-static_files');
 
 // Configure the module_manager persistent data path.
 var kiplingExtractionPath = package_loader.getExtractionPath();
@@ -183,56 +184,42 @@ function createModuleLoader() {
 	};
 	var loadHTMLFiles = function(newModule) {
 		var defered = q.defer();
-		console.log('here', newModule.htmlFiles);
-	// 	try {
-	// 	if(newModule.htmlFiles.view) {
-	// 		var htmlFile = newModule.htmlFiles.view;
-	// 		var template = handlebars.compile(htmlFile);
-	// 		var data = template(newModule.context);
-	// 		data = MODULE_LOADER_VIEW_TEMPLATE({
-	// 			'numLoaded': newModule.context.stats.numLoaded,
-	// 			'viewData': data,
-	// 		});
-	// 		newModule.outputLocation.view.append(data);
+		// console.log('loaded html files', newModule.htmlFiles);
+		var htmlFile = '<p>No view.html file loaded.</p>';
+		if(newModule.htmlFiles.view) {
+			htmlFile = newModule.htmlFiles.view;
 
-	// 		var elementID = MODULE_LOADER_VIEW_ID_TEMPLATE({
-	// 			'numLoaded': newModule.context.stats.numLoaded
-	// 		});
-	// 		$(elementID).ready(function() {
-	// 			defered.resolve(newModule);
-	// 			self.emit(eventList.VIEW_READY, {
-	// 				'name': newModule.name,
-	// 				'id': elementID,
-	// 				'data': newModule,
-	// 			});
-	// 		});
-	// 	}
-	// } catch(err) {
-	// 	console.log('err', err);
-	// }
-		newModule.html.forEach(function(htmlFile) {
-			if(htmlFile.fileName === 'view.html') {
-				var template = handlebars.compile(htmlFile.fileData);
-				var data = template(newModule.context);
-				data = MODULE_LOADER_VIEW_TEMPLATE({
-					'numLoaded': newModule.context.stats.numLoaded,
-					'viewData': data,
-				});
-				newModule.outputLocation.view.append(data);
+			// Compile & populate the view.html file
+			var template = handlebars.compile(htmlFile);
+			var data = template(newModule.context);
 
-				var elementID = MODULE_LOADER_VIEW_ID_TEMPLATE({
-					'numLoaded': newModule.context.stats.numLoaded
+			// Append a header & footer onto the template.
+			data = MODULE_LOADER_VIEW_TEMPLATE({
+				'numLoaded': newModule.context.stats.numLoaded,
+				'viewData': data,
+			});
+
+			// Add the page data to the dom.
+			newModule.outputLocation.view.append(data);
+
+			// Build the elementID string that was assigned to the element when
+			// compiling the "MODULE_LOADER_VIEW_TEMPLATE"
+			var elementID = MODULE_LOADER_VIEW_ID_TEMPLATE({
+				'numLoaded': newModule.context.stats.numLoaded,
+			});
+
+			// Attach to the .ready event of the element just created.
+			// Element must already be added because we use jquery to search for
+			// the element's ID to attach to the "ready" event.
+			$(elementID).ready(function() {
+				defered.resolve(newModule);
+				self.emit(eventList.VIEW_READY, {
+					'name': newModule.name,
+					'id': elementID,
+					'data': newModule,
 				});
-				$(elementID).ready(function() {
-					defered.resolve(newModule);
-					self.emit(eventList.VIEW_READY, {
-						'name': newModule.name,
-						'id': elementID,
-						'data': newModule,
-					});
-				});
-			}
-		});
+			});
+		}
 		return defered.promise;
 	};
 	var updateStatistics = function(newModule) {
@@ -255,7 +242,8 @@ function createModuleLoader() {
 			'html': [],
 		};
 		moduleData.context = {
-			'stats': self.stats
+			'stats': self.stats,
+			'staticFiles': static_files.getDir()
 		};
 		moduleData.outputLocation = {
 			'css': $('#' + MODULE_LOADER_CSS_DESTINATION_ID),

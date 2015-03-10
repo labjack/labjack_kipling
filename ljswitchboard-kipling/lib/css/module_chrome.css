@@ -54,6 +54,9 @@
     margin-left: 3px;
 }
 
+.body-tab {
+    display:none;
+}
 
 
 .module-list li {
