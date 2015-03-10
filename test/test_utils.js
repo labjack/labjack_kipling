@@ -25,6 +25,13 @@ var FRAMEWORK_ADDITIONS = {
 
 var unfinishedModules = ['device_selector', 'settings'];
 var loadedFiles = {};
+exports.getLoadedFiles = function() {
+	return loadedFiles;
+};
+exports.clearLoadedFiles = function() {
+	loadedFiles = {};
+};
+
 var checkLoadedFiles = function(test, fileObj) {
 	var fileObjkeys = Object.keys(fileObj);
 	var expectedKeys = ['fileName', 'filePath', 'fileData', 'lintResult'];
@@ -209,20 +216,109 @@ var checkLoadedModuleData = function(test, moduleData) {
 };
 exports.checkLoadedModuleData = checkLoadedModuleData;
 
+var printQueue = [];
+var delayPrint = function() {
+	var str = '';
+	var i;
+	for(i = 0; i < arguments.length; i++) {
+		str += JSON.stringify(arguments[i]);
+		str += ' ';
+		str = str.split('"').join('');
+		str = str.split('\\t').join('');
+		// str = str.replace('"', '');
+	}
+	printQueue.push(str);
+	// console.log(str);
+};
+var flushPrintQueue = function() {
+	var i;
+	for(i = 0; i < printQueue.length; i++) {
+		console.log(printQueue[i]);
+	}
+	printQueue = [];
+};
 var printLintError = function(lintResult) {
-	console.log(
+	delayPrint(
 		'Num:', lintResult.messages.length,
 		'Error:', lintResult.isError,
 		'Warning:', lintResult.isWarning
 	);
 	lintResult.messages.forEach(function(message, i) {
-		var str = i.toString() + '. ';
-		str += '(' + message.type +'): ' + message.message + '\r\n   ';
-		str += '(line: '+message.location.line+', char: ';
-		str += message.location.character+'): ';
-		str += message.evidence;
-		console.log(str);
+		var strA = i.toString() + '. ';
+		strA += '(' + message.type +'): ' + message.message;
+		var strB = '   ';
+		strB += '(line: '+message.location.line+', char: ';
+		strB += message.location.character+'): ';
+		strB += message.evidence;
+		delayPrint(strA);
+		delayPrint(strB);
 	});
 };
 exports.printLintError = printLintError;
+
+var getCheckForLintErrors = function(printWarnings) {
+	var checkForLintErrors = function(test) {
+		var loadedFileKeys = Object.keys(loadedFiles);
+		delayPrint('aa', 'ab');
+		delayPrint('');
+		delayPrint('Num Checked Files', loadedFileKeys.length);
+		var numLintedFiles = 0;
+		var warnings = [];
+		var errors = [];
+		loadedFileKeys.forEach(function(loadedFileKey) {
+			var loadedFile = loadedFiles[loadedFileKey];
+			if(loadedFile.lintResult) {
+				numLintedFiles += 1;
+				if(loadedFile.lintResult.isWarning) {
+					warnings.push(loadedFile);
+				}
+				if(loadedFile.lintResult.isError) {
+					errors.push(loadedFile);
+				}
+
+				if(!loadedFile.lintResult.overallResult) {
+					delayPrint(
+						'-------------------',
+						'Lint Error Detected: ' + loadedFile.fileName,
+						'-------------------'
+					);
+					delayPrint(loadedFile.fileName);
+					delayPrint(loadedFile.filePath);
+					printLintError(loadedFile.lintResult);
+					delayPrint('');
+				}
+				if(loadedFile.lintResult.isWarning && printWarnings) {
+					delayPrint(
+						'-------------------',
+						'Lint Warning Detected: ' + loadedFile.fileName,
+						'-------------------'
+					);
+					delayPrint(loadedFile.fileName);
+					delayPrint(loadedFile.filePath);
+					printLintError(loadedFile.lintResult);
+					delayPrint('');
+				}
+			}
+		});
+
+		delayPrint(' - Number of linted files', numLintedFiles);
+		delayPrint(' - Number of warnings', warnings.length);
+		delayPrint(' - Number of errors', errors.length);
+		delayPrint('');
+		var printLintResults = false;
+		if(warnings.length > 0) {
+			printLintResults = true;
+		}
+		if(errors.length > 0) {
+			printLintResults = true;
+		}
+		if(printLintResults) {
+			flushPrintQueue();
+		}
+		
+		test.done();
+	};
+	return checkForLintErrors;
+};
+exports.getCheckForLintErrors = getCheckForLintErrors;
 

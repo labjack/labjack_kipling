@@ -21,7 +21,7 @@ var testDir = 'test_persistent_data_dir';
 var testPath = path.normalize(path.join(cwd, testDir));
 var testPersistentDataFilePath = testPath;
 // disable module linting.
-module_manager.disableLinting();
+// module_manager.disableLinting();
 
 // Configure the persistent data directory
 module_manager.configurePersistentDataPath(testPersistentDataFilePath);
@@ -121,115 +121,77 @@ var tests = {
 			});
 		});
 	},
-	// 'loadAllModulesByName': function(test) {
-	// 	loadTimes.byName = {
-	// 		'start': new Date(),
-	// 		'end': null,
-	// 		'duration': null
-	// 	};
-	// 	var promises = [];
-	// 	var loadModule = function(moduleName) {
-	// 		var defered = q.defer();
-	// 		module_manager.loadModuleDataByName(moduleName)
-	// 		.then(function(moduleData) {
-	// 			checkLoadedModuleData(test, moduleData);
-	// 			defered.resolve();
-	// 		});
-	// 		return defered.promise;
-	// 	};
-	// 	moduleNames.forEach(function(moduleName) {
-	// 		promises.push(loadModule(moduleName));
-	// 	});
+	'loadAllModulesByName': function(test) {
+		loadTimes.byName = {
+			'start': new Date(),
+			'end': null,
+			'duration': null
+		};
+		var promises = [];
+		var loadModule = function(moduleName) {
+			var defered = q.defer();
+			module_manager.loadModuleDataByName(moduleName)
+			.then(function(moduleData) {
+				checkLoadedModuleData(test, moduleData);
+				defered.resolve();
+			});
+			return defered.promise;
+		};
+		moduleNames.forEach(function(moduleName) {
+			promises.push(loadModule(moduleName));
+		});
 
-	// 	q.allSettled(promises)
-	// 	.then(function(collectedData) {
-	// 		test.ok(true, 'test finished');
-	// 		loadTimes.byName.end = new Date();
-	// 		loadTimes.byName.duration = loadTimes.byName.end - loadTimes.byName.start;
-	// 		test.done();
-	// 	}, function(err) {
-	// 		test.ok(false, 'test failed');
-	// 		test.done();
-	// 	});
-	// },
-	// 'loadAllModulesByObject': function(test) {
-	// 	loadTimes.byObject = {
-	// 		'start': new Date(),
-	// 		'end': null,
-	// 		'duration': null
-	// 	};
-	// 	var promises = [];
-	// 	var loadModule = function(moduleObj) {
-	// 		var defered = q.defer();
-	// 		module_manager.loadModuleData(moduleObj)
-	// 		.then(function(moduleData) {
-	// 			checkLoadedModuleData(test, moduleData);
-	// 			defered.resolve();
-	// 		});
-	// 		return defered.promise;
-	// 	};
-	// 	var moduleKeys = Object.keys(savedModules);
-	// 	moduleKeys.forEach(function(moduleKey) {
-	// 		promises.push(loadModule(savedModules[moduleKey]));
-	// 	});
+		q.allSettled(promises)
+		.then(function(collectedData) {
+			test.ok(true, 'test finished');
+			loadTimes.byName.end = new Date();
+			loadTimes.byName.duration = loadTimes.byName.end - loadTimes.byName.start;
+			test.done();
+		}, function(err) {
+			test.ok(false, 'test failed');
+			test.done();
+		});
+	},
+	'loadAllModulesByObject': function(test) {
+		loadTimes.byObject = {
+			'start': new Date(),
+			'end': null,
+			'duration': null
+		};
+		var promises = [];
+		var loadModule = function(moduleObj) {
+			var defered = q.defer();
+			module_manager.loadModuleData(moduleObj)
+			.then(function(moduleData) {
+				checkLoadedModuleData(test, moduleData);
+				defered.resolve();
+			});
+			return defered.promise;
+		};
+		var moduleKeys = Object.keys(savedModules);
+		moduleKeys.forEach(function(moduleKey) {
+			promises.push(loadModule(savedModules[moduleKey]));
+		});
 
-	// 	q.allSettled(promises)
-	// 	.then(function(collectedData) {
-	// 		test.ok(true, 'test finished');
-	// 		loadTimes.byObject.end = new Date();
-	// 		loadTimes.byObject.duration = loadTimes.byObject.end - loadTimes.byObject.start;
-	// 		test.done();
-	// 	}, function(err) {
-	// 		test.ok(false, 'test failed');
-	// 		test.done();
-	// 	});
-	// },
-	// 'check cached files': function(test) {
-	// 	var cachedFiles = module_manager.getFileCache();
-	// 	var cachedFileKeys = Object.keys(cachedFiles);
-	// 	console.log('Number of cached files', cachedFileKeys.length);
-	// 	console.log(JSON.stringify(loadTimes, null, 2));
-	// 	test.done();
-	// },
-	// 'check for lint errors': function(test) {
-	// 	var loadedFileKeys = Object.keys(loadedFiles);
-	// 	console.log('');
-	// 	console.log('Num Checked Files', loadedFileKeys.length);
-	// 	console.log('');
-	// 	var numLintedFiles = 0;
-	// 	var warnings = [];
-	// 	var errors = [];
-	// 	loadedFileKeys.forEach(function(loadedFileKey) {
-	// 		var loadedFile = loadedFiles[loadedFileKey];
-	// 		if(loadedFile.lintResult) {
-	// 			numLintedFiles += 1;
-	// 			if(loadedFile.lintResult.isWarning) {
-	// 				warnings.push(loadedFile);
-	// 			}
-	// 			if(loadedFile.lintResult.isError) {
-	// 				errors.push(loadedFile);
-	// 			}
-
-	// 			if(!loadedFile.lintResult.overallResult) {
-	// 				console.log(
-	// 					'-------------------',
-	// 					'Lint Error Detected: ' + loadedFile.fileName,
-	// 					'-------------------'
-	// 				);
-	// 				console.log(loadedFile.fileName);
-	// 				console.log(loadedFile.filePath);
-	// 				printLintError(loadedFile.lintResult);
-	// 				console.log('');
-	// 			}
-	// 		}
-	// 	});
-
-	// 	console.log('Number of linted files', numLintedFiles);
-	// 	console.log('Number of warnings', warnings.length);
-	// 	console.log('Number of errors', errors.length);
-
-	// 	test.done();
-	// },
+		q.allSettled(promises)
+		.then(function(collectedData) {
+			test.ok(true, 'test finished');
+			loadTimes.byObject.end = new Date();
+			loadTimes.byObject.duration = loadTimes.byObject.end - loadTimes.byObject.start;
+			test.done();
+		}, function(err) {
+			test.ok(false, 'test failed');
+			test.done();
+		});
+	},
+	'check cached files': function(test) {
+		var cachedFiles = module_manager.getFileCache();
+		var cachedFileKeys = Object.keys(cachedFiles);
+		console.log('Number of cached files', cachedFileKeys.length);
+		console.log(JSON.stringify(loadTimes, null, 2));
+		test.done();
+	},
+	'check for lint errors': test_utils.getCheckForLintErrors(false),
 	'clearPersistentTestData - final': clearPersistentTestData,
 };
 

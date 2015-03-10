@@ -1,0 +1,58 @@
+<div id="device-scanner-device-listing">
+    {{#device_types}}
+    <div class="device-pane-section device-type DEVICE_TYPE_{{deviceTypeName}}">
+        <div class="device-pane-popover">
+            <div class="arrow"></div>
+            <div class="label">{{deviceTypeName}}</div>
+        </div>
+        <div class="devices-enumeration-scroller">
+            <div class="well {{size}}">
+                {{#devices}}
+                <table class="device SERIAL_NUMBER_{{serialNumber}}"><tr>
+                    <td id="image"><img src="{{../../staticFiles}}img/devices/{{productType}}.png"></td>
+                    <td class="connection-buttons-holder">
+                        <div class="disconnect_buttons_class {{disconnect_buttons_class}}">
+                            <div class="connection-button-holder"><button class="btn btn-danger disconnect-button" id="{{serial}}-disconnect">
+                                Disconnect
+                            </button></div>
+                            <div class="current-connection-indicator"></div>
+                        </div>
+                        <div class="connect_buttons_class {{connect_buttons_class}}">
+                            {{#connectionTypes}}
+                            <div class="connection-button-holder"><button
+                                id="{{dt}}-{{../serialNumber}}-{{ipSafe}}-{{name}}-{{ct}}-{{../deviceType}}"
+                                class="btn {{button_class}} connect-button CONNECTION_TYPE_{{name}}"
+                                title="{{button_title}}"
+                                {{button_state}}
+                                >{{name}}</button></div>
+                            {{/connectionTypes}}
+                        </div>
+                    </td>
+                    <td id="info-holder">
+                        <div id="info">
+                            <table>
+                                <tbody>
+                                    <tr><td class="device-attribute-label">Model</td><td id="type" class="device-attribute-value selectableText">{{modelType}}</td></tr>
+                                    <tr><td class="device-attribute-label">Serial</td><td id="serial" class="device-attribute-value selectableText">{{serialNumber}}</td></tr>
+                                    <tr><td class="device-attribute-label">Name</td><td id="name" class="device-attribute-value selectableText">{{DEVICE_NAME_DEFAULT.res}}</td></tr>
+                                    
+                                    {{#if ETHERNET_IP}}
+                                    <tr><td class="device-attribute-label">Eth. IP</td><td id="ethernet-ip-address" class="device-attribute-value selectableText">{{#if ETHERNET_IP.isReal}}{{ETHERNET_IP.str}}{{else}}Not Connected{{/if}}</td></tr>
+                                    {{/if}}
+
+                                    {{#if WIFI_IP}}{{#if HARDWARE_INSTALLED.wifi}}
+                                    <tr><td class="device-attribute-label">WiFi IP</td><td id="wifi-ip-address" class="device-attribute-value"><span class="wifiIPAddressText selectableText">{{#if WIFI_STATUS.isConnected}}{{WIFI_IP.str}}{{else}}{{WIFI_STATUS.str}}{{/if}}</span>
+                                        {{{../../wifiImage}}}</td></tr>
+                                    {{/if}}{{/if}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr></table>
+                {{/devices}}
+            </div>
+        </div>
+    </div>
+    {{/device_types}}
+    {{!--<pre>{{printContext}}</pre>--}}
+</div>

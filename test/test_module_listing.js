@@ -13,7 +13,8 @@ var testModuleCategoryResult = function(test, modules) {
 		var requiredKeys = [
 			'name',
 			'humanName',
-			'data'
+			'data',
+			'category',
 		];
 		requiredKeys.forEach(function(requiredKey) {
 			var exists = false;
