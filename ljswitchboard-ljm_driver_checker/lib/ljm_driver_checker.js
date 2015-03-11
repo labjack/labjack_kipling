@@ -149,18 +149,18 @@ var requirements = {
         },
         'linux': {
             'ia32': [
-                '/usr/local/share/LabJack/LJM/ljm_constants'
+                '/usr/local/share/LabJack/LJM/ljm_constants.json'
             ],
             'x64': [
-                '/usr/local/share/LabJack/LJM/ljm_constants'
+                '/usr/local/share/LabJack/LJM/ljm_constants.json'
             ]
         },
         'darwin': {
             'ia32': [
-                '/usr/local/share/LabJack/LJM/ljm_constants'
+                '/usr/local/share/LabJack/LJM/ljm_constants.json'
             ],
             'x64': [
-                '/usr/local/share/LabJack/LJM/ljm_constants'
+                '/usr/local/share/LabJack/LJM/ljm_constants.json'
             ]
         }
     },
