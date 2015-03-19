@@ -50,8 +50,7 @@ function device(useMockDevice) {
 		defered.resolve(self.deviceErrors);
 		return defered.promise;
 	};
-	this.getLatestDeviceErrors = function() {
-		var defered = q.defer();
+	this.getLatestDeviceErrorsSync = function() {
 		var errors = [];
 		var i;
 		var maxNum = self.numLatestErrors;
@@ -70,9 +69,14 @@ function device(useMockDevice) {
 			'numErrors': numErrors,
 			'errors': errors,
 		};
-		defered.resolve(data);
+		return data;
+	};
+	this.getLatestDeviceErrors = function() {
+		var defered = q.defer();
+		defered.resolve(self.getLatestDeviceErrorsSync());
 		return defered.promise;
 	};
+
 	this.clearDeviceErrors = function() {
 		var defered = q.defer();
 		self.deviceErrors = [];
@@ -173,6 +177,9 @@ function device(useMockDevice) {
 			self.deviceErrors.pop();
 			self.deviceErrors.unshift(errData);
 		}
+
+		// Report that a new error has occured.
+		self.emit(DEVICE_ERROR, errData);
 	};
 	var innerSaveDeviceError = function(funcName, err, data) {
 		var jsonData = modbusMap.getErrorInfo(err);
@@ -485,14 +492,7 @@ function device(useMockDevice) {
 	};
 	this.getDeviceAttributes = function() {
 		var defered = q.defer();
-		var retData = {};
-		var keys = Object.keys(self.savedAttributes);
-		keys.forEach(function(key) {
-			retData[key] = self.savedAttributes[key];
-		});
-		retData.deviceErrors = self.deviceErrors;
-		
-		defered.resolve(retData);
+		defered.resolve(self.savedAttributes);
 		return defered.promise;
 	};
 	this.readRaw = function(data) {
