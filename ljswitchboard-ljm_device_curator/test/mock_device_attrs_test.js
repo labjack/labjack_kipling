@@ -78,6 +78,7 @@ exports.tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 			test.strictEqual(res.deviceType, 7);
+			test.strictEqual(res.deviceTypeName, 'T7');
 			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
 			test.strictEqual(res.connectionType, 1);
 			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');

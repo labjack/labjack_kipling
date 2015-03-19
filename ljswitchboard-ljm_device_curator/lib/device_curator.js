@@ -23,6 +23,7 @@ var device_events = driver_const.device_curator_constants;
 
 var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
 var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;
+var DEVICE_ERROR = device_events.DEVICE_ERROR;
 
 
 
@@ -39,6 +40,45 @@ function device(useMockDevice) {
 	var ljmDevice;
 	this.isMockDevice = false;
 	this.allowReconnectManager = false;
+
+	this.deviceErrors = [];
+	this.maxNumErrors = 20;
+	this.numLatestErrors = 5;
+
+	this.getDeviceErrors = function() {
+		var defered = q.defer();
+		defered.resolve(self.deviceErrors);
+		return defered.promise;
+	};
+	this.getLatestDeviceErrors = function() {
+		var defered = q.defer();
+		var errors = [];
+		var i;
+		var maxNum = self.numLatestErrors;
+		var numErrors = self.deviceErrors.length;
+		if(numErrors < maxNum) {
+			for(i = 0; i < numErrors; i++) {
+				errors.push(self.deviceErrors[i]);
+			}
+		} else {
+			for(i = 0; i < maxNum; i++) {
+				errors.push(self.deviceErrors[i]);
+			}
+		}
+		
+		var data = {
+			'numErrors': numErrors,
+			'errors': errors,
+		};
+		defered.resolve(data);
+		return defered.promise;
+	};
+	this.clearDeviceErrors = function() {
+		var defered = q.defer();
+		self.deviceErrors = [];
+		defered.resolve();
+		return defered.promise;
+	};
 
 	if(useMockDevice) {
 		ljmMockDevice = require('./mocks/device_mock');
@@ -79,7 +119,7 @@ function device(useMockDevice) {
 		ljmDevice.read(
 			'PRODUCT_ID',
 			function(err) {
-				captureDeviceError('read', err);
+				captureDeviceError('reconnecting', err, {'address': 'PRODUCT_ID'});
 				refreshDefered.reject(err);
 			},
 			refreshDefered.resolve
@@ -100,8 +140,76 @@ function device(useMockDevice) {
 			}
 		}
 	};
+	var capitalizeString = function(s) {
+		return s.replace( /(^|\s)([a-z])/g , function(m,p1,p2){
+			return p1+p2.toUpperCase();
+		});
+	};
+	var filterErrorStringText = function(s) {
+		if(s !== 'LJME') {
+			return s.toLowerCase();
+		} else {
+			return s;
+		}
+	};
+	var transformErrorString = function(s) {
+		try {
+			return capitalizeString(
+				s.split('_')
+				.map(filterErrorStringText)
+				.join(' ')
+			);
+		} catch(err) {
+			return s.toString();
+		}
+	};
 
-	var captureDeviceError = function(funcName, err) {
+
+	var appendDeviceError = function(errData) {
+		if(self.deviceErrors.length < self.maxNumErrors) {
+			// Insert error into the top of the array
+			self.deviceErrors.unshift(errData);
+		} else {
+			self.deviceErrors.pop();
+			self.deviceErrors.unshift(errData);
+		}
+	};
+	var innerSaveDeviceError = function(funcName, err, data) {
+		var jsonData = modbusMap.getErrorInfo(err);
+		if(isNaN(err)){
+			err = -1;
+		}
+		var errorData = {
+			'code': err,
+			'string': jsonData.string,
+			'name': transformErrorString(jsonData.string),
+			'operation': funcName,
+			'data': data,
+		};
+		// console.log('Info', errorData);
+
+		appendDeviceError(errorData);
+	};
+	var saveDeviceError = function(funcName, err, data) {
+		if(funcName === 'reconnecting') {
+			var addReconnectingError = true;
+			var i;
+			var num = self.deviceErrors.length;
+			for(i = 0; i < num; i++) {
+				if(self.deviceErrors[i].operation === 'reconnecting') {
+					addReconnectingError = false;
+					break;
+				}
+			}
+
+			if(addReconnectingError) {
+				innerSaveDeviceError(funcName, err, data);
+			}
+		} else {
+			innerSaveDeviceError(funcName, err, data);
+		}
+	};
+	var captureDeviceError = function(funcName, err, data) {
 		// console.log('device_curator error detected', funcName, err);
 		var errCode;
 		if(isNaN(err)) {
@@ -118,6 +226,7 @@ function device(useMockDevice) {
 				setImmediate(reconnectManager);
 			}
 		}
+		saveDeviceError(funcName, err, data);
 	};
 
 	this.savedAttributes = {};
@@ -235,6 +344,7 @@ function device(useMockDevice) {
 	var saveAndLoadAttributes = function(openParameters) {
 		var saveAndLoad = function() {
 			var defered = q.defer();
+			self.deviceErrors = [];
 			self.savedAttributes = {};
 			self.savedAttributes.isMockDevice = self.isMockDevice;
 			self.savedAttributes.isConnected = true;
@@ -362,7 +472,7 @@ function device(useMockDevice) {
 		if(allowExecution()) {
 			ljmDevice.getHandleInfo(
 			function(err) {
-				captureDeviceError('getHandleInfo', err);
+				captureDeviceError('getHandleInfo', err, {});
 				defered.reject(err);
 			}, defered.resolve);
 		} else {
@@ -384,7 +494,7 @@ function device(useMockDevice) {
 			ljmDevice.readRaw(
 				data,
 				function(err) {
-					captureDeviceError('readRaw', err);
+					captureDeviceError('readRaw', err, {'data': data});
 					defered.reject(err);
 				},
 				defered.resolve
@@ -402,7 +512,7 @@ function device(useMockDevice) {
 			ljmDevice.read(
 				address,
 				function(err) {
-					captureDeviceError('read', err);
+					captureDeviceError('read', err, {'address': address});
 					defered.reject(err);
 				},
 				defered.resolve
@@ -485,7 +595,7 @@ function device(useMockDevice) {
 			ljmDevice.readMany(
 				addresses,
 				function(err) {
-					captureDeviceError('readMany', err);
+					captureDeviceError('readMany', err, {'addresses': addresses});
 					defered.reject(err);
 				},
 				defered.resolve
@@ -506,7 +616,7 @@ function device(useMockDevice) {
 			ljmDevice.writeRaw(
 				data,
 				function(err) {
-					captureDeviceError('writeRaw', err);
+					captureDeviceError('writeRaw', err, {'data': data});
 					defered.reject(err);
 				},
 				defered.resolve
@@ -525,7 +635,9 @@ function device(useMockDevice) {
 				address,
 				value,
 				function(err) {
-					captureDeviceError('write', err);
+					captureDeviceError('write', err, {
+						'address': address, 'value': value
+					});
 					defered.reject(err);
 				},
 				defered.resolve
@@ -544,7 +656,9 @@ function device(useMockDevice) {
 			addresses,
 			values,
 			function(err) {
-				captureDeviceError('writeMany', err);
+				captureDeviceError('writeMany', err, {
+					'addresseses': addresseses, 'values': values
+				});
 				defered.reject(err);
 			},
 			defered.resolve
@@ -618,7 +732,7 @@ function device(useMockDevice) {
 			ljmDevice.readUINT64(
 				type,
 				function(err) {
-					captureDeviceError('readUINT64', err);
+					captureDeviceError('readUINT64', err, {'type': type});
 					defered.reject(err);
 				},
 				defered.resolve
@@ -638,7 +752,11 @@ function device(useMockDevice) {
 				scanList,
 				scanRate,
 				function(err) {
-					captureDeviceError('streamStart', err);
+					captureDeviceError('streamStart', err, {
+						'scansPerRead': scansPerRead, 
+						'scanList': scanList,
+						'scanRate': scanRate,
+					});
 					defered.reject(err);
 				},
 				defered.resolve
@@ -710,7 +828,7 @@ function device(useMockDevice) {
 		if(allowExecution()) {
 			ljmDevice.streamRead(
 				function(err) {
-					captureDeviceError('streamRead', err);
+					captureDeviceError('streamRead', err, {});
 					defered.reject(err);
 				},
 				function(data) {
@@ -734,7 +852,7 @@ function device(useMockDevice) {
 		if(allowExecution()) {
 			ljmDevice.streamRead(
 				function(err) {
-					captureDeviceError('streamReadRaw', err);
+					captureDeviceError('streamReadRaw', err, {});
 					defered.reject(err);
 				},
 				defered.resolve
@@ -751,7 +869,7 @@ function device(useMockDevice) {
 		if(allowExecution()) {
 			ljmDevice.streamStop(
 				function(err) {
-					captureDeviceError('streamStop', err);
+					captureDeviceError('streamStop', err, {});
 					defered.reject(err);
 				},
 				defered.resolve
@@ -803,7 +921,10 @@ function device(useMockDevice) {
 				unsavedDefaults[addr] = val;
 			}
 		} catch(err) {
-			console.error('Dev_curator checkSingleAddressForDefaults', err, address, info);
+			// console.error(
+			// 	'Dev_curator checkSingleAddressForDefaults',
+			// 	err, address, info
+			// );
 		}
 	};
 
@@ -820,7 +941,10 @@ function device(useMockDevice) {
 				}
 			}
 		} catch(err) {
-			console.error('Dev_curator checkMultipleAddressesForDefaults', err);
+			// console.error(
+			// 	'Dev_curator checkMultipleAddressesForDefaults',
+			// 	err
+			// );
 		}
 	};
 	var checkRWManyForDefaults = function(addresses, directions, numValues, values) {

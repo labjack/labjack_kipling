@@ -84,6 +84,21 @@ var device_tests = {
 		};
 		connectToDevice();
 	},
+	'test failed writeMultiple invalid address': function(test) {
+		var results = [];
+		qExec(device, 'writeMultiple', ['DAC0A'], [1.0])(results)
+		.then(function(res) {
+			res.forEach(function(r) {
+				r.retData.forEach(function(ret) {
+					test.deepEqual(
+						ret,
+						{'address': 'DAC0A', 'isErr': true, 'data': 'Invalid Address'}
+					);
+				});
+			});
+			test.done();
+		});
+	},
 	'disconnect device': function(test) {
 		var reportedToCmd = false;
 		var disconnectDevice = function() {
@@ -188,7 +203,7 @@ var device_tests = {
 			res.forEach(function(r) {
 				r.retData.forEach(function(ret) {
 					test.deepEqual(
-						ret, 
+						ret,
 						{'address': 'DAC0', 'isErr': true, 'data': driver_const.LJN_DEVICE_NOT_CONNECTED}
 					);
 				});
@@ -222,6 +237,29 @@ var device_tests = {
 			});
 		};
 		waitForReconnect();
+	},
+	'get latest device errors': function(test) {
+		device.getLatestDeviceErrors()
+		.then(function(data) {
+			// console.log('Error Data', data);
+			var expNumErrors = 3;
+			var expLengthErrors = 3;
+			test.strictEqual(data.numErrors, expNumErrors, 'Unexpected number of errors');
+			test.strictEqual(data.errors.length, expLengthErrors, 'Unexpected number of errors');
+			test.done();
+		});
+	},
+	'clear device errors': function(test) {
+		device.clearDeviceErrors()
+		.then(device.getLatestDeviceErrors)
+		.then(function(data) {
+			// console.log('Error Data', data);
+			var expNumErrors = 0;
+			var expLengthErrors = 0;
+			test.strictEqual(data.numErrors, expNumErrors, 'Unexpected number of errors');
+			test.strictEqual(data.errors.length, expLengthErrors, 'Unexpected number of errors');
+			test.done();
+		});
 	},
 	'closeDevice': function(test) {
 		device.close()
