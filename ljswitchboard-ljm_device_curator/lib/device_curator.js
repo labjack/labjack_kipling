@@ -485,7 +485,14 @@ function device(useMockDevice) {
 	};
 	this.getDeviceAttributes = function() {
 		var defered = q.defer();
-		defered.resolve(self.savedAttributes);
+		var retData = {};
+		var keys = Object.keys(self.savedAttributes);
+		keys.forEach(function(key) {
+			retData[key] = self.savedAttributes[key];
+		});
+		retData.deviceErrors = self.deviceErrors;
+		
+		defered.resolve(retData);
 		return defered.promise;
 	};
 	this.readRaw = function(data) {
