@@ -2,3 +2,31 @@
 
 .bs-callout-success {border-left-color: #3c763d;}
 .bs-callout-success h4 {color: #3c763d;}
+
+button, input[type=button], input[type=reset], input[type=submit] {background-clip: border-box;}
+
+.badge {
+    padding-right:9px;
+    padding-left:9px;
+    border-radius:9px;
+}
+
+.list-group {
+	margin-bottom:10px;
+}
+.list-group-item {
+
+}
+.list-group-item:last-child {
+	margin-bottom:2px;
+	 border-bottom-right-radius:0;
+	 border-bottom-left-radius:0;
+}
+.list-group-item:first-child {
+	border-top-left-radius:0;
+	border-top-right-radius:0;
+}
+.expand-right .dropdown-menu {
+    right:0;
+    left:auto;
+}

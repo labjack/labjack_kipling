@@ -10,6 +10,12 @@ var resolveLink = function(link) {
 	var resolvedLink = path.normalize(path.join(cwd, link));
 	return resolvedLink;
 };
+var getDir = function() {
+	var cwd = path.join(path.dirname(module.filename), '..', 'static');
+
+	// force path to be a url/unix style path.
+	return cwd.split('\\').join('/') + '/';
+};
 
 var resolveLinks = function(links) {
 	var resolvedLinks = [];
@@ -27,7 +33,11 @@ Created this function w/ the help of:
 2. http://www.sitepoint.com/dynamically-load-jquery-library-javascript/
     Aided in detectecting when a script is loaded.
 **/
-var loadjscssfile = function(doc, filename, filetype){
+var loadjscssfile = function(doc, filename, filetype, documentlocation){
+	var location = 'head';
+	if(documentlocation) {
+		location = documentlocation;
+	}
 	var defered = q.defer();
 	var fileref;
 	if (filetype === '.js'){
@@ -61,12 +71,12 @@ var loadjscssfile = function(doc, filename, filetype){
 		defered.resolve();
 	}
 	if (typeof(fileref) !== 'undefined') {
-		doc.getElementsByTagName('head')[0].appendChild(fileref);
+		doc.getElementsByTagName(location)[0].appendChild(fileref);
 	}
 	return defered.promise;
 };
 
-var getLoadResouce = function(doc, resourceLink, isLocal) {
+var getLoadResouce = function(doc, resourceLink, isLocal, location) {
 	var loadResource = function(results) {
 		// console.log('Loading...', resourceLink, typeof(jQuery));
 		var defered = q.defer();
@@ -77,14 +87,14 @@ var getLoadResouce = function(doc, resourceLink, isLocal) {
 			link = resolveLink(resourceLink);
 		}
 		var filetype = path.extname(resourceLink);
-		loadjscssfile(doc, link, filetype)
+		loadjscssfile(doc, link, filetype, location)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
 	return loadResource;
 };
 // Asynchronously load a list of resources
-var loadResources = function(doc, resources, isLocal) {
+var loadResources = function(doc, resources, isLocal, location) {
 	var defered = q.defer();
 	var loadingOps = [];
 	resources.forEach(function(resource) {
@@ -112,4 +122,6 @@ var loadResources = function(doc, resources, isLocal) {
 
 exports.resolveLink = resolveLink;
 exports.resolveLinks = resolveLinks;
+exports.getDir = getDir;
+exports.getLoadResouce = getLoadResouce;
 exports.loadResources = loadResources;

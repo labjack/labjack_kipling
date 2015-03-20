@@ -3,7 +3,7 @@
 }
 html {
     background-image:url('../img/background.png');
-    min-width: 500px;
+    /*min-width: 500px;*/
 }
 
 body {
@@ -64,6 +64,16 @@ p, h1, h2, h3 {
     padding: 20px;
     z-index: 1;
 }
+
+#module-chrome-header .alert-holder {
+    position:absolute;
+    right:10px;
+    left:0;    
+}
+#module-chrome-header .alert-holder .alert{
+    margin-bottom:0;   
+}
+
 
 /* Some basic text & background coloring classes */
 .isa_info {
