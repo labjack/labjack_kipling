@@ -7,7 +7,6 @@
 var ref = require('ref');// http://tootallnate.github.io/ref/#types-double
 var util = require('util');
 var driverLib = require('./driver_wrapper');
-var ffi = require('ffi');
 
 var jsonConstants = require('ljswitchboard-modbus_map');
 var driver_const = require('ljswitchboard-ljm_driver_constants');

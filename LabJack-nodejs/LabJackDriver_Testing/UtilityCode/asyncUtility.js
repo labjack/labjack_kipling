@@ -97,7 +97,7 @@ var runTest = function() {
 		testComplete = true;
 		onTestSuccess({'time':runTime});
 	}
-}
+};
 
 exports.run = function(testList, onE, onS, printResults, printCommands) {
 	numTests = testList.length

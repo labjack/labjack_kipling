@@ -10,7 +10,7 @@ var driverLib = require('./driver_wrapper');
 
 var jsonConstants = require('ljswitchboard-modbus_map');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
-var ffi = require('ffi');//
+
 
 var LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = driver_const.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
 

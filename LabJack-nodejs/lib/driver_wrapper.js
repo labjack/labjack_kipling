@@ -4,7 +4,13 @@
  * @author Chris Johnson (chrisjohn404, LabJack Corp.)
  */
 
-var ffi = require('ffi');       //load _______ module 
+var ffi;
+try {
+    ffi = require('ffi');       //load _______ module
+} catch(err) {
+    ffi = require('ffi-io');
+}
+
 var ref = require('ref');       //Load variable type module
 var fs = require('fs');         //Load File System module
 var jsonConstants = require('ljswitchboard-modbus_map');
