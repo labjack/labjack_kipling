@@ -1,5 +1,5 @@
 
-
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var ljm_device = require('./ljm_device');
 
@@ -23,5 +23,6 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 	};
 	var self = this;
 }
+util.inherits(createDevice, EventEmitter);
 
 exports.createDevice = createDevice;

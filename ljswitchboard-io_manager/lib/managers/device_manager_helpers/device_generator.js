@@ -57,7 +57,8 @@ function newDevice(newProcess, mockDevice, mockDeviceConfig, sendFunc) {
 				performOpenDevice()
 				.then(defered.resolve, defered.reject);
 			}
-			
+			console.log('HERERE');
+			send('Bla Bla Bla');
 		}
 		return defered.promise;
 	};

@@ -1,4 +1,7 @@
 
+
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var q = require('q');
 
 function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDeviceFunc) {
@@ -31,6 +34,16 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 		return self.deviceCallFunc(self.device_comm_key, func, args);
 	};
 
+	this.getDeviceErrors = function() {
+		return self.callFunc('getDeviceErrors');
+	};
+	this.getLatestDeviceErrors = function() {
+		return self.callFunc('getLatestDeviceErrors');
+	};
+	this.clearDeviceErrors = function() {
+		return self.callFunc('clearDeviceErrors');
+	};
+	
 	this.getHandleInfo = function() {
 		return self.callFunc('getHandleInfo');
 	};
@@ -151,5 +164,6 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 	
 	var self = this;
 }
+util.inherits(createDevice, EventEmitter);
 
 exports.createDevice = createDevice;

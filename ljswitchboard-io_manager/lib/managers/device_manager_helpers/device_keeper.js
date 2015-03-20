@@ -407,6 +407,9 @@ function createDeviceKeeper(io_delegator, link) {
 	 * when each tab in kipling starts to retrieve easy to parse & display data
 	 * about each connected device.
 	 */
+	var appendDeviceErrors = function(data) {
+
+	};
 	this.getDeviceListing = function(reqFilters, requestdAttributes) {
 		var defered = q.defer();
 		var listing = [];
@@ -436,9 +439,11 @@ function createDeviceKeeper(io_delegator, link) {
 				'connectionTypeName',
 				'ipAddress',
 				'DEVICE_NAME_DEFAULT',
+				'isConnected',
 				'isSelected-Radio',
 				'isSelected-CheckBox',
-				'device_comm_key'
+				'device_comm_key',
+				'deviceErrors',
 			];
 			if(requestdAttributes) {
 				if(Array.isArray(requestdAttributes)) {
@@ -454,13 +459,19 @@ function createDeviceKeeper(io_delegator, link) {
 			var deviceKeys = Object.keys(self.devices);
 			deviceKeys.forEach(function(deviceKey) {
 				var added = false;
-				var dev = self.devices[deviceKey].device.savedAttributes;
+				var curDevice = self.devices[deviceKey].device;
+				var dev = curDevice.savedAttributes;
 				if(passesDeviceFilters(filters, dev)) {
 					added = true;
 					var devListing = {};
 					attributes.forEach(function(attribute) {
 						if(typeof(dev[attribute]) !== 'undefined') {
 							devListing[attribute] = dev[attribute];
+						} else if(typeof(curDevice[attribute]) !== 'undefined') {
+							devListing[attribute] = curDevice[attribute];
+							if(attribute === 'deviceErrors') {
+								
+							}
 						} else {
 							devListing[attribute] = 'N/A';
 						}
@@ -474,6 +485,41 @@ function createDeviceKeeper(io_delegator, link) {
 			console.log('Error in getDeviceListing', err, err.stack);
 		}
 		
+		return defered.promise;
+	};
+
+	this.selectDevice = function(deviceSerialNumber, type) {
+		var defered = q.defer();
+
+		var selectedType = {
+			'radio': 'Radio',
+			'Radio': 'Radio',
+			'RADIO': 'Radio',
+		}[type];
+		if(selectedType) {
+
+		} else {
+			selectedType = 'Radio';
+		}
+
+		var selectType = 'isSelected-' + selectedType;
+		var deviceKeys = Object.keys(self.devices);
+		var foundDeviceKey;
+		var retData = {};
+
+		deviceKeys.forEach(function(deviceKey) {
+			var attributes = self.devices[deviceKey].device.savedAttributes;
+			var serialNumber = attributes.serialNumber;
+			var newVal;
+			if(serialNumber == deviceSerialNumber) {
+				newVal = true;
+			} else {
+				newVal = false;
+			}
+			self.devices[deviceKey].device.savedAttributes[selectType] = newVal;
+		});
+
+		defered.resolve();
 		return defered.promise;
 	};
 	

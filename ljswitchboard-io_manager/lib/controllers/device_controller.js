@@ -33,6 +33,8 @@ function createDeviceController(io_interface) {
 
 	this.devices = null;
 
+	this.eventList = constants.deviceControllerEvents;
+
 	var callFunc = function(func, args) {
 		return innerCallFunc({
 			'func': func,
@@ -59,6 +61,7 @@ function createDeviceController(io_interface) {
 				self.devices[m.deviceKey].oneWayListener(m.message);
 			}
 		} if(typeof(m.eventName) !== 'undefined') {
+			// console.log('Emitting device_controller event', m.eventName);
 			self.emit(m.eventName, m.data);
 		}else {
 			// self.emit(DEVICE_CONTROLLER_DEVICE_OPENED, newDevice.savedAttributes);
@@ -102,7 +105,7 @@ function createDeviceController(io_interface) {
 	/**
 	 * Return a commonly acquired set of device attributes commonly used to
 	 * generate the header-box of various modules
-	 * 	   isSelected
+	 *     isSelected
 	 *     isActive
 	 *     isLocked
 	 *     serialNumber
@@ -114,9 +117,9 @@ function createDeviceController(io_interface) {
 	 */
 	this.getDeviceListing = function(reqFilters, requestdAttributes) {
 		// var defered = q.defer();
-		return callFunc('getDeviceListing', [reqFilters, requestdAttributes])
+		return callFunc('getDeviceListing', [reqFilters, requestdAttributes]);
 		// .then(function(res) {
-		// 	defered.resolve(res);
+		//  defered.resolve(res);
 		// }, defered.reject);
 		// return defered.promise;
 	};
@@ -191,16 +194,52 @@ function createDeviceController(io_interface) {
 		return defered.promise;
 	};
 
+	this.selectDevice = function(deviceSerialNumber) {
+		// var selectedType = {
+		//  'radio': 'Radio',
+		//  'Radio': 'Radio',
+		//  'RADIO': 'Radio',
+		// }[type];
+		// if(selectedType) {
+
+		// } else {
+		//  selectedType = 'Radio';
+		// }
+		// var selectType = 'isSelected-' + selectedType;
+		var selectType = 'isSelected-Radio';
+		var deviceKeys = Object.keys(self.devices);
+		var foundDeviceKey;
+		var retData = {};
+
+		deviceKeys.forEach(function(deviceKey) {
+			var attributes = self.devices[deviceKey].savedAttributes;
+			var serialNumber = attributes.serialNumber;
+			var newVal;
+			if(serialNumber == deviceSerialNumber) {
+				newVal = true;
+			} else {
+				newVal = false;
+			}
+			self.devices[deviceKey].savedAttributes[selectType] = newVal;
+		});
+		return callFunc('selectDevice', [deviceSerialNumber]);
+	};
+
 	/**
 	 * Get first found active device.
 	 */
 	this.getSelectedDevice = function(options) {
 		var defered = q.defer();
-		options['isSelected-Radio'] = true;
-		self.getDeviceListing(options)
+
+		var filters = {};
+		if(options) {
+			filters = options;
+		}
+		filters['isSelected-Radio'] = true;
+		self.getDeviceListing([filters])
 		.then(getDeviceObject)
 		.then(function(res) {
-			if(res.length > 0) {
+			if(res) {
 				defered.resolve(res);
 			} else {
 				self.getDeviceListing()
@@ -208,6 +247,13 @@ function createDeviceController(io_interface) {
 				.then(function(res) {
 					if(res.length > 0) {
 						// Mark first device as current/active
+						var firstSN = res[0].savedAttributes.serialNumber;
+						self.selectDevice(firstSN)
+						.then(function() {
+							self.getDeviceListing([filters])
+							.then(getDeviceObject)
+							.then(defered.resolve);
+						});
 					} else {
 						// No connected devices
 						defered.resolve([]);
@@ -219,8 +265,13 @@ function createDeviceController(io_interface) {
 	};
 	this.getSelectedDevices = function(options) {
 		var defered = q.defer();
-		options['isSelected-CheckBox'] = true;
-		self.getDeviceListing(options)
+
+		var filters = {};
+		if(options) {
+			filters = options;
+		}
+		filters['isSelected-CheckBox'] = true;
+		self.getDeviceListing([filters])
 		.then(getDeviceObject)
 		.then(function(res) {
 			if(res.length > 0) {
