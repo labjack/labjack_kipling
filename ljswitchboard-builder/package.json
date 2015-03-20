@@ -52,9 +52,12 @@
 	"enableStartupConfig":false,
 	"buildType": "release",
 	"test": true,
+	"testPersistentDataFolderName": "K3_DEV",
+	"performLiveTests": false,
 	"webkit": {
 		"plugin": true
 	},
+	"js-flags": "--expose-gc",
 	"persistentDataFolderName": "K3",
 	"persistentDataVersion": "0.0.1",
 	"forceRefreshOfPersistentData": false

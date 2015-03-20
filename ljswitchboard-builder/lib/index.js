@@ -266,11 +266,20 @@ var initializeProgram = function() {
 
 			// Save to the global scope
 			global.ljswitchboard.labjackFolderPath = lj_folder_path;
-			persistentDataManager = new persistent_data_manager.create(
-				lj_folder_path,
-				gui.App.manifest.persistentDataFolderName,
-				gui.App.manifest.persistentDataVersion
-			);
+			if(gui.App.manifest.test) {
+				persistentDataManager = new persistent_data_manager.create(
+					lj_folder_path,
+					gui.App.manifest.testPersistentDataFolderName,
+					gui.App.manifest.persistentDataVersion
+				);
+			} else {
+				persistentDataManager = new persistent_data_manager.create(
+					lj_folder_path,
+					gui.App.manifest.persistentDataFolderName,
+					gui.App.manifest.persistentDataVersion
+				);
+			}
+			
 
 			// Save the path to the global scope
 			global.ljswitchboard.appDataPath = persistentDataManager.getPath();
