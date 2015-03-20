@@ -11,10 +11,19 @@ var nodeunit = require(path.normalize(path.join(cwd, '../node_modules/nodeunit')
 var nodeunit_recorder = require(path.normalize(path.join(cwd, 'nodeunit_recorder')));
 
 var testFiles = [
-	'../test/test_ljswitchboard.js'
+	'test_kipling.js',
+	// Execute Mock-Device compatable Tests
+	'mock_module_tests/mock_device_selector.js',
+	'mock_module_tests/mock_device_info.js',
+
+	// Execute Live-Device tests
+	// 'module_tests/test_device_selector.js',
+
+	'finish_testing.js',
 ];
+var test_dir = '../test';
 for(var i = 0; i < testFiles.length; i++) {
-	testFiles[i] = path.normalize(path.join(cwd, testFiles[i]));
+	testFiles[i] = path.normalize(path.join(cwd, test_dir, testFiles[i]));
 }
 
 
@@ -22,7 +31,7 @@ var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
 var window_manager = require('ljswitchboard-window_manager');
 var startDir = global[gns].info.startDir;
-
+var handlebars = require('handlebars');
 /*
 	Function called to load the application's core resources.
 	The resources are loaded from the ljswitchboard-static_files/static
@@ -65,23 +74,57 @@ var loadResources = function(resources, isLocal) {
 	return defered.promise;
 };
 
-var runTests = function() {
-	console.log('in runTests');
-	try {
-	var outputHTML = nodeunit_recorder.run(testFiles, {}, function() {
+var getUpdateTestResults = function(divID) {
+	var updateTestResults = function() {
+
 		var savedText = nodeunit_recorder.getSavedText();
-		var testDiv = $('#nodeunit_test_results');
-		testDiv.html(savedText);
-	},function(err) {
-		if(err) {
-			console.log('Error Running Test');
-		} else {
-			console.log('Finished running test', savedText);
+		cachedTestDiv = $(divID);
+		cachedTestDiv.html(savedText);
+	};
+	return updateTestResults;
+};
+var getRunTest = function(testFile, testDiv) {
+	var fileName = path.basename(testFile);
+	var fileEnding = path.extname(fileName);
+	fileName = fileName.split(fileEnding).join('');
+
+	var divID = fileName + '-test';
+	var runTest = function() {
+		var defered = q.defer();
+		var str = '<div id="{{id}}"><p>Test!</p></div>';
+		var template = handlebars.compile(str);
+		var newTxt = template({'id': divID});
+		testDiv.append($(newTxt));
+		try {
+			var outputHTML = nodeunit_recorder.run(
+				[testFile],
+				{},
+				getUpdateTestResults('#' + divID),
+				function(err) {
+					if(err) {
+						console.log('Error running test', err, testFile);
+					} else {
+						// console.log('Finished running test', testFile);
+					}
+					defered.resolve();
+				});
+		} catch(err) {
+			console.error('Error Running nodeunit tester', err, testFile);
+			defered.resolve();
 		}
+		return defered.promise;
+	};
+	return runTest;
+};
+
+var runTests = function() {
+	var testDiv = $('#nodeunit_test_results');
+	// testDiv.empty();
+	var testFuncs = [];
+	testFiles.forEach(function(testFile) {
+		testFuncs.push(getRunTest(testFile, testDiv));
 	});
-} catch(err) {
-	console.error('Error running tests', err);
-}
+	return testFuncs.reduce(q.when, q({}));
 };
 
 var numLoadDelay = 0;

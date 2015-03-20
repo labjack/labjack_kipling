@@ -28,11 +28,15 @@ exports.info = "Report tests result as HTML";
  */
 
 var savedText = '';
+var tempText = '';
+var setTempText = function(str) {
+    tempText = str;
+};
 var appendText = function(str) {
     savedText += str;
 };
 exports.getSavedText = function() {
-    return savedText;
+    return savedText + tempText;
 };
 exports.run = function (files, options, update, callback) {
     savedText = '';
@@ -68,7 +72,15 @@ exports.run = function (files, options, update, callback) {
             appendText('<h2 id="nodeunit-banner">' + name + '</h2>');
             appendText('<ol id="nodeunit-tests">');
         },
+        testStart: function(name) {
+            var indeterminateTxt = '<div class="progress progress-indeterminate"><div class="bar"></div></div>';
+            setTempText('<li class="active">' + name + indeterminateTxt + '</li>');
+            if(update) {
+                update();
+            }
+        },
         testDone: function (name, assertions) {
+            setTempText('');
             if (!assertions.failures()) {
                 appendText('<li class="pass">' + name + '</li>');
             }
@@ -77,12 +89,16 @@ exports.run = function (files, options, update, callback) {
                 assertions.forEach(function (a) {
                     if (a.failed()) {
                         a = utils.betterErrors(a);
+                        // if(a.message) {
+                        //     appendText('<br>' + a.message)
+                        // }
                         if (a.error instanceof AssertionError && a.message) {
                             appendText('<div class="assertion_message">' +
                                 'Assertion Message: ' + a.message +
                             '</div>');
                         }
                         appendText('<pre>');
+                        appendText('Message: ' + a.message + '\r\n');
                         appendText(a.error.stack);
                         appendText('</pre>');
                     }
