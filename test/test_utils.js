@@ -109,7 +109,7 @@ var checkLoadedModuleData = function(test, moduleData) {
 			}
 
 			if(unfinishedModules.indexOf(moduleData.name) < 0) {
-				test.ok(!loadedEmptyFile, 'a loaded file was empty');
+				test.ok(!loadedEmptyFile, 'a loaded file was empty: ' + moduleData.name);
 			}
 			test.deepEqual(
 				loadedCSSFiles,
@@ -159,7 +159,7 @@ var checkLoadedModuleData = function(test, moduleData) {
 			requiredJSFiles = requiredJSFiles.concat(jsLibFiles);
 			requiredJSFiles = requiredJSFiles.concat(requiredFiles);
 			if(unfinishedModules.indexOf(moduleData.name) < 0) {
-				test.ok(!loadedEmptyFile, 'a loaded file was empty');
+				test.ok(!loadedEmptyFile, 'a loaded file was empty: ' + moduleData.name);
 			}
 			test.deepEqual(
 				loadedJSFiles,

@@ -3,7 +3,11 @@
 var q = require('q');
 var module_manager = require('../lib/ljswitchboard-module_manager');
 
+var testModuleResult = function(test, modules) {
+
+};
 var testModuleCategoryResult = function(test, modules) {
+	try {
 	test.ok(
 		Array.isArray(modules),
 		'Category should be an array'
@@ -24,6 +28,9 @@ var testModuleCategoryResult = function(test, modules) {
 			test.ok(exists, 'Required Key not found: ' + requiredKey);
 		});
 	});
+} catch(err) {
+	console.log('Error in testModuleCategoryResult', err, err.stack);
+}
 };
 var tests = {
 	'getModulesList': function(test) {
@@ -65,7 +72,13 @@ var tests = {
 			test.done();
 		});
 	},
-
+	'getTaskModules': function(test) {
+		module_manager.getTaskList()
+		.then(function(tasks) {
+			testModuleCategoryResult(test, tasks);
+			test.done();
+		});
+	},
 	'filterBodyModules': function(test) {
 		test.done();
 	},

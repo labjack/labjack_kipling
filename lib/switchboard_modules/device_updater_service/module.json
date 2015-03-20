@@ -1,0 +1,8 @@
+{
+    "name": "device_updater_service",
+    "humanName": "Device Updater Service",
+    "version": "0.0.1",
+    "jsFiles": ["device_updater_service.js"],
+    "startTime": "auto",
+    "description": "Listens to the update_manager and for the refreshing of module-tabs/active devices to insert an alert-icon on the device_updater'stab."
+}

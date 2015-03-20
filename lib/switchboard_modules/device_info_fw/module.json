@@ -1,0 +1,8 @@
+{
+    "name": "device_info_fw",
+    "humanName": "Device Info",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "third_party_code":[],
+    "supportedDevices": [{"type":"T7"}]
+}

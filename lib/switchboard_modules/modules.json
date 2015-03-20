@@ -8,6 +8,9 @@
         "active": false
     }, {
         "name": "device_info",
+        "active": false
+    }, {
+        "name": "device_info_fw",
         "active": true
     }, {
         "name": "device_overview",
@@ -67,8 +70,20 @@
         "name": "device_updater",
         "active": true
     }, {
-        "name": "task_data_output_buffer",
+        "name": "update_manager",
         "active": true,
+        "isTask": true
+    }, {
+        "name": "device_updater_service",
+        "active": true,
+        "isTask": true
+    }, {
+        "name": "tab_notification_manager",
+        "active": true,
+        "isTask": true
+    }, {
+        "name": "task_data_output_buffer",
+        "active": false,
         "isTask": true
     }, {
         "name": "task_data_logger",

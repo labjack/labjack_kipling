@@ -1,0 +1,68 @@
+<div id="single-device-framework-obj">
+    <div id="device-selector" class="unselectable">
+        <h4>Connected Devices:<h4>
+        <table class="table table-striped table-hover table-condensed" id="device-selector-table">
+            {{!--<thead>
+                <tr>
+                    <th><p style="width:46px">select</p></th>
+                    <th><p>device type</p></th>
+                    <th><p>connection type</p></th>
+                    <th><p>serial number</p></th>
+                    <th><p>name</p></th>
+                <tr>
+            </thead>--}}
+            <tbody>
+                {{#devices}}
+                <tr class='SERIAL_NUMBER_{{serialNumber}}'>
+                    <td class="device-selector-table-device-selector">
+                        <label class="radio" style="display:none">
+                            <input name="selected-device" class="device-selection-radio" id="{{serialNumber}}-selector" type="radio" value="{{serialNumber}}">
+                            <span class="metro-radio" title="Select {{productType}}, {{serialNumber}}"></span>
+                        </label>
+                    </td>
+                    <td class="device-selector-table-device-type">
+                        <div class="hide-overflow-text" title="Product Type">{{productType}}</div>
+                    </td>
+                    <td class="device-selector-table-connection-type">
+                        {{#unless isConnected}}
+                        <span class="status-icon icon-warn-2"></span>
+                        {{/unless}}
+                        <div class="hide-overflow-text" title="Connection Type">{{connectionTypeName}}</div>
+                    </td>
+                    <td class="device-selector-table-serial-number">
+                        <div class="hide-overflow-text" title="Serial Number (SERIAL_NUMBER)">{{serialNumber}}</div>
+                    </td>
+                    <td class="device-selector-table-device-name">
+                        <div class="hide-overflow-text" title="Device Name (DEVICE_NAME_DEFAULT)">{{DEVICE_NAME_DEFAULT}}</div>
+                    </td>
+                    <td class="device-selector-table-status">
+                        <div class="btn-group expand-right">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <div class="module-chrome-tab-badge">
+                                    <span class="badge">{{#if isConnected}}0{{else}}1{{/if}}</span>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                {{#if isConnected}}
+                                    <li><a>No Messages</a></li>
+                                {{else}}
+                                    <li><a>Device Not Connected</a></li>
+                                {{/if}}
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
+                {{/devices}}
+            </tbody>
+        </table>
+    </div>
+    <div id="sd-ramework-configuring-device-display" class="progress progress-indeterminate">
+        <div><p id="single-device-framework-loading-message">configuring device</p></div>
+        <div class="progress progress-indeterminate">
+            <div class="win-ring"></div>
+        </div>
+    </div>
+    <div id="device-view" style="display:none" class="unselectable"></div>
+    <pre>{{printContext}}</pre>
+    <pre>{{stats.numLoaded}}</pre>
+</div>

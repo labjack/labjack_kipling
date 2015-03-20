@@ -1,0 +1,8 @@
+{
+    "name": "tab_notification_manager",
+    "humanName": "Tab Notification Manager",
+    "version": "0.0.1",
+    "jsFiles": ["tab_notification_manager.js"],
+    "startTime": "auto",
+    "description": "Manage tab notifications as they get displayed and removed."
+}

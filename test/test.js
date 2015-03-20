@@ -20,8 +20,9 @@ modulePaths.forEach(function(modulePath) {
 // End common header
 
 
-var TEST_MODULE_LISTING = true;
+var TEST_MODULE_LISTING = false;
 var TEST_MODULE_LOADING = false;
+var TEST_TASK_LOADING = true;
 
 // Module Tests
 var TEST_DEVICE_SELECTOR = false;
@@ -35,6 +36,12 @@ if (TEST_MODULE_LISTING) {
 if (TEST_MODULE_LOADING) {
 	var test_module_loading = require('./test_module_loading');
 	exports.test_module_loading = test_module_loading.tests;
+}
+
+
+if (TEST_TASK_LOADING) {
+	var test_task_loading = require('./test_task_loading');
+	exports.test_task_loading = test_task_loading.tests;
 }
 
 if (TEST_DEVICE_SELECTOR) {
