@@ -81,19 +81,6 @@ var corePackages = [
 	},
 	{
 		// 'name': 'ljswitchboard-core',
-		'name': 'kipling_tester',
-		'folderName': 'ljswitchboard-kipling_tester',
-		'loadMethod': 'managed',
-		'forceRefresh': false,
-		'startApp': false,
-		'directLoad': true,
-		'locations': [
-			// Add path to files for development purposes, out of a repo.
-			path.join(startDir, '..', 'ljswitchboard-kipling_tester')
-		]
-	},
-	{
-		// 'name': 'ljswitchboard-core',
 		'name': 'kipling',
 		'folderName': 'ljswitchboard-kipling',
 		'loadMethod': 'managed',
@@ -118,6 +105,24 @@ var corePackages = [
 		]
 	}
 ];
+
+
+if(gui.App.manifest.test) {
+	console.log('Adding kipling_tester');
+	corePackages.splice(2,0,{
+		// 'name': 'ljswitchboard-core',
+		'name': 'kipling_tester',
+		'folderName': 'ljswitchboard-kipling_tester',
+		'loadMethod': 'managed',
+		'forceRefresh': false,
+		'startApp': false,
+		'directLoad': true,
+		'locations': [
+			// Add path to files for development purposes, out of a repo.
+			path.join(startDir, '..', 'ljswitchboard-kipling_tester')
+		]
+	});
+}
 
 var checkRequirements = function() {
 	var defered = q.defer();
@@ -169,6 +174,11 @@ var loadCorePackages = function() {
 	.then(function(managedPackages) {
 		console.log('Managed Packages', managedPackages);
 		var keys = Object.keys(managedPackages);
+		if(gui.App.manifest.test) {
+			
+			var isKiplingTesterManaged = keys.indexOf('kipling_tester');
+			console.log('kipling_tester required', isKiplingTesterManaged);
+		}
 		var continueLaunch = true;
 		keys.forEach(function(key) {
 			var resultText = 'passed';
