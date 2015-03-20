@@ -1,5 +1,5 @@
 
-console.log('in module chrome');
+
 var path = require('path');
 var q = global.require('q');
 var handlebars = global.require('handlebars');
@@ -17,7 +17,13 @@ function createModuleChrome() {
 		MODULE_CHROME_STARTED: 'MODULE_CHROME_STARTED',
 		LOADING_MODULE: 'LOADING_MODULE',
 		MODULE_LOADED: 'MODULE_LOADED',
+		MODULE_READY: 'MODULE_READY',
 		DEVICE_LIST_UPDATED: 'DEVICE_LIST_UPDATED',
+		MODULE_TABS_UPDATED: 'MODULE_TABS_UPDATED',
+
+		// Events triggered by the device selector.
+		DEVICE_SELECTOR_DEVICE_OPENED: 'DEVICE_SELECTOR_DEVICE_OPENED',
+		DEVICE_SELECTOR_DEVICE_CLOSED: 'DEVICE_SELECTOR_DEVICE_CLOSED',
 	};
 
 	var MODULE_CHROME_HOLDER_ID = '#module_chrome_holder';
@@ -93,6 +99,7 @@ function createModuleChrome() {
 		}
 		return defered.promise;
 	};
+	this.compileTemplate = compileTemplate;
 
 	var enableTabSliding = false;
 	var renderTemplate = function(location, name, context) {
@@ -139,8 +146,13 @@ function createModuleChrome() {
 		return defered.promise;
 	};
 
-	var computeTabSizing = function(numTabs, offset) {
-		var tabEl = $(TAB_SIZING_STYLE_CLASS);
+	var computeTabSizing = function(numTabs, offset, ele) {
+		var tabEl;
+		if(ele) {
+			tabEl = ele;
+		} else {
+			tabEl = $(TAB_SIZING_STYLE_CLASS);
+		}
 		var height = tabEl.height();
 		var padding = 2*parseInt(tabEl.css('padding'), 10);
 		var marginBottom = parseInt(tabEl.css('margin-bottom'), 10);
@@ -154,16 +166,26 @@ function createModuleChrome() {
 	this.adjustModuleChromeTabSpacing = function(tabSections, context) {
 		var defered = q.defer();
 		var headerHeight = computeTabSizing(context.header_modules.length);
-		var footerHeight = computeTabSizing(context.footer_modules.length);
+		var footerHeight = computeTabSizing(
+			context.footer_modules.length,
+			-2,
+			$(MODULE_CHROME_FOOTER_TABS_CLASS)
+		);
 		var bottomPadding = computeTabSizing(
 			context.footer_modules.length,
-			2
+			0,
+			$(MODULE_CHROME_FOOTER_TABS_CLASS)
 		);
+		// var bottomPadding = computeTabSizing(
+		// 	context.footer_modules.length,
+		// 	2
+		// );
 		
 		$(MODULE_CHROME_HEADER_TABS_CLASS).css('height', headerHeight);
 		$(MODULE_CHROME_FOOTER_TABS_CLASS).css('height', footerHeight);
 		$(MODULE_CHROME_BODY_TABS_CLASS).css('padding-top', headerHeight);
 		$(MODULE_CHROME_BODY_TABS_CLASS).css('padding-bottom', bottomPadding);
+		// $(MODULE_CHROME_BODY_TABS_CLASS).css('padding-bottom', footerHeight);
 		defered.resolve(tabSections, context);
 		return defered.promise;
 	};
@@ -222,6 +244,7 @@ function createModuleChrome() {
 	};
 
 	var innerUpdatePrimaryModuleListing = function(modules) {
+		var defered = q.defer();
 		var context = {
 			'header_modules': modules.header,
 			'footer_modules': modules.footer
@@ -235,17 +258,23 @@ function createModuleChrome() {
 		}];
 
 		// Begin execution & return a promise.
-		return internalUpdateModuleListing(tabSections, context)
-		.then(attachTabClickHandlers);
+		internalUpdateModuleListing(tabSections, context)
+		.then(attachTabClickHandlers)
+		.then(function() {
+			defered.resolve(context);
+		});
+		return defered.promise;
 	};
 	this.updatePrimaryModuleListing = function() {
 		// Get the list of modules and have the inner-function perform logic on
 		// acquired data.
 		return module_manager.getModulesList()
-		.then(innerUpdatePrimaryModuleListing);
+		.then(innerUpdatePrimaryModuleListing)
+		.then(reportModuleTabsUpdated);
 	};
 
 	var internalUpdateSecondaryModuleListing = function(modules) {
+		var defered = q.defer();
 		var context = {
 			'modules': modules.body
 		};
@@ -256,8 +285,12 @@ function createModuleChrome() {
 		}];
 
 		// Begin execution & return a promise.
-		return internalUpdateModuleListing(tabSections)
-		.then(attachTabClickHandlers);
+		internalUpdateModuleListing(tabSections)
+		.then(attachTabClickHandlers)
+		.then(function() {
+			defered.resolve(context);
+		});
+		return defered.promise;
 	};
 	var filterOperations = {
 		'minFW': function(filterValue, deviceAttributes) {
@@ -376,12 +409,39 @@ function createModuleChrome() {
 		return defered.promise;
 	};
 
+	var reportModuleTabsUpdated = function(updatedModules) {
+		var defered = q.defer();
+		self.emit(self.eventList.MODULE_TABS_UPDATED, updatedModules);
+		defered.resolve(a,b,c);
+		return defered.promise;
+	};
 	this.updateSecondaryModuleListing = function() {
 		// Get the list of modules and have the inner-function perform logic on
 		// acquired data.
 		return module_manager.getModulesList()
 		.then(filterModulesList)
-		.then(internalUpdateSecondaryModuleListing);
+		.then(internalUpdateSecondaryModuleListing)
+		.then(reportModuleTabsUpdated);
+	};
+	var runGC = function(data) {
+		var defered = q.defer();
+		var gcExecuted = false;
+		if(gc) {
+			if(gc.call) {
+				if(typeof(gc.call) === 'function') {
+					gc.call();
+					gcExecuted = true;
+				}
+			}
+		}
+		if(gcExecuted) {
+			// console.log('gc.call executed');
+		} else {
+			// console.log('gc.call not executed');
+		}
+		
+		defered.resolve(data);
+		return defered.promise;
 	};
 	this.updateModuleListing = function() {
 		var defered = q.defer();
@@ -394,6 +454,7 @@ function createModuleChrome() {
 
 		// Wait for all of the operations to complete
 		q.allSettled(promises)
+		.then(runGC)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 
@@ -405,10 +466,13 @@ function createModuleChrome() {
 		if(self.allowModuleToLoad) {
 			self.allowModuleToLoad = false;
 			self.emit(self.eventList.LOADING_MODULE, res);
+			MODULE_LOADER.once('MODULE_READY', function(res) {
+				self.allowModuleToLoad = true;
+			});
 			MODULE_LOADER.loadModule(res.data)
 			.then(function(res) {
 				self.emit(self.eventList.MODULE_LOADED, res);
-				self.allowModuleToLoad = true;
+				// self.allowModuleToLoad = true;
 				// // console.log('Finished Loading Module', res.name);
 
 				// Delete loaded data (commented out to let gc handle it)
@@ -421,7 +485,7 @@ function createModuleChrome() {
 				// }
 			}, function(err) {
 				self.allowModuleToLoad = true;
-				console.error('Error loading module');
+				console.error('Error loading module', err);
 			});
 		} else {
 			console.log('Preventing module from loading');

@@ -1,0 +1,10 @@
+
+function create_task_{{name}}(moduleData) {
+	{{#js}}
+	try {
+		{{{fileData}}}
+	} catch(err) {
+		console.error('Failed to load file: {{fileName}}, from task {{../name}} (task_module.html)', err, err.stack);
+	}
+	{{/js}}
+}

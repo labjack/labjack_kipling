@@ -1,7 +1,14 @@
 
 {{#if modules}}
 {{#modules}}
-<li id="{{name}}-tab" class="module-chrome-tab {{category}}-tab"><span id="{{name}}" class="module-chrome-tab-link">{{humanName}}</span></li>
+<li id="{{name}}-tab" class="module-chrome-tab {{category}}-tab">
+	<div id="{{name}}" class="module-chrome-tab-link">
+		<span>{{humanName}}</span>
+	</div>
+	<div class="module-chrome-tab-badge">
+		<span class="badge"></span>
+	</div>
+</li>
 {{/modules}}
 {{else}}
 <li>Please connect to a supported device to show modules</li>

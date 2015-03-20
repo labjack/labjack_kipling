@@ -77,8 +77,16 @@ var startIOManager = function(){
 	return defered.promise;
 };
 
+var performRemainingInitializationRoutines = function() {
+	var defered = q.defer();
+	
+	KEYBOARD_EVENT_HANDLER.init()
+	.then(defered.resolve, defered.reject);
+
+	return defered.promise;
+};
+
 var showKiplingWindow = function() {
-	console.log('showing window');
 	var defered = q.defer();
 	global[gns].splash_screen.update('Finished');
 	global[gns].window_manager.hideWindow('core');
@@ -102,7 +110,6 @@ var showKiplingWindow = function() {
 		var testerWindow = testerWin.window;
 		testerWindow.runTests();
 	}
-
 	defered.resolve();
 	return defered.promise;
 };
@@ -117,11 +124,17 @@ var startCoreApp = function() {
 		// Start the  IO Manager
 		startIOManager()
 
+		// Perform other initialization routines
+		.then(performRemainingInitializationRoutines)
+
 		// Render the module chrome window
 		.then(MODULE_CHROME.loadModuleChrome)
 
 		// Hide the splash screen & core windows & display the kipling window
-		.then(showKiplingWindow);
+		.then(showKiplingWindow)
+
+		// Load Kipling background tasks
+		.then(TASK_LOADER.loadTasks);
 		
 	} else {
 		numLoadDelay += 1;

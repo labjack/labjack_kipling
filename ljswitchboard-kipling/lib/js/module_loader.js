@@ -1,22 +1,16 @@
 
-console.log('in module loader');
+
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var path = require('path');
 var q = global.require('q');
 var handlebars = global.require('handlebars');
-try {
-	handlebars.registerHelper('printContext', function() {
-		return new handlebars.SafeString(JSON.stringify({'context': this}, null, 2));
-	});
-} catch(err) {
-	console.log('HErE', err);
-}
 var module_manager = require('ljswitchboard-module_manager');
 var fs = require('fs');
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
 var static_files = require('ljswitchboard-static_files');
+var io_manager = require('ljswitchboard-io_manager');
 
 // Configure the module_manager persistent data path.
 var kiplingExtractionPath = package_loader.getExtractionPath();
@@ -34,7 +28,8 @@ function createModuleLoader() {
 	};
 	var eventList = {
 		VIEW_READY: 'VIEW_READY',
-		UNLOAD_MODULE: 'UNLOAD_MODULE'
+		UNLOAD_MODULE: 'UNLOAD_MODULE',
+		MODULE_READY: 'MODULE_READY',
 	};
 	this.eventList = eventList;
 
@@ -182,50 +177,94 @@ function createModuleLoader() {
 		});
 		return defered.promise;
 	};
+	var getUpdatedDeviceListing = function(newModule) {
+		var defered = q.defer();
+		var io_interface = io_manager.io_interface();
+		var device_controller = io_interface.getDeviceController();
+		var filters;
+		if(newModule.data.supportedDevices) {
+			filters = newModule.data.supportedDevices;
+		}
+		device_controller.getDeviceListing(filters)
+		.then(function(deviceListing) {
+			newModule.context.devices = deviceListing;
+			defered.resolve(newModule);
+		});
+		return defered.promise;
+	};
 	var loadHTMLFiles = function(newModule) {
 		var defered = q.defer();
 		// console.log('loaded html files', newModule.htmlFiles);
 		var htmlFile = '<p>No view.html file loaded.</p>';
-		if(newModule.htmlFiles.view) {
-			htmlFile = newModule.htmlFiles.view;
-
-			// Compile & populate the view.html file
-			var template = handlebars.compile(htmlFile);
-			var data = template(newModule.context);
-
-			// Append a header & footer onto the template.
-			data = MODULE_LOADER_VIEW_TEMPLATE({
-				'numLoaded': newModule.context.stats.numLoaded,
-				'viewData': data,
-			});
-
-			// Add the page data to the dom.
-			newModule.outputLocation.view.append(data);
-
-			// Build the elementID string that was assigned to the element when
-			// compiling the "MODULE_LOADER_VIEW_TEMPLATE"
-			var elementID = MODULE_LOADER_VIEW_ID_TEMPLATE({
-				'numLoaded': newModule.context.stats.numLoaded,
-			});
-
-			// Attach to the .ready event of the element just created.
-			// Element must already be added because we use jquery to search for
-			// the element's ID to attach to the "ready" event.
-			$(elementID).ready(function() {
-				defered.resolve(newModule);
-				self.emit(eventList.VIEW_READY, {
-					'name': newModule.name,
-					'id': elementID,
-					'data': newModule,
-				});
-			});
+		// Check to see if a framework is being loaded:
+		if(newModule.data.framework) {
+			if(newModule.htmlFiles.framework_view) {
+				htmlFile = newModule.htmlFiles.framework_view;
+			} else if(newModule.htmlFiles.view) {
+				htmlFile = newModule.htmlFiles.view;
+			}
+		} else {
+			if(newModule.htmlFiles.view) {
+				htmlFile = newModule.htmlFiles.view;
+			}
 		}
+
+		// Compile & populate the view.html file
+		var template = handlebars.compile(htmlFile);
+		var data = template(newModule.context);
+
+		// Append a header & footer onto the template.
+		data = MODULE_LOADER_VIEW_TEMPLATE({
+			'numLoaded': newModule.context.stats.numLoaded,
+			'viewData': data,
+		});
+
+		// Add the page data to the dom.
+		newModule.outputLocation.view.append(data);
+
+		// Build the elementID string that was assigned to the element when
+		// compiling the "MODULE_LOADER_VIEW_TEMPLATE"
+		var elementID = MODULE_LOADER_VIEW_ID_TEMPLATE({
+			'numLoaded': newModule.context.stats.numLoaded,
+		});
+
+		// Attach to the .ready event of the element just created.
+		// Element must already be added because we use jquery to search for
+		// the element's ID to attach to the "ready" event.
+		$(elementID).ready(function() {
+			defered.resolve(newModule);
+			self.emit(eventList.VIEW_READY, {
+				'name': newModule.name,
+				'id': elementID,
+				'data': newModule,
+			});
+		});
 		return defered.promise;
 	};
 	var updateStatistics = function(newModule) {
 		var defered = q.defer();
 		self.stats.numLoaded += 1;
 		defered.resolve(newModule);
+		return defered.promise;
+	};
+	var runGC = function(data) {
+		var defered = q.defer();
+		var gcExecuted = false;
+		if(gc) {
+			if(gc.call) {
+				if(typeof(gc.call) === 'function') {
+					gc.call();
+					gcExecuted = true;
+				}
+			}
+		}
+		if(gcExecuted) {
+			// console.log('gc.call executed');
+		} else {
+			// console.log('gc.call not executed');
+		}
+		
+		defered.resolve(data);
 		return defered.promise;
 	};
 
@@ -243,7 +282,8 @@ function createModuleLoader() {
 		};
 		moduleData.context = {
 			'stats': self.stats,
-			'staticFiles': static_files.getDir()
+			'staticFiles': static_files.getDir(),
+			'devices': undefined,
 		};
 		moduleData.outputLocation = {
 			'css': $('#' + MODULE_LOADER_CSS_DESTINATION_ID),
@@ -255,8 +295,10 @@ function createModuleLoader() {
 		.then(loadCSSFiles)
 		.then(loadJSFiles)
 		.then(getModuleContext)
+		.then(getUpdatedDeviceListing)
 		.then(loadHTMLFiles)
 		.then(updateStatistics)
+		.then(runGC)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};

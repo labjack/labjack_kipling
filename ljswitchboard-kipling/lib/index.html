@@ -46,6 +46,12 @@
                 // CSS for the module_chrome
                 'css/module_chrome.css',
 
+                // JS to add error helpers
+                'js/error_helper.js',
+
+                // JS to extend standard handlebars features.
+                'js/handlebars_helpers.js',
+
                 // JS for loading & manipulating the module_chrome
                 // Creates a window-wide element "MODULE_CHROME"
                 'js/module_chrome.js',
@@ -54,8 +60,15 @@
                 // Creates a window-wide element "MODULE_LOADER"
                 'js/module_loader.js',
 
+                // JS for loading & manipulating tasks.
+                // Creates a global object "TASK_LOADER"
+                'js/task_loader.js',
+
                 // JS with convenient helper functions.
                 'js/module_utils.js',
+
+                // JS to listen to keyboard events
+                'js/keyboard_event_handler.js',
             ];
             loadLocalResources(localResourceList);
             
