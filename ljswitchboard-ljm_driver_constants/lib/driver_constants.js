@@ -345,8 +345,9 @@ exports.serialNumberOffsets = {
 // Error codes for the device_curator:
 exports.LJN_DEVICE_NOT_CONNECTED = 99999;
 exports.device_curator_constants = {
-	'LJN_DEVICE_DISCONNECTED': 'DEVICE_DISCONNECTED',
-	'LJN_DEVICE_RECONNECTED': 'DEVICE_RECONNECTED',
+	'DEVICE_DISCONNECTED': 'DEVICE_DISCONNECTED',
+	'DEVICE_RECONNECTED': 'DEVICE_RECONNECTED',
+	'DEVICE_ERROR': 'DEVICE_ERROR',
 };
 
 
