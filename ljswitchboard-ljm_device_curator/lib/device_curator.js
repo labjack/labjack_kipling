@@ -107,15 +107,15 @@ function device(useMockDevice) {
 	};
 
 	var allowExecution = function() {
-		var res = true;
+		var allowLJMFunctionExecution = true;
 		if(self.allowReconnectManager) {
 			if(self.savedAttributes) {
 				if(!self.savedAttributes.isConnected) {
-					res = false;
+					allowLJMFunctionExecution = false;
 				}
 			}
 		}
-		return res;
+		return allowLJMFunctionExecution;
 	};
 
 	var refreshDeviceConnectionStatus = function() {
@@ -417,7 +417,7 @@ function device(useMockDevice) {
 			self.savedAttributes.calibrationStatus = res;
 			defered.resolve(self.savedAttributes);
 		}, function(err) {
-			console.error('failed to get Calibration', res);
+			console.error('failed to get Calibration', err);
 			self.savedAttributes.calibrationStatus = err;
 			defered.resolve(self.savedAttributes);
 		});

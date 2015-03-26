@@ -12,6 +12,16 @@ var ljmErrors = modbusMap.errorsByNumber;
 
 var device;
 var capturedEvents = [];
+var getDeviceEventListener = function(eventKey) {
+	var deviceEventListener = function(eventData) {
+		console.log('Captured an event', eventKey);
+		if(eventKey === 'DEVICE_ERROR') {
+			// console.log('Error Data', eventData);
+		}
+		capturedEvents.push({'eventName': eventKey, 'data': eventData});
+	};
+	return deviceEventListener;
+};
 
 var criticalError = false;
 var stopTest = function(test, err) {
@@ -46,6 +56,13 @@ var device_tests = {
 		}
 		test.done();
 	},
+	'attach listeners': function(test) {
+		var events = Object.keys(driver_errors);
+		events.forEach(function(eventKey) {
+			device.on(eventKey, getDeviceEventListener(eventKey));
+		});
+		test.done();
+	},
 	'openDevice': function(test) {
 		var reportedToCmd = false;
 		var connectToDevice = function() {
@@ -55,7 +72,9 @@ var device_tests = {
 				'id': 'LJM_idANY'
 			};
 			// td.ct = 'LJM_ctEthernet';
-			// td.id = '192.168.1.11';
+			// td.ct = 'LJM_ctWifi';
+			// td.id = '192.168.1.28';
+			// td.id = '470010108';
 
 			device.open(td.dt, td.ct, td.id)
 			.then(function(res) {
@@ -86,6 +105,7 @@ var device_tests = {
 	},
 	'test failed writeMultiple invalid address': function(test) {
 		var results = [];
+		capturedEvents = [];
 		qExec(device, 'writeMultiple', ['DAC0A'], [1.0])(results)
 		.then(function(res) {
 			res.forEach(function(r) {
@@ -96,11 +116,13 @@ var device_tests = {
 					);
 				});
 			});
+			test.strictEqual(capturedEvents.length, 1);
 			test.done();
 		});
 	},
 	'disconnect device': function(test) {
 		var reportedToCmd = false;
+		capturedEvents = [];
 		var disconnectDevice = function() {
 			device.read('AIN0')
 			.then(function(res) {
@@ -112,13 +134,19 @@ var device_tests = {
 			}, function(err) {
 				if(err === 1239) {
 					console.log('  - Device Disconnected');
-					test.done();
+					test.strictEqual(capturedEvents.length, 2);
 				} else {
 					console.log('Encountered Error', err);
 					setTimeout(disconnectDevice, 100);
 				}
 			});
 		};
+		device.on('DEVICE_ERROR', function(data) {
+			if(data.operation === 'reconnecting') {
+				test.strictEqual(capturedEvents.length, 3);
+				test.done();
+			}
+		});
 		disconnectDevice();
 	},
 	'checkDeviceInfo': function(test) {
@@ -131,7 +159,27 @@ var device_tests = {
 			test.done();
 		});
 	},
-	'performTestRead': function(test) {
+	'performTestRead (1)': function(test) {
+		var results = [];
+		capturedEvents = [];
+		// Setup and call functions
+		qExec(device, 'read', 'AIN0')(results)
+		.then(qExec(device, 'read', 'AIN0'))
+		.then(function(res) {
+			res.forEach(function(r) {
+				test.strictEqual(r.errData, driver_const.LJN_DEVICE_NOT_CONNECTED);
+				// console.log(
+				// 	'Error Info',
+				// 	modbusMap.getErrorInfo(r.errData)
+				// );
+			});
+			// The first read after a device disconnects should fail but report 
+			// a "reconnecting" error.
+			// test.strictEqual(capturedEvents.length, 1, JSON.stringify(capturedEvents, null, 2));
+			test.done();
+		});
+	},
+	'performTestRead (2)': function(test) {
 		var results = [];
 		// Setup and call functions
 		qExec(device, 'read', 'AIN0')(results)
@@ -223,10 +271,12 @@ var device_tests = {
 	},
 	'test reconnectToDevice': function(test) {
 		var reportedToCmd = false;
+		capturedEvents = [];
 		var waitForReconnect = function() {
 			device.read('AIN0')
 			.then(function(res) {
 				console.log('  - Device Reconnected');
+				// test.strictEqual(capturedEvents.length, 1, JSON.stringify(capturedEvents, null, 2));
 				test.done();
 			}, function(err) {
 				if(!reportedToCmd) {
