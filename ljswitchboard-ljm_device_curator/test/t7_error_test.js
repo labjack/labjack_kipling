@@ -14,7 +14,7 @@ var device;
 var capturedEvents = [];
 var getDeviceEventListener = function(eventKey) {
 	var deviceEventListener = function(eventData) {
-		console.log('Captured an event', eventKey);
+		// console.log('Captured an event', eventKey);
 		if(eventKey === 'DEVICE_ERROR') {
 			// console.log('Error Data', eventData);
 		}
