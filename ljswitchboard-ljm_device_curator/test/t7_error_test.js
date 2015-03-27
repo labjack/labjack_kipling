@@ -141,12 +141,18 @@ var device_tests = {
 				}
 			});
 		};
-		device.on('DEVICE_ERROR', function(data) {
+		var errorListener = function(data) {
 			if(data.operation === 'reconnecting') {
 				test.strictEqual(capturedEvents.length, 3);
-				test.done();
+				try {
+					device.removeListener('DEVICE_ERROR', errorListener);
+					test.done();
+				}catch(err) {
+					console.log('err', err);
+				}
 			}
-		});
+		};
+		device.on('DEVICE_ERROR', errorListener);
 		disconnectDevice();
 	},
 	'checkDeviceInfo': function(test) {
@@ -311,12 +317,26 @@ var device_tests = {
 			test.done();
 		});
 	},
+	'disconnect device again': function(test) {
+		console.log('  - Please Disconnect Device');
+		device.once('DEVICE_DISCONNECTED', function() {
+			console.log('  - Device Disconnected');
+			test.done();
+		});
+	},
+	'reconnect device again': function(test) {
+		console.log('  - Please Reconnect Device');
+		device.once('DEVICE_RECONNECTED', function() {
+			console.log('  - Device Reconnected');
+			test.done();
+		});
+	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
 			test.done();
 		});
-	},
+	}
 };
 
 var tests = {};

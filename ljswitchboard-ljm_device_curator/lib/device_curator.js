@@ -40,6 +40,7 @@ function device(useMockDevice) {
 	var ljmDevice;
 	this.isMockDevice = false;
 	this.allowReconnectManager = false;
+	this.allowConnectionManager = false;
 
 	this.deviceErrors = [];
 	this.maxNumErrors = 20;
@@ -106,7 +107,34 @@ function device(useMockDevice) {
 		return ljmDevice;
 	};
 
+	this.connectionCheckInterval = 1000;
+	this.verifiedDeviceConnection = false;
+	var connectionManagerSuccess = function(res) {
+		if(self.allowConnectionManager) {
+			startConnectionManager();
+		}
+	};
+	var connectionManagerError = function(err) {
+		if(self.allowConnectionManager) {
+			startConnectionManager();
+		}
+	};
+	var runConnectionManager = function() {
+		if(self.allowConnectionManager) {
+			if(!self.verifiedDeviceConnection) {
+				self.read('PRODUCT_ID')
+				.then(connectionManagerSuccess, connectionManagerError);
+			} else {
+				startConnectionManager();
+			}
+		}
+	};
+	var startConnectionManager = function() {
+		self.verifiedDeviceConnection = false;
+		setTimeout(runConnectionManager, self.connectionCheckInterval);
+	};
 	var allowExecution = function() {
+		self.verifiedDeviceConnection = true;
 		var allowLJMFunctionExecution = true;
 		if(self.allowReconnectManager) {
 			if(self.savedAttributes) {
@@ -426,6 +454,8 @@ function device(useMockDevice) {
 	var finalizeOpenProcedure = function(bundle) {
 		var defered = q.defer();
 		self.allowReconnectManager = true;
+		self.allowConnectionManager = true;
+		startConnectionManager();
 		defered.resolve(bundle);
 		return defered.promise;
 	};
@@ -893,9 +923,11 @@ function device(useMockDevice) {
 		ljmDevice.close(
 			function(err) {
 				self.allowReconnectManager = false;
+				self.allowConnectionManager = false;
 				defered.reject(err);
 			}, function(res) {
 				self.allowReconnectManager = false;
+				self.allowConnectionManager = false;
 				defered.resolve(res);
 			}
 		);
