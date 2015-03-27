@@ -1188,8 +1188,27 @@ var deviceScanner = function() {
 		var defered = q.defer();
 		if(!self.scanInProgress) {
 			self.scanInProgress = true;
+			var numToDelete;
+			var i;
+			// Empty the cached scanResults
+			numToDelete = self.scanResults.length;
+			for(i = 0; i < numToDelete; i++) {
+				delete self.scanResults[i];
+			}
 			self.scanResults = [];
+
+			// Empty the cached activeDeviceResults
+			numToDelete = self.activeDeviceResults.length;
+			for(i = 0; i < numToDelete; i++) {
+				delete self.activeDeviceResults[i];
+			}
 			self.activeDeviceResults = [];
+
+			// Empty the cached sortedResults
+			numToDelete = self.sortedResults.length;
+			for(i = 0; i < numToDelete; i++) {
+				delete self.sortedResults[i];
+			}
 			self.sortedResults = [];
 
 			var getOnError = function(msg) {
