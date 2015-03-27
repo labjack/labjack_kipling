@@ -71,7 +71,8 @@ exports.tests = {
 		});
 	},
 	'update firmware': function(test) {
-		var fwLocation = 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin';
+		// var fwLocation = 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin';
+		var fwLocation = 'http://labjack.com/sites/default/files/2015/03/T7firmware_010159_2015-03-23.bin';
 		var numPercentUpdates = 0;
 		var percentListener = function(percent) {
 			console.log('    - Percent:', percent);

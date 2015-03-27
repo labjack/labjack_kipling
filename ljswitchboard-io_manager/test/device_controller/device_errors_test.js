@@ -26,6 +26,7 @@ var logger_controller;
 var device;
 
 var capturedEvents = [];
+var capturedDeviceEvents = [];
 
 var getDeviceControllerEventListener = function(eventKey) {
 	var deviceControllerEventListener = function(eventData) {
@@ -35,11 +36,21 @@ var getDeviceControllerEventListener = function(eventKey) {
 	return deviceControllerEventListener;
 };
 
+var getDeviceEventListener = function(eventKey) {
+	var deviceEventListener = function(eventData) {
+		capturedDeviceEvents.push({'eventName': eventKey, 'data': eventData});
+	};
+	return deviceEventListener;
+};
+
 var deviceParameters = [{
 	'deviceType': 'LJM_dtT7',
 	'connectionType': 'LJM_ctUSB',
 	'identifier': 'LJM_idANY',
 }];
+// deviceParameters[0].connectionType = 'LJM_ctWifi';
+// deviceParameters[0].identifier = 470010610;
+
 exports.tests = {
 	'initialization': function(test) {
 		// Require the io_manager library
@@ -76,32 +87,108 @@ exports.tests = {
 		});
 	},
 	'open device': function(test) {
-		var params = deviceParameters[0];
+		var reportedToCmd = false;
+		var connectToDevice = function() {
+			var params = deviceParameters[0];
 
-		device_controller.openDevice(params)
-		.then(function(newDevice) {
-			device = newDevice;
-			setTimeout(function() {
-				if(capturedEvents.length != 1) {
-					test.ok(false, 'unexpected number of events triggered.');
-				} else {
-					test.ok(true);
+			device_controller.openDevice(params)
+			.then(function(newDevice) {
+				device = newDevice;
+				var deviceEventKeys = Object.keys(constants.deviceEvents);
+				deviceEventKeys.forEach(function(eventKey) {
+					var eventName = constants.deviceEvents[eventKey];
+					newDevice.on(eventName, getDeviceEventListener(eventName));
+				});
+
+				setTimeout(function() {
+					if(capturedEvents.length != 1) {
+						test.ok(false, 'unexpected number of events triggered.');
+					} else {
+						test.ok(true);
+					}
+					test.done();
+				},50);
+			}, function(err) {
+				if(!reportedToCmd) {
+					console.log('  - Please Connect a Device', params);
+					reportedToCmd = true;
 				}
-				test.done();
-			},50);
-		}, function(err) {
-			console.log("Error opening device", err);
-			test.ok(false, 'failed to create new device object');
-			test.done();
-		});
+				setTimeout(connectToDevice, 50);
+			});
+		};
+		connectToDevice();
 	},
 	'cause device error': function(test) {
+		// Check to make sure that the device object is an event emitter.
+		test.strictEqual(
+			typeof(device.on),
+			'function',
+			'device is not an event emitter'
+		);
+		var errorDetected = false;
+		device.once('DEVICE_ERROR', function(data) {
+			errorDetected = true;
+		});
 		device.read('AINA')
 		.then(function(res) {
 			test.ok(false, 'Should have run into an error');
 		}, function(err) {
-			console.log('Error:', err);
-			test.ok(true);
+			console.log('  - Error:', err);
+			test.ok(errorDetected, 'device should have thrown a "DEVICE_ERROR"');
+			test.done();
+		});
+	},
+	'disconnect device': function(test) {
+		
+		var reportedToCmd = false;
+		var disconnectDevice = function() {
+			device.read('AIN0')
+			.then(function(res) {
+				if(!reportedToCmd) {
+					console.log('  - Please Disconnect Device');
+					reportedToCmd = true;
+				}
+				setTimeout(disconnectDevice, 100);
+			}, function(err) {
+				if(err === 1239) {
+					console.log('  - Device Disconnected');
+					test.ok(
+						deviceReportedDisconnected,
+						'Device should have reported that it was disconnected'
+					);
+					test.done();
+				} else {
+					console.log('Encountered Error', err);
+					setTimeout(disconnectDevice, 100);
+				}
+			});
+		};
+		var deviceReportedDisconnected = false;
+		device.once('DEVICE_DISCONNECTED', function() {
+			deviceReportedDisconnected = true;
+		});
+		device.once('DEVICE_ERROR', function(data) {
+		});
+		disconnectDevice();
+	},
+	'wait for reconnecting error': function(test) {
+		device.once('DEVICE_ERROR', function(data) {
+			test.done();
+		});
+	},
+	'get latest errors': function(test) {
+		device.getLatestDeviceErrors()
+		.then(function(latestErrors) {
+			// console.log('Latest Errors', latestErrors);
+			test.strictEqual(latestErrors.numErrors, 3);
+			test.strictEqual(latestErrors.errors.length, 3);
+			test.done();
+		});
+	},
+	'test reconnectToDevice': function(test) {
+		console.log('  - Please Reconnect Device');
+		device.once('DEVICE_RECONNECTED', function() {
+			console.log('  - Device Reconnected');
 			test.done();
 		});
 	},

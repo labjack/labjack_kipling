@@ -16,8 +16,13 @@ exports.deviceControllerEvents = {
 	DEVICE_CONTROLLER_DEVICE_OPENED: 'OPENED_DEVICE',
 	DEVICE_CONTROLLER_DEVICE_CLOSED: 'CLOSED_DEVICE',
 };
+
 var deviceScannerEvents = require('ljswitchboard-device_scanner').eventList;
 var deviceScannerEventKeys = Object.keys(deviceScannerEvents);
 deviceScannerEventKeys.forEach(function(key) {
 	exports.deviceControllerEvents[key] = deviceScannerEvents[key];
 });
+
+// Define device errors
+var ljm_driver_constants = require('ljswitchboard-ljm_driver_constants');
+exports.deviceEvents = ljm_driver_constants.device_curator_constants;

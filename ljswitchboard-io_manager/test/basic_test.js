@@ -46,7 +46,7 @@ exports.basic_test = {
 		
 
 		var keys = Object.keys(io_manager);
-		test.deepEqual(keys, ['io_interface', 'include_type'], 'io_manager not required properly');
+		test.deepEqual(keys, ['io_interface', 'info'], 'io_manager not required properly');
 		test.done();
 	},
 	'create new io_interface': function(test) {

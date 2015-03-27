@@ -3,8 +3,11 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
+var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDeviceFunc) {
+
+	this.eventList = driver_const.device_curator_constants;
 	this.savedAttributes = savedAttributes;
 	this.device_comm_key = savedAttributes.device_comm_key;
 	this.deviceCallFunc = deviceCallFunc;
@@ -27,7 +30,15 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 		if(self.internalListeners[m.func]) {
 			self.internalListeners[m.func](m.data);
 		} else {
-			console.log('In Device oneWayListener', self.device_comm_key, m);
+			if((typeof(m.name) !== 'undefined') && (typeof(m.data) !== 'undefined')) {
+				self.emit(m.name, m.data);
+			} else {
+				console.log(
+					'Un-handled ljm_device.js oneWayListener message',
+					self.device_comm_key,
+					m
+				);
+			}
 		}
 	};
 	this.callFunc = function(func, args) {

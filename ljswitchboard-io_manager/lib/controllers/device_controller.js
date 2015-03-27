@@ -60,10 +60,10 @@ function createDeviceController(io_interface) {
 			if(self.devices[m.deviceKey]) {
 				self.devices[m.deviceKey].oneWayListener(m.message);
 			}
-		} if(typeof(m.eventName) !== 'undefined') {
+		} else if(typeof(m.eventName) !== 'undefined') {
 			// console.log('Emitting device_controller event', m.eventName);
 			self.emit(m.eventName, m.data);
-		}else {
+		} else {
 			// self.emit(DEVICE_CONTROLLER_DEVICE_OPENED, newDevice.savedAttributes);
 			console.log('- device_controller in listener, message:', m);
 		}
@@ -428,8 +428,9 @@ function createDeviceController(io_interface) {
 		.then(function(res) {
 			var keys = Object.keys(self.devices);
 			keys.forEach(deleteDeviceReference);
+			defered.resolve(res);
 		});
-		defered.resolve();
+		
 		return defered.promise;
 	};
 

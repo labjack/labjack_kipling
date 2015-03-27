@@ -19,6 +19,12 @@ function newDevice(newProcess, mockDevice, mockDeviceConfig, sendFunc) {
 	var send = function(message) {
 		return sendFunc(self.device_comm_key, message);
 	};
+	var getDeviceEventListener = function(eventKey) {
+		var deviceEventListener = function(eventData) {
+			send({'name': eventKey, 'data': eventData});
+		};
+		return deviceEventListener;
+	};
 
 	this.device_comm_key = null;
 
@@ -49,6 +55,15 @@ function newDevice(newProcess, mockDevice, mockDeviceConfig, sendFunc) {
 			defered.reject('devices in sub-processes are currently not supported');
 		} else {
 			self.device = new device_curator.device(self.isMockDevice);
+
+			// Attach to device events.
+			var deviceEvents = constants.deviceEvents;
+			var keys = Object.keys(deviceEvents);
+			keys.forEach(function(key) {
+				var eventKey = deviceEvents[key];
+				self.device.on(eventKey, getDeviceEventListener(eventKey));
+			});
+
 			if(configureMockDevice) {
 				self.device.configureMockDevice(mockDeviceConfig)
 				.then(performOpenDevice)
@@ -57,8 +72,6 @@ function newDevice(newProcess, mockDevice, mockDeviceConfig, sendFunc) {
 				performOpenDevice()
 				.then(defered.resolve, defered.reject);
 			}
-			console.log('HERERE');
-			send('Bla Bla Bla');
 		}
 		return defered.promise;
 	};

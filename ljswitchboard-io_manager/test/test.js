@@ -12,22 +12,22 @@ var ENABLE_SIMPLE_TEST = false;						// Passing
 var TEST_DRIVER_CONTROLLER = false;					// Passing
 
 // Tests the creation of a sub-sub process (for each device being its own process)
-var TEST_SINGLE_DEVICE_CONTROLLER = false;
+var TEST_SINGLE_DEVICE_CONTROLLER = false;			// incomplete
 
 // Tests the scanning for devices
-var TEST_DEVICE_SCANNER = false;
+var TEST_DEVICE_SCANNER = false;					// Passes but outputs a lot of text.
 var TEST_MOCK_DEVICE_SCANNER = false;
 var TEST_LIVE_DEVICE_SCANNER = false;
 
 var TEST_DEVICE_CONTROLLER = false;					// incomplete
 var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing
 var TEST_DEVICE_CONTROLLER_LIVE_DEVICE = false;		// Passing
-var TEST_DEVICE_CONTROLLER_OPEN_ADVANCED = false;	//
-var TEST_DEVICE_KEEPER = false;
-var TEST_DEVICE_KEEPER_LIVE = false;
-var TEST_DEVICE_ERRORS = true;
+var TEST_DEVICE_CONTROLLER_OPEN_ADVANCED = false;	// Passing
+var TEST_DEVICE_KEEPER = false;						// Passing
+var TEST_DEVICE_KEEPER_LIVE = false;				// Passing
+var TEST_DEVICE_ERRORS = false;						// Passing
 var TEST_UPDATE_MOCK_DEVICE = false;				// Passing
-var TEST_UPDATE_USB_DEVICE = false;					// Failing, bad URL
+var TEST_UPDATE_USB_DEVICE = false;					// Passing
 
 
 if(ENABLE_BASIC_TEST) {
