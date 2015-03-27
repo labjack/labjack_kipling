@@ -255,7 +255,6 @@ function device(useMockDevice) {
 
 		if(errCode === 1239) {
 			if(self.savedAttributes.isConnected) {
-				console.log('  - device_curator: Device Disconnected');
 				self.savedAttributes.isConnected = false;
 				self.emit(DEVICE_DISCONNECTED, self.savedAttributes);
 				setImmediate(reconnectManager);
