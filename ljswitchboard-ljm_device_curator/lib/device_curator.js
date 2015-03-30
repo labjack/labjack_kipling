@@ -949,7 +949,7 @@ function device(useMockDevice) {
 	};
 	this.close = function() {
 		var defered = q.defer();
-		console.log('**** device_curator CLOSING DEVICE', self.savedAttributes.serialNumber, self.savedAttributes.handle);
+		self.haltBackgroundOperations();
 		ljmDevice.close(
 			function(err) {
 				self.allowReconnectManager = false;
