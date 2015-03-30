@@ -144,22 +144,9 @@ var deviceScanner = function() {
 				isNew = false;
 			}
 		});
-		var currentDevices = self.cachedCurrentDevices;
-		var keys = Object.keys(currentDevices);
-		keys.forEach(function(key) {
-			var device;
-			if(currentDevices[key].savedAttributes) {
-				device = currentDevices[key];
-			} else if(currentDevices[key].device){
-				device = currentDevices[key].device;
-			}
-			var serialNumber = device.savedAttributes.serialNumber;
-			if(serialNumber == newScanResult.serialNumber) {
-				isNew = false;
-			}
-		});
 		return isNew;
 	};
+
 	var getInitialConnectionTypeData = function(dt, ct, ip, method) {
 		var insertionMethod = 'scan';
 		var foundByAttribute = false;
@@ -572,24 +559,59 @@ var deviceScanner = function() {
 		}
 		return defered.promise;
 	};
+	var allowDeviceToClose = function(deviceRef) {
+		var closeDevice = true;
+		var currentDevices = self.cachedCurrentDevices;
+		var keys = Object.keys(currentDevices);
+		keys.forEach(function(key) {
+			var device;
+			if(currentDevices[key].savedAttributes) {
+				device = currentDevices[key];
+			} else if(currentDevices[key].device){
+				device = currentDevices[key].device;
+			}
+			var serialNumber = device.savedAttributes.serialNumber;
+			var deviceHandle = device.savedAttributes.handle;
+			if(serialNumber == deviceRef.savedAttributes.serialNumber) {
+				// Check the devices handle to as well as its serial number in
+				// order to say "don't close device".
+				if(deviceHandle == deviceRef.savedAttributes.handle) {
+					closeDevice = false;
+				}
+			}
+		});
+		return closeDevice;
+	};
 	var closeScannedDevice = function(data) {
 		var defered = q.defer();
 		if(data.openedDevice) {
-			// If the device is opened, try to close the device at most 2x
-			// and then return.
-			self.emit(eventList.CLOSING_FOUND_DEVICE, data.openParameters);
-			data.device.close()
-			.then(function(res) {
-				defered.resolve(data.scanResult);
-			}, function(err) {
-				device.close()
+			if(allowDeviceToClose(data.device)) {
+				// If the device is opened, try to close the device at most 2x
+				// and then return.
+				self.emit(eventList.CLOSING_FOUND_DEVICE, data.openParameters);
+				data.device.close()
 				.then(function(res) {
+					delete data.device;
 					defered.resolve(data.scanResult);
 				}, function(err) {
-					defered.resolve(data.scanResult);
+					device.close()
+					.then(function(res) {
+						delete data.device;
+						defered.resolve(data.scanResult);
+					}, function(err) {
+						delete data.device;
+						defered.resolve(data.scanResult);
+					});
 				});
-			});
+			} else {
+				// The device was open before the findAll function was called.
+				// Don't close it.
+				data.device.haltBackgroundOperations();
+				delete data.device;
+				defered.resolve(data.scanResult);
+			}
 		} else {
+			delete data.device;
 			defered.resolve(data.scanResult);
 		}
 		return defered.promise;
@@ -923,7 +945,7 @@ var deviceScanner = function() {
 						
 					}
 				} else {
-					console.log('device_scanner.js, why???', attrs[reqKey], attrKeys, reqKey);
+					// console.log('device_scanner.js, why???', attrs[reqKey], attrKeys, reqKey);
 					missingKeys.push(reqKey);
 				}
 			}
