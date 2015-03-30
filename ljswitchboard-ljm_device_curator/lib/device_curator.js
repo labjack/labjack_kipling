@@ -1292,8 +1292,10 @@ function device(useMockDevice) {
 			).then(function(results){
 				var resultDevice = results.getDevice();
 				ljmDevice.handle = resultDevice.handle;
+				self.savedAttributes.handle = resultDevice.handle;
 				ljmDevice.deviceType = resultDevice.deviceType;
 				ljmDevice.isHandleValid = resultDevice.isHandleValid;
+				console.info('Updated savedAttributes');
 				defered.resolve(results);
 			}, function(err) {
 				defered.reject(err);
