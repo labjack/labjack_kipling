@@ -116,7 +116,18 @@ function device(useMockDevice) {
 	};
 	var connectionManagerError = function(err) {
 		if(self.allowConnectionManager) {
-			startConnectionManager();
+			var exitCodes = [
+				1221,		// LJME_UNKNOWN_ERROR
+				1223,		// LJME_INVALID_HANDLE
+				1224,		// LJME_DEVICE_NOT_OPEN
+				1230,		// LJME_COULD_NOT_CLAIM_DEVICE
+				1233,		// LJME_SOCKET_LEVEL_ERROR
+				1237,		// LJME_CANNOT_DISCONNECT
+				1238,		// LJME_WINSOCK_FAILURE
+			];
+			if(exitCodes.indexOf(err) < 0) {
+				startConnectionManager();
+			}
 		}
 	};
 	var runConnectionManager = function() {
@@ -129,9 +140,16 @@ function device(useMockDevice) {
 			}
 		}
 	};
+	this.connectionManagerTimeout;
 	var startConnectionManager = function() {
 		self.verifiedDeviceConnection = false;
-		setTimeout(runConnectionManager, self.connectionCheckInterval);
+		self.connectionManagerTimeout = setTimeout(
+			runConnectionManager,
+			self.connectionCheckInterval
+		);
+	};
+	var stopConnectionManager = function() {
+		clearTimeout(self.connectionManagerTimeout);
 	};
 	var allowExecution = function() {
 		self.verifiedDeviceConnection = true;
@@ -158,6 +176,10 @@ function device(useMockDevice) {
 		);
 		return refreshDefered.promise;
 	};
+	this.reconnectManagerTimeout;
+	var stopReconnectManager = function() {
+		clearTimeout(self.reconnectManagerTimeout);
+	};
 	var reconnectManager = function() {
 		if(self.allowReconnectManager) {
 			if(!self.savedAttributes.isConnected) {
@@ -167,10 +189,17 @@ function device(useMockDevice) {
 						self.savedAttributes.isConnected = true;
 						self.emit(DEVICE_RECONNECTED, self.savedAttributes);
 					}, function() {
-						setTimeout(reconnectManager, 1000);
+						self.reconnectManagerTimeout = setTimeout(
+							reconnectManager,
+							1000
+						);
 					});
 			}
 		}
+	};
+	this.haltBackgroundOperations = function() {
+		stopConnectionManager();
+		stopReconnectManager();
 	};
 	var capitalizeString = function(s) {
 		return s.replace( /(^|\s)([a-z])/g , function(m,p1,p2){
@@ -207,13 +236,7 @@ function device(useMockDevice) {
 		}
 
 		// Report that a new error has occured.
-		var reportedData = {};
-		var errKeys = Object.keys(errData);
-		errKeys.forEach(function(errKey) {
-			reportedData[errKey] = errData[errKey];
-		});
-		reportedData.deviceAttributes = self.savedAttributes;
-		self.emit(DEVICE_ERROR, reportedData);
+		self.emit(DEVICE_ERROR, errData);
 	};
 	var innerSaveDeviceError = function(funcName, err, data) {
 		var jsonData = modbusMap.getErrorInfo(err);
@@ -225,7 +248,7 @@ function device(useMockDevice) {
 			'string': jsonData.string,
 			'name': transformErrorString(jsonData.string),
 			'operation': funcName,
-			'data': data
+			'data': data,
 		};
 		// console.log('Info', errorData);
 
@@ -926,6 +949,7 @@ function device(useMockDevice) {
 	};
 	this.close = function() {
 		var defered = q.defer();
+		console.log('**** device_curator CLOSING DEVICE', self.savedAttributes.serialNumber, self.savedAttributes.handle);
 		ljmDevice.close(
 			function(err) {
 				self.allowReconnectManager = false;
