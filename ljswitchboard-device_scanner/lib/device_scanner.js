@@ -147,7 +147,12 @@ var deviceScanner = function() {
 		var currentDevices = self.cachedCurrentDevices;
 		var keys = Object.keys(currentDevices);
 		keys.forEach(function(key) {
-			var device = currentDevices[key];
+			var device;
+			if(currentDevices[key].savedAttributes) {
+				device = currentDevices[key];
+			} else if(currentDevices[key].device){
+				device = currentDevices[key].device;
+			}
 			var serialNumber = device.savedAttributes.serialNumber;
 			if(serialNumber == newScanResult.serialNumber) {
 				isNew = false;
