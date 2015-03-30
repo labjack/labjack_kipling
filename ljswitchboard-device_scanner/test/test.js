@@ -2,6 +2,7 @@
 
 var BASIC_TEST = true;
 var MOCK_TEST = true;
+var SCAN_CONNECTED_DEVICES = true;
 var CRAZY_TEST = false;
 
 
@@ -14,6 +15,12 @@ if(MOCK_TEST) {
 	var mock_test = require('./mock_test');
 	exports.mock_test = mock_test.tests;
 }
+
+if(SCAN_CONNECTED_DEVICES) {
+	var scan_connected_devices = require('./scan_connected_devices');
+	exports.scan_connected_devices = scan_connected_devices.tests;
+}
+
 if(CRAZY_TEST) {
 	var crazy_test = require('./crazy_test');
 	exports.crazy_test = crazy_test.tests;

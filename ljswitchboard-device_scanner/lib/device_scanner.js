@@ -144,6 +144,15 @@ var deviceScanner = function() {
 				isNew = false;
 			}
 		});
+		var currentDevices = self.cachedCurrentDevices;
+		var keys = Object.keys(currentDevices);
+		keys.forEach(function(key) {
+			var device = currentDevices[key];
+			var serialNumber = device.savedAttributes.serialNumber;
+			if(serialNumber == newScanResult.serialNumber) {
+				isNew = false;
+			}
+		});
 		return isNew;
 	};
 	var getInitialConnectionTypeData = function(dt, ct, ip, method) {
@@ -852,7 +861,20 @@ var deviceScanner = function() {
 		var defered = q.defer();
 
 		var deviceKey = deviceAttributes.key;
-		var dev = currentDevices[deviceKey].device;
+		var dev;
+
+		if(currentDevices[deviceKey]) {
+			if(currentDevices[deviceKey].savedAttributes) {
+				dev = currentDevices[deviceKey]
+			} else if(currentDevices[deviceKey].device) {
+				dev = currentDevices[deviceKey].device;
+			}
+		} else {
+			console.error('We Have Big Issues!!, populateDeviceInfo');
+			throw new Error('Unexpected currentDevices object');
+			return;
+		}
+		
 		var attrs = dev.savedAttributes;
 		var attrKeys = Object.keys(attrs);
 		var dt = dev.savedAttributes.deviceType;
@@ -957,7 +979,6 @@ var deviceScanner = function() {
 					
 				}
 				deviceAttributes.acquiredRequiredData = true;
-
 				defered.resolve(deviceAttributes);
 			});
 		} else {
@@ -996,30 +1017,28 @@ var deviceScanner = function() {
 		});
 		return defered.promise;
 	};
-	var getFindAllDevices = function(currentDevices) {
-		var findAllDevices = function() {
-			var defered = q.defer();
-			var promises = SCAN_REQUEST_LIST.map(scanForDevices);
-			if(currentDevices) {
-				if(Object.keys(currentDevices).length > 0) {
-					// Add task that queries currently connected devices for their data.
-					promises.push(getCurrentDeviceListing(currentDevices));
-				}
+	var internalFindAllDevices = function() {
+		var currentDevices = self.cachedCurrentDevices;
+		var defered = q.defer();
+		var promises = SCAN_REQUEST_LIST.map(scanForDevices);
+		if(currentDevices) {
+			if(Object.keys(currentDevices).length > 0) {
+				// Add task that queries currently connected devices for their data.
+				promises.push(getCurrentDeviceListing(currentDevices));
 			}
+		}
 
-			q.allSettled(promises)
-			.then(function(res) {
-				self.emit(eventList.COMBINING_SCAN_RESULTS);
-				combineScanResults()
-				.then(defered.resolve, defered.reject);
-			}, function(err) {
-				// console.log("scan error", err);
-				defered.reject(self.scanResults);
-			});
-			
-			return defered.promise;
-		};
-		return findAllDevices;
+		q.allSettled(promises)
+		.then(function(res) {
+			self.emit(eventList.COMBINING_SCAN_RESULTS);
+			combineScanResults()
+			.then(defered.resolve, defered.reject);
+		}, function(err) {
+			// console.log("scan error", err);
+			defered.reject(self.scanResults);
+		});
+		
+		return defered.promise;
 	};
 
 	this.originalOldfwState = 0;
@@ -1180,14 +1199,31 @@ var deviceScanner = function() {
 	};
 	var returnResults = function() {
 		var defered = q.defer();
-		defered.resolve(self.sortedResults);
+		
 		self.scanInProgress = false;
+
+		var numToDelete;
+		var i;
+		numToDelete = self.cachedCurrentDevices.length;
+		for(i = 0; i < numToDelete; i++) {
+			delete self.cachedCurrentDevices[i];
+		}
+		self.cachedCurrentDevices = [];
+
+		defered.resolve(self.sortedResults);
 		return defered.promise;
 	};
+
+	this.cachedCurrentDevices = [];
 	this.findAllDevices = function(currentDevices) {
 		var defered = q.defer();
 		if(!self.scanInProgress) {
 			self.scanInProgress = true;
+			if(currentDevices) {
+				self.cachedCurrentDevices = currentDevices;
+			} else {
+				self.cachedCurrentDevices = [];
+			}
 			var numToDelete;
 			var i;
 			// Empty the cached scanResults
@@ -1223,8 +1259,8 @@ var deviceScanner = function() {
 			if(deviceScanningEnabled) {
 				saveDriverOldfwState()
 				.then(disableDriverOldfwState, getOnError('saveDriverOldfwState'))
-				.then(getFindAllDevices(currentDevices), getOnError('disableDriverOldfwState'))
-				.then(restoreDriverOldfwState, getOnError('getFindAllDevices'))
+				.then(internalFindAllDevices, getOnError('disableDriverOldfwState'))
+				.then(restoreDriverOldfwState, getOnError('internalFindAllDevices'))
 				.then(populateMissingScanData, getOnError('restoreDriverOldfwState'))
 				.then(markActiveDevices, getOnError('populateMissingScanData'))
 				.then(sortResultConnectionTypes, getOnError('markActiveDevices'))
@@ -1232,8 +1268,8 @@ var deviceScanner = function() {
 				.then(returnResults, getOnError('sortScanResults'))
 				.then(defered.resolve, defered.reject);
 			} else {
-				getFindMockDevices(currentDevices)()
-				.then(populateMissingScanData, getOnError('getFindAllDevices'))
+				internalFindMockDevices()
+				.then(populateMissingScanData, getOnError('internalFindMockDevices'))
 				.then(markActiveDevices, getOnError('populateMissingScanData'))
 				.then(sortResultConnectionTypes, getOnError('markActiveDevices'))
 				.then(sortScanResults, getOnError('sortResultConnectionTypes'))
@@ -1308,30 +1344,29 @@ var deviceScanner = function() {
 		});
 		return defered.promise;
 	};
-	var getFindMockDevices = function(currentDevices) {
-		var findMockDevices = function() {
-			var defered = q.defer();
-			var promises = SCAN_REQUEST_LIST.map(scanForMockDevices);
-			if(currentDevices) {
-				if(Object.keys(currentDevices).length > 0) {
-					// Add task that queries currently connected devices for their data.
-					promises.push(getCurrentDeviceListing(currentDevices));
-				}
-			}
 
-			q.allSettled(promises)
-			.then(function(res) {
-				self.emit(eventList.COMBINING_SCAN_RESULTS);
-				combineScanResults()
-				.then(defered.resolve, defered.reject);
-			}, function(err) {
-				// console.log("scan error", err);
-				defered.reject(self.scanResults);
-			});
-			
-			return defered.promise;
-		};
-		return findMockDevices;
+	var internalFindMockDevices = function() {
+		var defered = q.defer();
+		var currentDevices = self.cachedCurrentDevices;
+		var promises = SCAN_REQUEST_LIST.map(scanForMockDevices);
+		if(currentDevices) {
+			if(Object.keys(currentDevices).length > 0) {
+				// Add task that queries currently connected devices for their data.
+				promises.push(getCurrentDeviceListing(currentDevices));
+			}
+		}
+
+		q.allSettled(promises)
+		.then(function(res) {
+			self.emit(eventList.COMBINING_SCAN_RESULTS);
+			combineScanResults()
+			.then(defered.resolve, defered.reject);
+		}, function(err) {
+			// console.log("scan error", err);
+			defered.reject(self.scanResults);
+		});
+		
+		return defered.promise;
 	};
 
 	/*

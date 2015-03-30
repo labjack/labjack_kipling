@@ -85,7 +85,7 @@ exports.tests = {
 			}
 			test.done();
 		}, function(err) {
-			console.log('Scanning Error');
+			console.log('Scanning Error', err);
 			test.done();
 		});
 	},
@@ -123,7 +123,7 @@ exports.tests = {
 			testScanResults(deviceTypes, expectedData, test, false);
 			test.done();
 		}, function(err) {
-			console.log('Scanning Error');
+			console.log('Scanning Error', err);
 			test.done();
 		});
 	},
@@ -160,7 +160,7 @@ exports.tests = {
 			testScanResults(deviceTypes, expectedData, test, false);
 			test.done();
 		}, function(err) {
-			console.log('Scanning Error');
+			console.log('Scanning Error', err);
 			test.done();
 		});
 	},
@@ -197,7 +197,7 @@ exports.tests = {
 			testScanResults(deviceTypes, expectedData, test, false);
 			test.done();
 		}, function(err) {
-			console.log('Scanning Error');
+			console.log('Scanning Error', err);
 			test.done();
 		});
 	},
@@ -251,7 +251,7 @@ exports.tests = {
 			testScanResults(deviceTypes, expectedData, test, false);
 			test.done();
 		}, function(err) {
-			console.log('Scanning Error');
+			console.log('Scanning Error', err);
 			test.done();
 		});
 	},
@@ -304,7 +304,7 @@ exports.tests = {
 			testScanResults(deviceTypes, expectedData, test, false);
 			test.done();
 		}, function(err) {
-			console.log('Scanning Error');
+			console.log('Scanning Error', err);
 			test.done();
 		});
 	},
@@ -357,7 +357,7 @@ exports.tests = {
 			testScanResults(deviceTypes, expectedData, test, false);
 			test.done();
 		}, function(err) {
-			console.log('Scanning Error');
+			console.log('Scanning Error', err);
 			test.done();
 		});
 	},
@@ -415,7 +415,7 @@ exports.tests = {
 			testScanResults(deviceTypes, expectedData, test, false);
 			test.done();
 		}, function(err) {
-			console.log('Scanning Error');
+			console.log('Scanning Error', err);
 			test.done();
 		});
 	},
