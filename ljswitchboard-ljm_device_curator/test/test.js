@@ -28,7 +28,7 @@ var digit_basic_test = require('./digit_basic_test');
 
 /********************** Perform tests *****************************************/
 // Perform Generic tests on mock devices
-// exports.mock_device_test = mock_device_test.tests;								// Passing
+exports.mock_device_test = mock_device_test.tests;								// Passing
 // exports.mock_device_defaults_cache_test = mock_device_defaults_cache_test.tests;// Passing
 // exports.mock_device_attrs_test = mock_device_attrs_test.tests;
 

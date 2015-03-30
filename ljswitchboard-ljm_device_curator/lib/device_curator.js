@@ -380,6 +380,7 @@ function device(useMockDevice) {
 			var defered = q.defer();
 			self.deviceErrors = [];
 			self.savedAttributes = {};
+			self.savedAttributes.handle = ljmDevice.handle;
 			self.savedAttributes.isMockDevice = self.isMockDevice;
 			self.savedAttributes.isConnected = true;
 			this.allowReconnectManager = false;
