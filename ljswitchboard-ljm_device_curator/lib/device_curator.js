@@ -207,7 +207,13 @@ function device(useMockDevice) {
 		}
 
 		// Report that a new error has occured.
-		self.emit(DEVICE_ERROR, errData);
+		var reportedData = {};
+		var errKeys = Object.keys(errData);
+		errKeys.forEach(function(errKey) {
+			reportedData[errKey] = errData[errKey];
+		});
+		reportedData.deviceAttributes = self.savedAttributes;
+		self.emit(DEVICE_ERROR, reportedData);
 	};
 	var innerSaveDeviceError = function(funcName, err, data) {
 		var jsonData = modbusMap.getErrorInfo(err);
@@ -219,7 +225,7 @@ function device(useMockDevice) {
 			'string': jsonData.string,
 			'name': transformErrorString(jsonData.string),
 			'operation': funcName,
-			'data': data,
+			'data': data
 		};
 		// console.log('Info', errorData);
 
