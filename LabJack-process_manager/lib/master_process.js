@@ -313,6 +313,11 @@ function createNewProcessManager() {
                     deviceManagerSlaveOptions.execPath = options.execPath;
                 }
             }
+            if(options.execArgv) {
+                if(Array.isArray()) {
+                    deviceManagerSlaveOptions.execArgv = options.execArgv;
+                }
+            }
             if(options.spawnChildProcess) {
                 deviceManagerSlaveOptions.spawnChildProcess = options.spawnChildProcess;
             }
