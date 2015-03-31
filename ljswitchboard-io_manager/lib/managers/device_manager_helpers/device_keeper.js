@@ -527,7 +527,9 @@ function createDeviceKeeper(io_delegator, link) {
 		var defered = q.defer();
 
 		deviceScanner.findAllDevices(self.devices)
-		.then(defered.resolve, defered.reject);
+		.then(function(data) {
+			defered.resolve(data);
+		}, defered.reject);
 		return defered.promise;
 	};
 

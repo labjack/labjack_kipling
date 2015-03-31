@@ -341,9 +341,10 @@ function createIOInterface() {
 
 
 		// Define the version of the node binary to look for
-		var version = '0_10_33';
+		// var version = '0_10_33';
 		// Force execution of node 0_10_35
 		// version = '0_10_35';
+		var version = '0_12_1';
 
 		// If the labjack-nodejs lib`rary isn't built for the version defined
 		// then prevent the subprocess from starting.
@@ -470,7 +471,8 @@ function createIOInterface() {
 			'execPath': info.path,
 			'cwd': info.cwd,
 			'spawnChildProcess': false,
-			'debug_mode': false
+			'debug_mode': false,
+			'execArgv': ['-expose-gc']
 		};
 
 		// Detect if the current process is node-webkit or node via checking for

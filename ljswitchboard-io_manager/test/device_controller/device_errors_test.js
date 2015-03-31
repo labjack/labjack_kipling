@@ -133,43 +133,16 @@ exports.tests = {
 		.then(function(res) {
 			test.ok(false, 'Should have run into an error');
 		}, function(err) {
-			console.log('  - Error:', err);
 			test.ok(errorDetected, 'device should have thrown a "DEVICE_ERROR"');
 			test.done();
 		});
 	},
 	'disconnect device': function(test) {
-		
-		var reportedToCmd = false;
-		var disconnectDevice = function() {
-			device.read('AIN0')
-			.then(function(res) {
-				if(!reportedToCmd) {
-					console.log('  - Please Disconnect Device');
-					reportedToCmd = true;
-				}
-				setTimeout(disconnectDevice, 100);
-			}, function(err) {
-				if(err === 1239) {
-					console.log('  - Device Disconnected');
-					test.ok(
-						deviceReportedDisconnected,
-						'Device should have reported that it was disconnected'
-					);
-					test.done();
-				} else {
-					console.log('Encountered Error', err);
-					setTimeout(disconnectDevice, 100);
-				}
-			});
-		};
-		var deviceReportedDisconnected = false;
+		console.log('  - Please Disconnect Device');
 		device.once('DEVICE_DISCONNECTED', function() {
-			deviceReportedDisconnected = true;
+			console.log('  - Device Disconnected');
+			test.done();
 		});
-		device.once('DEVICE_ERROR', function(data) {
-		});
-		disconnectDevice();
 	},
 	'wait for reconnecting error': function(test) {
 		device.once('DEVICE_ERROR', function(data) {

@@ -48,6 +48,15 @@ var receivers = [
 	'file_io_manager'
 ];
 
+function runGarbageCollector() {
+	if(global.gc) {
+		if(typeof(global.gc) === 'function') {
+			global.gc();
+		}
+	}
+};
+var io_delegator_gc = setInterval(runGarbageCollector, 5000);
+
 function createIODelegator(slave_process) {
 	this.sp = slave_process;
 	this.sp_event_emitter = null;
