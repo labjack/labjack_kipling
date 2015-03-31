@@ -56,6 +56,7 @@ var print = function(argA, argB) {
 var readStream = null;
 var writeStream = null;
 var createStreamInterface = false;
+var exitListenerFunc = undefined;
 if(createStreamInterface) {
 	try {
 		readStream = fs.createReadStream(null, {fd: 4});
@@ -155,13 +156,29 @@ function createNewMessageManager(listeners) {
 		return defered.promise;
 	};
 	var stopChildprocess = function(bundle) {
+		var retData;
 		var defered = q.defer();
-
-		console.log("S: in stopChildprocess");
-		retData = 1;
-		bundle.successData = retData;
-		bundle.isHandled = true;
-		defered.resolve(bundle);
+		if(exitListenerFunc) {
+			var exitHandler = exitListenerFunc();
+			if(exitHandler.then) {
+				exitHandler.then(function() {
+					retData = 1;
+					bundle.successData = retData;
+					bundle.isHandled = true;
+					defered.resolve(bundle);
+				});
+			} else {
+				retData = 1;
+				bundle.successData = retData;
+				bundle.isHandled = true;
+				defered.resolve(bundle);
+			}
+		} else {
+			retData = 1;
+			bundle.successData = retData;
+			bundle.isHandled = true;
+			defered.resolve(bundle);
+		}
 		return defered.promise;
 	};
 	var internalMessageBindings = {};
@@ -468,3 +485,6 @@ exports.send = function(type, data) {
 		return messageManager.emitMessage(message);
 	}
 };
+exports.attachOnExitListener = function(onExitFunc) {
+	exitListenerFunc = onExitFunc;
+}

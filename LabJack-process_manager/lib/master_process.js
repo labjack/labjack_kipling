@@ -181,6 +181,9 @@ function createNewProcessManager() {
             } else if(bundle.message.type === PM_GET_PROCESS_INFO) {
                 bundle.isHandled = false;
                 bundle.executeMessageCallback = true;
+            } else if(bundle.message.type === PM_STOP_CHILD_PROCESS) {
+                bundle.isHandled = false;
+                bundle.executeMessageCallback = true;
             } else {
                 console.log('internal message type encountered and not handled', bundle.message);
                 bundle.isHandled = true;
@@ -543,6 +546,7 @@ function createNewProcessManager() {
     this.stopChildProcess = function() {
         var defered = q.defer();
         stopOpenStreams()
+        .then(informChildProcessToStop)
         .then(innerStopChildProcess)
         .then(defered.resolve, defered.reject);
         return defered.promise;
@@ -555,6 +559,12 @@ function createNewProcessManager() {
         }
         stopStreams.resolve();
         return stopStreams.promise;
+    };
+    var informChildProcessToStop = function() {
+        var defered = q.defer();
+        self.qSendInternalMessage(PM_STOP_CHILD_PROCESS,'')
+        .then(defered.resolve, defered.reject);
+        return defered.promise;
     };
     var innerStopChildProcess = function() {
         var stopDefered = q.defer();
