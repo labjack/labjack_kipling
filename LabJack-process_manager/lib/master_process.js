@@ -314,7 +314,7 @@ function createNewProcessManager() {
                 }
             }
             if(options.execArgv) {
-                if(Array.isArray()) {
+                if(Array.isArray(options.execArgv)) {
                     deviceManagerSlaveOptions.execArgv = options.execArgv;
                 }
             }
