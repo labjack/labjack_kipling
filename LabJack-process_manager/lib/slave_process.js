@@ -160,7 +160,13 @@ function createNewMessageManager(listeners) {
 		var defered = q.defer();
 		if(exitListenerFunc) {
 			var exitHandler = exitListenerFunc();
-			if(exitHandler.then) {
+			var isPromise = false;
+			if(typeof(exitHandler) !== 'undefined') {
+				if(typeof(exitHandler.then) === 'function') {
+					isPromise = true;
+				}
+			}
+			if(isPromise) {
 				exitHandler.then(function() {
 					retData = 1;
 					bundle.successData = retData;
