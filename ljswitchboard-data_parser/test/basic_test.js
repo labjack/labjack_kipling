@@ -329,6 +329,30 @@ exports.tests = {
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
+	'check TEMPERATURE_DEVICE_K': function(test) {
+		var vals = [
+			{'reg': 'TEMPERATURE_DEVICE_K', 'val': 303.123456, 'res': 303.1235}
+		];
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			var reg = val.reg;
+			results.push(data_parser.parseResult(reg, val.val));
+			reqResults.push({
+				'register': reg,
+				'name': constants.getAddressInfo(reg).data.name,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.res,
+				'str': val.res.toString(),
+				'unit': 'K'
+			});
+		});
+
+		// console.log('Results', results);
+		test.deepEqual(results, reqResults);
+		test.done();
+	},
 	'check POWER_ registers for text output': function(test) {
 		test.done();
 	},

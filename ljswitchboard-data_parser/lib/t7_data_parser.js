@@ -34,6 +34,15 @@ var T7_LIST = {
 			return res;
 		}
 	},
+	'TEMPERATURE_DEVICE_K':{
+		'decode': function(val) {
+			return {
+				'val': parseFloat(val.toFixed(4)),
+				'str': val.toFixed(4),
+				'unit': 'K',
+			};
+		},
+	},
 	'WIFI_STATUS': {
 		'valToString': {
 			2900: 'Associated',
