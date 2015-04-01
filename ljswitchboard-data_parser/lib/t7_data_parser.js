@@ -8,7 +8,17 @@ var ipDataType = {
 };
 
 var firmwareVersionRounder = shared_data_parser.firmwareVersionRounder;
-
+var decodeCurrentSourceCalVal = function(val) {
+	var res = {
+		'val': 0,
+		'str': '',
+		'unit': 'uA',
+	};
+	var rVal = (val * 1000000).toFixed(3);
+	res.val = parseFloat(rVal);
+	res.str = rVal;
+	return res;
+};
 var T7_LIST = {
 	'AIN#(0:254)': {
 		'decode': function(val) {
@@ -42,6 +52,12 @@ var T7_LIST = {
 				'unit': 'K',
 			};
 		},
+	},
+	'CURRENT_SOURCE_200UA_CAL_VALUE': {
+		'decode': decodeCurrentSourceCalVal,
+	},
+	'CURRENT_SOURCE_10UA_CAL_VALUE': {
+		'decode': decodeCurrentSourceCalVal,
 	},
 	'WIFI_STATUS': {
 		'valToString': {

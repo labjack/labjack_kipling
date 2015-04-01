@@ -353,6 +353,31 @@ exports.tests = {
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
+	'check CURRENT_SOURCE_x_CAL_VALUE': function(test) {
+		var vals = [
+			{'reg': 'CURRENT_SOURCE_10UA_CAL_VALUE', 'val': 0.0001981853274, 'res': 198.185},
+			{'reg': 'CURRENT_SOURCE_200UA_CAL_VALUE', 'val': 0.0001002213502, 'res': 100.221}
+		];
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			var reg = val.reg;
+			results.push(data_parser.parseResult(reg, val.val));
+			reqResults.push({
+				'register': reg,
+				'name': constants.getAddressInfo(reg).data.name,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.res,
+				'str': val.res.toString(),
+				'unit': 'uA'
+			});
+		});
+
+		// console.log('Results', results);
+		test.deepEqual(results, reqResults);
+		test.done();
+	},
 	'check POWER_ registers for text output': function(test) {
 		test.done();
 	},
