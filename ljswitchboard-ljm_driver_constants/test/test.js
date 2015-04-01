@@ -14,4 +14,9 @@ exports.tests = {
 		});
 		test.done();
 	},
+	'check ljm default values': function(test){
+		var keys = Object.keys(driver_constants.defaultValues);
+		test.strictEqual(keys.length, 7, 'invalid number of default values');
+		test.done();
+	}
 };
