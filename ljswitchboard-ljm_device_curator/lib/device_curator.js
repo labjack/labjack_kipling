@@ -581,10 +581,14 @@ function device(useMockDevice) {
 	this.read = function(address) {
 		var defered = q.defer();
 		if(allowExecution()) {
-			ljmDevice.read(
+			var operation = 'read';
+			if((address === 'ETHERNET_MAC')||(address === 'WIFI_MAC')) {
+				operation = 'readUINT64';
+			}
+			ljmDevice[operation](
 				address,
 				function(err) {
-					captureDeviceError('read', err, {'address': address});
+					captureDeviceError(operation, err, {'address': address});
 					defered.reject(err);
 				},
 				defered.resolve
