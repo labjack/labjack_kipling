@@ -1,0 +1,89 @@
+#change-name-controls
+{
+    display: none;
+    margin: 20px 0 30px 0;
+}
+.device-info-module-block {
+    min-width: 660px;
+}
+.device-info-div {
+    display:block;
+    float:left;
+}
+.device-links-div {
+    display:block;
+    float:left;
+    margin-left:10px;
+}
+.important-info
+{
+    font-weight: bold;
+}
+
+.info-section
+{
+    margin: 20px 0 0 85px;
+    position: relative;
+}
+.lj-link-holder {
+    cursor: pointer;
+}
+#change-name-link {
+    padding: 0px 5px;
+    margin: 0px 0px;
+    margin-top: -5px;
+}
+.block-separator {
+    height: 20px;
+}
+.pane-popover {
+    position: absolute;
+    width: 60px;
+    height: 18px;
+    line-height: 18px;
+    padding: 3px;
+    padding-right: 6px;
+    padding-left: 0px;
+    font-size: 12px;
+    color: white;
+    background-color: #999999;
+    margin-top: -3px;
+    left: -81px;
+    font-weight: bold;
+    text-align: right;
+}
+
+.pane-popover:after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-width: 7px;
+    border-style: solid;
+    border-color: transparent transparent transparent #999999;
+    top: 5px;
+    left: 66px;
+}
+
+#power-overview {
+    margin-top: 30px;
+}
+
+.power-indicator {
+    width: 14px;
+    height: 14px;
+    background-color: #C0C0C0;
+    display: inline-block;
+}
+
+.power-indicator.powered {
+    background-color: #00C000;
+}
+
+.calibration-message {
+    padding: 2px 5px 2px 8px;
+}
+
+.product-image {
+    width:220px;
+}

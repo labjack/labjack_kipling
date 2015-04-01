@@ -13,7 +13,7 @@
             </thead>--}}
             <tbody>
                 {{#devices}}
-                <tr class='SERIAL_NUMBER_{{serialNumber}}'>
+                <tr class="SERIAL_NUMBER_{{serialNumber}} {{#unless isConnected}}text-error{{/unless}}">
                     <td class="device-selector-table-device-selector">
                         <label class="radio" style="display:none">
                             <input name="selected-device" class="device-selection-radio" id="{{serialNumber}}-selector" type="radio" value="{{serialNumber}}">
@@ -24,9 +24,6 @@
                         <div class="hide-overflow-text" title="Product Type">{{productType}}</div>
                     </td>
                     <td class="device-selector-table-connection-type">
-                        {{#unless isConnected}}
-                        <span class="status-icon icon-warn-2"></span>
-                        {{/unless}}
                         <div class="hide-overflow-text" title="Connection Type">{{connectionTypeName}}</div>
                     </td>
                     <td class="device-selector-table-serial-number">
@@ -37,18 +34,26 @@
                     </td>
                     <td class="device-selector-table-status">
                         <div class="btn-group expand-right">
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <div class="module-chrome-tab-badge">
                                     <span class="badge">{{#if isConnected}}0{{else}}1{{/if}}</span>
                                 </div>
                             </button>
-                            <ul class="dropdown-menu" role="menu">
-                                {{#if isConnected}}
-                                    <li><a>No Messages</a></li>
-                                {{else}}
-                                    <li><a>Device Not Connected</a></li>
-                                {{/if}}
+                            <ul class="dropdown-menu dropdown-menu-data" role="menu">
+                                <li><ul class="dropdown-menu-errors">
+                                    {{#if isConnected}}
+                                        <li class="error-message">No Errors</li>
+                                    {{else}}
+                                        <li class="error-message">Device Not Connected</li>
+                                    {{/if}}
+                                </ul></li>
+                                <li class="divider"></li>
+                                <li><a class="clear-error-messages">Clear Errors</a></li>
+                                <li><a class="copy-to-clipboard">Copy Errors</a></li>
                             </ul>
+                        </div>
+                        <div class="connection-status-div">
+                            <span class="icon-warning-2 text-warning connection-status-icon" style="{{#if isConnected}}display:none;{{/if}}"></span>
                         </div>
                     </td>
                 </tr>
@@ -63,6 +68,6 @@
         </div>
     </div>
     <div id="device-view" style="display:none" class="unselectable"></div>
-    <pre>{{printContext}}</pre>
-    <pre>{{stats.numLoaded}}</pre>
+    {{!--<pre>{{printContext}}</pre>--}}
+    {{!--<pre>{{stats.numLoaded}}</pre>--}}
 </div>

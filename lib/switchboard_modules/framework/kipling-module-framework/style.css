@@ -114,6 +114,9 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+#device-selector-table {
+    margin-bottom:0;
+}
 .device-selector-table-device-selector {
     width:52px;
 }
@@ -129,17 +132,56 @@
 .device-selector-table-status {
     width:80px;
 }
+td.device-selector-table-status {
+    min-width:80px;
+}
 .device-selector-table-status .module-chrome-tab-badge{
     padding-left: 5px;
 }
 .device-selector-table-status .btn-group {
     margin: -4px;
+    float:left;
 }
 .device-selector-table-status .btn-group .dropdown-menu {
     padding:0;
+    width:400px;
+}
+
+.device-selector-table-status .btn-group .dropdown-menu .divider{
+    margin-top: 0;
+    margin-bottom: 0;
+    background-color: #bababa;
+    border-bottom: 0px solid #fff;
+}
+.device-selector-table-status .btn-group .dropdown-menu p{
+    white-space: normal;
 }
 
 .device-selector-table-status .btn-group button{
     border: none;
     background-color: inherit;
+}
+
+.connection-status-div {
+    float:right;
+}
+.connection-status-icon {
+    
+}
+.device-selector-table-status ul.dropdown-menu-errors {
+    margin: 5px;
+    overflow-y: auto;
+    height:200px;
+}
+.device-selector-table-status li.error-message {
+    list-style: none;
+    color: #333;
+}
+
+.device-selector-table-status dl.device-error-description-message {
+    margin-bottom:5px;
+}
+
+.device-selector-table-status .clear-error-messages:hover{
+    cursor: pointer;
 }
