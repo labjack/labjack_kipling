@@ -34,10 +34,10 @@ exports.mock_device_test = mock_device_test.tests;								// Passing
 
 // Perform T7 related tests
 // exports.t7_basic_test = t7_basic_test.tests;									// Passing
-// exports.t7_check_calibration_test = t7_check_calibration_test.tests;			// Passing
+exports.t7_check_calibration_test = t7_check_calibration_test.tests;			// Passing
 // exports.t7_read_recovery_fw_version_test = t7_read_recovery_fw_version_test.tests;
 // exports.t7_upgrade_test = t7_upgrade_test.tests;								// Passing
-exports.t7_error_test = t7_error_test.tests;									// Passing
+// exports.t7_error_test = t7_error_test.tests;									// Passing
 // exports.t7_open_close_test = t7_open_close_test.tests;						// Passing
 // exports.t7_basic_stream_test = t7_basic_stream_test.tests;						// Passing
 // exports.t7_single_channel_speed_test = t7_single_channel_speed_test.tests;		// Passing

@@ -43,7 +43,7 @@ var device_tests = {
 	'openDevice': function(test) {
 		var td = {
 			'dt': 'LJM_dtT7',
-			'ct': 'LJM_ctANY',
+			'ct': 'LJM_ctUSB',
 			'id': 'LJM_idANY'
 		};
 
@@ -73,6 +73,7 @@ var device_tests = {
 			test.strictEqual(res.deviceType, 7);
 			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
 			test.ok(res.calibrationStatus.overall, 'Device Not Calibrated');
+			test.strictEqual(res.calibrationStatus.message, 'Device Calibration is Good');
 			test.done();
 		});
 	},
