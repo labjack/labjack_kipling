@@ -5,5 +5,13 @@ exports.tests = {
 		var keys = Object.keys(driver_constants);
 		test.ok(keys.length > 0, 'Constants were not included');
 		test.done();
-	}
+	},
+	'check ljm types': function(test) {
+		var keys = Object.keys(driver_constants.ljmTypes);
+		// Make sure all types are of type "number".
+		keys.forEach(function(key) {
+			test.strictEqual(typeof(driver_constants.ljmTypes[key]), 'number');
+		});
+		test.done();
+	},
 };

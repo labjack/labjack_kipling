@@ -242,6 +242,47 @@ exports.LJM_FLOAT32 = 3; 			                 // C type of float
 exports.LJM_STRING = 98;                             // C type of c-String
 exports.LJM_BYTE = 99;                               // C type of unsigned char
 
+exports.ljmTypes = {
+	'LJM_UINT64': exports.LJM_UINT64,
+	'UINT64': exports.LJM_UINT64,
+	'Uint64': exports.LJM_UINT64,
+	'uint64': exports.LJM_UINT64,
+	'LJM_UINT16': exports.LJM_UINT16,
+	'UINT16': exports.LJM_UINT16,
+	'Uint16': exports.LJM_UINT16,
+	'uint16': exports.LJM_UINT16,
+	'LJM_UINT32': exports.LJM_UINT32,
+	'UINT32': exports.LJM_UINT32,
+	'Uint32': exports.LJM_UINT32,
+	'uint32': exports.LJM_UINT32,
+	'LJM_INT32': exports.LJM_INT32,
+	'INT32': exports.LJM_INT32,
+	'Int32': exports.LJM_INT32,
+	'int32': exports.LJM_INT32,
+	'LJM_FLOAT32': exports.LJM_FLOAT32,
+	'FLOAT32': exports.LJM_FLOAT32,
+	'Float32': exports.LJM_FLOAT32,
+	'float32': exports.LJM_FLOAT32,
+	'LJM_STRING': exports.LJM_STRING,
+	'STRING': exports.LJM_STRING,
+	'String': exports.LJM_STRING,
+	'string': exports.LJM_STRING,
+	'LJM_BYTE': exports.LJM_BYTE,
+	'BYTE': exports.LJM_BYTE,
+	'Byte': exports.LJM_BYTE,
+	'byte': exports.LJM_BYTE,
+}
+
+var defaultValues = {};
+defaultValues[exports.LJM_UINT64] = '00:00:00:00:00:00';
+defaultValues[exports.LJM_UINT16] = 0;
+defaultValues[exports.LJM_UINT32] = 0;
+defaultValues[exports.LJM_INT32] = 0;
+defaultValues[exports.LJM_FLOAT32] = -9999;
+defaultValues[exports.LJM_STRING] = '';
+defaultValues[exports.LJM_BYTE] = 0;
+exports.defaultValues = defaultValues;
+
 exports.ARCH_INT_NUM_BYTES = 4;
 exports.ARCH_DOUBLE_NUM_BYTES = 8;
 
