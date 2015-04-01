@@ -219,14 +219,18 @@ var testDeviceObject = function(test, device, expDevice) {
 exports.testDeviceObject = testDeviceObject;
 
 var testDeviceObjects = function(test, devices, expDevices) {
-	test.strictEqual(devices.length, expDevices.length, 'Num Devices not correct');
-	expDevices.forEach(function(expDevice, i) {
-		var device = devices[i];
-		testDeviceObject(
-			test,
-			device,
-			expDevice
-		);
-	});
+	try {
+		test.strictEqual(devices.length, expDevices.length, 'Num Devices not correct');
+		expDevices.forEach(function(expDevice, i) {
+			var device = devices[i];
+			testDeviceObject(
+				test,
+				device,
+				expDevice
+			);
+		});
+	} catch(err) {
+		test.ok(false, 'Error Running Test' + err.toString());
+	}
 };
 exports.testDeviceObjects = testDeviceObjects;

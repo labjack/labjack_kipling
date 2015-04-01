@@ -336,7 +336,7 @@ function createDeviceKeeper(io_delegator, link) {
 		},
 		'minFW': function (param, attrs) {
 			var res = false;
-			if(parseFloat(param) >= attrs.FIRMWARE_VERSION) {
+			if(attrs.FIRMWARE_VERSION >= parseFloat(param)) {
 				res = true;
 			}
 			return res;
@@ -386,18 +386,27 @@ function createDeviceKeeper(io_delegator, link) {
 	};
 	var specialDeviceFilterKeys = Object.keys(specialDeviceFilters);
 	var passesDeviceFilters = function(filters, attrs) {
-		var passes = true;
+		var passes = false;
 		if(typeof(filters) !== 'undefined') {
-			var keys = Object.keys(filters);
-			keys.forEach(function(key) {
-				if(specialDeviceFilterKeys.indexOf(key) >= 0) {
-					if(!specialDeviceFilters[key](filters[key], attrs)) {
-						passes = false;
+			filters.forEach(function(filter) {
+				var innerPasses = true;
+				var keys = Object.keys(filter);
+				keys.forEach(function(key) {
+					if(specialDeviceFilterKeys.indexOf(key) >= 0) {
+						if(!specialDeviceFilters[key](filter[key], attrs)) {
+							innerPasses = false;
+						}
+					} else if(filter[key] !== attrs[key]) {
+						innerPasses = false;
 					}
-				} else if(filters[key] !== attrs[key]) {
-					passes = false;
+				});
+				if(innerPasses) {
+					passes = true;
 				}
 			});
+			if(filters.length === 0) {
+				passes = true;
+			}
 		}
 		return passes;
 	};
@@ -407,27 +416,29 @@ function createDeviceKeeper(io_delegator, link) {
 	 * when each tab in kipling starts to retrieve easy to parse & display data
 	 * about each connected device.
 	 */
-	var appendDeviceErrors = function(data) {
-
-	};
+	var createDefaultFilter = function(userOptions) {
+		var newFilter = {'enableMockDevices': true};
+		try {
+			var filterKeys = Object.keys(userOptions);
+			filterKeys.forEach(function(key) {
+				newFilter[key] = userOptions[key];
+			});
+		} catch(err) {
+			// userOptions is likely not an object, just don't use it & return
+			// an object with only the default filter option.
+		}
+		return newFilter;
+	}
 	this.getDeviceListing = function(reqFilters, requestdAttributes) {
 		var defered = q.defer();
 		var listing = [];
 		try {
-			var filters = {'enableMockDevices': true};
+			var filters = [];
 			if(reqFilters) {
 				if(Array.isArray(reqFilters)) {
-					reqFilters.forEach(function(reqFilter) {
-						var filterKeys = Object.keys(reqFilter);
-						filterKeys.forEach(function(key) {
-							filters[key] = reqFilter[key];
-						});
-					});
+					filters = reqFilters.map(createDefaultFilter);
 				} else {
-					var filterKeys = Object.keys(reqFilters);
-					filterKeys.forEach(function(key) {
-						filters[key] = reqFilters[key];
-					});
+					filters.push(createDefaultFilter(reqFilters));
 				}
 			}
 			var attributes = [

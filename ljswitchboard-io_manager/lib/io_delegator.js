@@ -55,7 +55,11 @@ function runGarbageCollector() {
 		}
 	}
 };
-var io_delegator_gc = setInterval(runGarbageCollector, 5000);
+var io_delegator_gc = setInterval(runGarbageCollector, 1000);
+slave_process.attachOnExitListener(function() {
+	var defered = q.defer();
+	clearInterval(io_delegator_gc);
+});
 
 function createIODelegator(slave_process) {
 	this.sp = slave_process;

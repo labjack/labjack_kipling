@@ -28,6 +28,16 @@ var ioDelegatorPath = './' + ioDelegatorPathFromRoot;
 var constants = require('./common/constants');
 var io_endpoint_key = constants.io_manager_endpoint_key;
 
+
+function runGarbageCollector() {
+	if(global.gc) {
+		if(typeof(global.gc) === 'function') {
+			global.gc();
+		}
+	}
+};
+var io_interface_gc = setInterval(runGarbageCollector, 5000);
+
 function createIOInterface() {
 	this.mp = null;
 	this.mp_event_emitter = null;
@@ -678,6 +688,8 @@ function createIOInterface() {
 
 	this.destroy = function() {
 		var defered = q.defer();
+
+		clearInterval(io_interface_gc);
 
 		self.mp.qStop()
 		.then(defered.resolve);
