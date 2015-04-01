@@ -268,8 +268,11 @@ function device() {
 
 	this.readMany = function(addresses, onErr, onSucc) {
 		saveCall('readMany', arguments);
-		var result = 0;
-		finishCall('readMany', result).then(onSucc, onErr);
+		var results = [];
+		addresses.forEach(function(address) {
+			results.push(self.getResult(address));
+		});
+		finishCall('readMany', results).then(onSucc, onErr);
 	};
 
 	this.writeRaw = function(data, onErr, onSucc) {
@@ -298,7 +301,7 @@ function device() {
 
 	this.readUINT64 = function(type, onErr, onSucc) {
 		saveCall('readUINT64', arguments);
-		var result = 0;
+		var result = "00:00:00:00:00:00:00:00";
 		finishCall('readUINT64', result).then(onSucc, onErr);
 	};
 
