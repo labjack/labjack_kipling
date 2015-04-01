@@ -108,14 +108,16 @@ var getInterpretFlashResults = function(curatedDevice) {
                 'overall': false,
                 'flashVerification': false,
                 'ainVerification': false,
-                'message': 'Device Calibration is Bad'
+                'message': 'Device Calibration is Bad',
+                'shortMessage': 'Bad',
             };
         } else {
             calibrationStatus = {
                 'overall': true,
                 'flashVerification': true,
                 'ainVerification': false,
-                'message': 'Device Calibration is Good'
+                'message': 'Device Calibration is Good',
+                'shortMessage': 'Good',
             };
         }
         // return the device object
@@ -295,6 +297,7 @@ var getAndInterpretAINResults = function(curatedDevice) {
                 if(isValid) {
                     calibrationStatus.overall = true;
                     calibrationStatus.message = 'Device Calibration is Good';
+                    calibrationStatus.shortMessage = 'Good';
                 }
                 calibrationStatus.ainVerification = isValid;
 

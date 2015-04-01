@@ -74,6 +74,7 @@ var device_tests = {
 			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
 			test.ok(res.calibrationStatus.overall, 'Device Not Calibrated');
 			test.strictEqual(res.calibrationStatus.message, 'Device Calibration is Good');
+			test.strictEqual(res.calibrationStatus.shortMessage, 'Good');
 			test.done();
 		});
 	},
