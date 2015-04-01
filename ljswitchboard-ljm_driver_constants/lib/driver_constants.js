@@ -271,7 +271,14 @@ exports.ljmTypes = {
 	'BYTE': exports.LJM_BYTE,
 	'Byte': exports.LJM_BYTE,
 	'byte': exports.LJM_BYTE,
-}
+};
+exports.ljmTypes[exports.LJM_UINT64] = exports.LJM_UINT64;
+exports.ljmTypes[exports.LJM_UINT16] = exports.LJM_UINT16;
+exports.ljmTypes[exports.LJM_UINT32] = exports.LJM_UINT32;
+exports.ljmTypes[exports.LJM_INT32] = exports.LJM_INT32;
+exports.ljmTypes[exports.LJM_FLOAT32] = exports.LJM_FLOAT32;
+exports.ljmTypes[exports.LJM_STRING] = exports.LJM_STRING;
+exports.ljmTypes[exports.LJM_BYTE] = exports.LJM_BYTE;
 
 var defaultValues = {};
 defaultValues[exports.LJM_UINT64] = '00:00:00:00:00:00';
