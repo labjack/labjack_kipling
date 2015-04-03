@@ -8,16 +8,129 @@ var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 var formatters = data_formatters.list;
 var formatterKeys = Object.keys(formatters);
+var errorDefaults = data_formatters.errorList;
+var errorKeys = Object.keys(errorDefaults);
+
 var numFormatterKeys = formatterKeys.length;
 
-var parseResult = function(address, result, deviceType) {
+var parseError = function(address, err, options) {
+	// Options:
+	// options.valueCache, options.customValues, options.deviceType, options.val
+	var valueCache = {};
+	var customValues = {};
+	var deviceType = undefined;
+	if(options) {
+		if(options.valueCache) {
+			valueCache = options.valueCache;
+		}
+		if(options.customValues){
+			customValues = options.customValues;
+		}
+		if(options.deviceType){
+			deviceType = options.deviceType;
+		}
+	}
+
 	var dt;
 	var regInfo = constants.getAddressInfo(address);
-	var regName = regInfo.data.name;
+	var regName;
+	var regAddress;
+	if(regInfo.data) {
+		regName = regInfo.data.name;
+		regAddress = regInfo.data.address;
+	} else {
+		regName = '';
+		regAddress = -1;
+	}
+	var errorCode = 0;
+	if(isNaN(err)) {
+		errorCode = err.retError;
+	} else {
+		errorCode = err;
+	}
+
+	// Populate the default value based off the expected type.
+	var defaultValue;
+	if(driver_const.defaultValues[regInfo.type]) {
+		defaultValue = driver_const.defaultValues[regInfo.type];
+	} else {
+		defaultValue = 0;
+	}
+
+	// Check to see if there is a "last-valid value"
+	var lastValue = defaultValue;
+	if(typeof(valueCache[regName]) !== 'undefined') {
+		lastValue = valueCache[regName];
+	}
+
+	// Check to see if there is a custom-value
+	if(typeof(customValues[regName]) !== 'undefined') {
+		defaultValue = customValues[regName];
+	} else {
+		// search through the data_parser for data.
+		if(deviceType) {
+			dt = driver_const.deviceTypes[deviceType];
+			if(errorDefaults[dt]) {
+				if(errorDefaults[dt][regName]) {
+					defaultValue = errorDefaults[dt][regName];
+				}
+			}
+		} else {
+			var j;
+			for(j = 0; j < numFormatterKeys; j++) {
+				dt = errorKeys[j];
+				if(errorDefaults[dt][regName]) {
+					defaultValue = errorDefaults[dt][regName];
+				}
+			}
+		}
+	}
+
+	var errorInfo = constants.getErrorInfo(errorCode);
+
 	var retData = {
 		'register': address,
 		'name': regName,
-		'address': regInfo.data.address,
+		'address': regAddress,
+		'defaultValue': defaultValue,
+		'lastValue': lastValue,
+		'errorCode': errorCode,
+		'errorString': errorInfo.string,
+		'err': err
+	};
+	return retData;
+};
+var parseErrors = function(addresses, errors, options) {
+	// Options:
+	// options.valueCache, options.customValues, options.deviceType, options.values, options.val
+	var i;
+	var num = addresses.length;
+	var retResults = [];
+	for(i = 0; i < num; i ++) {
+		if(options.values) {
+			options.val = options.values[i];
+		}
+		retResults.push(parseError(addresses[i], errors[i], options));
+	}
+	return retResults;
+
+};
+var parseResult = function(address, result, deviceType) {
+	var dt;
+	var regInfo = constants.getAddressInfo(address);
+	var regName;
+	var regAddress;
+	if(regInfo.data) {
+		regName = regInfo.data.name;
+		regAddress = regInfo.data.address;
+	} else {
+		regName = '';
+		regAddress = -1;
+	}
+	var retData = {
+		'register': address,
+		'name': regName,
+		'address': regAddress,
 		'res': result,
 		'val': result,
 	};
@@ -59,10 +172,11 @@ var parseResults = function(addresses, results, deviceType) {
 	var num = addresses.length;
 	var retResults = [];
 	for(i = 0; i < num; i ++) {
-		retResults.push(parseResult(addresses[i], results[i]));
+		retResults.push(parseResult(addresses[i], results[i], deviceType));
 	}
 	return retResults;
 };
+
 var encodeValue = function(address, value, deviceType) {
 	var dt;
 	var regInfo = constants.getAddressInfo(address);
@@ -112,7 +226,7 @@ var encodeValues = function(addresses, values, deviceType) {
 	var num = addresses.length;
 	var retResults = [];
 	for(i = 0; i < num; i ++) {
-		retResults.push(encodeValue(addresses[i], results[i]));
+		retResults.push(encodeValue(addresses[i], results[i], deviceType));
 	}
 	return retResults;
 };
@@ -139,3 +253,5 @@ exports.parseResult = parseResult;
 exports.parseResults = parseResults;
 exports.encodeValue = encodeValue;
 exports.encodeValues = encodeValues;
+exports.parseError = parseError;
+exports.parseErrors = parseErrors;
