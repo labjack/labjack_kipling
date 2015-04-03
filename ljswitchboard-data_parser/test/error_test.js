@@ -5,7 +5,7 @@ var constants = modbus_map.getConstants();
 
 
 exports.tests = {
-	'float32 registers': function(test) {
+	'single-read errors': function(test) {
 		var options = {
 			'valueCache': {
 				'FIO0': 1
@@ -53,5 +53,50 @@ exports.tests = {
 		}
 		test.deepEqual(results, reqResults);
 		test.done();
-	}
+	},
+	'multiple-read errors': function(test) {
+		var options = {
+			'valueCache': {
+				'FIO0': 1
+			},
+			'customValues': {
+				'FIO1': 0
+			}
+		};
+		var vals = [
+			{'addrs': ['AIN0','AIN0'], 'err': 12, 'defaultVals': [-9999,-9999], 'lastVals': [-9999,-9999]},
+			{'addrs': ['DIO0','DIO0'], 'err': 12, 'defaultVals': [-1,-1], 'lastVals': [-1,-1]},
+			{'addrs': ['FIO0','FIO0'], 'err': 12, 'defaultVals': [-1,-1], 'lastVals': [1,1]},
+			{'addrs': ['FIO1','FIO1'], 'err': 12, 'defaultVals': [0,0], 'lastVals': [-1,-1]},
+		];
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			results.push(data_parser.parseErrorMultiple(
+				val.addrs,
+				val.err,
+				options
+			));
+			var data = [];
+			val.addrs.forEach(function(address, i) {
+				var regInfo = constants.getAddressInfo(address);
+				data.push({
+					'register': address,
+					'name': regInfo.data.name,
+					'address': regInfo.data.address,
+					'defaultValue': val.defaultVals[i],
+					'lastValue': val.lastVals[i]
+				});
+			});
+			var errorInfo = constants.getErrorInfo(val.err);
+			reqResults.push({
+				'data': data,
+				'errorCode': val.err,
+				'errorString': errorInfo.string,
+				'err': val.err
+			});
+		});
+		test.deepEqual(results, reqResults);
+		test.done();
+	},
 };

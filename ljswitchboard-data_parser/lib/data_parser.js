@@ -13,9 +13,22 @@ var errorKeys = Object.keys(errorDefaults);
 
 var numFormatterKeys = formatterKeys.length;
 
-var parseError = function(address, err, options) {
-	// Options:
-	// options.valueCache, options.customValues, options.deviceType, options.val
+
+var addErrorInfo = function(bundle, err) {
+	var errorCode = 0;
+	if(isNaN(err)) {
+		errorCode = err.retError;
+	} else {
+		errorCode = err;
+	}
+	var errorInfo = constants.getErrorInfo(errorCode);
+
+	bundle.errorCode = errorCode;
+	bundle.errorString = errorInfo.string;
+	bundle.err = err;
+	return bundle;
+};
+var addErrorData = function(bundle, address, options) {
 	var valueCache = {};
 	var customValues = {};
 	var deviceType = undefined;
@@ -41,12 +54,6 @@ var parseError = function(address, err, options) {
 	} else {
 		regName = '';
 		regAddress = -1;
-	}
-	var errorCode = 0;
-	if(isNaN(err)) {
-		errorCode = err.retError;
-	} else {
-		errorCode = err;
 	}
 
 	// Populate the default value based off the expected type.
@@ -85,19 +92,30 @@ var parseError = function(address, err, options) {
 			}
 		}
 	}
+	bundle.register = address;
+	bundle.name = regName;
+	bundle.address = regAddress;
+	bundle.defaultValue = defaultValue;
+	bundle.lastValue = lastValue;
+	return bundle;
 
-	var errorInfo = constants.getErrorInfo(errorCode);
-
+};
+var parseError = function(address, err, options) {
+	var retData = {};
+	addErrorData(retData, address, options);
+	addErrorInfo(retData, err);
+	return retData;
+};
+var parseErrorMultiple = function(addresses, error, options) {
 	var retData = {
-		'register': address,
-		'name': regName,
-		'address': regAddress,
-		'defaultValue': defaultValue,
-		'lastValue': lastValue,
-		'errorCode': errorCode,
-		'errorString': errorInfo.string,
-		'err': err
+		'data': []
 	};
+	addresses.forEach(function(address) {
+		var errData = {};
+		addErrorData(errData, address, options);
+		retData.data.push(errData);
+	});
+	addErrorInfo(retData, error);
 	return retData;
 };
 var parseErrors = function(addresses, errors, options) {
@@ -255,3 +273,4 @@ exports.encodeValue = encodeValue;
 exports.encodeValues = encodeValues;
 exports.parseError = parseError;
 exports.parseErrors = parseErrors;
+exports.parseErrorMultiple = parseErrorMultiple;
