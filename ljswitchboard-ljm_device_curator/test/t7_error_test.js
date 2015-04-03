@@ -103,6 +103,13 @@ var device_tests = {
 		};
 		connectToDevice();
 	},
+	'test successful read & caching of AIN0': function(test) {
+		var results = [];
+		qExec(device, 'iRead', 'AIN0')(results)
+		.then(function(res) {
+			test.done();
+		});
+	},
 	'test failed writeMultiple invalid address': function(test) {
 		var results = [];
 		capturedEvents = [];
@@ -271,6 +278,48 @@ var device_tests = {
 		.then(function(res) {
 			res.forEach(function(r) {
 				test.deepEqual(r.errData, {'retError': driver_const.LJN_DEVICE_NOT_CONNECTED, 'errFrame': 0});
+			});
+			test.done();
+		});
+	},
+	'test iRead': function(test) {
+		var results = [];
+		qExec(device, 'iRead', 'AIN0')(results)
+		.then(function(execResults) {
+			execResults.forEach(function(execResult) {
+				test.strictEqual(
+					execResult.errData.errorCode,
+					driver_const.LJN_DEVICE_NOT_CONNECTED
+				);
+			});
+			test.done();
+		});
+	},
+	'test iReadMany': function(test) {
+		var results = [];
+		qExec(device, 'iReadMany', ['AIN0','AIN1'])(results)
+		.then(function(execResults) {
+			execResults.forEach(function(execResult) {
+				test.strictEqual(
+					execResult.errData.errorCode,
+					driver_const.LJN_DEVICE_NOT_CONNECTED
+				);
+			});
+			test.done();
+		});
+	},
+	'test iReadMultiple': function(test) {
+		var results = [];
+		qExec(device, 'iReadMultiple', ['AIN0','AIN1'])(results)
+		.then(function(execResults) {
+			execResults.forEach(function(execResult) {
+				execResult.retData.forEach(function(result) {
+					test.ok(result.isErr, 'An error should have occured');
+					test.strictEqual(
+						result.data.errorCode,
+						driver_const.LJN_DEVICE_NOT_CONNECTED
+					);
+				});
 			});
 			test.done();
 		});

@@ -46,6 +46,8 @@ function device(useMockDevice) {
 	this.maxNumErrors = 20;
 	this.numLatestErrors = 5;
 
+	this.cachedValues = {};
+
 	this.getDeviceErrors = function() {
 		var defered = q.defer();
 		defered.resolve(self.deviceErrors);
@@ -363,8 +365,8 @@ function device(useMockDevice) {
 				var sc = self.savedAttributes.subclass;
 				self.savedAttributes.productType = dc + sc;
 			},
-			'DGT_BATTERY_INSTALL_DATE':null
-		}
+			'DGT_BATTERY_INSTALL_DATE':null,
+		},
 	};
 	var saveCustomAttributes = function(addresses, dt, formatters) {
 		var defered = q.defer();
@@ -415,6 +417,7 @@ function device(useMockDevice) {
 			var defered = q.defer();
 			self.deviceErrors = [];
 			self.savedAttributes = {};
+			self.cachedValues = {};
 			self.savedAttributes.handle = ljmDevice.handle;
 			self.savedAttributes.isMockDevice = self.isMockDevice;
 			self.savedAttributes.isConnected = true;
@@ -582,8 +585,12 @@ function device(useMockDevice) {
 		var defered = q.defer();
 		if(allowExecution()) {
 			var operation = 'read';
-			if((address === 'ETHERNET_MAC')||(address === 'WIFI_MAC')) {
-				operation = 'readUINT64';
+			// Perform special read operation for UINT64 type addresses.
+			var info = modbusMap.getAddressInfo(address);
+			if(info.type >= 0) {
+				if(info.typeString === 'UINT64') {
+					operation = 'readUINT64';
+				}
 			}
 			ljmDevice[operation](
 				address,
@@ -959,6 +966,8 @@ function device(useMockDevice) {
 	};
 	this.close = function() {
 		var defered = q.defer();
+		self.cachedValues = undefined;
+		self.cachedValues = {};
 		self.haltBackgroundOperations();
 		ljmDevice.close(
 			function(err) {
@@ -1052,13 +1061,35 @@ function device(useMockDevice) {
 	encoding/caching additions and all use the q functions for stability & 
 	reliability.
 	*/
+	var updateDeviceValueCacheSingle = function(address, value) {
+		self.cachedValues[address] = value;
+	};
+	var updateDeviceValueCacheArray = function(addresses, values) {
+		var i;
+		var num = addresses.length;
+		for(i = 0; i < num; i++) {
+			self.cachedValues[addresses[i]] = values[i];
+		}
+	};
 	this.iRead = function(address) {
 		var defered = q.defer();
 		self.qRead(address)
 		.then(function(res) {
-			defered.resolve(data_parser.parseResult(address, res));
+			// Cache the results
+			updateDeviceValueCacheSingle(address, res);
+
+			// Parse the results
+			defered.resolve(data_parser.parseResult(
+				address,
+				res,
+				self.savedAttributes.deviceType
+			));
 		}, function(err) {
-			defered.reject(err);
+			defered.reject(data_parser.parseError(
+				address,
+				err,
+				{'valueCache': self.cachedValues}
+			));
 		});
 		return defered.promise;
 	};
@@ -1066,7 +1097,10 @@ function device(useMockDevice) {
 		var defered = q.defer();
 		self.qReadMany(addresses)
 		.then(function(res) {
-			// defered.resolve(data_parser.parseResult(address, res));
+			// Cache the results
+			updateDeviceValueCacheArray(addresses, res);
+
+			// Parse the results
 			var results = data_parser.parseResults(
 				addresses,
 				res,
@@ -1074,23 +1108,42 @@ function device(useMockDevice) {
 			);
 			defered.resolve(results);
 		}, function(err) {
-			defered.reject(err);
+			defered.reject(data_parser.parseErrorMultiple(
+				addresses,
+				err,
+				{'valueCache': self.cachedValues}
+			));
 		});
 		return defered.promise;
 	};
 	this.iReadMultiple = function(addresses) {
 		var defered = q.defer();
+		// this.readMultiple uses the qRead command to automatically retry _DEFAULT registers.
 		self.readMultiple(addresses)
 		.then(function(results) {
-			// defered.resolve(data_parser.parseResult(address, res));
 			var i;
+			var tError;
 			for(i = 0; i < results.length; i ++) {
 				if(!results[i].isErr) {
+					// Cache the results
+					updateDeviceValueCacheSingle(
+						results[i].address,
+						results[i].data
+					);
+
+					// Parse the results
 					results[i].data = data_parser.parseResult(
 						results[i].address,
 						results[i].data,
 						self.savedAttributes.deviceType
 					);
+				} else {
+					tError = results[i].data;
+					results[i].data = data_parser.parseError(
+						results[i].address,
+						tError,
+						{'valueCache': self.cachedValues}
+					)
 				}
 			}
 			defered.resolve(results);
@@ -1362,7 +1415,6 @@ function device(useMockDevice) {
 			return defered.promise;
 		}
 	};
-
 	this.getRecoveryFirmwareVersion = function() {
 		return lj_t7_get_recovery_fw_version.getVersion(self);
 	};

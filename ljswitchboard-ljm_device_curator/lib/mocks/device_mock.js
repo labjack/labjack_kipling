@@ -301,7 +301,7 @@ function device() {
 
 	this.readUINT64 = function(type, onErr, onSucc) {
 		saveCall('readUINT64', arguments);
-		var result = "00:00:00:00:00:00:00:00";
+		var result = '00:00:00:00:00:00';
 		finishCall('readUINT64', result).then(onSucc, onErr);
 	};
 
