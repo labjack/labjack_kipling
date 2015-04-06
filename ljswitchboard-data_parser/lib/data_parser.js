@@ -64,22 +64,18 @@ var addErrorData = function(bundle, address, options) {
 		defaultValue = 0;
 	}
 
-	// Check to see if there is a "last-valid value"
-	var lastValue = defaultValue;
-	if(typeof(valueCache[regName]) !== 'undefined') {
-		lastValue = valueCache[regName];
-	}
-
 	// Check to see if there is a custom-value
 	if(typeof(customValues[regName]) !== 'undefined') {
 		defaultValue = customValues[regName];
 	} else {
+		var defaultFound = false;
 		// search through the data_parser for data.
 		if(deviceType) {
 			dt = driver_const.deviceTypes[deviceType];
 			if(errorDefaults[dt]) {
 				if(errorDefaults[dt][regName]) {
-					defaultValue = errorDefaults[dt][regName];
+					defaultFound = true;
+					defaultValue = errorDefaults[dt][regName].defaultValue;
 				}
 			}
 		} else {
@@ -87,16 +83,32 @@ var addErrorData = function(bundle, address, options) {
 			for(j = 0; j < numFormatterKeys; j++) {
 				dt = errorKeys[j];
 				if(errorDefaults[dt][regName]) {
-					defaultValue = errorDefaults[dt][regName];
+					defaultFound = true;
+					defaultValue = errorDefaults[dt][regName].defaultValue;
 				}
 			}
 		}
+		if(!defaultFound) {
+			if(typeof(regInfo.data['default']) !== 'undefined') {
+				defaultValue = regInfo.data['default'];
+			}
+		}
 	}
+
+	defaultValue = parseResult(address, defaultValue, deviceType);
+
+	// Check to see if there is a "last-valid value"
+	var lastValue = defaultValue;
+	if(typeof(valueCache[regName]) !== 'undefined') {
+		lastValue = valueCache[regName];
+		lastValue = parseResult(address, lastValue, deviceType);
+	}
+
 	bundle.register = address;
 	bundle.name = regName;
 	bundle.address = regAddress;
 	bundle.defaultValue = defaultValue;
-	bundle.lastValue = lastValue;
+	bundle.lastValue = lastValue
 	return bundle;
 
 };

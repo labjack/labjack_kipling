@@ -1,28 +1,34 @@
 
 var shared_error_parser = require('./shared_error_parser');
 
+var ipDefaultVal = 0;
 
 var T7_LIST = {
 	// 'AIN#(0:254)': defaultFloat,
+	'AIN#(0:254)_RANGE': 10,
+	'AIN#(0:254)_NEGATIVE_CH': 199,
+	'AIN#(0:254)_RESOLUTION_INDEX': 0,
+	'AIN#(0:254)_SETTLING_US': 0,
+	
 	// 'TEMPERATURE_DEVICE_K':defaultFloat,
-	'WIFI_STATUS': 2909,
-	'WIFI_RSSI': -201,
-	// 'WIFI_IP': ipDataType,
-	// 'WIFI_SUBNET': ipDataType,
-	// 'WIFI_GATEWAY': ipDataType,
-	// 'WIFI_IP_DEFAULT': ipDataType,
-	// 'WIFI_SUBNET_DEFAULT': ipDataType,
-	// 'WIFI_GATEWAY_DEFAULT': ipDataType,
-	// 'ETHERNET_IP': ipDataType,
-	// 'ETHERNET_SUBNET': ipDataType,
-	// 'ETHERNET_GATEWAY': ipDataType,
-	// 'ETHERNET_DNS': ipDataType,
-	// 'ETHERNET_ALTDNS': ipDataType,
-	// 'ETHERNET_IP_DEFAULT': ipDataType,
-	// 'ETHERNET_SUBNET_DEFAULT': ipDataType,
-	// 'ETHERNET_GATEWAY_DEFAULT': ipDataType,
-	// 'ETHERNET_DNS_DEFAULT': ipDataType,
-	// 'ETHERNET_ALTDNS_DEFAULT': ipDataType,
+	// 'WIFI_STATUS': 2909,
+	// 'WIFI_RSSI': -201,
+	'WIFI_IP': ipDefaultVal,
+	'WIFI_SUBNET': ipDefaultVal,
+	'WIFI_GATEWAY': ipDefaultVal,
+	'WIFI_IP_DEFAULT': ipDefaultVal,
+	'WIFI_SUBNET_DEFAULT': ipDefaultVal,
+	'WIFI_GATEWAY_DEFAULT': ipDefaultVal,
+	'ETHERNET_IP': ipDefaultVal,
+	'ETHERNET_SUBNET': ipDefaultVal,
+	'ETHERNET_GATEWAY': ipDefaultVal,
+	'ETHERNET_DNS': ipDefaultVal,
+	'ETHERNET_ALTDNS': ipDefaultVal,
+	'ETHERNET_IP_DEFAULT': ipDefaultVal,
+	'ETHERNET_SUBNET_DEFAULT': ipDefaultVal,
+	'ETHERNET_GATEWAY_DEFAULT': ipDefaultVal,
+	'ETHERNET_DNS_DEFAULT': ipDefaultVal,
+	'ETHERNET_ALTDNS_DEFAULT': ipDefaultVal,
 };
 
 exports.T7_LIST = T7_LIST;
