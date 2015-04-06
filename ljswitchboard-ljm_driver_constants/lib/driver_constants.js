@@ -282,12 +282,12 @@ exports.ljmTypes[exports.LJM_BYTE] = exports.LJM_BYTE;
 
 var defaultValues = {};
 defaultValues[exports.LJM_UINT64] = '00:00:00:00:00:00';
-defaultValues[exports.LJM_UINT16] = -1;
-defaultValues[exports.LJM_UINT32] = -1;
-defaultValues[exports.LJM_INT32] = -1;
+defaultValues[exports.LJM_UINT16] = 0;
+defaultValues[exports.LJM_UINT32] = 0;
+defaultValues[exports.LJM_INT32] = 0;
 defaultValues[exports.LJM_FLOAT32] = -9999;
 defaultValues[exports.LJM_STRING] = '';
-defaultValues[exports.LJM_BYTE] = -1;
+defaultValues[exports.LJM_BYTE] = 0;
 exports.defaultValues = defaultValues;
 
 exports.ARCH_INT_NUM_BYTES = 4;
