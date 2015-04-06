@@ -2,6 +2,7 @@
 var shared_error_parser = require('./shared_error_parser');
 
 var ipDefaultVal = 0;
+var currentSourceCalDefault = -0.00009999
 
 var T7_LIST = {
 	// 'AIN#(0:254)': defaultFloat,
@@ -29,6 +30,9 @@ var T7_LIST = {
 	'ETHERNET_GATEWAY_DEFAULT': ipDefaultVal,
 	'ETHERNET_DNS_DEFAULT': ipDefaultVal,
 	'ETHERNET_ALTDNS_DEFAULT': ipDefaultVal,
+
+	'CURRENT_SOURCE_200UA_CAL_VALUE': currentSourceCalDefault,
+	'CURRENT_SOURCE_10UA_CAL_VALUE': currentSourceCalDefault,
 };
 
 exports.T7_LIST = T7_LIST;

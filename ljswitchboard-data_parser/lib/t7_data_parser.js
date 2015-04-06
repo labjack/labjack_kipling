@@ -41,6 +41,9 @@ var T7_LIST = {
 				res.str = val.toFixed(6);
 				res.rounded = parseFloat(res.str);
 			}
+			if(val == -9999) {
+				res.str = '-9999';
+			}
 			return res;
 		}
 	},

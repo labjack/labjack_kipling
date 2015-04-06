@@ -16,8 +16,8 @@ exports.tests = {
 		};
 		var vals = [
 			{'reg': 'AIN0', 'err': 12, 'defaultVal': -9999, 'lastVal': -9999},
-			{'reg': 'DIO0', 'err': 12, 'defaultVal': -1, 'lastVal': -1},
-			{'reg': 'FIO0', 'err': 12, 'defaultVal': -1, 'lastVal': 1},
+			{'reg': 'DIO0', 'err': 12, 'defaultVal': 0, 'lastVal': 0},
+			{'reg': 'FIO0', 'err': 12, 'defaultVal': 0, 'lastVal': 1},
 			{'reg': 'FIO1', 'err': 12, 'defaultVal': 0, 'lastVal': 0},
 			{'reg': 'AIN0_RANGE', 'err': 12, 'defaultVal': 10, 'lastVal': 10},
 			{'reg': 'AIN0_EF_INDEX', 'err': 12, 'defaultVal': 0, 'lastVal': 0},
