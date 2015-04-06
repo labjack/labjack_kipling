@@ -287,6 +287,7 @@ var device_tests = {
 		qExec(device, 'iRead', 'AIN0')(results)
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
+				// console.log('execResult', execResult);
 				test.strictEqual(
 					execResult.errData.errorCode,
 					driver_const.LJN_DEVICE_NOT_CONNECTED
@@ -313,11 +314,55 @@ var device_tests = {
 		qExec(device, 'iReadMultiple', ['AIN0','AIN1'])(results)
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
+				console.log('execResult', execResult);
 				execResult.retData.forEach(function(result) {
 					test.ok(result.isErr, 'An error should have occured');
 					test.strictEqual(
 						result.data.errorCode,
 						driver_const.LJN_DEVICE_NOT_CONNECTED
+					);
+				});
+			});
+			test.done();
+		});
+	},
+	'test sRead': function(test) {
+		var results = [];
+		qExec(device, 'sRead', 'AIN0')(results)
+		.then(function(execResults) {
+			execResults.forEach(function(execResult) {
+				test.ok(
+					typeof(execResult.retData) !== 'undefined',
+					'Result should be returned'
+				);
+			});
+			test.done();
+		});
+	},
+	'test sReadMany': function(test) {
+		var results = [];
+		qExec(device, 'sReadMany', ['AIN0','AIN1'])(results)
+		.then(function(execResults) {
+			execResults.forEach(function(execResult) {
+				test.ok(
+					typeof(execResult.retData) !== 'undefined',
+					'Result should be returned'
+				);
+			});
+			test.done();
+		});
+	},
+	'test sReadMultiple': function(test) {
+		var results = [];
+		qExec(device, 'sReadMultiple', ['AIN0','AIN1'])(results)
+		.then(function(execResults) {
+			execResults.forEach(function(execResult) {
+				execResult.retData.forEach(function(result) {
+					console.log('Result', result);
+					test.ok(!result.isErr, 'An error should not have occured');
+					test.ok(
+						typeof(result.data) !== 'undefined',
+						'Result should be returned'
 					);
 				});
 			});

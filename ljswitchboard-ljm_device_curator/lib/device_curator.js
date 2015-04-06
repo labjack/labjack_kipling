@@ -1153,6 +1153,44 @@ function device(useMockDevice) {
 		return defered.promise;
 	};
 
+	this.sRead = function(address) {
+		var defered = q.defer();
+		self.iRead(address)
+		.then(defered.resolve,
+			function(err) {
+				defered.resolve(err.lastValue);
+		});
+		return defered.promise;
+	};
+	this.sReadMany = function(addresses) {
+		var defered = q.defer();
+		self.iReadMany(addresses)
+		.then(defered.resolve,
+			function(readResults) {
+				var retData = [];
+				readResults.data.forEach(function(data) {
+					retData.push(data.lastValue);
+				});
+				defered.resolve(retData);
+		});
+		return defered.promise;
+	};
+	this.sReadMultiple = function(addresses) {
+		var defered = q.defer();
+		self.iReadMultiple(addresses)
+		.then(function(results) {
+			var i;
+			for(i = 0; i < results.length; i++) {
+				if(results[i].isErr) {
+					results[i].isErr = false;
+					results[i].data = results[i].data.lastValue;
+				}
+			}
+			defered.resolve(results);
+		});
+		return defered.promise;
+	};
+
 	this.qRead = function(address) {
 		return self.retryFlashError('qRead', address);
 	};
