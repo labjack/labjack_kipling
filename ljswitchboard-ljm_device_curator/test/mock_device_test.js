@@ -64,7 +64,7 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'performTestRead': function(test) {
+	'performTest Read': function(test) {
 		if(device.isMockDevice) {
 			var dev = device.getDevice();
 			dev.clearCalledFunctions();
@@ -90,7 +90,7 @@ exports.tests = {
 			test.done();
 		}
 	},
-	'performTestAnalogRead': function(test) {
+	'performTest AnalogRead': function(test) {
 		var results = [];
 		// Setup and call functions
 		qExec(device, 'read', 'AIN0')(results)
@@ -104,7 +104,7 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'performTestqRead': function(test) {
+	'performTest qRead': function(test) {
 		if(device.isMockDevice) {
 			var dev = device.getDevice();
 			dev.clearCalledFunctions();
@@ -139,7 +139,7 @@ exports.tests = {
 			test.done();
 		}
 	},
-	'performTestReadMultiple': function(test) {
+	'performTest ReadMultiple': function(test) {
 		if(device.isMockDevice) {
 			var dev = device.getDevice();
 			dev.clearCalledFunctions();

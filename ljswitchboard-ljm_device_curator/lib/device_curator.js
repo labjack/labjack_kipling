@@ -168,6 +168,7 @@ function device(useMockDevice) {
 
 	var refreshDeviceConnectionStatus = function() {
 		var refreshDefered = q.defer();
+		console.log('Trying to reconnect...');
 		ljmDevice.read(
 			'PRODUCT_ID',
 			function(err) {
@@ -246,7 +247,7 @@ function device(useMockDevice) {
 		errorData.deviceInfo = self.savedAttributes;
 		self.emit(DEVICE_ERROR, errorData);
 	};
-	var innerSaveDeviceError = function(funcName, err, data) {
+	var innerSaveDeviceError = function(funcName, err, data, rawError) {
 		var jsonData = modbusMap.getErrorInfo(err);
 		if(isNaN(err)){
 			err = -1;
@@ -257,12 +258,13 @@ function device(useMockDevice) {
 			'name': transformErrorString(jsonData.string),
 			'operation': funcName,
 			'data': data,
+			'rawError': rawError
 		};
 		// console.log('Info', errorData);
 
 		appendDeviceError(errorData);
 	};
-	var saveDeviceError = function(funcName, err, data) {
+	var saveDeviceError = function(funcName, err, data, rawError) {
 		if(funcName === 'reconnecting') {
 			var addReconnectingError = true;
 			var i;
@@ -275,10 +277,10 @@ function device(useMockDevice) {
 			}
 
 			if(addReconnectingError) {
-				innerSaveDeviceError(funcName, err, data);
+				innerSaveDeviceError(funcName, err, data, rawError);
 			}
 		} else {
-			innerSaveDeviceError(funcName, err, data);
+			innerSaveDeviceError(funcName, err, data, rawError);
 		}
 	};
 	var captureDeviceError = function(funcName, err, data) {
@@ -297,7 +299,7 @@ function device(useMockDevice) {
 				setImmediate(reconnectManager);
 			}
 		}
-		saveDeviceError(funcName, err, data);
+		saveDeviceError(funcName, errCode, data, err);
 	};
 
 	this.savedAttributes = {};
@@ -675,6 +677,7 @@ function device(useMockDevice) {
 	this.readMany = function(addresses) {
 		var defered = q.defer();
 		if(allowExecution()) {
+			console.log('Calling readMany', addresses);
 			ljmDevice.readMany(
 				addresses,
 				function(err) {
@@ -1212,6 +1215,22 @@ function device(useMockDevice) {
 	this.qReadUINT64 = function(type) {
 		return self.retryFlashError('qReadUINT64', type);
 	};
+	var errorValuesToRetry = [2358];
+	var shouldPerformErrorRetry = function(errType, err) {
+		var shouldRetry = false;
+
+		if(errType === 'value') {
+			if(errorValuesToRetry.indexOf(err) >= 0) {
+				shouldRetry = true;
+			}
+		} else if(errType === 'object') {
+			if(errorValuesToRetry.indexOf(err.retError) >= 0) {
+				shouldRetry = true;
+			}
+		}
+
+		return shouldRetry;
+	};
 	this.retryFlashError = function(cmdType, arg0, arg1, arg2, arg3, arg4) {
 		var rqControlDeferred = q.defer();
 		var device = self;
@@ -1251,6 +1270,7 @@ function device(useMockDevice) {
 			'readFlash',
 			// 'updateFirmware'
 		];
+
 		var control = function() {
 			// console.log('in dRead.read');
 			var ioDeferred = q.defer();
@@ -1271,11 +1291,13 @@ function device(useMockDevice) {
 				var innerIODeferred = q.defer();
 				device[type](arg0,arg1,arg2,arg3)
 				.then(function(result){
-					// console.log('Read Succeded',result);
 					innerIODeferred.resolve({isErr: false, val:result});
 				}, function(err) {
-					// console.log('Read Failed',err);
-					innerIODeferred.reject({isErr: true, val:err});
+					if(shouldPerformErrorRetry(errType, err)) {
+						innerIODeferred.reject({isErr: true, val:err});
+					} else {
+						innerIODeferred.resolve({isErr: true, val:err});
+					}
 				});
 				return innerIODeferred.promise;
 			};
@@ -1323,20 +1345,11 @@ function device(useMockDevice) {
 				// console.log('in retryFlashError', errType, res, cmdType, arg0, arg1)
 				// error case for calling function
 				var innerDeferred = q.defer();
-				if(errType === 'value') {
-					if(res.val == 2358) {
-						delayAndRead()
-						.then(innerDeferred.resolve,innerDeferred.reject);
-					} else {
-						innerDeferred.reject(res.val);
-					}
-				} else if(errType === 'object') {
-					if(res.val.retError == 2358) {
-						delayAndRead()
-						.then(innerDeferred.resolve,innerDeferred.reject);
-					} else {
-						innerDeferred.reject(res.val);
-					}
+				if(shouldPerformErrorRetry(errType, res.val)) {
+					delayAndRead()
+					.then(innerDeferred.resolve,innerDeferred.reject);
+				} else {
+					innerDeferred.reject(res.val);
 				}
 				return innerDeferred.promise;
 			})
