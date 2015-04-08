@@ -1,5 +1,5 @@
 
-var BASIC_TEST = false;
+var BASIC_TEST = true;
 var ERROR_TEST = true;
 
 if(BASIC_TEST) {

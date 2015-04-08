@@ -23,7 +23,7 @@ var T7_LIST = {
 	'AIN#(0:254)': {
 		'decode': function(val) {
 			var res = {
-				'val': val,
+				'val': parseFloat(val.toFixed(6)),
 				'rounded': 0,
 				'unit': 'V',
 				'str': ''
@@ -34,7 +34,6 @@ var T7_LIST = {
 			if((-0.1 < val) && (val < 0.1)) {
 				var rVal = val * 1000;
 				res.unit = 'mV';
-				res.val = rVal;
 				res.str = rVal.toFixed(6);
 				res.rounded = parseFloat(res.str);
 			} else {
@@ -44,6 +43,18 @@ var T7_LIST = {
 			if(val == -9999) {
 				res.str = '-9999';
 			}
+			return res;
+		}
+	},
+	'DAC#(0:1)': {
+		'decode': function(val) {
+			var res = {
+				'val': 0,
+				'unit': 'V',
+				'str': ''
+			};
+			res.str = val.toFixed(3);
+			res.val = parseFloat(res.str);
 			return res;
 		}
 	},

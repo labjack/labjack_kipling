@@ -293,15 +293,57 @@ exports.tests = {
 	},
 	'check AINx registers for high-precision rounding': function(test) {
 		var ainValues = [
-			{'val': 1, 'rounded': 1, 'unit': 'V'},
-			{'val': 1.1234567, 'rounded': 1.1234567, 'unit': 'V'},
-			{'val': 0.0123456, 'rounded': 0.0123456, 'unit': 'V'},
+			{'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
+			{'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
+			{'res': 0.0123456789012, 'val': 0.012346, 'rounded': 12.345679, 'unit': 'mV'},
 		];
 
 		var results = ainValues.map(function(ainValue) {
-			return data_parser.parseResult('AIN0', ainValue.val);
+			return data_parser.parseResult('AIN0', ainValue.res);
+		});
+		var reqResults = ainValues.map(function(ainValue) {
+			return {
+				'register': 'AIN0',
+				'name': 'AIN0',
+				'address': 0,
+				'res': ainValue.res,
+				'val': ainValue.val,
+				'rounded': ainValue.rounded,
+				'unit': ainValue.unit,
+				'str': ainValue.rounded.toFixed(6),
+			};
 		});
 		// console.log('Results', results);
+		test.deepEqual(results, reqResults, 'AINx Values are bad');
+		test.done();
+	},
+	'check DACx registers for rounding': function(test) {
+		// DAC registers to test:
+		var registers = ['DAC0', 'DAC1', 1000, 1002];
+
+		registers.forEach(function(reg) {
+			var dacValues = [
+				{'res': 1, 'val': 1},
+				{'res': 1.123456789, 'val': 1.123},
+				{'res': 0.0123456789012, 'val': 0.012},
+			];
+
+			var results = dacValues.map(function(dacValue) {
+				return data_parser.parseResult(reg, dacValue.res);
+			});
+			var reqResults = dacValues.map(function(dacValue) {
+				return {
+					'register': reg,
+					'name': constants.getAddressInfo(reg).data.name,
+					'address': constants.getAddressInfo(reg).data.address,
+					'res': dacValue.res,
+					'val': dacValue.val,
+					'unit': 'V',
+					'str': dacValue.val.toFixed(3),
+				};
+			});
+			test.deepEqual(results, reqResults, 'DACx Values are bad');
+		});
 		test.done();
 	},
 	'check _VERSION Parsers': function(test) {
@@ -384,8 +426,8 @@ exports.tests = {
 	'check undefined register - parse': function(test) {
 		// Make sure that no parsers get run but some basic information is added
 		var cmds = [
-			{'reg': 'DAC0', 'val': 2.123},
-			{'reg': 1000, 'val': 2.123},
+			{'reg': 9000, 'val': 0},
+			{'reg': 'AIN0_EF_INDEX', 'val': 0},
 			{'reg': 'DEVICE_NAME_DEFAULT', 'val': 'MY TEST STRING'},
 		];
 
