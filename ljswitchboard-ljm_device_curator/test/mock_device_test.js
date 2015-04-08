@@ -64,6 +64,21 @@ exports.tests = {
 			test.done();
 		});
 	},
+	'perform test write': function(test) {
+		var testVal = 1;
+		device.read('DAC0')
+		.then(function(initialRes) {
+			test.strictEqual(initialRes, 0);
+			device.write('DAC0', testVal)
+			.then(function(res) {
+				device.read('DAC0')
+				.then(function(res) {
+					test.strictEqual(res, testVal);
+					test.done();
+				});
+			});
+		});
+	},
 	'performTest Read': function(test) {
 		if(device.isMockDevice) {
 			var dev = device.getDevice();

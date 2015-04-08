@@ -260,6 +260,19 @@ function device() {
 		}
 		return result;
 	};
+	this.saveWrite = function(address, value) {
+		var result = 0;
+		if(self.responses[address]) {
+			if(typeof(self.responses[address]) === 'function') {
+				// self.responses[address](address);
+			} else {
+				self.responses[address] = value;
+			}
+		} else {
+			self.responses[address] = value;
+		}
+		return value;
+	};
 	this.read = function(address, onErr, onSucc) {
 		saveCall('read', arguments);
 		var result = self.getResult(address);
@@ -283,12 +296,15 @@ function device() {
 
 	this.write = function(address, value, onErr, onSucc) {
 		saveCall('write', arguments);
-		var result = 0;
+		var result = self.saveWrite(address, value);
 		finishCall('write', result).then(onSucc, onErr);
 	};
 
 	this.writeMany = function(addresses, values, onErr, onSucc) {
 		saveCall('writeMany', arguments);
+		addresses.forEach(function(address, i) {
+			self.saveWrite(address, values[i]);
+		});
 		var result = 0;
 		finishCall('writeMany', result).then(onSucc, onErr);
 	};
