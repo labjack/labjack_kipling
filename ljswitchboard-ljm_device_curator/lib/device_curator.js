@@ -677,7 +677,6 @@ function device(useMockDevice) {
 	this.readMany = function(addresses) {
 		var defered = q.defer();
 		if(allowExecution()) {
-			console.log('Calling readMany', addresses);
 			ljmDevice.readMany(
 				addresses,
 				function(err) {
