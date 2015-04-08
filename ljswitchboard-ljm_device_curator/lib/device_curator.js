@@ -24,6 +24,7 @@ var device_events = driver_const.device_curator_constants;
 var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
 var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;
 var DEVICE_ERROR = device_events.DEVICE_ERROR;
+var DEVICE_RECONNECTING = device_events.DEVICE_RECONNECTING;
 
 
 
@@ -168,7 +169,7 @@ function device(useMockDevice) {
 
 	var refreshDeviceConnectionStatus = function() {
 		var refreshDefered = q.defer();
-		console.log('Trying to reconnect...');
+		self.emit(DEVICE_RECONNECTING, self.savedAttributes);
 		ljmDevice.read(
 			'PRODUCT_ID',
 			function(err) {
