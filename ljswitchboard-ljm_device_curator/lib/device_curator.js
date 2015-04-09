@@ -1237,6 +1237,18 @@ function device(useMockDevice) {
 		checkSingleAddressForDefaults(address, value);
 		return self.retryFlashError('qWrite', address, value);
 	};
+	this.writeDeviceName = function(deviceName) {
+		var defered = q.defer();
+		self.qWrite('DEVICE_NAME_DEFAULT', deviceName)
+		.then(function() {
+			self.savedAttributes.DEVICE_NAME_DEFAULT = deviceName;
+			self.emit(DEVICE_ATTRIBUTES_CHANGED, self.savedAttributes);
+			defered.resolve();
+		}, function(err) {
+			defered.reject(err);
+		});
+		return defered.promise;
+	};
 	this.qWriteMany = function(addresses, values) {
 		checkManyAddressesForDefaults(addresses, values);
 		return self.retryFlashError('qWriteMany', addresses, values);
