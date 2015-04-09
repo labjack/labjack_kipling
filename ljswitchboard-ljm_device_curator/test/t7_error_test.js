@@ -150,7 +150,14 @@ var device_tests = {
 		};
 		var errorListener = function(data) {
 			if(data.operation === 'reconnecting') {
-				test.strictEqual(capturedEvents.length, 3);
+				var ok = false;
+				if(capturedEvents.length == 3) {
+					ok = true;
+				} else if(capturedEvents.length == 4) {
+					ok = true;
+				}
+				test.ok(ok, 'Unexpected number of captured events during disconnect phase');
+				
 				try {
 					device.removeListener('DEVICE_ERROR', errorListener);
 					test.done();
@@ -314,7 +321,6 @@ var device_tests = {
 		qExec(device, 'iReadMultiple', ['AIN0','AIN1'])(results)
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
-				console.log('execResult', execResult);
 				execResult.retData.forEach(function(result) {
 					test.ok(result.isErr, 'An error should have occured');
 					test.strictEqual(
@@ -358,7 +364,6 @@ var device_tests = {
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
 				execResult.retData.forEach(function(result) {
-					console.log('Result', result);
 					test.ok(!result.isErr, 'An error should not have occured');
 					test.ok(
 						typeof(result.data) !== 'undefined',
@@ -420,8 +425,15 @@ var device_tests = {
 	},
 	'reconnect device again': function(test) {
 		console.log('  - Please Reconnect Device');
+		var receivedReconnectEvent = false;
 		device.once('DEVICE_RECONNECTED', function() {
 			console.log('  - Device Reconnected');
+			receivedReconnectEvent = true;
+			// test.done();
+		});
+		device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
+			// console.log('  - Device Attributes Updated');
+			test.ok(receivedReconnectEvent, 'Did not receive reconnect event');
 			test.done();
 		});
 	},
