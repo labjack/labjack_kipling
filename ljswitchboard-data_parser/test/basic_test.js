@@ -90,6 +90,10 @@ exports.tests = {
 					isReal = true;
 				}
 				results.push(data_parser.parseResult(ipRegister, testVal.val));
+				var text = 'Not Connected';
+				if(isReal) {
+					text = testVal.ip;
+				}
 				reqResults.push({
 					'register': ipRegister,
 					'name': constants.getAddressInfo(ipRegister).data.name,
@@ -97,7 +101,8 @@ exports.tests = {
 					'res': testVal.val,
 					'str': testVal.ip,
 					'val': testVal.ip,
-					'isReal': isReal
+					'isReal': isReal,
+					'text': text,
 				});
 			});
 		});

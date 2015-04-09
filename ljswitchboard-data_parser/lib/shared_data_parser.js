@@ -14,17 +14,23 @@ var parseIP = function(ipNum) {
 	if(ipNum !== 0) {
 		isReal = true;
 	}
-	var ipStr = "";
+	var ipStr = '';
 	var ipAddr = new Buffer(4);
+	var text = '';
 	ipAddr.writeUInt32LE(ipNum, 0);
 	ipStr += ipAddr.readUInt8(3).toString();
-	ipStr += ".";
+	ipStr += '.';
 	ipStr += ipAddr.readUInt8(2).toString();
-	ipStr += ".";
+	ipStr += '.';
 	ipStr += ipAddr.readUInt8(1).toString();
-	ipStr += ".";
+	ipStr += '.';
 	ipStr += ipAddr.readUInt8(0).toString();
-	return {'str': ipStr, 'isReal':isReal, 'val': ipStr};
+	if(isReal) {
+		text = ipStr;
+	} else {
+		text = 'Not Connected';
+	}
+	return {'str': ipStr, 'isReal':isReal, 'val': ipStr, 'text': text};
 };
 exports.parseIP = parseIP;
 
