@@ -185,12 +185,6 @@ function device(useMockDevice) {
 	var stopReconnectManager = function() {
 		clearTimeout(self.reconnectManagerTimeout);
 	};
-	var reloadDeviceSavedAttributes = function() {
-		updateSavedAttributes()
-		.then(function(updatedAttributes) {
-			self.emit(DEVICE_ATTRIBUTES_CHANGED, updatedAttributes);
-		});
-	}
 	var reconnectManager = function() {
 		if(self.allowReconnectManager) {
 			if(!self.savedAttributes.isConnected) {
@@ -199,7 +193,7 @@ function device(useMockDevice) {
 					function() {
 						self.savedAttributes.isConnected = true;
 						self.emit(DEVICE_RECONNECTED, self.savedAttributes);
-						reloadDeviceSavedAttributes();
+						self.updateSavedAttributes();
 					}, function() {
 						self.reconnectManagerTimeout = setTimeout(
 							reconnectManager,
@@ -423,7 +417,7 @@ function device(useMockDevice) {
 		});
 		return defered.promise;
 	};
-	var updateSavedAttributes = function() {
+	var innerUpdateSavedAttributes = function() {
 		var defered = q.defer();
 		var attributes = [];
 		var dt = self.savedAttributes.deviceType;
@@ -444,7 +438,16 @@ function device(useMockDevice) {
 		saveCustomAttributes(attributes, dt, formatters)
 		.then(defered.resolve);
 		return defered.promise;
-	}
+	};
+	this.updateSavedAttributes = function() {
+		var defered = q.defer();
+		innerUpdateSavedAttributes()
+		.then(function(updatedAttributes) {
+			self.emit(DEVICE_ATTRIBUTES_CHANGED, updatedAttributes);
+			defered.resolve(updatedAttributes);
+		});
+		return defered.promise;
+	};
 	var saveAndLoadAttributes = function(openParameters) {
 		var saveAndLoad = function() {
 			var defered = q.defer();
