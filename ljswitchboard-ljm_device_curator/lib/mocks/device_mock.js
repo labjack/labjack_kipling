@@ -36,7 +36,7 @@ function device() {
 				return TEST_SERIAL_NUMBER;
 			}
 			
-		}
+		},
 	};
 
 	this.configureMockDevice = function(deviceInfo) {
@@ -81,6 +81,24 @@ function device() {
 				}
 			}
 		});
+		var i = 0;
+		// Add various analog input register defaults:
+		var ainRegistersToAdd = [
+			{'header': 'AIN', 'footer':'_RANGE', 'val': 10},
+			{'header': 'AIN', 'footer':'_NEGATIVE_CH', 'val': 199},
+		];
+		self.responses.AIN_ALL_RANGE = 10;
+		self.responses.AIN_ALL_NEGATIVE_CH = 199;
+		// Add AIN#(0:254)_RANGE & AIN#(0:254)_NEGATIVE_CH
+		var addAinRegister = function(reg) {
+			var key = reg.header;
+			key += (i*2).toString();
+			key += reg.footer;
+			self.responses[key] = reg.val;
+		};
+		for(i = 0; i < 254/2; i++) {
+			ainRegistersToAdd.forEach(addAinRegister);
+		}
 		defered.resolve();
 		return defered.promise;
 	};
