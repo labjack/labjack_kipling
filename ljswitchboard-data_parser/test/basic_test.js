@@ -118,25 +118,25 @@ exports.tests = {
 	},
 	'check HARDWARE_INSTALLED -decode': function(test) {
 		// Origional values & results w/ proper bit-masks (If there wasn't a wifi issue);
-		// var vals = [
-		// {'val': 1, 'sdCard': false, 'rtc': false, 'wifi': false, 'adc': true, 'isPro': true},
-		// {'val': 2, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': false, 'isPro': true},
-		// {'val': 3, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': true, 'isPro': true},
-		// {'val': 4, 'sdCard': false, 'rtc': true, 'wifi': false, 'adc': false, 'isPro': true},
-		// {'val': 8, 'sdCard': true, 'rtc': false, 'wifi': false, 'adc': false, 'isPro': false},
-		// {'val': 9, 'sdCard': true, 'rtc': false, 'wifi': false, 'adc': true, 'isPro': true},
-		// ];
-
-		// Values w/ wifi fix:
 		var vals = [
-			{'val': 1, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': true, 'isPro': true},
+			{'val': 1, 'sdCard': false, 'rtc': false, 'wifi': false, 'adc': true, 'isPro': true},
 			{'val': 2, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': false, 'isPro': true},
 			{'val': 3, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': true, 'isPro': true},
-			{'val': 4, 'sdCard': false, 'rtc': true, 'wifi': true, 'adc': false, 'isPro': true},
+			{'val': 4, 'sdCard': false, 'rtc': true, 'wifi': false, 'adc': false, 'isPro': true},
 			{'val': 8, 'sdCard': true, 'rtc': false, 'wifi': false, 'adc': false, 'isPro': false},
-			{'val': 9, 'sdCard': true, 'rtc': false, 'wifi': true, 'adc': true, 'isPro': true},
-			{'val': 15, 'sdCard': true, 'rtc': true, 'wifi': true, 'adc': true, 'isPro': true},
+			{'val': 9, 'sdCard': true, 'rtc': false, 'wifi': false, 'adc': true, 'isPro': true},
 		];
+
+		// Values w/ wifi fix:
+		// var vals = [
+		// 	{'val': 1, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': true, 'isPro': true},
+		// 	{'val': 2, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': false, 'isPro': true},
+		// 	{'val': 3, 'sdCard': false, 'rtc': false, 'wifi': true, 'adc': true, 'isPro': true},
+		// 	{'val': 4, 'sdCard': false, 'rtc': true, 'wifi': true, 'adc': false, 'isPro': true},
+		// 	{'val': 8, 'sdCard': true, 'rtc': false, 'wifi': false, 'adc': false, 'isPro': false},
+		// 	{'val': 9, 'sdCard': true, 'rtc': false, 'wifi': true, 'adc': true, 'isPro': true},
+		// 	{'val': 15, 'sdCard': true, 'rtc': true, 'wifi': true, 'adc': true, 'isPro': true},
+		// ];
 
 		var results = [];
 		var reqResults = [];

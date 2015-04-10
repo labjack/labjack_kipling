@@ -160,9 +160,9 @@ var T7_LIST = {
 				}
 
 				// Wifi bit-fix, (if isPro, then wifi is installed)
-				if(isPro) {
-					wifi = true;
-				}
+				// if(isPro) {
+				// 	wifi = true;
+				// }
 				return {
 					'highResADC': highResADC,
 					'wifi': wifi,
