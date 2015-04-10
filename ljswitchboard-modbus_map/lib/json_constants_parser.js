@@ -189,6 +189,12 @@ function reindexConstantsByRegister(constants) {
 		devices:["T7"],
 		readwrite:"RW"
 	};
+
+	// Fix the STREAM_ENABLE register so that it is a readable register.
+	var streamEnableAddr = retDictName['STREAM_ENABLE'].address;
+	retDict[streamEnableAddr].readWrite = 'RW';
+	retDictName['STREAM_ENABLE'].readwrite = 'RW';
+
 	return [retDict, retDictName];
 }
 /**
