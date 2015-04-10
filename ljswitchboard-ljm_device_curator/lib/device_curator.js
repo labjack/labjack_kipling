@@ -420,14 +420,15 @@ function device(useMockDevice) {
 	var innerUpdateSavedAttributes = function() {
 		var defered = q.defer();
 		var attributes = [];
+		var formatters = {};
 		var dt = self.savedAttributes.deviceType;
 		var customAttributeKeys = Object.keys(customAttributes);
 		customAttributeKeys.forEach(function(key) {
-			attributes.push(customAttributes[key]);
+			attributes.push(key);
+			formatters[key] = customAttributes[key];
 		});
 
 		var devCustKeys;
-		var formatters = {};
 		if(deviceCustomAttributes[dt]) {
 			devCustKeys = Object.keys(deviceCustomAttributes[dt]);
 			attributes = customAttributeKeys.concat(devCustKeys);
@@ -1179,13 +1180,33 @@ function device(useMockDevice) {
 						results[i].address,
 						tError,
 						{'valueCache': self.cachedValues}
-					)
+					);
 				}
 			}
 			defered.resolve(results);
 		}, function(err) {
 			defered.reject(err);
 		});
+		return defered.promise;
+	};
+	this.iWrite = function(address, value) {
+		var defered = q.defer();
+		self.qWrite(address, value)
+		.then(function(res) {
+			// If the write happens successfully then update the device cache
+			updateDeviceValueCacheSingle(address, value);
+			defered.resolve(res);
+		}, defered.reject);
+		return defered.promise;
+	};
+	this.iWriteMany = function(addresses, values) {
+		var defered = q.defer();
+
+		self.qWriteMany(addresses, values)
+		.then(function() {
+			// If the write happens successfully then update the device cache
+			updateDeviceValueCacheArray(addresses, values);
+		}, defered.reject);
 		return defered.promise;
 	};
 
@@ -1239,7 +1260,7 @@ function device(useMockDevice) {
 	};
 	this.writeDeviceName = function(deviceName) {
 		var defered = q.defer();
-		self.qWrite('DEVICE_NAME_DEFAULT', deviceName)
+		self.iWrite('DEVICE_NAME_DEFAULT', deviceName)
 		.then(function() {
 			self.savedAttributes.DEVICE_NAME_DEFAULT = deviceName;
 			self.emit(DEVICE_ATTRIBUTES_CHANGED, self.savedAttributes);
