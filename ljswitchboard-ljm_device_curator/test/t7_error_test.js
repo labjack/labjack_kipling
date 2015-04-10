@@ -377,12 +377,21 @@ var device_tests = {
 	'test reconnectToDevice': function(test) {
 		var reportedToCmd = false;
 		capturedEvents = [];
+		var numSuccesses = 0;
+		var finishTest = function() {
+			if(numSuccesses > 1) {
+				test.done();
+			} else {
+				console.log('  * Verifying new device attributes');
+			}
+		};
 		var waitForReconnect = function() {
 			device.read('AIN0')
 			.then(function(res) {
 				console.log('  - Device Reconnected');
 				// test.strictEqual(capturedEvents.length, 1, JSON.stringify(capturedEvents, null, 2));
-				test.done();
+				numSuccesses += 1;
+				finishTest();
 			}, function(err) {
 				if(!reportedToCmd) {
 					console.log('  - Please Reconnect Device');
@@ -391,6 +400,11 @@ var device_tests = {
 				setTimeout(waitForReconnect, 1000);
 			});
 		};
+		device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
+			console.log('  - Device Attributes Updated');
+			numSuccesses += 1;
+			finishTest();
+		});
 		waitForReconnect();
 	},
 	'get latest device errors': function(test) {
@@ -432,7 +446,7 @@ var device_tests = {
 			// test.done();
 		});
 		device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
-			// console.log('  - Device Attributes Updated');
+			console.log('  - Device Attributes Updated');
 			test.ok(receivedReconnectEvent, 'Did not receive reconnect event');
 			test.done();
 		});

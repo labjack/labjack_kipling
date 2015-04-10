@@ -181,25 +181,48 @@ function device(useMockDevice) {
 		);
 		return refreshDefered.promise;
 	};
-	this.reconnectManagerTimeout;
+	this.reconnectManagerTimeout = undefined;
 	var stopReconnectManager = function() {
 		clearTimeout(self.reconnectManagerTimeout);
+	};
+	var declareDeviceReconnected = function() {
+		self.savedAttributes.isConnected = true;
+		self.emit(DEVICE_RECONNECTED, self.savedAttributes);
+	};
+	var handleReconnectHardwareInstalledError = function(err) {
+		console.error(
+			'(device_curator), handleReconnnectHardwareInstalledError',
+			err
+		);
+		captureDeviceError('failed-Reconnecting', err, {'address': 'PRODUCT_ID&HARDWARE_INSTALLED'});
+		handleFailedReconnectionAttemptRead();
+	};
+	var handleSuccessfulReconnectionAttemptRead = function() {
+		// Declare the device to be re-connected
+		declareDeviceReconnected();
+
+		// Wait for the device to initialize before updating the devices saved
+		// attributes.
+		self.waitForDeviceToInitialize()
+		.then(
+			self.updateSavedAttributes,
+			handleReconnectHardwareInstalledError
+		);
+	};
+	var handleFailedReconnectionAttemptRead = function() {
+		self.reconnectManagerTimeout = setTimeout(
+			reconnectManager,
+			1000
+		);
 	};
 	var reconnectManager = function() {
 		if(self.allowReconnectManager) {
 			if(!self.savedAttributes.isConnected) {
 				refreshDeviceConnectionStatus()
 				.then(
-					function() {
-						self.savedAttributes.isConnected = true;
-						self.emit(DEVICE_RECONNECTED, self.savedAttributes);
-						self.updateSavedAttributes();
-					}, function() {
-						self.reconnectManagerTimeout = setTimeout(
-							reconnectManager,
-							1000
-						);
-					});
+					handleSuccessfulReconnectionAttemptRead,
+					handleFailedReconnectionAttemptRead
+				);
 			}
 		}
 	};
@@ -306,18 +329,6 @@ function device(useMockDevice) {
 	};
 
 	this.savedAttributes = {};
-
-	var privateOpen = function(openParameters) {
-		var defered = q.defer();
-		ljmDevice.open(
-			openParameters.deviceType,
-			openParameters.connectionType,
-			openParameters.identifier,
-			defered.reject,
-			defered.resolve
-		);
-		return defered.promise;
-	};
 	var getVersionNumberParser = function(reg) {
 		var parser = function(res, isErr, errData) {
 			var dt = self.savedAttributes.deviceType;
@@ -375,7 +386,6 @@ function device(useMockDevice) {
 	};
 	var saveCustomAttributes = function(addresses, dt, formatters) {
 		var defered = q.defer();
-
 		self.readMultiple(addresses)
 		.then(function(results) {
 			results.forEach(function(res) {
@@ -534,6 +544,105 @@ function device(useMockDevice) {
 		defered.resolve(bundle);
 		return defered.promise;
 	};
+
+	var waitForT7ProToInitialize = function(result) {
+		var defered = q.defer();
+		var numAttempts = 0;
+		var numSeconds = 8;
+		var refreshRate = 500;
+		var maxNumAttempts = numSeconds * 1000/refreshRate;
+		var handleHardwareInstalled = function(newResult) {
+			numAttempts += 1;
+			if(numAttempts > maxNumAttempts) {
+				defered.resolve();
+			} else {
+				if(newResult.wifi) {
+					defered.resolve();
+				} else {
+					setTimeout(refreshResults, refreshRate);
+				}
+			}
+		};
+
+		var refreshResults = function() {
+			// console.log('waiting for wifi to initialize', numAttempts);
+			self.iRead('HARDWARE_INSTALLED')
+			.then(handleHardwareInstalled, defered.reject);
+		};
+		if(result.wifi) {
+			defered.resolve();
+		} else {
+			setTimeout(refreshResults, refreshRate);
+		}
+		
+		return defered.promise;
+	};
+	var waitForT7ToInitialize = function() {
+		var defered = q.defer();
+
+		var handleHardwareInstalled = function(result) {
+			if(result.isPro) {
+				// If we have a T7-Pro then we need to wait for wifi to
+				// initialize.
+				waitForT7ProToInitialize(result)
+				.then(defered.resolve, defered.reject);
+			} else {
+				// If we have a standard T7 we don't need to wait for wifi
+				// to initialize.
+				defered.resolve();
+			}
+		};
+		self.iRead('HARDWARE_INSTALLED')
+		.then(handleHardwareInstalled, defered.reject);
+		return defered.promise;
+	};
+	var waitForDigitToInitialize = function() {
+		var defered = q.defer();
+		defered.resolve();
+		return defered.promise;
+	};
+	this.waitForDeviceToInitialize = function() {
+		var defered = q.defer();
+		var numAttempts = 0;
+		var productID;
+		var hardwareInstalled;
+		var handleError = function(err) {
+			var innerDefered = q.defer();
+			console.log('device_curator error waiting to initialize', err);
+			innerDefered.reject(err);
+			return innerDefered.promise;
+		};
+		var handleProductID = function(productID) {
+			var innerDefered = q.defer();
+			if(productID == 7) {
+				// If we have opened a T7 we need to see if it is a Pro/non-pro
+				waitForT7ToInitialize()
+				.then(innerDefered.resolve, innerDefered.reject);
+			} else {
+				// If we have opened a digit then we don't need to wait for it
+				// to initialize.
+				waitForDigitToInitialize()
+				.then(innerDefered.resolve, innerDefered.reject);
+			}
+			return innerDefered.promise;
+		};
+
+		self.read('PRODUCT_ID')
+		.then(handleProductID, handleError)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	var privateOpen = function(openParameters) {
+		var defered = q.defer();
+		ljmDevice.open(
+			openParameters.deviceType,
+			openParameters.connectionType,
+			openParameters.identifier,
+			defered.reject,
+			defered.resolve
+		);
+		return defered.promise;
+	};
 	this.open = function(deviceType, connectionType, identifier) {
 		var defered = q.defer();
 		var getOnError = function(msg) {
@@ -551,7 +660,8 @@ function device(useMockDevice) {
 		};
 
 		privateOpen(openParameters)
-		.then(saveAndLoadAttributes(openParameters), getOnError('openStep'))
+		.then(self.waitForDeviceToInitialize, getOnError('openStep'))
+		.then(saveAndLoadAttributes(openParameters), getOnError('hardwareInitialization'))
 		.then(getAndSaveCalibration, getOnError('saveAndLoadAttrs'))
 		.then(finalizeOpenProcedure, getOnError('getAndSaveCalibration'))
 		.then(defered.resolve, defered.reject);
