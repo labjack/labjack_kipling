@@ -11,8 +11,8 @@
 
 var rewire = require('rewire');
 
-var ljmmm = rewire('./ljmmm');
-ljmmm.__set__('DATA_TYPE_SIZES', {TEST_TYPE: 4, ANOTHER_TYPE: 2})
+var ljmmm = rewire('../lib/ljmmm');
+ljmmm.__set__('DATA_TYPE_SIZES', {TEST_TYPE: 4, ANOTHER_TYPE: 2});
 
 
 /**
@@ -100,7 +100,7 @@ exports.testExpandLJMMMNameIncrement = function(test)
     ljmmm.expandLJMMMName(
         'Test#(0:4:2)After',
         function (error) {
-            test.ok(false, error)
+            test.ok(false, error);
         },
         function (result) {
             test.deepEqual(result, expectedResult);
