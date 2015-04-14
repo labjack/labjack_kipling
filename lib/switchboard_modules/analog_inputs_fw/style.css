@@ -110,22 +110,22 @@
 	width: 86%;
 }
 .range-header {
-	width: 108px;
+	width: 110px;
 }
 .range-LINK {
-	width: 94px;
+	width: 110px;
 }
 .resolution-header {
 	width: 62px;
 }
 .resolution-LINK {
-	width: 50px;
+	width: 62px;
 }
 .settling-header {
 	width: 68px;
 }
 .settling-LINK {
-	width: 54px;
+	width: 68px;
 }
 .negativeChannel-header {
 	/*width: 85px;*/
@@ -134,10 +134,10 @@
 	max-width: 150px;
 }
 .negativeChannel-LINK {
-	width: 53px;
+	width: 60px;
 }
 .efSystem-LINK {
-	width: 138px;
+	width: 150px;
 }
 .btn-group .currentValue {
 	float:left;

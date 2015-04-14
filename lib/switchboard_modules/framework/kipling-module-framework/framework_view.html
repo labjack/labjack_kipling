@@ -30,21 +30,23 @@
                         <div class="hide-overflow-text" title="Serial Number (SERIAL_NUMBER)">{{serialNumber}}</div>
                     </td>
                     <td class="device-selector-table-device-name">
-                        <div class="hide-overflow-text" title="Device Name (DEVICE_NAME_DEFAULT)">{{DEVICE_NAME_DEFAULT}}</div>
+                        <div class="hide-overflow-text device-name-holder" title="Device Name (DEVICE_NAME_DEFAULT)">{{DEVICE_NAME_DEFAULT}}</div>
                     </td>
                     <td class="device-selector-table-status">
                         <div class="btn-group expand-right">
                             <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                                 <div class="module-chrome-tab-badge">
-                                    <span class="badge">{{#if isConnected}}0{{else}}1{{/if}}</span>
+                                    <span class="badge">{{deviceErrors.length}}</span>
                                 </div>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-data" role="menu">
                                 <li><ul class="dropdown-menu-errors">
-                                    {{#if isConnected}}
-                                        <li class="error-message">No Errors</li>
+                                    {{#if deviceErrors.length}}
+                                        {{#each deviceErrorMessages}}
+                                        <li class="error-message">{{{this}}}</li>
+                                        {{/each}}
                                     {{else}}
-                                        <li class="error-message">Device Not Connected</li>
+                                        <li class="error-message">No Errors</li>
                                     {{/if}}
                                 </ul></li>
                                 <li class="divider"></li>
@@ -68,6 +70,6 @@
         </div>
     </div>
     <div id="device-view" style="display:none" class="unselectable"></div>
-    {{!--<pre>{{printContext}}</pre>--}}
+    {{!--<pre style="width:100%">{{printContext}}</pre>--}}
     {{!--<pre>{{stats.numLoaded}}</pre>--}}
 </div>

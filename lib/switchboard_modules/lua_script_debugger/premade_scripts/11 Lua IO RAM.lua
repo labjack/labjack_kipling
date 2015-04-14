@@ -1,11 +1,11 @@
 print("Save some data to RAM for subsequent access by an external computer.")
---The LUA IO RAM is useful in situations when a script is collecting 
+--The LUA IO MEM registers are useful in situations when a script is collecting 
 --readings, but external software running on a remote computer also
 --needs to log or view the data.
 
 --The Lua script handles the complicated sensor comm(I2C, SPI, 1-Wire etc), 
---and then saves the resultant values to Lua IO RAM.  Then, the external software
---simply reads the result out of the RAM.
+--and then saves the resultant values to Lua IO Memory.  Then, the external software
+--simply reads the result out of the IO MEM registers.
 --See the datasheet for more on LUA IO system
 --http://labjack.com/support/datasheets/t7/scripting
 

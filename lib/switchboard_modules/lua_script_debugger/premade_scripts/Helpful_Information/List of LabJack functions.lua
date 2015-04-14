@@ -53,11 +53,18 @@
 --LJ.ledtog()
 --Description: Toggles status LED. This is just for testing and will be removed.
 
+--LJ.DIO_D_W(IONum, direction)
+--LJ.DIO_S_R(IONum, state)
+--LJ.DIO_S_W(IONum, state)
+--Description: Integrated digital IO interaction that can operate a bit faster than traditional MB.W, MB.R functions.
+--These are beta functions, and may change in name or form.
+
 
 --LJ.Tick
 
 --Ticks = LJ.Tick()
---Description:  Reads the core timer. (1/2 core freq).
+--Description:  Reads the core timer. (1/2 core freq). Useful for timing events that happen irregularly, and/or very fast.
+--Most timing related operations can be timed using one of the 8 available interval timers using LJ.IntervalConfig([0-7], time[ms])
 
 
 --LJ.IntervalConfig & LJ.CheckInterval------------------------------------------
@@ -96,22 +103,22 @@ end
 --end LJ.IntervalConfig & LJ.CheckInterval--------------------------------------
 
 
---Lua_SetThrottle
+--LJ.setLuaThrottle
 
---Lua_SetThrottle(value)
+--LJ.setLuaThrottle(value)
 --value: Number of Lua instructions to execute before releasing control to the normal polling loop.
 --Description: Set the processor priority for the Lua script. After the normal polling loop 
 --completes, Lua will be given processor time again.  This is an advanced function that is useful
 --when Lua code is running on the device at the same time as a host computer is accessing it.
 
---Lua_GetThrottle
+--LJ.getLuaThrottle
 
---value = Lua_GetThrottle()
---Reads a value that corresponds with the processor priority of the Lua script, see Lua_SetThrottle.
+--value = LJ.getLuaThrottle()
+--Reads a value that corresponds with the processor priority of the Lua script, see LJ.setLuaThrottle.
 
 
 
---LUA IO------------------------------------------------------------------------
+--LUA IO Memory-----------------------------------------------------------------
 
 --LUA IO is a system that makes it easy for Lua scripts to make data available to external host computers,
 --and conversely, external host computers can provide information for the Lua script.
@@ -154,4 +161,4 @@ while true do
   end
 
 end
---end LUA IO--------------------------------------------------------------------
+--end LUA IO Memory-------------------------------------------------------------

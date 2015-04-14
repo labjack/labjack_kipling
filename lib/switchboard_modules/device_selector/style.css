@@ -45,7 +45,8 @@
     height: 10px;
     z-index: 99;
     position: relative;
-    top: 50px;
+    /*top: 50px;*/
+    top:12px;
     left: -107px;
 }
 .device-pane-popover .arrow {

@@ -1,4 +1,3 @@
-
 <div class="device-info-div">
 	<div class="info-section" id="general-section">
 		<div class="pane-popover">
@@ -29,6 +28,40 @@
 				</span>
 			</div>
 		</div>
+		<div class="device-detail">
+			Ethernet Mac Address: 
+			<span class="selectableText">
+				{{ETHERNET_MAC.val}}
+			</span>
+		</div>
+		{{#if HARDWARE_INSTALLED.wifi }}
+		<div class="device-detail">
+			WiFi Mac Address: 
+			<span class="selectableText">
+				{{WIFI_MAC.val}}
+			</span>
+		</div>
+		{{/if}}
+		<div class="device-detail">
+			200 uA Current Source Cal: 
+			<span class="selectableText">
+				{{CURRENT_SOURCE_200UA_CAL_VALUE.val}} uA
+			</span>
+		</div>
+		<div class="device-detail">
+			10 uA Current Source Cal: 
+			<span class="selectableText">
+				{{CURRENT_SOURCE_10UA_CAL_VALUE.val}} uA
+			</span>
+		</div>
+		{{#if calibrationStatus}}
+		<div class="device-detail">
+			Calibration Status: 
+			<span id="calibration-status-display" class="calibration-message selectableText {{#if calibrationStatus.overall}}isa_success{{else}}isa_error{{/if}}" title="{{calibrationStatus.message}}">
+				{{calibrationStatus.shortMessage}}&nbsp;&nbsp;<span class="{{#if calibrationStatus.overall}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
+			</span>
+		</div>
+		{{/if}}
 		<div class="block-separator"/>
 		<div class="pane-popover">
 			Versions
@@ -45,15 +78,45 @@
 					{{BOOTLOADER_VERSION}}
 			</span>
 		</div>
+		{{#if HARDWARE_INSTALLED.wifi }}
+		<div id="wifi-firmware-display-holder" class="device-detail">
+			WiFi Firmware Version: 
+			<span id="bootloader-display" class="selectableText">
+				{{WIFI_VERSION}}
+			</span>
+		</div>
+		{{/if}}
 		<div class="block-separator"/>
 		<div class="pane-popover">
 			Current Status
 		</div>
+
+		<div class="device-detail">
+			Ethernet IP Address: 
+			<span id="ethernet-ip-address" class="selectableText">
+				{{#if ETHERNET_IP.isReal}}{{ETHERNET_IP.val}}{{else}}Not Connected{{/if}}
+			</span>
+		</div>
+		{{#if isPro }}
+		<div class="device-detail">
+			WiFi IP Address: 
+			<span id="wifi-ip-address" class="selectableText">
+				{{WIFI_IP.val}}
+			</span>
+		</div>
+		{{/if}}
 		<div class="device-detail">
 			Device Temperature:
 			<span id="internal-device-temperature" class="selectableText">
-				{{DGT_LIGHT_RAW.val}}
+				{{TEMPERATURE_DEVICE_K.val}}
 			</span> K
+		</div>
+		<div id="power-overview">
+			<div><span class="power-indicator {{#if POWER_ETHERNET.val }}powered{{/if}}"></span> Ethernet {{#if POWER_ETHERNET.val }}Powered{{/if}} {{#unless POWER_ETHERNET.val}}Not Powered{{/unless}}</div>
+			<div><span class="power-indicator {{#if POWER_WIFI.val }}powered{{/if}}"></span> WiFi {{#if POWER_WIFI.val }}Powered{{/if}} {{#unless POWER_WIFI.val}}Not Powered{{/unless}}</div>
+			<div><span class="power-indicator {{#if POWER_AIN.val }}powered{{/if}}"></span> Analog Input Module {{#if POWER_AIN.val }}Powered{{/if}} {{#unless POWER_AIN.val}}Not Powered{{/unless}}</div>
+			<div><span class="power-indicator {{#if WATCHDOG_ENABLE_DEFAULT.val }}powered{{/if}}"></span> Watchdog {{#if WATCHDOG_ENABLE_DEFAULT.val }}Enabled{{/if}} {{#unless WATCHDOG_ENABLE_DEFAULT.val}}Disabled{{/unless}}</div>
+			<div><span class="power-indicator {{#if POWER_LED.val }}powered{{/if}}"></span> Device LED {{#if POWER_LED.val }}Powered{{/if}} {{#unless POWER_LED.val}}Not Powered{{/unless}}</div>
 		</div>
 	</div>
 </div>

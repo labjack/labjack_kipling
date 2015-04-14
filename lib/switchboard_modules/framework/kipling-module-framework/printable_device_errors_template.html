@@ -1,0 +1,11 @@
+Number of Errors: {{numErrors}}
+{{#each errors}}
+{{errNum}}. {{name}} ({{code}})
+  - LJM Error Name: {{string}}
+{{#if description}}
+  - Description: {{description}}
+{{/if}}
+  - Operation: {{operation}} 
+  - Arguments: {{{callInfo}}}
+
+ {{/each}}

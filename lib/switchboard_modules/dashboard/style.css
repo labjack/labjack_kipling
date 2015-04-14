@@ -36,13 +36,13 @@
 	font-size: 10px;
 	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, Sans-Serif;*/
 
-	padding: 1px 8px 1px 8px;
+	padding: 3px 8px 2px 8px;
 	margin-top: -1px;
 	min-width: 20px;
 	font-size: 10px;
 	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, Sans-Serif;
 	position: absolute;
-	width: 21px;
+	width: 36px;
 }
 .state-indicator.active {
 	background-color:#5BB75B;
@@ -56,6 +56,8 @@
 	height: 525px;
 	width: 370px;
 	display: inline-block;
+	float:left;
+	margin-left:10px;
 }
 #device-display-container-svg {
     /*shape-rendering: crispEdges;*/
@@ -70,19 +72,25 @@
 }
 #db-display-container {
 	height: 525px;
-	width: 445px;
+	/*width: 445px;*/
 	display: inline-block;
-	padding-left: 10px;
+	margin-left: 10px;
+	float:left;
 }
 #db-display-container-svg {
 	/*height: 525px;
 	width: 370px;*/
 	position: relative;
+	height: 100%;
+	width: 442px;
 }
 #db-display-container-registers {
 	position: relative;
 	width: 120px;
 	z-index: 1;
+}
+.digitalControlObject {
+
 }
 .digitalSelectButton {
 	float:left;
@@ -96,7 +104,7 @@
 .digitalSelectButton .dropdown-toggle {
 	font-size: 12px;
 	padding: 0px 0px 0px 5px;
-	min-width: 52px;
+	min-width: 61px;
 	/*margin-bottom: -10px;*/
 }
 .dropdown-menu {
@@ -142,6 +150,8 @@
 .digitalControlObject .digitalStateSelectButton .currentValue{
 	padding: 0px 4px 0px 4px;
 	min-width: 37px;
+	height: 25px;
+	border: none;
 }
 .digitalControlObject .digitalStateSelectButton .btn.dropdown-toggle {
 padding: 0px;

@@ -28,6 +28,5 @@ print("Welcome, please Load an example to get started!")
 
 --Other Comments-----------------------------------------------------------
 
---We ask that if you are having problems please contact us, but understand
---that we are resource constrained on this project.
+--We ask that if you are having problems please contact us
 --Send questions and feedback to support@labjack.com

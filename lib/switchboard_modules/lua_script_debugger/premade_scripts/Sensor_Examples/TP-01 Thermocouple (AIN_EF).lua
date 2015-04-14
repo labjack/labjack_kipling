@@ -15,9 +15,10 @@ TempK = 0           --Thermocouple is wired to AIN1 and GND
 TempF = 0
 
 MB.W(48005, 0, 1)   --ensure analog system is powered on
+MB.W(9002, 1, 22)   --AIN1_EF_INDEX set to 22 (type K)
 MB.W(40002, 3, 0.1) --AIN1_RANGE set to ±0.1V
 MB.W(41501, 0, 0)   --AIN1_RESOLUTION_INDEX set to 0 (auto)
-MB.W(9002, 1, 22)   --AIN1_EF_INDEX set to 22 (type K)
+MB.W(9302, 1, 0)    --set AIN1_EF_CONFIG_A to deg K (1=degC, 2=degF)
 
 LJ.IntervalConfig(0, 1000)          --set interval to 1000ms
 

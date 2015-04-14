@@ -66,22 +66,22 @@
 		<div class="pane-popover">
 			Versions
 		</div>
-		<div id="firmware-display-holder" class="device-detail">
+		<div id="firmware-display-holder" class="device-detail selectableText">
 			Firmware Version: 
-			<span id="firmware-display" class="selectableText">
+			<span id="firmware-display" class="">
 					{{FIRMWARE_VERSION}}
 			</span>
 		</div>
-		<div id="bootloader-display-holder" class="device-detail">
+		<div id="bootloader-display-holder" class="device-detail selectableText">
 			Bootloader Version: 
-			<span id="bootloader-display" class="selectableText">
+			<span id="bootloader-display" class="">
 					{{BOOTLOADER_VERSION}}
 			</span>
 		</div>
 		{{#if HARDWARE_INSTALLED.wifi }}
-		<div id="wifi-firmware-display-holder" class="device-detail">
+		<div id="wifi-firmware-display-holder" class="device-detail selectableText">
 			WiFi Firmware Version: 
-			<span id="bootloader-display" class="selectableText">
+			<span id="bootloader-display" class="">
 				{{WIFI_VERSION}}
 			</span>
 		</div>
@@ -91,29 +91,63 @@
 			Current Status
 		</div>
 
-		<div class="device-detail">
+		<div class="device-detail selectableText">
 			Ethernet IP Address: 
-			<span id="ethernet-ip-address" class="selectableText">
+			<span id="ethernet-ip-address" class="">
 				{{#if ETHERNET_IP.isReal}}{{ETHERNET_IP.val}}{{else}}Not Connected{{/if}}
 			</span>
 		</div>
-		{{#if isPro }}
-		<div class="device-detail">
+		{{#if HARDWARE_INSTALLED.wifi }}
+		<div class="device-detail selectableText">
 			WiFi IP Address: 
-			<span id="wifi-ip-address" class="selectableText">
-				{{WIFI_IP.val}}
+			<span id="wifi-ip-address" class="">
+				{{#if WIFI_IP.isReal}}{{WIFI_IP.val}}{{else}}Not Connected{{/if}}
 			</span>
+			<div id="wifi_rssi_val" class="wifi-rssi-val">
+				<img id="wifi_rssi_image" class="wifi-rssi-image" src="{{staticFiles}}img/{{WIFI_RSSI.imageName}}.png" title="Signal Strength: {{WIFI_RSSI.str}}">
+			</div>
 		</div>
 		{{/if}}
-		<div class="device-detail">
+		<div class="device-detail selectableText">
 			Device Temperature:
-			<span id="internal-device-temperature" class="selectableText">
+			<span id="internal-device-temperature" class="">
 				{{TEMPERATURE_DEVICE_K.val}}
 			</span> K
 		</div>
+		
+		<div class="block-separator"/>
+		<div class="pane-popover">
+			Hardware Installed
+		</div>
+		<div id="installed-hardware-overview">
+			<div>
+				<span class="installed-hardware-indicator {{#if HARDWARE_INSTALLED.sdCard }}isa_success icon-checkmark-3{{else}}icon-close isa_error{{/if}}"></span>
+				SD Card {{#if HARDWARE_INSTALLED.sdCard }}Installed{{/if}} {{#unless HARDWARE_INSTALLED.sdCard}}Not Installed{{/unless}}
+			</div>
+			{{#if isPro}}
+			<div>
+				<span class="installed-hardware-indicator {{#if HARDWARE_INSTALLED.highResADC }}isa_success icon-checkmark-3{{else}}icon-close isa_error{{/if}}"></span>
+				High Res ADC {{#if HARDWARE_INSTALLED.highResADC }}Installed{{/if}} {{#unless HARDWARE_INSTALLED.highResADC}}Not Installed{{/unless}}
+			</div>
+			<div>
+				<span class="installed-hardware-indicator {{#if HARDWARE_INSTALLED.rtc }}isa_success icon-checkmark-3{{else}}icon-close isa_error{{/if}}"></span>
+				Real Time Clock {{#if HARDWARE_INSTALLED.rtc }}Installed{{/if}} {{#unless HARDWARE_INSTALLED.rtc}}Not Installed{{/unless}}
+			</div>
+			<div>
+				<span class="installed-hardware-indicator {{#if HARDWARE_INSTALLED.wifi }}isa_success icon-checkmark-3{{else}}icon-close isa_error{{/if}}"></span>
+				WiFi {{#if HARDWARE_INSTALLED.wifi }}Installed{{/if}} {{#unless HARDWARE_INSTALLED.wifi}}Not Installed{{/unless}}
+			</div>
+			{{/if}}
+		</div>
+		<div class="block-separator"/>
+		<div class="pane-popover">
+			Enabled Features
+		</div>
 		<div id="power-overview">
 			<div><span class="power-indicator {{#if POWER_ETHERNET.val }}powered{{/if}}"></span> Ethernet {{#if POWER_ETHERNET.val }}Powered{{/if}} {{#unless POWER_ETHERNET.val}}Not Powered{{/unless}}</div>
+			{{#if isPro}}
 			<div><span class="power-indicator {{#if POWER_WIFI.val }}powered{{/if}}"></span> WiFi {{#if POWER_WIFI.val }}Powered{{/if}} {{#unless POWER_WIFI.val}}Not Powered{{/unless}}</div>
+			{{/if}}
 			<div><span class="power-indicator {{#if POWER_AIN.val }}powered{{/if}}"></span> Analog Input Module {{#if POWER_AIN.val }}Powered{{/if}} {{#unless POWER_AIN.val}}Not Powered{{/unless}}</div>
 			<div><span class="power-indicator {{#if WATCHDOG_ENABLE_DEFAULT.val }}powered{{/if}}"></span> Watchdog {{#if WATCHDOG_ENABLE_DEFAULT.val }}Enabled{{/if}} {{#unless WATCHDOG_ENABLE_DEFAULT.val}}Disabled{{/unless}}</div>
 			<div><span class="power-indicator {{#if POWER_LED.val }}powered{{/if}}"></span> Device LED {{#if POWER_LED.val }}Powered{{/if}} {{#unless POWER_LED.val}}Not Powered{{/unless}}</div>

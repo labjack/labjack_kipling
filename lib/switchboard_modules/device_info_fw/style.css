@@ -14,6 +14,7 @@
     display:block;
     float:left;
     margin-left:10px;
+    width: 37%;
 }
 .important-info
 {
@@ -38,8 +39,8 @@
 }
 .pane-popover {
     position: absolute;
-    width: 60px;
-    height: 18px;
+    width: 64px;
+    /*height: 18px;*/
     line-height: 18px;
     padding: 3px;
     padding-right: 6px;
@@ -66,7 +67,8 @@
 }
 
 #power-overview {
-    margin-top: 30px;
+    margin-top: 0;
+    min-height: 30px;
 }
 
 .power-indicator {
@@ -79,11 +81,33 @@
 .power-indicator.powered {
     background-color: #00C000;
 }
+#installed-hardware-overview {
+    margin-top: 0;
+    min-height: 30px;
+}
+.installed-hardware-indicator {
+    width: 14px;
+    height: 14px;
+    background-color: initial;
+    display: inline-block;
+}
 
 .calibration-message {
     padding: 2px 5px 2px 8px;
 }
 
 .product-image {
-    width:220px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.wifi-rssi-val {
+    position: relative;
+    height: 0px;
+    margin-left: 220px;
+    top: -24px;
+}
+
+.wifi-rssi-image {
+    height:20px;
 }
