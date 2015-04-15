@@ -10,8 +10,6 @@ var T7_LIST = {
 	'AIN#(0:254)_NEGATIVE_CH': 199,
 	'AIN#(0:254)_RESOLUTION_INDEX': 0,
 	'AIN#(0:254)_SETTLING_US': 0,
-
-	'DAC#(0:1)': 0,
 	
 	// 'TEMPERATURE_DEVICE_K':defaultFloat,
 	// 'WIFI_STATUS': 2909,
