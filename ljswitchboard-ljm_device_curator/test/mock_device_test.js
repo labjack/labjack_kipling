@@ -3,7 +3,7 @@ var q = require('q');
 var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');
 var qExec = utils.qExec;
-
+var data_parser = require('ljswitchboard-data_parser');
 
 var device;
 
@@ -68,12 +68,12 @@ exports.tests = {
 		var testVal = 1;
 		device.read('DAC0')
 		.then(function(initialRes) {
-			test.strictEqual(initialRes, 0);
+			test.strictEqual(initialRes, 0, 'Invalid initial DAC0 value');
 			device.write('DAC0', testVal)
 			.then(function(res) {
 				device.read('DAC0')
 				.then(function(res) {
-					test.strictEqual(res, testVal);
+					test.strictEqual(res, testVal, 'Invalid DAC0 value after write');
 					test.done();
 				});
 			});
@@ -279,7 +279,7 @@ exports.tests = {
 				{'functionCall': 'digitRead', 'retData': 0},
 				{'functionCall': 'digitRead', 'retData': 0},
 				{
-					'functionCall': 'updateFirmware', 
+					'functionCall': 'updateFirmware',
 					'errData': 'Function not supported for deviceType: 200'
 				},
 			];

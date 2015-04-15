@@ -37,6 +37,8 @@ function device() {
 			}
 			
 		},
+		'DAC0': 0,
+		'DAC1': 0,
 	};
 
 	this.configureMockDevice = function(deviceInfo) {
@@ -263,7 +265,11 @@ function device() {
 	var isAnalogInput = new RegExp("^AIN[0-9]{1,}$");
 	this.getResult = function(address) {
 		var result = 0;
-		if(self.responses[address]) {
+		// get the default value for the requested address
+		var errorData = data_parser.parseError(address, 1);
+		result = errorData.defaultValue.res;
+
+		if(typeof(self.responses[address]) !== 'undefined') {
 			if(typeof(self.responses[address]) === 'function') {
 				result = self.responses[address](address);
 			} else {
