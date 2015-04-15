@@ -2,7 +2,7 @@
 var shared_error_parser = require('./shared_error_parser');
 
 var ipDefaultVal = 0;
-var currentSourceCalDefault = -0.00009999
+var currentSourceCalDefault = -0.00009999;
 
 var T7_LIST = {
 	// 'AIN#(0:254)': defaultFloat,
@@ -10,6 +10,8 @@ var T7_LIST = {
 	'AIN#(0:254)_NEGATIVE_CH': 199,
 	'AIN#(0:254)_RESOLUTION_INDEX': 0,
 	'AIN#(0:254)_SETTLING_US': 0,
+
+	'DAC#(0:1)': 0,
 	
 	// 'TEMPERATURE_DEVICE_K':defaultFloat,
 	// 'WIFI_STATUS': 2909,
