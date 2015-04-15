@@ -205,7 +205,28 @@ var device_tests = {
 	'call iReadMultiple': function(test) {
 		device.iReadMultiple(['AIN0', 'ETHERNET_IP'])
 		.then(function(res) {
-			console.log('iReadMultiple res', res);
+			// console.log('iReadMultiple res', res);
+			test.done();
+		});
+	},
+	'call iWrite': function(test) {
+		device.iWrite('DAC0', 1.0)
+		.then(function(res) {
+			// console.log('iWrite res', res);
+			test.done();
+		});
+	},
+	'call iWriteMultiple': function(test) {
+		device.iWriteMultiple(['DAC0', 'DAC1'], [1.0, 1.0])
+		.then(function(res) {
+			// console.log('iWriteMultiple res', res);
+			test.done();
+		});
+	},
+	'call iWriteMany': function(test) {
+		device.iWriteMany(['DAC0', 'DAC1'], [1.0, 1.0])
+		.then(function(res) {
+			// console.log('iWriteMany res', res);
 			test.done();
 		});
 	},

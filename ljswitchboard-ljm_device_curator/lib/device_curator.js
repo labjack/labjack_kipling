@@ -1301,7 +1301,8 @@ function device(useMockDevice) {
 	};
 	this.iWrite = function(address, value) {
 		var defered = q.defer();
-		self.qWrite(address, value)
+		var encodedVal = data_parser.encodeValue(address, value);
+		self.qWrite(address, encodedVal)
 		.then(function(res) {
 			// If the write happens successfully then update the device cache
 			updateDeviceValueCacheSingle(address, value);
@@ -1311,15 +1312,43 @@ function device(useMockDevice) {
 	};
 	this.iWriteMany = function(addresses, values) {
 		var defered = q.defer();
-
-		self.qWriteMany(addresses, values)
-		.then(function() {
+		var encodedValues = values.map(function(value, i) {
+			return data_parser.encodeValue(addresses[i], value);
+		});
+		self.qWriteMany(addresses, encodedValues)
+		.then(function(res) {
 			// If the write happens successfully then update the device cache
 			updateDeviceValueCacheArray(addresses, values);
+			defered.resolve(res);
 		}, defered.reject);
 		return defered.promise;
 	};
 
+	this.iWriteMultiple = function(addresses, values) {
+		var defered = q.defer();
+		var encodedValues = values.map(function(value, i) {
+			return data_parser.encodeValue(addresses[i], value);
+		});
+		self.writeMultiple(addresses, encodedValues)
+		.then(function(results) {
+			var i, tError;
+			for(i = 0; i < results.length; i++) {
+				if(!results[i].isErr) {
+					// If the write happens successfully then update the device
+					// cache
+					updateDeviceValueCacheSingle(addresses[i], values[i]);
+				} else {
+					tError = results[i].data;
+					results[i].data = data_parser.parseError(
+						results[i].address,
+						tError
+					);
+				}
+			}
+			defered.resolve(results);
+		}, defered.reject);
+		return defered.promise;
+	};
 	this.sRead = function(address) {
 		var defered = q.defer();
 		self.iRead(address)

@@ -110,6 +110,17 @@ var device_tests = {
 			test.done();
 		});
 	},
+	'test successful writing & caching of WIFI_PASSWORD_DEFAULT': function(test) {
+		var netPass = 'smgmtbmb3cmtbc';
+		device.iWrite('WIFI_PASSWORD_DEFAULT', netPass)
+		.then(function(res) {
+			device.sRead('WIFI_PASSWORD_DEFAULT')
+			.then(function(res) {
+				test.strictEqual(netPass, res.val, 'Password does not match');
+				test.done();
+			});
+		});
+	},
 	'test failed writeMultiple invalid address': function(test) {
 		var results = [];
 		capturedEvents = [];
