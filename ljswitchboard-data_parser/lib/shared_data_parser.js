@@ -35,20 +35,37 @@ var parseIP = function(ipNum) {
 exports.parseIP = parseIP;
 
 var encodeIP = function(ipStr) {
-	var retData = ipStr;
-	if(ipStr.split) {
-		var ipBuf = new Buffer(4);
-		var i;
-		ipBuf.fill(0);
-		var ipVals = ipStr.split('.');
-		if(ipVals.length == 4) {
-			for(i = 0; i < 4; i ++) {
-				if(!isNaN(ipVals[i])) {
-					ipBuf.writeUInt8(parseInt(ipVals[i], 10), i);
-				}
+	var retData = 0;
+	try {
+		if(isNaN(ipStr)) {
+			var ipBuf, i, ipVals;
+			var convert = false;
+			// If the ipStr is not a number, aka most likely an IP address
+			if(ipStr.split) {
+				ipVals = ipStr.split('.');
+				convert = true;
+			} else if(Array.isArray(ipStr)) {
+				ipVals = ipStr;
+				convert = true;
 			}
+			if(convert) {
+				ipBuf = new Buffer(4);
+				ipBuf.fill(0);
+				if(ipVals.length == 4) {
+					for(i = 0; i < 4; i ++) {
+						if(!isNaN(ipVals[i])) {
+							ipBuf.writeUInt8(parseInt(ipVals[i], 10), i);
+						}
+					}
+				}
+				retData = ipBuf.readUInt32BE(0);
+			}
+		} else {
+			// Treat the input as a number
+			retData = parseInt(ipStr, 10);
 		}
-		retData = ipBuf.readUInt32BE(0);
+	} catch(err) {
+		retData = 0;
 	}
 	return retData;
 };

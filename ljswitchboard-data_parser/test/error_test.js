@@ -21,6 +21,9 @@ exports.tests = {
 			{'reg': 'FIO1', 'err': 12, 'defaultVal': 0, 'lastVal': 0},
 			{'reg': 'AIN0_RANGE', 'err': 12, 'defaultVal': 10, 'lastVal': 10},
 			{'reg': 'AIN0_EF_INDEX', 'err': 12, 'defaultVal': 0, 'lastVal': 0},
+			{'reg': 'WIFI_SSID', 'err': 12, 'defaultVal': '', 'lastVal': ''},
+			{'reg': 'WIFI_SSID_DEFAULT', 'err': 12, 'defaultVal': '', 'lastVal': ''},
+			{'reg': 'WIFI_PASSWORD_DEFAULT', 'err': 12, 'defaultVal': '', 'lastVal': ''},
 		];
 		/*
 		Most of the default values listed in the .json file seem like "valid" 

@@ -6,46 +6,55 @@ var constants = modbus_map.getConstants();
 
 exports.tests = {
 	'check IP registers - encode': function(test) {
-		var results = [
-			data_parser.encodeValue('WIFI_IP', '0.0.0.0'),
-			data_parser.encodeValue('WIFI_IP', '0.0.0.1'),
-			data_parser.encodeValue('WIFI_IP', '0.0.1.0'),
-			data_parser.encodeValue('WIFI_IP', '0.1.0.0'),
-			data_parser.encodeValue('WIFI_IP', '1.0.0.0'),
-			data_parser.encodeValue('WIFI_IP', '192.168.1.207'),
-			data_parser.encodeValue('WIFI_IP', '255.255.255.255'),
+		var testVals = [
+			// Test IP strings
+			{'val': '0.0.0.0', 'res': 0},
+			{'val': '0.0.0.1', 'res': 1},
+			{'val': '0.0.1.0', 'res': 256},
+			{'val': '0.1.0.0', 'res': 65536},
+			{'val': '1.0.0.0', 'res': 16777216},
+			{'val': '192.168.1.207', 'res': 3232235983},
+			{'val': '255.255.255.255', 'res': 4294967295},
+
+			// Test IP Values
+			{'val': 0, 'res': 0},
+			{'val': 1, 'res': 1},
+			{'val': 256, 'res': 256},
+			{'val': 65536, 'res': 65536},
+			{'val': 16777216, 'res': 16777216},
+			{'val': 3232235983, 'res': 3232235983},
+			{'val': 4294967295, 'res': 4294967295},
+
+			// Test IP Value Arrays
+			{'val': [0, 0, 0, 0], 'res': 0},
+			{'val': [0, 0, 0, 1], 'res': 1},
+			{'val': [0, 0, 1, 0], 'res': 256},
+			{'val': [0, 1, 0, 0], 'res': 65536},
+			{'val': [1, 0, 0, 0], 'res': 16777216},
+			{'val': [192, 168, 1, 207], 'res': 3232235983},
+			{'val': [255, 255, 255, 255], 'res': 4294967295},
 		];
-		var reqResults = [
-			0,
-			1,
-			256,
-			65536,
-			16777216,
-			3232235983,
-			4294967295
-		];
+		var results = [];
+		var reqResults = [];
+		testVals.forEach(function(testVal) {
+			results.push(data_parser.encodeValue('WIFI_IP', testVal.val));
+			reqResults.push(testVal.res);
+		});
+
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
 	'check IP registers (fail) - encode': function(test) {
-		var results = [
-			data_parser.encodeValue('WIFI_IP', 0),
-			data_parser.encodeValue('WIFI_IP', 1),
-			data_parser.encodeValue('WIFI_IP', 256),
-			data_parser.encodeValue('WIFI_IP', 65536),
-			data_parser.encodeValue('WIFI_IP', 16777216),
-			data_parser.encodeValue('WIFI_IP', 3232235983),
-			data_parser.encodeValue('WIFI_IP', 4294967295),
+		var testVals = [
+			{'val': 'aa', 'res': 0},
 		];
-		var reqResults = [
-			0,
-			1,
-			256,
-			65536,
-			16777216,
-			3232235983,
-			4294967295
-		];
+
+		var results = [];
+		var reqResults = [];
+		testVals.forEach(function(testVal) {
+			results.push(data_parser.encodeValue('WIFI_IP', testVal.val));
+			reqResults.push(testVal.res);
+		});
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
