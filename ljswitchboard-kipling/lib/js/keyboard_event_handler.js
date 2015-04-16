@@ -43,7 +43,7 @@ function keyboardEventHandler() {
         }
     };
     this.handleOpenConsole = function(info) {
-        console.log('in handleOpenConsole', info.name);
+        // console.log('in handleOpenConsole', info.name);
         if(typeof(gui) === 'undefined') {
             gui = require('nw.gui');
         }
@@ -92,11 +92,11 @@ function keyboardEventHandler() {
         }
     ];
     this.handleEscapeKey = function(info) {
-        console.log('in handleEscapeKey');
+        // console.log('in handleEscapeKey');
         var curClassName = document.activeElement.className;
         var curID = document.activeElement.id;
         var curKey = curID + curClassName;
-        console.log('in handleEscapeKey',curKey,self.lastOnFocusElementKey,self.lastOnFocusElementValue);
+        // console.log('in handleEscapeKey',curKey,self.lastOnFocusElementKey,self.lastOnFocusElementValue);
         if(curKey === self.lastOnFocusElementKey) {
             var newText = self.lastOnFocusElementValue;
             document.activeElement.value = newText;
@@ -117,7 +117,7 @@ function keyboardEventHandler() {
     this.lastOnFocusElementKey = '';
     this.onFocusListener = function(event) {
         self.lastOnFocusEvent = event;
-        console.log(event.target.value);
+        // console.log(event.target.value);
         self.lastOnFocusElementValue = event.target.value.toString();
         var className = event.target.className;
         var id = event.target.id;

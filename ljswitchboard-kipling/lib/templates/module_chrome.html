@@ -2,14 +2,18 @@
     <div id="module-chrome-header">
         <input style="display:none;" id="file-dialog-hidden" type="file" />
         <input style="display:none;" id="file-save-dialog-hidden" type="file" nwsaveas="luaScript.lua" accept=".lua"/>
-        <div class="alert-holder">
+        <div id="alert-message-holder" class="alert-holder">
+            <div id="info-message" class="alert alert-info" style="display:none;">
+              <button type="button" class="close close-alert-button"></button>
+              <div class="error-display"></div>
+            </div>
             <div id="alert-message" class="alert" style="display:none;">
               <button type="button" class="close close-alert-button"></button>
-              <div id="error-display"></div>
+              <div class="error-display"></div>
             </div>
             <div id="alert-error-message" class="alert alert-error" style="display:none;">
               <button type="button" class="close close-alert-button"></button>
-              <div id="error-display"></div>
+              <div class="error-display"></div>
             </div>
         </div>
     </div>

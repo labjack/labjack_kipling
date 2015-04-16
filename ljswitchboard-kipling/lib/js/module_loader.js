@@ -11,6 +11,7 @@ var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
 var static_files = require('ljswitchboard-static_files');
 var io_manager = require('ljswitchboard-io_manager');
+var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 // Configure the module_manager persistent data path.
 var kiplingExtractionPath = package_loader.getExtractionPath();
@@ -159,11 +160,11 @@ function createModuleLoader() {
 		var promises = [];
 		var i;
 		for(i = 0; i < precompileFunctions.length; i++) {
-			console.info(
-				'Executing precompile function',
-				i,
-				precompileFunctions.length
-			);
+			// console.info(
+			// 	'Executing precompile function',
+			// 	i,
+			// 	precompileFunctions.length
+			// );
 			promises.push(precompileFunctions[i](newModule));
 		}
 		q.allSettled(promises)
@@ -177,10 +178,13 @@ function createModuleLoader() {
 		});
 		return defered.promise;
 	};
+
 	var getUpdatedDeviceListing = function(newModule) {
 		var defered = q.defer();
 		var io_interface = io_manager.io_interface();
 		var device_controller = io_interface.getDeviceController();
+
+		// Filter what devices are displayed
 		var filters;
 		if(newModule.data.supportedDevices) {
 			filters = newModule.data.supportedDevices;
@@ -294,8 +298,8 @@ function createModuleLoader() {
 		clearCurrentModule(moduleData)
 		.then(loadCSSFiles)
 		.then(loadJSFiles)
-		.then(getModuleContext)
 		.then(getUpdatedDeviceListing)
+		.then(getModuleContext)
 		.then(loadHTMLFiles)
 		.then(updateStatistics)
 		.then(runGC)

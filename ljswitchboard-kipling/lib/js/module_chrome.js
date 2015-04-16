@@ -4,6 +4,7 @@ var path = require('path');
 var q = global.require('q');
 var handlebars = global.require('handlebars');
 var module_manager = require('ljswitchboard-module_manager');
+var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 var fs = require('fs');
 
 
@@ -293,6 +294,8 @@ function createModuleChrome() {
 		return defered.promise;
 	};
 	var filterOperations = {
+		// TODO: Should combine this filter code with the filter code in the
+		// io_manager device_keeper.js file.
 		'minFW': function(filterValue, deviceAttributes) {
 			if(self.debugFilters) {
 				console.log('Checking minFW', filterValue, deviceAttributes.FIRMWARE_VERSION);
@@ -302,6 +305,9 @@ function createModuleChrome() {
 					return true;
 				} else {
 					self.filterFlags.isOld = true;
+					if(self.debugFilters) {
+						console.log('FAILS!');
+					}
 					return false;
 				}
 			} else {
@@ -310,13 +316,16 @@ function createModuleChrome() {
 			}
 		},
 		'subclass': function(filterValues, deviceAttributes) {
-			var isMet = true;
+			var isMet = false;
 			if(self.debugFilters) {
 				console.log('Checking subclass', filterValues, deviceAttributes.productType);
 			}
 			filterValues.forEach(function(filterValue) {
-				if(deviceAttributes.productType.indexOf(filterValue) < 0) {
-					isMet = false;
+				if(deviceAttributes.productType.indexOf(filterValue) >= 0) {
+					if(self.debugFilters) {
+						console.log('Passes!', '"' + filterValue + '"');
+					}
+					isMet = true;
 				}
 			});
 			return isMet;
@@ -327,6 +336,9 @@ function createModuleChrome() {
 			}
 			var isMet = true;
 			if(deviceAttributes.productType.indexOf(filterValue) < 0) {
+				if(self.debugFilters) {
+					console.log('FAILS!');
+				}
 				isMet = false;
 			}
 			return isMet;
@@ -465,9 +477,17 @@ function createModuleChrome() {
 		// console.log('Clicked Tab', res.data.name);
 		if(self.allowModuleToLoad) {
 			self.allowModuleToLoad = false;
+
+			// Clear all selected module styling classes
+			$('.module-chrome-tab').removeClass('selected');
+			var tabID = '#' + res.data.name + '-tab';
+			$(tabID).addClass('selected');
+
 			self.emit(self.eventList.LOADING_MODULE, res);
 			MODULE_LOADER.once('MODULE_READY', function(res) {
 				self.allowModuleToLoad = true;
+				hideInfoMessage();
+				hideAlert();
 			});
 			MODULE_LOADER.loadModule(res.data)
 			.then(function(res) {
@@ -488,7 +508,8 @@ function createModuleChrome() {
 				console.error('Error loading module', err);
 			});
 		} else {
-			console.log('Preventing module from loading');
+			// console.log('Preventing module from loading');
+			showInfoMessage('Please wait for module to finish loading.');
 		}
 		// Query for the module's data.  Will be replaced by a function call
 		// to MODULE_LOADER.
@@ -497,7 +518,7 @@ function createModuleChrome() {
 
 	var saveDeviceListingData = function(deviceInfoArray) {
 		var defered = q.defer();
-		// console.log('Updated Device Listing', deviceInfoArray);
+		console.log('Updated Device Listing', deviceInfoArray);
 		self.cachedDeviceListing = deviceInfoArray;
 		defered.resolve();
 		return defered.promise;

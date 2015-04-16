@@ -44,10 +44,10 @@
   "window": {
     "title": "Kipling",
     "icon": "lib/Kipling_128x128.png",
-    "toolbar": true,
-    "width": 1120,
+    "toolbar": false,
+    "width": 900,
     "height-a": 730,
-    "height": 400,
+    "height": 700,
     "min_width":600,
     "a-min_width":785,
     "min_height":400,

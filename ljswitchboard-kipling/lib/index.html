@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html id="mainHTMLWindow" style="overflow:hidden" class="fullPage">
     <head>
+        <script type="text/javascript">
+            // prevent most webpage like drag & drop functionality to open links.
+            window.ondragover = function(e) {e.preventDefault();return false;};
+            window.ondrop = function(e) {e.preventDefault();return false;};
+        </script>
     	<script type='text/javascript' src="index.js"></script>
         <script>
             console.log('Loading Page Resources');
 
             // Resources located in the -static_files directory
             var resourceList = [
+                // Jquery lightness (hopefully things will get over-written)
+                'libs/jquery-ui-1.10.4.custom/css/ui-lightness/jquery-ui-1.10.4.custom.min.css',
+                
                 // CSS for bootstrap
                 'libs/bootstrap/css/bootstrap.docs.min.css',
                 'libs/bootstrap/css/bootstrap.min.css',
@@ -16,6 +24,11 @@
                 'libs/bootmetro/css/bootmetro-icons.min.css',
                 'libs/bootmetro/css/bootmetro-responsive.min.css',
                 'libs/bootmetro/css/bootmetro-ui-light.min.css',
+
+                // CSS for other things...
+                'css/bootstrap-switch.css',
+                'css/slider.css',
+                'css/twbsPagination.css',
 
                 // CSS for fixes to bootmetro & bootstrap
                 'css/bootmetro.fix.css',
@@ -38,6 +51,19 @@
 
                 // custom jquery ui stuff
                 'libs/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js',
+                'libs/jquery-ui-1.10.4.custom/js/jquery.mousewheel.js',
+
+
+                // JS for bootstrap sliders
+                'js/bootstrap-switch.js',
+                'js/bootstrap-slider.js',
+
+                // Other JS
+                'js/kinetic.js',
+                'js/typeahead.bundle.min.js',
+                'js/d3.js',
+                'js/ace/ace.js',
+                'js/ace/ext-language_tools.js',
             ];
             loadCoreResources(resourceList);
 

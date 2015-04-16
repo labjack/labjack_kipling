@@ -2,8 +2,9 @@
 
 
 .module-chrome-tabs {
-    float:left;
-    width:150px;
+    position: absolute;
+    left: 0px;
+    z-index: 1000;
 }
 .module-chrome-tab {
 }
@@ -43,7 +44,9 @@
     bottom:0px;
 }
 .module-chrome-body {
-    margin-left:150px;
+    position: absolute;
+    left: 150px;
+    right: 0;
 }
 
 #module-chrome-contents-holder {
