@@ -69,6 +69,7 @@ exports.run = function (files, options, update, callback) {
         testspec: options.testspec,
         testFullSpec: options.testFullSpec,
         moduleStart: function (name) {
+            appendText('<div id="nodeunit-test-' + name + '">');
             appendText('<h2 id="nodeunit-banner">' + name + '</h2>');
             appendText('<ol id="nodeunit-tests">');
         },
@@ -128,6 +129,7 @@ exports.run = function (files, options, update, callback) {
                     ' assertions (' + assertions.duration + 'ms)</h3>'
                 );
             }
+            appendText('</div>');
             // appendText('</body>');
             // appendText('</html>');
             if(update) {

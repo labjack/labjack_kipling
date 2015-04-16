@@ -15,9 +15,10 @@ var testFiles = [
 	// Execute Mock-Device compatable Tests
 	'mock_module_tests/mock_device_selector.js',
 	'mock_module_tests/mock_device_info.js',
+	// 'mock_module_tests/mock_dashboard.js',
 
 	// Execute Live-Device tests
-	// 'module_tests/test_device_selector.js',
+	'module_tests/test_device_info.js',
 
 	'finish_testing.js',
 ];
@@ -74,26 +75,49 @@ var loadResources = function(resources, isLocal) {
 	return defered.promise;
 };
 
+
 var getUpdateTestResults = function(divID) {
+	var cachedTestDiv;
+	cachedTestDiv = undefined;
 	var updateTestResults = function() {
 
 		var savedText = nodeunit_recorder.getSavedText();
-		cachedTestDiv = $(divID);
-		cachedTestDiv.html(savedText);
+		if(cachedTestDiv) {
+			cachedTestDiv.html(savedText);
+		} else {
+			cachedTestDiv = $(divID);
+			cachedTestDiv.html(savedText);
+		}
 	};
 	return updateTestResults;
 };
 var getRunTest = function(testFile, testDiv) {
+	var testName = path.basename(testFile);
 	var fileName = path.basename(testFile);
-	var fileEnding = path.extname(fileName);
+	var fileEnding = path.extname(testName);
 	fileName = fileName.split(fileEnding).join('');
 
 	var divID = fileName + '-test';
 	var runTest = function() {
 		var defered = q.defer();
-		var str = '<div id="{{id}}"><p>Test!</p></div>';
+		var str = [
+			'<li id="{{id}}_result">',
+			'<div class="no_select">',
+				'<span>Test: {{testName}}</span>',
+				'<div class="results_button">',
+					'<span>Status: <span id="{{id}}_status">In Progress</span></span>',
+					'<span id="{{id}}_button"class="icon-list-2 toggle_button"></span>',
+				'</div>',
+			'</div>',
+			'<div id="{{id}}"><p>Test!</p></div>',
+			'</li>'
+		].join('');
 		var template = handlebars.compile(str);
-		var newTxt = template({'id': divID});
+		var newTxt = template({
+			'id': divID,
+			'testName':testName,
+			'fileName': fileName
+		});
 		testDiv.append($(newTxt));
 		try {
 			var outputHTML = nodeunit_recorder.run(
@@ -101,11 +125,24 @@ var getRunTest = function(testFile, testDiv) {
 				{},
 				getUpdateTestResults('#' + divID),
 				function(err) {
+					var testResults = $('#' + divID);
 					if(err) {
 						console.log('Error running test', err, testFile);
+						var status = $('#' + divID + '_status');
+						status.text('Error');
+						status.css('color', 'red');
 					} else {
+						var status = $('#' + divID + '_status');
+						status.text('Success');
+						status.css('color', 'green');
+						testResults.slideUp();
 						// console.log('Finished running test', testFile);
 					}
+					
+					var btn = $('#' + divID + '_button');
+					btn.on('click', function() {
+						testResults.slideToggle();
+					})
 					defered.resolve();
 				});
 		} catch(err) {

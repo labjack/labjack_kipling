@@ -27,6 +27,24 @@ var activeModule;
 var viewGen;
 var eventList;
 
+var mockDevices;
+try {
+	mockDevices = require('./mock_devices').mockDevices;
+} catch(err) {
+	mockDevices = [];
+}
+var deviceScannerConfigData = [];
+var excludeKeys = ['deviceConfig'];
+mockDevices.forEach(function(mockDevice) {
+	var deviceData = {};
+	var keys = Object.keys(mockDevice);
+	keys.forEach(function(key) {
+		if(excludeKeys.indexOf(key) < 0) {
+			deviceData[key] = mockDevice[key];
+		}
+	});
+	deviceScannerConfigData.push(deviceData);
+});
 
 this.test_device_selector = {
 	'initialize test': function(test) {
@@ -60,28 +78,7 @@ this.test_device_selector = {
 		});
 	},
 	'Add mock devices': function(test) {
-		deviceController.addMockDevices([
-			{
-				'deviceType': 'LJM_dtT7',
-				'connectionType': 'LJM_ctUSB',
-				'serialNumber': 1,
-			},
-			{
-				'deviceType': 'LJM_dtT7',
-				'connectionType': 'LJM_ctETHERNET',
-				'serialNumber': 1,
-			},
-			{
-				'deviceType': 'LJM_dtT7',
-				'connectionType': 'LJM_ctUSB',
-				'serialNumber': 2,
-				'WIFI_RSSI': -65,
-			},
-			{
-				'deviceType': 'LJM_dtDIGIT',
-				'connectionType': 'LJM_ctUSB'
-			}
-		])
+		deviceController.addMockDevices(deviceScannerConfigData)
 		.then(function() {
 			test.done();
 		});

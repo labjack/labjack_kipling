@@ -42,26 +42,6 @@ mockDevices.forEach(function(mockDevice) {
 	deviceScannerConfigData.push(deviceData);
 });
 
-var configureMockDevice = function(deviceIndex) {
-	var defered = q.defer();
-	var deviceData = {};
-	if(mockDevices[deviceIndex]) {
-		deviceData = mockDevices[deviceIndex];
-	}
-	var filters = {};
-	var filterKeys = ['serialNumber', 'deviceType', 'connectionType'];
-	var deviceConfig = {};
-	var keys = Object.keys(deviceData);
-	keys.forEach(function(key) {
-		if(filterKeys.indexOf(key) >= 0) {
-			filters[key] = deviceData[key];
-		}
-		if(key === 'deviceConfig') {
-			deviceConfig = deviceData.deviceConfig;
-		}
-	});
-	return defered.promise;
-}
 this.test_device_info = {
 	'initialize test': function(test) {
 		package_loader = global.require('ljswitchboard-package_loader');
@@ -86,77 +66,42 @@ this.test_device_info = {
 		deviceController = io_interface.getDeviceController();
 		test.done();
 	},
-	'reload device selector': function(test) {
-		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
-		});
-
-		var deviceSelectorTab = $('#device_selector-tab');
-		deviceSelectorTab.trigger('click');
-		// MODULE_LOADER.loadModuleByName('device_selector')
-		// .then(function(res) {
-		// 	// Device selector isn't quite loaded yet.  Just ready for
-		// 	// other async tasks.  Must wait for the "MODULE_READY" event.
-		// });
-	},
-	'change slide-time': function(test) {
-		var activeModule = kiplingWin.window.activeModule;
-		var viewGen = activeModule.viewGen;
-		viewGen.slideDuration = 10;
-		test.done();
-	},
-	'connect to T7 (USB)': function(test) {
-		MODULE_CHROME.once(
-			MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
-			function(updatedModules) {
-				console.log('Tabs updated (test)', updatedModules);
-				test.done();
-			});
-
-		// Connect to the first found USB-T7
-		var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_USB');
-		var t7 = t7s.first();
-		t7.trigger('click');
-	},
-	'connect to T7 (Ethernet)': function(test) {
-		MODULE_CHROME.once(
-			MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
-			function(updatedModules) {
-				console.log('Tabs updated (test)', updatedModules);
-				test.done();
-			});
-
-		// Connect to the second found Ethernet-T7
-		var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_Ethernet');
-		var t7 = t7s.eq(1);
-		t7.trigger('click');
-	},
-	'connect to Digit (USB)': function(test) {
-		MODULE_CHROME.once(
-			MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
-			function(updatedModules) {
-				console.log('Tabs updated (test)', updatedModules);
-				test.done();
-			});
-
-		// Connect to the first found USB-Digit
-		var t7s = $('.DEVICE_TYPE_Digit .CONNECTION_TYPE_USB');
-		var t7 = t7s.first();
-		t7.trigger('click');
-	},
 	'load device info': function(test) {
-		kiplingWin.showDevTools();
 
 		MODULE_LOADER.once('MODULE_READY', function(res) {
 			test.done();
 		});
-		var deviceInfoTab = $('#device_info_fw-tab');
+		var deviceInfoTab = $('#dashboard-tab');
 		deviceInfoTab.trigger('click');
 		// MODULE_LOADER.loadModuleByName('device_info_fw')
 		// .then(function(res) {
 		// 	// Device selector isn't quite loaded yet.  Just ready for
 		// 	// other async tasks.  Must wait for the "MODULE_READY" event.
 		// });
+	},
+	'load analog inputs': function(test) {
+
+		MODULE_LOADER.once('MODULE_READY', function(res) {
+			test.done();
+		});
+		var deviceInfoTab = $('#analog_inputs_fw-tab');
+		deviceInfoTab.trigger('click');
+	},
+	'load lua script debugger': function(test) {
+
+		MODULE_LOADER.once('MODULE_READY', function(res) {
+			test.done();
+		});
+		var deviceInfoTab = $('#lua_script_debugger-tab');
+		deviceInfoTab.trigger('click');
+	},
+	'load network settings': function(test) {
+
+		MODULE_LOADER.once('MODULE_READY', function(res) {
+			test.done();
+		});
+		var deviceInfoTab = $('#network_settings-tab');
+		deviceInfoTab.trigger('click');
 	},
 	// 'disconnect from T7': function(test) {
 	// 	MODULE_CHROME.once(

@@ -1,7 +1,7 @@
 
 
 var testOptions = {
-	'forceLive': true
+	'forceLiveTest': true
 };
 
 // Generic Application Objects
@@ -25,6 +25,12 @@ var deviceController;
 var activeModule;
 var eventList;
 
+var q;
+try {
+	q = require('q');
+} catch(err) {
+	q = global.require('q');
+}
 
 this.test_device_selector = {
 	'initialize test': function(test) {
@@ -52,21 +58,49 @@ this.test_device_selector = {
 		test.done();
 	},
 	'load the device_selector module': function(test) {
-		MODULE_LOADER.loadModuleByName('device_selector')
-		.then(function(res) {
+		MODULE_LOADER.once('MODULE_READY', function(res) {
 			test.done();
 		});
+		var deviceSelectorTab = $('#device_selector-tab');
+		deviceSelectorTab.trigger('click');
 	},
 	'save save device_selector information': function(test) {
 		activeModule = kiplingWindow.activeModule;
 		eventList = activeModule.eventList;
 		test.done();
 	},
-	'wait for device selector module to start': function(test) {
-		activeModule.once(eventList.MODULE_STARTED, function(scanResults) {
-			var numResults = scanResults.length = 0;
-			test.strictEqual(numResults, 0, 'No results should currently be cached');
+	'disconnect from mock devices': function(test) {
+		var buttonClasses = $('.disconnect_buttons_class');
+		var num = buttonClasses.length;
+		var i;
+		var activeNums = [];
+		var promises = [];
+		var closeDevice = function(ele) {
+			var testDefered = q.defer();
+			var resolveFunc = function(updatedModules) {
+				testDefered.resolve();
+			};
+			MODULE_CHROME.once(
+				MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_CLOSED,
+				resolveFunc);
+			var disconnectButton = ele.find('.disconnect-button');
+			setImmediate(function() {
+				disconnectButton.trigger('click');
+			});
+			return testDefered.promise;
+		}
+		for(i = 0; i < num; i++) {
+			if(buttonClasses.eq(i).css('display') !== 'none') {
+				activeNums.push(i);
+				promises.push(closeDevice(buttonClasses.eq(i)));
+			}
+		}
+		q.allSettled(promises)
+		.then(function() {
+			console.log('Closed All Devices!');
 			test.done();
+		}, function(err) {
+			console.log('ERror...', err);
 		});
 	},
 	'Enable device scanning': function(test) {
@@ -104,4 +138,31 @@ this.test_device_selector = {
 			test.done();
 		}
 	},
+	'connect to T7 (USB)': function(test) {
+		MODULE_CHROME.once(
+			MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
+			function(updatedModules) {
+				console.log('Tabs updated (test)', updatedModules);
+				test.done();
+			});
+
+		// Connect to the first found USB-T7
+		var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_USB');
+		if(t7s.length > 0) {
+			var t7 = t7s.first();
+			t7.trigger('click');
+		} else {
+			test.done();
+		}
+	},
+	'load device info': function(test) {
+		MODULE_LOADER.once('MODULE_READY', function(res) {
+			test.done();
+		});
+		var deviceInfoTab = $('#device_info_fw-tab');
+		deviceInfoTab.trigger('click');
+	},
+	'please disconnect T7': function(test) {
+		test.done();
+	}
 };

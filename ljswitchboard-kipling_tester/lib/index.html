@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html id="mainHTMLWindow" style="overflow:hidden" class="fullPage">
     <head>
+        <script type="text/javascript">
+            // prevent most webpage like drag & drop functionality to open links.
+            window.ondragover = function(e) {e.preventDefault();return false;};
+            window.ondrop = function(e) {e.preventDefault();return false;};
+        </script>
     	<script type='text/javascript' src="index.js"></script>
         <script>
             console.log('Loading Page Resources');
@@ -55,8 +60,10 @@
         <script src="test/test_ljswitchboard.js"></script>-->
     </head>
     <body class="fullPage">
-        <div id="nodeunit_test_results" class="fullPage" style="overflow:auto">
+        <div class="fullPage" style="overflow:auto">
             <h1 id="nodeunit-header">Kipling Test Results</h1>
+            <ol id="nodeunit_test_results">
+            </ol>
         </div>
 		<script>
 			// nodeunit.run({
