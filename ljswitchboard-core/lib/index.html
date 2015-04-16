@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html id="mainHTMLWindow" style="overflow:hidden">
     <head>
+        <script type="text/javascript">
+            // prevent most webpage like drag & drop functionality to open links.
+            window.ondragover = function(e) {e.preventDefault();return false;};
+            window.ondrop = function(e) {e.preventDefault();return false;};
+        </script>
     	<script type='text/javascript' src="index.js"></script>
         <script>
             console.log('Loading Page Resources');
