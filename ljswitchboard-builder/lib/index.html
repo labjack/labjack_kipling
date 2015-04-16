@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html id="mainHTMLWindow" style="overflow:hidden">
     <head>
+        <script type="text/javascript">
+            // prevent most webpage like drag & drop functionality to open links.
+            window.ondragover = function(e) {e.preventDefault();return false;};
+            window.ondrop = function(e) {e.preventDefault();return false;};
+        </script>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
         <title>LJSwitchboard</title>
         <style type="text/css">
