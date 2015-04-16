@@ -326,14 +326,53 @@ function createDeviceKeeper(io_delegator, link) {
 	 * Accessory function for getDeviceListing that filters out devices from the
 	 * listing.
 	 */
-	var specialDeviceFilters = {
-		'type': function (param, attrs) {
-			var res = false;
-			if(driver_const.deviceTypes[param] == attrs.deviceType) {
+	 var deviceTypeFilterFunc = function (param, attrs) {
+		var res = false;
+		if(driver_const.deviceTypes[param] == attrs.deviceType) {
+			res = true;
+		}
+		return res;
+	};
+	var connectionTypeFilterFunc = function(param, attrs) {
+		var res = false;
+		if(driver_const.connectionTypes[param] == attrs.connectionType) {
+			res = true;
+		}
+		return res;
+	};
+	var subClassFilterFunc = function (params, attrs) {
+		var res = false;
+		var augmentParam = function(origParam) {
+			origParam = origParam.split('-').join('');
+			if(origParam !== '') {
+				origParam = '-' + origParam;
+			}
+			return origParam;
+		};
+		if(Array.isArray(params)) {
+			params.forEach(function(param) {
+				if(attrs.subclass === augmentParam(param)) {
+					res = true;
+				}
+			});
+		} else {
+			if(attrs.subclass === augmentParam(param)) {
 				res = true;
 			}
-			return res;
-		},
+		}
+		return res;
+	};
+	var specialDeviceFilters = {
+		// TODO: Should combine this filter code with the filter code in the
+		// kipling module_chrome.js file.
+		'type': deviceTypeFilterFunc,
+		'deviceType': deviceTypeFilterFunc,
+		'deviceTypeString': deviceTypeFilterFunc,
+		'deviceTypeName': deviceTypeFilterFunc,
+		'deviceClass': deviceTypeFilterFunc,
+		'connectionType': connectionTypeFilterFunc,
+		'connectionTypeName': connectionTypeFilterFunc,
+		'connectionTypeString': connectionTypeFilterFunc,
 		'minFW': function (param, attrs) {
 			var res = false;
 			if(attrs.FIRMWARE_VERSION >= parseFloat(param)) {
@@ -341,17 +380,8 @@ function createDeviceKeeper(io_delegator, link) {
 			}
 			return res;
 		},
-		'subClass': function (params, attrs) {
-			var res = false;
-			if(Array.isArray(params)) {
-				params.forEach(function(param) {
-					if(attrs.subclass.indexOf(param) >= 0) {
-						res = true;
-					}
-				});
-			}
-			return res;
-		},
+		'subClass': subClassFilterFunc,
+		'subclass': subClassFilterFunc,
 		'hasSDCard': function (param, attrs) {
 			var res = false;
 			if(attrs.HARDWARE_INSTALLED) {

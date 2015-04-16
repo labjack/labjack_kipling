@@ -4,6 +4,7 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
+var device_events = driver_const.device_curator_constants;
 
 function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDeviceFunc) {
 
@@ -31,6 +32,13 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 			self.internalListeners[m.func](m.data);
 		} else {
 			if((typeof(m.name) !== 'undefined') && (typeof(m.data) !== 'undefined')) {
+				if(m.name === device_events.DEVICE_ATTRIBUTES_CHANGED) {
+					// console.log('  ! (ljm_device) Updating saved attributes');
+					var updatedKeys = Object.keys(m.data);
+					updatedKeys.forEach(function(updatedKey) {
+						self.savedAttributes[updatedKey] = m.data[updatedKey];
+					});
+				}
 				self.emit(m.name, m.data);
 			} else {
 				console.log(
@@ -60,6 +68,9 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 	};
 	this.getDeviceAttributes = function() {
 		return self.callFunc('getDeviceAttributes');
+	};
+	this.updateSavedAttributes = function() {
+		return self.callFunc('updateSavedAttributes');
 	};
 	this.readRaw = function(data) {
 		return self.callFunc('readRaw', [data]);
@@ -123,6 +134,36 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 	};
 	this.iReadMultiple = function(addresses) {
 		return self.callFunc('iReadMultiple', [addresses]);
+	};
+	this.iWrite = function(address, value) {
+		return self.callFunc('iWrite', [address, value]);
+	};
+	this.iWriteMany = function(addresses, values) {
+		return self.callFunc('iWriteMany', [addresses, values]);
+	};
+	this.iWriteMultiple = function(addresses, values) {
+		return self.callFunc('iWriteMultiple', [addresses, values]);
+	};
+
+	/**
+	 * Special "smart" functions that use the i functions and resolve any errors
+	 * to register default values or last-valid cached values.
+	 */
+	this.sRead = function(address) {
+		return self.callFunc('sRead', [address]);
+	};
+	this.sReadMany = function(addresses) {
+		return self.callFunc('sReadMany', [addresses]);
+	};
+	this.sReadMultiple = function(addresses) {
+		return self.callFunc('sReadMultiple', [addresses]);
+	};
+
+	/**
+	 * Special function to set the device name
+	 */
+	this.writeDeviceName = function(newName) {
+		return self.callFunc('writeDeviceName', [newName]);
 	};
 
 	/**

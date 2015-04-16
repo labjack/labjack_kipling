@@ -23,9 +23,9 @@ var TEST_DEVICE_CONTROLLER = false;					// incomplete
 var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing
 var TEST_DEVICE_CONTROLLER_LIVE_DEVICE = false;		// Passing
 var TEST_DEVICE_CONTROLLER_OPEN_ADVANCED = false;	// Passing
-var TEST_DEVICE_KEEPER = true;						// Passing
+var TEST_DEVICE_KEEPER = false;						// Passing
 var TEST_DEVICE_KEEPER_LIVE = false;				// Passing
-var TEST_DEVICE_ERRORS = false;						// Passing
+var TEST_DEVICE_ERRORS = true;						// Passing
 var TEST_UPDATE_MOCK_DEVICE = false;				// Passing
 var TEST_UPDATE_USB_DEVICE = false;					// Passing
 

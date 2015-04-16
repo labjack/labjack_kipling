@@ -51,6 +51,11 @@ var deviceParameters = [{
 // deviceParameters[0].connectionType = 'LJM_ctWifi';
 // deviceParameters[0].identifier = 470010610;
 
+var nameOptions = [
+	'DeviceNameA', 'DeviceNameB'
+];
+var cachedDeviceName = '';
+var chosenTempName = '';
 exports.tests = {
 	'initialization': function(test) {
 		// Require the io_manager library
@@ -137,6 +142,21 @@ exports.tests = {
 			test.done();
 		});
 	},
+	'change device name': function(test) {
+		device.qRead('DEVICE_NAME_DEFAULT')
+		.then(function(res) {
+			cachedDeviceName = res;
+			if(nameOptions[0] === cachedDeviceName) {
+				chosenTempName = nameOptions[1];
+			} else {
+				chosenTempName = nameOptions[0];
+			}
+			device.qWrite('DEVICE_NAME_DEFAULT', chosenTempName)
+			.then(function() {
+				test.done();
+			});
+		});
+	},
 	'disconnect device': function(test) {
 		console.log('  - Please Disconnect Device');
 		device.once('DEVICE_DISCONNECTED', function() {
@@ -146,6 +166,11 @@ exports.tests = {
 	},
 	'wait for reconnecting error': function(test) {
 		device.once('DEVICE_ERROR', function(data) {
+			test.done();
+		});
+	},
+	'wait for device to emit DEVICE_RECONNECTING': function(test) {
+		device.once('DEVICE_RECONNECTING', function(data) {
 			test.done();
 		});
 	},
@@ -164,6 +189,54 @@ exports.tests = {
 			console.log('  - Device Reconnected');
 			test.done();
 		});
+	},
+	'test device attributes updated': function(test) {
+		device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
+			// console.log('  - Device Attributes Updated');
+			test.done();
+		});
+	},
+	'write original device name': function(test) {
+		test.strictEqual(
+			device.savedAttributes.DEVICE_NAME_DEFAULT,
+			chosenTempName,
+			'device name not written properly'
+		);
+		device.qWrite('DEVICE_NAME_DEFAULT', cachedDeviceName)
+		.then(function() {
+			test.done();
+		}, function(err) {
+			console.log('Error writing name', err);
+
+		});
+	},
+	'disconnect device (2)': function(test) {
+		console.log('  - Please Disconnect Device');
+		device.once('DEVICE_DISCONNECTED', function() {
+			console.log('  - Device Disconnected');
+			test.done();
+		});
+	},
+	'test reconnectToDevice (2)': function(test) {
+		console.log('  - Please Reconnect Device');
+		device.once('DEVICE_RECONNECTED', function() {
+			console.log('  - Device Reconnected');
+			test.done();
+		});
+	},
+	'test device attributes updated (2)': function(test) {
+		device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
+			// console.log('  - Device Attributes Updated');
+			test.done();
+		});
+	},
+	'verify name restoration': function(test) {
+		test.strictEqual(
+			device.savedAttributes.DEVICE_NAME_DEFAULT,
+			cachedDeviceName,
+			'device name not restored properly'
+		);
+		test.done();
 	},
 	'close device': function(test) {
 		device.close()
