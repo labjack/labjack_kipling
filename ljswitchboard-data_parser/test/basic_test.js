@@ -434,7 +434,40 @@ exports.tests = {
 		test.deepEqual(results, reqResults);
 		test.done();
 	},
-	'check POWER_ registers for text output': function(test) {
+	'check POWER_ & other systemEnabled/Disabled registers': function(test) {
+		var vals = [
+			{'reg': 'POWER_WIFI', 'val': 0, 'txt': 'WiFi Not Powered'},
+			{'reg': 'POWER_WIFI', 'val': 1, 'txt': 'WiFi Powered'},
+			{'reg': 'ETHERNET_DHCP_ENABLE', 'val': 1, 'txt': 'DHCP Enabled'},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			var reg = val.reg;
+			results.push(data_parser.parseResult(reg, val.val));
+			var strOut = {
+				0: 'Disabled',
+				1: 'Enabled'
+			}[val.val];
+
+			var txtOut = strOut;
+			if(typeof(val.txt) !== 'undefined') {
+				txtOut = val.txt;
+			}
+			var regName = constants.getAddressInfo(reg).data.name;
+			reqResults.push({
+				'register': reg,
+				'name': regName,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.val,
+				'str': strOut,
+				'text': txtOut,
+			});
+		});
+
+		test.deepEqual(results, reqResults, 'systemEnabled/Disabled registers failed');
 		test.done();
 	},
 	'check undefined register - parse': function(test) {

@@ -62,7 +62,7 @@ var encodeIP = function(ipStr) {
 			}
 		} else {
 			// Treat the input as a number
-			retData = parseInt(ipStr, 10);
+			retData = Number(ipStr);
 		}
 	} catch(err) {
 		retData = 0;
@@ -71,10 +71,123 @@ var encodeIP = function(ipStr) {
 };
 exports.encodeIP = encodeIP;
 
+// Force users to input value as a string IP address
+var ipValidatorRegixEq = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+var ipValidator = function(data) {
+	var retData = {
+		'isValid': false,
+		'reason': ''
+	};
+	try {
+		if(data.match) {
+			if(data.match(ipValidatorRegixEq)) {
+				retData.isValid = true;
+			} else {
+				retData.reason = 'invalid IP string.';
+			}
+		} else {
+			if(isNaN(data)) {
+				retData.reason = 'invalid data-type.';
+			} else {
+				var ipNum = Number(data);
+				if((0 <= ipNum) && (ipNum <= 0xFFFFFFFF)) {
+					retData.isValid = true;
+				} else {
+					retData.reason = 'invalid IP integer.  Out of range 0 -> 0xFFFFFFFF.';
+				}
+			}
+		}
+	} catch(err) {
+		retData.isValid = false;
+		retData.reason = 'Error encountered: ' + err.toString();
+	}
+
+	if(!retData.isValid) {
+		retData.reason = 'IP address validation failed, ' + retData.reason;
+	}
+	return retData;
+};
+
 var ipDataType = {
 	'decode': parseIP,
-	'encode': encodeIP
+	'encode': encodeIP,
+	'validate': ipValidator,
 };
+exports.ipDataType = ipDataType;
+
+var statusBooleans = {
+	'enabled': 1, 'enable': 1,
+	'powered': 1, 'power': 1,
+	'started': 1, 'start': 1,
+
+	'disabled': 0, 'disable': 0,
+	'un-powered': 0, 'un-power': 0, 'unpower': 0, 'unpowered': 0,
+	'stop': 0, 'stopped': 0,
+};
+var statusBooleanResults = {
+	'STREAM_ENABLE': {0: 'Stream Not Running', 1: 'Stream Running'},
+};
+var getSystemEnabledType = function(options) {
+	var falseStr = 'Disabled';
+	var trueStr = 'Enabled';
+	var falseText = 'Disabled';
+	var trueText = 'Enabled';
+
+	if(options) {
+		if(typeof(options.falseStr) !== 'undefined') {
+			falseStr = options.falseStr;
+		}
+		if(typeof(options.trueStr) !== 'undefined') {
+			trueStr = options.trueStr;
+		}
+		if(typeof(options.falseText) !== 'undefined') {
+			falseText = options.falseText;
+		}
+		if(typeof(options.trueText) !== 'undefined') {
+			trueText = options.trueText;
+		}
+		if(typeof(options.statusText) !== 'undefined') {
+			var statusTextOptions = options.statusText.split('/');
+			trueText = statusTextOptions[0];
+			falseText = statusTextOptions[1];
+		}
+		if(typeof(options.textPrepend) !== 'undefined') {
+			falseText = options.textPrepend + ' ' + falseText;
+			trueText = options.textPrepend + ' ' + trueText;
+		}
+	}
+	var parseSystemEnabled = function(status) {
+		var statusStr = falseStr;
+		var statusText = falseText;
+		if(status === 1) {
+			statusStr = trueStr;
+			statusText = trueText;
+		}
+		return {'str': statusStr, 'text': statusText, 'val': status};
+	};
+	var encodeSystemEnabled = function(status) {
+		var retData = 0;
+		if(isNaN(status)) {
+			tempStr = '';
+			if(status.toLowerCase) {
+				var tempStr = status.toLowerCase();
+				if(typeof(statusBooleans[tempStr]) !== 'undefined') {
+					retData = statusBooleans[tempStr];
+				}
+			}
+		} else {
+			retData = Number(status);
+		}
+		return retData;
+	};
+	var systemEnabledType = {
+		'decode': parseSystemEnabled,
+		'encode': encodeSystemEnabled,
+	};
+	return systemEnabledType;
+};
+exports.systemEnabledType = getSystemEnabledType();
+exports.getSystemEnabledType = getSystemEnabledType;
 
 var firmwareVersionRounder = function(res) {
 	return {

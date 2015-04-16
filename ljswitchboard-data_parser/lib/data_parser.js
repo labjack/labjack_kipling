@@ -277,6 +277,60 @@ var createDataParser = function(deviceType) {
 	var self = this;
 };
 
+var validate = function(address, value, deviceType) {
+	var dt;
+	var regInfo = constants.getAddressInfo(address);
+	var regName;
+	var regAddress;
+	if(regInfo.data) {
+		regName = regInfo.data.name;
+		regAddress = regInfo.data.address;
+	} else {
+		regName = '';
+		regAddress = -1;
+	}
+	var retData = {
+		'register': address,
+		'name': regName,
+		'address': regAddress,
+		'val': value,
+		'isValid': true,
+		'reason': ''
+	};
+	var parsedData;
+	var keys;
+	var i;
+	if(deviceType) {
+		dt = driver_const.deviceTypes[deviceType];
+		if(formatters[dt]) {
+			if(formatters[dt][regName]) {
+				if(formatters[dt][regName].validate) {
+					parsedData = formatters[dt][regName].validate(value);
+					keys = Object.keys(parsedData);
+					for(i = 0; i < keys.length; i++) {
+						retData[keys[i]] = parsedData[keys[i]];
+					}
+				}
+			}
+		}
+	} else {
+		var j;
+		for(j = 0; j < numFormatterKeys; j++) {
+			dt = formatterKeys[j];
+			if(formatters[dt][regName]) {
+				if(formatters[dt][regName].validate) {
+					parsedData = formatters[dt][regName].validate(value);
+					keys = Object.keys(parsedData);
+					for(i = 0; i < keys.length; i++) {
+						retData[keys[i]] = parsedData[keys[i]];
+					}
+				}
+			}
+		}
+	}
+	return retData;
+};
+
 // Define External Interface
 exports.createDataParser = createDataParser;
 exports.parseResult = parseResult;
@@ -286,3 +340,5 @@ exports.encodeValues = encodeValues;
 exports.parseError = parseError;
 exports.parseErrors = parseErrors;
 exports.parseErrorMultiple = parseErrorMultiple;
+
+exports.validate = validate;

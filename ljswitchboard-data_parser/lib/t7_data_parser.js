@@ -2,10 +2,9 @@
 var shared_data_parser = require('./shared_data_parser');
 var checkStr = shared_data_parser.checkStr;
 
-var ipDataType = {
-	'decode': shared_data_parser.parseIP,
-	'encode': shared_data_parser.encodeIP
-};
+var ipDataType = shared_data_parser.ipDataType;
+var systemEnabledType = shared_data_parser.systemEnabledType;
+var getSystemEnabledType = shared_data_parser.getSystemEnabledType;
 
 var firmwareVersionRounder = shared_data_parser.firmwareVersionRounder;
 var decodeCurrentSourceCalVal = function(val) {
@@ -175,12 +174,24 @@ var T7_LIST = {
 				};
 			},
 	},
+
+	// WiFi IP registers using the ipDataType
+	// & DHCP as custom systemEnabledType
 	'WIFI_IP': ipDataType,
 	'WIFI_SUBNET': ipDataType,
 	'WIFI_GATEWAY': ipDataType,
 	'WIFI_IP_DEFAULT': ipDataType,
 	'WIFI_SUBNET_DEFAULT': ipDataType,
 	'WIFI_GATEWAY_DEFAULT': ipDataType,
+	'WIFI_DHCP_ENABLE': getSystemEnabledType({
+		textPrepend: 'DHCP',
+	}),
+	'WIFI_DHCP_ENABLE_DEFAULT': getSystemEnabledType({
+		textPrepend: 'DHCP',
+	}),
+
+	// Ethernet IP registers using the ipDataType
+	// & DHCP as custom systemEnabledType
 	'ETHERNET_IP': ipDataType,
 	'ETHERNET_SUBNET': ipDataType,
 	'ETHERNET_GATEWAY': ipDataType,
@@ -191,6 +202,59 @@ var T7_LIST = {
 	'ETHERNET_GATEWAY_DEFAULT': ipDataType,
 	'ETHERNET_DNS_DEFAULT': ipDataType,
 	'ETHERNET_ALTDNS_DEFAULT': ipDataType,
+	'ETHERNET_DHCP_ENABLE': getSystemEnabledType({
+		textPrepend: 'DHCP',
+	}),
+	'ETHERNET_DHCP_ENABLE_DEFAULT': getSystemEnabledType({
+		textPrepend: 'DHCP',
+	}),
+
+	// Stream Registers
+	'STREAM_ENABLE': getSystemEnabledType({
+		textPrepend: 'Stream',
+		statusText: 'Running/Stopped',
+	}),
+
+	// Power registers enabled/disabled
+	'POWER_ETHERNET': getSystemEnabledType({
+		textPrepend: 'Ethernet',
+		statusText: 'Powered/Not Powered',
+	}),
+	'POWER_WIFI': getSystemEnabledType({
+		textPrepend: 'WiFi',
+		statusText: 'Powered/Not Powered',
+	}),
+	'POWER_AIN': getSystemEnabledType({
+		textPrepend: 'Analog Input Module',
+		statusText: 'Powered/Not Powered',
+	}),
+	'POWER_LED': getSystemEnabledType({
+		textPrepend: 'Device LED',
+		statusText: 'Powered/Not Powered',
+	}),
+	'POWER_ETHERNET_DEFAULT': getSystemEnabledType({
+		textPrepend: 'Ethernet',
+		statusText: 'Powered/Not Powered',
+	}),
+	'POWER_WIFI_DEFAULT': getSystemEnabledType({
+		textPrepend: 'WiFi',
+		statusText: 'Powered/Not Powered',
+	}),
+	'POWER_AIN_DEFAULT': getSystemEnabledType({
+		textPrepend: 'Analog Input Module',
+		statusText: 'Powered/Not Powered',
+	}),
+	'POWER_LED_DEFAULT': getSystemEnabledType({
+		textPrepend: 'Device LED',
+		statusText: 'Powered/Not Powered',
+	}),
+
+	// Watchdog Registers
+	'WATCHDOG_ENABLE_DEFAULT': getSystemEnabledType({
+		textPrepend: 'Watchdog',
+	}),
+
+	'ASYNCH_ENABLE': systemEnabledType,
 };
 
 exports.T7_LIST = T7_LIST;
