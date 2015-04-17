@@ -355,6 +355,11 @@ function createIOInterface() {
 		// Force execution of node 0_10_35
 		// version = '0_10_35';
 		var version = '0_12_1';
+		version = {
+			'win32': '0_12_1',
+			'darwin': '1_2_0',
+			'linux': ''
+		}[os];
 
 		// If the labjack-nodejs lib`rary isn't built for the version defined
 		// then prevent the subprocess from starting.

@@ -7,7 +7,7 @@
     "winNode32": ".\\test_binaries\\win32\\ia32\\0_11_13\\node_32.exe ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
     "winNode64": ".\\test_binaries\\win32\\x64\\0_11_13\\node_64.exe ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
     "basicTest": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
-    "test": "npm run winNode64",
+    "test": "npm run basicTest",
     "package": "echo \"Error: no package command specified\" && exit 1"
   },
   "packagesDirectory": "/packages",
