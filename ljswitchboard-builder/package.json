@@ -30,7 +30,8 @@
 		"semver": "4.2.0",
 		"unzip": "0.1.11",
 		"nw": "0.12.0-alpha2",
-		"nodewebkit": "0.11.6"
+		"nodewebkit": "0.11.6",
+	    "ljswitchboard-core": "0.0.x"
 	},
 	"old-dependencies": {
 		"async": "~0",
@@ -39,8 +40,7 @@
 	},
   	"devDependencies": {
 	    "nodeunit": "~0.9.0",
-	    "rewire": "2.1.4",
-	    "ljswitchboard-core": "0.0.x"
+	    "rewire": "2.1.4"
 	},
 	"script_notes": "to run a script w/o using npm test, use npm run [script name]",
 	"scripts": {
