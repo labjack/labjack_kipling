@@ -12,6 +12,9 @@ body {
     padding-left:0px;
     padding-right:0px;
 }
+#module-chrome-tab-holder {
+    background-image:url('../img/background.png');
+}
 
 .unselectable {
     cursor: default;

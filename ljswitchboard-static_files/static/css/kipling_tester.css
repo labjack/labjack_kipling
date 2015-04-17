@@ -5,3 +5,22 @@ html {
 body {
 	background-image:none;
 }
+
+.results_button {
+	float:right;
+}
+.no_select {
+	cursor: default;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	-ms-user-select: none;
+	user-select: none;;
+}
+.results_button .toggle_button:hover {
+	cursor:pointer;
+}
+.toggle_button {
+	margin-left: 10px;
+}
