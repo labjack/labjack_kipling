@@ -2,6 +2,28 @@
 	"name": "ljswitchboard-splash_screen",
 	"version": "0.0.1",
 	"description": "The splash screen & primary loading file for LabJack's Kipling program.",
+	"author": {
+		"name": "Chris Johnson",
+		"url": "http://labjack.com"
+	},
+	"homepage": "https://github.com/chrisJohn404/ljswitchboard-splash_screen",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/chrisJohn404/ljswitchboard-splash_screen"
+	},
+	"keywords": [
+		"LabJack",
+		"LJM",
+		"T7",
+		"ljswitchboard"
+	],
+	"license": {
+		"type": "MIT",
+		"url": "https://github.com/chrisJohn404/ljswitchboard-splash_screen/master/LICENSE"
+	},
+	"bugs": {
+		"url": "https://github.com/chrisJohn404/ljswitchboard-splash_screen/issues"
+	},
 	"main": "lib/index.html",
 	"node-main": "lib/main.js",
 	"window": {
@@ -18,7 +40,7 @@
 	},
 	"nodejs": true,
 	"dependencies": {
-    	"q": "~1",
+		"q": "~1",
 		"ljswitchboard-package_loader": "0.0.x",
 		"ljswitchboard-require": "0.0.x",
 		"ljswitchboard-ljm_driver_checker": "0.0.x",
@@ -49,7 +71,6 @@
 		"nodewebkit": "nodewebkit",
 		"nw": "nw",
 	    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
-	    "prepare_build": "node build_scripts/prepare_build.js"
 	},
 	"enableStartupConfig":false,
 	"buildType": "release",
