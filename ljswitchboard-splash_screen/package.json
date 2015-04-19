@@ -74,7 +74,7 @@
 	},
 	"enableStartupConfig":false,
 	"buildType": "release",
-	"test": true,
+	"test": false,
 	"testPersistentDataFolderName": "K3_DEV",
 	"performLiveTests": false,
 	"webkit": {
