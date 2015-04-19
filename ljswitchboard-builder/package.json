@@ -33,6 +33,17 @@
 		"nodewebkit": "0.11.6",
 	    "ljswitchboard-core": "0.0.x"
 	},
+	"kipling_dependencies": [
+		"ljswitchboard-splash_screen",
+		"ljswitchboard-core",
+		"ljswitchboard-io_manager",
+		"ljswitchboard-kipling",
+		"ljswitchboard-module_manager",
+		"ljswitchboard-static_files"
+	],
+	"kipling_test_dependencies": [
+		"ljswitchboard-kipling_tester"
+	],
 	"old-dependencies": {
 		"async": "~0",
 		"fs.extra": "1.3.x",
@@ -40,14 +51,18 @@
 	},
   	"devDependencies": {
 	    "nodeunit": "~0.9.0",
-	    "rewire": "2.1.4"
+	    "rewire": "2.1.4",
+	    "fs-extra": "0.18.x"
 	},
 	"script_notes": "to run a script w/o using npm test, use npm run [script name]",
 	"scripts": {
 		"start": "npm run nw",
 		"nodewebkit": "nodewebkit",
 		"nw": "nw",
-	    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+	    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+	    "prepare_build": "node build_scripts/prepare_build.js",
+	    "gather_project_files": "node build_scripts/gather_project_files.js",
+	    "gather_test_project_files": "node build_scripts/gather_project_files.js test"
 	},
 	"enableStartupConfig":false,
 	"buildType": "release",
