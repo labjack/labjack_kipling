@@ -1,9 +1,10 @@
 
 var path = require('path');
 
+var cwd = path.normalize(process.cwd());
 var execDir = path.normalize(path.dirname(process.execPath));
 var derivedCWD = path.resolve(path.join(execDir, '..','..','..'));
-var cwd = path.normalize(process.cwd());
+
 var startMethod = '';
 var isCompressed = false;
 var startDir = cwd;
@@ -36,6 +37,34 @@ if(os === 'win32') {
 		}
 	}
 } else if(os === 'darwin') {
+	/*
+	 * Notes for MAC OS X: (packaged & Un-zipped) 
+	 *   - cwd: "/Users/chrisjohn/git/ljswitchboard-project_manager/
+	 *   ljswitchboard-builder/output/nwjs.app/Contents/Resources/app.nw"
+	 *   - execDir: "/Users/chrisjohn/git/ljswitchboard-project_manager/
+	 *   ljswitchboard-builder/output/nwjs.app/Contents/Frameworks/nwjs Helper.app/Contents/MacOS"
+	 *   - derivedCWD: "/Users/chrisjohn/git/ljswitchboard-project_manager/
+	 *   ljswitchboard-builder/output/nwjs.app/Contents/Frameworks"
+	 *
+	 * Notes for MAC OS X: (packaged & zipped)
+	 *   - cwd: "/private/var/folders/vj/73p224w96012gvls7lc0n1140000gn/
+	 *   T/.org.chromium.Chromium.thjWeG"
+	 *   - execDir: "/Users/chrisjohnson/git/ljswitchboard-project_manager/
+	 *   ljswitchboard-builder/output/nwjs.app/Contents/Frameworks/nwjs Helper.app/Contents/MacOS"
+	 *   - derivedCWD: "/Users/chrisjohnson/git/ljswitchboard-project_manager/
+	 *   ljswitchboard-builder/output/nwjs.app/Contents/Frameworks"
+	 *
+	 * Notes for MAC OS X: (un-packaged, start via npm start)
+	 *   - cwd: "/Users/chrisjohnson/git/ljswitchboard-project_manager/
+	 *   ljswitchboard-splash_screen"
+	 *   - execDir: "/Users/chrisjohnson/git/ljswitchboard-project_manager/
+	 *   ljswitchboard-splash_screen/node_modules/nw/nwjs/nwjs.app/Contents/Frameworks/nwjs Helper.app/Contents/MacOS"
+	 *   - derivedCWD: "/Users/chrisjohnson/git/ljswitchboard-project_manager/
+	 *   ljswitchboard-splash_screen/node_modules/nw/nwjs/nwjs.app/Contents/Frameworks"
+	 */
+	
+
+
 	console.log('Mac OS Not Supported (Yet)', os, process.platform, process.arch);
 	console.log('cwd', cwd);
 	console.log('derivedCWD', derivedCWD);
@@ -56,6 +85,7 @@ var startInfo = {
 };
 console.log('Start info', startInfo);
 
+// startDir is the important directory that indicates where files that need to be extracted exist
 exports.startDir = startDir;
 exports.startInfo = startInfo;
 exports.getPaths = function() {

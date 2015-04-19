@@ -70,7 +70,7 @@
 		"start": "npm run nw",
 		"nodewebkit": "nodewebkit",
 		"nw": "nw",
-	    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+	    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
 	},
 	"enableStartupConfig":false,
 	"buildType": "release",
