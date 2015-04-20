@@ -10,6 +10,7 @@ var unzip = require('unzip');
 var semver = require('./semver_min');
 
 var fs = require('fs.extra');
+var fse = require('fs-extra');
 
 var gns = 'ljswitchboard';
 global[gns] = {};
@@ -151,7 +152,11 @@ function createPackageLoader() {
 					var dirToAdd = packageInfo.location;
 					var modulesDirToAdd = path.join(dirToAdd, extraPath);
 					modulesDirToAdd = path.normalize(modulesDirToAdd);
-					global.module.paths.splice(2,0,modulesDirToAdd);
+					if(global.module) {
+						if(global.module.paths) {
+							global.module.paths.splice(2,0,modulesDirToAdd);
+						}
+					}
 				});
 				
 				global[gns][name].data = moduleData;
@@ -1017,7 +1022,8 @@ function createPackageLoader() {
 		self.emit(EVENTS.STARTING_EXTRACTION, bundle);
 		self.emit(EVENTS.STARTING_DIRECTORY_EXTRACTION, bundle);
 
-		fs.copyRecursive(upgradeFilesPath, destinationPath, function(err) {
+		// fs.copyRecursive(upgradeFilesPath, destinationPath, function(err) {
+			fse.copy(upgradeFilesPath, destinationPath, function(err) {
 			if(err) {
 				console.error('  - Error performDirectoryUpgrade', err, bundle.name);
 				var msg = 'Error performing a directory upgrade.  Verify' +
