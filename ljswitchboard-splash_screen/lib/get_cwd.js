@@ -61,7 +61,7 @@ if(os === 'win32') {
 		startDir = cwd;
 	} else {
 		// In the case of an error assume the package was started via npm start.
-		console.error('Project was started via an un-known location');
+		console.error('Project was started via an un-known location (On Mac OS X)');
 		console.log('cwd', cwd);
 		console.log('derivedCWD', derivedCWD);
 		console.log('execDir', execDir);
@@ -100,6 +100,13 @@ if(os === 'win32') {
 	
 } else if(os === 'linux') {
 	console.log('Linux OS Not Supported (YET)', os, process.platform, process.arch);
+	console.error('Project was started via an un-known location (On Mac OS X)');
+	console.log('cwd', cwd);
+	console.log('derivedCWD', derivedCWD);
+	console.log('execDir', execDir);
+	console.log('sys info', {
+		'os': os, 'platform': process.platform, 'arch': process.arch
+	});
 } else {
 	console.log('OS Not Supported', os, process.platform, process.arch);
 }
