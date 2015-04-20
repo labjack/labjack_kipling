@@ -273,7 +273,8 @@ function createIOInterface() {
 		// selection.  TODO:
 		var exeName = {
 			'win32': 'node.exe',
-			'darwin': 'node'
+			'darwin': 'node',
+			'linux': 'node'
 		}[os];
 
 
@@ -358,7 +359,7 @@ function createIOInterface() {
 		version = {
 			'win32': '0_12_1',
 			'darwin': '1_2_0',
-			'linux': ''
+			'linux': '1_2_0'
 		}[os];
 
 		// If the labjack-nodejs lib`rary isn't built for the version defined
