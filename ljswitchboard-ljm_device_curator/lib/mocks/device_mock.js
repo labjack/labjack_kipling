@@ -124,6 +124,9 @@ function device() {
 	this.calledFunctions = [];
 	var saveCall = function(name, args) {
 		self.calledFunctions.push({'name': name, 'args': args});
+		if(self.calledFunctions.length > 100) {
+			self.calledFunctions.shift();
+		}
 	};
 	this.getCalledFunctions = function() {
 		return self.calledFunctions;
