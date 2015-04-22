@@ -488,7 +488,9 @@ function createIOInterface() {
 			'cwd': info.cwd,
 			'spawnChildProcess': false,
 			'debug_mode': false,
-			'execArgv': ['-expose-gc']
+			'execArgv': ['-expose-gc'],
+			'masterPID': process.pid,
+			'callStack': new Error().stack,
 		};
 
 		// Detect if the current process is node-webkit or node via checking for

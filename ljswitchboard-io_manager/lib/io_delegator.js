@@ -6,6 +6,8 @@ var constants = require('./common/constants');
 var io_endpoint_key = constants.io_manager_endpoint_key;
 var io_error_constants = require('./io_error_constants').errors;
 var process_manager = require('process_manager');
+var fs = require('fs');
+var path = require('path');
 var slave_process = process_manager.slave_process();
 
 // Include the io_managers
@@ -55,11 +57,60 @@ function runGarbageCollector() {
 		}
 	}
 };
-var io_delegator_gc = setInterval(runGarbageCollector, 1000);
-slave_process.attachOnExitListener(function() {
-	var defered = q.defer();
-	clearInterval(io_delegator_gc);
-});
+var outputCrashLogBuffer = [];
+var clearProcessTimers = function() {
+	if(io_delegator_gc) {
+		clearInterval(io_delegator_gc);
+	}
+	if(procesQuitChecker) {
+		clearInterval(procesQuitChecker);
+	}
+};
+var io_delegator_sp_env = JSON.parse(process.env.slave_process_env);
+function detectIfProcessShouldQuit() {
+	var mp_pid = io_delegator_sp_env.masterPID;
+	var mp_running = false;
+	var killError = '';
+	try {
+		mp_running = process.kill(mp_pid, 0);
+	} catch(err) {
+		// Catch the error but do nothing...
+		killError = JSON.stringify(err);
+	}
+	if(!mp_running) {
+		clearProcessTimers();
+		try {
+			outputCrashLogBuffer.push(JSON.stringify({
+				'processSendType':typeof(process.send),
+				'cwd': process.cwd(),
+				'pid': process.pid,
+				'slave_process_env_type': typeof(io_delegator_sp_env),
+				'slave_process_env': io_delegator_sp_env,
+				'masterPID': process.env.slave_process_env['masterPID\\'],
+				'mp_pid': mp_pid,
+				'mp_pid_type':typeof(mp_pid),
+				'mp_running': mp_running,
+				'killError':killError,
+			}));
+			var outputDir = path.join(process.cwd(),'outFile.txt');
+			var tempStr = '';
+			outputCrashLogBuffer.forEach(function(singleTempStr) {
+				tempStr += singleTempStr + '\r\n';
+			});
+			fs.writeFileSync(outputDir, tempStr);
+		} catch(err) {
+			// catch error but do nothing.
+		}
+		process.exit();
+		// process.abort();
+	}
+	// console.log('Typeof process.send', typeof(process.send));
+	// console.log('cwd', process.cwd());
+};
+detectIfProcessShouldQuit();
+var io_delegator_gc = setInterval(runGarbageCollector, 5000);
+var procesQuitChecker = setInterval(detectIfProcessShouldQuit, 5000);
+slave_process.attachOnExitListener(clearProcessTimers);
 
 function createIODelegator(slave_process) {
 	this.sp = slave_process;
