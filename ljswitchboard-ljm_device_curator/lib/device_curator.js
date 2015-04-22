@@ -190,10 +190,10 @@ function device(useMockDevice) {
 		self.emit(DEVICE_RECONNECTED, self.savedAttributes);
 	};
 	var handleReconnectHardwareInstalledError = function(err) {
-		console.error(
-			'(device_curator), handleReconnnectHardwareInstalledError',
-			err
-		);
+		// console.error(
+		// 	'(device_curator), handleReconnnectHardwareInstalledError',
+		// 	err
+		// );
 		captureDeviceError('failed-Reconnecting', err, {'address': 'PRODUCT_ID&HARDWARE_INSTALLED'});
 		handleFailedReconnectionAttemptRead();
 	};
