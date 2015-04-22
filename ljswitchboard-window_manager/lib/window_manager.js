@@ -212,7 +212,7 @@ function createWindowManager() {
 						// Error telling emitters that we are quitting.
 					}
 					
-					setImmediate(function() {
+					var innerQuitApplication = function() {
 						try {
 							var openWindows = self.getOpenWindows();
 							openWindows.forEach(function(openWindow) {
@@ -234,7 +234,8 @@ function createWindowManager() {
 						// } catch(err) {
 						// 	// Error telling the process to exit.
 						// }
-					});
+					}
+					setImmediate(innerQuitApplication);
 					// // TODO: Not sure why but in the basic test which does a 
 					// // crude timeout to check for the window exiting, it 
 					// // finishes b/c this function gets called to early.  The
