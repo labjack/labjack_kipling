@@ -649,7 +649,7 @@ function createIOInterface() {
 			// Execute sendReceive message
 			createMessage(m)
 			.then(executeSendReceive)
-			.then(cleanMessage, cleanError)
+			// .then(cleanMessage, cleanError)
 			.then(defered.resolve, defered.reject);
 
 			return defered.promise;

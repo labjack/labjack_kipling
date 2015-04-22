@@ -38,7 +38,12 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 					updatedKeys.forEach(function(updatedKey) {
 						self.savedAttributes[updatedKey] = m.data[updatedKey];
 					});
+				} else if(m.name === device_events.DEVICE_DISCONNECTED) {
+					self.savedAttributes.isConnected = false;
+				} else if(m.name === device_events.DEVICE_RECONNECTED) {
+					self.savedAttributes.isConnected = true;
 				}
+
 				self.emit(m.name, m.data);
 			} else {
 				console.log(

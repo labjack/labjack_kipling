@@ -42,7 +42,6 @@ function createDeviceController(io_interface) {
 		}, args);
 	};
 	var deviceCallFunc = function(deviceKey, func, args) {
-		var defered = q.defer();
 		return innerCallFunc({
 			'func': func,
 			'isDeviceFunc': true,
