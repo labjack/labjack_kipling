@@ -35,20 +35,20 @@
 							<span class=" icon-folder-open"></span>
 						</button>
 						<div id="save-lua-script-button" class="btn-group">
-							<button id="save-button" type="button" class="btn btn-default btn-lg" title="Save">
-								<span id="save-button" class="icon-disk"></span>
+							<button id="save-button-1" type="button" class="btn btn-default btn-lg" title="Save">
+								<span id="save-button-3" class="icon-disk"></span>
 							</button>
-							<button class="btn dropdown-toggle btn-lg" data-toggle="dropdown">
+							<button id="save-button-menu-toggle" class="btn dropdown-toggle btn-lg" data-toggle="dropdown">
 								<span class="caret" style="margin-right: -8px;margin-left: -8px;"></span>
 							</button>
 							<ul class="dropdown-menu">
-								<li><a id="save-button" >Save</a></li>
+								<li><a id="save-button-2" >Save</a></li>
 								<li><a id="saveAs-button">Save As</a></li>
 							</ul>
 						</div>
 						<span class="lua-examples-spacing-character">|</span>
-						<div id="load-example-lua-script-button" class="btn-group btn-lg">
-							<button class="btn dropdown-toggle" data-toggle="dropdown" title="Load Example">
+						<div id="load-example-lua-script-button" class="btn-group">
+							<button id="load-example-script-button-toggle" class="btn dropdown-toggle" data-toggle="dropdown" title="Load Example">
 								<span class="icon-code-3"></span>
 								<span class="caret" style="margin-right: -12px;margin-left: 4px;"></span>
 							</button>
@@ -99,12 +99,12 @@
 			</tbody>
 		</table>
 	</div>
-	<div id="lua-script-module-body" class="row">
+	<div id="lua-script-module-body" class="">
 		{{!--<div>
             <input type="text" id="file-loc-input" placeholder="Firmware location...">
             <a id="browse-link" class="btn btn-link">browse for file >></a>
         </div>--}}
-		<div id="{{custom.constants.deviceStatusID}}" class="span2" style="{{ custom.views.deviceStatus.visibility }}">
+		<div id="{{custom.constants.deviceStatusID}}" class="" style="{{ custom.views.deviceStatus.visibility }}">
 			<div id="lua-script-device-status">
 				<h3>Device Status</h3>
 				<p>Script Status:</p>
@@ -117,11 +117,11 @@
 				<p><span id="LUA_DEBUG_NUM_BYTES"></span></p>
 			</div>
 		</div>
-		<div id="{{custom.constants.luaBodyBarID}}" class="span10 {{#if custom.views.deviceStatus.isVisible}}deviceStatusBarVisible{{else}}deviceStatusBarHidden{{/if}}">
+		<div id="{{custom.constants.luaBodyBarID}}" class="{{#if custom.views.deviceStatus.isVisible}}deviceStatusBarVisible{{else}}deviceStatusBarHidden{{/if}}">
 			<div id="lua-script-window-views">
 				<div id="{{custom.constants.luaEditorID}}" style="{{ custom.views.luaEditor.visibility }}">
-					<div id="lua-script-active-script-info" class="row">
-						<div class="span12 textRow">
+					<div id="lua-script-active-script-info" class="">
+						<div class=" textRow">
 							<div>
 								<b>
 									<span id="{{ custom.scriptConstants.scriptTypeID }}">{{ custom.luaScript.windowMessage }}</span>
@@ -131,18 +131,18 @@
 							</div>
 						</div>
 					</div>
-					<div class="row">
-						<div class="span12">
+					<div class="">
+						<div class="">
 							<div id="lua-script-editor-view">
 								<div id="lua-code-editor">{{ custom.luaScript.code }}</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div id="lua-script-device-debugger-box" class="row">
-					<div class="span12">
-						<div class="row">
-							<div class="span12">
+				<div id="lua-script-device-debugger-box" class="">
+					<div class="">
+						<div class="">
+							<div class="">
 								<div id="lua-script-device-status-icons">
 									<div id="lua-script-device-status-info-short">
 										Device Status:
@@ -166,8 +166,8 @@
 							</div>
 						</div>
 						<div id="{{custom.constants.luaDebuggerID}}" style="{{ custom.views.luaDebugger.visibility }}">
-							<div id="lua-script-device-status" class="row">
-								<div class="span12">
+							<div id="lua-script-device-status" class="">
+								<div class="">
 									<div id="lua-debugging-log-view" style="">
 										<div id="lua-debugging-log-editor"></div>
 									</div>
