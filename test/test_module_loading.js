@@ -121,78 +121,125 @@ var tests = {
 			});
 		});
 	},
-	'loadAllModulesByName': function(test) {
-		loadTimes.byName = {
-			'start': new Date(),
-			'end': null,
-			'duration': null
-		};
-		var promises = [];
-		var loadModule = function(moduleName) {
-			var defered = q.defer();
-			module_manager.loadModuleDataByName(moduleName)
-			.then(function(moduleData) {
-				checkLoadedModuleData(test, moduleData);
-				defered.resolve();
+	'readWrite startupData AndLoadModule': function(test) {
+		var originalStartupData = {};
+		module_manager.getModuleStartupData(testModuleName)
+		.then(function(startupData) {
+			// Save the startup data to a different object
+			Object.keys(startupData).forEach(function(key) {
+				originalStartupData[key] = startupData[key];
 			});
-			return defered.promise;
-		};
-		moduleNames.forEach(function(moduleName) {
-			promises.push(loadModule(moduleName));
-		});
-
-		q.allSettled(promises)
-		.then(function(collectedData) {
-			test.ok(true, 'test finished');
-			loadTimes.byName.end = new Date();
-			loadTimes.byName.duration = loadTimes.byName.end - loadTimes.byName.start;
-			test.done();
-		}, function(err) {
-			test.ok(false, 'test failed');
-			test.done();
-		});
-	},
-	'loadAllModulesByObject': function(test) {
-		loadTimes.byObject = {
-			'start': new Date(),
-			'end': null,
-			'duration': null
-		};
-		var promises = [];
-		var loadModule = function(moduleObj) {
-			var defered = q.defer();
-			module_manager.loadModuleData(moduleObj)
-			.then(function(moduleData) {
-				checkLoadedModuleData(test, moduleData);
-				defered.resolve();
+			// Add data to the object & save/re-read it.
+			startupData.myNewAttr = 'abab';
+			module_manager.saveModuleStartupData(testModuleName, startupData)
+			.then(module_manager.getModuleStartupData)
+			.then(function(newStartupData) {
+				// Make sure the file has changed appropriately
+				test.deepEqual(
+					startupData,
+					newStartupData,
+					'startup data did not change'
+				);
+				// console.log('modules startup data', newStartupData);
+				module_manager.printTestStartupInfo();
+				module_manager.loadModuleDataByName(testModuleName)
+				.then(function(moduleData) {
+					module_manager.printTestStartupInfo();
+					// console.log('Loaded Module', moduleData.startupData);
+					test.deepEqual(
+						moduleData.startupData,
+						startupData,
+						'startup data was re-set'
+					);
+					test.done();
+				});
+				// Return it back to its original state
+				// module_manager.revertModuleStartupData(testModuleName)
+				// .then(module_manager.getModuleStartupData)
+				// .then(function(finalStartupData) {
+				// 	// Make sure that the file has changed back to its original 
+				// 	// state.
+				// 	test.deepEqual(
+				// 		finalStartupData,
+				// 		originalStartupData,
+				// 		'startup data did not revert');
+				// 	test.done();
+				// });
 			});
-			return defered.promise;
-		};
-		var moduleKeys = Object.keys(savedModules);
-		moduleKeys.forEach(function(moduleKey) {
-			promises.push(loadModule(savedModules[moduleKey]));
 		});
+	},
+	// 'loadAllModulesByName': function(test) {
+	// 	loadTimes.byName = {
+	// 		'start': new Date(),
+	// 		'end': null,
+	// 		'duration': null
+	// 	};
+	// 	var promises = [];
+	// 	var loadModule = function(moduleName) {
+	// 		var defered = q.defer();
+	// 		module_manager.loadModuleDataByName(moduleName)
+	// 		.then(function(moduleData) {
+	// 			checkLoadedModuleData(test, moduleData);
+	// 			defered.resolve();
+	// 		});
+	// 		return defered.promise;
+	// 	};
+	// 	moduleNames.forEach(function(moduleName) {
+	// 		promises.push(loadModule(moduleName));
+	// 	});
 
-		q.allSettled(promises)
-		.then(function(collectedData) {
-			test.ok(true, 'test finished');
-			loadTimes.byObject.end = new Date();
-			loadTimes.byObject.duration = loadTimes.byObject.end - loadTimes.byObject.start;
-			test.done();
-		}, function(err) {
-			test.ok(false, 'test failed');
-			test.done();
-		});
-	},
-	'check cached files': function(test) {
-		var cachedFiles = module_manager.getFileCache();
-		var cachedFileKeys = Object.keys(cachedFiles);
-		console.log('Number of cached files', cachedFileKeys.length);
-		console.log(JSON.stringify(loadTimes, null, 2));
-		test.done();
-	},
-	'check for lint errors': test_utils.getCheckForLintErrors(false),
-	'clearPersistentTestData - final': clearPersistentTestData,
+	// 	q.allSettled(promises)
+	// 	.then(function(collectedData) {
+	// 		test.ok(true, 'test finished');
+	// 		loadTimes.byName.end = new Date();
+	// 		loadTimes.byName.duration = loadTimes.byName.end - loadTimes.byName.start;
+	// 		test.done();
+	// 	}, function(err) {
+	// 		test.ok(false, 'test failed');
+	// 		test.done();
+	// 	});
+	// },
+	// 'loadAllModulesByObject': function(test) {
+	// 	loadTimes.byObject = {
+	// 		'start': new Date(),
+	// 		'end': null,
+	// 		'duration': null
+	// 	};
+	// 	var promises = [];
+	// 	var loadModule = function(moduleObj) {
+	// 		var defered = q.defer();
+	// 		module_manager.loadModuleData(moduleObj)
+	// 		.then(function(moduleData) {
+	// 			checkLoadedModuleData(test, moduleData);
+	// 			defered.resolve();
+	// 		});
+	// 		return defered.promise;
+	// 	};
+	// 	var moduleKeys = Object.keys(savedModules);
+	// 	moduleKeys.forEach(function(moduleKey) {
+	// 		promises.push(loadModule(savedModules[moduleKey]));
+	// 	});
+
+	// 	q.allSettled(promises)
+	// 	.then(function(collectedData) {
+	// 		test.ok(true, 'test finished');
+	// 		loadTimes.byObject.end = new Date();
+	// 		loadTimes.byObject.duration = loadTimes.byObject.end - loadTimes.byObject.start;
+	// 		test.done();
+	// 	}, function(err) {
+	// 		test.ok(false, 'test failed');
+	// 		test.done();
+	// 	});
+	// },
+	// 'check cached files': function(test) {
+	// 	var cachedFiles = module_manager.getFileCache();
+	// 	var cachedFileKeys = Object.keys(cachedFiles);
+	// 	console.log('Number of cached files', cachedFileKeys.length);
+	// 	console.log(JSON.stringify(loadTimes, null, 2));
+	// 	test.done();
+	// },
+	// 'check for lint errors': test_utils.getCheckForLintErrors(false),
+	// 'clearPersistentTestData - final': clearPersistentTestData,
 };
 
 exports.tests = tests;

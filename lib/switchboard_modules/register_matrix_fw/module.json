@@ -1,0 +1,11 @@
+{
+    "name": "register_matrix_fw",
+    "humanName": "Register Matrix",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "supportedDevices": [{"type":"T7"},{"type":"Digit"}],
+    "jsFiles": [
+    ],
+    "htmlFiles": [
+    ]
+}

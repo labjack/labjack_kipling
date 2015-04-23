@@ -21,8 +21,8 @@ modulePaths.forEach(function(modulePath) {
 
 
 var TEST_MODULE_LISTING = false;
-var TEST_MODULE_LOADING = false;
-var TEST_TASK_LOADING = true;
+var TEST_MODULE_LOADING = true;
+var TEST_TASK_LOADING = false;
 
 // Module Tests
 var TEST_DEVICE_SELECTOR = false;

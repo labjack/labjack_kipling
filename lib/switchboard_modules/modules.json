@@ -52,6 +52,9 @@
         "name": "data_logger",
         "active": false
     }, {
+        "name": "register_matrix_fw",
+        "active": true
+    }, {
         "name": "register_matrix",
         "active": true
     }, {

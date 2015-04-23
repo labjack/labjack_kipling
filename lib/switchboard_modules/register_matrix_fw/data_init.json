@@ -1,0 +1,7 @@
+{
+	"test_data": "test",
+	"display_method": "registers_by_sn",
+	"registers_by_sn": {},
+	"registers_by_product_type": {},
+	"registers_by_product_class": {}
+}
