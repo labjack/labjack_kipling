@@ -146,7 +146,8 @@ var tests = {
 				module_manager.loadModuleDataByName(testModuleName)
 				.then(function(moduleData) {
 					// console.log('currentData', moduleData.startupData);
-					// console.log('Loaded Module', moduleData.startupData);
+					// Make sure that the module's startupData is what was 
+					// written
 					test.deepEqual(
 						moduleData.startupData,
 						startupData,
@@ -166,6 +167,8 @@ var tests = {
 						module_manager.loadModuleDataByName(testModuleName)
 						.then(function(moduleDataB) {
 							// console.log('finalData', moduleDataB.startupData);
+							// Make sure the module's startupData was reverted
+							// back to its original state.
 							test.deepEqual(
 								moduleDataB.startupData,
 								originalStartupData,
