@@ -25,6 +25,9 @@ var t7_thermocouple_speed_test = require('./t7_thermocouple_speed_test');
 // Require Digit related tests
 var digit_basic_test = require('./digit_basic_test');
 
+// Require Register Watcher tests
+var basic_watcher_test = require('./basic_watcher_test');
+
 
 /********************** Perform tests *****************************************/
 // Perform Generic tests on mock devices
@@ -33,7 +36,7 @@ var digit_basic_test = require('./digit_basic_test');
 // exports.mock_device_attrs_test = mock_device_attrs_test.tests;
 
 // Perform T7 related tests
-exports.t7_basic_test = t7_basic_test.tests;									// Passing
+// exports.t7_basic_test = t7_basic_test.tests;									// Passing
 // exports.t7_check_calibration_test = t7_check_calibration_test.tests;			// Passing
 // exports.t7_read_recovery_fw_version_test = t7_read_recovery_fw_version_test.tests;
 // exports.t7_upgrade_test = t7_upgrade_test.tests;								// Passing
@@ -57,3 +60,6 @@ exports.t7_basic_test = t7_basic_test.tests;									// Passing
 
 // Perform Digit related tests
 // exports.digit_basic_test = digit_basic_test.tests;
+
+// Register Watcher tests
+exports.basic_watcher_test = basic_watcher_test.tests;

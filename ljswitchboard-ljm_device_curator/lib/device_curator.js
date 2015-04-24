@@ -19,6 +19,8 @@ var lj_t7_get_recovery_fw_version = require('./t7_get_recovery_fw_version');
 
 var lj_t7_cal_operations = require('./t7_calibration_operations');
 
+var register_watcher = require('./register_watcher');
+
 var device_events = driver_const.device_curator_constants;
 
 var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
@@ -1571,6 +1573,11 @@ function device(useMockDevice) {
 		}
 		return rqControlDeferred.promise;
 	};
+
+	/**
+	 * Begin extending the device with the register watcher system.
+	 */
+	
 
 	/**
 	 * Begin T7 specific functions:
