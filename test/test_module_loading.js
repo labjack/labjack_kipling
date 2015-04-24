@@ -125,6 +125,7 @@ var tests = {
 		var originalStartupData = {};
 		module_manager.getModuleStartupData(testModuleName)
 		.then(function(startupData) {
+			// console.log('currentData', startupData);
 			// Save the startup data to a different object
 			Object.keys(startupData).forEach(function(key) {
 				originalStartupData[key] = startupData[key];
@@ -134,6 +135,7 @@ var tests = {
 			module_manager.saveModuleStartupData(testModuleName, startupData)
 			.then(module_manager.getModuleStartupData)
 			.then(function(newStartupData) {
+				// console.log('currentData', newStartupData);
 				// Make sure the file has changed appropriately
 				test.deepEqual(
 					startupData,
@@ -141,30 +143,38 @@ var tests = {
 					'startup data did not change'
 				);
 				// console.log('modules startup data', newStartupData);
-				module_manager.printTestStartupInfo();
 				module_manager.loadModuleDataByName(testModuleName)
 				.then(function(moduleData) {
-					module_manager.printTestStartupInfo();
+					// console.log('currentData', moduleData.startupData);
 					// console.log('Loaded Module', moduleData.startupData);
 					test.deepEqual(
 						moduleData.startupData,
 						startupData,
 						'startup data was re-set'
 					);
-					test.done();
+					module_manager.revertModuleStartupData(testModuleName)
+					.then(module_manager.getModuleStartupData)
+					.then(function(finalStartupData) {
+						// console.log('currentData', finalStartupData);
+						// Make sure that the file has changed back to its 
+						// original state.
+						test.deepEqual(
+							finalStartupData,
+							originalStartupData,
+							'startup data did not revert'
+						);
+						module_manager.loadModuleDataByName(testModuleName)
+						.then(function(moduleDataB) {
+							// console.log('finalData', moduleDataB.startupData);
+							test.deepEqual(
+								moduleDataB.startupData,
+								originalStartupData,
+								'startup data did not revert B'
+							);
+							test.done();
+						});
+					});
 				});
-				// Return it back to its original state
-				// module_manager.revertModuleStartupData(testModuleName)
-				// .then(module_manager.getModuleStartupData)
-				// .then(function(finalStartupData) {
-				// 	// Make sure that the file has changed back to its original 
-				// 	// state.
-				// 	test.deepEqual(
-				// 		finalStartupData,
-				// 		originalStartupData,
-				// 		'startup data did not revert');
-				// 	test.done();
-				// });
 			});
 		});
 	},
