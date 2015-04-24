@@ -17,7 +17,7 @@ var ljmmm_parse = require('ljmmm-parse');
 
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
-
+var array_registers = require('./array_registers');
 
 // Important constants:
 // console.log(os.hostname());
@@ -213,13 +213,19 @@ var parseConstants = function(LJMJSONFileLocation) {
 	this.errorsByNumber = {};
 	this.errorsByName = {};
 
+	this.arrayRegisters = {};
+	var i;
+	for(i = 0; i < array_registers.arrayRegisters.length; i++) {
+		this.arrayRegisters[array_registers.arrayRegisters[i].name] = array_registers.arrayRegisters[i];
+	}
+
 	// Append custom "forcing error b/c device not connected" error
 	constantsData.errors.push({
 		'error': driver_const.LJN_DEVICE_NOT_CONNECTED,
 		'string': 'LJN_DEVICE_NOT_CONNECTED',
 		'description': 'The device is no longer connected, trying to reconnect'
 	});
-	var i;
+	
 	var numErrors = constantsData.errors.length;
 	for(i = 0; i < numErrors; i ++) {
 		this.errorsByNumber[constantsData.errors[i].error] = constantsData.errors[i];
@@ -228,9 +234,9 @@ var parseConstants = function(LJMJSONFileLocation) {
 	this.getErrorInfo = function(err) {
 		var result;
 		if(isNaN(err)) {
-			result = this.errorsByName[err];
+			result = self.errorsByName[err];
 		} else {
-			result = this.errorsByNumber[err];
+			result = self.errorsByNumber[err];
 		}
 		if(typeof(result) === 'undefined') {
 			result = {
@@ -245,17 +251,17 @@ var parseConstants = function(LJMJSONFileLocation) {
 		var regEntry;
 		//Get the Dictionary Entry
 		if(!isNaN(address)) {
-			regEntry = this.constantsByRegister[address];
+			regEntry = self.constantsByRegister[address];
 			resolvedAddress = address;
 		} else if(isNaN(address)) {
-			regEntry = this.constantsByName[address];
+			regEntry = self.constantsByName[address];
 			try {
 				resolvedAddress = regEntry.address;
 			}
 			catch (e) {
 				return {type: -1, directionValid: 0, typeString: "NA"};
 			}
-			//console.log(this.constantsByName);
+			//console.log(self.constantsByName);
 		}
 		//Create a deviceType Variable to save the deviceType number into
 		var validity;
@@ -299,6 +305,15 @@ var parseConstants = function(LJMJSONFileLocation) {
 			data: regEntry
 		};
 	};
+
+	this.isArrayRegister = function(address) {
+		if(typeof(self.arrayRegisters[address]) !== 'undefined') {
+			return true;
+		} else {
+			return false;
+		}
+	};
+	var self = this;
 };
 
 var constants = new parseConstants(LJM_JSON_FILE_LOCATION);

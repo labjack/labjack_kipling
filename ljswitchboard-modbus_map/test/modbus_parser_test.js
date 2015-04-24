@@ -83,4 +83,27 @@ exports.tests = {
     test.deepEqual(errStr, {'error': 0, 'string': 'LJ_SUCCESS'});
     test.done();
   },
+
+  testArrayRegisters: function(test) {
+    var vals = [
+      {'reg': 'I2C_DATA_TX_ARRAY', 'res': true},
+      {'reg': 'I2C_DATA_RX_ARRAY', 'res': true},
+      {'reg': 'ASYNCH_DATA_TX_ARRAY', 'res': true},
+      {'reg': 'ASYNCH_DATA_RX_ARRAY', 'res': true},
+      {'reg': 'LUA_DEBUG_DATA_ARRAY', 'res': true},
+      {'reg': 'LUA_SOURCE_ARRAY', 'res': true},
+      {'reg': 'ONEWIRE_DATA_TX_ARRAY', 'res': true},
+      {'reg': 'ONEWIRE_DATA_RX_ARRAY', 'res': true},
+      {'reg': 'AIN0', 'res': false},
+    ];
+    var results = [];
+    var reqResults = [];
+    vals.forEach(function(val) {
+      results.push(constants.isArrayRegister(val.reg));
+      reqResults.push(val.res);
+    });
+
+    test.deepEqual(results, reqResults, 'failed to check array registers');
+    test.done();
+  },
 };
