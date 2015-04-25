@@ -18,6 +18,7 @@ var ljmmm_parse = require('ljmmm-parse');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 var array_registers = require('./array_registers');
+var buffer_registers = require('./buffer_registers').bufferRegisters;
 
 // Important constants:
 // console.log(os.hostname());
@@ -78,6 +79,9 @@ function zipArraysToObject(keys, values) {
 	return retObj;
 }
 
+function extendBufferRegisters(constants) {
+
+};
 //Function that re-indexes the .json File Constants by their register
 function reindexConstantsByRegister(constants) {
 	var numConstantsEntries = constants.length;
@@ -197,6 +201,29 @@ function reindexConstantsByRegister(constants) {
 
 	return [retDict, retDictName];
 }
+
+/**
+ * This function forces the isBuffer register flag to be set for known buffer
+ * registers.
+**/
+var addMissingBufferRegisterFlags = function(constantsData) {
+	var i;
+	try {
+		for(i = 0; i < constantsData.registers.length; i++) {
+			if(buffer_registers.indexOf(constantsData.registers[i].name) >= 0) {
+				constantsData.registers[i].isBuffer = true;
+			}
+		}
+		for(i = 0; i < constantsData.registers_beta.length; i++) {
+			if(buffer_registers.indexOf(constantsData.registers_beta[i].name) >= 0) {
+				constantsData.registers_beta[i].isBuffer = true;
+			}
+		}
+	} catch(err) {
+		console.log('Error adding missing buffer register flags', err, i);
+	}
+	return constantsData;
+}
 /**
  * Object that parses the json file's & saves the two re-indexed dictionarys.
  * @param  {string} LJMJSONFileLocation location of 'ljm_constants.json'
@@ -206,6 +233,8 @@ var parseConstants = function(LJMJSONFileLocation) {
 	//Load files into memory:
 	var constantsData = require(LJMJSONFileLocation);
 	
+	addMissingBufferRegisterFlags(constantsData);
+
 	var indexedConstants = reindexConstantsByRegister(constantsData);
 	this.constantsByRegister = indexedConstants[0];
 	this.constantsByName = indexedConstants[1];

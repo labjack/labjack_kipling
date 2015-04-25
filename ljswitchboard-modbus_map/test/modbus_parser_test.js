@@ -12,6 +12,19 @@
 var jsonConstants = require('../lib/json_constants_parser');
 var constants = jsonConstants.getConstants();
 
+var ljmmm_parse = require('ljmmm-parse');
+var bufferRegisters = require('../lib/buffer_registers').bufferRegisters;
+
+var expandedBufferRegisters = [];
+bufferRegisters.forEach(function(bufferRegister) {
+  var newReg = ljmmm_parse.expandLJMMMName(bufferRegister);
+  if(Array.isArray(newReg)) {
+    expandedBufferRegisters = expandedBufferRegisters.concat(newReg);
+  } else {
+    expandedBufferRegisters.push(newReg);
+  }
+});
+
 exports.tests = {
   setUp: function(callback) {
     //this.mockDevice = new MockDevice();
@@ -104,6 +117,40 @@ exports.tests = {
     });
 
     test.deepEqual(results, reqResults, 'failed to check array registers');
+    test.done();
+  },
+
+  testBufferRegisters: function(test) {
+    var vals = [
+      {'reg': 'AIN0', 'isBuffer': false}
+    ];
+    // Make sure that the expandedBufferRegisters is of the correct length.
+    test.equal(expandedBufferRegisters.length, 45, 'wrong number of expanded buffer registers');
+    expandedBufferRegisters.forEach(function(reg) {
+      vals.push({'reg': reg, 'isBuffer': true});
+    });
+
+    // Make sure that each register has or doesn't have the isBuffer flag.
+    vals.forEach(function(val) {
+      var info = constants.getAddressInfo(val.reg,'R');
+      if(typeof(info.data) === 'undefined') {
+        console.log('  - (warn) Not Verifying Register', val.reg, '(old modbus map)');
+      } else {
+        var isBufferFlag = info.data.isBuffer;
+        var foundFlag = false;
+        if(typeof(isBufferFlag) !== 'undefined') {
+          foundFlag = true;
+        }
+        var msg = '';
+        if(val.isBuffer) {
+          msg = 'Register: ' + val.reg + ', should have an isBuffer flag';
+        } else {
+          msg = 'Register: ' + val.reg + ', should not have an isBuffer flag';
+        }
+        test.strictEqual(foundFlag, val.isBuffer, msg);
+      }
+    });
+
     test.done();
   },
 };
