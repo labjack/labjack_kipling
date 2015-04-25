@@ -25,10 +25,12 @@ var TEST_DEVICE_CONTROLLER_LIVE_DEVICE = false;		// Passing
 var TEST_DEVICE_CONTROLLER_OPEN_ADVANCED = false;	// Passing
 var TEST_DEVICE_KEEPER = false;						// Passing
 var TEST_DEVICE_KEEPER_LIVE = false;				// Passing
-var TEST_DEVICE_ERRORS = true;						// Passing
+var TEST_DEVICE_ERRORS = false;						// Passing
 var TEST_UPDATE_MOCK_DEVICE = false;				// Passing
 var TEST_UPDATE_USB_DEVICE = false;					// Passing
 
+var MOCK_DEVICE_SPEED_TEST = true;
+var T7_DEVICE_SPEED_TEST = true;
 
 if(ENABLE_BASIC_TEST) {
 	var basic_test = require('./basic_test');
@@ -98,4 +100,14 @@ if(TEST_UPDATE_USB_DEVICE) {
 	var update_usb_device_test = require('./update_usb_device_test');
 	exports.update_usb_device_test = update_usb_device_test.tests;
 }
+
+if(MOCK_DEVICE_SPEED_TEST) {
+	var mock_device_speed_test = require('./mock_device_speed_test');
+	exports.mock_device_speed_test = mock_device_speed_test.tests;
+}
+if(T7_DEVICE_SPEED_TEST) {
+	var t7_device_speed_test = require('./t7_device_speed_test');
+	exports.t7_device_speed_test = t7_device_speed_test.tests;
+}
+
 
