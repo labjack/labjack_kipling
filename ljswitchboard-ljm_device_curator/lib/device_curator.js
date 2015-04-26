@@ -1575,11 +1575,6 @@ function device(useMockDevice) {
 	};
 
 	/**
-	 * Begin extending the device with the register watcher system.
-	 */
-	
-
-	/**
 	 * Begin T7 specific functions:
 	**/
 	var UpgradeProgressListener = function (percentListener, stepListener) {
@@ -1724,6 +1719,26 @@ function device(useMockDevice) {
 	};
 
 	var self = this;
+
+	/**
+	 * Begin extending the device with the register watcher system.
+	**/
+	var registerWatcher = new register_watcher.createRegisterWatcher(self);
+	this.createWatcher = function(watcherName, callback) {
+		return registerWatcher.createWatcher(watcherName, callback);
+	};
+	this.configureWatcher = function(watcherName, config) {
+		return registerWatcher.configureWatcher(watcherName, config);
+	};
+	this.getWatchers = function() {
+		return registerWatcher.getWatchers();
+	};
+	this.stopWatcher = function(watcherName) {
+		return registerWatcher.stopWatcher(watcherName);
+	};
+	this.stopAllWatchers = function() {
+		return registerWatcher.stopAllWatchers();
+	}
 }
 util.inherits(device, EventEmitter);
 

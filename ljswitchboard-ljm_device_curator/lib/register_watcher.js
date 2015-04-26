@@ -237,6 +237,13 @@ var requiredWatcher
 function createRegisterWatcher(curatedDevice) {
 	this.watchers = {};
 
+	this.getWatchers = function() {
+		var defered = q.defer();
+		var watcherKeys = Object.keys(self.watchers);
+		defered.resolve(watcherKeys);
+		return defered.promise;
+	};
+	
 	var isValidWatcher = function(watcherName) {
 		var isValid = true;
 		if(typeof(self.watchers[watcherName]) === 'undefined') {
