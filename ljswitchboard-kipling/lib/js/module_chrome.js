@@ -51,6 +51,9 @@ function createModuleChrome() {
 		documentURL = '';
 	}
 	var cwd = path.dirname(documentURL);
+	if(!path.isAbsolute(cwd)) {
+		cwd = path.resolve(path.sep, cwd);
+	}
 	var moduleChromeTemplateName = 'module_chrome.html';
 	var moduleChromeTabTemplateName = 'module_tab.html';
 	var moduleChromeTemplatesDir = 'templates';
@@ -76,10 +79,24 @@ function createModuleChrome() {
 			moduleChromeTemplatesDir,
 			name
 		);
+		if(!path.isAbsolute(templatePath)) {
+			templatePath = path.resolve(path.sep, templatePath);
+		}
+		// console.log('Executing fs.readFile', {
+		// 	'optionA': path.resolve(templatePath),
+		// 	'optionB': path.resolve(path.sep, templatePath)
+		// });
+
 		fs.readFile(templatePath, function(err, data) {
 			var pageStr = '';
 			if(err) {
 				console.error('Error in loadTemplateFile', err);
+				console.error('Data', {
+					'path': templatePath,
+					'name': name,
+					'cwd': cwd,
+					'moduleChromeTemplatesDir': moduleChromeTemplatesDir,
+				});
 				defered.resolve(pageStr);
 			} else {
 				defered.resolve(data.toString());

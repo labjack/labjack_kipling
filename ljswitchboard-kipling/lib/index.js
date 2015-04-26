@@ -9,6 +9,26 @@ var win = gui.Window.get();
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
 var window_manager = require('ljswitchboard-window_manager');
+var GLOBAL_SUBPROCESS_REFERENCE = undefined;
+var GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
+
+var K3_ON_APPLICATION_EXIT_LISTENER = function() {
+	GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = false;
+	io_interface.off(io_interface.eventList.PROCESS_CLOSE);
+	// console.log(JSON.stringify(['Quitting Application', GLOBAL_ALLOW_SUBPROCESS_TO_RESTART, GLOBAL_SUBPROCESS_REFERENCE]));
+	try {
+		if(GLOBAL_SUBPROCESS_REFERENCE) {
+			GLOBAL_SUBPROCESS_REFERENCE.kill('SIGHUP');
+		}
+	} catch(err) {
+		console.log('Error quitting subprocess', err);
+	}
+	console.log('Quit sub-process');
+}
+window_manager.on(
+	window_manager.eventList.QUITTING_APPLICATION,
+	K3_ON_APPLICATION_EXIT_LISTENER
+);
 var startDir = global[gns].info.startDir;
 
 /*
@@ -53,13 +73,26 @@ var loadResources = function(resources, isLocal) {
 	return defered.promise;
 };
 
+var saveGlobalSubprocessReference = function(bundle) {
+	var defered = q.defer();
+	GLOBAL_SUBPROCESS_REFERENCE = io_manager.io_interface().mp.masterProcess.getSubprocess();
+	// console.log('subprocess pid', GLOBAL_SUBPROCESS_REFERENCE.pid);
+	defered.resolve(bundle);
+	return defered.promise;
+};
+
 var ioManagerMonitor = function(data) {
-	console.log('io_manager Close Event detected, restarting', data);
-	if(MODULE_LOADER) {
-		MODULE_LOADER.loadModuleByName('crash_module');
+	if(GLOBAL_ALLOW_SUBPROCESS_TO_RESTART) {
+		console.log('io_manager Close Event detected, restarting', data);
+		if(MODULE_LOADER) {
+			MODULE_LOADER.loadModuleByName('crash_module');
+		}
+		global[gns].ljm.io_interface.initialize()
+		.then(saveGlobalSubprocessReference)
+		.then(MODULE_CHROME.reloadModuleChrome);
+	} else {
+		console.log('subprocess exited and not restarting');
 	}
-	global[gns].ljm.io_interface.initialize()
-	.then(MODULE_CHROME.reloadModuleChrome);
 };
 
 
@@ -70,9 +103,11 @@ var startIOManager = function(){
 	global[gns].ljm.io_interface = io_interface;
 
 	// Attach monitor
+	GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
 	io_interface.on(io_interface.eventList.PROCESS_CLOSE, ioManagerMonitor);
 
 	io_interface.initialize()
+	.then(saveGlobalSubprocessReference)
 	.then(defered.resolve, defered.reject);
 	return defered.promise;
 };
