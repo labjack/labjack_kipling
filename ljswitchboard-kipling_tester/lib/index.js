@@ -6,6 +6,9 @@ var q = require('q');
 var win = gui.Window.get();
 
 var cwd = path.dirname(document.URL.split('file:///').join(''));
+if(!path.isAbsolute(cwd)) {
+	cwd = path.resolve(path.sep, cwd);
+}
 
 var nodeunit = require(path.normalize(path.join(cwd, '../node_modules/nodeunit')));
 var nodeunit_recorder = require(path.normalize(path.join(cwd, 'nodeunit_recorder')));
