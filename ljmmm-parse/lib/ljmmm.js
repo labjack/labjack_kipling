@@ -7,10 +7,11 @@
  * https://bitbucket.org/labjack/ljm_constants for the LJMMM specification.
  *
  * @author Sam Pottinger (samnsparky, http://gleap.org)
+ * @maintainer Chris Johnson (chrisjohn404, https://github.com/chrisJohn404)
  * @license MIT
 **/
 
-var async = require('async')
+var async = require('async');
 var extend = require('node.extend');
 var sprintf = require('sprintf-js');
 
@@ -198,6 +199,7 @@ exports.expandLJMMMEntry = function(entry, onError, onSuccess)
                     var newEntry = extend({}, entry);
                     newEntry.name = name;
                     newEntry.address = address;
+                    newEntry.group = entry.name;
                     address += regTypeSize;
                     delete newEntry.altnames;
                     expandedEntries.push(newEntry);
@@ -250,6 +252,7 @@ exports.expandLJMMMEntrySync = function(entry)
             var newEntry = extend({}, entry);
             newEntry.name = name;
             newEntry.address = address;
+            newEntry.group = entry.name;
             address += regTypeSize;
             delete newEntry.altnames;
             expandedEntries.push(newEntry);
