@@ -82,6 +82,10 @@ function zipArraysToObject(keys, values) {
 function extendBufferRegisters(constants) {
 
 };
+
+var retDict;
+var retDictName;
+
 //Function that re-indexes the .json File Constants by their register
 function reindexConstantsByRegister(constants) {
 	var numConstantsEntries = constants.length;
@@ -199,7 +203,7 @@ function reindexConstantsByRegister(constants) {
 	retDict[streamEnableAddr].readWrite = 'RW';
 	retDictName['STREAM_ENABLE'].readwrite = 'RW';
 
-	return [retDict, retDictName];
+	return [retDict, retDictName, expandedConstants];
 }
 
 /**
@@ -223,7 +227,7 @@ var addMissingBufferRegisterFlags = function(constantsData) {
 		console.log('Error adding missing buffer register flags', err, i);
 	}
 	return constantsData;
-}
+};
 /**
  * Object that parses the json file's & saves the two re-indexed dictionarys.
  * @param  {string} LJMJSONFileLocation location of 'ljm_constants.json'
@@ -238,6 +242,7 @@ var parseConstants = function(LJMJSONFileLocation) {
 	var indexedConstants = reindexConstantsByRegister(constantsData);
 	this.constantsByRegister = indexedConstants[0];
 	this.constantsByName = indexedConstants[1];
+	this.expandedConstants = indexedConstants[2];
 	this.origConstants = constantsData;
 	this.errorsByNumber = {};
 	this.errorsByName = {};
