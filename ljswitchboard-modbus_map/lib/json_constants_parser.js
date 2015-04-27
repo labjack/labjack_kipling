@@ -85,11 +85,11 @@ function extendBufferRegisters(constants) {
 
 var retDict;
 var retDictName;
-
+var expandedConstants = [];
 //Function that re-indexes the .json File Constants by their register
 function reindexConstantsByRegister(constants) {
 	var numConstantsEntries = constants.length;
-	var expandedConstants = [];
+	expandedConstants = [];
 	var expandedBetaRegisters = [];
 	var entry;
 	var regAddresses;
@@ -106,7 +106,7 @@ function reindexConstantsByRegister(constants) {
 		expandedConstants.push(betaRegister);
 	});
 
-	regAddresses = expandedConstants.map(function (e) { return parseInt(e.address); });
+	regAddresses = expandedConstants.map(function (e) { return parseInt(e.address);});
 	regNames = expandedConstants.map(function (e) { return e.name; });
 
 	retDict = zipArraysToObject(regAddresses, expandedConstants);
