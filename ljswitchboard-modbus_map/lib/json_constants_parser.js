@@ -86,14 +86,23 @@ function extendBufferRegisters(constants) {
 var retDict;
 var retDictName;
 var expandedConstants = [];
+var minifiedConstants = [];
 //Function that re-indexes the .json File Constants by their register
 function reindexConstantsByRegister(constants) {
 	var numConstantsEntries = constants.length;
 	expandedConstants = [];
+	minifiedConstants = [];
 	var expandedBetaRegisters = [];
 	var entry;
 	var regAddresses;
 	var regNames;
+
+	constants.registers.forEach(function(reg){
+		minifiedConstants.push(reg);
+	});
+	constants.registers_beta.forEach(function(reg){
+		minifiedConstants.push(reg);
+	});
 
 	// get registers list
 	expandedConstants = ljmmm_parse.expandLJMMMEntriesSync(constants.registers);
@@ -203,7 +212,7 @@ function reindexConstantsByRegister(constants) {
 	retDict[streamEnableAddr].readWrite = 'RW';
 	retDictName['STREAM_ENABLE'].readwrite = 'RW';
 
-	return [retDict, retDictName, expandedConstants];
+	return [retDict, retDictName, expandedConstants, minifiedConstants];
 }
 
 /**
@@ -243,6 +252,7 @@ var parseConstants = function(LJMJSONFileLocation) {
 	this.constantsByRegister = indexedConstants[0];
 	this.constantsByName = indexedConstants[1];
 	this.expandedConstants = indexedConstants[2];
+	this.minifiedConstants = indexedConstants[3];
 	this.origConstants = constantsData;
 	this.errorsByNumber = {};
 	this.errorsByName = {};
