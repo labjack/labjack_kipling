@@ -40,34 +40,4 @@
   "files": [
     "lib"
   ],
-  "gitHead": "28a909952a79dbb479bdd63613fac86f7428196b",
-  "bugs": {
-    "url": "https://github.com/samnsparky/ljmmm-parse/issues"
-  },
-  "_id": "ljmmm-parse@0.1.5",
-  "_shasum": "89cd442c38fcd8f540d64be9022408378587867f",
-  "_from": "ljmmm-parse@>=0.1.0 <0.2.0",
-  "_npmVersion": "2.7.4",
-  "_nodeVersion": "0.12.2",
-  "_npmUser": {
-    "name": "sam.pottinger",
-    "email": "samp@gleap.org"
-  },
-  "maintainers": [
-    {
-      "name": "sam.pottinger",
-      "email": "samp@gleap.org"
-    },
-    {
-      "name": "chrissjohnson4",
-      "email": "chris.s.johnson4@gmail.com"
-    }
-  ],
-  "dist": {
-    "shasum": "89cd442c38fcd8f540d64be9022408378587867f",
-    "tarball": "http://registry.npmjs.org/ljmmm-parse/-/ljmmm-parse-0.1.5.tgz"
-  },
-  "directories": {},
-  "_resolved": "https://registry.npmjs.org/ljmmm-parse/-/ljmmm-parse-0.1.5.tgz",
-  "readme": "ERROR: No README data found!"
 }
