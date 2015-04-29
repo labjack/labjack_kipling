@@ -7,5 +7,7 @@
     "jsFiles": [
     ],
     "htmlFiles": [
+    	"group_row.html",
+        "child_table.html"
     ]
 }

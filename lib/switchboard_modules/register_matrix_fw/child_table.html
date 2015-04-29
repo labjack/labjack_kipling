@@ -1,0 +1,40 @@
+<div style="padding-left:50px; width:100%">
+    <table cellpadding="5" cellspacing="0" border="0">
+        {{#if group}}
+        <tr>
+            <td>Group</td>
+            <td>{{group}}</td>
+        </tr>
+        {{/if}}
+        {{#if altnames}}
+        <tr>
+            <td>Altnames:</td>
+            <td>{{altnames}}</td>
+        </td>
+        {{/if}}
+        {{#if tags}}
+        <tr>
+            <td>Tags:</td>
+            <td>{{tags}}</td>
+        </tr>
+        {{/if}}
+        {{#if type}}
+        <tr>
+            <td>Type:</td>
+            <td>{{type}}</td>
+        </tr>
+        {{/if}}
+        {{#if access}}
+        <tr>
+            <td>Access:</td>
+            <td>{{access}}</td>
+        </tr>
+        {{/if}}
+        {{#if description}}
+        <tr>
+            <td>Description:</td>
+            <td>{{description}}</td>
+        </tr>
+        {{/if}}
+    </table>
+</div>

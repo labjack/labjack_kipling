@@ -3,15 +3,24 @@
 </div>
 <div id="register-matrix-empty-holder">
     {{!--<p>Active Registers list is empty, please select registers from the Modbus Map using  WATCH/CONFIG.--}}
-    <div>Loading the Active Registers</div>
+    <!-- <div>Loading the Active Registers</div>
     <div class="progress progress-indeterminate">
         <div class="win-ring"></div>
-    </div>
+    </div> -->
+    {{#each custom.registers}}
+    <p>Register: {{name}}, val: {{result.val}} {{result.unit}}</p>
+    {{/each}}
 </div>
 <h3 class="register-matrix-heading">Modbus Map</h3>
 <div id="register-matrix">
-    <div>Loading the Modbus Map</div>
+    <!-- <div>Loading the Modbus Map</div>
     <div class="progress progress-indeterminate">
         <div class="win-ring"></div>
-    </div>
+    </div> -->
+    <div class="container" style="width:100%">
+    	<div id="modbus_map">
+    		<table id="modbus_map_table" class="table table-striped table-bordered" cellspacing="0" width="100%">
+    		</table>
+    	</div>
+	</div>
 </div>
