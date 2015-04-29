@@ -160,7 +160,7 @@ exports.expandLJMMMNameAndAltName = function (entry, onError, onSuccess)
             onSuccess(results);
         }
     );
-}
+};
 
 
 /**
@@ -262,6 +262,49 @@ exports.expandLJMMMEntrySync = function(entry)
     return expandedEntries;
 };
 
+/**
+ * Interpret an entry's name field as LJMMM synchronously and don't expand the
+ * altname.  Simply leave it as an attribute.
+ *
+ * @param {Object} entry An Object containing information about a register or
+ *      set of registers.
+ * @return {Array} An Array of Object that results from interpreting the name
+ *      of the provided entry as an LJMMM field, enumerating and creating the
+ *      appropriate entries when interpreting that field.
+**/
+exports.expandPrimaryLJMMMEntrySync = function(entry)
+{
+    var names;
+    var numNameSets;
+    var nameSets = [];
+    var expandedEntries = [];
+
+    var address = entry.address;
+    var regTypeSize = getTypeRegSize(entry.type);
+
+    nameSets.push(exports.expandLJMMMName(entry.name));
+
+    numNameSets = nameSets.length;
+    for (var i=0; i<numNameSets; i++) {
+        names = nameSets[i];
+        numNames = names.length;
+        address = entry.address;
+
+        var numNames = names.length;
+        for (var j=0; j<numNames; j++) {
+            var name = names[j];
+            var newEntry = extend({}, entry);
+            newEntry.name = name;
+            newEntry.address = address;
+            newEntry.group = entry.name;
+            address += regTypeSize;
+            expandedEntries.push(newEntry);
+        }
+    }
+
+    return expandedEntries;
+};
+
 
 /**
  * Interpret an the names of entries field as LJMMM, enumerating as appropriate.
@@ -293,7 +336,7 @@ exports.expandLJMMMEntries = function(entries, onError, onSuccess)
                 onSuccess(retEntries);
         }
     );
-}
+};
 
 
 /**
@@ -317,4 +360,28 @@ exports.expandLJMMMEntriesSync = function(entries, onError, onSuccess)
     }
 
     return retEntries;
-}
+};
+
+/**
+ * Interpret an the names of entries field as LJMMM synchronously.  Only expand
+ * the primary entries, leave the altnames attribute as an attribute.
+ *
+ * @param {array} entry An array of objects containing information about a
+ *      register or set of registers.
+ * @return {Array} An Array of Object that results from interpreting the name
+ *      of the provided entry as an LJMMM field, enumerating and creating the
+ *      appropriate entries when interpreting that field.
+**/
+exports.expandLJMMMEntriesSync = function(entries, onError, onSuccess)
+{
+    var retEntries = [];
+
+    var numEntries = entries.length;
+    for(var i=0; i<numEntries; i++)
+    {
+        var newEntries = exports.expandPrimaryLJMMMEntrySync(entries[i]);
+        retEntries.push.apply(retEntries, newEntries);
+    }
+
+    return retEntries;
+};
