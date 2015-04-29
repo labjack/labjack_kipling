@@ -6,6 +6,7 @@ var qExec = utils.qExec;
 var labjack_nodejs = require('labjack-nodejs');
 var ljDevice = labjack_nodejs.getDeviceRef();
 var ljm = labjack_nodejs.driver();
+var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 
 var device;
@@ -21,6 +22,7 @@ var deviceFound = false;
 var performTests = true;
 
 var fws = {
+	'1.0070': 'http://labjack.com/sites/default/files/2014/06/T7firmware_010070_2014-02-27.bin',
 	'1.0135': 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin',
 	'1.0144': 'http://labjack.com/sites/default/files/2015/01/T7firmware_010144_2015-01-08.bin',
 	'1.0146': 'http://labjack.com/sites/default/files/2015/01/T7firmware_010146_2015-01-19.bin'
@@ -83,8 +85,8 @@ var device_tests = {
 		});
 	},
 	'upgradeFirmware': function(test) {
-		var fwVersionNum = 1.0146;
-		var fwURL = fws[fwVersionNum.toString()];
+		var fwVersionNum = 1.0070;
+		var fwURL = fws[fwVersionNum.toFixed(4)];
 		var lastPercent = 0;
 		var percentListener = function(value) {
 			var defered = q.defer();

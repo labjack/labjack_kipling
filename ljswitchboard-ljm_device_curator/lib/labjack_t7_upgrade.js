@@ -11,6 +11,7 @@ var labjack_nodejs = require('labjack-nodejs');
 var ljmDriver = new labjack_nodejs.driver();
 var q = require('q');
 var request = require('request');
+var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 var driver_const = labjack_nodejs.driver_const;
 
@@ -481,10 +482,11 @@ exports.eraseFlash = function(bundle, startAddress, numPages, key)
             );
         },
         function (err) {
-            if (err)
+            if (err) {
                 safelyReject(deferred, err);
-            else
+            } else {
                 deferred.resolve(bundle);
+            }
         }
     );
 
@@ -1099,6 +1101,14 @@ exports.forceClose = function(bundle) {
             if(keys[0] === 'message', keys[1] === 'error') {
                 executeCode = false;
             }
+        } else if(keys.length == 3) {
+            if(keys[0] === 'message', keys[1] === 'error', keys[2] === 'errorInfo') {
+                executeCode = false;
+            }
+        } else if(keys.length == 4) {
+            if(keys[0] === 'message', keys[1] === 'error', keys[2] === 'errorInfo', keys[3] === 'errorMessage') {
+                executeCode = false;
+            }
         }
     }
     if(executeCode) {
@@ -1304,7 +1314,32 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
         innerDeferred.resolve(bundle);
         return innerDeferred.promise;
     };
+    var createErrorMessage = function(step, error, deviceAttributes) {
+        var message = 'Encountered an error in step: ' + step.toString();
+        message += ', error ' + error.toString();
+
+        var errorCode = parseInt(error, 10);
+        var info = {};
+        if(errorCode) {
+            info = modbus_map.getErrorInfo(errorCode);
+            message += ' (' + info.string + ').';
+            if(info.description) {
+                message += '  ' + info.description;
+            }
+            if(deviceAttributes.isPro) {
+                if(deviceAttributes.WIFI_VERSION === 0) {
+                    message += '  Check the WiFi module, it reported a version number of 0.';
+                }
+            }
+        }
+
+        return {
+            'info': info,
+            'message': message
+        };
+    };
     var reportError = function(message) {
+        var errorMessage = '';
         var reportErrorFunc = function(error) {
             var reportErrorDefered = q.defer();
             
@@ -1312,9 +1347,16 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
                 reportErrorDefered.reject(error);
             } else {
                 var err;
+                var errorMessage = createErrorMessage(
+                    message,
+                    error,
+                    curatedDevice.savedAttributes
+                );
                 err = {
                     'step': message,
                     'error': error,
+                    'errorInfo': errorMessage.info,
+                    'errorMessage': errorMessage.message,
                 };
                 errorEncountered = true;
                 reportErrorDefered.reject(err);
