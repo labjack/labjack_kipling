@@ -2,3 +2,15 @@
 .details-control {
 	cursor:pointer;
 }
+
+.register_matrix_child_row dl dt {
+	width: 100px;
+}
+.register_matrix_child_row dl dd {
+	margin-left: 120px;
+}
+@media (max-width: 767px) {
+	.register_matrix_child_row dl dd {
+	  margin-left: 0;
+	}
+}

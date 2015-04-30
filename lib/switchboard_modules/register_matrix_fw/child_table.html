@@ -1,40 +1,28 @@
-<div style="padding-left:50px; width:100%">
-    <table cellpadding="5" cellspacing="0" border="0">
+<div class="register_matrix_child_row" style="padding-left:50px; width:100%">
+    <dl class="dl-horizontal">
         {{#if group}}
-        <tr>
-            <td>Group</td>
-            <td>{{group}}</td>
-        </tr>
+            <dt>Group:</dt>
+            <dd>{{group}}</dd>
         {{/if}}
         {{#if altnames}}
-        <tr>
-            <td>Altnames:</td>
-            <td>{{altnames}}</td>
-        </td>
+            <dt>Altnames:</dt>
+            <dd>{{altnames}}</dd>
         {{/if}}
         {{#if tags}}
-        <tr>
-            <td>Tags:</td>
-            <td>{{tags}}</td>
-        </tr>
+            <dt>Tags:</dt>
+            <dd>{{tags}}</dd>
         {{/if}}
         {{#if type}}
-        <tr>
-            <td>Type:</td>
-            <td>{{type}}</td>
-        </tr>
+            <dt>Type:</dt>
+            <dd>{{type}}</dd>
         {{/if}}
         {{#if access}}
-        <tr>
-            <td>Access:</td>
-            <td>{{access}}</td>
-        </tr>
+            <dt>Access:</dt>
+            <dd>{{access}}</dd>
         {{/if}}
         {{#if description}}
-        <tr>
-            <td>Description:</td>
-            <td>{{description}}</td>
-        </tr>
+            <dt>Description:</dt>
+            <dd>{{description}}</dd>
         {{/if}}
-    </table>
+    </dl>
 </div>
