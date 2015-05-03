@@ -1,4 +1,10 @@
-<div class="register_matrix_child_row" style="padding-left:50px; width:100%">
+<div class="register_matrix_child_row" style="padding-left:24px; width:100%; padding-right: 96px;">
+    {{#if childTableID}}
+        <div id="{{childTableID}}_holder" style="display:{{tableDisplayStyle}}">
+            <table id="{{childTableID}}" class="table table-bordered" cellspacing="0" width="100%">
+            </table>
+        </div>
+    {{/if}}
     <dl class="dl-horizontal">
         {{#if group}}
             <dt>Group:</dt>
