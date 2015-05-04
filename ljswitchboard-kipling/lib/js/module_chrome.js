@@ -104,6 +104,9 @@ function createModuleChrome() {
 		});
 		return defered.promise;
 	};
+	this.clearTemplateCache = function() {
+		cachedTemplates = {};
+	};
 	var compileTemplate = function(name, context) {
 		var defered = q.defer();
 		if(cachedTemplates[name]) {
@@ -495,6 +498,10 @@ function createModuleChrome() {
 		if(self.allowModuleToLoad) {
 			self.allowModuleToLoad = false;
 
+			if(CLEAR_CACHES) {
+				console.log('clearing caches');
+				CLEAR_CACHES();
+			}
 			// Clear all selected module styling classes
 			$('.module-chrome-tab').removeClass('selected');
 			var tabID = '#' + res.data.name + '-tab';

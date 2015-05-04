@@ -24,3 +24,29 @@ var le = function(err) {
 	console.log('Error:', err);
 };
 
+var CLEAR_CACHES = function() {
+	try {
+		if(MODULE_CHROME) {
+			console.log('Clearing MODULE_CHROME cache');
+			MODULE_CHROME.clearTemplateCache();
+		} else {
+			console.log('Not clearing MODULE_CHROME template cache');
+		}
+
+		if(module_manager) {
+			console.log('Clearing module_manager cache');
+			module_manager.clearFileCache();
+		} else {
+			console.log('Not clearing module_manager cache');
+		}
+
+		if(fs_facade) {
+			console.log('Clearing fs_facade cache');
+			fs_facade.clearCache();
+		} else {
+			console.log('Not clearing fs_facade cache');
+		}
+	} catch(err) {
+		console.log('Caches did not get cleared');
+	}
+}
