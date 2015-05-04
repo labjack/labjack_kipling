@@ -6,10 +6,10 @@
         </div>
     {{/if}}
     <dl class="dl-horizontal">
-        {{#if group}}
-            <dt>Group:</dt>
+        {{!--{{#if group}}
+            <dt>Name:</dt>
             <dd>{{group}}</dd>
-        {{/if}}
+        {{/if}}--}}
         {{#if altnames}}
             <dt>Altnames:</dt>
             <dd>{{altnames}}</dd>
@@ -25,6 +25,10 @@
         {{#if access}}
             <dt>Access:</dt>
             <dd>{{access}}</dd>
+        {{/if}}
+        {{#if streamable}}
+            <dt>Streamable:</dt>
+            <dd>{{streamable}}</dd>
         {{/if}}
         {{#if description}}
             <dt>Description:</dt>

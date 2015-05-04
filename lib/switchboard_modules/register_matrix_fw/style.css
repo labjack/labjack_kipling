@@ -54,10 +54,6 @@ th.details-control.sorting_disabled {
   background-color:#eee;
 }
 
-#modbus_map .primary_row:hover .select-button{
-  color: blue;
-}
-
 #modbus_map tr.primary_row.selected {
 	background-color:#DDD;
 }
@@ -73,12 +69,13 @@ th.details-control.sorting_disabled {
 
 /* Defining their hover-over effects */
 #modbus_map .primary_row:hover .select-button .state-indicator{
-	/*color: #5bb75b;  Almost green */
+	/*color: #5bb75b;  Light green */
 }
 
 /* Defining their state when row is selected */
 #modbus_map .primary_row.selected .select-button .state-indicator{
-	color:#468847; /* Green */
+	/* color:#468847; Dark Green */
+	color: #5bb75b; /* Light green */
 }
 
 /* Defining their hover-over effects */
@@ -108,6 +105,13 @@ th.details-control.sorting_disabled {
 	cursor:pointer;
 }
 
+/*#modbus_map .primary_row.hidden-data .register-name-header {
+	color:blue;
+}*/
+#modbus_map .primary_row.hidden-data:hover .show-details-button{
+  color: blue;
+}
+
 
 /* Define styling for child-tables */
 #modbus_map tr.secondary_row.odd {
@@ -126,6 +130,7 @@ th.details-control.sorting_disabled {
 	color:#999;	/* Dark grey */
 }
 #modbus_map .secondary_row.selected .select-button .state-indicator{
-	color:#468847; /* Green */
+	color: #5bb75b; /* Light green */
+	/* color:#468847; Dark Green */
 }
 
