@@ -1,0 +1,44 @@
+{
+  "name": "ljswitchboard-version_manager",
+  "version": "0.0.1",
+  "description": "A simple module to collect and cache important device firmware and software version numbers available for users to download.",
+  "author": {
+    "name": "Chris Johnson",
+    "url": "http://labjack.com"
+  },
+  "main": "./lib/version_manager.js",
+  "homepage": "https://github.com/chrisJohn404/ljswitchboard-version_manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-version_manager"
+  },
+  "keywords": [
+    "LabJack",
+    "LJM",
+    "T7",
+    "ljswitchboard"
+  ],
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-version_manager/master/LICENSE"
+  },
+  "bugs": {
+    "url": "https://github.com/chrisJohn404/ljswitchboard-version_manager/issues"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "async": "~0",
+    "dict": "1.4.0",
+    "nodeunit": "~0.9.0",
+    "q": "~1",
+    "request": "~2",
+    "handlebars": "3.0.x"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+  }
+}
