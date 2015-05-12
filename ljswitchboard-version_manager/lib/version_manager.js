@@ -19,7 +19,9 @@ var dict = require('dict');
 
 
 var eventList = {
-    'ERROR_PARSING_PAGE_DATA': 'ERROR_PARSING_PAGE_DATA'
+    'ERROR_PARSING_PAGE_DATA': 'ERROR_PARSING_PAGE_DATA',
+    'WARNING': 'WARNING',
+    'ERROR': 'ERROR',
 };
 function labjackVersionManager() {
     this.kiplingUpdateLinks = {
@@ -268,8 +270,7 @@ function labjackVersionManager() {
                                 "code": error.code,
                                 "url": url
                             };
-                            self.infoCache.isError = true;
-                            self.infoCache.errors.push(err);
+                            self.reportError(err);
                             callback(err);
                         } else if (response.statusCode != 200) {
                             // Report a http error, likely is 404, page not found.
@@ -284,15 +285,14 @@ function labjackVersionManager() {
                                 "quit": false,
                                 "url": url
                             };
-                            self.infoCache.warning = true;
-                            self.infoCache.warnings.push(err);
+                            self.reportWarning(err);
                             callback(err);
                         } else {
                             self.pageCache.set(url,body);
                             try {
                                 strategy(savedData, body, urlInfo, name);
-                            } catch(err) {
-                                console.error('Error calling strategy...', err, name);
+                            } catch(innerErr) {
+                                console.error('Error calling strategy...', innerErr, name);
                             }
                             callback();
                         }
@@ -523,6 +523,22 @@ function labjackVersionManager() {
             return true;
         }
     };
+    this.reportWarning = function(data) {
+        self.infoCache.warning = true;
+        self.infoCache.warnings.push(data);
+        self.emit(eventList.WARNING, {
+            'type': 'warning',
+            'data': data
+        });
+    };
+    this.reportError = function(data) {
+        self.infoCache.errors = true;
+        self.infoCache.errors.push(data);
+        self.emit(eventList.WARNING, {
+            'type': 'error',
+            'data': data
+        });
+    };
     this.getIssue = function() {
         var issue;
         if(self.isIssue()) {
@@ -608,7 +624,21 @@ function labjackVersionManager() {
         return ljSystemType;
     };
     this.getInfoCache = function() {
-        return self.infoCache;
+        return JSON.parse(JSON.stringify(self.infoCache));
+    };
+
+    this.getCachedT7Versions = function() {
+        var t7Data = {};
+        if(typeof(self.infoCache.t7) !== 'undefined') {
+            t7Data = JSON.parse(JSON.stringify(self.infoCache.t7));
+            t7Data.isValid = true;
+        } else {
+            t7Data.current = undefined;
+            t7Data.beta = [];
+            t7Data.old = [];
+            t7Data.isValid = false;
+        }
+        return t7Data;
     };
 
     var isDefined = function(ele) {

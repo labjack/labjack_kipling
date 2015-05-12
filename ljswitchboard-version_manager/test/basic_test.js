@@ -32,9 +32,19 @@ exports.tests = {
 		version_manager = require('../lib/version_manager');
 		test.done();
 	},
+	'get initial T7 Versions': function(test) {
+		var data = version_manager.lvm.getCachedT7Versions();
+		var isCurrentUndefined = true;
+		if(data.current) {
+			isCurrentUndefined = false;
+		}
+		test.ok(isCurrentUndefined, 'Current fw version is defined');
+		test.ok(!data.isValid, 'T7 Firmware data should not be valid yet');
+		test.done();
+	},
 	'initialize version_manager': function(test) {
 		var startTime = new Date();
-		version_manager.initialize()
+		version_manager.getAllVersions()
 		.then(function(data) {
 			var endTime = new Date();
 			addExecutionTime('Initialization', startTime, endTime);
@@ -61,8 +71,25 @@ exports.tests = {
 			test.done();
 		});
 	},
+	'get T7 Versions': function(test) {
+		var data = version_manager.lvm.getCachedT7Versions();
+		test.ok(data.isValid, 'T7 Firmware data should be valid');
+		var requiredKeys = ['current', 'old', 'beta'];
+		var givenKeys = Object.keys(data);
+		requiredKeys.forEach(function(reqKey) {
+			var isOk = false;
+			if(givenKeys.indexOf(reqKey) >= 0) {
+				isOK = true;
+			}
+			test.ok(isOK, 'Missing a required key: ' + reqKey);
+		});
+		// console.log('T7 FW Versions', data);
+		test.done();
+	},
 	'clear versions cache': function(test) {
+		// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
 		version_manager.lvm.clearPageCache();
+		// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
 		test.done();
 	},
 	'secondary query': function(test) {
