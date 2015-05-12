@@ -16,7 +16,6 @@ var q = require('q');
 var request = require('request');
 var async = require('async');
 var dict = require('dict');
-var handlebars = require('handlebars');
 
 
 var eventList = {
