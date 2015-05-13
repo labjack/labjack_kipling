@@ -633,7 +633,7 @@ function labjackVersionManager() {
             t7Data = JSON.parse(JSON.stringify(self.infoCache.t7));
             t7Data.isValid = true;
         } else {
-            t7Data.current = undefined;
+            t7Data.current = [];
             t7Data.beta = [];
             t7Data.old = [];
             t7Data.isValid = false;

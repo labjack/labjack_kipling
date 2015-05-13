@@ -34,11 +34,6 @@ exports.tests = {
 	},
 	'get initial T7 Versions': function(test) {
 		var data = version_manager.lvm.getCachedT7Versions();
-		var isCurrentUndefined = true;
-		if(data.current) {
-			isCurrentUndefined = false;
-		}
-		test.ok(isCurrentUndefined, 'Current fw version is defined');
 		test.ok(!data.isValid, 'T7 Firmware data should not be valid yet');
 		test.done();
 	},
