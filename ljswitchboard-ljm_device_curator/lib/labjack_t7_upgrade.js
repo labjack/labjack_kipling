@@ -36,15 +36,8 @@ var CHECKPOINT_FIVE_PERCENT = 100;
 var curOffset = 0;
 var curScaling = 0;
 var shouldUpdateProgressBar = false;
-var globalProgressListener;
 
 var nop = function(){};
-function updateProgressScaled (value) {
-    if (shouldUpdateProgressBar) {
-        var scaledValue = curScaling * value + curOffset;
-        globalProgressListener.updatePercentage(scaledValue, nop);
-    }
-}
 
 
 /**
@@ -146,6 +139,20 @@ function DeviceFirmwareBundle()
     var serial = null;
     var connectionType = null;
 
+    var progressListener = null;
+
+    this.setProgressListener = function(newListener) {
+        progressListener = newListener;
+    };
+    this.getProgressListener = function() {
+        return progressListener;
+    };
+    this.updateProgressScaled = function(value) {
+        if (shouldUpdateProgressBar) {
+            var scaledValue = curScaling * value + curOffset;
+            progressListener.updatePercentage(scaledValue, nop);
+        }
+    };
     /**
      * Get the raw contents of the firmware image.
      *
@@ -313,10 +320,9 @@ function DeviceFirmwareBundle()
  * @return {q.promise} New DeviceFirmwareBundle without a device loaded but
  *      initalized with the contents of the specified firmware file.
 **/
-exports.readFirmwareFile = function(fileSrc)
+exports.readFirmwareFile = function(fileSrc, bundle)
 {
     var deferred = q.defer();
-    var bundle = new DeviceFirmwareBundle();
     var urlComponents;
     var fileName;
     var parseFile = function (err, data) {
@@ -732,7 +738,7 @@ var createFlashOperation = function (bundle, startAddress, lengthInts, sizeInts,
         [],
         function (lastMemoryResult, currentExecution, callback) {
             numIntsWritten += sizeInts;
-            updateProgressScaled(numIntsWritten);
+            bundle.updateProgressScaled(numIntsWritten);
             currentExecution(lastMemoryResult).then(
                 function (newMemory){
                     callback(null, newMemory);
@@ -1424,6 +1430,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
     var updateProgress = function (value) {
         return function (bundle) {
             var innerDeferred = q.defer();
+            var progressListener = bundle.getProgressListener();
             progressListener.updatePercentage(value, function () {
                 innerDeferred.resolve(bundle);
             });
@@ -1433,6 +1440,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
     var updateStatusText = function (value) {
         return function (bundle) {
             var innerDeferred = q.defer();
+            var progressListener = bundle.getProgressListener();
             progressListener.updateStepName(value, function () {
                 innerDeferred.resolve(bundle);
             });
@@ -1440,7 +1448,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
         };
     };
     var saveStartupConfigsFWCheck = function() {
-        return function(bundle) {
+        return function (bundle) {
             var innerDeferred = q.defer();
             var param = 'LJM_OLD_FIRMWARE_CHECK';
             ljmDriver.readLibrary(param, function(err) {
@@ -1454,7 +1462,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
         };
     };
     var disableStartupConfigsFWCheck = function() {
-        return function(bundle) {
+        return function (bundle) {
             var innerDeferred = q.defer();
             var param = 'LJM_OLD_FIRMWARE_CHECK';
             ljmDriver.writeLibrary(param, 0, function(err) {
@@ -1467,7 +1475,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
         };
     };
     var restoreStartupConfigsFWCheck = function() {
-        return function(bundle) {
+        return function (bundle) {
             var innerDeferred = q.defer();
             var param = 'LJM_OLD_FIRMWARE_CHECK';
             ljmDriver.writeLibrary(param, initialStartupConfigs, function(err) {
@@ -1516,6 +1524,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
                     }
                     var getFinishFunc = function(msg) {
                         return function() {
+                            var progressListener = bundle.getProgressListener();
                             progressListener.updateStepName(
                                 msg,
                                 function() {
@@ -1547,11 +1556,13 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
         });
         return finishedDefered.promise;
     };
+    
+    // Create a new bundle to be passed along
+    var bundle = new DeviceFirmwareBundle();
 
-    globalProgressListener = progressListener;
+    bundle.setProgressListener(progressListener);
 
-    //
-    exports.readFirmwareFile(firmwareFileLocation, reportError('readingFirmwareFile'))
+    exports.readFirmwareFile(firmwareFileLocation, bundle) //reportError('readingFirmwareFile')
     .then(injectDevice, reportError('readingFirmwareFile'))
     .then(saveStartupConfigsFWCheck(), reportError('injectDevice'))
     .then(disableStartupConfigsFWCheck(), reportError('saveStartupConfigsFWCheck'))

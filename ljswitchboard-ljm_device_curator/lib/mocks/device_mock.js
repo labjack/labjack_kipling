@@ -360,8 +360,8 @@ function device() {
 		var result = 0;
 		// finishCall('rwMany', result).then(onSucc, onErr);
 		if(typeof(setImmediate) !== 'undefined') {
-			// setImmediate(onSucc);
-			setTimeout(onSucc);
+			setImmediate(onSucc);
+			// setTimeout(onSucc);
 		} else {
 			setTimeout(onSucc);
 		}
