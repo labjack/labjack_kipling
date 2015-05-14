@@ -105,7 +105,7 @@ exports.tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** mock_device_test ****');
+		console.log('**** multiple_mock_device_upgrade_test ****');
 		try {
 			deviceA = new device_curator.device(true);
 			deviceB = new device_curator.device(true);
