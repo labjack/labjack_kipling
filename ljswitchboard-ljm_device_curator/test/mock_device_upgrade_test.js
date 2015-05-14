@@ -3,10 +3,6 @@ var q = require('q');
 var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');
 var qExec = utils.qExec;
-var labjack_nodejs = require('labjack-nodejs');
-var ljDevice = labjack_nodejs.getDeviceRef();
-var ljm = labjack_nodejs.driver();
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 
 var device;
@@ -18,13 +14,27 @@ var stopTest = function(test, err) {
 	test.done();
 };
 
-var deviceFound = false;
-var performTests = true;
+var deviceInfo = {
+	'serialNumber': 47001000,
+	'DEVICE_NAME_DEFAULT': 'My Test Device',
+	'HARDWARE_INSTALLED': 15,
+	'ipAddress': '192.168.1.101',
+	'ETHERNET_IP': '192.168.1.101',
+};
+var infoMapping = {
+	'SERIAL_NUMBER': 'serialNumber',
+};
+var appropriateResultMap = {
+	// 'ETHERNET_IP': 'str',
+	// 'WIFI_IP': 'str',
+	// 'SERIAL_NUMBER': 'res',
+};
+deviceFound = false;
 
 var firmware_links = require('./firmware_links');
 var fws = firmware_links.firmwareLinks.T7;
 
-var device_tests = {
+exports.tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
 			process.exit(1);
@@ -37,46 +47,47 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t7_upgrade_test ****');
+		console.log('**** mock_device_test ****');
 		try {
-			device = new device_curator.device();
+			device = new device_curator.device(true);
 		} catch(err) {
 			stopTest(test, err);
 		}
 		test.done();
 	},
-	'openDevice': function(test) {
+	'configure mock device': function(test) {
+		device.configureMockDevice(deviceInfo)
+		.then(function(res) {
+			test.done();
+		});
+	},
+	'openDevice - ctANY device': function(test) {
 		var td = {
 			'dt': 'LJM_dtT7',
 			'ct': 'LJM_ctANY',
 			'id': 'LJM_idANY'
 		};
-		// td.ct = 'LJM_ctWIFI';
-		// td.id = 470010548;
 
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
-			console.log(
-				"  - Opened T7:",
-				res.productType,
-				res.connectionTypeName,
-				res.serialNumber,
-				parseFloat(res.FIRMWARE_VERSION.toFixed(4))
-			);
 			deviceFound = true;
 			test.done();
 		}, function(err) {
-			console.log("  - Failed to open device", ljm.errToStrSync(err));
-			performTests = false;
 			test.done();
 		});
 	},
-	'checkDeviceInfo': function(test) {
+	'checkDeviceInfo (assigned serial number)': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
 			test.strictEqual(res.deviceType, 7);
+			test.strictEqual(res.deviceTypeName, 'T7');
 			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			test.strictEqual(res.connectionType, 1);
+			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
+			test.strictEqual(res.ip, '0.0.0.0');
+			test.strictEqual(res.ipAddress, '0.0.0.0');
 			test.done();
 		});
 	},
@@ -130,41 +141,13 @@ var device_tests = {
 			}
 		);
 	},
-	'closeDevice': function(test) {
+	'perform upgrade': function(test) {
+		test.done();
+	},
+	'closeDevice (assigned serial number)': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
-		}, function(err) {
-			console.log("Failure");
-			test.ok(false);
 			test.done();
 		});
 	},
 };
-
-var tests = {};
-var functionKeys = Object.keys(device_tests);
-var getTest = function(testFunc, key) {
-	var execTest = function(test) {
-		// console.log("  > t7_basic_test - " + key);
-		if(performTests) {
-			testFunc(test);
-		} else {
-			console.log("  * Not Executing!!");
-			try {
-				test.done();
-			} catch(err) {
-				console.log("HERE", err);
-			}
-		}
-	};
-	return execTest;
-};
-functionKeys.forEach(function(functionKey) {
-	if ((functionKey !== 'setUp') && (functionKey !== 'tearDown')) {
-		tests[functionKey] = getTest(device_tests[functionKey], functionKey);
-	} else {
-		tests[functionKey] = device_tests[functionKey];
-	}
-});
-exports.tests = tests;

@@ -651,6 +651,10 @@ var createFlashOperation = function (bundle, startAddress, lengthInts, sizeInts,
                     var callFunc = createSafeReject(innerDeferred);
                 },
                 function (newResults) { 
+                    delete addresses;
+                    delete directions;
+                    delete numValues;
+                    delete values;
                     lastResults.push.apply(lastResults, newResults);
                     innerDeferred.resolve(lastResults);
                 }
@@ -798,7 +802,7 @@ exports.readImage = function(bundle)
     ).then(
         function (memoryContents) { deferred.resolve(bundle); },
         function (err) { safelyReject(deferred, err); }
-    );
+    ).done();
 
     return deferred.promise;
 };
@@ -826,7 +830,7 @@ exports.readImageInformation = function(bundle)
     ).then(
         function (memoryContents) { deferred.resolve(bundle); },
         function (err) { safelyReject(deferred, err); }
-    );
+    ).done();
 
     return deferred.promise;
 };
@@ -907,8 +911,7 @@ exports.checkErase = function(bundle)
  * @param {q.promise} Promise that resolves after the flash write operation
  *      finishes successfully or fails due to error (will reject on error).
 **/
-exports.writeFlash = function(bundle, startAddress, length, size, key, data)
-{
+exports.writeFlash = function(bundle, startAddress, length, size, key, data) {
     var writePtrAddress = driver_const.T7_MA_EXF_pWRITE;
     var writeFlashAddress = driver_const.T7_MA_EXF_WRITE;
     var device = bundle.getDevice();
@@ -933,8 +936,7 @@ exports.writeFlash = function(bundle, startAddress, length, size, key, data)
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      write is complete.
 **/
-exports.writeImage = function(minPercent, maxPercent)
-{
+exports.writeImage = function(minPercent, maxPercent) {
     return function (bundle) {
         var deferred = q.defer();
         shouldUpdateProgressBar = true;
@@ -962,7 +964,7 @@ exports.writeImage = function(minPercent, maxPercent)
                 shouldUpdateProgressBar = false;
                 callback(err);
             }
-        );
+        ).done();
 
         return deferred.promise;
     };
@@ -1009,7 +1011,7 @@ exports.writeImageInformation = function(minPercent, maxPercent)
                 shouldUpdateProgressBar = false;
                 callback(err);
             }
-        );
+        ).done();
 
         return deferred.promise;
     };
@@ -1168,23 +1170,59 @@ exports.pauseForClose = function(bundle) {
 **/
 exports.waitForEnumeration = function(bundle)
 {
+    var curatedDevice = bundle.getCuratedDevice();
+    var curatedDeviceAttributes = {};
+    var dataToTransfer = [
+        'serialNumber',
+        'HARDWARE_INSTALLED',
+        'ETHERNET_IP',
+        'WIFI_IP',
+        'PRODUCT_ID',
+        'HARDWARE_VERSION',
+        'ETHERNET_MAC',
+        'WIFI_MAC',
+        'DEVICE_NAME_DEFAULT',
+    ];
+    
+    var isMockDevice = false;
+    if(curatedDevice.savedAttributes.isMockDevice) {
+        isMockDevice = true;
+        dataToTransfer.forEach(function(key) {
+            curatedDeviceAttributes[key] = curatedDevice.savedAttributes[key];
+        });
+        curatedDeviceAttributes.FIRMWARE_VERSION = bundle.getFirmwareVersion();
+    }
     var deferred = q.defer();
     var targetSerial = bundle.getSerialNumber();
     this.targetSerial = targetSerial;
     
+    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+        console.log(
+            'in waitForEnumeration',
+            curatedDevice.savedAttributes.serialNumber,
+            targetSerial,
+            isMockDevice,
+            bundle.getFirmwareVersion(),
+            typeof(bundle.getFirmwareVersion())
+        );
+    }
+
     function getCheckForDevice (bundle) {
         this.bundle = bundle;
         this.targetSerial = bundle.getSerialNumber().toString();
         this.connectionType = bundle.getConnectionType();
         var getAllConnectedSerials = function () {
             var innerDeferred = q.defer();
-            ljmDriver.listAll("LJM_dtT7", 
+            ljmDriver.listAll("LJM_dtT7",
                 self.bundle.getConnectionType(),
                 createSafeReject(innerDeferred),
                 function (devicesInfo) {
                     var serials = devicesInfo.map(function (e) {
                         return e.serialNumber;
                     });
+                    if(isMockDevice) {
+                        serials.push(parseInt(self.targetSerial, 10));
+                    }
                     innerDeferred.resolve(serials);
                 }
             );
@@ -1196,8 +1234,23 @@ exports.waitForEnumeration = function(bundle)
             // console.log('Bundle Info:',self.bundle,self.targetSerial,self.connectionType);
             self.getAllConnectedSerials().then(function (serialNumbers) {
                 // console.log('t7_upgrade.js-Check Scan Results',self.targetSerial,self.connectionType,serialNumbers);
+                // console.log('Target Serial', targetSerial, self.targetSerial, serialNumbers.indexOf(targetSerial));
                 if (serialNumbers.indexOf(targetSerial) != -1) {
-                    var newDevice = new labjack_nodejs.device();
+                    var newDevice;
+                    if(isMockDevice) {
+                        var ljmMockDevice = require('./mocks/device_mock');
+                        newDevice = new ljmMockDevice.device();
+                        newDevice.configureMockDeviceSync(curatedDeviceAttributes);
+
+                        // Configure original curated device object as the
+                        // device handle can't be passed back...
+                        curatedDevice.configureMockDeviceSync({
+                            'FIRMWARE_VERSION': curatedDeviceAttributes.FIRMWARE_VERSION
+                        });
+                    } else {
+                        newDevice = new labjack_nodejs.device();
+                        
+                    }
                     // console.log('t7_upgrade.js-Trying to open device',self.targetSerial,self.connectionType);
                     newDevice.open(
                         "LJM_dtT7",
@@ -1207,7 +1260,7 @@ exports.waitForEnumeration = function(bundle)
                             if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
                                 console.log('t7_upgrade.js - Open Error',err);
                             }
-                            // console.log('t7_upgrade.js-Failed to connect',bundle.getConnectionType(),targetSerial.toString());
+                            // console.log('t7_upgrade.js-Failed to connect',bundle.getConnectionType(),targetSerial.toString(), err);
                             setTimeout(checkForDevice, EXPECTED_REBOOT_WAIT);
                         },
                         function(succ){
@@ -1220,7 +1273,7 @@ exports.waitForEnumeration = function(bundle)
                         }
                     );
                 } else {
-                    // console.log('HERE, serial number not found',targetSerial,serialNumbers);
+                    // console.log('HERE, serial number not found',targetSerial,serialNumbers, self.targetSerial);
                     setTimeout(self.checkForDevice, EXPECTED_REBOOT_WAIT);
                 }
             });
@@ -1304,7 +1357,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
     var injectDevice = function (bundle) {
         var innerDeferred = q.defer();
         try {
-            bundle.setSerialNumber(device.readSync('SERIAL_NUMBER'));
+            bundle.setSerialNumber(curatedDevice.savedAttributes.serialNumber);
             bundle.setConnectionType(connectionType);
         } catch (e) {
             safelyReject(innerDeferred, e);
@@ -1525,7 +1578,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
     .then(updateStatusText('Restarting...'), reportError('updateProgress'))
     .then(exports.restartAndUpgrade, reportError('updateStatusText'))
     .then(exports.closeDevice, exports.forceClose)
-    .then(updateStatusText('<br>Reconnecting to device(s)...'), reportError('restartAndUpgrade'))
+    .then(updateStatusText('Reconnecting to device..'), reportError('restartAndUpgrade'))
     .then(exports.pauseForClose, reportError('updateStatusText'))
     .then(exports.waitForEnumeration, reportError('pauseForClose'))
     .then(exports.checkNewFirmware, reportError('waitForEnumeration'))

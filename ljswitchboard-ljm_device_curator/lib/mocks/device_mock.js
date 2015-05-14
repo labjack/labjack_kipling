@@ -41,8 +41,7 @@ function device() {
 		'DAC1': 0,
 	};
 
-	this.configureMockDevice = function(deviceInfo) {
-		var defered = q.defer();
+	var innerConfigureMockDevice = function(deviceInfo) {
 		// device attribute key mapping
 		var devAttrKeys = {
 			'serialNumber': 'serialNumber',
@@ -66,20 +65,24 @@ function device() {
 			if(devAttrKeys[key]) {
 				self.devAttr[devAttrKeys[key]] = deviceInfo[key];
 			} else if(info.type !== -1) {
-				if(typeof(deviceInfo[key].res) !== 'undefined') {
-					newData = data_parser.encodeValue(
-						key,
-						deviceInfo[key].res,
-						dt
-					);
-					self.responses[key] = newData;
+				if(typeof(deviceInfo[key]) !== 'undefined') {
+					if(typeof(deviceInfo[key].res) !== 'undefined') {
+						newData = data_parser.encodeValue(
+							key,
+							deviceInfo[key].res,
+							dt
+						);
+						self.responses[key] = newData;
+					} else {
+						newData = data_parser.encodeValue(
+							key,
+							deviceInfo[key],
+							dt
+						);
+						self.responses[key] = newData;
+					}
 				} else {
-					newData = data_parser.encodeValue(
-						key,
-						deviceInfo[key],
-						dt
-					);
-					self.responses[key] = newData;
+					// console.log('in innerConfigureMockDevice, key:', key, deviceInfo[key]);
 				}
 			}
 		});
@@ -100,6 +103,21 @@ function device() {
 		};
 		for(i = 0; i < 254/2; i++) {
 			ainRegistersToAdd.forEach(addAinRegister);
+		}
+	};
+	this.configureMockDeviceSync = function(deviceInfo) {
+		try {
+			innerConfigureMockDevice(deviceInfo);
+		} catch(err) {
+			console.error('error configuring mock device', err);
+		}
+	};
+	this.configureMockDevice = function(deviceInfo) {
+		var defered = q.defer();
+		try {
+			innerConfigureMockDevice(deviceInfo);
+		} catch(err) {
+			console.error('error configuring mock device', err);
 		}
 		defered.resolve();
 		return defered.promise;
@@ -170,6 +188,7 @@ function device() {
 				}
 			}
 		}
+
 		setImmediate(function() {
 			defered.resolve(data);
 		});
@@ -337,9 +356,15 @@ function device() {
 	};
 
 	this.rwMany = function(addresses, directions, numValues, values, onErr, onSucc) {
-		saveCall('rwMany', arguments);
+		// saveCall('rwMany', arguments);
 		var result = 0;
-		finishCall('rwMany', result).then(onSucc, onErr);
+		// finishCall('rwMany', result).then(onSucc, onErr);
+		if(typeof(setImmediate) !== 'undefined') {
+			// setImmediate(onSucc);
+			setTimeout(onSucc);
+		} else {
+			setTimeout(onSucc);
+		}
 	};
 
 	this.readUINT64 = function(type, onErr, onSucc) {

@@ -98,7 +98,15 @@ function device(useMockDevice) {
 	} else {
 		ljmDevice = new ljmDeviceReference();
 	}
-
+	this.configureMockDeviceSync = function(deviceInfo) {
+		if(self.isMockDevice) {
+			try {
+				ljmDevice.configureMockDeviceSync(deviceInfo);
+			} catch(err) {
+				// Error...
+			}
+		}
+	};
 	this.configureMockDevice = function(deviceInfo) {
 		var defered = q.defer();
 		if(self.isMockDevice) {
@@ -1646,7 +1654,7 @@ function device(useMockDevice) {
 				self.savedAttributes.handle = resultDevice.handle;
 				ljmDevice.deviceType = resultDevice.deviceType;
 				ljmDevice.isHandleValid = resultDevice.isHandleValid;
-				console.info('Updated savedAttributes');
+				// console.info('Updated savedAttributes');
 				defered.resolve(results);
 			}, function(err) {
 				defered.reject(err);

@@ -5,6 +5,7 @@
 var mock_device_test = require('./mock_device_test');
 var mock_device_defaults_cache_test = require('./mock_device_defaults_cache_test');
 var mock_device_attrs_test = require('./mock_device_attrs_test');
+var mock_device_upgrade_test = require('./mock_device_upgrade_test');
 
 // Require T7 related tests
 var t7_basic_test = require('./t7_basic_test');
@@ -34,12 +35,13 @@ var basic_watcher_test = require('./basic_watcher_test');
 // exports.mock_device_test = mock_device_test.tests;								// Passing
 // exports.mock_device_defaults_cache_test = mock_device_defaults_cache_test.tests;// Passing
 // exports.mock_device_attrs_test = mock_device_attrs_test.tests;
+exports.mock_device_upgrade_test = mock_device_upgrade_test.tests;
 
 // Perform T7 related tests
 // exports.t7_basic_test = t7_basic_test.tests;									// Passing
 // exports.t7_check_calibration_test = t7_check_calibration_test.tests;			// Passing
 // exports.t7_read_recovery_fw_version_test = t7_read_recovery_fw_version_test.tests;
-exports.t7_upgrade_test = t7_upgrade_test.tests;								// Passing
+// exports.t7_upgrade_test = t7_upgrade_test.tests;								// Passing
 // exports.t7_error_test = t7_error_test.tests;									// Passing
 // exports.t7_open_close_test = t7_open_close_test.tests;						// Passing
 // exports.t7_basic_stream_test = t7_basic_stream_test.tests;						// Passing
