@@ -42,11 +42,26 @@ deviceFound = false;
 var firmware_links = require('./firmware_links');
 var fws = firmware_links.firmwareLinks.T7;
 
-function createDeviceUpgrader(device, firmwareInfo) {
+var driver_const = require('ljswitchboard-ljm_driver_constants');
+var device_events = driver_const.device_curator_constants;
+var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
+var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;
+
+function createDeviceUpgrader(device, firmwareInfo, test) {
 	this.sn = device.savedAttributes.serialNumber;
 	this.device = device;
 	this.firmwareInfo = firmwareInfo;
 
+	this.deviceDisconnectEventReceived = false;
+	this.deviceReconnectEventReceived = false;
+	device.on(DEVICE_DISCONNECTED, function(data) {
+		console.log('  - Device disconnected', self.sn);
+		self.deviceDisconnectEventReceived = true;
+	});
+	device.on(DEVICE_RECONNECTED, function(data) {
+		console.log('  - Device reconnected', self.sn);
+		self.deviceReconnectEventReceived = true;
+	});
 	this.percentListener = function(percent) {
 		var defered = q.defer();
 		// console.log('Percent Listener', self.sn, percent);
@@ -67,6 +82,16 @@ function createDeviceUpgrader(device, firmwareInfo) {
 			self.stepListener
 		).then(function() {
 			console.log('  - Upgrade finished', self.sn);
+			// Make sure that the device disconnect & reconnect events get
+			// fired.
+			test.ok(
+				self.deviceDisconnectEventReceived,
+				'Disconnect event should have been detected'
+			);
+			test.ok(
+				self.deviceReconnectEventReceived,
+				'Reconnect event should have been detected'
+			);
 			defered.resolve();
 		}, function() {
 			console.log('  ! Upgrade failed', self.sn);
@@ -79,11 +104,11 @@ function createDeviceUpgrader(device, firmwareInfo) {
 	};
 	var self = this;
 }
-var upgradeDevices = function(devices, firmwareInfo) {
+var upgradeDevices = function(devices, firmwareInfo, test) {
 	var defered = q.defer();
 	var promises = [];
 	devices.forEach(function(device) {
-		var deviceUpgrader = new createDeviceUpgrader(device, firmwareInfo);
+		var deviceUpgrader = new createDeviceUpgrader(device, firmwareInfo, test);
 		promises.push(deviceUpgrader.startUpgrade());
 	});
 	q.allSettled(promises)
@@ -177,7 +202,7 @@ exports.tests = {
 			'version': fwVersionNum,
 		};
 		var devices = [deviceA, deviceB];
-		upgradeDevices(devices, firmwareInfo)
+		upgradeDevices(devices, firmwareInfo, test)
 		.then(function() {
 			console.log('  - Devices Upgraded');
 			test.done();
@@ -237,9 +262,7 @@ exports.tests = {
 	// 		}
 	// 	);
 	// },
-	'perform upgrade': function(test) {
-		test.done();
-	},
+	
 	'closeDevice (assigned serial number)': function(test) {
 		deviceA.close()
 		.then(function() {

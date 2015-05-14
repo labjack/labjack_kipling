@@ -1081,6 +1081,7 @@ exports.closeDevice = function(bundle) {
     var deferred = q.defer();
     var device = bundle.getDevice();
     var curatedDevice = bundle.getCuratedDevice();
+    curatedDevice.declareDeviceDisconnected();
     var attributes = curatedDevice.savedAttributes;
     if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
         console.log(

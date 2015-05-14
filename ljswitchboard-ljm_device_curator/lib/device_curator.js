@@ -10,7 +10,7 @@ var data_parser = require('ljswitchboard-data_parser');
 var ljm = require('labjack-nodejs');
 var ljmDeviceReference = ljm.getDevice();
 var modbusMap = ljm.modbusMap.getConstants();
-var driver_const = ljm.driver_const;
+var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 var lj_t7_upgrader = require('./labjack_t7_upgrade');
 var lj_t7_flash_operations = require('./t7_flash_operations');
@@ -195,6 +195,10 @@ function device(useMockDevice) {
 	var stopReconnectManager = function() {
 		clearTimeout(self.reconnectManagerTimeout);
 	};
+	this.declareDeviceDisconnected = function() {
+		self.savedAttributes.isConnected = false;
+		self.emit(DEVICE_DISCONNECTED, self.savedAttributes);
+	};
 	var declareDeviceReconnected = function() {
 		self.savedAttributes.isConnected = true;
 		self.emit(DEVICE_RECONNECTED, self.savedAttributes);
@@ -319,6 +323,7 @@ function device(useMockDevice) {
 			innerSaveDeviceError(funcName, err, data, rawError);
 		}
 	};
+
 	var captureDeviceError = function(funcName, err, data) {
 		// console.log('device_curator error detected', funcName, err);
 		var errCode;
@@ -330,8 +335,7 @@ function device(useMockDevice) {
 
 		if(errCode === 1239) {
 			if(self.savedAttributes.isConnected) {
-				self.savedAttributes.isConnected = false;
-				self.emit(DEVICE_DISCONNECTED, self.savedAttributes);
+				self.declareDeviceDisconnected();
 				setImmediate(reconnectManager);
 			}
 		}
@@ -1617,6 +1621,41 @@ function device(useMockDevice) {
 		// return self.retryFlashError('updateFirmware', firmwareFileLocation, percentListener, stepListener);
 		return self.internalUpdateFirmware(firmwareFileLocation, percentListener, stepListener);
 	};
+
+	this.finishFirmwareUpdate = function(results) {
+		var defered = q.defer();
+		var handleInitializeError = function() {
+			var innerDeferred = q.defer();
+			innerDeferred.reject();
+			return innerDeferred.promise;
+		};
+		var finishFunc = function() {
+			defered.resolve(results);
+		};
+		// Declare the device to be re-connected
+		declareDeviceReconnected();
+
+		self.restartConnectionManager();
+
+		// Wait for the device to initialize before updating the devices saved
+		// attributes.
+		self.waitForDeviceToInitialize()
+		.then(
+			self.updateSavedAttributes,
+			handleInitializeError
+		).then(finishFunc, finishFunc);
+		return defered.promise;
+	};
+	this.restartConnectionManager = function() {
+		self.allowReconnectManager = true;
+		self.allowConnectionManager = true;
+		startConnectionManager();
+	};
+	this.prepareForUpgrade = function() {
+		self.haltBackgroundOperations();
+		self.allowReconnectManager = false;
+		self.allowConnectionManager = false;
+	};
 	this.internalUpdateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
 		var dt = self.savedAttributes.deviceType;
 		var percentListenerObj;
@@ -1642,6 +1681,7 @@ function device(useMockDevice) {
 				percentListenerObj,
 				stepListenerObj
 			);
+			self.prepareForUpgrade();
 			lj_t7_upgrader.updateFirmware(
 				self,
 				ljmDevice,
@@ -1655,8 +1695,11 @@ function device(useMockDevice) {
 				ljmDevice.deviceType = resultDevice.deviceType;
 				ljmDevice.isHandleValid = resultDevice.isHandleValid;
 				// console.info('Updated savedAttributes');
-				defered.resolve(results);
+				// defered.resolve(results);
+				self.finishFirmwareUpdate(results)
+				.then(defered.resolve);
 			}, function(err) {
+				self.restartConnectionManager();
 				defered.reject(err);
 			});
 		} else {

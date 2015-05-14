@@ -23,6 +23,10 @@ var performTests = true;
 
 var firmware_links = require('./firmware_links');
 var fws = firmware_links.firmwareLinks.T7;
+var driver_const = require('ljswitchboard-ljm_driver_constants');
+var device_events = driver_const.device_curator_constants;
+var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
+var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;
 
 var device_tests = {
 	'setUp': function(callback) {
@@ -97,6 +101,17 @@ var device_tests = {
 			defered.resolve();
 			return defered.promise;
 		};
+		var deviceDisconnectEventReceived = false;
+		var deviceReconnectEventReceived = false;
+		device.on(DEVICE_DISCONNECTED, function(data) {
+			console.log('  - Device disconnected');
+			deviceDisconnectEventReceived = true;
+		});
+		device.on(DEVICE_RECONNECTED, function(data) {
+			console.log('  - Device reconnected');
+			deviceReconnectEventReceived = true;
+		});
+
 		device.updateFirmware(fwURL, percentListener, stepListener)
 		.then(
 			function(res) {
@@ -111,6 +126,11 @@ var device_tests = {
 				// 	ljmDevice.deviceType,
 				// 	ljmDevice.isHandleValid
 				// );
+
+				// Make sure that the device disconnect & reconnect events get
+				// fired.
+				test.ok(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
+				test.ok(deviceReconnectEventReceived, 'Reconnect event should have been detected');
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
 					test.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
