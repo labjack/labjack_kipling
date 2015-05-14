@@ -532,7 +532,7 @@ function labjackVersionManager() {
         });
     };
     this.reportError = function(data) {
-        self.infoCache.errors = true;
+        self.infoCache.isError = true;
         self.infoCache.errors.push(data);
         self.emit(eventList.WARNING, {
             'type': 'error',
