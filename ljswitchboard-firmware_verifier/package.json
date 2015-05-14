@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-firmware_verifier",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A tool to verify and extract information saved in LabJack's firmware .bin files.",
   "author": {
     "name": "Chris Johnson",
