@@ -46,32 +46,30 @@ function createDeviceUpgrader(device, firmwareInfo) {
 	this.sn = device.savedAttributes.serialNumber;
 	this.device = device;
 	this.firmwareInfo = firmwareInfo;
-	console.log('device data', this.sn);
 
 	this.percentListener = function(percent) {
 		var defered = q.defer();
-		console.log('Percent Listener', self.sn, percent);
+		// console.log('Percent Listener', self.sn, percent);
 		defered.resolve();
 		return defered.promise;
 	};
 	this.stepListener = function(step) {
 		var defered = q.defer();
-		console.log('Step Listener', self.sn, step);
+		console.log('  - Current Step:', self.sn, step);
 		defered.resolve();
 		return defered.promise;
 	};
 	this.upgradeDevice = function() {
 		var defered = q.defer();
-		console.log('Available keys', Object.keys(self.device));
 		self.device.updateFirmware(
 			self.firmwareInfo.path,
 			self.percentListener,
 			self.stepListener
 		).then(function() {
-			console.log('Upgrade finished', self.sn);
+			console.log('  - Upgrade finished', self.sn);
 			defered.resolve();
 		}, function() {
-			console.log('Upgrade failed', self.sn);
+			console.log('  ! Upgrade failed', self.sn);
 			defered.resolve();
 		});
 		return defered.promise;
@@ -181,10 +179,10 @@ exports.tests = {
 		var devices = [deviceA, deviceB];
 		upgradeDevices(devices, firmwareInfo)
 		.then(function() {
-			console.log('devices upgraded');
+			console.log('  - Devices Upgraded');
 			test.done();
 		}, function() {
-			console.log('devices failed to upgrade');
+			console.log('  ! Devices failed to upgrade');
 			test.ok(false);
 			test.done();
 		});
