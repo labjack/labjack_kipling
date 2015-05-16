@@ -499,8 +499,11 @@ exports.tests = {
 	'check undefined register - encode': function(test) {
 		var cmds = [
 			{'reg': 'HARDWARE_INSTALLED', 'val': 15, 'res': 15},
+			{'reg': 'HARDWARE_INSTALLED', 'val': '15', 'res': 15},
 			{'reg': 'DEVICE_NAME_DEFAULT', 'val': '1', 'res': '1'},
+			{'reg': 'DEVICE_NAME_DEFAULT', 'val': 1, 'res': '1'},
 			{'reg': 'DAC0', 'val': '1', 'res': 1},
+			{'reg': 'DAC0', 'val': 1, 'res': 1},
 		];
 		var results = cmds.map(function(cmd) {
 			return data_parser.encodeValue(cmd.reg, cmd.val);
