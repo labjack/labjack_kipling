@@ -165,6 +165,9 @@ var startCoreApp = function() {
 		// Render the module chrome window
 		.then(MODULE_CHROME.loadModuleChrome)
 
+		// Initialize the file browser utility
+		.then(FILE_BROWSER.initialize)
+
 		// Hide the splash screen & core windows & display the kipling window
 		.then(showKiplingWindow)
 

@@ -117,3 +117,7 @@ Styling for the contents/body data
     display:inline-block;
     float:right;
 }
+
+.module-chrome-task-view {
+    display:none;
+}

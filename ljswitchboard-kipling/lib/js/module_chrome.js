@@ -543,6 +543,9 @@ function createModuleChrome() {
 	var saveDeviceListingData = function(deviceInfoArray) {
 		var defered = q.defer();
 		console.log('Updated Device Listing', deviceInfoArray);
+
+		self.emit(self.eventList.DEVICE_LIST_UPDATED, deviceInfoArray);
+
 		self.cachedDeviceListing = deviceInfoArray;
 		defered.resolve();
 		return defered.promise;

@@ -25,28 +25,50 @@ var le = function(err) {
 };
 
 var CLEAR_CACHES = function() {
+	var debugClearing = false;
 	try {
 		if(MODULE_CHROME) {
-			console.log('Clearing MODULE_CHROME cache');
+			if(debugClearing) {
+				console.log('Clearing MODULE_CHROME cache');
+			}
 			MODULE_CHROME.clearTemplateCache();
 		} else {
-			console.log('Not clearing MODULE_CHROME template cache');
+			if(debugClearing) {
+				console.log('Not clearing MODULE_CHROME template cache');
+			}
 		}
 
 		if(module_manager) {
-			console.log('Clearing module_manager cache');
+			if(debugClearing) {
+				console.log('Clearing module_manager cache');
+			}
 			module_manager.clearFileCache();
 		} else {
-			console.log('Not clearing module_manager cache');
+			if(debugClearing) {
+				console.log('Not clearing module_manager cache');
+			}
 		}
 
 		if(fs_facade) {
-			console.log('Clearing fs_facade cache');
+			if(debugClearing) {
+				console.log('Clearing fs_facade cache');
+			}
 			fs_facade.clearCache();
 		} else {
-			console.log('Not clearing fs_facade cache');
+			if(debugClearing) {
+				console.log('Not clearing fs_facade cache');
+			}
 		}
 	} catch(err) {
-		console.log('Caches did not get cleared');
+		if(debugClearing) {
+			console.log('Caches did not get cleared');
+		}
 	}
-}
+};
+
+var ENABLE_TASK_DEBUGGING = function() {
+	TASK_LOADER.tasks.update_manager.vm.debug = true;
+};
+var DISABLE_TASK_DEBUGGING = function() {
+	TASK_LOADER.tasks.update_manager.vm.debug = false;
+};

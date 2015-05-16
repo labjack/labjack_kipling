@@ -1,0 +1,11 @@
+<div id="{{taskData.name}}_task_view" class="module-chrome-task-view">
+	{{!-- Load CSS Files --}}
+	{{#each taskData.css}}
+	<style>
+		{{{fileData}}}
+	</style>
+	{{/each}}
+
+	{{!-- Load Task's view.html --}}
+	{{{compiledViewData}}}
+</div>

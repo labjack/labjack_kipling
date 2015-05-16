@@ -33,6 +33,8 @@ function createTaskLoader() {
 		STOPPED_TASK: 'STOPPED_TASK',
 		STOPPED_TASKS: 'STOPPED_TASKS',
 		LOADING_TASK: 'LOADING_TASK',
+		STARTED_TASK: 'STARTED_TASK',
+		STARTED_TASKS: 'STARTED_TASKS',
 	};
 	this.eventList = eventList;
 
@@ -43,6 +45,8 @@ function createTaskLoader() {
 	var TASK_CREATOR_TEMPLATE_STR = 'create_task_{{name}}';
 	var TASK_CREATOR_TEMPLATE = handlebars.compile(TASK_CREATOR_TEMPLATE_STR);
 
+	var TASK_VIEW_TEMPLATE_FILE_NAME = 'task_view.html';
+	var TASK_VIEW_DESTINATION_ID = 'module-chrome-loaded-task-views';
 
 	this.cachedTaskLoaderDestination = undefined;
 
@@ -67,7 +71,6 @@ function createTaskLoader() {
 
 	var loadTaskData = function(task) {
 		var defered = q.defer();
-		// console.log('Loading Task Data', task);
 		module_manager.loadModuleData(task.task)
 		.then(function(taskData) {
 			task.taskData = taskData;
@@ -75,6 +78,102 @@ function createTaskLoader() {
 		});
 		
 		return defered.promise;
+	};
+	var checkForViewData = function(task) {
+		var defered = q.defer();
+		// console.log('in checkForViewData', task, task.task.name);
+		var hasViewData = false;
+
+		// Search the current task for the "hasView" attribute and check to see
+		// if it is true.  If it is then it should have a view.html and style.css
+		// file that needs to be loaded.
+
+		// Search the current task's loaded data for any cssFiles or htmlFiles
+		// that should be loaded.
+
+		var viewIndex = -1;
+		var styleIndex = -1;
+
+		if(typeof(task.task.data.hasView) !== 'undefined') {
+			if(task.task.data.hasView) {
+				if(task.task.htmlFiles) {
+					viewIndex = task.task.htmlFiles.indexOf('view.html');
+				}
+				if(task.task.cssFiles) {
+					styleIndex = task.task.cssFiles.indexOf('style.css');
+				}
+				if((viewIndex > -1) && (styleIndex > -1)) {
+					hasViewData = true;
+				}
+			}
+		}
+		if(hasViewData) {
+			task.hasViewData = true;
+			task.viewDataIndices = {
+				'view': viewIndex,
+				'style': styleIndex,
+			};
+		}
+
+		defered.resolve(task);
+		return defered.promise;
+	};
+	var renderViewData = function(task) {
+		var defered = q.defer();
+		if(task.hasViewData) {
+			var taskViewData = task.taskData.htmlFiles.view;
+			var viewTemplate = handlebars.compile(taskViewData);
+			try {
+				task.compiledViewData = viewTemplate(task.taskData);
+			} catch(err) {
+				console.error('Error Compiling Task view.html', err);
+			}
+		}
+		defered.resolve(task);
+		return defered.promise;
+	};
+	var constructTaskView = function(task) {
+		var defered = q.defer();
+		if(task.hasViewData) {
+			compileTemplate(TASK_VIEW_TEMPLATE_FILE_NAME, task)
+			.then(function(compiledTask) {
+				// Save the compiled data
+				task.constructedTaskHTMLData = compiledTask;
+				defered.resolve(task);
+			});
+		} else {
+			defered.resolve(task);
+		}
+		return defered.promise;
+	};
+	var createAndLoadHTMLElement = function(task) {
+		var defered = q.defer();
+		try {
+			// Create the new element
+			var newElement = $(task.constructedTaskHTMLData);
+
+			// Insert newly created element into the DOM
+			var taskViewHolder = $('#' + TASK_VIEW_DESTINATION_ID);
+			taskViewHolder.append(newElement);
+			
+			// Wait for the task's view to be ready & resolve.
+			var taskID = '#' + task.task.name + '_task_view';
+			$(taskID).ready(function() {
+				defered.resolve(task);
+			});
+		} catch(err) {
+			console.error('Error in createAndLoadHTMLElement, task_loader.js', err);
+		}
+		return defered.promise;
+	};
+	var loadViewData = function(task) {
+		if(task.hasViewData) {
+			return createAndLoadHTMLElement(task);
+		} else {
+			var defered = q.defer();
+			defered.resolve(task);
+			return defered.promise;
+		}
 	};
 	var constructTaskData = function(task) {
 		var defered = q.defer();
@@ -114,6 +213,7 @@ function createTaskLoader() {
 		try {
 			var taskName = task.task.name;
 			var creatorName = task.taskCreatorName;
+			console.log('Saving Task Reference', taskName);
 			self.tasks[taskName] = new window[creatorName](task.taskData);
 			defered.resolve(task);
 		} catch(err) {
@@ -144,9 +244,17 @@ function createTaskLoader() {
 			'taskCreatorName': '',
 			'destination': self.getTaskLoaderDestination(),
 			'element': undefined,
+			'hasViewData': false,
+			'viewDataIndices': undefined,
+			'compiledViewData': '',
+			'constructedTaskHTMLData': ''
 		};
 		// module_manager.loadModuleDataByName(testTaskName)
 		loadTaskData(taskData)
+		.then(checkForViewData)
+		.then(renderViewData)
+		.then(constructTaskView)
+		.then(loadViewData)
 		.then(constructTaskData)
 		.then(loadTaskIntoPage)
 		.then(executeLoadedTask)
@@ -164,7 +272,52 @@ function createTaskLoader() {
 		});
 		return defered.promise;
 	};
-	
+	var internalStartTask = function(taskName) {
+		var defered = q.defer();
+		
+		var task;
+		if(self.tasks[taskName]) {
+			task = self.tasks[taskName];
+			if(task.startTask) {
+				console.log('Starting Task');
+				try {
+					task.startTask()
+					.then(defered.resolve, defered.reject);
+				} catch(err) {
+					console.error('Error Starting task', err);
+					defered.resolve();
+				}
+			} else {
+				console.log('task does not have a startTask property', taskName);
+				defered.resolve();
+			}
+		} else {
+			defered.resolve();
+		}
+		return defered.promise;
+	};
+	this.startTask = function(taskName) {
+		var defered = q.defer();
+		
+		internalStartTask(taskName)
+		.then(function() {
+			self.emit(eventList.STARTED_TASK, taskName);
+			defered.resolve();
+		});
+		return defered.promise;
+	};
+	this.startTasks = function(tasks) {
+		var defered = q.defer();
+		var keys = Object.keys(self.tasks);
+		var promises = keys.map(self.startTask);
+
+		q.allSettled(promises)
+		.then(function() {
+			self.emit(eventList.STARTED_TASKS);
+			defered.resolve(tasks);
+		});
+		return defered.promise;
+	};
 	var internalStopTask = function(taskName) {
 		var defered = q.defer();
 		
@@ -234,6 +387,7 @@ function createTaskLoader() {
 		.then(clearTasksFromDOM)
 		.then(module_manager.getTaskList)
 		.then(internalLoadTasks)
+		.then(self.startTasks)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
