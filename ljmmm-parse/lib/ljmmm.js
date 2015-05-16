@@ -372,7 +372,7 @@ exports.expandLJMMMEntriesSync = function(entries, onError, onSuccess)
  *      of the provided entry as an LJMMM field, enumerating and creating the
  *      appropriate entries when interpreting that field.
 **/
-exports.expandLJMMMEntriesSync = function(entries, onError, onSuccess)
+exports.expandPrimaryLJMMMEntriesSync = function(entries, onError, onSuccess)
 {
     var retEntries = [];
 

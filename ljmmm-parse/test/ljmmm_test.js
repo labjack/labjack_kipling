@@ -312,6 +312,25 @@ exports.testExpandLJMMMEntriesSync = function(test)
     test.deepEqual(result, expectedResult);
     test.done();
 };
+exports.testExpandLJMMMEntriesSync = function(test)
+{
+    var testInput = [
+        {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'},
+        {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE', altnames:['Again#(0:1)']}
+    ];
+    var expectedResult = [
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name},
+        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name},
+        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name},
+        {name: 'Again0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name},
+        {name: 'Again1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name},
+    ];
+
+    var result = ljmmm.expandLJMMMEntriesSync(testInput);
+    test.deepEqual(result, expectedResult);
+    test.done();
+};
 
 /**
  * Test expanding many register entries synchronously.
@@ -332,7 +351,7 @@ exports.testExpandPrimaryLJMMMEntriesSync = function(test)
         {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, altnames: testInput[1].altnames}
     ];
 
-    var result = ljmmm.expandLJMMMEntriesSync(testInput);
+    var result = ljmmm.expandPrimaryLJMMMEntriesSync(testInput);
     test.deepEqual(result, expectedResult);
     test.done();
 };
