@@ -44,6 +44,8 @@
     "ljswitchboard-device_scanner": "0.0.x",
     "ljswitchboard-data_parser": "0.0.x",
     "ljswitchboard-modbus_map": "0.0.x",
+    "ljswitchboard-firmware_verifier": "0.0.x",
+    "ljswitchboard-version_manager": "0.0.x",
     "json-parser": "0.2.4",
     "ljmmm-parse": "0.x"
   },

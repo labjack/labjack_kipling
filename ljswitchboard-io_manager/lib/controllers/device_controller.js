@@ -223,6 +223,33 @@ function createDeviceController(io_interface) {
 		});
 		return callFunc('selectDevice', [deviceSerialNumber]);
 	};
+	this.selectDevices = function(deviceSerialNumbers) {
+		var selectType = 'isSelected-CheckBox';
+		var deviceKeys = Object.keys(self.devices);
+
+		var defered = q.defer();
+		var promises = [];
+
+		console.log('in selectDevices', deviceSerialNumbers);
+		// Update whether the device is selected or not. (locally)
+		deviceKeys.forEach(function(deviceKey) {
+			var attributes = self.devices[deviceKey].savedAttributes;
+			var serialNumber = attributes.serialNumber;
+			var serialNumberStr = serialNumber.toString();
+			var newVal;
+			console.log('in selectDevices updating sn', serialNumber, deviceSerialNumbers.indexOf(serialNumberStr));
+			if(deviceSerialNumbers.indexOf(serialNumberStr) >= 0 ) {
+				newVal = true;
+			} else {
+				newVal = false;
+			}
+			self.devices[deviceKey].savedAttributes[selectType] = newVal;
+		});
+
+		// Update whether the device is selected or not (in the sub-process).
+		return callFunc('selectDevices', [deviceSerialNumbers]);
+	};
+
 
 	/**
 	 * Get first found active device.
@@ -271,7 +298,7 @@ function createDeviceController(io_interface) {
 		}
 		filters['isSelected-CheckBox'] = true;
 		self.getDeviceListing([filters])
-		.then(getDeviceObject)
+		.then(getDeviceObjects)
 		.then(function(res) {
 			if(res.length > 0) {
 				defered.resolve(res);

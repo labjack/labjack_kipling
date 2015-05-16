@@ -485,6 +485,8 @@ function createDeviceKeeper(io_delegator, link) {
 				'isSelected-CheckBox',
 				'device_comm_key',
 				'deviceErrors',
+				'deviceType',
+				'deviceTypeName'
 			];
 			if(requestdAttributes) {
 				if(Array.isArray(requestdAttributes)) {
@@ -536,6 +538,9 @@ function createDeviceKeeper(io_delegator, link) {
 			'radio': 'Radio',
 			'Radio': 'Radio',
 			'RADIO': 'Radio',
+			'CheckBox': 'CheckBox',
+			'checkbox': 'CheckBox',
+			'CHECKBOX': 'CheckBox'
 		}[type];
 		if(selectedType) {
 
@@ -561,6 +566,20 @@ function createDeviceKeeper(io_delegator, link) {
 		});
 
 		defered.resolve();
+		return defered.promise;
+	};
+
+	this.selectDevices = function(deviceSerialNumbers) {
+		var defered = q.defer();
+
+		var promises = deviceSerialNumbers.map(function(serialNumber) {
+			return self.selectDevice(serialNumber, 'CheckBox');
+		});
+
+		q.allSettled(promises)
+		.then(function() {
+			defered.resolve();
+		});
 		return defered.promise;
 	};
 	

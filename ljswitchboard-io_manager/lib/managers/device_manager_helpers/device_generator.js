@@ -104,7 +104,7 @@ function newDevice(newProcess, mockDevice, mockDeviceConfig, sendFunc) {
 		};
 		var defered = q.defer();
 
-		if(self.isMockDevice) {
+		if(self.isMockDevice && false) {
 			percentListener(100);
 			stepListener('finished');
 			setTimeout(function() {
