@@ -6,8 +6,9 @@
                 <tr>
                     <th><p style="width:46px">select</p></th>
                     <th><p>device type</p></th>
-                    <th><p>connection type</p></th>
                     <th><p>serial number</p></th>
+                    <th><p>connection type</p></th>
+                    <th><p>firmware version</p></th>
                     <th><p>name</p></th>
                 <tr>
             </thead>--}}
@@ -15,19 +16,30 @@
                 {{#devices}}
                 <tr class="SERIAL_NUMBER_{{serialNumber}} {{#unless isConnected}}text-error{{/unless}}">
                     <td class="device-selector-table-device-selector">
+                        {{#if ../frameworkType.singleDevice}}
                         <label class="radio" style="display:none">
                             <input name="selected-device" class="device-selection-radio" id="{{serialNumber}}-selector" type="radio" value="{{serialNumber}}">
                             <span class="metro-radio" title="Select {{productType}}, {{serialNumber}}"></span>
                         </label>
+                        {{/if}}
+                        {{#if ../frameworkType.multipleDevices}}
+                        <label class="checkbox" style="display:none">
+                            <input name="selected-device" class="device-selection-checkbox" id="{{serialNumber}}-selector" type="checkbox" value="{{serialNumber}}">
+                            <span class="metro-checkbox" title="Select {{productType}}, {{serialNumber}}"></span>
+                        </label>
+                        {{/if}}
                     </td>
                     <td class="device-selector-table-device-type">
                         <div class="hide-overflow-text" title="Product Type">{{productType}}</div>
                     </td>
+                    <td class="device-selector-table-serial-number">
+                        <div class="hide-overflow-text" title="Serial Number (SERIAL_NUMBER)">{{serialNumber}}</div>
+                    </td>
                     <td class="device-selector-table-connection-type">
                         <div class="hide-overflow-text" title="Connection Type">{{connectionTypeName}}</div>
                     </td>
-                    <td class="device-selector-table-serial-number">
-                        <div class="hide-overflow-text" title="Serial Number (SERIAL_NUMBER)">{{serialNumber}}</div>
+                    <td class="device-selector-table-firmware-version">
+                        <div class="hide-overflow-text device-firmware-version-holder" title="Firmware Version (FIRMWARE_VERSION)">{{FIRMWARE_VERSION}}</div>
                     </td>
                     <td class="device-selector-table-device-name">
                         <div class="hide-overflow-text device-name-holder" title="Device Name (DEVICE_NAME_DEFAULT)">{{DEVICE_NAME_DEFAULT}}</div>

@@ -1,0 +1,33 @@
+
+.extra-padding {
+	padding-bottom:10px;
+}
+
+.file-input-box{
+	width:350px;
+}
+
+.file-info.dl-horizontal dt{
+	width:100px;
+}
+.file-info.dl-horizontal dd{
+	margin-left: 120px;
+}
+
+@media (max-width: 767px) {
+	.file-info.dl-horizontal dd {
+	  margin-left: 0;
+	}
+}
+
+.upgrade-status-hoder {
+	display:none;
+}
+
+.upgrade-status ul{
+	margin-bottom:0px;
+}
+
+.lj-link-holder {
+	cursor:pointer;
+}

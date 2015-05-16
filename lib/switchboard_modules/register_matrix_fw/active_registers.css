@@ -1,0 +1,93 @@
+
+.value-edit-object {
+    display: inline-block;
+}
+.value-editor-button {
+    color: black;
+    /*background-color: #CCCCCC;*/
+    /*padding: 7px 5px 8px 5px;*/
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.value-editor-button:hover {
+    /*background-color: #AAAAAA;*/
+}
+.write-reg-value-input {
+    margin-top: -7px;
+    margin-left: 1px;
+}
+.value-edit-controls {
+    /*display: none;*/
+    margin-top: -7px;
+    margin-bottom: -7px;
+}
+
+.value-edit-controls .icon {
+    padding: 11px 8px 7px 5px;
+    background-color: #CCCCCC;
+}
+.value-editor-button .icon:hover {
+    background-color: #AAAAAA;
+}
+
+.close-value-editor-button {
+    margin-bottom: 1px;
+    width: 20px;
+}
+
+.write-value-editor-button {
+    margin-top: 1px;
+}
+.write-controls-holder {
+    height: 24px;
+    /*width: 70px;*/
+    font-size: 22px;
+    margin-left: -2px;
+}
+
+.write-controls-holder .write-confirm-msg {
+    float: right;
+    height: 30px;
+}
+.write-reg-value-input {
+    margin-bottom: 0px !important;
+    width: 120px;
+    height:30px;
+}
+.write-confirm-msg {
+    /*margin-top: -4px;*/
+    display:none;
+}
+
+.active-register-info .read-mode .value-edit-controls {
+	display:none;
+}
+.active-register-info .write-mode .value-display {
+	display:none;
+}
+
+.active-register-info .direction-control-disabled .edit-register-button {
+    display:none;
+}
+.active-register-info .direction-control-disabled .close-value-editor-button {
+    display:none;
+}
+
+.active-register-info .edit-register-button {
+    /*float:right;*/
+    /*width: 10px;*/
+    /*height: 10px;*/
+    background-color: #CCCCCC;
+    padding: 7px 5px 8px 5px;
+    cursor: pointer;
+    margin-top: -5px;
+    margin-bottom: -5px;
+}
+.active-register-info .edit-register-button:hover {
+    background-color: #AAAAAA;
+}
+
+.direction-control-disabled .register-value {
+    padding-left: 28px;
+}

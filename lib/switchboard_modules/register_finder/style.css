@@ -1,15 +1,3 @@
-
-/*
- *  ----------------- Styling for the active registers -------------------------
-**/
-.active-register-details {
-	display:none;
-}
-
-
-/*
- * ----------------- Styling for the modbus map --------------------------------
-**/
 .ct-select-control {
 	cursor:pointer;
 }
@@ -41,20 +29,8 @@ div.dataTables_info {
 .register-type-header {
 	width: 65px;
 }
-#modbus_map .register-name-header {
-	text-overflow: ellipsis;
-	overflow: hidden;
-	max-width: 200px;
-}
-div.dataTables_paginate {
-	display: inline;
-}
 .ct-address-header {
   width: 65px;
-}
-
-#modbus_map .select-button {
-	text-align: center;
 }
 
 th.ct-select-control.sorting_disabled {
@@ -131,6 +107,9 @@ th.details-control.sorting_disabled {
 /*#modbus_map .primary_row.hidden-data .register-name-header {
 	color:blue;
 }*/
+#modbus_map .primary_row.hidden-data:hover .show-details-button{
+  /*color: blue;*/
+}
 #modbus_map .primary_row:hover .select-button {
 	background-color:#ccc;
 }
@@ -139,9 +118,6 @@ th.details-control.sorting_disabled {
 }
 #modbus_map .primary_row.hidden-data:hover .select-button {
 	background-color:inherit;
-}
-#modbus_map .primary_row.hidden-data:hover .show-details-button{
-  /*color: blue;*/
 }
 
 
@@ -165,48 +141,3 @@ th.details-control.sorting_disabled {
 	color: #5bb75b; /* Light green */
 	/* color:#468847; Dark Green */
 }
-
-
-/* Define styling for the active-registers holder */
-#active-registers-holder {
-	padding-left:5px;
-	padding-right:15px;
-}
-#active-registers-holder .active-register-info .hide-details-button {
-	display:none;
-}
-#active-registers-holder .active-register-info .visible-details .hide-details-button {
-	display:inline;
-}
-#active-registers-holder .active-register-info .visible-details .show-details-button {
-	display:none;
-}
-
-#active-registers-holder .details-control {
-	width: 35px;
-}
-#active-registers-holder .remove-register {
-	width: 72px;
-	text-align: center;
-	cursor:pointer;
-}
-#active-registers-holder .register-name {
-	text-overflow: ellipsis;
-	overflow: hidden;
-	max-width: 200px;
-}
-#active-registers-holder .register-value-obj {
-	width:235px;
-}
-
-
-#active-registers-holder #module_instructions {
-	display:none;
-}
-#active-registers-holder.no-registers #module_instructions {
-	display:inline;
-}
-#active-registers-holder.no-registers #active_registers {
-	display:none;
-}
-

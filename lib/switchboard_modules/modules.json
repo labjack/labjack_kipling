@@ -56,7 +56,7 @@
         "active": true
     }, {
         "name": "register_matrix",
-        "active": true
+        "active": false
     }, {
         "name": "lua_script_debugger",
         "active": true
@@ -65,13 +65,26 @@
         "active": true
     }, {
         "name": "reset",
+        "active": false
+    }, {
+        "name": "global_config_fw",
         "active": true
     }, {
         "name": "set_defaults",
+        "active": false
+    }, {
+        "name": "powerup_defaults_fw",
         "active": true
     }, {
         "name": "device_updater",
+        "active": false
+    }, {
+        "name": "device_updater_fw",
         "active": true
+    }, {
+        "name": "tab_notification_manager",
+        "active": true,
+        "isTask": true
     }, {
         "name": "update_manager",
         "active": true,
@@ -81,8 +94,8 @@
         "active": true,
         "isTask": true
     }, {
-        "name": "tab_notification_manager",
-        "active": true,
+        "name": "register_finder",
+        "active": false,
         "isTask": true
     }, {
         "name": "task_data_output_buffer",

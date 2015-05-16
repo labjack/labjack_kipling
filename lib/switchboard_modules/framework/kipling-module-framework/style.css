@@ -99,20 +99,40 @@
     margin-bottom: 0px;
     line-height: 20px;
 }*/
-#single-device-framework-obj #device-selector-table .radio {
+/*#single-device-framework-obj #device-selector-table .radio {
+label.radio {
     margin-top: -8px;
     margin-bottom: 0;
 }
 
 #single-device-framework-obj #device-selector-table .metro-radio::before {
+span.metro-radio::before {
     top: 4px;
     left: 2px;
+}*/
+#single-device-framework-obj #device-selector-table .checkbox {
+    margin-top: -8px;
+    margin-bottom: 0;
+}
+
+#single-device-framework-obj #device-selector-table .metro-checkbox::before {
+    top: 4px;
+    left: 2px;
+}
+#single-device-framework-obj #device-selector-table .metro-checkbox::after {
+  top: 0px;
+  left: 0px;
+  width: 22px;
+  height: 22px;
+  padding-left: 2px;
+  font-size: 14px;
 }
 
 
 #single-device-framework-obj #device-selector-table .hide-overflow-text {
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    text-overflow: ellipsis;/*
+    white-space: nowrap;*/
+    line-height:14px;
 }
 #device-selector-table {
     margin-bottom:0;
@@ -121,13 +141,16 @@
     width:52px;
 }
 .device-selector-table-device-type {
-    width:80px;
+    width:85px;
 }
 .device-selector-table-connection-type {
     width:80px;
 }
 .device-selector-table-serial-number {
     width:100px;
+}
+.device-selector-table-firmware-version {
+    width:70px;
 }
 .device-selector-table-status {
     width:80px;

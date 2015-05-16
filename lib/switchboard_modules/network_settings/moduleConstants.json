@@ -34,7 +34,9 @@
         {"name":"WIFI_DHCP_ENABLE_DEFAULT","title":"","heading":"","id":"","type":"status"},
         {"name":"WIFI_RSSI","title":"","heading":"","id":"","type":"rssi"},
         {"name":"WIFI_SSID","title":"","heading":"","id":"","type":"networkName"},
-        {"name":"WIFI_SSID_DEFAULT","title":"","heading":"","id":"","type":"networkName","isConfig":true},
-        {"name":"WIFI_PASSWORD_DEFAULT","title":"","heading":"","id":"","type":"password","isConfig":true}
+        {"name":"WIFI_SSID_DEFAULT","title":"","heading":"","id":"","type":"networkName","isConfig":true}
+    ],
+    "extraRegs": [
+        {"name":"WIFI_PASSWORD_DEFAULT","title":"","heading":"","id":"","type":"password","isConfig":false}
     ]
 }

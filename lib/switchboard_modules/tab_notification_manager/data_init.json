@@ -1,3 +1,4 @@
 {
-	"settings": ["message"]
+	"settings": ["message"],
+	"initialMessages": {}
 }

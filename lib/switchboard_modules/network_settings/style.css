@@ -53,9 +53,9 @@
 }
 .networkSetting .alert {
 	margin-bottom: -2px;
-	padding: 0px;
-	width: 15px;
-	left:15px;
+	padding: 3px;
+	width: 21px;
+	left:-6px;
 	display:none;
 }
 .configSettingsDiv .dhcpAlert {
@@ -98,3 +98,7 @@
 	padding: 5px;*/
 }
 
+.win-command.win-command-small .win-commandicon {
+  width: 28px;
+  height: 28px;
+}

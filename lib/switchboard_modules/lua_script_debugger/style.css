@@ -1,6 +1,5 @@
 #lua-script-window-views {
 	width: 100%;
-	height: 500px;
 	margin-right:5px;
 }
 #lua-code-editor { 
@@ -21,7 +20,7 @@
 	left:5px;
 }
 #lua-script-module-body {
-	margin-top: -10px;
+	margin-top: -0px;
 	margin-left:0px;
 }
 /* Left portion of module */
@@ -29,8 +28,15 @@
 	width:20%;
 	max-width:141px;
 }
+.generic-module-info {
+	display: inline-block;
+	width: 100%;
+}
 #lua-script-device-status-icons {
 	float: right;
+}
+#lua-script-active-script-info {
+	float:left;
 }
 .info-visibe {
 	display:inherit;

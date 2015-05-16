@@ -1,6 +1,9 @@
 .ain-config-options {
     display:none;
 }
+.uninitialized .analog-input-graph {
+	height: 0;
+}
 .channelNamesList {
 	list-style-type: none;
 }
@@ -40,7 +43,7 @@
 	margin-bottom:5px;
 }
 .ainEFConfigA-LINK {
-	width: 60px;
+	width: 70px;
 }
 .ainEFConfigB-LINK {
 	width: 205px;

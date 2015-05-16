@@ -1,0 +1,21 @@
+{
+    "name": "register_finder",
+    "humanName": "Register Finder",
+    "version": "0.0.1",
+    "cssFiles": [
+    	"style.css"
+    ],
+    "jsFiles": [
+    	"register_finder.js",
+    	"data_formatter.js",
+        "data_table_helper.js"
+    ],
+    "htmlFiles": [
+    	"view.html",
+        "register_details.html",
+        "child_table.html"
+    ],
+    "hasView": true,
+    "startTime": "auto",
+    "description": "A common tool to allow users to search for and select registers."
+}

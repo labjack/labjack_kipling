@@ -1,0 +1,31 @@
+<div>
+	<div>
+		<dl class="upgrade-info dl-horizontal">
+			<dt>Target Version</dt>
+			<dd>{{firmwareInfo.version}}</dd>
+			<dt>Number of Devices</dt>
+			<dd>{{devices.length}}</dd>
+		</dl>
+	</div>
+	<div>
+		{{#each devices}}
+		{{#with savedAttributes}}
+		<div id="upgrade_status_{{serialNumber}}"class="upgrade-status">
+			<div><strong>Device Info:</strong></div>
+			<ul class="unstyled">
+				<li>Type: {{productType}}</li>
+				<li>Serial Number: {{serialNumber}}</li>
+				<li>Starting Version: {{FIRMWARE_VERSION}}</li>
+			</ul>
+			<div>
+				<strong>Step:</strong>
+				<span class="upgrade-step">Step...</span>
+			</div>
+			<div class="progress">
+				<div class="bar" style="width: 0%;"></div>
+			</div>
+		</div>
+		{{/with}}
+		{{/each}}
+	</div>
+</div>

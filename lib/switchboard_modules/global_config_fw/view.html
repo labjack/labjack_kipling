@@ -1,0 +1,40 @@
+<div id="reset-holder">
+    {{#if devices.length}}
+    <div class="section">
+        <h3>Introduction</h3>
+        <div>
+            This module configures the current settings of the selected devices.  The settings can be configured to be either the device's saved power-up defaults or factory defaults.  This feature is useful if you want to restore device settings without power cycling a device.
+        </div>
+    </div>
+    <div class="section">
+        <h3>Select Configuration Source</h3>
+        <div>
+            <label class="radio">
+                <input type="radio" name="source" value="powerup">
+                <span class="metro-radio">Power-Up Defaults</span>
+                <p class="option-description">
+                    Load the configuration the device uses when it is rebooted as the device's current settings.
+                </p>
+            </label>
+        </div>
+        <div>
+            <label class="radio">
+                <input type="radio" name="source" value="factory" checked>
+                <span class="metro-radio">Factory Defaults</span>
+                <p class="option-description">
+                    Load the configuration the device had when purchased as the device's current settings.
+                </p>
+            </label>
+        </div>
+    </div>
+
+    <div class="section">
+        <a id="configure-button" class="btn">Configure</a>
+        <div class="saving-notice" id="saving-indicator">Saving...</div>
+    </div>
+    {{else}}
+    <h3>Please slect a device</h3>
+    <p>Currently no devices are selected so this module has been disabled. Please Select a device to continue.</p>
+    {{/if}}
+    {{!--<pre style="width:100%">{{printContext}}</pre>--}}
+</div>

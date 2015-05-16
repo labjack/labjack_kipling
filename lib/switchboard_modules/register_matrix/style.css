@@ -33,8 +33,7 @@
     margin-top: -3px;
 }
 
-.close-value-editor-button
-{
+.close-value-editor-button {
     margin-bottom: 1px;
     width: 20px;
 }
@@ -45,23 +44,20 @@
     display: inline-block;
 }
 
-.write-value-editor-button
-{
+.write-value-editor-button {
     margin-top: 1px;
 }
 
-.value-editor-button
-{
+.value-editor-button {
     color: black;
     background-color: #CCCCCC;
     padding: 7px 5px 8px 5px;
     font-size: 11px;
+    cursor: pointer;
 }
 
-.value-editor-button:hover
-{
+.value-editor-button:hover {
     background-color: #AAAAAA;margin-top: -4px;
-    cursor: pointer;
 }
 
 .write-controls-holder
