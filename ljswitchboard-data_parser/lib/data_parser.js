@@ -108,7 +108,7 @@ var addErrorData = function(bundle, address, options) {
 	bundle.name = regName;
 	bundle.address = regAddress;
 	bundle.defaultValue = defaultValue;
-	bundle.lastValue = lastValue
+	bundle.lastValue = lastValue;
 	return bundle;
 
 };
@@ -244,10 +244,15 @@ var encodeValue = function(address, value, deviceType) {
 		}
 	}
 	if(!formattedResult) {
-			retData = value;
-		}
+		// If the value wasn't formatted then let it pass through.
+		retData = value;
+	}
+
+	// Force the data to be a string or a number.
 	if(isString) {
 		retData = retData.toString();
+	} else {
+		retData = Number(retData);
 	}
 	return retData;
 };
