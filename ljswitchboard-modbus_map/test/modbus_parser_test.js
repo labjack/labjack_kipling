@@ -68,11 +68,15 @@ exports.tests = {
       constants.getAddressInfo("DAC0",'W'),
       constants.getAddressInfo("AIN0",'R'),
       constants.getAddressInfo("AIN0",'W'),
+      constants.getAddressInfo("FIO0",'W'),
+      constants.getAddressInfo("DIO0",'W'),
     ];
     var tests = [
       {type: 3, directionValid: 1, typeString: 'FLOAT32'},
       {type: 3, directionValid: 1, typeString: 'FLOAT32'},
       {type: 3, directionValid: 0, typeString: 'FLOAT32'},
+      {type: 0, directionValid: 1, typeString: 'UINT16'},
+      {type: 0, directionValid: 1, typeString: 'UINT16'},
     ];
 
     test.equal(info.length, tests.length);
@@ -125,7 +129,7 @@ exports.tests = {
       {'reg': 'AIN0', 'isBuffer': false}
     ];
     // Make sure that the expandedBufferRegisters is of the correct length.
-    test.equal(expandedBufferRegisters.length, 45, 'wrong number of expanded buffer registers');
+    test.equal(expandedBufferRegisters.length, 47, 'wrong number of expanded buffer registers');
     expandedBufferRegisters.forEach(function(reg) {
       vals.push({'reg': reg, 'isBuffer': true});
     });

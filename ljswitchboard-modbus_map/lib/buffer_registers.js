@@ -7,8 +7,10 @@ var bufferRegisters = [
 	'WIFI_SCAN_DATA',
 	'LUA_SOURCE_WRITE',
 	'LUA_DEBUG_DATA',
-	'FILE_IO_NAME_WRITE',
-	'FILE_IO_NAME_READ',
+	'FILE_IO_NAME_WRITE',		// Old versions...
+	'FILE_IO_PATH_WRITE',
+	'FILE_IO_NAME_READ',		// Old versions...
+	'FILE_IO_PATH_READ',
 	'FILE_IO_WRITE',
 	'FILE_IO_READ',
 	'ONEWIRE_DATA_TX',

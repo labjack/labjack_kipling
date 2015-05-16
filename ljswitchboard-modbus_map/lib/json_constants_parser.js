@@ -294,10 +294,11 @@ var parseConstants = function(LJMJSONFileLocation) {
 	this.getAddressInfo = function(address, direction) {
 		var regEntry;
 		//Get the Dictionary Entry
-		if(!isNaN(address)) {
+		var isNumber = isNaN(address);
+		if(!isNumber) {
 			regEntry = self.constantsByRegister[address];
 			resolvedAddress = address;
-		} else if(isNaN(address)) {
+		} else if(isNumber) {
 			regEntry = self.constantsByName[address];
 			try {
 				resolvedAddress = regEntry.address;
