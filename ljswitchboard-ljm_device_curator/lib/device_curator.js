@@ -901,7 +901,7 @@ function device(useMockDevice) {
 			values,
 			function(err) {
 				captureDeviceError('writeMany', err, {
-					'addresseses': addresseses, 'values': values
+					'addresseses': addresses, 'values': values
 				});
 				defered.reject(err);
 			},
