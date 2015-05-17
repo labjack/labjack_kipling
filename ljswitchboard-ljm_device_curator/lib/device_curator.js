@@ -42,6 +42,7 @@ var use_mock_device = true;
 
 function device(useMockDevice) {
 	var ljmDevice;
+	var t7_device_upgrader = new lj_t7_upgrader.createT7Upgrader();
 	this.isMockDevice = false;
 	this.allowReconnectManager = false;
 	this.allowConnectionManager = false;
@@ -1682,7 +1683,7 @@ function device(useMockDevice) {
 				stepListenerObj
 			);
 			self.prepareForUpgrade();
-			lj_t7_upgrader.updateFirmware(
+			t7_device_upgrader.updateFirmware(
 				self,
 				ljmDevice,
 				firmwareFileLocation,

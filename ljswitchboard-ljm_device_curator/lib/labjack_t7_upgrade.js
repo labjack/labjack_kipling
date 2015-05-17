@@ -33,12 +33,14 @@ var CHECKPOINT_FOUR_PERCENT = 90;
 var CHECKPOINT_FIVE_PERCENT = 100;
 
 
-var curOffset = 0;
-var curScaling = 0;
-var shouldUpdateProgressBar = false;
+
 
 var nop = function(){};
 
+function createT7Upgrader() {
+var curOffset = 0;
+var curScaling = 0;
+var shouldUpdateProgressBar = false;
 
 /**
  * Reject a deferred / promise because of an error.
@@ -151,6 +153,7 @@ function DeviceFirmwareBundle()
         if (shouldUpdateProgressBar) {
             var scaledValue = curScaling * value + curOffset;
             progressListener.updatePercentage(scaledValue, nop);
+            // console.log('Updating progress...', serial, scaledValue);
         }
     };
     /**
@@ -320,7 +323,7 @@ function DeviceFirmwareBundle()
  * @return {q.promise} New DeviceFirmwareBundle without a device loaded but
  *      initalized with the contents of the specified firmware file.
 **/
-exports.readFirmwareFile = function(fileSrc, bundle)
+this.readFirmwareFile = function(fileSrc, bundle)
 {
     var deferred = q.defer();
     var urlComponents;
@@ -432,7 +435,7 @@ exports.readFirmwareFile = function(fileSrc, bundle)
  * @return {q.promise} Promise that resolves to the provided device bundle.
  * @throws {Error} Thrown if the firmware image is not compatible.
 **/
-exports.checkCompatibility = function(bundle)
+this.checkCompatibility = function(bundle)
 {
     var deferred = q.defer();
 
@@ -471,7 +474,7 @@ exports.checkCompatibility = function(bundle)
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
-exports.eraseFlash = function(bundle, startAddress, numPages, key)
+this.eraseFlash = function(bundle, startAddress, numPages, key)
 {
     var deferred = q.defer();
 
@@ -508,11 +511,11 @@ exports.eraseFlash = function(bundle, startAddress, numPages, key)
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
-exports.eraseImage = function(bundle)
+this.eraseImage = function(bundle)
 {
     var eraseImageDefered = q.defer();
 
-    exports.eraseFlash(
+    t7Upgrader.eraseFlash(
         bundle,
         driver_const.T7_EFAdd_ExtFirmwareImage,
         driver_const.T7_IMG_FLASH_PAGE_ERASE,
@@ -540,11 +543,11 @@ exports.eraseImage = function(bundle)
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
-exports.eraseImageInformation = function(bundle)
+this.eraseImageInformation = function(bundle)
 {
     var eraseImageInformationDefered = q.defer();
 
-    exports.eraseFlash(
+    t7Upgrader.eraseFlash(
         bundle,
         driver_const.T7_EFAdd_ExtFirmwareImgInfo,
         driver_const.T7_HDR_FLASH_PAGE_ERASE,
@@ -655,6 +658,7 @@ var createFlashOperation = function (bundle, startAddress, lengthInts, sizeInts,
                     console.log('t7_upgrade: calling rwMany', isReadOp, addresses, directions, numValues, values);
                     console.log('t7_upgrade: rwMany Error', err);
                     var callFunc = createSafeReject(innerDeferred);
+                    callFunc(err);
                 },
                 function (newResults) { 
                     delete addresses;
@@ -769,7 +773,7 @@ var createFlashOperation = function (bundle, startAddress, lengthInts, sizeInts,
  * @param {Number} length Number of integers to read.
  * @param {Number} size The number of reads to combine in a single read call.
 **/
-exports.readFlash = function(bundle, startAddress, length, size)
+this.readFlash = function(bundle, startAddress, length, size)
 {
     var readPtrAddress = driver_const.T7_MA_EXF_pREAD;
     var readFlashAddress = driver_const.T7_MA_EXF_READ;
@@ -793,14 +797,14 @@ exports.readFlash = function(bundle, startAddress, length, size)
  * @return {q.promise} Promise that resolves to the image as read from memory
  *      contents.
 **/
-exports.readImage = function(bundle)
+this.readImage = function(bundle)
 {
     var deferred = q.defer();
 
     var numberOfIntegers = driver_const.T7_IMG_FLASH_PAGE_ERASE *
         driver_const.T7_FLASH_PAGE_SIZE / 4;
 
-    exports.readFlash(
+    t7Upgrader.readFlash(
         bundle,
         driver_const.T7_EFAdd_ExtFirmwareImage,
         numberOfIntegers,
@@ -821,14 +825,14 @@ exports.readImage = function(bundle)
  * @return {q.promise} Promise that resolves to the image information as read
  *      from memory contents.
 **/
-exports.readImageInformation = function(bundle)
+this.readImageInformation = function(bundle)
 {
     var deferred = q.defer();
 
     var numberOfIntegers = driver_const.T7_HDR_FLASH_PAGE_ERASE *
         driver_const.T7_FLASH_PAGE_SIZE / 4;
 
-    exports.readFlash(
+    t7Upgrader.readFlash(
         bundle,
         driver_const.T7_EFAdd_ExtFirmwareImgInfo,
         numberOfIntegers,
@@ -850,7 +854,7 @@ exports.readImageInformation = function(bundle)
  * @throws {Error} Error thrown if the image and image information pages on the
  *      specified device are not zeroed.
 **/
-exports.checkErase = function(bundle)
+this.checkErase = function(bundle)
 {
     var deferred = q.defer();
 
@@ -891,9 +895,9 @@ exports.checkErase = function(bundle)
         };
     };
 
-    exports.readImageInformation(bundle)
+    t7Upgrader.readImageInformation(bundle)
     .then(checkIfZeroedThenContinue, createSafeReject(deferred))
-    .then(checkMemory(exports.readImage), createSafeReject(deferred))
+    .then(checkMemory(t7Upgrader.readImage), createSafeReject(deferred))
     .then(function () {
         deferred.resolve(bundle);
     }, createSafeReject(deferred));
@@ -917,7 +921,7 @@ exports.checkErase = function(bundle)
  * @param {q.promise} Promise that resolves after the flash write operation
  *      finishes successfully or fails due to error (will reject on error).
 **/
-exports.writeFlash = function(bundle, startAddress, length, size, key, data) {
+this.writeFlash = function(bundle, startAddress, length, size, key, data) {
     var writePtrAddress = driver_const.T7_MA_EXF_pWRITE;
     var writeFlashAddress = driver_const.T7_MA_EXF_WRITE;
     var device = bundle.getDevice();
@@ -942,7 +946,7 @@ exports.writeFlash = function(bundle, startAddress, length, size, key, data) {
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      write is complete.
 **/
-exports.writeImage = function(minPercent, maxPercent) {
+this.writeImage = function(minPercent, maxPercent) {
     return function (bundle) {
         var deferred = q.defer();
         shouldUpdateProgressBar = true;
@@ -953,7 +957,7 @@ exports.writeImage = function(minPercent, maxPercent) {
         curScaling = perecentScaleFactor;
         curOffset = minPercent;
 
-        exports.writeFlash(
+        t7Upgrader.writeFlash(
             bundle,
             driver_const.T7_EFAdd_ExtFirmwareImage,
             numberOfIntegers,
@@ -966,6 +970,7 @@ exports.writeImage = function(minPercent, maxPercent) {
                 deferred.resolve(bundle);
             },
             function (err) {
+                console.log('failed writeImage', err);
                 var callback = createSafeReject(deferred);
                 shouldUpdateProgressBar = false;
                 callback(err);
@@ -987,7 +992,7 @@ exports.writeImage = function(minPercent, maxPercent) {
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      write is complete.
 **/
-exports.writeImageInformation = function(minPercent, maxPercent)
+this.writeImageInformation = function(minPercent, maxPercent)
 {
     return function (bundle) {
         var deferred = q.defer();
@@ -1000,7 +1005,7 @@ exports.writeImageInformation = function(minPercent, maxPercent)
         curScaling = perecentScaleFactor;
         curOffset = minPercent;
 
-        exports.writeFlash(
+        t7Upgrader.writeFlash(
             bundle,
             driver_const.T7_EFAdd_ExtFirmwareImgInfo,
             numberOfIntegers,
@@ -1035,11 +1040,11 @@ exports.writeImageInformation = function(minPercent, maxPercent)
  *      check.
  * @throws {Error} Error thrown if the check fails.
 **/
-exports.checkImageWrite = function(bundle)
+this.checkImageWrite = function(bundle)
 {
     var deferred = q.defer();
 
-    exports.readImage(bundle).then(function (readImage) {
+    t7Upgrader.readImage(bundle).then(function (readImage) {
         var readImageLength = readImage.length;
         var bundleImage = bundle.getFirmwareImage();
         for(var i=0; i<readImageLength; i++)
@@ -1062,7 +1067,7 @@ exports.checkImageWrite = function(bundle)
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      upgrade and reboot has started.
 **/
-exports.restartAndUpgrade = function(bundle)
+this.restartAndUpgrade = function(bundle)
 {
     var deferred = q.defer();
     var device = bundle.getDevice();
@@ -1077,7 +1082,7 @@ exports.restartAndUpgrade = function(bundle)
     );
     return deferred.promise;
 };
-exports.closeDevice = function(bundle) {
+this.closeDevice = function(bundle) {
     var deferred = q.defer();
     var device = bundle.getDevice();
     var curatedDevice = bundle.getCuratedDevice();
@@ -1100,7 +1105,7 @@ exports.closeDevice = function(bundle) {
     });
     return deferred.promise;
 };
-exports.forceClose = function(bundle) {
+this.forceClose = function(bundle) {
     var deferred = q.defer();
 
     var executeCode = true;
@@ -1154,7 +1159,7 @@ exports.forceClose = function(bundle) {
     }
     return deferred.promise;
 };
-exports.pauseForClose = function(bundle) {
+this.pauseForClose = function(bundle) {
     var deferred = q.defer();
     var continueExec = function() {
         deferred.resolve(bundle);
@@ -1175,7 +1180,7 @@ exports.pauseForClose = function(bundle) {
  *      to match.
  * @return {q.promise} Promise that resolves to the updated bundle.
 **/
-exports.waitForEnumeration = function(bundle)
+this.waitForEnumeration = function(bundle)
 {
     var curatedDevice = bundle.getCuratedDevice();
     var curatedDeviceAttributes = {};
@@ -1304,7 +1309,7 @@ exports.waitForEnumeration = function(bundle)
  * @return {q.promise} Promise that resolves to the provided bundle.
  * @throws {Error} Error thrown if the firmware does not match.
 **/
-exports.checkNewFirmware = function(bundle)
+this.checkNewFirmware = function(bundle)
 {
     var deferred = q.defer();
     var device = bundle.getDevice();
@@ -1563,37 +1568,38 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
 
     bundle.setProgressListener(progressListener);
 
-    exports.readFirmwareFile(firmwareFileLocation, bundle) //reportError('readingFirmwareFile')
+    t7Upgrader.readFirmwareFile(firmwareFileLocation, bundle) //reportError('readingFirmwareFile')
     .then(injectDevice, reportError('readingFirmwareFile'))
     .then(saveStartupConfigsFWCheck(), reportError('injectDevice'))
     .then(disableStartupConfigsFWCheck(), reportError('saveStartupConfigsFWCheck'))
     .then(saveWiFiStatus(), reportError('disableStartupConfigsFWCheck'))
     .then(toggleWiFi('disable'), reportError('readWiFiStatus'))
-    .then(exports.checkCompatibility, reportError('disablingWiFi'))
+    .then(t7Upgrader.checkCompatibility, reportError('disablingWiFi'))
     .then(updateProgress(CHECKPOINT_ONE_PERCENT), reportError('checkCompatibility'))
     .then(updateStatusText('Erasing image...'), reportError('updateProgress'))
-    .then(exports.eraseImage, reportError('updateStatusText'))
-    .then(exports.eraseImageInformation, reportError('eraseImage'))
-    //.then(exports.checkErase, reportError)
+    .then(t7Upgrader.eraseImage, reportError('updateStatusText'))
+    .then(t7Upgrader.eraseImageInformation, reportError('eraseImage'))
+    //.then(t7Upgrader.checkErase, reportError)
     .then(updateProgress(CHECKPOINT_TWO_PERCENT), reportError('eraseImageInformation'))
     .then(updateStatusText('Writing image...'), reportError('updateProgress'))
-    .then(exports.writeImage(
+    .then(t7Upgrader.writeImage(
         CHECKPOINT_TWO_PERCENT,
         CHECKPOINT_THREE_PERCENT
     ), reportError('updateStatusText'))
-    .then(exports.writeImageInformation(
+    .then(updateStatusText('Writing image info...'), reportError('writeImage'))
+    .then(t7Upgrader.writeImageInformation(
         CHECKPOINT_THREE_PERCENT,
         CHECKPOINT_FOUR_PERCENT
-    ), reportError('writeImage'))
-    //.then(exports.checkImageWrite, reportError) - Not doing anymore for speed
+    ), reportError('updateStatusText'))
+    //.then(t7Upgrader.checkImageWrite, reportError) - Not doing anymore for speed
     .then(updateProgress(CHECKPOINT_FOUR_PERCENT), reportError('writeImageInformation'))
     .then(updateStatusText('Restarting...'), reportError('updateProgress'))
-    .then(exports.restartAndUpgrade, reportError('updateStatusText'))
-    .then(exports.closeDevice, exports.forceClose)
+    .then(t7Upgrader.restartAndUpgrade, reportError('updateStatusText'))
+    .then(t7Upgrader.closeDevice, exports.forceClose)
     .then(updateStatusText('Reconnecting to device..'), reportError('restartAndUpgrade'))
-    .then(exports.pauseForClose, reportError('updateStatusText'))
-    .then(exports.waitForEnumeration, reportError('pauseForClose'))
-    .then(exports.checkNewFirmware, reportError('waitForEnumeration'))
+    .then(t7Upgrader.pauseForClose, reportError('updateStatusText'))
+    .then(t7Upgrader.waitForEnumeration, reportError('pauseForClose'))
+    .then(t7Upgrader.checkNewFirmware, reportError('waitForEnumeration'))
     .then(toggleWiFi('enable'), reportError('checkNewFirmware'))
     .then(updateProgress(CHECKPOINT_FIVE_PERCENT), reportError('enablingWiFi'))
     .then(disableStartupConfigsFWCheck(), reportError('updateStatusText'))
@@ -1604,7 +1610,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
 };
 
 
-exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
+this.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     connectionType, progressListener) {
     var defered = q.defer();
     internalUpdateFirmware(curatedDevice, device, firmwareFileLocation, connectionType, progressListener)
@@ -1616,3 +1622,6 @@ exports.updateFirmware = function(curatedDevice, device, firmwareFileLocation,
     return defered.promise;
 };
 
+var t7Upgrader = this;
+}
+exports.createT7Upgrader = createT7Upgrader;
