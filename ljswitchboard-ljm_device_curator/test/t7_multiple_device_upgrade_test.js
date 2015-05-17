@@ -192,7 +192,7 @@ exports.tests = {
 	// 	}, 5000);
 	// },
 	'upgrade devices': function(test) {
-		var fwVersionNum = 1.0070;
+		var fwVersionNum = 1.0146;
 		var fwURL = fws[fwVersionNum.toFixed(4)];
 		var firmwareInfo = {
 			'path': fwURL,

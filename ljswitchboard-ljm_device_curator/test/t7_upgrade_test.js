@@ -90,7 +90,7 @@ var device_tests = {
 		var lastPercent = 0;
 		var percentListener = function(value) {
 			var defered = q.defer();
-			console.log("  - ", value.toString() + '%');
+			// console.log("  - ", value.toString() + '%');
 			lastPercent = value;
 			defered.resolve();
 			return defered.promise;
