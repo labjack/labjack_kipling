@@ -326,62 +326,91 @@ var findVersionString = new RegExp("(?:(\\#define\\sLJM_VERSION\\s))[0-9]\\.[0-9
 var findVersionNum = new RegExp("[0-9]\\.[0-9]{1,}");
 var checkHeaderFile = function(directoryInfo) {
     var defered = q.defer();
-    fs.readFile(directoryInfo.path, function(err, data) {
-        if(err) {
-            directoryInfo.isValid = false;
-            directoryInfo.error = 'Failed to read file: ' + err.toString();
-            defered.resolve(directoryInfo);
-        } else {
-            try {
-                var versionString = findVersionString.exec(data);
-                if(versionString) {
-                    versionString = versionString[0];
-                    var versionNumStr = findVersionNum.exec(versionString);
-                    if(versionNumStr) {
-                        versionNumStr = versionNumStr[0];
-                        directoryInfo.isValid = true;
-                        directoryInfo.version = versionNumStr;
-                        defered.resolve(directoryInfo); 
-                    } else {
-                        directoryInfo.isValid = false;
-                        directoryInfo.error = 'Vailed to find the LJM_VERSION string(2)';
-                        defered.resolve(directoryInfo);
-                    }
-                    
+    var finishFunc = function(data) {
+        try {
+            var versionString = findVersionString.exec(data);
+            if(versionString) {
+                versionString = versionString[0];
+                var versionNumStr = findVersionNum.exec(versionString);
+                if(versionNumStr) {
+                    versionNumStr = versionNumStr[0];
+                    directoryInfo.isValid = true;
+                    directoryInfo.version = versionNumStr;
+                    defered.resolve(directoryInfo);
                 } else {
                     directoryInfo.isValid = false;
-                    directoryInfo.error = 'Vailed to find the LJM_VERSION string';
+                    directoryInfo.error = 'Vailed to find the LJM_VERSION string(2)';
                     defered.resolve(directoryInfo);
                 }
                 
-            } catch (parseError) {
+            } else {
                 directoryInfo.isValid = false;
-                directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
+                directoryInfo.error = 'Vailed to find the LJM_VERSION string';
                 defered.resolve(directoryInfo);
             }
+            
+        } catch (parseError) {
+            directoryInfo.isValid = false;
+            directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
+            defered.resolve(directoryInfo);
+        }
+    };
+    fs.readFile(directoryInfo.path, function(err, data) {
+        if(err) {
+            fs.readFile(directoryInfo.path, function(err, data) {
+                if(err) {
+                    fs.readFile(directoryInfo.path, function(err, data) {
+                        if(err) {
+                            directoryInfo.isValid = false;
+                            directoryInfo.error = 'Failed to read file: ' + err.toString();
+                            defered.resolve(directoryInfo);
+                        } else {
+                            finishFunc(data);
+                        }
+                    });
+                } else {
+                    finishFunc(data);
+                }
+            });
+        } else {
+            finishFunc(data);
         }
     });
     return defered.promise;
 };
 var checkJSONFile = function(directoryInfo) {
     var defered = q.defer();
+    var finishFunc = function(data) {
+        var jsonFile;
+        try {
+            jsonFile = JSON.parse(data);
+            directoryInfo.isValid = true;
+            defered.resolve(directoryInfo);
+        } catch (parseError) {
+            directoryInfo.isValid = false;
+            directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
+            defered.resolve(directoryInfo);
+        }
+    };
     fs.readFile(directoryInfo.path, function(err, data) {
         if(err) {
-            directoryInfo.isValid = false;
-            directoryInfo.error = 'Failed to read file: ' + err.toString();
-            defered.resolve(directoryInfo);
+            fs.readFile(directoryInfo.path, function(err, data) {
+                if(err) {
+                    fs.readFile(directoryInfo.path, function(err, data) {
+                        if(err) {
+                            directoryInfo.isValid = false;
+                            directoryInfo.error = 'Failed to read file: ' + err.toString();
+                            defered.resolve(directoryInfo);
+                        } else {
+                            finishFunc(data);
+                        }
+                    });
+                } else {
+                    finishFunc(data);
+                }
+            });
         } else {
-            var jsonFile;
-            try {
-                jsonFile = JSON.parse(data);
-                directoryInfo.isValid = true;
-                defered.resolve(directoryInfo);
-            } catch (parseError) {
-                directoryInfo.isValid = false;
-                directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
-                defered.resolve(directoryInfo);
-            }
-            
+            finishFunc(data);
         }
     });
     return defered.promise;
