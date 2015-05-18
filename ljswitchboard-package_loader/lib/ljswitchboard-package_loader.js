@@ -365,30 +365,45 @@ function createPackageLoader() {
 			self.extractionPath,
 			packageInfoFileName
 		));
+		var finishFunc = function(fileData) {
+			var parsedFileData = {};
+			try {
+				parsedFileData = JSON.parse(
+					fileData.toString('ascii'));
+				// If the file is only "{}" the obj will be 'null'.
+				// force it to be an object.
+				if(parsedFileData === null) {
+					parsedFileData = {};
+				}
+				defered.resolve(parsedFileData);
+			} catch(jsonParseError) {
+				// Error parsing the JSON file so it should be 
+				// re-initialized and assume data is invalid/what was
+				// passed into the function.
+				initializeInfoFile(defaultData)
+				.then(defered.resolve);
+			}
+		};
 		fs.exists(filePath, function(exists) {
 			if(exists) {
 				fs.readFile(filePath, function(err, fileData) {
 					if(err) {
-						initializeInfoFile(defaultData)
-						.then(defered.resolve);
-					} else {
-						var parsedFileData = {};
-						try {
-							parsedFileData = JSON.parse(
-								fileData.toString('ascii'));
-							// If the file is only "{}" the obj will be 'null'.
-							// force it to be an object.
-							if(parsedFileData === null) {
-								parsedFileData = {};
+						fs.readFile(filePath, function(errB, fileData) {
+							if(errB) {
+								fs.readFile(filePath, function(errB, fileData) {
+									if(errB) {
+										initializeInfoFile(defaultData)
+										.then(defered.resolve);
+									} else {
+										finishFunc(fileData);
+									}
+								});
+							} else {
+								finishFunc(fileData);
 							}
-							defered.resolve(parsedFileData);
-						} catch(jsonParseError) {
-							// Error parsing the JSON file so it should be 
-							// re-initialized and assume data is invalid/what was
-							// passed into the function.
-							initializeInfoFile(defaultData)
-							.then(defered.resolve);
-						}
+						});
+					} else {
+						finishFunc(fileData);
 					}
 				});
 			} else {
@@ -603,26 +618,41 @@ function createPackageLoader() {
 		var defered = q.defer();
 
 		var packageDataDir = path.join(packageInfo.location, 'package.json');
+		var finishFunc = function(data) {
+			try {
+				var packageData = JSON.parse(data);
+				if(packageData.version) {
+					if(semver.valid(packageData.version)) {
+						packageInfo.version = packageData.version;
+					}
+				}
+				if(packageData.ljswitchboardDependencies) {
+					packageInfo.dependencies = packageData.ljswitchboardDependencies;
+				}
+				defered.resolve(packageInfo);
+			} catch(jsonParseError) {
+				defered.resolve(packageInfo);
+			}
+		};
 		fs.exists(packageDataDir, function(exists) {
 			if(exists) {
 				fs.readFile(packageDataDir, function(err, data) {
 					if(err) {
-						defered.resolve(packageInfo);
+						fs.readFile(packageDataDir, function(err, data) {
+							if(err) {
+								fs.readFile(packageDataDir, function(err, data) {
+									if(err) {
+										defered.resolve(packageInfo);
+									} else {
+										finishFunc(data);
+									}
+								});
+							} else {
+								finishFunc(data);
+							}
+						});
 					} else {
-						try {
-							var packageData = JSON.parse(data);
-							if(packageData.version) {
-								if(semver.valid(packageData.version)) {
-									packageInfo.version = packageData.version;
-								}
-							}
-							if(packageData.ljswitchboardDependencies) {
-								packageInfo.dependencies = packageData.ljswitchboardDependencies;
-							}
-							defered.resolve(packageInfo);
-						} catch(jsonParseError) {
-							defered.resolve(packageInfo);
-						}
+						finishFunc(data);
 					}
 				});
 			} else {
