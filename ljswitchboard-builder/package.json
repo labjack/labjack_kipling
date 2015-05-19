@@ -2,26 +2,11 @@
   "name": "ljswitchboard-builder",
   "description": "LabJack Desktop Utilities",
   "version": "3.0.7",
-  "main": "lib/index.html",
-  "node-main": "lib/main.js",
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-builder",
   "repository": {
     "type": "git",
     "url": "https://github.com/chrisJohn404/ljswitchboard-builder"
   },
-  "window": {
-    "title": "LJSwitchboard",
-    "icon": "lib/Kipling_128x128.png",
-    "toolbar": true,
-    "frame": true,
-    "width": 480,
-    "height": 300,
-    "min_width":480,
-    "min_height":300,
-    "show": true,
-    "resizable": false
-  },
-  "nodejs": true,
   "dependencies": {
     "ljswitchboard-package_loader": "0.0.x",
     "ljswitchboard-require": "0.0.x",
@@ -53,9 +38,7 @@
   "un-managed-dependencies": {
     "semver": "4.2.0",
     "unzip": "0.1.11",
-    "nw": "0.12.0-alpha2",
-    "nodewebkit": "0.11.6",
-      "ljswitchboard-core": "0.0.x"
+    "ljswitchboard-core": "0.0.x"
   },
   "kipling_dependencies": [
     "ljswitchboard-splash_screen",
@@ -77,24 +60,9 @@
   },
   "script_notes": "to run a script w/o using npm test, use npm run [script name]",
   "scripts": {
-    "start": "npm run nw",
-    "nodewebkit": "nodewebkit",
-    "nw": "nw",
-      "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
-      "prepare_build": "node build_scripts/prepare_build.js",
-      "gather_project_files": "node build_scripts/gather_project_files.js",
-      "gather_test_project_files": "node build_scripts/gather_project_files.js test"
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+    "prepare_build": "node build_scripts/prepare_build.js",
+    "gather_project_files": "node build_scripts/gather_project_files.js",
+    "gather_test_project_files": "node build_scripts/gather_project_files.js test"
   },
-  "enableStartupConfig":false,
-  "buildType": "release",
-  "test": true,
-  "testPersistentDataFolderName": "K3_DEV",
-  "performLiveTests": false,
-  "webkit": {
-    "plugin": true
-  },
-  "js-flags": "--expose-gc",
-  "persistentDataFolderName": "K3",
-  "persistentDataVersion": "0.0.1",
-  "forceRefreshOfPersistentData": false
 }
