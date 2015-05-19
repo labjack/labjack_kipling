@@ -1,4 +1,5 @@
 
+var errorCatcher = require('./error_catcher');
 var fs = require('fs');
 var fse = require('fs-extra');
 var path = require('path');

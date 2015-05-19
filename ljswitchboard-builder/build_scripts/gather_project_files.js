@@ -1,5 +1,5 @@
 
-
+var errorCatcher = require('./error_catcher');
 var fs = require('fs');
 var fse = require('fs-extra');
 var path = require('path');
@@ -54,6 +54,9 @@ var filteredFilesAndFolders = [
 	// 'node_binaries/win32',
 	'node_modules/q',
 	'node_modules/nodeunit',
+
+	// Filter out the node-webkit install
+	'node_modules/nw',
 ];
 
 var os = {
@@ -73,7 +76,7 @@ var addArchExclusions = function(os) {
 	if(process.arch !== 'arm') {
 		filteredFilesAndFolders.push('node_binaries/' + os + '/arm');
 	}
-}
+};
 if(os === 'darwin') {
 	filteredFilesAndFolders.push('node_binaries/linux');
 	filteredFilesAndFolders.push('node_binaries/win32');
@@ -178,7 +181,7 @@ var innerPrintStatus = function() {
 	outputText.forEach(function(outputStr) {
 		console.log(outputStr);
 	});
-}
+};
 var printStatus = function() {
 	var printStatus = true;
 
@@ -190,7 +193,7 @@ var printStatus = function() {
 	if(printStatus) {
 		innerPrintStatus();
 	}
-}
+};
 var copyRelevantFiles = function(from, to, filters) {
 	
 	var fileListing = fs.readdirSync(from);
@@ -265,7 +268,12 @@ var copyRelevantFiles = function(from, to, filters) {
 		}, defered.reject);
 	return defered.promise;
 };
+var copyRelevantFilesFake = function(from, to, filters) {
+	var defered = q.defer();
 
+	defered.resolve();
+	return defered.promise;
+};
 var copyRequiredFiles = function() {
 	var promises = requiredFiles.map(function(required_file) {
 		// console.log('Copying:', required_file);
@@ -278,9 +286,34 @@ var copyRequiredFiles = function() {
 			required_file
 		));
 		fs.mkdirSync(destination_path);
+
+		var projectInfo = require(path.normalize(path.join(
+			PROJECT_FILES_SEARCH_PATH,
+			required_file,
+			'package.json'
+		)));
+
+		// Dev dependency list
+		var devFilters = [];
+		if(projectInfo.devDependencies) {
+			var devDeps = Object.keys(projectInfo.devDependencies);
+			devFilters = devDeps.map(function(devDep) {
+				return 'node_modules/' + devDep;
+			});
+		}
+
+		var folderFilters = [];
+
+		filteredFilesAndFolders.forEach(function(filter) {
+			folderFilters.push(filter);
+		});
+		devFilters.forEach(function(filter) {
+			folderFilters.push(filter);
+		});
 		// fse.copySync(source_path, destination_path);
 		// console.log('Calling...',required_file, source_path, destination_path);
-		return copyRelevantFiles(source_path, destination_path, filteredFilesAndFolders);
+		return copyRelevantFiles(source_path, destination_path, folderFilters);
+		// return copyRelevantFilesFake(source_path, destination_path, folderFilters);
 	});
 	return q.allSettled(promises);
 };
@@ -292,3 +325,5 @@ copyRequiredFiles()
 
 
 // console.log('Preparing node-webkit version:', nwjs_version);
+
+
