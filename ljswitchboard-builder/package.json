@@ -1,5 +1,5 @@
 {
-  "name": "labjack-ljswitchboard",
+  "name": "ljswitchboard-builder",
   "description": "LabJack Desktop Utilities",
   "version": "3.0.7",
   "main": "lib/index.html",
