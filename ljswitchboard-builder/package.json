@@ -23,13 +23,31 @@
   },
   "nodejs": true,
   "dependencies": {
-      "q": "~1",
     "ljswitchboard-package_loader": "0.0.x",
     "ljswitchboard-require": "0.0.x",
     "ljswitchboard-ljm_driver_checker": "0.0.x",
     "ljswitchboard-window_manager": "0.0.x",
+    
+    "q": "~1",
+    "underscore": "1.7.0",
+    
     "rimraf": "2.2.x",
-    "underscore": "1.7.0"
+    "fs.extra": "1.3.x",
+    "fs-extra": "0.18.x",
+
+    "adm-zip": "0.4.7",
+    "archiver": "0.14.3",
+    "decompress": "2.3.0",
+    "decompress-zip": "0.2.0",
+    "express-zip": "2.0.0",
+    "jszip": "2.5.0",
+    "node-zip": "1.1.1",
+    "unzip": "0.1.11",
+    "yazl": "2.2.2",
+    "yauzl": "2.3.1",
+
+    "request": "2.55.0",
+    "request-progress": "0.3.1"
   },
   "un-managed-dependencies": {
     "semver": "4.2.0",
