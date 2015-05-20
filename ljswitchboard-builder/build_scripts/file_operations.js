@@ -126,23 +126,32 @@ exports.copyFolders = copyFolders;
 
 
 var extractWithUnzip = require(
-    'file_extractors/extract_with_unzip'
+    './file_extractors/extract_with_unzip'
 ).extractWithUnzip;
 
 var extractWithDecompressUnzip = require(
-    'file_extractors/extract_with_decompress_unzip'
+    './file_extractors/extract_with_decompress_unzip'
 ).extractWithDecompressUnzip;
 
 var extractWithYauzl = require(
-    'file_extractors/extract_with_yauzl'
+    './file_extractors/extract_with_yauzl'
 ).extractWithYauzl;
+
+var extractWithExtractZip = require(
+    './file_extractors/extract_with_extract_zip'
+).extractWithExtractZip;
+
+var extractWithYauzlQ = require(
+    './file_extractors/extract_with_yauzl_q'
+).extractWithYauzlQ;
 
 function extractFile (file) {
     var defered = q.defer();
-    extractWithYauzl(file.from, file.to)
+    // extractWithYauzl(file.from, file.to)
     // extractWithUnzip(file.from, file.to)
+    // extractWithExtractZip(file.from, file.to)
+    extractWithYauzlQ(file.from, file.to)
     .then(function() {
-        console.log('Finished Extracting...');
         defered.resolve();
     });
     return defered.promise;
@@ -155,13 +164,15 @@ exports.extractFile = extractFile;
 
 function extractFiles (files) {
     var defered = q.defer();
-
+    var startTime = new Date();
     var promises = files.map(function(file) {
         return extractFile(file);
     });
 
     q.allSettled(promises)
     .then(function() {
+        var endTime = new Date();
+        console.log('Duration', ((endTime - startTime)/1000).toFixed(4));
         defered.resolve();
     });
     return defered.promise;
@@ -169,62 +180,27 @@ function extractFiles (files) {
 exports.extractFiles = extractFiles;
 
 
-function parseWithUnzip(file) {
-    var defered = q.defer();
-    // Create a readable stream for the .zip file
-    var readZipStream = fs.createReadStream(file);
 
-    // Create an unzip parsing stream that will get piped the readable 
-    // stream data.
-    var parseZipStream = unzip.Parse();
 
-    var foundPackageJsonFile = false;
-    var packageString = '';
+var parseWithUnzip = require(
+    './file_parsers/parse_with_unzip'
+).parseWithUnzip;
 
-    // Define a function that saves the streamed package.json data to a 
-    // string.
-    var savePackageData = function(chunk) {
-        packageString += chunk.toString('ascii');
-    };
+var parseWithYauzl = require(
+    './file_parsers/parse_with_yauzl'
+).parseWithYauzl;
 
-    // Define a function to be called when the .json file is finished being
-    // parsed.
-    var finishedReadingPackageData = function() {
-        var data = JSON.parse(packageString);
-        console.log('Finished finishedReadingPackageData');
-        defered.resolve();
-    };
-
-    // Attach a variety of event listeners to the parse stream
-    parseZipStream.on('entry', function(entry) {
-        // console.log('Zip Info', entry.path);
-        if(entry.path === 'package.json') {
-            foundPackageJsonFile = true;
-            entry.on('data', savePackageData);
-            entry.on('end', finishedReadingPackageData);
-        } else {
-            entry.autodrain();
-        }
-    });
-    parseZipStream.on('error', function(err) {
-        console.error('  - .zip parsing finished with error', err, file);
-        if(!foundPackageJsonFile) {
-            defered.resolve();
-        }
-    });
-    parseZipStream.on('close', function() {
-        console.log('in parseZipStream close');
-        if(!foundPackageJsonFile) {
-            defered.resolve();
-        }
-    });
-
-    // Pipe the readStream into the parseStream
-    readZipStream.pipe(parseZipStream);
-    return defered.promise;
-}
 function parseZipFile (file) {
-    return parseWithUnzip(file.path);
+
+    var defered = q.defer();
+
+    // parseWithUnzip(file.path)
+    parseWithYauzl(file.path)
+    .then(function(data) {
+        console.log('Parsed Data', data.name, data.version);
+        defered.resolve();
+    });
+    return defered.promise;
 }
 exports.parseZipFile = parseZipFile;
 

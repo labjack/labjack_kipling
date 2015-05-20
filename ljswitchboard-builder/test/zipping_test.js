@@ -22,13 +22,22 @@ var DIR_OF_FILES_TO_ZIP = 'temp_project_files';
 var PATH_OF_FILES_TO_ZIP = path.normalize(path.join(cwd, DIR_OF_FILES_TO_ZIP));
 
 var testFolders = [];
+
+var createTestZipFiles = false;
+var parseTestZipFiles = true;
+var extractTestZipFiles = false;
 exports.tests = {
     'create temporary .zip output directory': function(test) {
         try {
-            fse.ensureDirSync(TEMP_ZIP_TEST_PATH);
-            fse.ensureDirSync(TEMP_EXTRACT_TEST_PATH);
-            fse.emptyDirSync(TEMP_ZIP_TEST_PATH);
-            fse.emptyDirSync(TEMP_EXTRACT_TEST_PATH);
+            if(createTestZipFiles) {
+                fse.ensureDirSync(TEMP_ZIP_TEST_PATH);
+                fse.emptyDirSync(TEMP_ZIP_TEST_PATH);
+            }
+
+            if(extractTestZipFiles) {
+                fse.ensureDirSync(TEMP_EXTRACT_TEST_PATH);
+                fse.emptyDirSync(TEMP_EXTRACT_TEST_PATH);
+            }
         } catch(err) {
             test.ok(false, 'failed to ensureDirSync');
             console.error(err);
@@ -48,38 +57,53 @@ exports.tests = {
                 'extractPath': extractPath,
             });
         });
-        testFolders = [testFolders[1]];
+        // testFolders = [testFolders[0]];
         test.done();
     },
     'create test .zip files': function(test) {
-        var folders = testFolders.map(function(testFolder) {
-            return {'from': testFolder.origin, 'to': testFolder.zipPath};
-        });
-        fileOps.compressFolders(folders)
-        .then(function() {
-            console.log('Finished Compressing (test)');
+        if(createTestZipFiles) {
+            var folders = testFolders.map(function(testFolder) {
+                return {'from': testFolder.origin, 'to': testFolder.zipPath};
+            });
+            fileOps.compressFolders(folders)
+            .then(function() {
+                console.log('Finished Compressing (test)');
+                test.done();
+            });
+        } else {
+            console.log('Skipping...');
             test.done();
-        });
+        }
     },
-    // 'parse .zip files': function(test) {
-    //     var files = testFolders.map(function(testFolder) {
-    //         return {'path': testFolder.zipPath};
-    //     });
-    //     fileOps.parseZipFiles(files)
-    //     .then(function() {
-    //         console.log('Finished Parsing');
-    //         test.done();
-    //     });
-    // },
-    'extract test .zip files': function(test) {
-        var files = testFolders.map(function(testFolder) {
-            return {'from': testFolder.zipPath, 'to': testFolder.extractPath};
-        });
-        fileOps.extractFiles(files)
-        .then(function() {
-            console.log('Finished Extracting (test)');
+    'parse .zip files': function(test) {
+        if(parseTestZipFiles) {
+            var files = testFolders.map(function(testFolder) {
+                return {'path': testFolder.zipPath};
+            });
+            fileOps.parseZipFiles(files)
+            .then(function() {
+                console.log('Finished Parsing');
+                test.done();
+            });
+        } else {
+            console.log('Skipping...');
             test.done();
-        });
+        }
+    },
+    'extract test .zip files': function(test) {
+        if(extractTestZipFiles) {
+            var files = testFolders.map(function(testFolder) {
+                return {'from': testFolder.zipPath, 'to': testFolder.extractPath};
+            });
+            fileOps.extractFiles(files)
+            .then(function() {
+                console.log('Finished Extracting (test)');
+                test.done();
+            });
+        } else {
+            console.log('Skipping...');
+            test.done();
+        }
     },
     // 'verify output directories': function(test) {
     //     var dd = new ndd.Dir_Diff(

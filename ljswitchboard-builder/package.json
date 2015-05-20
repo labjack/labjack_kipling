@@ -25,12 +25,14 @@
     "archiver": "0.14.3",
     "decompress": "2.3.0",
     "decompress-zip": "0.2.0",
-    "extract-zip": "1.0.3",
+    
     "jszip": "2.5.0",
     "node-zip": "1.1.1",
     "unzip": "0.1.11",
     "yazl": "2.2.2",
     "yauzl": "2.3.1",
+    "concat-stream": "^1.4.6",
+    "extract-zip": "1.0.3",
 
     "request": "2.55.0",
     "request-progress": "0.3.1"
@@ -56,13 +58,15 @@
   },
     "devDependencies": {
       "nodeunit": "~0.9.0",
-      "rewire": "2.1.4",
+      "rewire": "2.1.4"
   },
   "script_notes": "to run a script w/o using npm test, use npm run [script name]",
   "scripts": {
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
     "prepare_build": "node build_scripts/prepare_build.js",
     "gather_project_files": "node build_scripts/gather_project_files.js",
-    "gather_test_project_files": "node build_scripts/gather_project_files.js test"
-  },
+    "gather_test_project_files": "node build_scripts/gather_project_files.js test",
+    "organize_project_files": "node build_scripts/organize_project_files.js",
+    "build_project": "node build_scripts/build_project.js"
+  }
 }

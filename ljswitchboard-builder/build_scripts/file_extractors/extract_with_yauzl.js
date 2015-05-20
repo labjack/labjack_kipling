@@ -118,3 +118,5 @@ function extractWithYauzl (from, to) {
     });
     return defered.promise;
 }
+
+exports.extractWithYauzl = extractWithYauzl;
