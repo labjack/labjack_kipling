@@ -14,6 +14,8 @@ var fse = require('fs-extra');
 var gns = 'ljswitchboard';
 global[gns] = {};
 
+var useYauzl = true;
+
 var EVENTS = {
 	// Events emitted during the loadPackage function, they all return the
 	// name of the package being handled.
@@ -662,9 +664,10 @@ function createPackageLoader() {
 	};
 
 	try {
-		var parse_with_unzip = require('./parsers/parse_with_unzip');
-		var parseWithUnzip = parse_with_unzip.parseWithUnzip;
-		var parseWithYauzl = require('./parsers/parse_with_yauzl').parseWithYauzl;
+		// var parse_with_unzip = require('./parsers/parse_with_unzip');
+		// var parseWithUnzip = parse_with_unzip.parseWithUnzip;
+		var parse_with_yauzl = require('./parsers/parse_with_yauzl');
+		var parseWithYauzl = parse_with_yauzl.parseWithYauzl;
 	} catch(err) {
 		console.log('ERROR requiring parsers', err);
 	}
@@ -1033,8 +1036,8 @@ function createPackageLoader() {
 	};
 	
 	try {
-		var extract_with_unzip = require('./extractors/extract_with_unzip');
-		var extractWithUnzip = extract_with_unzip.extractWithUnzip;
+		// var extract_with_unzip = require('./extractors/extract_with_unzip');
+		// var extractWithUnzip = extract_with_unzip.extractWithUnzip;
 		var extract_with_yauzl = require('./extractors/extract_with_yauzl');
 		var extractWithYauzl = extract_with_yauzl.extractWithYauzl;
 	} catch(err) {
