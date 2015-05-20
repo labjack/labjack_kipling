@@ -4,7 +4,6 @@ var util = require('util');
 var path = require('path');
 var q = require('q');
 
-var unzip = require('unzip');
 // Switch to using a minified local version of semver
 // var semver = require('semver');
 var semver = require('./semver_min');
@@ -662,66 +661,16 @@ function createPackageLoader() {
 		return defered.promise;
 	};
 
+	try {
+		var parse_with_unzip = require('./parsers/parse_with_unzip');
+		var parseWithUnzip = parse_with_unzip.parseWithUnzip;
+		var parseWithYauzl = require('./parsers/parse_with_yauzl').parseWithYauzl;
+	} catch(err) {
+		console.log('ERROR requiring parsers', err);
+	}
 	var getPackageVersionOfZip = function(packageInfo) {
-		var defered = q.defer();
-
-		// Create a readable stream for the .zip file
-		var readZipStream = fs.createReadStream(packageInfo.location);
-
-		// Create an unzip parsing stream that will get piped the readable 
-		// stream data.
-		var parseZipStream = unzip.Parse();
-
-		var foundPackageJsonFile = false;
-		var packageString = '';
-
-		// Define a function that saves the streamed package.json data to a 
-		// string.
-		var savePackageData = function(chunk) {
-			packageString += chunk.toString('ascii');
-		};
-
-		// Define a function to be called when the .json file is finished being
-		// parsed.
-		var finishedReadingPackageData = function() {
-			var data = JSON.parse(packageString);
-			if(data.version) {
-				if(semver.valid(data.version)) {
-					packageInfo.version = data.version;
-				}
-			}
-			if(data.ljswitchboardDependencies) {
-				packageInfo.dependencies = data.ljswitchboardDependencies;
-			}
-			defered.resolve(packageInfo);
-		};
-
-		// Attach a variety of event listeners to the parse stream
-		parseZipStream.on('entry', function(entry) {
-			// console.log('Zip Info', entry.path);
-			if(entry.path === 'package.json') {
-				foundPackageJsonFile = true;
-				entry.on('data', savePackageData);
-				entry.on('end', finishedReadingPackageData);
-			} else {
-				entry.autodrain();
-			}
-		});
-		parseZipStream.on('error', function(err) {
-			console.error('  - .zip parsing finished with error', err);
-			if(!foundPackageJsonFile) {
-				defered.resolve(packageInfo);
-			}
-		});
-		parseZipStream.on('close', function() {
-			if(!foundPackageJsonFile) {
-				defered.resolve(packageInfo);
-			}
-		});
-
-		// Pipe the readStream into the parseStream
-		readZipStream.pipe(parseZipStream);
-		return defered.promise;
+		// return parseWithUnzip(packageInfo);
+		return parseWithYauzl(packageInfo);
 	};
 	var checkPackageVersion = function(packageInfo) {
 		var defered = q.defer();
@@ -787,27 +736,27 @@ function createPackageLoader() {
 		});
 
 		// Wait for all of the operations to complete
-	    q.allSettled(checkDirOps)
-	    .then(function(opgradeOptions) {
-	    	var validUpgrades = [];
+		q.allSettled(checkDirOps)
+		.then(function(opgradeOptions) {
+			var validUpgrades = [];
 
-	    	// Loop through and pick out the valid upgrades
-	    	opgradeOptions.forEach(function(opgradeOption) {
-	    		if(opgradeOption.value) {
-	    			if(opgradeOption.value.isValid) {
-	    				validUpgrades.push(opgradeOption.value);
-	    			}
-	    		}
-	    	});
+			// Loop through and pick out the valid upgrades
+			opgradeOptions.forEach(function(opgradeOption) {
+				if(opgradeOption.value) {
+					if(opgradeOption.value.isValid) {
+						validUpgrades.push(opgradeOption.value);
+					}
+				}
+			});
 
-	    	// Save the information about the currently available upgrades
-	        bundle.availableUpgrades = validUpgrades;
-	        defered.resolve(bundle);
+			// Save the information about the currently available upgrades
+			bundle.availableUpgrades = validUpgrades;
+			defered.resolve(bundle);
 
-	    }, function(err) {
-	        console.error('  - Finished Managing err', err, bundle.name);
-	        defered.reject(err);
-	    });
+		}, function(err) {
+			console.error('  - Finished Managing err', err, bundle.name);
+			defered.reject(err);
+		});
 		return defered.promise;
 	};
 	
@@ -846,75 +795,75 @@ function createPackageLoader() {
 
 		var chosenUpgrade;
 		// Pick the first-found package whose dependencies are met
-        var foundValidUpgrade = bundle.availableUpgrades.forEach(function(upgrade) {
-        	var isValid = true;
+		var foundValidUpgrade = bundle.availableUpgrades.forEach(function(upgrade) {
+			var isValid = true;
 
-        	// Check to see if its dependencies are met by the objects currently
-        	// managed by the package_loader, aka is the data in 
-        	// the self.dependencyData object and are the versions compatable.
-        	var requirementKeys = Object.keys(upgrade.dependencies);
-        	requirementKeys.every(function(key) {
-        		// Check to see if the dependency is found
-        		if(typeof(self.dependencyData[key]) !== 'undefined') {
-        			// Make sure that the dependency has a valid version number
-        			if(self.dependencyData[key].version) {
-        				var satisfies = semver.satisfies(
-        					self.dependencyData[key].version,
-        					upgrade.dependencies[key]
-        					);
-        				if(satisfies) {
-        					isValid = true;
-        				} else {
-        					isValid = false;
-        				}
-        			} else {
-        				isValid = false;
-        			}
-        		} else {
-        			isValid = false;
-        		}
-        		return isValid;
-        	});
-        	// Check to make sure that the available upgrade has a valid type
-        	if(isValid) {
-        	  	if(upgrade.type) {
-	        		if(upgrade.type === 'directory') {
-	        			isValid = true;
-	        		} else if (upgrade.type === '.zip') {
-	        			isValid = true;
-	        		} else {
-	        			isValid = false;
-	        		}
-	        	} else {
-	        		isValid = false;
-	        	} 
-	        }
-        	if(isValid) {
-        		if(typeof(chosenUpgrade) === 'undefined') {
-        			// Save the selected upgrade option
-        			chosenUpgrade = upgrade;
-        		} else {
-        			// Only replace the chosenUpgrade obj if the newer one has a
-        			// newer verion number
+			// Check to see if its dependencies are met by the objects currently
+			// managed by the package_loader, aka is the data in 
+			// the self.dependencyData object and are the versions compatable.
+			var requirementKeys = Object.keys(upgrade.dependencies);
+			requirementKeys.every(function(key) {
+				// Check to see if the dependency is found
+				if(typeof(self.dependencyData[key]) !== 'undefined') {
+					// Make sure that the dependency has a valid version number
+					if(self.dependencyData[key].version) {
+						var satisfies = semver.satisfies(
+							self.dependencyData[key].version,
+							upgrade.dependencies[key]
+							);
+						if(satisfies) {
+							isValid = true;
+						} else {
+							isValid = false;
+						}
+					} else {
+						isValid = false;
+					}
+				} else {
+					isValid = false;
+				}
+				return isValid;
+			});
+			// Check to make sure that the available upgrade has a valid type
+			if(isValid) {
+				if(upgrade.type) {
+					if(upgrade.type === 'directory') {
+						isValid = true;
+					} else if (upgrade.type === '.zip') {
+						isValid = true;
+					} else {
+						isValid = false;
+					}
+				} else {
+					isValid = false;
+				} 
+			}
+			if(isValid) {
+				if(typeof(chosenUpgrade) === 'undefined') {
+					// Save the selected upgrade option
+					chosenUpgrade = upgrade;
+				} else {
+					// Only replace the chosenUpgrade obj if the newer one has a
+					// newer verion number
 
-        			var isNewer = semver.lt(
-        				chosenUpgrade.version,
-        				upgrade.version
-        			);
-        			// console.log(isNewer, chosenUpgrade.version, upgrade.version, upgrade.type);
-        			if(isNewer) {
-        				chosenUpgrade = upgrade;
-        			}
-        		}
-        	}
-        });
+					var isNewer = semver.lt(
+						chosenUpgrade.version,
+						upgrade.version
+					);
+					// console.log(isNewer, chosenUpgrade.version, upgrade.version, upgrade.type);
+					if(isNewer) {
+						chosenUpgrade = upgrade;
+					}
+				}
+			}
+		});
 		if(typeof(chosenUpgrade) === 'undefined') {
 			// Emit an event indicating that a valid upgrade has been
-    		// detected.
+			// detected.
 			self.emit(EVENTS.NO_VALID_UPGRADE_DETECTED, bundle);
 		} else {
 			// Emit an event indicating that a valid upgrade has been
-    		// detected.
+			// detected.
 			self.emit(EVENTS.VALID_UPGRADE_DETECTED, bundle);
 		}
 		bundle.chosenUpgrade = chosenUpgrade;
@@ -1083,47 +1032,17 @@ function createPackageLoader() {
 		return defered.promise;
 	};
 	
+	try {
+		var extract_with_unzip = require('./extractors/extract_with_unzip');
+		var extractWithUnzip = extract_with_unzip.extractWithUnzip;
+		var extract_with_yauzl = require('./extractors/extract_with_yauzl');
+		var extractWithYauzl = extract_with_yauzl.extractWithYauzl;
+	} catch(err) {
+		console.log('Error including extractors', err);
+	}
 	var performZipFileUpgrade = function(bundle) {
-		var defered = q.defer();
-		var destinationPath = bundle.currentPackage.location;
-		var upgradeZipFilePath = bundle.chosenUpgrade.location;
-
-		var archiveStream = fs.createReadStream(upgradeZipFilePath);
-		var unzipExtractor = unzip.Extract({ path: destinationPath });
-
-		// Emit events indicating that a zip file extraction has started
-		self.emit(EVENTS.STARTING_EXTRACTION, bundle);
-		self.emit(EVENTS.STARTING_ZIP_FILE_EXTRACTION, bundle);
-		
-		unzipExtractor.on('error', function(err) {
-			console.error('  - Error performZipFileUpgrade', err, bundle.name);
-			var msg = 'Error performing a .zip file upgrade.  Verify ' +
-			'the user-permissions for the directory and .zip file: ' + 
-			upgradeZipFilePath + ', and ' + destinationPath;
-			bundle.resultMessages.push({
-				'step': 'performDirectoryUpgrade-copyRecursive',
-				'message': msg,
-				'isError': true,
-				'error': JSON.stringify(err)
-			});
-			bundle.overallResult = false;
-			bundle.isError = true;
-
-			// Emit events indicating that a zip file extraction has finished
-			// w/ an error
-			self.emit(EVENTS.FINISHED_EXTRACTION_ERROR, bundle);
-			self.emit(EVENTS.FINISHED_ZIP_FILE_EXTRACTION_ERROR, bundle);
-			defered.resolve(bundle);
-		});
-
-		unzipExtractor.on('close', function() {
-			// Emit events indicating that a zip file extraction has finished
-			self.emit(EVENTS.FINISHED_EXTRACTION, bundle);
-			self.emit(EVENTS.FINISHED_ZIP_FILE_EXTRACTION, bundle);
-			defered.resolve(bundle);
-		});
-		archiveStream.pipe(unzipExtractor);
-		return defered.promise;
+		// return extractWithUnzip(bundle, self, EVENTS);
+		return extractWithYauzl(bundle, self, EVENTS);
 	};
 
 	var performUpgrade = function(bundle) {
@@ -1241,7 +1160,7 @@ function createPackageLoader() {
 					bundle = extendedLoadManagedPackage(bundle);
 					
 				} catch(err) {
-					console.error('  - Error in loadManagedPackage', err, bundle.name);
+					console.error('  - Error in loadManagedPackage', err, bundle.name, err.stack);
 					var errMsg = 'Error requiring managedPackage during the ' +
 					'loadManagedPackage step.';
 					bundle.resultMessages.push({
@@ -1362,17 +1281,17 @@ function createPackageLoader() {
 		});
 
 		// Wait for all of the operations to complete
-	    // q.allSettled(manageOps)
-	    // .then(function(res) {
-	    //     var results = {};
-	    //     res.forEach(function(re) {
-	    //     	results[re.value.name] = re.value;
-	    //     });
-	    //     defered.resolve(results);
-	    // }, function(err) {
-	    //     console.log('Finished Managing err', err);
-	    //     defered.reject(err);
-	    // });
+		// q.allSettled(manageOps)
+		// .then(function(res) {
+		//     var results = {};
+		//     res.forEach(function(re) {
+		//     	results[re.value.name] = re.value;
+		//     });
+		//     defered.resolve(results);
+		// }, function(err) {
+		//     console.log('Finished Managing err', err);
+		//     defered.reject(err);
+		// });
 		
 		// Execute each operation one at a time
 		if(manageOps.length > 0) {
@@ -1390,7 +1309,7 @@ function createPackageLoader() {
 		} else {
 			defered.resolve({});
 		}
-	    return defered.promise;
+		return defered.promise;
 	};
 
 	/**

@@ -104,6 +104,7 @@ var tests = {
 			test.done();
 		});
 	},
+
 	'execution w/ existing data and same version upgrade': function(test) {
 		// Clear the fired-events list
 		capturedEvents = [];

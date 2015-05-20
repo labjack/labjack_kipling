@@ -77,7 +77,7 @@ var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType,
 	
 	// Verify upgrade choice & actions
 	if(testConditions.validUpgradeObj) {
-		test.strictEqual(chosenUpgrade.type, testConditions.upgradeType, 'Chosen upgrade is not a directory');
+		test.strictEqual(chosenUpgrade.type, testConditions.upgradeType, 'Chosen upgrade is not a ' + testConditions.upgradeType.toString());
 		test.ok(chosenUpgrade.isValid, 'Chosen upgrade is not valid');
 	} else {
 		test.strictEqual(typeof(chosenUpgrade), 'undefined', 'chosenUpgrade should not be defined');
@@ -130,6 +130,7 @@ var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType,
 			// console.log('Required Data', global[cns][requiredLibKey]);
 		} else {
 			test.ok(false, 'did not find required key: ' + requiredLibKey);
+			console.log('loadedLibKeys', loadedLibKeys);
 		}
 	});	
 };

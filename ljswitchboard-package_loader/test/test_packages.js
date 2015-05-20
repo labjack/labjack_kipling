@@ -100,6 +100,14 @@ var testPackages = {
 			path.join(process.cwd(), 'test_extraction_data', 'ljswitchboard-static_files'),
 		]
 	},
+	'staticFilesBadZip': {
+		'name': 'ljswitchboard-static_files',
+		'folderName': 'ljswitchboard-static_files',
+		'loadMethod': 'managed',
+		'locations': [
+			path.join(process.cwd(), 'test_extraction_data', 'ljswitchboard-static_files_bad_zip.zip'),
+		]
+	},
 	'staticFilesNoUpgrades': {
 		'name': 'ljswitchboard-static_files',
 		'folderName': 'ljswitchboard-static_files',
