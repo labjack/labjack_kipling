@@ -111,3 +111,9 @@
 .wifi-rssi-image {
     height:20px;
 }
+#name-display {
+    width:185px;
+}
+#current-name-display{
+    word-wrap:break-word;
+}

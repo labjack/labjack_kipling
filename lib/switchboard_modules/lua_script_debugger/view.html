@@ -64,18 +64,18 @@
 													<a tabindex="-1">{{name}}</a>
 													<ul class="dropdown-menu">
 														{{#each subScripts}}
-														<li><a id="{{ name }}">{{ name }}</a></li>
+														<li><a class="example-script" id="{{ name }}">{{ name }}</a></li>
 														{{/each}}
 													</ul>
 												</li>
 												{{else}}
-												<li><a id="{{ name }}">{{ name }}</a></li>
+												<li><a class="example-script" id="{{ name }}">{{ name }}</a></li>
 												{{/if}}
 											{{/each}}
 										</ul>
 									</li>
 									{{else}}
-									<li><a id="{{ name }}">{{ name }}</a></li>
+									<li><a class="example-script" id="{{ name }}">{{ name }}</a></li>
 									{{/if}}
 								{{/each}}
 							</ul>

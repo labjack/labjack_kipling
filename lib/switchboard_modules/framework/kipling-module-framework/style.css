@@ -130,9 +130,13 @@ span.metro-radio::before {
 
 
 #single-device-framework-obj #device-selector-table .hide-overflow-text {
-    text-overflow: ellipsis;/*
-    white-space: nowrap;*/
-    line-height:14px;
+    /*text-overflow: ellipsis;*/
+    /*white-space: nowrap;*/
+    /*line-height:14px;*/
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 14px;
+    max-width: 227px;
 }
 #device-selector-table {
     margin-bottom:0;
