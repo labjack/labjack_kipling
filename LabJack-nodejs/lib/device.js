@@ -36,8 +36,8 @@ var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 **/
 function DriverOperationError(code)
 {
-    this.code = code;
-    this.message = code;
+	this.code = code;
+	this.message = code;
 }
 util.inherits(DriverOperationError, Error);
 DriverOperationError.prototype.name = 'Driver Operation Error - device';
@@ -511,7 +511,7 @@ exports.labjack = function () {
 	 * Retrieves device metadata information about the device whose handle this
 	 * object encapsulates. Returns a DeviceInfo object with the following
 	 * structure:
-     * 
+	 * 
 	 * { 
 	 *		deviceType {number} A device model type corresponding to a constant
 	 *			in LabJackM.h. 
@@ -715,12 +715,21 @@ exports.labjack = function () {
 						return onError('Weird Error read', err);
 					}
 					if ( res === 0 ) {
-						//Calculate the length of the string
-						var i = 0;
-						while ( strBuffer[i] !== 0 ) {
-							i++;
+						// Parse the string buffer and get the actual string.
+						var receivedStrData = strBuffer.toString(
+							'utf8',
+							0,
+							driver_const.LJM_MAX_STRING_SIZE
+						);
+						var actualStr = '';
+						for(var i = 0; i < receivedStrData.length; i++) {
+							if(receivedStrData.charCodeAt(i) === 0) {
+								break;
+							} else {
+								actualStr += receivedStrData[i];
+							}
 						}
-						return onSuccess(strBuffer.toString('utf8', 0, i));
+						return onSuccess(actualStr);
 					} else {
 						return onError(res);
 					}
@@ -788,11 +797,21 @@ exports.labjack = function () {
 				strBuffer
 			);
 			if (output === 0) {
-				var i = 0;
-				while(strBuffer[i] !== 0) {
-					i++;
+				// Parse the string buffer and get the actual string.
+				var receivedStrData = strBuffer.toString(
+					'utf8',
+					0,
+					driver_const.LJM_MAX_STRING_SIZE
+				);
+				var actualStr = '';
+				for(var i = 0; i < receivedStrData.length; i++) {
+					if(receivedStrData.charCodeAt(i) === 0) {
+						break;
+					} else {
+						actualStr += receivedStrData[i];
+					}
 				}
-				result = strBuffer.toString('utf8',0,i);
+				result = actualStr;
 			}
 		
 		} else {

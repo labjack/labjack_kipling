@@ -273,10 +273,12 @@ exports.ljmDriver = function() {
         var retVar;
         var strInterpret = function(input) {
             var output = '';
-            var i = 0;
-            while(input.charCodeAt(i) !== 0) {
-                output += input[i];
-                i += 1;
+            for(var i = 0; i < input.length; i++) {
+                if(input.charCodeAt(i) === 0) {
+                    break;
+                } else {
+                    output += input[i];
+                }
             }
             return output;
         };
