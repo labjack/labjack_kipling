@@ -241,6 +241,25 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
                 ref.refType(ref.types.int)      //ErrorAddress
             ]
         ],
+        'LJM_eReadAddressArray': [
+            'int', [
+                'int',                          //Handle
+                'int',                          //Address
+                'int',                          //Type
+                'int',                          //NumValues
+                ref.refType(ref.types.double),  //aValues (Readings)
+                ref.refType(ref.types.int)      //ErrorAddress
+            ]
+        ],
+        'LJM_eReadNameArray': [
+            'int', [
+                'int',                          //Handle
+                'string',                       //Name
+                'int',                          //NumValues
+                ref.refType(ref.types.double),  //aValues (Readings)
+                ref.refType(ref.types.int)      //ErrorAddress
+            ]
+        ],
         'LJM_eWriteAddresses': [
             'int', [
                 'int',                          //Handle
@@ -257,6 +276,25 @@ var liblabjack = ffi.Library(LIBRARY_LOC,
                 'int',                          //NumFrames (Number of Registers being accessed)
                 ref.refType(ref.types.CString), //aNames (Registers to write to)
                 ref.refType('double'),          //aValues (Values to write)
+                ref.refType(ref.types.int)      //ErrorAddress
+            ]
+        ],
+        'LJM_eWriteAddressArray': [
+            'int', [
+                'int',                          //Handle
+                'int',                          //Address
+                'int',                          //Type
+                'int',                          //NumValues
+                ref.refType(ref.types.double),  //aValues (Readings)
+                ref.refType(ref.types.int)      //ErrorAddress
+            ]
+        ],
+        'LJM_eWriteNameArray': [
+            'int', [
+                'int',                          //Handle
+                'string',                       //Name
+                'int',                          //NumValues
+                ref.refType(ref.types.double),  //aValues (Readings)
                 ref.refType(ref.types.int)      //ErrorAddress
             ]
         ],

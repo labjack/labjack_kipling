@@ -150,7 +150,7 @@ var LJM_eReadAddress = createCallableObject(
 		lastFunctionCall.push("LJM_eReadAddress");
 		argumentsList.push(arguments);
 		resultPtr.writeDoubleLE(expectedResultArg,0);
-		return expectedResult;;
+		return expectedResult;
 	},
 	function(handle, address, addrType, resultPtr, callback) {
 		lastFunctionCall.push("LJM_eReadAddressAsync");
@@ -211,6 +211,72 @@ var LJM_eReadNameString = createCallableObject(
 		reportEnd(callback);
 	});
 /**
+ * Test-Function for Synchronous and Async array-reading operations.
+ */
+var defaultArrayTestData = {
+	6024: {
+		'data': function(){
+			var str = 'DEADBEEF\r\n';
+			var len = str.length;
+			var retData = [];
+			for(var i = 0; i < len; i++) {
+				retData.push(str.charCodeAt(i));
+			}
+			return retData;
+		}(),
+		'addressName': 'LUA_DEBUG_DATA',
+	}
+};
+var getArrayData = function(address, numValues, aValues, error) {
+	// console.log('Getting Array Data', address, numValues);
+	if(defaultArrayTestData[address]) {
+		var i = 0;
+		var data = defaultArrayTestData[address].data;
+		while((i < numValues) && (i < data.length )) {
+			aValues.writeDoubleLE(data[i], i * 8);
+			 i += 1;
+		}
+	}
+};
+var LJM_eReadAddressArray = createCallableObject(
+	function(handle, address, addrType, numValues, aValues, error) {
+		lastFunctionCall.push("LJM_eReadAddressArray");
+		argumentsList.push(arguments);
+		getArrayData(address, numValues, aValues, error);
+		return expectedResult;
+	},
+	function(handle, address, addrType, numValues, aValues, error, callback) {
+		lastFunctionCall.push("LJM_eReadAddressArrayAsync");
+		argumentsList.push(arguments);
+		getArrayData(address, numValues, aValues, error);
+		reportEnd(callback);
+	});
+/**
+ * Test-Function for Synchronous and Async array-writing operations.
+ */
+var interpretWriteArrayData = function(numValues, aValues) {
+	var data = [];
+	var offset = 0;
+	for(var i = 0; i < numValues; i ++) {
+		data.push(aValues.readDoubleLE(offset));
+		offset += 8;
+	}
+	// console.log('Data', data);
+};
+var LJM_eWriteAddressArray = createCallableObject(
+	function(handle, address, addrType, numValues, aValues, error) {
+		lastFunctionCall.push("LJM_eWriteAddressArray");
+		interpretWriteArrayData(numValues, aValues);
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(handle, address, addrType, numValues, aValues, error, callback) {
+		lastFunctionCall.push("LJM_eWriteAddressArrayAsync");
+		interpretWriteArrayData(numValues, aValues);
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+/**
  * Test-Function for Synchronous and Async Multiple-Operation functionality: 
  */
 var LJM_eReadAddresses = createCallableObject(
@@ -224,7 +290,7 @@ var LJM_eReadAddresses = createCallableObject(
 		for(var i = 0; i < length; i++) {
 			results.writeDoubleLE(expectedResultArg[i],i*8);
 		}
-		if(expectedResult != 0) {
+		if(expectedResult !== 0) {
 			errors.writeUInt32LE(99,0);
 		}
 		return expectedResult;
@@ -241,7 +307,7 @@ var LJM_eReadAddresses = createCallableObject(
 		for(var i = 0; i < length; i++) {
 			results.writeDoubleLE(expectedResultArg[i],i*8);
 		}
-		if(expectedResult != 0) {
+		if(expectedResult !== 0) {
 			errors.writeUInt32LE(99,0);
 		}
 		reportEnd(callback);
@@ -260,7 +326,7 @@ var LJM_eReadNames = createCallableObject(
 		for(var i = 0; i < length; i++) {
 			results.writeDoubleLE(expectedResultArg[i],i*8);
 		}
-		if(expectedResult != 0) {
+		if(expectedResult !== 0) {
 			errors.writeUInt32LE(99,0);
 		}
 		return expectedResult;
@@ -275,7 +341,7 @@ var LJM_eReadNames = createCallableObject(
 		for(var i = 0; i < length; i++) {
 			results.writeDoubleLE(expectedResultArg[i],i*8);
 		}
-		if(expectedResult != 0) {
+		if(expectedResult !== 0) {
 			errors.writeUInt32LE(99,0);
 		}
 		reportEnd(callback);
@@ -679,6 +745,8 @@ var fakeDriver = {
 	'LJM_eReadAddress': LJM_eReadAddress,
 	'LJM_eWriteName': LJM_eWriteName,
 	'LJM_eReadName': LJM_eReadName,
+	'LJM_eReadAddressArray': LJM_eReadAddressArray,
+	'LJM_eWriteAddressArray': LJM_eWriteAddressArray,
 	'LJM_eReadAddresses': LJM_eReadAddresses,
 	'LJM_eReadNames': LJM_eReadNames,
 	'LJM_eWriteAddresses': LJM_eWriteAddresses,

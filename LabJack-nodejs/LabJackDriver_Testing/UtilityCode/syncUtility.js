@@ -77,7 +77,6 @@ var runTest = function() {
 				onError(e.code);
 			}
 			else {
-				//console.log(e);
 				onError("Unexpected Error"+e.toString());
 			}
 		}	

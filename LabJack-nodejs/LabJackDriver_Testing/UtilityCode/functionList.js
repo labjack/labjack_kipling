@@ -3,9 +3,11 @@ var functionLocation = {
 	'open': 'device',
 	'readRaw': 'device',
 	'read': 'device',
+	'readArray': 'device',
 	'readMany': 'device',
 	'writeRaw': 'device',
 	'write': 'device',
+	'writeArray': 'device',
 	'writeMany': 'device',
 	'getHandleInfo': 'device',
 	'close': 'device',
@@ -31,9 +33,9 @@ var functionLocation = {
 	'disableLog': 'driver',
 };
 exports.getList = function() {
-	return functionLocation
-}
+	return functionLocation;
+};
 exports.search = function(arg) {
 	console.log(arg);
 	return functionLocation[arg];
-}
+};

@@ -1399,7 +1399,152 @@ module.exports = {
 				// console.log(argList);
     			test.done();
     		}, false, false);
-    }
+    },
+    readArray: function(test){
+        // asyncRun.config(dev, driver,driver_const);
+        // syncRun.config(dev, driver,driver_const);
+        
+        //Configure running-engines
+		asyncRun.config(dev, null);
+		syncRun.config(dev, null);
+        
+        //Create test-variables
+        var testList = [
+            'readArray("LUA_DEBUG_DATA", 10)',
+            'readArray("AIN0", 10)',
+        ];
+
+        var successData = function(){
+			var str = 'DEADBEEF\r\n';
+			var len = str.length;
+			var retData = [];
+			for(var i = 0; i < len; i++) {
+				retData.push(str.charCodeAt(i));
+			}
+			return retData;
+		}();
+		var errorText = 'Tried to read an array from a register that is not a buffer';
+        var expectedData = [
+	        successData,
+	        errorText,
+	        successData,
+	        errorText
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_eReadAddressArray',
+            'LJM_eReadAddressArrayAsync',
+        ];
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                console.log('Error',res);
+            }, function(res) {
+                //Report that test finished
+                // console.log('Finished!', res);
+
+                // Test to make sure the appropriate LJM functions were called
+    			var funcs = fakeDriver.getLastFunctionCall();
+    			test.deepEqual(funcs, expectedFunctionList);
+
+    			// Test to make sure the proper results were acquired
+    			var results = asyncRun.getResults();
+    			test.deepEqual(results, expectedData);
+    			// console.log('Results', results);
+
+                test.done();
+            },false,false
+        );
+    },
+
+    writeArray: function(test) {
+    	//Configure running-engines
+		asyncRun.config(dev, null);
+		syncRun.config(dev, null);
+        
+        //Create test-variables
+        var testList = [
+            'writeArray("LUA_SOURCE_WRITE", "DEADBEEF\\r\\n")',
+            'writeArray("LUA_SOURCE_WRITE", [68, 69, 65, 68, 66, 69, 69, 70, 13, 10])',
+            'writeArray("LUA_SOURCE_WRITE", "")',
+            'writeArray("LUA_SOURCE_WRITE", [])',
+        ];
+
+        var successData = function(){
+			var str = 'DEADBEEF\r\n';
+			var len = str.length;
+			var retData = [];
+			for(var i = 0; i < len; i++) {
+				retData.push(str.charCodeAt(i));
+			}
+			return retData;
+		}();
+        var expectedData = [
+	        successData,successData,[],[],
+	        successData,successData,[],[]
+        ];
+
+        //Expected function list:
+        var expectedFunctionList = [ 
+            'LJM_eWriteAddressArray',
+            'LJM_eWriteAddressArray',
+            'LJM_eWriteAddressArray',
+            'LJM_eWriteAddressArray',
+            'LJM_eWriteAddressArrayAsync',
+            'LJM_eWriteAddressArrayAsync',
+            'LJM_eWriteAddressArrayAsync',
+            'LJM_eWriteAddressArrayAsync',
+        ];
+        var interpretWriteArrayData = function(handle, address, type, numValues, aValues) {
+			var data = [];
+			var offset = 0;
+			for(var i = 0; i < numValues; i ++) {
+				data.push(aValues.readDoubleLE(offset));
+				offset += 8;
+			}
+			return data;
+		};
+		var interpretFunctionArgs = function(functionArgs, index) {
+			var argArray = [];
+			var keys = Object.keys(functionArgs);
+			keys.forEach(function(key) {
+				argArray.push(functionArgs[key]);
+			});
+			var retData = interpretWriteArrayData.apply(this, argArray);
+			var expectedRetData = expectedData[index];
+			test.deepEqual(retData, expectedRetData, 'written data was not encoded properly');
+		};
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                console.log('Error',res);
+            }, function(res) {
+                //Report that test finished
+                // console.log('Finished!', res);
+
+                // Test to make sure the appropriate LJM functions were called
+    			var funcs = fakeDriver.getLastFunctionCall();
+    			// console.log('funcs:', funcs);
+    			test.deepEqual(funcs, expectedFunctionList);
+
+    			var argList = fakeDriver.getArgumentsList();
+    			var actualArgs = argList.splice(1, argList.length);
+    			// console.log('Args', actualArgs[0]);
+    			actualArgs.forEach(interpretFunctionArgs);
+
+    			// Test to make sure the proper results were acquired
+    			var results = asyncRun.getResults();
+    			// console.log('results:', results);
+    			// test.deepEqual(results, expectedData);
+
+                test.done();
+            },false,false
+        );
+    },
 
 	/**
 	 * This test tests the  asynchronous function call of LJM.

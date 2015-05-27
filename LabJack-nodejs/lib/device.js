@@ -85,15 +85,19 @@ exports.labjack = function () {
 
 	var wrapUserFunction = function(userFunction) {
 		var persistentFunction = function(a, b, c, d) {
-			if(self.isHandleValid) {
-				if(userFunction) {
-					userFunction(a, b, c, d);
+			try {
+				if(self.isHandleValid) {
+					if(userFunction) {
+						userFunction(a, b, c, d);
+					} else {
+						console.error('function not defined', arguments);
+					}
 				} else {
-					console.error('function not defined', arguments);
+					console.error('Preventing execution of callback when handle is not valid,', typeof(userFunction));
+					console.trace();
 				}
-			} else {
-				console.error('Preventing execution of callback when handle is not valid,', typeof(userFunction));
-				console.trace();
+			} catch(err) {
+				console.error('Error calling userFunction', err);
 			}
 		};
 		return persistentFunction;
@@ -832,6 +836,165 @@ exports.labjack = function () {
 	};
 
 	/**
+	 * Asynchronously reads a single modbus buffer address.
+	 *
+	 * @param {Number/String} address Either an integer register address or a 
+	 *		String name compatible with LJM.
+	 * @param {Number} number The number of bytes to read from the device.
+	 * @param {function} onError Takes a single argument represenging
+	 *		the LJM-Error, either an integer error number or a String.
+	 * @param {Number/String} onSuccess Callback taking a single argument: an
+	 *		array containging data (as number or string elements based on data
+	 *		type) requested from the device.
+	 * @throws {DriverInterfaceError} If the input args aren't correct.
+	**/
+	this.readArray = function(address, numReads, onError, onSuccess) {
+		//Check to make sure a device has been opened
+		if (self.checkStatus(onError)) { return; }
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+
+		var output;
+		var addressNumber = 0;
+		var numValues = numReads;
+		var addressType = driver_const.LJM_BYTE;
+		var info = self.constants.getAddressInfo(address, 'R');
+		var expectedReturnType = info.type;
+		var isDirectionValid = info.directionValid == 1;
+		var isBufferRegister = false;
+		if(info.data) {
+			if(info.data.isBuffer) {
+				isBufferRegister = true;
+			}
+		}
+		if (isDirectionValid && isBufferRegister) {
+			addressNumber = info.address;
+
+			// Return Variable
+			var errorResult = undefined;
+
+			// Perform buffer allocations
+			var aValues = new Buffer(numReads * ARCH_DOUBLE_NUM_BYTES);			//Array of doubles
+			var errorVal = new Buffer(ARCH_INT_NUM_BYTES);						//Array the size of one UInt32 for err
+
+			// Clear all of the arrays
+			aValues.fill(0);
+			errorVal.fill(0);
+
+			// Call the LJM function
+			errorResult = self.ljm.LJM_eReadAddressArray.async(
+				self.handle,
+				addressNumber,
+				addressType,
+				numValues,
+				aValues,
+				errorVal,
+				function(err, res) {
+					if(err) {
+						return onError('Weird Error readAddress', err);
+					}
+					if ( (res === 0) ) {
+						var retData = [];
+						var offset = 0;
+						for (i = 0; i < numValues; i++) {
+							retData[i] = aValues.readDoubleLE(offset);
+							offset += ARCH_DOUBLE_NUM_BYTES;
+						}
+						return onSuccess(retData);
+					} else {
+						return onError({retError: res, errFrame: errorVal.deref()});
+					}
+				}
+			);
+		} else {
+			if (info.type == -1) {
+				onError('Invalid Address');
+			} else if (info.directionValid === 0) {
+				onError('Invalid Read Attempt');
+			} else if (!isBufferRegister) {
+				onError('Tried to read an array from a register that is not a buffer');
+			}
+			return -1;
+		}
+	};
+
+	/**
+	 * Synchronously reads a single modbus buffer address.
+	 *
+	 * @param {Number/String} address Either an integer register address or a 
+	 *		String name compatible with LJM.
+	 * @param {Number} number The number of bytes to read from the device.
+	 * @throws {DriverInterfaceError} If the input args aren't correct.
+	**/
+	this.readArraySync = function(address, numReads) {
+		//Check to make sure a device has been opened
+		self.checkStatus();
+
+		var output;
+		var addressNumber = 0;
+		var numValues = numReads;
+		var addressType = driver_const.LJM_BYTE;
+		var info = self.constants.getAddressInfo(address, 'R');
+		var expectedReturnType = info.type;
+		var isDirectionValid = info.directionValid == 1;
+		var isBufferRegister = false;
+		var retData = [];
+		if(info.data) {
+			if(info.data.isBuffer) {
+				isBufferRegister = true;
+			}
+		}
+		if (isDirectionValid && isBufferRegister) {
+			addressNumber = info.address;
+
+			// Return Variable
+			var errorResult = undefined;
+
+			// Perform buffer allocations
+			var aValues = new Buffer(numReads * ARCH_DOUBLE_NUM_BYTES);			//Array of doubles
+			var errorVal = new Buffer(ARCH_INT_NUM_BYTES);						//Array the size of one UInt32 for err
+
+			// Clear all of the arrays
+			aValues.fill(0);
+			errorVal.fill(0);
+
+			// Call the LJM function
+			output = self.ljm.LJM_eReadAddressArray(
+				self.handle,
+				addressNumber,
+				addressType,
+				numValues,
+				aValues,
+				errorVal
+			);
+			if (output === 0) {
+				// Parse the read data array.
+				var offset = 0;
+				for (i = 0; i < numValues; i++) {
+					retData[i] = aValues.readDoubleLE(offset);
+					offset += ARCH_DOUBLE_NUM_BYTES;
+				}
+			}
+		} else {
+			if (info.type == -1) {
+				throw new DriverInterfaceError('Invalid Address');
+			} else if (info.directionValid === 0) {
+				throw new DriverInterfaceError('Invalid Read Attempt');
+			} else if (!isBufferRegister) {
+				throw new DriverInterfaceError('Tried to read an array from a register that is not a buffer');
+			}
+			throw new DriverInterfaceError('Unexpected error.');
+		}
+
+		if (output === 0) {
+			return retData;
+		} else {
+			throw new DriverOperationError(output);
+		}
+	};
+	/**
 	 * Read many addresses asynchronously.
 	 *
 	 * Function performs LJM_eReadNames and LJM_eReadAddresses driver calls
@@ -1413,6 +1576,189 @@ exports.labjack = function () {
 		} else {
 			throw new DriverOperationError(errorResult);
 			return errorResult;
+		}
+	};
+
+	/**
+	 * A helper function for the writeArray and writeArraySync function to parse
+	 * or interpret the data to be written.
+	 */
+	var innerFormatAndValidateArrayData = function(address, writeData) {
+		var writeInfo = {
+			'isValid': false,
+			'message': 'Unknown Reason',
+
+			// Data to be written
+			'address': undefined,
+			'type': undefined,
+			'numValues': undefined,
+			'aValues': undefined,
+			'errorAddress': undefined,
+		};
+
+		var info = self.constants.getAddressInfo(address, 'W');
+		var isDirectionValid = info.directionValid == 1;
+		var isBufferRegister = false;
+		if(info.data) {
+			if(info.data.isBuffer) {
+				isBufferRegister = true;
+			}
+		}
+
+		if (isDirectionValid && isBufferRegister) {
+			writeInfo.isValid = true;
+
+			// Save info
+			writeInfo.address = info.address;
+			writeInfo.type = info.type;
+			var errorVal = new Buffer(ARCH_INT_NUM_BYTES);
+			errorVal.fill(0);
+			writeInfo.errorAddress = errorVal;
+
+			// Variable declarations:
+			var aValues, offset, i;
+
+			// Check to see if the input-data is of the type "buffer"
+			if(Buffer.isBuffer(writeData)) {
+				writeInfo.isValid = false;
+				writeInfo.message = 'Buffer type is not supported';
+			} else if(Array.isArray(writeData)) {
+				writeInfo.numValues = writeData.length;
+				aValues = new Buffer(writeData.length * ARCH_DOUBLE_NUM_BYTES);
+				aValues.fill(0);
+				offset = 0;
+				for(i = 0; i < writeData.length; i++) {
+					aValues.writeDoubleLE(writeData[i], offset);
+					offset += ARCH_DOUBLE_NUM_BYTES;
+				}
+				writeInfo.aValues = aValues;
+			} else if((typeof(writeData) === 'string') || (writeData instanceof String)) {
+				writeInfo.numValues = writeData.length;
+				aValues = new Buffer(writeData.length * ARCH_DOUBLE_NUM_BYTES);
+				aValues.fill(0);
+				offset = 0;
+				for(i = 0; i < writeData.length; i++) {
+					aValues.writeDoubleLE(writeData.charCodeAt(i), offset);
+					offset += ARCH_DOUBLE_NUM_BYTES;
+				}
+				writeInfo.aValues = aValues;
+			} else {
+				// Un-supported type
+				writeInfo.isValid = false;
+				writeInfo.message = 'Invalid data type being written: ' + typeof(writeData) + '.';
+			}
+			writeInfo.numValues = writeData.length;
+		} else {
+			writeInfo.isValid = false;
+			if (info.type == -1) {
+				writeInfo.message = 'Invalid Address';
+			} else if (info.directionValid === 0) {
+				writeInfo.message = 'Invalid Read Attempt';
+			} else if (!isBufferRegister) {
+				writeInfo.message = 'Tried to read an array from a register that is not a buffer';
+			}
+		}
+		return writeInfo;
+	};
+	/**
+	 * Asynchronously write a single modbus buffer address.
+	 *
+	 * @param {Number/String} address Either an integer register address or a 
+	 *		String name compatible with LJM.
+	 * @param {Number} number The number of bytes to read from the device.
+	 * @param {function} onError Takes a single argument represenging
+	 *		the LJM-Error, either an integer error number or a String.
+	 * @param {Number/String} onSuccess Callback taking a single argument: an
+	 *		array containging data (as number or string elements based on data
+	 *		type) requested from the device.
+	 * @throws {DriverInterfaceError} If the input args aren't correct.
+	**/
+	this.writeArray = function(address, writeData, onError, onSuccess) {
+		//Check to make sure a device has been opened
+		if (self.checkStatus(onError)) { return; }
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+
+		var writeInfo = innerFormatAndValidateArrayData(address, writeData);
+
+		if(writeInfo.isValid) {
+			// Return Variable
+			var errorResult;
+
+			var writeAddress = writeInfo.address;
+			var type = writeInfo.type;
+			var numValues = writeInfo.numValues;
+			var aValues = writeInfo.aValues;
+			var errorAddress = writeInfo.errorAddress;
+			// Call the LJM function
+			errorResult = self.ljm.LJM_eWriteAddressArray.async(
+				self.handle,
+				writeAddress,
+				type,
+				numValues,
+				aValues,
+				errorAddress,
+				function(err, res) {
+					if(err) {
+						return onError('Weird Error readAddress', err);
+					}
+					if ( (res === 0) ) {
+						return onSuccess();
+					} else {
+						return onError({retError: res, errFrame: errorAddress.deref()});
+					}
+				}
+			);
+		} else {
+			onError(writeInfo.message);
+			return -1;
+		}
+	};
+
+	/**
+	 * Synchronously reads a single modbus buffer address.
+	 *
+	 * @param {Number/String} address Either an integer register address or a 
+	 *		String name compatible with LJM.
+	 * @param {Number} number The number of bytes to read from the device.
+	 * @throws {DriverInterfaceError} If the input args aren't correct.
+	**/
+	this.writeArraySync = function(address, writeData) {
+		//Check to make sure a device has been opened
+		self.checkStatus();
+
+		var output;
+		var retData;
+		var writeInfo = innerFormatAndValidateArrayData(address, writeData);
+
+		if(writeInfo.isValid) {
+			var writeAddress = writeInfo.address;
+			var type = writeInfo.type;
+			var numValues = writeInfo.numValues;
+			var aValues = writeInfo.aValues;
+			var errorAddress = writeInfo.errorAddress;
+
+			// Call the LJM function
+			output = self.ljm.LJM_eWriteAddressArray(
+				self.handle,
+				writeAddress,
+				type,
+				numValues,
+				aValues,
+				errorAddress
+			);
+			if (output === 0) {
+				// Read was successful.
+			}
+		} else {
+			throw new DriverInterfaceError(writeInfo.message);
+		}
+		if (output === 0) {
+			return retData;
+		} else {
+			throw new DriverOperationError(output);
 		}
 	};
 
