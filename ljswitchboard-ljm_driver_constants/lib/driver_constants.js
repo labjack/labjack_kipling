@@ -138,7 +138,7 @@ exports.DIGIT_TARGET						= 100200000;
 
 //==============================================
 //==============================================
-exports.typeSizes = {
+var ljmTypeSizes = {
 	UINT64: 8,
 	INT32: 4,
 	STRING: 50,
@@ -147,6 +147,37 @@ exports.typeSizes = {
 	UINT32: 4,
 	FLOAT32: 4
 };
+exports.typeSizes = {
+	'LJM_UINT64': ljmTypeSizes.UINT64,
+	'UINT64': ljmTypeSizes.UINT64,
+	'Uint64': ljmTypeSizes.UINT64,
+	'uint64': ljmTypeSizes.UINT64,
+	'LJM_UINT16': ljmTypeSizes.UINT16,
+	'UINT16': ljmTypeSizes.UINT16,
+	'Uint16': ljmTypeSizes.UINT16,
+	'uint16': ljmTypeSizes.UINT16,
+	'LJM_UINT32': ljmTypeSizes.UINT32,
+	'UINT32': ljmTypeSizes.UINT32,
+	'Uint32': ljmTypeSizes.UINT32,
+	'uint32': ljmTypeSizes.UINT32,
+	'LJM_INT32': ljmTypeSizes.INT32,
+	'INT32': ljmTypeSizes.INT32,
+	'Int32': ljmTypeSizes.INT32,
+	'int32': ljmTypeSizes.INT32,
+	'LJM_FLOAT32': ljmTypeSizes.FLOAT32,
+	'FLOAT32': ljmTypeSizes.FLOAT32,
+	'Float32': ljmTypeSizes.FLOAT32,
+	'float32': ljmTypeSizes.FLOAT32,
+	'LJM_STRING': ljmTypeSizes.STRING,
+	'STRING': ljmTypeSizes.STRING,
+	'String': ljmTypeSizes.STRING,
+	'string': ljmTypeSizes.STRING,
+	'LJM_BYTE': ljmTypeSizes.BYTE,
+	'BYTE': ljmTypeSizes.BYTE,
+	'Byte': ljmTypeSizes.BYTE,
+	'byte': ljmTypeSizes.BYTE,
+};
+
 exports.LJM_BYTES_PER_REGISTER = 2;
 exports.deviceTypes = {
 	LJM_DTANY: 0,
