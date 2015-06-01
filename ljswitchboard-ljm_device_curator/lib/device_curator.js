@@ -865,7 +865,7 @@ function device(useMockDevice) {
 			reads.push({'address': address, 'numValues': remainder});
 		}
 
-		// console.log('readArray info', numReads, splitSize, numFullPackets, remainder);
+		// console.log('- readArray info', numReads, splitSize, numFullPackets, remainder);
 
 		// Perform reads
 		async.eachSeries(reads, function(singleRead, callback) {
