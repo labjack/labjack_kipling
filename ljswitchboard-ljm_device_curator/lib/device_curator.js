@@ -474,6 +474,52 @@ function device(useMockDevice) {
 		});
 		return defered.promise;
 	};
+
+	// Initialize the data object indicating how to split buffer arrays.
+	this.bufferDataSplitSizes = {
+		1: 1,
+		2: 1,
+		4: 1,
+	};
+	this.getBufferDataSplitSize = function(registerType) {
+		var splitSize = 1;
+		var dataSizeInBytes = driver_const.typeSizes[registerType];
+
+		if(dataSizeInBytes) {
+			if(self.bufferDataSplitSizes[dataSizeInBytes]) {
+				splitSize = self.bufferDataSplitSizes[dataSizeInBytes];
+			}
+		}
+		return splitSize;
+	};
+	var getMinimumValue = function(values) {
+		var minVal = 9999;
+		if(values.length > 0) {
+			values.forEach(function(value) {
+				if(value < minVal) {
+					minVal = value;
+				}
+			});
+		} else {
+			minVal = 1;
+		}
+		return minVal;
+	};
+	var calculateBufferDataSplitSizes = function() {
+		var ct = self.savedAttributes.connectionType;
+		var maxBytesPerMB = self.savedAttributes.maxBytesPerMB;
+
+		var keys = Object.keys(self.bufferDataSplitSizes);
+		keys.forEach(function(key) {
+			var numBytes = parseInt(key, 10);
+			
+			var standardValue = Math.floor((maxBytesPerMB - 12)/numBytes);
+			var possibleValues = [standardValue];
+			var minVal = getMinimumValue(possibleValues);
+
+			self.bufferDataSplitSizes[key] = minVal;
+		});
+	};
 	var saveAndLoadAttributes = function(openParameters) {
 		var saveAndLoad = function() {
 			var defered = q.defer();
@@ -530,6 +576,14 @@ function device(useMockDevice) {
 						formatters[key] = deviceCustomAttributes[dt][key];
 					});
 				}
+
+				try {
+					// Update the buffer data split sizes
+					calculateBufferDataSplitSizes();
+				} catch(err) {
+					console.log('Error updating bufferDataSplitSizes', err, err.stack);
+				}
+
 				saveCustomAttributes(otherAttributeKeys, dt, formatters)
 				.then(defered.resolve);
 			}, defered.reject);
@@ -769,6 +823,73 @@ function device(useMockDevice) {
 		}
 		return defered.promise;
 	};
+	var innerReadArray = function(address, numReads) {
+		var defered = q.defer();
+		if(allowExecution()) {
+			ljmDevice.readArray(
+				address,
+				numReads,
+				function(err) {
+					captureDeviceError('readArray', err, {'address': address});
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject({
+					retError:driver_const.LJN_DEVICE_NOT_CONNECTED,
+					errFrame:0}
+				);
+			});
+		}
+		return defered.promise;
+	};
+	this.readArray = function(address, numReads) {
+		var defered = q.defer();
+		var reads = [];
+		var readData = [];
+		var readError;
+		var isError = false;
+
+		// Prepare reads
+		var info = modbusMap.getAddressInfo(address);
+		var splitSize = self.getBufferDataSplitSize(info.typeString);
+
+		var numFullPackets = Math.floor(numReads / splitSize);
+		for(var i = 0; i < numFullPackets; i++) {
+			reads.push({'address': address, 'numValues': splitSize});
+		}
+		var remainder = numReads % splitSize;
+		if(remainder !== 0) {
+			reads.push({'address': address, 'numValues': remainder});
+		}
+
+		// console.log('readArray info', numReads, splitSize, numFullPackets, remainder);
+
+		// Perform reads
+		async.eachSeries(reads, function(singleRead, callback) {
+			innerReadArray(singleRead.address, singleRead.numValues)
+			.then(function(newReadData) {
+				for(var i = 0; i < newReadData.length; i++) {
+					readData.push(newReadData[i]);
+				}
+				callback();
+			}, function(readArrayError) {
+				readError = readArrayError;
+				isError = true;
+				callback(readError);
+			});
+		},function(err) {
+			if(err) {
+				defered.reject(err);
+			} else {
+				defered.resolve(readData);
+			}
+		});
+		
+		return defered.promise;
+	};
 	/**
 	 * Performs several single reads to get individual error codes.
 	**/
@@ -891,6 +1012,122 @@ function device(useMockDevice) {
 			setImmediate(function() {
 				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
 			});
+		}
+		return defered.promise;
+	};
+	var innerWriteArray = function(address, writeData) {
+		var defered = q.defer();
+		if(allowExecution()) {
+			ljmDevice.writeArray(
+				address,
+				writeData,
+				function(err) {
+					captureDeviceError('writeArray', err, {'address': address});
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject({
+					retError:driver_const.LJN_DEVICE_NOT_CONNECTED,
+					errFrame:0}
+				);
+			});
+		}
+		return defered.promise;
+	};
+	this.writeArray = function(address, writeData) {
+		var defered = q.defer();
+		var writes = [];
+		var writeError;
+		var isError = false;
+
+		// Prepare writes
+		var info = modbusMap.getAddressInfo(address);
+		var splitSize = self.getBufferDataSplitSize(info.typeString);
+		var numWrites = 0;
+
+		var isDataValid = false;
+		var message = '';
+		var i;
+
+		var numFullPackets = 0;
+		var remainder = 0;
+
+		if(Buffer.isBuffer(writeData)) {
+			isDataValid = false;
+			message = 'Buffer type is not supported.';
+		} else if(Array.isArray(writeData)) {
+			isDataValid = true;
+			numWrites = writeData.length;
+			numFullPackets = Math.floor(numWrites / splitSize);
+			for(i = 0; i < numFullPackets; i++) {
+				// .splice returns a new array with the old data removed from
+				// the original data.
+				writes.push({
+					'address': address,
+					'writeData': writeData.splice(0, splitSize),
+				});
+			}
+
+			remainder = numWrites % splitSize;
+			if(remainder !== 0) {
+				writes.push({
+					'address': address,
+					'writeData': writeData.splice(0, remainder),
+				});
+			}
+
+			if(writeData.length !== 0) {
+				console.warn('Did not separate all of the data into writes', writeData);
+			}
+		} else if((typeof(writeData === 'string') || writeData instanceof String)) {
+			isDataValid = true;
+			numWrites = writeData.length;
+			numFullPackets = Math.floor(numWrites / splitSize);
+			for(i = 0; i < numFullPackets; i++) {
+				writes.push({
+					'address': address,
+					'writeData': writeData.slice(i, i + splitSize),
+				});
+			}
+
+			remainder = numWrites % splitSize;
+			if(remainder !== 0) {
+				writes.push({
+					'address': address,
+					'writeData': writeData.slice(numWrites - remainder, numWrites),
+				});
+			}
+		} else {
+			isDataValid = false;
+			message = 'Invalid data type being written: ' + typeof(writeData) + '.';
+		}
+
+		// console.log('writeArray info', numWrites, splitSize, numFullPackets, remainder, isDataValid, message);
+
+		// Perform reads
+		if(isDataValid) {
+			async.eachSeries(writes, function(singleWrite, callback) {
+				innerWriteArray(singleWrite.address, singleWrite.writeData)
+				.then(function(writeResult) {
+					callback();
+				}, function(writeArrayError) {
+					writeError = writeArrayError;
+					isError = true;
+					callback(writeError);
+				});
+			}, function(err) {
+				if(err) {
+					defered.reject(err);
+				} else {
+					// No data needs to be returned for successful writes.
+					defered.resolve();
+				}
+			});
+		} else {
+			defered.reject(message);
 		}
 		return defered.promise;
 	};

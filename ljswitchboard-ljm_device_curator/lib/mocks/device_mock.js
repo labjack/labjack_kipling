@@ -220,9 +220,10 @@ function device() {
 		var ipAddr = NO_IP_ADDRESS;
 		var port = 0;
 		var isIP;
+
 		if(self.devAttr.ip) {
 			// Do stuff...
-			if((conTNum === 3) || (conTNum === 4)) {
+			if((conTNum == 3) || (conTNum == 4)) {
 				port = 502;
 				ipAddr = self.devAttr.ip;
 			} else {
@@ -230,7 +231,7 @@ function device() {
 			}
 		} else {
 			isIP = identifier.split('.').length === 3;
-			if((conTNum === 3) || (conTNum === 4)) {
+			if((conTNum == 3) || (conTNum == 4)) {
 				port = 502;
 				if(isIP) {
 					ipAddr = identifier;
@@ -242,7 +243,12 @@ function device() {
 			}
 		}
 		
-
+		var maxBytesPerMB = 64;
+		if(conTNum == 3) { // Ethernet
+			maxBytesPerMB = 1040;
+		} else if(conTNum == 4) { // WiFi
+			maxBytesPerMB = 500;
+		}
 		// Assign a serial number?
 		var serialNum = TEST_SERIAL_NUMBER;
 		if(self.devAttr.serialNumber) {
@@ -265,7 +271,7 @@ function device() {
 		self.devAttr.ip = ipAddr;
 		self.devAttr.ipAddress = ipAddr;
 		self.devAttr.port = port;
-		self.devAttr.maxBytesPerMB = 32;
+		self.devAttr.maxBytesPerMB = maxBytesPerMB;
 
 		// Finish:
 		finishCall('open').then(onSucc, onErr);
@@ -324,6 +330,14 @@ function device() {
 		var result = self.getResult(address);
 		finishCall('read', result).then(onSucc, onErr);
 	};
+	this.readArray = function(address, numReads, onErr, onSucc) {
+		saveCall('readArray', arguments);
+		var retArray = [];
+		for(var i = 0; i < numReads; i++) {
+			retArray.push(0);
+		}
+		finishCall('readArray', retArray).then(onSucc, onErr);
+	};
 
 	this.readMany = function(addresses, onErr, onSucc) {
 		saveCall('readMany', arguments);
@@ -344,6 +358,12 @@ function device() {
 		saveCall('write', arguments);
 		var result = self.saveWrite(address, value);
 		finishCall('write', result).then(onSucc, onErr);
+	};
+
+	this.writeArray = function(address, writeData, onErr, onSucc) {
+		saveCall('writeArray', arguments);
+		var result = 0;
+		finishCall('writeArray', result).then(onSucc, onErr);
 	};
 
 	this.writeMany = function(addresses, values, onErr, onSucc) {

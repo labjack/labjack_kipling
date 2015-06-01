@@ -32,14 +32,19 @@ exports.qRunner = qRunner;
 var qExec = function(obj, func, argA, argB, argC) {
 	return function(bundle) {
 		var defered = q.defer();
-		obj[func](argA, argB, argC)
-		.then(function(data) {
-			bundle.push({'functionCall':func, 'retData': data});
-			defered.resolve(bundle);
-		}, function(err) {
-			bundle.push({'functionCall':func, 'errData': err});
-			defered.resolve(bundle);
-		});
+		try {
+			obj[func](argA, argB, argC)
+			.then(function(data) {
+				bundle.push({'functionCall':func, 'retData': data});
+				defered.resolve(bundle);
+			}, function(err) {
+				bundle.push({'functionCall':func, 'errData': err});
+				defered.resolve(bundle);
+			});
+		} catch(err) {
+			console.error('Error calling', func, argA, argB, argC, err);
+			console.error(err.stack);
+		}
 		return defered.promise;
 	};
 };
