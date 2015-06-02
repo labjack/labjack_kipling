@@ -1,6 +1,9 @@
 #network_settings hr{
 	margin:0px;
 }
+.network-settings-div {
+	padding-bottom:10px;
+}
 .currentStatusInfo {
 	height:30px;
 }

@@ -70,12 +70,12 @@ while true do
     local i = 1
     local fg = 0
     indexVal = 1
-    fg = LJ.CheckFileFlag()           --host software wants to read Lua's active file? -Address 6500
+    fg = LJ.CheckFileFlag()           --host software wants to read Lua's active file? Is FILE_IO_LUA_SWITCH_FILE=1?
     if fg == 1 then
       NumFn = NumFn + 1               --increment filename
       Filename = Filepre..string.format("%02d", NumFn)..Filesuf
       f:close()
-      LJ.ClearFileFlag()              --inform host that previous file is available
+      LJ.ClearFileFlag()              --inform host that previous file is available. Sets FILE_IO_LUA_SWITCH_FILE=0
       f = io.open(Filename, "w")      --create or replace new file
       print ("Command issued by host to create new file")
     end

@@ -1,4 +1,5 @@
 print("Communicate with several DS18S20 1-wire sensors")
+--Requires Firmware 1.0161 or newer
 --First change the ROM IDs of each sensor to use this example. Also change eioNum
 --Discover the ROM IDs using the "1-Wire Read ROM ID" example.
 --Note, there are several kinds of 1-wire sensors from Maxim.
@@ -166,7 +167,6 @@ sensorNotFound = 0
 sensorFound = 1
 invalidReading = 2
 SensPinNum = eioNum + 8
-MB.W(6006, 1, NumSensors)              -- Enable some IO RAM
 curProbe = 0
 curStep = 0
 curDelay = 0
@@ -192,13 +192,13 @@ while true do
           print("Reading sensors:")
         end
         print(curName, temp, "F")
-        IOMEM.W(46000+curProbe*2, temp)
+        MB.W(46000+curProbe*2, temp)  --USER_RAM#_F32
       elseif(err == sensorNotFound) then
         print(curName,"N/A")
-        IOMEM.W(46000+curProbe*2, 0)
+        MB.W(46000+curProbe*2, 0)     --USER_RAM#_F32
       elseif(err == invalidReading) then
         print(curName,"Inv")
-        IOMEM.W(46000+curProbe*2, 0)
+        MB.W(46000+curProbe*2, 0)     --USER_RAM#_F32
       else
         print(curName,"Unknown State")
       end

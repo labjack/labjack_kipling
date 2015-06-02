@@ -1,3 +1,4 @@
+--Documentation updated for T7 firmware 1.0161 or newer
 --This is the list of LabJack-specific functions.  There are many more native Lua functions
 --http://www.lua.org/manual/5.2/manual.html#3
 --All LabJack addresses can be found in the Register Matrix(Modbus Map)
@@ -50,8 +51,9 @@
 
 --LJ.ledtog
 
+
 --LJ.ledtog()
---Description: Toggles status LED. This is just for testing and will be removed.
+--Description: Toggles status LED.  Note that reading AINs also toggles the status LED.
 
 --LJ.DIO_D_W(IONum, direction)
 --LJ.DIO_S_R(IONum, state)
@@ -66,6 +68,26 @@
 --Description:  Reads the core timer. (1/2 core freq). Useful for timing events that happen irregularly, and/or very fast.
 --Most timing related operations can be timed using one of the 8 available interval timers using LJ.IntervalConfig([0-7], time[ms])
 
+
+--LJ.CheckFileFlag & LJ.ClearFileFlag
+
+--LJ.CheckFileFlag and LJ.ClearFileFlag work together to provide an easy way to tell a Lua script to switch files.  
+--This is useful for applications that require continuous logging in a Lua script, and on-demand file access from a host.
+--Since files cannot be opened simultaneously by a Lua script and a host, the Lua script must first close the active file if the host wants
+--to read file contents. The host writes a value of 1 to FILE_IO_LUA_SWITCH_FILE, and the Lua script is setup to poll this parameter
+--using LJ.CheckFileFlag(). If the file flag is set, Lua code should switch files as shown in the example below.
+
+--EXAMPLE
+flag = LJ.CheckFileFlag() --poll the flag every few seconds
+if flag == 1 then
+  NumFn = NumFn + 1                --increment filename
+  Filename = Filepre..string.format("%02d", NumFn)..Filesuf
+  f:close()
+  LJ.ClearFileFlag()              --inform host that previous file is available.
+  f = io.open(Filename, "w")      --create or replace a new file
+  print ("Command issued by host to create new file")
+end
+ 
 
 --LJ.IntervalConfig & LJ.CheckInterval------------------------------------------
 
@@ -118,47 +140,59 @@ end
 
 
 
---LUA IO Memory-----------------------------------------------------------------
+--User RAM (Formerly LUA IO Memory)----------------------------------------------
 
---LUA IO is a system that makes it easy for Lua scripts to make data available to external host computers,
+--User RAM is a system that makes it easy for Lua scripts to make data available to external host computers,
 --and conversely, external host computers can provide information for the Lua script.
---Before using IOMEM.R or IOMEM.W, it is necessary to specify the number of floats which should be 
---allocated in memory using modbus address 6006 "LUA_NUM_IO_FLOATS", which is dataType 1
 
+--WRITE
+--MB.W(46000, Value)
 
---IOMEM.W
+--READ
+--Value = MB.R(46000, 3)
 
---IOMEM.W(Address, Value)
---Description: Lua writes to internal RAM, and instantly that data is available to external computers using modbus addresses 
---46000 to 46127 "LUA_IO#(0:127)_READ". 
+--Description: Lua writes to internal RAM, and instantly that data is available to external computers using modbus addresses
+--46000 to 46199. Access by name using "USER_RAM#(0:39)_F32", "USER_RAM#(0:9)_I32", "USER_RAM#(0:39)_U32", "USER_RAM#(0:19)_U16". 
+--There are a total of 200 registers of pre-allocated RAM, which is split into several groups with different data types.
 --This feature makes it possible to handle processing complexity in a script, and run a simple polling application at the high level.
 --Since it is merely a chunk of RAM, you may overwrite the values at any time.
 
+--USER_RAM EXAMPLE
 
---IOMEM.R
+Enable = MB.R(46000, 3) --host may disable portion of the script with USER_RAM0_F32
+if Enable >= 1 then
+  val = val + 1
+  print("New value:", val)
+  MB.W(46002, 3, val)  --provide a new value to host with USER_RAM1_F32
+end
 
---Address, Value = IOMEM.R()
---Description: Reads from the FIFO a value written to the 47000 range. Address is zero if FIFO is empty.
---An external computer can send information to the Lua script using modbus addresses 47000 to 47127 "LUA_IO#(0:127)_WRITE". 
---External writes to these LUA_IO_WRITE registers are stored in a linked list. 
---The linked list is read as First-In-First-Out (FIFO) by the Lua script. 
---This prevents issues arising from write order and multiple writes to the same address. 
+--User RAM FIFOs - ADVANCED-------------------------------------------------------
+
+--There is also a more advanced system for passing data to/from a Lua script referred to as FIFO buffers. These buffers are useful
+--for users who want to send an array of information in sequence to/from a Lua script. Usually 2 buffers are used for each endpoint, 
+--one buffer dedicated for each communication direction (read and write). A host may write new data for the Lua script into FIFO0, 
+--then once the script reads the data out of that buffer, it responds by writing data into FIFO1, and then the host may read the data 
+--out of FIFO1.
  
 
---EXAMPLE
-MB.W(6006, 1, 10)       --allocate memory for 10 floats
+--User RAM FIFO EXAMPLE
 
-while true do
+aF32_Out= {}  --array of 5 values(floats)
+aF32_In = {}
+numValuesFIO0 = 5
+ValueSizeInBytes = 4
+numBytesInFIFO0 = numValuesFIO0*ValueSizeInBytes
+MB.W(47900, 1, numBytesInFIFO0) --allocate FIFO0 to 20 bytes
 
-  add, val = IOMEM.R()  --get a value from an external PC
-
-  if add > 0 then
-
-    print(string.format("New MB Write: %0.0f %f", add, val))
-
-    IOMEM.W(add - 1000, val + 100)  --add 100 to the value, and write to 46000
-
-  end
-
+--write out to the host with FIFO0
+for i=1, (numValuesFIO0+1) do
+  MB.W(47030, 3, aF32_Out[i])  --provide a new array of 4 float values to host
 end
---end LUA IO Memory-------------------------------------------------------------
+
+--read in from the host with FIFO1
+numBytesFIFO1 = MB.R(47912, 1)
+for i=1, ((numBytesFIFO1+1)/ValueSizeInBytes) do
+  aF32_In[i] = MB.R(47032, 3)
+end
+
+--end User RAM discussion-------------------------------------------------------------

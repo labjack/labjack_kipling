@@ -1,3 +1,4 @@
+--Requires Firmware 1.0161 or newer
 function round(num, idp)
   local mult = 10^(idp or 0)
   return math.floor(num * mult + 0.5) / mult
@@ -153,7 +154,6 @@ sensorNotFound = 0
 sensorFound = 1
 invalidReading = 2
 SensPinNum = eioNum + 8
-MB.W(6006,1,NumSensors)              -- Enable some IO RAM
 curProbe = 0
 curStep = 0
 curDelay = 0
@@ -179,13 +179,16 @@ while true do
                 print("Reading sensors:")
             end
             print(curName, temp, "F")
-            IOMEM.W(46000+curProbe*2, temp)
+            MB.W(46000+curProbe*2, temp)
+            --IOMEM.W(46000+curProbe*2, temp)
         elseif(err == sensorNotFound) then
             print(curName,"N/A")
-            IOMEM.W(46000+curProbe*2, 0)
+            MB.W(46000+curProbe*2, 0)
+            --IOMEM.W(46000+curProbe*2, 0)
         elseif(err == invalidReading) then
             print(curName,"Inv")
-            IOMEM.W(46000+curProbe*2, 0)
+            MB.W(46000+curProbe*2, 0)
+            --IOMEM.W(46000+curProbe*2, 0)
         else
             print(curName,"Unknown State")
         end

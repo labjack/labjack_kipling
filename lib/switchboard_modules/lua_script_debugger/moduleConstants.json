@@ -134,11 +134,17 @@
             "name": "1-Wire Read ROM ID",
             "location": "lua_script_debugger/premade_scripts/10 1-Wire Read ROM ID.lua"
         }, {
-            "name": "Lua IO MEM",
-            "location": "lua_script_debugger/premade_scripts/11 Lua IO RAM.lua"
-        }, {
             "name": "RTC Triggered Logging",
             "location": "lua_script_debugger/premade_scripts/12 RTC Triggered Logging.lua"
+        }, {
+            "name": "Lua IO USER RAM",
+            "location": "lua_script_debugger/premade_scripts/11 Lua IO RAM.lua"
+        }, {
+            "name": "Lua IO USER RAM FIFO",
+            "location": "lua_script_debugger/premade_scripts/11b USER RAM FIFO.lua"
+        }, {
+            "name": "PID Example",
+            "location": "lua_script_debugger/premade_scripts/13 PID Example.lua"
         }
     ],
     "scriptOptions": {

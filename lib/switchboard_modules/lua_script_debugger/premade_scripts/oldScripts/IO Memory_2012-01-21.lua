@@ -4,15 +4,13 @@ This can be diffult to test. While LUA_Simple_PoC is running nothing else can ta
 
 
 count = 0
-MB.W(6006,1,16)
-print("NumFloats:", MB.R(6006,1))
 LJ.IntervalConfig(0, 10)
 while true do
   if LJ.CheckInterval(0) then
     a, v = IOMEM.R()
     if a ~= 0 then
       print("Register write detected: ", a, v)
-      IOMEM.W(a-1000, v+5)
+      MB.W(a-1000, v+5)
     end
   end
 end

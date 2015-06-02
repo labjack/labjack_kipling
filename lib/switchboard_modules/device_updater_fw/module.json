@@ -9,6 +9,7 @@
     "htmlFiles": [
         "device_upgrade_status.html",
         "firmware_file_info.html",
-    	"selected_firmware.html"
+    	"selected_firmware.html",
+        "upgrade_results.html"
     ]
 }

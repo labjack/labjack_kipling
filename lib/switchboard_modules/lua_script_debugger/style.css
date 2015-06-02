@@ -106,3 +106,7 @@
 #All-device-config-options-table {
 	margin-bottom:0px;
 }
+.ace-editor-text-box {
+ 	margin-left: -5px;
+ 	margin-right: -5px;
+}

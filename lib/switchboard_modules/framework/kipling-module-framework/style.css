@@ -1,3 +1,11 @@
+#device-view {
+    padding-right:5px;
+    padding-left:5px;
+}
+.device-selector-table-header h4{
+    padding-left:5px;
+}
+
 #single-device-framework-obj {
     width:100%;
     padding:1px;

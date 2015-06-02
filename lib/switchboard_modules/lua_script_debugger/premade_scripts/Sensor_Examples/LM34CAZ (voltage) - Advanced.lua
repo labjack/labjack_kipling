@@ -1,4 +1,5 @@
 print("Get voltage from a LM34 temperature sensor. Set FIO3. Save temperature to LUA_IO0_READ.")
+--Requires Firmware 1.0161 or newer
 --The LM34CAZ outputs an analog voltage equal to 10mV/°F.
 --At 70 degrees F, the output will be 0.70mV, so the conversion is very easy.
 --For more information on the LM34CAZ, see http://www.ti.com/lit/ds/symlink/lm34.pdf
@@ -11,7 +12,6 @@ under_thresh_DIO_state = 0      --0 is output low 0V
 
 MB.W(48005, 0, 1)               --Ensure analog is on
 MB.W(43903, 0, 0)               --Set AIN_ALL_RESOLUTION_INDEX to auto
-MB.W(6006, 1, 1)                --Enable 1 float in LUA IO RAM to store the temperature
 
 LJ.IntervalConfig(0, 1000)      --set interval to 1000 for 1000ms
 
@@ -33,8 +33,7 @@ while true do
     end
     
     --Make temperature accessible to external computer (logging program)
-    --For more than one item, increase memory space with address 6006
-    IOMEM.W(46000, Temperature_F)    --LUA_IO0_READ
+    MB.W(46000, Temperature_F)    --USER_RAM0_F32
     
   end
 end

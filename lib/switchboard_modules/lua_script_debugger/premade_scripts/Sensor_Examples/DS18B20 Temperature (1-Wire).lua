@@ -1,4 +1,5 @@
 print("Get temperature from a DS18B20 1-wire sensor.")
+--Requires firmware 1.0161 or newer
 --First change the ROM ID to that of your sensor. Also change SensorPinNum, and ConversionFactor(if needed)
 --Discover the ROM ID using the "1-Wire Read ROM ID" example.
 --Note, there are several kinds of 1-wire sensors from Maxim.
@@ -33,7 +34,6 @@ curStep = 0
 curDelay = 0
 tempC = 0
 tempF = 0
-MB.W(6006, 1, 1)                -- Enable 1 float in LUA IO RAM to store the temperature
 
 
 function round(num, idp)
@@ -144,8 +144,8 @@ while true do
       else
         print("Reading:","Unknown State")
       end
-      --save the temperature value in LUA IO RAM so an external PC running simple logging software can easily read the temperature
-      IOMEM.W(46000, tempF)    --LUA_IO0_READ
+      --save the temperature value in User RAM so an external PC running simple logging software can easily read the temperature
+      MB.W(46000, tempF)  --USER_RAM0_F32
       curStep = 0
     else
       print("Err")

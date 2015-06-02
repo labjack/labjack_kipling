@@ -3,7 +3,7 @@
 		<h3>Ethernet</h3>
 		{{#if custom.showEthernetWarning}}<span class="text-warning icon-warning" title="{{../custom.ethernetPowerButtonWarning }}"></span>Currently connected to device over Ethernet, changing current Ethernet settings may break your connection.{{/if}}
 		<hr>
-		<div id="ethernet_settings">
+		<div id="ethernet_settings" class="network-settings-div">
 			<div class="settingsTopDiv">
 				<div class="currentStatusInfo">
 					<span>Connection Status: </span><b><span id="ethernet_connection_status">{{ custom.ethernetConnectionStatus}}</span></b>
@@ -82,8 +82,7 @@
 		</div>
 	</div>
 	{{# if custom.isPro }}
-	<br>
-	<div id="wifi_settings_div">
+	<div id="wifi_settings_div" class="network-settings-div">
 		<h3>WiFi</h3>
 		{{#if custom.showWifiWarning}}<span class="text-warning icon-warning" title="{{../custom.ethernetPowerButtonWarning }}"></span>Currently connected to device over WiFi, changing current WiFi settings may break your connection.{{/if}}
 		<hr>

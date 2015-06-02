@@ -31,3 +31,6 @@
 .lj-link-holder {
 	cursor:pointer;
 }
+#firmware-update-results-holder {
+	/*display:none;*/
+}

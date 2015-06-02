@@ -1,3 +1,4 @@
+--Requires Firmware 1.0161 or newer
 function round(num, idp)
   local mult = 10^(idp or 0)
   return math.floor(num * mult + 0.5) / mult
@@ -67,7 +68,6 @@ NumSensors = 2
 ROM0 = {[0] = 0x4800, [1] = 0x0000, [2] = 0x24AA, [3] = 0xC622}
 ROM1 = {[0] = 0xB600, [1] = 0x0000, [2] = 0x24B5, [3] = 0xF622}
 ROMs = {[0] = ROM0, [1] = ROM1} 
-MB.W(6006,1,NumSensors)              -- Enable some IO RAM
 temps = {}
 while true do
   if LJ.CheckInterval(0) then
@@ -80,7 +80,7 @@ while true do
    
       print(i, temp, "K")
       temps[i] = temp
-      IOMEM.W(46000+i*2, temps[i])
+      MB.W(46000+i*2, temps[i])
     end
     
     count = count + 1

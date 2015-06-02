@@ -1,19 +1,21 @@
 <div id="device_updater_holder">
-  <h3>T7 Firmware Change Log</h3>
-  <ul class="unstyled">
-    <li><div title="Open the T7 firmware change log in your default browser"><a id="lj-link-holder-changeLog" class="lj-link-holder">Change Log</a></div></li>
-  </ul>
-  <script>
-    $('#lj-link-holder-changeLog').unbind();
-    $('#lj-link-holder-changeLog').bind('click',function(){
-      if(typeof(gui) === 'undefined') {
-        gui = require('nw.gui');
-      }
-      gui.Shell.openExternal("http://labjack.com/support/firmware/t7");
-    });
-  </script>
+  {{#if devices.length}}
+  <div id="firmware-update-results-holder"></div>
+  
   <div id="t7_firmware_controls">
-
+    <h3>T7 Firmware Change Log</h3>
+    <ul class="unstyled">
+      <li><div title="Open the T7 firmware change log in your default browser"><a id="lj-link-holder-changeLog" class="lj-link-holder">Change Log</a></div></li>
+    </ul>
+    <script>
+      $('#lj-link-holder-changeLog').unbind();
+      $('#lj-link-holder-changeLog').bind('click',function(){
+        if(typeof(gui) === 'undefined') {
+          gui = require('nw.gui');
+        }
+        gui.Shell.openExternal("http://labjack.com/support/firmware/t7");
+      });
+    </script>
     {{#with custom.t7VersionData}}
     <div id="internet-controls">
       <h3 class="extra-padding">Download firmware online</h3>
@@ -86,5 +88,9 @@
     {{/with}}
   </div>
   <div id="upgrade_status_holder" class="upgrade-status-holder"></div>
+  {{else}}
+  <h3>Please slect a device</h3>
+  <p>Currently no devices are selected so this module has been disabled. Please Select a device to continue.</p>
+  {{/if}}
   {{!--<pre style="width:100%">{{printContext}}</pre>--}}
 </div>
