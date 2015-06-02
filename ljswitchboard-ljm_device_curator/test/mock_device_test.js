@@ -16,6 +16,316 @@ var stopTest = function(test, err) {
 
 deviceFound = false;
 
+var getReadArrayTest = function(options) {
+	var readArrayTest = function(test) {
+		if(device.isMockDevice) {
+			var dev = device.getDevice();
+			dev.clearCalledFunctions();
+
+			var testFunc = 'readArray';
+			var splitSize = 52;
+			if(options) {
+				if(options.splitSize) {
+					splitSize = options.splitSize;
+				}
+			}
+			var testArrays = [
+				{'data': [0, 1, 2, 3, 4]},
+			];
+			var createAndAddLongData = [
+				{'numVals': 53},
+				{'numVals': 103},
+				// {'numVals': 110},
+			];
+
+			if(options) {
+				if(options.tests) {
+					if(Array.isArray(options.tests)) {
+						createAndAddLongData = [];
+						options.tests.forEach(function(customTest) {
+							createAndAddLongData.push({'numVals': customTest});
+						});
+					}
+				}
+			}
+
+			createAndAddLongData.forEach(function(dataInfo) {
+				var testData, i;
+				testData = [];
+				for(i = 0; i < dataInfo.numVals; i++) {
+					testData.push(i);
+				}
+				testArrays.push({'data': testData});
+			});
+
+			var totalNumExpectedCalls = 0;
+
+			var testVals = testArrays.map(function(testArray) {
+				var forcedResults = [];
+				var originalArray = testArray.data.map(function(dataPt) {
+					return dataPt;
+				});
+				var dataLength = originalArray.length;
+				var numFullPackets = Math.floor(dataLength / splitSize);
+				for(var i = 0; i < numFullPackets; i++) {
+					forcedResults.push({
+						'isError': false,
+						'res':testArray.data.splice(0, splitSize),
+					});
+				}
+				var remainder = dataLength % splitSize;
+				var expectedNumCalls = numFullPackets;
+				if(remainder !== 0) {
+					expectedNumCalls += 1;
+					forcedResults.push({
+						'isError': false,
+						'res': testArray.data.splice(0, remainder),
+					});
+				}
+
+				totalNumExpectedCalls += expectedNumCalls;
+
+				return {
+					'address': 'LUA_DEBUG_DATA',
+					'data': dataLength,
+					'forcedResults': forcedResults,
+					'result': originalArray,
+					'expectedNumCalls': expectedNumCalls,
+				};
+			});
+
+			// Add forced results to the mock-device
+			testVals.forEach(function(testVal) {
+				testVal.forcedResults.forEach(function(forcedResult) {
+					dev.pushResult(
+						testFunc,
+						forcedResult.isErr,
+						forcedResult.res
+					);
+				});
+			});
+
+			// Build expected-results array
+			var expectedResults = testVals.map(function(testVal) {
+				return {
+					'functionCall': testFunc,
+					'retData': testVal.result,
+				};
+			});
+
+			// Chain and execute functions
+			var results = [];
+			var promises;
+			testVals.forEach(function(testVal, i) {
+				if(i === 0) {
+					promises = qExec(
+						device,
+						testFunc,
+						testVal.address,
+						testVal.data
+					)(results);
+				} else {
+					promises = promises.then(qExec(
+						device,
+						testFunc,
+						testVal.address,
+						testVal.data
+					));
+				}
+			});
+			promises.then(function(res) {
+				// Quit the test if new testVals need to be added that weren't
+				// added.
+				if(res.length !== testVals.length) {
+					console.log();
+					console.log('!!! Need to add the testVals array !!!', res.length, testVals.length);
+					process.exit();
+				}
+
+				var msgA = 'mock device not working (readArray)';
+				test.deepEqual(res, expectedResults, msgA);
+
+				// Check to make sure there were the right number of calls
+				var calledFuncs = dev.getCalledFunctions();
+
+				// console.log('Called Functions', calledFuncs);
+				var msgB = 'Wrong number of readArray function calls executed. ';
+				msgB += calledFuncs.length.toString();
+				msgB += ' != ';
+				msgB += totalNumExpectedCalls.toString();
+
+				test.equal(calledFuncs.length, totalNumExpectedCalls, msgB);
+
+				test.done();
+			});
+		} else {
+			console.log('* Skipping Test');
+			test.done();
+		}
+	};
+	return readArrayTest;
+};
+
+var getWriteArrayTest = function(options) {
+	var writeArrayTest = function(test) {
+		if(device.isMockDevice) {
+			var dev = device.getDevice();
+			dev.clearCalledFunctions();
+
+			var testFunc = 'writeArray';
+			var splitSize = 52;
+			if(options) {
+				if(options.splitSize) {
+					splitSize = options.splitSize;
+				}
+			}
+			var testArrays = [{
+				'data': [0, 1, 2, 3, 4],
+			}, {
+				'data': '01234\0',
+			}];
+
+			var createAndAddLongData = [
+				{'type': 'array', 'length': 53},
+				{'type': 'string', 'length': 53},
+				{'type': 'array', 'length': 103},
+				{'type': 'string', 'length': 103}
+			];
+
+			if(options) {
+				if(options.tests) {
+					if(Array.isArray(options.tests)) {
+						createAndAddLongData = [];
+						options.tests.forEach(function(customTest) {
+							var addTest = true;
+							if(typeof(customTest.type) === 'undefined') {
+								addTest = false;
+							}
+							if(typeof(customTest.length) === 'undefined') {
+								addTest = false;
+							}
+							if(addTest) {
+								createAndAddLongData.push({
+									'type': customTest.type,
+									'length': customTest.length
+								});
+							} else {
+								console.error('Not Adding Test!! It is invalid.');
+								process.exit();
+							}
+						});
+					}
+				}
+			}
+
+			createAndAddLongData.forEach(function(dataInfo) {
+				var testData, i;
+
+				if(dataInfo.type === 'array') {
+					testData = [];
+					for(i = 0; i < dataInfo.length; i++) {
+						testData.push(i);
+					}
+				} else if(dataInfo.type === 'string') {
+					testData = '';
+					for(i = 0; i < dataInfo.length; i++) {
+						testData += i.toString();
+					}
+				}
+				testArrays.push({'data': testData});
+			});
+
+			
+			var totalNumExpectedCalls = 0;
+
+			var testVals = testArrays.map(function(testArray) {
+				var numFullPackets = Math.floor(testArray.data.length / splitSize);
+				var remainder = testArray.data.length % splitSize;
+				var expectedNumCalls = numFullPackets;
+				if(remainder !== 0) {
+					expectedNumCalls += 1;
+				}
+
+				totalNumExpectedCalls += expectedNumCalls;
+
+				return {
+					'address': 'LUA_SOURCE_WRITE',
+					'data': testArray.data,
+					'forcedResult': {'isError': false, 'res': undefined},
+					'result': undefined,
+					'expectedNumCalls': expectedNumCalls,
+				};
+			});
+
+
+			// Add forced results to the mock-device
+			testVals.forEach(function(testVal) {
+				dev.pushResult(
+					testFunc,
+					testVal.forcedResult.isErr,
+					testVal.forcedResult. res
+				);
+			});
+
+			// Build expected-results array
+			var expectedResults = testVals.map(function(testVal) {
+				return {
+					'functionCall': testFunc,
+					'retData': testVal.result,
+				};
+			});
+
+
+			var results = [];
+			var promises;
+			testVals.forEach(function(testVal, i) {
+				if(i === 0) {
+					promises = qExec(
+						device,
+						testFunc,
+						testVal.address,
+						testVal.data
+					)(results);
+				} else {
+					promises = promises.then(qExec(
+						device,
+						testFunc,
+						testVal.address,
+						testVal.data
+					));
+				}
+			});
+			promises.then(function(res) {
+				// Quit the test if new testVals need to be added that weren't
+				// added.
+				if(res.length !== testVals.length) {
+					console.log();
+					console.log('!!! Need to add the testVals array !!!', res.length, testVals.length);
+					process.exit();
+				}
+
+				var msgA = 'mock device not working (writeArray)';
+				test.deepEqual(res, expectedResults, msgA);
+
+				// Check to make sure there were the right number of calls
+				var calledFuncs = dev.getCalledFunctions();
+
+				var msgB = 'Wrong number of writeArray function calls executed. ';
+				msgB += calledFuncs.length.toString();
+				msgB += ' != ';
+				msgB += totalNumExpectedCalls.toString();
+
+				test.equal(calledFuncs.length, totalNumExpectedCalls, msgB);
+
+				test.done();
+			});
+		} else {
+			console.log('* Skipping Test');
+			test.done();
+		}
+	};
+	return writeArrayTest;
+};
 exports.tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
@@ -154,262 +464,8 @@ exports.tests = {
 			test.done();
 		}
 	},
-	'performTest readArray': function(test) {
-		if(device.isMockDevice) {
-			var dev = device.getDevice();
-			dev.clearCalledFunctions();
-
-			var testFunc = 'readArray';
-			var splitSize = 52;
-			var testArrays = [
-				{'data': [0, 1, 2, 3, 4]},
-			];
-			var createAndAddLongData = [
-				{'numVals': 53},
-				{'numVals': 103},
-				{'numVals': 110},
-			];
-
-			createAndAddLongData.forEach(function(dataInfo) {
-				var testData, i;
-				testData = [];
-				for(i = 0; i < dataInfo.numVals; i++) {
-					testData.push(i);
-				}
-				testArrays.push({'data': testData});
-			});
-
-			var totalNumExpectedCalls = 0;
-
-			var testVals = testArrays.map(function(testArray) {
-				var forcedResults = [];
-				var originalArray = testArray.data.map(function(dataPt) {
-					return dataPt;
-				});
-				var dataLength = originalArray.length;
-				var numFullPackets = Math.floor(dataLength / splitSize);
-				for(var i = 0; i < numFullPackets; i++) {
-					forcedResults.push({
-						'isError': false,
-						'res':testArray.data.splice(0, splitSize),
-					});
-				}
-				var remainder = dataLength % splitSize;
-				var expectedNumCalls = numFullPackets;
-				if(remainder !== 0) {
-					expectedNumCalls += 1;
-					forcedResults.push({
-						'isError': false,
-						'res': testArray.data.splice(0, remainder),
-					});
-				}
-
-				totalNumExpectedCalls += expectedNumCalls;
-
-				return {
-					'address': 'LUA_DEBUG_DATA',
-					'data': dataLength,
-					'forcedResults': forcedResults,
-					'result': originalArray,
-					'expectedNumCalls': expectedNumCalls,
-				};
-			});
-
-			// Add forced results to the mock-device
-			testVals.forEach(function(testVal) {
-				testVal.forcedResults.forEach(function(forcedResult) {
-					dev.pushResult(
-						testFunc,
-						forcedResult.isErr,
-						forcedResult.res
-					);
-				});
-			});
-
-			// Build expected-results array
-			var expectedResults = testVals.map(function(testVal) {
-				return {
-					'functionCall': testFunc,
-					'retData': testVal.result,
-				};
-			});
-
-			// Chain and execute functions
-			var results = [];
-			var promises;
-			testVals.forEach(function(testVal, i) {
-				if(i === 0) {
-					promises = qExec(
-						device,
-						testFunc,
-						testVal.address,
-						testVal.data
-					)(results);
-				} else {
-					promises = promises.then(qExec(
-						device,
-						testFunc,
-						testVal.address,
-						testVal.data
-					));
-				}
-			});
-			promises.then(function(res) {
-				// Quit the test if new testVals need to be added that weren't
-				// added.
-				if(res.length !== testVals.length) {
-					console.log();
-					console.log('!!! Need to add the testVals array !!!', res.length, testVals.length);
-					process.exit();
-				}
-
-				var msgA = 'mock device not working (readArray)';
-				test.deepEqual(res, expectedResults, msgA);
-
-				// Check to make sure there were the right number of calls
-				var calledFuncs = dev.getCalledFunctions();
-
-				// console.log('Called Functions', calledFuncs);
-				var msgB = 'Wrong number of readArray function calls executed. ';
-				msgB += calledFuncs.length.toString();
-				msgB += ' != ';
-				msgB += totalNumExpectedCalls.toString();
-
-				test.equal(calledFuncs.length, totalNumExpectedCalls, msgB);
-
-				test.done();
-			});
-		} else {
-			console.log('* Skipping Test');
-			test.done();
-		}
-	},
-	'performTest writeArray': function(test) {
-		if(device.isMockDevice) {
-			var dev = device.getDevice();
-			dev.clearCalledFunctions();
-
-			var testFunc = 'writeArray';
-			var splitSize = 52;
-			var testArrays = [{
-				'data': [0, 1, 2, 3, 4],
-			}, {
-				'data': '01234',
-			}];
-
-			var createAndAddLongData = [
-				{'type': 'array', 'length': 53},
-				{'type': 'string', 'length': 53},
-				{'type': 'array', 'length': 103},
-				{'type': 'string', 'length': 103}
-			];
-
-			createAndAddLongData.forEach(function(dataInfo) {
-				var testData, i;
-
-				if(dataInfo.type === 'array') {
-					testData = [];
-					for(i = 0; i < dataInfo.length; i++) {
-						testData.push(i);
-					}
-				} else if(dataInfo.type === 'string') {
-					testData = '';
-					for(i = 0; i < dataInfo.length; i++) {
-						testData += i.toString();
-					}
-				}
-				testArrays.push({'data': testData});
-			});
-
-			
-			var totalNumExpectedCalls = 0;
-
-			var testVals = testArrays.map(function(testArray) {
-				var numFullPackets = Math.floor(testArray.data.length / splitSize);
-				var remainder = testArray.data.length % splitSize;
-				var expectedNumCalls = numFullPackets;
-				if(remainder !== 0) {
-					expectedNumCalls += 1;
-				}
-
-				totalNumExpectedCalls += expectedNumCalls;
-
-				return {
-					'address': 'LUA_SOURCE_WRITE',
-					'data': testArray.data,
-					'forcedResult': {'isError': false, 'res': undefined},
-					'result': undefined,
-					'expectedNumCalls': expectedNumCalls,
-				};
-			});
-
-
-			// Add forced results to the mock-device
-			testVals.forEach(function(testVal) {
-				dev.pushResult(
-					testFunc,
-					testVal.forcedResult.isErr,
-					testVal.forcedResult. res
-				);
-			});
-
-			// Build expected-results array
-			var expectedResults = testVals.map(function(testVal) {
-				return {
-					'functionCall': testFunc,
-					'retData': testVal.result,
-				};
-			});
-
-
-			var results = [];
-			var promises;
-			testVals.forEach(function(testVal, i) {
-				if(i === 0) {
-					promises = qExec(
-						device,
-						testFunc,
-						testVal.address,
-						testVal.data
-					)(results);
-				} else {
-					promises = promises.then(qExec(
-						device,
-						testFunc,
-						testVal.address,
-						testVal.data
-					));
-				}
-			});
-			promises.then(function(res) {
-				// Quit the test if new testVals need to be added that weren't
-				// added.
-				if(res.length !== testVals.length) {
-					console.log();
-					console.log('!!! Need to add the testVals array !!!', res.length, testVals.length);
-					process.exit();
-				}
-
-				var msgA = 'mock device not working (writeArray)';
-				test.deepEqual(res, expectedResults, msgA);
-
-				// Check to make sure there were the right number of calls
-				var calledFuncs = dev.getCalledFunctions();
-
-				var msgB = 'Wrong number of writeArray function calls executed. ';
-				msgB += calledFuncs.length.toString();
-				msgB += ' != ';
-				msgB += totalNumExpectedCalls.toString();
-
-				test.equal(calledFuncs.length, totalNumExpectedCalls, msgB);
-
-				test.done();
-			});
-		} else {
-			console.log('* Skipping Test');
-			test.done();
-		}
-	},
+	'performTest readArray': getReadArrayTest(),
+	'performTest writeArray': getWriteArrayTest(),
 	'performTest ReadMultiple': function(test) {
 		if(device.isMockDevice) {
 			var dev = device.getDevice();
@@ -484,6 +540,78 @@ exports.tests = {
 		});
 	},
 	'closeDevice (assigned serial number)': function(test) {
+		device.close()
+		.then(function() {
+			test.done();
+		});
+	},
+	'open T7 via Ethernet': function(test) {
+		var td = {
+			'dt': 'LJM_dtANY',
+			'ct': 'LJM_ctEthernet',
+			'id': 'LJM_idANY'
+		};
+
+		device.open(td.dt, td.ct, td.id)
+		.then(function(res) {
+			deviceFound = true;
+			test.done();
+		}, function(err) {
+			test.done();
+		});
+	},
+	'performTest readArray Ethernet': getReadArrayTest({
+		'splitSize': 510,
+		'tests': [53, 103, 509, 510, 511, 1048],
+	}),
+	'performTest writeArray Ethernet': getWriteArrayTest({
+		'splitSize': 510,
+		'tests': [
+			{'length': 53, 'type': 'array'},
+			{'length': 103, 'type': 'array'},
+			{'length': 509, 'type': 'array'},
+			{'length': 510, 'type': 'array'},
+			{'length': 511, 'type': 'array'},
+			{'length': 1048, 'type': 'array'},
+		]
+	}),
+	'close T7 via Ethernet': function(test) {
+		device.close()
+		.then(function() {
+			test.done();
+		});
+	},
+	'open T7 via WiFi': function(test) {
+		var td = {
+			'dt': 'LJM_dtANY',
+			'ct': 'LJM_ctWiFi',
+			'id': 'LJM_idANY'
+		};
+
+		device.open(td.dt, td.ct, td.id)
+		.then(function(res) {
+			deviceFound = true;
+			test.done();
+		}, function(err) {
+			test.done();
+		});
+	},
+	'performTest readArray WiFi': getReadArrayTest({
+		'splitSize': 488,
+		'tests': [53, 103, 509, 510, 511, 1048],
+	}),
+	'performTest writeArray WiFi': getWriteArrayTest({
+		'splitSize': 488,
+		'tests': [
+			{'length': 53, 'type': 'array'},
+			{'length': 103, 'type': 'array'},
+			{'length': 509, 'type': 'array'},
+			{'length': 510, 'type': 'array'},
+			{'length': 511, 'type': 'array'},
+			{'length': 1048, 'type': 'array'},
+		]
+	}),
+	'close T7 via WiFi': function(test) {
 		device.close()
 		.then(function() {
 			test.done();

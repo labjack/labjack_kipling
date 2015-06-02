@@ -514,7 +514,24 @@ function device(useMockDevice) {
 			var numBytes = parseInt(key, 10);
 			
 			var standardValue = Math.floor((maxBytesPerMB - 12)/numBytes);
-			var possibleValues = [standardValue];
+
+			
+
+			// Ratio to convert bytes to numRegisters, each register is 16bits
+			// of data vs 8bits.
+			var registerSizeMultiple = 0.5;
+			var numAddresses = numBytes * registerSizeMultiple;
+
+			// Defined here:
+			// http://labjack.com/support/modbus/protocol-details
+			// Max "Modbus Feedback" frame size.
+			var maxRegistersPerFrame = 255;
+
+			// Un-optomized min-valu for ethernet.
+			var hardCapSplitSize = Math.floor((maxRegistersPerFrame / numAddresses));
+
+
+			var possibleValues = [standardValue, hardCapSplitSize];
 			var minVal = getMinimumValue(possibleValues);
 
 			self.bufferDataSplitSizes[key] = minVal;
@@ -1105,7 +1122,7 @@ function device(useMockDevice) {
 			message = 'Invalid data type being written: ' + typeof(writeData) + '.';
 		}
 
-		// console.log('writeArray info', numWrites, splitSize, numFullPackets, remainder, isDataValid, message);
+		// console.log('- writeArray info', numWrites, splitSize, numFullPackets, remainder, isDataValid, message);
 
 		// Perform reads
 		if(isDataValid) {

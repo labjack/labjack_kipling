@@ -209,6 +209,18 @@ var device_tests = {
 			test.done();
 		});
 	},
+	'performTest readArray': function(test) {
+		device.readArray('LUA_DEBUG_DATA', 10)
+		.then(function(res) {
+			// console.log('readArray res', res);
+			test.ok(true);
+			test.done();
+		},function(err) {
+			// console.log('readArray error', err);
+			test.ok(false);
+			test.done();
+		});
+	},
 	'call iWrite': function(test) {
 		device.iWrite('DAC0', 1.0)
 		.then(function(res) {
