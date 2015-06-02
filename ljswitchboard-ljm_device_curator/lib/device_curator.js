@@ -663,6 +663,9 @@ function device(useMockDevice) {
 		
 		return defered.promise;
 	};
+	var factoryFirmwareVersions = [
+		1.0069,
+	];
 	var waitForT7ToInitialize = function() {
 		var defered = q.defer();
 
@@ -670,8 +673,18 @@ function device(useMockDevice) {
 			if(result.isPro) {
 				// If we have a T7-Pro then we need to wait for wifi to
 				// initialize.
-				waitForT7ProToInitialize(result)
-				.then(defered.resolve, defered.reject);
+				self.iRead('FIRMWARE_VERSION')
+				.then(function(firmwareVersion) {
+					if(factoryFirmwareVersions.indexOf(firmwareVersion.val) < 0) {
+						waitForT7ProToInitialize(result)
+						.then(defered.resolve, defered.reject);
+					} else {
+						defered.resolve();
+					}
+				}, function(err) {
+					// We encountered an error reading the firmware version.
+					defered.resolve();
+				});
 			} else {
 				// If we have a standard T7 we don't need to wait for wifi
 				// to initialize.
