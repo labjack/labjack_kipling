@@ -1454,6 +1454,10 @@ module.exports = {
     			test.deepEqual(results, expectedData);
     			// console.log('Results', results);
 
+    			var argList = fakeDriver.getArgumentsList();
+    			var actualArgs = argList.splice(1, argList.length);
+    			// console.log('Args', actualArgs[0]);
+    			
                 test.done();
             },false,false
         );

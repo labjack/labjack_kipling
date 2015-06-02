@@ -877,7 +877,7 @@ exports.labjack = function () {
 
 			// Perform buffer allocations
 			var aValues = new Buffer(numReads * ARCH_DOUBLE_NUM_BYTES);			//Array of doubles
-			var errorVal = new Buffer(ARCH_INT_NUM_BYTES);						//Array the size of one UInt32 for err
+			var errorVal = new ref.alloc('int',1);
 
 			// Clear all of the arrays
 			aValues.fill(0);
@@ -954,7 +954,7 @@ exports.labjack = function () {
 
 			// Perform buffer allocations
 			var aValues = new Buffer(numReads * ARCH_DOUBLE_NUM_BYTES);			//Array of doubles
-			var errorVal = new Buffer(ARCH_INT_NUM_BYTES);						//Array the size of one UInt32 for err
+			var errorVal = new ref.alloc('int',1);
 
 			// Clear all of the arrays
 			aValues.fill(0);
@@ -1611,8 +1611,10 @@ exports.labjack = function () {
 			// Save info
 			writeInfo.address = info.address;
 			writeInfo.type = info.type;
-			var errorVal = new Buffer(ARCH_INT_NUM_BYTES);
+
+			var errorVal = new ref.alloc('int',1);
 			errorVal.fill(0);
+			
 			writeInfo.errorAddress = errorVal;
 
 			// Variable declarations:
