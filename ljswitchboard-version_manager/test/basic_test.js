@@ -74,9 +74,24 @@ exports.tests = {
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;
 			if(givenKeys.indexOf(reqKey) >= 0) {
-				isOK = true;
+				isOk = true;
 			}
-			test.ok(isOK, 'Missing a required key: ' + reqKey);
+			test.ok(isOk, 'Missing a required key: ' + reqKey);
+		});
+		// console.log('T7 FW Versions', data);
+		test.done();
+	},
+	'get LJM Versions': function(test) {
+		var data = version_manager.lvm.getCachedLJMVersions();
+		test.ok(data.isValid, 'LJM Versions data should be valid');
+		var requiredKeys = ['current_win', 'current_mac'];
+		var givenKeys = Object.keys(data);
+		requiredKeys.forEach(function(reqKey, i) {
+			var isOk = false;
+			if(givenKeys.indexOf(reqKey) >= 0) {
+				isOk = true;
+			}
+			test.ok(isOk, 'Missing a required key: ' + reqKey);
 		});
 		// console.log('T7 FW Versions', data);
 		test.done();

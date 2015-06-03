@@ -139,11 +139,19 @@ function labjackVersionManager() {
             var match;
             var getMatch = true;
             if (platform === 'win') {
-                LJM_REGEX = /href=\".*LabJackMUpdate-([\d]\.[\d]+)\.exe(?=\"\stype)/g;
+                LJM_REGEX = /href=\".*LabJackMUpdate-([\d]\.[\d]+)-Windows\.exe(?=\"\stype)/g;
                 match = LJM_REGEX.exec(pageData);
                 if(!match) {
-                    LJM_REGEX = /href=\".*LabJackMUpgrade-([\d]\.[\d]+)\.exe(?=\"\stype)/g;
+                    LJM_REGEX = /href=\".*LabJackMUpgrade-([\d]\.[\d]+)-Windows\.exe(?=\"\stype)/g;
                     match = LJM_REGEX.exec(pageData);
+                    if(!match) {
+                        LJM_REGEX = /href=\".*LabJackMUpgrade-([\d]\.[\d]+)\.exe(?=\"\stype)/g;
+                        match = LJM_REGEX.exec(pageData);
+                        if(!match) {
+                            LJM_REGEX = /href=\".*LabJackMUpdate-([\d]\.[\d]+)\.exe(?=\"\stype)/g;
+                            match = LJM_REGEX.exec(pageData);
+                        }
+                    }
                 }
                 getMatch = false;
             } else if (platform === 'mac') {
@@ -641,6 +649,20 @@ function labjackVersionManager() {
         return t7Data;
     };
 
+    this.getCachedLJMVersions = function() {
+        var ljmData = {};
+        if(typeof(self.infoCache.ljm) !== 'undefined') {
+            ljmData = JSON.parse(JSON.stringify(self.infoCache.ljm));
+            ljmData.isValid = true;
+        } else {
+            ljmData.current_win = [];
+            ljmData.current_mac = [];
+            ljmData.current_linux32 = [];
+            ljmData.current_linux64 = [];
+            ljmData.isValid = false;
+        }
+        return ljmData;
+    };
     var isDefined = function(ele) {
         if(typeof(ele) !== 'undefined') {
             return true;
