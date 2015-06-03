@@ -655,8 +655,9 @@ var createFlashOperation = function (bundle, startAddress, lengthInts, sizeInts,
                 numValues,
                 values,
                 function(err) {
-                    console.log('t7_upgrade: calling rwMany', isReadOp, addresses, directions, numValues, values);
-                    console.log('t7_upgrade: rwMany Error', err);
+                    // console.log('t7_upgrade: calling rwMany', isReadOp, addresses, directions, numValues, values);
+                    // console.log('t7_upgrade: rwMany Error', err);
+                    // console.log('Throwing Upgrade Error', err);
                     var callFunc = createSafeReject(innerDeferred);
                     callFunc(err);
                 },
@@ -970,7 +971,6 @@ this.writeImage = function(minPercent, maxPercent) {
                 deferred.resolve(bundle);
             },
             function (err) {
-                console.log('failed writeImage', err);
                 var callback = createSafeReject(deferred);
                 shouldUpdateProgressBar = false;
                 callback(err);
@@ -1379,30 +1379,50 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
         innerDeferred.resolve(bundle);
         return innerDeferred.promise;
     };
+    var cleanErrorMessageString = function(LJMError) {
+        var stringError = LJMError.toString();
+        var lowerCaseStr = stringError.toLowerCase();
+        var splitStr = lowerCaseStr.split('_');
+        return splitStr.join(' ');
+    };
     var createErrorMessage = function(step, error, deviceAttributes) {
         var message = 'Encountered an error in step: ' + step.toString();
-        message += ', error ' + error.toString();
+        
 
         var errorCode = parseInt(error, 10);
         var info = {};
+        var shortMessage = 'Encountered an error in step: ' + step.toString();
         if(errorCode) {
             info = modbus_map.getErrorInfo(errorCode);
-            message += ' (' + info.string + ').';
+            var cleanErrorString = cleanErrorMessageString(info.string);
+
+            shortMessage += ', ' + cleanErrorString + ' (' + error.toString() + ').';
+            message += ', ' + cleanErrorString + ' (' + error.toString() + ').';
+            // message += ', error ' + error.toString();
+            // message += ' (' + info.string + ').';
             if(info.description) {
                 message += '  ' + info.description;
             }
+            var addCheckWiFiMsg = true;
+            if(errorCode == 2355) {
+                message += '  Remove the uSD card and try again.';
+                addCheckWiFiMsg = false;
+            }
             if(deviceAttributes.isPro) {
-                if(deviceAttributes.WIFI_VERSION === 0) {
+                if((deviceAttributes.WIFI_VERSION === 0) && addCheckWiFiMsg) {
                     message += '  Check the WiFi module, it reported a version number of 0.';
                 }
             }
+        } else {
+            message += ', error ' + error.toString();
         }
-
         return {
             'info': info,
-            'message': message
+            'message': message,
+            'shortMessage': shortMessage,
         };
     };
+    
     var reportError = function(message) {
         var errorMessage = '';
         var reportErrorFunc = function(error) {
@@ -1424,7 +1444,11 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
                     'errorMessage': errorMessage.message,
                 };
                 errorEncountered = true;
-                reportErrorDefered.reject(err);
+
+                updateStatusText(errorMessage.shortMessage)(bundle)
+                .then(function() {
+                    reportErrorDefered.reject(err);
+                });
             }
 
             // throw error;

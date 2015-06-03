@@ -52,7 +52,7 @@ var device_tests = {
 	'openDevice': function(test) {
 		var td = {
 			'dt': 'LJM_dtT7',
-			'ct': 'LJM_ctANY',
+			'ct': 'LJM_ctUSB',
 			'id': 'LJM_idANY'
 		};
 		// td.ct = 'LJM_ctWIFI';
