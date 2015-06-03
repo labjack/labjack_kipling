@@ -1,18 +1,20 @@
 <div class="upgrade-results well">
-  <button type="button" class="hide-upgrade-results close" data-dismiss="upgrade-results"><span class="icon-cross"/></button>
+  <button type="button" class="hide-upgrade-results close" data-dismiss="upgrade-results"><span class="icon-cross"></span></button>
   <h3>Upgrade Results:</h3>
-  <dl>
-    {{#each results}}
-    <dt>{{productType}}, {{DEVICE_NAME_DEFAULT}}, {{sn}}</dt>
-    {{#if isError}}
-    <dd><strong>Upgrade Failed:</strong></dd>
-    <dd>{{err.errorMessage}}</dd>
-    {{else}}
-    <dd><strong>Upgrade was successful</strong></dd>
-    <dd>Duration: {{duration}}</dd>
-    <dd>Starting FW Version: {{startingFW}}</dd>
-    <dd>Ending FW Version: {{firmwareInfo.version}}</dd>
-    {{/if}}
-    {{/each}}
-  </dl>
+  {{#each results}}
+  <div class="device-upgrade-results bs-callout {{#if isError}}bs-callout-danger{{else}}bs-callout-success{{/if}}">
+    <dl>
+      <dt>{{productType}}, {{DEVICE_NAME_DEFAULT}}, {{sn}}</dt>
+      {{#if isError}}
+      <dd><strong>Upgrade Failed:</strong></dd>
+      <dd>{{err.errorMessage}}</dd>
+      {{else}}
+      <dd><strong>Upgrade was successful</strong></dd>
+      <!-- <dd>Duration: {{duration}}</dd>
+      <dd>Starting FW Version: {{startingFW}}</dd>
+      <dd>Ending FW Version: {{firmwareInfo.version}}</dd> -->
+      {{/if}}
+    </dl>
+  </div>
+  {{/each}}
 </div>

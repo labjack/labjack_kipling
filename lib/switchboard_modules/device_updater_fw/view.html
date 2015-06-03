@@ -1,93 +1,121 @@
 <div id="device_updater_holder">
   {{#if devices.length}}
-  <div id="firmware-update-results-holder"></div>
   
   <div id="t7_firmware_controls">
-    <h3>T7 Firmware Change Log</h3>
-    <ul class="unstyled">
-      <li><div title="Open the T7 firmware change log in your default browser"><a id="lj-link-holder-changeLog" class="lj-link-holder">Change Log</a></div></li>
+    <div id="firmware-update-results-holder"></div>
+    <h3>Update Method</h3>
+    <ul class="nav nav-tabs" id="myTab">
+      <li class="active"><a href="#home">Internet</a></li>
+      <li><a href="#profile">Local File</a></li>
+      <li><a href="#changeLog">Change Log</a></li>
     </ul>
-    <script>
-      $('#lj-link-holder-changeLog').unbind();
-      $('#lj-link-holder-changeLog').bind('click',function(){
-        if(typeof(gui) === 'undefined') {
-          gui = require('nw.gui');
-        }
-        gui.Shell.openExternal("http://labjack.com/support/firmware/t7");
-      });
-    </script>
-    {{#with custom.t7VersionData}}
-    <div id="internet-controls">
-      <h3 class="extra-padding">Download firmware online</h3>
 
-      <!-- display the drop-down menu for selecting firmware versions -->
-      {{#if isValid}}
-      <div class="btn-group extra-padding">
-        <button id="cloud" class="btn dropdown-toggle" data-toggle="dropdown" title="Load Example" aria-expanded="false">
-          <span id="selected-firmware">{{{../../custom.selectedFW}}}</span>
-          <span class="caret" style="margin-right: -12px;margin-left: 4px;"></span>
-        </button>
-        <ul class="dropdown-menu">
-          <!-- Display the current firmware versions -->
-          {{#each current}}
-            <li><a class="firmware-selection-link" id="{{key}}">{{version}} -{{type}} {{#if latest}}(latest){{/if}}</a></li>
+    <div class="tab-content">
+      <div class="tab-pane active" id="home">
+        {{#with custom.t7VersionData}}
+        <div id="internet-controls">
+          <!-- <h3 class="extra-padding">Download firmware online</h3> -->
+          <h4>Choose Firmware Version:</h4><br>
+
+          <!-- display the drop-down menu for selecting firmware versions -->
+          {{#if isValid}}
+          <div class="btn-group extra-padding">
+            <button id="cloud" class="btn dropdown-toggle" data-toggle="dropdown" title="Load Example" aria-expanded="false">
+              <span id="selected-firmware">{{{../../custom.selectedFW}}}</span>
+              <span class="caret" style="margin-right: -12px;margin-left: 4px;"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <!-- Display the current firmware versions -->
+              {{#each current}}
+                <li><a class="firmware-selection-link" id="{{key}}">{{version}} -{{type}} {{#if latest}}(latest){{/if}}</a></li>
+              {{else}}
+              {{/each}}
+
+              <!-- Display the Beta firmware versions in a sub-menu -->
+              {{#if beta}}
+              <li class="dropdown-submenu">
+                <a tabindex="-1">Beta</a>
+                <ul class="dropdown-menu">
+                  {{#each beta}}
+                  <li><a class="firmware-selection-link" id="{{key}}">{{version}} -{{type}}</a></li>
+                  {{/each}}
+                </ul>
+              </li>
+              {{/if}}
+              {{#if old}}
+              <li class="dropdown-submenu">
+                <a tabindex="-1">Old</a>
+                <ul class="dropdown-menu">
+                  {{#each old}}
+                  <li><a class="firmware-selection-link" id="{{key}}">{{version}} -{{type}}</a></li>
+                  {{/each}}
+                </ul>
+              </li>
+              {{/if}}
+            </ul>
+          </div>
           {{else}}
-          {{/each}}
-
-          <!-- Display the Beta firmware versions in a sub-menu -->
-          {{#if beta}}
-          <li class="dropdown-submenu">
-            <a tabindex="-1">Beta</a>
-            <ul class="dropdown-menu">
-              {{#each beta}}
-              <li><a class="firmware-selection-link" id="{{key}}">{{version}} -{{type}}</a></li>
-              {{/each}}
-            </ul>
-          </li>
+          <p>No online firmware files detected</p>
           {{/if}}
-          {{#if old}}
-          <li class="dropdown-submenu">
-            <a tabindex="-1">Old</a>
-            <ul class="dropdown-menu">
-              {{#each old}}
-              <li><a class="firmware-selection-link" id="{{key}}">{{version}} -{{type}}</a></li>
-              {{/each}}
-            </ul>
-          </li>
-          {{/if}}
-        </ul>
-      </div>
-      {{else}}
-      <p>No online firmware files detected</p>
-      {{/if}}
 
-      <!-- Display the Download and Update button -->
-      <div class="extra-padding">
-        <button id="web-update-button" class="btn" title="Downloads file from labjack.com and updates selected devices" {{#unless isValid}}disabled{{/unless}}>Download and update</button>
+          <!-- Display the Download and Update button -->
+          <div class="extra-padding">
+            <button id="web-update-button" class="btn" title="Downloads file from labjack.com and updates selected devices" {{#unless isValid}}disabled{{/unless}}>Download and update</button>
+          </div>
+        </div>
+        {{/with}}
       </div>
-    </div>
-    {{/with}}
 
-    {{#with custom}}
-    <div id="local-file-controls">
-      <h3 class="extra-padding">Load firmware from hard drive</h3>
-      <div id="firmware-browse">
-        <div>
-            <input type="text" id="file-loc-input" class="file-input-box" placeholder="Firmware location..." value = "{{#if selectedFile}}{{selectedFile.path}}{{/if}}">
-            <input style="display:none;" id="file-dialog-hidden" type="file">
-            <a id="browse-link" class="btn btn-link">browse for file &gt;&gt;</a>
+      <div class="tab-pane" id="profile">
+        {{#with custom}}
+        <div id="local-file-controls">
+          <!-- <h3 class="extra-padding">Load firmware from hard drive</h3> -->
+          <h4>Search for and select a valid *.bin file:</h4><br>
+          <div id="firmware-browse">
+            <div>
+                <input type="text" id="file-loc-input" class="file-input-box" placeholder="Firmware location..." value = "{{#if selectedFile}}{{selectedFile.path}}{{/if}}">
+                <input style="display:none;" id="file-dialog-hidden" type="file">
+                <a id="browse-link" class="btn btn-link">browse for file &gt;&gt;</a>
+            </div>
+            <div>
+                <button id="local-update-button" class="btn" title="Updates selected devices using local file" disabled>Update from local file</button>
+            </div>
+            <div id="user-selected-file-info">
+              {{{fileInfo}}}
+            </div>
+          </div>
         </div>
-        <div id="user-selected-file-info">
-          {{{fileInfo}}}
-        </div>
-        <div>
-            <button id="local-update-button" class="btn" title="Updates selected devices using local file" disabled>Update from local file</button>
+        {{/with}}
+      </div>
+      <div class="tab-pane" id="changeLog">
+        <div id="t7_change_log_holder">
+          <h3>T7 Firmware Change Log</h3>
+          <ul class="unstyled">
+            <li><div title="Open the T7 firmware change log in your default browser"><a id="lj-link-holder-changeLog" class="lj-link-holder">Change Log</a></div></li>
+          </ul>
+          <script>
+            $('#lj-link-holder-changeLog').unbind();
+            $('#lj-link-holder-changeLog').bind('click',function(){
+              if(typeof(gui) === 'undefined') {
+                gui = require('nw.gui');
+              }
+              gui.Shell.openExternal("http://labjack.com/support/firmware/t7");
+            });
+          </script>
         </div>
       </div>
     </div>
-    {{/with}}
+    <script>
+      $('#myTab a').click(function (e) {
+       e.preventDefault();
+       $(this).tab('show');
+     })
+    </script>
   </div>
+  
+  
   <div id="upgrade_status_holder" class="upgrade-status-holder"></div>
+
   {{else}}
   <h3>Please slect a device</h3>
   <p>Currently no devices are selected so this module has been disabled. Please Select a device to continue.</p>
