@@ -52,7 +52,6 @@ var filteredFilesAndFolders = [
 	'test_binaries',
 	// 'node_binaries/linux',
 	// 'node_binaries/win32',
-	'node_modules/q',
 	'node_modules/nodeunit',
 
 	// Filter out the node-webkit install

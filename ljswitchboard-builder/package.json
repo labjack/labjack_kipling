@@ -53,6 +53,7 @@
   "kipling_test_dependencies": [
     "ljswitchboard-kipling_tester"
   ],
+  "kipling_primary_dependency": "ljswitchboard-splash_screen",
   "old-dependencies": {
     "handlebars": "2.0.0"
   },
