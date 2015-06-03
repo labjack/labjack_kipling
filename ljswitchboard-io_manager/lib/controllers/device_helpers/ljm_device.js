@@ -83,6 +83,9 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 	this.read = function(address) {
 		return self.callFunc('read', [address]);
 	};
+	this.readArray = function(address, numReads) {
+		return self.callFunc('readArray', [address, numReads]);
+	};
 	this.readMultiple = function(addresses) {
 		return self.callFunc('readMultiple', [addresses]);
 	};
@@ -94,6 +97,9 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 	};
 	this.write = function(address, value) {
 		return self.callFunc('write', [address, value]);
+	};
+	this.writeArray = function(address, writeData) {
+		return self.callFunc('writeArray', [address, writeData]);
 	};
 	this.writeMany = function(addresses, values) {
 		return self.callFunc('writeMany', [addresses, values]);
