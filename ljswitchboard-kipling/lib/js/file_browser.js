@@ -49,7 +49,19 @@ function createFileBrowser() {
 
         self.fileBrowserDialog.trigger('click');
     };
-    this.browseForFile = function() {
+    this.browseForFile = function(options) {
+        var fileFilters = '';
+        if(options) {
+            if(options.filters) {
+                fileFilters = options.filters.toString();
+            }
+        }
+        // Configuring as per:
+        // https://github.com/nwjs/nw.js/wiki/File-dialogs
+
+        // Configure file-filters
+        self.fileBrowserDialog.attr('accept', fileFilters);
+
         setTimeout(innerBrowseForFile, 1);
     };
     var self = this;
