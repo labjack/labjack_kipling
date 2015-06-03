@@ -492,15 +492,31 @@ function createModuleChrome() {
 
 	};
 
+
+	this.moduleLockMessage = '';
+	this.disableModuleLoading = function(message) {
+		self.allowModuleToLoad = false;
+		self.moduleLockMessage = message;
+	};
+	this.enableModuleLoading = function() {
+		self.moduleLockMessage = '';
+		self.allowModuleToLoad = true;
+	};
 	this.allowModuleToLoad = true;
 	var moduleChromeTabClickHandler = function(res) {
 		// console.log('Clicked Tab', res.data.name);
 		if(self.allowModuleToLoad) {
 			self.allowModuleToLoad = false;
 
-			if(CLEAR_CACHES) {
-				console.log('clearing caches');
-				CLEAR_CACHES();
+			try {
+				if(gui.App.manifest.test || true) {
+					if(CLEAR_CACHES) {
+						console.log('clearing caches');
+						CLEAR_CACHES();
+					}
+				}
+			} catch(err) {
+				console.error('Not Clearing Caches due to error', err);
 			}
 			// Clear all selected module styling classes
 			$('.module-chrome-tab').removeClass('selected');
@@ -533,7 +549,11 @@ function createModuleChrome() {
 			});
 		} else {
 			// console.log('Preventing module from loading');
-			showInfoMessage('Please wait for module to finish loading.');
+			if(self.moduleLockMessage) {
+				showInfoMessage(self.moduleLockMessage);
+			} else {
+				showInfoMessage('Please wait for module to finish loading.');
+			}
 		}
 		// Query for the module's data.  Will be replaced by a function call
 		// to MODULE_LOADER.

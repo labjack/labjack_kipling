@@ -24,7 +24,7 @@ var K3_ON_APPLICATION_EXIT_LISTENER = function() {
 		console.log('Error quitting subprocess', err);
 	}
 	console.log('Quit sub-process');
-}
+};
 window_manager.on(
 	window_manager.eventList.QUITTING_APPLICATION,
 	K3_ON_APPLICATION_EXIT_LISTENER
@@ -84,6 +84,15 @@ var saveGlobalSubprocessReference = function(bundle) {
 var ioManagerMonitor = function(data) {
 	if(GLOBAL_ALLOW_SUBPROCESS_TO_RESTART) {
 		console.log('io_manager Close Event detected, restarting', data);
+		var errorString = '<p>';
+		errorString += 'Kipling\'s sub-process was closed or has crashed and ';
+		errorString += 'is being restarted.';
+		errorString += '</p>';
+		errorString += '<p>';
+		errorString += 'Current time is: ' + (new Date()).toString();
+		errorString += '</p>';
+
+		showCriticalAlert(errorString);
 		if(MODULE_LOADER) {
 			MODULE_LOADER.loadModuleByName('crash_module');
 		}
@@ -152,7 +161,7 @@ var showKiplingWindow = function() {
 var numLoadDelay = 0;
 var startCoreApp = function() {
 	if(coreResourcesLoaded && localResourcesLoaded) {
-		win.showDevTools();
+		// win.showDevTools();
 		// Start the application
 		global[gns].splash_screen.update('Starting IO Manager');
 
