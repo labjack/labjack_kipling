@@ -57,7 +57,8 @@
 }
 
 .value-editor-button:hover {
-    background-color: #AAAAAA;margin-top: -4px;
+    background-color: #AAAAAA;
+    margin-top: -4px;
 }
 
 .write-controls-holder
