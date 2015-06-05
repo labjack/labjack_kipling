@@ -71,7 +71,6 @@ if(isTest) {
 function organizeProjectFiles () {
 	var defered = q.defer();
 
-	console.log('Organizing...', foldersToCompress, requiredFiles);
 	var promises = [];
 	promises.push(fileOps.compressFolders(foldersToCompress));
 	promises.push(fileOps.copyFolders(requiredFiles));
