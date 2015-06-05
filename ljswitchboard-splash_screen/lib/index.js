@@ -303,7 +303,12 @@ var initializeProgram = function() {
 			});
 		} else {
 			defered.reject({'code': 'core', 'data': res});
+			console.log('Failed core-check', err);
+			splashScreenUpdater.update('Failed installation verification');
 		}
+	}, function(err) {
+		console.log('Failed while executing verifyCoreInstall', err);
+		splashScreenUpdater.update('Failed to verify installation');
 	});
 	return defered.promise;
 };
@@ -347,6 +352,9 @@ var loadSecondaryPackages = function() {
 		// Execute test function to proove that io_manager can be used.
 		// global.require('../../test.js').runProgram();
 
+	}, function(err) {
+		console.log('Failed to run package manager (sp)', err);
+		splashScreenUpdater.update('Failed to run package manager (sp)');
 	});
 
 	return defered.promise;
