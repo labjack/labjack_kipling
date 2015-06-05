@@ -509,7 +509,7 @@ function createModuleChrome() {
 			self.allowModuleToLoad = false;
 
 			try {
-				if(gui.App.manifest.test || true) {
+				if(gui.App.manifest.test) {
 					if(CLEAR_CACHES) {
 						console.log('clearing caches');
 						CLEAR_CACHES();
