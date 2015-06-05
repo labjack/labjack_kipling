@@ -163,12 +163,12 @@
         "userScript": {
             "windowMessage": "",
             "canSave": true,
-            "saveOnRun": true
+            "saveOnRun": false
         },
         "newScript": {
             "windowMessage": "New Script (not saved)",
             "canSave": false,
-            "saveOnRun": true
+            "saveOnRun": false
         }
     },
     "scriptTemplates": [],
