@@ -111,12 +111,16 @@ var startIOManager = function(){
 	global[gns].ljm = {};
 	global[gns].ljm.io_interface = io_interface;
 
+	var reportIOInitializationError = function(data) {
+		console.error('io_interface.initialize error:', data);
+		global[gns].splash_screen.update('Failed to initialize IO Manager');
+	};
 	// Attach monitor
 	GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
 	io_interface.on(io_interface.eventList.PROCESS_CLOSE, ioManagerMonitor);
 
 	io_interface.initialize()
-	.then(saveGlobalSubprocessReference)
+	.then(saveGlobalSubprocessReference,reportIOInitializationError)
 	.then(defered.resolve, defered.reject);
 	return defered.promise;
 };
