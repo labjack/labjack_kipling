@@ -19,11 +19,14 @@ var testFiles = [
 	'mock_module_tests/mock_device_selector.js',
 	'mock_module_tests/mock_device_info.js',
 	// 'mock_module_tests/mock_dashboard.js',
-	'mock_module_tests/mock_register_matrix.js',
+	// 'mock_module_tests/mock_register_matrix.js',
+	
 
 	// Execute Live-Device tests
 	'module_tests/test_device_info.js',
 	// 'module_tests/test_device_updater.js',
+
+	'mock_module_tests/mock_lua_script_debugger.js',
 
 	'finish_testing.js',
 ];
