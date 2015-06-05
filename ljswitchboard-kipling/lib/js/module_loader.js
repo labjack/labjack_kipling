@@ -49,6 +49,8 @@ function createModuleLoader() {
 		'#module-chrome-current-module-{{numLoaded}}'
 	].join(''));
 
+	
+
 	var clearCurrentModule = function(newModule) {
 		var defered = q.defer();
 
@@ -67,6 +69,7 @@ function createModuleLoader() {
 		return defered.promise;
 		// location.append($(compiledData));
 	};
+
 	var getCreatePageElement = function(newModule) {
 		var createPageElement = function(newFile) {
 			var defered = q.defer();
@@ -155,6 +158,7 @@ function createModuleLoader() {
 	this.addPreloadStep = function(func) {
 		precompileFunctions.push(func);
 	};
+
 	var getModuleContext = function(newModule) {
 		var defered = q.defer();
 		var promises = [];
@@ -272,6 +276,34 @@ function createModuleLoader() {
 		return defered.promise;
 	};
 
+	var unloadModuleFunctions = [];
+	this.addUnloadStep = function(func) {
+		unloadModuleFunctions.push(func);
+	};
+
+	var executeUnloadModuleFunctions = function(moduleData) {
+		var defered = q.defer();
+
+		if(unloadModuleFunctions.length > 0) {
+			var promises = [];
+			var i;
+			for(i = 0; i < unloadModuleFunctions.length; i++) {
+				promises.push(unloadModuleFunctions[i]());
+			}
+			q.allSettled(promises)
+			.then(function(results) {
+				unloadModuleFunctions = [];
+				defered.resolve(moduleData);
+			}, function(err) {
+				console.error('Finished unload-module steps', err);
+				defered.resolve(moduleData);
+			});
+		} else {
+			defered.resolve(moduleData);
+		}
+
+		return defered.promise;
+	};
 	var renderModule = function(moduleData) {
 		var defered = q.defer();
 		// Trigger any loaded module to halt its execution
@@ -310,6 +342,7 @@ function createModuleLoader() {
 	this.loadModule = function(moduleObject) {
 		var defered = q.defer();
 		module_manager.loadModuleData(moduleObject)
+		.then(executeUnloadModuleFunctions)
 		.then(renderModule)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
@@ -318,6 +351,7 @@ function createModuleLoader() {
 	this.loadModuleByName = function(moduleName) {
 		var defered = q.defer();
 		module_manager.loadModuleDataByName(moduleName)
+		.then(executeUnloadModuleFunctions)
 		.then(renderModule)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
