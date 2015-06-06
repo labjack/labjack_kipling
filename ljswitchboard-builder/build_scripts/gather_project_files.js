@@ -2,8 +2,12 @@
 var errorCatcher = require('./error_catcher');
 var fs = require('fs');
 var fse = require('fs-extra');
+var fsex = require('fs.extra');
 var path = require('path');
 var q = require('q');
+var rimraf = require('rimraf');
+
+var emptyDirectory = require('./empty_directory');
 
 var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
 var startingDir = process.cwd();
@@ -14,14 +18,8 @@ var DEBUG_FILE_COPYING = false;
 // projects.
 var PROJECT_FILES_SEARCH_PATH = path.normalize(path.join(startingDir, '..'));
 
-// Empty the output directory
-try {
-	console.log('Cleaning temp project files directory');
-	fse.emptyDirSync(TEMP_PROJECT_FILES_PATH);
-} catch(err) {
-	console.log('Failed to empty the temp project files directory', err);
-	process.exit(1);
-}
+// Empty the temp files dir.
+emptyDirectory.emptyDirectoryOrDie(TEMP_PROJECT_FILES_PATH);
 
 var buildData = require('../package.json');
 var isTest = false;
@@ -125,7 +123,7 @@ var addWorkingDir = function(dir) {
 			return getFinishedFunc(savedKey);
 		}
 	}
-	
+
 }
 var fixNameStr = function(nameStr) {
 	var minLength = 40;
@@ -137,7 +135,7 @@ var fixNameStr = function(nameStr) {
 	var outStr = '';
 	outStr += nameStr;
 	var numToAdd = minLength - outStr.length;
-	
+
 	for(i = 0; i < numToAdd; i++) {
 		outStr += ' ';
 	}
@@ -150,8 +148,8 @@ var getHeaderStr = function() {
 	var str = fixNameStr('status');
 	var curTime = new Date();
 	var curDuration = ((curTime - startingTime)/1000).toFixed(1);
-	
-	
+
+
 	var keys = Object.keys(copyStatus);
 	var num = keys.length;
 	var numComplete = 0;
@@ -194,7 +192,7 @@ var printStatus = function() {
 	}
 };
 var copyRelevantFiles = function(from, to, filters) {
-	
+
 	var fileListing = fs.readdirSync(from);
 	var promises = [];
 	var defered = q.defer();
@@ -221,7 +219,7 @@ var copyRelevantFiles = function(from, to, filters) {
 		filters.forEach(function(filter) {
 			var splitFilter = filter.split('/');
 			var folderFilter = splitFilter.shift();
-			// determine if the folder should be recursed into instead of 
+			// determine if the folder should be recursed into instead of
 			// coppied.
 			// Check to see if there is data to be recursed into.
 			if(splitFilter.length > 0) {

@@ -2,19 +2,16 @@
 var errorCatcher = require('./error_catcher');
 var fs = require('fs');
 var fse = require('fs-extra');
+var fsex = require('fs.extra');
 var path = require('path');
 
 var OUTPUT_BUILD_DIRECTORY = 'output';
 var OUTPUT_BUILD_PATH = path.join(process.cwd(), OUTPUT_BUILD_DIRECTORY);
 
-// Empty the output directory
-try {
-	console.log('Cleaning output directory');
-	fse.emptyDirSync(OUTPUT_BUILD_PATH);
-} catch(err) {
-	console.log('Failed to empty the build output directory', err);
-	process.exit(1);
-}
+var emptyDirectory = require('./empty_directory');
+
+// Empty the temp files dir.
+emptyDirectory.emptyDirectoryOrDie(OUTPUT_BUILD_PATH);
 
 // Determine current operating system so an appropriate version of node-webkit
 // can be used
