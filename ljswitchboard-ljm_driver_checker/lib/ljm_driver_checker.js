@@ -300,18 +300,20 @@ var validDirectory = function(directories) {
     var defered = q.defer();
     var directoryExists = false;
     var validDirectory = '';
+    var isFound = false;
     async.each(
         directories,
         function (directory, callback) {
             fs.exists(directory, function(exists) {
-                if(exists) {
+                if(exists && !isFound) {
+                    isFound = true;
                    directoryExists = true;
                     validDirectory = directory;
                 }
                 callback();
             });
         }, function(err) {
-            
+
             if(err) {
                 defered.reject(err);
             } else {
@@ -347,13 +349,13 @@ var checkHeaderFile = function(directoryInfo) {
                     directoryInfo.error = 'Vailed to find the LJM_VERSION string(2)';
                     defered.resolve(directoryInfo);
                 }
-                
+
             } else {
                 directoryInfo.isValid = false;
                 directoryInfo.error = 'Vailed to find the LJM_VERSION string';
                 defered.resolve(directoryInfo);
             }
-            
+
         } catch (parseError) {
             directoryInfo.isValid = false;
             directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
@@ -456,7 +458,7 @@ var buildOperation = function(key, requirement, isRequired) {
                 if(isRequired) {
                     bundle.overallResult = bundle.overallResult && res.isValid;
                 }
-                
+
                 defered.resolve(bundle);
             });
         } else {
@@ -482,7 +484,7 @@ var getOperations = function(requirements, isRequired) {
     keys.forEach(function(key) {
         operations.push(buildOperation(key, requirements[key], isRequired));
     });
-    
+
     return operations;
 };
 
