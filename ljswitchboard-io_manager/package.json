@@ -37,6 +37,8 @@
     "async": "~0",
     "dict": "1.4.0",
     "q": "~1",
+    "ffi": "*",
+    "ref": "*",
     "process_manager": "0.0.x",
     "labjack-nodejs": "0.0.x",
     "ljswitchboard-ljm_device_curator": "0.0.x",
