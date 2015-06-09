@@ -39,7 +39,7 @@ var getPerformTest = function(functionName, testArguments, numReads) {
 		q.allSettled(promises)
 		.then(function() {
 			endTime = new Date();
-			
+
 			var totalTime = (endTime - startTime)/1000;
 			var timePerRead = totalTime/numReads;
 			var rate = 1/timePerRead;
@@ -62,7 +62,7 @@ exports.tests = {
 		// Require the io_manager library
 		io_manager = require('../lib/io_manager');
 
-		// Require the io_interface that gives access to the ljm driver, 
+		// Require the io_interface that gives access to the ljm driver,
 		// device controller, logger, and file_io_controller objects.
 		io_interface = io_manager.io_interface();
 
@@ -72,7 +72,7 @@ exports.tests = {
 			// io_interface has initialized and is ready for use
 
 			// Save local pointers to the created objects
-			driver_controller = io_interface.getDriverController();
+			driver_controller = io_interface.getDriverCotroller();
 			device_controller = io_interface.getDeviceController();
 
 			test.ok(true);
@@ -90,6 +90,7 @@ exports.tests = {
 			'mockDevice': true
 		};
 
+		console.log('opening mock device');
 		device_controller.openDevice(params)
 		.then(function(newDevice) {
 			// save device reference

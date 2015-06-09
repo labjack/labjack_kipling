@@ -136,7 +136,7 @@ var checkGYPIFile = function(directoryInfo) {
                 directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
                 defered.resolve(directoryInfo);
             }
-            
+
         }
     });
     return defered.promise;
@@ -199,7 +199,7 @@ var getOperations = function(requirements, isRequired) {
     keys.forEach(function(key) {
         operations.push(buildOperation(key, requirements[key], isRequired));
     });
-    
+
     return operations;
 };
 
@@ -207,7 +207,7 @@ var checkRequirements = function(passedResult, passedResults) {
 	var defered = q.defer();
 	var rootDir;
     // Because the get_cwd file was first required in the io_interface.js file
-    // the reported path doesn't need to get fixed.  It can be used directly.  
+    // the reported path doesn't need to get fixed.  It can be used directly.
     // It reports the path of the caller who originally included the file via
     // "module.parent.filename".
     var cwd = get_cwd.getCWD();
@@ -216,27 +216,29 @@ var checkRequirements = function(passedResult, passedResults) {
 	} else {
 		rootDir = cwd;
     }
-    
+
 
 	var res = {
 		'overallResult': true
 	};
 
+    // var baseDirectory = rootDir + '/node_modules/labjack-nodejs';
+    var baseDirectory = rootDir + '';
 	var reqs = {
 		'labjack-nodejs': [
-			path.normalize(rootDir + '/node_modules/labjack-nodejs')
+			path.normalize(baseDirectory + '')
 		],
 		'ffi': [
-			path.normalize(rootDir + '/node_modules/labjack-nodejs/node_modules/ffi')
+			path.normalize(baseDirectory + '/node_modules/ffi')
 		],
 		'ffi-build-info': [
-			path.normalize(rootDir + '/node_modules/labjack-nodejs/node_modules/ffi/build/config.gypi')
+			path.normalize(baseDirectory + '/node_modules/ffi/build/config.gypi')
 		],
 		'ref': [
-			path.normalize(rootDir + '/node_modules/labjack-nodejs/node_modules/ref')
+			path.normalize(baseDirectory + '/node_modules/ref')
 		],
 		'ref-build-info': [
-			path.normalize(rootDir + '/node_modules/labjack-nodejs/node_modules/ref/build/config.gypi')
+			path.normalize(baseDirectory + '/node_modules/ref/build/config.gypi')
 		],
 	};
 

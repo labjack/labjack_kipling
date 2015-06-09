@@ -43,7 +43,7 @@ exports.basic_test = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		
+
 
 		var keys = Object.keys(io_manager);
 		test.deepEqual(keys, ['io_interface', 'info'], 'io_manager not required properly');
@@ -51,7 +51,6 @@ exports.basic_test = {
 	},
 	'create new io_interface': function(test) {
 		io_interface = io_manager.io_interface();
-		
 		var keys = Object.keys(io_interface);
 		var requiredKeys = [
 			'driver_controller',
@@ -79,7 +78,10 @@ exports.basic_test = {
 		.then(function(res) {
 			test.ok(true, res);
 			test.done();
-		});	
+		}, function(err) {
+			test.ok(false, err);
+			test.done();
+		});
 	},
 	'destroy io_interface': function(test) {
 		qRunner(test, io_interface.destroy)

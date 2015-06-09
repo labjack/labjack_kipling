@@ -48,6 +48,13 @@ function createIOInterface() {
 	this.logger_controller = null;
 	this.file_io_controller = null;
 
+	this.DEBUG_SUBPROCESS_START = false;
+	this.printStartMsg = function() {
+		if(self.DEBUG_SUBPROCESS_START) {
+			console.log.apply(console, arguments);
+		}
+	};
+
 	this.eventList = {
 		'PROCESS_ERROR': 'PROCESS_ERROR',
 		'PROCESS_DISCONNECT': 'PROCESS_DISCONNECT',
@@ -164,20 +171,20 @@ function createIOInterface() {
 	 * qExec is a function that aids in initializing the io_interface.  It saves
 	 * the results from each function call and allows each function call to be
 	 * passed data from a previously called function.  This allows for a final
-	 * 'defered' function call to return a plethora of error/debugging 
+	 * 'defered' function call to return a plethora of error/debugging
 	 * information.
 	 * func: function, The function that should be called.
 	 * name: string, The name of the function that should be called.  Also used
 	 *     to store the function call's results to the results object.
 	 * passResults: string, The name of the previously called function's results
-	 *     that need to get passed into the function being executed. 
+	 *     that need to get passed into the function being executed.
 	 */
 	var qExec = function(func, name, passResults) {
 		var execFunc = function(results) {
 			var defered = q.defer();
 			var keys = Object.keys(results);
-			
-			// Get previous function call's results & pass them along if 
+
+			// Get previous function call's results & pass them along if
 			// necessary
 			var inputData;
 			if(passResults) {
@@ -215,11 +222,12 @@ function createIOInterface() {
 	};
 
 	/**
-	 * The checkLabJackM function verifies that the LabJack LJM driver is 
+	 * The checkLabJackM function verifies that the LabJack LJM driver is
 	 * properly installed on a users machine.  If the driver isn't installed
 	 * properly the initialization routine for the io_interface will fail.
 	 */
 	var checkLabJackM = function() {
+		self.printStartMsg('in checkLabJackM');
 		var defered = q.defer();
 		ljmCheck.verifyLJMInstallation()
 		.then(defered.resolve, defered.reject);
@@ -228,17 +236,18 @@ function createIOInterface() {
 
 	/**
 	 * The checkRequirements function verifies that the labjack-nodejs library
-	 * has been properly included by npm and has been built for the proper os.  
-	 * It also verifies that the proper node_binary is going to be executed.  
-	 * If anything isn't configured/installed properly the initialization 
+	 * has been properly included by npm and has been built for the proper os.
+	 * It also verifies that the proper node_binary is going to be executed.
+	 * If anything isn't configured/installed properly the initialization
 	 * routine for the io_interface will fail.
-	 * 
+	 *
 	 * cwdOverride: object, The current working directory override object.
-	 * passedRequirements: object, An object passed into the function by the  
-	 *     qExec function that contains all of the previous results from the 
+	 * passedRequirements: object, An object passed into the function by the
+	 *     qExec function that contains all of the previous results from the
 	 *     io_interface initialization routine.
 	 */
 	var checkRequirements = function(cwdOverride, passedRequirements) {
+		self.printStartMsg('in checkRequirements');
 		var defered = q.defer();
 		npm_build_check.checkRequirements(cwdOverride, passedRequirements)
 		.then(defered.resolve, defered.reject);
@@ -252,6 +261,7 @@ function createIOInterface() {
 	 * various manager processes that make up the io_interface.
 	**/
 	var innerGetNodePath = function(passedResult, passedResults) {
+		self.printStartMsg('in innerGetNodePath');
 		var defered = q.defer();
 
 		// Collect information about the process
@@ -291,7 +301,7 @@ function createIOInterface() {
 			isOkToRun = false;
 			errors.push('No suitable executable name found');
 		}
-		
+
 		// If the os that the labjack-nodejs library was built for isn't
 		// the current platform, prevent the subprocess from starting.
 		if(os != passedResult.os) {
@@ -309,7 +319,7 @@ function createIOInterface() {
 				// If the labjack-nodejs library is built for x64 and we are a
 				// x64 machine, AND we started as a 32bit instance of node, then
 				// over-write the arch to be x64.  Otherwise there is nothing we
-				// can do but force an error. (Fix only for win32 OS, not sure 
+				// can do but force an error. (Fix only for win32 OS, not sure
 				// how to detect this on mac/linux).
 				if(os === 'win32') {
 					if(process.env['PROGRAMFILES(x86)']) {
@@ -335,11 +345,11 @@ function createIOInterface() {
 						passedResult.arch
 					);
 				}
-				
+
 			}
 		}
 
-		
+
 
 		// Save the root directory of the io_manager library
 		var resolvedCWD = get_cwd.getCWD();
@@ -416,14 +426,15 @@ function createIOInterface() {
 	};
 
 	/**
-	 * the innerInitialize function only gets executed when all 
+	 * the innerInitialize function only gets executed when all
 	 * checks/verifications have passed.  It starts the sub-process and reports
 	 * an error code with a result message if the the sub-process fails to start
-	 * properly.  It is still possible for this function to fail, this will 
-	 * happen in there is a syntax error/require error somewhere in the 
+	 * properly.  It is still possible for this function to fail, this will
+	 * happen in there is a syntax error/require error somewhere in the
 	 * io_delegator.js file/its requirements.
 	 */
 	var innerInitialize = function(info, passedResults) {
+		self.printStartMsg('in innerGetNodePath');
 		var defered = q.defer();
 		// If debugging is enabled, print out information about that process
 		// that is about to start.
@@ -522,12 +533,12 @@ function createIOInterface() {
 				options.stderrListener = passedResults.stderrListener;
 			}
 		}
-		
+
 		// Build a direct-path reference for the io_delegator.js file.  Relative
 		// path's don't work very well when starting from node-webkit and the
 		// ljswitchboard project.
 		var filetoStart = path.join(info.cwd, ioDelegatorPathFromRoot);
-
+		self.printStartMsg('Starting sub-process');
 		// Start the subprocess.
 		self.mp.qStart(filetoStart, options)
 		.then(initInternalMessenger, function(err) {
@@ -545,7 +556,7 @@ function createIOInterface() {
 			// .then(self.logger_controller.init)
 			// .then(self.file_io_controller.init)
 			.then(defered.resolve);
-			
+
 			// defered.resolve();
 		}, function(err) {
 			console.log("Error :(", err);
@@ -591,13 +602,14 @@ function createIOInterface() {
 		}
 
 		var errFunc = function(err) {
-			// console.log('io_interface error', err);
+			console.log('io_interface error', err);
 			defered.reject(err);
 		};
-		
+
 		// For reference, qExec is in charge of passing the results object to
 		// each of the functions that get called and any required results to
 		// functions after the initial function.
+		self.printStartMsg('Starting Initialization Procedure');
 
 		// Check to make sure labjackm is properly installed
 		qExec(checkLabJackM,'checkLabJackM')(results)

@@ -7,7 +7,7 @@ var pResults = utils.pResults;
 var q = require('q');
 
 // enable/disable tests
-var ENABLE_BASIC_TEST = false;						// Passing
+var ENABLE_BASIC_TEST = true;						// Passing
 var ENABLE_SIMPLE_TEST = false;						// Passing
 var TEST_DRIVER_CONTROLLER = false;					// Passing
 
