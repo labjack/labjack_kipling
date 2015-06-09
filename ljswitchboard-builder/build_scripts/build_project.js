@@ -22,6 +22,7 @@ var commands = {};
 var buildScripts = [
 	{'script': 'prepare_build', 'text': 'Preparing Build'},
 	{'script': 'gather_project_files', 'text': 'Gathering Project Files'},
+	{'script': 'rebuild_native_modules', 'text': 'Rebuilding Native Modules (ffi & ref)'},
 	{'script': 'organize_project_files', 'text': 'Organizing Project Files'},
 ];
 buildScripts.forEach(function(buildScript) {

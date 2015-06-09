@@ -63,14 +63,43 @@ var os = {
     'freebsd': 'linux',
     'sunos': 'linux'
 }[process.platform];
+
+var nodejsBinaryVersions = [
+	'0_10_33',
+	'0_10_35',
+	'0_12_1',
+	'1_2_0',
+];
+
+var addNodeVersionExclusions = function(os, arch) {
+	// Get the currently running node version
+	var curVersion = process.versions.node.split('.').join('_');
+
+	var versionsToDelete = [];
+	nodejsBinaryVersions.forEach(function(nodejsBinaryVersion) {
+		if(nodejsBinaryVersion !== curVersion) {
+			versionsToDelete.push(nodejsBinaryVersion);
+		}
+	});
+	versionsToDelete.forEach(function(versionToDelete) {
+		filteredFilesAndFolders.push(
+			'node_binaries/' +
+			os + '/' +
+			arch + '/' +
+			versionToDelete
+		);
+	});
+}
 var addArchExclusions = function(os) {
-	if(process.arch !== 'x64') {
+	var curArch = process.arch;
+	addNodeVersionExclusions(os, curArch);
+	if(curArch !== 'x64') {
 		filteredFilesAndFolders.push('node_binaries/' + os + '/x64');
 	}
-	if(process.arch !== 'ia32') {
+	if(curArch !== 'ia32') {
 		filteredFilesAndFolders.push('node_binaries/' + os + '/ia32');
 	}
-	if(process.arch !== 'arm') {
+	if(curArch !== 'arm') {
 		filteredFilesAndFolders.push('node_binaries/' + os + '/arm');
 	}
 };
@@ -163,21 +192,25 @@ var getHeaderStr = function() {
 	outputText.push('Duration: '+ curDuration.toString() + ' seconds');
 	return outputText;
 };
+
+var ENABLE_STATUS_UPDATES = true;
 var innerPrintStatus = function() {
-	console.log('');
-	console.log('');
-	console.log('');
-	var outputText = [];
-	outputText = outputText.concat(getHeaderStr());
-	var keys = Object.keys(copyStatus);
-	outputText = outputText.concat(keys.map(function(key) {
-		var outStr = fixNameStr(key);
-		outStr += '\t' + copyStatus[key].toString();
-		return outStr;
-	}));
-	outputText.forEach(function(outputStr) {
-		console.log(outputStr);
-	});
+	if(ENABLE_STATUS_UPDATES) {
+		console.log('');
+		console.log('');
+		console.log('');
+		var outputText = [];
+		outputText = outputText.concat(getHeaderStr());
+		var keys = Object.keys(copyStatus);
+		outputText = outputText.concat(keys.map(function(key) {
+			var outStr = fixNameStr(key);
+			outStr += '\t' + copyStatus[key].toString();
+			return outStr;
+		}));
+		outputText.forEach(function(outputStr) {
+			console.log(outputStr);
+		});
+	}
 };
 var printStatus = function() {
 	var printStatus = true;
