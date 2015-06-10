@@ -48,7 +48,7 @@ var loadCoreResources = function(resources) {
 
 /*
 	Function called to load the application's local resources.
-	The resources are loaded starting from the directory of the 
+	The resources are loaded starting from the directory of the
 	index.html/index.js file aka the cwd of the window.
 */
 var localResourcesLoaded = false;
@@ -113,7 +113,16 @@ var startIOManager = function(){
 
 	var reportIOInitializationError = function(data) {
 		console.error('io_interface.initialize error:', data);
-		global[gns].splash_screen.update('Failed to initialize IO Manager');
+
+		var remainingMessage = '';
+
+		if(data.code === 'EPERM') {
+			remainingMessage += ', Permissions';
+		} else {
+			console.log(typeof(data.code), data.code);
+			remainingMessage += ', Subprocess Failed';
+		}
+		global[gns].splash_screen.update('Failed to initialize IO Manager' + remainingMessage);
 	};
 	// Attach monitor
 	GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
@@ -127,7 +136,7 @@ var startIOManager = function(){
 
 var performRemainingInitializationRoutines = function() {
 	var defered = q.defer();
-	
+
 	KEYBOARD_EVENT_HANDLER.init()
 	.then(defered.resolve, defered.reject);
 
@@ -162,6 +171,30 @@ var showKiplingWindow = function() {
 	return defered.promise;
 };
 
+var getHandleError = function(msg) {
+	var handleError = function(err) {
+		var reportError = true;
+		if(err) {
+			if(err.loadError) {
+				reportError = false;
+			}
+		}
+
+		if(reportError) {
+			var defered = q.defer();
+			console.error('Error on step', msg);
+			defered.reject({
+				'loadError': true,
+				'message': 'Error on step: ' + msg.toString(),
+				'errorInfo': err,
+			});
+		} else {
+			defered.reject(reportError);
+		}
+		return defered.promise;
+	};
+	return handleError;
+};
 var numLoadDelay = 0;
 var startCoreApp = function() {
 	if(coreResourcesLoaded && localResourcesLoaded) {
@@ -173,20 +206,23 @@ var startCoreApp = function() {
 		startIOManager()
 
 		// Perform other initialization routines
-		.then(performRemainingInitializationRoutines)
+		.then(performRemainingInitializationRoutines, getHandleError('startIOManager'))
 
 		// Render the module chrome window
-		.then(MODULE_CHROME.loadModuleChrome)
+		.then(MODULE_CHROME.loadModuleChrome, getHandleError('performRemainingInitializationRoutines'))
 
 		// Initialize the file browser utility
-		.then(FILE_BROWSER.initialize)
+		.then(FILE_BROWSER.initialize, getHandleError('MODULE_CHROME.loadModuleChrome'))
 
 		// Hide the splash screen & core windows & display the kipling window
-		.then(showKiplingWindow)
+		.then(showKiplingWindow, getHandleError('FILE_BROWSER.initialize'))
 
 		// Load Kipling background tasks
-		.then(TASK_LOADER.loadTasks);
-		
+		.then(TASK_LOADER.loadTasks, getHandleError('showKiplingWindow'))
+
+		// Report remaining errors
+		.then(function(){}, getHandleError('TASK_LOADER.loadTasks'));
+
 	} else {
 		numLoadDelay += 1;
 		if(numLoadDelay > 5) {

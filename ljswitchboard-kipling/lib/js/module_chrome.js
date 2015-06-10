@@ -51,6 +51,11 @@ function createModuleChrome() {
 		documentURL = '';
 	}
 	var cwd = path.dirname(documentURL);
+	try {
+		cwd = decodeURIComponent(cwd);
+	} catch(err) {
+		cwd = cwd.split('%20').join(' ');
+	}
 	if(!path.isAbsolute(cwd)) {
 		cwd = path.resolve(path.sep, cwd);
 	}
@@ -59,7 +64,7 @@ function createModuleChrome() {
 	var moduleChromeTemplatesDir = 'templates';
 
 	var sliderTabsClass = '.body-tab';
-	
+
 	var cachedTemplates = {};
 
 	// Initialize variables for communicating with the driver.
@@ -201,7 +206,7 @@ function createModuleChrome() {
 		// 	context.footer_modules.length,
 		// 	2
 		// );
-		
+
 		$(MODULE_CHROME_HEADER_TABS_CLASS).css('height', headerHeight);
 		$(MODULE_CHROME_FOOTER_TABS_CLASS).css('height', footerHeight);
 		$(MODULE_CHROME_BODY_TABS_CLASS).css('padding-top', headerHeight);
@@ -368,11 +373,11 @@ function createModuleChrome() {
 		var passedFilters = filters.some(function(filter) {
 			var isSupportedDevice = true;
 			var keys = Object.keys(filter);
-			
+
 			// Check each filter to see if the current device meets all filter
 			// requirements.
 			keys.every(function(key) {
-				
+
 				if(typeof(filterOperations[key]) === 'function') {
 					if(self.debugFilters) {
 						console.log(
@@ -471,7 +476,7 @@ function createModuleChrome() {
 		} else {
 			// console.log('gc.call not executed');
 		}
-		
+
 		defered.resolve(data);
 		return defered.promise;
 	};
@@ -648,14 +653,14 @@ function createModuleChrome() {
 
 		// Instruct the startup module to load, aka the device_selector
 		.then(self.loadStartupModule)
-		
+
 		// Report that the module chrome has started
 		.then(reportModuleChromeStarted)
 
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
-	// Almost identical to the "internalLoadModuleChrome", however it doesn't 
+	// Almost identical to the "internalLoadModuleChrome", however it doesn't
 	// start the device_selector module.
 	var loadTestModuleChrome = function() {
 		var defered = q.defer();
@@ -673,7 +678,7 @@ function createModuleChrome() {
 
 		// Attach to important device_controller events.
 		.then(attachToDeviceControllerEvents)
-		
+
 		// Report that the module chrome has started
 		.then(reportModuleChromeStarted)
 
