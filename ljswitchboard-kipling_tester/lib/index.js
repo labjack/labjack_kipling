@@ -23,10 +23,10 @@ var testFiles = [
 	
 
 	// Execute Live-Device tests
-	'module_tests/test_device_info.js',
+	// 'module_tests/test_device_info.js',
 	// 'module_tests/test_device_updater.js',
 
-	'mock_module_tests/mock_lua_script_debugger.js',
+	// 'mock_module_tests/mock_lua_script_debugger.js',
 
 	'finish_testing.js',
 ];
