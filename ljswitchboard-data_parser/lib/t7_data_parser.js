@@ -29,8 +29,9 @@ var T7_LIST = {
 			};
 			var strVal = '';
 			
+			var convertSigFigs = false;
 			// Decide whether or not to convert units for sigfig reasons.
-			if((-0.1 < val) && (val < 0.1)) {
+			if((-0.1 < val) && (val < 0.1) && convertSigFigs) {
 				var rVal = val * 1000;
 				res.unit = 'mV';
 				res.str = rVal.toFixed(6);

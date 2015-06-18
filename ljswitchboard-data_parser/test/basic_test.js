@@ -309,7 +309,7 @@ exports.tests = {
 		var ainValues = [
 			{'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
 			{'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
-			{'res': 0.0123456789012, 'val': 0.012346, 'rounded': 12.345679, 'unit': 'mV'},
+			{'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 		];
 
 		var results = ainValues.map(function(ainValue) {
