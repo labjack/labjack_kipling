@@ -664,7 +664,9 @@ function device(useMockDevice) {
 		return defered.promise;
 	};
 	var factoryFirmwareVersions = [
+		0.6602,
 		1.0069,
+		1.0100,
 	];
 	var waitForT7ToInitialize = function() {
 		var defered = q.defer();
