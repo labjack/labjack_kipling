@@ -47,8 +47,8 @@ buildScripts.forEach(function(buildScript) {
 		'node-gyp',
 		'configure',
 		'--msvs_version=2010',
-		'--arch=ia32',
-		'--target=0.12.1'
+		'--arch=' + process.arch,
+		'--target=' + process.versions.node
 	].join(' ');
 
 	var buildProject = [
