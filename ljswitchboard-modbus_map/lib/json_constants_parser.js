@@ -17,7 +17,7 @@ var ljmmm_parse = require('ljmmm-parse');
 
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
-var array_registers = require('./array_registers');
+var array_registers = require('./array_registers').arrayRegisters;
 var buffer_registers = require('./buffer_registers').bufferRegisters;
 
 // Important constants:
@@ -216,20 +216,74 @@ function reindexConstantsByRegister(constants) {
 }
 
 /**
+ * This function forces the creation of the bufferInfo attribute to registers
+ * that contains more information about them.
+**/
+var addMissingBufferRegisterInfoObject = function(options) {
+	var constantsData = options.constantsData;
+	var location = options.location;
+	var index = options.index;
+	var name = options.name;
+
+	var bufferInfo;
+	var addData = false;
+
+	// Search for a buffer's info
+	array_registers.forEach(function(arrayRegister) {
+		if(name === arrayRegister.data) {
+			bufferInfo = {
+				'size': arrayRegister.size,
+			};
+			var importTypeData = true;
+			if(arrayRegister.type) {
+				if(arrayRegister.type !== 'raw') {
+					bufferInfo.type = arrayRegister.type;
+					importTypeData = false;
+				}
+			}
+			if(importTypeData) {
+				bufferInfo.type = constantsData[location][index].type;
+			}
+			addData = true;
+		}
+	});
+
+	if(addData) {
+		constantsData[location][index].bufferInfo = bufferInfo;
+	}
+};
+/**
  * This function forces the isBuffer register flag to be set for known buffer
  * registers.
 **/
 var addMissingBufferRegisterFlags = function(constantsData) {
 	var i;
+	var registerName;
 	try {
 		for(i = 0; i < constantsData.registers.length; i++) {
-			if(buffer_registers.indexOf(constantsData.registers[i].name) >= 0) {
+			registerName = constantsData.registers[i].name;
+			if(buffer_registers.indexOf(registerName) >= 0) {
 				constantsData.registers[i].isBuffer = true;
+
+				addMissingBufferRegisterInfoObject({
+					'constantsData': constantsData,
+					'location': 'registers',
+					'index': i,
+					'name': registerName,
+				});
 			}
 		}
 		for(i = 0; i < constantsData.registers_beta.length; i++) {
-			if(buffer_registers.indexOf(constantsData.registers_beta[i].name) >= 0) {
+			registerName = constantsData.registers_beta[i].name;
+			if(buffer_registers.indexOf(registerName) >= 0) {
 				constantsData.registers_beta[i].isBuffer = true;
+
+				addMissingBufferRegisterInfoObject({
+					'constantsData': constantsData,
+					'location': 'registers_beta',
+					'index': i,
+					'name': registerName,
+				});
 			}
 		}
 	} catch(err) {
@@ -237,6 +291,7 @@ var addMissingBufferRegisterFlags = function(constantsData) {
 	}
 	return constantsData;
 };
+
 /**
  * Object that parses the json file's & saves the two re-indexed dictionarys.
  * @param  {string} LJMJSONFileLocation location of 'ljm_constants.json'
@@ -259,8 +314,8 @@ var parseConstants = function(LJMJSONFileLocation) {
 
 	this.arrayRegisters = {};
 	var i;
-	for(i = 0; i < array_registers.arrayRegisters.length; i++) {
-		this.arrayRegisters[array_registers.arrayRegisters[i].name] = array_registers.arrayRegisters[i];
+	for(i = 0; i < array_registers.length; i++) {
+		this.arrayRegisters[array_registers[i].name] = array_registers[i];
 	}
 
 	// Append custom "forcing error b/c device not connected" error
