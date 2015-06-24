@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>12F45</string>
+	<string>14D136</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -54,13 +54,13 @@
 	<key>CFBundleVersion</key>
 	<string>2272.76</string>
 	<key>DTSDKBuild</key>
-	<string>12F37</string>
+	<string>13F34</string>
 	<key>DTSDKName</key>
-	<string>macosx10.8</string>
+	<string>macosx10.9</string>
 	<key>DTXcode</key>
-	<string>0511</string>
+	<string>0631</string>
 	<key>DTXcodeBuild</key>
-	<string>5B1008</string>
+	<string>6D1002</string>
 	<key>LSFileQuarantineEnabled</key>
 	<false/>
 	<key>LSMinimumSystemVersion</key>
@@ -70,7 +70,7 @@
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
 	<key>SCMRevision</key>
-	<string>072d56ad45f528d86ca62d8709be879fd2e7644c</string>
+	<string>4997442d98d80e4cacb1d81ce90d0a45ccd4b185</string>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>

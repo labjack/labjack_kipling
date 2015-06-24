@@ -16,6 +16,23 @@ var DEBUG_FILE_COPYING = false;
 var OUTPUT_PROJECT_FILES_DIRECTORY = 'output';
 var OUTPUT_PROJECT_FILES_PATH = path.normalize(path.join(startingDir, OUTPUT_PROJECT_FILES_DIRECTORY));
 
+// Add a few extra paths if we are building for mac-osx
+var buildOS = {
+	'darwin': 'darwin',
+	'win32': 'win32'
+}[process.platform];
+if(typeof(buildOS) === 'undefined') {
+	buildOS = 'linux';
+}
+if(buildOS === 'darwin') {
+	OUTPUT_PROJECT_FILES_PATH = path.normalize(path.join(
+	 	OUTPUT_PROJECT_FILES_PATH,
+	 	'nwjs.app',
+	 	'Contents',
+	 	'Resources'
+	 ));
+}
+
 var buildData = require('../package.json');
 var isTest = false;
 // console.log('Args', process.argv);

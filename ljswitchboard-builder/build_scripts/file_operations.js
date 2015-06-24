@@ -23,10 +23,15 @@ function compressFolderWithArchiver (from, to) {
     var output = fs.createWriteStream(to);
     var archive = archiver('zip');
 
+    var reportedError = false;
+
     output.on('close', function() {
         if(exports.debug) {
             console.log(archive.pointer() + ' total bytes');
             console.log('archiver has been finalized and the output file descriptor has closed.');
+        }
+        if(reportedError) {
+            console.log('!!! Close Happened after reporting an error');
         }
         defered.resolve();
     });
@@ -39,6 +44,7 @@ function compressFolderWithArchiver (from, to) {
 
     archive.on('error', function(err) {
         console.log('Error creating archive', err);
+        reportedError = true;
         defered.reject();
     });
 

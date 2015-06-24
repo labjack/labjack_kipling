@@ -43,13 +43,29 @@ buildScripts.forEach(function(buildScript) {
 		'clean'
 	].join(' ');
 
-	var configureProject = [
-		'node-gyp',
-		'configure',
-		'--msvs_version=2010',
-		'--arch=' + process.arch,
-		'--target=' + process.versions.node
-	].join(' ');
+	var buildOS = {
+		'darwin': 'darwin',
+		'win32': 'win32'
+	}[process.platform];
+	if(typeof(buildOS) === 'undefined') {
+		buildOS = 'linux';
+	}
+
+	var configureProject = {
+		'win32': [
+			'node-gyp',
+			'configure',
+			'--msvs_version=2010',
+			'--arch=' + process.arch,
+			'--target=' + process.versions.node
+		],
+		'darwin': [
+			'node-gyp',
+			'configure',
+			'--arch=' + process.arch,
+			'--target=' + process.versions.node
+		]
+	}[buildOS].join(' ');
 
 	var buildProject = [
 		'node-gyp',
