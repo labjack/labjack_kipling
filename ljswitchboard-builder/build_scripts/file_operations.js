@@ -2,6 +2,7 @@ var errorCatcher = require('./error_catcher');
 var archiver = require('archiver');
 var fs = require('fs');
 var fse = require('fs-extra');
+var fsex = require('fs.extra');
 var path = require('path');
 var q = require('q');
 
@@ -14,6 +15,118 @@ var AdmZip = require('adm-zip');
 exports.debug = false;
 
 
+function walkDirectory (bundle) {
+    var defered = q.defer();
+
+    var from = bundle.from;
+    var debugCompression = bundle.debugCompression;
+
+    function fileHandler(root, fileStat, next) {
+        // debugCompression('in fileHandler', fileStat.name);
+        
+
+        var fromDirName = path.dirname(from);
+        var splitPath = root.split(from + '/');
+        var relativeRootPath = '';
+        if(splitPath.length > 1) {
+            relativeRootPath = splitPath[1];
+        }
+
+        // debugCompression('in fileHandler', relativeRootPath);
+
+        var absolutePath = path.normalize(path.join(
+            root,
+            fileStat.name
+        ));
+        // debugCompression('in fileHandler', relativeRootPath);
+        var relativePath = path.normalize(path.join(
+            relativeRootPath,
+            fileStat.name
+        ));
+        // debugCompression('in fileHandler', relativePath);
+        bundle.files.push({
+            'absolutePath': absolutePath,
+            'relativePath': relativePath,
+        });
+        next();
+    }
+    function errorsHandler(root, nodeStatsArray, next) {
+        console.log('ERROR!!! Walking', from);
+        next();
+    }
+    function endHandler() {
+        debugCompression('Finished Walking');
+        defered.resolve(bundle);
+    }
+    var walker = fsex.walk(from, { followLinks: true });
+    
+    // Attach Handlers
+    walker.on('file', fileHandler);
+    walker.on('errors', errorsHandler);
+    walker.on('end', endHandler);
+
+    return defered.promise;
+}
+var yazl = require('yazl');
+function performCompressionWithYazl (bundle) {
+    var defered = q.defer();
+
+    var from = bundle.from;
+    var to = bundle.to;
+    var files = bundle.files;
+    var debugCompression = bundle.debugCompression;
+
+    var zipfile = new yazl.ZipFile();
+
+    // Add files to the zip file
+    files.forEach(function(file) {
+        zipfile.addFile(file.absolutePath, file.relativePath);
+    });
+    zipfile.end();
+
+    // create the .zip file
+    function handleFinish() {
+        debugCompression('Finished creating .zip file');
+        defered.resolve();
+    }
+    zipfile.outputStream.pipe(fs.createWriteStream(to)).on(
+        'close',
+        handleFinish
+    );
+
+    return defered.promise;
+}
+function compressFolderWithYazl (from, to) {
+    var defered = q.defer();
+
+    var innerDebug = false;
+    var debugCompression = function() {
+        if(innerDebug) {
+            console.log.apply(console, arguments);
+        }
+    }
+    if(from.indexOf('splash_screen') >= 0) {
+        innerDebug = true;
+    }
+
+    debugCompression('Compressing...', from);
+    debugCompression('YaY!!!');
+
+    var fileListing = [];
+
+    var bundle = {
+        'from': from,
+        'to': to,
+        'files': [],
+        'debugCompression': debugCompression,
+    };
+
+    walkDirectory(bundle)
+    .then(performCompressionWithYazl)
+    .then(defered.resolve);
+
+    return defered.promise;
+}
 function compressFolderWithArchiver (from, to) {
     var defered = q.defer();
     if(exports.debug) {
@@ -50,7 +163,8 @@ function compressFolderWithArchiver (from, to) {
 
     archive.pipe(output);
 
-    archive.directory(from, false, { date: new Date() }).finalize();
+    archive.directory(from, false, { date: new Date() })
+    .finalize();
     
     return defered.promise;
 }
@@ -68,7 +182,9 @@ function compressFolderWithAdmZip (from, to) {
 }
 
 function compressFolder (folder) {
-    return compressFolderWithArchiver(folder.from, folder.to);
+    // return compressFolderWithArchiver(folder.from, folder.to);
+    return compressFolderWithYazl(folder.from, folder.to);
+    
 }
 exports.compressFolder = compressFolder;
 

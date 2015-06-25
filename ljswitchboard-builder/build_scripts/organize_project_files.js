@@ -47,7 +47,7 @@ var primaryProject = buildData.kipling_primary_dependency;
 var foldersToCompress = [];
 
 function normalizeAndJoin(dirA, dirB) {
-	console.log('HERE', dirA, dirB);
+	// console.log('HERE', dirA, dirB);
 	return path.normalize(path.join.apply(this, arguments));
 }
 function addProjectFolder (folder) {
@@ -64,10 +64,17 @@ function addProjectFolder (folder) {
 			});
 		}
 	} else {
-		requiredFiles.push({
-			'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
-			'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH),
-		});
+		if(buildOS !== 'darwin') {
+			requiredFiles.push({
+				'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
+				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH),
+			});
+		} else {
+			foldersToCompress.push({
+				'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
+				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH, 'app' + '.nw'),
+			});
+		}
 	}
 }
 buildData.kipling_dependencies.forEach(addProjectFolder);
