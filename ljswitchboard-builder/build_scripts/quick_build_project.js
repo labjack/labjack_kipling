@@ -22,6 +22,7 @@ var commands = {};
 var buildScripts = [
 	{'script': 'prepare_build', 'text': 'Preparing Build'},
 	{'script': 'organize_project_files', 'text': 'Organizing Project Files'},
+	{'script': 'brand_project', 'text': 'Branding Project Files'},
 ];
 buildScripts.forEach(function(buildScript) {
 	buildScript.scriptPath = path.normalize(path.join(
