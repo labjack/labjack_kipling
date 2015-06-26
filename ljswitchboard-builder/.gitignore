@@ -8,3 +8,6 @@ temp_extract_test_dir/*
 temp_zip_test_dir/*
 output.zip
 output.tar.gz
+
+build_tools/resource_hacker/ResourceHacker.ini
+build_tools/resource_hacker/ResourceHacker.log
