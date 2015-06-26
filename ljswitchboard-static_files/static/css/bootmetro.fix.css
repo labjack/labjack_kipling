@@ -3,6 +3,20 @@
 .bs-callout-success {border-left-color: #3c763d;}
 .bs-callout-success h4 {color: #3c763d;}
 
+/* Fixing the weird button-highlighting
+https://bootstrapbay.com/blog/bootstrap-button-styles/
+*/
+/*.btn {
+    padding: 14px 24px;
+    border: 0 none;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}*/
+ 
+.btn:focus, .btn:active:focus, .btn.active:focus {
+    outline: 0 none;
+}
 button, input[type=button], input[type=reset], input[type=submit] {background-clip: border-box;}
 
 .badge {
@@ -36,4 +50,32 @@ line-height: 1.42857143;
 vertical-align: top;
 /*border-top: 1px solid #ddd;*/
 border-top:none;
+}
+
+label.radio {
+    margin-top: -8px;
+    margin-bottom: 0;
+}
+span.metro-radio::before {
+    top: 4px;
+    left: 2px;
+}
+input[type=radio] ~ span.metro-radio::before {
+  top: 4px;
+  left: 2px;
+}
+@media (min-width: 1200px) {
+	.row {
+	   margin-left: -20px; 
+	}
+}
+@media (max-width: 979px) and (min-width: 768px) {
+	.row {
+	  margin-left: -20px;
+	}
+}
+@media (max-width: 767px) {
+    .row, .thumbnails {
+	  margin-left:-20px;
+	}
 }

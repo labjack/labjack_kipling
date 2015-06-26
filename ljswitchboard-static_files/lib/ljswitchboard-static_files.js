@@ -1,6 +1,11 @@
 
 var path = require('path');
-var q = global.require('q');
+var q;
+try {
+	q = global.require('q');
+} catch(err) {
+	q = require('q');
+}
 exports.info = {
 	'type': 'staticFiles'
 };
