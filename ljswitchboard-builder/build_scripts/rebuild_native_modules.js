@@ -64,6 +64,12 @@ buildScripts.forEach(function(buildScript) {
 			'configure',
 			'--arch=' + process.arch,
 			'--target=' + process.versions.node
+		],
+		'linux': [
+			'node-gyp',
+			'configure',
+			'--arch=' + process.arch,
+			'--target=' + process.versions.node,
 		]
 	}[buildOS].join(' ');
 

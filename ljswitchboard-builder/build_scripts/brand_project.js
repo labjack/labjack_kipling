@@ -122,7 +122,11 @@ var darwinBrandingOps = [{
 
 var win32BrandingOps = [];
 
-var linuxBrandingOps = [];
+var linuxBrandingOps = [{
+	'operation': 'rename',
+	'from': 'nw',
+	'to': desiredProjectName,
+}];
 
 var brandingOperations = {
 	'darwin': darwinBrandingOps,
