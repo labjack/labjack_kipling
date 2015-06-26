@@ -12,9 +12,12 @@ var resolveLink = function(link) {
 };
 var getDir = function() {
 	var cwd = path.join(path.dirname(module.filename), '..', 'static');
-
-	// force path to be a url/unix style path.
-	return cwd.split('\\').join('/') + '/';
+	if(process.platform !== 'win32') {
+		return cwd + path.sep;
+	} else {
+		// force path to be a url/unix style path.
+		return cwd.split('\\').join('/') + '/';
+	}
 };
 
 var resolveLinks = function(links) {
