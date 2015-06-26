@@ -100,6 +100,17 @@
                     "location": "lua_script_debugger/premade_scripts/benchmarking_tests/Low Level Speed Test - Toggle LED.lua"
                 }
             ]
+        },  {
+                "name": "Advanced Scripts",
+                "subScripts": [
+                {
+                    "name": "PID Example",
+                    "location": "lua_script_debugger/premade_scripts/Advanced_Scripts/13 PID Example.lua"
+                }, {
+                    "name": "Zerocrossing Detect & Pulse Response",
+                    "location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Zerocrossing Pulse Response.lua"
+                }
+            ]
         }, {
             "name": "Get Device Temperature",
             "location": "lua_script_debugger/premade_scripts/1 Get Device Temperature.lua"
@@ -142,9 +153,6 @@
         }, {
             "name": "Lua IO USER RAM FIFO",
             "location": "lua_script_debugger/premade_scripts/11b USER RAM FIFO.lua"
-        }, {
-            "name": "PID Example",
-            "location": "lua_script_debugger/premade_scripts/13 PID Example.lua"
         }
     ],
     "scriptOptions": {
@@ -163,12 +171,12 @@
         "userScript": {
             "windowMessage": "",
             "canSave": true,
-            "saveOnRun": false
+            "saveOnRun": true
         },
         "newScript": {
             "windowMessage": "New Script (not saved)",
             "canSave": false,
-            "saveOnRun": false
+            "saveOnRun": true
         }
     },
     "scriptTemplates": [],
