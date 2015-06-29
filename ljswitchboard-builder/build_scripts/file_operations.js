@@ -21,34 +21,43 @@ function walkDirectory (bundle) {
     var from = bundle.from;
     var debugCompression = bundle.debugCompression;
 
-    function fileHandler(root, fileStat, next) {
-        // debugCompression('in fileHandler', fileStat.name);
-        
+    function getFileHandler(isDirectory) {
+        var fileHandler = function(root, fileStat, next) {
+            // debugCompression('in fileHandler', fileStat.name);
 
-        var fromDirName = path.dirname(from);
-        var splitPath = root.split(from + '/');
-        var relativeRootPath = '';
-        if(splitPath.length > 1) {
-            relativeRootPath = splitPath[1];
-        }
+            var fromDirName = path.dirname(from);
+            var splitPath = root.split(from + path.sep);
+            var relativeRootPath = '';
+            if(splitPath.length > 1) {
+                relativeRootPath = splitPath[1];
+            }
 
-        // debugCompression('in fileHandler', relativeRootPath);
+            // debugCompression('in fileHandler', relativeRootPath);
 
-        var absolutePath = path.normalize(path.join(
-            root,
-            fileStat.name
-        ));
-        // debugCompression('in fileHandler', relativeRootPath);
-        var relativePath = path.normalize(path.join(
-            relativeRootPath,
-            fileStat.name
-        ));
-        // debugCompression('in fileHandler', relativePath);
-        bundle.files.push({
-            'absolutePath': absolutePath,
-            'relativePath': relativePath,
-        });
-        next();
+            var absolutePath = path.normalize(path.join(
+                root,
+                fileStat.name
+            ));
+            // debugCompression('in fileHandler', relativeRootPath);
+            var relativePath = path.normalize(path.join(
+                relativeRootPath,
+                fileStat.name
+            ));
+            // debugCompression('in fileHandler', relativePath);
+            if(isDirectory) {
+                bundle.folders.push({
+                    'absolutePath': absolutePath,
+                    'relativePath': relativePath, 
+                });
+            } else {
+                bundle.files.push({
+                    'absolutePath': absolutePath,
+                    'relativePath': relativePath,
+                });
+            }
+            next();
+        };
+        return fileHandler;
     }
     function errorsHandler(root, nodeStatsArray, next) {
         console.log('ERROR!!! Walking', from);
@@ -61,7 +70,8 @@ function walkDirectory (bundle) {
     var walker = fsex.walk(from, { followLinks: true });
     
     // Attach Handlers
-    walker.on('file', fileHandler);
+    walker.on('file', getFileHandler(false));
+    walker.on('directory', getFileHandler(true));
     walker.on('errors', errorsHandler);
     walker.on('end', endHandler);
 
@@ -74,13 +84,32 @@ function performCompressionWithYazl (bundle) {
     var from = bundle.from;
     var to = bundle.to;
     var files = bundle.files;
+    var folders = bundle.folders;
     var debugCompression = bundle.debugCompression;
 
     var zipfile = new yazl.ZipFile();
 
+    // Add folders to the zip file
+    // folders.forEach(function(file) {
+    //     console.log('Adding Folder', file);
+    //     var unixRelativePath = path.posix.join.apply(
+    //         path,
+    //         file.relativePath.split(path.sep)
+    //     );
+    //     zipfile.addEmptyDirectory(unixRelativePath);
+    // });
+
     // Add files to the zip file
     files.forEach(function(file) {
-        zipfile.addFile(file.absolutePath, file.relativePath);
+        var unixAbsolutePath = path.posix.join.apply(
+            path,
+            file.absolutePath.split(path.sep)
+        );
+        var unixRelativePath = path.posix.join.apply(
+            path,
+            file.relativePath.split(path.sep)
+        );
+        zipfile.addFile(file.absolutePath, unixRelativePath);
     });
     zipfile.end();
 
@@ -104,7 +133,7 @@ function compressFolderWithYazl (from, to) {
         if(innerDebug) {
             console.log.apply(console, arguments);
         }
-    }
+    };
     if(from.indexOf('splash_screen') >= 0) {
         innerDebug = true;
     }
@@ -118,6 +147,7 @@ function compressFolderWithYazl (from, to) {
         'from': from,
         'to': to,
         'files': [],
+        'folders': [],
         'debugCompression': debugCompression,
     };
 
@@ -195,9 +225,10 @@ function compressFolders (folders) {
         return compressFolder(folder);
     });
 
+    // console.log('Compressing Folders...');
     q.allSettled(promises)
     .then(function() {
-        console.log('finished in compressFolders');
+        // console.log('finished in compressFolders');
         defered.resolve();
     });
     return defered.promise;

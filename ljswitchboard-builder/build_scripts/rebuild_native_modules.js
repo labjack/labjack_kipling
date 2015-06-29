@@ -55,7 +55,7 @@ buildScripts.forEach(function(buildScript) {
 		'win32': [
 			'node-gyp',
 			'configure',
-			'--msvs_version=2010',
+			'--msvs_version=2008',
 			'--arch=' + process.arch,
 			'--target=' + process.versions.node
 		],

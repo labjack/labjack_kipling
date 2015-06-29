@@ -4,7 +4,7 @@ var fse = require('fs-extra');
 var path = require('path');
 var archiver = require('archiver');
 var cwd = process.cwd();
-var ndd = require('node-dir-diff');
+// var ndd = require('node-dir-diff');
 var util = require('util');
 
 var fileOps = require('../build_scripts/file_operations');
@@ -23,9 +23,9 @@ var PATH_OF_FILES_TO_ZIP = path.normalize(path.join(cwd, DIR_OF_FILES_TO_ZIP));
 
 var testFolders = [];
 
-var createTestZipFiles = false;
+var createTestZipFiles = true;
 var parseTestZipFiles = true;
-var extractTestZipFiles = false;
+var extractTestZipFiles = true;
 exports.tests = {
     'create temporary .zip output directory': function(test) {
         try {
