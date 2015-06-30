@@ -225,8 +225,10 @@ var startCoreApp = function() {
 
 	} else {
 		numLoadDelay += 1;
-		if(numLoadDelay > 5) {
-			win.showDevTools();
+		if(numLoadDelay > 10) {
+			if(numLoadDelay > 2000) {
+				win.showDevTools();
+			}
 			console.log('numLoadDelay', numLoadDelay);
 			setTimeout(startCoreApp, 100);
 		} else {
