@@ -57,6 +57,8 @@ var EVENTS = {
 	FINISHED_DIRECTORY_EXTRACTION_ERROR: 'finished_directory_extraction_error',
 
 	FAILED_TO_LOAD_MANAGED_PACKAGE: 'failed_to_load_managed_package',
+
+	FAILED_TO_INITIALIZE_PACKAGE_MANAGER: 'failed_to_initialize_package_manager',
 };
 exports.eventList = EVENTS;
 
@@ -352,7 +354,17 @@ function createPackageLoader() {
 		));
 		fs.writeFile(filePath, JSON.stringify({}), function(err) {
 			if(err) {
-				console.error('Error Initializing package_loader info file', err);
+				if(err.code === 'ENOENT') {
+					var errPath = err.path;
+					console.error('Error Initializing package_loader info file b/c of permissions', err);
+					var message = '';
+					message += 'Write-access required for: ' + path.dirname(errPath);
+					console.error('Message:', message);
+					self.emit(EVENTS.FAILED_TO_INITIALIZE_PACKAGE_MANAGER, message);
+					
+				} else {
+					console.error('Error Initializing package_loader info file', err);
+				}
 				defered.resolve(bundle);
 			} else {
 				defered.resolve(bundle);
