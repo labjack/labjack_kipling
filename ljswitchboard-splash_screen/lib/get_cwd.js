@@ -100,7 +100,7 @@ if(os === 'win32') {
 	
 } else if(os === 'linux') {
 	console.log('Linux OS Not Supported (YET)', os, process.platform, process.arch);
-	console.error('Project was started via an un-known location (On Mac OS X)');
+	console.error('Project was started via an un-known location (On Linux)');
 	console.log('cwd', cwd);
 	console.log('derivedCWD', derivedCWD);
 	console.log('execDir', execDir);

@@ -29,7 +29,7 @@
 	"window": {
 		"title": "Kipling",
 		"icon": "lib/Kipling_128x128.png",
-		"toolbar": false,
+		"toolbar": true,
 		"frame": false,
 		"width": 480,
 		"height": 300,

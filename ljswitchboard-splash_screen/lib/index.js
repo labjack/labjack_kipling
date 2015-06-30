@@ -151,6 +151,13 @@ package_loader.on('finished_extraction', function(packageInfo) {
 	splashScreenUpdater.update('Finished Extracting ' + packageInfo.name);
 });
 
+package_loader.on('failed_to_initialize_package_manager', function(message) {
+	console.log('Failed to initialize pagkage_manager', message);
+	splashScreenUpdater.update(message.toString());
+});
+package_loader.on('failed_to_load_managed_package', function(message) {
+	console.warn('Message:', message);
+});
 
 var startDir = require('./get_cwd').startDir;
 var startInfo = require('./get_cwd').startInfo;
