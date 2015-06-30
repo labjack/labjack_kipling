@@ -9,5 +9,7 @@ temp_zip_test_dir/*
 output.zip
 output.tar.gz
 
+.DS_Store
+
 build_tools/resource_hacker/ResourceHacker.ini
 build_tools/resource_hacker/ResourceHacker.log
