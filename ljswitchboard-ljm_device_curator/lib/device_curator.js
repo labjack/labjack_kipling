@@ -21,6 +21,8 @@ var lj_t7_cal_operations = require('./t7_calibration_operations');
 
 var register_watcher = require('./register_watcher');
 
+var digit_format_functions = require('./digit_format_functions');
+
 var device_events = driver_const.device_curator_constants;
 
 var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
@@ -397,6 +399,9 @@ function device(useMockDevice) {
 				self.savedAttributes.productType = dc + sc;
 			},
 			'DGT_BATTERY_INSTALL_DATE':null,
+			'DGT_HUMIDITY_CAL_OFFSET': null,
+			'DGT_HUMIDITY_CAL_SLOPE': null,
+			'DGT_HUMIDITY_CAL_T_SLOPE': null,
 		},
 	};
 	var saveCustomAttributes = function(addresses, dt, formatters) {
@@ -2037,6 +2042,28 @@ function device(useMockDevice) {
 	};
 	this.readHumidity = function() {
 		return self.digitRead('DGT_HUMIDITY_RAW');
+	};
+
+	var applyDigitFormatterFunctions = function(newData) {
+		return digit_format_functions.applyFormatters(self, newData);
+	};
+	this.readTempLightHumidity = function() {
+		var dt = self.savedAttributes.deviceType;
+		var digitDeviceNum = driver_const.deviceTypes.digit;
+		var defered = q.defer();
+		if(dt === digitDeviceNum) {
+			console.log('Acquiring temp, light, and humidity reading');
+			self.iReadMany([
+				'DGT_TEMPERATURE_LATEST_RAW',
+				'DGT_HUMIDITY_RAW',
+				'DGT_LIGHT_RAW',
+			])
+			.then(applyDigitFormatterFunctions, defered.reject)
+			.then(defered.resolve, defered.reject);
+		} else {
+			defered.reject(getDeviceTypeMessage(dt));
+		}
+		return defered.promise;
 	};
 
 	var self = this;

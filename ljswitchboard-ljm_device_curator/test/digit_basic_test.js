@@ -74,6 +74,10 @@ var device_tests = {
 			test.done();
 		});
 	},
+	'check constants': function(test) {
+		// console.log(device.savedAttributes);
+		test.done();
+	},
 	'readTemp': function(test) {
 		var results = [];
 
@@ -87,6 +91,15 @@ var device_tests = {
 				{'functionCall': 'read', 'type': 'range', 'min': 0, 'max': 99999}
 			];
 			utils.testResults(test, expectedResult, res);
+			test.done();
+		});
+	},
+	'readTempLightHumidity': function(test) {
+		var results = [];
+
+		qExec(device, 'readTempLightHumidity')(results)
+		.then(function(readResults) {
+			console.log(JSON.stringify(readResults, null, 2));
 			test.done();
 		});
 	},
