@@ -2045,18 +2045,44 @@ function device(useMockDevice) {
 	};
 
 	var applyDigitFormatterFunctions = function(newData) {
-		return digit_format_functions.applyFormatters(self, newData);
+		// console.log('New Data', newData);
+		var coercedData = [];
+		newData.forEach(function(dataPoint) {
+			if(typeof(dataPoint.isErr) !== 'undefined') {
+				coercedData.push(dataPoint.data);
+			} else {
+				coercedData.push(dataPoint);
+			}
+		});
+		return digit_format_functions.applyFormatters(self, coercedData);
+	};
+	this.readTempHumidityLight = function() {
+		var dt = self.savedAttributes.deviceType;
+		var digitDeviceNum = driver_const.deviceTypes.digit;
+		var defered = q.defer();
+		if(dt === digitDeviceNum) {
+			self.iReadMultiple([
+				'DGT_TEMPERATURE_LATEST_RAW',
+				'DGT_HUMIDITY_RAW',
+				'DGT_LIGHT_RAW',
+				
+			])
+			.then(applyDigitFormatterFunctions, defered.reject)
+			.then(defered.resolve, defered.reject);
+		} else {
+			defered.reject(getDeviceTypeMessage(dt));
+		}
+		return defered.promise;
 	};
 	this.readTempLightHumidity = function() {
 		var dt = self.savedAttributes.deviceType;
 		var digitDeviceNum = driver_const.deviceTypes.digit;
 		var defered = q.defer();
 		if(dt === digitDeviceNum) {
-			console.log('Acquiring temp, light, and humidity reading');
-			self.iReadMany([
+			self.iReadMultiple([
 				'DGT_TEMPERATURE_LATEST_RAW',
-				'DGT_HUMIDITY_RAW',
 				'DGT_LIGHT_RAW',
+				'DGT_HUMIDITY_RAW',
 			])
 			.then(applyDigitFormatterFunctions, defered.reject)
 			.then(defered.resolve, defered.reject);

@@ -12,13 +12,19 @@ var aLux = digit_light_calibration.aLux;
 function convertRawTemperatureC(latestRawTemperature) {
 	var currentTemperature;
 
-	currentTemperature = latestRawTemperature;
+	currentTemperature = parseInt(latestRawTemperature);
 
 	// Temperature is negative, MSB==1
 	if(currentTemperature >= 32768) {
+		currentTemperature = ((currentTemperature) >> 4); // Get rid of flag bits
+		currentTemperature = ((currentTemperature) << 4);
 		currentTemperature = ((currentTemperature) - 1);
+
         currentTemperature = ~(currentTemperature);
+        currentTemperature = currentTemperature & 0xFFFF; // Disregard upper-order bits
+
         currentTemperature = ((currentTemperature) >> 4);
+        currentTemperature = currentTemperature & 0xFFFF; // Disregard upper-order bits
         currentTemperature = (currentTemperature) * (-1);
 	} else { // temperature is positive, MSB==0
 		currentTemperature = ((currentTemperature) >> 4);
@@ -50,8 +56,14 @@ function convertRawHumidity(rawHumidity, currentTemperature, deviceCal) {
 }
 exports.convertRawHumidity = convertRawHumidity;
 
-function linearInterpolate(a, b, coefficient) {
+function linearInterpolate (a, b, coefficient) {
 	return (a + (coefficient * (b - a) ) );
+}
+var ENABLE_LUX_CONVERSION_DEBUGGING = false;
+function debugLightConversion() {
+	if(ENABLE_LUX_CONVERSION_DEBUGGING) {
+		console.log.apply(console, arguments);
+	}
 }
 function convertRawLight(rawLight, currentTemperature, onUSBPower) {
 	var lightValueLux;
@@ -79,12 +91,14 @@ function convertRawLight(rawLight, currentTemperature, onUSBPower) {
     var fractionalIndex = 0;
 
     // Round current temperature to nearest degree Celsius, to allow for perfect match with 'aTempC[]' calibration values
-    RoundedDegC = Math.floor(CurrentdegreesC+0.5);
+    RoundedDegC = Math.floor(CurrentdegreesC);
+    debugLightConversion('RoundedDegC', RoundedDegC);
 
     //Reduce raw value by 35% due to 3.3V reg(USB), instead of 3.0V(battery).
     if (OnUSBPower == 1) {
         RawLight = (RawLight * 0.65);
     }
+    
 
     // Create two arrays: Raw light readings and Lux, for a single temperature (the current temperature).  
     // This is how the 3D surface is simplifed, as discussed in the low-level docs 
@@ -106,9 +120,15 @@ function convertRawLight(rawLight, currentTemperature, onUSBPower) {
     } else {
         for(var k = 0; k < 14; k++) {
             if(aMatchingRaw[k] >= RawLight) {
+            	debugLightConversion('converted RawLight', RawLight);
+            	debugLightConversion('MatchingRaw', aMatchingRaw[k], aMatchingRaw[k-1]);
                 //k, and k-1 are the raw values that bracket the input value
                 fractionalIndex = (RawLight - aMatchingRaw[k-1]) / (aMatchingRaw[k] - aMatchingRaw[k-1]);
-                Lux = linearInterpolate(aMatchingLux[k], aMatchingLux[k-1], fractionalIndex);
+
+                debugLightConversion('MatchingLux', aMatchingLux[k], aMatchingLux[k-1]);
+                debugLightConversion('FractionalIndex', fractionalIndex);
+                
+                Lux = linearInterpolate(aMatchingLux[k-1], aMatchingLux[k], fractionalIndex);
                 break;
             }
         }
@@ -123,34 +143,37 @@ exports.convertRawLight = convertRawLight;
 var formatters = {
 	'DGT_TEMPERATURE_LATEST_RAW': {
 		'formatter': function(deviceCal, newData, results) {
-			console.log('in DGT_TEMPERATURE_LATEST_RAW formatter', newData, results);
+			// console.log('in DGT_TEMPERATURE_LATEST_RAW formatter', newData, results);
 			results.temperature = convertRawTemperatureC(
 				newData.DGT_TEMPERATURE_LATEST_RAW
 			);
+			results.rawTemperature = newData.DGT_TEMPERATURE_LATEST_RAW;
 		},
 		'order': 0,
 	},
 	'DGT_HUMIDITY_RAW': {
 		'formatter': function(deviceCal, newData, results) {
-			console.log('in DGT_HUMIDITY_RAW formatter', newData, results);
+			// console.log('in DGT_HUMIDITY_RAW formatter', newData, results);
 
 			results.relativeHumidity = convertRawHumidity(
 				newData.DGT_HUMIDITY_RAW,
 				results.temperature,
 				deviceCal
 			);
+			results.rawHumidity = newData.DGT_HUMIDITY_RAW;
 		},
 		'order': 1,
 	},
 	'DGT_LIGHT_RAW': {
 		'formatter': function(deviceCal, newData, results) {
-			console.log('in DGT_LIGHT_RAW formatter', newData, results);
+			// console.log('in DGT_LIGHT_RAW formatter', newData, results);
 			try {
 				results.lux = convertRawLight(
 					newData.DGT_LIGHT_RAW,
 					results.temperature,
 					true
 				);
+				results.rawLight = newData.DGT_LIGHT_RAW;
 			} catch(err) {
 				console.log('Error converting to lux', err);
 			}
@@ -184,8 +207,6 @@ function applyFormatters(device, latestReadings) {
 	var defered = q.defer();
 	var results = {};
 	var newData = {};
-
-	console.log('in digit_format_functions, applyFormatters', latestReadings);
 
 	var isValid = false;
 	var i;
