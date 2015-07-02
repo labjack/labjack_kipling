@@ -1,4 +1,7 @@
 
+/*
+http://labjack.rhb.cc/support/datasheets/t7/communication/modbus-map/buffer-registers
+*/
 exports.arrayRegisters = [
 	// SPI
 	{'name': 'SPI_DATA_TX_ARRAY', 'size': 'SPI_NUM_BYTES', 'data': 'SPI_DATA_TX', 'type': 'raw'},// LJM Type: Raw
@@ -22,6 +25,8 @@ exports.arrayRegisters = [
 	// Pure buffers with no length property:
 	// FILE_IO_WRITE
 	// FILE_IO_READ
+	{'name': 'FILE_IO_READ_ARRAY', 'size': 'FILE_IO_SIZE_BYTES', 'data': 'FILE_IO_READ', 'type': 'string'},
+	{'name': 'FILE_IO_WRITE_ARRAY', 'size': 'FILE_IO_SIZE_BYTES', 'data': 'FILE_IO_WRITE', 'type': 'string'},
 
 	// One Wire
 	{'name': 'ONEWIRE_DATA_TX_ARRAY', 'size': 'ONEWIRE_NUM_BYTES_TX', 'data': 'ONEWIRE_DATA_TX', 'type': 'raw'},
