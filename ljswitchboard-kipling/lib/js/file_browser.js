@@ -27,6 +27,7 @@ function createFileBrowser() {
 
     this.eventList = {
         FILE_SELECTED: 'FILE_SELECTED',
+        FILE_NOT_SELECTED: 'FILE_NOT_SELECTED'
     };
     this.initialize = function(bundle) {
         var defered = q.defer();
@@ -39,10 +40,19 @@ function createFileBrowser() {
     };
 
     var innerBrowseForFile = function() {
+        self.fileBrowserDialog.val('');
         self.fileBrowserDialog.off('change');
-        self.fileBrowserDialog.one('change', function(evt) {
+        self.fileBrowserDialog.one('change', function fileSelected(evt) {
             var fileLoc = $(this).val();
-            self.emit(self.eventList.FILE_SELECTED, fileLoc);
+
+            if(fileLoc === '') {
+                console.log('FILE_BROWSER file not selected');
+                self.emit(self.eventList.FILE_NOT_SELECTED, fileLoc);
+            } else {
+                console.log('FILE_BROWSER file selected');
+                self.emit(self.eventList.FILE_SELECTED, fileLoc);
+            }
+
             // Reset the selected value to empty
             $(this).val('');
         });
@@ -51,9 +61,13 @@ function createFileBrowser() {
     };
     this.browseForFile = function(options) {
         var fileFilters = '';
+        var workingDirectory = fs_facade.getDefaultFilePath();
         if(options) {
             if(options.filters) {
                 fileFilters = options.filters.toString();
+            }
+            if(options.workingDirectory) {
+                workingDirectory = options.workingDirectory.toString();
             }
         }
         // Configuring as per:
@@ -61,8 +75,99 @@ function createFileBrowser() {
 
         // Configure file-filters
         self.fileBrowserDialog.attr('accept', fileFilters);
+        self.fileSaveDialog.attr('nwworkingdir', workingDirectory);
 
         setTimeout(innerBrowseForFile, 1);
+    };
+
+    /*
+    CODE FROM "luaDeviceController.js":
+
+    var chooser = $(fs_facade.getFileSaveAsID());
+    chooser[0].files.append(new File("luaScript", ""));
+    chooser.attr('nwsaveas', 'luaScript.lua');
+    chooser.attr('accept', '.lua');
+    chooser.attr('nwworkingdir',fs_facade.getDefaultFilePath());
+    var onChangedSaveToFile = function(event) {
+        var fileLoc = $(fs_facade.getFileSaveAsID()).val();
+        if(fileLoc === '') {
+            console.log('No File Selected');
+            fileIODeferred.resolve();
+            return;
+        }
+        var scriptData = self.codeEditorDoc.getValue();
+
+        self.print('Saving Script to file - saveAs', '"' + fileLoc + '"');
+
+        fs_facade.saveDataToFile(
+            fileLoc,
+            scriptData,
+            function(err) {
+                // onError function
+                console.log('Failed to Save Script to file', err);
+                fileIODeferred.reject(err);
+            },
+            function() {
+                // onSuccess function
+                self.print('Successfuly Saved Script to File');
+
+                // Update Internal Constants
+                self.configureAsUserScript(fileLoc);
+
+                fileIODeferred.resolve();
+            }
+        );
+    };
+
+    chooser.unbind('change');
+    chooser.bind('change', onChangedSaveToFile);
+
+    chooser.trigger('click');
+    */
+    var innerSaveFile = function() {
+        self.fileSaveDialog.val('');
+        self.fileSaveDialog.off('change');
+        self.fileSaveDialog.one('change', function fileSelected(evt) {
+            var fileLoc = $(this).val();
+
+            if(fileLoc === '') {
+                console.log('FILE_BROWSER file not selected');
+                self.emit(self.eventList.FILE_NOT_SELECTED, fileLoc);
+            } else {
+                console.log('FILE_BROWSER file selected');
+                self.emit(self.eventList.FILE_SELECTED, fileLoc);
+            }
+
+            // Reset the selected value to empty
+            $(this).val('');
+        });
+
+        self.fileSaveDialog.trigger('click');
+    };
+    this.saveFile = function(options) {
+        var fileFilters = '';
+        var suggestedName = '';
+        var workingDirectory = fs_facade.getDefaultFilePath();
+        if(options) {
+            if(options.filters) {
+                fileFilters = options.filters.toString();
+            }
+            if(options.suggestedName) {
+                suggestedName = options.suggestedName.toString();
+            }
+            if(options.workingDirectory) {
+                workingDirectory = options.workingDirectory.toString();
+            }
+        }
+        // Configuring as per:
+        // https://github.com/nwjs/nw.js/wiki/File-dialogs
+
+        // Configure file-filters
+        self.fileSaveDialog.attr('accept', fileFilters);
+        self.fileSaveDialog.attr('nwsaveas', suggestedName);
+        self.fileSaveDialog.attr('nwworkingdir', workingDirectory);
+
+        setTimeout(innerSaveFile, 1);
     };
     var self = this;
 }

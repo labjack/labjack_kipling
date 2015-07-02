@@ -48,7 +48,7 @@
     "title": "Kipling",
     "icon": "lib/Kipling_128x128.png",
     "toolbar": false,
-    "width": 900,
+    "width": 1016,
     "height-a": 730,
     "height": 700,
     "min_width":600,
