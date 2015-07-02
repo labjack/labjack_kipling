@@ -14,7 +14,9 @@
         "active_register_details.html",
         "register_details.html",
     	"group_row.html",
-        "child_table.html"
+        "child_table.html",
+        "search_input_box.html",
+        "ljm_filter_box.html"
     ],
     "cssFiles": [
         "active_registers.css"
