@@ -5,5 +5,10 @@
     "framework":"singleDevice",
     "third_party_code":[],
     "supportedDevices": [{"type":"T7","subclass":["Pro",""],"minFW":"0.5"}],
-    "third_party_code_unload":[]
+    "third_party_code_unload":[],
+    "htmlFiles": [
+        "ethernet_settings.html",
+        "wifi_settings.html",
+    	"current_pc_settings.html"
+    ]
 }
