@@ -305,6 +305,15 @@ function createPackageLoader() {
 	this.getDependencyList = function() {
 		return Object.keys(self.dependencyData);
 	};
+	this.getDependencyData = function() {
+		var retData = {};
+		try {
+			retData = JSON.parse(JSON.stringify(self.dependencyData));
+		} catch(err) {
+			retData = {};
+		}
+		return retData;
+	};
 	this.deleteManagedPackage = function(name) {
 		var isValid = false;
 		if(self.managedPackages[name]) {
@@ -1353,9 +1362,12 @@ exports.on = function(eventName, callback) {
 };
 exports.loadPackage = PACKAGE_LOADER.loadPackage;
 exports.setExtractionPath = PACKAGE_LOADER.setExtractionPath;
+
 exports.getExtractionPath = PACKAGE_LOADER.getExtractionPath;
 exports.getManagedPackages = PACKAGE_LOADER.getManagedPackages;
 exports.getDependencyList = PACKAGE_LOADER.getDependencyList;
+exports.getDependencyData = PACKAGE_LOADER.getDependencyData;
+
 exports.deleteManagedPackage = PACKAGE_LOADER.deleteManagedPackage;
 exports.deleteAllManagedPackages = PACKAGE_LOADER.deleteAllManagedPackages;
 exports.runPackageManager = PACKAGE_LOADER.runPackageManager;
