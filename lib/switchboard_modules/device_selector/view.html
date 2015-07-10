@@ -1,6 +1,6 @@
-<div class="device-selector-holder">
+<div class="device-selector-header">
 	<div id="logo-holder" class="center-text"><img id="labjack-logo-image" src="{{staticFiles}}img/labjack-logo.png"></img></div>
-	<div id="lj-link-holder" class="center-text"><a id="lj-link-text" title="Open LabJack home page in your default browser">labjack.com</a></div>
+	<div id="lj-link-holder" class="link center-text"><a id="lj-link-text" title="Open LabJack home page in your default browser">labjack.com</a></div>
 	<script>
         $('#lj-link-text').unbind();
         $('#lj-link-text').bind('click',function(){
@@ -10,7 +10,7 @@
             gui.Shell.openExternal("http://labjack.com");
         });
     </script>
-    <h1>Select Devices <button id="refresh_devices_button" class="btn btn-primary">Refresh Devices >></button></h1>
+    
     <div id="versionNumbers" class="labjackVersions" style="display:none">
         <table class="table">
             <tr id="kipling" class="lvm_link">
@@ -29,6 +29,9 @@
             </tr>
         </table>
     </div>
+</div>
+<div class="device-selector-holder">
+    <h1>Select Devices <button id="refresh_devices_button" class="btn btn-primary">Refresh Devices >></button></h1>
     <div class="device-pane">
     	<div id="device_scan_status" class="device_scan_status_box">
     		<div class="progress progress-indeterminate">

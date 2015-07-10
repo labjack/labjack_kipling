@@ -1,0 +1,94 @@
+
+<div id="kipling_settings">
+  <div id="logo-holder" class="center-text"><img id="labjack-logo-image" src="{{staticFiles}}img/labjack-logo.png"></img></div>
+  <div id="lj-link-holder" class="center-text link"><a id="lj-link-text" title="Open LabJack home page in your default browser">labjack.com</a></div>
+  <script>
+    $('#lj-link-text').unbind();
+    $('#lj-link-text').bind('click',function(){
+      if(typeof(gui) === 'undefined') {
+        gui = require('nw.gui');
+      }
+      gui.Shell.openExternal("http://labjack.com");
+    });
+  </script>
+  <p>The following resources related to Kipling are installed on this computer:</p>
+  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingOne">
+        <h4 class="panel-title">
+          <a role="button" data-toggle="collapse" data-parent="#accordion" href="#ljmDriverCollapsible" aria-expanded="false" aria-controls="collapseOne">
+            LJM Driver: {{pageData.ljm_data.LJM_LIBRARY_VERSION}}
+          </a>
+        </h4>
+      </div>
+      <div id="ljmDriverCollapsible" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+        <div class="panel-body">
+          <div>
+            <table class="table table-hover table-condensed">
+              <tr>
+                <td class="selectableText">LJM Library Version</td>
+                <td class="selectableText">{{pageData.ljm_data.LJM_LIBRARY_VERSION}}</td>
+              </tr>
+              <tr>
+                <td class="selectableText">LJM Modbus Map Constants File</td>
+                <td class="selectableText">{{pageData.ljm_data.LJM_MODBUS_MAP_CONSTANTS_FILE}}</td>
+              </tr>
+              <tr>
+                <td class="selectableText">LJM Error Constants File</td>
+                <td class="selectableText">{{pageData.ljm_data.LJM_ERROR_CONSTANTS_FILE}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingTwo">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#modbusMapCollapsible" aria-expanded="false" aria-controls="collapseTwo">
+            Modbus Map: {{pageData.modbus_map_version}}
+          </a>
+        </h4>
+      </div>
+      <div id="modbusMapCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+        <div class="panel-body">
+          <div>
+            <table class="table table-hover table-condensed">
+              {{#each pageData.modbus_map_data}}
+              <tr>
+                <td class="selectableText">{{name}}</td>
+                <td class="selectableText">{{data}}</td>
+              </tr>
+              {{/each}}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingThree">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#kiplingCollapsible" aria-expanded="false" aria-controls="collapseThree">
+            Kipling: {{pageData.kipling_data.data}}
+          </a>
+        </h4>
+      </div>
+      <div id="kiplingCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+        <div class="panel-body">
+          <div>
+            <table class="table table-hover table-condensed">
+              {{#each pageData.packages}}
+              <tr>
+                <td class="selectableText">{{name}}</td>
+                <td class="selectableText">{{data}}</td>
+              </tr>
+              {{/each}}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{!-- <pre class="selectableText">{{printContext}}</pre> --}}

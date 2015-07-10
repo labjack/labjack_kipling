@@ -6,6 +6,9 @@
 .center-text {
 	text-align: center;
 }
+div.link a {
+    cursor:pointer;
+}
 
 
 
@@ -25,9 +28,11 @@
     font-weight: bold;
     min-width: 55px;
 }
+.device-selector-header {
+    margin-top: 10px;
+}
 .device-selector-holder {
     margin-left: 50px;
-    margin-top: 10px;
 }
 .devices-enumeration-scroller {
     width: 100%;

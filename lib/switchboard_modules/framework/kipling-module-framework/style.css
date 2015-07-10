@@ -9,6 +9,7 @@
 #single-device-framework-obj {
     width:100%;
     padding:1px;
+    padding-top:5px;
 }
 #single-device-framework-obj #device-selector
 {

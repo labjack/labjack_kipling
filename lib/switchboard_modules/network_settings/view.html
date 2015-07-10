@@ -1,8 +1,10 @@
 <div id="network_settings">
   <ul class="nav nav-tabs" id="myTab">
     <li class="active"><a href="#ethernet_settings_tab">Ethernet</a></li>
+    {{# if custom.isPro }}
     <li><a href="#wifi_settings_tab">WiFi</a></li>
-    <li><a href="#current_pc_settings_tab">Current PC Settings</a></li>
+    {{/if}}
+    {{!--<li><a href="#current_pc_settings_tab">Current PC Settings</a></li>--}}
   </ul> 
   <div class="tab-content">
     <div class="tab-pane active" id="ethernet_settings_tab">
@@ -15,9 +17,10 @@
     </div>
     {{/if}}
 
-    <div class="tab-pane" id="current_pc_settings_tab">
+    {{!--<div class="tab-pane" id="current_pc_settings_tab">
       {{{custom.current_pc_settings}}}
-    </div>
+    </div>--}}
+
   </div>
   <script>
     $('#myTab a').click(function (e) {
