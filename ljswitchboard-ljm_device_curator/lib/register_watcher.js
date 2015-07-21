@@ -2,7 +2,7 @@
 var q = require('q');
 var math = require('mathjs');
 
-var DEBUG_DATA_COLLECTOR = false;
+var DEBUG_DATA_COLLECTOR = true;
 
 function createWatcherObject(watcherName, collectionFunction, callback, curatedDevice) {
 	this.timerRef = undefined;
@@ -101,7 +101,7 @@ function createWatcherObject(watcherName, collectionFunction, callback, curatedD
 
 		// query the device for data
 		if(DEBUG_DATA_COLLECTOR) {
-			console.log('Collecting data', collectionFunction, readRegisters);
+			console.log('  - Collecting data', collectionFunction, readRegisters);
 		}
 		self.statistics.numReads += 1;
 		curatedDevice[collectionFunction](readRegisters)
@@ -109,7 +109,7 @@ function createWatcherObject(watcherName, collectionFunction, callback, curatedD
 	};
 	var skipDataCollection = function() {
 		if(DEBUG_DATA_COLLECTOR) {
-			console.log('in skipDataCollection');
+			console.log('  - in skipDataCollection');
 		}
 		var i;
 		var numGroups = self.registerGroups.length;
@@ -118,7 +118,7 @@ function createWatcherObject(watcherName, collectionFunction, callback, curatedD
 			self.registerGroups[i].currentDelay -= 1;
 		}
 		self.statistics.numSkipped += 1;
-	}
+	};
 	var dataCollector = function() {
 		try {
 			if(self.isDataCollectorActive) {
@@ -148,7 +148,7 @@ function createWatcherObject(watcherName, collectionFunction, callback, curatedD
 
 		// query the device for data
 		if(DEBUG_DATA_COLLECTOR) {
-			console.log('Collecting Initial data', collectionFunction, readRegisters);
+			console.log('  - Collecting Initial data', collectionFunction, readRegisters);
 		}
 		self.statistics.numReads += 1;
 		curatedDevice[collectionFunction](readRegisters)
@@ -208,7 +208,7 @@ function createWatcherObject(watcherName, collectionFunction, callback, curatedD
 		}
 		
 		return defered.promise;
-	}
+	};
 	this.configureWatcher = function(newConfig) {
 		var defered = q.defer();
 		self.stopWatcher()
@@ -229,8 +229,7 @@ function createWatcherObject(watcherName, collectionFunction, callback, curatedD
 		return defered.promise;
 	};
 	var self = this;
-};
-var requiredWatcher
+}
 
 // Create a general "register watcher" system that will be ported out and 
 // directly accessable in the device_curator object.
@@ -251,7 +250,7 @@ function createRegisterWatcher(curatedDevice) {
 			return isValid;
 		}
 		return isValid;
-	}
+	};
 	// createWatcher is the function that creates a new watcher if one doesn't
 	// already exist.
 	this.createWatcher = function(watcherName, callback, options) {
@@ -330,5 +329,6 @@ function createRegisterWatcher(curatedDevice) {
 	};
 	
 	var self = this;
-};
+}
+
 exports.createRegisterWatcher = createRegisterWatcher;

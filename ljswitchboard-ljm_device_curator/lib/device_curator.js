@@ -671,6 +671,7 @@ function device(useMockDevice) {
 	var factoryFirmwareVersions = [
 		0.6602,
 		1.0069,
+		1.0007,
 		1.0100,
 	];
 	var waitForT7ToInitialize = function() {

@@ -55,6 +55,9 @@ var basic_watcher_test = require('./basic_watcher_test');
 // exports.t7_multiple_device_upgrade_test = t7_multiple_device_upgrade_test.tests;
 // exports.t7_error_test = t7_error_test.tests;									// Passing
 // exports.t7_open_close_test = t7_open_close_test.tests;						// Passing
+
+
+// Tests for streaming
 // exports.t7_basic_stream_test = t7_basic_stream_test.tests;						// Passing
 // exports.t7_single_channel_speed_test = t7_single_channel_speed_test.tests;		// Passing
 // exports.t7_single_channel_speed_testA = t7_single_channel_speed_test.tests;
@@ -72,7 +75,7 @@ var basic_watcher_test = require('./basic_watcher_test');
 // exports.t7_thermocouple_speed_test = t7_thermocouple_speed_test.tests;
 
 // Perform Digit related tests
-exports.digit_basic_test = digit_basic_test.tests;
+// exports.digit_basic_test = digit_basic_test.tests;
 
 // Register Watcher tests
-// exports.basic_watcher_test = basic_watcher_test.tests;
+exports.basic_watcher_test = basic_watcher_test.tests;

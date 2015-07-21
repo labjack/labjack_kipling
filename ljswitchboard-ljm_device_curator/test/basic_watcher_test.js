@@ -3,7 +3,7 @@ var q = require('q');
 var register_watcher = require('../lib/register_watcher');
 
 function createMockDevice() {
-	this.delay = 10;
+	this.delay = 1000;
 	this.iReadMany = function(addresses) {
 		var defered = q.defer();
 		// console.log('in mock iReadMany', addresses);
@@ -15,16 +15,18 @@ function createMockDevice() {
 			defered.resolve(results);
 		}, self.delay);
 		return defered.promise;
-	}
+	};
 	var self = this;
 }
+
 var mockDevice = new createMockDevice();
 var registerWatcher;
 
 var testWatcherName = 'test_receiver';
 var watcherReceiver = function(results) {
-	// console.log('Received Updated Results', results);
+	console.log('  * Received Updated Results', results);
 };
+
 exports.tests = {
 	'create watcher object': function(test) {
 		registerWatcher = new register_watcher.createRegisterWatcher(mockDevice);
@@ -55,7 +57,7 @@ exports.tests = {
 				'invalid watcher name'
 			);
 			test.done();
-		})
+		});
 	},
 	'wait for data': function(test) {
 		var finishWaiting = function() {
@@ -82,7 +84,7 @@ exports.tests = {
 				'invalid watcher name'
 			);
 			test.done();
-		})
+		});
 	},
 	'increase delay': function(test) {
 		mockDevice.delay = 210;
@@ -113,7 +115,7 @@ exports.tests = {
 				'invalid watcher name'
 			);
 			test.done();
-		})
+		});
 	},
 	'wait for data (2)': function(test) {
 		var finishWaiting = function() {
@@ -140,7 +142,7 @@ exports.tests = {
 				'invalid watcher name'
 			);
 			test.done();
-		})
+		});
 	},
 	'stop remaining watchers': function(test) {
 		registerWatcher.stopAllWatchers()
