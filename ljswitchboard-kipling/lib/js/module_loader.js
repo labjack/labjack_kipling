@@ -27,6 +27,8 @@ function createModuleLoader() {
 	this.stats = {
 		'numLoaded': 0
 	};
+	this.current_module_data = {};
+
 	var eventList = {
 		VIEW_READY: 'VIEW_READY',
 		UNLOAD_MODULE: 'UNLOAD_MODULE',
@@ -241,11 +243,16 @@ function createModuleLoader() {
 		// the element's ID to attach to the "ready" event.
 		$(elementID).ready(function() {
 			defered.resolve(newModule);
-			self.emit(eventList.VIEW_READY, {
+			var loadedData = {
 				'name': newModule.name,
 				'id': elementID,
 				'data': newModule,
-			});
+				'humanName': newModule.data.humanName,
+			};
+			self.emit(eventList.VIEW_READY, loadedData);
+			self.current_module_data = null;
+			self.current_module_data = undefined;
+			self.current_module_data = loadedData;
 		});
 		return defered.promise;
 	};
