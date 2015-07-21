@@ -17,6 +17,8 @@ var request = require('request');
 var async = require('async');
 var dict = require('dict');
 
+var cheerio = require('cheerio');
+
 
 var eventList = {
     'ERROR_PARSING_PAGE_DATA': 'ERROR_PARSING_PAGE_DATA',
@@ -24,6 +26,7 @@ var eventList = {
     'ERROR': 'ERROR',
 };
 function labjackVersionManager() {
+
     this.kiplingUpdateLinks = {
         "current_win":      "https://s3.amazonaws.com/ljrob/win32/kipling/kipling_win.zip",
         "beta_win":         "https://s3.amazonaws.com/ljrob/win32/kipling/beta/kipling_beta_win.zip",
@@ -46,6 +49,7 @@ function labjackVersionManager() {
     this.urlDict = {
         "kipling": {
             "type":"kipling",
+            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
             "platformDependent": true,
             "types": ['current','beta','test'],
             "urls":[
@@ -75,45 +79,168 @@ function labjackVersionManager() {
                 {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/test.txt", "type": "test_linux64"}
             ]
         },
-        "ljm": {
-            "type":"ljmDownloadsPage",
+        // Re-define the Kipling tag to point to new downloads page
+        "kipling": {
+            "type":"kiplingDownloadsPage",
+            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
             "platformDependent": true,
             "types": ['current'],
             "urls":[
-                {"url": "http://labjack.com/support/ljm", "type": "current_win"},
-                {"url": "http://labjack.com/support/ljm", "type": "current_mac"},
-                {"url": "http://labjack.com/support/ljm", "type": "current_linux32"},
-                {"url": "http://labjack.com/support/ljm", "type": "current_linux64"}
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_win"},
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_mac"},
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux32"},
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux64"}
             ]
         },
-        "ljm_wrapper": {
-            "type":"ljm_wrapper",
-            "platformDependent": false,
+        "ljm": {
+            "type":"ljmDownloadsPage",
+            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
+            "platformDependent": true,
+            "types": ['current'],
             "urls":[
-                {"url": "http://files.labjack.com/versions/ljrob/K3/stable/ljm_wrapper.txt", "type": "current"},
-                {"url": "http://files.labjack.com/versions/ljrob/K3/beta/ljm_wrapper.txt", "type": "beta"}
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_win"},
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_mac"},
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux32"},
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux64"}
             ]
         },
         "t7": {
             "type":"t7FirmwarePage",
+            "upgradeReference": "https://labjack.com/support/firmware/t7",
             "platformDependent": false,
             "urls":[
-                {"url": "http://labjack.com/support/firmware/t7", "type": "current"},
-                {"url": "http://labjack.com/support/firmware/t7/beta", "type": "beta"},
-                {"url": "http://labjack.com/support/firmware/t7/old", "type": "old"},
+                {"url": "https://labjack.com/support/firmware/t7", "type": "current"},
+                {"url": "https://labjack.com/support/firmware/t7/beta", "type": "beta"},
+                // {"url": "https://labjack.com/support/firmware/t7/old", "type": "old"},
+                {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ]
         },
         "digit": {
             "type":"digitFirmwarePage",
+            "upgradeReference": "https://labjack.com/support/firmware/digit",
             "platformDependent": false,
             "urls":[
-                {"url": "http://labjack.com/support/firmware/digit", "type": "current"},
-                {"url": "http://labjack.com/support/firmware/digit/beta", "type": "beta"},
-                {"url": "http://labjack.com/support/firmware/digit/old", "type": "old"},
+                {"url": "https://labjack.com/support/firmware/digit", "type": "current"},
+                {"url": "https://labjack.com/support/firmware/digit/beta", "type": "beta"},
+                {"url": "https://labjack.com/support/firmware/digit/old", "type": "old"},
             ]
         }
     };
 
+
+    this.innerAdvancedPageParser = function(options, retData) {
+        var url = options.url;              // Page URL to use for caching
+        var pageType = options.pageType;    // Either 'software' or 'firmware'
+        var releaseType = options.releaseType;  // Either 'stable' or 'beta'
+        var platformType = options.platformType; // either mac, win, linux32, or linux64
+        var programName = options.programName;  // A program name to look for
+
+        var $;
+        if(self.cachedDoms.has(url)) {
+            $ = self.cachedDoms.get(url);
+        } else {
+            try {
+                $ = cheerio.load(options.pageData);
+            } catch(err) {
+                console.log('Error loading page (cheerio)...', err);
+            }
+            self.cachedDoms.set(url, $);
+        }
+
+        var isValid = true;
+
+        if(pageType === 'software') {
+            var currentNode = $('.node-software-platform');
+            isValid = (currentNode.length >= 0);
+            
+            if(isValid) {
+                var platformSelector = {
+                    'win': '.platform-windows',
+                    'mac': '.platform-mac-os-x',
+                    'linux32': '.platform-linux-32-bit',
+                    'linux64': '.platform-linux-64-bit',
+                }[platformType];
+                currentNode = currentNode.find(platformSelector);
+                isValid = (currentNode.length >= 0);
+            }
+
+            // Get the parent element
+            if(isValid) {
+                currentNode = currentNode.parent();
+                isValid = (currentNode.length >= 0);
+            }
+
+            // Limit by group
+            if(isValid) {
+                var groupSelector = {
+                    'beta': '.group-beta',
+                    'stable': '.group-stable',
+                }[releaseType];
+                var currentNode = currentNode.find(groupSelector);
+                isValid = (currentNode.length >= 0);
+            }
+
+            // Parse out actual file data
+            if(isValid) {
+                var fileSearchStr = '.file a';
+                var descriptionSearchStr = {
+                    'stable': '.field-name-field-stable-components li',
+                    'beta': '.field-name-field-beta-components li',
+                }[releaseType];
+                retData.upgradeLink = currentNode.find(fileSearchStr).attr('href');
+                var fileDescription = currentNode.find(descriptionSearchStr);
+
+                var versionInfo = {};
+                fileDescription.each(function(index, element) {
+                    try {
+                        var versionStr = $(element).text();
+                        var splitStr = versionStr.split(' - Version: ');
+                        var programName = splitStr[0];
+                        var safeProgramName = programName.split(' ').join('_').toLowerCase();
+                        var versionStr = splitStr[1];
+                        versionInfo[safeProgramName] = versionStr;
+                    } catch(err) {
+                        console.log('error in each', err);
+                        // Error getting contained versions
+                    }
+                });
+
+                if(versionInfo[programName]) {
+                    retData.version = versionInfo[programName];
+                    retData.isValid = true;
+                }
+            }
+        }
+
+        return retData;
+    };
+    this.advancedPageParser = function(options) {
+        var runParser = true;
+
+        var keys = Object.keys(options);
+        var requiredKeys = ['url', 'pageData', 'pageType'];
+        requiredKeys.forEach(function(key) {
+            if(keys.indexOf(key) < 0) {
+                runParser = false;
+                console.error('Not running parser, missing key', key);
+            }
+        });
+        var retData = {
+            'isValid': false,
+            'upgradeLink': '',
+            'version': '',
+        };
+        if(runParser) {
+            try {
+                return self.innerAdvancedPageParser(options, retData);
+            } catch(err) {
+                console.log('Error...', err);
+                return retData;
+            }
+        } else {
+            return retData;
+        }
+    };
     this.strategies = {
         kipling: function(listingArray, pageData, urlInfo, name) {
             listingArray.push({
@@ -133,49 +260,57 @@ function labjackVersionManager() {
             });
             return;
         },
-        ljmDownloadsPage: function(listingArray, pageData, urlInfo, name) {
-            var LJM_REGEX;
+        kiplingDownloadsPage: function(listingArray, pageData, urlInfo, name) {
             var platform = urlInfo.type.split('_')[1];
-            var match;
-            var getMatch = true;
-            if (platform === 'win') {
-                LJM_REGEX = /href=\".*LabJackMUpdate-([\d]\.[\d]+)-Windows\.exe(?=\"\stype)/g;
-                match = LJM_REGEX.exec(pageData);
-                if(!match) {
-                    LJM_REGEX = /href=\".*LabJackMUpgrade-([\d]\.[\d]+)-Windows\.exe(?=\"\stype)/g;
-                    match = LJM_REGEX.exec(pageData);
-                    if(!match) {
-                        LJM_REGEX = /href=\".*LabJackMUpgrade-([\d]\.[\d]+)\.exe(?=\"\stype)/g;
-                        match = LJM_REGEX.exec(pageData);
-                        if(!match) {
-                            LJM_REGEX = /href=\".*LabJackMUpdate-([\d]\.[\d]+)\.exe(?=\"\stype)/g;
-                            match = LJM_REGEX.exec(pageData);
-                        }
-                    }
-                }
-                getMatch = false;
-            } else if (platform === 'mac') {
-                LJM_REGEX = /href=\".*LabJackM-([\d]\.[\d]+)\-Mac\.tgz(?=\"\stype)/g;
-            } else if (platform === 'linux32') {
-                LJM_REGEX = /href=\".*LabJackM-([\d]\.[\d]+)\-CentOS.*-i386.*.gz(?=\"\stype)/g;
-            } else if (platform === 'linux64') {
-                LJM_REGEX = /href=\".*LabJackM-([\d]\.[\d]+)\-CentOS.*-x86\_64.*.gz(?=\"\stype)/g;
-            }
-            if(getMatch) {
-                match = LJM_REGEX.exec(pageData);
-            }
+            var parsedData = self.advancedPageParser({
+                'url': urlInfo.url,
+                'pageData': pageData,
+                'pageType': 'software',
+                'platformType': platform,
+                'releaseType': 'stable',
+                'programName': 'kipling',
+            });
 
-            if(match) {
-                var targetURL = match[0].replace(/href\=\"/g, '');
-                var version = match[1];
+            // console.log('Data:', parsedData, parsedData.version);
+
+            if(parsedData.isValid) {
                 listingArray.push({
-                        "upgradeLink":targetURL,
-                        "version":version,
-                        "type":urlInfo.type,
-                        "key":urlInfo.type + '-' + version
-                    });
+                    'upgradeLink': parsedData.upgradeLink,
+                    'version': parsedData.version,
+                    'type': urlInfo.type,
+                    'key': urlInfo.type + '-' + parsedData.version,
+                });
             } else {
-                console.error('Bad LJM_REGEX strings', name);
+                // console.error('Failed to get latest Kipling version', name, platform);
+                self.emit(eventList.ERROR_PARSING_PAGE_DATA, {
+                    'urlInfo': urlInfo,
+                    'name': name,
+                });
+            }
+            return;
+        },
+        ljmDownloadsPage: function(listingArray, pageData, urlInfo, name) {
+            var platform = urlInfo.type.split('_')[1];
+            var parsedData = self.advancedPageParser({
+                'url': urlInfo.url,
+                'pageData': pageData,
+                'pageType': 'software',
+                'platformType': platform,
+                'releaseType': 'stable',
+                'programName': 'ljm_library',
+            });
+
+            // console.log('Data:', parsedData, parsedData.version);
+
+            if(parsedData.isValid) {
+                listingArray.push({
+                    'upgradeLink': parsedData.upgradeLink,
+                    'version': parsedData.version,
+                    'type': urlInfo.type,
+                    'key': urlInfo.type + '-' + parsedData.version,
+                });
+            } else {
+                // console.error('Failed to get latest LJM version', name, platform);
                 self.emit(eventList.ERROR_PARSING_PAGE_DATA, {
                     'urlInfo': urlInfo,
                     'name': name,
@@ -189,6 +324,7 @@ function labjackVersionManager() {
          * http://labjack.com/sites/default/files/2014/05/T7firmware_010100_2014-05-12.bin
         **/
         t7FirmwarePage: function(listingArray, pageData, urlInfo, name) {
+            console.log('Getting T7 Firmware Data');
             var FIRMWARE_LINK_REGEX = /href\=\".*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin"/g;
             var match = FIRMWARE_LINK_REGEX.exec(pageData);
             while (match !== null) {
@@ -201,6 +337,8 @@ function labjackVersionManager() {
                     "type":urlInfo.type,
                     "key":urlInfo.type + '-' + version
                 });
+                console.log('T7 FW Versions', version);
+                console.log('Type....', urlInfo.type);
                 match = FIRMWARE_LINK_REGEX.exec(pageData);
             }
             return;
@@ -228,6 +366,7 @@ function labjackVersionManager() {
             return;
         },
     };
+    this.cachedDoms = dict();
     this.pageCache = dict();
     this.infoCache = {};
     this.dataCache = {};
@@ -509,7 +648,7 @@ function labjackVersionManager() {
         var defered = q.defer();
         self.getLJMVersions()
         .then(self.getKiplingVersions, errorFunc)
-        .then(self.getLJMWrapperVersions, errorFunc)
+        // .then(self.getLJMWrapperVersions, errorFunc)
         .then(self.getT7FirmwareVersions, errorFunc)
         .then(self.getDigitFirmwareVersions, errorFunc)
         .then(function() {
@@ -520,6 +659,7 @@ function labjackVersionManager() {
     };
     this.clearPageCache = function() {
         self.pageCache.clear();
+        self.cachedDoms.clear();
     };
     this.getStatus = function() {
         return self.isDataComplete;

@@ -76,64 +76,64 @@ exports.tests = {
 			if(givenKeys.indexOf(reqKey) >= 0) {
 				isOk = true;
 			}
-			test.ok(isOk, 'Missing a required key: ' + reqKey);
+			test.ok(isOk, '(T7 Firmware) Missing a required key: ' + reqKey);
 		});
 		// console.log('T7 FW Versions', data);
 		test.done();
 	},
-	'get LJM Versions': function(test) {
-		var data = version_manager.lvm.getCachedLJMVersions();
-		test.ok(data.isValid, 'LJM Versions data should be valid');
-		var requiredKeys = ['current_win', 'current_mac'];
-		var givenKeys = Object.keys(data);
-		requiredKeys.forEach(function(reqKey, i) {
-			var isOk = false;
-			if(givenKeys.indexOf(reqKey) >= 0) {
-				isOk = true;
-			}
-			test.ok(isOk, 'Missing a required key: ' + reqKey);
-		});
-		// console.log('T7 FW Versions', data);
-		test.done();
-	},
-	'clear versions cache': function(test) {
-		// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
-		version_manager.lvm.clearPageCache();
-		// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
-		test.done();
-	},
-	'secondary query': function(test) {
-		var startTime = new Date();
-		version_manager.getAllVersions()
-		.then(function(data) {
-			var endTime = new Date();
-			addExecutionTime('Secondary query', startTime, endTime);
-			test.ok(true);
-			validateVersionData(test, data);
-			test.done();
-		}, function(err) {
-			test.ok(false, 'Error getting version numbers');
-			test.done();
-		});
-	},
-	'check T7 versions': function(test) {
-		version_manager.lvm.getT7FirmwareVersions()
-		.then(function(data) {
-			// console.log('T7 FW Versions', data);
-			test.done();
-		}, function(err) {
-			test.ok(false,'Failed to get T7 firmware versions');
-			test.done();
-		});
-	},
-	'Check load times': function(test) {
-		var output = [];
-		console.log('Execution Times:');
-		executionTimes.forEach(function(executionTime) {
-			var str = executionTime.name + ': ' + executionTime.durationStr;
-			output.push(str);
-			console.log(str);
-		});
-		test.done();
-	},
+	// 'get LJM Versions': function(test) {
+	// 	var data = version_manager.lvm.getCachedLJMVersions();
+	// 	test.ok(data.isValid, 'LJM Versions data should be valid');
+	// 	var requiredKeys = ['current_win', 'current_mac'];
+	// 	var givenKeys = Object.keys(data);
+	// 	requiredKeys.forEach(function(reqKey, i) {
+	// 		var isOk = false;
+	// 		if(givenKeys.indexOf(reqKey) >= 0) {
+	// 			isOk = true;
+	// 		}
+	// 		test.ok(isOk, '(LJM Check) Missing a required key: ' + reqKey);
+	// 	});
+	// 	// console.log('T7 FW Versions', data);
+	// 	test.done();
+	// },
+	// 'clear versions cache': function(test) {
+	// 	// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
+	// 	version_manager.lvm.clearPageCache();
+	// 	// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
+	// 	test.done();
+	// },
+	// 'secondary query': function(test) {
+	// 	var startTime = new Date();
+	// 	version_manager.getAllVersions()
+	// 	.then(function(data) {
+	// 		var endTime = new Date();
+	// 		addExecutionTime('Secondary query', startTime, endTime);
+	// 		test.ok(true);
+	// 		validateVersionData(test, data);
+	// 		test.done();
+	// 	}, function(err) {
+	// 		test.ok(false, 'Error getting version numbers');
+	// 		test.done();
+	// 	});
+	// },
+	// 'check T7 versions': function(test) {
+	// 	version_manager.lvm.getT7FirmwareVersions()
+	// 	.then(function(data) {
+	// 		// console.log('T7 FW Versions', data);
+	// 		test.done();
+	// 	}, function(err) {
+	// 		test.ok(false,'Failed to get T7 firmware versions');
+	// 		test.done();
+	// 	});
+	// },
+	// 'Check load times': function(test) {
+	// 	var output = [];
+	// 	console.log('Execution Times:');
+	// 	executionTimes.forEach(function(executionTime) {
+	// 		var str = executionTime.name + ': ' + executionTime.durationStr;
+	// 		output.push(str);
+	// 		console.log(str);
+	// 	});
+	// 	test.done();
+	// },
 };
