@@ -1,0 +1,8 @@
+{
+    "name": "simple_logger_collector",
+    "humanName": "Simple Logger Collector",
+    "version": "0.0.1",
+    "jsFiles": ["simple_logger_collector.js"],
+    "startTime": "auto",
+    "description": "Manage starting, stopping, and receiving data from devices for the purpose of logging data."
+}

@@ -7,6 +7,9 @@
 	width:350px;
 }
 
+.file-info {
+	padding-top:10px;
+}
 .file-info.dl-horizontal dt{
 	width:100px;
 }

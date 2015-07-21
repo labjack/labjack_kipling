@@ -76,6 +76,12 @@
         "name": "powerup_defaults_fw",
         "active": true
     }, {
+        "name": "simple_logger_flot",
+        "active": false
+    }, {
+        "name": "simple_logger_epoch",
+        "active": false
+    }, {
         "name": "device_updater",
         "active": false
     }, {
@@ -102,11 +108,14 @@
         "active": false,
         "isTask": true
     }, {
-        "name": "task_data_logger",
+        "name": "task_simple_logger_collector",
         "active": false,
         "isTask": true
     }],
     "footer": [{
+        "name": "error_codes_temp",
+        "active": false
+    }, {
         "name": "settings",
         "active": true
     }]

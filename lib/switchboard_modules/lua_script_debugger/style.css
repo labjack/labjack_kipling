@@ -6,8 +6,14 @@
 	width: 100%;
 	height: 500px;
 }
+.ace_search_field {
+	color:grey;
+}
+.ace_searchbtn {
+  color: grey;
+}
 #lua-script-device-status {
-	margin-bottom: 10px;
+	margin-bottom: 0px;
 }
 #lua-debugging-log-editor { 
 	width: 100%;
