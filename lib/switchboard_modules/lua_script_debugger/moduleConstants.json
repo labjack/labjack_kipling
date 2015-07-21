@@ -69,6 +69,12 @@
                 }, {
                     "name": "TP-01 Thermocouple (AIN_EF)",
                     "location": "lua_script_debugger/premade_scripts/Sensor_Examples/TP-01 Thermocouple (AIN_EF).lua"
+                }, {
+                    "name": "HMC6352 Magnetometer (I2C)",
+                    "location": "lua_script_debugger/premade_scripts/Sensor_Examples/HMC6352 Magnetometer (I2C).lua"
+                }, {
+                    "name": "ES08AII Servo Motor (PWM)",
+                    "location": "lua_script_debugger/premade_scripts/Sensor_Examples/ES08AII Servo Motor (PWM).lua"
                 }
             ]
         }, {
