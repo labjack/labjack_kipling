@@ -21,6 +21,12 @@ table[5] = 0    --minute
 table[6] = 0    --second
 
 file = io.open(Filename, "w")   --create and open file for write access
+if file then    -- Make sure that the file was opened properly.
+  print("Opened uSD Card")
+else
+  -- If the file was not opened properly we probably have a bad SD card.
+  print("!! Failed to open uSD Card !!")
+end
 
 MB.W(48005, 0, 1)                       --ensure analog is on
 
