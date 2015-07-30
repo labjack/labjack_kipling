@@ -21,6 +21,11 @@ table[5] = 0    --minute
 table[6] = 0    --second
 
 file = io.open(Filename, "w")   --create and open file for write access
+if file then
+  print("Opened File on uSD Card")
+else
+  print("Failed to open file on uSD Card")
+end
 
 MB.W(48005, 0, 1)                       --ensure analog is on
 
@@ -41,6 +46,7 @@ while true do
     break
   end
 end
+
 file:close()
 print("Done acquiring data. Now read and display file contents. \n")
 file = io.open(Filename, "r")
