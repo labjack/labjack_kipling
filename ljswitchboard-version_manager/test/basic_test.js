@@ -69,7 +69,11 @@ exports.tests = {
 	'get T7 Versions': function(test) {
 		var data = version_manager.lvm.getCachedT7Versions();
 		test.ok(data.isValid, 'T7 Firmware data should be valid');
-		var requiredKeys = ['current', 'old', 'beta'];
+		var requiredKeys = [
+			'current',
+			// 'old',
+			'beta'
+		];
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;

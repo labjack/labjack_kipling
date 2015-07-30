@@ -324,12 +324,15 @@ function labjackVersionManager() {
          * http://labjack.com/sites/default/files/2014/05/T7firmware_010100_2014-05-12.bin
         **/
         t7FirmwarePage: function(listingArray, pageData, urlInfo, name) {
-            console.log('Getting T7 Firmware Data');
-            var FIRMWARE_LINK_REGEX = /href\=\".*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin"/g;
+            var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin".*<\/a>/g;
             var match = FIRMWARE_LINK_REGEX.exec(pageData);
             while (match !== null) {
-                var targetURL = match[0].replace(/href\=\"/g, '');
-                targetURL = targetURL.replace(/\"/g, '');
+                var $ = cheerio.load(match[0]);
+                var ele = $('a');
+                var targetURL = ele.attr('href');
+
+                // var targetURL = match[0].replace(/href\=\"/g, '');
+                // targetURL = targetURL.replace(/\"/g, '');
                 var version = (parseFloat(match[1])/10000).toFixed(4);
                 listingArray.push({
                     "upgradeLink":targetURL,
@@ -337,8 +340,9 @@ function labjackVersionManager() {
                     "type":urlInfo.type,
                     "key":urlInfo.type + '-' + version
                 });
-                console.log('T7 FW Versions', version);
-                console.log('Type....', urlInfo.type);
+                // console.log('T7 FW Versions', version);
+                // console.log('Type....', urlInfo.type);
+                // console.log('targetURL', targetURL);
                 match = FIRMWARE_LINK_REGEX.exec(pageData);
             }
             return;
