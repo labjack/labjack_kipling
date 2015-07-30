@@ -402,7 +402,7 @@ this.readFirmwareFile = function(fileSrc, bundle)
         deferred.resolve(bundle);
     };
 
-    if (fileSrc.indexOf('http') === 0) {
+    if ((fileSrc.indexOf('http') === 0) || (fileSrc.indexOf('https') === 0)) {
         urlComponents = fileSrc.split('/');
         fileName = urlComponents[urlComponents.length-1];
         request(
@@ -1406,6 +1406,10 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
             var addCheckWiFiMsg = true;
             if(errorCode == 2355) {
                 message += '  Remove the uSD card and try again.';
+                addCheckWiFiMsg = false;
+            }
+            if(errorCode == 1300) {
+                message += 'Remove the uSD card and try again.';
                 addCheckWiFiMsg = false;
             }
             if(deviceAttributes.isPro) {
