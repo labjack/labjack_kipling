@@ -105,7 +105,7 @@ exports.tests = {
 	},
 	'get Kipling Versions': function(test) {
 		var data = version_manager.lvm.getCachedKiplingVersions();
-		
+
 		// Print out data
 		// console.log(JSON.stringify(data, null, 2));
 		test.ok(data.isValid, 'Kipling Versions data should be valid');
@@ -119,45 +119,45 @@ exports.tests = {
 			test.ok(isOk, '(Kipling Check) Missing a required key: ' + reqKey);
 		});
 		test.done();
-	}
-	// 'clear versions cache': function(test) {
-	// 	// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
-	// 	version_manager.lvm.clearPageCache();
-	// 	// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
-	// 	test.done();
-	// },
-	// 'secondary query': function(test) {
-	// 	var startTime = new Date();
-	// 	version_manager.getAllVersions()
-	// 	.then(function(data) {
-	// 		var endTime = new Date();
-	// 		addExecutionTime('Secondary query', startTime, endTime);
-	// 		test.ok(true);
-	// 		validateVersionData(test, data);
-	// 		test.done();
-	// 	}, function(err) {
-	// 		test.ok(false, 'Error getting version numbers');
-	// 		test.done();
-	// 	});
-	// },
-	// 'check T7 versions': function(test) {
-	// 	version_manager.lvm.getT7FirmwareVersions()
-	// 	.then(function(data) {
-	// 		// console.log('T7 FW Versions', data);
-	// 		test.done();
-	// 	}, function(err) {
-	// 		test.ok(false,'Failed to get T7 firmware versions');
-	// 		test.done();
-	// 	});
-	// },
-	// 'Check load times': function(test) {
-	// 	var output = [];
-	// 	console.log('Execution Times:');
-	// 	executionTimes.forEach(function(executionTime) {
-	// 		var str = executionTime.name + ': ' + executionTime.durationStr;
-	// 		output.push(str);
-	// 		console.log(str);
-	// 	});
-	// 	test.done();
-	// },
+	},
+	'clear versions cache': function(test) {
+		// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
+		version_manager.lvm.clearPageCache();
+		// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
+		test.done();
+	},
+	'secondary query': function(test) {
+		var startTime = new Date();
+		version_manager.getAllVersions()
+		.then(function(data) {
+			var endTime = new Date();
+			addExecutionTime('Secondary query', startTime, endTime);
+			test.ok(true);
+			validateVersionData(test, data);
+			test.done();
+		}, function(err) {
+			test.ok(false, 'Error getting version numbers');
+			test.done();
+		});
+	},
+	'check T7 versions': function(test) {
+		version_manager.lvm.getT7FirmwareVersions()
+		.then(function(data) {
+			// console.log('T7 FW Versions', data);
+			test.done();
+		}, function(err) {
+			test.ok(false,'Failed to get T7 firmware versions');
+			test.done();
+		});
+	},
+	'Check load times': function(test) {
+		var output = [];
+		console.log('Execution Times:');
+		executionTimes.forEach(function(executionTime) {
+			var str = executionTime.name + ': ' + executionTime.durationStr;
+			output.push(str);
+			console.log(str);
+		});
+		test.done();
+	},
 };
