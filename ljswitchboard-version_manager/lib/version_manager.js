@@ -16,9 +16,10 @@ var q = require('q');
 var request = require('request');
 var async = require('async');
 var dict = require('dict');
+var path = require('path');
 
 var cheerio = require('cheerio');
-
+var semver = require('./semver_min');
 
 var eventList = {
     'ERROR_PARSING_PAGE_DATA': 'ERROR_PARSING_PAGE_DATA',
@@ -109,11 +110,12 @@ function labjackVersionManager() {
             "upgradeReference": "https://labjack.com/support/firmware/t7",
             "platformDependent": false,
             "urls":[
+                {"url": "https://labjack.com/support/firmware/t7", "type": "organizer-current"},
                 {"url": "https://labjack.com/support/firmware/t7", "type": "current"},
                 {"url": "https://labjack.com/support/firmware/t7/beta", "type": "beta"},
                 // {"url": "https://labjack.com/support/firmware/t7/old", "type": "old"},
-                {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
-            ]
+                // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
+            ],
         },
         "digit": {
             "type":"digitFirmwarePage",
@@ -149,8 +151,9 @@ function labjackVersionManager() {
 
         var isValid = true;
 
+        var currentNode;
         if(pageType === 'software') {
-            var currentNode = $('.node-software-platform');
+            currentNode = $('.node-software-platform');
             isValid = (currentNode.length >= 0);
             
             if(isValid) {
@@ -176,7 +179,7 @@ function labjackVersionManager() {
                     'beta': '.group-beta',
                     'stable': '.group-stable',
                 }[releaseType];
-                var currentNode = currentNode.find(groupSelector);
+                currentNode = currentNode.find(groupSelector);
                 isValid = (currentNode.length >= 0);
             }
 
@@ -209,6 +212,29 @@ function labjackVersionManager() {
                     retData.version = versionInfo[programName];
                     retData.isValid = true;
                 }
+            }
+        } else if(pageType === 'firmware') {
+            currentNode = $('.node-firmware-section');
+            isValid = (currentNode.length >= 0);
+
+             // Limit by group
+            if(isValid) {
+                var groupSelector = {
+                    'beta': '.group-beta',
+                    'stable': '.group-stable',
+                }[releaseType];
+                currentNode = currentNode.find(groupSelector);
+                isValid = (currentNode.length >= 0);
+            }
+            // Parse out actual file data
+            if(isValid) {
+                var fileSearchStr = '.file a';
+                retData.upgradeLink = currentNode.find(fileSearchStr).attr('href');
+
+                var fileName = path.basename(retData.upgradeLink);
+                var version = (parseFloat(fileName.split('_')[1])/10000).toFixed(4);
+                retData.version = version;
+                retData.isValid = true;
             }
         }
 
@@ -324,26 +350,60 @@ function labjackVersionManager() {
          * http://labjack.com/sites/default/files/2014/05/T7firmware_010100_2014-05-12.bin
         **/
         t7FirmwarePage: function(listingArray, pageData, urlInfo, name) {
-            var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin".*<\/a>/g;
-            var match = FIRMWARE_LINK_REGEX.exec(pageData);
-            while (match !== null) {
-                var $ = cheerio.load(match[0]);
-                var ele = $('a');
-                var targetURL = ele.attr('href');
-
-                // var targetURL = match[0].replace(/href\=\"/g, '');
-                // targetURL = targetURL.replace(/\"/g, '');
-                var version = (parseFloat(match[1])/10000).toFixed(4);
-                listingArray.push({
-                    "upgradeLink":targetURL,
-                    "version":version,
-                    "type":urlInfo.type,
-                    "key":urlInfo.type + '-' + version
+            if(urlInfo.type === 'organizer-current') {
+                var parsedData = self.advancedPageParser({
+                    'url': urlInfo.url,
+                    'pageData': pageData,
+                    'pageType': 'firmware',
+                    'releaseType': 'stable',
                 });
-                // console.log('T7 FW Versions', version);
-                // console.log('Type....', urlInfo.type);
-                // console.log('targetURL', targetURL);
-                match = FIRMWARE_LINK_REGEX.exec(pageData);
+
+                if(parsedData.isValid) {
+                    listingArray.push({
+                        'upgradeLink': parsedData.upgradeLink,
+                        'version': parsedData.version,
+                        'type': urlInfo.type,
+                        'key': urlInfo.type + '-' + parsedData.version
+                    });
+                } else {
+                    // Insert a defined reference to the 1.0146 firmware version
+                    // to define it as the "default current version" just incase
+                    // website parsing breaks.
+                    listingArray.push({
+                        'upgradeLink': 'https://labjack.com/sites/default/files/firmware/T7firmware_010146_2015-01-19.bin',
+                        'version': '1.0146',
+                        'type': urlInfo.type,
+                        'key': urlInfo.type + '-' + parsedData.version
+                    });
+                }
+            } else {
+                var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
+                var match = FIRMWARE_LINK_REGEX.exec(pageData);
+                while (match !== null) {
+                    var $ = cheerio.load(match[0]);
+                    var linkElements = $('a');
+
+                    linkElements.each(function(i, linkElement){
+                        var ele = $(linkElement);
+                        var targetURL = ele.attr('href');
+                        var fileName = path.basename(targetURL);
+
+                        // var targetURL = match[0].replace(/href\=\"/g, '');
+                        // targetURL = targetURL.replace(/\"/g, '');
+                        var version = (parseFloat(fileName.split('_')[1])/10000).toFixed(4);
+                        listingArray.push({
+                            "upgradeLink":targetURL,
+                            "version":version,
+                            "type":urlInfo.type,
+                            "key":urlInfo.type + '-' + version
+                        });
+                        // console.log('T7 FW Versions', version);
+                        // console.log('Type....', urlInfo.type);
+                        // console.log('targetURL', targetURL);
+                        // console.log('fileName', fileName);
+                    });
+                    match = FIRMWARE_LINK_REGEX.exec(pageData);
+                }
             }
             return;
         },
@@ -353,17 +413,29 @@ function labjackVersionManager() {
          * http://labjack.com/sites/default/files/2013/01/DigitFW_007416_01232013.bin
         **/
         digitFirmwarePage: function(listingArray, pageData, urlInfo, name) {
-            var FIRMWARE_LINK_REGEX = /href=\".*DigitFW\_([\d\_]+).bin\"(?=\s)/g;
+            // var FIRMWARE_LINK_REGEX = /href=\".*DigitFW\_([\d\_]+).bin\"(?=\s)/g;
+            var FIRMWARE_LINK_REGEX = /<a href\=\"http.*DigitFW\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
             var match = FIRMWARE_LINK_REGEX.exec(pageData);
             while (match !== null) {
-                var targetURL = match[0].replace(/href\=\=/g, '');
-                targetURL = targetURL.replace(/\"/g, '');
-                var version = parseFloat(match[1].split('_')[0]/10000).toFixed(4);
-                listingArray.push({
-                    "upgradeLink":targetURL,
-                    "version":version,
-                    "type":urlInfo.type,
-                    "key":urlInfo.type + '-' + version
+                var $ = cheerio.load(match[0]);
+                var linkElements = $('a');
+
+                linkElements.each(function(i, linkElement){
+                    var ele = $(linkElement);
+                    // console.log('ele', ele);
+                    var targetURL = ele.attr('href');
+                    var fileName = path.basename(targetURL);
+
+                    var version = parseFloat(fileName.split('_')[1]/10000).toFixed(4);
+                    // console.log('targetURL', targetURL);
+                    // console.log('version', version);
+                    // console.log('type', urlInfo.type);
+                    listingArray.push({
+                        "upgradeLink":targetURL,
+                        "version":version,
+                        "type":urlInfo.type,
+                        "key":urlInfo.type + '-' + version
+                    });
                 });
                 match = FIRMWARE_LINK_REGEX.exec(pageData);
             }
@@ -458,43 +530,117 @@ function labjackVersionManager() {
         };
         return dataQuery;
     };
-    this.saveTempData = function(name, infos) {
+    this.saveTempData = function(name, rawInfos) {
         var systemType = self.getLabjackSystemType();
         var platformDependent = self.urlDict[name].platformDependent;
         
-        // console.log('name',name);
-        // console.log('is dependent',platformDependent);
-        // console.log('systemType',systemType);
-        
+        var organizer = null;
+        var infos = [];
+
+        rawInfos.forEach(function(info) {
+            if(info.type.indexOf('organizer') >= 0) {
+                organizer = info;
+            } else {
+                infos.push(info);
+            }
+        });
+
+        if(organizer) {
+            // Determine versioning scheme, is the version a number?
+            if(semver.valid(organizer.version)) {
+                // The version follows semver.
+                organizer.eq = function(baseVersion, checkVersion) {
+                    return semver.eq(baseVersion, checkVersion);
+                };
+                organizer.gt = function(baseVersion, checkVersion) {
+                    return semver.gt(baseVersion, checkVersion);
+                };
+            } else {
+                // The version should be parsed as a number.
+                var orgVersionNum = parseFloat(organizer.version);
+                if(isNaN(orgVersionNum)) {
+                    orgVersionNum = 0;
+                }
+                organizer.versionNum = orgVersionNum;
+                organizer.eq = function(baseVersion, checkVersion) {
+                    return baseVersion == checkVersion;
+                };
+                organizer.gt = function(baseVersion, checkVersion) {
+                    return baseVersion > checkVersion;
+                };
+            }
+
+            // Function to determine the actual type of a given version.
+            organizer.getType = function(checkVersion) {
+                var orgType = 'beta';
+                // console.log('Organizer Version', this.version);
+                // console.log('Given Version', checkVersion);
+                if(this.eq(this.version, checkVersion)) {
+                    orgType = 'current';
+                }
+                if(this.gt(this.version, checkVersion)) {
+                    orgType = 'old';
+                }
+                return orgType;
+            };
+        }
+
+        // console.log(' - name:',name);
+        // console.log(' - is dependent:',platformDependent);
+        // console.log(' - systemType:',systemType);
+        // console.log(' - organizer', organizer);
+        // // console.log(' - infos', infos);
+        // console.log('');
+
         self.infoCache[name] = {};
         self.dataCache[name] = {};
         infos.forEach(function(info) {
+            // Check to see if the type needs to be altered with the organizer.
+            if(organizer) {
+                info.type = organizer.getType(info.version);
+            }
+
+            // Initialize the infoCache array if it is empty
             if (typeof(self.infoCache[name][info.type]) === 'undefined') {
                 self.infoCache[name][info.type] = [];
             }
+
             var data = {
                 upgradeLink: info.upgradeLink,
                 version: info.version,
                 type: info.type,
                 key: info.key
             };
-            self.infoCache[name][info.type].push(data);
-            if (platformDependent) {
-                var isCurSys = info.type.search(systemType) > 0;
-                var curType = info.type.split('_'+systemType)[0];
-                if(isCurSys) {
-                    // console.log('Current Type',info.type)
-                    if (typeof(self.dataCache[name][curType]) === 'undefined') {
-                        self.dataCache[name][curType] = [];
-                    }
-                    self.dataCache[name][curType].push(data);
-                }
 
-            } else {
-                if (typeof(self.dataCache[name][info.type]) === 'undefined') {
-                    self.dataCache[name][info.type] = [];
+            // Determine if the node should be inserted into the array.  Check
+            // if that version has already been found.
+            var addToCache = true;
+            self.infoCache[name][info.type].forEach(function(cachedInfo) {
+                if(cachedInfo.version === info.version) {
+                    addToCache = false;
                 }
-                self.dataCache[name][info.type].push(data);
+            });
+
+            // If the node should be added, add it.
+            if(addToCache) {
+                self.infoCache[name][info.type].push(data);
+                if (platformDependent) {
+                    var isCurSys = info.type.search(systemType) > 0;
+                    var curType = info.type.split('_'+systemType)[0];
+                    if(isCurSys) {
+                        // console.log('Current Type',info.type)
+                        if (typeof(self.dataCache[name][curType]) === 'undefined') {
+                            self.dataCache[name][curType] = [];
+                        }
+                        self.dataCache[name][curType].push(data);
+                    }
+
+                } else {
+                    if (typeof(self.dataCache[name][info.type]) === 'undefined') {
+                        self.dataCache[name][info.type] = [];
+                    }
+                    self.dataCache[name][info.type].push(data);
+                }
             }
         });
     };
@@ -806,6 +952,20 @@ function labjackVersionManager() {
             ljmData.isValid = false;
         }
         return ljmData;
+    };
+    this.getCachedKiplingVersions = function() {
+        var kiplingData = {};
+        if(typeof(self.infoCache.kipling) !== 'undefined') {
+            kiplingData = JSON.parse(JSON.stringify(self.infoCache.kipling));
+            kiplingData.isValid = true;
+        } else {
+            kiplingData.current_win = [];
+            kiplingData.current_mac = [];
+            kiplingData.current_linux32 = [];
+            kiplingData.current_linux64 = [];
+            kiplingData.isValid = false;
+        }
+        return kiplingData;
     };
     var isDefined = function(ele) {
         if(typeof(ele) !== 'undefined') {
