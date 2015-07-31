@@ -113,7 +113,7 @@ function labjackVersionManager() {
                 {"url": "https://labjack.com/support/firmware/t7", "type": "organizer-current"},
                 {"url": "https://labjack.com/support/firmware/t7", "type": "current"},
                 {"url": "https://labjack.com/support/firmware/t7/beta", "type": "beta"},
-                // {"url": "https://labjack.com/support/firmware/t7/old", "type": "old"},
+                {"url": "https://labjack.com/support/firmware/t7/old", "type": "old"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -363,7 +363,8 @@ function labjackVersionManager() {
                         'upgradeLink': parsedData.upgradeLink,
                         'version': parsedData.version,
                         'type': urlInfo.type,
-                        'key': urlInfo.type + '-' + parsedData.version
+                        'key': urlInfo.type + '-' + parsedData.version,
+                        'isValid': true,
                     });
                 } else {
                     // Insert a defined reference to the 1.0146 firmware version
@@ -373,7 +374,8 @@ function labjackVersionManager() {
                         'upgradeLink': 'https://labjack.com/sites/default/files/firmware/T7firmware_010146_2015-01-19.bin',
                         'version': '1.0146',
                         'type': urlInfo.type,
-                        'key': urlInfo.type + '-' + parsedData.version
+                        'key': urlInfo.type + '-' + parsedData.version,
+                        'isValid': false,
                     });
                 }
             } else {
@@ -536,16 +538,29 @@ function labjackVersionManager() {
         
         var organizer = null;
         var infos = [];
-
+        var numCurrent = 0;
         rawInfos.forEach(function(info) {
             if(info.type.indexOf('organizer') >= 0) {
                 organizer = info;
             } else {
+                if(info.type.indexOf('current') >= 0) {
+                    numCurrent += 1;
+                }
                 infos.push(info);
             }
         });
 
         if(organizer) {
+            if((numCurrent == 1) && (organizer.isValid == false)) {
+                console.log('Defaulting to the current-version');
+                infos.forEach(function(info) {
+                    if(info.type.indexOf('current') >= 0) {
+                        organizer = info;
+                    }
+                });
+            } else if(organizer.isValid == false) {
+                console.log('!! Using default fw version as current');
+            }
             // Determine versioning scheme, is the version a number?
             if(semver.valid(organizer.version)) {
                 // The version follows semver.
@@ -925,10 +940,19 @@ function labjackVersionManager() {
         return JSON.parse(JSON.stringify(self.infoCache));
     };
 
+    var populateMissingKeys = function(obj, requiredKeys) {
+        var keys = Object.keys(obj);
+        requiredKeys.forEach(function(requiredKey) {
+            if(typeof(obj[requiredKey]) === 'undefined') {
+                obj[requiredKey] = [];
+            }
+        });
+    };
     this.getCachedT7Versions = function() {
         var t7Data = {};
         if(typeof(self.infoCache.t7) !== 'undefined') {
             t7Data = JSON.parse(JSON.stringify(self.infoCache.t7));
+            // populateMissingKeys(t7Data, ['beta', 'current', 'old']);
             t7Data.isValid = true;
         } else {
             t7Data.current = [];

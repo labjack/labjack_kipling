@@ -74,7 +74,9 @@ exports.tests = {
 			'old',
 			'beta'
 		];
-		// console.log(JSON.stringify(data, null, 2));
+		
+		// Print out data
+		console.log(JSON.stringify(data, null, 2));
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;
