@@ -10,6 +10,7 @@ function interpretLoadConfigFileResults(bundle) {
 		'isValid': true,
 		'data': {},
 		'message': '',
+		'warning': '',
 	};
 
 	if(bundle.isError) {
@@ -117,5 +118,31 @@ function verifyConfigFile(filePath) {
 
 	return defered.promise;
 }
-
 exports.verifyConfigFile = verifyConfigFile;
+
+function verifyConfigObject(dataObject) {
+	var defered = q.defer();
+
+	var results = {
+		'isValid': true,
+		'data': {},
+		'message': '',
+		'warning': '',
+	};
+	try {
+		results.data = JSON.parse(JSON.stringify(dataObject));
+
+		verifyConfigFileRequiredKeys(results)
+		.then(verifyDefinedViews, defered.reject)
+		.then(verifyDefinedDataGroups, defered.reject)
+		.then(defered.resolve, defered.reject);
+	} catch(err) {
+		results.isValid = false;
+		results.message = 'Failed to parse given data object: ' + err.toString();
+		defered.reject(results);
+	}
+
+	return defered.promise;
+}
+exports.verifyConfigObject = verifyConfigObject;
+

@@ -1,7 +1,7 @@
 
 
 var testGroups = {
-	'basic_test': false,
+	'basic_test': true,
 	'config_loader': {
 		'basic': true,
 	},
@@ -31,7 +31,7 @@ function requireTest(groupName, fileNamePartials, isEnabled, destObj) {
 	filePath += testName;
 
 	if(isEnabled) {
-		console.log(' - Requiring file', filePath);
+		console.log(' - Requiring test file', filePath);
 
 		if(groupName) {
 			exports[groupName] = require(filePath);

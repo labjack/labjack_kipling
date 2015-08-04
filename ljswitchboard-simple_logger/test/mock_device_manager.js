@@ -11,8 +11,8 @@ function openDevices(test) {
 	test.done();
 }
 
-function getDevices(test) {
-	test.done();
+function getDevices() {
+	return [];
 }
 
 function closeDevices(test) {

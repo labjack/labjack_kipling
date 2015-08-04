@@ -1,3 +1,5 @@
+
+
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
@@ -23,3 +25,79 @@ var data_logger = require('./data_logger');
 
 // Code that collects & reports data to listeners.
 var data_reporter = require('./data_reporter');
+
+
+
+function CREATE_SIMPLE_LOGGER () {
+	this.devices = undefined;
+	this.config = undefined;
+
+	this.eventList = {
+
+	};
+
+	this.initialize = function(devices) {
+		var defered = q.defer();
+		self.devices = devices;
+
+		defered.resolve();
+		return defered.promise;
+	};
+
+
+
+
+	/* Configuration File Loading & Checking functions */
+	this.verifyConfigFile = function(filePath) {
+		return config_checker.verifyConfigFile(filePath);
+	};
+	this.verifyConfigObject = function(dataObject) {
+		return config_checker.verifyConfigObject(filePath);
+	};
+
+	var handleLoadConfigFileSuccess = function(configData) {
+		var defered = q.defer();
+		
+		self.config = configData.data;
+
+		defered.resolve(configData);
+		return defered.promise;
+	};
+	var handleLoadConfigFileError = function(error) {
+		var defered = q.defer();
+
+		defered.reject(error);
+		return defered.promise;
+	};
+	this.loadConfigFile = function(filePath) {
+		var defered = q.defer();
+		
+		config_checker.verifyConfigFile(filePath)
+		.then(handleLoadConfigFileSuccess, handleLoadConfigFileError)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+
+
+
+
+	var self = this;
+}
+util.inherits(CREATE_SIMPLE_LOGGER, EventEmitter);
+
+
+var simple_logger = new CREATE_SIMPLE_LOGGER();
+
+/* feature discovery & event constant handling */
+exports.eventList = simple_logger.eventList;
+
+/* Initialization functions */
+exports.initialize = simple_logger.initialize;
+
+/* Functions for configuration file loading & verification */
+exports.verifyConfigFile = simple_logger.verifyConfigFile;
+exports.verifyConfigObject = simple_logger.verifyConfigObject;
+exports.loadConfigFile = simple_logger.loadConfigFile;
+
+
+
