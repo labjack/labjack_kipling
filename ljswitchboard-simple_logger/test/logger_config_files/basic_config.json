@@ -1,0 +1,50 @@
+{
+	"logging_period_ms": 1000,
+	"logging_config": {
+		"file_prefix": "test_log",
+		"write_to_file": false,
+		"default_result_view": "0",
+		"default_result_file": "0"
+	},
+
+
+	"view_config": {
+		"update_rate_ms": 100
+	},
+	"views": [
+		"basic_view",
+		"current_values_view"
+	],
+	"basic_view": {
+		"name": "Basic Graph",
+		"view_type": "basic_graph",
+		"window_size": 100,
+		"group": "basic_data_group"
+	},
+	"current_values_view": {
+		"name": "Current Values",
+		"view_type": "current_values",
+		"group": "basic_data_group"
+	},
+
+
+	"data_groups": [
+		"basic_data_group"
+	],
+	"basic_data_group": {
+		"device_serial_numbers": ["1", "2"],
+		"1": {
+			"registers": [{
+				"name": "AIN0",
+				"format": "default"
+			}]
+		},
+		"2": {
+			"registers": [{
+				"name": "AIN0",
+				"format": "custom_func",
+				"format_func": "console.log('Custom Func', val); return val;"
+			}]
+		}
+	}
+}

@@ -1,0 +1,47 @@
+{
+  "name": "ljswitchboard-simple_logger",
+  "version": "0.0.1",
+  "description": "A simple data logger for LabJack devices.",
+  "main": "./lib/ljswitchboard-simple_logger",
+  "scripts": {
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+  },
+  "homepage": "https://github.com/chrisJohn404/ljswitchboard-simple_logger",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisJohn404/ljswitchboard-simple_logger"
+  },
+  "keywords": [
+    "LabJack",
+    "LJM",
+    "T7",
+    "ljswitchboard"
+  ],
+  "author": {
+    "name": "Chris Johnson",
+    "url": "http://labjack.com"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "https://raw.githubusercontent.com/chrisJohn404/ljswitchboard-simple_logger/master/LICENSE"
+  },
+  "bugs": {
+    "url": "https://github.com/chrisJohn404/ljswitchboard-simple_logger/issues"
+  },
+  "dependencies": {
+    "async": "~0",
+    "q": "~1",
+    "labjack-nodejs": "0.0.x",
+    "ljswitchboard-ljm_driver_constants": "0.0.x",
+    "ljswitchboard-modbus_map": "0.0.x",
+    "ljswitchboard-data_parser": "0.0.x",
+    "ljswitchboard-ljm_device_curator": "0.0.x"
+  },
+  "devDependencies": {
+    "nodeunit": "0.9.x",
+    "rewire": "2.3.x"
+  },
+  "directories": {
+    "lib": "./lib"
+  }
+}
