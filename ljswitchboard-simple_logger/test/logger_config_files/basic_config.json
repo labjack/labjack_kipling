@@ -1,7 +1,7 @@
 {
 	"logging_period_ms": 1000,
 	"logging_config": {
-		"file_prefix": "test_log",
+		"file_prefix": "basic_config",
 		"write_to_file": false,
 		"default_result_view": "0",
 		"default_result_file": "0"
@@ -32,16 +32,20 @@
 		"basic_data_group"
 	],
 	"basic_data_group": {
+		"group_name": "basic_data_group",
+
 		"device_serial_numbers": ["1", "2"],
 		"1": {
 			"registers": [{
 				"name": "AIN0",
+				"id": "1-AIN0",
 				"format": "default"
 			}]
 		},
 		"2": {
 			"registers": [{
 				"name": "AIN0",
+				"id": "2-AIN0",
 				"format": "custom_func",
 				"format_func": "console.log('Custom Func', val); return val;"
 			}]

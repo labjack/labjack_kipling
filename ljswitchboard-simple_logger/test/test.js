@@ -7,7 +7,10 @@ var testGroups = {
 	},
 	'config_checker': {
 		'basic': true,
-	}
+	},
+	'data_collector': {
+		'basic': true,
+	},
 };
 
 

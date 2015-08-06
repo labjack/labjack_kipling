@@ -37,15 +37,11 @@ function CREATE_SIMPLE_LOGGER () {
 	};
 
 	this.initialize = function(devices) {
-		var defered = q.defer();
+		self.devices = undefined;
 		self.devices = devices;
 
-		defered.resolve();
-		return defered.promise;
+		return data_collector.updateDeviceReferences(devices);
 	};
-
-
-
 
 	/* Configuration File Loading & Checking functions */
 	this.verifyConfigFile = function(filePath) {
@@ -56,12 +52,10 @@ function CREATE_SIMPLE_LOGGER () {
 	};
 
 	var handleLoadConfigFileSuccess = function(configData) {
-		var defered = q.defer();
-		
+		self.config = undefined;
 		self.config = configData.data;
 
-		defered.resolve(configData);
-		return defered.promise;
+		return data_collector.configureLogger(configData.data);
 	};
 	var handleLoadConfigFileError = function(error) {
 		var defered = q.defer();
