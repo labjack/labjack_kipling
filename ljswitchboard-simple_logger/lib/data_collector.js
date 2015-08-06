@@ -39,7 +39,10 @@ function CREATE_DATA_COLLECTOR() {
 	};
 
 	// This array contains
-	this.device_strategies = [];
+
+	// Object that stores device_data_collector objects that can be indexed
+	// by their serial numbers.
+	this.deviceDataCollectors = {};
 
 	this.updateDeviceReferences = function(devices) {
 		var defered = q.defer();
