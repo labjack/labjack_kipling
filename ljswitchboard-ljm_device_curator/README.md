@@ -69,3 +69,5 @@ device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
 	console.log('  - Device Attributes Updated');
 });
 ```
+
+Look at the /test/test.js file for tests/examples that can be run by executing "npm test".  The "t7_basic_test.js" is a great resource for more getting started information.
