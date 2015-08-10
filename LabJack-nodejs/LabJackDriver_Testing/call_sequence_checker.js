@@ -59,7 +59,11 @@ function bufferEqualsArray(test, expected, actual, bufFunc, valueSizeInBytes) {
 var POINTER_LENGTH = {
 	'ia32': 4,
 	'x64': 8,
+	'arm': 4, // NOT SURE IF THIS IS CORRECT!!
 }[process.arch];
+if(process.arch === 'arm') {
+	console.error('!!! Warning: Not sure if string pointers are 4 bytes or 8 bytes!!!');
+}
 
 function cPointerEqualsArray(test, expected, actual) {
 	for(var i = 0; i < expected.length; i++) {
