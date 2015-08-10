@@ -1,27 +1,46 @@
 LabJack-nodejs
 ==============
-UPDATED FOR LJM VERSION 1.03
+
+### LabJack-nodejs
+==============
+'LabJack-nodejs' makes LabJack's [LJM library](http://labjack.com/ljm) available for node.js.  The library uses [node-ffi](https://www.npmjs.com/package/node-ffi) to link to the LabJackLJM.dll or appropriate .dynlib file that must be installed with one of [LabJack's installers](https://labjack.com/support/software/installers/ljm).  Currently, they are available for Windows, Mac OS X, Linux 32-bit & 64-bit, and a few builds for ARMv6 and ARMV7 architectures.
+
+This library exposes the LJM driver slightly different than our standard [LJM Library](https://labjack.com/support/software/examples/ljm) wrappers because it was created primarily for use in Kipling.  If this library were to be re-written it would be split into two modules, one that directly exposes the LJM Library functions, and another that performs some of the abstractions.  A breif summary of how this library exposes the LJM Library:
+ * Created two different objects, device.js and driver.js, that can be imported individually.
+ * Was created to function much like the [LabJack Python driver](http://labjack.com/support/labjackpython) for LabJack UD devices.
+ * For more information about what each function does, please look at the LabJackM.h file that can be downloaded & installed from LabJacks [Software & Driver](http://labjack.com/support/software) page.
+
+Currently this wrapper only supports the [T7](http://labjack.com/products/t7), [T7-Pro](http://labjack.com/products/t7), [Digit-TL](http://labjack.com/products/digit), and[Digit-TLH](http://labjack.com/products/digit) LabJack devices. (Which are low cost, high-quality, multifunction USB / Ethernet / 802.11b/g Wifi DAQ devices.)  Devices using the UD library (Windows only) aka U3, U6, and UE9 are not supported.  Additionally, the U12 is not supported.
+
+Requirements
+------------
+
+* LabJack's [LJM Library](https://labjack.com/support/software/installers/ljm).
+* Ability to build native modules, for windows this requires visual studio.
+* Look at the [node-ffi](https://www.npmjs.com/package/node-ffi) library for more requirements.
+* Also look at the [ref](https://www.npmjs.com/package/ref) library as it too is a native module.
+
+Installation
+------------
+
+Make sure that node-ffi and ref can be installed, it may be wise to create a dummy project and invoke:
+``` bash
+$ npm install ffi
+```
+before trying to install LabJack-nodejs.  Once you can do that simply install via npm:
+``` bash
+$ npm install labjack-nodejs
+```
 
 Installation notes for windows:
+-------------------------------
 Make sure that [node-gyp is properlly installed](http://stackoverflow.com/questions/21365714/nodejs-error-installing-with-npm).
 Peforming the standard npm install command will fail on windows.  It will hopefully complain about not having proper "TargetFrameworkVersion or PlatformToolset variables not being set.  If this is true, set them:
 "npm install --msvs_version=2012" or 2013.
 
 This hint came from someone building [couchbase](http://www.bitcrunch.de/install-couchbase-node-js-windows-8-machine/)
 
-
-
-nodejs library for using [LJM library](http://labjack.com/ljm).
-
- * Created two different objects, device.js and driver.js, that can be imported.
- * Was created to function much like the [LabJack Python driver](http://labjack.com/support/labjackpython) for LabJack UD devices.
- * For more information about what each function does, please look at the LabJackM.h file that can be downloaded & installed from LabJacks [Software & Driver](http://labjack.com/support/software) page.
-
-Currently this wrapper only supports the [T7](http://labjack.com/t7) and [T7-Pro](http://labjack.com/t7) LabJack devices. (Which are low cost, high-quality, multifunction USB / Ethernet / 802.11b/g Wifi DAQ devices!)
-
-## Device (device.js)
-Manages the handle for you & aims to simplify the interface with the LJM driver.
-
+## General Information (Async vs sync function calls)
 This driver wrapper was created supporting both synchronous and asynchronous function calls to support both functional and object-oriented programing styles. The general format is shown below:
 ```javascript
 //Synchronous syntax:
@@ -39,45 +58,78 @@ exampleFunction(
 );
 ```
 
-### How To Use:
-Before writing any code you must create a device or driver object:
+### Basic Usage (Hello World, reading an analog input):
+
 
 ```javascript
+//Require LabJack-nodejs
+var ljn = require('labjack-nodejs');
+
+//Device object (to control a LabJack device)c
+var createDeviceObject = ljn.getDevice();
+
 //Device object (to control a LabJack device)
-var deviceManager = require('device');
-var device = new deviceManager.labjack();
+var device = new createDeviceObject();
+
+// Open a device
+device.openSync();
+
+// Read an analog input
+console.log('AIN0:', device.readSync('AIN0'));
+
+// Close the device
+device.closeSync();
 ```
 
-
-Now you can use any of the implemented functions by:
-
+### Available functions in the labjack-nodejs library:
+After creating a labjack-nodejs library reference:
 ```javascript
-//not using callbacks
-device.exampleFunctionSync();
-
-//using callbacks
-device.exampleFunction(
-	function (err) {
-		console.log('error', err);
-	}, 
-	function (result) {
-		console.log('success', result);
-	}
-);
-
-//you can also use other callback handlers
-onError = function(res)
-{
-	console.log('error', res);
-};
-onSuccess = function(res)
-{
-	console.log('success', res);
-};
-device.exampleFunction(arg1, arg2, onError, onSuccess);
+var ljn = require('labjack-nodejs');
 ```
+you get access to several attributes, the two most important ones are:
+* ljn.device()
+* ljn.getDevice()
+* ljn.getDeviceRef()
+* ljn.driver()
+* ljn.getDriver()
 
-### Available Functions & what they use:
+Look at the lib/labjack_nodejs.js file for what gets exported.  There are a few subtile differences between the functions in terms of creating new objects.
+
+In general, LJM functions that require the passing of a device handle are implemented in the device object.  Functions that are device-agnostic are implemented in the driver object.
+
+### Available Functions in the device object (device.js):
+After creating a device object:
+```javascript
+var device = new createDeviceObject();
+```
+several functions are made available:
+
+Device Opening/Closing
+* open/openSync
+* close/closeSync
+* getHandleInfo/getHandleInfoSync
+
+Reading:
+* readRaw/readRawSync
+* read/readSync
+* readArray/readArraySync
+* readMany/readManySync
+
+Writing:
+* writeRaw/writeRawSync
+* write/writeSync
+* writeArray/writeArraySync
+* writeMany/writeManySync
+
+Both Directions:
+* rwMany/rwManySync
+
+Special/Streaming
+* readUINT64/readUINT64Sync
+* streamSettings
+* streamStart/streamStartSync
+* streamRead/streamReadSync
+* streamStop/streamStopSync
 
 #### open():
 Uses LJM_Open and LJM_OpenS
@@ -203,7 +255,6 @@ device.close(
 	});
 ```
 
-
 ### All Relevant 'libLabJackM' Functions:
 - [x] LJM_Open
 - [x] LJM_OpenS
@@ -222,29 +273,41 @@ device.close(
 - [x] LJM_eWriteNames
 - [x] LJM_eAddresses
 - [x] LJM_eNames
-- [ ] LJM_eStreamStart
-- [ ] LJM_eStreamRead
-- [ ] LJM_eStreamStop
+- [x] LJM_eStreamStart
+- [x] LJM_eStreamRead
+- [x] LJM_eStreamStop
 - [x] LJM_eReadString
 - [x] LJM_eWriteString
-
 
 
 ## LJM_Driver (driver.js)
 JavaScript wrapper for the rest of the LJM_Driver functions.
 
-
-### How To Use:
-Before writing any code you must create a driver object:
-
 ```javascript
+//Require LabJack-nodejs
+var ljn = require('labjack-nodejs');
+
 //Driver Object (to gain access to more general driver-related features)
-var driverManager = require('driver');
-var ljmDriver = new driverManager.ljmDriver();
+var driver = ljn.driver();
 ```
 
 
 ### Available Functions & what they use:
+* listAll/listAllSync
+* listAllExtended/listAllExtendedSync
+* errToStr/errToStrSync
+* loadConstants/loadConstantsSync
+* closeAll/closeAllSync
+* readLibrary/readLibrarySync
+* readLibraryS/readLibrarySSync
+* writeLibrary/writeLibrarySync
+* log/logSync
+* logS/logSSync
+* resetLog/resetLogSync
+* controlLog/controlLogSync
+* enableLog/enableLogSync
+* disableLog/disableLogSync
+
 
 #### listAll(deviceType 'number' or 'string', connectionType 'number' or 'string'):
 Uses LJM_ListAll and LJM_ListAllS

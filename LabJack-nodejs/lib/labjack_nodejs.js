@@ -21,14 +21,6 @@ exports.device = function() {
 		return new device.labjack();
 	}
 };
-exports.driver = function() {
-	if(driver) {
-		return new driver.ljmDriver();
-	} else {
-		driver = require('./driver');
-		return new driver.ljmDriver();
-	}
-};
 exports.getDevice = function() {
 	if(device) {
 		return device.labjack;
@@ -43,6 +35,15 @@ exports.getDeviceRef = function() {
 	} else {
 		device = require('./device');
 		return device;
+	}
+};
+
+exports.driver = function() {
+	if(driver) {
+		return new driver.ljmDriver();
+	} else {
+		driver = require('./driver');
+		return new driver.ljmDriver();
 	}
 };
 exports.getDriver = function() {
