@@ -670,6 +670,7 @@ function device(useMockDevice) {
 	};
 	var factoryFirmwareVersions = [
 		0.6602,
+		// 0.6604,
 		1.0069,
 		1.0007,
 		1.0100,
@@ -683,7 +684,9 @@ function device(useMockDevice) {
 				// initialize.
 				self.iRead('FIRMWARE_VERSION')
 				.then(function(firmwareVersion) {
-					if(factoryFirmwareVersions.indexOf(firmwareVersion.val) < 0) {
+					if(firmwareVersion.val < 1) {
+						defered.resolve();
+					} else if(factoryFirmwareVersions.indexOf(firmwareVersion.val) < 0) {
 						waitForT7ProToInitialize(result)
 						.then(defered.resolve, defered.reject);
 					} else {

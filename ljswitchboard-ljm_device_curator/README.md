@@ -101,29 +101,24 @@ LabJack-nodejs Functions wrapped by q
 * readMany
 * readMultiple
 * readUINT64 // For reading a devices MAC address (Ethernet & WiFi)
-
 * write
 * writeArray
 * writeMany
 * writeMultiple
-
 * rwMany
 
 Functions that automatically re-try on flash un-available errors that commonly happen on T7-Pro devices when writing/reading _DEFAULT registers
 * qRead
 * qReadMany
 * qReadUINT64
-
 * qWrite
 * qWriteMany
-
 * qrwMany
 
 Functions that automatically apply "intelligent" result formatting.  Happens on both reads and writes
 * iRead
 * iReadMany
 * iReadMultiple
-
 * iWrite
 * iWriteMany
 * iWriteMultiple
