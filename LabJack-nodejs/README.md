@@ -9,6 +9,12 @@ This library exposes the LJM driver slightly different than our standard [LJM Li
 
 Currently this wrapper only supports the [T7](http://labjack.com/products/t7), [T7-Pro](http://labjack.com/products/t7), [Digit-TL](http://labjack.com/products/digit), and[Digit-TLH](http://labjack.com/products/digit) LabJack devices. (Which are low cost, high-quality, multifunction USB / Ethernet / 802.11b/g Wifi DAQ devices.)  Devices using the UD library (Windows only) aka U3, U6, and UE9 are not supported.  Additionally, the U12 is not supported.
 
+Notes:
+------
+
+If you are trying to perform device IO, consider looking at the [ljswitchboard-ljm_device_curator](https://www.npmjs.com/package/ljswitchboard-ljm_device_curator) project.  It makes several more device abstractions and wraps this library in a promise interface.
+If you are trying to scan for devices consider using the [ljswitchboard-device_scanner](https://www.npmjs.com/package/ljswitchboard-device_scanner) module.
+
 Requirements
 ------------
 
