@@ -1017,7 +1017,7 @@ module.exports = {
 	 * function calls of LJM.
 	 * @param  {[type]} test The test object.
 	 */
-	testWriteMany: function(test) {		
+	testWriteMany: function(test) {
 		//Configure running-engines
 		asyncRun.config(dev, null);
 		syncRun.config(dev, null);

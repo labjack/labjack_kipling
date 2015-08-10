@@ -47,7 +47,7 @@ VERIFICATION_STRATEGIES = {
 	'length': function(test, expected, actual) { test.equal(expected, actual.length); },
 	'stringArray': function(test, expected, actual) { cPointerEqualsArray(test, expected, actual); },
 	'type': function(test, expected, actual) { test.notStrictEqual(typeof(actual), expected); }
-}
+};
 
 function bufferEqualsArray(test, expected, actual, bufFunc, valueSizeInBytes) {
 	//Expected = buffer imput from argList
@@ -56,10 +56,15 @@ function bufferEqualsArray(test, expected, actual, bufFunc, valueSizeInBytes) {
 		test.equal(bufFunc.call(actual, i*valueSizeInBytes),expected[i]);
 	}
 }
+var POINTER_LENGTH = {
+	'ia32': 4,
+	'x64': 8,
+}[process.arch];
+
 function cPointerEqualsArray(test, expected, actual) {
 	for(var i = 0; i < expected.length; i++) {
-		var namePtr = ref.readPointer(actual, i*8, 50);
-		test.equal(ref.readCString(namePtr,0),expected[i]);
+		var namePtr = ref.readPointer(actual, i*POINTER_LENGTH, 50);
+		test.strictEqual(ref.readCString(namePtr,0),expected[i], 'Failed to check argument string');
 	}
 }
 
@@ -70,7 +75,6 @@ exports.createCallSequenceChecker = function (expectedFunctionNames, expectedPar
 	};
 
 	var createCallChecker = function (functionName) {
-
 		var functionParams = AVAILABLE_FUNCTIONS[functionName];
 
 		return function (test, calledFunctionName, passedArgs) {
@@ -92,16 +96,20 @@ exports.createCallSequenceChecker = function (expectedFunctionNames, expectedPar
 				strategy = VERIFICATION_STRATEGIES[strategyName];
 				strategy(test, expectedValue, passedArgs[i]);
 			}
-		}
+		};
 	};
 
 	var callCheckers = expectedFunctionNames.map(function (e) { return createCallChecker(e); });
 
 	return function (test, calledFunctionNames, passedArgsVector) {
-		var numCallCheckers = callCheckers.length;
-		
-		for (var i=0; i<numCallCheckers; i++) {
-			callCheckers[i](test, calledFunctionNames[i], passedArgsVector[i]);
-		};
+		try {
+			var numCallCheckers = callCheckers.length;
+			
+			for (var i=0; i<numCallCheckers; i++) {
+				callCheckers[i](test, calledFunctionNames[i], passedArgsVector[i]);
+			}
+		} catch(err) {
+			console.log('Error Checking...', err);
+		}
 	};
-}
+};
