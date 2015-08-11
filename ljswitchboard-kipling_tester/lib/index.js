@@ -17,9 +17,9 @@ var testFiles = [
 	'test_kipling.js',
 	// Execute Mock-Device compatable Tests
 	'mock_module_tests/mock_device_selector.js',
-	'mock_module_tests/mock_device_info.js',
+	// 'mock_module_tests/mock_device_info.js',
 	// 'mock_module_tests/mock_dashboard.js',
-	'mock_module_tests/mock_register_matrix.js',
+	// 'mock_module_tests/mock_register_matrix.js',
 	
 
 	// Execute Live-Device tests
