@@ -143,6 +143,9 @@ function labjackVersionManager() {
         } else {
             try {
                 $ = cheerio.load(options.pageData);
+
+                var fs = require('fs');
+                fs.writeFileSync('C:\\Users\\chris\\test_'+pageType+'.html', options.pageData);
             } catch(err) {
                 console.log('Error loading page (cheerio)...', err);
             }

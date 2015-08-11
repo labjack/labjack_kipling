@@ -76,7 +76,7 @@ exports.tests = {
 		];
 		
 		// Print out data
-		console.log(JSON.stringify(data, null, 2));
+		console.log(' - Test Output:', JSON.stringify(data, null, 2));
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;
@@ -92,7 +92,7 @@ exports.tests = {
 		var data = version_manager.lvm.getCachedLJMVersions();
 		
 		// Print out data
-		// console.log(JSON.stringify(data, null, 2));
+		console.log(' - Test Output:', JSON.stringify(data, null, 2));
 		test.ok(data.isValid, 'LJM Versions data should be valid');
 		var requiredKeys = ['current_win', 'current_mac', 'current_linux32', 'current_linux64'];
 		var givenKeys = Object.keys(data);
@@ -109,7 +109,7 @@ exports.tests = {
 		var data = version_manager.lvm.getCachedKiplingVersions();
 
 		// Print out data
-		// console.log(JSON.stringify(data, null, 2));
+		console.log(' - Test Output:', JSON.stringify(data, null, 2));
 		test.ok(data.isValid, 'Kipling Versions data should be valid');
 		var requiredKeys = ['current_win', 'current_mac', 'current_linux32', 'current_linux64'];
 		var givenKeys = Object.keys(data);
