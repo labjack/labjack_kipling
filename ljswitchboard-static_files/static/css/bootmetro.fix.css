@@ -52,6 +52,25 @@ vertical-align: top;
 border-top:none;
 }
 
+/* Adding different pannel stylings */
+.panel-default .panel-heading a:hover{
+    color:#333;
+}
+.panel-primary .panel-heading a:hover{
+    color:#fff;
+}
+.panel-success .panel-heading a:hover{
+    color:#3c763d;
+}
+.panel-danger .panel-heading a:hover{
+    color: #a94442;
+}
+
+/* Extra badge styling */
+.label-danger, .badge-danger {
+      color: #fff;
+    background-color: #c9302c;
+}
 label.radio {
     margin-top: -8px;
     margin-bottom: 0;
