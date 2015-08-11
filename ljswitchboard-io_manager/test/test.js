@@ -29,8 +29,8 @@ var TEST_DEVICE_ERRORS = false;						// Passing
 var TEST_UPDATE_MOCK_DEVICE = false;				// Passing
 var TEST_UPDATE_USB_DEVICE = false;					// Passing
 
-var MOCK_DEVICE_SPEED_TEST = true;
-var T7_DEVICE_SPEED_TEST = true;
+var MOCK_DEVICE_SPEED_TEST = false;
+var T7_DEVICE_SPEED_TEST = false;
 
 if(ENABLE_BASIC_TEST) {
 	var basic_test = require('./basic_test');
