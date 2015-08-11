@@ -100,6 +100,10 @@
         "active": true,
         "isTask": true
     }, {
+        "name": "kipling_updater_service",
+        "active": true,
+        "isTask": true
+    }, {
         "name": "register_finder",
         "active": false,
         "isTask": true

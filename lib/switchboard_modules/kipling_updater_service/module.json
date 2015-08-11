@@ -1,0 +1,8 @@
+{
+    "name": "kipling_updater_service",
+    "humanName": "Kipling Updater Service",
+    "version": "0.0.1",
+    "jsFiles": ["kipling_updater_service.js"],
+    "startTime": "auto",
+    "description": "Listens to the update_manager to insert an alert-icon on the settings tab."
+}

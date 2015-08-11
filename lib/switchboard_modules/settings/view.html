@@ -88,7 +88,63 @@
         </div>
       </div>
     </div>
+    {{#with pageData.programUpdates}}
+    <div class="panel {{pannelType}}">
+      <div class="panel-heading" role="tab" id="headingFour">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#programUpdatesCollapsible" aria-expanded="false" aria-controls="collapseFour">
+            Available Updates: {{updateText}}
+          </a>
+        </h4>
+      </div>
+      <div id="programUpdatesCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+        <div class="panel-body">
+          <div>
+            <table class="table table-hover table-condensed">
+              {{#if availableUpdates}}
+              <p>Update Instructions:</p>
+              <ol>
+                <li>Download Installer via button below (Downloads link using your default browser).</li>
+                <li>Exit Kipling</li>
+                <li>Run Installer</li>
+                <li>Re-start Kipling</li>
+              </ol>
+              {{else}}
+              <p>Program is currently up to date.</p>
+              {{/if}}
+              {{#if isLJMOld}}
+              <button id="ljm-update-link" type="button" class="btn btn-default">Download LJM Version: {{availableLJMVersion.version}}</button>
+              <p class="selectableText">{{availableLJMVersion.upgradeLink}}</p>
+              <script>
+                $('#ljm-update-link').unbind();
+                $('#ljm-update-link').bind('click',function(){
+                  if(typeof(gui) === 'undefined') {
+                    gui = require('nw.gui');
+                  }
+                  gui.Shell.openExternal("{{availableLJMVersion.upgradeLink}}");
+                });
+              </script>
+              {{/if}}
+              {{#if isKiplingOld}}
+              <button id="kipling-update-link" type="button" class="btn btn-default">Download Kipling Version: {{availableKiplingVersion.version}}</button>
+              <p class="selectableText">{{availableKiplingVersion.upgradeLink}}</p>
+              <script>
+                $('#kipling-update-link').unbind();
+                $('#kipling-update-link').bind('click',function(){
+                  if(typeof(gui) === 'undefined') {
+                    gui = require('nw.gui');
+                  }
+                  gui.Shell.openExternal("{{availableKiplingVersion.upgradeLink}}");
+                });
+              </script>
+              {{/if}}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/with}}
   </div>
 </div>
 
-{{!-- <pre class="selectableText">{{printContext}}</pre> --}}
+{{!--<pre class="selectableText">{{printContext}}</pre>--}}
