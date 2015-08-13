@@ -26,6 +26,11 @@ var errorCodes = {
 	currently.
 	*/
 	'DEVICE_STILL_ACTIVE': 1206,
+
+	/*
+	No Error case
+	*/
+	'NO_ERROR': 0
 };
 
 
@@ -81,10 +86,10 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	/*
 	Function that reports collected via emitting a data event.
 	*/
-	this.reportResults = function(results, errorCode) {
+	this.reportResults = function(results) {
 		self.emit(EVENT_LIST.DATA, {
+			'serialNumber': self.deviceSerialNumber,
 			'results': results,
-			'errorCode': errorCode
 		});
 	};
 
@@ -97,24 +102,100 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		return val;
 	};
 
-	/*
-	Function that reports data when the device isn't valid.
-	*/
-	this.reportDeviceNotValid = function(registerList, errorCode) {
-		var dummyData = [];
-		registerList.forEach(function(register) {
-			dummyData.push(self.getDefaultRegisterValue(register));
-		});
-
-		self.reportResults(dummyData, errorCode);
+	this.getCurrentTime = function() {
+		return new Date();
 	};
 
+	/*
+	Function that reports data when the data isn't valid.
+	*/
+	this.reportDefaultRegisterData = function(registerList, errorCode, intervalTimerKey, timerKey) {
+		var dummyData = [];
+		registerList.forEach(function(register, i) {
+			dummyData.push(self.getDefaultRegisterValue(register));
+		});
+	
+		var retData = {
+			'registers': registerList,
+			'results': dummyData,
+			'errorCode': errorCode,
+			'time': self.getCurrentTime(),
+			'duration': self.stopTimer(timerKey),
+			'interval': self.getIntervalTimer(intervalTimerKey),
+		};
+
+		self.reportResults(retData);
+	};
+
+	/*
+	Function that reports data when the data is valid.
+	*/
+	this.reportCollectedData = function(registerList, results, intervalTimerKey, timerKey) {
+		var retData = {
+			'registers': registerList,
+			'results': results,
+			'errorCode': errorCodes.NO_ERROR,
+			'time': self.getCurrentTime(),
+			'duration': self.stopTimer(timerKey),
+			'interval': self.getIntervalTimer(intervalTimerKey),
+		};
+
+		self.reportResults(retData);
+	};
+
+	this.startTimes = {};
+	this.startTimer = function(timerKey) {
+		if(self.startTimes[timerKey]) {
+			var i = 0;
+			for(i = 0; i < 1000; i ++) {
+				var newKey = timerKey + '-' + i.toString();
+				if(typeof(self.startTimes[newKey]) === 'undefined') {
+					timerKey = newKey;
+					break;
+				}
+			}
+		}
+		self.startTimes[timerKey] = process.hrtime();
+
+		return timerKey;
+	};
+
+	this.stopTimer = function(timerKey) {
+		var diff = [0,0];
+
+		if(self.startTimes[timerKey]) {
+			diff = process.hrtime(self.startTimes[timerKey]);
+			self.startTimes[timerKey] = undefined;
+		}
+
+		// Convert to Milliseconds
+		var duration = diff[0] * 1000 + diff[1]/1000000;
+		return duration;
+	};
+
+	this.callIntervals = {};
+	this.getIntervalTimer = function(timerKey) {
+		var diff = [0,0];
+
+		if(self.callIntervals[timerKey]) {
+			diff = process.hrtime(self.callIntervals[timerKey]);
+		}
+		self.callIntervals[timerKey] = process.hrtime();
+
+		// Convert to Milliseconds
+		var duration = diff[0] * 1000 + diff[1]/1000000;
+		return duration;
+	};
 	/*
 	Function that gets called by the data_collector when new data should be
 	collected from the managed device.
 	*/
 	this.startNewRead = function(registerList) {
 		var defered = q.defer();
+
+		var intervalTimerKey = 'readMany';
+		var timerKey = intervalTimerKey;
+		var timerKey = self.startTimer(timerKey);
 
 		if(self.isValidDevice) {
 			// Check to see if a device IO is currently pending.
@@ -123,9 +204,10 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				If an IO is currently pending, don't start a new read and
 				return a dummy value.
 				*/
-				self.reportDeviceNotValid(
+				self.reportDefaultRegisterData(
 					registerList,
-					errorCodes.DEVICE_STILL_ACTIVE
+					errorCodes.DEVICE_STILL_ACTIVE,
+					intervalTimerKey, timerKey
 				);
 				defered.resolve();
 			} else {
@@ -133,8 +215,10 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				self.device.readMany(registerList)
 				.then(function(results) {
 					console.log('readMany Results', registerList, results);
+					self.reportCollectedData(registerList, results, intervalTimerKey, timerKey);
 				}, function(err) {
 					console.log('readMany Error', err);
+					self.reportDefaultRegisterData(registerList, err, intervalTimerKey, timerKey);
 				});
 				defered.resolve();
 			}
@@ -143,9 +227,10 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 			The device data collector isn't linked to a real device.  Return a
 			dummy value.
 			*/
-			self.reportDeviceNotValid(
+			self.reportDefaultRegisterData(
 				registerList,
-				errorCodes.DEVICE_NOT_VALID
+				errorCodes.DEVICE_NOT_VALID,
+				intervalTimerKey, timerKey
 			);
 			defered.resolve();
 		}
@@ -162,3 +247,5 @@ util.inherits(CREATE_DEVICE_DATA_COLLECTOR, EventEmitter);
 exports.createDeviceDataCollector = function() {
 	return new CREATE_DEVICE_DATA_COLLECTOR();
 };
+
+exports.EVENT_LIST = EVENT_LIST;

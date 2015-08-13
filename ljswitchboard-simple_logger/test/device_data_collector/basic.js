@@ -49,6 +49,15 @@ required_data_collectors = [{
 
 var dataToRead = ['AIN0'];
 
+var collectedData = {};
+var dataCollector = function(data) {
+	if(collectedData[data.serialNumber]) {
+		collectedData[data.serialNumber].push(data.results);
+	} else {
+		collectedData[data.serialNumber] = [data.results];
+	}
+};
+
 exports.basic_tests = {
 	'Require device_data_collector': function(test) {
 		try {
@@ -106,6 +115,14 @@ exports.basic_tests = {
 			test.done();
 		});
 	},
+	'attach data collectors': function(test) {
+		deviceDataCollectors.forEach(function(deviceDataCollector, i) {
+			// Attach to the new data event of each of the deviceDataCollectors.
+			var newDataEvent = device_data_collector.EVENT_LIST.DATA;
+			deviceDataCollector.on(newDataEvent, dataCollector);
+		});
+		test.done();
+	},
 	'trigger read for dummy data': function(test) {
 		var promises = deviceDataCollectors.map(function(deviceDataCollector, i) {
 			// trigger the deviceDataCollector to start a new read for dummy data.
@@ -116,6 +133,38 @@ exports.basic_tests = {
 		.then(function() {
 			test.done();
 		});
+	},
+	'trigger read for dummy data (2)': function(test) {
+		var promises = deviceDataCollectors.map(function(deviceDataCollector, i) {
+			// trigger the deviceDataCollector to start a new read for dummy data.
+			return deviceDataCollector.startNewRead(dataToRead);
+		});
+
+		q.allSettled(promises)
+		.then(function() {
+			test.done();
+		});
+	},
+	'trigger read for dummy data (3)': function(test) {
+		var promises = deviceDataCollectors.map(function(deviceDataCollector, i) {
+			// trigger the deviceDataCollector to start a new read for dummy data.
+			return deviceDataCollector.startNewRead(dataToRead);
+		});
+
+		q.allSettled(promises)
+		.then(function() {
+			test.done();
+		});
+	},
+	'time delay...': function(test) {
+		setTimeout(function() {
+			test.done();
+		}, 100);
+	},
+	'print results': function(test) {
+		console.log('Results...');
+		console.log(JSON.stringify(collectedData['1'], null, 2));
+		test.done();
 	},
 	'Close Devices':mockDeviceManager.closeDevices,
 };
