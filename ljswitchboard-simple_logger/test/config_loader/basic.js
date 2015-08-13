@@ -42,8 +42,8 @@ exports.tests = {
 		});
 	},
 	'load a file that exists': function(test) {
-		var bad_file_path = path.join(logger_config_files_dir, 'basic_config.json');
-		config_loader.loadConfigFile(bad_file_path)
+		var good_file_path = path.join(logger_config_files_dir, 'basic_config.json');
+		config_loader.loadConfigFile(good_file_path)
 		.then(function(result) {
 			test.ok(true);
 			test.done();

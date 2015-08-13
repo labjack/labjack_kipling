@@ -44,7 +44,7 @@ function CREATE_DATA_COLLECTOR() {
 	// by their serial numbers.
 	this.deviceDataCollectors = {};
 
-	this.updateDeviceReferences = function(devices) {
+	this.updateDeviceObjects = function(devices) {
 		var defered = q.defer();
 
 		// Remove old reference
@@ -111,5 +111,5 @@ function CREATE_DATA_COLLECTOR() {
 
 var data_collector = new CREATE_DATA_COLLECTOR();
 
-exports.updateDeviceReferences = data_collector.updateDeviceReferences;
+exports.updateDeviceObjects = data_collector.updateDeviceObjects;
 exports.configureLogger = data_collector.configureLogger;
