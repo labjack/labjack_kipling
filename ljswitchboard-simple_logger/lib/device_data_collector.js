@@ -195,7 +195,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 
 		var intervalTimerKey = 'readMany';
 		var timerKey = intervalTimerKey;
-		var timerKey = self.startTimer(timerKey);
+		timerKey = self.startTimer(timerKey);
 
 		if(self.isValidDevice) {
 			// Check to see if a device IO is currently pending.

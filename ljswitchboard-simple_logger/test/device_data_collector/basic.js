@@ -9,6 +9,7 @@ basic functionality.
 */
 var path = require('path');
 var q = require('q');
+var async = require('async');
 
 var device_data_collector;
 var deviceDataCollectors = [];
@@ -58,6 +59,40 @@ var dataCollector = function(data) {
 	}
 };
 
+
+/*
+Function that creates a trigger logger test to run N number of triggers that
+cause data to get read.
+*/
+var numReads = 3;
+function getTriggerLoggerTest(numReads) {
+	var readEvents = [];
+	for(var i = 0; i < numReads; i++) {
+		readEvents.push(i);
+	}
+	return function triggerLoggerTest(test) {
+		async.eachSeries(
+			readEvents,
+			function(readEvent, cb) {
+				var promises = deviceDataCollectors.map(function(deviceDataCollector, i) {
+					// trigger the deviceDataCollector to start a new read for dummy data.
+					return deviceDataCollector.startNewRead(dataToRead);
+				});
+
+				q.allSettled(promises)
+				.then(function() {
+					cb();
+				});
+			},
+			function(err) {
+				test.done();
+			});
+	};
+}
+
+/*
+Begin defining test cases.
+*/
 exports.basic_tests = {
 	'Require device_data_collector': function(test) {
 		try {
@@ -123,39 +158,7 @@ exports.basic_tests = {
 		});
 		test.done();
 	},
-	'trigger read for dummy data': function(test) {
-		var promises = deviceDataCollectors.map(function(deviceDataCollector, i) {
-			// trigger the deviceDataCollector to start a new read for dummy data.
-			return deviceDataCollector.startNewRead(dataToRead);
-		});
-
-		q.allSettled(promises)
-		.then(function() {
-			test.done();
-		});
-	},
-	'trigger read for dummy data (2)': function(test) {
-		var promises = deviceDataCollectors.map(function(deviceDataCollector, i) {
-			// trigger the deviceDataCollector to start a new read for dummy data.
-			return deviceDataCollector.startNewRead(dataToRead);
-		});
-
-		q.allSettled(promises)
-		.then(function() {
-			test.done();
-		});
-	},
-	'trigger read for dummy data (3)': function(test) {
-		var promises = deviceDataCollectors.map(function(deviceDataCollector, i) {
-			// trigger the deviceDataCollector to start a new read for dummy data.
-			return deviceDataCollector.startNewRead(dataToRead);
-		});
-
-		q.allSettled(promises)
-		.then(function() {
-			test.done();
-		});
-	},
+	'trigger read for dummy data': getTriggerLoggerTest(numReads),
 	'time delay...': function(test) {
 		setTimeout(function() {
 			test.done();
