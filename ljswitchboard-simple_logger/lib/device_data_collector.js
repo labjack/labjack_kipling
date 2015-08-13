@@ -28,6 +28,10 @@ var errorCodes = {
 	'DEVICE_STILL_ACTIVE': 1206,
 };
 
+
+/*
+Object creation function for the device data collector.
+*/
 function CREATE_DEVICE_DATA_COLLECTOR () {
 	this.devices = undefined;
 
@@ -150,9 +154,11 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 
 	var self = this;
 }
+
+// The device data collector is an event-emitter.
 util.inherits(CREATE_DEVICE_DATA_COLLECTOR, EventEmitter);
 
-
+// Exported function that creates a new device data collector object.
 exports.createDeviceDataCollector = function() {
 	return new CREATE_DEVICE_DATA_COLLECTOR();
 };
