@@ -40,7 +40,7 @@ function CREATE_SIMPLE_LOGGER () {
 		self.devices = undefined;
 		self.devices = devices;
 
-		return data_collector.updateDeviceReferences(devices);
+		return data_collector.updateDeviceObjects(devices);
 	};
 
 	/* Configuration File Loading & Checking functions */

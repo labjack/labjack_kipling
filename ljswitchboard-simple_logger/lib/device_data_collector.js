@@ -28,6 +28,11 @@ var errorCodes = {
 	'DEVICE_STILL_ACTIVE': 1206,
 
 	/*
+	This error code indicates that a read was returned later than expected.
+	*/
+	'VALUE_WAS_DELAYED': 90001,
+
+	/*
 	No Error case
 	*/
 	'NO_ERROR': 0
@@ -45,6 +50,12 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	this.deviceSerialNumber = undefined;
 
 	this.isActive = false;
+	this.isValueLate = false;
+
+	this.options = {
+		REPORT_DEVICE_IS_ACTIVE_VALUES: true,
+		REPORT_DEFAULT_VALUES_WHEN_LATE: false,
+	};
 
 	/*
 	This function updates the device_data_collector's internal devices
@@ -106,22 +117,27 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		return new Date();
 	};
 
-	/*
-	Function that reports data when the data isn't valid.
-	*/
-	this.reportDefaultRegisterData = function(registerList, errorCode, intervalTimerKey, timerKey) {
+	this.getDefaultRegisterValues = function(registerList) {
 		var dummyData = [];
 		registerList.forEach(function(register, i) {
 			dummyData.push(self.getDefaultRegisterValue(register));
 		});
+		return dummyData;
+	};
+	/*
+	Function that reports data when the data isn't valid.
+	*/
+	this.reportDefaultRegisterData = function(registerList, errorCode, intervalTimerKey, timerKey, index) {
+		
 	
 		var retData = {
 			'registers': registerList,
-			'results': dummyData,
+			'results': self.getDefaultRegisterValues(registerList),
 			'errorCode': errorCode,
 			'time': self.getCurrentTime(),
 			'duration': self.stopTimer(timerKey),
 			'interval': self.getIntervalTimer(intervalTimerKey),
+			'index': index,
 		};
 
 		self.reportResults(retData);
@@ -130,16 +146,23 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	/*
 	Function that reports data when the data is valid.
 	*/
-	this.reportCollectedData = function(registerList, results, intervalTimerKey, timerKey) {
+	this.reportCollectedData = function(registerList, results, errorCode, intervalTimerKey, timerKey, index) {
 		var retData = {
 			'registers': registerList,
 			'results': results,
-			'errorCode': errorCodes.NO_ERROR,
+			'errorCode': errorCode,
 			'time': self.getCurrentTime(),
 			'duration': self.stopTimer(timerKey),
 			'interval': self.getIntervalTimer(intervalTimerKey),
+			'index': index,
 		};
 
+		if(errorCode === errorCodes.VALUE_WAS_DELAYED) {
+			var reportDefaultVal = self.options.REPORT_DEFAULT_VALUES_WHEN_LATE;
+			if(reportDefaultVal) {
+				retData.results = self.getDefaultRegisterValues(registerList);
+			}
+		}
 		self.reportResults(retData);
 	};
 
@@ -190,7 +213,8 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	Function that gets called by the data_collector when new data should be
 	collected from the managed device.
 	*/
-	this.startNewRead = function(registerList) {
+	this.startNewRead = function(registerList, index) {
+		// console.log('Starting New Read', self.isActive, index);
 		var defered = q.defer();
 
 		var intervalTimerKey = 'readMany';
@@ -204,21 +228,65 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				If an IO is currently pending, don't start a new read and
 				return a dummy value.
 				*/
+				// Report that the next value is a late-value.
+				self.isValueLate = true;
+
+				// Report the device-still-active result.
 				self.reportDefaultRegisterData(
 					registerList,
 					errorCodes.DEVICE_STILL_ACTIVE,
-					intervalTimerKey, timerKey
+					intervalTimerKey,
+					timerKey,
+					index
 				);
 				defered.resolve();
 			} else {
+				// Declare device to be actively reading data
+				self.isActive = true;
+
+
+				// errorCodes.VALUE_WAS_DELAYED
+				// self.options.REPORT_DEFAULT_VALUES_WHEN_LATE
+
 				// If an IO is not currently pending then start a new read.
 				self.device.readMany(registerList)
 				.then(function(results) {
-					console.log('readMany Results', registerList, results);
-					self.reportCollectedData(registerList, results, intervalTimerKey, timerKey);
+					// console.log('readMany Results', registerList, results);
+
+					if(self.isValueLate) {
+						self.reportCollectedData(
+							registerList,
+							results,
+							errorCodes.VALUE_WAS_DELAYED,
+							intervalTimerKey,
+							timerKey,
+							index
+						);
+					} else {
+						self.reportCollectedData(
+							registerList,
+							results,
+							errorCodes.NO_ERROR,
+							intervalTimerKey,
+							timerKey,
+							index
+						);
+					}
+
+					// Declare device to be inactive.
+					self.isActive = false;
 				}, function(err) {
 					console.log('readMany Error', err);
-					self.reportDefaultRegisterData(registerList, err, intervalTimerKey, timerKey);
+					self.reportDefaultRegisterData(
+						registerList,
+						err,
+						intervalTimerKey,
+						timerKey,
+						index
+					);
+
+					// Declare device to be inactive.
+					self.isActive = false;
 				});
 				defered.resolve();
 			}
@@ -230,7 +298,9 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 			self.reportDefaultRegisterData(
 				registerList,
 				errorCodes.DEVICE_NOT_VALID,
-				intervalTimerKey, timerKey
+				intervalTimerKey,
+				timerKey,
+				index
 			);
 			defered.resolve();
 		}
@@ -249,3 +319,4 @@ exports.createDeviceDataCollector = function() {
 };
 
 exports.EVENT_LIST = EVENT_LIST;
+exports.errorCodes = errorCodes;

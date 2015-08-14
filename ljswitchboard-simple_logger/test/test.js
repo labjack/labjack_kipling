@@ -9,10 +9,10 @@ var testGroups = {
 		'basic': false,
 	},
 	'device_data_collector': {
-		'basic': true,
+		'basic': false,
 	},
 	'data_group_manager': {
-		'basic': false,
+		'basic': true,
 	},
 	'data_collector': {
 		'basic': false,

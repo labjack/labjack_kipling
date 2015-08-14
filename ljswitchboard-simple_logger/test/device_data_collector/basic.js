@@ -15,7 +15,7 @@ var device_data_collector;
 var deviceDataCollectors = [];
 
 /* Code that is required to load a logger-configuration */
-var config_loader = require('../../lib/device_data_collector');
+var config_loader = require('../../lib/config_loader');
 var cwd = process.cwd();
 var logger_config_files_dir = path.join(cwd, 'test', 'logger_config_files');
 var basic_config = undefined;
@@ -37,16 +37,20 @@ mockDeviceManager.configure([{
 }]);
 
 /* What devices should be logged from */
-required_data_collectors = [{
+required_data_collectors = [
+{
 	'serialNumber': 1,
 	'isFound': true,
-}, {
+},
+{
 	'serialNumber': 2,
 	'isFound': true,
-}, {
+},
+{
 	'serialNumber': 3,
 	'isFound': false,
-}];
+}
+];
 
 var dataToRead = ['AIN0'];
 
@@ -59,36 +63,19 @@ var dataCollector = function(data) {
 	}
 };
 
+var numReads = 100;
+var daqInterval = 10;
 
 /*
 Function that creates a trigger logger test to run N number of triggers that
 cause data to get read.
 */
-var numReads = 3;
-function getTriggerLoggerTest(numReads) {
-	var readEvents = [];
-	for(var i = 0; i < numReads; i++) {
-		readEvents.push(i);
-	}
-	return function triggerLoggerTest(test) {
-		async.eachSeries(
-			readEvents,
-			function(readEvent, cb) {
-				var promises = deviceDataCollectors.map(function(deviceDataCollector, i) {
-					// trigger the deviceDataCollector to start a new read for dummy data.
-					return deviceDataCollector.startNewRead(dataToRead);
-				});
 
-				q.allSettled(promises)
-				.then(function() {
-					cb();
-				});
-			},
-			function(err) {
-				test.done();
-			});
-	};
-}
+var loggerTestGenerator = require('./loggerTestGenerator');
+var getTriggerLoggerTest = loggerTestGenerator.getTriggerLoggerTest;
+var triggerLoggerTest = getTriggerLoggerTest(numReads, daqInterval, dataToRead);
+
+
 
 /*
 Begin defining test cases.
@@ -111,6 +98,9 @@ exports.basic_tests = {
 		deviceDataCollectors = required_data_collectors.map(function() {
 			return device_data_collector.createDeviceDataCollector();
 		});
+
+		// Save data collectors to the test generator.
+		loggerTestGenerator.setDataCollectors(deviceDataCollectors);
 		test.done();
 	},
 	'update device listings': function(test) {
@@ -158,15 +148,66 @@ exports.basic_tests = {
 		});
 		test.done();
 	},
-	'trigger read for dummy data': getTriggerLoggerTest(numReads),
+	'trigger read for dummy data': triggerLoggerTest,
 	'time delay...': function(test) {
 		setTimeout(function() {
 			test.done();
 		}, 100);
 	},
-	'print results': function(test) {
-		console.log('Results...');
-		console.log(JSON.stringify(collectedData['1'], null, 2));
+	'test results': function(test) {
+		var expectedResults = {};
+
+		var keys = Object.keys(required_data_collectors);
+		keys.forEach(function(key) {
+			var requiredDataCollector = required_data_collectors[key];
+
+			var sn = requiredDataCollector.serialNumber;
+			expectedResults[sn] = [];
+			
+			var isFound = requiredDataCollector.isFound;
+			var reqErrorCode = 0;
+			if(!isFound) {
+				reqErrorCode = device_data_collector.errorCodes.DEVICE_NOT_VALID;
+			}
+
+			for(var i = 0; i < numReads; i++) {
+				expectedResults[sn].push({
+					'registers': dataToRead,
+					'errorCode': reqErrorCode
+				});
+			}
+		});
+
+		keys.forEach(function(key) {
+			var requiredDataCollector = required_data_collectors[key];
+			var sn = requiredDataCollector.serialNumber;
+
+			var deviceData = collectedData[sn];
+			var expectedData = expectedResults[sn];
+
+			if(deviceData.length == expectedData.length) {
+				for(var i = 0; i < deviceData.length; i++) {
+					var resData = deviceData[i];
+					var expData = expectedData[i];
+
+					// Check error codes
+					test.equals(resData.errorCode, expData.errorCode, 'Error Code does not match');
+
+					// Check registers read
+					test.deepEqual(resData.registers, expData.registers, 'Registers list does not match');
+				}
+			} else {
+				test.ok(false, 'result data lengths dont align');
+			}
+		});
+		// console.log('Results...');
+		// console.log('Timing Stats: ', 'I', 'Dur.    ', 'Int.');
+		// collectedData['1'].forEach(function(result) {
+		// 	console.log('Timing Stats: ', result.index, result.duration, result.interval, result.errorCode, result.results);
+		// });
+		// console.log(JSON.stringify(collectedData['1'], null, 2));
+		// console.log('Expected Results');
+		// console.log(JSON.stringify(expectedResults['1'], null, 2));
 		test.done();
 	},
 	'Close Devices':mockDeviceManager.closeDevices,

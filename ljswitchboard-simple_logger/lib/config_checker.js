@@ -27,7 +27,7 @@ function interpretLoadConfigFileResults(bundle) {
 }
 
 var requiredConfigKeys = [
-	'logging_period_ms',
+	// 'logging_period_ms',
 	'logging_config',
 	'view_config',
 	'views',

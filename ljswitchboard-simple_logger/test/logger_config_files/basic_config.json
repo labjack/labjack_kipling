@@ -1,5 +1,4 @@
 {
-	"logging_period_ms": 1000,
 	"logging_config": {
 		"file_prefix": "basic_config",
 		"write_to_file": false,
@@ -32,6 +31,7 @@
 		"basic_data_group"
 	],
 	"basic_data_group": {
+		"group_period_ms": 1000,
 		"group_name": "basic_data_group",
 
 		"device_serial_numbers": ["1", "2"],

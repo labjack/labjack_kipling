@@ -2,7 +2,8 @@
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
-var mockDeviceManager = require('./mock_device_manager');
+var mock_device_manager = require('./mock_device_manager');
+var mockDeviceManager = mock_device_manager.createDeviceManager();
 var log_display = require('./utils/log_display');
 var path = require('path');
 
