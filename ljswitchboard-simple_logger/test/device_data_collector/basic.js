@@ -64,7 +64,7 @@ var dataCollector = function(data) {
 };
 
 var numReads = 100;
-var daqInterval = 10;
+var daqInterval = 5;
 
 /*
 Function that creates a trigger logger test to run N number of triggers that

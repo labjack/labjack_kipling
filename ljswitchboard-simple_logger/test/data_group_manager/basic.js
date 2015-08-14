@@ -10,6 +10,7 @@ basic functionality.
 var path = require('path');
 var q = require('q');
 var async = require('async');
+var gcd = require('compute-gcd');
 
 var data_group_manager;
 
@@ -23,23 +24,48 @@ var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 
 /* What devices should be logged from */
-data_groups = [
+configurations = [
 {
-	'serialNumber': 1,
-	'isFound': true,
+	'fileName': 'basic_config.json',
+	'filePath': '',
+	'data': undefined,
+	'core_period': 0,
+	'dataGroups': [],
+	'managers': [],
+	'results': [],
+
+	'pattern': [{
+		"1": ["AIN0"],
+		"2": ["AIN0"]
+	}],
+	'numExpectedPatterns': 4,
 },
 {
-	'serialNumber': 2,
-	'isFound': true,
-},
-{
-	'serialNumber': 3,
-	'isFound': false,
+	'fileName': 'two_data_groups.json',
+	'filePath': '',
+	'data': undefined,
+	'core_period': 0,
+	'dataGroups': [],
+	'managers': [],
+	'results': [],
+
+	'pattern': [{
+		"1": ["AIN1"],
+	}, {
+		"1": ["AIN0","AIN1"],
+		"2": ["AIN0"]
+	}],
+	'numExpectedPatterns': 2,
 }
 ];
 
 
-
+var ENABLE_DEBUGGING = false;
+function debugLog() {
+	if(ENABLE_DEBUGGING) {
+		console.log.apply(console, arguments);
+	}
+}
 /*
 Begin defining test cases.
 */
@@ -53,5 +79,110 @@ exports.basic_tests = {
 		}
 		test.done();
 	},
-	
+	'Load Test Files': function(test) {
+		var promises = configurations.map(function(config) {
+			config.filePath = path.join(
+				logger_config_files_dir,
+				config.fileName
+			);
+
+			return config_loader.loadConfigFile(config.filePath)
+			.then(function(configData) {
+				var defered = q.defer();
+				config.data = configData.data;
+
+				debugLog('Loaded File');
+				var dataGroupNames = config.data.data_groups;
+
+				debugLog('Group Names', dataGroupNames);
+				dataGroupNames.forEach(function(groupName) {
+					config.dataGroups.push(config.data[groupName]);
+				});
+
+				var periods = [];
+				config.dataGroups.forEach(function(dataGroup) {
+					periods.push(dataGroup.group_period_ms);
+				});
+
+				debugLog('Calculating GCD');
+				// Calculate GCD
+				if(periods.length > 1) {
+					config.core_period = gcd(periods);
+				} else {
+					config.core_period = periods[0];
+				}
+
+				// Calculate the data group's "group_delay" value to determine
+				// how frequently the data-groups will report that their values
+				// need to be collected.
+				config.dataGroups.forEach(function(dataGroup) {
+					dataGroup.group_delay = (dataGroup.group_period_ms / config.core_period) - 1;
+				});
+
+				debugLog('Data Groups', config.dataGroups);
+				defered.resolve();
+				return defered.promise;
+			}, function(err) {
+				var defered = q.defer();
+				console.log('Failed to load file...', err);
+				test.ok(false, 'Failed to load file... ' + config.fileName + '. ' + err.errorMessage);
+				
+				defered.reject(err);
+				return defered.promise;
+			});
+		});
+
+		q.allSettled(promises)
+		.then(function() {
+			test.done();
+		});
+	},
+	'create data_group_managers': function(test) {
+		configurations.forEach(function(config) {
+			config.managers = config.dataGroups.map(function(dataGroup) {
+				return data_group_manager.create(dataGroup);
+			});
+		});
+		test.done();
+	},
+	'execute and test operation ticks': function(test) {
+		var numIterations = 4;
+		var iterations = [];
+		for(var i = 0; i < numIterations; i++) {
+			iterations.push(i);
+		}
+
+		iterations.forEach(function(iteration) {
+			configurations.forEach(function(config) {
+				var combinedData = {};
+
+				config.managers.forEach(function(manager) {
+					var reqData = manager.getRequiredRegisters();
+					if(reqData) {
+						var serialNumbers = Object.keys(reqData);
+						serialNumbers.forEach(function(sn) {
+							if(combinedData[sn]) {
+								combinedData[sn] = combinedData[sn].concat(reqData[sn]);
+							} else {
+								combinedData[sn] = reqData[sn];
+							}
+						})
+					}
+				});
+				config.results.push(combinedData);
+			});
+		});
+
+		configurations.forEach(function(config) {
+			expectedResults = [];
+			for(var i = 0; i < config.numExpectedPatterns; i++) {
+				expectedResults = expectedResults.concat(config.pattern);
+			}
+			// console.log('Results', config.fileName);
+			// console.log(JSON.stringify(config.results, null, 2));
+			// console.log(JSON.stringify(expectedResults, null, 2));
+			test.deepEqual(config.results, expectedResults, 'Results do not match pattern');
+		})
+		test.done();
+	},
 };

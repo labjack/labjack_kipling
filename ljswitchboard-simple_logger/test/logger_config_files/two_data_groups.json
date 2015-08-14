@@ -28,7 +28,8 @@
 
 
 	"data_groups": [
-		"basic_data_group"
+		"basic_data_group",
+		"secondary_data_group"
 	],
 	"basic_data_group": {
 		"group_period_ms": 100,
@@ -48,6 +49,18 @@
 				"id": "2-AIN0",
 				"format": "custom_func",
 				"format_func": "console.log('Custom Func', val); return val;"
+			}]
+		}
+	},
+	"secondary_data_group": {
+		"group_period_ms": 50,
+		"group_name": "secondary_data_group",
+		"device_serial_numbers": ["1"],
+		"1": {
+			"registers": [{
+				"name": "AIN1",
+				"id": "1-AIN1",
+				"format": "default"
 			}]
 		}
 	}

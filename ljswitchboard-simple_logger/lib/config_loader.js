@@ -35,7 +35,7 @@ function innerLoadConfigFile (bundle) {
 					defered.resolve(bundle);
 				} catch(parseError) {
 					bundle.err = {
-						'code': 'Invalid .json file',
+						'code': 'Invalid .json file. ' + parseError.toString(),
 						'str': parseError.toString(),
 						'step': 'JSON.parse',
 					};
