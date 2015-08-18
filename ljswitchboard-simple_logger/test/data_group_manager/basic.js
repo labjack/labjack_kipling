@@ -24,7 +24,7 @@ var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 
 /* What devices should be logged from */
-configurations = [
+var configurations = [
 {
 	'fileName': 'basic_config.json',
 	'filePath': '',
@@ -157,16 +157,17 @@ exports.basic_tests = {
 				var combinedData = {};
 
 				config.managers.forEach(function(manager) {
-					var reqData = manager.getRequiredRegisters();
+					var reqData = manager.getRequiredData();
 					if(reqData) {
-						var serialNumbers = Object.keys(reqData);
+						var reqRegisters = reqData.registers;
+						var serialNumbers = Object.keys(reqRegisters);
 						serialNumbers.forEach(function(sn) {
 							if(combinedData[sn]) {
-								combinedData[sn] = combinedData[sn].concat(reqData[sn]);
+								combinedData[sn] = combinedData[sn].concat(reqRegisters[sn]);
 							} else {
-								combinedData[sn] = reqData[sn];
+								combinedData[sn] = reqRegisters[sn];
 							}
-						})
+						});
 					}
 				});
 				config.results.push(combinedData);
@@ -182,7 +183,7 @@ exports.basic_tests = {
 			// console.log(JSON.stringify(config.results, null, 2));
 			// console.log(JSON.stringify(expectedResults, null, 2));
 			test.deepEqual(config.results, expectedResults, 'Results do not match pattern');
-		})
+		});
 		test.done();
 	},
 };

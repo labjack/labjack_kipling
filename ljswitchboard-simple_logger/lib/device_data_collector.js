@@ -53,8 +53,30 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	this.isValueLate = false;
 
 	this.options = {
+		/*
+		If enabled the data collector will report values indicating that the
+		device has an outstanding read to fill-space in spreadsheet files.  This
+		also allows the logger to show users & allow users to log how long a 
+		device is inactive for over the course of a logging session.
+		*/
 		REPORT_DEVICE_IS_ACTIVE_VALUES: true,
+
+		/*
+		If enabled the data colelctor will report register default values 
+		instead of the actually collected value for values that get returned 
+		later than they were supposed to.
+		*/
 		REPORT_DEFAULT_VALUES_WHEN_LATE: false,
+	};
+
+	/*
+	This function allows the device_data_collector's options to be configured.
+	*/
+	this.configureDataCollector = function(newOptions) {
+		var keys = Object.keys(newOptions);
+		keys.forEach(function(key) {
+			self.options[key] = newOptions[key];
+		});
 	};
 
 	/*
@@ -231,14 +253,18 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// Report that the next value is a late-value.
 				self.isValueLate = true;
 
-				// Report the device-still-active result.
-				self.reportDefaultRegisterData(
-					registerList,
-					errorCodes.DEVICE_STILL_ACTIVE,
-					intervalTimerKey,
-					timerKey,
-					index
-				);
+				// Check to see if these values should be reported or if the
+				// data collector should simply wait for new data.
+				if(self.options.REPORT_DEVICE_IS_ACTIVE_VALUES) {
+					// Report the device-still-active result.
+					self.reportDefaultRegisterData(
+						registerList,
+						errorCodes.DEVICE_STILL_ACTIVE,
+						intervalTimerKey,
+						timerKey,
+						index
+					);
+				}
 				defered.resolve();
 			} else {
 				// Declare device to be actively reading data

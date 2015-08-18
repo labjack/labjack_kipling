@@ -31,8 +31,9 @@
 		"basic_data_group"
 	],
 	"basic_data_group": {
-		"group_period_ms": 100,
 		"group_name": "basic_data_group",
+		"group_period_ms": 100,
+		"is_stream": false,
 
 		"device_serial_numbers": ["1", "2"],
 		"1": {
@@ -49,6 +50,16 @@
 				"format": "custom_func",
 				"format_func": "console.log('Custom Func', val); return val;"
 			}]
+		},
+		
+		"logging_options": {
+			"write_to_file": false,
+			"file_prefix": "basic_group",
+			"max_samples_per_file": 100,
+			"data_collector_config": {
+				"REPORT_DEVICE_IS_ACTIVE_VALUES": true,
+				"REPORT_DEFAULT_VALUES_WHEN_LATE": false
+			}
 		}
 	}
 }

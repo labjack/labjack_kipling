@@ -61,6 +61,7 @@ function CREATE_DATA_COLLECTOR() {
 		var device_serial_numbers = [];
 
 		var data_group_keys = self.config.data_groups;
+		console.log('HERE!!', self.config.data_groups);
 		data_group_keys.forEach(function(data_group_key) {
 			var data_group = self.config[data_group_key];
 
@@ -94,14 +95,24 @@ function CREATE_DATA_COLLECTOR() {
 		defered.resolve(config);
 		return defered.promise;
 	};
-	this.configureLogger = function(config) {
-		return stopLoggingSession(config)
+	this.configureDataCollector = function(config) {
+		return innerStopLoggingSession(config)
 		.then(saveLoggerConfigReference);
 	};
 
-	var stopLoggingSession = function(bundle) {
+	this.startDataCollector = function() {
+		return innerStartDataCollector();
+	};
+	var innerStartDataCollector = function(bundle) {
 		var defered = q.defer();
-
+		defered.resolve(bundle);
+		return defered.promise;
+	};
+	this.stopDataCollector = function() {
+		return innerStopLoggingSession();
+	};
+	var innerStopLoggingSession = function(bundle) {
+		var defered = q.defer();
 		defered.resolve(bundle);
 		return defered.promise;
 	};
@@ -109,7 +120,23 @@ function CREATE_DATA_COLLECTOR() {
 	var self = this;
 }
 
+// The data collector is an event-emitter.
+util.inherits(CREATE_DATA_COLLECTOR, EventEmitter);
+
 var data_collector = new CREATE_DATA_COLLECTOR();
 
 exports.updateDeviceObjects = data_collector.updateDeviceObjects;
-exports.configureLogger = data_collector.configureLogger;
+exports.configureDataCollector = data_collector.configureDataCollector;
+exports.startDataCollector = data_collector.startDataCollector;
+exports.stopDataCollector = data_collector.stopDataCollector;
+
+/* Expose event functions */
+exports.addListener = data_collector.addListener;
+exports.on = data_collector.on;
+exports.once = data_collector.once;
+exports.removeListener = data_collector.removeListener;
+exports.removeAllListeners = data_collector.removeAllListeners;
+exports.setMaxListeners = data_collector.setMaxListeners;
+exports.setMaxListeners = data_collector.setMaxListeners;
+exports.emit = data_collector.emit;
+

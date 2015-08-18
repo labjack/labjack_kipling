@@ -12,10 +12,10 @@ var testGroups = {
 		'basic': false,
 	},
 	'data_group_manager': {
-		'basic': true,
+		'basic': false,
 	},
 	'data_collector': {
-		'basic': false,
+		'basic': true,
 	},
 };
 
