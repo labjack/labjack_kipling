@@ -62,11 +62,72 @@ var configurations = [
 ];
 
 var data_collector;
+var dataCollector;
+var dcEvents;
+
+function DATA_COLLECTOR_TESTER () {
+	this.eventLog = [];
+
+	this.config = undefined;
+	this.getEventListener = function(eventName) {
+		return function(newData) {
+			console.log('!!! Event Fired', eventName, newData);
+			self.eventLog.push({
+				'eventName': eventName,
+				'data': newData,
+			});
+		};
+	};
+	this.dataListener = function(newData) {
+		console.log('Got new data', newData);
+	};
+	this.linkToDataCollector = function(bundle) {
+		var defered = q.defer();
+
+		var keys = Object.keys(dcEvents);
+		keys.forEach(function(key) {
+			var eventName = dcEvents[key];
+			dataCollector.on(eventName, self.getEventListener(eventName));
+		});
+
+		defered.resolve(bundle);
+		return defered.promise;
+	};
+	this.initializeTester = function(config) {
+		var defered = q.defer();
+		
+		// Clear the captured event log
+		this.config = config;
+		self.eventLog = [];
+
+		// Resolve to the actual config data for the data_collector to use for
+		// initialization.
+		defered.resolve(config.data);
+		return defered.promise;
+	};
+	this.collectData = function(bundle) {
+		var defered = q.defer();
+
+		setTimeout(function() {
+			defered.resolve(bundle);
+		}, 2000);
+		return defered.promise;
+	};
+	this.testExecution = function(test) {
+		console.log('  - Testing... Number of captured events', self.eventLog.length);
+		test.ok(true);
+	};
+	var self = this;
+}
+var dataCollectorTester = new DATA_COLLECTOR_TESTER();
+
 
 exports.tests = {
 	'Require data_collector': function(test) {
 		try {
 			data_collector = require('../../lib/data_collector');
+			dcEvents = data_collector.eventList;
+			dataCollector = data_collector.create();
 			test.ok(true);
 		} catch(err) {
 			test.ok(false, 'error loading data_collector');
@@ -134,10 +195,22 @@ exports.tests = {
 	},
 	'Open Devices': mockDeviceManager.openDevices,
 	'Verify Device Info': mockDeviceManager.getDevicesInfo,
+	'link tester to data collector': function(test) {
+		dataCollectorTester.linkToDataCollector()
+		.then(function() {
+			test.ok(true);
+			test.done();
+		})
+		.catch(function(error) {
+			test.ok(false, 'Failed to link tester to data collector');
+			test.done();
+		})
+		.done();
+	},
 	'configure data collector': function(test) {
-		// Configure the data_collector with the available device objects.
+		// Configure the dataCollector with the available device objects.
 		var devices = mockDeviceManager.getDevices();
-		data_collector.updateDeviceObjects(devices)
+		dataCollector.updateDeviceObjects(devices)
 		.then(function() {
 			test.ok(true);
 			test.done();
@@ -147,18 +220,21 @@ exports.tests = {
 		});
 	},
 	'create data collector object': function(test) {
-		console.log('Configurations', configurations);
+		// console.log('Configurations', configurations);
 
 		// q.longStackSupport = true;
 
 		async.eachSeries(
 			configurations,
 			function(configuration, callback) {
-				data_collector.configureDataCollector(configuration.data)
-				.then(data_collector.startDataCollector)
+				dataCollectorTester.initializeTester(configuration)
+				.then(dataCollector.configureDataCollector)
+				.then(dataCollector.startDataCollector)
+				.then(dataCollectorTester.collectData)
+				.then(dataCollector.stopDataCollector)
 				.then(function() {
-					console.log('Successfully started data collector...');
-					test.ok(true);
+					console.log('Successfully ran data collector...');
+					dataCollectorTester.testExecution(test);
 					callback();
 				})
 				.catch(function(error) {

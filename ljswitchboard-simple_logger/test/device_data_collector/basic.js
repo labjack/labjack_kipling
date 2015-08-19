@@ -47,7 +47,7 @@ required_data_collectors = [
 	'isFound': true,
 },
 {
-	'serialNumber': 3,
+	'serialNumber': '3',
 	'isFound': false,
 }
 ];

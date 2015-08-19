@@ -99,13 +99,15 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	this.linkToDevice = function(deviceSerialNumber) {
 		var defered = q.defer();
 
+		var serialNum = parseInt(deviceSerialNumber);
+
 		// Save a reference to the devices serial number
-		self.deviceSerialNumber = deviceSerialNumber;
+		self.deviceSerialNumber = serialNum;
 
 		// Loop through the devices object and try to link to the device with
 		// the desired serial number.
 		var isFound = self.devices.some(function(device) {
-			if(device.savedAttributes.serialNumber == deviceSerialNumber) {
+			if(device.savedAttributes.serialNumber == serialNum) {
 				self.isValidDevice = true;
 				self.device = device;
 				return true;
