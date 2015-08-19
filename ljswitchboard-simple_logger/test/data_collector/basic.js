@@ -71,11 +71,16 @@ function DATA_COLLECTOR_TESTER () {
 	this.config = undefined;
 	this.getEventListener = function(eventName) {
 		return function(newData) {
-			console.log('!!! Event Fired', eventName, newData);
 			self.eventLog.push({
 				'eventName': eventName,
 				'data': newData,
 			});
+
+			if(eventName === 'COLLECTOR_DATA') {
+				// console.log('  - ', newData.groupKey, JSON.stringify(newData.data));
+			} else {
+				// console.log('!!! Event Fired', eventName, newData);
+			}
 		};
 	};
 	this.dataListener = function(newData) {
@@ -110,7 +115,7 @@ function DATA_COLLECTOR_TESTER () {
 
 		setTimeout(function() {
 			defered.resolve(bundle);
-		}, 2000);
+		}, 500);
 		return defered.promise;
 	};
 	this.testExecution = function(test) {

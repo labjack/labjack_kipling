@@ -122,6 +122,7 @@ function CREATE_DATA_COLLECTOR() {
 		self.config.dataGroups = [];
 
 		self.config.data_groups.forEach(function(key) {
+			self.config[key].groupKey = key;
 			self.config.dataGroups.push(self.config[key]);
 		});
 		
@@ -300,15 +301,17 @@ function CREATE_DATA_COLLECTOR() {
 
 	this.activeDataStore = {};
 	this.deviceDataCollectorDataListener = function(data) {
-		console.log('Acquired Data from deviceDataCollector', data.serialNumber, data.results.registers);
+		// console.log('Acquired Data from deviceDataCollector', data.serialNumber, data.results.registers);
 		var sn = data.serialNumber.toString();
 		self.activeDataStore[sn] = data.results;
 	};
 
 	this.dataCollectionCounter = 0;
+	this.activeGroups = {};
 	var innerPerformDataCollection = function() {
 		var requiredData = {};
-		var dataFormatters = {};
+
+		var nextActiveGroupsData = {};
 
 		self.dataGroupManagers.forEach(function(manager) {
 			var reqData = manager.getRequiredData();
@@ -322,6 +325,11 @@ function CREATE_DATA_COLLECTOR() {
 						requiredData[sn] = registers[sn];
 					}
 				});
+
+				// Save the active-group data
+				var registerData = reqData.registerData;
+				var groupKey = manager.options.groupKey;
+				nextActiveGroupsData[groupKey] = registerData;
 			}
 		});
 
@@ -338,7 +346,7 @@ function CREATE_DATA_COLLECTOR() {
 
 		q.allSettled(promises)
 		.then(function() {
-			console.log('Started New Reads...');
+			// console.log('Started New Reads...');
 
 			/*
 			Save a copy of the data that was acquired to make room for new
@@ -353,18 +361,86 @@ function CREATE_DATA_COLLECTOR() {
 			self.activeDataStore = {};
 
 			// Organize what data needs to be given to each dataGroup.
+			var organizedData = {};
+
+			var activeGroupKeys = Object.keys(self.activeGroups);
+			activeGroupKeys.forEach(function(activeGroupKey) {
+				var organizedGroupData = {};
+
+				var activeGroup = self.activeGroups[activeGroupKey];
+				var serialNumbers = Object.keys(activeGroup);
+				serialNumbers.forEach(function(serialNumber) {
+					var organizedDeviceData = {};
+
+					// Get the devices data
+					var newDeviceData = oldData[serialNumber];
+
+					// Save timing data & error code.
+					organizedDeviceData.errorCode = newDeviceData.errorCode;
+					organizedDeviceData.time = newDeviceData.time;
+					organizedDeviceData.duration = newDeviceData.duration;
+					organizedDeviceData.interval = newDeviceData.interval;
+
+					// Make room for acquired device data
+					organizedDeviceData.results = {};
+
+					var reqDeviceData = activeGroup[serialNumber];
+					var deviceDataIDs = Object.keys(reqDeviceData);
+					deviceDataIDs.forEach(function(deviceDataID) {
+						var reqReg = reqDeviceData[deviceDataID];
+						var regName = reqReg.name;
+						var regValue;
+						var formattedValue;
+
+						// Get the required data point & save it to the regValue
+						// variable.
+						var newDeviceResults = newDeviceData.results;
+						var newDeviceRegisters = newDeviceData.registers;
+						for(var i = 0; i < newDeviceRegisters.length; i++) {
+							var newDeviceReg = newDeviceRegisters[i];
+							if(newDeviceReg === regName) {
+								regValue = newDeviceResults[i];
+								break;
+							}
+						}
+
+						// console.log('Req Data', activeGroupKey, serialNumber, regName, regValue);
+
+						// Apply formatting to acquired data
+						formattedValue = regValue;
+
+						// Organize the collected data.
+						organizedDeviceData.results[regName] = formattedValue;
+
+						// console.log('Available Data', newDeviceData);
+					});
+					organizedGroupData[serialNumber] = organizedDeviceData;
+				});
+	
+				// console.log('Collected Group Data', organizedGroupData);
+
+				// Report the collected group data
+				self.emit(self.eventList.COLLECTOR_DATA, {
+					'groupKey': activeGroupKey,
+					'data': organizedGroupData
+				});
+
+				// Save organized group data to the organizedData object.
+				organizedData[activeGroupKey] = organizedGroupData;
+			});
 
 			// Go through the collected data and format the values as per each
 			// dataGroup specifications.
 
 			// Report that data has been collected for each dataGroup.
+			self.activeGroups = nextActiveGroupsData;
 
-			console.log('Past Data', Object.keys(oldData));
+			// save the nextGroupData as
+			// console.log('Past Data', Object.keys(oldData));
 		});
 
 		// Increment the counter
 		self.dataCollectionCounter += 1;
-		// self.emit(self.eventList.COLLECTOR_DATA, requiredData);
 	};
 
 	this.performDataCollection = function() {

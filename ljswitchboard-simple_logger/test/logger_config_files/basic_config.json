@@ -39,14 +39,12 @@
 		"1": {
 			"registers": [{
 				"name": "AIN0",
-				"id": "1-AIN0",
 				"format": "default"
 			}]
 		},
 		"2": {
 			"registers": [{
 				"name": "AIN0",
-				"id": "2-AIN0",
 				"format": "custom_func",
 				"format_func": "console.log('Custom Func', val); return val;"
 			}]
