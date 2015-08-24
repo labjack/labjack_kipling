@@ -5,7 +5,18 @@ var path = require('path');
 var q = require('q');
 var win = gui.Window.get();
 
-var cwd = path.dirname(document.URL.split('file:///').join(''));
+var documentURL;
+try {
+	documentURL = document.URL.split('file:///')[1];
+} catch(err) {
+	documentURL = '';
+}
+var cwd = path.dirname(documentURL);
+try {
+	cwd = decodeURIComponent(cwd);
+} catch(err) {
+	cwd = cwd.split('%20').join(' ');
+}
 if(!path.isAbsolute(cwd)) {
 	cwd = path.resolve(path.sep, cwd);
 }
