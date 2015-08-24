@@ -566,21 +566,29 @@ function createNewProcessManager() {
         .then(defered.resolve, defered.reject);
         return defered.promise;
     };
-    var innerStopChildProcess = function() {
+   var innerStopChildProcess = function() {
         var stopDefered = q.defer();
         print('in stopChildProcess');
         subProcess.disconnect();
         var numIterations = 0;
-        var maxIterations = 200;
+        var numToKill = 200;
+        var maxIterations = 400;
         var loopTillSubprocessEnded = function() {
+            numIterations += 1;
             if(receivedExitMessage && receivedDisconnectMessage) {
                 print('Lost Messages due to stoppingChildProcess', messageBuffer.size);
                 stopDefered.resolve({'numLostMessages': messageBuffer.size});
             } else {
                 if(numIterations < maxIterations) {
+                    if(numIterations == numToKill) {
+                        console.log('Killing...');
+                        subProcess.kill();
+                    }
                     setTimeout(loopTillSubprocessEnded, 10);
                 } else {
-                    stopDefered.reject('Failed to verify that subProcess was ended');
+                    console.log('Failed to verify ending...');
+                    // stopDefered.reject('Failed to verify that subProcess was ended');
+                    stopDefered.resolve({'numLostMessages': messageBuffer.size});
                 }
             }
         };
