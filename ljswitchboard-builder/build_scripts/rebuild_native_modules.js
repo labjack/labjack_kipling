@@ -51,6 +51,7 @@ buildScripts.forEach(function(buildScript) {
 		buildOS = 'linux';
 	}
 
+	// Project configurations
 	var configureProject = {
 		'win32': [
 			'node-gyp',
