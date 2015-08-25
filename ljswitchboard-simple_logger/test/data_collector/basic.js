@@ -27,21 +27,25 @@ mockDeviceManager.configure([{
 
 /* What logging configurations should be tested. */
 var configurations = [
-{
-	'fileName': 'basic_config.json',
-	'filePath': '',
-	'data': undefined,
-	'core_period': 0,
-	'dataGroups': [],
-	'managers': [],
-	'results': [],
+// {
+// 	'fileName': 'basic_config.json',
+// 	'filePath': '',
+// 	'data': undefined,
+// 	'core_period': 0,
+// 	'dataGroups': [],
+// 	'managers': [],
+// 	'results': [],
 
-	'pattern': [{
-		"1": ["AIN0"],
-		"2": ["AIN0"]
-	}],
-	'numExpectedPatterns': 4,
-},
+// 	'pattern': [{
+// 		"1": ["AIN0"],
+// 		"2": ["AIN0"]
+// 	}],
+// 	'numExpectedPatterns': 4,
+
+// 	'stopCases': {
+// 		'basic_data_group': 4,
+// 	}
+// },
 {
 	'fileName': 'two_data_groups.json',
 	'filePath': '',
@@ -58,6 +62,11 @@ var configurations = [
 		"2": ["AIN0"]
 	}],
 	'numExpectedPatterns': 2,
+
+	'stopCases': {
+		'basic_data_group': 4,
+		'secondary_data_group': 8,
+	}
 }
 ];
 
@@ -68,7 +77,25 @@ var dcEvents;
 function DATA_COLLECTOR_TESTER () {
 	this.eventLog = [];
 
+	this.dataGroupData = {};
+
+	this.triggerStopDataCollection = undefined;
+
 	this.config = undefined;
+
+	this.shouldStop = function() {
+		var shouldStop = true;
+
+		var data_groups = self.config.data.data_groups;
+		data_groups.forEach(function(data_group) {
+			var numRequired = self.config.stopCases[data_group];
+			var numCollected = self.dataGroupData[data_group].length;
+			if(numCollected < numRequired) {
+				shouldStop = false;
+			}
+		});
+		return shouldStop;
+	};
 	this.getEventListener = function(eventName) {
 		return function(newData) {
 			self.eventLog.push({
@@ -77,6 +104,21 @@ function DATA_COLLECTOR_TESTER () {
 			});
 
 			if(eventName === 'COLLECTOR_DATA') {
+				var groupNames = Object.keys(newData);
+				groupNames.forEach(function(groupName) {
+					var groupData = newData[groupName];
+					self.dataGroupData[groupName].push(groupData);
+
+					if(self.shouldStop()) {
+						console.log(
+							'Stopping Data Collection',
+							typeof(self.triggerStopDataCollection)
+						);
+						if(self.triggerStopDataCollection) {
+							self.triggerStopDataCollection();
+						}
+					}
+				});
 				// console.log('  - ', newData.groupKey, JSON.stringify(newData.data));
 			} else {
 				// console.log('!!! Event Fired', eventName, newData);
@@ -102,8 +144,13 @@ function DATA_COLLECTOR_TESTER () {
 		var defered = q.defer();
 		
 		// Clear the captured event log
-		this.config = config;
+		self.config = config;
 		self.eventLog = [];
+		self.dataGroupData = {};
+
+		config.data.data_groups.forEach(function(data_group) {
+			self.dataGroupData[data_group] = [];
+		});
 
 		// Resolve to the actual config data for the data_collector to use for
 		// initialization.
@@ -113,13 +160,68 @@ function DATA_COLLECTOR_TESTER () {
 	this.collectData = function(bundle) {
 		var defered = q.defer();
 
-		setTimeout(function() {
+		self.triggerStopDataCollection = function() {
 			defered.resolve(bundle);
-		}, 500);
+		};
+		// setTimeout(function() {
+		// 	defered.resolve(bundle);
+		// }, 500);
 		return defered.promise;
+	};
+
+	var reportResults = function(collectorData) {
+		var groupNames = Object.keys(collectorData);
+		groupNames.forEach(function(groupName) {
+			var groupData = collectorData[groupName];
+			var serialNumbers = Object.keys(groupData);
+			serialNumbers.forEach(function(sn) {
+				var deviceData = groupData[sn];
+				var results = deviceData.results;
+				console.log(groupName, sn, deviceData);
+			});
+		});
 	};
 	this.testExecution = function(test) {
 		console.log('  - Testing... Number of captured events', self.eventLog.length);
+
+		if(true) {
+			self.eventLog.forEach(function(singleEvent) {
+				if(singleEvent.eventName === 'COLLECTOR_DATA') {
+					console.log(
+						'  - ',
+						singleEvent.eventName,
+						// singleEvent.data,
+						Object.keys(singleEvent.data)
+					);
+					reportResults(singleEvent.data);
+					console.log();
+				} else if(singleEvent.eventName === 'COLLECTING_DEVICE_DATA') {
+					console.log(
+						'  - ',
+						singleEvent.eventName,
+						singleEvent.data.data,
+						singleEvent.data.count
+					);
+				} else if(singleEvent.eventName === 'COLLECTING_GROUP_DATA') {
+					console.log(
+						'  - ',
+						singleEvent.eventName,
+						singleEvent.data.data
+					);
+				} else if(singleEvent.eventName === 'REPORTING_COLLECTED_DATA') {
+					console.log(
+						'  - ',
+						singleEvent.eventName,
+						singleEvent.data.data
+					);
+				} else {
+					console.log(
+						'  - ',
+						singleEvent.eventName
+					);
+				}
+			});
+		}
 		test.ok(true);
 	};
 	var self = this;
@@ -240,7 +342,10 @@ exports.tests = {
 				.then(function() {
 					console.log('Successfully ran data collector...');
 					dataCollectorTester.testExecution(test);
-					callback();
+					console.log('Delaying to let any data come in...');
+					setTimeout(function() {
+						callback();
+					}, 1000);
 				})
 				.catch(function(error) {
 					test.ok(false,'Caught an error running the data collector');

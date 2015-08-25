@@ -38,7 +38,7 @@ var configurations = [
 		"1": ["AIN0"],
 		"2": ["AIN0"]
 	}],
-	'numExpectedPatterns': 4,
+	'numExpectedPatterns': 8,
 },
 {
 	'fileName': 'two_data_groups.json',
@@ -50,12 +50,12 @@ var configurations = [
 	'results': [],
 
 	'pattern': [{
-		"1": ["AIN1"],
-	}, {
 		"1": ["AIN0","AIN1"],
 		"2": ["AIN0"]
+	}, {
+		"1": ["AIN1"],
 	}],
-	'numExpectedPatterns': 2,
+	'numExpectedPatterns': 4,
 }
 ];
 
@@ -146,7 +146,7 @@ exports.basic_tests = {
 		test.done();
 	},
 	'execute and test operation ticks': function(test) {
-		var numIterations = 4;
+		var numIterations = 8;
 		var iterations = [];
 		for(var i = 0; i < numIterations; i++) {
 			iterations.push(i);

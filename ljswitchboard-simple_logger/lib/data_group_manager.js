@@ -7,7 +7,8 @@ var async = require('async');
 function CREATE_DATA_GROUP_MANAGER(options) {
 	this.options = options;
 
-	this.currentDelay = options.group_delay;
+	// this.currentDelay = options.group_delay;
+	this.currentDelay = 0;
 
 	this.data = {};
 	this.completeData = {};

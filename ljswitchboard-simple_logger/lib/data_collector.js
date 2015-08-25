@@ -11,6 +11,8 @@ var COLLECTOR_MODES = {
 	IDLE: 'IDLE'
 };
 
+var errorCodes = require('./error_codes').errorCodes;
+
 var DATA_COLLECTOR_EVENTS = {
 	// Event indicating that the device listing was updated.
 	DEVICE_LISTING_CHANGED: 'DEVICE_LISTING_CHANGED',
@@ -29,6 +31,13 @@ var DATA_COLLECTOR_EVENTS = {
 	 */
 	COLLECTOR_DATA: 'COLLECTOR_DATA',
 	SETUP_DATA: 'SETUP_DATA',
+
+	/*
+	Events indicating when data collection is starting.
+	*/
+	COLLECTING_DEVICE_DATA: 'COLLECTING_DEVICE_DATA',
+	COLLECTING_GROUP_DATA: 'COLLECTING_GROUP_DATA',
+	REPORTING_COLLECTED_DATA: 'REPORTING_COLLECTED_DATA',
 
 	/*
 	Event indicating that not all required devices were found.  Is fired once
@@ -53,6 +62,8 @@ function CREATE_DATA_COLLECTOR() {
 	this.status = {
 		'mode': COLLECTOR_MODES.IDLE
 	};
+
+	this.isActive = false;
 
 	// Variables that are used for the data collection timer
 	this.daqTimer = undefined;
@@ -301,17 +312,48 @@ function CREATE_DATA_COLLECTOR() {
 
 	this.activeDataStore = {};
 	this.deviceDataCollectorDataListener = function(data) {
-		// console.log('Acquired Data from deviceDataCollector', data.serialNumber, data.results.registers);
-		var sn = data.serialNumber.toString();
-		self.activeDataStore[sn] = data.results;
+		if(self.isActive) {
+			var deviceData = data.results;
+			console.log('Acquired Data from deviceDataCollector', data.serialNumber, deviceData.registers);
+			var sn = data.serialNumber.toString();
+			if(self.activeDataStore[sn]) {
+			} else {
+				self.activeDataStore[sn] = {};
+			}
+			deviceData.results.forEach(function(result, i) {
+				var register = deviceData.registers[i];
+				self.activeDataStore[sn][register] = {
+					'register': register,
+					'result': result,
+					'errorCode': deviceData.errorCode,
+					'time': deviceData.time,
+					'duration': deviceData.duration,
+					'interval': deviceData.interval,
+					'index': deviceData.index,
+				};
+			});
+		} else {
+			console.log('Acquired late data', data.serialNumber, data.results.registers);
+		}
+	};
+
+	this.clearDataStoreValue = function(sn, register) {
+		self.activeDataStore[sn][register] = {
+			'register': register,
+			'result': -9999,
+			'errorCode': errorCodes.errorCodes,
+			'time': new Date(),
+			'duration': 0,
+			'interval': 0,
+			'index': 0,
+		};
 	};
 
 	this.dataCollectionCounter = 0;
-	this.activeGroups = {};
 	var innerPerformDataCollection = function() {
 		var requiredData = {};
 
-		var nextActiveGroupsData = {};
+		var activeGroups = {};
 
 		self.dataGroupManagers.forEach(function(manager) {
 			var reqData = manager.getRequiredData();
@@ -329,8 +371,19 @@ function CREATE_DATA_COLLECTOR() {
 				// Save the active-group data
 				var registerData = reqData.registerData;
 				var groupKey = manager.options.groupKey;
-				nextActiveGroupsData[groupKey] = registerData;
+				activeGroups[groupKey] = registerData;
 			}
+		});
+
+		// Report what data groups are active.
+		self.emit(self.eventList.COLLECTING_GROUP_DATA, {
+			'data': Object.keys(activeGroups),
+		});
+
+		// Report what data is being collected from each device
+		self.emit(self.eventList.COLLECTING_DEVICE_DATA, {
+			'data': requiredData,
+			'count': self.dataCollectionCounter,
 		});
 
 		var serialNumbers = Object.keys(requiredData);
@@ -344,10 +397,9 @@ function CREATE_DATA_COLLECTOR() {
 			);
 		});
 
-		q.allSettled(promises)
-		.then(function() {
+		var reportCollectedData = function() {
 			// console.log('Started New Reads...');
-
+			
 			/*
 			Save a copy of the data that was acquired to make room for new
 			data.  This must be done after the each deviceDataCollector is
@@ -357,17 +409,23 @@ function CREATE_DATA_COLLECTOR() {
 			var oldData = JSON.parse(JSON.stringify(self.activeDataStore));
 
 			// Clear the activeDataStore
-			self.activeDataStore = undefined;
-			self.activeDataStore = {};
+			serialNumbers.forEach(function(serialNumber) {
+				requiredData[serialNumber].forEach(function(register) {
+					self.clearDataStoreValue(serialNumber, register);
+				});
+			});
 
 			// Organize what data needs to be given to each dataGroup.
 			var organizedData = {};
 
-			var activeGroupKeys = Object.keys(self.activeGroups);
+			var activeGroupKeys = Object.keys(activeGroups);
+			self.emit(self.eventList.REPORTING_COLLECTED_DATA, {
+				'data': activeGroupKeys
+			});
 			activeGroupKeys.forEach(function(activeGroupKey) {
 				var organizedGroupData = {};
 
-				var activeGroup = self.activeGroups[activeGroupKey];
+				var activeGroup = activeGroups[activeGroupKey];
 				var serialNumbers = Object.keys(activeGroup);
 				serialNumbers.forEach(function(serialNumber) {
 					var organizedDeviceData = {};
@@ -394,15 +452,7 @@ function CREATE_DATA_COLLECTOR() {
 
 						// Get the required data point & save it to the regValue
 						// variable.
-						var newDeviceResults = newDeviceData.results;
-						var newDeviceRegisters = newDeviceData.registers;
-						for(var i = 0; i < newDeviceRegisters.length; i++) {
-							var newDeviceReg = newDeviceRegisters[i];
-							if(newDeviceReg === regName) {
-								regValue = newDeviceResults[i];
-								break;
-							}
-						}
+						regValue = newDeviceData[regName];
 
 						// console.log('Req Data', activeGroupKey, serialNumber, regName, regValue);
 
@@ -420,23 +470,24 @@ function CREATE_DATA_COLLECTOR() {
 				// console.log('Collected Group Data', organizedGroupData);
 
 				// Report the collected group data
-				self.emit(self.eventList.COLLECTOR_DATA, {
-					'groupKey': activeGroupKey,
-					'data': organizedGroupData
-				});
+				// self.emit(self.eventList.COLLECTOR_DATA, {
+				// 	'groupKey': activeGroupKey,
+				// 	'data': organizedGroupData
+				// });
 
 				// Save organized group data to the organizedData object.
 				organizedData[activeGroupKey] = organizedGroupData;
 			});
-
-			// Go through the collected data and format the values as per each
-			// dataGroup specifications.
-
-			// Report that data has been collected for each dataGroup.
-			self.activeGroups = nextActiveGroupsData;
-
-			// save the nextGroupData as
-			// console.log('Past Data', Object.keys(oldData));
+			// Report the collected data
+			self.emit(self.eventList.COLLECTOR_DATA, organizedData);
+		};
+		q.allSettled(promises)
+		.then(function() {
+			if(self.isFirstDataCollectionIteration) {
+				self.isFirstDataCollectionIteration = false;
+			} else {
+				reportCollectedData();
+			}
 		});
 
 		// Increment the counter
@@ -455,10 +506,25 @@ function CREATE_DATA_COLLECTOR() {
 		}
 	};
 
+	var clearDataCollectionVariables = function() {
+		// Re-set the increment counter
+		self.dataCollectionCounter = 0;
+
+		self.activeDataStore = undefined;
+		self.activeDataStore = {};
+
+		self.dataCollectionCounter = 0;
+	};
+	this.isFirstDataCollectionIteration = false;
 	var innerStartDataCollector = function(bundle) {
 		var defered = q.defer();
 
+		// Clear data-collection variables.
+		clearDataCollectionVariables();
+
 		console.log('Starting Data Collector', self.config.core_period);
+		self.isActive = true;
+		self.isFirstDataCollectionIteration = true;
 		self.daqTimer = setInterval(
 			self.performDataCollection,
 			self.config.core_period
@@ -476,6 +542,7 @@ function CREATE_DATA_COLLECTOR() {
 	var innerStopLoggingSession = function(bundle) {
 		var defered = q.defer();
 
+		self.isActive = false;
 		clearInterval(self.daqTimer);
 		self.daqTimer = undefined;
 
