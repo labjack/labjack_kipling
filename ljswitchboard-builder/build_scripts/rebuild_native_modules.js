@@ -8,6 +8,7 @@ var fse = require('fs-extra');
 var path = require('path');
 var cwd = process.cwd();
 var child_process = require('child_process');
+var async = require('async');
 
 
 // It is required that anode/io.js version with child_process.execSync implemented
@@ -80,7 +81,7 @@ buildScripts.forEach(function(buildScript) {
 	].join(' ');
 
 	buildScript.cmds = [
-		cleanProject,
+		// cleanProject,
 		configureProject,
 		buildProject,
 	];
@@ -92,11 +93,50 @@ buildScripts.forEach(function(buildScript) {
 console.log('buildScripts', buildScripts);
 
 
+// var executeBuildStepAsync = function(buildStep, cb) {
+// 	console.log('Executing CMD', buildStep);
+// 	// var execOutput = child_process.execSync(buildStep);
+// 	child_process.exec(
+// 		buildStep,
+// 		function(error, stdout, stderr) {
+// 			console.log('stdout: ' + stdout);
+// 			console.log('stderr: ' + stderr);
+// 			if (error !== null) {
+// 				console.log('exec error: ' + error);
+// 			}
+// 			cb();
+// 		});
+// };
+
+// async.eachSeries(
+// 	buildScripts,
+// 	function(buildScript, cb) {
+// 		// Change Directories
+// 		process.chdir(buildScript.libPath);
+
+// 		console.log('Current Dir', process.cwd());
+// 		try {
+// 			console.log('Starting Step:', buildScript.text);
+// 			// buildScript.cmds.forEach(executeBuildStep);
+// 			async.eachSeries(buildScript.cmds, executeBuildStep, function(err) {
+// 				// Restoring to starting directory
+// 				process.chdir(cwd);
+// 				cb();
+// 			});
+// 		} catch(err) {
+// 			console.log('Error Executing', buildScript.text);
+// 			// Restoring to starting directory
+// 			process.chdir(cwd);
+// 			cb();
+// 		}
+// 	}, function(err) {
+
+// 	});
+
 var executeBuildStep = function(buildStep) {
 	console.log('Executing CMD', buildStep);
 	var execOutput = child_process.execSync(buildStep);
 };
-
 buildScripts.forEach(function(buildScript) {
 	// Change Directories
 	process.chdir(buildScript.libPath);
