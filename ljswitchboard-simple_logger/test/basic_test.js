@@ -1,6 +1,7 @@
 
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
+var simpleLogger;
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 var mock_device_manager = require('./mock_device_manager');
 var mockDeviceManager = mock_device_manager.createDeviceManager();
@@ -35,6 +36,10 @@ exports.tests = {
 	'Starting Basic Test': function(test) {
 		console.log('');
 		console.log('*** Starting Basic Test ***');
+		test.done();
+	},
+	'Create simpleLogger': function(test) {
+		simpleLogger = simple_logger.create();
 		test.done();
 	},
 	'Open Devices': mockDeviceManager.openDevices,

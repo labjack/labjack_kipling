@@ -1,0 +1,11 @@
+There is a bug involving how data gets aggregated.  Because data isn't aggregated and reported in the exact order that it is collected a data group can get newer data than expected if there is a secondary faster-polling data group requesting data at a faster rate.  Basically, data needs to be aggregated by index, serial number, and register name so that there can be multiple stored values.
+
+The data collector needs to manage these "buckets" instead of the device data collector.
+
+The reason why this isn't immediately being done is because of the complexities with making the system handle timeout's gracefully. Data can come in late and may still be useful to a user.  Implementing a "bucketing" system would break the ability to properly store late data.  
+
+For now I will just expose this "bug" as a feature/describe how it works because it allows all acquired data points to be logged to a file and this is a fairly complex edge-case anyways.  We aren't sure if users will use multi-device/multi-group logging to begin with.  Especially at different rates.  This error doesn't happen if all data groups are being collected from at the same rate.  It requires:
+
+2x data groups
+both data groups logging at different rates.
+both data groups logging the same register

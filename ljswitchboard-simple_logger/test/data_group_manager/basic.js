@@ -56,6 +56,23 @@ var configurations = [
 		"1": ["AIN1"],
 	}],
 	'numExpectedPatterns': 4,
+},
+{
+	'fileName': 'two_data_groups_adv.json',
+	'filePath': '',
+	'data': undefined,
+	'core_period': 0,
+	'dataGroups': [],
+	'managers': [],
+	'results': [],
+
+	'pattern': [{
+		"1": ["AIN0","AIN1","AIN2"],
+		"2": ["AIN0"]
+	}, {
+		"1": ["AIN1"],
+	}],
+	'numExpectedPatterns': 4,
 }
 ];
 
@@ -163,7 +180,11 @@ exports.basic_tests = {
 						var serialNumbers = Object.keys(reqRegisters);
 						serialNumbers.forEach(function(sn) {
 							if(combinedData[sn]) {
-								combinedData[sn] = combinedData[sn].concat(reqRegisters[sn]);
+								reqRegisters[sn].forEach(function(reqReg) {
+									if(combinedData[sn].indexOf(reqReg) < 0) {
+										combinedData[sn].push(reqReg);
+									}
+								});
 							} else {
 								combinedData[sn] = reqRegisters[sn];
 							}

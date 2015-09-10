@@ -30,6 +30,7 @@ var DATA_COLLECTOR_EVENTS = {
 	 * SETUP_DATA: Reports data collected in setup-mode
 	 */
 	COLLECTOR_DATA: 'COLLECTOR_DATA',
+	COLLECTOR_GROUP_DATA: 'COLLECTOR_GROUP_DATA',
 	SETUP_DATA: 'SETUP_DATA',
 
 	/*
@@ -52,6 +53,13 @@ var DATA_COLLECTOR_EVENTS = {
 
 var data_group_manager = require('./data_group_manager');
 var device_data_collector = require('./device_data_collector');
+
+var ENABLE_DEBUG_LOG = false;
+function debugLog() {
+	if(ENABLE_DEBUG_LOG) {
+		console.log.apply(console, arguments);
+	}
+}
 
 function CREATE_DATA_COLLECTOR() {
 	this.devices = undefined;
@@ -314,7 +322,7 @@ function CREATE_DATA_COLLECTOR() {
 	this.deviceDataCollectorDataListener = function(data) {
 		if(self.isActive) {
 			var deviceData = data.results;
-			console.log('Acquired Data from deviceDataCollector', data.serialNumber, deviceData.registers);
+			debugLog('Acquired Data from deviceDataCollector', data.serialNumber, deviceData.registers);
 			var sn = data.serialNumber.toString();
 			if(self.activeDataStore[sn]) {
 			} else {
@@ -333,7 +341,7 @@ function CREATE_DATA_COLLECTOR() {
 				};
 			});
 		} else {
-			console.log('Acquired late data', data.serialNumber, data.results.registers);
+			debugLog('Acquired late data', data.serialNumber, data.results.registers);
 		}
 	};
 
@@ -362,7 +370,11 @@ function CREATE_DATA_COLLECTOR() {
 				var serialNumbers = Object.keys(registers);
 				serialNumbers.forEach(function(sn) {
 					if(requiredData[sn]) {
-						requiredData[sn] = requiredData[sn].concat(registers[sn]);
+						registers[sn].forEach(function(reqReg) {
+							if(requiredData[sn].indexOf(reqReg) < 0) {
+								requiredData[sn].push(reqReg);
+							}
+						});
 					} else {
 						requiredData[sn] = registers[sn];
 					}
@@ -439,6 +451,7 @@ function CREATE_DATA_COLLECTOR() {
 					organizedDeviceData.duration = newDeviceData.duration;
 					organizedDeviceData.interval = newDeviceData.interval;
 
+					var index = -1;
 					// Make room for acquired device data
 					organizedDeviceData.results = {};
 
@@ -454,6 +467,23 @@ function CREATE_DATA_COLLECTOR() {
 						// variable.
 						regValue = newDeviceData[regName];
 
+						// Save the initial index value.
+						var saveDeviceData = false;
+						if(index < 0) {
+							saveDeviceData = true;
+						}
+						if(regValue.index < index) {
+							saveDeviceData = true;
+						}
+
+						if(saveDeviceData) {
+							index = regValue.index;
+							organizedDeviceData.errorCode = regValue.errorCode;
+							organizedDeviceData.time = regValue.time;
+							organizedDeviceData.duration = regValue.duration;
+							organizedDeviceData.interval = regValue.interval;
+						}
+
 						// console.log('Req Data', activeGroupKey, serialNumber, regName, regValue);
 
 						// Apply formatting to acquired data
@@ -461,8 +491,6 @@ function CREATE_DATA_COLLECTOR() {
 
 						// Organize the collected data.
 						organizedDeviceData.results[regName] = formattedValue;
-
-						// console.log('Available Data', newDeviceData);
 					});
 					organizedGroupData[serialNumber] = organizedDeviceData;
 				});
@@ -470,10 +498,10 @@ function CREATE_DATA_COLLECTOR() {
 				// console.log('Collected Group Data', organizedGroupData);
 
 				// Report the collected group data
-				// self.emit(self.eventList.COLLECTOR_DATA, {
-				// 	'groupKey': activeGroupKey,
-				// 	'data': organizedGroupData
-				// });
+				self.emit(self.eventList.COLLECTOR_GROUP_DATA, {
+					'groupKey': activeGroupKey,
+					'data': organizedGroupData
+				});
 
 				// Save organized group data to the organizedData object.
 				organizedData[activeGroupKey] = organizedGroupData;
@@ -522,7 +550,7 @@ function CREATE_DATA_COLLECTOR() {
 		// Clear data-collection variables.
 		clearDataCollectionVariables();
 
-		console.log('Starting Data Collector', self.config.core_period);
+		debugLog('Starting Data Collector', self.config.core_period);
 		self.isActive = true;
 		self.isFirstDataCollectionIteration = true;
 		self.daqTimer = setInterval(
@@ -609,4 +637,3 @@ var data_collector = new CREATE_DATA_COLLECTOR();
 // exports.emit = data_collector.emit;
 
 exports.eventList = DATA_COLLECTOR_EVENTS;
-

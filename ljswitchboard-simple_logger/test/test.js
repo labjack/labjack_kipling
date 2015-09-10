@@ -1,7 +1,7 @@
 
 
 var testGroups = {
-	'basic_test': false,
+	'basic_test': true,
 	'config_loader': {
 		'basic': false,
 	},
@@ -13,9 +13,9 @@ var testGroups = {
 	},
 	'data_group_manager': {
 		'basic': false,
-	},
+	}, 
 	'data_collector': {
-		'basic': true,
+		'basic': false,
 	},
 };
 

@@ -30,7 +30,9 @@ function CREATE_DATA_GROUP_MANAGER(options) {
 			this.completeData[sn][registerID] = JSON.parse(JSON.stringify(
 				registers[j]
 			));
-			this.data[sn].push(registers[j].name);
+			if(this.data[sn].indexOf(registers[j].name) < 0) {
+				this.data[sn].push(registers[j].name);
+			}
 		}
 	}
 
