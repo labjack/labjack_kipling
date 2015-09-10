@@ -117,6 +117,14 @@
                     "location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Zerocrossing Pulse Response.lua"
                 }
             ]
+        },  {
+                "name": "Digital IO EF",
+                "subScripts": [
+                {
+                    "name": "PWM Library & Example",
+                    "location": "lua_script_debugger/premade_scripts/digital_io_ef/PWM Library.lua"
+                }
+            ]
         }, {
             "name": "Get Device Temperature",
             "location": "lua_script_debugger/premade_scripts/1 Get Device Temperature.lua"
