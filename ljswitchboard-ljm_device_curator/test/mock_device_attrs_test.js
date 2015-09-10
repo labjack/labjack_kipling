@@ -135,6 +135,7 @@ exports.tests = {
 		});
 	},
 	'configure mock device - Ethernet': function(test) {
+		// THIS HAS TO HAPPEN BEFORE OPENING A DEVICE!!!
 		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
 			test.done();
