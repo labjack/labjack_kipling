@@ -458,7 +458,7 @@ function createDeviceKeeper(io_delegator, link) {
 			// an object with only the default filter option.
 		}
 		return newFilter;
-	}
+	};
 	this.getDeviceListing = function(reqFilters, requestdAttributes) {
 		var defered = q.defer();
 		var listing = [];
