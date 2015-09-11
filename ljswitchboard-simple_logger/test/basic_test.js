@@ -29,7 +29,16 @@ var logger_config_file_path = path.normalize(path.join(
 	logger_config_file
 ));
 
-
+function attachListeners(loggerObject) {
+	var eventMap = require('../lib/events').events;
+	var eventKeys = Object.keys(eventMap);
+	eventKeys.forEach(function(eventKey) {
+		var key = eventMap[eventKey];
+		loggerObject.on(key, function(data) {
+			console.log('Captured Event!!', key, data);
+		});
+	});
+}
 
 /* Define Test Cases */
 exports.tests = {
@@ -40,11 +49,21 @@ exports.tests = {
 	},
 	'Create simpleLogger': function(test) {
 		simpleLogger = simple_logger.create();
+		attachListeners(simpleLogger);
 		test.done();
 	},
 	'Open Devices': mockDeviceManager.openDevices,
 	'Initialize Logger': function(test) {
-		simple_logger.initialize(mockDeviceManager.getDevices())
+		simpleLogger.initialize()
+		.then(function() {
+			test.done();
+		}, function() {
+			test.ok(false);
+			test.done();
+		});
+	},
+	'Update Loggers Device Listing': function(test) {
+		simpleLogger.initialize(mockDeviceManager.getDevices())
 		.then(function() {
 			test.done();
 		}, function() {
@@ -53,7 +72,10 @@ exports.tests = {
 		});
 	},
 	'Load Config File': function(test) {
-		simple_logger.loadConfigFile(logger_config_file_path)
+		simpleLogger.configureLogger({
+			'configType': 'filePath',
+			'filePath': logger_config_file_path
+		})
 		.then(function() {
 			test.done();
 		}, function() {

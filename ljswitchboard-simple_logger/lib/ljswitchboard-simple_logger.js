@@ -27,36 +27,48 @@ var CONFIG_TYPES = {
 	'OBJECT': 'object',
 };
 
-var eventList = require('./logger_events').events;
+var eventList = require('./events').events;
 
 function CREATE_SIMPLE_LOGGER () {
 	this.devices = undefined;
 	this.config = undefined;
-
-	this.coordinator = log_coordinator.create();
+	this.coordinator = undefined;
 
 	var eventMap = [
 		{from: 'CONFIGURATION_SUCCESSFUL', to: 'onConfigurationSuccessful'},
 		{from: 'CONFIGURATION_ERROR', to: 'onConfigurationError'},
+		
 		{from:'STARTED_LOGGER', to: 'onStartedLogger'},
 		{from: 'ERROR_STARTING_LOGGER', to: 'onErrorStartingLogger'},
+		
 		{from:'STOPPED_LOGGER', to: 'onStoppedLogger'},
 		{from: 'ERROR_STOPPING_LOGGER', to: 'onErrorStoppingLogger'},
+		
 		{from:'NEW_VIEW_DATA', to: 'onNewViewData'},
+
 		{from:'UPDATED_ACTIVE_FILES', to: 'onUpdatedActiveFiles'},
 	];
 
+	/*
+	 * Use the eventMap to define functions for each event that needs to get 
+	 * passed on.
+	 */
 	function createAndLinkEventListener(eventListing) {
 		self[eventListing.to] = function(data) {
 			self.emit(eventListing.from, data);
 		};
 		self.coordinator.on(eventListing.from, self[eventListing.to]);
-	}
-	this.initialize = function(bundle) {
+	};
+
+	function innerInitialize(bundle) {
 		var defered = q.defer();
 
 		self.coordinator = undefined;
+
+		// Create a new coordinator instance.
 		self.coordinator = log_coordinator.create();
+
+		// Link to all of the events that it will emit.
 		eventMap.forEach(createAndLinkEventListener);
 
 		defered.resolve(bundle);
@@ -69,32 +81,21 @@ function CREATE_SIMPLE_LOGGER () {
 		self.devices = undefined;
 		self.devices = devices;
 
-		self.coordinator.stop(loggerConfig)
-		.then(self.coordinator.updateDeviceListing(devices))
+		// Make sure that the coordinator is stopped before updating the
+		// device listing.
+		self.coordinator.stop(devices)
+
+		// make sure that the coordinator is unconfigured.
+		.then(self.coordinator.unconfigure)
+
+		// After stopping & clearing the coordinators config. 
+		//update its device listing.
+		.then(self.coordinator.updateDeviceListing)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	}
 
-	this.updateDeviceListing = function(devices) {
-		var defered = q.defer();
-
-		var promises = [];
-		promises.push(innerUpdateDeviceListing(devices));
-
-		q.allSettled(promises)
-		.then(function() {
-			defered.resolve();
-		});
-		return defered.promise;
-	};
-
-	/* Configuration File Loading & Checking functions */
-	this.verifyConfigFile = function(filePath) {
-		return config_checker.verifyConfigFile(filePath);
-	};
-	this.verifyConfigObject = function(dataObject) {
-		return config_checker.verifyConfigObject(filePath);
-	};
+	
 
 	function handleLoadConfigFileSuccess(configData) {
 		var defered = q.defer();
@@ -182,15 +183,17 @@ function CREATE_SIMPLE_LOGGER () {
 		}
 
 		function onSuccess(data) {
+			// Let the coordinator fire the config-successful event.
+			// self.onConfigurationSuccessful(data);
 			defered.resolve(data);
-			self.emit(eventList.CONFIGURATION_SUCCESSFUL, data);
 		}
 		function onError(data) {
+			self.onConfigurationError(data);
 			defered.resolve(data);
-			self.emit(eventList.CONFIGURATION_ERROR, data);
 		}
 		if(isValidCall) {
 			self.coordinator.stop(loggerConfig)
+			.then(self.coordinator.unconfigure)
 			.then(self.coordinator.configure)
 			.then(onSuccess, onError);
 		} else {
@@ -214,6 +217,21 @@ function CREATE_SIMPLE_LOGGER () {
 		return defered.promise;
 	}
 
+	/* Configuration File Loading & Checking functions */
+	this.verifyConfigFile = function(filePath) {
+		return config_checker.verifyConfigFile(filePath);
+	};
+	this.verifyConfigObject = function(dataObject) {
+		return config_checker.verifyConfigObject(filePath);
+	};
+
+	/* Controls for the logger */
+	this.initialize = function(bundle) {
+		return innerInitialize(bundle);
+	}
+	this.updateDeviceListing = function(devices) {
+		return innerUpdateDeviceListing(devices);
+	};
 	this.configureLogger = function(loggerConfig) {
 		return innerConfigureLogger(loggerConfig);
 	};
@@ -237,7 +255,6 @@ exports.create = function() {
 
 /* feature discovery & event constant handling */
 exports.eventList = eventList;
-
 
 /* Functions for configuration file loading & verification */
 exports.verifyConfigFile = function(filePath) {
