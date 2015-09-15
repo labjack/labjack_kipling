@@ -29,13 +29,21 @@ var logger_config_file_path = path.normalize(path.join(
 	logger_config_file
 ));
 
+var eventMap = require('../lib/events').events;
+var ignoreErrorsList = [
+	eventMap.STOPPED_LOGGER,
+	eventMap.CONFIGURATION_SUCCESSFUL,
+];
 function attachListeners(loggerObject) {
-	var eventMap = require('../lib/events').events;
+	
 	var eventKeys = Object.keys(eventMap);
 	eventKeys.forEach(function(eventKey) {
 		var key = eventMap[eventKey];
 		loggerObject.on(key, function(data) {
-			console.log('Captured Event!!', key, data);
+			if(ignoreErrorsList.indexOf(key) < 0) {
+				console.log('Captured Event (basic_test)!!', key, data);
+			}
+			// console.log('Captured Event (basic_test)!!', key, data);
 		});
 	});
 }
@@ -58,16 +66,17 @@ exports.tests = {
 		.then(function() {
 			test.done();
 		}, function() {
-			test.ok(false);
+			test.ok(false, 'Should not have failed to initialize logger');
 			test.done();
 		});
 	},
 	'Update Loggers Device Listing': function(test) {
-		simpleLogger.initialize(mockDeviceManager.getDevices())
+		simpleLogger.updateDeviceListing(mockDeviceManager.getDevices())
 		.then(function() {
 			test.done();
 		}, function() {
-			test.ok(false);
+			test.ok(false, 'Should not have failed to updateDeviceListing');
+			// process.exit();
 			test.done();
 		});
 	},
@@ -87,6 +96,20 @@ exports.tests = {
 		// log_display.initialize();
 		test.done();
 
+	},
+	'Run Logger': function(test) {
+		simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
+			console.log('Logger Stopped');
+			test.done();
+		});
+		simpleLogger.startLogger()
+		.then(function succ() {
+			test.ok(true);
+			console.log('Logger Started');
+		}, function err() {
+			test.ok(false, 'Logger should have started');
+			console.log('Logger Started');
+		});
 	},
 	'Verify Configuration': function(test) {
 		test.done();

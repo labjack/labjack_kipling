@@ -29,6 +29,13 @@ var CONFIG_TYPES = {
 
 var eventList = require('./events').events;
 
+function rippleError(bundle) {
+	var defered = q.defer();
+	console.log('Ripple Error', bundle);
+	defered.reject(bundle);
+	return defered.promise;
+}
+
 function CREATE_SIMPLE_LOGGER () {
 	this.devices = undefined;
 	this.config = undefined;
@@ -58,7 +65,7 @@ function CREATE_SIMPLE_LOGGER () {
 			self.emit(eventListing.from, data);
 		};
 		self.coordinator.on(eventListing.from, self[eventListing.to]);
-	};
+	}
 
 	function innerInitialize(bundle) {
 		var defered = q.defer();
@@ -71,9 +78,12 @@ function CREATE_SIMPLE_LOGGER () {
 		// Link to all of the events that it will emit.
 		eventMap.forEach(createAndLinkEventListener);
 
-		defered.resolve(bundle);
+		self.coordinator.initialize(bundle)
+		.then(defered.resolve, defered.reject)
+		.catch(defered.reject)
+		.done();
 		return defered.promise;
-	};
+	}
 
 	function innerUpdateDeviceListing(devices) {
 		var defered = q.defer();
@@ -83,7 +93,7 @@ function CREATE_SIMPLE_LOGGER () {
 
 		// Make sure that the coordinator is stopped before updating the
 		// device listing.
-		self.coordinator.stop(devices)
+		innerStopLogger(devices)
 
 		// make sure that the coordinator is unconfigured.
 		.then(self.coordinator.unconfigure)
@@ -123,7 +133,7 @@ function CREATE_SIMPLE_LOGGER () {
 		return defered.promise;
 	}
 
-	function performConfiguration(loggerConfig) {
+	function verifyAndLoadConfiguration(loggerConfig) {
 		var defered = q.defer();
 
 		var configType = loggerConfig.configType;
@@ -152,6 +162,12 @@ function CREATE_SIMPLE_LOGGER () {
 
 			defered.reject(loggerConfig);
 		}
+		return defered.promise;
+	}
+
+	function resolveToConfigData(loggerConfig) {
+		var defered = q.defer();
+		defered.resolve(loggerConfig.configData);
 		return defered.promise;
 	}
 
@@ -188,32 +204,45 @@ function CREATE_SIMPLE_LOGGER () {
 			defered.resolve(data);
 		}
 		function onError(data) {
+			console.log('simple_logger.js config error', data);
+			// Report the CONFIGURATION_ERROR event.
 			self.onConfigurationError(data);
-			defered.resolve(data);
+			// Force successful resolution of promise & errors to be handled via
+			// event system.
+			defered.reject(data);
 		}
 		if(isValidCall) {
-			self.coordinator.stop(loggerConfig)
-			.then(self.coordinator.unconfigure)
-			.then(self.coordinator.configure)
+			verifyAndLoadConfiguration(loggerConfig)
+			.then(resolveToConfigData, rippleError)
+			.then(innerStopLogger, rippleError)
+			.then(self.coordinator.unconfigure, rippleError)
+			.then(self.coordinator.configure, rippleError)
 			.then(onSuccess, onError);
 		} else {
-			self.coordinator.stop(loggerConfig)
+			innerStopLogger(loggerConfig)
 			.then(onError, onError);
 		}
 		return defered.promise;
+	}
+	function innerUnconfigureLogger(bundle) {
+		return self.coordinator.unconfigure(bundle);
 	}
 	function innerStartLogger(startData) {
 		var defered = q.defer();
 
 		self.coordinator.start(startData)
-		.then(defered.resolve, defered.reject);
+		.then(defered.resolve, defered.reject)
+		.catch(defered.reject)
+		.done();
 		return defered.promise;
 	}
 	function innerStopLogger(stopData) {
 		var defered = q.defer();
 
 		self.coordinator.stop(stopData)
-		.then(defered.resolve, defered.reject);
+		.then(defered.resolve, defered.reject)
+		.catch(defered.reject)
+		.done();
 		return defered.promise;
 	}
 
@@ -228,12 +257,15 @@ function CREATE_SIMPLE_LOGGER () {
 	/* Controls for the logger */
 	this.initialize = function(bundle) {
 		return innerInitialize(bundle);
-	}
+	};
 	this.updateDeviceListing = function(devices) {
 		return innerUpdateDeviceListing(devices);
 	};
 	this.configureLogger = function(loggerConfig) {
 		return innerConfigureLogger(loggerConfig);
+	};
+	this.unconfigureLogger = function(bundle) {
+		return innerUnconfigureLogger(bundle);
 	};
 	this.startLogger = function(startData) {
 		return innerStartLogger(startData);

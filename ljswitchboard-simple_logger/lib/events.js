@@ -17,4 +17,7 @@ exports.events = {
 
 	/* Events regarding the status of log-files */
 	'UPDATED_ACTIVE_FILES': 'UPDATED_ACTIVE_FILES',
+
+	/* Logging Errors */
+	'DATA_COLLECTOR_ERROR': 'DATA_COLLECTOR_ERROR',
 };

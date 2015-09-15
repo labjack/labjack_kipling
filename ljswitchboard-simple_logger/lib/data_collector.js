@@ -564,8 +564,8 @@ function CREATE_DATA_COLLECTOR() {
 		defered.resolve(bundle);
 		return defered.promise;
 	};
-	this.stopDataCollector = function() {
-		return innerStopLoggingSession();
+	this.stopDataCollector = function(bundle) {
+		return innerStopLoggingSession(bundle);
 	};
 	var innerStopLoggingSession = function(bundle) {
 		var defered = q.defer();

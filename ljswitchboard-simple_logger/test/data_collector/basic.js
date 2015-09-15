@@ -424,7 +424,7 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'create data collector object': function(test) {
+	'configure and test data collector': function(test) {
 		// console.log('Configurations', configurations);
 
 		// q.longStackSupport = true;

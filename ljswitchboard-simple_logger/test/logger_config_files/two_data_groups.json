@@ -60,5 +60,13 @@
 				"format": "default"
 			}]
 		}
+	},
+
+	"stop_trigger": {
+		"relation": "and",
+		"triggers": [
+			{"attr_type": "num_logged", "data_group": "basic_data_group", "val": 4},
+			{"attr_type": "num_logged", "data_group": "secondary_data_group", "val": 8}
+		]
 	}
 }

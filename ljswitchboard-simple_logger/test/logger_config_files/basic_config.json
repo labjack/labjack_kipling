@@ -1,7 +1,8 @@
 {
 	"logging_config": {
+		"name": "Basic Config",
 		"file_prefix": "basic_config",
-		"write_to_file": false,
+		"write_to_file": true,
 		"default_result_view": "0",
 		"default_result_file": "0"
 	},
@@ -31,7 +32,7 @@
 		"basic_data_group"
 	],
 	"basic_data_group": {
-		"group_name": "basic_data_group",
+		"group_name": "Basic Data Group",
 		"group_period_ms": 100,
 		"is_stream": false,
 
@@ -51,7 +52,7 @@
 		},
 		
 		"logging_options": {
-			"write_to_file": false,
+			"write_to_file": true,
 			"file_prefix": "basic_group",
 			"max_samples_per_file": 100,
 			"data_collector_config": {
@@ -59,5 +60,12 @@
 				"REPORT_DEFAULT_VALUES_WHEN_LATE": false
 			}
 		}
+	},
+
+	"stop_trigger": {
+		"relation": "and",
+		"triggers": [{
+			"attr_type": "num_logged", "data_group": "basic_data_group", "val": 4
+		}]
 	}
 }
