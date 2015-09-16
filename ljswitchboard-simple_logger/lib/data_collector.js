@@ -57,7 +57,12 @@ var device_data_collector = require('./device_data_collector');
 var ENABLE_DEBUG_LOG = false;
 function debugLog() {
 	if(ENABLE_DEBUG_LOG) {
-		console.log.apply(console, arguments);
+		var dataToPrint = [];
+		dataToPrint.push('(data_collector.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
 	}
 }
 

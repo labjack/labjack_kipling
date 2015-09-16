@@ -34,6 +34,19 @@ var ignoreErrorsList = [
 	eventMap.STOPPED_LOGGER,
 	eventMap.CONFIGURATION_SUCCESSFUL,
 ];
+
+var ENABLE_DEBUG_LOG = true;
+function debugLog() {
+	if(ENABLE_DEBUG_LOG) {
+		var dataToPrint = [];
+		dataToPrint.push('(basic_test.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+
 function attachListeners(loggerObject) {
 	
 	var eventKeys = Object.keys(eventMap);
@@ -41,12 +54,13 @@ function attachListeners(loggerObject) {
 		var key = eventMap[eventKey];
 		loggerObject.on(key, function(data) {
 			if(ignoreErrorsList.indexOf(key) < 0) {
-				console.log('Captured Event (basic_test)!!', key, data);
+				debugLog('Captured Event!!', key, data);
 			}
 			// console.log('Captured Event (basic_test)!!', key, data);
 		});
 	});
 }
+
 
 /* Define Test Cases */
 exports.tests = {
@@ -99,16 +113,16 @@ exports.tests = {
 	},
 	'Run Logger': function(test) {
 		simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
-			console.log('Logger Stopped');
+			debugLog('Logger Stopped');
 			test.done();
 		});
 		simpleLogger.startLogger()
 		.then(function succ() {
 			test.ok(true);
-			console.log('Logger Started');
+			debugLog('Logger Started');
 		}, function err() {
 			test.ok(false, 'Logger should have started');
-			console.log('Logger Started');
+			debugLog('Logger Started');
 		});
 	},
 	'Verify Configuration': function(test) {

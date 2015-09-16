@@ -7,6 +7,8 @@ var util = require('util');
 var q = require('q');
 var async = require('async');
 var path = require('path');
+var fs = require('fs');
+var fse = require('fs-extra');
 
 var events = {};
 exports.events = events;
@@ -62,7 +64,7 @@ if(typeof(DEFAULT_ROOT_DIR) === 'undefined') {
 	}
 }
 
-DEFAULT_ROOT_DIR = path.join(DEFAULT_ROOT_DIR, 'labjack_logger_data');
+DEFAULT_ROOT_DIR = path.join(DEFAULT_ROOT_DIR, 'labjack_data_logger');
 
 
 var DATA_LOGGER_EVENTS = {
@@ -81,6 +83,16 @@ var DATA_LOGGER_EVENTS = {
 	ERROR_CREATING_FILE: 'ERROR_CREATING_FILE',
 
 };
+
+function print() {
+	var dataToPrint = [];
+	dataToPrint.push('(data_logger.js)');
+	for(var i = 0; i < arguments.length; i++) {
+		dataToPrint.push(arguments[i]);
+	}
+	console.log.apply(console, dataToPrint);
+}
+
 function CREATE_DATA_LOGGER() {
 	// Default Root Directory
 	this.rootDirectory = DEFAULT_ROOT_DIR;
@@ -91,6 +103,7 @@ function CREATE_DATA_LOGGER() {
 		'initialized': false,
 		'enabled': false,
 		'name': '',
+		'dir': '',
 	};
 
 	this.stats = {
@@ -200,6 +213,7 @@ function CREATE_DATA_LOGGER() {
 				'headerData': headerData,
 				'enabled': isEnabled,
 				'group_name': groupName,
+				'dir': '',
 			};
 		});
 	}
@@ -232,13 +246,157 @@ function CREATE_DATA_LOGGER() {
 		return defered.promise;
 	}
 
+	function initializeDirectory(dir) {
+		var defered = q.defer();
+		fse.ensureDir(dir, function(err) {
+			if(err) {
+				fse.ensureDir(dir, function(err) {
+					if(err) {
+						defered.reject(dir);
+					} else {
+						defered.resolve(dir);
+					}
+				});
+			} else {
+				defered.resolve(dir);
+			}
+		});
+		return defered.promise;
+	}
+
+	function initializeRootDirectory(bundle) {
+		var defered = q.defer();
+		function onSuccess() {
+			defered.resolve(bundle);
+		}
+		function onError() {
+			defered.reject(bundle);
+		}
+
+		initializeDirectory(self.rootDirectory)
+		.then(onSuccess, onError);
+		return defered.promise;
+	}
+	function getUniqueDirectory(baseDir) {
+		var defered = q.defer();
+		var baseName = path.basename(baseDir);
+		var directoryName = path.dirname(baseDir);
+		var files = fs.readdirSync(directoryName);
+		var folders = [];
+		var isUnique = true;
+		files.forEach(function(file) {
+			var dir = path.join(directoryName, file);
+			var isDirectory = fs.statSync(dir).isDirectory();
+			if(isDirectory) {
+				folders.push(file);
+				if(file === baseName) {
+					isUnique = false;
+				}
+			}
+		});
+
+		var uniqueName = baseName;
+		if(!isUnique) {
+			var i = 1;
+			while(folders.indexOf(uniqueName) >= 0) {
+				uniqueName = baseName + '_' + i.toString();
+				i += 1;
+			}
+		}
+		var uniqueDir = path.join(directoryName, uniqueName);
+		defered.resolve(uniqueDir);
+		return defered.promise;
+	}
+
+	function getCreateDirectory(objToUpdate) {
+		return function createDirectory(dirToCreate) {
+			var defered = q.defer();
+			function onSuccess() {
+				objToUpdate.dir = dirToCreate;
+				defered.resolve(dirToCreate);
+			}
+			function onError(err) {
+				defered.reject(err);
+			}
+			initializeDirectory(dirToCreate)
+			.then(onSuccess, onError)
+			.catch(onError)
+			.done();
+			return defered.promise;
+		};
+	}
+	function initializeLoggerDirectory(bundle) {
+		var defered = q.defer();
+		var loggerDir = path.join(self.rootDirectory,self.state.name);
+
+		function onSuccess() {
+			defered.resolve(bundle);
+		}
+		function onError(err) {
+			defered.reject(bundle);
+		}
+
+		getUniqueDirectory(loggerDir)
+		.then(getCreateDirectory(self.state))
+		.then(onSuccess, onError)
+		.catch(onError)
+		.done();
+		return defered.promise;
+	}
+
+	
+	function initializeDataGroupDirectory(data_group) {
+		var defered = q.defer();
+
+		var dataGroup = self.logData[data_group];
+		var groupDir = path.join(self.state.dir, dataGroup.group_name);
+		function onSuccess() {
+			defered.resolve(data_group);
+		}
+		function onError() {
+			defered.reject(data_group);
+		}
+
+		getUniqueDirectory(groupDir)
+		.then(getCreateDirectory(dataGroup))
+		.then(onSuccess, onError);
+		return defered.promise;
+	}
+	function initializeDataGroupDirectories(bundle) {
+		var defered = q.defer();
+
+		var groupKeys = Object.keys(self.logData);
+		var promises = groupKeys.map(initializeDataGroupDirectory);
+
+		q.allSettled(promises)
+		.then(function() {
+			defered.resolve(bundle);
+		}).done();
+		return defered.promise;
+	}
+
+	function initializeFolderStructure(bundle) {
+		var defered = q.defer();
+
+		initializeRootDirectory(bundle)
+		.then(initializeLoggerDirectory, defered.reject)
+		.then(initializeDataGroupDirectories, defered.reject)
+		.then(defered.resolve, defered.reject)
+		.catch(defered.reject)
+		.done();
+		return defered.promise;
+	}
 	function innerStartDataLogger(bundle) {
 		var defered = q.defer();
 
 		// Initialize the data logger statistics object.
 		initializeStats();
 
-		defered.resolve(bundle);
+		// Perform a full initialization of the directory structure.
+		initializeFolderStructure(bundle)
+		.then(defered.resolve, defered.reject)
+		.catch(defered.reject)
+		.done();
 		return defered.promise;
 	}
 
@@ -252,7 +410,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function saveNewData(data) {
-		console.log('Saving Data!!');
+		print('Saving Data!!');
 	}
 	/* Externally Accessable functions */
 	this.onNewData = function(data) {
@@ -267,7 +425,7 @@ function CREATE_DATA_LOGGER() {
 		if(saveData) {
 			saveNewData(data);
 		} else {
-			console.log(
+			print(
 				'Not Saving Data.... :(',
 				self.state.enabled,
 				self.logData[data.groupKey].enabled

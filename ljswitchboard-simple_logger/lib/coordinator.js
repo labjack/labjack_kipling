@@ -39,6 +39,14 @@ var DATA_REPORTER_EVENTS_MAP = [
 
 var eventList = require('./events').events;
 
+function print() {
+	var dataToPrint = [];
+	dataToPrint.push('(coordinator.js)');
+	for(var i = 0; i < arguments.length; i++) {
+		dataToPrint.push(arguments[i]);
+	}
+	console.log.apply(console, dataToPrint);
+}
 
 function CREATE_COORDINATOR () {
 	this.state = {
@@ -108,15 +116,15 @@ function CREATE_COORDINATOR () {
 	/* Define event handler functions that get linked to by the initializer. */
 	// Events that get linked to the DataCollector
 	this.onDataCollectorStarted = function(data) {
-		console.log('in onDataCollectorStarted', data);
+		print('in onDataCollectorStarted', data);
 		self.emit(eventList.STARTED_LOGGER, data);
 	};
 	this.onDataCollectorStopped = function(data) {
-		console.log('in onDataCollectorStopped', data);
+		print('in onDataCollectorStopped', data);
 		self.emit(eventList.STOPPED_LOGGER, data);
 	};
 	this.onDataCollectorGroupData = function(data) {
-		console.log('in onDataCollectorGroupData', data);
+		print('in onDataCollectorGroupData', data);
 		self.updateStats(data);
 
 		// Send data to the dataLogger and dataReporter.
@@ -134,13 +142,13 @@ function CREATE_COORDINATOR () {
 		}
 	};
 	this.onDataCollectorError = function(data) {
-		console.log('in onDataCollectorError', data);
+		print('in onDataCollectorError', data);
 		self.emit(eventList.DATA_COLLECTOR_ERROR, data);
 	};
 
 	// Events that get linked to the dataReporter object.
 	this.onDataReporterViewData = function(data) {
-		console.log('in onDataReporterViewData', data);
+		print('in onDataReporterViewData', data);
 	};
 
 	function getAttachListener(emitter) {
@@ -152,7 +160,7 @@ function CREATE_COORDINATOR () {
 			if(typeof(self[map.funcName]) === 'function') {
 				emitter.on(map.eventName, self[map.funcName]);
 			} else {
-				console.log('Undefined function...', map.funcName, map.eventName);
+				print('Undefined function...', map.funcName, map.eventName);
 			}
 		};
 	}
