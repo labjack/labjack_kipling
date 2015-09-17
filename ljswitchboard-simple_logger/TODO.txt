@@ -1,3 +1,6 @@
+
+TODO #1
+
 There is a bug involving how data gets aggregated.  Because data isn't aggregated and reported in the exact order that it is collected a data group can get newer data than expected if there is a secondary faster-polling data group requesting data at a faster rate.  Basically, data needs to be aggregated by index, serial number, and register name so that there can be multiple stored values.
 
 The data collector needs to manage these "buckets" instead of the device data collector.
@@ -9,3 +12,12 @@ For now I will just expose this "bug" as a feature/describe how it works because
 2x data groups
 both data groups logging at different rates.
 both data groups logging the same register
+
+
+TODO #2
+
+Need to allow the config file to specify (on a register basis) whether to log the value should be logged or not.
+
+Create a "computed" values section and let the user define an array of computed values.  This will allow users to create scaling equations & not be so confused about everything that is going on...  The computed values get generated after all of the formatting functions have been applied. What to do if there is an error?????
+
+In each of the views users should be able to select specific device/registers/computed values that should be displayed.  This way they can choose to not display values that were needed to generate the computed results.  (This should actually be done in the definition.  Each "value" should have a reporting options object. "enable_logging", "enable_view", "enable_xxx"... cloud services/databases/etc. )
