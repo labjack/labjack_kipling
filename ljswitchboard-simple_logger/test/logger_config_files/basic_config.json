@@ -54,7 +54,7 @@
 		"logging_options": {
 			"write_to_file": true,
 			"file_prefix": "basic_group",
-			"max_samples_per_file": 100,
+			"max_samples_per_file": 3,
 			"data_collector_config": {
 				"REPORT_DEVICE_IS_ACTIVE_VALUES": true,
 				"REPORT_DEFAULT_VALUES_WHEN_LATE": false

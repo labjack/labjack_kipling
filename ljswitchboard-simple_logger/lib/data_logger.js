@@ -30,8 +30,8 @@ for each data-group... create a folder:
 /[group_name] + extraTextToBeUnique("_0" ... "_100")
 
 each folder will then contain files...
-[name] + [group_name] + "-config" + file_ending(.csv)
-[name] + [group_name] + "-data" + extraTextToBeUnique("_0" ... "_100") + file_ending(.csv)
+[name] + '-' + [group_name] + "-config" + file_ending(.csv)
+[name] + '-' + [group_name] + "-data" + extraTextToBeUnique("_0" ... "_100") + file_ending(.csv)
 
 
 3. When starting the logger I need to initialize the required folder/file structure.
@@ -69,13 +69,19 @@ var DEFAULTS = {
 	'ROOT_DIRECTORY': DEFAULT_ROOT_DIR,
 
 	// Define the default num data points per file.
-	'NUM_DATA_POINTS_PER_FILE': 65535,
+	'MAX_SAMPLES_PER_FILE': 65535,
 
 	// Define the default set of characters to include at the end of a line
 	'LINE_ENDING': '\r\n',
 
 	// Define the default value separator.
 	'VALUE_SEPARATOR': ',',
+
+	// Define the data-file ending string.
+	'FILE_NAME_ENDING': '-data',
+
+	// Define the default file extension string.
+	'FILE_EXTENSION': '.csv',
 
 	// Define the default time stamp format
 	'TIME_STAMP_FORMAT': 'default',
@@ -109,6 +115,18 @@ function print() {
 		dataToPrint.push(arguments[i]);
 	}
 	console.log.apply(console, dataToPrint);
+}
+
+function debugLogFiles() {
+	if(false) {
+		print.apply(this,arguments);
+	}
+}
+
+function debugDataSaving() {
+	if(false) {
+		print.apply(this,arguments);
+	}
 }
 
 function CREATE_DATA_LOGGER() {
@@ -229,19 +247,61 @@ function CREATE_DATA_LOGGER() {
 				groupName = data_group;
 			}
 
-			// Determine how many data points to save to a file before creating
-			// a new one.
-			var numDataPoints = DEFAULTS.NUM_DATA_POINTS_PER_FILE;
-			if(logging_config.num_data_per_file) {
-				if(!isNaN(logging_config.num_data_per_file)) {
-					numDataPoints = parseInt(logging_config.num_data_per_file);
+			var options = {
+				numDataPoints: DEFAULTS.MAX_SAMPLES_PER_FILE,
+				lineEnding: DEFAULTS.LINE_ENDING,
+				valueSeparator: DEFAULTS.VALUE_SEPARATOR,
+				fileNameEnding: DEFAULTS.FILE_NAME_ENDING,
+				fileExtension: DEFAULTS.FILE_EXTENSION,
+			};
+
+			var dataMap = [
+				{
+					'config_str': 'max_samples_per_file',
+					'saveStr': 'numDataPoints',
+					verify: function(val) { return !isNaN(val);},
+					coerce: function(val) {return parseInt(val);},
+				}, {
+					'config_str': 'line_ending',
+					'saveStr': 'lineEnding',
+					verify: function(){return true;},
+					coerce: function(val) {return val;},
+				}, {
+					'config_str': 'value_separator',
+					'saveStr': 'valueSeparator',
+					verify: function(){return true;},
+					coerce: function(val) {return val;},
+				}, {
+					'config_str': 'file_name_ending',
+					'saveStr': 'fileNameEnding',
+					verify: function(){return true;},
+					coerce: function(val) {return val;},
+				}, {
+					'config_str': 'file_extension',
+					'saveStr': 'fileExtension',
+					verify: function(){return true;},
+					coerce: function(val) {return val;},
+				}];
+			try {
+			dataMap.forEach(function(valMap) {
+				if(logging_config[valMap.config_str]) {
+					if(valMap.verify(logging_config[valMap.config_str])) {
+						options[valMap.saveStr] = valMap.coerce(logging_config[valMap.config_str]);
+					}
 				}
-			}
-			if(logging_options.num_data_per_file) {
-				if(!isNaN(logging_options.num_data_per_file)) {
-					numDataPoints = parseInt(logging_options.num_data_per_file);
+				if(logging_options[valMap.config_str]) {
+					if(valMap.verify(logging_options[valMap.config_str])) {
+						options[valMap.saveStr] = valMap.coerce(logging_options[valMap.config_str]);
+					}
 				}
-			}
+			});
+		} catch(err) {
+			console.log('Error...', err);
+		}
+			var lineEndingText = DEFAULTS.LINE_ENDING;
+			var valueSeparatorText = DEFAULTS.VALUE_SEPARATOR;
+			var fileNameEndingText = DEFAULTS.FILE_NAME_ENDING;
+			var fileExtensionText = DEFAULTS.FILE_EXTENSION;
 
 			// Save the headerData to the logData object.
 			self.logData[data_group] = {
@@ -249,12 +309,16 @@ function CREATE_DATA_LOGGER() {
 				'enabled': isEnabled,
 				'group_name': groupName,
 				'dir': '',
-				'numDataPoints': numDataPoints,
-				'line_ending': DEFAULTS.LINE_ENDING,
-				'value_separator': DEFAULTS.VALUE_SEPARATOR,
+				'numDataPoints': options.numDataPoints,
+				'line_ending': options.lineEnding,
+				'value_separator': options.valueSeparator,
+				'file_name_ending': options.fileNameEnding,
+				'file_extension': options.fileExtension,
 				'file_stream_active': false,
 				'file_path': '',
 				'file_stream': undefined,
+				'file_stream_buffer': [],
+				'num_written_lines': 0,
 			};
 		});
 	}
@@ -309,11 +373,11 @@ function CREATE_DATA_LOGGER() {
 		var defered = q.defer();
 		var file = fs.createWriteStream(filePath);
 		file.on('open', function(fd) {
-			console.log('Initialized file write stream');
+			debugLogFiles('Initialized file write stream');
 			defered.resolve(file);
 		});
 		file.on('error', function(err) {
-			console.log('Error initializing file write stream', err);
+			console.error('Error initializing file write stream', err);
 			defered.reject(err);
 		});
 		return defered.promise;
@@ -325,7 +389,7 @@ function CREATE_DATA_LOGGER() {
 			defered.resolve(fileStream);
 		});
 
-		print('Finalizing file write stream');
+		debugLogFiles('Finalizing file write stream');
 		fileStream.end();
 		return defered.promise;
 	}
@@ -346,8 +410,6 @@ function CREATE_DATA_LOGGER() {
 	function getUniqueDirectory(baseDir) {
 		var defered = q.defer();
 		var baseName = path.basename(baseDir);
-		var extName = path.extname(baseDir);
-		baseName = baseName.slice(0, baseName.length - extName.length);
 
 		var directoryName = path.dirname(baseDir);
 		var files = fs.readdirSync(directoryName);
@@ -373,8 +435,40 @@ function CREATE_DATA_LOGGER() {
 			}
 		}
 		var uniqueDir = path.join(directoryName, uniqueName);
-		uniqueDir += extName;
 		defered.resolve(uniqueDir);
+		return defered.promise;
+	}
+	function getUniqueFilePath(baseDir) {
+		var defered = q.defer();
+		var baseName = path.basename(baseDir);
+		var extName = path.extname(baseDir);
+		var fileName = baseName.slice(0, baseName.length - extName.length);
+
+		var directoryName = path.dirname(baseDir);
+		var files = fs.readdirSync(directoryName);
+		var fileList = [];
+		var isUnique = true;
+		files.forEach(function(file) {
+			var dir = path.join(directoryName, file);
+			var isFile = fs.statSync(dir).isFile();
+			if(isFile) {
+				fileList.push(file);
+				if(file === baseName) {
+					isUnique = false;
+				}
+			}
+		});
+
+		var uniqueName = baseName;
+		if(!isUnique) {
+			var i = 1;
+			while(fileList.indexOf(uniqueName) >= 0) {
+				uniqueName = fileName + '_' + i.toString() + extName;
+				i += 1;
+			}
+		}
+		var uniqueFilePath = path.join(directoryName, uniqueName);
+		defered.resolve(uniqueFilePath);
 		return defered.promise;
 	}
 
@@ -472,8 +566,9 @@ function CREATE_DATA_LOGGER() {
 		return function createLogFileWriteStream(filePath) {
 			var defered = q.defer();
 			function onSuccess(fileStream) {
-				console.log('Created log file write stream');
-				objToUpdate.file_stream_active = true;
+				// Make sure that the file stream is not yet active as the heder
+				// data still needs to be written.
+				objToUpdate.file_stream_active = false;
 				objToUpdate.file_path = filePath;
 				objToUpdate.file_stream = fileStream;
 				defered.resolve(fileStream);
@@ -498,26 +593,23 @@ function CREATE_DATA_LOGGER() {
 
 		var logName = self.state.name;
 		var groupName = dataGroup.group_name;
-		var logFileAppendText = '-data';
-		var fileExtensionType = '.csv';
+		var logFileAppendText = dataGroup.file_name_ending;
+		var fileExtensionType = dataGroup.file_extension;
 
 		var logFileName = logName + '-' + groupName + logFileAppendText + fileExtensionType;
-		// each folder will then contain files...
-		// [name] + [group_name] + "-config" + file_ending(.csv)
-		// [name] + [group_name] + "-data" + extraTextToBeUnique("_0" ... "_100") + file_ending(.csv)
 		var filePath = path.join(groupDir, logFileName);
 		
 		function onSuccess() {
-			console.log('Successfully initialized log file', groupName);
+			debugLogFiles('Successfully initialized log file', groupName);
 			defered.resolve(data_group);
 		}
 		function onError(err) {
-			console.log('Error initializing log file', groupName, err);
+			console.error('Error initializing log file', groupName, err);
 			defered.reject(data_group);
 		}
 
-		print('Initializing log file', groupName);
-		getUniqueDirectory(filePath)
+		debugLogFiles('Initializing log file', groupName, filePath);
+		getUniqueFilePath(filePath)
 		.then(getCreateLogFileWriteStream(dataGroup))
 		.then(onSuccess, onError);
 		return defered.promise;
@@ -525,7 +617,7 @@ function CREATE_DATA_LOGGER() {
 	function initializeLogFiles(bundle) {
 		var defered = q.defer();
 
-		print('Initializing log files');
+		debugLogFiles('Initializing log files');
 		var enabledGroupKeys = getEnabledDataGroupKeys();
 		var promises = enabledGroupKeys.map(initializeLogFile);
 
@@ -559,18 +651,26 @@ function CREATE_DATA_LOGGER() {
 		});
 		
 		function onSuccess() {
-			console.log('Successfully initialized log file header', groupName);
+			debugLogFiles('Successfully initialized log file header', groupName);
+
+			// Indicate that the file stream is active and ready to be written to.
+			self.logData[data_group].file_stream_active = true;
+
+			// At this point it is safe to re-set the number of lines written to
+			// the current file.
+			self.logData[data_group].num_written_lines = 0;
+
 			defered.resolve(data_group);
 		}
 
-		print('Initializing log file header', groupName);
+		debugLogFiles('Initializing log file header', groupName);
 		fileStream.write(fileData, onSuccess);
 		return defered.promise;
 	}
 	function initializeLogFileHeaders(bundle) {
 		var defered = q.defer();
 
-		print('Initializing log file headers');
+		debugLogFiles('Initializing log file headers');
 		var enabledGroupKeys = getEnabledDataGroupKeys();
 		var promises = enabledGroupKeys.map(initializeLogFileHeader);
 
@@ -589,15 +689,15 @@ function CREATE_DATA_LOGGER() {
 		var fileStream = dataGroup.file_stream;
 
 		function onSuccess() {
-			console.log('Successfully Finalized log file', groupName);
+			debugLogFiles('Successfully Finalized log file', groupName);
 			defered.resolve(data_group);
 		}
 		function onError(err) {
-			console.log('Error finalizing log file', groupName, err);
+			console.error('Error finalizing log file', groupName, err);
 			defered.reject(data_group);
 		}
 
-		print('Finalizing log file', groupName);
+		debugLogFiles('Finalizing log file', groupName);
 		finalizeFileWriteStream(fileStream)
 		.then(onSuccess, onError);
 		return defered.promise;
@@ -606,7 +706,7 @@ function CREATE_DATA_LOGGER() {
 		
 		var defered = q.defer();
 
-		print('Finalizing log files');
+		debugLogFiles('Finalizing log files');
 		var enabledGroupKeys = getEnabledDataGroupKeys();
 		var promises = enabledGroupKeys.map(finalizeLogFile);
 
@@ -639,6 +739,12 @@ function CREATE_DATA_LOGGER() {
 		// Finalize the data logger's statistics object.
 		finalizeStats();
 
+		var remainingData = {};
+		var enabledGroupKeys = getEnabledDataGroupKeys();
+		enabledGroupKeys.forEach(function(key) {
+			remainingData[key] = self.logData[key].file_stream_buffer;
+		});
+		debugDataSaving('Remaining Data', remainingData);
 		finalizeLogFiles(bundle)
 		.then(defered.resolve, defered.reject)
 		.catch(defered.reject)
@@ -650,13 +756,11 @@ function CREATE_DATA_LOGGER() {
 		return timeStamp.toString();
 	}
 
-	function saveNewData(data) {
-		print('Saving Data!!', data.groupKey);
-
+	function saveNewDataToBuffer(data) {
 		var groupData = self.logData[data.groupKey];
 		var line_ending = groupData.line_ending;
 		var value_separator = groupData.value_separator;
-		var fileStream = groupData.file_stream;
+		
 		var dataToWrite = '';
 		var dataBySerialNumber = data.data;
 		var serialNumbers = Object.keys(dataBySerialNumber);
@@ -670,7 +774,7 @@ function CREATE_DATA_LOGGER() {
 			var resultKeys = Object.keys(deviceData.results);
 			resultKeys.forEach(function(resultKey) {
 				var result = deviceData.results[resultKey];
-				print('Result', serialNumber, result);
+				debugDataSaving('Result', serialNumber, result);
 				if(result.str) {
 					dataToWrite += result.str + value_separator;
 				} else {
@@ -684,10 +788,61 @@ function CREATE_DATA_LOGGER() {
 		// Add the line ending text.
 		dataToWrite += line_ending;
 
-		var ok = fileStream.write(dataToWrite);
-		if(!ok) {
-			// TODO: handle this error case.
-			console.error('WRITING TO QUICKLY!!!!! HANDLE ME!!');
+		// Add the formatted data to the internal buffer.
+		groupData.file_stream_buffer.push(dataToWrite);
+	}
+	function saveNewData(data) {
+		debugDataSaving('Saving Data!!', data.groupKey, self.logData[data.groupKey].num_written_lines);
+
+		// Format data & add it to the file_stream_buffer
+		saveNewDataToBuffer(data);
+		
+		var groupKey = data.groupKey;
+		var groupData = self.logData[data.groupKey];
+		var file_stream_buffer = groupData.file_stream_buffer;
+		var fileStream = groupData.file_stream;
+		var isActive = groupData.file_stream_active;
+		var ok = true;
+		var isData = file_stream_buffer.length > 0;
+		var initializeNewFile = false;
+		/*
+		 * 1. While there is data to be written.
+		 * 2. the stream is healthy:
+		      https://nodejs.org/api/stream.html#stream_event_drain
+		 * 3. The stream buffer is active (not in the middle of changing files).
+		 *
+		 */
+		debugDataSaving('Writing data', isData, ok, isActive);
+		while((isData) && (ok) && (isActive)) {
+			// un-shift one line of data.
+			var dataToWrite = file_stream_buffer.shift(1);
+
+			ok = fileStream.write(dataToWrite);
+
+			// Update necessary values.
+			isData = file_stream_buffer > 0;
+			groupData.num_written_lines += 1;
+
+			// Detect if we should switch to a new file
+			if(groupData.num_written_lines >= groupData.numDataPoints) {
+				// De-activate the current file stream to break out of the loop.
+				isActive = false;
+				groupData.file_stream_active = false;
+
+				// Indicate that we need to switch to a new file.
+				initializeNewFile = true;
+			}
+		}
+
+		if(initializeNewFile) {
+			debugLogFiles('Switching to a new file:', groupData.num_written_lines);
+			finalizeLogFile(groupKey)
+			.then(initializeLogFile)
+			.then(initializeLogFileHeader)
+			.catch(function switchFileError(err) {
+				console.error('(data_logger.js) Error switching to new file.', err);
+			})
+			.done();
 		}
 	}
 	/* Externally Accessable functions */

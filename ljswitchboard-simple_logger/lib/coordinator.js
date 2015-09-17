@@ -124,7 +124,7 @@ function CREATE_COORDINATOR () {
 		self.emit(eventList.STOPPED_LOGGER, data);
 	};
 	this.onDataCollectorGroupData = function(data) {
-		print('in onDataCollectorGroupData', data);
+		print('in onDataCollectorGroupData', Object.keys(data));
 		self.updateStats(data);
 
 		// Send data to the dataLogger and dataReporter.
