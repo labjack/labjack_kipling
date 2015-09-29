@@ -1,0 +1,1 @@
+console.log('in fake nw.gui.js');
