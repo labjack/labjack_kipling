@@ -18,7 +18,7 @@
 	"basic_view": {
 		"name": "Basic Graph",
 		"view_type": "basic_graph",
-		"window_size": 100,
+		"window_size": 5,
 		"group": "basic_data_group"
 	},
 	"current_values_view": {
@@ -40,15 +40,49 @@
 		"1": {
 			"registers": [{
 				"name": "AIN0",
-				"format": "default"
+				"human_name": "Analog Input 0",
+				"format": "default",
+				"enable_logging": true,
+				"enable_view": true
 			}]
 		},
 		"2": {
 			"registers": [{
 				"name": "AIN0",
+				"human_name": "Analog Input 0",
 				"format": "custom_func",
-				"format_func": "console.log('Custom Func', val); return val;"
+				"format_func": "for(var i = 0; i < 9999; i++) {var a = 1; val = val + a;}",
+				"format_func": "val = val * 10",
+				"enable_logging": true,
+				"enable_view": true
 			}]
+		},
+		"defined_user_values": ["temp", "humidity", "promiseVal"],
+		"user_values": {
+			"temp": {
+				"name": "temp",
+				"human_name": "Temp. K",
+				"exec_method": "sync",
+				"func": " val = 273.15 + data['1'].results.AIN0.result",
+				"enable_logging": true,
+				"enable_view": true
+			},
+			"humidity": {
+				"name": "humidity",
+				"human_name": "RH %",
+				"exec_method": "async",
+				"func": "cb(80)",
+				"enable_logging": true,
+				"enable_view": true
+			},
+			"promiseVal": {
+				"name": "promiseVal",
+				"human_name": "Arbitrary Promise",
+				"exec_method": "q",
+				"func": "defered.resolve(data['1'].results.AIN0.result);",
+				"enable_logging": true,
+				"enable_view": true
+			}
 		},
 		
 		"logging_options": {

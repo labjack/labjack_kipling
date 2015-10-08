@@ -4,6 +4,7 @@ var util = require('util');
 var q = require('q');
 var async = require('async');
 var gcd = require('compute-gcd');
+var vm = require('vm');
 
 // Constants
 var COLLECTOR_MODES = {
@@ -39,6 +40,12 @@ var DATA_COLLECTOR_EVENTS = {
 	COLLECTING_DEVICE_DATA: 'COLLECTING_DEVICE_DATA',
 	COLLECTING_GROUP_DATA: 'COLLECTING_GROUP_DATA',
 	REPORTING_COLLECTED_DATA: 'REPORTING_COLLECTED_DATA',
+
+	/*
+	Events indicating when the data collector is executing user defined functions.
+	*/
+	EXECUTING_USER_FUNCTIONS: 'EXECUTING_USER_FUNCTIONS',
+	EXECUTING_USER_FUNCTION: 'EXECUTING_USER_FUNCTION',
 
 	/*
 	Event indicating that not all required devices were found.  Is fired once
@@ -125,6 +132,89 @@ function CREATE_DATA_COLLECTOR() {
 			});
 		});
 	};
+
+	function createUserValueFunction(execMethod, funcText, errors) {
+		var sandbox = {
+			val: 0,
+			console: console,
+		};
+		var context = new vm.createContext(sandbox);
+		var script;
+		try {
+			script = new vm.Script(funcText, {filename: 'format_func.vm'});
+		} catch(err) {
+			console.log('Tried to create a bad script', err);
+			errors.push(err);
+			script = new vm.Script('', {filename: 'format_func.vm'});
+		}
+
+		function executeUserFunc(groupData) {
+			var defered = q.defer();
+			 try {
+				sandbox.data = groupData;
+				if(execMethod === 'sync') {
+					// Enforce formatting scripts to finish in less than 50ms.
+					script.runInContext(context, {timeout: 50});
+					defered.resolve(sandbox.val);
+				} else if(execMethod === 'async') {
+					sandbox.cb = function(val) {
+						defered.resolve(val);
+					};
+					// Enforce formatting scripts to finish in less than 50ms.
+					script.runInContext(context, {timeout: 5000});
+
+				} else if(execMethod === 'q') {
+					sandbox.defered = defered;
+
+					script.runInContext(context, {timeout: 5000});
+				} else {
+					defered.reject(0);
+				}
+			} catch(err) {
+				defered.reject(err);
+			}
+
+			return defered.promise;
+		}
+
+		return executeUserFunc;
+	}
+
+	function initializeUserFunctions() {
+		var errors = [];
+		var data_group_keys = self.config.data_groups;
+		data_group_keys.forEach(function(data_group_key) {
+			var data_group = self.config[data_group_key];
+
+			// For each serial number, check each required register for any 
+			// formatting functions that need to be created.
+			// var serial_numbers = data_group.device_serial_numbers;
+			// serial_numbers.forEach(function(serial_number) {
+			// 	var registers = data_group[serial_number].registers;
+			// 	registers.forEach(function(reg) {
+			// 		if(reg.format_func) {
+			// 			reg.formatFunc = createFormattingFunction(reg.format_func, errors);
+
+			// 			// Example to execute format function
+			// 			// var newVal = reg.formatFunc(12);
+			// 		}
+			// 	});
+			// });
+
+			// For each custom register check to see if there are any functions
+			// that need to be created.
+			if(data_group.defined_user_values) {
+				var user_value_keys = data_group.defined_user_values;
+				user_value_keys.forEach(function(user_value_key) {
+					var userValue = data_group.user_values[user_value_key];
+					var execMethod = userValue.exec_method;
+					var func = userValue.func;
+					userValue.userFunc = createUserValueFunction(execMethod, func, errors);
+				});
+			}
+		});
+		return errors;
+	}
 	var saveLoggerConfigReference = function(config) {
 		var defered = q.defer();
 
@@ -140,6 +230,12 @@ function CREATE_DATA_COLLECTOR() {
 		// Determine what devices are required
 		saveRequiredDeviceSerialNumbers();
 		// self.requiredDeviceSerialNumbers;
+
+		// Create user functions.
+		var initErrors = initializeUserFunctions();
+		if(initErrors.length > 0) {
+			console.log('There were errors initializing user functions!');
+		}
 
 		// create the dataGroups array by getting the data group keys from the
 		// config's "data_group" variable.
@@ -362,11 +458,178 @@ function CREATE_DATA_COLLECTOR() {
 		};
 	};
 
+	this.reportCollectedData = function(dataCollectionObj) {
+		var defered = q.defer();
+
+		var requiredData = dataCollectionObj.requiredData;
+		var activeGroups = dataCollectionObj.activeGroups;
+		var serialNumbers = dataCollectionObj.serialNumbers;
+
+		// Organize what data needs to be given to each dataGroup.
+		var organizedData = dataCollectionObj.organizedData;
+		
+		// console.log('Started New Reads...');
+		
+		/*
+		Save a copy of the data that was acquired to make room for new
+		data.  This must be done after the each deviceDataCollector is
+		instructed to read new data so that it has a chance to report error
+		data.
+		*/
+		var oldData = JSON.parse(JSON.stringify(self.activeDataStore));
+
+		// Clear the activeDataStore
+		serialNumbers.forEach(function(serialNumber) {
+			requiredData[serialNumber].forEach(function(register) {
+				self.clearDataStoreValue(serialNumber, register);
+			});
+		});
+
+
+		var activeGroupKeys = Object.keys(activeGroups);
+		self.emit(self.eventList.REPORTING_COLLECTED_DATA, {
+			'data': activeGroupKeys
+		});
+
+		async.eachSeries(
+			activeGroupKeys,
+			function(activeGroupKey, callback) {
+				var organizedGroupData = {};
+
+				var activeGroup = activeGroups[activeGroupKey];
+				var serialNumbers = Object.keys(activeGroup);
+				serialNumbers.forEach(function(serialNumber) {
+					var organizedDeviceData = {};
+
+					// Get the devices data
+					var newDeviceData = oldData[serialNumber];
+
+					// Save timing data & error code.
+					organizedDeviceData.errorCode = newDeviceData.errorCode;
+					organizedDeviceData.time = newDeviceData.time;
+					organizedDeviceData.duration = newDeviceData.duration;
+					organizedDeviceData.interval = newDeviceData.interval;
+
+					var index = -1;
+					// Make room for acquired device data
+					organizedDeviceData.results = {};
+
+					var reqDeviceData = activeGroup[serialNumber];
+
+					var deviceDataIDs = Object.keys(reqDeviceData);
+					deviceDataIDs.forEach(function(deviceDataID) {
+						var reqReg = reqDeviceData[deviceDataID];
+						var regName = reqReg.name;
+						var regValue;
+						var formattedValue;
+
+						// Get the required data point & save it to the regValue
+						// variable.
+						regValue = newDeviceData[regName];
+
+						// Save the initial index value.
+						var saveDeviceData = false;
+						if(index < 0) {
+							saveDeviceData = true;
+						}
+						if(regValue.index < index) {
+							saveDeviceData = true;
+						}
+
+						if(saveDeviceData) {
+							index = regValue.index;
+							organizedDeviceData.errorCode = regValue.errorCode;
+							organizedDeviceData.time = regValue.time;
+							organizedDeviceData.duration = regValue.duration;
+							organizedDeviceData.interval = regValue.interval;
+						}
+
+						// console.log('Req Data', activeGroupKey, serialNumber, regName, regValue);
+
+						// Apply formatting to acquired data
+						formattedValue = regValue;
+						if(reqReg.formatFunc) {
+							formattedValue.result = reqReg.formatFunc(regValue.result);
+						}
+
+						// Organize the collected data.
+						organizedDeviceData.results[regName] = formattedValue;
+					});
+					organizedGroupData[serialNumber] = organizedDeviceData;
+				});
+				// console.log('Collected Group Data', organizedGroupData);
+
+				var promises = [];
+				var activeGroupObj = self.config[activeGroupKey];
+				if(activeGroupObj.defined_user_values) {
+					
+					// Report that we are executing user functions.
+					self.emit(self.eventList.EXECUTING_USER_FUNCTIONS, {
+						'groupKey': activeGroupKey,
+						'useFunctions': activeGroupObj.defined_user_values
+					});
+	
+					// Execute user functions
+					// Make room in the organizedGroupData object for user values.
+					organizedGroupData.userValues = {};
+					
+					var user_value_keys = activeGroupObj.defined_user_values;
+					var userValueKeys = [];
+					
+					user_value_keys.forEach(function(user_value_key) {
+						var userValue = activeGroupObj.user_values[user_value_key];
+						
+						// Report that we are executing the user funciton.
+						self.emit(self.eventList.EXECUTING_USER_FUNCTION, {
+							'functionName': userValue.name
+						});
+						userValueKeys.push(user_value_key);
+						promises.push(userValue.userFunc(organizedGroupData));
+					});
+				}
+
+				q.allSettled(promises)
+				.then(function(results) {
+					if(results) {
+						// Save the returned results into the organizedGroupData object.
+						// If there was an error use the default value of zero.
+						results.forEach(function(result, i) {
+							var valueKey = userValueKeys[i];
+							if(result.state === 'fulfilled') {
+								organizedGroupData.userValues[valueKey] = result.value;
+							} else {
+								var defaultVal = 0;
+								var userValue = activeGroupObj.user_values[valueKey];
+								if(userValue.default_value) {
+									defaultVal = userValue.default_value;
+								}
+								organizedGroupData.userValues[valueKey] = defaultVal;
+							}
+						});
+					}
+
+					// Report the collected group data
+					self.emit(self.eventList.COLLECTOR_GROUP_DATA, {
+						'groupKey': activeGroupKey,
+						'data': organizedGroupData
+					});
+
+					// Save organized group data to the organizedData object.
+					organizedData[activeGroupKey] = organizedGroupData;
+
+					callback();
+				});
+			}, function(err) {
+				// Report the collected data
+				self.emit(self.eventList.COLLECTOR_DATA, organizedData);
+				defered.resolve(dataCollectionObj);
+			});
+	};
 	this.dataCollectionCounter = 0;
 	var innerPerformDataCollection = function() {
 		var requiredData = {};
-
 		var activeGroups = {};
+		var organizedData = {};
 
 		self.dataGroupManagers.forEach(function(manager) {
 			var reqData = manager.getRequiredData();
@@ -414,117 +677,29 @@ function CREATE_DATA_COLLECTOR() {
 			);
 		});
 
-		var reportCollectedData = function() {
-			// console.log('Started New Reads...');
-			
-			/*
-			Save a copy of the data that was acquired to make room for new
-			data.  This must be done after the each deviceDataCollector is
-			instructed to read new data so that it has a chance to report error
-			data.
-			*/
-			var oldData = JSON.parse(JSON.stringify(self.activeDataStore));
-
-			// Clear the activeDataStore
-			serialNumbers.forEach(function(serialNumber) {
-				requiredData[serialNumber].forEach(function(register) {
-					self.clearDataStoreValue(serialNumber, register);
-				});
-			});
-
-			// Organize what data needs to be given to each dataGroup.
-			var organizedData = {};
-
-			var activeGroupKeys = Object.keys(activeGroups);
-			self.emit(self.eventList.REPORTING_COLLECTED_DATA, {
-				'data': activeGroupKeys
-			});
-			activeGroupKeys.forEach(function(activeGroupKey) {
-				var organizedGroupData = {};
-
-				var activeGroup = activeGroups[activeGroupKey];
-				var serialNumbers = Object.keys(activeGroup);
-				serialNumbers.forEach(function(serialNumber) {
-					var organizedDeviceData = {};
-
-					// Get the devices data
-					var newDeviceData = oldData[serialNumber];
-
-					// Save timing data & error code.
-					organizedDeviceData.errorCode = newDeviceData.errorCode;
-					organizedDeviceData.time = newDeviceData.time;
-					organizedDeviceData.duration = newDeviceData.duration;
-					organizedDeviceData.interval = newDeviceData.interval;
-
-					var index = -1;
-					// Make room for acquired device data
-					organizedDeviceData.results = {};
-
-					var reqDeviceData = activeGroup[serialNumber];
-					var deviceDataIDs = Object.keys(reqDeviceData);
-					deviceDataIDs.forEach(function(deviceDataID) {
-						var reqReg = reqDeviceData[deviceDataID];
-						var regName = reqReg.name;
-						var regValue;
-						var formattedValue;
-
-						// Get the required data point & save it to the regValue
-						// variable.
-						regValue = newDeviceData[regName];
-
-						// Save the initial index value.
-						var saveDeviceData = false;
-						if(index < 0) {
-							saveDeviceData = true;
-						}
-						if(regValue.index < index) {
-							saveDeviceData = true;
-						}
-
-						if(saveDeviceData) {
-							index = regValue.index;
-							organizedDeviceData.errorCode = regValue.errorCode;
-							organizedDeviceData.time = regValue.time;
-							organizedDeviceData.duration = regValue.duration;
-							organizedDeviceData.interval = regValue.interval;
-						}
-
-						// console.log('Req Data', activeGroupKey, serialNumber, regName, regValue);
-
-						// Apply formatting to acquired data
-						formattedValue = regValue;
-
-						// Organize the collected data.
-						organizedDeviceData.results[regName] = formattedValue;
-					});
-					organizedGroupData[serialNumber] = organizedDeviceData;
-				});
-	
-				// console.log('Collected Group Data', organizedGroupData);
-
-				// Report the collected group data
-				self.emit(self.eventList.COLLECTOR_GROUP_DATA, {
-					'groupKey': activeGroupKey,
-					'data': organizedGroupData
-				});
-
-				// Save organized group data to the organizedData object.
-				organizedData[activeGroupKey] = organizedGroupData;
-			});
-			// Report the collected data
-			self.emit(self.eventList.COLLECTOR_DATA, organizedData);
+		var dataCollectionObj = {
+			'requiredData': requiredData,
+			'activeGroups': activeGroups,
+			'organizedData': organizedData,
+			'serialNumbers': serialNumbers,
 		};
+
+
 		q.allSettled(promises)
 		.then(function() {
 			if(self.isFirstDataCollectionIteration) {
 				self.isFirstDataCollectionIteration = false;
 			} else {
-				reportCollectedData();
+				try {
+					self.reportCollectedData(dataCollectionObj);
+				} catch(err) {
+					console.log('Error reporting collected data', err, err.stack);
+				}
 			}
-		});
 
-		// Increment the counter
-		self.dataCollectionCounter += 1;
+			// Increment the counter
+			self.dataCollectionCounter += 1;
+		});
 	};
 
 	this.performDataCollection = function() {

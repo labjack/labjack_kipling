@@ -18,6 +18,7 @@ TODO #2
 
 Need to allow the config file to specify (on a register basis) whether to log the value should be logged or not.
 
-Create a "computed" values section and let the user define an array of computed values.  This will allow users to create scaling equations & not be so confused about everything that is going on...  The computed values get generated after all of the formatting functions have been applied. What to do if there is an error?????
+Create a "computed" values section and let the user define an array of computed values.  This will allow users to create scaling equations & not be so confused about everything that is going on...  The computed values get generated after all of the formatting functions have been applied. What to do if there is an error????? 
+ - Dave: Don't execute the user-value functions
 
 In each of the views users should be able to select specific device/registers/computed values that should be displayed.  This way they can choose to not display values that were needed to generate the computed results.  (This should actually be done in the definition.  Each "value" should have a reporting options object. "enable_logging", "enable_view", "enable_xxx"... cloud services/databases/etc. )

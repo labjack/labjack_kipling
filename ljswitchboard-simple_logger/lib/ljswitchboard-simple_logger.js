@@ -1,16 +1,20 @@
 
-
+/* Native Requirements */
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+
+/* 3rd party requirements */
 var q = require('q');
 var async = require('async');
-var ljm = require('labjack-nodejs');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
-var driver = ljm.driver();
-var data_parser = require('ljswitchboard-data_parser');
-var curatedDevice = require('ljswitchboard-ljm_device_curator');
-var modbus_map = require('ljswitchboard-modbus_map');
-var constants = modbus_map.getConstants();
+
+/* LJ requirements, not sure if these are used. */
+// var ljm = require('labjack-nodejs');
+// var driver_const = require('ljswitchboard-ljm_driver_constants');
+// var driver = ljm.driver();
+// var data_parser = require('ljswitchboard-data_parser');
+// var curatedDevice = require('ljswitchboard-ljm_device_curator');
+// var modbus_map = require('ljswitchboard-modbus_map');
+// var constants = modbus_map.getConstants();
 
 
 // Utilities to load and verify logger config files.

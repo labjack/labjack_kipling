@@ -1,6 +1,7 @@
 
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+
 var q = require('q');
 var async = require('async');
 
@@ -30,11 +31,11 @@ var DATA_LOGGER_EVENTS_MAP = [
 ];
 
 // Code that collects & reports data to listeners.
-var data_reporter = require('./data_reporter');
-var dataLReporterEvents = data_reporter.eventList;
-var DATA_REPORTER_EVENTS_MAP = [
+var view_data_reporter = require('./view_data_reporter');
+var dataReporterEvents = view_data_reporter.eventList;
+var VIEW_DATA_REPORTER_EVENTS_MAP = [
 	// Data reporter event indicating that the logger's "view" should be updated
-	{'eventName': 'NEW_VIEW_DATA', 'funcName': 'onDataReporterViewData'},
+	{'eventName': 'UPDATE_VIEW_DATA', 'funcName': 'onDataReporterViewData'},
 ];
 
 var eventList = require('./events').events;
@@ -47,6 +48,15 @@ function print() {
 	}
 	console.log.apply(console, dataToPrint);
 }
+function warn() {
+	var dataToPrint = [];
+	dataToPrint.push('** WARNING ** (coordinator.js)');
+	for(var i = 0; i < arguments.length; i++) {
+		dataToPrint.push(arguments[i]);
+	}
+	console.warn.apply(console, dataToPrint);
+}
+
 
 function CREATE_COORDINATOR () {
 	this.state = {
@@ -111,7 +121,7 @@ function CREATE_COORDINATOR () {
 	this.dataCollector = undefined;
 
 	this.dataLogger = undefined;
-	this.dataReporter = undefined;
+	this.viewDataReporter = undefined;
 
 	/* Define event handler functions that get linked to by the initializer. */
 	// Events that get linked to the DataCollector
@@ -124,12 +134,12 @@ function CREATE_COORDINATOR () {
 		self.emit(eventList.STOPPED_LOGGER, data);
 	};
 	this.onDataCollectorGroupData = function(data) {
-		print('in onDataCollectorGroupData', Object.keys(data));
+		print('in onDataCollectorGroupData', Object.keys(data), Object.keys(data.data));
 		self.updateStats(data);
 
 		// Send data to the dataLogger and dataReporter.
 		self.dataLogger.onNewData(data);
-		self.dataReporter.onNewData(data);
+		self.viewDataReporter.onNewData(data);
 
 		// Determine if the logger should stop based on the config file's
 		// "stop_trigger" attribute.
@@ -182,14 +192,14 @@ function CREATE_COORDINATOR () {
 		self.dataLogger = data_logger.create();
 
 		// Attach listeners to the dataLogger object.
-		DATA_COLLECTOR_EVENTS_MAP.forEach(getAttachListener(self.dataLogger));
+		DATA_LOGGER_EVENTS_MAP.forEach(getAttachListener(self.dataLogger));
 
 
-		// Initialize the dataReporter object.
-		self.dataReporter = data_reporter.create();
+		// Initialize the viewDataReporter object.
+		self.viewDataReporter = view_data_reporter.create();
 
-		// Attach listeners to the dataReporter object.
-		DATA_COLLECTOR_EVENTS_MAP.forEach(getAttachListener(self.dataReporter));
+		// Attach listeners to the viewDataReporter object.
+		VIEW_DATA_REPORTER_EVENTS_MAP.forEach(getAttachListener(self.viewDataReporter));
 
 
 		// Configure coordinator state to be initialized.
@@ -236,7 +246,7 @@ function CREATE_COORDINATOR () {
 			// Configure dataCollector object
 			self.dataCollector.configureDataCollector(config)
 			.then(self.dataLogger.configure, onError)
-			.then(self.dataReporter.configure, onError)
+			.then(self.viewDataReporter.configure, onError)
 			.then(onSuccess, onError)
 			.catch(onError)
 			.done();
@@ -253,6 +263,8 @@ function CREATE_COORDINATOR () {
 		} else {
 			self.config = undefined;
 			self.state.configured = false;
+
+			warn('Does not unconfigure sub-systems');
 			defered.resolve(bundle);
 			return defered.promise;
 		}
@@ -279,9 +291,12 @@ function CREATE_COORDINATOR () {
 			// Initialize the log stats tracker object.
 			self.initializeStats();
 
-			// Start the dataLogger, dataReporter, and dataCollector.
+			// Start the dataLogger, viewDataReporter, and dataCollector.
 			self.dataLogger.start(bundle)
-			.then(self.dataReporter.start, onError)
+			.then(self.viewDataReporter.start, onError)
+
+			// Once all of the data listeners have been started, start the
+			// data collector.
 			.then(self.dataCollector.startDataCollector, onError)
 			.then(onSuccess, onError)
 			.catch(onError)
@@ -310,10 +325,13 @@ function CREATE_COORDINATOR () {
 			// Finalize the log stats tracker object
 			self.finalizeStats();
 
-			// Stop the dataCollector, dataLogger, and dataReporter.
+			// Stop the dataCollector, viewDataReporter, and dataReporter.
 			self.dataCollector.stopDataCollector(bundle)
+
+			// Once the data collector has been stopped stop all of the data
+			// listeners.
 			.then(self.dataLogger.stop, onError)
-			.then(self.dataReporter.stop, onError)
+			.then(self.viewDataReporter.stop, onError)
 			.then(onSuccess, onError)
 			.catch(onError)
 			.done();

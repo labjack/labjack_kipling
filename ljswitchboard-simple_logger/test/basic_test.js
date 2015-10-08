@@ -1,4 +1,9 @@
 
+/*
+The basic_test tests the logger with a single logging configuration for basic
+debugging & development purposes.  The adv_test.js executes the logger and makes
+sure that it works with all of the test_config_files.
+*/
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
 var simpleLogger;
@@ -6,6 +11,7 @@ var driver_const = require('ljswitchboard-ljm_driver_constants');
 var mock_device_manager = require('./mock_device_manager');
 var mockDeviceManager = mock_device_manager.createDeviceManager();
 var log_display = require('./utils/log_display');
+var log_tester = require('./utils/log_tester');
 var path = require('path');
 
 /* Configure what devices to open/create */
@@ -48,7 +54,6 @@ function debugLog() {
 }
 
 function attachListeners(loggerObject) {
-	
 	var eventKeys = Object.keys(eventMap);
 	eventKeys.forEach(function(eventKey) {
 		var key = eventMap[eventKey];
@@ -108,6 +113,7 @@ exports.tests = {
 	},
 	'Attach Display to Logger': function(test) {
 		// log_display.initialize();
+		// log_tester.initialize();
 		test.done();
 
 	},

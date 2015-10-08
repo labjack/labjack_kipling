@@ -190,6 +190,7 @@ function CREATE_DATA_LOGGER() {
 		}
 
 		// Initialize the logData object.
+		self.logData = undefined;
 		self.logData = {};
 		
 		// Parse the config file for various data.
@@ -199,6 +200,9 @@ function CREATE_DATA_LOGGER() {
 			var dataGroup = self.config[data_group];
 			var logging_options = dataGroup.logging_options;
 
+			// Build an object that stores the enabled/disabled logging states.
+			var logStatus = {};
+
 			// Compile the header object that should be inserted above the data
 			// in each output file.
 			var dataCategories = [];
@@ -207,26 +211,52 @@ function CREATE_DATA_LOGGER() {
 			// Add device serial number/register data.
 			var serial_numbers = dataGroup.device_serial_numbers;
 			serial_numbers.forEach(function(serial_number) {
+				logStatus[serial_number] = {};
 				var serialNumber = dataGroup[serial_number];
 				var addedSerialNumber = false;
 				
 				// Add the device serial number to the data category array
-				dataCategories.push(serial_number.toString());
+				dataCategories.push('SN: ' + serial_number.toString());
 
 				// Add the time header.
 				dataNames.push('time');
 
 				// Add each required registers & align the data category array.
 				serialNumber.registers.forEach(function(register) {
-					// Align the device serial number to its data
-					dataCategories.push('');
-					dataNames.push(register.name);
+					// Save the enabled/disabled logging state.
+					logStatus[serial_number][register.name] = register.enable_logging;
+
+					// Check to see if the register is enabled for logging
+					if(register.enable_logging) {
+						// Align the device serial number to its data
+						dataCategories.push('');
+						dataNames.push(register.name);
+					}
 				});
 
 				// Add the error code header & align the data category.
 				dataCategories.push('');
 				dataNames.push('error code');
 			});
+
+			if(dataGroup.defined_user_values) {
+				var addedUserValueCategory = false;
+
+				var user_value_keys = dataGroup.defined_user_values;
+				var userValues = dataGroup.user_values;
+				user_value_keys.forEach(function(user_value_key) {
+					var userValue = userValues[user_value_key];
+					if(userValue.enable_logging) {
+						if(!addedUserValueCategory) {
+							dataCategories.push('User Values');
+							addedUserValueCategory = true;
+						} else {
+							dataCategories.push('');
+						}
+						dataNames.push(userValue.name);
+					}
+				})
+			}
 
 			// Define the header data as a combination of the dataCategories and
 			// dataNames arrays.
@@ -282,7 +312,7 @@ function CREATE_DATA_LOGGER() {
 					verify: function(){return true;},
 					coerce: function(val) {return val;},
 				}];
-			try {
+
 			dataMap.forEach(function(valMap) {
 				if(logging_config[valMap.config_str]) {
 					if(valMap.verify(logging_config[valMap.config_str])) {
@@ -295,9 +325,7 @@ function CREATE_DATA_LOGGER() {
 					}
 				}
 			});
-		} catch(err) {
-			console.log('Error...', err);
-		}
+
 			var lineEndingText = DEFAULTS.LINE_ENDING;
 			var valueSeparatorText = DEFAULTS.VALUE_SEPARATOR;
 			var fileNameEndingText = DEFAULTS.FILE_NAME_ENDING;
@@ -319,6 +347,7 @@ function CREATE_DATA_LOGGER() {
 				'file_stream': undefined,
 				'file_stream_buffer': [],
 				'num_written_lines': 0,
+				'logStatus': logStatus,
 			};
 		});
 	}
@@ -762,10 +791,19 @@ function CREATE_DATA_LOGGER() {
 		var value_separator = groupData.value_separator;
 		
 		var dataToWrite = '';
-		var dataBySerialNumber = data.data;
-		var serialNumbers = Object.keys(dataBySerialNumber);
+		var dataGroups = data.data;
+		var serialNumbers = [];
+		var userValues;
+		var groupKeys = Object.keys(dataGroups);
+		groupKeys.forEach(function(groupKey) {
+			if(groupKey !== 'userValues') {
+				serialNumbers.push(groupKey);
+			} else {
+				userValues = dataGroups[groupKey];
+			}
+		});
 		serialNumbers.forEach(function(serialNumber) {
-			var deviceData = dataBySerialNumber[serialNumber];
+			var deviceData = dataGroups[serialNumber];
 			
 			// Get and format the time stamp
 			var time = formatTimeStamp(deviceData.time);
@@ -773,18 +811,33 @@ function CREATE_DATA_LOGGER() {
 
 			var resultKeys = Object.keys(deviceData.results);
 			resultKeys.forEach(function(resultKey) {
+				// Determine if the result should be logged.
+				var logData = groupData.logStatus[serialNumber][resultKey];
+
 				var result = deviceData.results[resultKey];
-				debugDataSaving('Result', serialNumber, result);
-				if(result.str) {
-					dataToWrite += result.str + value_separator;
-				} else {
-					dataToWrite += result.result.toString() + value_separator;
+				debugDataSaving('Result', serialNumber, result, logData);
+				// If the result should be logged then save the result to the
+				// string to be written.
+				if(logData) {
+					if(result.str) {
+						dataToWrite += result.str + value_separator;
+					} else {
+						dataToWrite += result.result.toString() + value_separator;
+					}
 				}
 			});
 
 			dataToWrite += deviceData.errorCode.toString() + value_separator;
 		});
 
+		if(userValues) {
+			var userValueKeys = Object.keys(userValues);
+			debugDataSaving('Saving User Values', userValueKeys)
+			userValueKeys.forEach(function(userValueKey) {
+				debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
+				dataToWrite += userValues[userValueKey] + value_separator;
+			});
+		}
 		// Add the line ending text.
 		dataToWrite += line_ending;
 
@@ -795,7 +848,11 @@ function CREATE_DATA_LOGGER() {
 		debugDataSaving('Saving Data!!', data.groupKey, self.logData[data.groupKey].num_written_lines);
 
 		// Format data & add it to the file_stream_buffer
-		saveNewDataToBuffer(data);
+		try {
+			saveNewDataToBuffer(data);
+		} catch(err) {
+			console.error('(data_logger.js) Error executing saveNewDataToBuffer', err);
+		}
 		
 		var groupKey = data.groupKey;
 		var groupData = self.logData[data.groupKey];

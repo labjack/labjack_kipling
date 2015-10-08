@@ -1,7 +1,8 @@
 
 
+
 var testGroups = {
-	'basic_test': true,
+	'basic_test': false,
 	'config_loader': {
 		'basic': false,
 	},
@@ -9,7 +10,7 @@ var testGroups = {
 		'basic': false,
 	},
 	'device_data_collector': {
-		'basic': false,
+		'basic': true,
 	},
 	'data_group_manager': {
 		'basic': false,

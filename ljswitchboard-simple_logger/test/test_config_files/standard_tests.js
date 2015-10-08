@@ -24,7 +24,7 @@ exports.configurations = [
 	'extraReportedDataGroupsPattern':[],
 
 	'collectedGroupDataPattern': [{
-		'basic_data_group': {'1': ['AIN0'], '2': ['AIN0']},
+		'basic_data_group': {'1': ['AIN0'], '2': ['AIN0'], 'userValues': ['temp', 'humidity', 'promiseVal']},
 	}],
 	'extraCollectedGroupDataPattern':[],
 	'numExpectedPatterns': 4,

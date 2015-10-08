@@ -29,6 +29,9 @@ mockDeviceManager.configure([{
 var configurations;
 try {
 	configurations = require('../test_config_files/standard_tests').configurations;
+
+	// Only test the first configuration
+	// configurations = [configurations[0]];
 } catch(err) {
 	console.log('Error requiring configurations', err);
 	configurations = [];
@@ -175,14 +178,29 @@ function DATA_COLLECTOR_TESTER () {
 			var aggregatedGroupData = {};
 
 			var groupData = collectorData[groupName];
-			var serialNumbers = Object.keys(groupData);
+			var groupKeys = Object.keys(groupData);
+			var serialNumbers = [];
+			var userValuesArray = [];
+			// Exclude the userValues results.
+			groupKeys.forEach(function(groupKey) {
+				if(groupKey !== 'userValues') {
+					serialNumbers.push(groupKey);
+				} else {
+					userValuesArray = Object.keys(groupData[groupKey]);
+				}
+			});
+			
+			// Save the user values object if necessary.
+			if(userValuesArray.length > 0) {
+				aggregatedGroupData.userValues = userValuesArray;
+			}
+
 			serialNumbers.forEach(function(sn) {
 				var aggregatedDeviceData = [];
 
 				var deviceData = groupData[sn];
 				var results = deviceData.results;
 				var resultKeys = Object.keys(results);
-
 				resultKeys.forEach(function(resultKey) {
 					var result = results[resultKey];
 					// console.log('Aggregating...', groupName, sn, result.register, result.result);
@@ -192,11 +210,11 @@ function DATA_COLLECTOR_TESTER () {
 				// console.log('Device Data', aggregatedDeviceData);
 				aggregatedGroupData[sn] = aggregatedDeviceData;
 			});
+
 			// console.log('Group Data', aggregatedGroupData);
 			aggregatedData[groupName] = aggregatedGroupData;
 		});
 
-		// console.log('Collected Data', aggregatedData);
 		return aggregatedData;
 	};
 	this.testExecution = function(test) {

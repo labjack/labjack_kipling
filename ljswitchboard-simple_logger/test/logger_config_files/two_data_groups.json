@@ -46,7 +46,7 @@
 			"registers": [{
 				"name": "AIN0",
 				"format": "custom_func",
-				"format_func": "console.log('Custom Func', val); return val;"
+				"format_func": "val = val"
 			}]
 		}
 	},
