@@ -32,6 +32,7 @@ function innerLoadConfigFile (bundle) {
 				var str = data.toString();
 				try {
 					bundle.data = JSON.parse(str);
+					bundle.data.config_file_path = filePath;
 					defered.resolve(bundle);
 				} catch(parseError) {
 					bundle.err = {

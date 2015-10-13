@@ -3,9 +3,11 @@
 var q = require('q');
 var async = require('async');
 var vm = require('vm');
+var user_code_executor = require('./user_code_executor');
 
-function CREATE_DATA_GROUP_MANAGER(options) {
+function CREATE_DATA_GROUP_MANAGER(options, config) {
 	this.options = options;
+	this.config = config;
 
 	// this.currentDelay = options.group_delay;
 	this.currentDelay = 0;
@@ -19,22 +21,30 @@ function CREATE_DATA_GROUP_MANAGER(options) {
 		var sandbox = {
 			val: 0,
 		};
-		var context = new vm.createContext(sandbox);
-		var script;
-		try {
-			script = new vm.Script(funcText, {filename: 'format_func.vm'});
-		} catch(err) {
-			console.error('(data_group_manager.js) Tried to create a bad script', err);
-			errors.push(err);
-			script = new vm.Script('', {filename: 'format_func.vm'});
-		}
+
+		var executor = new user_code_executor.create(
+			config.config_file_path,
+			funcText,
+			sandbox,
+			{timeout: 500, filename: 'format_func.vm'}
+		);
+		
+		// var script;
+		// try {
+		// 	script = new vm.Script(funcText, {filename: 'format_func.vm'});
+		// } catch(err) {
+		// 	console.error('(data_group_manager.js) Tried to create a bad script', err);
+		// 	errors.push(err);
+		// 	script = new vm.Script('', {filename: 'format_func.vm'});
+		// }
 
 		function executeFormatter(val) {
 			var retVal;
 			sandbox.val = val;
 			try {
 				// Enforce formatting scripts to finish in less than 50ms.
-				script.runInContext(context, {timeout: 500});
+				// script.runInContext(context, {timeout: 500});
+				executor.run();
 				retVal = sandbox.val;
 			} catch(err) {
 				console.error('(data_group_manager.js) Error running script', err);
@@ -111,6 +121,6 @@ function CREATE_DATA_GROUP_MANAGER(options) {
 }
 
 
-exports.create = function(options) {
-	return new CREATE_DATA_GROUP_MANAGER(options);
+exports.create = function(options, config) {
+	return new CREATE_DATA_GROUP_MANAGER(options, config);
 };

@@ -157,7 +157,7 @@ exports.basic_tests = {
 	'create data_group_managers': function(test) {
 		configurations.forEach(function(config) {
 			config.managers = config.dataGroups.map(function(dataGroup) {
-				return data_group_manager.create(dataGroup);
+				return data_group_manager.create(dataGroup, config.data);
 			});
 		});
 		test.done();

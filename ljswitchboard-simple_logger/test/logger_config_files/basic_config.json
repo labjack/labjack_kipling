@@ -52,7 +52,7 @@
 				"human_name": "Analog Input 0",
 				"format": "custom_func",
 				"format_func": "for(var i = 0; i < 9999; i++) {var a = 1; val = val + a;}",
-				"format_func": "val = val * 10",
+				"format_func": "val = require('./file.js').run(val);",
 				"enable_logging": true,
 				"enable_view": true
 			}]
@@ -64,6 +64,7 @@
 				"human_name": "Temp. K",
 				"exec_method": "sync",
 				"func": " val = 273.15 + data['1'].results.AIN0.result",
+				"func": "val = require('./file.js').getTemp(data);",
 				"enable_logging": true,
 				"enable_view": true
 			},
@@ -71,7 +72,7 @@
 				"name": "humidity",
 				"human_name": "RH %",
 				"exec_method": "async",
-				"func": "cb(80)",
+				"func": "require('./sub_dir/sub_file.js').getHumidity(data, cb)",
 				"enable_logging": true,
 				"enable_view": true
 			},

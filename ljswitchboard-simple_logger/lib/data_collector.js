@@ -5,6 +5,7 @@ var q = require('q');
 var async = require('async');
 var gcd = require('compute-gcd');
 var vm = require('vm');
+var user_code_executor = require('./user_code_executor');
 
 // Constants
 var COLLECTOR_MODES = {
@@ -134,44 +135,63 @@ function CREATE_DATA_COLLECTOR() {
 	};
 
 	function createUserValueFunction(execMethod, funcText, errors) {
+
 		var sandbox = {
 			val: 0,
-			console: console,
 		};
-		var context = new vm.createContext(sandbox);
-		var script;
-		try {
-			script = new vm.Script(funcText, {filename: 'format_func.vm'});
-		} catch(err) {
-			console.log('Tried to create a bad script', err);
-			errors.push(err);
-			script = new vm.Script('', {filename: 'format_func.vm'});
+		var timeoutMS = 5000;
+		if(execMethod === 'sync') {
+			timeoutMS = 50;
 		}
+
+		var executor = new user_code_executor.create(
+			self.config.config_file_path,
+			funcText,
+			sandbox,
+			{timeout: timeoutMS}
+		);
+		// var context = new vm.createContext(sandbox);
+		// var script;
+		// try {
+		// 	script = new vm.Script(funcText, {filename: 'format_func.vm'});
+		// } catch(err) {
+		// 	console.log('Tried to create a bad script', err);
+		// 	errors.push(err);
+		// 	script = new vm.Script('', {filename: 'format_func.vm'});
+		// }
 
 		function executeUserFunc(groupData) {
 			var defered = q.defer();
+			function onSuccess(val) {
+				defered.resolve(val);
+			}
+			function onError(val) {
+				defered.reject(val);
+			}
 			 try {
-				sandbox.data = groupData;
+			 	// console.log('Executing user func', execMethod);
+				executor.sandbox.data = groupData;
 				if(execMethod === 'sync') {
 					// Enforce formatting scripts to finish in less than 50ms.
-					script.runInContext(context, {timeout: 50});
+					// script.runInContext(context, {timeout: 50});
+					executor.run();
 					defered.resolve(sandbox.val);
 				} else if(execMethod === 'async') {
-					sandbox.cb = function(val) {
-						defered.resolve(val);
-					};
+					executor.sandbox.cb = onSuccess;
 					// Enforce formatting scripts to finish in less than 50ms.
-					script.runInContext(context, {timeout: 5000});
+					// script.runInContext(context, {timeout: 5000});
+					executor.run();
 
 				} else if(execMethod === 'q') {
-					sandbox.defered = defered;
+					executor.sandbox.defered = defered;
 
-					script.runInContext(context, {timeout: 5000});
+					// script.runInContext(context, {timeout: 5000});
+					executor.run();
 				} else {
-					defered.reject(0);
+					onError(0);
 				}
 			} catch(err) {
-				defered.reject(err);
+				onError(err);
 			}
 
 			return defered.promise;
@@ -291,7 +311,7 @@ function CREATE_DATA_COLLECTOR() {
 
 		// Create one data_group_manager for each defined data_group.
 		self.config.dataGroups.forEach(function(dataGroup) {
-			self.dataGroupManagers.push(data_group_manager.create(dataGroup));
+			self.dataGroupManagers.push(data_group_manager.create(dataGroup, self.config));
 		});
 
 		defered.resolve(bundle);
