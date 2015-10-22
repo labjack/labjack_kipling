@@ -639,15 +639,26 @@ function device(useMockDevice) {
 	var waitForT7ProToInitialize = function(result) {
 		var defered = q.defer();
 		var numAttempts = 0;
-		var numSeconds = 8;
+		var numSeconds = 10;
 		var refreshRate = 500;
 		var maxNumAttempts = numSeconds * 1000/refreshRate;
-		var handleHardwareInstalled = function(newResult) {
+		var handleHardwareInstalled = function(newResults) {
+			var wifiFound = false;
+			var validWiFiVersion = false;
+			newResults.forEach(function(res) {
+				if(res.name === 'HARDWARE_INSTALLED') {
+					wifiFound = res.wifi;
+				} else if(res.name === 'WIFI_VERSION') {
+					if(res.val >= 3.12) {
+						validWiFiVersion = true;
+					}
+				}
+			});
 			numAttempts += 1;
 			if(numAttempts > maxNumAttempts) {
 				defered.resolve();
 			} else {
-				if(newResult.wifi) {
+				if(wifiFound && validWiFiVersion) {
 					defered.resolve();
 				} else {
 					setTimeout(refreshResults, refreshRate);
@@ -656,11 +667,12 @@ function device(useMockDevice) {
 		};
 
 		var refreshResults = function() {
-			// console.log('waiting for wifi to initialize', numAttempts);
-			self.iRead('HARDWARE_INSTALLED')
+			console.log('Really waiting...', numAttempts, maxNumAttempts);
+			self.iReadMany(['HARDWARE_INSTALLED','WIFI_VERSION'])
 			.then(handleHardwareInstalled, defered.reject);
 		};
-		if(result.wifi) {
+		// Force data to be re-read.
+		if(result.wifi && false) {
 			defered.resolve();
 		} else {
 			setTimeout(refreshResults, refreshRate);
@@ -675,18 +687,30 @@ function device(useMockDevice) {
 		1.0007,
 		1.0100,
 	];
+	function isFactoryFWVersion(fwToCheck) {
+		return factoryFirmwareVersions.some(function(factoryFW) {
+			if(factoryFW == fwToCheck) {
+				return true;
+			} else {
+				return false;
+			}
+		});
+	}
 	var waitForT7ToInitialize = function() {
 		var defered = q.defer();
 
 		var handleHardwareInstalled = function(result) {
+			console.log('Handling T7 Hardware installed', result.wifi);
 			if(result.isPro) {
+				console.log('We are a pro!');
 				// If we have a T7-Pro then we need to wait for wifi to
 				// initialize.
 				self.iRead('FIRMWARE_VERSION')
 				.then(function(firmwareVersion) {
+					console.log('Firmware Version', firmwareVersion.val);
 					if(firmwareVersion.val < 1) {
 						defered.resolve();
-					} else if(factoryFirmwareVersions.indexOf(firmwareVersion.val) < 0) {
+					} else if(isFactoryFWVersion(firmwareVersion.val)) {
 						waitForT7ProToInitialize(result)
 						.then(defered.resolve, defered.reject);
 					} else {

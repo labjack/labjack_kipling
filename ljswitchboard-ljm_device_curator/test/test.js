@@ -42,7 +42,7 @@ var basic_watcher_test = require('./basic_watcher_test');
 // Perform Generic tests on mock devices
 // exports.mock_device_test = mock_device_test.tests;								// Passing
 // exports.mock_device_defaults_cache_test = mock_device_defaults_cache_test.tests;// Passing
-exports.mock_device_attrs_test = mock_device_attrs_test.tests;
+// exports.mock_device_attrs_test = mock_device_attrs_test.tests;
 // exports.mock_device_upgrade_test = mock_device_upgrade_test.tests;
 // exports.multiple_mock_device_upgrade_test = multiple_mock_device_upgrade_test.tests;
 
@@ -51,7 +51,7 @@ exports.mock_device_attrs_test = mock_device_attrs_test.tests;
 // exports.t7_array_test = t7_array_test.tests;
 // exports.t7_check_calibration_test = t7_check_calibration_test.tests;			// Passing
 // exports.t7_read_recovery_fw_version_test = t7_read_recovery_fw_version_test.tests;
-// exports.t7_upgrade_test = t7_upgrade_test.tests;								// Passing
+exports.t7_upgrade_test = t7_upgrade_test.tests;								// Passing
 // exports.t7_multiple_device_upgrade_test = t7_multiple_device_upgrade_test.tests;
 // exports.t7_error_test = t7_error_test.tests;									// Passing
 // exports.t7_open_close_test = t7_open_close_test.tests;						// Passing

@@ -84,8 +84,17 @@ var device_tests = {
 			test.done();
 		});
 	},
+	'get wifi version': function(test) {
+		device.read('WIFI_VERSION')
+		.then(function(version) {
+			console.log('WiFi FW Version:', version);
+			test.done();
+		}, function(err) {
+			test.done();
+		});
+	},
 	'upgradeFirmware': function(test) {
-		var fwVersionNum = 1.0176;
+		var fwVersionNum = 1.0188;
 		var fwURL = fws[fwVersionNum.toFixed(4)];
 		console.log('  - fwURL (in test file)', fwURL);
 		var lastPercent = 0;
