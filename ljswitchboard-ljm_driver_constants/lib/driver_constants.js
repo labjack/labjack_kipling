@@ -93,6 +93,7 @@ exports.T7_EFAdd_EmerFirmwareImage			= 0x3E0000;
 exports.T7_HEAD_FIRST_FOUR_BYTES			= 0x4C4A4658;
 exports.T7_TARGET_OLD						= 100017001;
 exports.T7_TARGET							= 100007001;
+exports.T7_RECOVERY_TARGET					= 100007021;
 
 // Device Specific constants
 exports.T7_HDR_FLASH_PAGE_ERASE				= 1;
