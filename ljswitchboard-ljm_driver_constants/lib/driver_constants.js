@@ -98,6 +98,7 @@ exports.T7_RECOVERY_TARGET					= 100007021;
 // Device Specific constants
 exports.T7_HDR_FLASH_PAGE_ERASE				= 1;
 exports.T7_IMG_FLASH_PAGE_ERASE				= 120;
+exports.T7_RECOVERY_IMG_FLASH_PAGE_ERASE	= 32;
 exports.T7_IMG_HEADER_LENGTH				= 128;
 exports.T7_FLASH_BLOCK_WRITE_SIZE			= 8; 
 exports.T7_FLASH_PAGE_SIZE					= 4096;
