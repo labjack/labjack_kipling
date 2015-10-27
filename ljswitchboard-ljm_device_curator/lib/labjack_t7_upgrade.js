@@ -77,8 +77,8 @@ var CHECKPOINT_FIVE_PERCENT = 100;
 var RECOVERY_FIRMWARE_VERSIONS = [0.6602, 0.6604];
 
 function isRecoveryFirmwareVersion(versionToCheck) {
-    var isRecoveryVersion = RECOVERY_FIRMWARE_VERSIONS.forEach(function(fwV) {
-        if(versionToCheck == fwV) {
+    var isRecoveryVersion = RECOVERY_FIRMWARE_VERSIONS.some(function(fwV) {
+        if(parseFloat(versionToCheck) == parseFloat(fwV)) {
             return true;
         } else {
             return false;
@@ -381,12 +381,13 @@ function DeviceFirmwareBundle() {
 
     
     function interpretData(activeFW, primaryFW, recoveryFW) {
-        var activeFWStr = parseFloat(activeFW).toFixed(4);
-        var recoveryFWStr = parseFloat(recoveryFWStr).toFixed(4);
-        var isRecoveryFWLoaded = false;
-        if(activeFWStr === recoveryFWStr) {
-            isRecoveryFWLoaded = true;
-        }
+        // var activeFWStr = parseFloat(activeFW).toFixed(4);
+        // var recoveryFWStr = parseFloat(recoveryFW).toFixed(4);
+        // var isRecoveryFWLoaded = false;
+        // if(activeFWStr === recoveryFWStr) {
+        //     isRecoveryFWLoaded = true;
+        // }
+        var isRecoveryFWLoaded = isRecoveryFirmwareVersion(activeFW);
         return {
             'activeFW': parseFloat(activeFW),
             'primaryFW': parseFloat(primaryFW),

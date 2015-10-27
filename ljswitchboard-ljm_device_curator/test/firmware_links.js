@@ -2,6 +2,7 @@
 
 exports.firmwareLinks = {
 	'T7': {
+		'0.6602': 'https://labjack.com/sites/default/files/organized/special_firmware/T7/recovery_fw/T7recovery_006602_07232013.bin',
 		'0.6604': 'https://labjack.com/sites/default/files/organized/special_firmware/T7/recovery_fw/T7recovery_006604_2015-08-05.bin',
 		'1.0070': 'http://labjack.com/sites/default/files/2014/06/T7firmware_010070_2014-02-27.bin',
 		'1.0135': 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin',

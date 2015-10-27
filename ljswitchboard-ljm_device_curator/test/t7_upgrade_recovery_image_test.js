@@ -174,15 +174,23 @@ var device_tests = {
 		var deviceInfo = {};
 		device.iRead('FIRMWARE_VERSION').then(function(res) {
 			deviceInfo['Firmware Version'] = res.val;
-			device.getRecoveryFirmwareVersion()
+			device.getPrimaryFirmwareVersion()
 			.then(function(res) {
-				deviceInfo['Recovery Version'] = res;
-				console.log('  - FW Version Info:',deviceInfo);
-				test.done();
+				deviceInfo['Primary Version'] = res;
+				device.getRecoveryFirmwareVersion()
+				.then(function(res) {
+					deviceInfo['Recovery Version'] = res;
+					console.log('  - FW Version Info:',deviceInfo);
+					test.done();
+				}, function(err) {
+					console.log('Error', err);
+					test.done();
+				});
 			}, function(err) {
 				console.log('Error', err);
 				test.done();
 			});
+			
 		}, function(err) {
 			test.done();
 		});
