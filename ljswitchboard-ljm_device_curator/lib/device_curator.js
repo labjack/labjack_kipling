@@ -15,7 +15,7 @@ var driver_const = require('ljswitchboard-ljm_driver_constants');
 var lj_t7_upgrader = require('./labjack_t7_upgrade');
 var lj_t7_flash_operations = require('./t7_flash_operations');
 lj_t7_flash_operations.setDriverConst(ljm.driver_const);
-var lj_t7_get_recovery_fw_version = require('./t7_get_recovery_fw_version');
+var lj_t7_get_flash_fw_versions = require('./t7_get_flash_fw_versions');
 
 var lj_t7_cal_operations = require('./t7_calibration_operations');
 
@@ -667,7 +667,6 @@ function device(useMockDevice) {
 		};
 
 		var refreshResults = function() {
-			console.log('Really waiting...', numAttempts, maxNumAttempts);
 			self.iReadMany(['HARDWARE_INSTALLED','WIFI_VERSION'])
 			.then(handleHardwareInstalled, defered.reject);
 		};
@@ -682,7 +681,7 @@ function device(useMockDevice) {
 	};
 	var factoryFirmwareVersions = [
 		0.6602,
-		// 0.6604,
+		0.6604,
 		1.0069,
 		1.0007,
 		1.0100,
@@ -700,17 +699,14 @@ function device(useMockDevice) {
 		var defered = q.defer();
 
 		var handleHardwareInstalled = function(result) {
-			console.log('Handling T7 Hardware installed', result.wifi);
 			if(result.isPro) {
-				console.log('We are a pro!');
 				// If we have a T7-Pro then we need to wait for wifi to
 				// initialize.
 				self.iRead('FIRMWARE_VERSION')
 				.then(function(firmwareVersion) {
-					console.log('Firmware Version', firmwareVersion.val);
 					if(firmwareVersion.val < 1) {
 						defered.resolve();
-					} else if(isFactoryFWVersion(firmwareVersion.val)) {
+					} else if(!isFactoryFWVersion(firmwareVersion.val)) {
 						waitForT7ProToInitialize(result)
 						.then(defered.resolve, defered.reject);
 					} else {
@@ -2028,7 +2024,10 @@ function device(useMockDevice) {
 		}
 	};
 	this.getRecoveryFirmwareVersion = function() {
-		return lj_t7_get_recovery_fw_version.getVersion(self);
+		return lj_t7_get_flash_fw_versions.getRecoveryFWVersion(self);
+	};
+	this.getPrimaryFirmwareVersion = function() {
+		return lj_t7_get_flash_fw_versions.getPrimaryFWVersion(self);
 	};
 	this.getCalibrationStatus = function() {
 		var dt = self.savedAttributes.deviceType;
@@ -2140,7 +2139,7 @@ function device(useMockDevice) {
 	};
 	this.stopAllWatchers = function() {
 		return registerWatcher.stopAllWatchers();
-	}
+	};
 }
 util.inherits(device, EventEmitter);
 

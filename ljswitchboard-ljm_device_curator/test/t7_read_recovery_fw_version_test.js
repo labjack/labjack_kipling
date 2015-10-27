@@ -48,7 +48,7 @@ var device_tests = {
 	'openDevice': function(test) {
 		var td = {
 			'dt': 'LJM_dtT7',
-			'ct': 'LJM_ctANY',
+			'ct': 'LJM_ctUSB',
 			'id': 'LJM_idANY'
 		};
 		// td.ct = 'LJM_ctWIFI';
@@ -83,7 +83,7 @@ var device_tests = {
 	'get recovery fw version': function(test) {
 		device.getRecoveryFirmwareVersion()
 		.then(function(res) {
-			console.log('Succ', res);
+			console.log('Success! Recovery FW Version:', res);
 			test.done();
 		}, function(err) {
 			console.log('Error', err);

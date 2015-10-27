@@ -20,8 +20,50 @@ var DEBUG_CHECK_WRITE = true;
 var DEBUG_FIRMWARE_UPGRADE_PROCESS = false;
 var ALLOWED_IMAGE_INFO_DEVICE_TYPES = [
     driver_const.T7_TARGET_OLD,
-    driver_const.T7_TARGET
+    driver_const.T7_TARGET,
+    driver_const.T7_RECOVERY_TARGET,
 ];
+
+var UPGRADE_TARGET_FLASH_INFO = {};
+UPGRADE_TARGET_FLASH_INFO[driver_const.T7_TARGET_OLD.toString()] = {
+    'imageKey': driver_const.T7_EFkey_ExtFirmwareImage,
+    'imageAddress': driver_const.T7_EFAdd_ExtFirmwareImage,
+    'imageInfoKey': driver_const.T7_EFkey_ExtFirmwareImgInfo,
+    'imageInfoAddress': driver_const.T7_EFAdd_ExtFirmwareImgInfo,
+    'imagePageSize': driver_const.T7_IMG_FLASH_PAGE_ERASE,
+    'verifyFirmwareVersion': true,
+    'isRecoveryFW': false,
+};
+UPGRADE_TARGET_FLASH_INFO[driver_const.T7_TARGET.toString()] = {
+    'imageKey': driver_const.T7_EFkey_ExtFirmwareImage,
+    'imageAddress': driver_const.T7_EFAdd_ExtFirmwareImage,
+    'imageInfoKey': driver_const.T7_EFkey_ExtFirmwareImgInfo,
+    'imageInfoAddress': driver_const.T7_EFAdd_ExtFirmwareImgInfo,
+    'imagePageSize': driver_const.T7_IMG_FLASH_PAGE_ERASE,
+    'verifyFirmwareVersion': true,
+    'isRecoveryFW': false,
+};
+UPGRADE_TARGET_FLASH_INFO[driver_const.T7_RECOVERY_TARGET.toString()] = {
+    'imageKey': driver_const.T7_EFkey_EmerFirmwareImage,
+    'imageAddress': driver_const.T7_EFAdd_EmerFirmwareImage,
+    'imageInfoKey': driver_const.T7_EFkey_EmerFirmwareImgInfo,
+    'imageInfoAddress': driver_const.T7_EFAdd_EmerFirmwareImgInfo,
+    'imagePageSize': driver_const.T7_RECOVERY_IMG_FLASH_PAGE_ERASE,
+    'verifyFirmwareVersion': false,
+    'isRecoveryFW': true,
+};
+
+var DEFAULT_UPGRADE_TARGET_FLASH_INFO = {
+    'imageKey': driver_const.T7_EFkey_ExtFirmwareImage,
+    'imageAddress': driver_const.T7_EFAdd_ExtFirmwareImage,
+    'imageInfoKey': driver_const.T7_EFkey_ExtFirmwareImgInfo,
+    'imageInfoAddress': driver_const.T7_EFAdd_ExtFirmwareImgInfo,
+    'imagePageSize': driver_const.T7_IMG_FLASH_PAGE_ERASE,
+    'verifyFirmwareVersion': true,
+    'isRecoveryFW': false,
+};
+
+
 var EXPECTED_ZEROED_MEM_VAL = 4294967295; // 0xFFFFFFFF
 var EXPECTED_REBOOT_WAIT = 1000;
 var EXPECTED_FIRMWARE_UPDATE_TIME = 5000;
@@ -32,8 +74,18 @@ var CHECKPOINT_THREE_PERCENT = 85;
 var CHECKPOINT_FOUR_PERCENT = 90;
 var CHECKPOINT_FIVE_PERCENT = 100;
 
+var RECOVERY_FIRMWARE_VERSIONS = [0.6602, 0.6604];
 
-
+function isRecoveryFirmwareVersion(versionToCheck) {
+    var isRecoveryVersion = RECOVERY_FIRMWARE_VERSIONS.forEach(function(fwV) {
+        if(versionToCheck == fwV) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+    return isRecoveryVersion;
+}
 
 var nop = function(){};
 
@@ -105,19 +157,19 @@ function createSafeReject (deferred) {
  * @author Tadeck - http://stackoverflow.com/questions/8273047
 **/
 function range(start, stop, step) {
-    if (typeof stop=='undefined'){
+    if (typeof stop=='undefined') {
         // one param defined
         stop = start;
         start = 0;
     }
-    if (typeof step=='undefined'){
+    if (typeof step=='undefined') {
         step = 1;
     }
-    if ((step>0 && start>=stop) || (step<0 && start<=stop)){
+    if ((step>0 && start>=stop) || (step<0 && start<=stop)) {
         return [];
     }
     var result = [];
-    for (var i=start; step>0 ? i<stop : i>stop; i+=step){
+    for (var i=start; step>0 ? i<stop : i>stop; i+=step) {
         result.push(i);
     }
     return result;
@@ -130,13 +182,15 @@ function range(start, stop, step) {
  * Structure containing device and firmware information that is passed along the
  * pipeline of steps used to upgrade a device.
 **/
-function DeviceFirmwareBundle()
-{
+function DeviceFirmwareBundle() {
     var firmwareImageInformation = null;
     var firmwareImage = null;
     var deviceImage = null;
     var device = null;
     var curatedDevice = null;
+
+    var initialDeviceState = {};
+
     var version = null;
     var serial = null;
     var connectionType = null;
@@ -166,8 +220,7 @@ function DeviceFirmwareBundle()
      * @return {Buffer} A node standard library Buffer with the raw firmware
      *      file contents.
     **/
-    this.getFirmwareImage = function()
-    {
+    this.getFirmwareImage = function() {
         return firmwareImage;
     };
 
@@ -181,8 +234,7 @@ function DeviceFirmwareBundle()
      * @param {Buffer} newFirmwareImage A node standard library Buffer with the
      *      raw firmware (file) contents.
     **/
-    this.setFirmwareImage = function(newFirmwareImage)
-    {
+    this.setFirmwareImage = function(newFirmwareImage) {
         firmwareImage = newFirmwareImage;
     };
 
@@ -195,13 +247,37 @@ function DeviceFirmwareBundle()
      * @return {Object} Object with information about the image being written
      *      to the device.
     **/
-    this.getFirmwareImageInformation = function()
-    {
+    this.getFirmwareImageInformation = function() {
         return firmwareImageInformation;
     };
 
-    this.setConnectionType = function(newConnectionType)
-    {
+    function getUpgradeTargetFlashInfo() {
+        var upgradeTarget = firmwareImageInformation.intendedDevice;
+        var upgradeTargetStr = upgradeTarget.toString();
+        var info = UPGRADE_TARGET_FLASH_INFO[upgradeTargetStr];
+        // console.log('Returning Flash Info', info);
+        if(false) {
+            var keys = Object.keys(info);
+            keys.forEach(function(key) {
+                var  numStr = info[key].toString(16).toUpperCase();
+                console.log('Flash Info: ' + key, '0x' + numStr);
+            });
+        }
+        if(info) {
+            return info;
+        } else {
+            return DEFAULT_UPGRADE_TARGET_FLASH_INFO;
+        }
+    }
+    this.getUpgradeTargetFlashInfo = getUpgradeTargetFlashInfo;
+
+    function isLoadingRecoveryFW() {
+        var info = getUpgradeTargetFlashInfo();
+        return info.isRecoveryFW;
+    }
+    this.isLoadingRecoveryFW = isLoadingRecoveryFW;
+
+    this.setConnectionType = function(newConnectionType) {
         connectionType = newConnectionType;
     };
 
@@ -215,8 +291,7 @@ function DeviceFirmwareBundle()
      * @param {Object} newFirmwareImageInformation Object with parsed firmware
      *      image information.
     **/
-    this.setFirmwareImageInformation = function(newFirmwareImageInformation)
-    {
+    this.setFirmwareImageInformation = function(newFirmwareImageInformation) {
         firmwareImageInformation = newFirmwareImageInformation;
     };
 
@@ -228,8 +303,7 @@ function DeviceFirmwareBundle()
      *
      * @param {labjack-nodejs.device} newDevice The device to upgrade.
     **/
-    this.setDevice = function(newDevice)
-    {
+    this.setDevice = function(newDevice) {
         device = newDevice;
     };
 
@@ -247,8 +321,7 @@ function DeviceFirmwareBundle()
      * be upgraded.
      *
     **/
-    this.getDevice = function()
-    {
+    this.getDevice = function() {
         return device;
     };
 
@@ -265,8 +338,7 @@ function DeviceFirmwareBundle()
      * @return {float} The version of the firmware that is being written to the
      *      device as part of this upgrade.
     **/
-    this.getFirmwareVersion = function()
-    {
+    this.getFirmwareVersion = function() {
         return version;
     };
 
@@ -276,8 +348,7 @@ function DeviceFirmwareBundle()
      * @param {float} The version of the firmware that is being written to the
      *      device as part of this upgrade.
     **/
-    this.setFirmwareVersion = function(newVersion)
-    {
+    this.setFirmwareVersion = function(newVersion) {
         version = newVersion;
     };
 
@@ -290,8 +361,7 @@ function DeviceFirmwareBundle()
      * @param {float} newSerial The serial number of the device taht is being
      *      upgraded.
     **/
-    this.setSerialNumber = function(newSerial)
-    {
+    this.setSerialNumber = function(newSerial) {
         serial = newSerial;
     };
 
@@ -301,14 +371,90 @@ function DeviceFirmwareBundle()
      * Get the recorded serial number of the device that is being upgraded. This
      * serial number should be checked against during device re-enumeration.
     **/
-    this.getSerialNumber = function()
-    {
+    this.getSerialNumber = function() {
         return serial;
     };
 
-    this.getConnectionType = function ()
-    {
+    this.getConnectionType = function () {
         return connectionType;
+    };
+
+    
+    function interpretData(activeFW, primaryFW, recoveryFW) {
+        var activeFWStr = parseFloat(activeFW).toFixed(4);
+        var recoveryFWStr = parseFloat(recoveryFWStr).toFixed(4);
+        var isRecoveryFWLoaded = false;
+        if(activeFWStr === recoveryFWStr) {
+            isRecoveryFWLoaded = true;
+        }
+        return {
+            'activeFW': parseFloat(activeFW),
+            'primaryFW': parseFloat(primaryFW),
+            'recoveryFW': parseFloat(recoveryFW),
+            'isRecoveryFWLoaded': isRecoveryFWLoaded,
+        };
+    }
+    /**
+     * Functions to get and set the device firmware states.
+    **/
+    this.getInitialDeviceState = function() {
+        return initialDeviceState;
+    };
+    this.setInitialDeviceState = function(activeFW, primaryFW, recoveryFW) {
+        initialDeviceState = interpretData(activeFW, primaryFW, recoveryFW);
+    };
+    this.performDeviceReboot = function() {
+        /**
+         * Variables...
+         * 1. isLoadingRecoveryFW()
+         * 2. initialDeviceState.isRecoveryFWLoaded
+         *
+         * Cases...
+         * 1. We are loading a primary fw version & device is executing primary
+         * fw.  False, False -> we should re-boot.
+         * 2. We are loading recovery fw & device is executing recovery fw.
+         * True, True -> we should re-boot (just incase SPC & FIO3 are still
+         * connected)
+         * 3. We are loading a primary fw & device is executing recovery fw.
+         * False, True -> we should re-boot.
+         * 4. We are loading a recovery fw & device is executing primary fw.
+         * True, False -> We should not re-boot.
+        **/
+        var loadingRecoveryFW = isLoadingRecoveryFW();
+        var executingRecoveryFW = initialDeviceState.isRecoveryFWLoaded;
+        if(executingRecoveryFW) {
+            return true;
+        } else {
+            if(loadingRecoveryFW) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    };
+    this.verifyLoadedFirmwareVersion = function() {
+        /**
+         * We should only verify the loaded firmware version when:
+         * 1. We loaded a primary FW and the device was executing its primary fw.
+        **/
+        var loadingRecoveryFW = isLoadingRecoveryFW();
+        var executingRecoveryFW = initialDeviceState.isRecoveryFWLoaded;
+        if(!loadingRecoveryFW && !executingRecoveryFW) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    var tempDataStore = {};
+    this.clearTempDataStore = function() {
+        tempDataStore = {};
+    };
+    this.addTempDataStore = function(key, value) {
+        tempDataStore[key] = value;
+    };
+    this.getTempDataStore = function() {
+        return tempDataStore;
     };
 }
 
@@ -462,6 +608,81 @@ this.checkCompatibility = function(bundle)
     return deferred.promise;
 };
 
+/**
+ * Gets and updates the bundle with the currently loaded firmware version in ex
+ * flash.
+**/
+this.getLoadedPrimaryFW = function(bundle) {
+    var defered = q.defer();
+    function succFunc(res) {
+        bundle.addTempDataStore('primaryFW', res);
+        defered.resolve(bundle);
+    }
+    function errFunc(err) {
+        bundle.addTempDataStore('primaryFW', 0.000);
+        defered.resolve(bundle);
+    }
+
+    var curatedDevice = bundle.getCuratedDevice();
+    curatedDevice.getPrimaryFirmwareVersion()
+    .then(succFunc, succFunc).catch(errFunc);
+
+    return defered.promise;
+};
+
+this.getLoadedEmergencyFW = function(bundle) {
+    var defered = q.defer();
+    function succFunc(res) {
+        bundle.addTempDataStore('recoveryFW', res);
+        defered.resolve(bundle);
+    }
+    function errFunc(err) {
+        bundle.addTempDataStore('recoveryFW', 0.000);
+        defered.resolve(bundle);
+    }
+    
+    var curatedDevice = bundle.getCuratedDevice();
+    curatedDevice.getRecoveryFirmwareVersion()
+    .then(succFunc, succFunc).catch(errFunc);
+    return defered.promise;
+};
+this.getLoadedActiveFW = function(bundle) {
+    var defered = q.defer();
+    function succFunc(res) {
+        bundle.addTempDataStore('activeFW', res.val);
+        defered.resolve(bundle);
+    }
+    function errFunc(err) {
+        bundle.addTempDataStore('activeFW', 0.000);
+        defered.resolve(bundle);
+    }
+    
+    var curatedDevice = bundle.getCuratedDevice();
+    curatedDevice.iRead('FIRMWARE_VERSION')
+    .then(succFunc, errFunc).catch(errFunc);
+    return defered.promise;
+};
+this.getInitialDeviceFWState = function(bundle) {
+    var deferred = q.defer();
+    bundle.clearTempDataStore();
+    t7Upgrader.getLoadedActiveFW(bundle)
+    .then(t7Upgrader.getLoadedEmergencyFW)
+    .then(t7Upgrader.getLoadedPrimaryFW)
+    .then(function(retBundle) {
+        var fwData = retBundle.getTempDataStore();
+        retBundle.setInitialDeviceState(
+            fwData.activeFW,
+            fwData.primaryFW,
+            fwData.recoveryFW
+        );
+        // console.log(
+        //     'Finished in getInitialDeviceFWState',
+        //     JSON.stringify(retBundle.getInitialDeviceState())
+        // );
+        deferred.resolve(retBundle);
+    });
+    return deferred.promise;
+};
 
 /**
  * Erases n number of flash pages on the device within the provided bundle.
@@ -474,8 +695,7 @@ this.checkCompatibility = function(bundle)
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
-this.eraseFlash = function(bundle, startAddress, numPages, key)
-{
+this.eraseFlash = function(bundle, startAddress, numPages, key) {
     var deferred = q.defer();
 
     var device = bundle.getDevice();
@@ -511,15 +731,17 @@ this.eraseFlash = function(bundle, startAddress, numPages, key)
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
-this.eraseImage = function(bundle)
-{
+this.eraseImage = function(bundle) {
     var eraseImageDefered = q.defer();
+    var info = bundle.getUpgradeTargetFlashInfo();
+    //imagePageSize
+    //
 
     t7Upgrader.eraseFlash(
         bundle,
-        driver_const.T7_EFAdd_ExtFirmwareImage,
-        driver_const.T7_IMG_FLASH_PAGE_ERASE,
-        driver_const.T7_EFkey_ExtFirmwareImage
+        info.imageAddress,
+        info.imagePageSize,//driver_const.T7_IMG_FLASH_PAGE_ERASE,
+        info.imageKey
     ).then(
         function(bundle) {
             eraseImageDefered.resolve(bundle);
@@ -546,12 +768,12 @@ this.eraseImage = function(bundle)
 this.eraseImageInformation = function(bundle)
 {
     var eraseImageInformationDefered = q.defer();
-
+    var info = bundle.getUpgradeTargetFlashInfo();
     t7Upgrader.eraseFlash(
         bundle,
-        driver_const.T7_EFAdd_ExtFirmwareImgInfo,
+        info.imageInfoAddress,
         driver_const.T7_HDR_FLASH_PAGE_ERASE,
-        driver_const.T7_EFkey_ExtFirmwareImgInfo
+        info.imageInfoKey
     ).then(
         function(bundle) {
             eraseImageInformationDefered.resolve(bundle);
@@ -805,9 +1027,10 @@ this.readImage = function(bundle)
     var numberOfIntegers = driver_const.T7_IMG_FLASH_PAGE_ERASE *
         driver_const.T7_FLASH_PAGE_SIZE / 4;
 
+    var info = bundle.getUpgradeTargetFlashInfo();
     t7Upgrader.readFlash(
         bundle,
-        driver_const.T7_EFAdd_ExtFirmwareImage,
+        info.imageAddress,
         numberOfIntegers,
         driver_const.T7_FLASH_BLOCK_WRITE_SIZE
     ).then(
@@ -833,9 +1056,10 @@ this.readImageInformation = function(bundle)
     var numberOfIntegers = driver_const.T7_HDR_FLASH_PAGE_ERASE *
         driver_const.T7_FLASH_PAGE_SIZE / 4;
 
+    var info = bundle.getUpgradeTargetFlashInfo();
     t7Upgrader.readFlash(
         bundle,
-        driver_const.T7_EFAdd_ExtFirmwareImgInfo,
+        info.imageInfoAddress,
         numberOfIntegers,
         driver_const.T7_FLASH_BLOCK_WRITE_SIZE
     ).then(
@@ -958,12 +1182,13 @@ this.writeImage = function(minPercent, maxPercent) {
         curScaling = perecentScaleFactor;
         curOffset = minPercent;
 
+        var info = bundle.getUpgradeTargetFlashInfo();
         t7Upgrader.writeFlash(
             bundle,
-            driver_const.T7_EFAdd_ExtFirmwareImage,
+            info.imageAddress,
             numberOfIntegers,
             driver_const.T7_FLASH_BLOCK_WRITE_SIZE,
-            driver_const.T7_EFkey_ExtFirmwareImage,
+            info.imageKey,
             bundle.getFirmwareImage()
         ).then(
             function (memoryContents) {
@@ -1005,12 +1230,13 @@ this.writeImageInformation = function(minPercent, maxPercent)
         curScaling = perecentScaleFactor;
         curOffset = minPercent;
 
+        var info = bundle.getUpgradeTargetFlashInfo();
         t7Upgrader.writeFlash(
             bundle,
-            driver_const.T7_EFAdd_ExtFirmwareImgInfo,
+            info.imageInfoAddress,
             numberOfIntegers,
             driver_const.T7_FLASH_BLOCK_WRITE_SIZE,
-            driver_const.T7_EFkey_ExtFirmwareImgInfo,
+            info.imageInfoKey,
             rawImageInfo
         ).then(
             function (memoryContents) {
@@ -1067,104 +1293,118 @@ this.checkImageWrite = function(bundle)
  * @return {q.promise} Promise that resolves to the provided bundle after the
  *      upgrade and reboot has started.
 **/
-this.restartAndUpgrade = function(bundle)
-{
+this.restartAndUpgrade = function(bundle) {
     var deferred = q.defer();
-    var device = bundle.getDevice();
-    var self = this;
-    device.write(
-        driver_const.T7_MA_REQ_FWUPG,
-        driver_const.T7_REQUEST_FW_UPGRADE,
-        createSafeReject(deferred),
-        function () {
-            deferred.resolve(bundle);
-        }
-    );
+    if(bundle.performDeviceReboot()) {
+        var device = bundle.getDevice();
+        var self = this;
+        device.write(
+            driver_const.T7_MA_REQ_FWUPG,
+            driver_const.T7_REQUEST_FW_UPGRADE,
+            createSafeReject(deferred),
+            function () {
+                deferred.resolve(bundle);
+            }
+        );
+    } else {
+        deferred.resolve(bundle);
+    }
     return deferred.promise;
 };
 this.closeDevice = function(bundle) {
     var deferred = q.defer();
-    var device = bundle.getDevice();
-    var curatedDevice = bundle.getCuratedDevice();
-    curatedDevice.declareDeviceDisconnected();
-    var attributes = curatedDevice.savedAttributes;
-    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
-        console.log(
-            'Closing Device',
-            device.handle,
-            // Object.keys(attributes),
-            attributes.identifierString,
-            attributes.deviceTypeString,
-            attributes.connectionTypeString
-        );
-    }
-    device.close(function(err) {
-        deferred.reject(bundle);
-    }, function() {
-        deferred.resolve(bundle);
-    });
-    return deferred.promise;
-};
-this.forceClose = function(bundle) {
-    var deferred = q.defer();
-
-    var executeCode = true;
-    if(typeof(bundle) === 'object') {
-        var keys = Object.keys(bundle);
-        if(keys.length == 2) {
-            if(keys[0] === 'message', keys[1] === 'error') {
-                executeCode = false;
-            }
-        } else if(keys.length == 3) {
-            if(keys[0] === 'message', keys[1] === 'error', keys[2] === 'errorInfo') {
-                executeCode = false;
-            }
-        } else if(keys.length == 4) {
-            if(keys[0] === 'message', keys[1] === 'error', keys[2] === 'errorInfo', keys[3] === 'errorMessage') {
-                executeCode = false;
-            }
-        }
-    }
-    if(executeCode) {
-        var curatedDevice = bundle.getCuratedDevice();
-        var attributes = curatedDevice.getDeviceAttributes();
-        console.error(
-            'Force Closing Device',
-            device,
-            device.handle,
-            attributes,
-            attributes.identifierString,
-            attributes.deviceTypeString,
-            attributes.connectionTypeString
-        );
-        
+    if(bundle.performDeviceReboot()) {
         var device = bundle.getDevice();
+        var curatedDevice = bundle.getCuratedDevice();
+        curatedDevice.declareDeviceDisconnected();
+        var attributes = curatedDevice.savedAttributes;
         if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
             console.log(
-                'Device Info',
+                'Closing Device',
                 device.handle,
-                attributes,
+                // Object.keys(attributes),
                 attributes.identifierString,
                 attributes.deviceTypeString,
                 attributes.connectionTypeString
             );
         }
         device.close(function(err) {
-            deferred.resolve(bundle);
+            deferred.reject(bundle);
         }, function() {
             deferred.resolve(bundle);
         });
     } else {
-        deferred.reject(bundle);
+        deferred.resolve(bundle);
+    }
+    return deferred.promise;
+};
+this.forceClose = function(bundle) {
+    var deferred = q.defer();
+    if(bundle.performDeviceReboot()) {
+        var executeCode = true;
+        if(typeof(bundle) === 'object') {
+            var keys = Object.keys(bundle);
+            if(keys.length == 2) {
+                if(keys[0] === 'message', keys[1] === 'error') {
+                    executeCode = false;
+                }
+            } else if(keys.length == 3) {
+                if(keys[0] === 'message', keys[1] === 'error', keys[2] === 'errorInfo') {
+                    executeCode = false;
+                }
+            } else if(keys.length == 4) {
+                if(keys[0] === 'message', keys[1] === 'error', keys[2] === 'errorInfo', keys[3] === 'errorMessage') {
+                    executeCode = false;
+                }
+            }
+        }
+        if(executeCode) {
+            var curatedDevice = bundle.getCuratedDevice();
+            var attributes = curatedDevice.getDeviceAttributes();
+            console.error(
+                'Force Closing Device',
+                device,
+                device.handle,
+                attributes,
+                attributes.identifierString,
+                attributes.deviceTypeString,
+                attributes.connectionTypeString
+            );
+            
+            var device = bundle.getDevice();
+            if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+                console.log(
+                    'Device Info',
+                    device.handle,
+                    attributes,
+                    attributes.identifierString,
+                    attributes.deviceTypeString,
+                    attributes.connectionTypeString
+                );
+            }
+            device.close(function(err) {
+                deferred.resolve(bundle);
+            }, function() {
+                deferred.resolve(bundle);
+            });
+        } else {
+            deferred.reject(bundle);
+        }
+    } else {
+        deferred.resolve(bundle);
     }
     return deferred.promise;
 };
 this.pauseForClose = function(bundle) {
     var deferred = q.defer();
-    var continueExec = function() {
+    if(bundle.performDeviceReboot()) {
+        var continueExec = function() {
+            deferred.resolve(bundle);
+        };
+        setTimeout(continueExec, EXPECTED_FIRMWARE_UPDATE_TIME);
+    } else {
         deferred.resolve(bundle);
-    };
-    setTimeout(continueExec, EXPECTED_FIRMWARE_UPDATE_TIME);
+    }
     return deferred.promise;
 };
 
@@ -1321,32 +1561,37 @@ this.checkNewFirmware = function(bundle)
             device.isHandleValid
         );
     }
-    device.read('FIRMWARE_VERSION',
-        createSafeReject(deferred),
-        function (firmwareVersion) {
-            if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
-                console.log('t7_upgrade.js - Reported Firmware Version', firmwareVersion.toFixed(4));
+    var verifyFWVersion = bundle.verifyLoadedFirmwareVersion();
+    if(verifyFWVersion) {
+        device.read('FIRMWARE_VERSION',
+            createSafeReject(deferred),
+            function (firmwareVersion) {
+                if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+                    console.log('t7_upgrade.js - Reported Firmware Version', firmwareVersion.toFixed(4));
+                }
+                var dif = bundle.getFirmwareVersion() - firmwareVersion;
+                if(Math.abs(dif) > 0.0001) {
+                    var errorMsg = 'New firmware version does not reflect upgrade.';
+                    deferred.reject(new Error(errorMsg));
+                } else {
+                    deferred.resolve(bundle);
+                }
+                // if(Math.abs(dif) > 0.0001) {
+                //     var errorMsg = 'New firmware version does not reflect upgrade.';
+                //     console.error('Reported Firmware Version',firmwareVersion);
+                //     if(bundle.getFirmwareVersion() > 0.96) {
+                //         deferred.reject(new Error(errorMsg))
+                //     } else {
+                //         deferred.resolve(bundle);
+                //     }
+                // } else {
+                //     deferred.resolve(bundle);
+                // }
             }
-            var dif = bundle.getFirmwareVersion() - firmwareVersion;
-            if(Math.abs(dif) > 0.0001) {
-                var errorMsg = 'New firmware version does not reflect upgrade.';
-                deferred.reject(new Error(errorMsg));
-            } else {
-                deferred.resolve(bundle);
-            }
-            // if(Math.abs(dif) > 0.0001) {
-            //     var errorMsg = 'New firmware version does not reflect upgrade.';
-            //     console.error('Reported Firmware Version',firmwareVersion);
-            //     if(bundle.getFirmwareVersion() > 0.96) {
-            //         deferred.reject(new Error(errorMsg))
-            //     } else {
-            //         deferred.resolve(bundle);
-            //     }
-            // } else {
-            //     deferred.resolve(bundle);
-            // }
-        }
-    );
+        );
+    } else {
+        deferred.resolve(bundle);
+    }
 
     return deferred.promise;
 };
@@ -1596,6 +1841,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
 
     bundle.setProgressListener(progressListener);
 
+
     t7Upgrader.readFirmwareFile(firmwareFileLocation, bundle) //reportError('readingFirmwareFile')
     .then(injectDevice, reportError('readingFirmwareFile'))
     .then(saveStartupConfigsFWCheck(), reportError('injectDevice'))
@@ -1604,7 +1850,8 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
     .then(toggleWiFi('disable'), reportError('readWiFiStatus'))
     .then(t7Upgrader.checkCompatibility, reportError('disablingWiFi'))
     .then(updateProgress(CHECKPOINT_ONE_PERCENT), reportError('checkCompatibility'))
-    .then(updateStatusText('Erasing image...'), reportError('updateProgress'))
+    .then(t7Upgrader.getInitialDeviceFWState, reportError('updateProgress'))
+    .then(updateStatusText('Erasing image...'), reportError('getInitialDeviceFWState'))
     .then(t7Upgrader.eraseImage, reportError('updateStatusText'))
     .then(t7Upgrader.eraseImageInformation, reportError('eraseImage'))
     //.then(t7Upgrader.checkErase, reportError)

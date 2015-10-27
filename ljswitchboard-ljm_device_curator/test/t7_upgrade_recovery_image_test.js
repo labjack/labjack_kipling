@@ -94,8 +94,7 @@ var device_tests = {
 		});
 	},
 	'upgradeFirmware': function(test) {
-		var fwVersionNum = 1.0188;
-		// var fwVersionNum = 0.6604;
+		var fwVersionNum = 0.6604;
 		var fwURL = fws[fwVersionNum.toFixed(4)];
 		console.log('  - fwURL:', fwURL);
 		var lastPercent = 0;
@@ -138,13 +137,21 @@ var device_tests = {
 				// 	ljmDevice.isHandleValid
 				// );
 
-				// Make sure that the device disconnect & reconnect events get
-				// fired.
-				test.ok(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
-				test.ok(deviceReconnectEventReceived, 'Reconnect event should have been detected');
-				device.read('FIRMWARE_VERSION')
+				device.getRecoveryFirmwareVersion()
 				.then(function(res) {
-					test.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
+					try {
+						console.log('  - Currently Loaded Recovery FW', res);
+						test.strictEqual(
+							parseFloat(res).toFixed(4),
+							parseFloat(fwVersionNum).toFixed(4),
+							'Firmware Not Upgraded');
+						test.done();
+					} catch(err) {
+						console.log('Error', err);
+						test.done();
+					}
+				}, function(err) {
+					console.log('Error', err);
 					test.done();
 				});
 			}, function(err) {

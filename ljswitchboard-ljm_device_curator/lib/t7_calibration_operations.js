@@ -330,6 +330,7 @@ exports.getDeviceCalibrationStatus = function(curatedDevice) {
     // Read the calibration of a device, starting at memory address 0x3C4000 hex 
     // and reading 41*4 bytes of data.  Aka read 41 integers (4 bytes each) 
     // worth of data.
+    console.log('In get cal status', T7_NominalCalValues.length);
     curatedDevice.readFlash(0x3C4000, 41)
     .then(getInterpretFlashResults(curatedDevice), getErrFunc('readingFlash'))
     .then(getAndInterpretAINResults(curatedDevice), getErrFunc('interpretingFlashResults'))
