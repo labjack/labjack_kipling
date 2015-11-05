@@ -29,6 +29,9 @@ var bufferRegisters = [
 	// Digit registers:
 	'DGT_FLASH_READ',
 	'DGT_FLASH_WRITE',
+
+	// This is a special register.  It has to be read 7 bytes at a time to get
+	// the complete YMD-weekday-HMS time stamp.
 	'DGT_LOG_START_TIME',
 ];
 
