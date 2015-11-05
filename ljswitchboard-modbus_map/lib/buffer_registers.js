@@ -21,12 +21,15 @@ var bufferRegisters = [
 
 	'ASYNCH_DATA_RX',
 	'ASYNCH_DATA_TX',
-	'DGT_FLASH_READ',
-	'DGT_FLASH_WRITE',
 	'USER_RAM_FIFO#(0:3)_DATA_U16',
 	'USER_RAM_FIFO#(0:3)_DATA_U32',
 	'USER_RAM_FIFO#(0:3)_DATA_I32',
 	'USER_RAM_FIFO#(0:3)_DATA_F32',
+
+	// Digit registers:
+	'DGT_FLASH_READ',
+	'DGT_FLASH_WRITE',
+	'DGT_LOG_START_TIME',
 ];
 
 exports.bufferRegisters = bufferRegisters;
