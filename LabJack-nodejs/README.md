@@ -1,6 +1,6 @@
 LabJack-nodejs
 ==============
-'LabJack-nodejs' makes LabJack's [LJM library](http://labjack.com/ljm) available for node.js.  The library uses [node-ffi](https://www.npmjs.com/package/node-ffi) to link to the LabJackLJM.dll or appropriate .dynlib file that must be installed with one of [LabJack's installers](https://labjack.com/support/software/installers/ljm).  Currently, they are available for Windows, Mac OS X, Linux 32-bit & 64-bit, and a few builds for ARMv6 and ARMV7 architectures.
+'LabJack-nodejs' makes LabJack's [LJM library](http://labjack.com/ljm) available for node.js.  The library uses [ffi](https://www.npmjs.com/package/ffi) to link to the LabJackLJM.dll or appropriate .dynlib file that must be installed with one of [LabJack's installers](https://labjack.com/support/software/installers/ljm).  Currently, they are available for Windows, Mac OS X, Linux 32-bit & 64-bit, and a few builds for ARMv6 and ARMV7 architectures.
 
 This library exposes the LJM driver slightly different than our standard [LJM Library](https://labjack.com/support/software/examples/ljm) wrappers because it was created primarily for use in Kipling.  If this library were to be re-written it would be split into two modules, one that directly exposes the LJM Library functions, and another that performs some of the abstractions.  A breif summary of how this library exposes the LJM Library:
  * Created two different objects, device.js and driver.js, that can be imported individually.
@@ -20,7 +20,8 @@ Requirements
 
 * LabJack's [LJM Library](https://labjack.com/support/software/installers/ljm).
 * Ability to build native modules, for windows this requires visual studio.
-* Look at the [node-ffi](https://www.npmjs.com/package/node-ffi) library for more requirements.
+* Look at the [ffi](https://www.npmjs.com/package/ffi) library for more requirements.
+* Look at the [node-gyp installation notes](https://github.com/nodejs/node-gyp#installation) for various requirements.
 * Also look at the [ref](https://www.npmjs.com/package/ref) library as it too is a native module.
 
 Installation
