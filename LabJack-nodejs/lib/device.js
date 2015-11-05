@@ -861,7 +861,8 @@ exports.labjack = function () {
 		var numValues = numReads;
 		var addressType = driver_const.LJM_BYTE;
 		var info = self.constants.getAddressInfo(address, 'R');
-		var expectedReturnType = info.type;
+		// var expectedReturnType = info.type;
+		addressType = info.type;
 		var isDirectionValid = info.directionValid == 1;
 		var isBufferRegister = false;
 		if(info.data) {
@@ -938,6 +939,7 @@ exports.labjack = function () {
 		var addressType = driver_const.LJM_BYTE;
 		var info = self.constants.getAddressInfo(address, 'R');
 		var expectedReturnType = info.type;
+		addressType = info.type;
 		var isDirectionValid = info.directionValid == 1;
 		var isBufferRegister = false;
 		var retData = [];
