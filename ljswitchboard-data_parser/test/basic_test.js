@@ -470,6 +470,79 @@ exports.tests = {
 		test.deepEqual(results, reqResults, 'systemEnabled/Disabled registers failed');
 		test.done();
 	},
+	'check DGT_LOG_ITEMS_DATASET register': function(test) {
+		var vals = [
+			{'val': 0, 'temperature': false, 'light': false, 'humidity': false, 'isValid': false},
+			{'val': 1, 'temperature': true, 'light': false, 'humidity': false, 'isValid': true},
+			{'val': 3, 'temperature': true, 'light': true, 'humidity': false, 'isValid': true},
+			{'val': 5, 'temperature': true, 'light': false, 'humidity': true, 'isValid': true},
+			{'val': 7, 'temperature': true, 'light': true, 'humidity': true, 'isValid': true},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			var reg = 'DGT_LOG_ITEMS_DATASET';
+			results.push(data_parser.parseResult(reg, val.val));
+			var regName = constants.getAddressInfo(reg).data.name;
+			reqResults.push({
+				'register': reg,
+				'name': regName,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.val,
+				'temperature': val.temperature,
+				'light': val.light,
+				'humidity': val.humidity,
+				'isValid': val.isValid,
+			});
+		});
+		results.forEach(function(result, i) {
+			test.deepEqual(
+				result,
+				reqResults[i], 
+				'dgt log items failed ' + result.name + ' i: ' + i
+			);
+		});
+		test.done();
+	},
+	'check DGT_LOG_INTERVAL_INDEX_DATASET register': function(test) {
+		var vals = [
+			{'val': 0, 'time': 10, 'isValid': true},
+			{'val': 1, 'time': 30, 'isValid': true},
+			{'val': 2, 'time': 60, 'isValid': true},
+			{'val': 3, 'time': 600, 'isValid': true},
+			{'val': 4, 'time': 1800, 'isValid': true},
+			{'val': 5, 'time': 3600, 'isValid': true},
+			{'val': 6, 'time': 21600, 'isValid': true},
+			{'val': 7, 'time': 10, 'isValid': false},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			var reg = 'DGT_LOG_INTERVAL_INDEX_DATASET';
+			results.push(data_parser.parseResult(reg, val.val));
+			var regName = constants.getAddressInfo(reg).data.name;
+			reqResults.push({
+				'register': reg,
+				'name': regName,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.val,
+				'time': val.time,
+				'isValid': val.isValid,
+			});
+		});
+		results.forEach(function(result, i) {
+			test.deepEqual(
+				result,
+				reqResults[i], 
+				'dgt log intervals failed ' + result.name + ' i: ' + i
+			);
+		});
+		test.done();
+	},
 	'check undefined register - parse': function(test) {
 		// Make sure that no parsers get run but some basic information is added
 		var cmds = [

@@ -45,7 +45,7 @@ var DIGIT_LIST = {
 			var temperature = false;
 			var light = false;
 			var humidity = false;
-			var isValid = true
+			var isValid = true;
 
 			if(res == 1) {
 				temperature = true;
@@ -65,8 +65,8 @@ var DIGIT_LIST = {
 
 			return {
 				'temperature': temperature,
-				'humidity': light,
-				'light': humidity,
+				'light': light,
+				'humidity': humidity,
 				'isValid': isValid,
 				'res': res,
 			};
@@ -82,9 +82,17 @@ var DIGIT_LIST = {
 		'decode': function(res) {
 			var key = res.toString();
 			if(DGT_LOG_INTERVAL_INDEX_CONSTANTS[key]) {
-				return DGT_LOG_INTERVAL_INDEX_CONSTANTS[key];
+				return {
+					'time': DGT_LOG_INTERVAL_INDEX_CONSTANTS[key],
+					'isValid': true,
+					'res': res,
+				};
 			} else {
-				return DGT_LOG_INTERVAL_INDEX_CONSTANTS['0'];
+				return {
+					'time': DGT_LOG_INTERVAL_INDEX_CONSTANTS['0'],
+					'isValid': false,
+					'res': res,
+				};
 			}
 		},
 	},
