@@ -33,6 +33,7 @@ var bufferRegisters = [
 	// This is a special register.  It has to be read 7 bytes at a time to get
 	// the complete YMD-weekday-HMS time stamp.
 	'DGT_LOG_START_TIME',
+	'DGT_RTCC_TIME',
 ];
 
 exports.bufferRegisters = bufferRegisters;
