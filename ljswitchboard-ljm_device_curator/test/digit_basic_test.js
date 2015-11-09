@@ -4,6 +4,7 @@ var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');
 var qExec = utils.qExec;
 var async = require('async');
+var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 // Digit format functions
 var digit_format_functions = require('../lib/digit_format_functions');
@@ -200,6 +201,30 @@ var device_tests = {
 		});
 		test.deepEqual(results, reqResults, 'There are some wrong light-conversions');
 		test.done();
+	},
+	// 'read log parameters': function(test) {
+	// 	device.getLogParams()
+	// 	.then(function(res) {
+	// 		console.log('Ret Data', Object.keys(res), res);
+	// 		test.ok(true);
+	// 		test.done();
+	// 	}, function(err) {
+	// 		console.log('Error!!', err);
+	// 		test.ok(false);
+	// 		test.done();
+	// 	});
+	// },
+	'read log data': function(test) {
+		device.readDigitLoggedData()
+		.then(function(res) {
+			console.log('Ret Data', Object.keys(res), res);
+			test.ok(true);
+			test.done();
+		}, function(err) {
+			console.log('Error test!!', err);
+			test.ok(false);
+			test.done();
+		});
 	},
 	// 'readTempLightHumidity': function(test) {
 	// 	var results = [];

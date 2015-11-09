@@ -6,7 +6,8 @@ var ljm = new labjack_nodejs.driver();
 var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');
 var qExec = utils.qExec;
-
+var ljm_modbus_map = require('ljswitchboard-modbus_map');
+var modbus_map = ljm_modbus_map.getConstants();
 
 var device;
 
@@ -93,7 +94,8 @@ var device_tests = {
 				test.done();
 			}, function(err) {
 				// End the test & report that an error has occured.
-				console.log('Stream not started', err);
+				console.log('Stream not started', err, modbus_map.getErrorInfo(err));
+
 				performTests = false;
 				test.ok(false, 'Stream failed to start');
 				test.done();
@@ -119,7 +121,7 @@ var device_tests = {
 			});
 			test.done();
 		}, function(err) {
-			console.log('Stream Read failed', err);
+			console.log('Stream Read failed', err, modbus_map.getErrorInfo(err));
 			test.ok(false, 'Stream Read failed');
 			test.done();
 		});

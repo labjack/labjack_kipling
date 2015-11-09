@@ -162,9 +162,11 @@ var device_tests = {
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
 					console.log('Device is still responding to messages', res);
+					test.ok(false, 'Failed to Upgrade Device');
 					test.done();
 				}, function(err) {
 					console.log('Device is not responding anymore', err);
+					test.ok(false, 'Failed to Upgrade Device');
 					test.done();
 				});
 			}

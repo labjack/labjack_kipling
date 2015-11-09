@@ -22,6 +22,7 @@ var lj_t7_cal_operations = require('./t7_calibration_operations');
 var register_watcher = require('./register_watcher');
 
 var digit_format_functions = require('./digit_format_functions');
+var digit_io_helper = require('./digit_io_helper');
 
 var device_events = driver_const.device_curator_constants;
 
@@ -1612,6 +1613,7 @@ function device(useMockDevice) {
 		});
 		return defered.promise;
 	};
+
 	this.iWrite = function(address, value) {
 		var defered = q.defer();
 		var encodedVal = data_parser.encodeValue(address, value);
@@ -1662,6 +1664,12 @@ function device(useMockDevice) {
 		}, defered.reject);
 		return defered.promise;
 	};
+
+	/* 
+	 * The "s" functions always resolve successfully.  
+	 * They either resolve with the latest value or an 
+	 * old cached value.
+	 */
 	this.sRead = function(address) {
 		var defered = q.defer();
 		self.iRead(address)
@@ -1705,6 +1713,9 @@ function device(useMockDevice) {
 	};
 	this.qReadMany = function(addresses) {
 		return self.retryFlashError('qReadMany', addresses);
+	};
+	this.qReadArray = function(address, numReads) {
+		return self.retryFlashError('qReadArray', address, numReads);
 	};
 	this.qWrite = function(address, value) {
 		checkSingleAddressForDefaults(address, value);
@@ -1766,6 +1777,7 @@ function device(useMockDevice) {
 			'qrwMany':'rwMany',
 			'qReadUINT64':'readUINT64',
 			'readFlash':'internalReadFlash',
+			'qReadArray': 'readArray',
 			// 'updateFirmware': 'internalUpdateFirmware'
 		}[cmdType];
 		var errType = {
@@ -1776,6 +1788,7 @@ function device(useMockDevice) {
 			'qrwMany':'object',
 			'qReadUINT64':'value',
 			'readFlash':'value',
+			'qReadArray': 'object',
 			// 'updateFirmware': 'value'
 		}[cmdType];
 		var supportedFunctions = [
@@ -1786,6 +1799,7 @@ function device(useMockDevice) {
 			'qrwMany',
 			'qReadUINT64',
 			'readFlash',
+			'qReadArray',
 			// 'updateFirmware'
 		];
 
@@ -2117,6 +2131,42 @@ function device(useMockDevice) {
 			defered.reject(getDeviceTypeMessage(dt));
 		}
 		return defered.promise;
+	};
+	var applyDigitFormatterFunctions = function(newData) {
+		// console.log('New Data', newData);
+		var coercedData = [];
+		newData.forEach(function(dataPoint) {
+			if(typeof(dataPoint.isErr) !== 'undefined') {
+				coercedData.push(dataPoint.data);
+			} else {
+				coercedData.push(dataPoint);
+			}
+		});
+		return digit_format_functions.get(self, coercedData);
+	};
+	this.getLogParams = function() {
+		var dt = self.savedAttributes.deviceType;
+		var digitDeviceNum = driver_const.deviceTypes.digit;
+		
+		if(dt === digitDeviceNum) {
+			return digit_io_helper.getLogParams(self);
+		} else {
+			var defered = q.defer();
+			defered.reject(getDeviceTypeMessage(dt));
+			return defered.promise;
+		}
+	};
+	this.readDigitLoggedData = function() {
+		var dt = self.savedAttributes.deviceType;
+		var digitDeviceNum = driver_const.deviceTypes.digit;
+		
+		if(dt === digitDeviceNum) {
+			return digit_io_helper.readDigitLoggedData(self);
+		} else {
+			var defered = q.defer();
+			defered.reject(getDeviceTypeMessage(dt));
+			return defered.promise;
+		}
 	};
 
 	var self = this;
