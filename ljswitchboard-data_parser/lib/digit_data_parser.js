@@ -73,11 +73,15 @@ var DIGIT_LIST = {
 		},
 	},
 	// Don't have to interpret...
-	// 'DGT_STORED_BYTES': {
-	// 	'decode': function(res) {
-
-	// 	},
-	// },
+	'DGT_STORED_BYTES': {
+		'decode': function(res) {
+			var numBytes = Math.round(res/2);
+			return {
+				'numBytes': numBytes,
+				'res': numBytes,
+			};
+		},
+	},
 	'DGT_LOG_INTERVAL_INDEX_DATASET': {
 		'decode': function(res) {
 			var key = res.toString();

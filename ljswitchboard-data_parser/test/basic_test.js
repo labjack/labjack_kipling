@@ -506,6 +506,40 @@ exports.tests = {
 		});
 		test.done();
 	},
+	'check DGT_STORED_BYTES register': function(test) {
+		var vals = [
+			{'val': 0},
+			{'val': 1},
+			{'val': 2},
+			{'val': 4},
+			{'val': 6},
+			{'val': 8},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			var reg = 'DGT_STORED_BYTES';
+			results.push(data_parser.parseResult(reg, val.val));
+			var regName = constants.getAddressInfo(reg).data.name;
+			reqResults.push({
+				'register': reg,
+				'name': regName,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': Math.round(val.val/2),
+				'numBytes': Math.round(val.val/2),
+				'val': val.val,
+			});
+		});
+		results.forEach(function(result, i) {
+			test.deepEqual(
+				result,
+				reqResults[i], 
+				'dgt log intervals failed ' + result.name + ' i: ' + i
+			);
+		});
+		test.done();
+	},
 	'check DGT_LOG_INTERVAL_INDEX_DATASET register': function(test) {
 		var vals = [
 			{'val': 0, 'time': 10, 'isValid': true},
