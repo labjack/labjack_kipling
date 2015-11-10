@@ -9,6 +9,29 @@ var aRawCounts = digit_light_calibration.aRawCounts;
 var aTempC = digit_light_calibration.aTempC;
 var aLux = digit_light_calibration.aLux;
 
+function getSystemFlagBits(latestRawTemperature) {
+	var sysFlags = {
+		'warning': false,
+		'pwrFail': false,
+		'reset': false,
+		'usbActive': false,
+		'tErr': false,
+	};
+	var currentTemperature = parseInt(latestRawTemperature);
+	var flagBits = currentTemperature & 0xF;
+	var warningBit = (flagBits & 0x1);
+	var pwrFailBit = ((flagBits & 0x2) >> 1);
+	var resetBit = ((flagBits & 0x4) >> 2);
+	var usbActiveBit = ((flagBits & 0x8) >> 3);
+	var tErrBit = ((flagBits & 0x10) >> 4);
+
+	sysFlags.warning = warningBit == 1;
+	sysFlags.pwrFail = pwrFailBit == 1;
+	sysFlags.reset = resetBit == 1;
+	sysFlags.usbActive = usbActiveBit == 1;
+	sysFlags.tErr = tErrBit == 1;
+	return sysFlags;
+}
 function convertRawTemperatureC(latestRawTemperature) {
 	var currentTemperature;
 
@@ -34,7 +57,6 @@ function convertRawTemperatureC(latestRawTemperature) {
 	currentTemperature = ((currentTemperature) * 0.0625);
 	return currentTemperature;
 }
-exports.convertRawTemperatureC = convertRawTemperatureC;
 
 
 function convertRawHumidity(rawHumidity, currentTemperature, deviceCal) {
@@ -51,10 +73,9 @@ function convertRawHumidity(rawHumidity, currentTemperature, deviceCal) {
     //ToffsetH = ((TslopeH)(Tcurrent)) - ((TslopeH)(Tmin))
     ToffsetH = (TslopeH * currentTemperature) - (TslopeH * Tmin);
     percentRelativeHumidity = (rawHumidity - CalOffsetH + ToffsetH) * Hslope;
-
+    percentRelativeHumidity = parseFloat(percentRelativeHumidity.toFixed(3));
 	return percentRelativeHumidity;
 }
-exports.convertRawHumidity = convertRawHumidity;
 
 function linearInterpolate (a, b, coefficient) {
 	return (a + (coefficient * (b - a) ) );
@@ -136,9 +157,9 @@ function convertRawLight(rawLight, currentTemperature, onUSBPower) {
 	// End Calling function defined by caleb...
 
 	lightValueLux = Lux;
+	lightValueLux = parseFloat(lightValueLux.toFixed(3));
 	return lightValueLux;
 }
-exports.convertRawLight = convertRawLight;
 
 var formatters = {
 	'DGT_TEMPERATURE_LATEST_RAW': {
@@ -252,5 +273,13 @@ function applyFormatters(device, latestReadings) {
 	}
 	return defered.promise;
 }
+
+// Expose the raw formatting functions:
+exports.getSystemFlagBits = getSystemFlagBits;
+exports.convertRawTemperatureC = convertRawTemperatureC;
+exports.convertRawHumidity = convertRawHumidity;
+exports.convertRawLight = convertRawLight;
+
+// Expose a function that does all the formatting.
 exports.applyFormatters = applyFormatters;
 

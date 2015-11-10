@@ -1,6 +1,11 @@
 
 var q = require('q');
 var async = require('async');
+var digit_format_functions = require('./digit_format_functions');
+var getSystemFlagBits = digit_format_functions.getSystemFlagBits;
+var convertRawTemperatureC = digit_format_functions.convertRawTemperatureC;
+var convertRawHumidity = digit_format_functions.convertRawHumidity;
+var convertRawLight = digit_format_functions.convertRawLight;
 
 var NUM_LOG_TIME_REGISTERS = 7;
 
@@ -88,13 +93,16 @@ function initializeDigitFlashForRead(device) {
 	});
 	return defered.promise;
 }
-function readDigitFlash(device, numBytes) {
-
+function readDigitFlash(device, numBytes, options) {
+	return device.qReadArray('DGT_FLASH_READ', numBytes, options);
 }
-function readDigitSavedReadings(device, numReadings) {
-	var defered = q.defer();
-	defered.resolve();
-	return defered.promise;
+function readDigitSavedReadings(bundle) {
+	var device = bundle.device;
+	var numReadings = bundle.logParams.storedBytes.numBytes;
+	// var defered = q.defer();
+	return readDigitFlash(device, numReadings, {'update': bundle.updateFunc});
+	// defered.resolve();
+	// return defered.promise;
 }
 
 function getLogParamsForFlashRead(bundle) {
@@ -113,7 +121,7 @@ function getLogParamsForFlashRead(bundle) {
 	return defered.promise;
 }
 function initFlashForFlashRead(bundle) {
-	console.log('in initFlashForFlashRead');
+	console.log('in initFlashForFlashRead', bundle.logParams.storedBytes.numBytes);
 	var defered = q.defer();
 	var device = bundle.device;
 	if(bundle.error) {
@@ -135,12 +143,15 @@ function readFlashForFlashRead(bundle) {
 	var defered = q.defer();
 	var device = bundle.device;
 
+	
+
 	if(bundle.error) {
 		defered.reject(bundle);
 	} else {
-		readDigitSavedReadings(device)
+		readDigitSavedReadings(bundle)
 		.then(function(data) {
-			console.log('Read Digit saved readings', data);
+			console.log('Read Digit saved readings', data.length);
+			bundle.rawDeviceData = data;
 			defered.resolve(bundle);
 		}, function(err) {
 			bundle.isError = true;
@@ -150,15 +161,151 @@ function readFlashForFlashRead(bundle) {
 	}
 	return defered.promise;
 }
+function formatAndCalibrateRawFlashData(bundle) {
+	console.log('in formatAndCalibrateRawFlashData', bundle.logParams);
+	var defered = q.defer();
+	var device = bundle.device;
+
+	var rawData = bundle.rawDeviceData;
+	var numReadings = bundle.logParams.storedBytes.numBytes;
+	var temperatureUnits = bundle.temperatureUnits;
+	var itemsLogged = bundle.logParams.itemsLogged;
+	var startTime = bundle.logParams.startTime;
+	var logInterval = bundle.logParams.logInterval.time;
+	var logIntervalMS = logInterval * 1000;
+	var i = 0;
+	var j = 0;
+	var dataType = 'temperature';
+	var formatData = false;
+	var curData = {
+		'temperature': 0,
+		'humidity': 0,
+		'light': 0,
+		'sysFlags': {
+			'warning': false,
+			'pwrFail': false,
+			'reset': false,
+			'usbActive': false,
+			'tErr': false,
+		},
+		'time': startTime,
+	};
+	var calibratedData = {
+		'temperature': undefined,
+		'humidity': undefined,
+		'light': undefined,
+	};
+	var deviceCal = {
+		'CalOffsetH': device.savedAttributes.DGT_HUMIDITY_CAL_OFFSET,
+		'Hslope': device.savedAttributes.DGT_HUMIDITY_CAL_SLOPE,
+		'TslopeH': device.savedAttributes.DGT_HUMIDITY_CAL_T_SLOPE,
+	};
+	var curTime = startTime;
+	var numValuePairs = 1;
+	while(i < numReadings - 1) {
+		// Manage what type of data will come next
+		if(dataType === 'temperature') {
+			curData.temperature = rawData[i];
+			curData.temperature = convertRawTemperatureC(rawData[i]);
+			curData.sysFlags = getSystemFlagBits(rawData[i]);
+			if(itemsLogged.humidity) {
+				dataType = 'humidity';
+			} else if(itemsLogged.light) {
+				dataType = 'light';
+			} else {
+				formatData = true;
+			}
+		} else if(dataType === 'humidity') {
+			curData.humidity = rawData[i];
+			curData.humidity = convertRawHumidity(
+				rawData[i],
+				curData.temperature,
+				deviceCal
+			);
+			if(itemsLogged.light) {
+				dataType = 'light';
+			} else {
+				dataType = 'temperature';
+				formatData = true;
+			}
+		} else if(dataType === 'light') {
+			curData.light = rawData[i];
+			curData.light = convertRawLight(
+				rawData[i],
+				curData.temperature,
+				curData.sysFlags.usbActive
+			);
+			dataType = 'temperature';
+			formatData = true;
+		} else {
+			console.log('Un-recognized type...', dataType);
+		}
+
+		// Increment the pointer variables.
+		i += 1;
+		j += 1;
+		if(formatData) {
+			if(i < 30) {
+				// console.log('Incrementing Time', curData.time);
+			}
+			// calibratedData.temperature = convertRawTemperatureC(
+			// 	curData.temperature
+			// );
+			if(((numValuePairs) % 60) === 0) {
+				if(i < 1000000) {
+					// console.log('Cur Data', curData.time, numValuePairs);
+				}
+			}
+			if(i == (numReadings-3)) {
+				console.log('Last reading', curData.time, numValuePairs);
+			}
+
+			numValuePairs += 1;
+			// Increment the time...
+			curTime = new Date((curTime.valueOf() + logIntervalMS));
+			curData.time = curTime;
+
+			// Re-set the data for the next group of TLH data.
+			curData.temperature = 0;
+			curData.humidity = 0;
+			curData.light = 0;
+			formatData = false;
+		} else {
+			if(i < 30) {
+				// console.log('Not Incrementing Time');
+			}
+		}
+	}
+	console.log('Num Readings', numReadings);
+	var numGroups = numReadings/3;
+	console.log('Num Value Groups', numGroups);
+	console.log('Log Interval (s)', logInterval);
+	var logDurationS = numGroups * logInterval;
+	var logDurationM = logDurationS/60;
+	var logDurationH = logDurationM/60;
+	var logDurationD = logDurationM/24;
+	console.log('Log Duration (s)', logDurationS);
+	console.log('Log Duration (m)', logDurationM);
+	console.log('Log Duration (h)', logDurationH);
+	console.log('Log Duration (d)', logDurationD);
+	console.log('Log Interval...', logIntervalMS, startTime, curTime);
+	defered.resolve(bundle);
+	return defered.promise;
+}
 
 function readDigitLoggedData(device) {
 	var defered = q.defer();
 	var bundle = {
 		'device': device,
 		'logParams': undefined,
+		'rawDeviceData': [],
 		'data': {},
 		'isError': false,
 		'error': undefined,
+		'temperatureUnits': 'C',
+		'updateFunc': function onUpdate(percent) {
+			// console.log(' - Update:', percent, '%');
+		}
 	};
 
 	function onError(errBundle) {
@@ -166,12 +313,13 @@ function readDigitLoggedData(device) {
 		defered.reject(errBundle.error);
 	}
 	function onSuccess(succBundle) {
-		console.log('Successfully read data', Object.keys(succBundle));
+		console.log('Successfully read data', Object.keys(succBundle), Object.keys(succBundle.logParams));
 		defered.resolve(succBundle.data);
 	}
 	getLogParamsForFlashRead(bundle)
 	.then(initFlashForFlashRead)
 	.then(readFlashForFlashRead)
+	.then(formatAndCalibrateRawFlashData)
 	.then(onSuccess, onError);
 	return defered.promise;
 }

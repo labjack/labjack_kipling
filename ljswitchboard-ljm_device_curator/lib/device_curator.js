@@ -907,13 +907,23 @@ function device(useMockDevice) {
 		}
 		return defered.promise;
 	};
-	this.readArray = function(address, numReads) {
+	this.readArray = function(address, numReads, options) {
 		var defered = q.defer();
 		var reads = [];
 		var readData = [];
 		var readError;
 		var isError = false;
 
+		var updateFunc;
+		console.log('in readArray', options);
+		if(options) {
+			if(options.update) {
+				if(typeof(options.update) === 'function') {
+					updateFunc = options.update;
+				}
+			}
+		}
+		
 		// Prepare reads
 		var info = modbusMap.getAddressInfo(address);
 		var splitSize = self.getBufferDataSplitSize(info.typeString);
@@ -928,7 +938,30 @@ function device(useMockDevice) {
 		}
 
 		// console.log('- readArray info', numReads, splitSize, numFullPackets, remainder);
+		// console.log('types...', {
+		// 	'numReads': typeof(numReads),
+		// 	'splitSize': typeof(splitSize),
+		// 	'numFullPackets': typeof(numFullPackets),
+		// 	'remainder': typeof(remainder),
+		// });
 
+		if(remainder != 0) {
+			numFullPackets += 1;
+		}
+		var curRead = 0;
+		var lastUpdateValue = 0;
+		function updateUser() {
+			var percent = parseFloat((curRead / numFullPackets * 100).toFixed(2));
+			if(lastUpdateValue != percent) {
+				if(updateFunc) {
+					updateFunc(percent);
+				}
+				lastUpdateValue = percent;
+			} else {
+				lastUpdateValue = percent;
+			}
+			
+		}
 		// Perform reads
 		async.eachSeries(reads, function(singleRead, callback) {
 			innerReadArray(singleRead.address, singleRead.numValues)
@@ -936,6 +969,8 @@ function device(useMockDevice) {
 				for(var i = 0; i < newReadData.length; i++) {
 					readData.push(newReadData[i]);
 				}
+				curRead += 1;
+				updateUser();
 				callback();
 			}, function(readArrayError) {
 				readError = readArrayError;
@@ -1714,8 +1749,8 @@ function device(useMockDevice) {
 	this.qReadMany = function(addresses) {
 		return self.retryFlashError('qReadMany', addresses);
 	};
-	this.qReadArray = function(address, numReads) {
-		return self.retryFlashError('qReadArray', address, numReads);
+	this.qReadArray = function(address, numReads, options) {
+		return self.retryFlashError('qReadArray', address, numReads, options);
 	};
 	this.qWrite = function(address, value) {
 		checkSingleAddressForDefaults(address, value);
