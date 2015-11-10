@@ -75,10 +75,10 @@ var DIGIT_LIST = {
 	// Don't have to interpret...
 	'DGT_STORED_BYTES': {
 		'decode': function(res) {
-			var numBytes = Math.round(res/2);
+			var numReadings = Math.round(res/2);
 			return {
-				'numBytes': numBytes,
-				'res': numBytes,
+				'numReadings': numReadings,
+				'res': res,
 			};
 		},
 	},

@@ -526,8 +526,8 @@ exports.tests = {
 				'register': reg,
 				'name': regName,
 				'address': constants.getAddressInfo(reg).data.address,
-				'res': Math.round(val.val/2),
-				'numBytes': Math.round(val.val/2),
+				'res': val.val,
+				'numReadings': Math.round(val.val/2),
 				'val': val.val,
 			});
 		});
