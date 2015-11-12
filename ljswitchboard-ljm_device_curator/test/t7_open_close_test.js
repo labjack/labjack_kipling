@@ -26,6 +26,7 @@ var openAndCloseMultipleTimes = function(test, numOp) {
 		'ct': 'LJM_ctUSB',
 		'id': 'LJM_idANY'
 	};
+
 	var getOp = function() {
 		var openClose = function(bundle) {
 			// console.log("Bundle", bundle);
@@ -128,7 +129,16 @@ var device_tests = {
 			test.ok(false, 'Failed to open/close a device' + JSON.stringify(err));
 			test.done();
 		});
-	}
+	},
+	'closeAllDevices': function(test) {
+		ljm.closeAll(function(err){
+			test.ok(false, 'Close All failed');
+			test.done();
+		}, function(res) {
+			test.ok(true);
+			test.done();
+		});
+	},
 };
 
 var tests = {};

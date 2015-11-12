@@ -422,8 +422,11 @@ var device_tests = {
 		device.getLatestDeviceErrors()
 		.then(function(data) {
 			// console.log('Error Data', data);
-			var expNumErrors = 3;
-			var expLengthErrors = 3;
+			// data.errors.forEach(function(errData) {
+			// 	console.log('Data', errData);
+			// });
+			var expNumErrors = 4;
+			var expLengthErrors = 4;
 			test.strictEqual(data.numErrors, expNumErrors, 'Unexpected number of errors');
 			test.strictEqual(data.errors.length, expLengthErrors, 'Unexpected number of errors');
 			test.done();
