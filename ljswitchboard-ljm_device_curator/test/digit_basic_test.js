@@ -202,26 +202,91 @@ var device_tests = {
 		test.deepEqual(results, reqResults, 'There are some wrong light-conversions');
 		test.done();
 	},
-	// 'read log parameters': function(test) {
-	// 	device.getLogParams()
-	// 	.then(function(res) {
-	// 		console.log('Ret Data', Object.keys(res), res);
-	// 		test.ok(true);
-	// 		test.done();
-	// 	}, function(err) {
-	// 		console.log('Error!!', err);
-	// 		test.ok(false);
-	// 		test.done();
-	// 	});
-	// },
-	'read log data': function(test) {
-		device.readDigitLoggedData()
-		.then(function(res) {
-			console.log('Ret Data', Object.keys(res), res);
+	'read log parameters': function(test) {
+		device.getLogParams()
+		.then(function(logParams) {
+			// console.log('Ret Data', Object.keys(logParams), logParams);
+			var requiredKeys = [
+				'itemsLogged',
+				'storedBytes',
+				'installedOptions',
+				'logInterval',
+				'startTime',
+			];
+			var acquiredKeys = Object.keys(logParams);
+			test.deepEqual(acquiredKeys, requiredKeys, 'getLogParams data is invalid');
 			test.ok(true);
 			test.done();
 		}, function(err) {
-			console.log('Error test!!', err);
+			console.log('Error!!', err);
+			test.ok(false);
+			test.done();
+		});
+	},
+	'read log data': function(test) {
+		var options = {
+			'temperatureUnits': 'f',
+			'updateFunc': function(percent) {
+				if(percent % 10 === 0) {
+					console.log(' - Percent Complete', percent);
+				}
+			}
+		};
+		function printLogResult(results, index) {
+			var result = JSON.parse(JSON.stringify(results[index]));
+			result.time = new Date(result.time);
+			return result;
+		}
+		var startTime = new Date();
+		device.readDigitLoggedData(options)
+		.then(function(loggedData) {
+			var stopTime = new Date();
+			var duration = stopTime - startTime;
+			
+
+			var requiredKeys = [
+				'logParams',
+				'data',
+				'temperatureUnits',
+				'isError',
+				'error',
+			];
+			var acquiredKeys = Object.keys(loggedData);
+			test.deepEqual(acquiredKeys, requiredKeys, 'readDigitLoggedData data is invalid');
+			
+			if(false) {
+				console.log(
+					'Logged Data',
+					loggedData.data.length,
+					parseFloat((duration/1000).toFixed(3))
+				);
+				console.log('Logged Params', {
+					'temperature': loggedData.logParams.itemsLogged.temperature,
+					'humidity': loggedData.logParams.itemsLogged.humidity,
+					'light': loggedData.logParams.itemsLogged.light
+				});
+				console.log('First Result', printLogResult(loggedData.data, 0));
+				console.log('Last Result', printLogResult(loggedData.data, loggedData.data.length - 1));
+				loggedData.data.forEach(function(dataPoint) {
+					// console.log('Data', dataPoint);
+				});
+			} else {
+				console.log(
+					' - Logged Data',
+					loggedData.data.length,
+					'time to download',
+					parseFloat((duration/1000).toFixed(3))
+				);
+				console.log(' - Logged Params', {
+					'temperature': loggedData.logParams.itemsLogged.temperature,
+					'humidity': loggedData.logParams.itemsLogged.humidity,
+					'light': loggedData.logParams.itemsLogged.light
+				});
+			}
+			test.ok(true);
+			test.done();
+		}, function(err) {
+			console.log('Error test!!', Object.keys(err));
 			test.ok(false);
 			test.done();
 		});

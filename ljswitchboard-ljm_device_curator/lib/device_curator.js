@@ -915,7 +915,6 @@ function device(useMockDevice) {
 		var isError = false;
 
 		var updateFunc;
-		console.log('in readArray', options);
 		if(options) {
 			if(options.update) {
 				if(typeof(options.update) === 'function') {
@@ -945,13 +944,13 @@ function device(useMockDevice) {
 		// 	'remainder': typeof(remainder),
 		// });
 
-		if(remainder != 0) {
+		if(remainder !== 0) {
 			numFullPackets += 1;
 		}
 		var curRead = 0;
 		var lastUpdateValue = 0;
 		function updateUser() {
-			var percent = parseFloat((curRead / numFullPackets * 100).toFixed(2));
+			var percent = parseInt((curRead / numFullPackets * 100).toFixed(0));
 			if(lastUpdateValue != percent) {
 				if(updateFunc) {
 					updateFunc(percent);
@@ -2191,12 +2190,12 @@ function device(useMockDevice) {
 			return defered.promise;
 		}
 	};
-	this.readDigitLoggedData = function() {
+	this.readDigitLoggedData = function(options) {
 		var dt = self.savedAttributes.deviceType;
 		var digitDeviceNum = driver_const.deviceTypes.digit;
 		
 		if(dt === digitDeviceNum) {
-			return digit_io_helper.readDigitLoggedData(self);
+			return digit_io_helper.readDigitLoggedData(self, options);
 		} else {
 			var defered = q.defer();
 			defered.reject(getDeviceTypeMessage(dt));
