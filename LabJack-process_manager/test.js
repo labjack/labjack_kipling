@@ -35,3 +35,4 @@ exports.basic_test = basicTest.tests;
 if(isMasterProcess) {
 	exports.advanced_test = advancedTest.tests;
 }
+
