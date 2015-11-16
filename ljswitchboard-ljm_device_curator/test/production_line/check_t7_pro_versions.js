@@ -129,6 +129,20 @@ var device_tests = {
 			test.done();
 		});
 	},
+	'check t7 calibration': function(test) {
+		device.getCalibrationStatus()
+		.then(function(calStatus) {
+			var keys = Object.keys(calStatus);
+			keys.forEach(function(key) {
+				test.ok(calStatus[key], 'T7 Cal Check Failed: ' + key.toString());
+			});
+			test.done();
+		}, function(err) {
+			console.log('Error', err);
+			test.ok(false, 'Failed to get the devices calibration status: ' + err.toString());
+			test.done();
+		});
+	},
 	'closeDevice': function(test) {
 		// setTimeout(function() {
 			device.close()
