@@ -156,13 +156,23 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 				);
 			}
 			
-			// For each connection type verify expected results.
-			connectionTypes.forEach(function(connectionType, j) {
-				// Organize device connection type results.
-				// Get and organize expected connection type results.
-				var expConnectionType = expConnectionTypes[j];
-				verifyConnectionTypeInfo(connectionType, expConnectionType);
-			});
+			if (expConnectionTypes.length == connectionTypes.length) {
+				// For each connection type verify expected results.
+				connectionTypes.forEach(function(connectionType, j) {
+					// Organize device connection type results.
+					// Get and organize expected connection type results.
+					var expConnectionType = expConnectionTypes[j];
+					verifyConnectionTypeInfo(connectionType, expConnectionType);
+				});
+			}
+			else {
+				console.log(
+					'Unexpected number of connection types, expected: ',
+					expConnectionTypes.length,
+					', got: ', connectionTypes.length
+				);
+				test.ok(false, 'unexpected number of connection types, see console.log');
+			}
 			if(debug) {
 				printAvailableDeviceData(device);
 			}
