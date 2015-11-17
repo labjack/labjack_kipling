@@ -13,6 +13,21 @@ var testScanResults = test_util.testScanResults;
 var deviceScanner;
 var device;
 
+var GLOBAL_TEST_EXPECTED_DEVICE_LIST = true;
+var GLOBAL_EXPECTED_DEVICE_TYPES = {
+	'T7': {
+		'devices': [{
+			'connectionTypes': [{
+				'name': 'USB',
+				'insertionMethod': 'scan',
+			}, {
+				'name': 'WiFi',
+				'insertionMethod': 'attribute',
+			}]
+		}]
+	},
+};
+
 exports.tests = {
 	'Starting Mock Test': function(test) {
 		console.log('');
@@ -110,28 +125,16 @@ exports.tests = {
 			{'type': 'listAllExtended', 'enabled': true},
 			{'type': 'listAll', 'enabled': true},
 		];
-		device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
-		device_scanner.__set__('scanStrategies', scanStrategies);
+		// device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
+		// device_scanner.__set__('scanStrategies', scanStrategies);
 		test.done();
 	},
 	'perform initial scan': function(test) {
 		var currentDeviceList = {};
-		var expDeviceTypes = {
-			'T7': {
-				'devices': [{
-					'connectionTypes': [{
-						'name': 'USB',
-						'insertionMethod': 'scan',
-					}, {
-						'name': 'Ethernet',
-						'insertionMethod': 'scan',
-					}]
-				}]
-			},
-		};
+		var expDeviceTypes = GLOBAL_EXPECTED_DEVICE_TYPES;
 		deviceScanner.findAllDevices(currentDeviceList)
 		.then(function(deviceTypes) {
-			var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
+			var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': GLOBAL_TEST_EXPECTED_DEVICE_LIST, 'debug': false});
 			test.ok(testStatus, 'Unexpected test result');
 			var dA = deviceTypes[0].devices[0];
 
@@ -172,22 +175,10 @@ exports.tests = {
 	},
 	'Re-scan for devices': function(test) {
 		var currentDeviceList = [device];
-		var expDeviceTypes = {
-			'T7': {
-				'devices': [{
-					'connectionTypes': [{
-						'name': 'USB',
-						'insertionMethod': 'scan',
-					}, {
-						'name': 'WiFi',
-						'insertionMethod': 'attribute',
-					}]
-				}]
-			},
-		};
+		var expDeviceTypes = GLOBAL_EXPECTED_DEVICE_TYPES;
 		deviceScanner.findAllDevices(currentDeviceList)
 		.then(function(deviceTypes) {
-			var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
+			var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': GLOBAL_TEST_EXPECTED_DEVICE_LIST, 'debug': false});
 			test.ok(testStatus, 'Unexpected test result');
 			var dA = deviceTypes[0].devices[0];
 
