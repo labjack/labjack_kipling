@@ -136,6 +136,12 @@ exports.tests = {
 		.then(function(deviceTypes) {
 			var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': GLOBAL_TEST_EXPECTED_DEVICE_LIST, 'debug': false});
 			test.ok(testStatus, 'Unexpected test result');
+			if (deviceTypes.length === 0) {
+				console.log('Expected at least one device; exiting process');
+				test.done();
+				process.exit();
+				return;
+			}
 			var dA = deviceTypes[0].devices[0];
 
 			device = new device_curator.device();
