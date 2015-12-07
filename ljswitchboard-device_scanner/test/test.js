@@ -1,4 +1,9 @@
 
+process.on('uncaughtException', function(err) {
+    console.log('ERROR!!!', err);
+    console.log(err.stack);
+    process.exit();
+});
 
 var BASIC_TEST = false;
 var MOCK_TEST = false;
