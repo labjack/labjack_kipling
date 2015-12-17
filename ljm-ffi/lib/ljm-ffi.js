@@ -188,7 +188,6 @@ function loadLJMMultiple() {
         // console.log('Finished linking to LJM');
         loadedLJM = true;
     }
-    return ljm;
 }
 function loadLJMSingle() {
     if(!loadedLJM) {
@@ -239,10 +238,12 @@ ljm.test.async = function(cb) {
     console.log('ljm here');
 };
 exports.load = function() {
-    loadLJMSingle();
+    // loadLJMSingle();
+    loadLJMMultiple();
     return ljm;
 };
 exports.loadRaw = function() {
-    loadLJMSingle();
+    // loadLJMSingle();
+    loadLJMMultiple();
     return liblabjack;
-}
+};
