@@ -118,7 +118,7 @@ LJM_FUNCTIONS.LJM_ListAllExtended = {
 	]
 };
 
-LJM_FUNCTIONS.ljM_OpenAll = {
+LJM_FUNCTIONS.LJM_OpenAll = {
 	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
 	'args': [
 		{'DeviceType': 				'int'},
