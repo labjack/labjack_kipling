@@ -78,8 +78,8 @@ LJM_FUNCTIONS.LJM_ListAll = {
 	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
 	'args': [
 		{'DeviceType': 				'int'},
-		{'ConnectionType': 		'int'},
-		{'numFound': 				'int*'},
+		{'ConnectionType': 			'int'},
+		{'NumFound': 				'int*'},
 		{'aDeviceTypes': 			'a-int*'},
 		{'aConnectionTypes': 		'a-int*'},
 		{'aSerialNumbers': 			'a-int*'},
@@ -92,7 +92,7 @@ LJM_FUNCTIONS.LJM_ListAllS = {
 	'args': [
 		{'DeviceType': 				'string'},
 		{'Connection Type': 		'string'},
-		{'numFound': 				'int*'},
+		{'NumFound': 				'int*'},
 		{'aDeviceTypes': 			'a-int*'},
 		{'aConnectionTypes': 		'a-int*'},
 		{'aSerialNumbers': 			'a-int*'},

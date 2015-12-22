@@ -48,6 +48,7 @@ function convertLJFunctionInfoToFFI(functionInfo) {
     return ffiInfo;
 }
 
+// Define what the library name will be on the various platforms.
 var LIBRARY_LOC = {
     'linux': 'libLabJackM.so',
     'linux2': 'libLabJackM.so',
@@ -60,7 +61,7 @@ var LIBRARY_LOC = {
     'win32': 'LabJackM.dll'
 }[process.platform];
 
-
+// Define an error object that gets created by this library.
 function LJMFFIError(description) {
     this.description = description;
     this.stack = new Error().stack;
@@ -68,10 +69,13 @@ function LJMFFIError(description) {
 util.inherits(LJMFFIError, Error);
 LJMFFIError.prototype.name = 'ljm-ffi Error';
 
+// Define a function that is used for creating error messages.
 function getFunctionArgNames (functionInfo) {
     return JSON.parse(JSON.stringify(functionInfo.requiredArgNames));
 }
 
+// Define a function that is used to allocate and fill buffers to communicate
+// with the LJM library through ffi.
 function allocateAndFillSyncFunctionArgs(functionInfo, funcArgs, userArgs) {
     functionInfo.requiredArgTypes.forEach(function(type, i) {
         var buf = ljTypeOps[type].allocate(userArgs[i]);
@@ -80,6 +84,8 @@ function allocateAndFillSyncFunctionArgs(functionInfo, funcArgs, userArgs) {
     });
 }
 
+// Define a function that is used to parse the values altered by LJM through the
+// ffi library & save them to a return-object.
 function parseAndStoreSyncFunctionArgs(functionInfo, funcArgs, saveObj) {
     functionInfo.requiredArgTypes.forEach(function(type, i) {
         var buf = funcArgs[i];
@@ -89,6 +95,7 @@ function parseAndStoreSyncFunctionArgs(functionInfo, funcArgs, saveObj) {
     });
 }
 
+// Define a function that creates functions that can call LJM synchronously.
 function createSyncFunction(functionName, functionInfo) {
     return function syncLJMFunction() {
         if(arguments.length != functionInfo.args.length) {
@@ -98,17 +105,14 @@ function createSyncFunction(functionName, functionInfo) {
             errStr += '.';
             throw new LJMFFIError(errStr);
         } else {
-            // console.log('Calling Sync Function', functionName);
             // Create an array that will be filled with values to call the
             // LJM function with.
             var funcArgs = [];
 
             // Parse and fill the function arguments array with data.
             allocateAndFillSyncFunctionArgs(functionInfo, funcArgs, arguments);
-            // console.log('Filled Args', funcArgs);
 
             // Execute the synchronous LJM function.
-            // var ljmError = liblabjack[functionName].apply(liblabjack[functionName], funcArgs);
             var ljmFunction = liblabjack[functionName];
             var ljmError = ljmFunction.apply(this, funcArgs);
 
@@ -120,15 +124,62 @@ function createSyncFunction(functionName, functionInfo) {
                 retObj.errorInfo = modbus_map.getErrorInfo(ljmError);
             }
 
-
             // Fill the object being returned with data.
             parseAndStoreSyncFunctionArgs(functionInfo, funcArgs, retObj);
-            // console.log('Ret Data', retObj);
             return retObj;
         }
     };
 }
 
+// Define a function that creates safe LJM ffi calls.
+function createSafeSyncFunction(functionName, functionInfo) {
+    return function safeSyncFunction() {
+        // Define a variable to store the error string in.
+        var errStr;
+
+        // Check to make sure the arguments seem to be valid.
+        if(arguments.length != functionInfo.args.length) {
+            // Throw an error if an invalid number of arguments were found.
+            errStr = 'Invalid number of arguments.  Should be: ';
+            errStr += functionInfo.args.length.toString() + '.  ';
+            errStr += getFunctionArgNames(functionInfo).join(', ');
+            errStr += '.';
+            throw new LJMFFIError(errStr);
+        } else {
+            // Get a reference to the LJM function being called.
+            var ljmFunction = ffi_liblabjack[functionName];
+            
+            // Check to make sure that the function being called has been
+            // defined.
+            if(typeof(ljmFunction) === 'function') {
+                // Define a variable to store the ljmError value in.
+                var ljmError;
+
+                try {
+                    // Execute the synchronous LJM function.
+                    ljmError = ljmFunction.apply(this, arguments);
+                } catch(err) {
+                    // Throw an error if the function being called doesn't exist.
+                    errStr = 'The function: ';
+                    errStr += functionName;
+                    errStr += ' is not implemented by the installed version of LJM.';
+                    throw new LJMFFIError(errStr);
+                }
+
+                // Return the ljmError
+                return ljmError;
+            } else {
+                // Throw an error if the function being called doesn't exist.
+                errStr = 'The function: ';
+                errStr += functionName;
+                errStr += ' is not implemented by the installed version of LJM.';
+                throw new LJMFFIError(errStr);
+            }
+        }
+    };
+}
+
+// Define a function that creates functions that can call LJM asynchronously.
 function createAsyncFunction(functionName, functionInfo) {
     return function asyncLJMFunction() {
         // Check arg-length + 1 for the callback.
@@ -150,8 +201,59 @@ function createAsyncFunction(functionName, functionInfo) {
     };
 }
 
+// Define a function that creates safe LJM ffi calls.
+function createSafeAsyncFunction(functionName, functionInfo) {
+    return function safeAsyncFunction() {
+        // Define a variable to store the error string in.
+        var errStr;
+
+        // Check to make sure the arguments seem to be valid.
+        if(arguments.length != functionInfo.args.length) {
+            // Throw an error if an invalid number of arguments were found.
+            errStr = 'Invalid number of arguments.  Should be: ';
+            errStr += functionInfo.args.length.toString() + '.  ';
+            errStr += getFunctionArgNames(functionInfo).join(', ');
+            errStr += '.';
+            throw new LJMFFIError(errStr);
+        } else {
+            // Get a reference to the LJM function being called.
+            var ljmFunction = ffi_liblabjack[functionName];
+            
+            // Check to make sure that the function being called has been
+            // defined.
+            if(typeof(ljmFunction) === 'function') {
+                // Define a variable to store the ljmError value in.
+                var ljmError;
+
+                try {
+                    // Execute the synchronous LJM function.
+                    console.log('Calling ffi_liblabjack function', functionName);
+                    ljmError = ljmFunction.apply(this, funcArgs);
+                } catch(err) {
+                    // Throw an error if the function being called doesn't exist.
+                    errStr = 'The function: ';
+                    errStr += functionName;
+                    errStr += ' is not implemented by the installed version of LJM.';
+                    throw new LJMFFIError(errStr);
+                }
+
+                // Return the ljmError
+                return ljmError;
+            } else {
+                // Throw an error if the function being called doesn't exist.
+                errStr = 'The function: ';
+                errStr += functionName;
+                errStr += ' is not implemented by the installed version of LJM.';
+                throw new LJMFFIError(errStr);
+            }
+        }
+    };
+}
+
+var ffi_liblabjack = {};
 var liblabjack = {};
 var ljm = {};
+
 var loadedLJM = false;
 function loadLJMMultiple() {
     if(!loadedLJM) {
@@ -169,16 +271,18 @@ function loadLJMMultiple() {
 
                     // Create a reference to the function with FFI.
                     var ljmFunctionBinding = ffi.Library(LIBRARY_LOC, funcInfo);
-                    liblabjack[functionName] = ljmFunctionBinding[functionName];
+                    ffi_liblabjack[functionName] = ljmFunctionBinding[functionName];
 
-                    ljm[functionName] = createSyncFunction(
-                        functionName,
-                        LJM_FUNCTIONS[functionName]
-                    );
-                    ljm[functionName].async = createSyncFunction(
-                        functionName,
-                        LJM_FUNCTIONS[functionName]
-                    );
+                    var fn = functionName;
+                    var fi = LJM_FUNCTIONS[functionName];
+
+                    // Create functions that go in the liblabjack object.
+                    liblabjack[fn] = createSafeSyncFunction(fn, fi);
+                    liblabjack[fn].async = createSafeAsyncFunction(fn, fi);
+
+                    // Create functions in the ljm object with the same names.
+                    ljm[fn] = createSyncFunction(fn, fi);
+                    ljm[fn].async = createAsyncFunction(fn, fi);
                 }
             } catch(err) {
                 console.log('Failed to link function', functionName, err);
@@ -189,6 +293,7 @@ function loadLJMMultiple() {
         loadedLJM = true;
     }
 }
+
 function loadLJMSingle() {
     if(!loadedLJM) {
         var numToTry = 1000;
@@ -207,43 +312,38 @@ function loadLJMSingle() {
             }
         });
         
-        liblabjack = ffi.Library(LIBRARY_LOC, ffiFuncInfo);
+        ffi_liblabjack = ffi.Library(LIBRARY_LOC, ffiFuncInfo);
 
-        var ljmFunctionNames = Object.keys(liblabjack);
-        ljmFunctionNames.forEach(function(ljmFunctionName) {
-            ljm[ljmFunctionName] = createSyncFunction(
-                ljmFunctionName,
-                LJM_FUNCTIONS[ljmFunctionName]
-            );
-            ljm[ljmFunctionName].async = createSyncFunction(
-                ljmFunctionName,
-                LJM_FUNCTIONS[ljmFunctionName]
-            );
+        var ljmFunctionNames = Object.keys(ffi_liblabjack);
+        ljmFunctionNames.forEach(function(functionName) {
+            var fn = functionName;
+            var fi = LJM_FUNCTIONS[functionName];
+
+            // Create functions that go in the liblabjack object.
+            liblabjack[fn] = createSafeSyncFunction(fn, fi);
+            liblabjack[fn].async = createSafeAsyncFunction(fn, fi);
+
+            // Create functions in the ljm object with the same names.
+            ljm[fn] = createSyncFunction(fn, fi);
+            ljm[fn].async = createAsyncFunction(fn, fi);
         });
 
         // console.log('Finished linking to LJM');
         loadedLJM = true;
     }
 }
-liblabjack.test = function() {
-    console.log('liblabjack HERE');
-};
-liblabjack.test.async = function(cb) {
-    console.log('liblabjack here');
-};
-ljm.test = function() {
-    console.log('ljm HERE');
-};
-ljm.test.async = function(cb) {
-    console.log('ljm here');
-};
+
 exports.load = function() {
     // loadLJMSingle();
     loadLJMMultiple();
     return ljm;
 };
+exports.loadSafe = function() {
+    loadLJMMultiple();
+    return liblabjack;
+};
 exports.loadRaw = function() {
     // loadLJMSingle();
     loadLJMMultiple();
-    return liblabjack;
+    return ffi_liblabjack;
 };
