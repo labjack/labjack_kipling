@@ -52,7 +52,7 @@ var ffi_liblabjackm = ljm_ffi.loadRaw();
 ```
 
 ### Type 1:
-The first way to interact with the LJM driver automatically handles the converting data to and from the appropriate buffer-based data types required to perform native function calls with the ffi library.  The best way to show this is through example, (Calling the LJM_NameToAddress function).  For quick details about what arguments are required by this function look at the ./lib/ljm_functions.js file.  Look at the ./test/basic_ljm_calls.js file in the "Execute LJM_NameToAddress (Sync)" and "Execute LJM_NameToAddress (Async)" tests for more details.
+The first, easiest, and recomended way to interact with the LJM driver automatically handles the converting data to and from the appropriate buffer-based data types required to perform native function calls with the ffi library.  If speed and efficiency is required, look at types 2 and 3.  The best way to show this is through example, (Calling the LJM_NameToAddress function).  For quick details about what arguments are required by this function look at the ./lib/ljm_functions.js file.  Look at the ./test/basic_ljm_calls.js file in the "Execute LJM_NameToAddress (Sync)" and "Execute LJM_NameToAddress (Async)" tests for more details.
 
 ```javascript
 // Include and load the ljm-ffi library:
