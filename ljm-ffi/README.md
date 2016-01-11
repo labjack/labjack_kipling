@@ -35,7 +35,7 @@ These are the raw ffi functions.  If the FFI library threw an error when binding
 The most straight forward example that demonstraits that this library is communicating with the LJM library properly is to request the version of LJM installed on the system.  This can be done with the following code (Synchronously):
 ```javascript
 // Load the LJM Library.
-var ljm_ffi = require('../lib/ljm-ffi');
+var ljm_ffi = require('ljm-ffi');
 var ljm = ljm_ffi.load();
 
 // Call the LJM_ReadLibraryConfigS function:
@@ -48,7 +48,7 @@ console.log('LJM Version:', ljmLibraryVersion.Value);
 This can be done with the following code (Asynchronously):
 ```javascript
 // Load the LJM Library.
-var ljm_ffi = require('../lib/ljm-ffi');
+var ljm_ffi = require('ljm-ffi');
 var ljm = ljm_ffi.load();
 
 // Execute LJM Function
