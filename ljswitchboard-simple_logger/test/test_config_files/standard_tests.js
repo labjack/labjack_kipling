@@ -27,10 +27,10 @@ exports.configurations = [
 		'basic_data_group': {'1': ['AIN0'], '2': ['AIN0'], 'userValues': ['temp', 'humidity', 'promiseVal']},
 	}],
 	'extraCollectedGroupDataPattern':[],
-	'numExpectedPatterns': 4,
+	'numExpectedPatterns': 2,
 
 	'stopCases': {
-		'basic_data_group': 4,
+		'basic_data_group': 2,
 	}
 },
 {
@@ -107,9 +107,9 @@ exports.configurations = [
 	}],
 	'extraCollectedGroupDataPattern':[],
 
-	'numExpectedPatterns': 4,
+	'numExpectedPatterns': 2,
 	'stopCases': {
-		'basic_data_group': 4,
-		'secondary_data_group': 8,
+		'basic_data_group': 2,
+		'secondary_data_group': 4,
 	}
 }];

@@ -31,7 +31,7 @@ try {
 	configurations = require('../test_config_files/standard_tests').configurations;
 
 	// Only test the first configuration
-	// configurations = [configurations[0]];
+	configurations = [configurations[2]];
 } catch(err) {
 	console.log('Error requiring configurations', err);
 	configurations = [];

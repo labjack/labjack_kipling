@@ -440,9 +440,11 @@ function CREATE_DATA_COLLECTOR() {
 	};
 
 	this.activeDataStore = {};
+	this.orderedActiveDataStore = {};
 	this.deviceDataCollectorDataListener = function(data) {
 		if(self.isActive) {
 			var deviceData = data.results;
+			console.log('Acquired New Data', data);
 			debugLog('Acquired Data from deviceDataCollector', data.serialNumber, deviceData.registers);
 			var sn = data.serialNumber.toString();
 			if(self.activeDataStore[sn]) {
@@ -465,12 +467,46 @@ function CREATE_DATA_COLLECTOR() {
 			debugLog('Acquired late data', data.serialNumber, data.results.registers);
 		}
 	};
+	this.initializeDataStoreValues = function(index, sn, registers) {
+		// This is important for ordering the queried device data.
+		
+		// If the index doesn't already exist, add it.
+		if(typeof(self.orderedActiveDataStore[sn]) === 'undefined') {
+			self.orderedActiveDataStore[sn] = {};
+		}
 
+		// If the serial number key doesn't already exist, add it.
+		if(typeof(self.orderedActiveDataStore[sn][index]) === 'undefined') {
+			self.orderedActiveDataStore[sn][index] = {};
+		}
+
+		// Initialize the data store for each queried register.
+		var datastoreRef = self.orderedActiveDataStore[sn][index];
+		registers.forEach(function(register) {
+			if(typeof(datastoreRef[register]) === 'undefined') {
+				self.orderedActiveDataStore[sn][index][register] = {
+					'register': register,
+					'result': -9999,
+					'errorCode': errorCodes.VALUE_INITIALIZED,
+					'time': new Date(),
+					'duration': 0,
+					'interval': 0,
+					'index': 0,
+					'queriedIndex': index, // When was the value requested?
+					'resultIndex': 0, // When was the value received?
+					'numDependent': 1,
+				};
+			} else {
+				// Increase the number of dependents.
+				self.orderedActiveDataStore[sn][index][register].numDependent += 1;
+			}
+		});
+	};
 	this.clearDataStoreValue = function(sn, register) {
 		self.activeDataStore[sn][register] = {
 			'register': register,
 			'result': -9999,
-			'errorCode': errorCodes.errorCodes,
+			'errorCode': errorCodes.VALUE_INITIALIZED,
 			'time': new Date(),
 			'duration': 0,
 			'interval': 0,
@@ -628,6 +664,17 @@ function CREATE_DATA_COLLECTOR() {
 						});
 					}
 
+					
+					var data = {};
+					var keys = Object.keys(organizedGroupData['1'].results);
+					keys.forEach(function(key) {
+						data[key] = organizedGroupData['1'].results[key].index;
+					});
+					console.log('Collected Data',activeGroupKey, data);
+					// console.log('  - data', data);
+					// console.log('  - register', organizedGroupData['1'].results.AIN1.register);
+					// console.log('  - index', organizedGroupData['1'].results.AIN1.index);
+					// console.log('  - result', organizedGroupData['1'].results.AIN1.result);
 					// Report the collected group data
 					self.emit(self.eventList.COLLECTOR_GROUP_DATA, {
 						'groupKey': activeGroupKey,
@@ -688,9 +735,21 @@ function CREATE_DATA_COLLECTOR() {
 
 		var serialNumbers = Object.keys(requiredData);
 		var promises = serialNumbers.map(function(serialNumber) {
+
 			var deviceDataCollector = self.deviceDataCollectors[serialNumber];
 			var dataToRead = requiredData[serialNumber];
-
+			console.log(
+				'Starting a new read',
+				self.dataCollectionCounter,
+				serialNumber,
+				dataToRead
+			);
+			// Make room in the data store for the values trying to be read.
+			self.initializeDataStoreValues(
+				self.dataCollectionCounter,
+				serialNumber,
+				dataToRead
+			);
 			return deviceDataCollector.startNewRead(
 				dataToRead,
 				self.dataCollectionCounter
@@ -740,6 +799,9 @@ function CREATE_DATA_COLLECTOR() {
 
 		self.activeDataStore = undefined;
 		self.activeDataStore = {};
+
+		self.orderedActiveDataStore = undefined;
+		self.orderedActiveDataStore = {};
 
 		self.dataCollectionCounter = 0;
 	};
