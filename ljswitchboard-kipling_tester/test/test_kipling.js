@@ -49,9 +49,10 @@ this.test_kipling = {
 
 			var managedKiplingWindow = window_manager.windowManager.managedWindows.kipling;
 			kiplingWin = managedKiplingWindow.win;
-			kiplingWin.resizeTo(winWidth, winHeight);
-			kiplingWin.moveTo(kiplingWinPos,0);
+			kiplingWin.resizeTo(winWidth+300, winHeight);
+			kiplingWin.moveTo(kiplingWinPos-300,0);
 			kiplingWin.closeDevTools();
+			kiplingWin.focus();
 
 
 			kiplingWindow = kiplingWin.window;

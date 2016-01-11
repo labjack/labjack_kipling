@@ -27,11 +27,14 @@ var nodeunit_recorder = require(path.normalize(path.join(cwd, 'nodeunit_recorder
 var testFiles = [
 	'test_kipling.js',
 	// Execute Mock-Device compatable Tests
-	'mock_module_tests/mock_device_selector.js',
+	// 'mock_module_tests/mock_device_selector.js',
 	// 'mock_module_tests/mock_device_info.js',
 	// 'mock_module_tests/mock_dashboard.js',
 	// 'mock_module_tests/mock_register_matrix.js',
+	// 'mock_module_tests/mock_simple_logger.js',
 	
+	// Execute stand-alone mock tests
+	'mock_module_tests/mock_file_browser.js',
 
 	// Execute Live-Device tests
 	// 'module_tests/test_device_info.js',
@@ -161,7 +164,7 @@ var getRunTest = function(testFile, testDiv) {
 					var btn = $('#' + divID + '_button');
 					btn.on('click', function() {
 						testResults.slideToggle();
-					})
+					});
 					defered.resolve();
 				});
 		} catch(err) {
