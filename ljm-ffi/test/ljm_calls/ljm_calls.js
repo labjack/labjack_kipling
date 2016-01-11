@@ -59,8 +59,8 @@ function_tests.LJM_NameToAddress = {
 };
 
 // Import test calls for device scanning.
-var device_scanning_ljm_calls = require('./device_scanning');
-extend(false, function_tests, device_scanning_ljm_calls);
+// var device_scanning_ljm_calls = require('./device_scanning');
+// extend(false, function_tests, device_scanning_ljm_calls);
 
 // Import test calls for open-all testing.
 var open_all_testing = require('./open_all_testing');

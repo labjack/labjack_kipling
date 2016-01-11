@@ -78,7 +78,7 @@ function getHandleInfos(handles, cb) {
 module.exports.LJM_OpenAll = {
 	'test_args': [
 		{'DeviceType': 				0},
-		{'ConnectionType': 			0},
+		{'ConnectionType': 			5},
 		{'NumOpened': 				0},
 		{'aHandles': 				scanIntArray},
 		{'NumErrors': 				0},
