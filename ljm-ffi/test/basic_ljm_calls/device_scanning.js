@@ -1,3 +1,58 @@
+var ref = require('ref');
+
+var ENABLE_DEBUG = false;
+function debug() {
+	if(ENABLE_DEBUG) {
+		console.log.apply(console, arguments);
+	}
+}
+var ENABLE_LOG = true;
+function log() {
+	if(ENABLE_LOG) {
+		console.log.apply(console, arguments);
+	}
+}
+
+function verifyResultKeys(test, results, functionName) {
+	var expectedKeys = [];
+	expectedKeys.push('ljmError');
+	var test_args = module.exports[functionName].test_args;
+	test_args.forEach(function(test_arg) {
+		var argName = Object.keys(test_arg)[0];
+		expectedKeys.push(argName);
+	});
+	debug(Object.keys(results), expectedKeys);
+	test.deepEqual(
+		Object.keys(results),
+		expectedKeys,
+		'Found unexpected return argument'
+	);
+}
+
+function verifyNoLJMError(test, results, functionName) {
+	var ljmError = results.ljmError;
+	test.equal(
+		ljmError,
+		0,
+		'There should not have been an LJM Error calling' + functionName
+	);
+}
+
+function parseIPAddress(ipInt) {
+	var ipAddr = ref.alloc('int', 1);
+	ipAddr.writeInt32LE(ipInt, 0);
+	
+	var ipStr = "";
+	ipStr += ipAddr.readUInt8(3).toString();
+	ipStr += ".";
+	ipStr += ipAddr.readUInt8(2).toString();
+	ipStr += ".";
+	ipStr += ipAddr.readUInt8(1).toString();
+	ipStr += ".";
+	ipStr += ipAddr.readUInt8(0).toString();
+	return ipStr;
+}
+
 var scanIntArray = [];
 for(var i = 0; i < 128; i++) {
 	scanIntArray.push(0);
@@ -14,24 +69,29 @@ module.exports.LJM_ListAll = {
 		{'aIPAddresses': scanIntArray},
 	],
 	'throws_err': false,
-	'custom_verify': function(test, results) {
+	'custom_verify': function(test, results, cb) {
+		verifyResultKeys(test, results, 'LJM_ListAll');
+		verifyNoLJMError(test, results, 'LJM_ListAll');
+
 		if(results.NumFound > 0) {
-			var deviceTypes = [];
-			var connectionTypes = [];
-			var serialNumbers = [];
-			var ipAddresses = [];
+			var deviceData = [];
+			
 			for(var i = 0; i < results.NumFound; i++) {
-				deviceTypes.push(results.aDeviceTypes[i]);
-				connectionTypes.push(results.aConnectionTypes[i]);
-				serialNumbers.push(results.aSerialNumbers[i]);
-				ipAddresses.push(results.aIPAddresses[i]);
+				var ipStr = parseIPAddress(results.aIPAddresses[i]);
+				deviceData.push({
+					'DT': results.aDeviceTypes[i],
+					'CT': results.aConnectionTypes[i],
+					'SN': results.aSerialNumbers[i],
+					'IP': ipStr,
+				});
 			}
-			console.log('Results:', results.NumFound);
-			console.log('deviceTypes', deviceTypes);
-			console.log('connectionTypes', connectionTypes);
-			console.log('serialNumbers', serialNumbers);
-			console.log('ipAddresses', ipAddresses);
+
+			log(' - Found Devices (', results.NumFound, '):');
+			deviceData.forEach(function(info) {
+				log('  -', info);
+			});
 		}
+		cb();
 	},
 };
 
@@ -46,24 +106,27 @@ module.exports.LJM_ListAllS = {
 		{'aIPAddresses': scanIntArray},
 	],
 	'throws_err': false,
-	'custom_verify': function(test, results) {
+	'custom_verify': function(test, results, cb) {
+		verifyResultKeys(test, results, 'LJM_ListAllS');
 		if(results.NumFound > 0) {
-			var deviceTypes = [];
-			var connectionTypes = [];
-			var serialNumbers = [];
-			var ipAddresses = [];
+			var deviceData = [];
+			
 			for(var i = 0; i < results.NumFound; i++) {
-				deviceTypes.push(results.aDeviceTypes[i]);
-				connectionTypes.push(results.aConnectionTypes[i]);
-				serialNumbers.push(results.aSerialNumbers[i]);
-				ipAddresses.push(results.aIPAddresses[i]);
+				var ipStr = parseIPAddress(results.aIPAddresses[i]);
+				deviceData.push({
+					'DT': results.aDeviceTypes[i],
+					'CT': results.aConnectionTypes[i],
+					'SN': results.aSerialNumbers[i],
+					'IP': ipStr,
+				});
 			}
-			console.log('Results:', results.NumFound);
-			console.log('deviceTypes', deviceTypes);
-			console.log('connectionTypes', connectionTypes);
-			console.log('serialNumbers', serialNumbers);
-			console.log('ipAddresses', ipAddresses);
+
+			log(' - Found Devices (', results.NumFound, '):');
+			deviceData.forEach(function(info) {
+				log('  -', info);
+			});
 		}
+		cb();
 	},
 };
 
@@ -75,7 +138,7 @@ for(var i = 0; i < (128 * 2 * 1); i++) {
 module.exports.LJM_ListAllExtended = {
 	'test_args': [
 		{'DeviceType': 				0},
-		{'Connection Type': 		0},
+		{'ConnectionType': 			0},
 		{'NumAddresses': 			1},
 		{'aAddresses': 				[0]},
 		{'aNumRegs': 				[2]},
@@ -88,25 +151,29 @@ module.exports.LJM_ListAllExtended = {
 		{'aBytes': 					aBytesArray},
 	],
 	'throws_err': false,
-	'custom_verify': function(test, results) {
-		console.log('We are here!!')
+	'custom_verify': function(test, results, cb) {
+		verifyResultKeys(test, results, 'LJM_ListAllExtended');
+		Object.keys(results);
 		if(results.NumFound > 0) {
-			var deviceTypes = [];
-			var connectionTypes = [];
-			var serialNumbers = [];
-			var ipAddresses = [];
+			var deviceData = [];
+			
 			for(var i = 0; i < results.NumFound; i++) {
-				deviceTypes.push(results.aDeviceTypes[i]);
-				connectionTypes.push(results.aConnectionTypes[i]);
-				serialNumbers.push(results.aSerialNumbers[i]);
-				ipAddresses.push(results.aIPAddresses[i]);
+				var ipStr = parseIPAddress(results.aIPAddresses[i]);
+				deviceData.push({
+					'DT': results.aDeviceTypes[i],
+					'CT': results.aConnectionTypes[i],
+					'SN': results.aSerialNumbers[i],
+					'IP': ipStr,
+				});
 			}
-			console.log('Results:', results.NumFound);
-			console.log('deviceTypes', deviceTypes);
-			console.log('connectionTypes', connectionTypes);
-			console.log('serialNumbers', serialNumbers);
-			console.log('ipAddresses', ipAddresses);
+
+			log(' - Found Devices (', results.NumFound, '):');
+			deviceData.forEach(function(info) {
+				log('  -', info);
+			});
 		}
+		cb();
 	},
 };
+
 

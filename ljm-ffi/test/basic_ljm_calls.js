@@ -12,6 +12,18 @@ var ARCH_INT_NUM_BYTES = driver_const.ARCH_INT_NUM_BYTES;
 var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
 var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 
+var ENABLE_DEBUG = false;
+function debug() {
+	if(ENABLE_DEBUG) {
+		console.log.apply(console, arguments);
+	}
+}
+var ENABLE_LOG = true;
+function log() {
+	if(ENABLE_LOG) {
+		console.log.apply(console, arguments);
+	}
+}
 
 
 var function_tests = {};
@@ -34,6 +46,16 @@ function_tests.LJM_NameToAddress = {
 var device_scanning_ljm_calls = require('./basic_ljm_calls/device_scanning');
 extend(false, function_tests, device_scanning_ljm_calls);
 
+// function_tests.LJM_ListAll = undefined;
+// delete function_tests.LJM_ListAll;
+// function_tests.LJM_ListAllS = undefined;
+// delete function_tests.LJM_ListAllS;
+// function_tests.LJM_ListAllExtended = undefined;
+// delete function_tests.LJM_ListAllExtended;
+
+// Import test calls for open-all testing.
+var open_all_testing = require('./basic_ljm_calls/open_all_testing');
+extend(false, function_tests, open_all_testing);
 
 
 var ljm;
@@ -41,6 +63,11 @@ var liblabjack;
 var ffi_liblabjack;
 var enabled_tests = {
 	'sync': {
+		'ljm': false,
+		'liblabjack': false,
+		'ffi_liblabjack': false,
+	},
+	'async': {
 		'ljm': true,
 		'liblabjack': false,
 		'ffi_liblabjack': false,
@@ -75,7 +102,7 @@ function create_ljm_sync_test(functionName, testInfo) {
 		});
 
 		var results;
-		console.log('Calling Function', functionName);
+		log(' - Calling Sync Function', functionName);
 
 		var has_function = false;
 		if(typeof(ljm[functionName]) === 'function') {
@@ -89,15 +116,19 @@ function create_ljm_sync_test(functionName, testInfo) {
 				);
 			}
 			if(testInfo.custom_verify) {
-				testInfo.custom_verify(test, results);
+				testInfo.custom_verify(test, results, function() {
+					test.done();
+				});
+			} else {
+				test.done();
 			}
 		} else {
-			console.log('Does not have function', functionName);
-			console.log('Available Functions', Object.keys(functionName));
+			console.error('Does not have function', functionName);
+			console.error('Available Functions', Object.keys(functionName));
+			test.done();
 		}
 		// ljm_err = ljm[functionName].apply(this, args);
 		// console.log('Err', ljm_err);
-		test.done();
 	};
 }
 function create_liblabjack_sync_test(functionName, testInfo) {
@@ -111,38 +142,100 @@ function create_ffi_liblabjack_sync_test(functionName, testInfo) {
 	};
 }
 
+function create_ljm_async_test(functionName, testInfo) {
+	return function test_ljm_async_call(test) {
+		function finished_ljm_call (results) {
+			if(testInfo.expected_results) {
+				test.deepEqual(
+					testInfo.expected_results,
+					results,
+					'Results are not correct for: ' + functionName  + '-ljm-async'
+				);
+			}
+			if(testInfo.custom_verify) {
+				testInfo.custom_verify(test, results, function() {
+					test.done();
+				});
+			} else {
+				test.done();
+			}
+		}
+
+		var args = [];
+		var argNames = [];
+
+		testInfo.test_args.forEach(function(test_arg) {
+			var keys = Object.keys(test_arg);
+			var argName = keys[0];
+			var argVal = test_arg[argName];
+			args.push(argVal);
+			argNames.push(argName);
+		});
+
+		var results;
+		log(' - Calling Async Function', functionName);
+
+		var has_function = false;
+		if(typeof(ljm[functionName].async) === 'function') {
+			has_function = true;
+			args.push(finished_ljm_call);
+
+			results = ljm[functionName].async.apply(this, args);
+		} else {
+			console.error('Does not have function', functionName);
+			console.error('Available Functions', Object.keys(functionName));
+			test.ok(false,'Failed to call function...');
+			test.done();
+		}
+		// ljm_err = ljm[functionName].apply(this, args);
+		// console.log('Err', ljm_err);
+		
+	};
+}
+
 /* Programatically add more test cases */
 function addTests() {
 	var functionNames = Object.keys(function_tests);
 
 	functionNames.forEach(function(functionName) {
-		var testName;
-		var testInfo = function_tests[functionName];
-		if(enabled_tests.sync.ljm) {
-			// Add the ljm call
-			testName = functionName + '-ljm-sync';
-			test_cases[testName] = create_ljm_sync_test(
-				functionName,
-				testInfo
-			);
-		}
-		if(enabled_tests.sync.liblabjack) {
-			// Add the liblabjack call
-			testName = functionName + '-liblabjack-sync';
-			test_cases[testName] = create_liblabjack_sync_test(
-				functionName,
-				testInfo
-			);
-		}
-		if(enabled_tests.sync.ffi_liblabjack) {
-			// Add the ffi_liblabjack call
-			testName = functionName + '-ffi_liblabjack-sync';
-			test_cases[testName] = create_ffi_liblabjack_sync_test(
-				functionName,
-				testInfo
-			);
-		}
+		try {
+			var testName;
+			var testInfo = function_tests[functionName];
+			if(enabled_tests.sync.ljm) {
+				// Add the ljm call
+				testName = functionName + '-ljm-sync';
+				test_cases[testName] = create_ljm_sync_test(
+					functionName,
+					testInfo
+				);
+			}
+			if(enabled_tests.sync.liblabjack) {
+				// Add the liblabjack call
+				testName = functionName + '-liblabjack-sync';
+				test_cases[testName] = create_liblabjack_sync_test(
+					functionName,
+					testInfo
+				);
+			}
+			if(enabled_tests.sync.ffi_liblabjack) {
+				// Add the ffi_liblabjack call
+				testName = functionName + '-ffi_liblabjack-sync';
+				test_cases[testName] = create_ffi_liblabjack_sync_test(
+					functionName,
+					testInfo
+				);
+			}
 
+			if(enabled_tests.async.ljm) {
+				testName = functionName + '-ljm-async';
+				test_cases[testName] = create_ljm_async_test(
+					functionName,
+					testInfo
+				);
+			}
+		} catch(err) {
+			console.log('Error adding function', testName);
+		}
 	});
 	
 }

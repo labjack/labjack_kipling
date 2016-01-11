@@ -182,6 +182,30 @@ function createSafeSyncFunction(functionName, functionInfo) {
 // Define a function that creates functions that can call LJM asynchronously.
 function createAsyncFunction(functionName, functionInfo) {
     return function asyncLJMFunction() {
+        var userCB;
+        function cb(err, res) {
+            if(err) {
+                console.error('Error Reported by Async Function', functionName);
+            }
+            
+            // Create an object to be returned.
+            var ljmError = res;
+            var retObj = {
+                'ljmError': ljmError,
+            };
+            if(ljmError !== 0) {
+                retObj.errorInfo = modbus_map.getErrorInfo(ljmError);
+            }
+
+            // Fill the object being returned with data.
+            parseAndStoreSyncFunctionArgs(functionInfo, funcArgs, retObj);
+
+            // Execute the user's callback function.
+            userCB(retObj);
+
+            return;
+        }
+
         // Check arg-length + 1 for the callback.
         if(arguments.length != (functionInfo.args.length + 1)) {
             var errStr = 'Invalid number of arguments.  Should be: ';
@@ -192,11 +216,28 @@ function createAsyncFunction(functionName, functionInfo) {
         // } else if(typeof(arguments[arguments.length]) !== 'function') {
         //     var errStr
         } else {
-            var cb;
-            if(typeof(arguments[arguments.length]) !== 'function') {
-                cb = function() {};
+            if(typeof(arguments[functionInfo.args.length]) !== 'function') {
+                userCB = function() {};
+            } else {
+                userCB = arguments[functionInfo.args.length];
+
             }
-            console.log('Calling Async Function', functionName, functionInfo);
+
+            // Create an array that will be filled with values to call the
+            // LJM function with.
+            var funcArgs = [];
+
+            // Parse and fill the function arguments array with data.
+            allocateAndFillSyncFunctionArgs(functionInfo, funcArgs, arguments);
+
+            // Over-write the function callback in the arguments list.
+            funcArgs[funcArgs.length] = cb;
+
+            // Execute the asynchronous LJM function.
+            var ljmFunction = liblabjack[functionName].async;
+            ljmFunction.apply(this, funcArgs);
+
+            return;
         }
     };
 }
@@ -208,7 +249,7 @@ function createSafeAsyncFunction(functionName, functionInfo) {
         var errStr;
 
         // Check to make sure the arguments seem to be valid.
-        if(arguments.length != functionInfo.args.length) {
+        if(arguments.length != (functionInfo.args.length + 1)) {
             // Throw an error if an invalid number of arguments were found.
             errStr = 'Invalid number of arguments.  Should be: ';
             errStr += functionInfo.args.length.toString() + '.  ';
@@ -216,8 +257,14 @@ function createSafeAsyncFunction(functionName, functionInfo) {
             errStr += '.';
             throw new LJMFFIError(errStr);
         } else {
+            // Make sure that the last argument is a function.  This is
+            // mandatory for all async function calls.
+            if(typeof(arguments[functionInfo.args.length]) !== 'function') {
+                arguments[functionInfo.args.length] = function undef() {};
+            }
+
             // Get a reference to the LJM function being called.
-            var ljmFunction = ffi_liblabjack[functionName];
+            var ljmFunction = ffi_liblabjack[functionName].async;
             
             // Check to make sure that the function being called has been
             // defined.
@@ -227,8 +274,7 @@ function createSafeAsyncFunction(functionName, functionInfo) {
 
                 try {
                     // Execute the synchronous LJM function.
-                    console.log('Calling ffi_liblabjack function', functionName);
-                    ljmError = ljmFunction.apply(this, funcArgs);
+                    ljmError = ljmFunction.apply(this, arguments);
                 } catch(err) {
                     // Throw an error if the function being called doesn't exist.
                     errStr = 'The function: ';
