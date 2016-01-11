@@ -29,9 +29,10 @@ function log() {
 var ljm;
 var liblabjack;
 var ffi_liblabjack;
+var ljmVersion;
 var enabled_tests = {
 	'sync': {
-		'ljm': false,
+		'ljm': true,
 		'liblabjack': false,
 		'ffi_liblabjack': false,
 	},
@@ -67,8 +68,23 @@ var open_all_testing = require('./open_all_testing');
 extend(false, function_tests, open_all_testing);
 
 
-function create_ljm_sync_test(functionName, testInfo) {
+function create_ljm_sync_test(functionName, testInfo, nameAppend) {
 	return function test_ljm_sync_call(test) {
+		var minVersion = 0;
+		if(testInfo.min_ljm_version) {
+			minVersion = testInfo.min_ljm_version;
+		}
+		if(minVersion > ljmVersion) {
+			console.log(
+				' ! Skipping Test:',
+				functionName + nameAppend,
+				'Requres LJM Version:',
+				minVersion
+			);
+			test.done();
+			return;
+		}
+
 		var args = [];
 		var argNames = [];
 
@@ -91,7 +107,7 @@ function create_ljm_sync_test(functionName, testInfo) {
 				test.deepEqual(
 					testInfo.expected_results,
 					results,
-					'Results are not correct for: ' + functionName  + '-ljm-sync'
+					'Results are not correct for: ' + functionName  + nameAppend
 				);
 			}
 			if(testInfo.custom_verify) {
@@ -121,14 +137,29 @@ function create_ffi_liblabjack_sync_test(functionName, testInfo) {
 	};
 }
 
-function create_ljm_async_test(functionName, testInfo) {
+function create_ljm_async_test(functionName, testInfo, nameAppend) {
 	return function test_ljm_async_call(test) {
+
+		var minVersion = 0;
+		if(testInfo.min_ljm_version) {
+			minVersion = testInfo.min_ljm_version;
+		}
+		if(minVersion > ljmVersion) {
+			console.log(
+				' ! Skipping Test:',
+				functionName + nameAppend,
+				'Requres LJM Version:',
+				minVersion
+			);
+			test.done();
+			return;
+		}
 		function finished_ljm_call (results) {
 			if(testInfo.expected_results) {
 				test.deepEqual(
 					testInfo.expected_results,
 					results,
-					'Results are not correct for: ' + functionName  + '-ljm-async'
+					'Results are not correct for: ' + functionName  + nameAppend
 				);
 			}
 			if(testInfo.custom_verify) {
@@ -180,36 +211,45 @@ function addTests() {
 		try {
 			var testName;
 			var testInfo = function_tests[functionName];
+			var nameAppend;
 			if(enabled_tests.sync.ljm) {
 				// Add the ljm call
-				testName = functionName + '-ljm-sync';
+				nameAppend = '-ljm-sync';
+				testName = functionName + nameAppend;
 				test_cases[testName] = create_ljm_sync_test(
 					functionName,
-					testInfo
+					testInfo,
+					nameAppend
 				);
 			}
 			if(enabled_tests.sync.liblabjack) {
 				// Add the liblabjack call
-				testName = functionName + '-liblabjack-sync';
+				nameAppend = '-liblabjack-sync'
+				testName = functionName + nameAppend;
 				test_cases[testName] = create_liblabjack_sync_test(
 					functionName,
-					testInfo
+					testInfo,
+					nameAppend
 				);
 			}
 			if(enabled_tests.sync.ffi_liblabjack) {
 				// Add the ffi_liblabjack call
-				testName = functionName + '-ffi_liblabjack-sync';
+				nameAppend = '-ffi_liblabjack-sync';
+				testName = functionName + nameAppend;
 				test_cases[testName] = create_ffi_liblabjack_sync_test(
 					functionName,
-					testInfo
+					testInfo,
+					nameAppend
 				);
 			}
 
 			if(enabled_tests.async.ljm) {
-				testName = functionName + '-ljm-async';
+				nameAppend = '-ljm-async';
+				testName = functionName + nameAppend;
 				test_cases[testName] = create_ljm_async_test(
 					functionName,
-					testInfo
+					testInfo,
+					nameAppend
 				);
 			}
 		} catch(err) {
@@ -227,6 +267,10 @@ var test_cases = {
 		ljm = ljm_ffi.load();
 		liblabjack = ljm_ffi.loadSafe();
 		ffi_liblabjack = ljm_ffi.loadRaw();
+
+		var ljmLibraryVersion = ljm.LJM_ReadLibraryConfigS(
+			'LJM_LIBRARY_VERSION', 0);
+		ljmVersion = ljmLibraryVersion.Value;
 
 		test.done();
 	},
