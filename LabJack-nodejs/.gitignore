@@ -4,3 +4,4 @@ node_modules/serialport/build/Release/serialport.node
 npm-debug.log
 
 testing
+/build
