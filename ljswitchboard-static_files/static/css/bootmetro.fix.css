@@ -98,3 +98,57 @@ input[type=radio] ~ span.metro-radio::before {
 	  margin-left:-20px;
 	}
 }
+
+/* Styling fixes for nav-bar elements */
+.navbar .nav>li>a {
+  float: none;
+  padding: 10px 15px 10px;
+  color: #000;
+  text-decoration: none;
+  text-shadow: none;
+}
+
+/* Command Icons with custom coloring */
+.win-command.green .win-commandicon,
+.win-command.green .win-label {
+  color: #2b542c;
+}
+.win-command.green .win-commandring {
+  border-color: #2b542c;
+}
+.win-command.green:hover .win-commandring {
+   background-color: #dff0d8;
+}
+
+.win-command.blue .win-commandicon,
+.win-command.blue .win-label {
+  color: #245269;
+}
+.win-command.blue .win-commandring {
+  border-color: #245269;
+}
+.win-command.blue:hover .win-commandring {
+   background-color: #d9edf7;
+}
+
+.win-command.yellow .win-commandicon,
+.win-command.yellow .win-label {
+  color: #66512c;
+}
+.win-command.yellow .win-commandring {
+  border-color: #66512c;
+}
+.win-command.yellow:hover .win-commandring {
+   background-color: #fcf8e3;
+}
+
+.win-command.red .win-commandicon,
+.win-command.red .win-label {
+  color: #843534;
+}
+.win-command.red .win-commandring {
+  border-color: #843534;
+}
+.win-command.red:hover .win-commandring {
+   background-color: #f2dede;
+}
