@@ -306,7 +306,8 @@ function loadLJMMultiple() {
         var numToTry = 1000;
         functionNames.forEach(function(functionName, i) {
             function dummyFunction() {
-                console.log(functionName + ' is not implemented by the installed version of LJM.');
+                console.log('I am alive');
+                // console.log(functionName + ' is not implemented by the installed version of LJM.');
             }
             
             var fn = functionName;

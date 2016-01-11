@@ -76,10 +76,10 @@ function getHandleInfos(handles, cb) {
 
 
 module.exports.LJM_OpenAll = {
-	'min_ljm_version': 1.11,
+	'min_ljm_version': 1.09,
 	'test_args': [
 		{'DeviceType': 				0},
-		{'ConnectionType': 			5},
+		{'ConnectionType': 			0},
 		{'NumOpened': 				0},
 		{'aHandles': 				scanIntArray},
 		{'NumErrors': 				0},
@@ -108,7 +108,7 @@ module.exports.LJM_OpenAll = {
 };
 
 module.exports.LJM_CloseAll = {
-	'min_ljm_version': 1.11,
+	'min_ljm_version': 1.09,
 	'test_args': [],
 	'throws_err': false,
 	'custom_verify': function(test, results, cb) {

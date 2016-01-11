@@ -3,22 +3,28 @@ var ref = require('ref');       //Load variable type module
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 var ljTypeMap = {
+    // These argument types are basic data types and are the easiest to parse.
     'string':       'string',
     'char':         'char',
     'uint':         'uint',
     'int':          'int',
     'double':       'double',
     
+    // These argument types are pointers.  They require data to be moved in
+    // and out of buffer objects.  They are essentially arrays of length 1.
     'char*':        ref.refType(ref.types.char),
     'uint*':        ref.refType(ref.types.uint),
     'int*':         ref.refType(ref.types.int),
     'double*':      ref.refType(ref.types.double),
 
+    // These argument types are arrays.  Unlike their pointer counterparts,
+    // they require a "length".  The pointers are essentially length of 1.
     'a-char*':      ref.refType(ref.types.char),
     'a-uint*':      ref.refType(ref.types.uint),
     'a-int*':       ref.refType(ref.types.int),
     'a-double*':    ref.refType(ref.types.double),
 
+    // These argument types are arrays of arrays or arrays of pointers.
     'char**':       ref.refType(ref.types.CString),
     'a-char**':     ref.refType(ref.types.CString),
 };
