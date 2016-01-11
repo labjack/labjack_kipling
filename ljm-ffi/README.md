@@ -50,7 +50,6 @@ This can be done with the following code (Asynchronously):
 // Load the LJM Library.
 var ljm_ffi = require('../lib/ljm-ffi');
 var ljm = ljm_ffi.load();
-```
 
 // Execute LJM Function
 ljm.LJM_ReadLibraryConfigS.async('LJM_LIBRARY_VERSION', 0, function(ljmLibraryVersion) {
