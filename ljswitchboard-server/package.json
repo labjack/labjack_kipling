@@ -1,0 +1,14 @@
+{
+  "name": "ljswitchboard-server",
+  "version": "1.0.0",
+  "description": "This is Kipling's server process.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mosca": "^0.32.1"
+  }
+}
