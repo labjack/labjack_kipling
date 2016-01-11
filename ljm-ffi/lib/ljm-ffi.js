@@ -305,6 +305,12 @@ function loadLJMMultiple() {
     if(!loadedLJM) {
         var numToTry = 1000;
         functionNames.forEach(function(functionName, i) {
+            function dummyFunction() {
+                console.log(functionName + ' is not implemented by the installed version of LJM.');
+            }
+            
+            var fn = functionName;
+            var fi = dummyFunction;
             try {
                 if(i < numToTry) {
                     var funcInfo = {};
@@ -319,8 +325,8 @@ function loadLJMMultiple() {
                     var ljmFunctionBinding = ffi.Library(LIBRARY_LOC, funcInfo);
                     ffi_liblabjack[functionName] = ljmFunctionBinding[functionName];
 
-                    var fn = functionName;
-                    var fi = LJM_FUNCTIONS[functionName];
+                    fn = functionName;
+                    fi = LJM_FUNCTIONS[functionName];
 
                     // Create functions that go in the liblabjack object.
                     liblabjack[fn] = createSafeSyncFunction(fn, fi);
@@ -331,7 +337,15 @@ function loadLJMMultiple() {
                     ljm[fn].async = createAsyncFunction(fn, fi);
                 }
             } catch(err) {
-                console.log('Failed to link function', functionName, err);
+                // console.log('Failed to link function', functionName, err);
+                
+                // Create functions that go in the liblabjack object.
+                liblabjack[fn] = createSafeSyncFunction(fn, fi);
+                liblabjack[fn].async = createSafeAsyncFunction(fn, fi);
+
+                // Create functions in the ljm object with the same names.
+                ljm[fn] = createSyncFunction(fn, fi);
+                ljm[fn].async = createAsyncFunction(fn, fi);
             }
         });
 
