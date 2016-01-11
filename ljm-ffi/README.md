@@ -78,15 +78,16 @@ var liblabjackm = ljm_ffi.loadSafe();
 var registerName = 'AIN0';
 
 // Code to create node.js buffer objects.
-var regName = new Buffer();
-var address = new Buffer();
-var type = new Buffer();
+var pAddress = new Buffer(4);
+var pType = new Buffer(4);
 
 // Call the LJM Function:
-var data = liblabjackm.LJM_NameToAddress(regName, address, type);
+var data = liblabjackm.LJM_NameToAddress(registerName, pAddress, pType);
 
 // Code to parse the arguments.  Some (but not all) pointers and arrays will have been modified
 // and need to be parsed back into javascript-land.
+var address = pAddress.readInt32LE(0);
+var type = pType.readInt32LE(0);
 ```
 
 
@@ -101,15 +102,16 @@ var ffi_liblabjackm = ljm_ffi.loadRaw();
 var registerName = 'AIN0';
 
 // Code to create node.js buffer objects.
-var regName = new Buffer();
-var address = new Buffer();
-var type = new Buffer();
+var pAddress = new Buffer(4);
+var pType = new Buffer(4);
 
 // Call the LJM Function:
-var data = ffi_liblabjackm.LJM_NameToAddress(regName, address, type);
+var data = ffi_liblabjackm.LJM_NameToAddress(registerName, pAddress, pType);
 
 // Code to parse the arguments.  Some (but not all) pointers and arrays will have been modified
 // and need to be parsed back into javascript-land.
+var address = pAddress.readInt32LE(0);
+var type = pType.readInt32LE(0);
 ```
 
 ## More Examples:
