@@ -1,4 +1,16 @@
 
+/*
+ * This test makes sure that a simple LJM function call can be performed with
+ * each exposed method.  Synchronous and Asynchronous versions of all three
+ * types.
+ * Type 1: Automatically handles converting/parsing of data into and out of
+ * 		buffer data structures.
+ * Type 2: Adds a try-catch around the function call that makes the 
+ * 		Linux/Mac/Windows ffi implementations more similar.
+ * Type 3: The raw FFI function calls.
+ */
+
+
 var extend = require('extend');
 // Define functions to assist with handling various C data types.
 var type_helpers = require('../lib/type_helpers');
@@ -26,56 +38,14 @@ function log() {
 }
 
 
-var function_tests = {};
-function_tests.LJM_NameToAddress = {
-	'test_args': [
-		{'Name': 'AIN0'},
-		{'Address': 0},
-		{'Type': 0},
-	],
-	'throws_err': false,
-	'expected_results': {
-		'ljmError': 0,
-		'Name': 'AIN0',
-		'Address': 0,
-		'Type': 3,
-	}
-};
-
-// Import test calls for device scanning.
-var device_scanning_ljm_calls = require('./basic_ljm_calls/device_scanning');
-extend(false, function_tests, device_scanning_ljm_calls);
-
-// function_tests.LJM_ListAll = undefined;
-// delete function_tests.LJM_ListAll;
-// function_tests.LJM_ListAllS = undefined;
-// delete function_tests.LJM_ListAllS;
-// function_tests.LJM_ListAllExtended = undefined;
-// delete function_tests.LJM_ListAllExtended;
-
-// Import test calls for open-all testing.
-var open_all_testing = require('./basic_ljm_calls/open_all_testing');
-extend(false, function_tests, open_all_testing);
-
-
+/* Define how the tests will be run. */
 var ljm;
 var liblabjack;
 var ffi_liblabjack;
-var enabled_tests = {
-	'sync': {
-		'ljm': false,
-		'liblabjack': false,
-		'ffi_liblabjack': false,
-	},
-	'async': {
-		'ljm': true,
-		'liblabjack': false,
-		'ffi_liblabjack': false,
-	}
-};
+
 
 /* Define Test Cases */
-test_cases = {
+var test_cases = {
 	'include ljm': function(test) {
 		var ljm_ffi = require('../lib/ljm-ffi');
 
@@ -85,161 +55,171 @@ test_cases = {
 
 		test.done();
 	},
-	
+	'Execute LJM_NameToAddress (Sync)': function(test) {
+		var addressInfo = ljm.LJM_NameToAddress('AIN0', 0, 0);
+		var expectedData = {
+			'ljmError': 0,
+			'Name': 'AIN0',
+			'Address': 0,
+			'Type': 3,
+		};
+		test.deepEqual(addressInfo, expectedData);
+		test.done();
+	},
+	'Execute LJM_NameToAddress (Async)': function(test) {
+		function testData(addressInfo) {
+			var expectedData = {
+				'ljmError': 0,
+				'Name': 'AIN0',
+				'Address': 0,
+				'Type': 3,
+			};
+			test.deepEqual(addressInfo, expectedData);
+			test.done();
+		}
+
+		// Execute LJM Function
+		ljm.LJM_NameToAddress.async('AIN0', 0, 0, testData);
+	},
+
+	'Execute LJM_NameToAddress (Sync) - Safe': function(test) {
+		// Allocate and fill buffers required to execute LJM calls with ffi.
+		var addrName = 'AIN0';
+		var Name = ljTypeOps['string'].allocate(addrName);
+		Name = ljTypeOps['string'].fill(Name, addrName);
+
+		var Address = ljTypeOps['int*'].allocate(0);
+		Address = ljTypeOps['int*'].fill(Address, 0);
+
+		var Type = ljTypeOps['int*'].allocate(0);
+		Type = ljTypeOps['int*'].fill(Type, 0);
+
+		// Execute LJM Function
+		var ljmError = liblabjack.LJM_NameToAddress(Name, Address, Type);
+
+		// Parse returned data
+		var addressInfo = {
+			'ljmError': ljmError,
+			'Name': ljTypeOps['string'].parse(Name),
+			'Address': ljTypeOps['int*'].parse(Address),
+			'Type': ljTypeOps['int*'].parse(Type),
+		};
+		var expectedData = {
+			'ljmError': 0,
+			'Name': 'AIN0',
+			'Address': 0,
+			'Type': 3,
+		};
+
+		// Check Results
+		test.deepEqual(addressInfo, expectedData);
+		test.done();
+	},
+	'Execute LJM_NameToAddress (Async) - Safe': function(test) {
+		function testData(err, ljmError) {
+			// Parse returned data
+			var addressInfo = {
+				'ljmError': ljmError,
+				'Name': ljTypeOps['string'].parse(Name),
+				'Address': ljTypeOps['int*'].parse(Address),
+				'Type': ljTypeOps['int*'].parse(Type),
+			};
+			var expectedData = {
+				'ljmError': 0,
+				'Name': 'AIN0',
+				'Address': 0,
+				'Type': 3,
+			};
+
+			// Check Results
+			test.deepEqual(addressInfo, expectedData);
+			test.done();
+		}
+
+		// Allocate and fill buffers required to execute LJM calls with ffi.
+		var addrName = 'AIN0';
+		var Name = ljTypeOps['string'].allocate(addrName);
+		Name = ljTypeOps['string'].fill(Name, addrName);
+
+		var Address = ljTypeOps['int*'].allocate(0);
+		Address = ljTypeOps['int*'].fill(Address, 0);
+
+		var Type = ljTypeOps['int*'].allocate(0);
+		Type = ljTypeOps['int*'].fill(Type, 0);
+
+		// Execute LJM Function
+		liblabjack.LJM_NameToAddress.async(Name, Address, Type, testData);
+	},
+
+	'Execute LJM_NameToAddress (Sync) - Raw': function(test) {
+		// Allocate and fill buffers required to execute LJM calls with ffi.
+		var addrName = 'AIN0';
+		var Name = ljTypeOps['string'].allocate(addrName);
+		Name = ljTypeOps['string'].fill(Name, addrName);
+
+		var Address = ljTypeOps['int*'].allocate(0);
+		Address = ljTypeOps['int*'].fill(Address, 0);
+
+		var Type = ljTypeOps['int*'].allocate(0);
+		Type = ljTypeOps['int*'].fill(Type, 0);
+
+		// Execute LJM Function
+		var ljmError = ffi_liblabjack.LJM_NameToAddress(Name, Address, Type);
+
+		// Parse returned data
+		var addressInfo = {
+			'ljmError': ljmError,
+			'Name': ljTypeOps['string'].parse(Name),
+			'Address': ljTypeOps['int*'].parse(Address),
+			'Type': ljTypeOps['int*'].parse(Type),
+		};
+		var expectedData = {
+			'ljmError': 0,
+			'Name': 'AIN0',
+			'Address': 0,
+			'Type': 3,
+		};
+
+		// Check Results
+		test.deepEqual(addressInfo, expectedData);
+		test.done();
+	},
+	'Execute LJM_NameToAddress (Async) - Raw': function(test) {
+		function testData(err, ljmError) {
+			// Parse returned data
+			var addressInfo = {
+				'ljmError': ljmError,
+				'Name': ljTypeOps['string'].parse(Name),
+				'Address': ljTypeOps['int*'].parse(Address),
+				'Type': ljTypeOps['int*'].parse(Type),
+			};
+			var expectedData = {
+				'ljmError': 0,
+				'Name': 'AIN0',
+				'Address': 0,
+				'Type': 3,
+			};
+
+			// Check Results
+			test.deepEqual(addressInfo, expectedData);
+			test.done();
+		}
+
+		// Allocate and fill buffers required to execute LJM calls with ffi.
+		var addrName = 'AIN0';
+		var Name = ljTypeOps['string'].allocate(addrName);
+		Name = ljTypeOps['string'].fill(Name, addrName);
+
+		var Address = ljTypeOps['int*'].allocate(0);
+		Address = ljTypeOps['int*'].fill(Address, 0);
+
+		var Type = ljTypeOps['int*'].allocate(0);
+		Type = ljTypeOps['int*'].fill(Type, 0);
+
+		// Execute LJM Function
+		ffi_liblabjack.LJM_NameToAddress.async(Name, Address, Type, testData);
+	},
 };
 
-function create_ljm_sync_test(functionName, testInfo) {
-	return function test_ljm_sync_call(test) {
-		var args = [];
-		var argNames = [];
-
-		testInfo.test_args.forEach(function(test_arg) {
-			var keys = Object.keys(test_arg);
-			var argName = keys[0];
-			var argVal = test_arg[argName];
-			args.push(argVal);
-			argNames.push(argName);
-		});
-
-		var results;
-		log(' - Calling Sync Function', functionName);
-
-		var has_function = false;
-		if(typeof(ljm[functionName]) === 'function') {
-			has_function = true;
-			results = ljm[functionName].apply(this, args);
-			if(testInfo.expected_results) {
-				test.deepEqual(
-					testInfo.expected_results,
-					results,
-					'Results are not correct for: ' + functionName  + '-ljm-sync'
-				);
-			}
-			if(testInfo.custom_verify) {
-				testInfo.custom_verify(test, results, function() {
-					test.done();
-				});
-			} else {
-				test.done();
-			}
-		} else {
-			console.error('Does not have function', functionName);
-			console.error('Available Functions', Object.keys(functionName));
-			test.done();
-		}
-		// ljm_err = ljm[functionName].apply(this, args);
-		// console.log('Err', ljm_err);
-	};
-}
-function create_liblabjack_sync_test(functionName, testInfo) {
-	return function test_liblabjack_sync_call(test) {
-
-	};
-}
-function create_ffi_liblabjack_sync_test(functionName, testInfo) {
-	return function test_ffi_liblabjack_sync_call(test) {
-
-	};
-}
-
-function create_ljm_async_test(functionName, testInfo) {
-	return function test_ljm_async_call(test) {
-		function finished_ljm_call (results) {
-			if(testInfo.expected_results) {
-				test.deepEqual(
-					testInfo.expected_results,
-					results,
-					'Results are not correct for: ' + functionName  + '-ljm-async'
-				);
-			}
-			if(testInfo.custom_verify) {
-				testInfo.custom_verify(test, results, function() {
-					test.done();
-				});
-			} else {
-				test.done();
-			}
-		}
-
-		var args = [];
-		var argNames = [];
-
-		testInfo.test_args.forEach(function(test_arg) {
-			var keys = Object.keys(test_arg);
-			var argName = keys[0];
-			var argVal = test_arg[argName];
-			args.push(argVal);
-			argNames.push(argName);
-		});
-
-		var results;
-		log(' - Calling Async Function', functionName);
-
-		var has_function = false;
-		if(typeof(ljm[functionName].async) === 'function') {
-			has_function = true;
-			args.push(finished_ljm_call);
-
-			results = ljm[functionName].async.apply(this, args);
-		} else {
-			console.error('Does not have function', functionName);
-			console.error('Available Functions', Object.keys(functionName));
-			test.ok(false,'Failed to call function...');
-			test.done();
-		}
-		// ljm_err = ljm[functionName].apply(this, args);
-		// console.log('Err', ljm_err);
-		
-	};
-}
-
-/* Programatically add more test cases */
-function addTests() {
-	var functionNames = Object.keys(function_tests);
-
-	functionNames.forEach(function(functionName) {
-		try {
-			var testName;
-			var testInfo = function_tests[functionName];
-			if(enabled_tests.sync.ljm) {
-				// Add the ljm call
-				testName = functionName + '-ljm-sync';
-				test_cases[testName] = create_ljm_sync_test(
-					functionName,
-					testInfo
-				);
-			}
-			if(enabled_tests.sync.liblabjack) {
-				// Add the liblabjack call
-				testName = functionName + '-liblabjack-sync';
-				test_cases[testName] = create_liblabjack_sync_test(
-					functionName,
-					testInfo
-				);
-			}
-			if(enabled_tests.sync.ffi_liblabjack) {
-				// Add the ffi_liblabjack call
-				testName = functionName + '-ffi_liblabjack-sync';
-				test_cases[testName] = create_ffi_liblabjack_sync_test(
-					functionName,
-					testInfo
-				);
-			}
-
-			if(enabled_tests.async.ljm) {
-				testName = functionName + '-ljm-async';
-				test_cases[testName] = create_ljm_async_test(
-					functionName,
-					testInfo
-				);
-			}
-		} catch(err) {
-			console.log('Error adding function', testName);
-		}
-	});
-	
-}
-
-addTests();
 
 exports.tests = test_cases;

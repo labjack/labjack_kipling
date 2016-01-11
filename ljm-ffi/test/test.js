@@ -2,8 +2,11 @@
 
 
 var testGroups = {
-	'test_type_helpers': false,
+	'test_type_helpers': true,
 	'basic_ljm_calls': true,
+	'ljm_calls': {
+		'ljm_calls': true,
+	}
 	// 'config_loader': {
 	// 	'basic': false,
 	// },
