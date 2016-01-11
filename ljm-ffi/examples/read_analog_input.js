@@ -28,7 +28,7 @@ var operations = {
 					cb();
 				});
 			} else {
-				log('Failed to open a device, please connect a T7 to your computer.');
+				log('Failed to open a device, please connect a T7 to your computer via USB.');
 				cb();
 			}
 		}

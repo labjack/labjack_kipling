@@ -45,6 +45,27 @@ function getHandleInfo(handle, cb) {
 }
 module.exports.getHandleInfo = getHandleInfo;
 
+function getHandleInfoSync(handle) {
+	var data = ljm.LJM_GetHandleInfo(
+		handle, // Handle
+		0, // DeviceType
+		0, // ConnectionType
+		0, // SerialNumber
+		0, // IPAddress
+		0, // Port
+		0 // MaxBytesPerMB
+	);
+	var ipStr = parseIPAddress(data.IPAddress);
+	var deviceData = {
+		'DT': data.DeviceType,
+		'CT': data.ConnectionType,
+		'SN': data.SerialNumber,
+		'IP': ipStr,
+	};
+	return deviceData;
+}
+module.exports.getHandleInfoSync = getHandleInfoSync;
+
 var ENABLE_DEBUG = false;
 function debug() {
 	if(ENABLE_DEBUG) {
