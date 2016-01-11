@@ -1,0 +1,38 @@
+{
+  "name": "kipling-cli",
+  "version": "1.0.0",
+  "description": "This is a cmd-line based program that gives you access to LabJack devices.",
+  "main": "lib/kipling-cli.js",
+  "scripts": {
+    "start": "node ./kipling-cli.js",
+    "test": "nodeunit ./test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisJohn404/kipling-cli.git"
+  },
+  "author": "Chris Johnson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chrisJohn404/kipling-cli/issues"
+  },
+  "homepage": "https://github.com/chrisJohn404/kipling-cli#readme",
+  "preferGlobal": true,
+  "bin": {
+    "kipling-cli": "./lib/kipling-cli.js",
+    "kipling-cli-test": "./lib/kipling-cli-test.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.0.6",
+    "cli": "^0.11.1",
+    "human-readable-ids": "^1.0.1",
+    "log": "^1.4.0",
+    "readline": "^1.2.1",
+    "shelljs": "^0.5.3",
+    "static": "^2.0.0",
+    "task-runner": "0.0.8",
+    "terminal-menu": "^2.1.1",
+    "terminal-menu-program": "0.0.17",
+    "terminal-task-runner": "^1.5.3"
+  }
+}

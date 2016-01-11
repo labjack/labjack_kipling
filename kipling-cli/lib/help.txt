@@ -1,0 +1,8 @@
+{yellow}{bold}Having trouble with the runner?{/bold}{/yellow}
+    You can register {bold}issues{/bold} at:
+        {magenta}https://github.com/leftstick/task-runner/issues{/magenta}
+
+{yellow}{bold}Found a bug or just want to contribute?{/bold}{/yellow}
+    The official repository is:
+        {magenta}https://github.com/leftstick/task-runner{/magenta}
+    Feel free to issue a bug or create a pull request.
