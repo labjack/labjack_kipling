@@ -1,0 +1,118 @@
+{{#with custom}}
+<p></p>
+
+<div id="logger_module" class="{{logger_mode}}">
+<!-- <div id="logger_module" class="dashboard_mode"> -->
+  <div id="logger_controls">
+    <div id="navbar-example" class="navbar">
+      <div class="navbar-inner">
+        <div class="container">
+          <h2 class="brand active-log-controls">Log Name...</h2>
+          <ul class="nav navbar-nav active-log-controls">
+            <li>
+              <button class="win-command green" rel="tootlip" title="Command with icon and label with border ring">
+                <span class="win-commandicon win-commandring icon-play"></span>
+                <span class="win-label">Start</span>
+             </button>
+            </li>
+            <li>
+              <button class="win-command red" rel="tootlip" title="Command with icon and label with border ring">
+                <span class="win-commandicon win-commandring icon-stop"></span>
+                <span class="win-label">Stop</span>
+             </button>
+            </li>
+          </ul>
+
+          <ul class="nav navbar-nav configure-log-controls">
+            <li>
+              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+                <span class="win-commandicon win-commandring icon-file-4"></span>
+                <span class="win-label">New</span>
+             </button>
+            </li>
+            <li>
+              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+                <span class="win-commandicon win-commandring icon-folder-open"></span>
+                <span class="win-label">Open</span>
+             </button>
+            </li>
+            <li>
+              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+                <span class="win-commandicon win-commandring icon-disk"></span>
+                <span class="win-label">Save</span>
+             </button>
+            </li>
+            <li>
+              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+                <span class="win-commandicon win-commandring icon-code-3"></span>
+                <span class="win-label">Examples</span>
+             </button>
+            </li>
+          </ul>
+          <ul class="nav pull-right active-log-controls">
+            <li>
+              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+                <span class="win-commandicon win-commandring icon-cog-4"></span>
+                <span class="win-label">Configure</span>
+             </button>
+            </li>
+          </ul>
+          <ul class="nav pull-right configure-log-controls">
+            <li>
+              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+                <span class="win-commandicon win-commandring  icon-statistics"></span>
+                <span class="win-label">Dashboard</span>
+             </button>
+            </li>
+          </ul>
+        </div><!-- /.container -->
+      </div>
+    </div>
+  </div><!-- /#logger_controls -->
+  <div id="config_view" class="config-pannel">
+    <div id="config_forum">
+      <div class="panel-group">
+        <div class="panel panel-default">
+          <div class="panel-heading" role="button" id="configured-views">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" href="#loggerViewsCollapsible" aria-expanded="false" aria-controls="collapseOne">
+                Configured Views
+                <span class="badge">0</span>
+              </a>
+            </h4>
+          </div>
+          <div id="loggerViewsCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="configured-views">
+            <div class="panel-body">
+              <div>
+                <p>This is where the configured views will be displayed</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="button" id="configured-data-groups">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" href="#loggerDataGroupsCollapsible" aria-expanded="false" aria-controls="collapseThree">
+                Defined Data Groups
+                <span class="badge">0</span>
+              </a>
+            </h4>
+          </div>
+          <div id="loggerDataGroupsCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="configured-data-groups">
+            <div class="panel-body">
+              <div>
+                <p>This is where the configured data groups will be displayed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="logger_view" class="logger-pannel">
+    <p>This is the active logger view</p>
+  </div>
+</div>
+<pre class="selectableText">{{printContext}}</pre>
+{{/with}}
+

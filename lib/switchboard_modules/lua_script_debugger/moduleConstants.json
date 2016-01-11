@@ -121,6 +121,9 @@
                 "name": "Digital IO EF",
                 "subScripts": [
                 {
+                    "name": "High Speed Counter",
+                    "location": "lua_script_debugger/premade_scripts/digital_io_ef/High Speed Counter.lua"
+                }, {
                     "name": "PWM Library & Example",
                     "location": "lua_script_debugger/premade_scripts/digital_io_ef/PWM Library.lua"
                 }

@@ -6,10 +6,7 @@
 	width: 100%;
 	height: 500px;
 }
-.ace_search_field {
-	color:grey;
-}
-.ace_searchbtn {
+.ace_searchbtn, .ace_replacebtn, .ace_search_field {
   color: grey;
 }
 #lua-script-device-status {

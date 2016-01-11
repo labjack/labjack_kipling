@@ -76,6 +76,10 @@
         "name": "powerup_defaults_fw",
         "active": true
     }, {
+        "name": "simple_logger",
+        "description": "A starting point for the device logger.",
+        "active": false
+    }, {
         "name": "simple_logger_flot",
         "active": false
     }, {
@@ -122,5 +126,9 @@
     }, {
         "name": "settings",
         "active": true
+    }, {
+        "name": "demo_file_browser",
+        "description":"A test module for the T7 uSD card file browser",
+        "active": false
     }]
 }
