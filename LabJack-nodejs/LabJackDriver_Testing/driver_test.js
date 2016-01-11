@@ -343,6 +343,30 @@ module.exports = {
             },false,false
         );
     },
+    'configure ethernet timeout': function(test) {
+        driver.writeLibrarySync('LJM_LISTALL_TIMEOUT_MS_ETHERNET', 10000);
+        test.done();
+    },
+    testReadLibraryScallSpeed: function(test) {
+        console.log('in testReadLibraryScallSpeed');
+        // Get the starting time
+        var startTime = new Date();
+        var numIterations = 1;
+        var results = [];
+        var testArg = "LJM_LISTALL_TIMEOUT_MS_ETHERNET";
+
+        for(var i = 0; i < numIterations; i++) {//LJM_ReadLibraryConfigS
+            results.push(driver.readLibrarySync(testArg));
+        }
+        
+        // Get the final time
+        var endTime = new Date();
+
+        console.log('Duration:', endTime - startTime);
+        console.log('Results', results);
+        console.log('Available Functions:', Object.keys(driver));
+        test.done();
+    },
     testWriteLibrary: function(test) {
         asyncRun.config(dev, driver,driver_const);
         syncRun.config(dev, driver,driver_const);

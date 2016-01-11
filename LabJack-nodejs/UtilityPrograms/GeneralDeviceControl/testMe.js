@@ -234,7 +234,7 @@ var buildReadManySpeedTest = function() {
 	var startString = "readMany([\"";
 	var separator = "\",\"";
 	var endString = "\"])";
-	var numReadManyChannels
+	var numReadManyChannels;
 	var i;
 	var cmdStr = "";
 	for(i = 0; i < numChannels; i++) {
@@ -255,7 +255,7 @@ var buildReadManySpeedTest = function() {
 	cmdList.push('#PRINTTIME');
 	cmdList.push('close()');
 	// console.log('Command List:',cmdList)
-	return cmdList
+	return cmdList;;
 }
 var readManySpeedTest = buildReadManySpeedTest();
 

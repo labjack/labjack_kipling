@@ -861,6 +861,7 @@ exports.ljmDriver = function() {
                 parameter, 
                 returnVar
             );
+            console.log('readLibrarySync', parameter, returnVar.deref(), errorResult);
             if (errorResult !== 0) {
                 return errorResult;
             }
@@ -913,15 +914,16 @@ exports.ljmDriver = function() {
                 parameter,
                 strBuffer
             );
-            if (errorResult !== 0) {
+            if (errorResult === 0) {
                 //Calculate the length of the string
                 var i=0;
                 while(strBuffer[i] !== 0) {
                     i++;
                 }
                 return strBuffer.toString('utf8',0,i);
+            } else {
+                return errorResult;
             }
-            return strBuffer.toString('utf8',0,i);
         } else {
             throw DriverInterfaceError('Invalid Input Parameter Type');
             return 'Invalid Input Parameter Type';
