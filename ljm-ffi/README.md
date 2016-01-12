@@ -3,7 +3,7 @@ The ljm-ffi node module provides bindings to LabJack's [LJM library](http://labj
 
 Unlike the [LabJack-nodejs]() library, this library exposes the LJM library calls without modifying any of their functionality. Eventually the LabJack-nodejs library will use this library as its .dll/.dynlib file interface.
 
-As per LabJack's LJM library, this wrapper only supports the [T7](http://labjack.com/products/t7), [T7-Pro](http://labjack.com/products/t7), [Digit-TL](http://labjack.com/products/digit), and [Digit-TLH](http://labjack.com/products/digit) LabJack devices. (Which are low cost, high-quality, multifunction USB / Ethernet / 802.11b/g Wifi DAQ devices.)  Devices using the UD library (Windows only) aka U3, U6, and UE9 are not supported.  Additionally, the U12 is not supported.
+As per LabJack's LJM library, this wrapper only supports the [T7](http://labjack.com/products/t7), [T7-Pro](http://labjack.com/products/t7), [Digit-TL](http://labjack.com/products/digit), and [Digit-TLH](http://labjack.com/products/digit) LabJack devices.  Devices using the UD library (Windows only) aka U3, U6, and UE9 are not supported.  Additionally, the U12 is not supported.
 
 ## Installing the LJM Library
 This library can be downloaded and installed for free on LabJack's website on the [LJM Library Installers](https://labjack.com/support/software/installers/ljm) page.

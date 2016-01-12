@@ -1,13 +1,13 @@
 {
     "name": "ljm-ffi",
-    "version": "1.0.01",
+    "version": "1.0.2",
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
         "url": "http://labjack.com"
     },
     "main": "./lib/ljm-ffi",
-    "license": "GNU GPL v3",
+    "license": "MIT",
     "keywords": [
         "LabJack",
         "LJMMM",
