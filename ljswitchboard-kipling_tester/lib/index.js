@@ -34,10 +34,10 @@ var testFiles = [
 	// 'mock_module_tests/mock_simple_logger.js',
 	
 	// Execute stand-alone mock tests
-	'mock_module_tests/mock_file_browser.js',
+	// 'mock_module_tests/mock_file_browser.js',
 
 	// Execute Live-Device tests
-	// 'module_tests/test_device_info.js',
+	'module_tests/test_device_info.js',
 	// 'module_tests/test_device_updater.js',
 
 	// 'mock_module_tests/mock_lua_script_debugger.js',
