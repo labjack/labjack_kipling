@@ -31,7 +31,7 @@ var addErrorInfo = function(bundle, err) {
 var addErrorData = function(bundle, address, options) {
 	var valueCache = {};
 	var customValues = {};
-	var deviceType = undefined;
+	var deviceType;
 	if(options) {
 		if(options.valueCache) {
 			valueCache = options.valueCache;
@@ -195,6 +195,9 @@ var parseResult = function(address, result, deviceType) {
 			}
 		}
 	}
+	// if(typeof(parsedData) === 'undefined') {
+	// 	console.log('Did not parse the data...', regName, regInfo, retData);
+	// }
 	return retData;
 };
 var parseResults = function(addresses, results, deviceType) {

@@ -67,7 +67,7 @@ exports.tests = {
 					// console.log('  - res',results[j][resultKeys[i]]);
 					// console.log('  - req', reqResults[j][resultKeys[i]]);
 				}
-				test.deepEqual(results[j][resultKeys[i]], reqResults[j][resultKeys[i]], 'Register:' + resultKeys[i])
+				test.deepEqual(results[j][resultKeys[i]], reqResults[j][resultKeys[i]], 'Register ' + results[j].name + ':' + resultKeys[i]);
 			}
 		}
 		for(i = 0; i < results.length; i++) {
