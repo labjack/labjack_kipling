@@ -56,7 +56,7 @@
 	"un-managed-dependencies": {
 		"semver": "4.2.0",
 		"unzip": "0.1.11",
-		"nw": "0.12.2",
+		"nw": "0.12.3",
 		"nodewebkit": "0.11.6",
 	    "ljswitchboard-core": "0.0.x"
 	},
@@ -69,7 +69,7 @@
 	    "fs-extra": "0.18.x"
 	},
   	"devDependencies": {
-  		"nw": "0.12.2"
+  		"nw": "0.12.3"
   	},
 	"script_notes": "to run a script w/o using npm test, use npm run [script name]",
 	"scripts": {
