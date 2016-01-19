@@ -18,6 +18,19 @@ var decodeCurrentSourceCalVal = function(val) {
 	res.str = rVal;
 	return res;
 };
+
+function decodeSixDigitsOfPrecisionFloat(val) {
+	var strVal = val.toFixed(6);
+	var res = {
+		'val': parseFloat(strVal),
+		'str': strVal,
+	};
+	return res;
+}
+var analogFloatReg = {
+	'decode': decodeSixDigitsOfPrecisionFloat,
+};
+
 var T7_LIST = {
 	'AIN#(0:254)': {
 		'decode': function(val) {
@@ -46,6 +59,22 @@ var T7_LIST = {
 			return res;
 		}
 	},
+	'AIN#(0:254)_RANGE': analogFloatReg,
+	'AIN#(0:254)_SETTLING_US': analogFloatReg,
+
+	'AIN_ALL_RANGE': analogFloatReg,
+	'AIN_ALL_SETTLING_US': analogFloatReg,
+
+	'AIN#(0:149)_EF_READ_A': analogFloatReg,
+	'AIN#(0:149)_EF_READ_B': analogFloatReg,
+	'AIN#(0:149)_EF_READ_C': analogFloatReg,
+	'AIN#(0:149)_EF_READ_D': analogFloatReg,
+
+	'AIN#(0:149)_EF_CONFIG_D': analogFloatReg,
+	'AIN#(0:149)_EF_CONFIG_E': analogFloatReg,
+	'AIN#(0:149)_EF_CONFIG_F': analogFloatReg,
+	'AIN#(0:149)_EF_CONFIG_G': analogFloatReg,
+
 	'DAC#(0:1)': {
 		'decode': function(val) {
 			var res = {
@@ -59,6 +88,15 @@ var T7_LIST = {
 		}
 	},
 	'TEMPERATURE_DEVICE_K':{
+		'decode': function(val) {
+			return {
+				'val': parseFloat(val.toFixed(4)),
+				'str': val.toFixed(4),
+				'unit': 'K',
+			};
+		},
+	},
+	'TEMPERATURE_AIR_K':{
 		'decode': function(val) {
 			return {
 				'val': parseFloat(val.toFixed(4)),

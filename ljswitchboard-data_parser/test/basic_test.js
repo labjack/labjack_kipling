@@ -307,24 +307,59 @@ exports.tests = {
 	},
 	'check AINx registers for high-precision rounding': function(test) {
 		var ainValues = [
-			{'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
-			{'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
-			{'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0', 'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
+			{'reg': 'AIN0', 'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
+			{'reg': 'AIN254', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN254', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 		];
 
-		var results = ainValues.map(function(ainValue) {
-			return data_parser.parseResult('AIN0', ainValue.res);
+		var results = ainValues.map(function(tVal) {
+			return data_parser.parseResult(tVal.reg, tVal.res);
 		});
-		var reqResults = ainValues.map(function(ainValue) {
+		var reqResults = ainValues.map(function(tVal) {
 			return {
-				'register': 'AIN0',
-				'name': 'AIN0',
-				'address': 0,
-				'res': ainValue.res,
-				'val': ainValue.val,
-				'rounded': ainValue.rounded,
-				'unit': ainValue.unit,
-				'str': ainValue.rounded.toFixed(6),
+				'register': tVal.reg,
+				'name': tVal.reg,
+				'address': constants.getAddressInfo(tVal.reg).data.address,
+				'res': tVal.res,
+				'val': tVal.val,
+				'rounded': tVal.rounded,
+				'unit': tVal.unit,
+				'str': tVal.rounded.toFixed(6),
+			};
+		});
+		// console.log('Results', results);
+		test.deepEqual(results, reqResults, 'AINx Values are bad');
+		test.done();
+	},
+	'check other AINx related registers for rounding': function(test) {
+		var ainValues = [
+			{'reg': 'AIN_ALL_RANGE', 'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
+			{'reg': 'AIN_ALL_RANGE', 'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
+			{'reg': 'AIN_ALL_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN_ALL_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+		
+			{'reg': 'AIN_ALL_SETTLING_US', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN254_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+
+			{'reg': 'AIN0_EF_READ_A', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN149_EF_READ_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_EF_CONFIG_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN149_EF_CONFIG_G', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+		];
+
+		var results = ainValues.map(function(tVal) {
+			return data_parser.parseResult(tVal.reg, tVal.res);
+		});
+		var reqResults = ainValues.map(function(tVal) {
+			return {
+				'register': tVal.reg,
+				'name': tVal.reg,
+				'address': constants.getAddressInfo(tVal.reg).data.address,
+				'res': tVal.res,
+				'val': tVal.val,
+				'str': tVal.rounded.toFixed(6),
 			};
 		});
 		// console.log('Results', results);
