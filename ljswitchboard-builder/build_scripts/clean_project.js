@@ -55,6 +55,7 @@ var createStdCleanModules = function(names) {
 
 var filesToDelete = {
 	'ljswitchboard-io_manager': {
+		'foldersToDelete': ['.bin'],
 		'node_modules': {
 			'ffi': {
 				'filesToSave': ['LICENSE', 'package.json',],
@@ -78,44 +79,76 @@ var filesToDelete = {
 					}
 				}
 			},
+			'mathjs': {
+				'filesToDelete': ['CONTRIBUTING.md', 'HISTORY.md', 'NOTICE', 'README.md', 'ROADMAP.md'],
+				'foldersToDelete': ['test', 'examples', 'docs', 'bin', 'dist']
+			},
 			'ljswitchboard-ljm_device_curator': {
 				'filesToDelete': ['.npmignore'],
 				'foldersToDelete': ['test'],
-				'node_modules': {
-					'foldersToDelete': ['.bin'],
-					'mathjs': {
-						'filesToDelete': ['CONTRIBUTING.md', 'HISTORY.md', 'NOTICE', 'README.md', 'ROADMAP.md'],
-						'foldersToDelete': ['test', 'examples', 'docs', 'bin', 'dist']
-					}
-				}
+				// 'node_modules': {
+				// 	'foldersToDelete': ['.bin'],
+				// 	'mathjs': {
+				// 		'filesToDelete': ['CONTRIBUTING.md', 'HISTORY.md', 'NOTICE', 'README.md', 'ROADMAP.md'],
+				// 		'foldersToDelete': ['test', 'examples', 'docs', 'bin', 'dist']
+				// 	}
+				// }
 			},
 			'request': {
 				'filesToSave': ['LICENSE', 'package.json', 'request.js', 'index.js'],
 				'foldersToSave': ['lib', 'node_modules'],
-				'node_modules': createStdCleanModules([
-					'aws-sign2',
-					'bl',
-					'caseless',
-					'combined-stream',
-					'forever-agent',
-					'form-data',
-					'har-validator',
-					'hawk',
-					'http-signature',
-					'isstream',
-					'json-stringify-safe',
-					'mime-types',
-					'node-uuid',
-					'oauth-sign',
-					'qs',
-					'stringstream',
-					'tough-cookie',
-					'tunnel-agent',
-				]),
+				// 'node_modules': createStdCleanModules([
+				// 	'aws-sign2',
+				// 	'bl',
+				// 	'caseless',
+				// 	'combined-stream',
+				// 	'forever-agent',
+				// 	'form-data',
+				// 	'har-validator',
+				// 	'hawk',
+				// 	'http-signature',
+				// 	'isstream',
+				// 	'json-stringify-safe',
+				// 	'mime-types',
+				// 	'node-uuid',
+				// 	'oauth-sign',
+				// 	'qs',
+				// 	'stringstream',
+				// 	'tough-cookie',
+				// 	'tunnel-agent',
+				// ]),
 			}
 		}
 	}
-}
+};
+
+// Code that adds more cleaning requests...
+var requestModulesToClean = createStdCleanModules([
+	'aws-sign2',
+	'bl',
+	'caseless',
+	'combined-stream',
+	'forever-agent',
+	'form-data',
+	'har-validator',
+	'hawk',
+	'http-signature',
+	'isstream',
+	'json-stringify-safe',
+	'mime-types',
+	'node-uuid',
+	'oauth-sign',
+	'qs',
+	'stringstream',
+	'tough-cookie',
+	'tunnel-agent',
+]);
+var keys_requestModulesToClean = Object.keys(requestModulesToClean);
+keys_requestModulesToClean.forEach(function(key) {
+	var obj = requestModulesToClean[key];
+
+	filesToDelete['ljswitchboard-io_manager'].node_modules[key] = obj;
+});
 
 var deleteOperations = [];
 
@@ -125,8 +158,13 @@ var operationKeys = [
 	'foldersToDelete',
 	'filesToSave',
 	'foldersToSave',
-]
+];
+
+var numTimesCalled = 0;
 var createDeleteOperations = function(map, directoryOffset, searchOffset) {
+	numTimesCalled += 1;
+	// Debugging cleaning a flattened node_module's tree...
+	// console.log('Called...', numTimesCalled);
 	var keys = Object.keys(map);
 	var availableThings;
 	try {
@@ -175,7 +213,7 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 			'isError': false,
 			'message': '',
 		});
-	}
+	};
 	// If there are things that need to be deleted then lets figure them out!
 	if(hasThingsToDelete) {
 		if(DEBUG_DIRECTORY_SEARCHING) {
