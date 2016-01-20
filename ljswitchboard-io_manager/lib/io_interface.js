@@ -365,11 +365,11 @@ function createIOInterface() {
 		// var version = '0_10_33';
 		// Force execution of node 0_10_35
 		// version = '0_10_35';
-		var version = '0_12_1';
+		var version = '5_4_1';
 		version = {
 			'win32': '5_4_1',
-			'darwin': '1_2_0',
-			'linux': '1_2_0'
+			'darwin': '5_4_1',
+			'linux': '5_4_1'
 		}[os];
 
 		// If the labjack-nodejs lib`rary isn't built for the version defined
