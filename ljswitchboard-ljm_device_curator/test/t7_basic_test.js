@@ -3,6 +3,8 @@ var q = require('q');
 var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');
 var qExec = utils.qExec;
+var ljm_ffi = require('ljm-ffi');
+var ljm = ljm_ffi.load();
 
 
 var device;
@@ -250,6 +252,20 @@ var device_tests = {
 			test.done();
 		});
 	},
+	'close all devices': function(test) {
+		ljm.LJM_CloseAll();
+		test.done();
+	},
+	'close all devices': function(test) {
+		ljm.LJM_CloseAll();
+		test.done();
+	},
+	'close all devices': function(test) {
+		ljm.LJM_CloseAll();
+		setTimeout(function() {
+			test.done();
+		}, 100);
+	}
 };
 
 var tests = {};

@@ -820,6 +820,49 @@ function device(useMockDevice) {
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
+
+	function linkLJMHandle(openParameters) {
+		var defered = q.defer();
+
+		// Save attributes to the ljmDevice object
+		ljmDevice.handle = openParameters.deviceHandle;
+		ljmDevice.deviceType = openParameters.deviceType;
+		ljmDevice.connectionType = openParameters.connectionType;
+		ljmDevice.identifier = openParameters.identifier;
+
+		// Inform the ljmDevice object that the handle is valid.
+		ljmDevice.isHandleValid = true;
+
+		defered.resolve();
+		return defered.promise;
+	}
+
+	/* 
+	 * This function allows users to generate a LJM device handle and then create a curated device object with it.
+	*/
+	this.linkToHandle = function(deviceHandle, deviceType, connectionType, identifier) {
+		var defered = q.defer();
+		var getOnError = function(msg) {
+			return function(err) {
+				var innerDefered = q.defer();
+				// console.log("device_curator.js - Open Failed", err);
+				innerDefered.reject(err);
+				return innerDefered.promise;
+			};
+		};
+		var openParameters = {
+			'deviceHandle': deviceHandle,
+			'deviceType': deviceType,
+			'connectionType': connectionType,
+			'identifier': identifier
+		};
+
+		privateOpen(openParameters)
+		.then(saveAndLoadAttributes(openParameters), getOnError('openStep'))
+		.then(finalizeOpenProcedure, getOnError('saveAndLoadAttrs'))
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
 	this.getHandleInfo = function() {
 		var defered = q.defer();
 		if(allowExecution()) {
