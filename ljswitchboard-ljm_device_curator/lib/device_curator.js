@@ -857,7 +857,7 @@ function device(useMockDevice) {
 			'identifier': identifier
 		};
 
-		privateOpen(openParameters)
+		linkLJMHandle(openParameters)
 		.then(saveAndLoadAttributes(openParameters), getOnError('openStep'))
 		.then(finalizeOpenProcedure, getOnError('saveAndLoadAttrs'))
 		.then(defered.resolve, defered.reject);
