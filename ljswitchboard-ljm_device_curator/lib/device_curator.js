@@ -644,6 +644,7 @@ function device(useMockDevice) {
 		var refreshRate = 500;
 		var maxNumAttempts = numSeconds * 1000/refreshRate;
 		var handleHardwareInstalled = function(newResults) {
+			console.log('Waiting for T7-Pro to initialize...', numAttempts);
 			var wifiFound = false;
 			var validWiFiVersion = false;
 			newResults.forEach(function(res) {
