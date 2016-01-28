@@ -291,35 +291,36 @@ var device_tests = {
 			test.done();
 		});
 	},
-	// 'readTempLightHumidity': function(test) {
-	// 	var results = [];
+	'readTempLightHumidity': function(test) {
+		var results = [];
 
-	// 	qExec(device, 'readTempLightHumidity')(results)
-	// 	.then(function(readResults) {
-	// 		console.log(JSON.stringify(readResults, null, 2));
-	// 		test.done();
-	// 	});
-	// },
-	// 'averageTLH Readings': function(test) {
-	// 	var numReads = 10;
-	// 	var operation = 'readTempLightHumidity';
+		qExec(device, 'readTempLightHumidity')(results)
+		.then(function(readResults) {
+			console.log(JSON.stringify(results, null, 2));
+			test.done();
+		});
+	},
+	'averageTLH Readings': function(test) {
+		var numReads = 10;
+		var operation = 'readTempLightHumidity';
 
-	// 	executeMany(operation, numReads)
-	// 	.then(function(averagedData) {
-	// 		console.log('Averaged Data', averagedData);
-	// 		test.done();
-	// 	});
-	// },
-	// 'averageTHL Readings': function(test) {
-	// 	var numReads = 10;
-	// 	var operation = 'readTempHumidityLight';
+		executeMany(operation, numReads)
+		.then(function(averagedData) {
+			console.log('Averaged Data', averagedData);
+			test.done();
+		});
+	},
+	'averageTHL Readings': function(test) {
+		var numReads = 10;
+		var operation = 'readTempHumidityLight';
 
-	// 	executeMany(operation, numReads)
-	// 	.then(function(averagedData) {
-	// 		console.log('Averaged Data', averagedData);
-	// 		test.done();
-	// 	});
-	// },
+		executeMany(operation, numReads)
+		.then(function(averagedData) {
+			console.log('SN:', device.savedAttributes.serialNumber);
+			console.log('Averaged Data', averagedData);
+			test.done();
+		});
+	},
 	'closeDigit': function(test) {
 		device.close()
 		.then(function() {

@@ -2220,7 +2220,7 @@ function device(useMockDevice) {
 				coercedData.push(dataPoint);
 			}
 		});
-		return digit_format_functions.get(self, coercedData);
+		return digit_format_functions.applyFormatters(self, coercedData);
 	};
 	this.getLogParams = function() {
 		var dt = self.savedAttributes.deviceType;
