@@ -42,21 +42,24 @@ var device_tests = {
 	},
 	'createDigitDevice': function(test) {
 		console.log('');
-		console.log('**** digit_basic_test ****');
-		try {
-			device = new device_curator.device();
-		} catch(err) {
-			stopTest(test, err);
-		}
+		console.log('**** digit_variance_testing ****');
 		test.done();
 	},
 	'list all digits...': function(test) {
-		var foundDevices = driver.listAllSync('LJM_dtDIGIT', 'LJM_ctUSB');
-		console.log('We found digits!', foundDevices.length);
-		deviceSerials = foundDevices.map(function(foundDevice) {
-			return foundDevice.serialNumber;
-		});
-		test.done();
+		driver.listAll(
+			'LJM_dtDIGIT',
+			'LJM_ctUSB',
+			function onError(err) {
+				console.log('Error Performing listAll', err);
+				test.done();
+			},
+			function onSuccess(foundDevices) {
+				console.log('We found digits!', foundDevices.length);
+				deviceSerials = foundDevices.map(function(foundDevice) {
+					return foundDevice.serialNumber;
+				});
+				test.done();
+			});
 	},
 	'open all digits': function(test) {
 		console.log('Opening Devices', deviceSerials);
@@ -136,6 +139,14 @@ var device_tests = {
 				test.done();
 			});
 	},
+	'close all digits': function(test) {
+		driver.closeAll(function onError(err) {
+			console.log('Error closing all', err);
+			test.done();
+		}, function onSuccess(res) {
+			test.done();
+		})
+	}
 };
 
 var executeMany = function(device, operation, numIterations) {

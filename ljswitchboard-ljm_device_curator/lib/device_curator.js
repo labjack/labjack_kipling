@@ -1503,19 +1503,31 @@ function device(useMockDevice) {
 		}
 		return defered.promise;
 	};
+	
 	this.close = function() {
 		var defered = q.defer();
 		self.cachedValues = undefined;
 		self.cachedValues = {};
+		
+		// Disable various background operations.
 		self.haltBackgroundOperations();
+
+		// Disable the connection & reconnection managers.
+		self.allowReconnectManager = false;
+		self.allowConnectionManager = false;
+
+		// Clear the reconnect manager & connection manager timers
+		clearTimeout(self.reconnectManagerTimeout);
+		stopReconnectManager();
+
+		clearTimeout(self.connectionManagerTimeout);
+		stopConnectionManager();
+		
+		// Close the LJM device.
 		ljmDevice.close(
 			function(err) {
-				self.allowReconnectManager = false;
-				self.allowConnectionManager = false;
 				defered.reject(err);
 			}, function(res) {
-				self.allowReconnectManager = false;
-				self.allowConnectionManager = false;
 				defered.resolve(res);
 			}
 		);

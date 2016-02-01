@@ -43,6 +43,10 @@ var device_tests = {
 		}
 		test.done();
 	},
+	'close all open devices': function(test) {
+		ljm.LJM_CloseAll();
+		test.done();
+	},
 	'openDevice': function(test) {
 		var td = {
 			'dt': 'LJM_dtT7',
@@ -251,10 +255,6 @@ var device_tests = {
 		.then(function() {
 			test.done();
 		});
-	},
-	'close all devices': function(test) {
-		ljm.LJM_CloseAll();
-		test.done();
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
