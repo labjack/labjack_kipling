@@ -1,4 +1,7 @@
 
+// Configure the number of max listeners on the process object to be infinity.
+process.setMaxListeners(0);
+
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
@@ -31,6 +34,7 @@ var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;
 var DEVICE_ERROR = device_events.DEVICE_ERROR;
 var DEVICE_RECONNECTING = device_events.DEVICE_RECONNECTING;
 var DEVICE_ATTRIBUTES_CHANGED = device_events.DEVICE_ATTRIBUTES_CHANGED;
+var DEVICE_INITIALIZING = device_events.DEVICE_INITIALIZING;
 
 
 
@@ -43,7 +47,12 @@ var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 var ljmMockDevice;
 var use_mock_device = true;
 
+var numCreatedDevices = 0;
+
 function device(useMockDevice) {
+	this.curatedDeviceInt = numCreatedDevices;
+	numCreatedDevices += 1;
+
 	var ljmDevice;
 	var t7_device_upgrader = new lj_t7_upgrader.createT7Upgrader();
 	this.isMockDevice = false;
@@ -644,7 +653,8 @@ function device(useMockDevice) {
 		var refreshRate = 500;
 		var maxNumAttempts = numSeconds * 1000/refreshRate;
 		var handleHardwareInstalled = function(newResults) {
-			console.log('Waiting for T7-Pro to initialize...', numAttempts);
+			// console.log('Waiting for T7-Pro to initialize...', numAttempts);
+			self.emit(DEVICE_INITIALIZING, numAttempts);
 			var wifiFound = false;
 			var validWiFiVersion = false;
 			newResults.forEach(function(res) {
@@ -1504,8 +1514,16 @@ function device(useMockDevice) {
 		return defered.promise;
 	};
 	
-	this.close = function() {
-		var defered = q.defer();
+
+	function removeProcessListeners() {
+		// Remove the connected process listeners.
+		// console.log('Removing process interrupts', self.curatedDeviceInt);
+		process.removeListener('exit', handleProcessExitInterrupt);
+		process.removeListener('SIGINT', handleSIGINTInterrupt);
+	}
+
+	function prepareToCloseDevice() {
+		// Clear cached device values
 		self.cachedValues = undefined;
 		self.cachedValues = {};
 		
@@ -1522,6 +1540,14 @@ function device(useMockDevice) {
 
 		clearTimeout(self.connectionManagerTimeout);
 		stopConnectionManager();
+
+		removeProcessListeners();
+	}
+
+	this.close = function() {
+		var defered = q.defer();
+		
+		prepareToCloseDevice();
 		
 		// Close the LJM device.
 		ljmDevice.close(
@@ -1533,6 +1559,27 @@ function device(useMockDevice) {
 		);
 		return defered.promise;
 	};
+
+	
+
+	function handleProcessExitInterrupt(code) {
+		console.log('Exiting... event not removed..', self.curatedDeviceInt);
+		process.removeListener('SIGINT', handleSIGINTInterrupt);
+		prepareToCloseDevice();
+	}
+	function handleSIGINTInterrupt(code) {
+		console.log('Got SIGINT. Exiting...', self.curatedDeviceInt);
+		
+		prepareToCloseDevice();
+		process.exit();
+	}
+	// console.log('Attaching to process interrupts', this.curatedDeviceInt);
+	process.on('exit', handleProcessExitInterrupt);
+	process.on('SIGINT', handleSIGINTInterrupt);
+
+	this.destroy = function() {
+		prepareToCloseDevice();
+	}
 
 	/**
 	 * Begin _DEFAULT safe and _DEFAULT status-saving functions

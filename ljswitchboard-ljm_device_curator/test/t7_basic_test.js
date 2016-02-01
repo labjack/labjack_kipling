@@ -70,6 +70,7 @@ var device_tests = {
 		}, function(err) {
 			console.log('Failed to open device', err);
 			performTests = false;
+			device.destroy();
 			test.done();
 		});
 	},
