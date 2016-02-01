@@ -6,8 +6,11 @@ var testGroups = {
 	'get_ljm_version': true,
 	'basic_ljm_calls': true,
 	'ljm_calls': {
-		'ljm_calls': true,
-	}
+		'ljm_calls': false,
+	},
+	'device_opening': {
+		'udp_connections': true,
+	},
 	// 'config_loader': {
 	// 	'basic': false,
 	// },

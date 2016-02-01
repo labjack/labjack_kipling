@@ -25,8 +25,8 @@ var ljTypeMap = {
     'a-double*':    ref.refType(ref.types.double),
 
     // These argument types are arrays of arrays or arrays of pointers.
-    'char**':       ref.refType(ref.types.CString),
-    'a-char**':     ref.refType(ref.types.CString),
+    'char**':       ref.refType(ref.types.CString), // Not really used...
+    'a-char**':     ref.refType(ref.types.CString), // This is an array of strings
 };
 exports.ljTypeMap = ljTypeMap;
 

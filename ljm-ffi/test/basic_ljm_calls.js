@@ -11,7 +11,6 @@
  */
 
 
-var extend = require('extend');
 // Define functions to assist with handling various C data types.
 var type_helpers = require('../lib/type_helpers');
 var ljTypeMap = type_helpers.ljTypeMap;
