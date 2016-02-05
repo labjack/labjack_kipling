@@ -30,6 +30,7 @@ exports.LJM_CT_USB = 1;
 exports.LJM_CT_TCP = 2;
 exports.LJM_CT_ETHERNET = 3;
 exports.LJM_CT_WIFI = 4;
+exports.LJM_CT_UDP = 5;
 
 //Read/write constants
 exports.LJM_READ = 0;
@@ -268,7 +269,13 @@ exports.connectionTypes = {
 	WiFi: 4,
 	Wifi: 4,
 	wifi: 4,
-	4:4
+	4:4,
+	LJM_CTUDP: 5,
+	LJM_ctUDP: 5,
+	LJM_ctudp: 5,
+	UDP: 5,
+	udp: 5,
+	5: 5,
 };
 exports.LJM_UINT64 = 69;							 // Un-supported C type of UINT64/mac addresses
 exports.LJM_UINT16 = 0; 			                 // C type of unsigned short
@@ -399,14 +406,16 @@ exports.DRIVER_CONNECTION_TYPE_NAMES = {
     '1': 'LJM_ctUSB',
     '2': 'LJM_ctTCP',
     '3': 'LJM_ctETHERNET',
-    '4': 'LJM_ctWIFI'
+    '4': 'LJM_ctWIFI',
+    '5': 'LJM_ctUDP',
 };
 exports.CONNECTION_TYPE_NAMES = {
     '0': 'Any',
     '1': 'USB',
     '2': 'TCP',
     '3': 'Ethernet',
-    '4': 'WiFi'
+    '4': 'WiFi',
+    '5': 'UDP'
 };
 exports.WIFI_STATUS_DISPLAY_DATA = {
     2900: {'display':true,'str':'Associated'},
