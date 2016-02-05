@@ -70,6 +70,9 @@ module.exports.LJM_ListAll = {
 	],
 	'throws_err': false,
 	'custom_verify': function(test, results, cb) {
+		if(results.ljmError) {
+			console.log('We got an error...', results.ljmError);
+		}
 		verifyResultKeys(test, results, 'LJM_ListAll');
 		verifyNoLJMError(test, results, 'LJM_ListAll');
 

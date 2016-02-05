@@ -126,7 +126,8 @@ LJM_FUNCTIONS.LJM_OpenAll = {
 		{'NumOpened': 				'int*'},
 		{'aHandles': 				'a-int*'},
 		{'NumErrors': 				'int*'},
-		{'aErrors': 				'a-int*'},
+		{'ErrorHandle':				'int*'},
+		{'Errors':					'char**'},
 	]
 };
 
@@ -157,9 +158,17 @@ LJM_FUNCTIONS.LJM_GetHandleInfo = {
 		{'DeviceType': 				'int*'},
 		{'ConnectionType': 			'int*'},
 		{'SerialNumber': 			'int*'},
-		{'IPAddress': 				'int*'},
+		{'IPAddress': 				'uint*'},
 		{'Port': 					'int*'},
 		{'MaxBytesPerMB': 			'int*'},
+	]
+};
+
+LJM_FUNCTIONS.LJM_NumberToIP = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'Number': 					'int'},
+		{'IPv4String': 				'ex-char*'},
 	]
 };
 
@@ -465,7 +474,7 @@ LJM_FUNCTIONS.LJM_ReadLibraryConfigStringS = {
 	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
 	'args': [
 		{'Parameter': 				'string'},
-		{'String': 					'char*'},
+		{'String': 					'ex-char*'},
 	]
 };
 

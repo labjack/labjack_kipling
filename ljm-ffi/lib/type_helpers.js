@@ -12,7 +12,8 @@ var ljTypeMap = {
     
     // These argument types are pointers.  They require data to be moved in
     // and out of buffer objects.  They are essentially arrays of length 1.
-    'char*':        ref.refType(ref.types.char),
+    'char*':        ref.refType(ref.types.char), // The max-size of this char* data type is 50, it is meant to communicate with devices.
+    'ex-char*':     ref.refType(ref.types.char), // The max-size of this char* data type is 256, it is meant to communicate with LJM. ex -> extended
     'uint*':        ref.refType(ref.types.uint),
     'int*':         ref.refType(ref.types.int),
     'double*':      ref.refType(ref.types.double),
@@ -142,6 +143,44 @@ ljTypeOps['char*'] = {
             'utf8',
             0,
             driver_const.LJM_MAX_STRING_SIZE
+        );
+        var parsedStr = '';
+        for ( var i = 0; i < receivedStrData.length; i++ ) {
+            if ( receivedStrData.charCodeAt(i) === 0 ) {
+                break;
+            } else {
+                parsedStr += receivedStrData[i];
+            }
+        }
+        return parsedStr;
+    }
+};
+// Handling data type pointer variants is the same way as the standard
+// data types.
+ljTypeOps['ex-char*'] = {
+    'allocate': function(userData) {
+        var strBuffer = new Buffer(driver_const.LJM_MAX_NAME_SIZE);
+        strBuffer.fill(0);
+        return strBuffer;
+    },
+    'fill': function(buffer, userData) {
+        if ( userData.length <= driver_const.LJM_MAX_NAME_SIZE ) {
+            buffer.write(userData, 0, userData.length, 'utf8');
+        } else {
+            buffer.write(
+                userData,
+                0,
+                driver_const.LJM_MAX_NAME_SIZE,
+                'utf8'
+            );
+        }
+        return buffer;
+    },
+    'parse': function(strBuffer) {
+        var receivedStrData = strBuffer.toString(
+            'utf8',
+            0,
+            driver_const.LJM_MAX_NAME_SIZE
         );
         var parsedStr = '';
         for ( var i = 0; i < receivedStrData.length; i++ ) {
@@ -310,6 +349,27 @@ ljTypeOps['a-double*'] =  {
 
 ljTypeOps['char**'] =  {
     'allocate': function(userData) {
+        //ref: http://tootallnate.github.io/ref/
+        var pointerArray = new Buffer(ARCH_POINTER_SIZE);
+        pointerArray.fill(0);
+        return pointerArray;
+    },
+    'fill':function(buffer, userData) {
+        var buf = new Buffer(userData.length + 1);
+        buf.fill(0);
+        ref.writeCString(buf, 0, userData);
+        ref.writePointer(buffer, 0, buf);
+        return buffer;
+    },
+    'parse': function(buffer) {
+        var pointerToCharStar = ref.readPointer(buffer, 0, ARCH_POINTER_SIZE);
+        var parsedCharStar = ref.readCString(pointerToCharStar, 0);
+        return parsedCharStar;
+    },
+};
+
+ljTypeOps['a-char**'] = {
+    'allocate': function(userData) {
         var length = userData.length;
         var i = 0;
         var offset = 0;
@@ -359,7 +419,6 @@ ljTypeOps['char**'] =  {
         return parsedDataArray;
     },
 };
-ljTypeOps['a-char**'] = ljTypeOps['char**'];
 
 exports.ljTypeOps = ljTypeOps;
 

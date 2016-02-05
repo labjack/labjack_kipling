@@ -27,8 +27,8 @@ var ljm_ffi = require('../../lib/ljm-ffi');
 var ljm = ljm_ffi.load();
 
 function parseIPAddress(ipInt) {
-	var ipAddr = ref.alloc('int', 1);
-	ipAddr.writeInt32LE(ipInt, 0);
+	var ipAddr = ref.alloc('uint', 1);
+	ipAddr.writeUInt32LE(ipInt, 0);
 	
 	var ipStr = "";
 	ipStr += ipAddr.readUInt8(3).toString();
@@ -76,14 +76,15 @@ function getHandleInfos(handles, cb) {
 
 
 module.exports.LJM_OpenAll = {
-	'min_ljm_version': 1.09,
+	'min_ljm_version': 1.1101,
 	'test_args': [
 		{'DeviceType': 				0},
 		{'ConnectionType': 			0},
 		{'NumOpened': 				0},
 		{'aHandles': 				scanIntArray},
 		{'NumErrors': 				0},
-		{'aErrors': 				scanIntArray},
+		{'ErrorHandle':  			0},
+		{'Errors': 					''},
 	],
 	'throws_err': false,
 	'custom_verify': function(test, results, cb) {
@@ -97,6 +98,7 @@ module.exports.LJM_OpenAll = {
 			handles.push(results.aHandles[i]);
 		}
 		
+		debug('Num Handles', handles.length, handles);
 		getHandleInfos(handles, function(infos) {
 			log(' - Found Devices (', infos.length, '):');
 			infos.forEach(function(info) {

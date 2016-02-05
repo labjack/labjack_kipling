@@ -60,8 +60,8 @@ function_tests.LJM_NameToAddress = {
 };
 
 // Import test calls for device scanning.
-// var device_scanning_ljm_calls = require('./device_scanning');
-// extend(false, function_tests, device_scanning_ljm_calls);
+var device_scanning_ljm_calls = require('./device_scanning');
+extend(false, function_tests, device_scanning_ljm_calls);
 
 // Import test calls for open-all testing.
 var open_all_testing = require('./open_all_testing');
@@ -78,7 +78,7 @@ function create_ljm_sync_test(functionName, testInfo, nameAppend) {
 			console.log(
 				' ! Skipping Test:',
 				functionName + nameAppend,
-				'Requres LJM Version:',
+				'Requires LJM Version:',
 				minVersion
 			);
 			test.done();
@@ -103,6 +103,7 @@ function create_ljm_sync_test(functionName, testInfo, nameAppend) {
 		if(typeof(ljm[functionName]) === 'function') {
 			has_function = true;
 			results = ljm[functionName].apply(this, args);
+			log(' - Finished Calling Sync Function', functionName);
 			if(testInfo.expected_results) {
 				test.deepEqual(
 					testInfo.expected_results,

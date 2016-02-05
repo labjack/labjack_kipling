@@ -153,12 +153,18 @@ type_tests['a-double*'] = {
 };
 type_tests['char**'] = {
 	'test_vals': [
-		{'start': ['testA', 'testB'], 'end': ['testA', 'testB'], 'err': false},
+		{'start': 'testA', 'end': 'testA', 'err': false},
 	],
 	'type': 'char**',
 	'size': ARCH_POINTER_SIZE,
 };
-type_tests['a-char**'] = type_tests['char**'];
+type_tests['a-char**'] = {
+	'test_vals': [
+		{'start': ['testA', 'testB'], 'end': ['testA', 'testB'], 'err': false},
+	],
+	'type': 'a-char**',
+	'size': ARCH_POINTER_SIZE,
+};
 
 /* Define Test Cases */
 exports.tests = {
