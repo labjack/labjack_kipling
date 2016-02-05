@@ -9,13 +9,16 @@ var testGroups = {
 		'ljm_calls': true,
 		// 'open_all': false,
 	},
-	'load_specific_ljm': true,
 	'ljm_config_testing': {
 		'special_addresses': true,
 	},
 	'device_opening': {
 		'udp_connections': true,
 	},
+
+	// This test should be run last because it switches to a potentially old version of the
+	// LJM library.
+	'load_specific_ljm': true,
 	// 'config_loader': {
 	// 	'basic': false,
 	// },
