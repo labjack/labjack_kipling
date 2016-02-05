@@ -861,7 +861,7 @@ exports.ljmDriver = function() {
                 parameter, 
                 returnVar
             );
-            console.log('readLibrarySync', parameter, returnVar.deref(), errorResult);
+            // console.log('readLibrarySync', parameter, returnVar.deref(), errorResult);
             if (errorResult !== 0) {
                 return errorResult;
             }

@@ -28,7 +28,7 @@
     ],
     "dependencies": {
         "async": "~0",
-        "ffi": "2.x.x",
+        "ljm-ffi": "1.x.x",
         "ref": "*",
         "ljswitchboard-modbus_map":"0.0.x",
         "ljswitchboard-ljm_driver_constants":"0.0.x",

@@ -348,7 +348,7 @@ module.exports = {
         test.done();
     },
     testReadLibraryScallSpeed: function(test) {
-        console.log('in testReadLibraryScallSpeed');
+        console.log(' - in testReadLibraryScallSpeed');
         // Get the starting time
         var startTime = new Date();
         var numIterations = 1;
@@ -362,9 +362,9 @@ module.exports = {
         // Get the final time
         var endTime = new Date();
 
-        console.log('Duration:', endTime - startTime);
-        console.log('Results', results);
-        console.log('Available Functions:', Object.keys(driver));
+        console.log(' - Duration:', endTime - startTime);
+        console.log(' - Results', results);
+        // console.log('Available Functions:', Object.keys(driver));
         test.done();
     },
     testWriteLibrary: function(test) {
