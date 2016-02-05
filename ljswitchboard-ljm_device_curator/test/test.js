@@ -6,6 +6,12 @@ process.on('uncaughtException', function(err) {
 
 
 /********************** Require tests *****************************************/
+// Require LJM Versioning tests
+// var load_specific_ljm_version = require('./load_specific_ljm_version');
+// exports.load_specific_ljm_version = load_specific_ljm_version.tests;
+var get_ljm_version = require('./get_ljm_version');
+exports.get_ljm_version = get_ljm_version.tests;
+
 // Require generic tests on mock devices
 var mock_device_test = require('./mock_device_test');
 var mock_device_defaults_cache_test = require('./mock_device_defaults_cache_test');
