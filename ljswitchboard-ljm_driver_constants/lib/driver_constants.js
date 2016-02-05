@@ -21,6 +21,9 @@ exports.LJM_DT_DIGIT = 200;
 //Max string size
 exports.LJM_MAX_STRING_SIZE = 50;
 
+// Max Name size
+exports.LJM_MAX_NAME_SIZE = 256;
+
 //Connection Types
 exports.LJM_CT_ANY = 0;
 exports.LJM_CT_USB = 1;
