@@ -567,6 +567,18 @@ var LJM_ListAllExtended = createCallableObject(
 		reportEnd(callback);
 	});
 
+var LJM_OpenAll = createCallableObject(
+	function(DeviceType, ConnectionType, NumOpened, aHandles, NumErrors, ErrorHandle, Errors) {
+		lastFunctionCall.push("LJM_OpenAll");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(DeviceType, ConnectionType, NumOpened, aHandles, NumErrors, ErrorHandle, Errors, callback) {
+		lastFunctionCall.push("LJM_OpenAllAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
+
 /**
  * Test-Function for Synchronous and Async Multiple-Operation functionality: 
  */
@@ -765,6 +777,7 @@ var fakeDriver = {
 	'LJM_ListAll': LJM_ListAll,
 	'LJM_ListAllS': LJM_ListAllS,
 	'LJM_ListAllExtended': LJM_ListAllExtended,
+	'LJM_OpenAll': LJM_OpenAll,
 	'LJM_ErrorToString': LJM_ErrorToString,
 	'LJM_LoadConstants': LJM_LoadConstants,
 	'LJM_CloseAll': LJM_CloseAll,
@@ -785,6 +798,9 @@ exports.getDriver = function()
 exports.getConstants = function()
 {
 	return ljmJsonManager.getConstants();
+}
+exports.hasOpenAll = function() {
+	return true;
 }
 exports.getLastFunctionCall = function() {
 	return lastFunctionCall;

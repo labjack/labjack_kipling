@@ -17,6 +17,7 @@ var LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = driver_const.LIST_ALL_EXTENDED_MAX_NUM_T
 var ARCH_INT_NUM_BYTES = driver_const.ARCH_INT_NUM_BYTES;
 var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
 var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
+var LJM_LIST_ALL_SIZE = driver_const.LJM_LIST_ALL_SIZE;
 
 // For problems encountered while in driver DLL
 function DriverOperationError(code,description) {
@@ -37,6 +38,7 @@ function DriverInterfaceError(description) {
  */
 exports.ljmDriver = function() {
     this.ljm = driverLib.getDriver();
+    this.hasOpenAll = driverLib.hasOpenAll();
     this.constants = jsonConstants.getConstants();
 
     /**
@@ -667,6 +669,104 @@ exports.ljmDriver = function() {
     };
 
     /**
+     * Internal helper function to prepare the arguments for an OpenAll call.
+     */
+    var prepareOpenAll = function(me, deviceType, connectionType) {
+        if (!self.hasOpenAll) {
+            throw new DriverInterfaceError(
+                'openAll is not loaded. Use ListAll and Open functions instead.'
+            );
+        }
+
+        if (deviceType === undefined || connectionType === undefined) {
+            throw 'Insufficient parameters for OpenAll - DeviceType and ConnectionType required';
+        }
+
+        me.numOpened = new ref.alloc('int', 0);
+        me.aHandles = new Buffer(ARCH_INT_NUM_BYTES * LJM_LIST_ALL_SIZE);
+        me.aHandles.fill(0);
+        me.numErrors = new ref.alloc('int', 0);
+        me.errorHandle = new ref.alloc('int', 0);
+        me.errors = new Buffer(ARCH_POINTER_SIZE);
+        me.errors.fill(0);
+        me.devType = parseInt(deviceType, 10);
+        me.connType = parseInt(connectionType, 10);
+
+        if (isNaN(me.devType) || isNaN(me.connType)) {
+            throw new DriverInterfaceError(
+                'openAll deviceType and connectionType must be numerical'
+            );
+        }
+    }
+
+    /**
+     * Desc: Internal helper function to extract return data from an OpenAll call.
+     */
+    var extractOpenAllResults = function(me) {
+        var results = [];
+        var numDevices = me.numOpened.deref();
+        for(var i = 0; i < numDevices; i++) {
+            results.push({
+                // Currently just a list of objects which only tell you the handle
+                // We might want to return devices or something else though
+                handle: me.aHandles.readInt32LE(i * ARCH_INT_NUM_BYTES)
+            });
+        }
+        return results;
+    }
+
+    /**
+     * Desc: Opens all LabJacks of the specified device type and connection type.
+     *
+     * @param {int} deviceType The numerical device type
+     * @param {int} connectionType The numerical connection type
+     * @param {function} onError Function to call if an error is encountered
+     *      while enumerating available devices. Must take a single parameter
+     *      (either an integer or string) describing the error encountered.
+     * @param {function} onSuccess Function to call with the resulting
+     *      enumeration. Should take a single argument: a listing representing
+     *      the devices opened as an array of objects.
+     */
+    this.openAll = function(deviceType, connectionType, onError, onSuccess) {
+        var me = {};
+        prepareOpenAll(me, deviceType, connectionType);
+
+        self.ljm.LJM_OpenAll.async(
+            me.devType,
+            me.connType,
+            me.numOpened,
+            me.aHandles,
+            me.numErrors,
+            me.errorHandle,
+            me.errors,
+            function (err, res) {
+                if (err) throw err;
+                if (res !== 0) return onError(res);
+                return onSuccess(extractOpenAllResults(me));
+            }
+        );
+    };
+    this.openAllSync = function(deviceType, connectionType) {
+        var me = {};
+        prepareOpenAll(me, deviceType, connectionType);
+
+        var errorResult = self.ljm.LJM_OpenAll(
+            me.devType,
+            me.connType,
+            me.numOpened,
+            me.aHandles,
+            me.numErrors,
+            me.errorHandle,
+            me.errors
+        );
+        if (errorResult !== 0) {
+            throw new DriverOperationError(errorResult);
+        }
+
+        return extractOpenAllResults(me);
+    };
+
+    /**
      * Converts an error number to a string asynchronously.
      * @param {number} errNum Error number to be converted to a string.
      * @param {function} onError Function to call if an error is encountered
@@ -876,7 +976,7 @@ exports.ljmDriver = function() {
             var errorResult;
 
             //Allocate a buffer for the result
-            var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+            var strBuffer = new Buffer(driver_const.LJM_MAX_NAME_SIZE);
             //Clear the buffer
             strBuffer.fill(0);
 
@@ -887,11 +987,12 @@ exports.ljmDriver = function() {
                     if (err) throw err;
                     if ( res === 0 ) {
                         //Calculate the length of the string
-                        var i=0;
-                        while(strBuffer[i] !== 0) {
-                            i++;
-                        }
-                        return onSuccess(strBuffer.toString('utf8',0,i));
+                        // var i=0;
+                        // while(strBuffer[i] !== 0) {
+                        //     i++;
+                        // }
+                        // return onSuccess(strBuffer.toString('utf8',0,i));
+                        return onSuccess(ref.readCString(strBuffer));
                     } else {
                         return onError(res);
                     }
@@ -906,7 +1007,7 @@ exports.ljmDriver = function() {
         if(isNaN(parameter)) {
             var errorResult;
             //Allocate a buffer for the result
-            var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+            var strBuffer = new Buffer(driver_const.LJM_MAX_NAME_SIZE);
             //Clear the buffer
             strBuffer.fill(0);
 
@@ -916,14 +1017,15 @@ exports.ljmDriver = function() {
             );
             if (errorResult === 0) {
                 //Calculate the length of the string
-                var i=0;
-                while(strBuffer[i] !== 0) {
-                    i++;
-                }
-                return strBuffer.toString('utf8',0,i);
-            } else {
-                return errorResult;
+                // var i=0;
+                // while(strBuffer[i] !== 0) {
+                //     i++;
+                // }
+                // return strBuffer.toString('utf8',0,i);
+                return ref.readCString(strBuffer);
             }
+            // return strBuffer.toString('utf8',0,i);
+            return errorResult;
         } else {
             throw DriverInterfaceError('Invalid Input Parameter Type');
             return 'Invalid Input Parameter Type';

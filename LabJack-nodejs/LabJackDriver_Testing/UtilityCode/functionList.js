@@ -20,6 +20,7 @@ var functionLocation = {
 	//Driver Functions
 	'listAll': 'driver',
 	'listAllExtended': 'driver',
+	'openAll': 'driver',
 	'errToStr': 'driver',
 	'loadConstants': 'driver',
 	'closeAll': 'driver',

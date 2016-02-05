@@ -12,21 +12,35 @@ var jsonConstants = require('ljswitchboard-modbus_map');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 var ljm;
+var ffi_liblabjack;
 
 // Require the ljm-ffi library.
 var ljm_ffi = require('ljm-ffi');
 
 // Link to the ljm shared library (.so, .dylib, .dll)
-ljm = ljm_ffi.loadRaw();
+ljm = ljm_ffi.load();
+ffi_liblabjack = ljm_ffi.loadRaw();
+
+// Get the loaded version of LJM
+var ljmLibraryVersionData = ljm.LJM_ReadLibraryConfigS('LJM_LIBRARY_VERSION', 0);
+var ljmLibraryVersion = ljmLibraryVersionData.Version;
+
+var openAllIsLoaded = false;
+if(ljmLibraryVersion > 1.1100) {
+    openAllIsLoaded = true;
+}
 
 exports.getDriver = function() {
-    return ljm;
+    return ffi_liblabjack;
 };
 exports.getConstants = function() {
     return jsonConstants.getConstants();
 };
 exports.parseRegisterNameString = function (name) {
     return parseRegisterNameString(name);
+};
+exports.hasOpenAll = function() {
+    return openAllIsLoaded;
 };
 
 /*

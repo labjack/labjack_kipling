@@ -173,6 +173,52 @@ module.exports = {
             }
         ); 
     },
+    testOpenAll: function(test) {
+        // Manually set OpenAll to true so that this test doesn't depend on the
+        // version of LJM that happens to be available.
+        driver.hasOpenAll = true;
+
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+         //Create test-variables
+        var testList = [
+            'openAll("0","0")',
+            'openAll("7","1")',
+            'openAll(7,1)',
+        ];
+        //Expected info combines both sync & async
+        var expectedFunctionList = [
+            'LJM_OpenAll',
+            'LJM_OpenAll',
+            'LJM_OpenAll',
+            'LJM_OpenAllAsync',
+            'LJM_OpenAllAsync',
+            'LJM_OpenAllAsync'
+        ];
+        //Expected info combines both sync & async
+        var expectedResultList = [[], [], [], [], [], []];
+
+        //Run the desired commands
+        syncRun.run(testList);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+
+                //Make sure we called the proper test-driver functions
+                test.deepEqual(expectedFunctionList, funcs);
+
+                //Make sure we get the proper results back
+                test.deepEqual(expectedResultList, results);
+
+                test.done();
+            }
+        );
+    },
     testErrToStr: function(test) {
         asyncRun.config(dev, driver,driver_const);
         syncRun.config(dev, driver,driver_const);
