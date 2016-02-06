@@ -61,6 +61,7 @@ var device_tests = {
 	'initial test': function(test) {
 		console.log('');
 		console.log('**** Starting external_handle_test ****');
+		console.log('Please connect 1x T7 via Ethernet and 1x T7 via USB');
 		test.done();
 	},
 	'openDevice (UDP)': function(test) {

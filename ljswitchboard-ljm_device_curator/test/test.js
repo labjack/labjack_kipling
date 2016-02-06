@@ -53,15 +53,15 @@ var basic_watcher_test = require('./basic_watcher_test');
 
 /********************** Perform tests *****************************************/
 // Perform Generic tests on mock devices
-// exports.mock_device_test = mock_device_test.tests;								// Passing
-// exports.mock_device_defaults_cache_test = mock_device_defaults_cache_test.tests;// Passing
-// exports.mock_device_attrs_test = mock_device_attrs_test.tests;
-// exports.mock_device_upgrade_test = mock_device_upgrade_test.tests;
-// exports.multiple_mock_device_upgrade_test = multiple_mock_device_upgrade_test.tests;
+exports.mock_device_test = mock_device_test.tests;								// Passing
+exports.mock_device_defaults_cache_test = mock_device_defaults_cache_test.tests;// Passing
+exports.mock_device_attrs_test = mock_device_attrs_test.tests;
+exports.mock_device_upgrade_test = mock_device_upgrade_test.tests;
+exports.multiple_mock_device_upgrade_test = multiple_mock_device_upgrade_test.tests;
 
 // Perform T7 related tests
-// exports.t7_basic_test = t7_basic_test.tests;									// Passing
-// exports.t7_array_test = t7_array_test.tests;
+exports.t7_basic_test = t7_basic_test.tests;									// Passing
+exports.t7_array_test = t7_array_test.tests;
 // exports.t7_check_calibration_test = t7_check_calibration_test.tests;			// Passing
 // exports.t7_read_recovery_fw_version_test = t7_read_recovery_fw_version_test.tests;
 // exports.t7_upgrade_recovery_image_test = t7_upgrade_recovery_image_test;

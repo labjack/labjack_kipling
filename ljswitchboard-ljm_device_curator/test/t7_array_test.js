@@ -38,6 +38,7 @@ var device_tests = {
 	'createDevice': function(test) {
 		console.log('');
 		console.log('**** t7_array_test ****');
+		console.log('Please connect 1x T7 via USB');
 		try {
 			device = new device_curator.device();
 		} catch(err) {
