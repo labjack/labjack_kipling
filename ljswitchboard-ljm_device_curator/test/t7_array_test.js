@@ -5,6 +5,8 @@ var utils = require('./utils/utils');
 var qExec = utils.qExec;
 var ljm_ffi = require('ljm-ffi');
 var ljm = ljm_ffi.load();
+var ljmb = require('ljswitchboard-modbus_map');
+var modbus_map = ljmb.getConstants();
 
 
 var device;
@@ -70,7 +72,11 @@ var device_tests = {
 			deviceFound = true;
 			test.done();
 		}, function(err) {
-			console.log('Failed to open device', err);
+			console.log('Failed to open device:');
+			var info = modbus_map.getErrorInfo(err);
+			console.log('Error Code', err);
+			console.log('Error Name', info.string);
+			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
 			test.done();
