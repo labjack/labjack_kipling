@@ -42,24 +42,21 @@ var device_tests = {
 	},
 	'createDigitDevice': function(test) {
 		console.log('');
-		console.log('**** digit_variance_testing ****');
+		console.log('**** digit_basic_test ****');
+		try {
+			device = new device_curator.device();
+		} catch(err) {
+			stopTest(test, err);
+		}
 		test.done();
 	},
 	'list all digits...': function(test) {
-		driver.listAll(
-			'LJM_dtDIGIT',
-			'LJM_ctUSB',
-			function onError(err) {
-				console.log('Error Performing listAll', err);
-				test.done();
-			},
-			function onSuccess(foundDevices) {
-				console.log('We found digits!', foundDevices.length);
-				deviceSerials = foundDevices.map(function(foundDevice) {
-					return foundDevice.serialNumber;
-				});
-				test.done();
-			});
+		var foundDevices = driver.listAllSync('LJM_dtDIGIT', 'LJM_ctUSB');
+		console.log('We found digits!', foundDevices.length);
+		deviceSerials = foundDevices.map(function(foundDevice) {
+			return foundDevice.serialNumber;
+		});
+		test.done();
 	},
 	'open all digits': function(test) {
 		console.log('Opening Devices', deviceSerials);
@@ -114,7 +111,8 @@ var device_tests = {
 					collectedData.push({
 						'SN': device.savedAttributes.serialNumber,
 						'temp': parseFloat(averagedData.temperature.toFixed(2)),
-						'lux': parseFloat(averagedData.light.toFixed(2))
+						'lux': parseFloat(averagedData.light.toFixed(2)),
+						'hum': parseFloat(averagedData.humidity.toFixed(2)),
 					});
 					iterationCB();
 				});
@@ -139,14 +137,6 @@ var device_tests = {
 				test.done();
 			});
 	},
-	'close all digits': function(test) {
-		driver.closeAll(function onError(err) {
-			console.log('Error closing all', err);
-			test.done();
-		}, function onSuccess(res) {
-			test.done();
-		})
-	}
 };
 
 var executeMany = function(device, operation, numIterations) {

@@ -5,6 +5,8 @@ var utils = require('./utils/utils');
 var qExec = utils.qExec;
 var ljm_ffi = require('ljm-ffi');
 var ljm = ljm_ffi.load();
+var mb = require('ljswitchboard-modbus_map');
+var modbus_map = mb.getConstants();
 
 
 var device;
@@ -43,6 +45,8 @@ var dataToRead = [
 	'SERIAL_NUMBER',
 ];
 
+var networkIdToTest = '';
+
 var device_tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
@@ -62,7 +66,7 @@ var device_tests = {
 	'openDevice (UDP)': function(test) {
 		var td = {
 			'dt': 'LJM_dtT7',
-			'ct': 'LJM_ctUDP',
+			'ct': 'LJM_ctTCP',
 			'id': 'LJM_idANY'
 		};
 		var openData = ljm.LJM_OpenS.async(td.dt, td.ct, td.id, 0, function(data) {
@@ -74,7 +78,7 @@ var device_tests = {
 			} else {
 				// The device was opened properly.
 				deviceFound = true;
-				deviceHandle = data.Handle;
+				deviceHandle = data.handle;
 				test.done();
 			}
 		});
@@ -83,7 +87,7 @@ var device_tests = {
 		try {
 			var td = {
 				'dt': 'LJM_dtT7',
-				'ct': 'LJM_ctUDP',
+				'ct': 'LJM_ctTCP',
 				'id': 'LJM_idANY'
 			};
 			device = new device_curator.device();
@@ -102,6 +106,8 @@ var device_tests = {
 				test.done();
 			}, function(err) {
 				console.log('Failed to link to open device', err);
+				var mbInfo = modbus_map.getErrorInfo(err);
+				console.log('MB Info', mbInfo);
 				performTests = false;
 				test.done();
 			})
@@ -172,7 +178,7 @@ var device_tests = {
 			} else {
 				// The device was opened properly.
 				deviceFound = true;
-				deviceHandle = data.Handle;
+				deviceHandle = data.handle;
 				test.done();
 			}
 		});
@@ -200,6 +206,8 @@ var device_tests = {
 				test.done();
 			}, function(err) {
 				console.log('Failed to link to open device', err);
+				var mbInfo = modbus_map.getErrorInfo(err);
+				console.log('MB Info', mbInfo);
 				performTests = false;
 				test.done();
 			})
