@@ -5,11 +5,17 @@ process.on('uncaughtException', function(err) {
     process.exit();
 });
 
+var GET_LJM_VERSION = true;
 var BASIC_TEST = false;
 var MOCK_TEST = false;
 var SCAN_CONNECTED_DEVICES = true;
 var CRAZY_TEST = false;
 
+
+if(GET_LJM_VERSION) {
+	var get_ljm_version = require('./get_ljm_version');
+	exports.get_ljm_version = get_ljm_version.tests;
+}
 
 if(BASIC_TEST) {
 	var basic_test = require('./basic_test');

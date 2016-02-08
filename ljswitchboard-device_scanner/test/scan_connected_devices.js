@@ -21,8 +21,13 @@ var GLOBAL_EXPECTED_DEVICE_TYPES = {
 				'name': 'USB',
 				'insertionMethod': 'scan',
 			}, {
-				'name': 'WiFi',
+				'name': 'Ethernet',
 				'insertionMethod': 'attribute',
+			}]
+		}, {
+			'connectionTypes': [{
+				'name': 'USB',
+				'insertionMethod': 'scan',
 			}]
 		}]
 	},

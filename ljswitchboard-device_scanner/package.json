@@ -40,7 +40,8 @@
   },
   "devDependencies": {
     "nodeunit": "0.9.x",
-    "rewire": "2.3.x"
+    "rewire": "2.3.x",
+    "ljm-ffi": "1.x.x"
   },
   "directories": {
     "lib": "./lib"
