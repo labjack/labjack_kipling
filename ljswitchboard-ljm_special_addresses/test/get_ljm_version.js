@@ -1,6 +1,5 @@
 
 var q = require('q');
-var qExec = utils.qExec;
 var ljm_ffi = require('ljm-ffi');
 var ljm = ljm_ffi.load();
 

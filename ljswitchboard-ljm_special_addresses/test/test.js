@@ -2,6 +2,7 @@
 
 
 var testGroups = {
+	'get_ljm_version': true,
 	'basic_test': true,
 };
 

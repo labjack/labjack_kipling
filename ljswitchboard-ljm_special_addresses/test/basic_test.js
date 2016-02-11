@@ -38,7 +38,7 @@ var tests = {
 		test.done();
 	},
 	'parse test files': function(test) {
-		var filePath = testFiles[1];
+		var filePath = testFiles[2];
 		ljm_special_addresses.parse({'filePath': filePath})
 		.then(function(res) {
 			console.log('File Parsed', res.fileData);

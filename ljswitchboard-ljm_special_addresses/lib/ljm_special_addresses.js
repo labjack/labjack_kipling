@@ -13,12 +13,13 @@
 var q = require('q');
 var fs = require('fs');
 var path = require('path');
+var natural_sort = require('javascript-natural-sort');
 
 var DEFAULT_SPECIAL_ADDRESS_FILE_PATHS = {
 	'darwin': '/usr/local/share/LabJack/LJM/ljm_special_addresses.config',
 	'linux': '/usr/local/share/LabJack/LJM/ljm_special_addresses.config',
 	'windows': '',
-}
+};
 
 var DEFAULT_SPECIAL_ADDRESS_FILE_PATH;
 
@@ -120,8 +121,87 @@ function innerReadFile(data) {
 	return defered.promise;
 }
 var whiteSpaceRegex = /^\s{1,}$/
-var checkForIP = /^([0-9]{1,3}.){3}[0-9]{1,3}$/
+var checkForIP = /([0-9]{1,3}.){3}[0-9]{1,3}/
+var checkForComment = /\/\/(\s{1,}).*/
+var getCommentString = /\/\/(\s{1,})/
 
+function isIPV4Str(ipAddress) {
+	var isIPV4 = false;
+	if((splitAStr.length == 4) || (splitBStr.length == 4)) {
+		isIPV4 = true;
+	}
+	return isIPV4;
+}
+
+function getIPWeights(ipAddress) {
+	var ipWeights = [];
+	var splitIPAddress = ipAddress.split('.');
+	
+	splitIPAddress.some(function(partialIPStr, i) {
+		var partialIPNum = 0;
+		var partialIPNum = 0;
+		if(isIPV4(ipAddress)) {
+			partialIPNum = parseInt(partialIPStr, 10);
+			if(i < 4) {
+				// Stop...
+				return false;
+			} else {
+				// Keep going...
+				return true;
+			}
+		} else {
+			partialIPNum = parseInt(partialIPStr, 16);
+			if(i < 6) {
+				// Stop...
+				return false;
+			} else {
+				// Keep going...
+				return true;
+			}
+		}
+		ipWeights.push(partialIPNum);
+	});
+	return ipWeights;
+}
+function getIPWeight(ipAddress) {
+	var ipAddressWeights = getIPWeights(ipAddress);
+	var ipWeight = 0;
+	if(isIPV4(ipAddress)) {
+		ipAddressWeights.forEach(function(ipPartialWeight, i) {
+			ipWeight += ipPartialWeight * i;
+		});
+		ipWeight = parseInt(partialIPStr, 10);
+		if(i < 4) {
+			// Stop...
+			return false;
+		} else {
+			// Keep going...
+			return true;
+		}
+	} else {
+		ipWeight = parseInt(partialIPStr, 16);
+		if(i < 6) {
+			// Stop...
+			return false;
+		} else {
+			// Keep going...
+			return true;
+		}
+	}
+	return ipWeight;
+}
+function sortIPAddresses(ipAddressA, ipAddressB) {
+	var ipAWeight = getIPWeights(ipAddressA);
+	var ipAWeight = getIPWeights(ipAddressA);
+	var splitBStr = ipAddressB.split('.');
+
+	isIP4 = false;
+	if((splitAStr.length == 4) || (splitBStr.length == 4)) {
+		isIP4 = true;
+	}
+
+	
+}
 function innerParseFile(data) {
 	console.log('Parsing File');
 	var defered = q.defer();
@@ -165,28 +245,41 @@ function innerParseFile(data) {
 			}
 		});
 
-		console.log('HERE');
 		// Now we should loop through the remaining lines and group the associated
 		// comments with the IP address.
 		innerParseFileStep = 'parsing data';
-		var ipData = [];
+		var ipAddresses = [];
+		var ipData = {};
 		var tempComments = [];
 		var tempIP = '';
 		linesWithData.forEach(function organizingData(lineStr) {
 			var isIP = checkForIP.exec(lineStr);
 			if(isIP) {
-				ipData.push({
-					'ip': lineStr,
+				ipData[isIP[0]] = {
+					'ip': isIP[0],
 					'comments': tempComments
-				});
+				};
+				ipAddresses.push(isIP[0]);
 				tempComments = [];
 			} else {
-				tempComments.push(lineStr);
+				var isComment = checkForComment.exec(lineStr);
+				var commentHeader = getCommentString.exec(lineStr);
+				if(commentHeader) {
+					var commentText = lineStr.split(commentHeader[0])[1];
+					tempComments.push(commentText);
+				}
 			}
 		});
 
-		// Save the parsed ipData array as the fileData.
-		data.fileData = ipData;
+		// Sort the ipData
+		ipAddresses.sort(natural_sort);
+
+		// Fill the fileData array
+		data.fileData = [];
+		ipAddresses.forEach(function(ipAddress) {
+			data.fileData.push(ipData[ipAddress]);
+		});
+
 		defered.resolve(data);
 	} catch(err) {
 		data.isError = true;
