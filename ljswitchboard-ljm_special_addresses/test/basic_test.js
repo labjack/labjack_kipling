@@ -99,7 +99,19 @@ filesToTest.forEach(function(fileName, i) {
 
 		testFiles.push(testFilePath);
 		
+		
 		var testFileExpData = require(testInfoFilePath).data;
+
+		var outputData = testFileExpData.map(function(a) { return a; });
+		outputData.push({
+			'ip': '169.169.169.169',
+			'comments': ['added ip in basic_test'],
+		});
+		outputData.push({
+			'ip': '192.168.1.10',
+			'comments': ['added ip in basic_test'],
+		});
+
 		expectedDataTestFiles.push(testFileExpData);
 		tests['File Parsing Test - ' + fileName] = generateFileParseTest(
 			fileName,
@@ -110,7 +122,7 @@ filesToTest.forEach(function(fileName, i) {
 			fileName,
 			outputTestFilePath,
 			expectedOutputTestFilePath,
-			testFileExpData
+			outputData
 		);
 		
 	}

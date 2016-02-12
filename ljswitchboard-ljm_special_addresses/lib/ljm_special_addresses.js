@@ -238,15 +238,37 @@ function parse(options) {
 	return defered.promise;
 }
 
+function sortUserIPs(a, b) {
+	var ips = {};
+	ips[a.ip] = a;
+	ips[b.ip] = b;
+
+	var selectedIP = natural_sort(a.ip, b.ip);
+	return ips[selectedIP];
+}
+
 function save(userIPs, options) {
 	var defered = q.defer();
 	var parsedOptions = parseOptions(options);
 	var data = prepareOperation(parsedOptions);
 	
-	// console.log('User Data', userIPs);
-	
+	var ips = {};
+	var ipAddrs = [];
+	userIPs.forEach(function(userIP) {
+		ips[userIP.ip] = userIP;
+		ipAddrs.push(userIP.ip);
+	});
+	// console.log('Un-sorted Data', ipAddrs);
+	ipAddrs.sort(natural_sort);
+	// console.log('Sorted Data', ipAddrs);
+
+	var sortedUserIPs = [];
+	ipAddrs.forEach(function(ipAddr) {
+		sortedUserIPs.push(ips[ipAddr]);
+	});
+
 	var partialStrs = [];
-	partialStrs = userIPs.map(function(userIP) {
+	partialStrs = sortedUserIPs.map(function(userIP) {
 		
 		var ipDataLines = [];
 		userIP.comments.forEach(function(comment) {
