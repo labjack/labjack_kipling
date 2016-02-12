@@ -1,0 +1,7 @@
+
+test/.*
+
+expected_output_test_files/.*
+output_test_files/.*
+test_files/.*
+test_files_info/.*
