@@ -14,6 +14,7 @@ var q = require('q');
 var fs = require('fs');
 var path = require('path');
 var natural_sort = require('javascript-natural-sort');
+var fse = require('fs-extra');
 
 var DEFAULT_SPECIAL_ADDRESS_FILE_PATHS = {
 	'darwin': '/usr/local/share/LabJack/LJM/ljm_special_addresses.config',
@@ -96,7 +97,6 @@ function verify() {
 
 var MAX_FILE_READ_RETRIES = 5;
 function innerReadFile(data) {
-	console.log('Reading File');
 	var defered = q.defer();
 	var numReTries = 0;
 	function handleRead(err, fileData) {
@@ -120,90 +120,14 @@ function innerReadFile(data) {
 	
 	return defered.promise;
 }
-var whiteSpaceRegex = /^\s{1,}$/
-var checkForIP = /([0-9]{1,3}.){3}[0-9]{1,3}/
-var checkForComment = /\/\/(\s{1,}).*/
-var getCommentString = /\/\/(\s{1,})/
+var whiteSpaceRegex = /^\s{1,}$/;
+var checkForIP = /([0-9]{1,3}.){3}[0-9]{1,3}/;
+var checkForComment = /\/\/(\s{1,}).*/;
+var getCommentString = /\/\/(\s{1,})/;
 
-function isIPV4Str(ipAddress) {
-	var isIPV4 = false;
-	if((splitAStr.length == 4) || (splitBStr.length == 4)) {
-		isIPV4 = true;
-	}
-	return isIPV4;
-}
 
-function getIPWeights(ipAddress) {
-	var ipWeights = [];
-	var splitIPAddress = ipAddress.split('.');
-	
-	splitIPAddress.some(function(partialIPStr, i) {
-		var partialIPNum = 0;
-		var partialIPNum = 0;
-		if(isIPV4(ipAddress)) {
-			partialIPNum = parseInt(partialIPStr, 10);
-			if(i < 4) {
-				// Stop...
-				return false;
-			} else {
-				// Keep going...
-				return true;
-			}
-		} else {
-			partialIPNum = parseInt(partialIPStr, 16);
-			if(i < 6) {
-				// Stop...
-				return false;
-			} else {
-				// Keep going...
-				return true;
-			}
-		}
-		ipWeights.push(partialIPNum);
-	});
-	return ipWeights;
-}
-function getIPWeight(ipAddress) {
-	var ipAddressWeights = getIPWeights(ipAddress);
-	var ipWeight = 0;
-	if(isIPV4(ipAddress)) {
-		ipAddressWeights.forEach(function(ipPartialWeight, i) {
-			ipWeight += ipPartialWeight * i;
-		});
-		ipWeight = parseInt(partialIPStr, 10);
-		if(i < 4) {
-			// Stop...
-			return false;
-		} else {
-			// Keep going...
-			return true;
-		}
-	} else {
-		ipWeight = parseInt(partialIPStr, 16);
-		if(i < 6) {
-			// Stop...
-			return false;
-		} else {
-			// Keep going...
-			return true;
-		}
-	}
-	return ipWeight;
-}
-function sortIPAddresses(ipAddressA, ipAddressB) {
-	var ipAWeight = getIPWeights(ipAddressA);
-	var ipAWeight = getIPWeights(ipAddressA);
-	var splitBStr = ipAddressB.split('.');
-
-	isIP4 = false;
-	if((splitAStr.length == 4) || (splitBStr.length == 4)) {
-		isIP4 = true;
-	}
-
-	
-}
 function innerParseFile(data) {
-	console.log('Parsing File');
+	// console.log('Parsing File');
 	var defered = q.defer();
 	// We need to parse the file like how LJM is doing it...
 	/*
@@ -314,9 +238,38 @@ function parse(options) {
 	return defered.promise;
 }
 
-function save() {
+function save(userIPs, options) {
 	var defered = q.defer();
-	defered.resolve();
+	var parsedOptions = parseOptions(options);
+	var data = prepareOperation(parsedOptions);
+	
+	// console.log('User Data', userIPs);
+	
+	var partialStrs = [];
+	partialStrs = userIPs.map(function(userIP) {
+		
+		var ipDataLines = [];
+		userIP.comments.forEach(function(comment) {
+			ipDataLines.push('// ' + comment);
+		});
+		ipDataLines.push(userIP.ip);
+		return ipDataLines.join('\r\n') + '\r\n';
+	});
+	// console.log('Partial Strs', partialStrs);
+	var fullStr = partialStrs.join('\r\n');
+	// console.log('Full Str:');
+	// console.log(fullStr);
+
+	// console.log('Creating file', parsedOptions.filePath);
+	fse.outputFile(
+		parsedOptions.filePath,
+		fullStr,
+		function(err) {
+			if(err) {
+				console.log('Error writing file', err);
+			}
+			defered.resolve();
+		});
 	return defered.promise;
 }
 
@@ -348,8 +301,9 @@ function addIPs(newIPs, options) {
 		defered.resolve();
 	}, function() {
 		defered.resolve();
-	})
+	});
 	return defered.promise;
 }
 
 exports.parse = parse;
+exports.save = save;
