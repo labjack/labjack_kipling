@@ -15,6 +15,15 @@ var fs = require('fs');
 var path = require('path');
 var natural_sort = require('javascript-natural-sort');
 var fse = require('fs-extra');
+var ljm_ffi = require('ljm-ffi');
+var ljm = ljm_ffi.load();
+
+var DEBUG_LJM_SPECIAL_ADDRESS_INTEGRATION = false;
+function ljmDebugOut() {
+	if(DEBUG_LJM_SPECIAL_ADDRESS_INTEGRATION) {
+		console.log.apply(this, addresses);
+	}
+}
 
 var DEFAULT_SPECIAL_ADDRESS_FILE_PATHS = {
 	'darwin': '/usr/local/share/LabJack/LJM/ljm_special_addresses.config',
@@ -84,8 +93,29 @@ function prepareOperation (options) {
 		'isError': false,
 		'errorStep': undefined,
 		'errorInfo': undefined,
+		'ljmVersion': 0,
+		'hasSpecialAddresses': false,
 	};
 	return data;
+}
+
+function parseGivenUserIPs(userIPs) {
+	var isObject = true;
+	if(typeof(userIPs[0]) === 'string') {
+		isObject = false;
+	}
+
+	if(!isObject) {
+		var parsedIPs = userIPs.map(function(userIP) {
+			return {
+				'ip': userIP,
+				'comments': []
+			};
+		});
+		return parsedIPs;
+	} else {
+		return userIPs;
+	}
 }
 
 
@@ -247,11 +277,10 @@ function sortUserIPs(a, b) {
 	return ips[selectedIP];
 }
 
-function save(userIPs, options) {
+function generateNewFileString(data) {
 	var defered = q.defer();
-	var parsedOptions = parseOptions(options);
-	var data = prepareOperation(parsedOptions);
-	
+
+	var userIPs = data.fileData;
 	var ips = {};
 	var ipAddrs = [];
 	userIPs.forEach(function(userIP) {
@@ -279,19 +308,163 @@ function save(userIPs, options) {
 	});
 	// console.log('Partial Strs', partialStrs);
 	var fullStr = partialStrs.join('\r\n');
+
+	// Save the data into the newFileString attribute of the data object.
 	// console.log('Full Str:');
 	// console.log(fullStr);
+	data.newFileString = fullStr;
 
+	defered.resolve(data);
+	return defered.promise;
+}
+
+var MAX_FILE_WRITE_RETRIES = 5;
+function innerWriteFile(data) {
 	// console.log('Creating file', parsedOptions.filePath);
-	fse.outputFile(
-		parsedOptions.filePath,
-		fullStr,
-		function(err) {
-			if(err) {
-				console.log('Error writing file', err);
+	var defered = q.defer();
+	var numReTries = 0;
+
+	function handleWrite(err) {
+		if(err) {
+			numReTries += 1;
+			if(numReTries < MAX_FILE_WRITE_RETRIES) {
+				fse.outputFile(
+					data.filePath,
+					data.newFileString,
+					handleWrite
+				);
+			} else {
+				// There was definitely an error... assume file is empty.
+				data.isError = true;
+				data.errorStep = 'innerWriteFile';
+				data.errorInfo = err;
+				defered.reject(data);
 			}
-			defered.resolve();
+		} else {
+			defered.resolve(data);
+		}
+	}
+	fse.outputFile(
+		data.filePath,
+		data.newFileString,
+		handleWrite
+	);
+	
+	return defered.promise;
+}
+
+var MIN_LJM_VERSION = 1.09;
+function checkLJMVersion(data) {
+	ljmDebugOut('Checking LJM Version');
+	var defered = q.defer();
+	var libVerKey = 'LJM_LIBRARY_VERSION';
+	function handleReadLib(ljmData) {
+		ljmDebugOut('LJM Lib Ver', ljmData);
+		data.ljmVersion = ljmData.Value;
+
+		if(ljmData.Value > MIN_LJM_VERSION) {
+			data.hasSpecialAddresses = true;
+		}
+		defered.resolve(data);
+	}
+	ljm.LJM_ReadLibraryConfigS.async(libVerKey, 0, handleReadLib);
+	return defered.promise;
+}
+
+function updateLJMSpecialAddressesFilePath(data) {
+	ljmDebugOut('Updating LJM Special Addresses File Path');
+	var defered = q.defer();
+	var specAddrFilePathKey = 'LJM_SPECIAL_ADDRESSES_FILE';
+
+	function handleWriteLib(ljmData) {
+		if(ljmData.ljmError) {
+			console.error('Failed to write', data.filePath,
+				'to', specAddrFilePathKey);
+		}
+		defered.resolve(data);
+	}
+	
+	if(data.hasSpecialAddresses) {
+		ljm.LJM_WriteLibraryConfigStringS.async(
+			specAddrFilePathKey,
+			data.filePath,
+			handleWriteLib
+		);
+	} else {
+		defered.resolve(data);
+	}
+	return defered.promise;
+}
+
+function checkLJMSpecialAddressesStatus(data) {
+	ljmDebugOut('Checking LJM Sepcial Addresses Status');
+	var defered = q.defer();
+	var specAddrFileStatusKey = 'LJM_SPECIAL_ADDRESSES_STATUS';
+
+	function handleReadLib(ljmData) {
+		if(ljmData.ljmError) {
+			console.error('Failed to read', specAddrFileStatusKey);
+		} else {
+			ljmDebugOut('Checked:', specAddrFileStatusKey);
+			ljmDebugOut(ljmData.String);
+		}
+		defered.resolve(data);
+	}
+	
+	if(data.hasSpecialAddresses) {
+		ljm.LJM_ReadLibraryConfigStringS.async(
+			specAddrFileStatusKey,
+			'',
+			handleReadLib
+		);
+	} else {
+		defered.resolve(data);
+	}
+	return defered.promise;
+}
+
+function instructLJMToLoadFile(data) {
+	var defered = q.defer();
+	function finalize(resData) {
+		defered.resolve(resData);
+	}
+	function handleError(errData) {
+		defered.reject(errData);
+	}
+	checkLJMVersion(data)
+	.then(updateLJMSpecialAddressesFilePath)
+	.then(checkLJMSpecialAddressesStatus)
+	.catch(handleError);
+	return defered.promise;
+}
+
+function save(userIPs, options) {
+	var defered = q.defer();
+	var parsedOptions = parseOptions(options);
+	var data = prepareOperation(parsedOptions);
+	data.fileData = parseGivenUserIPs(userIPs);
+	
+	function finalize(successData) {
+		defered.resolve(successData);
+	}
+
+	generateNewFileString(data)
+	.then(innerWriteFile)
+
+	// .then(instructLJMToLoadFile)
+	.then(checkLJMVersion)
+	.then(updateLJMSpecialAddressesFilePath)
+	.then(checkLJMSpecialAddressesStatus)
+	.then(finalize)
+	.catch(function resolveError(errdata) {
+		defered.reject({
+			'data': errData,
+			'isError': errData.isError,
+			'errorStep': errData.errorStep,
+			'errorInfo': errData.errorInfo,
 		});
+	});
+
 	return defered.promise;
 }
 

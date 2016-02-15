@@ -17,39 +17,27 @@ var test_files_info_dir = path.resolve(path.join(testPath,'..','test_files_info'
 var output_test_files_dir = path.resolve(path.join(testPath, '..', 'output_test_files'));
 var expected_output_test_files_dir = path.resolve(path.join(testPath, '..', 'expected_output_test_files'));
 
+var has_special_addresses = false;
+var minLJMVersion = 1.09;
+
 var tests = {
 	'include ljm_special_addresses': function(test) {
 		ljm_special_addresses = require('../lib/ljm_special_addresses');
 		test.done();
 	},
-	'get_test_files': function(test) {
-		// var filesToTest = fs.readdirSync(test_files_dir);
-		// filesToTest.forEach(function(fileName) {
-		// 	var testFileName = path.parse(fileName).name;
-		// 	var testInfoFileName = testFileName + '.js';
-		// 	var testInfoFilePath = path.join(test_files_info_dir, testInfoFileName);
-		// 	var exists = fs.existsSync(testInfoFilePath);
-		// 	if(exists) {
-		// 		// console.log('Requiring...', testInfoFilePath);
-		// 		testFiles.push(path.join(test_files_dir,fileName));
-		// 		expectedDataTestFiles.push(require(testInfoFilePath).data);
-		// 	}
-		// });
-		// console.log('Test files:', testFiles);
-		// console.log('Test Data', expectedDataTestFiles);
+	'Check LJM Version for Special Address implementation': function(test) {
+		var ljmLibraryVersion = ljm.LJM_ReadLibraryConfigS('LJM_LIBRARY_VERSION', 0);
+		var expectedData = {
+			'ljmError': 0,
+			'Parameter': 'LJM_LIBRARY_VERSION',
+			'Value': ljmLibraryVersion.Value,
+		};
+		if(ljmLibraryVersion.Value >= minLJMVersion) {
+			has_special_addresses = true;
+		}
+		test.deepEqual(ljmLibraryVersion, expectedData);
 		test.done();
 	},
-	// 'parse test files': function(test) {
-	// 	var filePath = testFiles[2];
-	// 	ljm_special_addresses.parse({'filePath': filePath})
-	// 	.then(function(res) {
-	// 		console.log('File Parsed', res.fileData);
-	// 		test.done();
-	// 	}, function(err) {
-	// 		console.log('Error parsing', err);
-	// 		test.done();
-	// 	});
-	// }
 };
 
 function generateFileParseTest(fileName, filePath, expFileData) {
@@ -81,6 +69,75 @@ function generateFileSaveTest(fileName, outputFilePath, expectedFileContentsPath
 			test.ok(false, 'Failed to create the output test file.');
 			test.done();
 		});
+	};
+}
+
+function checkLJMSpecialAddressesStatus(data) {
+	var defered = q.defer();
+	function handleReadLibConfigStr(ljmSpecialAddressesStatus) {
+		var isOk = true;
+		if(ljmSpecialAddressesStatus.ljmError) {
+			isOk = false;
+		}
+		data.specAddrStatus = ljmSpecialAddressesStatus.String;
+		defered.resolve(data);
+	}
+	if(has_special_addresses) {
+		ljm.LJM_ReadLibraryConfigStringS.async(
+			'LJM_SPECIAL_ADDRESSES_STATUS',
+			'',
+			handleReadLibConfigStr
+		);
+	} else {
+		console.log(' ! This version of LJM does not have the LJM Special Addresses feature.');
+		defered.resolve(data);
+	}
+	return defered.promise;
+}
+
+function checkLJMSpecialAddressesFile(data) {
+	var defered = q.defer();
+	function handleReadLibConfigStr(ljmSpecialAddressesFileLocation) {
+		var isOk = true;
+		if(ljmSpecialAddressesFileLocation.ljmError) {
+			isOk = false;
+		}
+		data.specAddrFile = ljmSpecialAddressesFileLocation.String;
+		defered.resolve(data);
+	}
+	if(has_special_addresses) {
+		ljm.LJM_ReadLibraryConfigStringS.async(
+			'LJM_SPECIAL_ADDRESSES_FILE',
+			'',
+			handleReadLibConfigStr
+		);
+	} else {
+		console.log(' ! This version of LJM does not have the LJM Special Addresses feature.');
+		defered.resolve(data);
+	}
+	return defered.promise;
+}
+
+function generateVerifyLoadWithLJMTest(fileName, filePath) {
+	return function verifyLoadWithLJMTest(test) {
+		var data = {};
+
+		function finalize(data) {
+			// console.log('Verify Load W/ LJM Success', data);
+			test.strictEqual(data.specAddrFile, filePath, 
+				'LJM did not load the correct file');
+			test.done();
+		}
+		function handleError(data) {
+			console.log('Verify Load W/ LJM Error', data);
+			test.ok(false, 'There was an error verifying S.A. loading w/ LJM');
+			test.done();
+		}
+
+		checkLJMSpecialAddressesStatus(data)
+		.then(checkLJMSpecialAddressesFile)
+		.then(finalize)
+		.catch(handleError);
 	};
 }
 
@@ -118,6 +175,7 @@ filesToTest.forEach(function(fileName, i) {
 			testFilePath,
 			testFileExpData
 		);
+
 		tests['File Save Test - ' + fileName] = generateFileSaveTest(
 			fileName,
 			outputTestFilePath,
@@ -125,6 +183,10 @@ filesToTest.forEach(function(fileName, i) {
 			outputData
 		);
 		
+		tests['Load With LJM Test - ' + fileName] = generateVerifyLoadWithLJMTest(
+			fileName,
+			outputTestFilePath
+		);
 	}
 });
 
