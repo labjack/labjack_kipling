@@ -17,7 +17,28 @@ This module exposes two functions "parse" and "save".
 ```javascript
 var ljm_special_addresses = require('ljswitchboard-ljm_special_addresses');
 
+/*
+ * The parse function parses the specified .config file.
+ */
 ljm_special_addresses.parse()
+.then(function(res) {
+	console.log('Config File Path:', res.filePath);
+	console.log('Special IP Addresses:');
+	console.log(res.fileData);
+}, function(err) {
+	console.log('Error parsing', err);
+});
+```
+
+### Example usage of the "load" function:
+```javascript
+var ljm_special_addresses = require('../lib/ljm_special_addresses');
+
+/*
+ * The load function parses and instructs LJM to load the 
+ * specified .config file.
+ */
+ljm_special_addresses.load()
 .then(function(res) {
 	console.log('Config File Path:', res.filePath);
 	console.log('Special IP Addresses:');
@@ -36,6 +57,11 @@ var userIPs = [
 	{'ip': '192.168.1.10', 'comments': ['My First IP']},
 	{'ip': '192.168.1.11', 'comments': ['My Second IP']},
 ];
+
+/*
+ * The save function formats, saves, and instructs LJM to load the 
+ * specified .config file.
+ */
 ljm_special_addresses.save(userIPs)
 .then(function(res) {
 	console.log('Config File Path:', res.filePath);
