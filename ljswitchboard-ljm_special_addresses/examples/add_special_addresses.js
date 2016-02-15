@@ -1,7 +1,9 @@
 var ljm_special_addresses = require('../lib/ljm_special_addresses');
 
-// Save the IPs in one of the test files.
-var userIPs = require('../test_files_info/1_two_ips').data;
+var userIPs = [
+	{'ip': '192.168.1.10', 'comments': ['My First IP']},
+	{'ip': '192.168.1.11', 'comments': ['My Second IP']},
+];
 ljm_special_addresses.save(userIPs)
 .then(function(res) {
 	console.log('Config File Path:', res.filePath);
