@@ -12,7 +12,7 @@
 
 
 // Define functions to assist with handling various C data types.
-var type_helpers = require('../lib/type_helpers');
+var type_helpers = require('../../lib/type_helpers');
 var ljTypeMap = type_helpers.ljTypeMap;
 var ljTypeOps = type_helpers.ljTypeOps;
 var convertToFFIType = type_helpers.convertToFFIType;
@@ -42,11 +42,13 @@ var ljm;
 var liblabjack;
 var ffi_liblabjack;
 
+/* Define a variable to hold the opened handle. */
+var device;
 
 /* Define Test Cases */
 var test_cases = {
 	'include ljm': function(test) {
-		var ljm_ffi = require('../lib/ljm-ffi');
+		var ljm_ffi = require('../../lib/ljm-ffi');
 
 		ljm = ljm_ffi.load();
 		liblabjack = ljm_ffi.loadSafe();
@@ -54,31 +56,59 @@ var test_cases = {
 
 		test.done();
 	},
-	'Execute LJM_NameToAddress (Sync)': function(test) {
-		var ljmLibraryVersion = ljm.LJM_ReadLibraryConfigS('LJM_LIBRARY_VERSION', 0);
-		var expectedData = {
-			'ljmError': 0,
-			'Parameter': 'LJM_LIBRARY_VERSION',
-			'Value': ljmLibraryVersion.Value,
-		};
-		console.log(' - LJM Library Version:', ljmLibraryVersion.Value);
-		test.deepEqual(ljmLibraryVersion, expectedData);
-		test.done();
-	},
-	'Execute LJM_NameToAddress (Async)': function(test) {
-		function testData(ljmLibraryVersion) {
-			var expectedData = {
-				'ljmError': 0,
-				'Parameter': 'LJM_LIBRARY_VERSION',
-				'Value': ljmLibraryVersion.Value,
-			};
-			test.deepEqual(ljmLibraryVersion, expectedData);
-			test.done();
-		}
+	'Execute Opening (Sync)': function(test) {
+
 
 		// Execute LJM Function
-		ljm.LJM_ReadLibraryConfigS.async('LJM_LIBRARY_VERSION', 0, testData);
+		var dt = 'LJM_dtT7';
+		var ct = 'LJM_ctUSB';
+		// var id = '192.168.1.118';
+		var id = 'LJM_idANY';
+
+		var i = 0;
+		for(i = 0; i < 2; i++) {
+			console.log('Opening USB Device, iteration:', i);
+			var openInfo = ljm.LJM_OpenS(dt, ct, id, 0);
+			console.log('Open Info', openInfo);
+			
+			var closeInfo = ljm.LJM_Close(openInfo.handle);
+			console.log('Close Info', closeInfo);
+		}
+		
+		test.ok(true);
+		test.done();
 	},
+	// 'Execute Opening (Async)': function(test) {
+
+
+	// 	// Execute LJM Function
+	// 	var dt = 'LJM_dtT7';
+	// 	var ct = 'LJM_ctUSB';
+	// 	var id = 'LJM_idANY';
+	// 	var dHandle;
+
+	// 	function handleOpen(openInfo) {
+	// 		console.log('Opened', openInfo);
+	// 		ljm.LJM_Close.async(openInfo.handle, handleClose);
+	// 	}
+	// 	function handleClose(closeInfo) {
+	// 		console.log('Closed', closeInfo);
+	// 		runTest();
+	// 	}
+
+	// 	var numIterations = 2;
+	// 	var currentIteration = 0;
+	// 	function runTest() {
+	// 		if(currentIteration < numIterations) {
+	// 			currentIteration += 1;
+	// 			ljm.LJM_OpenS.async(dt, ct, id, 0, handleOpen);
+	// 		} else {
+	// 			test.done();
+	// 		}
+	// 	}
+		
+	// 	runTest();
+	// },
 };
 
 

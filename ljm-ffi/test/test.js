@@ -4,21 +4,22 @@
 var testGroups = {
 	'test_type_helpers': true,
 	'get_ljm_version': true,
-	'basic_ljm_calls': true,
+	'basic_ljm_calls': false,
 	'ljm_calls': {
-		'ljm_calls': true,
+		'ljm_calls': false,
 		// 'open_all': false,
 	},
 	'ljm_config_testing': {
-		'special_addresses': true,
+		'special_addresses': false,
 	},
 	'device_opening': {
-		'udp_connections': true,
+		'usb_connections': true,
+		'udp_connections': false,
 	},
 
 	// This test should be run last because it switches to a potentially old version of the
 	// LJM library.
-	'load_specific_ljm': true,
+	'load_specific_ljm': false,
 	// 'config_loader': {
 	// 	'basic': false,
 	// },
