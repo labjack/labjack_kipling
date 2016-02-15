@@ -26,7 +26,8 @@
   "dependencies": {
     "q": "~1",
     "ljm-ffi": "1.x.x",
-    "javascript-natural-sort": "0.x.x"
+    "javascript-natural-sort": "0.x.x",
+    "fs-extra": "0.x.x"
   },
   "devDependencies": {
     "nodeunit": "0.x.x"
