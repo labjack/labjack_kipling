@@ -254,7 +254,13 @@ function parse(options) {
 	var data = prepareOperation(parsedOptions);
 	
 	function finalize(successData) {
-		defered.resolve(successData);
+		defered.resolve({
+			'filePath': successData.filePath,
+			'fileData': successData.fileData,
+			// 'ljmVersion': successData.ljmVersion,
+			// 'hasSpecialAddresses': successData.hasSpecialAddresses,
+			// 'ljmStatus': successData.ljmStatus,
+		});
 	}
 
 	innerReadFile(data)
@@ -407,6 +413,7 @@ function checkLJMSpecialAddressesStatus(data) {
 	function handleReadLib(ljmData) {
 		if(ljmData.ljmError) {
 			console.error('Failed to read', specAddrFileStatusKey);
+			data.ljmStatus = ljmData.String;
 		} else {
 			ljmDebugOut('Checked:', specAddrFileStatusKey);
 			ljmDebugOut(ljmData.String);
@@ -423,6 +430,9 @@ function checkLJMSpecialAddressesStatus(data) {
 			handleReadLib
 		);
 	} else {
+		data.ljmStatus = 'Installed Version of LJM does not have the Special ';
+		data.ljmStatus +='Addresses feature.  Please install version ';
+		data.ljmStatus += MIN_LJM_VERSION.toString() + ' or greater.';
 		defered.resolve(data);
 	}
 	return defered.promise;
@@ -435,7 +445,13 @@ function save(userIPs, options) {
 	data.fileData = parseGivenUserIPs(userIPs);
 	
 	function finalize(successData) {
-		defered.resolve(successData);
+		defered.resolve({
+			'filePath': successData.filePath,
+			'fileData': successData.fileData,
+			'ljmVersion': successData.ljmVersion,
+			'hasSpecialAddresses': successData.hasSpecialAddresses,
+			'ljmStatus': successData.ljmStatus,
+		});
 	}
 
 	generateNewFileString(data)
@@ -465,7 +481,13 @@ function load(options) {
 	var data = prepareOperation(parsedOptions);
 	
 	function finalize(successData) {
-		defered.resolve(successData);
+		defered.resolve({
+			'filePath': successData.filePath,
+			'fileData': successData.fileData,
+			'ljmVersion': successData.ljmVersion,
+			'hasSpecialAddresses': successData.hasSpecialAddresses,
+			'ljmStatus': successData.ljmStatus,
+		});
 	}
 
 	innerReadFile(data)

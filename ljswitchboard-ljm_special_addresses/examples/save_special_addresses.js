@@ -9,6 +9,8 @@ ljm_special_addresses.save(userIPs)
 	console.log('Config File Path:', res.filePath);
 	console.log('Special IP Addresses:');
 	console.log(res.fileData);
+	console.log('LJM\'s Special Addresses Status String:')
+	console.log(res.ljmStatus);
 }, function(err) {
 	console.log('Error parsing', err);
 });
