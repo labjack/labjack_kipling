@@ -141,6 +141,22 @@ function generateVerifyLoadWithLJMTest(fileName, filePath) {
 	};
 }
 
+function generateLJMLoadSpecialAddressesFile(fileName, filePath) {
+	return function ljmLoadSpecialAddressesFile(test) {
+		// console.log('Testing...', fileName);
+		ljm_special_addresses.load({'filePath': filePath})
+		.then(function(res) {
+			console.log('File Loaded', res);
+			// test.deepEqual(res.fileData, expFileData);
+			test.done();
+		}, function(err) {
+			console.log('Error parsing', err);
+			// test.ok(false, 'Should have parsed file...');
+			test.done();
+		});
+	};
+}
+
 var filesToTest = fs.readdirSync(test_files_dir);
 filesToTest.forEach(function(fileName, i) {
 	var testFileName = path.parse(fileName).name;
@@ -183,10 +199,17 @@ filesToTest.forEach(function(fileName, i) {
 			outputData
 		);
 		
-		tests['Load With LJM Test - ' + fileName] = generateVerifyLoadWithLJMTest(
+		tests['Verify Load With LJM Test - ' + fileName] = generateVerifyLoadWithLJMTest(
 			fileName,
 			outputTestFilePath
 		);
+
+		tests['Load With LJM Test - ' + fileName] = generateLJMLoadSpecialAddressesFile(
+			fileName,
+			outputTestFilePath
+		);
+
+		
 	}
 });
 

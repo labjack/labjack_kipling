@@ -97,6 +97,7 @@ function prepareOperation (options) {
 		'errorInfo': undefined,
 		'ljmVersion': 0,
 		'hasSpecialAddresses': false,
+		'ljmStatus': '',
 	};
 	return data;
 }
@@ -409,6 +410,8 @@ function checkLJMSpecialAddressesStatus(data) {
 		} else {
 			ljmDebugOut('Checked:', specAddrFileStatusKey);
 			ljmDebugOut(ljmData.String);
+
+			data.ljmStatus = ljmData.String;
 		}
 		defered.resolve(data);
 	}
@@ -425,21 +428,6 @@ function checkLJMSpecialAddressesStatus(data) {
 	return defered.promise;
 }
 
-function instructLJMToLoadFile(data) {
-	var defered = q.defer();
-	function finalize(resData) {
-		defered.resolve(resData);
-	}
-	function handleError(errData) {
-		defered.reject(errData);
-	}
-	checkLJMVersion(data)
-	.then(updateLJMSpecialAddressesFilePath)
-	.then(checkLJMSpecialAddressesStatus)
-	.catch(handleError);
-	return defered.promise;
-}
-
 function save(userIPs, options) {
 	var defered = q.defer();
 	var parsedOptions = parseOptions(options);
@@ -453,10 +441,11 @@ function save(userIPs, options) {
 	generateNewFileString(data)
 	.then(innerWriteFile)
 
-	// .then(instructLJMToLoadFile)
+	// instruct LJM to load file
 	.then(checkLJMVersion)
 	.then(updateLJMSpecialAddressesFilePath)
 	.then(checkLJMSpecialAddressesStatus)
+
 	.then(finalize)
 	.catch(function resolveError(errdata) {
 		defered.reject({
@@ -467,6 +456,35 @@ function save(userIPs, options) {
 		});
 	});
 
+	return defered.promise;
+}
+
+function load(options) {
+	var defered = q.defer();
+	var parsedOptions = parseOptions(options);
+	var data = prepareOperation(parsedOptions);
+	
+	function finalize(successData) {
+		defered.resolve(successData);
+	}
+
+	innerReadFile(data)
+	.then(innerParseFile)
+	
+	// instruct LJM to load file
+	.then(checkLJMVersion)
+	.then(updateLJMSpecialAddressesFilePath)
+	.then(checkLJMSpecialAddressesStatus)
+
+	.then(finalize)
+	.catch(function resolveError(errData) {
+		defered.reject({
+			'data': errData,
+			'isError': errData.isError,
+			'errorStep': errData.errorStep,
+			'errorInfo': errData.errorInfo,
+		});
+	});
 	return defered.promise;
 }
 
@@ -504,3 +522,4 @@ function addIPs(newIPs, options) {
 
 exports.parse = parse;
 exports.save = save;
+exports.load = load;
