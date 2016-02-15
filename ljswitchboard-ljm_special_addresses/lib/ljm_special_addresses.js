@@ -371,7 +371,7 @@ function checkLJMVersion(data) {
 		ljmDebugOut('LJM Lib Ver', ljmData);
 		data.ljmVersion = ljmData.Value;
 
-		if(ljmData.Value > MIN_LJM_VERSION) {
+		if(ljmData.Value >= MIN_LJM_VERSION) {
 			data.hasSpecialAddresses = true;
 		}
 		defered.resolve(data);

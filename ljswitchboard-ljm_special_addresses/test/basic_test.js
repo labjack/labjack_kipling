@@ -62,6 +62,19 @@ function generateFileSaveTest(fileName, outputFilePath, expectedFileContentsPath
 		.then(function(res) {
 			var createdFileData = fs.readFileSync(outputFilePath).toString();
 			var expectedFileData = fs.readFileSync(expectedFileContentsPath).toString();
+
+			var numCreatedLines = createdFileData.split('\r\n');
+			var numExpectedCreatedLines = expectedFileData.split('\r\n');
+
+			// console.log("HERE!!!");
+			// console.log('numCreatedLines', numCreatedLines);
+			// console.log('numExpectedCreatedLines', numExpectedCreatedLines);
+
+			// If there is some sort of line-ending discrepency then we need to fix the
+			// expected file data b/c it has unix style file endings.
+			if((numCreatedLines.length != numExpectedCreatedLines.length) && (numExpectedCreatedLines.length == 1)) {
+				expectedFileData = expectedFileData.split('\n').join('\r\n');
+			}
 			test.strictEqual(createdFileData, expectedFileData);
 			test.done();
 		}, function(err) {
