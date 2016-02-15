@@ -71,24 +71,19 @@ var test_cases = {
 		test.done();
 	},
 	'Execute LJM_SPECIAL_ADDRESSES_STATUS': function(test) {
-		if(has_special_addresses) {
-			function testData(ljmSpecialAddressesStatus) {
-				// var expectedData = {
-				// 	'ljmError': 0,
-				// 	'Parameter': 'LJM_LIBRARY_VERSION',
-				// 	'Value': ljmLibraryVersion.Value,
-				// };
-				// test.deepEqual(ljmLibraryVersion, expectedData);
-				var isOk = true;
-				if(ljmSpecialAddressesStatus.ljmError) {
-					isOk = false;
-				}
-				test.ok(isOk, 'Failed to read the LJM_SPECIAL_ADDRESSES_STATUS register');
-				// console.log('Result', ljmSpecialAddressesStatus);
-				// console.log('Res Str Len', ljmSpecialAddressesStatus.String.length);
-				test.done();
-			}
 
+		function testData(ljmSpecialAddressesStatus) {
+			var isOk = true;
+			if(ljmSpecialAddressesStatus.ljmError) {
+				isOk = false;
+			}
+			test.ok(isOk, 'Failed to read the LJM_SPECIAL_ADDRESSES_STATUS register');
+			console.log('Result', ljmSpecialAddressesStatus);
+			console.log('Res Str Len', ljmSpecialAddressesStatus.String.length);
+			test.done();
+		}
+
+		if(has_special_addresses) {
 			// Execute LJM Function
 			ljm.LJM_ReadLibraryConfigStringS.async('LJM_SPECIAL_ADDRESSES_STATUS', '', testData);
 		} else {
