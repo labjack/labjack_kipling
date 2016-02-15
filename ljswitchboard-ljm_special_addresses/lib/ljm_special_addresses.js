@@ -72,14 +72,16 @@ try {
     );
 }
 
-console.log('Default S-A Path:', DEFAULT_SPECIAL_ADDRESS_FILE_PATH);
+// console.log('Default S-A Path:', DEFAULT_SPECIAL_ADDRESS_FILE_PATH);
 
 function parseOptions(options) {
 	var parsedOptions = {
 		'filePath': DEFAULT_SPECIAL_ADDRESS_FILE_PATH,
 	};
-	if(options.filePath) {
-		parsedOptions.filePath = options.filePath;
+	if(options) {
+		if(options.filePath) {
+			parsedOptions.filePath = options.filePath;
+		}
 	}
 	return parsedOptions;
 }
