@@ -16,6 +16,5 @@ ljm_special_addresses.parse()
 		'isError': err.isError,
 		'errorStep': err.errorStep,
 	});
-	console.error('Error parsing .config file', err);
 	process.exit(1);
 });

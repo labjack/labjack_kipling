@@ -4,7 +4,15 @@
   "description": "This module allows Kipling to interface with LJM's special address/specific ip feature.",
   "main": "lib/ljm_special_addresses.js",
   "scripts": {
-      "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+      "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+
+      "example_add_address": "node ./examples/add_special_address.js",
+      "example_add_addresses": "node ./examples/add_special_addresses.js",
+      "example_clear": "node ./examples/clear_special_addresses.js",
+      "example_get_file_path": "node ./examples/get_special_addresses_default_file_path.js",
+      "example_load": "node ./examples/load_special_addresses.js",
+      "example_parse": "node ./examples/parse_special_addresses.js",
+      "example_save": "node ./examples/save_special_addresses.js"
   },
   "repository": {
     "type": "git",

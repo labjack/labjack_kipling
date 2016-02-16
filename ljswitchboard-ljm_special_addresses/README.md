@@ -40,6 +40,15 @@ ljm_special_addresses.parse()
 	console.log('Error parsing', err);
 });
 ```
+Output:
+```
+> node ./examples/parse_special_addresses.js
+
+Config File Path: C:\ProgramData\LabJack\LJM\ljm_special_addresses.config
+Special IP Addresses:
+[ { ip: '192.168.1.10', comments: [ 'My First IP' ] },
+  { ip: '192.168.1.11', comments: [ 'My Second IP' ] } ]
+```
 
 ### Example usage of the "load" function:
 ```javascript
@@ -57,6 +66,17 @@ ljm_special_addresses.load()
 }, function(err) {
 	console.log('Error parsing', err);
 });
+```
+Output:
+```
+> node ./examples/load_special_addresses.js
+
+Config File Path: C:\ProgramData\LabJack\LJM\ljm_special_addresses.config
+Special IP Addresses:
+[ { ip: '192.168.1.10', comments: [ 'My First IP' ] },
+  { ip: '192.168.1.11', comments: [ 'My Second IP' ] } ]
+LJM's Special Addresses Status String:
+Success. IPs: [192.168.1.10, 192.168.1.11]
 ```
 
 ### Example usage of the "save" function:
@@ -82,6 +102,17 @@ ljm_special_addresses.save(userIPs)
 	console.log('Error parsing', err);
 });
 ```
+Output:
+```
+> node ./examples/save_special_addresses.js
+
+Config File Path: C:\ProgramData\LabJack\LJM\ljm_special_addresses.config
+Special IP Addresses:
+[ { ip: '192.168.1.10', comments: [ 'My First IP' ] },
+  { ip: '192.168.1.11', comments: [ 'My Second IP' ] } ]
+LJM's Special Addresses Status String:
+Success. IPs: [192.168.1.10, 192.168.1.11]
+```
 
 ### Example usage of the "addIP" function:
 ```javascript
@@ -105,6 +136,18 @@ ljm_special_addresses.addIP(userIP)
 }, function(err) {
 	console.log('Error parsing', err);
 });
+```
+Output:
+```
+> node ./examples/add_special_address.js
+
+Config File Path: C:\ProgramData\LabJack\LJM\ljm_special_addresses.config
+Special IP Addresses:
+[ { ip: '192.168.1.10', comments: [ 'My First IP' ] },
+  { ip: '192.168.1.11', comments: [ 'My Second IP' ] },
+  { ip: '192.168.1.12', comments: [ 'My First Single New IP' ] } ]
+LJM's Special Addresses Status String:
+Success. IPs: [192.168.1.10, 192.168.1.11, 192.168.1.12]
 ```
 
 ### Example usage of the "addIPs" function:
@@ -132,4 +175,16 @@ ljm_special_addresses.addIPs(userIPs)
 }, function(err) {
 	console.log('Error parsing', err);
 });
+```
+Output:
+```
+> node ./examples/add_special_addresses.js
+
+Config File Path: C:\ProgramData\LabJack\LJM\ljm_special_addresses.config
+Special IP Addresses:
+[ { ip: '192.168.1.10', comments: [ 'My First New IP' ] },
+  { ip: '192.168.1.11', comments: [ 'My Second New IP' ] },
+  { ip: '192.168.1.12', comments: [ 'My First Single New IP' ] } ]
+LJM's Special Addresses Status String:
+Success. IPs: [192.168.1.10, 192.168.1.11, 192.168.1.12]
 ```
