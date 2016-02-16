@@ -7,5 +7,10 @@ ljm_special_addresses.save(userIPs)
 	console.log('Special IP Addresses:');
 	console.log(res.fileData);
 }, function(err) {
-	console.log('Error parsing', err);
+	console.error('Error saving IPs:');
+	console.error({
+		'isError': err.isError,
+		'errorStep': err.errorStep,
+	});
+	process.exit(1);
 });

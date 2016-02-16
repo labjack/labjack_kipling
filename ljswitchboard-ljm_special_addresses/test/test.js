@@ -4,6 +4,12 @@
 var testGroups = {
 	'get_ljm_version': true,
 	'basic_test': true,
+
+	/*
+	 * Running the examples modifies the global .config file.  It is important 
+	 * to run all of the available examples before publishing to npm.
+	*/
+	'run_examples': true,
 };
 
 

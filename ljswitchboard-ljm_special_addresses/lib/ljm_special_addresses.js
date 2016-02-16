@@ -248,6 +248,17 @@ function innerParseFile(data) {
 	return defered.promise;
 }
 
+function innerParse(data) {
+	var defered = q.defer();
+	
+	innerReadFile(data)
+	.then(innerParseFile)
+	.then(defered.resolve)
+	.catch(defered.reject);
+
+	return defered.promise;
+}
+
 function parse(options) {
 	var defered = q.defer();
 	var parsedOptions = parseOptions(options);
@@ -263,17 +274,19 @@ function parse(options) {
 		});
 	}
 
-	innerReadFile(data)
-	.then(innerParseFile)
-	.then(finalize)
-	.catch(function resolveError(errData) {
+	function resolveError(errData) {
 		defered.reject({
 			'data': errData,
 			'isError': errData.isError,
 			'errorStep': errData.errorStep,
 			'errorInfo': errData.errorInfo,
 		});
-	});
+	}
+
+	innerParse(data)
+	.then(finalize)
+	.catch(resolveError);
+
 	return defered.promise;
 }
 
@@ -286,6 +299,37 @@ function sortUserIPs(a, b) {
 	return ips[selectedIP];
 }
 
+function removeDuplicateIPAddresses(data) {
+	var defered = q.defer();
+
+	var userIPs = [];
+	var ips = {};
+	var ipAddrs = [];
+	data.fileData.forEach(function(userIP) {
+		var exists = false;
+		if(ips[userIP.ip]) {
+			exists = true;
+		}
+
+		// Indicate that the IP exists.
+		ips[userIP.ip] = userIP;
+		
+		if(!exists) {
+			ipAddrs.push(userIP.ip);
+		}
+	});
+
+	userIPs = ipAddrs.map(function(ipAddr) {
+		return ips[ipAddr];
+	});
+
+	// over-write the fileData object.
+	data.fileData = userIPs;
+
+	defered.resolve(data);
+	return defered.promise;
+}
+
 function generateNewFileString(data) {
 	var defered = q.defer();
 
@@ -293,8 +337,16 @@ function generateNewFileString(data) {
 	var ips = {};
 	var ipAddrs = [];
 	userIPs.forEach(function(userIP) {
+		var exists = false;
+		if(ips[userIP.ip]) {
+			exists = true;
+		}
+
 		ips[userIP.ip] = userIP;
-		ipAddrs.push(userIP.ip);
+		
+		if(!exists) {
+			ipAddrs.push(userIP.ip);
+		}
 	});
 	// console.log('Un-sorted Data', ipAddrs);
 	ipAddrs.sort(natural_sort);
@@ -438,6 +490,24 @@ function checkLJMSpecialAddressesStatus(data) {
 	return defered.promise;
 }
 
+function innerSave(data) {
+	var defered = q.defer();
+	
+	removeDuplicateIPAddresses(data)
+	.then(generateNewFileString)
+	.then(innerWriteFile)
+
+	// instruct LJM to load file
+	.then(checkLJMVersion)
+	.then(updateLJMSpecialAddressesFilePath)
+	.then(checkLJMSpecialAddressesStatus)
+
+	.then(defered.resolve)
+	.catch(defered.reject);
+
+	return defered.promise;
+}
+
 function save(userIPs, options) {
 	var defered = q.defer();
 	var parsedOptions = parseOptions(options);
@@ -454,16 +524,7 @@ function save(userIPs, options) {
 		});
 	}
 
-	generateNewFileString(data)
-	.then(innerWriteFile)
-
-	// instruct LJM to load file
-	.then(checkLJMVersion)
-	.then(updateLJMSpecialAddressesFilePath)
-	.then(checkLJMSpecialAddressesStatus)
-
-	.then(finalize)
-	.catch(function resolveError(errData) {
+	function resolveError(errData) {
 		// console.log('Handling Error...', errData);
 		defered.reject({
 			'data': errData,
@@ -471,11 +532,31 @@ function save(userIPs, options) {
 			'errorStep': errData.errorStep,
 			'errorInfo': errData.errorInfo,
 		});
-	});
+	}
+
+	innerSave(data)
+	.then(finalize)
+	.catch(resolveError);
 
 	return defered.promise;
 }
 
+function innerLoad(data) {
+	var defered = q.defer();
+
+	innerReadFile(data)
+	.then(innerParseFile)
+	
+	// instruct LJM to load file
+	.then(checkLJMVersion)
+	.then(updateLJMSpecialAddressesFilePath)
+	.then(checkLJMSpecialAddressesStatus)
+
+	.then(defered.resolve)
+	.catch(defered.reject);
+
+	return defered.promise;
+}
 function load(options) {
 	var defered = q.defer();
 	var parsedOptions = parseOptions(options);
@@ -491,58 +572,89 @@ function load(options) {
 		});
 	}
 
-	innerReadFile(data)
-	.then(innerParseFile)
-	
-	// instruct LJM to load file
-	.then(checkLJMVersion)
-	.then(updateLJMSpecialAddressesFilePath)
-	.then(checkLJMSpecialAddressesStatus)
-
-	.then(finalize)
-	.catch(function resolveError(errData) {
+	function resolveError(errData) {
 		defered.reject({
 			'data': errData,
 			'isError': errData.isError,
 			'errorStep': errData.errorStep,
 			'errorInfo': errData.errorInfo,
 		});
-	});
+	}
+
+	innerLoad(data)
+	.then(finalize)
+	.catch(resolveError);
+
 	return defered.promise;
 }
 
-function addIP(newIP, options) {
-	var defered = q.defer();
-	var parsedOptions = parseOptions(options);
-	var data = prepareOperation(parsedOptions);
+function getAddNewIPs(newIPs) {
+	var parsedNewIPs = parseGivenUserIPs(newIPs);
+	
+	return function addNewIPs(data) {
+		var defered = q.defer();
 
-	innerReadFile(data)
-	.then(innerParseFile)
-	.catch(function resolveError(errData) {
-		defered.reject({
-			'isError': errData.isError,
-			'errorStep': errData.errorStep,
-			'errorInfo': errData.errorInfo,
+		// Add new IPs to the parsed file data array.
+		parsedNewIPs.forEach(function(parsedNewIP) {
+			data.fileData.push(parsedNewIP);
 		});
-	});
-	return defered.promise;
+
+		defered.resolve(data);
+		return defered.promise;
+	};
+}
+
+function addIP(newIP, options) {
+	return addIPs([newIP], options);
 }
 
 function addIPs(newIPs, options) {
 	var defered = q.defer();
-	var promises = newIPs.map(function mappingToAddIP(newIP) {
-		return addIP(newIP, options);
-	});
+	var parsedOptions = parseOptions(options);
+	var data = prepareOperation(parsedOptions);
 
-	q.allSettled(promises)
-	.then(function() {
-		defered.resolve();
-	}, function() {
-		defered.resolve();
+	function finalize(successData) {
+		defered.resolve({
+			'filePath': successData.filePath,
+			'fileData': successData.fileData,
+			'ljmVersion': successData.ljmVersion,
+			'hasSpecialAddresses': successData.hasSpecialAddresses,
+			'ljmStatus': successData.ljmStatus,
+		});
+	}
+
+	function resolveError(errData) {
+		defered.reject({
+			'data': errData,
+			'isError': errData.isError,
+			'errorStep': errData.errorStep,
+			'errorInfo': errData.errorInfo,
+		});
+	}
+
+	innerParse(data)
+	.then(getAddNewIPs(newIPs))
+	.then(innerSave)
+	.then(finalize)
+	.catch(resolveError);
+
+	return defered.promise;
+}
+
+function getDefaultSpecialAddressesFilePath() {
+	var defered = q.defer();
+
+	defered.resolve({
+		'filePath': DEFAULT_SPECIAL_ADDRESS_FILE_PATH,
 	});
 	return defered.promise;
 }
 
 exports.parse = parse;
-exports.save = save;
 exports.load = load;
+exports.save = save;
+
+exports.addIP = addIP;
+exports.addIPs = addIPs;
+
+exports.getDefaultFilePath = getDefaultSpecialAddressesFilePath;
