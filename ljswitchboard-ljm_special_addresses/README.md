@@ -2,7 +2,7 @@
 This module allows Kipling to interface with LJM's Special Addresses/Specific IPs feature.  Documentation for this feature can be found on LabJack's website: [LJM Special Addresses](https://labjack.com/support/software/api/ljm/constants/SpecialAddressesConfigs).
 
 ## Installing the LJM Library
-This library can be downloaded and installed for free on LabJack's website on the [LJM Library Installers](https://labjack.com/support/software/installers/ljm) page.
+The LJM library can be downloaded and installed for free on LabJack's website on the [LJM Library Installers](https://labjack.com/support/software/installers/ljm) page.
 
 ## Installation:
 Install with npm:
