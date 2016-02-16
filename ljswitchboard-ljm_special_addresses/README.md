@@ -16,7 +16,7 @@ var ljm_special_addresses = require('ljswitchboard-ljm_special_addresses');
 ```
 
 ## Examples
-The most up to date list of (examples)[https://github.com/chrisJohn404/ljswitchboard-ljm_special_addresses/tree/master/examples] can be found in the examples directory of this repository.  This module exposes the following functions:
+The most up to date list of [examples](https://github.com/chrisJohn404/ljswitchboard-ljm_special_addresses/tree/master/examples) can be found in the examples directory of this repository.  This module exposes the following functions:
 * parse
 * load
 * save
