@@ -96,8 +96,26 @@ function createDriverController(io_interface) {
 	this.driverVersion = function() {
 		return self.readLibrary('LJM_LIBRARY_VERSION');
 	};
-
-	
+	this.specialAddresses = {
+		load: function (options) {
+			return callFunc('specialAddressesLoad', [options]);
+		},
+		parse: function(options) {
+			return callFunc('specialAddressesParse', [options]);
+		},
+		save: function(userIPs, options) {
+			return callFunc('specialAddressesSave', [userIPs, options]);
+		},
+		addIP: function(userIP, options) {
+			return callFunc('specialAddressesAddIP', [userIP, options]);
+		},
+		addIPs: function(userIPs, options) {
+			return callFunc('specialAddressesAddIPs', [userIPs, options]);
+		},
+		getDefaultFilePath: function() {
+			return callFunc('specialAddressesGetDefaultFilePath');
+		},
+	};
 	var self = this;
 }
 

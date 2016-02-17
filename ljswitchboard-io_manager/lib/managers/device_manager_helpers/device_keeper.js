@@ -27,7 +27,8 @@ var ljmConstants = modbus_map.getConstants();
 function createDeviceKeeper(io_delegator, link) {
 	var send = link.send;
 	var sendMessage = link.sendMessage;
-	var deviceScanner = new device_scanner.deviceScanner();
+	// var deviceScanner = new device_scanner.deviceScanner();
+	var deviceScanner = device_scanner;
 
 
 	var deviceSendMessage = function(deviceKey, message) {

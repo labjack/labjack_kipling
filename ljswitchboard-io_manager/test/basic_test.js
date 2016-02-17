@@ -74,6 +74,7 @@ exports.basic_test = {
 		test.done();
 	},
 	'initialize io_interface': function(test) {
+		console.log('TEST: Initializing io_interface');
 		qRunner(test, io_interface.initialize)
 		.then(function(res) {
 			test.ok(true, res);

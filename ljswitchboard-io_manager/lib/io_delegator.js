@@ -1,4 +1,11 @@
 
+// process.on('unhandledRejection', function(reason, p) {
+//   console.log('io_delegator unhandledRejection:', p, reason);
+// });
+
+// process.on('uncaughtException', function(err) {
+//   console.log('io_delegator uncaughtException:', 'Caught exception: ', err);
+// });
 
 var dict = require('dict');
 var q = require('q');
@@ -15,14 +22,15 @@ var driver_manager;
 var device_manager;
 var logger_manager;
 var file_io_manager;
+
 try {
 	driver_manager = require('./managers/driver_manager');
 	device_manager = require('./managers/device_manager');
 	logger_manager = require('./managers/logger_manager');
 	file_io_manager = require('./managers/file_io_manager');
 } catch(err) {
-	// console.log('Error Requiring Library:');
-	// console.log(err);
+	console.error('io_delegator: Error Requiring Library:');
+	console.error(err);
 	process.exit(io_error_constants.REQUIRE_REF_OR_FFI_ERROR.code);
 }
 

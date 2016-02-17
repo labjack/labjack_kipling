@@ -7,7 +7,7 @@ var pResults = utils.pResults;
 var q = require('q');
 
 // enable/disable tests
-var ENABLE_BASIC_TEST = true;						// Passing
+var ENABLE_BASIC_TEST = false;						// Passing
 var ENABLE_SIMPLE_TEST = false;						// Passing
 var TEST_DRIVER_CONTROLLER = false;					// Passing
 
@@ -31,6 +31,8 @@ var TEST_UPDATE_USB_DEVICE = false;					// Passing
 
 var MOCK_DEVICE_SPEED_TEST = false;
 var T7_DEVICE_SPEED_TEST = false;
+
+var TEST_SPECIAL_ADDRESSES_INTERFACE = true;
 
 if(ENABLE_BASIC_TEST) {
 	var basic_test = require('./basic_test');
@@ -110,4 +112,7 @@ if(T7_DEVICE_SPEED_TEST) {
 	exports.t7_device_speed_test = t7_device_speed_test.tests;
 }
 
-
+if(TEST_SPECIAL_ADDRESSES_INTERFACE) {
+	var ljm_special_addresses_test = require('./special_addresses/ljm_special_addresses_test');
+	exports.ljm_special_addresses_test = ljm_special_addresses_test.tests;
+}

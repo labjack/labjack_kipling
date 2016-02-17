@@ -365,9 +365,9 @@ function createIOInterface() {
 		// var version = '0_10_33';
 		// Force execution of node 0_10_35
 		// version = '0_10_35';
-		var version = '5_4_1';
+		var version = '5_6_0';
 		version = {
-			'win32': '5_4_1',
+			'win32': '5_6_0',
 			'darwin': '5_4_1',
 			'linux': '5_4_1'
 		}[os];
@@ -444,7 +444,7 @@ function createIOInterface() {
 			infoKeys.forEach(function(key) {
 				console.log('    - ' + key + ': ' + JSON.stringify(info[key]));
 			});
-	}
+		}
 
 		self.mp = null;
 		self.mp_event_emitter = null;
@@ -550,6 +550,7 @@ function createIOInterface() {
 		})
 		.then(getDriverConstants)
 		.then(function(res) {
+			console.log('Initializing Controllers...');
 			// Initialize Controllers
 			self.driver_controller.init()
 			.then(self.device_controller.init)

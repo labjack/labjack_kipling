@@ -4,6 +4,14 @@ var constants = require('../common/constants');
 var q = require('q');
 var io_endpoint_key = constants.driver_endpoint_key;
 
+var ljm_special_addresses_loaded = false;
+var ljm_special_addresses;
+function loadLJMSpecialAddresses() {
+	if(!ljm_special_addresses_loaded) {
+		ljm_special_addresses = require('ljswitchboard-ljm_special_addresses');
+	}
+}
+
 function createDriverManager(io_delegator) {
 	var ljm_driver = null;
 	var custom_functions = {
@@ -12,10 +20,52 @@ function createDriverManager(io_delegator) {
 			setImmediate(function() {
 				onSuccess(functionList);
 			});
-		}
+		},
+		'specialAddressesLoad': function(options, onError, onSuccess) {
+			loadLJMSpecialAddresses();
+			ljm_special_addresses.load(options)
+			.then(onSuccess, onError)
+			.catch(onError);
+		},
+		'specialAddressesParse': function(options, onError, onSuccess) {
+			loadLJMSpecialAddresses();
+			ljm_special_addresses.parse(options)
+			.then(onSuccess, onError)
+			.catch(onError);
+		},
+		'specialAddressesSave': function(userIPs, options, onError, onSuccess) {
+			loadLJMSpecialAddresses();
+			ljm_special_addresses.save(userIPs, options)
+			.then(onSuccess, onError)
+			.catch(onError);
+		},
+		'specialAddressesAddIP': function(userIP, options, onError, onSuccess) {
+			loadLJMSpecialAddresses();
+			ljm_special_addresses.addIP(userIP, options)
+			.then(onSuccess, onError)
+			.catch(onError);
+		},
+		'specialAddressesAddIPs': function(userIPs, options, onError, onSuccess) {
+			loadLJMSpecialAddresses();
+			ljm_special_addresses.addIPs(userIPs, options)
+			.then(onSuccess, onError)
+			.catch(onError);
+		},
+		'specialAddressesGetDefaultFilePath': function(onError, onSuccess) {
+			loadLJMSpecialAddresses();
+			ljm_special_addresses.getDefaultFilePath()
+			.then(onSuccess, onError)
+			.catch(onError);
+		},
 	};
 	var customNumArgs = {
-		'getFuncs': 0
+		'getFuncs': 0,
+		'specialAddressesLoad': 1,
+		'specialAddressesParse': 1,
+		'specialAddressesSave': 2,
+		'specialAddressesAddIP': 2,
+		'specialAddressesAddIPs': 2,
+		'specialAddressesGetDefaultFilePath': 0,
 	};
 
 	var sendMessage = null;
@@ -60,8 +110,14 @@ function createDriverManager(io_delegator) {
 			args = m.args;
 			if (numArgs === 0) {
 				custom_functions[func](error, success);
+			} else if (numArgs === 1) {
+				custom_functions[func](args[0], error, success);
+			} else if (numArgs === 2) {
+				custom_functions[func](args[0], args[1], error, success);
+			} else if (numArgs === 2) {
+				custom_functions[func](args[0], args[1], args[2], error, success);
 			} else {
-				console.error("in driver_manager.js-mR func argLength invalid", m, self.numArgs);
+				console.error("in driver_manager.js-mR custom func argLength invalid", m, customNumArgs);
 				error(m);
 			}
 		} else {
