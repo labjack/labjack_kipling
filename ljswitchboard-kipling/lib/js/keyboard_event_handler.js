@@ -109,11 +109,11 @@ function keyboardEventHandler() {
         }
     };
     this.handleZoomIn = function(info) {
-        console.log('in handleZoomIn');
+        // console.log('in handleZoomIn');
         self.managers.zoom.zoomIn();
     };
     this.handleZoomOut = function(info) {
-        console.log('in handleZoomOut');
+        // console.log('in handleZoomOut');
         self.managers.zoom.zoomOut();
     };
 
@@ -336,7 +336,7 @@ function keyboardEventHandler() {
         // console.log('Key!!', keyNum, keyStr);
         var str = '';
         if(event.ctrlKey) {
-            console.log('Ctrl Key Down');
+            // console.log('Ctrl Key Down');
             self.pressedKeys.ctrlKey = true;
             str += 'ctrl+';
         }
@@ -363,7 +363,7 @@ function keyboardEventHandler() {
     **/
     this.keyupListener = function(event) {
         if(!event.ctrlKey) {
-            console.log('Ctrl Key Up');
+            // console.log('Ctrl Key Up');
             self.pressedKeys.ctrlKey = false;
         }
         if(!event.altKey) {

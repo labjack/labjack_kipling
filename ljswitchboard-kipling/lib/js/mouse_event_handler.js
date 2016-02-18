@@ -5,20 +5,34 @@ var async = require('async');
 
 // Define the Mouse event Handler.
 function createMouseEventHandler() {
-    
+    this.lastMouseEventData = undefined;
     this.keyboardEventHandler = undefined;
     this.windowZoomManager = undefined;
 
     function handleMouseScroll(event) {
-        console.log('scroll detected!!');
-        if(self.keyboardEventHandler.pressedKeys.ctrlKey) {
+        self.lastMouseEventData = event;
+        // console.log('scroll detected!!');
+        if(event.ctrlKey) {
             // console.log('Zooming!!');
             var wheelDelta = event.wheelDelta;
             var wheelDeltaY = event.wheelDeltaY;
 
-            if(wheelDeltaY > 0) {
+            // Using the shift key while scrolling changes scroll to the X axis.
+            // Therefore we need to ignore the situation when Y delta is zero.
+            // or make the decision to allow both ctrl and ctrl + shift to allow
+            // scrolling.... which is what is going to happen...
+            
+            // Enable only Y axis scroll deltas.
+            // if(wheelDeltaY > 0) {
+            //     self.windowZoomManager.zoomIn();
+            // } else if(wheelDeltaY < 0) {
+            //     self.windowZoomManager.zoomOut();
+            // }
+
+            // Enable X and Y axis scroll deltas.
+            if(wheelDelta > 0) {
                 self.windowZoomManager.zoomIn();
-            } else {
+            } else if(wheelDelta < 0) {
                 self.windowZoomManager.zoomOut();
             }
         }
