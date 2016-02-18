@@ -93,73 +93,67 @@ this.test_device_info = {
 			test.done();
 		});
 
-		var deviceSelectorTab = $('#device_selector-tab');
-		deviceSelectorTab.trigger('click');
+		var settingsTab = $('#settings-tab');
+		settingsTab.trigger('click');
 		// MODULE_LOADER.loadModuleByName('device_selector')
 		// .then(function(res) {
 		// 	// Device selector isn't quite loaded yet.  Just ready for
 		// 	// other async tasks.  Must wait for the "MODULE_READY" event.
 		// });
 	},
-	'change slide-time': function(test) {
-		var activeModule = kiplingWin.window.activeModule;
-		var viewGen = activeModule.viewGen;
-		viewGen.slideDuration = 10;
-		test.done();
-	},
-	'connect to T7 (USB)': function(test) {
-		MODULE_CHROME.once(
-			MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
-			function(updatedModules) {
-				console.log('Tabs updated (test)', updatedModules);
-				test.done();
-			});
+	// 'connect to T7 (USB)': function(test) {
+	// 	MODULE_CHROME.once(
+	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
+	// 		function(updatedModules) {
+	// 			console.log('Tabs updated (test)', updatedModules);
+	// 			test.done();
+	// 		});
 
-		// Connect to the first found USB-T7
-		var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_USB');
-		var t7 = t7s.first();
-		t7.trigger('click');
-	},
-	'connect to T7 (Ethernet)': function(test) {
-		MODULE_CHROME.once(
-			MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
-			function(updatedModules) {
-				console.log('Tabs updated (test)', updatedModules);
-				test.done();
-			});
+	// 	// Connect to the first found USB-T7
+	// 	var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_USB');
+	// 	var t7 = t7s.first();
+	// 	t7.trigger('click');
+	// },
+	// 'connect to T7 (Ethernet)': function(test) {
+	// 	MODULE_CHROME.once(
+	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
+	// 		function(updatedModules) {
+	// 			console.log('Tabs updated (test)', updatedModules);
+	// 			test.done();
+	// 		});
 
-		// Connect to the second found Ethernet-T7
-		var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_Ethernet');
-		var t7 = t7s.eq(1);
-		t7.trigger('click');
-	},
-	'connect to Digit (USB)': function(test) {
-		MODULE_CHROME.once(
-			MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
-			function(updatedModules) {
-				console.log('Tabs updated (test)', updatedModules);
-				test.done();
-			});
+	// 	// Connect to the second found Ethernet-T7
+	// 	var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_Ethernet');
+	// 	var t7 = t7s.eq(1);
+	// 	t7.trigger('click');
+	// },
+	// 'connect to Digit (USB)': function(test) {
+	// 	MODULE_CHROME.once(
+	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
+	// 		function(updatedModules) {
+	// 			console.log('Tabs updated (test)', updatedModules);
+	// 			test.done();
+	// 		});
 
-		// Connect to the first found USB-Digit
-		var t7s = $('.DEVICE_TYPE_Digit .CONNECTION_TYPE_USB');
-		var t7 = t7s.first();
-		t7.trigger('click');
-	},
-	'load device info': function(test) {
-		kiplingWin.showDevTools();
+	// 	// Connect to the first found USB-Digit
+	// 	var t7s = $('.DEVICE_TYPE_Digit .CONNECTION_TYPE_USB');
+	// 	var t7 = t7s.first();
+	// 	t7.trigger('click');
+	// },
+	// 'load device info': function(test) {
+	// 	kiplingWin.showDevTools();
 
-		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
-		});
-		var deviceInfoTab = $('#device_info_fw-tab');
-		deviceInfoTab.trigger('click');
-		// MODULE_LOADER.loadModuleByName('device_info_fw')
-		// .then(function(res) {
-		// 	// Device selector isn't quite loaded yet.  Just ready for
-		// 	// other async tasks.  Must wait for the "MODULE_READY" event.
-		// });
-	},
+	// 	MODULE_LOADER.once('MODULE_READY', function(res) {
+	// 		test.done();
+	// 	});
+	// 	var deviceInfoTab = $('#device_info_fw-tab');
+	// 	deviceInfoTab.trigger('click');
+	// 	// MODULE_LOADER.loadModuleByName('device_info_fw')
+	// 	// .then(function(res) {
+	// 	// 	// Device selector isn't quite loaded yet.  Just ready for
+	// 	// 	// other async tasks.  Must wait for the "MODULE_READY" event.
+	// 	// });
+	// },
 	// 'disconnect from T7': function(test) {
 	// 	MODULE_CHROME.once(
 	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_CLOSED,

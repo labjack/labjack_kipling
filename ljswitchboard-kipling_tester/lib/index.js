@@ -27,17 +27,20 @@ var nodeunit_recorder = require(path.normalize(path.join(cwd, 'nodeunit_recorder
 var testFiles = [
 	'test_kipling.js',
 	// Execute Mock-Device compatable Tests
-	// 'mock_module_tests/mock_device_selector.js',
+	'mock_module_tests/mock_device_selector.js',
 	// 'mock_module_tests/mock_device_info.js',
 	// 'mock_module_tests/mock_dashboard.js',
 	// 'mock_module_tests/mock_register_matrix.js',
 	// 'mock_module_tests/mock_simple_logger.js',
+
+	// Execute Mock-Settings test.
+	'mock_module_tests/settings.js',
 	
 	// Execute stand-alone mock tests
 	// 'mock_module_tests/mock_file_browser.js',
 
 	// Execute Live-Device tests
-	'module_tests/test_device_info.js',
+	// 'module_tests/test_device_info.js',
 	// 'module_tests/test_device_updater.js',
 
 	// 'mock_module_tests/mock_lua_script_debugger.js',
