@@ -39,6 +39,10 @@
 	display:block;
 	list-style-type: none;
 }
+.efExtendedInfo.ainEFSecondaryReadRegisters {
+  margin-left: 20px;
+  margin-right: -20px;
+}
 .efExtendedInfo li {
 	margin-bottom:5px;
 }
@@ -46,7 +50,7 @@
 	width: 70px;
 }
 .ainEFConfigB-LINK {
-	width: 205px;
+  width: 215px;
 }
 .efConfig-FORM {
 	margin:0;

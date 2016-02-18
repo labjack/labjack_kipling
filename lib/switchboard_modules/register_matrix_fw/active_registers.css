@@ -19,12 +19,13 @@
 }
 .value-edit-controls {
     /*display: none;*/
-    margin-top: -7px;
+    margin-top: -11px;
     margin-bottom: -7px;
 }
 
 .value-edit-controls .icon {
-    padding: 11px 8px 7px 5px;
+    /*padding: 11px 8px 7px 5px;*/
+    padding: 5px 8px 10px 5px;
     background-color: #CCCCCC;
 }
 .value-editor-button .icon:hover {
@@ -79,7 +80,7 @@
     /*width: 10px;*/
     /*height: 10px;*/
     background-color: #CCCCCC;
-    padding: 7px 5px 8px 5px;
+    padding: 5px 5px 8px 5px;
     cursor: pointer;
     margin-top: -5px;
     margin-bottom: -5px;

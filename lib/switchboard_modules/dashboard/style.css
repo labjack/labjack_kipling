@@ -1,8 +1,10 @@
 .register-overlay {
     font-size: 12px;
     position: absolute;
-    width: 122px;
-    margin-left:-3px;
+    /*width: 122px;
+    margin-left:-3px;*/
+    width: 128px;
+  	margin-left: 0px;
 }
 .device-register-overlay {
 	font-size: 12px;

@@ -1,0 +1,8 @@
+{
+    "name": "task_ljm_controller",
+    "humanName": "LJM Controller",
+    "version": "0.0.1",
+    "jsFiles": ["ljm_controller.js"],
+    "startTime": "auto",
+    "description": "Control/configure the LabJack LJM library upon initialization."
+}

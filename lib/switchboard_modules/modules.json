@@ -119,6 +119,10 @@
         "name": "task_simple_logger_collector",
         "active": false,
         "isTask": true
+    }, {
+        "name": "task_ljm_controller",
+        "active": true,
+        "isTask": true
     }],
     "footer": [{
         "name": "error_codes_temp",

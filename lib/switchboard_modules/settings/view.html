@@ -16,12 +16,12 @@
     <div class="panel panel-default">
       <div class="panel-heading" role="tab" id="headingOne">
         <h4 class="panel-title">
-          <a role="button" data-toggle="collapse" data-parent="#accordion" href="#ljmDriverCollapsible" aria-expanded="false" aria-controls="collapseOne">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#ljmDriverCollapsible" aria-expanded="false" aria-controls="collapseOne">
             LJM Driver: {{pageData.ljm_data.LJM_LIBRARY_VERSION}}
           </a>
         </h4>
       </div>
-      <div id="ljmDriverCollapsible" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+      <div id="ljmDriverCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
         <div class="panel-body">
           <div>
             <table class="table table-hover table-condensed">
@@ -83,6 +83,48 @@
                 <td class="selectableText">{{data}}</td>
               </tr>
               {{/each}}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading" role="tab" id="headingFour">
+        <h4 class="panel-title">
+          <a role="button" data-toggle="collapse" data-parent="#accordion" href="#simpleAddressesCollapsible" aria-expanded="true" aria-controls="collapseFour">
+            Specific IPs: {{!--{{pageData.kipling_data.data}}--}}
+          </a>
+        </h4>
+      </div>
+      <div id="simpleAddressesCollapsible" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingFour">
+        <div class="panel-body">
+          <div>
+            <table class="table table-hover table-condensed">
+              <!-- {{#each pageData.packages}}
+              <tr>
+                <td class="selectableText">{{name}}</td>
+                <td class="selectableText">{{data}}</td>
+              </tr>
+              {{/each}} -->
+              <tr><td><p id="My_IPS">Specific IPs!!</p></td></tr>
+            </table>
+            <table id="ljm_special_addresses_table" class="table table-hover table-contensed">
+              <!-- <thead>
+              <tr>
+                <th>Col 1</th>
+                <th>Col 2</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+              <th>Row 1 Col 1</th>
+              <th>Row 1 Col 2</th>
+              </tr>
+              <tr>
+              <th>Row 2 Col 1</th>
+              <th>Row 2 Col 2</th>
+              </tr>
+              </tbody> -->
             </table>
           </div>
         </div>

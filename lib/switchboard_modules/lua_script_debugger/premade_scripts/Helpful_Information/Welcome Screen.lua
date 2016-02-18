@@ -30,3 +30,6 @@ print("Welcome, please Load an example to get started!")
 
 --We ask that if you are having problems please contact us
 --Send questions and feedback to support@labjack.com
+
+print("Exiting Lua Script")
+MB.W(6000, 1, 0)
