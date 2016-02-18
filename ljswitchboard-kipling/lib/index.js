@@ -137,8 +137,20 @@ var startIOManager = function(){
 var performRemainingInitializationRoutines = function() {
 	var defered = q.defer();
 
-	KEYBOARD_EVENT_HANDLER.init()
-	.then(defered.resolve, defered.reject);
+	var managers = {
+		'keyboard': KEYBOARD_EVENT_HANDLER,
+		'mouse': MOUSE_EVENT_HANDLER,
+		'zoom': WINDOW_ZOOM_MANAGER,
+	};
+
+	function finalize() {
+		defered.resolve();
+	}
+	
+	KEYBOARD_EVENT_HANDLER.init(managers)
+	.then(WINDOW_ZOOM_MANAGER.init)
+	.then(MOUSE_EVENT_HANDLER.init)
+	.then(finalize, defered.reject);
 
 	return defered.promise;
 };

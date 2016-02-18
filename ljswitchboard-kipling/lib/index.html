@@ -48,6 +48,9 @@
                 // CSS for the switchboard base
                 'css/switchboard_base.css',
 
+                // CSS for bootstrap3-editable
+                'libs/bootstrap3-editable-1.5.1/bootstrap3-editable/css/bootstrap-editable.css',
+
                 // ------------------ Require js files -----------------------//
                 // JS for jQuery
                 'libs/jquery/jquery-1.10.2.min.js',
@@ -77,6 +80,9 @@
                 // JS for bootstrap multiselect: 
                 //  - http://davidstutz.github.io/bootstrap-multiselect/#methods
                 'js/bootstrap-multiselect.js',
+
+                // CSs for bootstrap3-editable
+                'libs/bootstrap3-editable-1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js',
 
                 // Other JS
                 'js/kinetic.js',
@@ -116,10 +122,16 @@
                 // JS with convenient helper functions.
                 'js/module_utils.js',
 
-                // JS to listen to keyboard events
+                // JS to listen to keyboard events.
                 'js/keyboard_event_handler.js',
 
-                // JS to interface with the node-webkit's file browser
+                // JS to listen to mouse events.
+                'js/mouse_event_handler.js',
+
+                // JS to manage the zoom level of the window.
+                'js/window_zoom_manager.js',
+
+                // JS to interface with the node-webkit's file browser.
                 'js/file_browser.js',
             ];
             loadLocalResources(localResourceList);
@@ -128,5 +140,54 @@
     </head>
     <body class="fullPage">
         <div id="module_chrome_holder" class="fullPage"></div>
+        <div id="scroll">Dancing Div</div>
+        <script>
+        // function INITIALIZE_WINDOW_ZOOMER() {
+        //     this.zoomLevel = 1;
+        //     this.zoomIncrement = 0.05;
+        //     // Set the initial body zoom.
+        //     window.document.body.style.zoom = this.initialZoom;
+
+        //     // window.onload = function()
+        //     // {
+        //     //     //adding the event listerner for Mozilla
+        //     //     if(window.addEventListener)
+        //     //         document.addEventListener('DOMMouseScroll', moveObject, false);
+             
+        //     //     //for IE/OPERA etc
+        //     //     document.onmousewheel = moveObject;
+        //     // }
+        //     setTimeout(function() {
+        //         console.log('Initializing window zoomer');
+        //         //adding the event listerner for Mozilla
+        //         if(window.addEventListener)
+        //             document.addEventListener('DOMMouseScroll', moveObject, false);
+             
+        //         //for IE/OPERA etc
+        //         document.onmousewheel = moveObject;
+        //     }, 3000)
+        //     function moveObject(event)
+        //     {
+        //         console.log('scroll detected!!', event);
+        //         var wheelDelta = event.wheelDelta;
+        //         var wheelDeltaY = event.wheelDeltaY;
+
+        //         if(wheelDeltaY > 0) {
+        //             self.zoomLevel = self.zoomLevel - self.zoomIncrement;
+        //         } else {
+        //             self.zoomLevel = self.zoomLevel + self.zoomIncrement;
+        //         }
+        //         window.document.body.style.zoom = self.zoomLevel;
+        //     }
+        //     var self = this;
+        // }
+
+        // try {
+        //     INITIALIZE_WINDOW_ZOOMER();
+        // } catch(err) {
+        //     console.log('Error..', err);
+        // }
+                
+        </script>
     </body>
 </html>

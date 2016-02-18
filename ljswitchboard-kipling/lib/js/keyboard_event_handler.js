@@ -108,6 +108,14 @@ function keyboardEventHandler() {
             });
         }
     };
+    this.handleZoomIn = function(info) {
+        console.log('in handleZoomIn');
+        self.managers.zoom.zoomIn();
+    };
+    this.handleZoomOut = function(info) {
+        console.log('in handleZoomOut');
+        self.managers.zoom.zoomOut();
+    };
 
     this.lastElementOriginalData = dict();
     this.lastOnFocusEvent = null;
@@ -173,7 +181,32 @@ function keyboardEventHandler() {
             'platforms':['mac'],
             'func': this.handleGenericKeypress,
             'listeners': dict()
+        },{ // zoom in
+            'name':'zoomIn',
+            'key':'ctrl+shift+=',
+            'platforms':['mac','win','linux'],
+            'func': this.handleZoomIn,
+            'listeners': dict()
+        },{ // zoom out
+            'name':'zoomOut',
+            'key':'ctrl+-',
+            'platforms':['mac','win','linux'],
+            'func': this.handleZoomOut,
+            'listeners': dict()
         }
+        // },{ // zoom inB
+        //     'name':'zoomInB',
+        //     'key':'+',
+        //     'platforms':['mac','win','linux'],
+        //     'func': this.handleZoomIn,
+        //     'listeners': dict()
+        // },{ // zoom outB
+        //     'name':'zoomOutB',
+        //     'key':'-',
+        //     'platforms':['mac','win','linux'],
+        //     'func': this.handleZoomOut,
+        //     'listeners': dict()
+        // }
     ];
     this.curPlatform = {
         'linux': 'linux',
@@ -209,20 +242,25 @@ function keyboardEventHandler() {
         17:{'key':'ctrl', 'isPressed': false},
         18:{'key':'alt', 'isPressed': false},
         27:{'key':'esc', 'isPressed': false},
+        187:{'key': '=', 'isPressed': false},
+        189:{'key': '-', 'isPressed': false},
         67:{'key':'c', 'isPressed': false},
         81:{'key':'q', 'isPressed': false},
         83:{'key':'s', 'isPressed': false},
         87:{'key':'w', 'isPressed': false},
         91:{'key':'cmd', 'isPressed': false},
     };
-    this.keyList = [16, 17, 18, 27, 67, 81, 83, 87, 91];
+    this.keyList = [16, 17, 18, 27, 187, 189, 67, 81, 83, 87, 91];
 
     var esc_KEY     = 27;
+    var equ_KEY    = 187;
+    var minus_KEY   = 189;
     var c_KEY       = 67;
     var q_KEY       = 81;
     var s_KEY       = 83;
     var w_KEY       = 87;
-    this.primaryKeysList = [esc_KEY, c_KEY, q_KEY, s_KEY, w_KEY];
+    this.primaryKeysList = [esc_KEY, minus_KEY, equ_KEY, c_KEY, 
+        q_KEY, s_KEY, w_KEY];
 
     this.convertKeyCode = function(code) {
         if(typeof(self.keyMap[code]) !== 'unified') {
@@ -284,21 +322,34 @@ function keyboardEventHandler() {
      * Function to be used as the keydown listener
     **/
     this.lastKeydownEvent = null;
+    this.ctrlKeyPressed = false;
+    this.pressedKeys = {
+        'ctrlKey': false,
+        'altKey': false,
+        'shiftKey': false,
+        'metaKey': false,
+    };
     this.keydownListener = function(event) {
         self.lastKeydownEvent = event;
         var keyNum = event.keyCode;
         var keyStr = keyNum.toString();
+        // console.log('Key!!', keyNum, keyStr);
         var str = '';
         if(event.ctrlKey) {
+            console.log('Ctrl Key Down');
+            self.pressedKeys.ctrlKey = true;
             str += 'ctrl+';
         }
         if(event.altKey) {
+            self.pressedKeys.altKey = true;
             str += 'alt+';
         }
         if(event.shiftKey) {
+            self.pressedKeys.shiftKey = true;
             str += 'shift+';
         }
         if(event.metaKey) {
+            self.pressedKeys.metaKey = true;
             str += 'meta+';
         }
         if(self.primaryKeysList.indexOf(keyNum) !== -1) {
@@ -311,8 +362,22 @@ function keyboardEventHandler() {
      * Function to be used as the keyup listener
     **/
     this.keyupListener = function(event) {
-
+        if(!event.ctrlKey) {
+            console.log('Ctrl Key Up');
+            self.pressedKeys.ctrlKey = false;
+        }
+        if(!event.altKey) {
+            self.pressedKeys.altKey = false;
+        }
+        if(!event.shiftKey) {
+            self.pressedKeys.shiftKey = false;
+        }
+        if(!event.metaKey) {
+            self.pressedKeys.metaKey = false;
+        }
     };
+
+    this.managers = undefined;
 
     /**
      * Function to be called that sets up the document wide keypress listener.
@@ -320,6 +385,7 @@ function keyboardEventHandler() {
     this.init = function(bundle) {
         var defered = q.defer();
 
+        self.managers = bundle;
         // Initialize the key listener list
         self.keysList.forEach(function(keysListItem) {
             keysListItem.platforms.forEach(function(platform) {
@@ -344,3 +410,4 @@ function keyboardEventHandler() {
 
 // Initialize object and make object available in k3's namespace.
 var KEYBOARD_EVENT_HANDLER = new keyboardEventHandler();
+
