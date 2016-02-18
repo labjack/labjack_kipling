@@ -13,7 +13,25 @@ https://bootstrapbay.com/blog/bootstrap-button-styles/
     letter-spacing: 1px;
     text-transform: uppercase;
 }*/
- 
+
+.btn {
+  border-width: 1px;
+  margin: 1px;
+}
+.dropdown-menu {
+  border-width: 1px;
+}
+.multiselect-container {
+  margin-left: 2px;
+}
+/* Styling to fix modbus-map tag filter. */
+.input-group .form-control {
+  height: 30px;
+  border-width: 1px;
+}
+input[type=text], input[type=password], input[type=email], input[type=number], input[type=tel], input[type=url], input[type=search], textarea {
+  margin-top: 1px; 
+}
 .btn:focus, .btn:active:focus, .btn.active:focus {
     outline: 0 none;
 }
