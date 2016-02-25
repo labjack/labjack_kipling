@@ -132,6 +132,7 @@ var device_tests = {
 	'check t7 calibration': function(test) {
 		device.getCalibrationStatus()
 		.then(function(calStatus) {
+			console.log('Cal Status...', calStatus);
 			var keys = Object.keys(calStatus);
 			keys.forEach(function(key) {
 				test.ok(calStatus[key], 'T7 Cal Check Failed: ' + key.toString());
@@ -142,6 +143,19 @@ var device_tests = {
 			test.ok(false, 'Failed to get the devices calibration status: ' + err.toString());
 			test.done();
 		});
+	},
+	'check for installed uSD card': function(test) {
+		// console.log('HERE!!', device.savedAttributes);
+		var uSDCardInstalled = device.savedAttributes.HARDWARE_INSTALLED.sdCard;
+		if(device.savedAttributes.productType === 'T7-Pro') {
+			if(uSDCardInstalled) {
+				test.ok(true);
+			} else {
+				test.ok(false, 'There should be a uSD card installed in a T7-Pro');
+				console.log('HW Installed', device.savedAttributes.HARDWARE_INSTALLED);
+			}
+		}
+		test.done();
 	},
 	'closeDevice': function(test) {
 		// setTimeout(function() {
