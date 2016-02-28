@@ -1,0 +1,36 @@
+{
+  "name": "ljswitchboard-ljm_device_manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./lib/ljm_device_manager.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "node ./apps/app.js",
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+  },
+  "dependencies": {
+    "ljswitchboard-ljm_device_curator": "0.x.x",
+    "ljswitchboard-device_scanner": "0.x.x",
+    "ljswitchboard-ljm_driver_constants": "0.x.x",
+    "async": "~0",
+    "q": "~1"
+  },
+  "devDependencies": {
+    "nodeunit": "0.9.x"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisJohn404/ljswitchboard-ljm_device_manager.git"
+  },
+  "author": "Chris Johnson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_manager/issues"
+  },
+  "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_manager#readme"
+}
