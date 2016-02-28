@@ -372,6 +372,7 @@ var parseConstants = function(LJMJSONFileLocation) {
 			return {type: -1, directionValid: 0, typeString: "NA"};
 		}
 
+		var deviceType;
 		if(regEntry.type == 'UINT16') {
 			deviceType = driver_const.LJM_UINT16;
 		} else if(regEntry.type == 'UINT32') {
