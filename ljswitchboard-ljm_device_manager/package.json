@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_device_manager",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "./lib/ljm_device_manager.js",
   "directories": {
