@@ -235,7 +235,7 @@ function DEVICE_MANAGER() {
 			return deviceObjects[deviceKey];
 		});
 
-		self.deviceScanner.findAllDevices(deviceObjectList)
+		deviceScanner.findAllDevices(deviceObjectList)
 		.then(function(deviceTypes) {
 			self.cachedDeviceScanResults = deviceTypes;
 
