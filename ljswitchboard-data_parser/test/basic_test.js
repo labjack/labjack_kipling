@@ -507,6 +507,7 @@ exports.tests = {
 	},
 	'check byte size registers': function(test) {
 		var vals = [
+			{'reg': 'FILE_IO_SIZE', 'val': 0, 'str': '0 B'},
 			{'reg': 'FILE_IO_SIZE_BYTES', 'val': 0, 'str': '0 B'},
 			{'reg': 'FILE_IO_DISK_SECTOR_SIZE_BYTES', 'val': 1, 'str': '1 B'},
 			{'reg': 'FILE_IO_DISK_SECTOR_SIZE_BYTES', 'val': 1000, 'str': '1 KB'},
