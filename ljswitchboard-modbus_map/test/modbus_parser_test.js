@@ -140,7 +140,7 @@ exports.tests = {
     // Make sure that each register has or doesn't have the isBuffer flag.
     vals.forEach(function(val) {
       var info = constants.getAddressInfo(val.reg,'R');
-      console.log('HERE', info);
+      // console.log('HERE', info);
       if(typeof(info.data) === 'undefined') {
         console.log('  - (warn) Not Verifying Register', val.reg, '(old modbus map)');
       } else {

@@ -389,6 +389,23 @@ var parseConstants = function(LJMJSONFileLocation) {
 			deviceType = driver_const.LJM_UINT64;
 		}
 		
+		var luaTypeInt;
+		if(regEntry.type == 'UINT16') {
+			luaTypeInt = 0;
+		} else if(regEntry.type == 'UINT32') {
+			luaTypeInt = 1;
+		} else if(regEntry.type == 'INT32') {
+			luaTypeInt = 2;
+		} else if(regEntry.type == 'FLOAT32') {
+			luaTypeInt = 3;
+		} else if(regEntry.type == 'STRING') {
+			luaTypeInt = 98;
+		} else if(regEntry.type == 'BYTE') {
+			luaTypeInt = 99;
+		} else if(regEntry.type == 'UINT64') {
+			luaTypeInt = -1;
+		}
+
 		if(regEntry.readwrite.indexOf(direction) != -1) {
 			validity = 1;
 		} else {
@@ -400,6 +417,7 @@ var parseConstants = function(LJMJSONFileLocation) {
 		}
 		return {
 			type: deviceType,
+			luaTypeInt: luaTypeInt,
 			directionValid: validity,
 			typeString: regEntry.type,
 			address: resolvedAddress,
