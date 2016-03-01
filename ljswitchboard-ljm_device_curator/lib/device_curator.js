@@ -32,6 +32,7 @@ var digit_io_helper = require('./digit_io_helper');
 /* Other helper functions */
 var lua_script_operations = require('./lua_script_operations');
 var device_value_checker = require('./device_value_checker');
+var file_system_operations = require('./file_system_operations');
 
 var device_events = driver_const.device_curator_constants;
 
@@ -2225,6 +2226,15 @@ function device(useMockDevice) {
 	var luaScriptOperationKeys = Object.keys(luaScriptOperations);
 	for(i = 0; i < luaScriptOperationKeys.length; i++) {
 		this[luaScriptOperationKeys[i]] = luaScriptOperations[luaScriptOperationKeys[i]];
+	}
+
+	/**
+	 * File System functions:
+	**/
+	var fileSystemOperations = new file_system_operations.get(this);
+	var fileSystemOperationKeys = Object.keys(fileSystemOperations);
+	for(i = 0; i < fileSystemOperationKeys.length; i++) {
+		this[fileSystemOperationKeys[i]] = fileSystemOperations[fileSystemOperationKeys[i]];
 	}
 
 	/**

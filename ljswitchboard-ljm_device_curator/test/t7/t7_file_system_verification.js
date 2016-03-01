@@ -26,18 +26,6 @@ var performTests = true;
 
 var DEBUG_TEST = false;
 
-var luaScriptData = '';
-var luaScriptDataArray = [];
-
-var checkSDCardLuaScriptName = 'check_sd_card.lua';
-var luaScriptDirectory = path.join('test', 'lua_scripts');
-var cwd = process.cwd();
-var luaScriptsPath = path.join(cwd,luaScriptDirectory);
-var checkSDCardLuaScriptPath = path.join(luaScriptsPath, checkSDCardLuaScriptName);
-
-
-var luaScriptExecuted = false;
-
 var device_tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
@@ -51,7 +39,7 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t7_load_and_run_lua_script ****');
+		console.log('**** t7_file_system_verification ****');
 		console.log('**** Please connect 1x T7-Pro via USB ****');
 		try {
 			device = new device_curator.device();
@@ -81,7 +69,7 @@ var device_tests = {
 					res.serialNumber
 				);
 			}
-			console.log('in t7_basic_test.js, openDevice', res);
+			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
 			test.done();
 		}, function(err) {
@@ -105,63 +93,26 @@ var device_tests = {
 			test.done();
 		});
 	},
-	'stopping lua script': function(test) {
-		console.log('  - Stopping Lua Script.');
-		device.stopLuaScript()
+	'get cwd': function(test) {
+		console.log('  - Getting Device CWD.');
+		device.getCWD()
 		.then(function(res) {
-			console.log('  - Lua Script Stopped.');
+			console.log('  - Got CWD.', res);
 			test.done();
 		}, function(err) {
+			test.ok(false,'Should not have received an error...');
 			test.done();
 		});
 	},
-	'load lua script': function(test) {
-		device.loadLuaScript({
-			'filePath': checkSDCardLuaScriptPath,
-		})
+	'get file listing': function(test) {
+		console.log('  - Getting File Listing, "ls".');
+		device.readdir()
 		.then(function(res) {
-			console.log('Finished Loading Script', res);
-			test.ok(true, 'Finished loading script');
+			console.log('  - Got ls:', res);
 			test.done();
 		}, function(err) {
-			console.log('Error loading script', err);
-			test.ok(false, 'Error loading script');
-			test.done();
-		});
-	},
-	'starting lua script': function(test) {
-		console.log('  - Starting Lua Script.');
-		device.startLuaScript()
-		.then(function(res) {
-			console.log('  - Lua Script Started.');
-			test.done();
-		}, function(err) {
-			test.done();
-		});
-	},
-	'wait for script to stop': function(test) {
-		console.log('  - Waiting for Lua script to run.');
-		var reg = 'LUA_RUN';
-		var evalStr = 'x === 0';
-		var maxAttempts = 10;
-		var delay = 500;
-		var readOptions = {
-			'register': reg,
-			'evalStr': evalStr,
-			'maxAttempts': maxAttempts,
-			'delay': delay,
-			'rejectOnError': true,
-		};
-		device.readAndEvaluate(readOptions)
-		.then(function(res) {
-			// console.log('  - Lua Script Finished?', res);
-			console.log('  - Lua Script Finished Running.');
-			test.ok(true, 'Lua script finished running.');
-			luaScriptExecuted = true;
-			test.done();
-		}, function(err) {
-			test.ok(false, 'Lua script failed to execute and finish.');
-			luaScriptExecuted = false;
+			console.log('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
 			test.done();
 		});
 	},

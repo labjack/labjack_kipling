@@ -116,7 +116,8 @@ var testGroups = {
 		't7_check_calibration_test': false,
 		't7_read_recovery_fw_version_test': false,
 		't7_upgrade_recovery_image_test': false,
-		't7_load_and_run_lua_script': true,
+		't7_load_and_run_lua_script': false,
+		't7_file_system_verification': true
 	},
 };
 
