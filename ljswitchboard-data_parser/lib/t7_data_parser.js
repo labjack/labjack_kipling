@@ -238,13 +238,14 @@ var T7_LIST = {
 	// File I/O Registers
 	'FILE_IO_ATTRIBUTES': {
 		'decode': function(res) {
-			// Nothing with bit 1 (shift 0)
-			// Nothing with bit 2 (shift 1)
-			// Nothing with bit 3 (shift 2)
+			// Nothing with bit 0 (shift 0)
+			// Nothing with bit 1 (shift 1)
+			// Nothing with bit 2 (shift 2)
+			// Nothing with bit 3 (shift 3)
 			// Interpret bit 4:
-			var isDir = ((res & 0xFF) >> 3) & 0x1;
+			var isDir = ((res & 0xFF) >> 4) & 0x1;
 			// Interpret bit 5:
-			var isFile = ((res & 0xFF) >> 4) & 0x1;
+			var isFile = ((res & 0xFF) >> 5) & 0x1;
 
 			isDir = isDir == 1;
 			isFile = isFile == 1;
@@ -257,6 +258,9 @@ var T7_LIST = {
 		},
 	},
 	'FILE_IO_SIZE_BYTES': {
+		'decode': decodeByteSizeRegisters,
+	},
+	'FILE_IO_SIZE': {
 		'decode': decodeByteSizeRegisters,
 	},
 	'FILE_IO_DISK_SECTOR_SIZE_BYTES': {

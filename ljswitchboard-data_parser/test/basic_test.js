@@ -542,17 +542,17 @@ exports.tests = {
 	},
 	'check File I/O registers: FILE_IO_ATTRIBUTES': function(test) {
 		var vals = [
-			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b00000, 'isDir': false, 'isFile': false},
-			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b00001, 'isDir': false, 'isFile': false},
-			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b01000, 'isDir': true, 'isFile': false},
-			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b10000, 'isDir': false, 'isFile': true},
-			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b11000, 'isDir': true, 'isFile': true},
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b000000, 'isDir': false, 'isFile': false},
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b000001, 'isDir': false, 'isFile': false},
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b010000, 'isDir': true, 'isFile': false},
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b100000, 'isDir': false, 'isFile': true},
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b110000, 'isDir': true, 'isFile': true},
 
 			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x00, 'isDir': false, 'isFile': false},
 			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x01, 'isDir': false, 'isFile': false},
-			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x08, 'isDir': true, 'isFile': false},
-			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x10, 'isDir': false, 'isFile': true},
-			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x18, 'isDir': true, 'isFile': true},
+			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x10, 'isDir': true, 'isFile': false},
+			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x20, 'isDir': false, 'isFile': true},
+			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x30, 'isDir': true, 'isFile': true},
 		];
 
 		var results = [];
