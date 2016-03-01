@@ -207,7 +207,7 @@ function getFileSystemOperations(self) {
 			debugLS('in getReaddirAttributes res', results);
 			results.forEach(function(result) {
 				if(!result.isErr) {
-					bundle[result.data.name] = result.data.val;
+					bundle[result.data.name] = result.data;
 				}
 			});
 			// console.log("HERE!@'");
@@ -225,9 +225,9 @@ function getFileSystemOperations(self) {
 	}
 	// Step #3 in Readdir Operation
 	function readAndSaveFileListing(bundle) {
-		debugLS('in readAndSaveFileListing', bundle);
+		debugLS('in readAndSaveFileListing');
 		var defered = q.defer();
-		self.readArray('FILE_IO_NAME_READ', bundle.FILE_IO_NAME_READ_LEN)
+		self.readArray('FILE_IO_NAME_READ', bundle.FILE_IO_NAME_READ_LEN.val)
 		.then(function(cwdChars) {
 			debugLS('in readAndSaveFileListing raw', cwdChars);
 			var str = '';
@@ -317,7 +317,7 @@ function getFileSystemOperations(self) {
 
 		function succFunc(rBundle) {
 			debugFSOps('in readdir res');
-			defered.resolve(rBundle);
+			// defered.resolve(rBundle);
 			defered.resolve({
 				'fileNames': rBundle.filesInDirectory,
 				'files': rBundle.filesInDirectory,
