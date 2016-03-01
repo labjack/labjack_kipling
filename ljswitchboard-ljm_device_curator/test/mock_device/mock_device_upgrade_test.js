@@ -1,7 +1,7 @@
 
 var q = require('q');
-var device_curator = require('../lib/device_curator');
-var utils = require('./utils/utils');
+var device_curator = require('../../lib/device_curator');
+var utils = require('../utils/utils');
 var qExec = utils.qExec;
 
 
@@ -31,7 +31,7 @@ var appropriateResultMap = {
 };
 deviceFound = false;
 
-var firmware_links = require('./firmware_links');
+var firmware_links = require('../firmware_links');
 var fws = firmware_links.firmwareLinks.T7;
 
 var driver_const = require('ljswitchboard-ljm_driver_constants');

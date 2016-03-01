@@ -1,7 +1,7 @@
 
 var q = require('q');
-var device_curator = require('../lib/device_curator');
-var utils = require('./utils/utils');
+var device_curator = require('../../lib/device_curator');
+var utils = require('../utils/utils');
 var qExec = utils.qExec;
 var labjack_nodejs = require('labjack-nodejs');
 var ljDevice = labjack_nodejs.getDeviceRef();
@@ -21,7 +21,7 @@ var stopTest = function(test, err) {
 var deviceFound = false;
 var performTests = true;
 
-var firmware_links = require('./firmware_links');
+var firmware_links = require('../firmware_links');
 var fws = firmware_links.firmwareLinks.T7;
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 var device_events = driver_const.device_curator_constants;
@@ -41,7 +41,8 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t7_upgrade_test ****');
+		console.log('**** t7_upgrade_recovery_image ****');
+		console.log('**** Please connect 1x T7 via USB ****');
 		try {
 			device = new device_curator.device();
 		} catch(err) {
@@ -85,9 +86,9 @@ var device_tests = {
 		});
 	},
 	'get wifi version': function(test) {
-		device.read('WIFI_VERSION')
+		device.iRead('WIFI_VERSION')
 		.then(function(version) {
-			console.log('  - WiFi FW Version:', version);
+			console.log('  - WiFi FW Version:', version.val);
 			test.done();
 		}, function(err) {
 			test.done();

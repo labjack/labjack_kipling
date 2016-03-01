@@ -1,7 +1,7 @@
 
 var q = require('q');
-var device_curator = require('../lib/device_curator');
-var utils = require('./utils/utils');
+var device_curator = require('../../lib/device_curator');
+var utils = require('../utils/utils');
 var qExec = utils.qExec;
 var ljm = require('labjack-nodejs').driver();
 
@@ -37,7 +37,8 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t7_upgrade_test ****');
+		console.log('**** t7_read_recovery_fw_version ****');
+		console.log('**** Please connect 1x T7 via USB ****');
 		try {
 			device = new device_curator.device();
 		} catch(err) {
@@ -62,7 +63,7 @@ var device_tests = {
 				res.connectionTypeName,
 				res.serialNumber
 			);
-			console.log('Current Fw Version:', res.FIRMWARE_VERSION);
+			console.log('  - Current Fw Version:', res.FIRMWARE_VERSION);
 			deviceFound = true;
 			test.done();
 		}, function(err) {
@@ -83,7 +84,7 @@ var device_tests = {
 	'get recovery fw version': function(test) {
 		device.getRecoveryFirmwareVersion()
 		.then(function(res) {
-			console.log('Success! Recovery FW Version:', res);
+			console.log('  - Recovery FW Version:', res);
 			test.done();
 		}, function(err) {
 			console.log('Error', err);

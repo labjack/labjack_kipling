@@ -6,6 +6,8 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
 var async = require('async');
+var vm = require('vm');
+var fs = require('fs');
 
 var data_parser = require('ljswitchboard-data_parser');
 
@@ -26,6 +28,10 @@ var register_watcher = require('./register_watcher');
 
 var digit_format_functions = require('./digit_format_functions');
 var digit_io_helper = require('./digit_io_helper');
+
+/* Other helper functions */
+var lua_script_operations = require('./lua_script_operations');
+var device_value_checker = require('./device_value_checker');
 
 var device_events = driver_const.device_curator_constants;
 
@@ -2200,6 +2206,26 @@ function device(useMockDevice) {
 		}
 
 	};
+
+	var i;
+
+	/**
+	 * Device functions that allow for waiting...
+	**/
+    var deviceValueChecker = new device_value_checker.get(this);
+    var deviceValueCheckerKeys = Object.keys(deviceValueChecker);
+    for(i = 0; i < deviceValueCheckerKeys.length; i++) {
+		this[deviceValueCheckerKeys[i]] = deviceValueChecker[deviceValueCheckerKeys[i]];
+	}
+	
+	/**
+	 * Lua Script functions:
+	**/
+	var luaScriptOperations = new lua_script_operations.get(this);
+	var luaScriptOperationKeys = Object.keys(luaScriptOperations);
+	for(i = 0; i < luaScriptOperationKeys.length; i++) {
+		this[luaScriptOperationKeys[i]] = luaScriptOperations[luaScriptOperationKeys[i]];
+	}
 
 	/**
 	 * Digit Specific functions:

@@ -44,7 +44,7 @@ while true do
     file:write(dateStr, delimiter, voltageStr, "\n")
     count = count + 1
   end
-  if count >= 10 then
+  if count >= 1 then
     break
   end
 end
@@ -55,3 +55,6 @@ file = io.open(Filename, "r")
 local line = file:read("*all")
 file:close()
 print(line)
+
+print("Finished Script")
+MB.W(6000, 1, 0);

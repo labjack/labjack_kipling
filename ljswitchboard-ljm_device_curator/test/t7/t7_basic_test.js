@@ -1,7 +1,7 @@
 
 var q = require('q');
-var device_curator = require('../lib/device_curator');
-var utils = require('./utils/utils');
+var device_curator = require('../../lib/device_curator');
+var utils = require('../utils/utils');
 var qExec = utils.qExec;
 var ljm_ffi = require('ljm-ffi');
 var ljm = ljm_ffi.load();
@@ -38,7 +38,7 @@ var device_tests = {
 	'createDevice': function(test) {
 		console.log('');
 		console.log('**** t7_basic_test ****');
-		console.log('Please connect 1x T7 via USB');
+		console.log('**** Please connect 1x T7 via USB ****');
 		try {
 			device = new device_curator.device();
 		} catch(err) {
