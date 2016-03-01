@@ -4,9 +4,9 @@ var fs = require('fs');
 var path = require('path');
 var modbusMap = require('ljswitchboard-modbus_map').getConstants();
 
-var DEBUG_FILE_SYSTEM_OPERATIONS = true;
+var DEBUG_FILE_SYSTEM_OPERATIONS = false;
 var DEBUG_FILE_SYSTEM_GET_CWD = false;
-var DEBUG_FILE_SYSTEM_GET_LS = true;
+var DEBUG_FILE_SYSTEM_GET_LS = false;
 var ENABLE_ERROR_OUTPUT = false;
 
 function getLogger(bool) {
@@ -143,12 +143,12 @@ function getFileSystemOperations(self) {
 	 * the root directory, or "/DIR1/DIR2" for a directory.
 	*/
 	this.getCWD = function() {
-		debugFSOps('in getCWD');
+		debugFSOps('* in getCWD');
 		var defered = q.defer();
 		var bundle = createGetCWDBundle();
 		
 		function succFunc(rBundle) {
-			debugFSOps('in getCWD res');
+			debugCWD('in getCWD res');
 			defered.resolve({
 				'cwd': rBundle.FILE_IO_NAME_READ,
 				// 'res': rBundle.FILE_IO_NAME_READ,
@@ -156,7 +156,7 @@ function getFileSystemOperations(self) {
 			});
 		}
 		function errFunc(rBundle) {
-			debugFSOps('in getCWD err', rBundle);
+			debugCWD('in getCWD err', rBundle);
 			defered.reject(rBundle);
 		}
 
@@ -173,7 +173,8 @@ function getFileSystemOperations(self) {
 	 */
 	function createReaddirBundle() {
 		return {
-			'filesInDirectory': [],
+			'fileNames': [],
+			'files': [],
 		};
 	}
 	// Step #1 in Readdir Operation
@@ -236,8 +237,20 @@ function getFileSystemOperations(self) {
 					str += String.fromCharCode(cwdChar);
 				}
 			});
-			debugLS('in readAndSaveFileListing str', str);
-			bundle.filesInDirectory.push(str);
+			// Save the file name.
+			bundle.fileNames.push(str);
+
+			var fileInfo = {
+				'name': str,
+				'isDirectory': bundle.FILE_IO_ATTRIBUTES.isDirectory,
+				'isFile': bundle.FILE_IO_ATTRIBUTES.isFile,
+				'size': bundle.FILE_IO_SIZE.val,
+				'sizeStr': bundle.FILE_IO_SIZE.str,
+			};
+			// Save the file's info.
+			bundle.files.push(fileInfo);
+			
+			debugLS('in readAndSaveFileListing fileInfo', fileInfo);
 			defered.resolve(bundle);
 		}, function(err) {
 			debugLS('in readAndSaveFileListing err', err);
@@ -312,19 +325,19 @@ function getFileSystemOperations(self) {
 		 *  FILE_IO_NOT_FOUND (2960) indicates that there 
 		 *  are no more items->Done.
 		 */
+		debugFSOps('* in readdir');
 		var defered = q.defer();
 		var bundle = createReaddirBundle();
 
 		function succFunc(rBundle) {
-			debugFSOps('in readdir res');
-			// defered.resolve(rBundle);
+			debugLS('in readdir res');
 			defered.resolve({
-				'fileNames': rBundle.filesInDirectory,
-				'files': rBundle.filesInDirectory,
+				'fileNames': rBundle.fileNames,
+				'files': rBundle.files,
 			});
 		}
 		function errFunc(rBundle) {
-			debugFSOps('in readdir err', rBundle);
+			debugLS('in readdir err', rBundle);
 			defered.reject(rBundle);
 		}
 
