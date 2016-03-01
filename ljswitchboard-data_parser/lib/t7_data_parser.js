@@ -31,6 +31,27 @@ var analogFloatReg = {
 	'decode': decodeSixDigitsOfPrecisionFloat,
 };
 
+function decodeByteSizeRegisters(val) {
+	var kB = parseFloat((val/1000).toFixed(3));
+	var mB = parseFloat((kB/1000).toFixed(3));
+	var str = val.toString() + ' B';
+	if(mB >= 1) {
+		str = mB.toString() + ' MB';
+	} else if(kB >= 1) {
+		str = kB.toString() + ' KB';
+	}
+	var res = {
+		'res': val,
+		'val': val,
+		'unit': 'B',
+		'bytes': val,
+		'kBytes': kB,
+		'mBytes': mB,
+		'str': str,
+	};
+	return res;
+}
+
 var T7_LIST = {
 	'AIN#(0:254)': {
 		'decode': function(val) {
@@ -212,6 +233,52 @@ var T7_LIST = {
 					'productType': productType
 				};
 			},
+	},
+
+	// File I/O Registers
+	'FILE_IO_ATTRIBUTES': {
+		'decode': function(res) {
+			// Nothing with bit 1 (shift 0)
+			// Nothing with bit 2 (shift 1)
+			// Nothing with bit 3 (shift 2)
+			// Interpret bit 4:
+			var isDir = ((res & 0xFF) >> 3) & 0x1;
+			// Interpret bit 5:
+			var isFile = ((res & 0xFF) >> 4) & 0x1;
+
+			isDir = isDir == 1;
+			isFile = isFile == 1;
+			return {
+				'res': res,
+				'val': res,
+				'isDirectory': isDir,
+				'isFile': isFile,
+			};
+		},
+	},
+	'FILE_IO_SIZE_BYTES': {
+		'decode': decodeByteSizeRegisters,
+	},
+	'FILE_IO_DISK_SECTOR_SIZE_BYTES': {
+		'decode': decodeByteSizeRegisters,
+	},
+	'FILE_IO_DISK_FORMAT_INDEX': {
+		'decode': function(res) {
+			var fsType = 'Unknown: ' + res.toString();
+			if(res === 1) {
+				fsType = 'FAT12';
+			} else if(res === 2) {
+				fsType = 'FAT16';
+			} else if(res === 3) {
+				fsType = 'FAT32';
+			}
+			return {
+				'res': res,
+				'val': res,
+				'str': fsType,
+				'fileSystem': fsType,
+			};
+		},
 	},
 
 	// WiFi IP registers using the ipDataType

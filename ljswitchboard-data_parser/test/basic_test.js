@@ -505,6 +505,113 @@ exports.tests = {
 		test.deepEqual(results, reqResults, 'systemEnabled/Disabled registers failed');
 		test.done();
 	},
+	'check byte size registers': function(test) {
+		var vals = [
+			{'reg': 'FILE_IO_SIZE_BYTES', 'val': 0, 'str': '0 B'},
+			{'reg': 'FILE_IO_DISK_SECTOR_SIZE_BYTES', 'val': 1, 'str': '1 B'},
+			{'reg': 'FILE_IO_DISK_SECTOR_SIZE_BYTES', 'val': 1000, 'str': '1 KB'},
+			{'reg': 'FILE_IO_DISK_SECTOR_SIZE_BYTES', 'val': 1000000, 'str': '1 MB'},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			// Query the data parser.
+			var reg = val.reg;
+			// console.log('Res', data_parser.parseResult(reg, val.val));
+			results.push(data_parser.parseResult(reg, val.val));
+
+			var kB = parseFloat((val.val/1000).toFixed(3));
+			var mB = parseFloat((kB/1000).toFixed(3));
+			// Build the expected data parser results.
+			reqResults.push({
+				'register': reg,
+				'name': reg,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.val,
+				'unit': 'B',
+				'bytes': val.val,
+				'kBytes': kB,
+				'mBytes': mB,
+				'str': val.str,
+			});
+		});
+		test.deepEqual(results, reqResults, 'byte size registers failed');
+		test.done();
+	},
+	'check File I/O registers: FILE_IO_ATTRIBUTES': function(test) {
+		var vals = [
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b00000, 'isDir': false, 'isFile': false},
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b00001, 'isDir': false, 'isFile': false},
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b01000, 'isDir': true, 'isFile': false},
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b10000, 'isDir': false, 'isFile': true},
+			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b11000, 'isDir': true, 'isFile': true},
+
+			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x00, 'isDir': false, 'isFile': false},
+			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x01, 'isDir': false, 'isFile': false},
+			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x08, 'isDir': true, 'isFile': false},
+			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x10, 'isDir': false, 'isFile': true},
+			{'reg': 'FILE_IO_ATTRIBUTES', 'val': 0x18, 'isDir': true, 'isFile': true},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			// Query the data parser.
+			var reg = val.reg;
+			// console.log('Res', data_parser.parseResult(reg, val.val));
+			results.push(data_parser.parseResult(reg, val.val));
+
+			var kB = parseFloat((val.val/1000).toFixed(3));
+			var mB = parseFloat((kB/1000).toFixed(3));
+			// Build the expected data parser results.
+			reqResults.push({
+				'register': reg,
+				'name': reg,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.val,
+				'isDirectory': val.isDir,
+				'isFile': val.isFile,
+			});
+		});
+		test.deepEqual(results, reqResults, 'File I/O registers: FILE_IO_ATTRIBUTES failed');
+		test.done();
+	},
+	'check File I/O registers: FILE_IO_DISK_FORMAT_INDEX': function(test) {
+		var vals = [
+			{'reg': 'FILE_IO_DISK_FORMAT_INDEX', 'val': 0, 'fsType': 'Unknown: 0'},
+			{'reg': 'FILE_IO_DISK_FORMAT_INDEX', 'val': 1, 'fsType': 'FAT12'},
+			{'reg': 'FILE_IO_DISK_FORMAT_INDEX', 'val': 2, 'fsType': 'FAT16'},
+			{'reg': 'FILE_IO_DISK_FORMAT_INDEX', 'val': 3, 'fsType': 'FAT32'},
+			{'reg': 'FILE_IO_DISK_FORMAT_INDEX', 'val': 4, 'fsType': 'Unknown: 4'},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			// Query the data parser.
+			var reg = val.reg;
+			// console.log('Res', data_parser.parseResult(reg, val.val));
+			results.push(data_parser.parseResult(reg, val.val));
+
+			var kB = parseFloat((val.val/1000).toFixed(3));
+			var mB = parseFloat((kB/1000).toFixed(3));
+			// Build the expected data parser results.
+			reqResults.push({
+				'register': reg,
+				'name': reg,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.val,
+				'str': val.fsType,
+				'fileSystem': val.fsType,
+			});
+		});
+		test.deepEqual(results, reqResults, 'File I/O registers: FILE_IO_DISK_FORMAT_INDEX failed');
+		test.done();
+	},
 	'check DGT_LOG_ITEMS_DATASET register': function(test) {
 		var vals = [
 			{'val': 0, 'temperature': false, 'light': false, 'humidity': false, 'isValid': false},
