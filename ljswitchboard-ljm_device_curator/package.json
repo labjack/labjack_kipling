@@ -5,9 +5,9 @@
   "main": "./lib/device_curator.js",
   "scripts": {
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
-    "production_line_test": "node ./node_modules/nodeunit/bin/nodeunit ./test/production_line/test.js",
+    "prep_for_qt": "node ./node_modules/nodeunit/bin/nodeunit ./test/production_line/prep_for_qt.js",
     "prep_for_cal": "node ./node_modules/nodeunit/bin/nodeunit ./test/production_line/prep_for_cal.js",
-    "verify_t7_pro_upgrades": "node ./node_modules/nodeunit/bin/nodeunit ./test/production_line/verify_t7_pro_upgrades.js"
+    "production_line_test": "node ./node_modules/nodeunit/bin/nodeunit ./test/production_line_test.js"
   },
   "packagesDirectory": "/packages",
   "repository": {

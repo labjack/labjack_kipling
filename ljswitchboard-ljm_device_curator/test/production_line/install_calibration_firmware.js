@@ -41,7 +41,7 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t7_upgrade_test ****');
+		console.log('**** install_calibration_firmware ****');
 		try {
 			device = new device_curator.device();
 		} catch(err) {
@@ -85,9 +85,9 @@ var device_tests = {
 		});
 	},
 	'get wifi version': function(test) {
-		device.read('WIFI_VERSION')
+		device.iRead('WIFI_VERSION')
 		.then(function(version) {
-			console.log('  - WiFi FW Version:', version);
+			console.log('  - WiFi FW Version:', version.val);
 			test.done();
 		}, function(err) {
 			test.done();
