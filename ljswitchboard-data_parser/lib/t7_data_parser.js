@@ -263,6 +263,9 @@ var T7_LIST = {
 	'FILE_IO_SIZE': {
 		'decode': decodeByteSizeRegisters,
 	},
+	'FILE_IO_DISK_SECTOR_SIZE': {
+		'decode': decodeByteSizeRegisters,
+	},
 	'FILE_IO_DISK_SECTOR_SIZE_BYTES': {
 		'decode': decodeByteSizeRegisters,
 	},

@@ -1,6 +1,6 @@
 {
     "name": "ljswitchboard-data_parser",
-    "version": "0.0.39",
+    "version": "0.0.40",
     "description": "A library that contains a variety of formatters for data coming and going to LabJack devices.",
     "author": {
         "name": "Chris Johnson",

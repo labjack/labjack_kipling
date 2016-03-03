@@ -509,6 +509,7 @@ exports.tests = {
 		var vals = [
 			{'reg': 'FILE_IO_SIZE', 'val': 0, 'str': '0 B'},
 			{'reg': 'FILE_IO_SIZE_BYTES', 'val': 0, 'str': '0 B'},
+			{'reg': 'FILE_IO_DISK_SECTOR_SIZE', 'val': 1, 'str': '1 B'},
 			{'reg': 'FILE_IO_DISK_SECTOR_SIZE_BYTES', 'val': 1, 'str': '1 B'},
 			{'reg': 'FILE_IO_DISK_SECTOR_SIZE_BYTES', 'val': 1000, 'str': '1 KB'},
 			{'reg': 'FILE_IO_DISK_SECTOR_SIZE_BYTES', 'val': 1000000, 'str': '1 MB'},
