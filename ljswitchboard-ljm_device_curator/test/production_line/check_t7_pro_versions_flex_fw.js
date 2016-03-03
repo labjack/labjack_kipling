@@ -41,7 +41,7 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** check_t7_pro_versions ****');
+		console.log('**** check_t7_pro_versions_flex_fw ****');
 		try {
 			device = new device_curator.device();
 		} catch(err) {
@@ -106,7 +106,9 @@ var device_tests = {
 			if(fwVersion.val == fwVersionNum) {
 				test.ok(true);
 			} else {
-				test.ok(false, 'T7 Firmware version should be 1.0188, it is: ' + fwVersion.str);
+				// this is the "flex_fw" part of this test.
+				test.ok(true);
+				// test.ok(false, 'T7 Firmware version should be 1.0188, it is: ' + fwVersion.str);
 			}
 			test.done();
 		}, function(err) {

@@ -110,15 +110,31 @@ var testGroups = {
 		'mock_device_upgrade_test': false,
 		'multiple_mock_device_upgrade_test': false,
 	},
+
+	// These are T7 specific tests.
 	't7': {
 		't7_basic_test': false,
 		't7_array_test': false,
 		't7_check_calibration_test': false,
 		't7_read_recovery_fw_version_test': false,
 		't7_upgrade_recovery_image_test': false,
-		't7_load_and_run_lua_script': false,
-		't7_file_system_verification': true
+		
+		// These two tests should be enabled and disabled together.  The first
+		// test loads and runs a lua script that creates a file.  The second
+		// test verifies that the file was created and then deletes it.  They
+		// are used together to test uSD card compatibility with the T7/T7-Pro.
+		't7_load_and_run_lua_script': true,
+		't7_verify_lua_script_created_file': true,
+		
+		// This test requires special files to be on the uSD card.
+		't7_file_system_verification': false,
 	},
+
+	// These are production-line tests.
+	'production_line': {
+		'check_t7_pro_versions': false,
+		'check_t7_pro_versions_flex_fw': true,
+	}
 };
 
 

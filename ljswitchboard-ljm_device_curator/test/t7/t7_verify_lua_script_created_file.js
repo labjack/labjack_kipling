@@ -30,8 +30,8 @@ var DEBUG_FILE_SYSTEM_GET_CWD = false;
 var DEBUG_FILE_SYSTEM_GET_LS = false;
 var DEBUG_FILE_SYSTEM_GET_CD = false;
 var DEBUG_FILE_SYSTEM_GET_DISK_INFO = false;
-var DEBUG_FILE_SYSTEM_READ_FILE = true;
-var DEBUG_FILE_SYSTEM_DELETE_FILE = true;
+var DEBUG_FILE_SYSTEM_READ_FILE = false;
+var DEBUG_FILE_SYSTEM_DELETE_FILE = false;
 var ENABLE_ERROR_OUTPUT = true;
 var ENABLE_TEST_OUTPUT = true;
 
@@ -66,11 +66,8 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t7_file_system_verification ****');
+		console.log('**** t7_verify_lua_script_created_file ****');
 		console.log('**** Please connect 1x T7-Pro via USB ****');
-		console.log('**** This uSD card test requires that ****');
-		console.log('**** certain files/folders already be ****');
-		console.log('**** on the uSD card.                 ****');
 		try {
 			device = new device_curator.device();
 		} catch(err) {
@@ -149,89 +146,17 @@ var device_tests = {
 			test.done();
 		});
 	},
-	'change directories': function(test) {
-		debugCD('  - changing directories cd /Test Folder');
-		device.changeDirectory({'path': '/Test Folder'})
-		.then(function(res) {
-			debugCD('  - performed cd:', res);
-			test.done();
-		}, function(err) {
-			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
-		});
-	},
-	'get cwd (2)': function(test) {
-		debugCWD('  - Getting Device CWD.');
-		device.getCWD()
-		.then(function(res) {
-			debugCWD('  - Got CWD', res);
-			testLog('  - Got CWD:', res);
-			test.done();
-		}, function(err) {
-			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
-		});
-	},
-	'get file listing (2)': function(test) {
-		debugLS('  - Getting File Listing, "ls".');
-		device.readdir()
-		.then(function(res) {
-			debugLS('  - Got ls:', res.fileNames);
-			testLog('  - Got ls:', res.fileNames);
-			test.done();
-		}, function(err) {
-			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
-		});
-	},
-	'change directories (2)': function(test) {
-		debugCD('  - changing directories cd /');
-		device.changeDirectory({'path': '/'})
-		.then(function(res) {
-			debugCD('  - performed cd:', res);
-			test.done();
-		}, function(err) {
-			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
-		});
-	},
-	'get cwd (3)': function(test) {
-		debugCWD('  - Getting Device CWD.');
-		device.getCWD()
-		.then(function(res) {
-			debugCWD('  - Got CWD', res);
-			testLog('  - Got CWD:', res);
-			test.done();
-		}, function(err) {
-			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
-		});
-	},
-	'get file listing (3)': function(test) {
-		debugLS('  - Getting File Listing, "ls".');
-		device.readdir()
-		.then(function(res) {
-			debugLS('  - Got ls:', res.fileNames);
-			testLog('  - Got ls:', res.fileNames);
-			test.done();
-		}, function(err) {
-			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
-		});
-	},
 	'get disk information': function(test) {
-		console.log('!!!! This is not working properly. W/ 16GB uSD card.  Works with 1GB.');
+		console.log('!!!! - WARNING: This is not working properly. W/ 16GB uSD card.  Works with 1GB. - !!!!');
 		debugDiskInfo('  - Get disk Info');
 		device.getDiskInfo()
 		.then(function(res) {
 			debugDiskInfo('  - Got Info', res);
-			testLog('  - Got Info:', res);
+			testLog('  - Got Info:', {
+				'totalSize': res.totalSize.str,
+				'freeSpace': res.freeSpace.str,
+				'fileSystem': res.fileSystem,
+			});
 			test.done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
@@ -252,51 +177,48 @@ var device_tests = {
 			test.done();
 		});
 	},
-	'read test file (2)': function(test) {
-		var testFileName = 'Test Folder/another file.txt';
-		debugRF('  - Reading Test File, ', testFileName);
-		device.readFile({'path': testFileName})
-		.then(function(res) {
-			debugRF('  - Read File...', res);
-			test.done();
-		}, function(err) {
-			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
-		});
-	},
-	'get cwd (4)': function(test) {
-		debugCWD('  - Getting Device CWD.');
-		device.getCWD()
-		.then(function(res) {
-			debugCWD('  - Got CWD', res);
-			testLog('  - Got CWD:', res);
-			test.done();
-		}, function(err) {
-			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
-		});
-	},
-	'get test file preview': function(test) {
-		var testFileName = 'log1.csv';
-		debugRF('  - getting file preview');
-		device.getFilePreview({'path': testFileName})
-		.then(function(res) {
-			debugRF('  - Got file preview', res);
-			test.done();
-		}, function(err) {
-			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
-		});
-	},
 	'delete test file': function(test) {
 		var testFileName = 'log1.csv';
-		debugDF('  - deleting file...');
+		debugDF('  - Deleting File');
 		device.deleteFile({'path': testFileName})
 		.then(function(res) {
-			debugDF('  - Got file preview', res);
+			debugDF('  - Deleted Test File', res);
+			testLog('  - Deleted Test File');
+			test.done();
+		}, function(err) {
+			errorLog('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
+			test.done();
+		});
+	},
+	'change directories (2)': function(test) {
+		debugCD('  - changing directories cd /');
+		device.changeDirectory({'path': '/'})
+		.then(function(res) {
+			debugCD('  - performed cd:', res);
+			test.done();
+		}, function(err) {
+			errorLog('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
+			test.done();
+		});
+	},
+	'get file listing (2)': function(test) {
+		debugLS('  - Getting File Listing, "ls".');
+		device.readdir()
+		.then(function(res) {
+			debugLS('  - Got ls:', res.fileNames);
+			testLog('  - Got ls:', res.fileNames);
+
+			var testFileName = 'log1.csv';
+			var foundFile = false;
+			res.fileNames.some(function(fn) {
+				if(testFileName === fn) {
+					foundFile = true;
+					return true;
+				}
+			});
+			test.ok(!foundFile, 'Failed to delete the test file.');
 			test.done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
@@ -305,7 +227,6 @@ var device_tests = {
 		});
 	},
 	'closeDevice': function(test) {
-		console.log('Closing...');
 		device.close()
 		.then(function() {
 			test.done();

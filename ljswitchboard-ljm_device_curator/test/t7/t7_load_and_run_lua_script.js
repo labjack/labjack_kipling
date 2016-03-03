@@ -81,7 +81,7 @@ var device_tests = {
 					res.serialNumber
 				);
 			}
-			console.log('in t7_basic_test.js, openDevice', res);
+			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
 			test.done();
 		}, function(err) {
@@ -162,6 +162,17 @@ var device_tests = {
 		}, function(err) {
 			test.ok(false, 'Lua script failed to execute and finish.');
 			luaScriptExecuted = false;
+			test.done();
+		});
+	},
+	'stopping lua script(2)': function(test) {
+		console.log('  - Stopping Lua Script.');
+		device.stopLuaScript()
+		.then(function(res) {
+			console.log('  - Lua Script Stopped.');
+			test.done();
+		}, function(err) {
+			test.ok(false, 'Lua script should have stopped.');
 			test.done();
 		});
 	},
