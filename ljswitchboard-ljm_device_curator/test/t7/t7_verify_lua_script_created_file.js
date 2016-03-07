@@ -147,7 +147,8 @@ var device_tests = {
 		});
 	},
 	'get disk information': function(test) {
-		console.log('!!!! - WARNING: This is not working properly. W/ 16GB uSD card.  Works with 1GB. - !!!!');
+		// I believe this test should be working properly...
+		// console.log('!!!! - WARNING: This is not working properly. W/ 16GB uSD card.  Works with 1GB. - !!!!');
 		debugDiskInfo('  - Get disk Info');
 		device.getDiskInfo()
 		.then(function(res) {
