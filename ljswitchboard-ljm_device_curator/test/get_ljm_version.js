@@ -40,7 +40,7 @@ var device_tests = {
 		var ljmLibraryVersion = ljm.LJM_ReadLibraryConfigS('LJM_LIBRARY_VERSION', 0);
 		console.log('');
 		console.log('**** get_ljm_version ****');
-		console.log(' - Installed LJM Library Version:', ljmLibraryVersion.Value);
+		console.log(' - Installed LJM Library Version:'.green, ljmLibraryVersion.Value);
 		test.done();
 	},
 };

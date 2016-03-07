@@ -45,7 +45,8 @@
     "request": "~2"
   },
   "devDependencies": {
-    "nodeunit": "0.9.x"
+    "nodeunit": "0.9.x",
+    "colors": "*"
   },
   "directories": {
     "lib": "./lib"

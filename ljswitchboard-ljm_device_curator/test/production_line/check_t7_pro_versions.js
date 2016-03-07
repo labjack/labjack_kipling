@@ -88,7 +88,7 @@ var device_tests = {
 	'check wifi version': function(test) {
 		device.iRead('WIFI_VERSION')
 		.then(function(version) {
-			console.log('  - WiFi FW Version:', version.val);
+			console.log('  - WiFi FW Version:'.green, version.val);
 			if(version.val == 3.12) {
 				test.ok(true);
 			} else {
@@ -132,7 +132,7 @@ var device_tests = {
 	'check t7 calibration': function(test) {
 		device.getCalibrationStatus()
 		.then(function(calStatus) {
-			console.log('Cal Status...', calStatus);
+			console.log('  - Cal Status:'.green, calStatus);
 			var keys = Object.keys(calStatus);
 			keys.forEach(function(key) {
 				test.ok(calStatus[key], 'T7 Cal Check Failed: ' + key.toString());
@@ -147,7 +147,7 @@ var device_tests = {
 	'check for installed uSD card': function(test) {
 		// console.log('HERE!!', device.savedAttributes);
 		var uSDCardInstalled = device.savedAttributes.HARDWARE_INSTALLED.sdCard;
-		console.log('  - HW Installed:', {
+		console.log('  - HW Installed:'.green, {
 			'sd': device.savedAttributes.HARDWARE_INSTALLED.sdCard,
 			'rtc': device.savedAttributes.HARDWARE_INSTALLED.rtc,
 			'wifi': device.savedAttributes.HARDWARE_INSTALLED.wifi,
@@ -158,7 +158,7 @@ var device_tests = {
 				test.ok(true);
 			} else {
 				test.ok(false, 'There should be a uSD card installed in a T7-Pro');
-				console.log('HW Installed', device.savedAttributes.HARDWARE_INSTALLED);
+				console.log('HW Installed'.red, device.savedAttributes.HARDWARE_INSTALLED);
 			}
 		}
 		test.done();

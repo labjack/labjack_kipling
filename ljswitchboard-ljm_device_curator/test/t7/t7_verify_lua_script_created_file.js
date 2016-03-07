@@ -10,7 +10,6 @@ var modbus_map = ljmb.getConstants();
 
 var path = require('path');
 var fs = require('fs');
-
 var device;
 var capturedEvents = [];
 
@@ -153,10 +152,10 @@ var device_tests = {
 		device.getDiskInfo()
 		.then(function(res) {
 			debugDiskInfo('  - Got Info', res);
-			testLog('  - Got Info:', {
-				'totalSize': res.totalSize.str,
-				'freeSpace': res.freeSpace.str,
-				'fileSystem': res.fileSystem,
+			testLog('  - uSD Info:'.green, {
+				'Size': res.totalSize.str,
+				'Rem': res.freeSpace.str,
+				'FS': res.fileSystem,
 			});
 			test.done();
 		}, function(err) {

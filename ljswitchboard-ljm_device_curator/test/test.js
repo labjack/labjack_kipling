@@ -1,3 +1,4 @@
+var colors = require('colors');
 process.on('uncaughtException', function(err) {
 	console.log('ERROR!!!', err);
 	console.log(err.stack);
