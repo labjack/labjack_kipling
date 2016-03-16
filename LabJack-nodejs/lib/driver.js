@@ -689,31 +689,41 @@ exports.ljmDriver = function() {
         me.errorHandle = new ref.alloc('int', 0);
         me.errors = new Buffer(ARCH_POINTER_SIZE);
         me.errors.fill(0);
-        me.devType = parseInt(deviceType, 10);
-        me.connType = parseInt(connectionType, 10);
 
-        if (isNaN(me.devType) || isNaN(me.connType)) {
-            throw new DriverInterfaceError(
-                'openAll deviceType and connectionType must be numerical'
-            );
-        }
-    }
+        me.devType = driver_const.deviceTypes[deviceType];
+        me.deviceType = deviceType;
+        me.connType = driver_const.connectionTypes[connectionType];
+        me.connectionType = connectionType;
+    };
 
     /**
      * Desc: Internal helper function to extract return data from an OpenAll call.
      */
     var extractOpenAllResults = function(me) {
-        var results = [];
-        var numDevices = me.numOpened.deref();
-        for(var i = 0; i < numDevices; i++) {
-            results.push({
-                // Currently just a list of objects which only tell you the handle
-                // We might want to return devices or something else though
-                handle: me.aHandles.readInt32LE(i * ARCH_INT_NUM_BYTES)
-            });
+        var results = {
+            'deviceType': me.deviceType,
+            'deviceTypeNum': me.devType,
+            'connectionType': me.connectionType,
+            'connectionTypeNum': me.connType,
+        };
+
+        // Parse the successfully opened devices.
+        var numOpened = me.numOpened.deref();
+        var handles = [];
+        for(var i = 0; i < numOpened; i++) {
+            var handle = me.aHandles.readInt32LE(i * ARCH_INT_NUM_BYTES);
+            handles.push(handle);
         }
+        results.numOpened = numOpened;
+        results.handles = handles;
+
+        // Parse the errors...
+        var numErrors = me.numErrors.deref();
+        var failedOpens = [];
+        results.numErrors = numErrors;
+        results.failedOpens = failedOpens;
         return results;
-    }
+    };
 
     /**
      * Desc: Opens all LabJacks of the specified device type and connection type.
@@ -731,7 +741,7 @@ exports.ljmDriver = function() {
         var me = {};
         prepareOpenAll(me, deviceType, connectionType);
 
-        self.ljm.LJM_OpenAll.async(
+        self.ljm.Internal_LJM_OpenAll.async(
             me.devType,
             me.connType,
             me.numOpened,
@@ -750,7 +760,7 @@ exports.ljmDriver = function() {
         var me = {};
         prepareOpenAll(me, deviceType, connectionType);
 
-        var errorResult = self.ljm.LJM_OpenAll(
+        var errorResult = self.ljm.Internal_LJM_OpenAll(
             me.devType,
             me.connType,
             me.numOpened,

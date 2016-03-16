@@ -490,7 +490,7 @@ var populateValues = function(numFrames, aWrites, aNumValues, aValues) {
 	// for(var i = 0; i < aValues.length/8; i++) {
 	// 	console.log(aValues.readDoubleLE(i*8));
 	// }
-}
+};
 
 /**
  * Test-Function for Synchronous and Async Multiple-Operation functionality: 
@@ -567,15 +567,46 @@ var LJM_ListAllExtended = createCallableObject(
 		reportEnd(callback);
 	});
 
-var LJM_OpenAll = createCallableObject(
-	function(DeviceType, ConnectionType, NumOpened, aHandles, NumErrors, ErrorHandle, Errors) {
-		lastFunctionCall.push("LJM_OpenAll");
+function populateOpenAllValues(NumOpened, aHandles, NumErrors, InfoHandle, Info) {
+	// Define a list of devices that were found
+	var foundDevices = [{
+		'h': 0,
+		'errors': [],
+		'info': {},
+	}];
+
+	// Populate arguments
+	var numDevs = foundDevices.length;
+	var numErrs = 0;
+	var info = {};
+	var infoHandle = 0;
+	var handles = [];
+	foundDevices.forEach(function(foundDevice) {
+		handles.push(foundDevice.h);
+		numErrs += foundDevice.errors.length;
+	});
+
+	// Save stuff to buffers...
+	NumOpened.writeInt32LE(numDevs);
+	handles.forEach(function(handle, i) {
+		aHandles.writeInt32LE(handle, i * 4);
+	});
+	NumErrors.writeInt32LE(numErrs);
+	InfoHandle.writeInt32LE(infoHandle);
+
+	// Write Info String...
+}
+var Internal_LJM_OpenAll = createCallableObject(
+	function(DeviceType, ConnectionType, NumOpened, aHandles, NumErrors, InfoHandle, Info) {
+		lastFunctionCall.push("Internal_LJM_OpenAll");
 		argumentsList.push(arguments);
+		populateOpenAllValues(NumOpened, aHandles, NumErrors, InfoHandle, Info);
 		return expectedResult;
 	},
-	function(DeviceType, ConnectionType, NumOpened, aHandles, NumErrors, ErrorHandle, Errors, callback) {
-		lastFunctionCall.push("LJM_OpenAllAsync");
+	function(DeviceType, ConnectionType, NumOpened, aHandles, NumErrors, InfoHandle, Info, callback) {
+		lastFunctionCall.push("Internal_LJM_OpenAllAsync");
 		argumentsList.push(arguments);
+		populateOpenAllValues(NumOpened, aHandles, NumErrors, InfoHandle, Info);
 		reportEnd(callback);
 	});
 
@@ -777,7 +808,7 @@ var fakeDriver = {
 	'LJM_ListAll': LJM_ListAll,
 	'LJM_ListAllS': LJM_ListAllS,
 	'LJM_ListAllExtended': LJM_ListAllExtended,
-	'LJM_OpenAll': LJM_OpenAll,
+	'Internal_LJM_OpenAll': Internal_LJM_OpenAll,
 	'LJM_ErrorToString': LJM_ErrorToString,
 	'LJM_LoadConstants': LJM_LoadConstants,
 	'LJM_CloseAll': LJM_CloseAll,
@@ -791,32 +822,30 @@ var fakeDriver = {
 	
 };
 
-exports.getDriver = function()
-{
+exports.getDriver = function() {
 	return fakeDriver;
-}
-exports.getConstants = function()
-{
+};
+exports.getConstants = function() {
 	return ljmJsonManager.getConstants();
-}
+};
 exports.hasOpenAll = function() {
 	return true;
-}
+};
 exports.getLastFunctionCall = function() {
 	return lastFunctionCall;
-}
+};
 exports.clearLastFunctionCall = function() {
 	lastFunctionCall = [];
-}
+};
 exports.setExpectedResult = function(val) {
 	expectedResult = val;
-}
+};
 exports.setResultArg = function(val) {
 	expectedResultArg = val;
-}
+};
 exports.clearArgumentsList = function(val) {
 	argumentsList = [];
-}
+};
 exports.getArgumentsList = function(val) {
 	return argumentsList;
-}
+};

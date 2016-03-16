@@ -173,7 +173,7 @@ module.exports = {
             }
         ); 
     },
-    testOpenAll: function(test) {
+    testInternalOpenAll: function(test) {
         // Manually set OpenAll to true so that this test doesn't depend on the
         // version of LJM that happens to be available.
         driver.hasOpenAll = true;
@@ -181,23 +181,55 @@ module.exports = {
         asyncRun.config(dev, driver,driver_const);
         syncRun.config(dev, driver,driver_const);
 
-         //Create test-variables
-        var testList = [
-            'openAll("0","0")',
-            'openAll("7","1")',
-            'openAll(7,1)',
+        var testOptions = [
+            {dt:'0', ct:'0'},
+            {dt:0, ct:0},
+            {dt:'LJM_dtT7', ct:'LJM_ctUDP'},
         ];
+
+        function generateTestListStr(args) {
+            var dt = args.dt;
+            if(typeof(args.dt) === 'string') { dt = '"' + args.dt + '"'; }
+            var ct = args.ct;
+            if(typeof(args.ct) === 'string') { ct = '"' + args.ct + '"'; }
+            return 'openAll(' + dt + ',' + ct + ')';
+        }
+
+        //Create test-variables
+        var testList = testOptions.map(generateTestListStr);
+
+        function generateFuncListSync() {
+            return 'Internal_LJM_OpenAll';
+        }
+        function generateFuncListAsync() {
+            return 'Internal_LJM_OpenAllAsync';
+        }
+
         //Expected info combines both sync & async
-        var expectedFunctionList = [
-            'LJM_OpenAll',
-            'LJM_OpenAll',
-            'LJM_OpenAll',
-            'LJM_OpenAllAsync',
-            'LJM_OpenAllAsync',
-            'LJM_OpenAllAsync'
-        ];
-        //Expected info combines both sync & async
-        var expectedResultList = [[], [], [], [], [], []];
+        var syncFuncList = testOptions.map(generateFuncListSync);
+        var asyncFuncList = testOptions.map(generateFuncListAsync);
+        var expectedFunctionList = syncFuncList.concat(asyncFuncList);
+        
+
+        function createExpectedData(args) {
+            var dt = args.dt;
+            var ct = args.ct;
+            return {
+                'deviceType': dt,
+                'deviceTypeNum': driver_const.deviceTypes[dt],
+                'connectionType': ct,
+                'connectionTypeNum': driver_const.connectionTypes[ct],
+                'numOpened': 1,
+                'handles': [0],
+                'numErrors': 0,
+                'failedOpens': [],
+            };
+
+        }
+
+        var syncResults = testOptions.map(createExpectedData);
+        var asyncResults = testOptions.map(createExpectedData);
+        var expectedResultList = syncResults.concat(asyncResults);
 
         //Run the desired commands
         syncRun.run(testList);
