@@ -23,9 +23,10 @@ ffi_liblabjack = ljm_ffi.loadRaw();
 
 // Get the loaded version of LJM
 var ljmLibraryVersionData = ljm.LJM_ReadLibraryConfigS('LJM_LIBRARY_VERSION', 0);
-var ljmLibraryVersion = ljmLibraryVersionData.Version;
+var ljmLibraryVersion = ljmLibraryVersionData.Value;
 
 var openAllIsLoaded = false;
+console.log('ljmLibraryVersion', ljmLibraryVersion);
 if(ljmLibraryVersion >= 1.1200) {
     openAllIsLoaded = true;
 }
