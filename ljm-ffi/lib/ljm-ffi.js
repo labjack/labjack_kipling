@@ -973,7 +973,7 @@ function loadLJMMultiple(ljmVersion) {
                     ljm[fn].async = createAsyncFunction(fn, fi);
                 }
             } catch(err) {
-                // console.log('Failed to link function', functionName, err);
+                console.log('Failed to link function', functionName, err);
                 
                 // Create functions that go in the liblabjack object.
                 liblabjack[fn] = createSafeSyncFunction(fn, fi);

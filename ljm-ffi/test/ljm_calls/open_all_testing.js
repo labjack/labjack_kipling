@@ -26,65 +26,24 @@ for(var i = 0; i < (128 * 2 * 1); i++) {
 var ljm_ffi = require('../../lib/ljm-ffi');
 var ljm = ljm_ffi.load();
 
-function parseIPAddress(ipInt) {
-	var ipAddr = ref.alloc('uint', 1);
-	ipAddr.writeUInt32LE(ipInt, 0);
-	
-	var ipStr = "";
-	ipStr += ipAddr.readUInt8(3).toString();
-	ipStr += ".";
-	ipStr += ipAddr.readUInt8(2).toString();
-	ipStr += ".";
-	ipStr += ipAddr.readUInt8(1).toString();
-	ipStr += ".";
-	ipStr += ipAddr.readUInt8(0).toString();
-	return ipStr;
-}
 
-function getHandleInfos(handles, cb) {
-	var deviceData = [];
-	function getHandleInfo(handle, innerCB) {
-		var res = ljm.LJM_GetHandleInfo.async(
-			handle, // Handle
-			0, // DeviceType
-			0, // ConnectionType
-			0, // SerialNumber
-			0, // IPAddress
-			0, // Port
-			0, // MaxBytesPerMB
-			function handleInfoReporter(data) {
-				// console.log('Handle Info', data);
-				var ipStr = parseIPAddress(data.IPAddress);
-				deviceData.push({
-					'DT': data.DeviceType,
-					'CT': data.ConnectionType,
-					'SN': data.SerialNumber,
-					'IP': ipStr,
-				});
-				innerCB();
-			}
-		);
-	}
-	function finished(err) {
-		cb(deviceData);
-	}
-	async.each(handles, getHandleInfo, finished);
-}
-
+var test_utils = require('../test_utils/test_utils');
+var parseIPAddress = test_utils.parseIPAddress;
+var getHandleInfos = test_utils.getHandleInfos;
 
 
 
 
 module.exports.LJM_OpenAll = {
-	'min_ljm_version': 1.1101,
+	'min_ljm_version': 1.1200,
 	'test_args': [
 		{'DeviceType': 				0},
 		{'ConnectionType': 			0},
 		{'NumOpened': 				0},
 		{'aHandles': 				scanIntArray},
 		{'NumErrors': 				0},
-		{'ErrorHandle':  			0},
-		{'Errors': 					''},
+		{'InfoHandle':  			0},
+		{'Info': 					''},
 	],
 	'throws_err': false,
 	'custom_verify': function(test, results, cb) {

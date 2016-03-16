@@ -61,7 +61,7 @@ var test_cases = {
 			'Parameter': 'LJM_LIBRARY_VERSION',
 			'Value': ljmLibraryVersion.Value,
 		};
-		console.log(' - LJM Library Version:', ljmLibraryVersion.Value);
+		console.log('  - LJM Library Version:'.green, ljmLibraryVersion.Value);
 		test.deepEqual(ljmLibraryVersion, expectedData);
 		test.done();
 	},

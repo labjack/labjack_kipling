@@ -118,19 +118,6 @@ LJM_FUNCTIONS.LJM_ListAllExtended = {
 	]
 };
 
-LJM_FUNCTIONS.LJM_OpenAll = {
-	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
-	'args': [
-		{'DeviceType': 				'int'},
-		{'ConnectionType': 			'int'},
-		{'NumOpened': 				'int*'},
-		{'aHandles': 				'a-int*'},
-		{'NumErrors': 				'int*'},
-		{'ErrorHandle':				'int*'},
-		{'Errors':					'char**'},
-	]
-};
-
 LJM_FUNCTIONS.LJM_Open = {
 	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
 	'args': [
@@ -470,11 +457,34 @@ LJM_FUNCTIONS.LJM_ReadLibraryConfigS = {
 		{'Value': 					'double*'},
 	]
 };
+
 LJM_FUNCTIONS.LJM_ReadLibraryConfigStringS = {
 	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
 	'args': [
 		{'Parameter': 				'string'},
 		{'String': 					'ex-char*'},
+	]
+};
+
+LJM_FUNCTIONS.LJM_LoadConfigurationFile = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'FileName': 				'string'},
+	]
+};
+
+LJM_FUNCTIONS.LJM_GetSpecificIPsInfo = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'InfoHandle':				'int*'},
+		{'Info':					'char**'},
+	]
+};
+
+LJM_FUNCTIONS.LJM_CleanInfo = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'InfoHandle': 				'int'},
 	]
 };
 
@@ -490,6 +500,26 @@ LJM_FUNCTIONS.LJM_ResetLog = {
 	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
 	'args': []						//No Args
 };
+
+/*
+ * Define some internal LJM functions.  These functions should not be used by
+ * third party applications as they may change at any given point in time.  They
+ * are meant for alpha/beta testing and internal use only.
+ */
+
+LJM_FUNCTIONS.Internal_LJM_OpenAll = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'DeviceType': 				'int'},
+		{'ConnectionType': 			'int'},
+		{'NumOpened': 				'int*'},
+		{'aHandles': 				'a-int*'},
+		{'NumErrors': 				'int*'},
+		{'InfoHandle':				'int*'},
+		{'Info':					'char**'},
+	]
+};
+
 
 
 var functionNames = Object.keys(LJM_FUNCTIONS);
