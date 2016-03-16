@@ -26,7 +26,7 @@ var ljmLibraryVersionData = ljm.LJM_ReadLibraryConfigS('LJM_LIBRARY_VERSION', 0)
 var ljmLibraryVersion = ljmLibraryVersionData.Version;
 
 var openAllIsLoaded = false;
-if(ljmLibraryVersion > 1.1100) {
+if(ljmLibraryVersion >= 1.1200) {
     openAllIsLoaded = true;
 }
 
