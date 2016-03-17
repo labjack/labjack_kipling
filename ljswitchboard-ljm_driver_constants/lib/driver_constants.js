@@ -427,6 +427,13 @@ exports.CONNECTION_TYPE_NAMES = {
     '6': 'Ethernet_UDP',
     '7': 'WiFi_UDP',
 };
+exports.CONNECTION_MEDIUM = {
+	'1': 1,
+	'3': 3,
+    '4': 4,
+	'6': 3,
+    '7': 4,
+};
 exports.WIFI_STATUS_DISPLAY_DATA = {
     2900: {'display':true,'str':'Associated'},
     2901: {'display':true,'str':'Associating'},
