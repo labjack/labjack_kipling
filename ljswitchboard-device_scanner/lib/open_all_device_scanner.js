@@ -1180,6 +1180,7 @@ function openAllDeviceScanner() {
     */
     function returnResults(bundle) {
         debugSS('in returnResults');
+        self.cachedScanBundle = bundle;
         self.scanInProgress = false;
         var defered = q.defer();
         defered.resolve(bundle.deviceTypes);
@@ -1196,7 +1197,7 @@ function openAllDeviceScanner() {
         };
     }
     this.originalOldfwState = 0;
-
+    this.cachedScanBundle = undefined;
     this.cachedCurrentDevices = [];
     this.findAllDevices = function(currentDevices) {
         var innerCurrentDevices = [];
@@ -1328,14 +1329,22 @@ function openAllDeviceScanner() {
         return defered.promise;
     };
 
+    // function returnResults(bundle) {
+    //     debugSS('in returnResults');
+    //     self.cachedScanBundle = bundle;
+    //     self.scanInProgress = false;
+    //     var defered = q.defer();
+    //     defered.resolve(bundle.deviceTypes);
+    //     return defered.promise;
+    // }
     this.getLastFoundDevices = function() {
-        var defered = q.defer();
-        if(!self.scanInProgress) {
-            defered.resolve(self.sortedResults);
+        if(self.cachedScanBundle) {
+            return returnResults(self.cachedScanBundle);
         } else {
             defered.resolve([]);
+            return defered.promise;
         }
-        return defered.promise;
+        
     };
 
     this.addMockDevice = function(device) {

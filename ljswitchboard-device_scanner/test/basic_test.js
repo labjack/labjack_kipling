@@ -74,6 +74,19 @@ exports.tests = {
 			test.done();
 		}
 	},
+	'get last scan results': function(test) {
+		deviceScanner.getLastFoundDevices()
+		.then(function(deviceTypes) {
+			printScanResultsData(deviceTypes);
+			verifyScanResults(deviceTypes, test, {debug: false});
+			test.ok(true);
+			test.done();
+		}, function(err) {
+			console.log('Error getting cached scan results');
+			test.ok(false);
+			test.done();
+		});
+	},
 	'close device': function(test) {
 		if(devices[0]) {
 			devices[0].close()
