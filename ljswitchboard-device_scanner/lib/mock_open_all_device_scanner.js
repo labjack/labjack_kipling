@@ -201,7 +201,23 @@ function createMockDeviceScanner() {
 
 	var addMockDevices = function(foundDevices, deviceType, connectionType) {
 		var defered = q.defer();
-		self.devices.forEach(function(device, i) {
+		var devicesToScan = [];
+		self.devices.forEach(function(device) {
+			devicesToScan.push(device);
+		});
+		self.currentDevices.forEach(function(cDevice) {
+			var d = cDevice.savedAttributes;
+			devicesToScan.push({
+				'dt': d.deviceType,
+				'deviceType': d.deviceType,
+				'serialNumber': d.serialNumber,
+				'connectionType': d.connectionType,
+				'ipAddress': d.ipAddress,
+				'isMockDevice': d.isMockDevice,
+				'handle': d.handle,
+			})
+		})
+		devicesToScan.forEach(function(device, i) {
 			var addDevice = false;
 			var dtANY = driver_const.LJM_DT_ANY;
 			var scanDT = driver_const.deviceTypes[deviceType];
@@ -270,6 +286,7 @@ function createMockDeviceScanner() {
 				foundDevices.push(device);
 			}
 		});
+		
 		defered.resolve(foundDevices);
 		return defered.promise;
 	};
@@ -356,6 +373,20 @@ function createMockDeviceScanner() {
 			}
 		});
 
+		// Support already connected devices...
+		if(!foundDevice) {
+			foundDevice = self.currentDevices.some(function(currentDevice) {
+				if(currentDevice.savedAttributes.handle === handle) {
+					sn = currentDevice.savedAttributes.serialNumber;
+					device = currentDevice.savedAttributes;
+					return true;
+				} else {
+					return false;
+				}
+			});
+			device.dt = device.deviceType;
+		}
+
 		var data = {};
 		if(foundDevice) {
 			// self.getMockDeviceData(sn, requiredInfo)
@@ -398,10 +429,6 @@ function createMockDeviceScanner() {
 			ljmUtils.getDeviceInfo( handle, requiredInfo, cb);
 		}
 		cb(data);
-		/* This function needs to collect data from a currently connected device
-		 * and return the data in a data object. */
-		 // var data = {};
-		 // cb(data);
 	};
 
 	this.verifyDeviceConnection = function(dt, ct, id, cb) {

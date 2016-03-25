@@ -52,7 +52,6 @@ function safeGetOpenAllScanner() {
     }
 }
 function innerGetDeviceScanner(whichScanner) {
-    console.log('Getting Scanner...', whichScanner, device_scanner);
     if(device_scanner) {
         // Nothing; we already have the device_scanner
     } else {

@@ -20,9 +20,9 @@ var testGroups = {
 		'basic_test': false,
 	},
 	'openall': {
-		'basic_mock': false,
+		'basic_mock': true,
 		'mock_openall': true,
-		'basic_test': false,
+		'basic_test': true,
 	},
 };
 
