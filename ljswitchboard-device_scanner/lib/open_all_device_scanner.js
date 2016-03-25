@@ -1199,10 +1199,18 @@ function openAllDeviceScanner() {
 
     this.cachedCurrentDevices = [];
     this.findAllDevices = function(currentDevices) {
+        var innerCurrentDevices = [];
+        if(currentDevices) {
+            var cdKeys = Object.keys(currentDevices);
+            cdKeys.forEach(function(cdKey) {
+                innerCurrentDevices.push(currentDevices[cdKey]);
+            });
+        }
+
         debugSS('Finding all devices...');
         
         // Update the mock device scanner.
-        mockDeviceScanningLib.updateCurrentDevices(currentDevices);
+        mockDeviceScanningLib.updateCurrentDevices(innerCurrentDevices);
 
         var defered = q.defer();
         if (self.scanInProgress) {
@@ -1211,9 +1219,9 @@ function openAllDeviceScanner() {
         }
 
         self.scanInProgress = true;
-        if(currentDevices) {
-            if(Array.isArray(currentDevices)) {
-                self.cachedCurrentDevices = currentDevices;
+        if(innerCurrentDevices) {
+            if(Array.isArray(innerCurrentDevices)) {
+                self.cachedCurrentDevices = innerCurrentDevices;
             } else {
                 self.cachedCurrentDevices = [];
             }
