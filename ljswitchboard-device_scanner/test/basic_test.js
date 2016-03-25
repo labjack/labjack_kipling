@@ -1,15 +1,15 @@
 // Legacy test for the old ListAll scan method. Expects to open real devices.
 
 var deviceScanner;
-var device_scanner = require('../../lib/ljswitchboard-device_scanner');
-var test_util = require('../utils/test_util');
+var device_scanner = require('../lib/ljswitchboard-device_scanner');
+var test_util = require('./utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
 var printScanResultsKeys = test_util.printScanResultsKeys;
 var verifyScanResults = test_util.verifyScanResults;
 var testScanResults = test_util.testScanResults;
 
-var expDeviceTypes = require('../utils/expected_devices').expectedDevices;
+var expDeviceTypes = require('./utils/expected_devices').expectedDevices;
 
 var device_curator = require('ljswitchboard-ljm_device_curator');
 
@@ -18,9 +18,9 @@ var devices = [];
 exports.tests = {
 	'Starting Basic Test': function(test) {
 		console.log('');
-		console.log('*** Starting Basic (OpenAll) Test ***');
+		console.log('*** Starting Basic Test ***');
 
-		deviceScanner = device_scanner.getDeviceScanner('open_all');
+		deviceScanner = device_scanner.getDeviceScanner();
 
 		test.done();
 	},
@@ -59,7 +59,7 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'read device ASNIN': function(test) {
+	'read device SN': function(test) {
 		if(devices[0]) {
 			devices[0].iRead('SERIAL_NUMBER')
 			.then(function(res) {

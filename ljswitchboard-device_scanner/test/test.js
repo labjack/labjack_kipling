@@ -8,6 +8,7 @@ process.on('uncaughtException', function(err) {
 
 var testGroups = {
 	'get_ljm_version': true,
+	'basic_test': true,
 	'listall': {
 		'mock_test': true,
 		'basic_test': true,

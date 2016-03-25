@@ -56,14 +56,15 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'read device AIN': function(test) {
+	'read device SN': function(test) {
 		if(device) {
-			device.iRead('AIN0')
+			device.iRead('SERIAL_NUMBER')
 			.then(function(res) {
-				console.log('  - AIN Res:'.green, res.val);
+				console.log('  - SN Res:'.green, res.val);
 				test.done();
 			}, function(err) {
-				test.ok(false, 'Failed to read AIN0: ' + err.toString());
+				console.log('Failed to read SN:', err, device.savedAttributes);
+				test.ok(false, 'Failed to read SN: ' + JSON.stringify(err));
 				test.done();
 			});
 		} else {
