@@ -7,6 +7,7 @@ var REQUIRED_INFO_BY_DEVICE = require('../../lib/required_device_info').required
 var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
+var printScanResultsKeys = test_util.printScanResultsKeys;
 var testScanResults = test_util.testScanResults;
 var device_curator = require('ljswitchboard-ljm_device_curator');
 

@@ -349,7 +349,7 @@ function createMockDeviceScanner() {
 		// console.log('in inspectMockDevices!');
 		// console.log('Num Current Devices', self.currentDevices.length);
 		// console.log('Num Mock Devices', self.devices);
-	}
+	};
 	this.currentDevices = [];
 	this.updateCurrentDevices = function(currentDevices) {
 		if(currentDevices) {
@@ -358,7 +358,30 @@ function createMockDeviceScanner() {
 			self.currentDevices = [];
 		}
 	};
-
+	function getProductType(deviceInfo) {
+		if(deviceInfo.dt === 7) {
+			return deviceInfo.HARDWARE_INSTALLED.productType;
+		} else if(deviceInfo.dt === 200) {
+			return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
+		} else {
+			console.log('Failed to get product type');
+			return deviceInfo.deviceTypeName;
+		}
+	}
+	function getModelType(deviceInfo) {
+		var pt = deviceInfo.deviceTypeName;
+		var sc = '';
+		if(deviceInfo.dt === 7) {
+			pt = deviceInfo.HARDWARE_INSTALLED.productType;
+			sc = deviceInfo.HARDWARE_INSTALLED.subclass;
+		} else if(deviceInfo.dt === 200) {
+			pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
+			sc = deviceInfo.DGT_INSTALLED_OPTIONS.subclass;
+		} else {
+			console.log('Failed to get product type');
+		}
+		return pt + sc;
+	}
 	this.getDeviceInfo = function(handle, requiredInfo, cb) {
 		// console.log('Getting Device Data', handle, requiredInfo);
 		var sn = 0;
@@ -405,6 +428,7 @@ function createMockDeviceScanner() {
 			data.dt = dt;
 			data.deviceType = dt;
 			data.deviceTypeStr = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
+			data.deviceTypeString = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
 			data.deviceTypeName = driver_const.DEVICE_TYPE_NAMES[dt];
 
 			var ct = device.connectionType;
@@ -422,7 +446,11 @@ function createMockDeviceScanner() {
 			// deviceInfo.ip = parseIPAddress(handleInfo.IPAddress);
 			data.ip = device.ip;
 			// deviceInfo.port = handleInfo.Port;
-			// deviceInfo.maxBytesPerMB = handleInfo.MaxBytesPerMB;		
+			// deviceInfo.maxBytesPerMB = handleInfo.MaxBytesPerMB;	
+
+			data.acquiredRequiredData = true;
+			data.productType = getProductType(data);
+			data.modelType = getModelType(data);	
 		} else {
 			// The mock device wasn't found.  We should try getting a real device...
 			console.log('Finding a real device...')

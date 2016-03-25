@@ -1,11 +1,14 @@
 
 var rewire = require('rewire');
-var device_scanner = rewire('../lib/device_scanner');
+var device_scanner = rewire('../../lib/device_scanner');
 var driver = require('LabJack-nodejs').driver();
 
-var test_util = require('./test_util');
+var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
+var printScanResultsData = test_util.printScanResultsData;
+var printScanResultsKeys = test_util.printScanResultsKeys;
 var testScanResults = test_util.testScanResults;
+var verifyScanResults = test_util.verifyScanResults;
 
 var deviceScanner;
 exports.tests = {
@@ -75,11 +78,12 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
+			verifyScanResults(deviceTypes, test);
 			var endTime = new Date();
 			var debug = false;
 
 			testScanResults(deviceTypes, expectedData, test, {'debug': false});
-			
+			// printScanResultsKeys(deviceTypes);
 			if(debug) {
 				console.log('  - Duration', (endTime - startTime)/1000);
 			}

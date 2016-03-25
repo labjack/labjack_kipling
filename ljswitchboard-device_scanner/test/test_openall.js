@@ -6,14 +6,6 @@ process.on('uncaughtException', function(err) {
 	process.exit();
 });
 
-// // exports.unit_tests = require('./unit_tests').tests;
-// exports.basic_test = require('./basic_test').tests;
-// // exports.open_all_basic_test = require('./open_all_basic_test').tests;
-// exports.mock_test = require('./mock_test').tests;
-// exports.scan_connected_devices = require('./scan_connected_devices').tests;
-
-// exports.crazy_test = require('./crazy_test').tests;
-
 var testGroups = {
 	'get_ljm_version': true,
 	'listall': {
@@ -22,6 +14,7 @@ var testGroups = {
 	'openall': {
 		'basic_mock': true,
 		'mock_openall': true,
+		'mock_w_device': true,
 		'basic_test': true,
 	},
 };

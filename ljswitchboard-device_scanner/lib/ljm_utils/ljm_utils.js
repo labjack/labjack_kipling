@@ -74,6 +74,10 @@ function readDeviceRegister(handle, register, cb) {
 						info.address,
 						results.ljmError
 					);
+					var keys = Object.keys(pErr.defaultValue);
+					keys.forEach(function(key) {
+						pErr[key] = pErr.defaultValue[key];
+					});
 					cb(pErr);
 				}
 			}
@@ -117,14 +121,45 @@ function readAndParseRegisters(handle, registers, cb) {
 	async.eachSeries(registers, getData, returnResults);
 }
 
+
+function getProductType(deviceInfo) {
+	if(deviceInfo.dt === 7) {
+		return deviceInfo.HARDWARE_INSTALLED.productType;
+	} else if(deviceInfo.dt === 200) {
+		return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
+	} else {
+		console.log('Failed to get product type');
+		return deviceInfo.deviceTypeName;
+	}
+}
+function getModelType(deviceInfo) {
+	var pt = deviceInfo.deviceTypeName;
+	var sc = '';
+	if(deviceInfo.dt === 7) {
+		pt = deviceInfo.HARDWARE_INSTALLED.productType;
+	} else if(deviceInfo.dt === 200) {
+		pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
+	} else {
+		console.log('Failed to get product type');
+	}
+	return pt;
+}
 function getDeviceInfo(handle, registers, cb) {
 
 	var deviceInfo = {};
 	function handleReadData(results) {
+		var isError = false;
 		var keys = Object.keys(results);
 		keys.forEach(function(key) {
 			deviceInfo[key] = results[key];
+			if(results[key].errorCode) {
+				isError = true;
+			}
 		});
+		deviceInfo.acquiredRequiredData = !isError;
+		deviceInfo.productType = getProductType(deviceInfo);
+		deviceInfo.modelType = getModelType(deviceInfo);
+
 		// console.log('Device Info', deviceInfo);
 		cb(deviceInfo);
 	}
@@ -136,6 +171,7 @@ function getDeviceInfo(handle, registers, cb) {
 		deviceInfo.dt = dt;
 		deviceInfo.deviceType = dt;
 		deviceInfo.deviceTypeStr = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
+		deviceInfo.deviceTypeString = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
 		deviceInfo.deviceTypeName = driver_const.DEVICE_TYPE_NAMES[dt];
 
 		var ct = handleInfo.ConnectionType;

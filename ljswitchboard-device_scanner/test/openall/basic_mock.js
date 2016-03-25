@@ -5,6 +5,8 @@ var device_scanner = rewire('../../lib/ljswitchboard-device_scanner');
 var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var testScanResults = test_util.testScanResults;
+var printScanResultsKeys = test_util.printScanResultsKeys;
+var verifyScanResults = test_util.verifyScanResults;
 
 var deviceScanner;
 exports.tests = {
@@ -92,7 +94,8 @@ exports.tests = {
 			// });
 			var endTime = new Date();
 			var debug = false;
-
+			// printScanResultsKeys(deviceTypes);
+			verifyScanResults(deviceTypes, test);
 			testScanResults(deviceTypes, expectedData, test, {'debug': false});
 			
 			if(debug) {

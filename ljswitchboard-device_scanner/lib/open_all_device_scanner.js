@@ -58,6 +58,9 @@ var DEBUG_ORGANIZE_SCAN_DATA = false;
 /* Sort the connection type data. */
 var DEBUG_CONNECTION_TYPE_SORTING = false;
 
+/* Mark active connection types */
+var DEBUG_MARKING_ACTIVE_CONNECTION_TYPES = true;
+
 function getLogger(bool) {
     return function logger() {
         if(bool) {
@@ -73,6 +76,7 @@ var debugLJMCalls = getLogger(DEBUG_LJM_CALLS);
 var debugDC = getLogger(DEBUG_DEVICE_CORRELATING);
 var debugVCT = getLogger(DEBUG_VERIFY_CONNECTION_TYPE);
 var debugOSD = getLogger(DEBUG_ORGANIZE_SCAN_DATA);
+var debugMACT = getLogger(DEBUG_MARKING_ACTIVE_CONNECTION_TYPES);
 var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
 
 
@@ -214,8 +218,14 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
     // Save initialization data to this context.
     this.handle = deviceHandle;
     this.openParameters = openParameters;
+    this.isMockDevice = false;
+    this.isActive = false;
+    this.activeConnectionType = -1;
     if(curatedDevice) {
         this.openParameters = curatedDevice.savedAttributes.openParameters;
+        this.isMockDevice = curatedDevice.savedAttributes.isMockDevice;
+        this.isActive = true;
+        this.activeConnectionType = curatedDevice.savedAttributes.connectionType;
     }
     this.curatedDevice = curatedDevice;
 
@@ -236,6 +246,8 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
                 function(data) {
                     parseDeviceInfo(data, self.requiredInfo);
                     self.collectedDeviceData = data;
+                    self.collectedDeviceData.isActive = self.isActive;
+                    self.collectedDeviceData.isMockDevice = self.isMockDevice;
                     defered.resolve();
                 });
         } else {
@@ -245,6 +257,8 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
                 function(data) {
                     parseDeviceInfo(data, self.requiredInfo);
                     self.collectedDeviceData = data;
+                    self.collectedDeviceData.isActive = self.isActive;
+                    self.collectedDeviceData.isMockDevice;
                     defered.resolve();
                 });
         }
@@ -716,13 +730,17 @@ function openAllDeviceScanner() {
                 'connectionTypeName': driver_const.CONNECTION_TYPE_NAMES[ct],
                 'name': driver_const.CONNECTION_TYPE_NAMES[ct],
                 'isVerified': false,
+                'verified': false,
                 'isScanned': false,
                 'insertionMethod': 'unknown',
+                'foundByAttribute': false,
+                'isActive': false,
             };
             var ethCT = driver_const.connectionTypes.ethernet;
             var wifiCT = driver_const.connectionTypes.wifi;
             if((ct == ethCT)||(ct == wifiCT)) {
                 obj.ip = id;
+                obj.ipAddress = id;
                 // Define the port as the modbus 502 port.
                 obj.port = 502;
             }
@@ -753,7 +771,9 @@ function openAllDeviceScanner() {
                     deviceInfo.serialNumber.toString()
                 );
                 usbInfo.isVerified = true;
+                usbInfo.verified = true;
                 usbInfo.isScanned = true;
+                usbInfo.isActive = deviceInfo.isActive;
                 usbInfo.insertionMethod = 'scan';
                 foundUSB = true;
             } else if(deviceInfo.ct === ethCT) {
@@ -762,9 +782,9 @@ function openAllDeviceScanner() {
                     deviceInfo.ct,
                     deviceInfo.ip
                 );
-                ethInfo.isVerified = false;
                 ethInfo.isScanned = true;
                 ethInfo.insertionMethod = 'scan';
+                ethInfo.isActive = deviceInfo.isActive;
                 foundEth = true;
             } else if(deviceInfo.ct === wifiCT) {
                 wifiInfo = createDeviceConnectionObj(
@@ -772,9 +792,9 @@ function openAllDeviceScanner() {
                     deviceInfo.ct,
                     deviceInfo.ip
                 );
-                wifiInfo.isVerified = false;
                 wifiInfo.isScanned = true;
                 wifiInfo.insertionMethod = 'scan';
+                wifiInfo.isActive = deviceInfo.isActive;
                 foundWiFi = true;
             } else {
                 console.error('openall_d_s, Encountered Invalid Connection Type', deviceInfo.ct);
@@ -790,6 +810,7 @@ function openAllDeviceScanner() {
                         );
                         foundEth = true;
                         ethInfo.insertionMethod = 'attribute';
+                        ethInfo.foundByAttribute = true;
                     }
                 }
             }
@@ -803,6 +824,7 @@ function openAllDeviceScanner() {
                         );
                         foundWiFi = true;
                         wifiInfo.insertionMethod = 'attribute';
+                        wifiInfo.foundByAttribute = true;
                     }
                 }
             }
@@ -826,10 +848,15 @@ function openAllDeviceScanner() {
                         // properties.
                         if(newCT.isVerified) {
                             origCT.isVerified = true;
+                            origCT.verified = true;
                         }
                         if(newCT.isScanned) {
                             origCT.isScanned = true;
                             origCT.insertionMethod = 'scan';
+                            origCT.foundByAttribute = false;
+                        }
+                        if(newCT.isActive) {
+                            origCT.isActive = true;
                         }
                         return true;
                     } else {
@@ -942,11 +969,13 @@ function openAllDeviceScanner() {
         if(LIVE_DEVICE_SCANNING_ENABLED) {
             ljmUtils.verifyDeviceConnection(ct.dt, ct.ct, ct.id, function(res) {
                 ct.isVerified = res.isVerified;
+                ct.verified = res.isVerified;
                 defered.resolve();
             });
         } else {
             mockDeviceScanningLib.verifyDeviceConnection(ct.dt, ct.ct, ct.id, function(res) {
                 ct.isVerified = res.isVerified;
+                ct.verified = res.isVerified;
                 defered.resolve();
             });
         }
@@ -1081,10 +1110,10 @@ function openAllDeviceScanner() {
         return defered.promise;
     }
 
-    var sortResultConnectionTypes = function(bundle) {
+    function sortResultConnectionTypes (bundle) {
         var defered = q.defer();
         var deviceTypes = bundle.deviceTypes;
-        debugSS('in sortResultConnectionTypes')
+        debugSS('in sortResultConnectionTypes');
         var compare = function(a,b) {
             var usbCT = driver_const.connectionTypes.usb;
             var ethCT = driver_const.connectionTypes.ethernet;
@@ -1127,7 +1156,7 @@ function openAllDeviceScanner() {
         });
         defered.resolve(bundle);
         return defered.promise;
-    };
+    }
 
     /*
      * The function "closeInactiveDevices" does...

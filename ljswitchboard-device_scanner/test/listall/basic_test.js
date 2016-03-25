@@ -6,9 +6,10 @@ var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
 var testScanResults = test_util.testScanResults;
-
+var device_curator = require('ljswitchboard-ljm_device_curator');
 var expDeviceTypes = require('../utils/expected_devices').expectedDevices;
-
+var devices = [];
+var device;
 exports.tests = {
 	'Starting Basic Test': function(test) {
 		console.log('');
@@ -20,10 +21,29 @@ exports.tests = {
 
 		test.done();
 	},
+	'open device': function(test) {
+		device = new device_curator.device();
+		devices.push(device);
+		device.open('LJM_dtT7', 'LJM_ctUSB', 'LJM_idANY')
+		.then(function() {
+			console.log('Opened Device');
+			test.done();
+		}, function(err) {
+			console.log('Failed....', err)
+			devices[0].destroy();
+			devices = [];
+			test.done();
+		});
+	},
+	'enable device scanning': function(test) {
+		deviceScanner.enableDeviceScanning()
+		.then(function() {
+			test.done();
+		});
+	},
 	'basic test': function(test) {
-		var currentDeviceList = {};
 		var startTime = new Date();
-		deviceScanner.findAllDevices(currentDeviceList)
+		deviceScanner.findAllDevices(devices)
 		.then(function(deviceTypes) {
 			// printAvailableDeviceData(deviceTypes);
 			printScanResultsData(deviceTypes);
@@ -36,5 +56,32 @@ exports.tests = {
 			console.log('Scanning Error');
 			test.done();
 		});
-	}
+	},
+	'read device AIN': function(test) {
+		if(device) {
+			device.iRead('AIN0')
+			.then(function(res) {
+				console.log('  - AIN Res:'.green, res.val);
+				test.done();
+			}, function(err) {
+				test.ok(false, 'Failed to read AIN0: ' + err.toString());
+				test.done();
+			});
+		} else {
+			test.done();
+		}
+	},
+	'close device': function(test) {
+		if(device) {
+			console.log('Closing Device');
+			device.close()
+			.then(function() {
+				test.done();
+			}, function() {
+				test.done();
+			});
+		} else {
+			test.done();
+		}
+	},
 };
