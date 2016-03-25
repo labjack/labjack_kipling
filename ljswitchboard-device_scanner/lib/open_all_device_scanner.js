@@ -1341,6 +1341,7 @@ function openAllDeviceScanner() {
         if(self.cachedScanBundle) {
             return returnResults(self.cachedScanBundle);
         } else {
+            var defered = q.defer();
             defered.resolve([]);
             return defered.promise;
         }
