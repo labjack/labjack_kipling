@@ -4,8 +4,10 @@ var driver_const = require('ljswitchboard-ljm_driver_constants');
 var data_parser = require('ljswitchboard-data_parser');
 var modbus_map = require('ljswitchboard-modbus_map');
 var constants = modbus_map.getConstants();
-
+var ljmUtils;
 function createMockDeviceScanner() {
+	ljmUtils = require('./ljm_utils/ljm_utils');
+
 	var self = this;
 	this.devices = [];
 
@@ -63,6 +65,7 @@ function createMockDeviceScanner() {
 			'address': info.data.address,
 			'val': defaultVal
 		};
+		res = data_parser.parseResult(address, defaultVal);
 		return res;
 	};
 	var getSerialNumberOffset = function(dt) {
@@ -141,7 +144,7 @@ function createMockDeviceScanner() {
 			ipAddress = getDeviceIPAddress(dt, ct, serialNumber);
 		}
 		
-
+		data.dt = dt;
 		data.deviceType = dt;
 		data.serialNumber = serialNumber;
 		data.connectionType = ct;
@@ -240,6 +243,29 @@ function createMockDeviceScanner() {
 						'ETHERNET_IP', device.ipAddress
 					).str;
 				}
+
+				// // Create curated device object.
+				// var curatedDevice = new device_curator.device(true);
+
+				// var deviceInfo = {};
+				// if(currentDT === 7) {
+				// 	deviceInfo = {
+				// 		'serialNumber': 47001000,
+				// 		'DEVICE_NAME_DEFAULT': 'Mock T7',
+				// 		'HARDWARE_INSTALLED': 15,
+				// 		'ipAddress': '192.168.1.101',
+				// 		'ETHERNET_IP': '192.168.1.101',
+				// 	};
+				// } else {
+				// 	deviceInfo = {
+				// 		'serialNumber': 47001000,
+				// 		'DEVICE_NAME_DEFAULT': 'Mock Digit',
+				// 		'HARDWARE_INSTALLED': 15,
+				// 		'ipAddress': '192.168.1.101',
+				// 		'ETHERNET_IP': '192.168.1.101',
+				// 	};
+				// }
+				// curatedDevice.configureMockDevice(deviceInfo)
 				foundDevices.push(device);
 			}
 		});
@@ -302,9 +328,9 @@ function createMockDeviceScanner() {
 
 	/* Stubbed functions... */
 	this.inspectMockDevices = function() {
-		console.log('in inspectMockDevices!');
-		console.log('Num Current Devices', self.currentDevices.length);
-		console.log('Num Mock Devices', self.devices);
+		// console.log('in inspectMockDevices!');
+		// console.log('Num Current Devices', self.currentDevices.length);
+		// console.log('Num Mock Devices', self.devices);
 	}
 	this.currentDevices = [];
 	this.updateCurrentDevices = function(currentDevices) {
@@ -316,23 +342,62 @@ function createMockDeviceScanner() {
 	};
 
 	this.getDeviceInfo = function(handle, requiredInfo, cb) {
-		console.log('Getting Device Data', handle, requiredInfo);
+		// console.log('Getting Device Data', handle, requiredInfo);
 		var sn = 0;
-		var foundDevice = self.devices.some(function(device) {
-			if(device.handle === handle) {
-				sn = device.serialNumber;
+		var device;
+		var foundDevice = self.devices.some(function(mockDevice) {
+			if(mockDevice.handle === handle) {
+				sn = mockDevice.serialNumber;
+				device = mockDevice;
 				return true;
 			} else {
 				return false;
 			}
 		});
 
+		var data = {};
 		if(foundDevice) {
-			self.getMockDeviceData(sn, requiredInfo)
-			.then(cb);
+			// self.getMockDeviceData(sn, requiredInfo)
+			requiredInfo.forEach(function(address) {
+				var res = getFakeResult(device, address);
+				data[res.name] = res;
+			});
+			data.dt = device.dt;
+			data.deviceType = device.deviceType;
+			data.ct = device.connectionType;
+			data.connectionType = device.connectionType;
+			data.serialNumber = device.serialNumber;	
+			data.isMockDevice = true;
+
+			var dt = device.dt;
+			data.dt = dt;
+			data.deviceType = dt;
+			data.deviceTypeStr = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
+			data.deviceTypeName = driver_const.DEVICE_TYPE_NAMES[dt];
+
+			var ct = device.connectionType;
+			data.handleConnectionType = ct;
+			data.handleConnectionTypeStr = driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct];
+			data.handleConnectionTypeName = driver_const.CONNECTION_TYPE_NAMES[ct];
+			
+			var liveCT = driver_const.CONNECTION_MEDIUM[ct];
+			data.ct = liveCT;
+			data.connectionType = liveCT;
+			data.connectionTypeStr = driver_const.DRIVER_CONNECTION_TYPE_NAMES[liveCT];
+			data.connectionTypeName = driver_const.CONNECTION_TYPE_NAMES[liveCT];
+
+			// deviceInfo.serialNumber = handleInfo.SerialNumber;
+			// deviceInfo.ip = parseIPAddress(handleInfo.IPAddress);
+			console.log("IP ADDRESS!!", device.ipAddress);
+			data.ip = device.ip;
+			// deviceInfo.port = handleInfo.Port;
+			// deviceInfo.maxBytesPerMB = handleInfo.MaxBytesPerMB;		
 		} else {
-			console.log('ERROR!!', self.devices);
+			// The mock device wasn't found.  We should try getting a real device...
+			console.log('Finding a real device...')
+			ljmUtils.getDeviceInfo( handle, requiredInfo, cb);
 		}
+		cb(data);
 		/* This function needs to collect data from a currently connected device
 		 * and return the data in a data object. */
 		 // var data = {};

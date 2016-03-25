@@ -76,7 +76,13 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			console.log('HERE');
+			// console.log('HERE', deviceTypes);
+			// deviceTypes.forEach(function(deviceType) {
+			// 	var devices = deviceType.devices;
+			// 	devices.forEach(function(device) {
+			// 		console.log('Device Info...', device);
+			// 	});
+			// });
 			// var endTime = new Date();
 			// var debug = false;
 

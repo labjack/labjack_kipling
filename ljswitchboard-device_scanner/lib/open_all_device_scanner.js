@@ -20,7 +20,7 @@ var ds_util = require('../lib/device_scanner_util');
 // Constant that controls mock scanning.
 var LIVE_DEVICE_SCANNING_ENABLED = true;
 var mock_open_all_device_scanner = require('./mock_open_all_device_scanner');
-var mockDeviceScanningLib = new mock_open_all_device_scanner.create();
+var mockDeviceScanningLib;
 
 // A variable that will store a reference to the ljm driver
 var ljm;
@@ -47,7 +47,7 @@ var DEBUG_DEVICE_CORRELATING = false;
  * discovered Ethernet and WiFi connection types are verified to make sure that
  * they can be properly used.
  */
-var DEBUG_VERIFY_CONNECTION_TYPE = true;
+var DEBUG_VERIFY_CONNECTION_TYPE = false;
 /*
  * Enable debugging for organizing all of the scanned device data to get
  * returned to user.
@@ -906,7 +906,7 @@ function openAllDeviceScanner() {
                 } catch(err) {
                     console.log('ERR', err, err.stack);
                 }
-                // console.log('collected data', Object.keys(cd));
+                // console.log('collected data', cd);
             });
             if(DEBUG_DEVICE_CORRELATING) {
                 debugPrintFlatScannedData(scannedData, debugDC);
@@ -1086,7 +1086,7 @@ function openAllDeviceScanner() {
      * The function "returnResults" does...
     */
     function returnResults(bundle) {
-        console.log('in returnResults');
+        debugSS('in returnResults');
         var defered = q.defer();
         defered.resolve(bundle.deviceTypes);
         return defered.promise;
@@ -1105,7 +1105,7 @@ function openAllDeviceScanner() {
 
     this.cachedCurrentDevices = [];
     this.findAllDevices = function(currentDevices) {
-        console.log('Finding all devices...');
+        debugSS('Finding all devices...');
         
         // Update the mock device scanner.
         mockDeviceScanningLib.updateCurrentDevices(currentDevices);
@@ -1161,9 +1161,9 @@ function openAllDeviceScanner() {
 
         var bundle = createFindAllDevicesBundle();
 
-        console.log('in findAllDevices');
+        debugSS('in findAllDevices');
         if(!LIVE_DEVICE_SCANNING_ENABLED) {
-            console.log('Mock scanning...');
+            debugSS('Mock scanning...');
             mockDeviceScanningLib.inspectMockDevices();
         }
         if(LIVE_DEVICE_SCANNING_ENABLED || true) {
@@ -1254,6 +1254,7 @@ var createDeviceScanner = function(driver) {
     ljm = require('ljm-ffi').load();
     ljmUtils = require('./ljm_utils/ljm_utils');
     ljmDriver = driver;
+    mockDeviceScanningLib = new mock_open_all_device_scanner.create();
     return ds;
 };
 
