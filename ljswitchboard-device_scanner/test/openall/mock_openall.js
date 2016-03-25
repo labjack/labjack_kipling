@@ -343,4 +343,8 @@ exports.tests = {
 			test.done();
 		}
 	},
+	'unload': function(test) {
+		device_scanner.unload();
+		test.done();
+	},
 };

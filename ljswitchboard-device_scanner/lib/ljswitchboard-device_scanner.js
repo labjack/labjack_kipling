@@ -87,10 +87,13 @@ function innerGetDeviceScanner(whichScanner) {
 }
 exports.enableSafeLoad = function() {
     SAFE_LOAD_ENABLED = true;
-}
+};
 exports.disableSafeLoad = function() {
     SAFE_LOAD_ENABLED = false;
-}
+};
+exports.unload = function() {
+    device_scanner = undefined;
+};
 exports.getDeviceScanner = innerGetDeviceScanner;
 exports.deviceScanner = innerGetDeviceScanner;
 

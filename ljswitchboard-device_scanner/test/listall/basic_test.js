@@ -7,6 +7,7 @@ var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
 var testScanResults = test_util.testScanResults;
 var device_curator = require('ljswitchboard-ljm_device_curator');
+var device_scanner = require('../../lib/ljswitchboard-device_scanner');
 var expDeviceTypes = require('../utils/expected_devices').expectedDevices;
 var devices = [];
 var device;
@@ -15,9 +16,7 @@ exports.tests = {
 		console.log('');
 		console.log('*** Starting Basic (ListAll) Test ***');
 
-		deviceScanner = require(
-			'../../lib/ljswitchboard-device_scanner'
-		).getDeviceScanner('device_scanner');
+		deviceScanner = device_scanner.getDeviceScanner('device_scanner');
 
 		test.done();
 	},
@@ -83,5 +82,9 @@ exports.tests = {
 		} else {
 			test.done();
 		}
+	},
+	'unload': function(test) {
+		device_scanner.unload();
+		test.done();
 	},
 };

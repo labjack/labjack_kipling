@@ -1,7 +1,7 @@
 // Legacy test for the old ListAll scan method. Expects to open real devices.
 
 var deviceScanner;
-
+var device_scanner = require('../../lib/ljswitchboard-device_scanner');
 var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
@@ -20,9 +20,7 @@ exports.tests = {
 		console.log('');
 		console.log('*** Starting Basic (OpenAll) Test ***');
 
-		deviceScanner = require(
-			'../../lib/ljswitchboard-device_scanner'
-		).getDeviceScanner('open_all');
+		deviceScanner = device_scanner.getDeviceScanner('open_all');
 
 		test.done();
 	},
@@ -86,5 +84,9 @@ exports.tests = {
 		} else {
 			test.done();
 		}
+	},
+	'unload': function(test) {
+		device_scanner.unload();
+		test.done();
 	},
 };

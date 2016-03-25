@@ -12,11 +12,6 @@ var testGroups = {
 		'mock_test': true,
 		'basic_test': true,
 	},
-	'openall': {
-		'basic_mock': false,
-		'mock_openall': false,
-		'basic_test': false,
-	},
 };
 
 
