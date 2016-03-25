@@ -2,7 +2,6 @@
 var fs = require('fs');
 var path = require('path');
 var rewire = require('rewire');
-// var device_scanner = require('../lib/ljswitchboard-device_scanner').getDeviceScanner();
 var device_scanner = rewire('../lib/device_scanner');
 
 var test_util = require('./test_util');
@@ -125,8 +124,8 @@ var tests = {
 		});
 	},
 	'create device scanner': function(test) {
-		deviceScanner = new device_scanner.deviceScanner();
-		
+		deviceScanner = require('../lib/ljswitchboard-device_scanner').getDeviceScanner();
+
 		var eventsToHandle = [
 			eventList.PERFORMING_LIST_ALL_EXTENDED,
 			eventList.FINISHED_LIST_ALL_EXTENDED,

@@ -3,9 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
 var async = require('async');
-var ljm = require('labjack-nodejs');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
-var driver = ljm.driver();
 var data_parser = require('ljswitchboard-data_parser');
 var curatedDevice = require('ljswitchboard-ljm_device_curator');
 var modbus_map = require('ljswitchboard-modbus_map');
@@ -15,27 +13,17 @@ var requiredInformation = {};
 var eventList = require('./event_list').eventList;
 var mock_device_scanner = require('./mock_device_scanner');
 
+var DEBUG_SYNC_VS_ASYNC_EXECUTION = false;
 var DEBUG_CONNECTION_TYPE_SORTING = false;
 var DEBUG_DEVICE_SCAN_RESULT_SAVING = false;
+var DEBUG_LJM_SCAN_FUNCTIONS = false;
 
 var reportAsyncError = function(err) {
 	console.log('device_scanner.js reportAsyncError', err, err.stack);
 };
-var REQUIRED_INFO_BY_DEVICE = {
-	'LJM_dtDIGIT': [
-		'DEVICE_NAME_DEFAULT',
-		'DGT_INSTALLED_OPTIONS'
-	],
-	'LJM_dtT7': [
-		'DEVICE_NAME_DEFAULT',
-        'HARDWARE_INSTALLED',
-        'ETHERNET_IP',
-        'WIFI_STATUS',
-        'WIFI_IP',
-        'WIFI_RSSI',
-        'FIRMWARE_VERSION'
-	]
-};
+
+var REQUIRED_INFO_BY_DEVICE = require('./required_device_info').requiredInfo;
+
 var getModelType = {
 	'LJM_dtDIGIT': function(attrs) {
 		var name = 'Digit-Variant';
@@ -84,6 +72,9 @@ var CONNECTED_DEVICE_INFO_COPY_STRATEGY = {
 };
 exports.REQUIRED_INFO_BY_DEVICE = REQUIRED_INFO_BY_DEVICE;
 
+var EXEC_SCAN_FOR_DEVICES_ASYNC = false;
+var EXEC_INTERNAL_FIND_ALL_DEVICES_ASYNC = false;
+
 var SCAN_REQUEST_LIST = [
 	{
         'deviceType': 'LJM_dtDIGIT',
@@ -92,14 +83,14 @@ var SCAN_REQUEST_LIST = [
     },
     {
         'deviceType': 'LJM_dtT7',
-        'connectionType': 'LJM_ctUSB',
+        'connectionType': 'LJM_ctANY',
         'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7
     },
-    {
-        'deviceType': 'LJM_dtT7',
-        'connectionType': 'LJM_ctTCP',
-        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7
-    },
+    // {
+    //     'deviceType': 'LJM_dtT7',
+    //     'connectionType': 'LJM_ctTCP',
+    //     'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7
+    // },
 ];
 
 var scanStrategies = [
@@ -109,10 +100,10 @@ var scanStrategies = [
 
 
 var deviceScanner = function() {
+	this.driver = undefined;
 
 	this.scanResults = [];
 	this.activeDeviceResults = [];
-	this.currentDeviceList = null;
 	this.scanInProgress = false;
 	this.sortedResults = [];
 
@@ -591,14 +582,23 @@ var deviceScanner = function() {
 				self.emit(eventList.CLOSING_FOUND_DEVICE, data.openParameters);
 				data.device.close()
 				.then(function(res) {
+					if(typeof(data.device.destroy) === 'function') {
+						data.device.destroy();
+					}
 					delete data.device;
 					defered.resolve(data.scanResult);
 				}, function(err) {
 					device.close()
 					.then(function(res) {
+						if(typeof(data.device.destroy) === 'function') {
+							data.device.destroy();
+						}
 						delete data.device;
 						defered.resolve(data.scanResult);
 					}, function(err) {
+						if(typeof(data.device.destroy) === 'function') {
+							data.device.destroy();
+						}
 						delete data.device;
 						defered.resolve(data.scanResult);
 					});
@@ -607,10 +607,16 @@ var deviceScanner = function() {
 				// The device was open before the findAll function was called.
 				// Don't close it.
 				data.device.haltBackgroundOperations();
+				if(typeof(data.device.destroy) === 'function') {
+					data.device.destroy();
+				}
 				delete data.device;
 				defered.resolve(data.scanResult);
 			}
 		} else {
+			if(typeof(data.device.destroy) === 'function') {
+				data.device.destroy();
+			}
 			delete data.device;
 			defered.resolve(data.scanResult);
 		}
@@ -724,7 +730,10 @@ var deviceScanner = function() {
 		scanRequest.startTime = new Date();
 		setImmediate(function() {
 			self.emit(eventList.PERFORMING_LIST_ALL_EXTENDED, scanRequest);
-			driver.listAllExtended(
+			if(DEBUG_LJM_SCAN_FUNCTIONS) {
+				console.log('Starting listAllExtended scan', deviceType, connectionType);
+			}
+			self.driver.listAllExtended(
 				deviceType,
 				connectionType,
 				addresses,
@@ -733,6 +742,9 @@ var deviceScanner = function() {
 					self.emit(eventList.LIST_ALL_EXTENDED_ERROR, err);
 					defered.reject(err);
 				}, function(res) {
+					if(DEBUG_LJM_SCAN_FUNCTIONS) {
+						console.log('Finished listAllExtended scan', deviceType, connectionType);
+					}
 					scanRequest.stopTime = new Date();
 					saveResults(scanRequest, res);
 					scanRequest.scanNum += 1;
@@ -752,12 +764,18 @@ var deviceScanner = function() {
 		scanRequest.startTime = new Date();
 		setImmediate(function() {
 			self.emit(eventList.PERFORMING_LIST_ALL, scanRequest);
-			driver.listAll(
+			if(DEBUG_LJM_SCAN_FUNCTIONS) {
+				console.log('Starting listAll scan', deviceType, connectionType);
+			}
+			self.driver.listAll(
 				deviceType,
 				connectionType,
 				function(err) {
 					defered.reject(err);
 				}, function(res) {
+					if(DEBUG_LJM_SCAN_FUNCTIONS) {
+						console.log('Finished listAll scan', deviceType, connectionType);
+					}
 					scanRequest.stopTime = new Date();
 					saveResults(scanRequest, res);
 					scanRequest.scanNum += 1;
@@ -809,28 +827,66 @@ var deviceScanner = function() {
 
 	var scanForDevices = function(scanRequest) {
 		var defered = q.defer();
-		var promises = [];
-		scanRequest.scanNum = 0;
-		scanRequest.scanTypes = [];
-		scanStrategies.forEach(function(scanStrategy) {
-			if(scanStrategy.enabled) {
-				if(scanStrategy.type === 'listAllExtended') {
-					scanRequest.scanTypes.push('listAllExtended');
-					promises.push(listAllExtended(scanRequest));
-				} else if(scanStrategy.type === 'listAll') {
-					scanRequest.scanTypes.push('listAll');
-					promises.push(listAll(scanRequest));
-				}
-			}
-		});
 
-		q.allSettled(promises)
-		.then(function(results) {
-			defered.resolve();
-		}, function(err) {
-			console.error("singleScan error", err);
-			defered.reject();
-		});
+		if(EXEC_SCAN_FOR_DEVICES_ASYNC) {
+			if(DEBUG_SYNC_VS_ASYNC_EXECUTION) {
+				console.log('Executing scanForDevices Async'); 
+			}
+			var promises = [];
+			scanRequest.scanNum = 0;
+			scanRequest.scanTypes = [];
+			scanStrategies.forEach(function(scanStrategy) {
+				if(scanStrategy.enabled) {
+					if(scanStrategy.type === 'listAllExtended') {
+						scanRequest.scanTypes.push('listAllExtended');
+						promises.push(listAllExtended(scanRequest));
+					} else if(scanStrategy.type === 'listAll') {
+						scanRequest.scanTypes.push('listAll');
+						promises.push(listAll(scanRequest));
+					}
+				}
+			});
+
+			q.allSettled(promises)
+			.then(function(results) {
+				defered.resolve();
+			}, function(err) {
+				console.error("singleScan error", err);
+				defered.reject();
+			});
+		} else {
+			if(DEBUG_SYNC_VS_ASYNC_EXECUTION) {
+				console.log('Executing scanForDevices Sync');
+			}
+			var executions = [];
+			scanRequest.scanNum = 0;
+			scanRequest.scanTypes = [];
+			async.eachSeries(
+				scanStrategies,
+				function performScanStrategy(scanStrategy, cb) {
+					if(scanStrategy.enabled) {
+						if(scanStrategy.type === 'listAllExtended') {
+							scanRequest.scanTypes.push('listAllExtended');
+							listAllExtended(scanRequest)
+							.then(function listAllExtendedStrategySuccess() {
+								cb();
+							}, function listAllExtendedStrategyError() {
+								cb();
+							});
+						} else if(scanStrategy.type === 'listAll') {
+							scanRequest.scanTypes.push('listAll');
+							listAll(scanRequest)
+							.then(function listAllStrategySuccess() {
+								cb();
+							}, function listAllStrategyError() {
+								cb();
+							});
+						}
+					}
+				}, function finishedExecutingScanStrategies() {
+					defered.resolve();
+				});
+		}
 		return defered.promise;
 	};
 
@@ -1047,23 +1103,67 @@ var deviceScanner = function() {
 	var internalFindAllDevices = function() {
 		var currentDevices = self.cachedCurrentDevices;
 		var defered = q.defer();
-		var promises = SCAN_REQUEST_LIST.map(scanForDevices);
-		if(currentDevices) {
-			if(Object.keys(currentDevices).length > 0) {
-				// Add task that queries currently connected devices for their data.
-				promises.push(getCurrentDeviceListing(currentDevices));
-			}
-		}
 
-		q.allSettled(promises)
-		.then(function(res) {
-			self.emit(eventList.COMBINING_SCAN_RESULTS);
-			combineScanResults()
-			.then(defered.resolve, defered.reject);
-		}, function(err) {
-			// console.log("scan error", err);
-			defered.reject(self.scanResults);
-		});
+		if(EXEC_INTERNAL_FIND_ALL_DEVICES_ASYNC) {
+			if(DEBUG_SYNC_VS_ASYNC_EXECUTION) {
+				console.log('Executing internalFindAllDevices Async');
+			}
+			var promises = SCAN_REQUEST_LIST.map(scanForDevices);
+			if(currentDevices) {
+				if(Object.keys(currentDevices).length > 0) {
+					// Add task that queries currently connected devices for their data.
+					promises.push(getCurrentDeviceListing(currentDevices));
+				}
+			}
+
+			q.allSettled(promises)
+			.then(function(res) {
+				self.emit(eventList.COMBINING_SCAN_RESULTS);
+				combineScanResults()
+				.then(defered.resolve, defered.reject);
+			}, function(err) {
+				// console.log("scan error", err);
+				defered.reject(self.scanResults);
+			});
+		} else {
+			if(DEBUG_SYNC_VS_ASYNC_EXECUTION) {
+				console.log('Executing internalFindAllDevices Sync');
+			}
+			var executions = SCAN_REQUEST_LIST.map(function(scanRequest) {
+				return function performScanForDevices(cb) {
+						scanForDevices(scanRequest)
+						.then(function performScanForDevicesSuccess() {
+							cb();
+						}, function performScanForDevicesErr() {
+							cb();
+						});
+					};
+			});
+			if(currentDevices) {
+				if(Object.keys(currentDevices).length > 0) {
+					// Add task that queries currently connected devices for their data.
+					executions.push(function performGetCurrentDeviceListing(cb) {
+						getCurrentDeviceListing(currentDevices)
+						.then(function performGetCurrentDeviceListingSuccess() {
+							cb();
+						}, function performGetCurrentDeviceListingErr() {
+							cb();
+						});
+					});
+				}
+			}
+
+			async.eachSeries(
+				executions,
+				function internalFindAllDevicesSyncRunner(execution, callback) {
+					execution(callback);
+				},
+				function internalFindAllDevicesSyncFinished() {
+					self.emit(eventList.COMBINING_SCAN_RESULTS);
+					combineScanResults()
+					.then(defered.resolve, defered.reject);
+				});
+		}
 		
 		return defered.promise;
 	};
@@ -1071,7 +1171,7 @@ var deviceScanner = function() {
 	this.originalOldfwState = 0;
 	var saveDriverOldfwState = function() {
 		var defered = q.defer();
-		driver.readLibrary(
+		self.driver.readLibrary(
 			'LJM_OLD_FIRMWARE_CHECK',
 			function(err) {
 				defered.reject(err);
@@ -1084,7 +1184,7 @@ var deviceScanner = function() {
 	};
 	var disableDriverOldfwState = function() {
 		var defered = q.defer();
-		driver.writeLibrary(
+		self.driver.writeLibrary(
 			'LJM_OLD_FIRMWARE_CHECK',
 			0,
 			function(err) {
@@ -1096,7 +1196,7 @@ var deviceScanner = function() {
 	};
 	var restoreDriverOldfwState = function() {
 		var defered = q.defer();
-		driver.writeLibrary(
+		self.driver.writeLibrary(
 			'LJM_OLD_FIRMWARE_CHECK',
 			self.originalOldfwState,
 			function(err) {
@@ -1427,4 +1527,10 @@ var deviceScanner = function() {
 };
 util.inherits(deviceScanner, EventEmitter);
 
-exports.deviceScanner = deviceScanner;
+var createDeviceScanner = function(driver) {
+	var ds = new deviceScanner();
+	ds.driver = driver;
+	return ds;
+};
+
+exports.createDeviceScanner = createDeviceScanner;

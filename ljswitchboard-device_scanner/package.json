@@ -1,11 +1,15 @@
 {
   "name": "ljswitchboard-device_scanner",
-  "version": "0.0.28",
-  "description": "A node project dedicated to finding ALL labjack devices that are able to be connected to.",
+  "version": "0.0.29",
+  "description": "A node project dedicated to finding ALL LabJack devices that are able to be connected to.",
   "main": "./lib/ljswitchboard-device_scanner",
   "scripts": {
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
-    "scan": "node ./scripts/scan_for_devices.js"
+    "test_openall": "node ./node_modules/nodeunit/bin/nodeunit ./test/test_openall.js",
+    "test_listall": "node ./node_modules/nodeunit/bin/nodeunit ./test/test_listall.js",
+    "scan": "node ./scripts/scan_for_devices.js",
+    "scan_with_listall": "node ./scripts/scan_with_listall.js",
+    "scan_with_openall": "node ./scripts/scan_with_openall.js"
   },
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-device_scanning",
   "repository": {
@@ -32,7 +36,8 @@
   "dependencies": {
     "async": "~0",
     "q": "~1",
-    "labjack-nodejs": "0.0.x",
+    "labjack-nodejs": "0.x.x",
+    "ljm-ffi": "1.x.x",
     "ljswitchboard-ljm_driver_constants": "0.0.x",
     "ljswitchboard-modbus_map": "0.0.x",
     "ljswitchboard-data_parser": "0.0.x",
@@ -41,7 +46,8 @@
   "devDependencies": {
     "nodeunit": "0.9.x",
     "rewire": "2.3.x",
-    "ljm-ffi": "1.x.x"
+    "ljm-ffi": "1.x.x",
+    "colors": "*"
   },
   "directories": {
     "lib": "./lib"

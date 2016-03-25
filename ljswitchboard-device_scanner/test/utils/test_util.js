@@ -1,3 +1,13 @@
+function printScanResultsData(deviceTypes) {
+	console.log('Device Types', deviceTypes);
+	// var keys = Object.keys(deviceTypes);
+	// console.log('Scan Result Keys', keys);
+	// keys.forEach(function(keys){
+
+	// });
+}
+exports.printScanResultsData = printScanResultsData;
+
 var printAvailableDeviceData = function(device) {
 	if(device.connectionTypes) {
 		console.log(
@@ -66,11 +76,9 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 	} else {
 		if(numDeviceTypes != numExpDeviceTypes) {
 			suppressTestingErrors = true;
-			console.log(
-				'Warning, unexpected number of device types',
-				numDeviceTypes,
-				numExpDeviceTypes
-			);
+			console.log('Warning, unexpected number of device types');
+			console.log('    Expected number:', numExpDeviceTypes);
+			console.log('    Actual Number:', numDeviceTypes);
 		}
 	}
 
@@ -104,11 +112,21 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 		} else {
 			if(numDevices != expNumDevices) {
 				suppressTestingErrors = true;
-				console.log(
-					'Warning, unexpected number of devices',
-					numDevices,
-					expNumDevices
-				);
+				console.log('Warning, unexpected number of devices:');
+				console.log('    Expected number:', expNumDevices);
+				console.log('    Actual Number:', numDevices);
+				console.log('List of Found Devices:');
+				devices.forEach(function(device) {
+					console.log('  Device Type', device.deviceTypeName, device.serialNumber);
+					device.connectionTypes.forEach(function(connectionType) {
+						console.log(
+							'    Connection Type Name',
+							connectionType.name,
+							'method:',
+							connectionType.insertionMethod
+						);
+					});
+				});
 			}
 		}
 
@@ -156,22 +174,25 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 				);
 			}
 			
-			if (expConnectionTypes.length == connectionTypes.length) {
-				// For each connection type verify expected results.
-				connectionTypes.forEach(function(connectionType, j) {
-					// Organize device connection type results.
-					// Get and organize expected connection type results.
-					var expConnectionType = expConnectionTypes[j];
-					verifyConnectionTypeInfo(connectionType, expConnectionType);
-				});
-			}
-			else {
-				console.log(
-					'Unexpected number of connection types, expected: ',
-					expConnectionTypes.length,
-					', got: ', connectionTypes.length
-				);
-				test.ok(false, 'unexpected number of connection types, see console.log');
+			if(performTests) {
+				if (expConnectionTypes.length == connectionTypes.length) {
+					// For each connection type verify expected results.
+					connectionTypes.forEach(function(connectionType, j) {
+						// Organize device connection type results.
+						// Get and organize expected connection type results.
+						var expConnectionType = expConnectionTypes[j];
+						verifyConnectionTypeInfo(connectionType, expConnectionType);
+					});
+				}
+				else {
+					console.log('For Device...', device.deviceTypeName, device.serialNumber);
+					console.log(
+						'Unexpected number of connection types, expected: ',
+						expConnectionTypes.length,
+						', got: ', connectionTypes.length
+					);
+					test.ok(false, 'unexpected number of connection types, see console.log');
+				}
 			}
 			if(debug) {
 				printAvailableDeviceData(device);
