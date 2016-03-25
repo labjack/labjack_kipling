@@ -773,8 +773,11 @@ function openAllDeviceScanner() {
                 usbInfo.isVerified = true;
                 usbInfo.verified = true;
                 usbInfo.isScanned = true;
-                usbInfo.isActive = deviceInfo.isActive;
                 usbInfo.insertionMethod = 'scan';
+                usbInfo.isActive = deviceInfo.isActive;
+                if(deviceInfo.isActive) {
+                    usbInfo.insertionMethod = 'connected';
+                }
                 foundUSB = true;
             } else if(deviceInfo.ct === ethCT) {
                 ethInfo = createDeviceConnectionObj(
@@ -785,6 +788,9 @@ function openAllDeviceScanner() {
                 ethInfo.isScanned = true;
                 ethInfo.insertionMethod = 'scan';
                 ethInfo.isActive = deviceInfo.isActive;
+                if(deviceInfo.isActive) {
+                    ethInfo.insertionMethod = 'connected';
+                }
                 foundEth = true;
             } else if(deviceInfo.ct === wifiCT) {
                 wifiInfo = createDeviceConnectionObj(
@@ -795,6 +801,9 @@ function openAllDeviceScanner() {
                 wifiInfo.isScanned = true;
                 wifiInfo.insertionMethod = 'scan';
                 wifiInfo.isActive = deviceInfo.isActive;
+                if(deviceInfo.isActive) {
+                    wifiInfo.insertionMethod = 'connected';
+                }
                 foundWiFi = true;
             } else {
                 console.error('openall_d_s, Encountered Invalid Connection Type', deviceInfo.ct);
@@ -857,6 +866,7 @@ function openAllDeviceScanner() {
                         }
                         if(newCT.isActive) {
                             origCT.isActive = true;
+                            origCT.insertionMethod = 'connected';
                         }
                         return true;
                     } else {
