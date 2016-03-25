@@ -105,6 +105,7 @@ function createMockDeviceScanner() {
 		}
 		return  ipNum;
 	};
+	var nextHandle = -1;
 	var createDeviceData = function(deviceInfo) {
 		var deviceType = deviceInfo.deviceType;
 		var connectionType = deviceInfo.connectionType;
@@ -146,6 +147,8 @@ function createMockDeviceScanner() {
 		data.connectionType = ct;
 		data.ipAddress = ipAddress;
 		data.isMockDevice = true;
+		data.handle = nextHandle;
+		nextHandle -= 1;
 		return data;
 	};
 	// Required device info keys:
@@ -297,21 +300,66 @@ function createMockDeviceScanner() {
 	};
 
 
-
 	/* Stubbed functions... */
+	this.inspectMockDevices = function() {
+		console.log('in inspectMockDevices!');
+		console.log('Num Current Devices', self.currentDevices.length);
+		console.log('Num Mock Devices', self.devices);
+	}
+	this.currentDevices = [];
+	this.updateCurrentDevices = function(currentDevices) {
+		if(currentDevices) {
+			self.currentDevices = currentDevices;
+		} else {
+			self.currentDevices = [];
+		}
+	};
+
 	this.getDeviceInfo = function(handle, requiredInfo, cb) {
+		console.log('Getting Device Data', handle, requiredInfo);
+		var sn = 0;
+		var foundDevice = self.devices.some(function(device) {
+			if(device.handle === handle) {
+				sn = device.serialNumber;
+				return true;
+			} else {
+				return false;
+			}
+		});
+
+		if(foundDevice) {
+			self.getMockDeviceData(sn, requiredInfo)
+			.then(cb);
+		} else {
+			console.log('ERROR!!', self.devices);
+		}
 		/* This function needs to collect data from a currently connected device
 		 * and return the data in a data object. */
-		 var data = {};
-		 cb(data);
+		 // var data = {};
+		 // cb(data);
 	};
+
 	this.verifyDeviceConnection = function(dt, ct, id, cb) {
 		var data = {
 			isVerified: true,
 		};
 		cb(data);
 	};
+
 	this.openAll = function(dt, ct, onErr, onSuccess) {
+		var foundDevices = [];
+		// console.log('dt, ct', dt, ct);
+		addMockDevices(foundDevices, dt, ct)
+		.then(function(devices) {
+			// console.log('OpenAll Data', devices);
+			var handles = [];
+			devices.forEach(function(device) {
+				handles.push(device.handle);
+			});
+			onSuccess({
+				'handles': handles,
+			});
+		});
 		/* Needs to return a data structure that matches the LJM openAll function. */
 	};
 }

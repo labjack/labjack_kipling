@@ -32,17 +32,23 @@ function debug () {
     }
 }
 
+var SAFE_LOAD_ENABLED = true;
 function safeGetOpenAllScanner() {
-    if(driver.hasOpenAll) {
-        // If installed LJM driver has a compatable version of openAll
-        // then use the openAll scanner.
+    if(SAFE_LOAD_ENABLED) {
+        if(driver.hasOpenAll) {
+            // If installed LJM driver has a compatable version of openAll
+            // then use the openAll scanner.
+            debug('Selecting openAll Scanner...');
+            getOpenAllScanner();
+        } else {
+            // If the installed LJM driver does not have a compatable
+            // version of openALl then use the listAll scanner.
+            debug('Selecting listAll Scanner...');
+            getListAllScanner();
+        }
+    } else {
         debug('Selecting openAll Scanner...');
         getOpenAllScanner();
-    } else {
-        // If the installed LJM driver does not have a compatable
-        // version of openALl then use the listAll scanner.
-        debug('Selecting listAll Scanner...');
-        getListAllScanner();
     }
 }
 function innerGetDeviceScanner(whichScanner) {
@@ -80,7 +86,12 @@ function innerGetDeviceScanner(whichScanner) {
     // Return the device_scanner.
     return device_scanner;
 }
-
+exports.enableSafeLoad = function() {
+    SAFE_LOAD_ENABLED = true;
+}
+exports.disableSafeLoad = function() {
+    SAFE_LOAD_ENABLED = false;
+}
 exports.getDeviceScanner = innerGetDeviceScanner;
 exports.deviceScanner = innerGetDeviceScanner;
 

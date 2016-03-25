@@ -1106,6 +1106,10 @@ function openAllDeviceScanner() {
     this.cachedCurrentDevices = [];
     this.findAllDevices = function(currentDevices) {
         console.log('Finding all devices...');
+        
+        // Update the mock device scanner.
+        mockDeviceScanningLib.updateCurrentDevices(currentDevices);
+
         var defered = q.defer();
         if (self.scanInProgress) {
             defered.reject('Scan in progress');
@@ -1157,7 +1161,12 @@ function openAllDeviceScanner() {
 
         var bundle = createFindAllDevicesBundle();
 
-        if(LIVE_DEVICE_SCANNING_ENABLED) {
+        console.log('in findAllDevices');
+        if(!LIVE_DEVICE_SCANNING_ENABLED) {
+            console.log('Mock scanning...');
+            mockDeviceScanningLib.inspectMockDevices();
+        }
+        if(LIVE_DEVICE_SCANNING_ENABLED || true) {
             // Create the device manager object.
             createScannedDeviceManager(bundle)
 
@@ -1200,6 +1209,8 @@ function openAllDeviceScanner() {
             // .then(defered.resolve, defered.reject);
             // defered.resolve({'data':'dummy data'});
         } else {
+            console.log('Mock scanning...');
+            mockDeviceScanningLib.inspectMockDevices();
             // internalFindMockDevices()
             // .then(populateMissingScanData, getOnError('internalFindMockDevices'))
             // .then(markActiveDevices, getOnError('populateMissingScanData'))

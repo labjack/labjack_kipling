@@ -1,7 +1,7 @@
 
 var rewire = require('rewire');
-var device_scanner = rewire('../../lib/device_scanner');
-var driver = require('LabJack-nodejs').driver();
+var device_scanner = rewire('../../lib/ljswitchboard-device_scanner');
+// var driver = require('LabJack-nodejs').driver();
 
 var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
@@ -15,7 +15,8 @@ exports.tests = {
 		test.done();
 	},
 	'create device scanner': function(test) {
-		deviceScanner = new device_scanner.createDeviceScanner(driver);
+		device_scanner.disableSafeLoad();
+		deviceScanner = device_scanner.deviceScanner();
 		test.done();
 	},
 	'disable device scanning': function(test) {
@@ -45,48 +46,49 @@ exports.tests = {
 			test.done();
 		});
 	},
-	// 'mock test': function(test) {
-	// 	var startTime = new Date();
+	'mock test': function(test) {
+		var startTime = new Date();
 		
-	// 	var expectedData = {
-	// 		'T7': {
-	// 			'devices': [{
-	// 				'connectionTypes': [{
-	// 					'name': 'USB',
-	// 					'insertionMethod': 'scan',
-	// 				}, {
-	// 					'name': 'Ethernet',
-	// 					'insertionMethod': 'scan',
-	// 				}, {
-	// 					'name': 'WiFi',
-	// 					'insertionMethod': 'attribute'
-	// 				}]
-	// 			}]
-	// 		},
-	// 		'Digit': {
-	// 			'devices': [{
-	// 				'connectionTypes': [{
-	// 					'name': 'USB',
-	// 					'insertionMethod': 'scan',
-	// 				}]
-	// 			}]
-	// 		},
-	// 	};
+		// var expectedData = {
+		// 	'T7': {
+		// 		'devices': [{
+		// 			'connectionTypes': [{
+		// 				'name': 'USB',
+		// 				'insertionMethod': 'scan',
+		// 			}, {
+		// 				'name': 'Ethernet',
+		// 				'insertionMethod': 'scan',
+		// 			}, {
+		// 				'name': 'WiFi',
+		// 				'insertionMethod': 'attribute'
+		// 			}]
+		// 		}]
+		// 	},
+		// 	'Digit': {
+		// 		'devices': [{
+		// 			'connectionTypes': [{
+		// 				'name': 'USB',
+		// 				'insertionMethod': 'scan',
+		// 			}]
+		// 		}]
+		// 	},
+		// };
 
-	// 	deviceScanner.findAllDevices()
-	// 	.then(function(deviceTypes) {
-	// 		var endTime = new Date();
-	// 		var debug = false;
+		deviceScanner.findAllDevices()
+		.then(function(deviceTypes) {
+			console.log('HERE');
+			// var endTime = new Date();
+			// var debug = false;
 
-	// 		testScanResults(deviceTypes, expectedData, test, {'debug': false});
+			// testScanResults(deviceTypes, expectedData, test, {'debug': false});
 			
-	// 		if(debug) {
-	// 			console.log('  - Duration', (endTime - startTime)/1000);
-	// 		}
-	// 		test.done();
-	// 	}, function(err) {
-	// 		console.log('Scanning Error', err);
-	// 		test.done();
-	// 	});
-	// },
+			// if(debug) {
+			// 	console.log('  - Duration', (endTime - startTime)/1000);
+			// }
+			test.done();
+		}, function(err) {
+			console.log('Scanning Error', err);
+			test.done();
+		});
+	},
 };
