@@ -35,6 +35,7 @@ var ENABLE_ERROR_OUTPUT = false;
 var DEBUG_SCAN_STEP = false;
 /* Enable debugging for the OpenAll calls */
 var DEBUG_OPEN_ALL_SCAN = false;
+var DEBUG_OPEN_ALL_RESULTS = false;
 /* Enable debugging for the LJM Calls */
 var DEBUG_LJM_CALLS = false;
 /*
@@ -54,6 +55,9 @@ var DEBUG_VERIFY_CONNECTION_TYPE = false;
 */
 var DEBUG_ORGANIZE_SCAN_DATA = false;
 
+/* Sort the connection type data. */
+var DEBUG_CONNECTION_TYPE_SORTING = false;
+
 function getLogger(bool) {
     return function logger() {
         if(bool) {
@@ -64,6 +68,7 @@ function getLogger(bool) {
 
 var debugSS = getLogger(DEBUG_SCAN_STEP);
 var debugOpenAll = getLogger(DEBUG_OPEN_ALL_SCAN);
+var debugOpenAllResults = getLogger(DEBUG_OPEN_ALL_RESULTS);
 var debugLJMCalls = getLogger(DEBUG_LJM_CALLS);
 var debugDC = getLogger(DEBUG_DEVICE_CORRELATING);
 var debugVCT = getLogger(DEBUG_VERIFY_CONNECTION_TYPE);
@@ -503,6 +508,8 @@ function openAllDeviceScanner() {
             cb();
         }
         function onSuccess(openAllData) {
+            // console.log('OpenAll...', openAllData, dt, ct);
+            debugOpenAllResults('OpenAll...', openAllData, dt, ct);
             var stopTime = new Date();
             var deltaTime = parseFloat(((stopTime - startTime)/1000).toFixed(2));
             debugSS('Successfully called OpenAll', deltaTime);
@@ -707,8 +714,10 @@ function openAllDeviceScanner() {
                 'connectionType': ct,
                 'connectionTypeStr': driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct],
                 'connectionTypeName': driver_const.CONNECTION_TYPE_NAMES[ct],
+                'name': driver_const.CONNECTION_TYPE_NAMES[ct],
                 'isVerified': false,
                 'isScanned': false,
+                'insertionMethod': 'unknown',
             };
             var ethCT = driver_const.connectionTypes.ethernet;
             var wifiCT = driver_const.connectionTypes.wifi;
@@ -745,6 +754,7 @@ function openAllDeviceScanner() {
                 );
                 usbInfo.isVerified = true;
                 usbInfo.isScanned = true;
+                usbInfo.insertionMethod = 'scan';
                 foundUSB = true;
             } else if(deviceInfo.ct === ethCT) {
                 ethInfo = createDeviceConnectionObj(
@@ -754,6 +764,7 @@ function openAllDeviceScanner() {
                 );
                 ethInfo.isVerified = false;
                 ethInfo.isScanned = true;
+                ethInfo.insertionMethod = 'scan';
                 foundEth = true;
             } else if(deviceInfo.ct === wifiCT) {
                 wifiInfo = createDeviceConnectionObj(
@@ -763,6 +774,7 @@ function openAllDeviceScanner() {
                 );
                 wifiInfo.isVerified = false;
                 wifiInfo.isScanned = true;
+                wifiInfo.insertionMethod = 'scan';
                 foundWiFi = true;
             } else {
                 console.error('openall_d_s, Encountered Invalid Connection Type', deviceInfo.ct);
@@ -777,6 +789,7 @@ function openAllDeviceScanner() {
                             deviceInfo.ethernetIP
                         );
                         foundEth = true;
+                        ethInfo.insertionMethod = 'attribute';
                     }
                 }
             }
@@ -789,6 +802,7 @@ function openAllDeviceScanner() {
                             deviceInfo.wifiIP
                         );
                         foundWiFi = true;
+                        wifiInfo.insertionMethod = 'attribute';
                     }
                 }
             }
@@ -815,6 +829,7 @@ function openAllDeviceScanner() {
                         }
                         if(newCT.isScanned) {
                             origCT.isScanned = true;
+                            origCT.insertionMethod = 'scan';
                         }
                         return true;
                     } else {
@@ -898,6 +913,7 @@ function openAllDeviceScanner() {
         q.allSettled(promises)
         .then(function() {
             debugSS('Finished Collecting Device Data');
+            // console.log('Open Devices...', openDevices.length);
             openDevices.forEach(function(openDevice) {
                 debugSS('Organizing Collected Data...');
                 var cd = openDevice.collectedDeviceData;
@@ -1065,6 +1081,54 @@ function openAllDeviceScanner() {
         return defered.promise;
     }
 
+    var sortResultConnectionTypes = function(bundle) {
+        var defered = q.defer();
+        var deviceTypes = bundle.deviceTypes;
+        debugSS('in sortResultConnectionTypes')
+        var compare = function(a,b) {
+            var usbCT = driver_const.connectionTypes.usb;
+            var ethCT = driver_const.connectionTypes.ethernet;
+            var wifiCT = driver_const.connectionTypes.wifi;
+            // Define connection type weights;
+            var weight = {};
+            weight[driver_const.CONNECTION_TYPE_NAMES[usbCT]] = 1;
+            weight[driver_const.CONNECTION_TYPE_NAMES[ethCT]] = 2;
+            weight[driver_const.CONNECTION_TYPE_NAMES[wifiCT]] = 3;
+
+            if(weight[a.name] < weight[b.name]) {
+                return -1;
+            }
+            if(weight[a.name] > weight[b.name]) {
+                return 1;
+            }
+            return 0;
+        };
+        deviceTypes.forEach(function(deviceType) {
+            var devices = deviceType.devices;
+            devices.forEach(function(device) {
+                var connectionTypes = device.connectionTypes;
+
+                if(DEBUG_CONNECTION_TYPE_SORTING) {
+                    console.log('Before Sort', device.serialNumber, connectionTypes);
+                    connectionTypes.forEach(function(ct) {
+                        console.log('  - Type:', ct.name, ct.insertionMethod);
+                    });
+                }
+                // Sort the connection types so that the order is USB, Ethernet, 
+                // Wifi and not the arbitrary order that they were found in.
+                connectionTypes.sort(compare);
+                if(DEBUG_CONNECTION_TYPE_SORTING) {
+                    console.log('After Sort', device.serialNumber, connectionTypes);
+                    connectionTypes.forEach(function(ct) {
+                        console.log('  - Type:', ct.name, ct.insertionMethod);
+                    });
+                }
+            });
+        });
+        defered.resolve(bundle);
+        return defered.promise;
+    };
+
     /*
      * The function "closeInactiveDevices" does...
     */
@@ -1087,6 +1151,7 @@ function openAllDeviceScanner() {
     */
     function returnResults(bundle) {
         debugSS('in returnResults');
+        self.scanInProgress = false;
         var defered = q.defer();
         defered.resolve(bundle.deviceTypes);
         return defered.promise;
@@ -1185,8 +1250,11 @@ function openAllDeviceScanner() {
             // Organize the collected device data.
             .then(organizeCollectedDeviceData, getOnError('verifyDeviceConnections'))
 
+            // Sort the found connection types.
+            .then(sortResultConnectionTypes, getOnError('organizeCollectedDeviceData'))
+
             // Close the devices that aren't currently open.
-            .then(closeInactiveDevices, getOnError('organizeCollectedDeviceData'))
+            .then(closeInactiveDevices, getOnError('sortResultConnectionTypes'))
 
             // Compile the data that needs to be returned to the user.
             .then(returnResults, getOnError('closeInactiveDevices'))

@@ -1,7 +1,6 @@
 
 var rewire = require('rewire');
 var device_scanner = rewire('../../lib/ljswitchboard-device_scanner');
-// var driver = require('LabJack-nodejs').driver();
 
 var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
@@ -49,30 +48,30 @@ exports.tests = {
 	'mock test': function(test) {
 		var startTime = new Date();
 		
-		// var expectedData = {
-		// 	'T7': {
-		// 		'devices': [{
-		// 			'connectionTypes': [{
-		// 				'name': 'USB',
-		// 				'insertionMethod': 'scan',
-		// 			}, {
-		// 				'name': 'Ethernet',
-		// 				'insertionMethod': 'scan',
-		// 			}, {
-		// 				'name': 'WiFi',
-		// 				'insertionMethod': 'attribute'
-		// 			}]
-		// 		}]
-		// 	},
-		// 	'Digit': {
-		// 		'devices': [{
-		// 			'connectionTypes': [{
-		// 				'name': 'USB',
-		// 				'insertionMethod': 'scan',
-		// 			}]
-		// 		}]
-		// 	},
-		// };
+		var expectedData = {
+			'T7': {
+				'devices': [{
+					'connectionTypes': [{
+						'name': 'USB',
+						'insertionMethod': 'scan',
+					}, {
+						'name': 'Ethernet',
+						'insertionMethod': 'scan',
+					}, {
+						'name': 'WiFi',
+						'insertionMethod': 'attribute'
+					}]
+				}]
+			},
+			'Digit': {
+				'devices': [{
+					'connectionTypes': [{
+						'name': 'USB',
+						'insertionMethod': 'scan',
+					}]
+				}]
+			},
+		};
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
@@ -80,17 +79,25 @@ exports.tests = {
 			// deviceTypes.forEach(function(deviceType) {
 			// 	var devices = deviceType.devices;
 			// 	devices.forEach(function(device) {
-			// 		console.log('Device Info...', device);
+			// 		// console.log('Device Info...', device);
+			// 		device.connectionTypes.forEach(function(ct){
+			// 			console.log(
+			// 				device.serialNumber,
+			// 				'CT:',
+			// 				ct.connectionTypeName,
+			// 				ct.isScanned,
+			// 				ct.insertionMethod);
+			// 		});
 			// 	});
 			// });
-			// var endTime = new Date();
-			// var debug = false;
+			var endTime = new Date();
+			var debug = false;
 
-			// testScanResults(deviceTypes, expectedData, test, {'debug': false});
+			testScanResults(deviceTypes, expectedData, test, {'debug': false});
 			
-			// if(debug) {
-			// 	console.log('  - Duration', (endTime - startTime)/1000);
-			// }
+			if(debug) {
+				console.log('  - Duration', (endTime - startTime)/1000);
+			}
 			test.done();
 		}, function(err) {
 			console.log('Scanning Error', err);

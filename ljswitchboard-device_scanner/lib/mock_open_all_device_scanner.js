@@ -209,6 +209,7 @@ function createMockDeviceScanner() {
 			var ctANY = driver_const.LJM_CT_ANY;
 			var scanCT = driver_const.connectionTypes[connectionType];
 			var currentCT = driver_const.connectionTypes[device.connectionType];
+			var ctUDP = driver_const.LJM_CT_UDP;
 			if(scanDT == dtANY) {
 				// If we are scanning for ANY device type
 				addDevice = true;
@@ -225,7 +226,7 @@ function createMockDeviceScanner() {
 					addDevice = true;
 				} else if(scanCT == currentCT) {
 					addDevice = true;
-				} else if(scanCT == driver_const.LJM_CT_TCP) {
+				} else if((scanCT == driver_const.LJM_CT_TCP) || (scanCT == ctUDP)) {
 					if(currentCT == driver_const.LJM_CT_ETHERNET) {
 						addDevice = true;
 					}
@@ -388,7 +389,6 @@ function createMockDeviceScanner() {
 
 			// deviceInfo.serialNumber = handleInfo.SerialNumber;
 			// deviceInfo.ip = parseIPAddress(handleInfo.IPAddress);
-			console.log("IP ADDRESS!!", device.ipAddress);
 			data.ip = device.ip;
 			// deviceInfo.port = handleInfo.Port;
 			// deviceInfo.maxBytesPerMB = handleInfo.MaxBytesPerMB;		

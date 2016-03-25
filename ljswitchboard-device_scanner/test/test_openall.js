@@ -1,7 +1,7 @@
 
 var colors = require('colors');
 process.on('uncaughtException', function(err) {
-	console.log('ERROR!!!', err);
+	console.log('TEST_OPENALL ERROR!!!', err);
 	console.log(err.stack);
 	process.exit();
 });
@@ -20,8 +20,8 @@ var testGroups = {
 		'basic_test': false,
 	},
 	'openall': {
-		'basic_mock': true,
-		'mock_openall': false,
+		'basic_mock': false,
+		'mock_openall': true,
 		'basic_test': false,
 	},
 };
