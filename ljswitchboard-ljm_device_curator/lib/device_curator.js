@@ -1570,7 +1570,7 @@ function device(useMockDevice) {
 	
 
 	function handleProcessExitInterrupt(code) {
-		console.log('Exiting... event not removed..', self.curatedDeviceInt);
+		console.log('Exiting... event not removed.. Call device\'s ".destroy()" function.', self.curatedDeviceInt);
 		process.removeListener('SIGINT', handleSIGINTInterrupt);
 		prepareToCloseDevice();
 	}
@@ -1586,7 +1586,7 @@ function device(useMockDevice) {
 
 	this.destroy = function() {
 		prepareToCloseDevice();
-	}
+	};
 
 	/**
 	 * Begin _DEFAULT safe and _DEFAULT status-saving functions

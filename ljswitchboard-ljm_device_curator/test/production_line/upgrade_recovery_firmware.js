@@ -181,7 +181,7 @@ var device_tests = {
 				test.ok(true);
 				test.done();
 			}
-		})
+		});
 	},
 	'Get FW Related Info': function(test) {
 		var deviceInfo = {};

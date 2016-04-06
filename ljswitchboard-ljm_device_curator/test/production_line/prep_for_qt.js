@@ -6,10 +6,10 @@ process.on('uncaughtException', function(err) {
 
 
 /********************** Require tests *****************************************/
-var upgrade_recovery_firmware = require('./upgrade_recovery_firmware');
-var upgrade_primary_firmware = require('./upgrade_primary_firmware');
+var mult_upgrade_recovery_firmware = require('./mult_upgrade_recovery_firmware');
+var mult_upgrade_primary_firmware = require('./mult_upgrade_primary_firmware');
 
 
 /********************** Perform tests *****************************************/
-exports.upgrade_recovery_firmware = upgrade_recovery_firmware;
-exports.upgrade_primary_firmware = upgrade_primary_firmware.tests;								// Passing
+exports.mult_upgrade_recovery_firmware = mult_upgrade_recovery_firmware;
+exports.mult_upgrade_primary_firmware = mult_upgrade_primary_firmware;

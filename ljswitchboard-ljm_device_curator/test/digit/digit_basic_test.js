@@ -1,13 +1,13 @@
 
 var q = require('q');
-var device_curator = require('../lib/device_curator');
-var utils = require('./utils/utils');
+var device_curator = require('../../lib/device_curator');
+var utils = require('../utils/utils');
 var qExec = utils.qExec;
 var async = require('async');
 var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 // Digit format functions
-var digit_format_functions = require('../lib/digit_format_functions');
+var digit_format_functions = require('../../lib/digit_format_functions');
 
 var device;
 
