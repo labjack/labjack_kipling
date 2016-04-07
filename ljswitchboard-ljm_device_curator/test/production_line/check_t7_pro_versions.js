@@ -103,7 +103,7 @@ var device_tests = {
 		var fwVersionNum = 1.0188;
 		device.iRead('FIRMWARE_VERSION')
 		.then(function(fwVersion) {
-			console.log('  - Recovery FW:'.green, fwVersion.val);
+			console.log('  - Primary FW:'.green, fwVersion.val);
 			if(fwVersion.val == fwVersionNum) {
 				test.ok(true);
 			} else {
