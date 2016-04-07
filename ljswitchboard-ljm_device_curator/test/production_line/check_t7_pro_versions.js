@@ -103,6 +103,7 @@ var device_tests = {
 		var fwVersionNum = 1.0188;
 		device.iRead('FIRMWARE_VERSION')
 		.then(function(fwVersion) {
+			console.log('  - Recovery FW:'.green, fwVersion.val);
 			if(fwVersion.val == fwVersionNum) {
 				test.ok(true);
 			} else {
@@ -117,6 +118,7 @@ var device_tests = {
 	'check recovery firmware version': function(test) {
 		device.getRecoveryFirmwareVersion()
 		.then(function(res) {
+			console.log('  - Recovery FW:'.green, res);
 			if(res == 0.6604) {
 				test.ok(true);
 			} else {
