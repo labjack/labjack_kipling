@@ -18,7 +18,7 @@ var devices = [];
 exports.tests = {
 	'Starting Basic Test': function(test) {
 		console.log('');
-		console.log('*** Starting Basic Ethernet (OpenAll) Test ***');
+		console.log('*** Starting Multiple Sequential Scans (OpenAll) Test ***');
 
 		deviceScanner = device_scanner.getDeviceScanner('open_all');
 
@@ -42,7 +42,44 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'basic test': function(test) {
+	'first scan': function(test) {
+		console.log('Starting first scan');
+		var currentDeviceList = [];
+		var startTime = new Date();
+		deviceScanner.findAllDevices(devices)
+		.then(function(deviceTypes) {
+			printScanResultsData(deviceTypes);
+			verifyScanResults(deviceTypes, test, {debug: false});
+			var endTime = new Date();
+			// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
+			// test.ok(testStatus, 'Unexpected test result');
+			console.log('  - Duration'.cyan, (endTime - startTime)/1000);
+			test.done();
+		}, function(err) {
+			console.log('Scanning Error');
+			test.done();
+		});
+	},
+	'second scan': function(test) {
+		console.log('Starting second scan');
+		var currentDeviceList = [];
+		var startTime = new Date();
+		deviceScanner.findAllDevices(devices)
+		.then(function(deviceTypes) {
+			printScanResultsData(deviceTypes);
+			verifyScanResults(deviceTypes, test, {debug: false});
+			var endTime = new Date();
+			// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
+			// test.ok(testStatus, 'Unexpected test result');
+			console.log('  - Duration'.cyan, (endTime - startTime)/1000);
+			test.done();
+		}, function(err) {
+			console.log('Scanning Error');
+			test.done();
+		});
+	},
+	'third scan': function(test) {
+		console.log('Starting third scan');
 		var currentDeviceList = [];
 		var startTime = new Date();
 		deviceScanner.findAllDevices(devices)
