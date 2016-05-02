@@ -27,7 +27,7 @@ exports.tests = {
 	'open device': function(test) {
 		var device = new device_curator.device();
 		devices.push(device);
-		device.open('LJM_dtT7', 'LJM_ctUSB', 'LJM_idANY')
+		device.open('LJM_dtT7', 'LJM_ctEthernet', 'LJM_idANY')
 		.then(function() {
 			test.done();
 		}, function() {
@@ -66,7 +66,7 @@ exports.tests = {
 				console.log('  - SN Res:'.green, res.val);
 				test.done();
 			}, function(err) {
-				console.log('Failed to read SN:', err, devices[0].savedAttributes);
+				console.log('Failed to read SN:', err, devices[0].savedAttributes.serialNumber);
 				test.ok(false, 'Failed to read SN: ' + JSON.stringify(err));
 				test.done();
 			});

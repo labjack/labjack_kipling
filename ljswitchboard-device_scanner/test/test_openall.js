@@ -13,6 +13,7 @@ var testGroups = {
 		'mock_openall': true,
 		'mock_w_device': true,
 		'basic_test': true,
+		'basic_eth_test': true,
 	},
 };
 

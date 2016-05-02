@@ -752,6 +752,7 @@ function openAllDeviceScanner() {
          * is a list of the device's available connection types.
          */
         function getDeviceConnectionTypesData(deviceInfo) {
+            // console.log('in getDeviceConnectionTypesData', deviceInfo.serialNumber, deviceInfo.ct, deviceInfo.port, deviceInfo.isActive);//, Object.keys(deviceInfo));
             var connectionTypes = [];
 
             var foundUSB = false;
@@ -770,13 +771,18 @@ function openAllDeviceScanner() {
                     deviceInfo.ct,
                     deviceInfo.serialNumber.toString()
                 );
+                // Always indicate that a USB device's USB connection 
+                // is verified.
                 usbInfo.isVerified = true;
                 usbInfo.verified = true;
+                
                 usbInfo.isScanned = true;
                 usbInfo.insertionMethod = 'scan';
                 usbInfo.isActive = deviceInfo.isActive;
                 if(deviceInfo.isActive) {
                     usbInfo.insertionMethod = 'connected';
+                    usbInfo.isVerified = true;
+                    usbInfo.verified = true;
                 }
                 foundUSB = true;
             } else if(deviceInfo.ct === ethCT) {
@@ -790,6 +796,8 @@ function openAllDeviceScanner() {
                 ethInfo.isActive = deviceInfo.isActive;
                 if(deviceInfo.isActive) {
                     ethInfo.insertionMethod = 'connected';
+                    ethInfo.isVerified = true;
+                    ethInfo.verified = true;
                 }
                 foundEth = true;
             } else if(deviceInfo.ct === wifiCT) {
@@ -803,6 +811,8 @@ function openAllDeviceScanner() {
                 wifiInfo.isActive = deviceInfo.isActive;
                 if(deviceInfo.isActive) {
                     wifiInfo.insertionMethod = 'connected';
+                    wifiInfo.isVerified = true;
+                    wifiInfo.verified = true;
                 }
                 foundWiFi = true;
             } else {
