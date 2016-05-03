@@ -7,19 +7,20 @@ process.on('uncaughtException', function(err) {
 });
 
 var testGroups = {
-	'get_ljm_version': true,
-	'basic_test': true,
-	'listall': {
-		'mock_test': true,
-		'basic_test': true,
-	},
-	'openall': {
-		'basic_mock': true,
-		'mock_openall': true,
-		'mock_w_device': true,
-		'basic_test': true,
-		'basic_eth_test': true,
-	},
+	// 'get_ljm_version': true,
+	// 'basic_test': true,
+	// 'listall': {
+	// 	'mock_test': true,
+	// 	'basic_test': true,
+	// },
+	// 'openall': {
+	// 	'basic_mock': true,
+	// 	'mock_openall': true,
+	// 	'mock_w_device': true,
+	// 	'basic_test': true,
+	// 	'basic_eth_test': true,
+	// },
+	'test_openall': true,
 };
 
 

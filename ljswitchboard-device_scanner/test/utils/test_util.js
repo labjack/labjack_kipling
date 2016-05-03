@@ -5,11 +5,31 @@ function printScanResultsData(deviceTypes) {
 		// console.log('Device Type', deviceType.deviceTypeString, Object.keys(deviceType));
 		var devices = deviceType.devices;
 		devices.forEach(function(device) {
+			var isAct = 'F';
+			if(device.isActive) {
+				isAct = 'T';
+			}
+			var isMock = 'F';
+			if(device.isMockDevice) {
+				isMock = 'T';
+			}
+			var actMockMsg = isAct + '&' + isMock;
+			var shortNames = [];
+			try {
+				shortNames = device.connectionTypeNames.map(function(name) {
+					return name.slice(0,4);
+				});
+			} catch(err) {
+
+			}
 			console.log(' - Device', {
 				dt: device.deviceTypeName,
 				sn: device.serialNumber,
 				cts: device.connectionTypeNames,
-				// isActive: device.isActive,
+				// cts: shortNames,
+				// act: device.isActive,
+				// mock: device.isMockDevice,
+				// 'A&M': actMockMsg,
 			});
 			cts = device.connectionTypes;
 			cts.forEach(function(ct) {

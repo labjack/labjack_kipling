@@ -119,7 +119,12 @@ function createMockDeviceScanner() {
 		var ct = driver_const.connectionTypes[connectionType];
 		var ctANY = driver_const.LJM_CT_ANY;
 		var ctTCP = driver_const.LJM_CT_TCP;
+		var ctETH = driver_const.LJM_CT_ETHERNET;
+		var ctWIFI = driver_const.LJM_CT_WIFI;
 
+		var ethScanPort = driver_const.LJM_ETH_UDP_PORT;
+		var wifiScanPort = driver_const.LJM_WIFI_UDP_PORT;
+		var port = 0;
 		var serialNumber;
 		var ipAddress;
 		if(dt == dtANY) {
@@ -127,9 +132,17 @@ function createMockDeviceScanner() {
 		}
 		if(ct == ctANY) {
 			ct = driver_const.LJM_CT_USB;
+			port = 0;
 		}
 		if(ct == ctTCP) {
 			ct = driver_const.LJM_CT_ETHERNET;
+			port = ethScanPort;
+		}
+		if(ct == ctETH) {
+			port = ethScanPort;
+		}
+		if(ct == ctWIFI) {
+			port = wifiScanPort;
 		}
 
 		if(deviceInfo.serialNumber) {
@@ -151,6 +164,7 @@ function createMockDeviceScanner() {
 		data.ipAddress = ipAddress;
 		data.isMockDevice = true;
 		data.handle = nextHandle;
+		data.port = port;
 		nextHandle -= 1;
 		return data;
 	};
@@ -203,10 +217,12 @@ function createMockDeviceScanner() {
 		var defered = q.defer();
 		var devicesToScan = [];
 		self.devices.forEach(function(device) {
+			// console.log('Adding mock devices', device);
 			devicesToScan.push(device);
 		});
 		self.currentDevices.forEach(function(cDevice) {
 			var d = cDevice.savedAttributes;
+			// console.log('Adding already connected devices...', d.serialNumber);
 			devicesToScan.push({
 				'dt': d.deviceType,
 				'deviceType': d.deviceType,
@@ -215,8 +231,9 @@ function createMockDeviceScanner() {
 				'ipAddress': d.ipAddress,
 				'isMockDevice': d.isMockDevice,
 				'handle': d.handle,
-			})
-		})
+				'port': d.port,
+			});
+		});
 		devicesToScan.forEach(function(device, i) {
 			var addDevice = false;
 			var dtANY = driver_const.LJM_DT_ANY;
@@ -346,9 +363,9 @@ function createMockDeviceScanner() {
 
 	/* Stubbed functions... */
 	this.inspectMockDevices = function() {
-		// console.log('in inspectMockDevices!');
-		// console.log('Num Current Devices', self.currentDevices.length);
-		// console.log('Num Mock Devices', self.devices);
+		console.log('in inspectMockDevices!');
+		console.log('Num Current Devices', self.currentDevices.length);
+		console.log('Num Mock Devices', self.devices);
 	};
 	this.currentDevices = [];
 	this.updateCurrentDevices = function(currentDevices) {
@@ -378,7 +395,7 @@ function createMockDeviceScanner() {
 			pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 			sc = deviceInfo.DGT_INSTALLED_OPTIONS.subclass;
 		} else {
-			console.log('Failed to get product type');
+			console.log('Failed to get model type');
 		}
 		return pt + sc;
 	}
@@ -402,12 +419,12 @@ function createMockDeviceScanner() {
 				if(currentDevice.savedAttributes.handle === handle) {
 					sn = currentDevice.savedAttributes.serialNumber;
 					device = currentDevice.savedAttributes;
+					device.dt = device.deviceType;
 					return true;
 				} else {
 					return false;
 				}
 			});
-			device.dt = device.deviceType;
 		}
 
 		var data = {};
@@ -445,6 +462,7 @@ function createMockDeviceScanner() {
 			// deviceInfo.serialNumber = handleInfo.SerialNumber;
 			// deviceInfo.ip = parseIPAddress(handleInfo.IPAddress);
 			data.ip = device.ip;
+			data.port = device.port;
 			// deviceInfo.port = handleInfo.Port;
 			// deviceInfo.maxBytesPerMB = handleInfo.MaxBytesPerMB;	
 
@@ -469,6 +487,7 @@ function createMockDeviceScanner() {
 	this.openAll = function(dt, ct, onErr, onSuccess) {
 		var foundDevices = [];
 		// console.log('dt, ct', dt, ct);
+		// console.log('Called OpenAll', dt, ct);
 		addMockDevices(foundDevices, dt, ct)
 		.then(function(devices) {
 			// console.log('OpenAll Data', devices);

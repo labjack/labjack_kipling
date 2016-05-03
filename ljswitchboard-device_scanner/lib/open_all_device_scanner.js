@@ -61,6 +61,8 @@ var DEBUG_CONNECTION_TYPE_SORTING = false;
 /* Mark active connection types */
 var DEBUG_MARKING_ACTIVE_CONNECTION_TYPES = true;
 
+var DEBUG_MOCK_DEVICES = false;
+
 function getLogger(bool) {
     return function logger() {
         if(bool) {
@@ -219,6 +221,10 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
     this.handle = deviceHandle;
     this.openParameters = openParameters;
     this.isMockDevice = false;
+    // Define the device by default as a mock device if live scanning is disabled.
+    if(!LIVE_DEVICE_SCANNING_ENABLED) {
+        this.isMockDevice = true;
+    }
     this.isActive = false;
     this.activeConnectionType = -1;
     if(curatedDevice) {
@@ -239,7 +245,8 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
     function getDeviceInfo() {
         var defered = q.defer();
         debugLJMCalls('Getting Device Info:', self.handle);
-        if(LIVE_DEVICE_SCANNING_ENABLED) {
+        // console.log('Getting Device Info...', self.handle, self.isActive, self.isMockDevice);
+        if(!self.isMockDevice) {
             ljmUtils.getDeviceInfo(
                 self.handle,
                 self.requiredInfo,
@@ -252,15 +259,15 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
                 });
         } else {
             mockDeviceScanningLib.getDeviceInfo(
-                self.handle,
-                self.requiredInfo,
-                function(data) {
-                    parseDeviceInfo(data, self.requiredInfo);
-                    self.collectedDeviceData = data;
-                    self.collectedDeviceData.isActive = self.isActive;
-                    self.collectedDeviceData.isMockDevice;
-                    defered.resolve();
-                });
+            self.handle,
+            self.requiredInfo,
+            function(data) {
+                parseDeviceInfo(data, self.requiredInfo);
+                self.collectedDeviceData = data;
+                self.collectedDeviceData.isActive = self.isActive;
+                self.collectedDeviceData.isMockDevice = true;
+                defered.resolve();
+            });
         }
         return defered.promise;
     }
@@ -735,14 +742,21 @@ function openAllDeviceScanner() {
                 'insertionMethod': 'unknown',
                 'foundByAttribute': false,
                 'isActive': false,
+                'isMockDevice': false,
             };
+            var usbCT = driver_const.connectionTypes.usb;
             var ethCT = driver_const.connectionTypes.ethernet;
             var wifiCT = driver_const.connectionTypes.wifi;
+
             if((ct == ethCT)||(ct == wifiCT)) {
                 obj.ip = id;
                 obj.ipAddress = id;
                 // Define the port as the modbus 502 port.
-                obj.port = 502;
+                obj.port = driver_const.LJM_MODBUS_PORT;
+            } else if(ct == usbCT) {
+                obj.ip = '0.0.0.0';
+                obj.ipAddress = '0.0.0.0';
+                obj.port = 0;
             }
             return obj;
         }
@@ -752,7 +766,16 @@ function openAllDeviceScanner() {
          * is a list of the device's available connection types.
          */
         function getDeviceConnectionTypesData(deviceInfo) {
-            // console.log('in getDeviceConnectionTypesData', deviceInfo.serialNumber, deviceInfo.ct, deviceInfo.port, deviceInfo.isActive);//, Object.keys(deviceInfo));
+            if(false) {
+                console.log(
+                    'in getDeviceConnectionTypesData',
+                    deviceInfo.serialNumber,
+                    deviceInfo.ct,
+                    deviceInfo.port,
+                    deviceInfo.isActive,
+                    deviceInfo.isMockDevice
+                );//, Object.keys(deviceInfo));
+            }
             var connectionTypes = [];
 
             var foundUSB = false;
@@ -982,11 +1005,13 @@ function openAllDeviceScanner() {
         return defered.promise;
     }
 
-    function verifyUnverifiedConnectionType(ct) {
+    function verifyUnverifiedConnectionType(deviceInfo, ct) {
         var defered = q.defer();
         debugVCT('Verifying CT:', ct.dt, ct.ct, ct.id);
         debugLJMCalls('Verifying CT:', ct.dt, ct.ct, ct.id);
-        if(LIVE_DEVICE_SCANNING_ENABLED) {
+        if(!deviceInfo.isMockDevice) {
+        // if(LIVE_DEVICE_SCANNING_ENABLED) {
+            // console.log('Verifying Connection Type', deviceInfo.serialNumber, ct.name,ct.ct,ct.id,deviceInfo.WIFI_STATUS);
             ljmUtils.verifyDeviceConnection(ct.dt, ct.ct, ct.id, function(res) {
                 ct.isVerified = res.isVerified;
                 ct.verified = res.isVerified;
@@ -1007,7 +1032,7 @@ function openAllDeviceScanner() {
             var promises = [];
             deviceInfo.connectionTypes.forEach(function(ct) {
                 if(!ct.isVerified) {
-                    promises.push(verifyUnverifiedConnectionType(ct));
+                    promises.push(verifyUnverifiedConnectionType(deviceInfo, ct));
                 }
             });
             q.allSettled(promises)
@@ -1021,7 +1046,7 @@ function openAllDeviceScanner() {
                 deviceInfo.connectionTypes,
                 function syncVerifyConnectionType(ct, cb) {
                     if(!ct.isVerified) {
-                        verifyUnverifiedConnectionType(ct)
+                        verifyUnverifiedConnectionType(deviceInfo, ct)
                         .then(cb, cb);
                     } else {
                         cb();
@@ -1287,16 +1312,19 @@ function openAllDeviceScanner() {
         debugSS('in findAllDevices');
         if(!LIVE_DEVICE_SCANNING_ENABLED) {
             debugSS('Mock scanning...');
-            mockDeviceScanningLib.inspectMockDevices();
+            if(DEBUG_MOCK_DEVICES) {
+                mockDeviceScanningLib.inspectMockDevices();
+            }
         }
         if(LIVE_DEVICE_SCANNING_ENABLED || true) {
             // Create the device manager object.
             createScannedDeviceManager(bundle)
 
-            // Mark the devices that are currently open and should not be closed.
+            // Mark and add the devices that are currently open and should not be closed.
             .then(markAndAddActiveDevices, getOnError('createScannedDeviceManager'))
 
             // Incrementally open as many devices as possible via USB and UDP connections.
+            // This function calls the openAll function and its mock-device-variant.
             .then(openAllAvailableDevices, getOnError('markAndAddActiveDevices'))
 
             // Collect the required information about each opened device.
