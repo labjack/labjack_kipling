@@ -32,6 +32,13 @@ exports.LJM_CT_ETHERNET = 3;
 exports.LJM_CT_WIFI = 4;
 exports.LJM_CT_UDP = 5;
 
+// Modbus Port
+exports.LJM_MODBUS_PORT = 502;
+
+// T7 Ethernet and WiFi UDP Scanning Port
+exports.LJM_ETH_UDP_PORT = 52362;
+exports.LJM_WIFI_UDP_PORT = 502;
+
 //Read/write constants
 exports.LJM_READ = 0;
 exports.LJM_WRITE = 1;
