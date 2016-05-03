@@ -54,6 +54,7 @@ function getHandleInfo(handle, cb) {
 module.exports.getHandleInfo = getHandleInfo;
 
 function readDeviceRegister(handle, register, cb) {
+	// console.log('VCT - ', handle, register);
 	var info = modbus_map.getAddressInfo(register, 0);
 	if(info.typeString !== 'STRING') {
 		// data_parser.parseResult
@@ -320,3 +321,25 @@ function verifyDeviceConnection(dt, ct, id, cb) {
 	);
 }
 module.exports.verifyDeviceConnection = verifyDeviceConnection;
+
+function closeDevice (handle, cb) {
+	function handleDeviceClose(closeInfo) {
+		var deviceClosed = false;
+		var closeError = closeInfo.ljmError;
+		if(closeInfo.ljmError === 0) {
+			deviceClosed = true;
+		} else {
+			deviceClosed = false;
+		}
+		
+		cb({
+			deviceClosed: deviceClosed,
+			closeError: closeError,
+		});
+	}
+	ljm.LJM_Close.async(
+		handle,
+		handleDeviceClose
+	);
+}
+module.exports.closeDevice = closeDevice;

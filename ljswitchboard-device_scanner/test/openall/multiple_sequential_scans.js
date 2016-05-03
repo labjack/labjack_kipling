@@ -24,18 +24,18 @@ exports.tests = {
 
 		test.done();
 	},
-	'open device': function(test) {
-		var device = new device_curator.device();
-		devices.push(device);
-		device.open('LJM_dtT7', 'LJM_ctEthernet', 'LJM_idANY')
-		.then(function() {
-			test.done();
-		}, function() {
-			devices[0].destroy();
-			devices = [];
-			test.done();
-		});
-	},
+	// 'open device': function(test) {
+	// 	var device = new device_curator.device();
+	// 	devices.push(device);
+	// 	device.open('LJM_dtT7', 'LJM_ctEthernet', 'LJM_idANY')
+	// 	.then(function() {
+	// 		test.done();
+	// 	}, function() {
+	// 		devices[0].destroy();
+	// 		devices = [];
+	// 		test.done();
+	// 	});
+	// },
 	'enable device scanning': function(test) {
 		deviceScanner.enableDeviceScanning()
 		.then(function() {
@@ -96,33 +96,33 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'read device SERIAL_NUMBER': function(test) {
-		if(devices[0]) {
-			devices[0].iRead('SERIAL_NUMBER')
-			.then(function(res) {
-				console.log('  - SN Res:'.green, res.val);
-				test.done();
-			}, function(err) {
-				console.log('Failed to read SN:', err, devices[0].savedAttributes.serialNumber);
-				test.ok(false, 'Failed to read SN: ' + JSON.stringify(err));
-				test.done();
-			});
-		} else {
-			test.done();
-		}
-	},
-	'close device': function(test) {
-		if(devices[0]) {
-			devices[0].close()
-			.then(function() {
-				test.done();
-			}, function() {
-				test.done();
-			});
-		} else {
-			test.done();
-		}
-	},
+	// 'read device SERIAL_NUMBER': function(test) {
+	// 	if(devices[0]) {
+	// 		devices[0].iRead('SERIAL_NUMBER')
+	// 		.then(function(res) {
+	// 			console.log('  - SN Res:'.green, res.val);
+	// 			test.done();
+	// 		}, function(err) {
+	// 			console.log('Failed to read SN:', err, devices[0].savedAttributes.serialNumber);
+	// 			test.ok(false, 'Failed to read SN: ' + JSON.stringify(err));
+	// 			test.done();
+	// 		});
+	// 	} else {
+	// 		test.done();
+	// 	}
+	// },
+	// 'close device': function(test) {
+	// 	if(devices[0]) {
+	// 		devices[0].close()
+	// 		.then(function() {
+	// 			test.done();
+	// 		}, function() {
+	// 			test.done();
+	// 		});
+	// 	} else {
+	// 		test.done();
+	// 	}
+	// },
 	'unload': function(test) {
 		device_scanner.unload();
 		test.done();

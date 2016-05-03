@@ -290,12 +290,37 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
         }
     };
     this.closeDevice = function() {
+        // console.log('Close Device...', self.openParameters);
         self.log('in closeDevice');
-        var promise;
         var defered = q.defer();
-        defered.resolve();
-        promise = defered.promise;
-        return promise;
+        if(self.isActive) {
+            // Don't close active devices.
+            defered.resolve();
+        } else {
+            if(!self.isMockDevice) {
+                ljmUtils.closeDevice(
+                    self.handle,
+                    function(data) {
+                        // console.log('Closed Device Info', data);
+                        defered.resolve();
+                    });
+                // defered.resolve();
+            } else {
+                defered.resolve();
+                // mockDeviceScanningLib.getDeviceInfo(
+                // self.handle,
+                // self.requiredInfo,
+                // function(data) {
+                //     parseDeviceInfo(data, self.requiredInfo);
+                //     self.collectedDeviceData = data;
+                //     self.collectedDeviceData.isActive = self.isActive;
+                //     self.collectedDeviceData.isMockDevice = true;
+                //     defered.resolve();
+                // });
+                // Don't bother closing??
+            }
+        }
+        return defered.promise;
     };
     var self = this;
 }
