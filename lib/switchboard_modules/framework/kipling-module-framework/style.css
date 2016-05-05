@@ -169,7 +169,7 @@ span.metro-radio::before {
     width:80px;
 }
 td.device-selector-table-status {
-    min-width:80px;
+    min-width:90px;
 }
 .device-selector-table-status .module-chrome-tab-badge{
     padding-left: 5px;

@@ -121,7 +121,7 @@
         "isTask": true
     }, {
         "name": "task_ljm_controller",
-        "active": true,
+        "active": false,
         "isTask": true
     }],
     "footer": [{
