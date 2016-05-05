@@ -11,8 +11,9 @@ var testGroups = {
 	'get_ljm_version': true,
 	'basic_ljm_calls': false,
 	'ljm_calls': {
-		'ljm_calls': false,
+		'ljm_calls': true,
 		'open_all': true,
+		'list_all': true,
 	},
 	'ljm_config_testing': {
 		'special_addresses': false,

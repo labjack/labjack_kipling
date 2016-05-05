@@ -11,7 +11,7 @@ var ARCH_INT_NUM_BYTES = driver_const.ARCH_INT_NUM_BYTES;
 var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
 var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 
-var ENABLE_DEBUG = false;
+var ENABLE_DEBUG = true;
 function debug() {
 	if(ENABLE_DEBUG) {
 		console.log.apply(console, arguments);
@@ -101,7 +101,7 @@ var test_cases = {
 
 		var dts = 'LJM_dtT7'; 
 		var dt = driver_const.deviceTypes[dts];
-		var cts = 'LJM_ctUSB';
+		var cts = 'LJM_ctANY';
 		var ct = driver_const.connectionTypes[cts];
 		var numOpened = 0;
 		var aHandles = [];
