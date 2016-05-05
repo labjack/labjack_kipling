@@ -56,7 +56,7 @@ function innerGetDeviceScanner(whichScanner) {
         // Nothing; we already have the device_scanner
     } else {
         // Load the LJM driver functions
-        driver = require('LabJack-nodejs').driver();
+        driver = require('labjack-nodejs').driver();
         
         // Determine which version of the device_scanner to return.
         if(whichScanner) {
