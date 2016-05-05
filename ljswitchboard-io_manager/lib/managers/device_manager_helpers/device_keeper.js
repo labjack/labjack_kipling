@@ -586,8 +586,13 @@ function createDeviceKeeper(io_delegator, link) {
 	
 	this.listAllDevices = function() {
 		var defered = q.defer();
-
-		deviceScanner.findAllDevices(self.devices)
+		var currentDevices = [];
+		var keys = Object.keys(self.devices);
+		keys.forEach(function(key) {
+			var dev = self.devices[key].device;
+			currentDevices.push(dev);
+		});
+		deviceScanner.findAllDevices(currentDevices)
 		.then(function(data) {
 			defered.resolve(data);
 		}, defered.reject);

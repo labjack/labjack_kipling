@@ -15,7 +15,7 @@ var TEST_DRIVER_CONTROLLER = false;					// Passing
 var TEST_SINGLE_DEVICE_CONTROLLER = false;			// incomplete
 
 // Tests the scanning for devices
-var TEST_DEVICE_SCANNER = false;					// Passes but outputs a lot of text.
+var TEST_DEVICE_SCANNER = true;					// Passes but outputs a lot of text.
 var TEST_MOCK_DEVICE_SCANNER = false;
 var TEST_LIVE_DEVICE_SCANNER = false;
 
@@ -32,7 +32,7 @@ var TEST_UPDATE_USB_DEVICE = false;					// Passing
 var MOCK_DEVICE_SPEED_TEST = false;
 var T7_DEVICE_SPEED_TEST = false;
 
-var TEST_SPECIAL_ADDRESSES_INTERFACE = true;
+var TEST_SPECIAL_ADDRESSES_INTERFACE = false;
 
 if(ENABLE_BASIC_TEST) {
 	var basic_test = require('./basic_test');
