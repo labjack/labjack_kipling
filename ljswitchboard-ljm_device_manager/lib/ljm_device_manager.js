@@ -12,6 +12,7 @@ var eventList = {
 	deviceStatusChanged: 'DEVICE_STATUS_CHANGED',
 	deviceRemoved: 'DEVICE_REMOVED',
 	deviceListChanged: 'DEVICE_LIST_CHANGED',
+	scannedDeviceListChanged: 'SCANNED_DEVICE_LIST_CHANGED',
 	subEvent: 'SUB_EVENT',
 };
 
@@ -238,7 +239,11 @@ function DEVICE_MANAGER() {
 		deviceScanner.findAllDevices(deviceObjectList)
 		.then(function(deviceTypes) {
 			self.cachedDeviceScanResults = deviceTypes;
-
+			// Emit an event indicating that the cache has been updated.
+			self.emit(
+				eventList.scannedDeviceListChanged,
+				self.cachedDeviceScanResults
+			);
 			if(DEBUG_DEVICE_MANAGER_SCANNING) {
 				debugLog.dms('Scan Preview...');
 				deviceTypes.forEach(function(deviceType) {
