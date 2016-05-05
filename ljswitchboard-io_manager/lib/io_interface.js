@@ -369,7 +369,7 @@ function createIOInterface() {
 		version = {
 			'win32': '5_6_0',
 			'darwin': '5_6_0',
-			'linux': '5_4_1'
+			'linux': '5_6_0'
 		}[os];
 
 		// If the labjack-nodejs lib`rary isn't built for the version defined
