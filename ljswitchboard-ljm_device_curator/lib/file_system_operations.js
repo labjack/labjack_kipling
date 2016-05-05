@@ -279,9 +279,11 @@ function getFileSystemOperations(self) {
 	// Define some error codes that cound indicate that there are no more
 	// files to be listed when checking for more files.
 	var LJM_ERR_FILE_IO_NOT_FOUND = 2960;
+	var LJM_ERR_FILE_IO_END_OF_CWD = 2966;
 	var LJM_ERR_FILE_IO_INVALID_OBJECT = 2809;
 	var acceptableCheckForMoreFilesErrCodes = [
 		LJM_ERR_FILE_IO_NOT_FOUND,
+		LJM_ERR_FILE_IO_END_OF_CWD,
 		LJM_ERR_FILE_IO_INVALID_OBJECT
 	];
 

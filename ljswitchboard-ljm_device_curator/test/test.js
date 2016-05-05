@@ -113,7 +113,7 @@ var testGroups = {
 	},
 	'digit': {
 		'digit_basic_test': false,
-		'digit_variance_testing': true,
+		'digit_variance_testing': false,
 	},
 
 	// These are T7 specific tests.
@@ -123,16 +123,19 @@ var testGroups = {
 		't7_check_calibration_test': false,
 		't7_read_recovery_fw_version_test': false,
 		't7_upgrade_recovery_image_test': false,
+		't7_upgrade_test': false,
 		
 		// These two tests should be enabled and disabled together.  The first
 		// test loads and runs a lua script that creates a file.  The second
 		// test verifies that the file was created and then deletes it.  They
 		// are used together to test uSD card compatibility with the T7/T7-Pro.
-		't7_load_and_run_lua_script': false,
-		't7_verify_lua_script_created_file': false,
+		't7_load_and_run_lua_script': true,
+		't7_verify_lua_script_created_file': true,
 		
 		// This test requires special files to be on the uSD card.
-		't7_file_system_verification': false,
+		// Folder named "Test Folder" in the root directory.
+		// "Test Folder/JP2 period 2.txt"
+		't7_file_system_verification': true,
 	},
 
 	// These are production-line tests.

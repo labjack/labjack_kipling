@@ -1,7 +1,7 @@
 
 var q = require('q');
-var device_curator = require('../lib/device_curator');
-var utils = require('./utils/utils');
+var device_curator = require('../../lib/device_curator');
+var utils = require('../utils/utils');
 var qExec = utils.qExec;
 var labjack_nodejs = require('labjack-nodejs');
 var ljDevice = labjack_nodejs.getDeviceRef();
@@ -21,7 +21,7 @@ var stopTest = function(test, err) {
 var deviceFound = false;
 var performTests = true;
 
-var firmware_links = require('./firmware_links');
+var firmware_links = require('../firmware_links');
 var fws = firmware_links.firmwareLinks.T7;
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 var device_events = driver_const.device_curator_constants;
@@ -94,7 +94,7 @@ var device_tests = {
 		});
 	},
 	'upgradeFirmware': function(test) {
-		var fwVersionNum = 1.0188;
+		var fwVersionNum = 1.0199;
 		// var fwVersionNum = 0.6604;
 		var fwURL = fws[fwVersionNum.toFixed(4)];
 		console.log('  - fwURL:', fwURL);
