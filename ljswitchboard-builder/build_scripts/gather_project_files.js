@@ -68,7 +68,10 @@ var nodejsBinaryVersions = [
 	'0_10_33',
 	'0_10_35',
 	'0_12_1',
+	'0_12_7',
 	'1_2_0',
+	'5_4_1',
+	// '5_6_0',
 ];
 
 var addNodeVersionExclusions = function(os, arch) {
