@@ -1,4 +1,8 @@
 
+/**
+ * This test was designed to test the digit LJM functionality and how the
+ * various calibrations get applied by the device curator.
+ **/
 var q = require('q');
 var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');

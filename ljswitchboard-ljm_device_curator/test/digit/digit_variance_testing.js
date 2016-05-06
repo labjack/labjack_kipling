@@ -1,4 +1,9 @@
 
+/**
+ * This test is designed to quickly verify digits readings to make sure they
+ * aren't obviously broken.  It doesn't verify their readings, users need
+ * to visually inspect the test's output to check the results.
+ **/
 var q = require('q');
 var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');
