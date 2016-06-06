@@ -129,13 +129,17 @@ var testGroups = {
 		// test loads and runs a lua script that creates a file.  The second
 		// test verifies that the file was created and then deletes it.  They
 		// are used together to test uSD card compatibility with the T7/T7-Pro.
-		't7_load_and_run_lua_script': true,
-		't7_verify_lua_script_created_file': true,
+		't7_load_and_run_lua_script': false,
+		't7_verify_lua_script_created_file': false,
 		
 		// This test requires special files to be on the uSD card.
 		// Folder named "Test Folder" in the root directory.
 		// "Test Folder/JP2 period 2.txt"
-		't7_file_system_verification': true,
+		't7_file_system_verification': false,
+
+		// This test checks the ability to read the T7's manufacturing info 
+		// saved in flash.
+		't7_manufacturing_info_test': true,
 	},
 
 	// These are production-line tests.

@@ -33,6 +33,7 @@ var digit_io_helper = require('./digit_io_helper');
 var lua_script_operations = require('./lua_script_operations');
 var device_value_checker = require('./device_value_checker');
 var file_system_operations = require('./file_system_operations');
+var manufacturing_info_operations = require('./manufacturing_info_operations');
 
 var device_events = driver_const.device_curator_constants;
 
@@ -2235,6 +2236,15 @@ function device(useMockDevice) {
 	var fileSystemOperationKeys = Object.keys(fileSystemOperations);
 	for(i = 0; i < fileSystemOperationKeys.length; i++) {
 		this[fileSystemOperationKeys[i]] = fileSystemOperations[fileSystemOperationKeys[i]];
+	}
+
+	/**
+	 * Loading of Manufacturing Info functions:
+	**/
+	var manufacturingInfoOperations = new manufacturing_info_operations.get(this);
+	var manufacturingInfoKeys = Object.keys(manufacturingInfoOperations);
+	for(i = 0; i < manufacturingInfoKeys.length; i++) {
+		this[manufacturingInfoKeys[i]] = manufacturingInfoOperations[manufacturingInfoKeys[i]];
 	}
 
 	/**
