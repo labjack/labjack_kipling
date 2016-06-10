@@ -132,6 +132,7 @@ var testGroups = {
 		't7_load_and_run_lua_script': false,
 		't7_verify_lua_script_created_file': false,
 		
+		't7_file_system_basic': true,
 		// This test requires special files to be on the uSD card.
 		// Folder named "Test Folder" in the root directory.
 		// "Test Folder/JP2 period 2.txt"

@@ -186,8 +186,13 @@ function getFileSystemOperations(self) {
 	// Define object for "readdir" operation.
 	function createReaddirBundle() {
 		return {
+			'cwd': '',
 			'fileNames': [],
 			'files': [],
+			'isError': false,
+			'errorStep': '',
+			'error': undefined,
+			'errorCode': 0,
 		};
 	}
 	// Step #1 in "readdir" Operation
@@ -242,19 +247,24 @@ function getFileSystemOperations(self) {
 		debugLS('in readAndSaveFileListing');
 		var defered = q.defer();
 		self.readArray('FILE_IO_NAME_READ', bundle.FILE_IO_NAME_READ_LEN.val)
-		.then(function(cwdChars) {
-			debugLS('in readAndSaveFileListing raw', cwdChars);
-			var str = '';
-			cwdChars.forEach(function(cwdChar) {
-				if(cwdChar !== 0) {
-					str += String.fromCharCode(cwdChar);
+		.then(function(fileNameChars) {
+			debugLS('in readAndSaveFileListing raw', fileNameChars);
+			var fileName = '';
+			fileNameChars.forEach(function(fileNameChar) {
+				if(fileNameChar !== 0) {
+					fileName += String.fromCharCode(fileNameChar);
 				}
 			});
 			// Save the file name.
-			bundle.fileNames.push(str);
-
+			bundle.fileNames.push(fileName);
+			console.log('Debug CWD:', bundle.cwd, fileName);
+			var filePath = path.posix.join(bundle.cwd, fileName);
+			var pathInfo = path.posix.parse(filePath);
 			var fileInfo = {
-				'name': str,
+				'name': fileName,
+				'ext': pathInfo.ext,
+				'path': filePath,
+				'pathInfo': pathInfo,
 				'isDirectory': bundle.FILE_IO_ATTRIBUTES.isDirectory,
 				'isFile': bundle.FILE_IO_ATTRIBUTES.isFile,
 				'size': bundle.FILE_IO_SIZE.val,
@@ -306,7 +316,6 @@ function getFileSystemOperations(self) {
 		}, function(err) {
 			// Determine if there are more files to look for.
 			if(acceptableCheckForMoreFilesErrCodes.indexOf(err) >= 0) {
-			// if(err == 2960) { // Unfortunately... its not always this error code.
 				debugLS('in checkForMoreFiles Finished!');
 				// Then there are no more items... done.
 				defered.resolve(bundle);
@@ -324,7 +333,8 @@ function getFileSystemOperations(self) {
 	}
 
 	function innerReaddir(bundle) {
-		return startReaddirOperation(bundle)
+		return innerGetCWD(bundle)
+		.then(startReaddirOperation)
 		.then(getReaddirAttributes)
 		.then(readAndSaveFileListing)
 		.then(checkForMoreFiles);
