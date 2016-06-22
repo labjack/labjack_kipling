@@ -124,6 +124,83 @@ var device_tests = {
 			test.done();
 		});
 	},
+	'perform false change directory': function(test) {
+		debugCD('  - false change directory cd ');
+		device.changeDirectory()
+		.then(function(res) {
+			debugCD('  - performed cd:', res);
+			testLog('  - fake cd:'.green, res);
+			test.done();
+		}, function(err) {
+			errorLog('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
+			test.done();
+		});
+	},
+	'change directory to testDir': function(test) {
+		debugCD('  - changing directories cd /');
+		device.changeDirectory({'path': '/testDir'})
+		.then(function(res) {
+			debugCD('  - performed cd:', res);
+			testLog('  - performed cd:'.green, res);
+			test.done();
+		}, function(err) {
+			errorLog('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
+			test.done();
+		});
+	},
+	'get file listing - testDir - in /testDir': function(test) {
+		debugLS('  - Getting File Listing, "ls".');
+		device.readdir({path:'/testDir'})
+		.then(function(res) {
+			debugLS('  - Got ls:', res.fileNames);
+			testLog('  - CWD:'.green, res.cwd);
+			testLog('  - Path:'.green, res.path);
+			testLog('  - File Names:'.green, res.fileNames);
+			testLog('  - File Array:'.green, res.files.length);
+			// console.log('!!- ls:', res);
+			test.done();
+		}, function(err) {
+			errorLog('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
+			test.done();
+		});
+	},
+	'get file listing - root - in /testDir': function(test) {
+		debugLS('  - Getting File Listing, "ls".');
+		device.readdir({path:'/'})
+		.then(function(res) {
+			debugLS('  - Got ls:', res.fileNames);
+			testLog('  - CWD:'.green, res.cwd);
+			testLog('  - Path:'.green, res.path);
+			testLog('  - File Names:'.green, res.fileNames);
+			testLog('  - File Array:'.green, res.files.length);
+			// console.log('!!- ls:', res);
+			test.done();
+		}, function(err) {
+			errorLog('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
+			test.done();
+		});
+	},
+	'get file listing - cwd - in /testDir': function(test) {
+		debugLS('  - Getting File Listing, "ls".');
+		device.readdir()
+		.then(function(res) {
+			debugLS('  - Got ls:', res.fileNames);
+			testLog('  - CWD:'.green, res.cwd);
+			testLog('  - Path:'.green, res.path);
+			testLog('  - File Names:'.green, res.fileNames);
+			testLog('  - File Array:'.green, res.files.length);
+			// console.log('!!- ls:', res);
+			test.done();
+		}, function(err) {
+			errorLog('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
+			test.done();
+		});
+	},
 	'change directory to root': function(test) {
 		debugCD('  - changing directories cd /');
 		device.changeDirectory({'path': '/'})
@@ -143,6 +220,23 @@ var device_tests = {
 		.then(function(res) {
 			debugCWD('  - Got CWD', res);
 			testLog('  - Got CWD:'.green, res);
+			test.done();
+		}, function(err) {
+			errorLog('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
+			test.done();
+		});
+	},
+	'get file listing - testDir': function(test) {
+		debugLS('  - Getting File Listing, "ls".');
+		device.readdir({path:'/testDir'})
+		.then(function(res) {
+			debugLS('  - Got ls:', res.fileNames);
+			testLog('  - CWD:'.green, res.cwd);
+			testLog('  - Path:'.green, res.path);
+			testLog('  - File Names:'.green, res.fileNames);
+			testLog('  - File Array:'.green, res.files.length);
+			// console.log('!!- ls:', res);
 			test.done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
@@ -208,6 +302,20 @@ var device_tests = {
 			testLog('No files were found');
 			test.done();
 		}
+	},
+	'read test file': function(test) {
+		var filePath = '/testDir/txtFile.txt';
+		testLog('  - Reading File:'.green, filePath);
+		device.readFile({path:filePath})
+		.then(function(res) {
+			debugRF('  - File Contents:', res.data);
+			testLog('  - File Contents:'.green, res.data);
+			test.done();
+		}, function(err) {
+			errorLog('ERROR!!', err);
+			test.ok(false,'Should not have received an error...');
+			test.done();
+		});
 	},
 	'get disk information': function(test) {
 		debugDiskInfo('  - Get disk Info');

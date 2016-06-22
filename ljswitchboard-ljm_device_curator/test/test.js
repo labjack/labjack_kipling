@@ -118,21 +118,28 @@ var testGroups = {
 
 	// These are T7 specific tests.
 	't7': {
-		't7_basic_test': false,
-		't7_array_test': false,
-		't7_check_calibration_test': false,
-		't7_read_recovery_fw_version_test': false,
-		't7_upgrade_recovery_image_test': false,
-		't7_upgrade_test': false,
+		't7_basic_test': true,
+		't7_array_test': true,
+		't7_check_calibration_test': true,
+		't7_read_recovery_fw_version_test': true,
+		't7_upgrade_recovery_image_test': true,
+		't7_upgrade_test': true,
 		
 		// These two tests should be enabled and disabled together.  The first
 		// test loads and runs a lua script that creates a file.  The second
 		// test verifies that the file was created and then deletes it.  They
 		// are used together to test uSD card compatibility with the T7/T7-Pro.
-		't7_load_and_run_lua_script': false,
-		't7_verify_lua_script_created_file': false,
+		't7_load_and_run_lua_script': true,
+		't7_verify_lua_script_created_file': true,
 		
+		// This test prints out what files are on the uSD card.
 		't7_file_system_basic': true,
+
+		// This test performs multiple readdir commands and two read file
+		// commands to test file I/O commands.  Requires there to be a folder
+		// called 'testDir' and a file '/testDir/txtFile.txt'.
+		't7_file_system_mult_readdir': true,
+
 		// This test requires special files to be on the uSD card.
 		// Folder named "Test Folder" in the root directory.
 		// "Test Folder/JP2 period 2.txt"

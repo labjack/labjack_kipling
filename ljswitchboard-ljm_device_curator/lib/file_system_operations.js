@@ -183,10 +183,28 @@ function getFileSystemOperations(self) {
 	/*
 	 * Helper functions for "readdir"
 	 */
+	function parseReaddirOptions (options) {
+			var parsedOptions = {
+				'pathProvided': false,
+				'path': '/',
+			};
+			if(options) {
+				if(options.path) {
+					parsedOptions.path = options.path;
+					parsedOptions.pathProvided = true;
+				}
+			}
+			return parsedOptions;
+		}
 	// Define object for "readdir" operation.
-	function createReaddirBundle() {
+	function createReaddirBundle(options) {
 		return {
+			'changeDir': false,
+			'pathProvided': options.pathProvided,
+			'path': options.path,
+			'readdirPath': options.path,
 			'cwd': '',
+			'startingDir': '',
 			'fileNames': [],
 			'files': [],
 			'isError': false,
@@ -194,6 +212,38 @@ function getFileSystemOperations(self) {
 			'error': undefined,
 			'errorCode': 0,
 		};
+	}
+
+	function saveCWDPrepForInitialCD(bundle) {
+		debugLS('in saveCWDAsStartingCWD');
+		var defered = q.defer();
+		// If the a path option was provided
+		if(bundle.pathProvided) {
+			// Check to see if we are already at the requested path
+			if(bundle.cwd != bundle.path) {
+				bundle.changeDir = true;
+			} else {
+				// Make sure that the CWD doesn't get changed.
+				bundle.changeDir = false;
+			}
+			bundle.startingDir = bundle.cwd;
+		} else {
+			// Make sure that the CWD doesn't get changed.
+			bundle.changeDir = false;
+			bundle.readdirPath = bundle.cwd;
+		}
+		defered.resolve(bundle);
+		return defered.promise;
+	}
+
+	function prepForFinalCD(bundle) {
+		debugLS('in saveCWDAsStartingCWD');
+		var defered = q.defer();
+		if(bundle.changeDir) {
+			bundle.path = bundle.startingDir;
+		}
+		defered.resolve(bundle);
+		return defered.promise;
 	}
 	// Step #1 in "readdir" Operation
 	function startReaddirOperation(bundle) {
@@ -257,7 +307,7 @@ function getFileSystemOperations(self) {
 			});
 			// Save the file name.
 			bundle.fileNames.push(fileName);
-			console.log('Debug CWD:', bundle.cwd, fileName);
+			debugLS('Debug CWD:', bundle.cwd, fileName);
 			var filePath = path.posix.join(bundle.cwd, fileName);
 			var pathInfo = path.posix.parse(filePath);
 			var fileInfo = {
@@ -334,12 +384,16 @@ function getFileSystemOperations(self) {
 
 	function innerReaddir(bundle) {
 		return innerGetCWD(bundle)
+		.then(saveCWDPrepForInitialCD)
+		.then(innerChangeDirectory)
 		.then(startReaddirOperation)
 		.then(getReaddirAttributes)
 		.then(readAndSaveFileListing)
-		.then(checkForMoreFiles);
+		.then(checkForMoreFiles)
+		.then(prepForFinalCD)
+		.then(innerChangeDirectory);
 	}
-	this.readdir = function(path) {
+	this.readdir = function(options) {
 		/*
 		 * Get list of items in the CWD
 		 * 1. Write a value of 1 to FILE_IO_DIR_FIRST. 
@@ -361,13 +415,17 @@ function getFileSystemOperations(self) {
 		 *  FILE_IO_NOT_FOUND (2960) indicates that there 
 		 *  are no more items->Done.
 		 */
+
 		debugFSOps('* in readdir');
 		var defered = q.defer();
-		var bundle = createReaddirBundle();
+		var parsedOptions = parseReaddirOptions(options);
+		var bundle = createReaddirBundle(parsedOptions);
 
 		function succFunc(rBundle) {
 			debugLS('in readdir res');
 			defered.resolve({
+				'cwd': rBundle.cwd,
+				'path': rBundle.readdirPath,
 				'fileNames': rBundle.fileNames,
 				'files': rBundle.files,
 			});
@@ -381,6 +439,7 @@ function getFileSystemOperations(self) {
 			}
 			if(resolve) {
 				defered.resolve({
+					'cwd': rBundle.cwd,
 					'fileNames': rBundle.fileNames,
 					'files': rBundle.files,
 				});
@@ -401,11 +460,13 @@ function getFileSystemOperations(self) {
 	 */
 	function parseChangeDirectoryOptions (options) {
 		var parsedOptions = {
+			'changeDir': false,
 			'path': '/',
 		};
 		if(options) {
 			if(options.path) {
 				parsedOptions.path = options.path;
+				parsedOptions.changeDir = true;
 			}
 		}
 		return parsedOptions;
@@ -413,7 +474,9 @@ function getFileSystemOperations(self) {
 	function getChangeDirectoryBundle(options) {
 		debugCD('in getChangeDirectoryBundle');
 		var bundle ={
+			'changeDir': options.changeDir,
 			'path': options.path,
+			'cwd': '',
 			'directoryNameArray': [],
 			'isError': false,
 			'errorStep': '',
@@ -501,10 +564,16 @@ function getFileSystemOperations(self) {
 		return defered.promise;
 	}
 	function innerChangeDirectory(bundle) {
-		return populateDirectoryNameArray(bundle)
-		.then(writeDesiredDirectoryNameSize)
-		.then(writeDesiredDirectoryName)
-		.then(executeChangeDirectoryCommand);
+		if(bundle.changeDir) {
+			return populateDirectoryNameArray(bundle)
+			.then(writeDesiredDirectoryNameSize)
+			.then(writeDesiredDirectoryName)
+			.then(executeChangeDirectoryCommand)
+			.then(innerGetCWD);
+		} else {
+			// console.log('FS Debug: Not Changing Directory');
+			return innerGetCWD(bundle);
+		}
 	}
 	this.changeDirectory = function(options) {
 		/*
@@ -535,7 +604,7 @@ function getFileSystemOperations(self) {
 		function succFunc(rBundle) {
 			debugCD('in changeDirectory res');
 			defered.resolve({
-				'directory': rBundle.directory,
+				'cwd': rBundle.cwd,
 			});
 		}
 		function errFunc(rBundle) {
@@ -679,6 +748,7 @@ function getFileSystemOperations(self) {
 			'startingDirectory': '',
 			'cwd': '',// To be used as a temporary location to store the cwd.
 			'path': '',
+			'changeDir': true, // Set this boolean flag to 
 			'directoryNameArray': [],
 			'files': [],
 			'fileNames': [],
@@ -702,6 +772,7 @@ function getFileSystemOperations(self) {
 		// Configure the "path" variable that is used by the changeDirectory
 		// function
 		bundle.path = '' + bundle.fileRootPath;
+		bundle.changeDir = true;
 		defered.resolve(bundle);
 		return defered.promise;
 	}
@@ -769,6 +840,7 @@ function getFileSystemOperations(self) {
 		var defered = q.defer();
 		// Save the acquired cwd to the startingDirectory attribute.
 		bundle.path = '' + bundle.filePath;
+
 
 		defered.resolve(bundle);
 		return defered.promise;
