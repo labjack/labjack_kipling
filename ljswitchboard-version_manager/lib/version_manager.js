@@ -357,7 +357,7 @@ function labjackVersionManager() {
                     'pageType': 'firmware',
                     'releaseType': 'stable',
                 });
-
+                
                 if(parsedData.isValid) {
                     listingArray.push({
                         'upgradeLink': parsedData.upgradeLink,
@@ -613,13 +613,13 @@ function labjackVersionManager() {
             // Check to see if the type needs to be altered with the organizer.
             if(organizer) {
                 info.type = organizer.getType(info.version);
+                info.key = info.type + '-' + info.version;
             }
 
             // Initialize the infoCache array if it is empty
             if (typeof(self.infoCache[name][info.type]) === 'undefined') {
                 self.infoCache[name][info.type] = [];
             }
-
             var data = {
                 upgradeLink: info.upgradeLink,
                 version: info.version,
