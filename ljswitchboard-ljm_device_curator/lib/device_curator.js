@@ -2373,6 +2373,49 @@ function device(useMockDevice) {
 	this.stopAllWatchers = function() {
 		return registerWatcher.stopAllWatchers();
 	};
+
+	/**
+	 * Utility function that indicates what functions are implemented.
+	**/
+	var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+	var ARGUMENT_NAMES = /([^\s,]+)/g;
+	function getFuncParamNames(func) {
+		var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+		var result = fnStr.slice(fnStr.indexOf('(')+1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+		if(result === null) {
+			result = [];
+		}
+		return result;
+	}
+	this.getFunctions = function() {
+		var listOfAttributes = Object.keys(self);
+		var listOfFunctions = [];
+		listOfAttributes.forEach(function(attributeName) {
+			var attr = self[attributeName];
+			var attrType = typeof(attr);
+			var funcName = '';
+			var numArgs = 0;
+			var argNames = [];
+			var validFunc = false;
+			if(attrType === 'function') {
+				try {
+					funcName = attr.name;
+					numArgs = attr.length;
+					argNames = getFuncParamNames(attr);
+					validFunc = true;
+				} catch(err) {
+					// Just catch the error...
+				}
+			}
+			if(validFunc) {
+				listOfFunctions.push({
+					'name': funcName,
+					'numArgs': numArgs,
+					'argNames': argNames,
+				});
+			}
+		});
+	};
 }
 util.inherits(device, EventEmitter);
 
