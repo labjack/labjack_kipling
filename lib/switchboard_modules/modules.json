@@ -80,6 +80,10 @@
         "description": "A starting point for the device logger.",
         "active": false
     }, {
+        "name": "file_browser_fw",
+        "description":"A SD Card file browser for the  T7.",
+        "active": true
+    }, {
         "name": "simple_logger_flot",
         "active": false
     }, {
@@ -130,9 +134,5 @@
     }, {
         "name": "settings",
         "active": true
-    }, {
-        "name": "demo_file_browser",
-        "description":"A test module for the T7 uSD card file browser",
-        "active": false
     }]
 }

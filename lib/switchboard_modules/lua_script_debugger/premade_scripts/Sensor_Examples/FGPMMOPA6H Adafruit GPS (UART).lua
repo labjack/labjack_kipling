@@ -5,7 +5,7 @@ print("Get the GPS latitude & longitude from a FGPMMOPA6H Adafruit GPS Module.")
 --other helpful resources
 --https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.h
 --https://github.com/adafruit/Adafruit-GPS-Library/blob/master/Adafruit_GPS.cpp
-
+--Change 6/28/2016.  Writes to register 5440 need to use type 0 and not 1.
 
 data = {}
 temp = 0
@@ -42,7 +42,7 @@ ASCIIcharAsByte2 = 0
 
 --Set the baud rate
 strLen = string.len(PMTK_SET_BAUD_9600)
-MB.W(5440, 1, strLen)--ASYNCH_NUM_BYTES_TX
+MB.W(5440, 0, strLen)--ASYNCH_NUM_BYTES_TX
 for i=1, strLen do
   ASCIIcharAsByte = string.byte(PMTK_SET_BAUD_9600, i)
   MB.W(5490, 0, ASCIIcharAsByte)
@@ -52,7 +52,7 @@ MB.W(5450, 0, 1) --ASYNCH_TX_GO
 
 --Set the update rate.  i.e.  the rate at which the signal is echoed.
 strLen1 = string.len(PMTK_SET_NMEA_UPDATE_1HZ)
-MB.W(5440, 1, strLen1)--ASYNCH_NUM_BYTES_TX
+MB.W(5440, 0, strLen1)--ASYNCH_NUM_BYTES_TX
 for i=1, strLen1 do
   ASCIIcharAsByte1 = string.byte(PMTK_SET_NMEA_UPDATE_1HZ, i)
   MB.W(5490, 0, ASCIIcharAsByte1)
@@ -61,7 +61,7 @@ MB.W(5450, 0, 1) --ASYNCH_TX_GO
 
 --To actually speed up the position fix you must also send one of the position fix rate commands
 strLen2 = string.len(PMTK_API_SET_FIX_CTL_1HZ)
-MB.W(5440, 1, strLen2)--ASYNCH_NUM_BYTES_TX
+MB.W(5440, 0, strLen2)--ASYNCH_NUM_BYTES_TX
 for i=1, strLen2 do
   ASCIIcharAsByte2 = string.byte(PMTK_API_SET_FIX_CTL_1HZ, i)
   MB.W(5490, 0, ASCIIcharAsByte2)

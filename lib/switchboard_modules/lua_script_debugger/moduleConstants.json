@@ -170,6 +170,12 @@
         }, {
             "name": "Lua IO USER RAM FIFO",
             "location": "lua_script_debugger/premade_scripts/11b USER RAM FIFO.lua"
+        }, {
+            "name": "UART Example",
+            "location": "lua_script_debugger/premade_scripts/13 UART Example.lua"
+        }, {
+            "name": "PWM Library",
+            "location": "lua_script_debugger/premade_scripts/14 PWM Library.lua"
         }
     ],
     "scriptOptions": {
