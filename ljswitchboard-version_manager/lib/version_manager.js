@@ -381,6 +381,7 @@ function labjackVersionManager() {
             } else {
                 var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
                 var match = FIRMWARE_LINK_REGEX.exec(pageData);
+
                 while (match !== null) {
                     var $ = cheerio.load(match[0]);
                     var linkElements = $('a');
@@ -389,16 +390,22 @@ function labjackVersionManager() {
                         var ele = $(linkElement);
                         var targetURL = ele.attr('href');
                         var fileName = path.basename(targetURL);
-
-                        // var targetURL = match[0].replace(/href\=\"/g, '');
-                        // targetURL = targetURL.replace(/\"/g, '');
-                        var version = (parseFloat(fileName.split('_')[1])/10000).toFixed(4);
-                        listingArray.push({
-                            "upgradeLink":targetURL,
-                            "version":version,
-                            "type":urlInfo.type,
-                            "key":urlInfo.type + '-' + version
-                        });
+                        var FIRMWARE_FILE_REGEX = /http.*T7firmware\_([\d\-]+).*\.bin/g;
+                        var isValidFWLink = FIRMWARE_FILE_REGEX.test(targetURL);
+                        if(isValidFWLink) {
+                            // console.log('Adding...', targetURL, targetURL.length);
+                            // var targetURL = match[0].replace(/href\=\"/g, '');
+                            // targetURL = targetURL.replace(/\"/g, '');
+                            var version = (parseFloat(fileName.split('_')[1])/10000).toFixed(4);
+                            listingArray.push({
+                                "upgradeLink":targetURL,
+                                "version":version,
+                                "type":urlInfo.type,
+                                "key":urlInfo.type + '-' + version
+                            });
+                        } else {
+                            // console.log('Invalid URL', targetURL, targetURL.length);
+                        }
                         // console.log('T7 FW Versions', version);
                         // console.log('Type....', urlInfo.type);
                         // console.log('targetURL', targetURL);
