@@ -2352,8 +2352,6 @@ function device(useMockDevice) {
 		}
 	};
 
-	var self = this;
-
 	/**
 	 * Begin extending the device with the register watcher system.
 	**/
@@ -2388,18 +2386,19 @@ function device(useMockDevice) {
 		return result;
 	}
 	this.getFunctions = function() {
+		var defered = q.defer();
+
 		var listOfAttributes = Object.keys(self);
 		var listOfFunctions = [];
 		listOfAttributes.forEach(function(attributeName) {
 			var attr = self[attributeName];
 			var attrType = typeof(attr);
-			var funcName = '';
+			var funcName = attributeName;
 			var numArgs = 0;
 			var argNames = [];
 			var validFunc = false;
 			if(attrType === 'function') {
 				try {
-					funcName = attr.name;
 					numArgs = attr.length;
 					argNames = getFuncParamNames(attr);
 					validFunc = true;
@@ -2415,7 +2414,12 @@ function device(useMockDevice) {
 				});
 			}
 		});
+
+		defered.resolve(listOfFunctions);
+		return defered.promise;
 	};
+
+	var self = this;
 }
 util.inherits(device, EventEmitter);
 
