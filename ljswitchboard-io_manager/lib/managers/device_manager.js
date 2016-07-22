@@ -101,6 +101,9 @@ function createDeviceManager(io_delegator) {
 					} else if(numArgs === 4) {
 						caller[func](args[0], args[1], args[2], args[3])
 						.then(success, error, syntaxError);
+					}  else if(numArgs === 5) {
+						caller[func](args[0], args[1], args[2], args[3], args[4])
+						.then(success, error, syntaxError);
 					} else {
 						caller[func](args)
 						.then(success, error, syntaxError);

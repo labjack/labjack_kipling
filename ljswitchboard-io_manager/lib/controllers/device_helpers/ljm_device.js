@@ -208,7 +208,9 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 		return defered.promise;
 	};
 	
-
+	this.getFunctions = function() {
+		return self.callFunc('getFunctions');
+	};
 
 	/**
 	 *	The close function calls the previously passed in close function of the

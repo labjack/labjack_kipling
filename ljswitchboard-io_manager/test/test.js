@@ -7,7 +7,7 @@ var pResults = utils.pResults;
 var q = require('q');
 
 // enable/disable tests
-var ENABLE_BASIC_TEST = false;						// Passing
+var ENABLE_BASIC_TEST = true;						// Passing
 var ENABLE_SIMPLE_TEST = false;						// Passing
 var TEST_DRIVER_CONTROLLER = false;					// Passing
 
@@ -15,7 +15,7 @@ var TEST_DRIVER_CONTROLLER = false;					// Passing
 var TEST_SINGLE_DEVICE_CONTROLLER = false;			// incomplete
 
 // Tests the scanning for devices
-var TEST_DEVICE_SCANNER = true;					// Passes but outputs a lot of text.
+var TEST_DEVICE_SCANNER = false;					// Passes but outputs a lot of text.
 var TEST_MOCK_DEVICE_SCANNER = false;
 var TEST_LIVE_DEVICE_SCANNER = false;
 

@@ -349,6 +349,52 @@ function createDeviceController(io_interface) {
 		return callFunc('getNumDevices');
 	};
 
+	// Define a list of functions that aren't implemented by a device helper
+	// that shouldn't be automatically generated as a "beta" function.
+	var missing_funcs_to_ignore = [
+	'getLatestDeviceErrorsSync', 'configureMockDeviceSync', 'getDevice',
+	'declareDeviceDisconnected', 'haltBackgroundOperations',
+	'getBufferDataSplitSize', 'waitForDeviceToInitialize',
+	'open', 'simpleOpen', 'linkToHandle',
+	// 'writeMultiple',
+	// 'performMultipleWrites',
+	'streamStart', 'streamRead', 'streamReadRaw', 'streamStop',
+	'destroy', 'getUnsavedDefaults', 'clearUnsavedDefaults',
+	// 'qReadArray',
+	'retryFlashError', 'finishFirmwareUpdate', 'restartConnectionManager',
+	'prepareForUpgrade', 'internalUpdateFirmware',
+	// 'readFlash',
+	'internalReadFlash',
+	
+	// Get information about the device.
+	// 'getRecoveryFirmwareVersion', 'getPrimaryFirmwareVersion', 'getCalibrationStatus',
+
+	// 'readAndEvaluate', ** A cool beta function **
+	// 'writeReadAndEvaluate', ** A cool beta function **
+
+	// Lua script functions
+	// 'stopLuaScript', 'startLuaScript', 'loadLuaScript',
+
+	// File I/O Functions
+	// 'getCWD', 'readdir', 'changeDirectory',
+	// 'getDiskInfo', 'readFile', 'getFilePreview', 'deleteFile',
+
+	// More manufacturing info
+	// 'readManufacturingInfo',
+
+	// Digit functions
+	'digitRead',
+	'readHumidity',
+	'readTempHumidityLight',
+	'readTempLightHumidity',
+	'getLogParams',
+	'readDigitLoggedData',
+	'createWatcher',
+	'configureWatcher',
+	'getWatchers',
+	'stopWatcher',
+	'stopAllWatchers'
+	];
 	/**
 	 * This function creates a new device object (T7/Digit) and adds it to the
 	 * device_controller device management system.
@@ -380,7 +426,60 @@ function createDeviceController(io_interface) {
 
 		self.devices[comKey] = newDevice;
 
-		defered.resolve(newDevice);
+		self.devices[comKey].getFunctions()
+		.then(function success(functionList) {
+			// print out the functions that are implemented by the device
+			// curator.
+			// console.log('Created a new device, List of implemented functions!', functionList);
+			var newDeviceKeys = Object.keys(newDevice);
+			var missingFunctions = [];
+			functionList.forEach(function(implementedFunction) {
+				var name = implementedFunction.name;
+				var attrType = typeof(newDevice[name]);
+				if(attrType === 'function') {
+					// The function is implemented properly.  I hope...
+				} else {
+					if(missing_funcs_to_ignore.indexOf(name) < 0) {
+						missingFunctions.push(name);
+
+						
+
+						// Since the function isn't defined, we need to 
+						// Define the function.
+						// We need to generate a string that looks like this:
+						// "return self.callFunc('writeDeviceName', [newName]);"
+						// According to the docs: http://www.bryanbraun.com/2014/11/27/every-possible-way-to-define-a-javascript-function
+						// Hint: Search "Function Constructor w/apply".
+
+						// Function argument names
+						var argNames = implementedFunction.argNames;
+
+						// Generate function string
+						var funcStr = 'return this.callFunc(\''+name+'\', [';
+						funcStr += argNames.join(',');
+						funcStr += ']);';
+
+						// Populate array to construct function with.
+						var funcConstructorArray = [];
+						argNames.forEach(function(argName) {
+							funcConstructorArray.push(argName);
+						});
+						funcConstructorArray.push(funcStr);
+
+						// Create the function
+						self.devices[comKey][name] = Function.apply(self.devices[comKey], funcConstructorArray);
+					}
+				}
+			});
+
+			// Print out the list of functions that are being automatically
+			// defined.
+			// console.log('Created a new device, missing functions are', missingFunctions);
+			defered.resolve(newDevice);
+		}, function err() {
+			defered.resolve(newDevice);
+		});
+		// defered.resolve(newDevice);
 		return defered.promise;
 	};
 	/**
