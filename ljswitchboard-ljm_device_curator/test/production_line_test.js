@@ -126,6 +126,7 @@ var testGroups = {
 		// are used together to test uSD card compatibility with the T7/T7-Pro.
 		't7_load_and_run_lua_script': true,
 		't7_verify_lua_script_created_file': true,
+		't7_verify_sd_card_empty': true,
 		
 		// This test requires special files to be on the uSD card.
 		't7_file_system_verification': false,
