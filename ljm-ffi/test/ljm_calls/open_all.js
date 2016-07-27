@@ -123,6 +123,12 @@ var test_cases = {
 			handleOpenAll
 		);
 	},
+	'Execute close-all function': function(test) {
+		function handleCloseAll(info) {
+			test.done();
+		}
+		ljm.LJM_CloseAll.async(handleCloseAll);
+	},
 };
 
 

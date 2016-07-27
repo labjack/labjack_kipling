@@ -13,7 +13,7 @@ var testGroups = {
 	'ljm_calls': {
 		'ljm_calls': true,
 		'open_all': true,
-		'list_all': true,
+		// 'list_all': true,
 	},
 	'ljm_config_testing': {
 		'special_addresses': false,

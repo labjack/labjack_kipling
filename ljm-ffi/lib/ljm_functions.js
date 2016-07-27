@@ -172,6 +172,20 @@ LJM_FUNCTIONS.LJM_LoadConstants = {
 	'args': []						//No Args
 };
 
+LJM_FUNCTIONS.LJM_LoadConstantsFromFile = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'FileName': 				'string'}
+	]
+};
+
+LJM_FUNCTIONS.LJM_LoadConstantsFromString = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'JsonString': 				'string'}
+	]
+};
+
 LJM_FUNCTIONS.LJM_Close = {
 	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
 	'args': [
@@ -285,6 +299,29 @@ LJM_FUNCTIONS.LJM_eReadNameArray = {
 	]
 };
 
+
+LJM_FUNCTIONS.LJM_eReadAddressByteArray = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'Handle': 					'int'},
+		{'Address': 				'int'},
+		{'NumBytes': 				'int'},
+		{'aBytes': 					'a-char*'},
+		{'ErrorAddress': 			'int*'},
+	]
+};
+
+LJM_FUNCTIONS.LJM_eReadNameByteArray = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'Handle': 					'int'},
+		{'Name': 					'string'},
+		{'NumBytes': 				'int'},
+		{'aBytes': 					'a-char*'},	// (Readings)
+		{'ErrorAddress': 			'int*'},
+	]
+};
+
 LJM_FUNCTIONS.LJM_eWriteAddresses = {
 	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
 	'args': [
@@ -327,6 +364,28 @@ LJM_FUNCTIONS.LJM_eWriteNameArray = {
 		{'Name': 					'string'},
 		{'NumValues': 				'int'},
 		{'aValues': 				'a-double*'},	// (Readings)
+		{'ErrorAddress': 			'int*'},
+	]
+};
+
+LJM_FUNCTIONS.LJM_eWriteAddressByteArray = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'Handle': 					'int'},
+		{'Address': 				'int'},
+		{'NumBytes': 				'int'},
+		{'aBytes': 					'a-char*'},
+		{'ErrorAddress': 			'int*'},
+	]
+};
+
+LJM_FUNCTIONS.LJM_eWriteNameByteArray = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'Handle': 					'int'},
+		{'Name': 					'string'},
+		{'NumBytes': 				'int'},
+		{'aBytes': 					'a-char*'},	// (Readings)
 		{'ErrorAddress': 			'int*'},
 	]
 };
@@ -515,6 +574,14 @@ LJM_FUNCTIONS.Internal_LJM_OpenAll = {
 		{'NumOpened': 				'int*'},
 		{'aHandles': 				'a-int*'},
 		{'NumErrors': 				'int*'},
+		{'InfoHandle':				'int*'},
+		{'Info':					'char**'},
+	]
+};
+
+LJM_FUNCTIONS.Internal_LJM_GetHandles = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
 		{'InfoHandle':				'int*'},
 		{'Info':					'char**'},
 	]
