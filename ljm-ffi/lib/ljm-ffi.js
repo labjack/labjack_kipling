@@ -26,6 +26,7 @@ var path = require('path');
 var DEBUG_LJM_LIBRARY_LOCATION_SELECTION = false;
 var DEBUG_SEARCHING_FOR_LJM_LIB_LOCATIONS = false;
 var DEBUG_LOAD_CUSTOM_LJM = false;
+var VERBOSE_LJM_FUNCTION_LINKING = false;
 
 function convertLJFunctionInfoToFFI(functionInfo) {
     // Define the array to store data types into
@@ -92,6 +93,7 @@ var LJM_LIBRARY_FILE_TYPE = {
 var defaultLinuxLibraryLoc = {
     'ia32': function() {return ['/usr/local/lib'];},
     'x64': function() {return ['/usr/local/lib'];},
+    'arm': function() {return ['/usr/local/lib'];},
 };
 var defaultMacLibraryLoc = {
     'ia32': function() {return ['/usr/local/lib'];},
@@ -973,7 +975,11 @@ function loadLJMMultiple(ljmVersion) {
                     ljm[fn].async = createAsyncFunction(fn, fi);
                 }
             } catch(err) {
-                console.log('Failed to link function', functionName, err);
+                if(VERBOSE_LJM_FUNCTION_LINKING) {
+                    console.log('Warning: Failed to link function', functionName, err);
+                } else {
+                    console.log('Warning: Failed to link function', functionName);
+                }
                 
                 // Create functions that go in the liblabjack object.
                 liblabjack[fn] = createSafeSyncFunction(fn, fi);
@@ -1005,7 +1011,11 @@ function loadLJMSingle(ljmVersion) {
                     );
                 }
             } catch(err) {
-                console.log('Failed to convert function', functionName, err);
+                if(VERBOSE_LJM_FUNCTION_LINKING) {
+                    console.log('Failed to convert function', functionName, err);
+                } else {
+                    console.log('Failed to convert function', functionName);
+                }
             }
         });
         
