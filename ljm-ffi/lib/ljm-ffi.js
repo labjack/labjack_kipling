@@ -128,7 +128,8 @@ try {
     console.error(
         'This platform/arch combination is not supported.',
         process.platform,
-        process.arch
+        process.arch,
+        err
     );
 }
 
