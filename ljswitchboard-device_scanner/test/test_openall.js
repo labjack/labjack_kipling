@@ -14,6 +14,7 @@ var testGroups = {
 		'mock_w_device': true,
 		'mock_scan_mix_mock_and_live_devices': true,
 		'basic_test': true,
+		'basic_test-open_T4': true,
 		'basic_eth_test': true,
 		'multiple_sequential_scans': true,
 	},
