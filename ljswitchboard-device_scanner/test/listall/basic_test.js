@@ -42,6 +42,7 @@ exports.tests = {
 	},
 	'basic test': function(test) {
 		var startTime = new Date();
+		console.log('Starting Scan');
 		deviceScanner.findAllDevices(devices)
 		.then(function(deviceTypes) {
 			// printAvailableDeviceData(deviceTypes);
@@ -64,6 +65,7 @@ exports.tests = {
 				test.done();
 			}, function(err) {
 				console.log('Failed to read SN:', err, device.savedAttributes);
+				console.log('Connect a T7 via USB!!!!!!!!!');
 				test.ok(false, 'Failed to read SN: ' + JSON.stringify(err));
 				test.done();
 			});

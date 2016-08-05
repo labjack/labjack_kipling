@@ -18,7 +18,7 @@ var devices = [];
 exports.tests = {
 	'Starting Basic Test': function(test) {
 		console.log('');
-		console.log('*** Starting Basic (OpenAll) Test ***');
+		console.log('*** Starting Cached Results (OpenAll) Test ***');
 
 		deviceScanner = device_scanner.getDeviceScanner('open_all');
 
@@ -42,14 +42,22 @@ exports.tests = {
 			test.done();
 		});
 	},
+	'get initially found devices': function(test) {
+		deviceScanner.getLastFoundDevices()
+		.then(function(deviceTypes) {
+			test.deepEqual(deviceTypes, [], 'Device types array should be empty');
+			test.done();
+		}, function(err) {
+			console.log('Scan Cache Error');
+			test.done();
+		});
+	},
 	'basic test': function(test) {
 		var currentDeviceList = [];
 		var startTime = new Date();
 		deviceScanner.findAllDevices(devices)
 		.then(function(deviceTypes) {
-			console.log('finished scanning, scan data', deviceTypes);
 			printScanResultsData(deviceTypes);
-			console.log('Finished printing scan results');
 			verifyScanResults(deviceTypes, test, {debug: false});
 			var endTime = new Date();
 			// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
@@ -58,6 +66,23 @@ exports.tests = {
 			test.done();
 		}, function(err) {
 			console.log('Scanning Error');
+			test.done();
+		});
+	},
+	'get last found devices': function(test) {
+		var startTime = new Date();
+		deviceScanner.getLastFoundDevices()
+		.then(function(deviceTypes) {
+			// console.log('Device Types', deviceTypes);
+			printScanResultsData(deviceTypes);
+			verifyScanResults(deviceTypes, test, {debug: false});
+			var endTime = new Date();
+			// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
+			// test.ok(testStatus, 'Unexpected test result');
+			console.log('  - Duration'.cyan, (endTime - startTime)/1000);
+			test.done();
+		}, function(err) {
+			console.log('Scan Cache Error');
 			test.done();
 		});
 	},

@@ -40,6 +40,15 @@ var getModelType = {
 			}
 		}
 		return name;
+	},
+	'LJM_dtT4': function(attrs) {
+		var name = 'T4-Variant';
+		if(attrs.HARDWARE_INSTALLED) {
+			if(attrs.HARDWARE_INSTALLED.productType) {
+				name = attrs.HARDWARE_INSTALLED.productType;
+			}
+		}
+		return name;
 	}
 };
 var getProductType = {
@@ -52,6 +61,15 @@ var getProductType = {
 	},
 	'LJM_dtT7': function(attrs) {
 		var name = 'T7';
+		if(attrs.HARDWARE_INSTALLED) {
+			if(attrs.HARDWARE_INSTALLED.productType) {
+				name = attrs.HARDWARE_INSTALLED.productType;
+			}
+		}
+		return name;
+	},
+	'LJM_dtT4': function(attrs) {
+		var name = 'T4-Variant';
 		if(attrs.HARDWARE_INSTALLED) {
 			if(attrs.HARDWARE_INSTALLED.productType) {
 				name = attrs.HARDWARE_INSTALLED.productType;
@@ -85,6 +103,11 @@ var SCAN_REQUEST_LIST = [
         'deviceType': 'LJM_dtT7',
         'connectionType': 'LJM_ctANY',
         'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7
+    },
+    {
+        'deviceType': 'LJM_dtT4',
+        'connectionType': 'LJM_ctANY',
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4
     },
     // {
     //     'deviceType': 'LJM_dtT7',

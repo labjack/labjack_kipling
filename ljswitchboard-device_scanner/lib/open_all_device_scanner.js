@@ -130,7 +130,14 @@ var OPEN_ALL_SCAN_REQUEST_LIST = [
         'deviceType': driver_const.LJM_DT_T7,
         'connectionType': driver_const.LJM_CT_UDP,
         'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
-        'numAttempts': 2,
+        'numAttempts': 1,
+        'async': false,
+    },
+    {
+        'deviceType': driver_const.LJM_DT_T4,
+        'connectionType': driver_const.LJM_CT_USB,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4,
+        'numAttempts': 1,
         'async': false,
     },
 ];

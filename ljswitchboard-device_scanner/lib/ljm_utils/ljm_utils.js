@@ -126,10 +126,12 @@ function readAndParseRegisters(handle, registers, cb) {
 function getProductType(deviceInfo) {
 	if(deviceInfo.dt === 7) {
 		return deviceInfo.HARDWARE_INSTALLED.productType;
+	} else if(deviceInfo.dt === 4) {
+		return deviceInfo.HARDWARE_INSTALLED.productType;
 	} else if(deviceInfo.dt === 200) {
 		return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
-		console.log('Failed to get product type');
+		console.log('Failed to get product type', deviceInfo.dt);
 		return deviceInfo.deviceTypeName;
 	}
 }
@@ -138,6 +140,8 @@ function getModelType(deviceInfo) {
 	var sc = '';
 	if(deviceInfo.dt === 7) {
 		pt = deviceInfo.HARDWARE_INSTALLED.productType;
+	} else if(deviceInfo.dt === 4) {
+		return deviceInfo.HARDWARE_INSTALLED.productType;
 	} else if(deviceInfo.dt === 200) {
 		pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
