@@ -22,6 +22,7 @@ function printScanResultsData(deviceTypes) {
 			} catch(err) {
 
 			}
+			// console.log('Keys:', Object.keys(device));
 			console.log(' - Device', {
 				dt: device.deviceTypeName,
 				sn: device.serialNumber,
@@ -30,6 +31,8 @@ function printScanResultsData(deviceTypes) {
 				// act: device.isActive,
 				// mock: device.isMockDevice,
 				// 'A&M': actMockMsg,
+				'modelType': device.modelType,
+				'productType': device.productType,
 			});
 			cts = device.connectionTypes;
 			cts.forEach(function(ct) {

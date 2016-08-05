@@ -53,7 +53,7 @@ function getHandleInfo(handle, cb) {
 }
 module.exports.getHandleInfo = getHandleInfo;
 
-function readDeviceRegister(handle, register, cb) {
+function readDeviceRegister(handle, deviceType, register, cb) {
 	// console.log('VCT - ', handle, register);
 	var info = modbus_map.getAddressInfo(register, 0);
 	if(info.typeString !== 'STRING') {
@@ -67,13 +67,15 @@ function readDeviceRegister(handle, register, cb) {
 				if(results.ljmError === 0) {
 					var pRes = data_parser.parseResult(
 						info.address,
-						results.Value
+						results.Value,
+						deviceType
 					);
 					cb(pRes);
 				} else {
 					var pErr = data_parser.parseError(
 						info.address,
-						results.ljmError
+						results.ljmError,
+						deviceType
 					);
 					var keys = Object.keys(pErr.defaultValue);
 					keys.forEach(function(key) {
@@ -93,13 +95,15 @@ function readDeviceRegister(handle, register, cb) {
 				if(results.ljmError === 0) {
 					var pRes = data_parser.parseResult(
 						info.address,
-						results.String
+						results.String,
+						deviceType
 					);
 					cb(pRes);
 				} else {
 					var pErr = data_parser.parseError(
 						info.address,
-						results.ljmError
+						results.ljmError,
+						deviceType
 					);
 					cb(pErr);
 				}
@@ -108,10 +112,10 @@ function readDeviceRegister(handle, register, cb) {
 	}
 }
 
-function readAndParseRegisters(handle, registers, cb) {
+function readAndParseRegisters(handle, deviceType, registers, cb) {
 	var data = {};
 	function getData(register, innerCB) {
-		readDeviceRegister(handle, register, function(regData) {
+		readDeviceRegister(handle, deviceType, register, function(regData) {
 			data[regData.name] = regData;
 			innerCB();
 		});
@@ -194,7 +198,7 @@ function getDeviceInfo(handle, registers, cb) {
 		deviceInfo.ip = parseIPAddress(handleInfo.IPAddress);
 		deviceInfo.port = handleInfo.Port;
 		deviceInfo.maxBytesPerMB = handleInfo.MaxBytesPerMB;
-		readAndParseRegisters(handle, registers, handleReadData);
+		readAndParseRegisters(handle, dt, registers, handleReadData);
 	}
 
 	var res = ljm.LJM_GetHandleInfo.async(
