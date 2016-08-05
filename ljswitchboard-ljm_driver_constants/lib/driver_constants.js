@@ -465,6 +465,7 @@ exports.WIFI_STATUS_DISPLAY_DATA = {
 };
 
 exports.serialNumberOffsets = {
+	'LJM_dtT4': 440010000,
 	'LJM_dtT7': 470010000,
 	'LJM_dtDIGIT': 220010000,
 };
