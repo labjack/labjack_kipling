@@ -403,6 +403,24 @@ function device(useMockDevice) {
 				return retResult;
 			},
 		},
+		'4': {
+			'HARDWARE_INSTALLED': function(res, isErr, errData) {
+				var retResult = {};
+				var dt = self.savedAttributes.deviceType;
+				var parsedResult = data_parser.parseResult('HARDWARE_INSTALLED', res, dt);
+
+				// Save results
+				var parsedResultKeys = Object.keys(parsedResult);
+				parsedResultKeys.forEach(function(key) {
+					retResult[key] = parsedResult[key];
+				});
+
+				self.savedAttributes.subclass = parsedResult.subclass;
+				self.savedAttributes.productType = parsedResult.productType;
+
+				return retResult;
+			}
+		},
 		'200': {
 			'DGT_INSTALLED_OPTIONS': function(res, isErr, errData) {
 				self.savedAttributes.subclass = '';
