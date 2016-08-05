@@ -157,7 +157,7 @@ exports.tests = {
 			if(val.isPro) {
 				subClass = '-Pro';
 			}
-			results.push(data_parser.parseResult(reg, val.val));
+			results.push(data_parser.parseResult(reg, val.val, 'T7'));
 			reqResults.push({
 				'register': reg,
 				'name': constants.getAddressInfo(reg).data.name,

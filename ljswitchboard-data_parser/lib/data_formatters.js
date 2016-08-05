@@ -6,6 +6,7 @@ var list = {
 	// '3': {}, // U3
 	// '6': {}, // U6
 	// '9': {}, // UE9
+	'4': {}, // T4
 	'7': {}, // T7
 	'200': {}, // Digit
 };
@@ -14,6 +15,7 @@ var errorList = {
 	// '3': {}, // U3
 	// '6': {}, // U6
 	// '9': {}, // UE9
+	'4': {}, // T4
 	'7': {}, // T7
 	'200': {}, // Digit
 };
@@ -65,6 +67,9 @@ function populateErrorList(destination, newList, endKey, debug) {
 var t7List = require('./t7_data_parser').T7_LIST;
 populateList(list, t7List, '7');
 
+var t4List = require('./t4_data_parser').T4_LIST;
+populateList(list, t4List, '4');
+
 var digitList = require('./digit_data_parser').DIGIT_LIST;
 populateList(list, digitList, '200');
 
@@ -78,6 +83,9 @@ exports.list = list;
 // Populate errorList
 var t7ErrorsList = require('./t7_error_parser').T7_LIST;
 populateErrorList(errorList, t7ErrorsList, '7', false);
+
+var t4ErrorsList = require('./t4_error_parser').T4_LIST;
+populateErrorList(errorList, t4ErrorsList, '4', false);
 
 var digitErrorsList = require('./digit_error_parser').DIGIT_LIST;
 populateErrorList(errorList, digitErrorsList, '200');
