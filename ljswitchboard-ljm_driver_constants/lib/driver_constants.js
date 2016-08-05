@@ -14,6 +14,7 @@ exports.LJM_DT_ANY = 0;
 exports.LJM_DT_UE9 = 9;
 exports.LJM_DT_U3 = 3;
 exports.LJM_DT_U6 = 6;
+exports.LJM_DT_T4 = 4;
 exports.LJM_DT_T7 = 7;
 exports.LJM_DT_SKYMOTE_BRIDGE = 1000;
 exports.LJM_DT_DIGIT = 200;
@@ -213,6 +214,12 @@ exports.deviceTypes = {
 	U3: 3,
 	u3: 3,
 	3:3,
+	LJM_DTT3: 4,
+	LJM_dtT3: 4,
+	LJM_dtt3: 4,
+	T4: 4,
+	t4: 4,
+	4:4,
 	LJM_DTU6: 6,
 	LJM_dtU6: 6,
 	LJM_dtu6: 6,
@@ -393,6 +400,7 @@ exports.LJM_LIBRARY_CONSTANTS = {
 
 exports.DEVICE_TYPE_NAMES = {
     '3': 'U3',
+    '4': 'T4',
     '6': 'U6',
     '7': 'T7',
     '9': 'UE9',
@@ -400,6 +408,7 @@ exports.DEVICE_TYPE_NAMES = {
 };
 exports.DRIVER_DEVICE_TYPE_NAMES = {
     '3': 'LJM_dtU3',
+    '4': 'LJM_dtT4',
     '6': 'LJM_dtU6',
     '7': 'LJM_dtT7',
     '9': 'LJM_dtUE9',
@@ -408,6 +417,7 @@ exports.DRIVER_DEVICE_TYPE_NAMES = {
 
 exports.DEVICE_TYPE_NAMES_BY_DRIVER_NAME = {
     'LJM_dtU3': 'U3',
+    'LJM_dtT4': 'T4',
     'LJM_dtU6': 'U6',
     'LJM_dtT7': 'T7',
     'LJM_dtUE9': 'UE9',
@@ -438,8 +448,8 @@ exports.CONNECTION_MEDIUM = {
 	'1': 1,
 	'3': 3,
     '4': 4,
-	'6': 3,
-    '7': 4,
+	'6': 3,//Indicates that Ethernet_UDP is an Ethernet connection type
+    '7': 4,//Indicates that WiFi_UDP is a WiFi connection type
 };
 exports.WIFI_STATUS_DISPLAY_DATA = {
     2900: {'display':true,'str':'Associated'},
