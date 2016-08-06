@@ -117,6 +117,19 @@ function labjackVersionManager() {
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
+        "t4": {
+            "type":"t4FirmwarePage",
+            "upgradeReference": "https://labjack.com/support/firmware/t4",
+            "platformDependent": false,
+            "urls":[
+                {"url": "https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
+                // {"url": "https://labjack.com/support/firmware/t4", "type": "organizer-current"},
+                // {"url": "https://labjack.com/support/firmware/t4", "type": "current"},
+                // {"url": "https://labjack.com/support/firmware/t4/beta", "type": "beta"},
+                // {"url": "https://labjack.com/support/firmware/t4/old", "type": "old"},
+                // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
+            ],
+        },
         "digit": {
             "type":"digitFirmwarePage",
             "upgradeReference": "https://labjack.com/support/firmware/digit",
@@ -341,6 +354,28 @@ function labjackVersionManager() {
                     'urlInfo': urlInfo,
                     'name': name,
                 });
+            }
+            return;
+        },
+        t4FirmwarePage: function(listingArray, pageData, urlInfo, name) {
+            if(urlInfo.type === 'static-t4-alpha-organizer') {
+                try {
+                    var jsonData = JSON.parse(pageData);
+                    var versions = jsonData.versions;
+                    versions.forEach(function(version) {
+                        listingArray.push({
+                            'upgradeLink': version.link,
+                            'version': version.version,
+                            'type': 'alpha',
+                            'key': 'alpha' + '-' + version.version,
+                            'isValid': true,
+                        });
+                    });
+                } catch(err) {
+                    console.log('Error Parsing T4 static-t4-alpha-organizer', err);
+                }
+            } else {
+
             }
             return;
         },
@@ -786,6 +821,12 @@ function labjackVersionManager() {
         .then(defered.resolve,defered.reject);
         return defered.promise;
     };
+    this.getT4FirmwareVersions = function() {
+        var defered = q.defer();
+        self.queryForVersions('t4')
+        .then(defered.resolve,defered.reject);
+        return defered.promise;
+    };
     this.getDigitFirmwareVersions = function() {
         var defered = q.defer();
         self.queryForVersions('digit')
@@ -822,6 +863,7 @@ function labjackVersionManager() {
         .then(self.getKiplingVersions, errorFunc)
         // .then(self.getLJMWrapperVersions, errorFunc)
         .then(self.getT7FirmwareVersions, errorFunc)
+        .then(self.getT4FirmwareVersions, errorFunc)
         .then(self.getDigitFirmwareVersions, errorFunc)
         .then(function() {
             self.isDataComplete = true;
@@ -968,6 +1010,35 @@ function labjackVersionManager() {
             t7Data.isValid = false;
         }
         return t7Data;
+    };
+
+    this.getCachedT4Versions = function() {
+        var t4Data = {};
+        if(typeof(self.infoCache.t4) !== 'undefined') {
+            t4Data = JSON.parse(JSON.stringify(self.infoCache.t4));
+            // populateMissingKeys(t4Data, ['beta', 'current', 'old']);
+            t4Data.isValid = true;
+        } else {
+            t4Data.current = [];
+            t4Data.beta = [];
+            t4Data.old = [];
+            t4Data.isValid = false;
+        }
+        return t4Data;
+    };
+    this.getCachedDigitVersions = function() {
+        var digitData = {};
+        if(typeof(self.infoCache.t4) !== 'undefined') {
+            digitData = JSON.parse(JSON.stringify(self.infoCache.digit));
+            // populateMissingKeys(t4Data, ['beta', 'current', 'old']);
+            digitData.isValid = true;
+        } else {
+            digitData.current = [];
+            digitData.beta = [];
+            digitData.old = [];
+            digitData.isValid = false;
+        }
+        return digitData;
     };
 
     this.getCachedLJMVersions = function() {

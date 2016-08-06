@@ -88,6 +88,47 @@ exports.tests = {
 		// console.log('T7 FW Versions', data);
 		test.done();
 	},
+	'get T4 Versions': function(test) {
+		var data = version_manager.lvm.getCachedT4Versions();
+		test.ok(data.isValid, 'T4 Firmware data should be valid');
+		var requiredKeys = [
+			'alpha',
+		];
+		
+		// Print out data
+		console.log(' - T4 Test Output:', JSON.stringify(data, null, 2));
+		var givenKeys = Object.keys(data);
+		requiredKeys.forEach(function(reqKey) {
+			var isOk = false;
+			if(givenKeys.indexOf(reqKey) >= 0) {
+				isOk = true;
+			}
+			test.ok(isOk, '(T4 Firmware) Missing a required key: ' + reqKey);
+		});
+		// console.log('T4 FW Versions', data);
+		test.done();
+	},
+	'get Digit Versions': function(test) {
+		var data = version_manager.lvm.getCachedDigitVersions();
+		test.ok(data.isValid, 'Digit Firmware data should be valid');
+		var requiredKeys = [
+			'current',
+			'old',
+		];
+		
+		// Print out data
+		// console.log(' - Digit Test Output:', JSON.stringify(data, null, 2));
+		var givenKeys = Object.keys(data);
+		requiredKeys.forEach(function(reqKey) {
+			var isOk = false;
+			if(givenKeys.indexOf(reqKey) >= 0) {
+				isOk = true;
+			}
+			test.ok(isOk, '(Digit Firmware) Missing a required key: ' + reqKey);
+		});
+		// console.log('Digit FW Versions', data);
+		test.done();
+	},
 	'get LJM Versions': function(test) {
 		var data = version_manager.lvm.getCachedLJMVersions();
 		

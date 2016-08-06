@@ -1,0 +1,11 @@
+{
+	"versions": [{
+		"version": "10.1301",
+		"type": "alpha",
+		"link": "https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/T4firmware_101301_2016-08-01.bin"
+	}, {
+		"version": "10.1401",
+		"type": "alpha",
+		"link": "https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/T4firmware_101401_2016-08-01.bin"
+	}]
+}
