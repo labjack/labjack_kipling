@@ -111,6 +111,14 @@ exports.T7_RECOVERY_TARGET					= 100007021;
 exports.T4_TARGET							= 100004001;
 exports.T4_RECOVERY_TARGET					= 100004021;
 
+// Firmware Targets to required device types
+exports.TARGET_TO_REQ_DT = {};
+exports.TARGET_TO_REQ_DT[exports.T7_TARGET_OLD] = exports.LJM_DT_T7;
+exports.TARGET_TO_REQ_DT[exports.T7_TARGET] = exports.LJM_DT_T7;
+exports.TARGET_TO_REQ_DT[exports.T7_RECOVERY_TARGET] = exports.LJM_DT_T7;
+exports.TARGET_TO_REQ_DT[exports.T4_TARGET] = exports.LJM_DT_T4;
+exports.TARGET_TO_REQ_DT[exports.T4_RECOVERY_TARGET] = exports.LJM_DT_T4;
+
 // Device Specific constants
 exports.T7_HDR_FLASH_PAGE_ERASE				= 1;
 exports.T7_IMG_FLASH_PAGE_ERASE				= 120;
