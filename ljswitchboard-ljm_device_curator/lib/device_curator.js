@@ -17,17 +17,27 @@ var ljmDeviceReference = ljm.getDevice();
 var modbusMap = ljm.modbusMap.getConstants();
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
-var lj_t7_upgrader = require('./labjack_t7_upgrade');
+
+// Special T7 additional functions/operations
+// - Not Needed, see tseries:
+//     var lj_t7_upgrader = require('./labjack_t7_upgrade');
 var lj_t7_flash_operations = require('./t7_flash_operations');
 lj_t7_flash_operations.setDriverConst(ljm.driver_const);
 var lj_t7_get_flash_fw_versions = require('./t7_get_flash_fw_versions');
-
 var lj_t7_cal_operations = require('./t7_calibration_operations');
 
-var register_watcher = require('./register_watcher');
+// Special T4 additional functions/operations
+// - Not Needed, see tseries:
+//     var lj_t4_upgrader = require('./labjack_t4_upgrade');
 
+// Special TSeries additional functions/operations
+var lj_tseries_upgrader = require('./labjack_tseries_upgrade');
+
+// Special Digit additional functions/operations.
 var digit_format_functions = require('./digit_format_functions');
 var digit_io_helper = require('./digit_io_helper');
+
+var register_watcher = require('./register_watcher');
 
 /* Other helper functions */
 var lua_script_operations = require('./lua_script_operations');
@@ -62,7 +72,11 @@ function device(useMockDevice) {
 	numCreatedDevices += 1;
 
 	var ljmDevice;
-	var t7_device_upgrader = new lj_t7_upgrader.createT7Upgrader();
+	// These upgraders aren't needed, see tseries
+	// var t7_device_upgrader = new lj_t7_upgrader.createT7Upgrader();
+	// var t4_device_upgrader = new lj_t4_upgrader.createT4Upgrader();
+	var tseries_device_upgrader = new lj_tseries_upgrader.createTSeriesUpgrader();
+
 	this.isMockDevice = false;
 	this.allowReconnectManager = false;
 	this.allowConnectionManager = false;
@@ -2158,7 +2172,33 @@ function device(useMockDevice) {
 				stepListenerObj
 			);
 			self.prepareForUpgrade();
-			t7_device_upgrader.updateFirmware(
+			tseries_device_upgrader.updateFirmware(
+				self,
+				ljmDevice,
+				firmwareFileLocation,
+				self.savedAttributes.connectionTypeString,
+				progressListener
+			).then(function(results){
+				var resultDevice = results.getDevice();
+				ljmDevice.handle = resultDevice.handle;
+				self.savedAttributes.handle = resultDevice.handle;
+				ljmDevice.deviceType = resultDevice.deviceType;
+				ljmDevice.isHandleValid = resultDevice.isHandleValid;
+				// console.info('Updated savedAttributes');
+				// defered.resolve(results);
+				self.finishFirmwareUpdate(results)
+				.then(defered.resolve);
+			}, function(err) {
+				self.restartConnectionManager();
+				defered.reject(err);
+			});
+		} else if (dt === 4) {
+			var progressListener = new UpgradeProgressListener(
+				percentListenerObj,
+				stepListenerObj
+			);
+			self.prepareForUpgrade();
+			tseries_device_upgrader.updateFirmware(
 				self,
 				ljmDevice,
 				firmwareFileLocation,
@@ -2189,6 +2229,8 @@ function device(useMockDevice) {
 	this.internalReadFlash = function(startAddress, length) {
 		var dt = self.savedAttributes.deviceType;
 		if(dt === driver_const.LJM_DT_T7) {
+			return lj_t7_flash_operations.readFlash(ljmDevice, startAddress, length);
+		} else if(dt === driver_const.LJM_DT_T4) {
 			return lj_t7_flash_operations.readFlash(ljmDevice, startAddress, length);
 		} else if(dt === driver_const.LJM_DT_DIGIT) {
 			var digitDefered = q.defer();

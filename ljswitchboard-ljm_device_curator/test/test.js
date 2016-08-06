@@ -149,11 +149,20 @@ var testGroups = {
 		// saved in flash.
 		't7_manufacturing_info_test': true,
 	},
+	't7': {
+		't7_upgrade_test': true,
+	},
 
 	// These are production-line tests.
 	'production_line': {
 		'check_t7_pro_versions': false,
 		'check_t7_pro_versions_flex_fw': false,
+	},
+
+	// These are T4 specific tests.
+	't4': {
+		't4_basic_test.js': false,
+		't4_upgrade_test': false,
 	}
 };
 
