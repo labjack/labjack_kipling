@@ -107,6 +107,10 @@ exports.T7_TARGET_OLD						= 100017001;
 exports.T7_TARGET							= 100007001;
 exports.T7_RECOVERY_TARGET					= 100007021;
 
+// T4 targets
+exports.T4_TARGET							= 100004001;
+exports.T4_RECOVERY_TARGET					= 100004021;
+
 // Device Specific constants
 exports.T7_HDR_FLASH_PAGE_ERASE				= 1;
 exports.T7_IMG_FLASH_PAGE_ERASE				= 120;
