@@ -40,6 +40,10 @@ var parseFirmwareFile = function(parsedData, fileData) {
             parsedData.unencryptedSHA = imageFile.readUInt32BE(HEADER_SHA1);
             parsedData.headerChecksum = imageFile.readUInt32BE(HEADER_CHECKSUM);
 
+            // Save the required device type
+            var reqDev = parsedData.intendedDevice;
+            parsedData.requiredDT = driver_const.TARGET_TO_REQ_DT[reqDev];
+
             parsedData.isValid = true;
         }
 
@@ -51,9 +55,13 @@ var parseFirmwareFile = function(parsedData, fileData) {
 };
 
 var ALLOWED_IMAGE_INFO_DEVICE_TYPES = [
+    driver_const.T4_TARGET,
+    driver_const.T4_RECOVERY_TARGET,
     driver_const.T7_TARGET_OLD,
-    driver_const.T7_TARGET
+    driver_const.T7_TARGET,
+    driver_const.T7_RECOVERY_TARGET,
 ];
+
 var validateParsedData = function(parsedData, fileData, options) {
     if(parsedData.isValid) {
         var expectedHeaderCode = driver_const.T7_HEAD_FIRST_FOUR_BYTES;
@@ -63,7 +71,16 @@ var validateParsedData = function(parsedData, fileData, options) {
         var intendedDeviceCorrect = ALLOWED_IMAGE_INFO_DEVICE_TYPES.indexOf(
             parsedData.intendedDevice) != -1;
 
-        var versionCorrect = parsedData.containedVersion === options.version;
+        var versionCorrect = true;
+        if(options.check_version) {
+            versionCorrect = parsedData.containedVersion === options.version;
+        }
+
+        // Make sure that the intended device type is the type of device that is
+        // being upgraded.
+        var dt = options.deviceType;
+        var curDevIsReqDev = dt == parsedData.requiredDT;
+        intendedDeviceCorrect = intendedDeviceCorrect && curDevIsReqDev;
 
         if (headerCodeCorrect && intendedDeviceCorrect && versionCorrect) {
             parsedData.isValid = true;
@@ -82,8 +99,28 @@ var validateParsedData = function(parsedData, fileData, options) {
     }
     return parsedData;
 };
+
+function parseValidateFirmwareFileOptions(options) {
+    var parsedOptions = {
+        'version': '',
+        'check_version': false,
+        'deviceType': 7,
+    };
+    if(options) {
+        if(options.deviceType) {
+            var dtNum = driver_const.deviceTypes[options.deviceType];
+            parsedOptions.deviceType = dtNum;
+        }
+        if(options.version) {
+            parsedOptions.version = options.version;
+            parsedOptions.check_version = true;
+        }
+    }
+    return parsedOptions;
+}
 exports.validateFirmwareFile = function(fileData, options) {
     var defered = q.defer();
+    var parsedOptions = parseValidateFirmwareFileOptions(options);
     var parsedData = {
         'rawImageInfo': undefined,
         'headerCode': undefined,
@@ -100,13 +137,14 @@ exports.validateFirmwareFile = function(fileData, options) {
         'encryptedSHA': undefined,
         'unencryptedSHA': undefined,
         'headerChecksum': undefined,
+        'requiredDT': undefined,
         'isValid': false,
         'message': '',
     };
 
     try {
         parseFirmwareFile(parsedData, fileData);
-        validateParsedData(parsedData, fileData, options);
+        validateParsedData(parsedData, fileData, parsedOptions);
         defered.resolve(parsedData);
     } catch(err) {
         parsedData.message = JSON.stringify(err);

@@ -10,6 +10,14 @@ var testFiles = [{
 		'fileName': 'T7firmware_010146_2015-01-19.bin',
 		'test': true,
 	}, {
+		'deviceType': 'T7',
+		'fileName': 'T7recovery_006602_07232013.bin',
+		'test': true,
+	}, {
+		'deviceType': 'T4',
+		'fileName': 'T4firmware_101401_2016-08-01.bin',
+		'test': true,
+	}, {
 		'deviceType': 'Digit',
 		'fileName': 'DigitFW_012200_04222015.bin',
 		'test': true,
@@ -36,8 +44,35 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'test invalid file': function(test) {
+	'test T7 recovery fw': function(test) {
 		var fileData = fs.readFileSync(testFiles[1].path);
+
+		firmware_verifier.validateFirmwareFile(fileData, {
+			'version': '0.6602',
+			'deviceType': 'T7', // This flag isn't currently enabled but should be...
+		})
+		.then(function(parsedData) {
+			// console.log('Parsed Data', parsedData);
+			test.ok(parsedData.isValid, parsedData.message);
+			test.done();
+		});
+	},
+	'test T4 fw file': function(test) {
+		var fileData = fs.readFileSync(testFiles[2].path);
+
+		firmware_verifier.validateFirmwareFile(fileData, {
+			'version': '10.1401',
+			'deviceType': 'T4', // This flag isn't currently enabled but should be...
+		})
+		.then(function(parsedData) {
+			// console.log('Parsed Data', parsedData);
+			test.ok(parsedData.isValid, parsedData.message);
+			test.done();
+		});
+	},
+	'test invalid file': function(test) {
+		// Try to load a Digit's firmware file as a T7.
+		var fileData = fs.readFileSync(testFiles[3].path);
 
 		firmware_verifier.validateFirmwareFile(fileData, {
 			'version': '1.0146',
