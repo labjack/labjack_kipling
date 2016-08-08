@@ -178,13 +178,68 @@ function cmdApp() {
 		}
 		return defered.promise;
 	}
+	function openFoundDevice(deviceData) {
+		var defered = q.defer();
+
+		function openSuccess(data) {
+			console.log('Opened Device Attributes', Object.keys(data));
+			var sn = data.savedAttributes.serialNumber.toString();
+			var dt = data.savedAttributes.deviceTypeName;
+			var ct = data.savedAttributes.connectionTypeName;
+			var key = ([dt,ct,sn]).join('_');
+			// console.log('In openSuccess');
+			if(replServer.context.devices) {
+				replServer.context.devices[key] = data;
+			} else {
+				replServer.context.devices = {};
+				replServer.context.devices[key] = data;
+			}
+			defered.resolve();
+		}
+		function openError(data) {
+			console.log('In openError', data);
+			defered.resolve();
+		}
+		console.log('Device Data to open', deviceData);
+		var openParameters = {};
+		openParameters = {
+			'deviceType': deviceData.dt,
+			'connectionType': deviceData.ct,
+			'identifier': deviceData.serialNumber,
+		};
+		deviceController.openDevice(openParameters)
+		.then(openSuccess, openError);
+		return defered.promise;
+	}
+	function openAllFoundDevices() {
+		var defered = q.defer();
+		var devicesToOpen = [];
+		var scanData = self.initialScanData;
+		scanData.forEach(function(deviceType) {
+			deviceType.devices.forEach(function(device) {
+				devicesToOpen.push(device);
+			});
+		});
+		console.log('Calling Opens');
+		var promises = devicesToOpen.map(openFoundDevice);
+		q.allSettled(promises)
+		.then(function() {
+			defered.resolve();
+		}, function() {
+			// Don't think this ever gets called...
+			defered.reject();
+		});
+		return defered.promise;
+	}
 	this.start = function() {
 		return startSubProcess()
 		.then(getAndSaveDeviceAndDriverObjects)
 		.then(enableMockDeviceScanning)
 		.then(addMockDevices)
 		.then(performInitialDeviceScan)
-		.then(openFirstFoundDevice);
+		// .then(openFirstFoundDevice);
+		.then(openAllFoundDevices);
+
 	};
 
 	var self = this;

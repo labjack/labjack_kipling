@@ -324,7 +324,7 @@ function createDeviceKeeper(io_delegator, link) {
 
 
 	/**
-	 * Accessory function for getDeviceListing that filters out devices from the
+	 * Accessory functions for getDeviceListing that filters out devices from the
 	 * listing.
 	 */
 	 var deviceTypeFilterFunc = function (param, attrs) {

@@ -19,6 +19,7 @@ var io_endpoint_key = constants.device_endpoint_key;
 // device creators:
 var ljm_device_creator = require('./device_helpers/ljm_device');
 var t7_device_creator = require('./device_helpers/t7_device');
+var t4_device_creator = require('./device_helpers/t4_device');
 var digit_device_creator = require('./device_helpers/digit_device');
 
 // var ljm_device_controller = require('./device_helpers/ljm_device');
@@ -396,7 +397,7 @@ function createDeviceController(io_interface) {
 	'stopAllWatchers'
 	];
 	/**
-	 * This function creates a new device object (T7/Digit) and adds it to the
+	 * This function creates a new device object (T4/T7/Digit) and adds it to the
 	 * device_controller device management system.
 	**/
 	var createDeviceObject = function(deviceInfo) {
@@ -410,6 +411,8 @@ function createDeviceController(io_interface) {
 		// Create device object based on what type of device we just opened
 		if(deviceInfo.deviceType == driver_constants.deviceTypes.t7) {
 			deviceCreator = t7_device_creator;
+		} else if (deviceInfo.deviceType == driver_constants.deviceTypes.t4) {
+			deviceCreator = t4_device_creator;
 		} else if (deviceInfo.deviceType == driver_constants.deviceTypes.digit) {
 			deviceCreator = digit_device_creator;
 		} else {
