@@ -2,5 +2,5 @@
     "name": "device_info",
     "humanName": "Device Information",
     "version": "0.0.1",
-    "supportedDevices": [{"type":"T7"}]
+    "supportedDevices": [{"type":"T7"}, {"type":"T4"}]
 }
