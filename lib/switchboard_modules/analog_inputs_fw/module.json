@@ -3,5 +3,13 @@
     "humanName": "Analog Inputs",
     "version": "0.0.1",
     "framework":"singleDevice",
-    "supportedDevices": [{"type":"T7","minFW":"0.5"}]
+    "supportedDevices": [{"type":"T7","minFW":"0.5"}],
+    "htmlFiles": [
+	    "ainEFTypeNameTemplate.html",
+		"ainEFTypePrimaryTemplate.html",
+		"ainEFTypeSecondaryRegTemplate.html",
+		"ainEFTypeConfigTemplateStr_value.html",
+		"ainEFTypeConfigTemplateStr_modbusRegister.html",
+		"ainEFTypeConfigTemplateStr_select.html"
+	]
 }

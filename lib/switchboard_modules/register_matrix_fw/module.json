@@ -3,7 +3,7 @@
     "humanName": "Register Matrix",
     "version": "0.0.1",
     "framework":"singleDevice",
-    "supportedDevices": [{"type":"T7"},{"type":"Digit"}],
+    "supportedDevices": [{"type":"T7"},{"type":"T4"},{"type":"Digit"}],
     "jsFiles": [
         "data_formatter.js",
         "data_table_helper.js"

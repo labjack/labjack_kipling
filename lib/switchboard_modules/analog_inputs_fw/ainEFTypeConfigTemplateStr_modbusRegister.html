@@ -1,0 +1,22 @@
+<li id="{{registerName}}-configOption">
+<span class="result-text" style="font-size:13px;">
+{{humanName}}: <br>
+<form class="efConfig-FORM" id="{{registerName}}-FORM">
+   <div class="efConfig-INPUT-APPEND input-append">
+       <div id="{{registerName}}-MB-REG-SELECT" class="btn-group ainConfigReg efConfig-MB-REG-SELECT">
+            <a style="font-size:12px;"class="btn dropdown-toggle {{cssClass}}-LINK" data-toggle="dropdown"title="Set Register: {{registerName}}"><span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                {{#each menuOptions}}
+                <li>
+                    <a style="font-size:12px;" class="menuOption" title="Set {{../registerName}} to {{value}}{{titleAppend}}" value="{{value}}">{{name}}</a>
+                </li>
+                {{/each}}
+            </ul>
+       </div>
+       <input class="efConfig-INPUT" id="{{registerName}}" title="{{title}}" ljtype="modbusRegister" type="text" placeholder="{{hint}}" pattern="{{pattern}}" required/>
+       <button id="{{registerName}}-efConfig-INPUT-BTN"class="efConfig-INPUT-BTN btn" type="button" title="write value to {{registerName}}"><span class="icon icon-arrow-right-12"></span></button>
+   </div>
+</form>
+</span>
+</li>

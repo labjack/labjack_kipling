@@ -31,10 +31,15 @@
 	margin-left: 14%;
 	display: block;
 }
+@media (max-width: 767px) {
+	.ainEFExtendedInfo {
+		margin-left: 0px;
+	}
+}
 .efExtendedInfo {
 	min-height: 0;
 	margin:0;
-	width:49%;
+	/*width:49%;*/
 	float:left;
 	display:block;
 	list-style-type: none;
@@ -42,7 +47,12 @@
 .efExtendedInfo.ainEFSecondaryReadRegisters {
   margin-left: 20px;
   margin-right: -20px;
+  width:43%;
 }
+.efExtendedInfo.ainEFConfigs {
+  width:55%;
+}
+
 .efExtendedInfo li {
 	margin-bottom:5px;
 }
@@ -59,7 +69,7 @@
 	margin:0;
 }
 .efConfig-INPUT {
-	width: 190px;
+	width: 225px;
 }
 .efConfig-INPUT-BTN {
 	width: 25px;
@@ -116,6 +126,11 @@
 	margin-left: 14%;
 	width: 86%;
 }
+@media (max-width: 767px) {
+	.ainConfigTable {
+		margin-left: 0px;
+	}
+}
 .range-header {
 	width: 110px;
 }
@@ -171,3 +186,4 @@
 .table-dataHeader th {
 	line-height: 12px;
 }
+
