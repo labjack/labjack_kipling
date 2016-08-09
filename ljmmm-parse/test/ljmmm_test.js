@@ -13,6 +13,7 @@ var rewire = require('rewire');
 
 var ljmmm = rewire('../lib/ljmmm');
 ljmmm.__set__('DATA_TYPE_SIZES', {TEST_TYPE: 4, ANOTHER_TYPE: 2});
+ljmmm.__set__('LUA_INTEGER_TYPES', {TEST_TYPE: 4, ANOTHER_TYPE: 2});
 
 
 /**
@@ -48,10 +49,10 @@ exports.testGetTypeRegSizeNotFound = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testGetTypeRegSize = function(test)
+exports.testGetTypeLuaType = function(test)
 {
-    var getTypeRegSize = ljmmm.__get__('getTypeRegSize');
-    test.equal(getTypeRegSize('TEST_TYPE'), 4);
+    var getLuaTypeInt = ljmmm.__get__('getLuaTypeInt');
+    test.equal(getLuaTypeInt('TEST_TYPE'), 4);
     test.done();
 };
 
@@ -62,10 +63,10 @@ exports.testGetTypeRegSize = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testGetTypeRegSizeNotFound = function(test)
+exports.testGetTypeLuaTypeNotFound = function(test)
 {
-    var getTypeRegSize = ljmmm.__get__('getTypeRegSize');
-    test.equal(getTypeRegSize('SOMETHING_ELSE'), -1);
+    var getLuaTypeInt = ljmmm.__get__('getLuaTypeInt');
+    test.equal(getLuaTypeInt('SOMETHING_ELSE'), -1);
     test.done();
 };
 
@@ -147,8 +148,8 @@ exports.testExpandLJMMMEntry = function(test)
 {
     var testInput = {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'};
     var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1}
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4}
     ];
 
     ljmmm.expandLJMMMEntry(
@@ -178,10 +179,10 @@ exports.testExpandLJMMMEntryAltNames = function(test)
     };
 
     var expectedResult = [
-        {name: 'Again0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1},
-        {name: 'Again1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1},
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1}
+        {name: 'Again0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
+        {name: 'Again1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4}
     ];
 
     ljmmm.expandLJMMMEntry(
@@ -205,8 +206,8 @@ exports.testExpandLJMMMEntrySync = function(test)
 {
     var testInput = {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'};
     var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1}
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4}
     ];
 
     var result = ljmmm.expandLJMMMEntrySync(testInput);
@@ -231,10 +232,10 @@ exports.testExpandLJMMMEntryAltNamesSync = function(test)
     };
 
     var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1},
-        {name: 'Again0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1},
-        {name: 'Again1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1}
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
+        {name: 'Again0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
+        {name: 'Again1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4}
     ];
 
     var result = ljmmm.expandLJMMMEntrySync(testInput);
@@ -252,8 +253,8 @@ exports.expandPrimaryLJMMMEntrySync = function(test)
 {
     var testInput = {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'};
     var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: -1}
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4}
     ];
 
     var result = ljmmm.expandPrimaryLJMMMEntrySync(testInput);
@@ -277,8 +278,8 @@ exports.testExpandPrimaryLJMMMEntryAltNamesSync = function(test)
     };
 
     var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, altnames: testInput.altnames, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, altnames: testInput.altnames, luaTypeInt: -1},
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, altnames: testInput.altnames, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput.name, altnames: testInput.altnames, luaTypeInt: 4},
     ];
 
     var result = ljmmm.expandPrimaryLJMMMEntrySync(testInput);
@@ -299,10 +300,10 @@ exports.testExpandLJMMMEntries = function(test)
         {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE'}
     ];
     var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: -1},
-        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: -1},
-        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: -1}
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
+        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2},
+        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2}
     ];
 
     ljmmm.expandLJMMMEntries(
@@ -329,10 +330,10 @@ exports.testExpandLJMMMEntriesSync = function(test)
         {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE'}
     ];
     var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: -1},
-        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: -1},
-        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: -1}
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
+        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2},
+        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2}
     ];
 
     var result = ljmmm.expandLJMMMEntriesSync(testInput);
@@ -346,12 +347,12 @@ exports.testExpandLJMMMEntriesSync = function(test)
         {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE', altnames:['Again#(0:1)']}
     ];
     var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: -1},
-        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: -1},
-        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: -1},
-        {name: 'Again0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: -1},
-        {name: 'Again1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: -1},
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
+        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2},
+        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2},
+        {name: 'Again0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2},
+        {name: 'Again1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2},
     ];
 
     var result = ljmmm.expandLJMMMEntriesSync(testInput);
@@ -372,10 +373,10 @@ exports.testExpandPrimaryLJMMMEntriesSync = function(test)
         {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE', altnames:['Again#(0:1)']}
     ];
     var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: -1},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: -1},
-        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, altnames: testInput[1].altnames, luaTypeInt: -1},
-        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, altnames: testInput[1].altnames, luaTypeInt: -1}
+        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
+        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
+        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, altnames: testInput[1].altnames, luaTypeInt: 2},
+        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, altnames: testInput[1].altnames, luaTypeInt: 2}
     ];
 
     var result = ljmmm.expandPrimaryLJMMMEntriesSync(testInput);
