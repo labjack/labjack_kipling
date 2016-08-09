@@ -254,7 +254,7 @@ exports.deviceTypes = {
 	DIGIT: 200,
 	Digit: 200,
 	digit: 200,
-	200:200
+	200:200,
 	LJM_DTTSERIES: 84,
 	LJM_dtTSERIES: 84,
 	LJM_dttSERIES: 84,
