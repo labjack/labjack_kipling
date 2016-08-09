@@ -231,14 +231,14 @@ function createDeviceController(io_interface) {
 		var defered = q.defer();
 		var promises = [];
 
-		console.log('in selectDevices', deviceSerialNumbers);
+		// console.log('in selectDevices', deviceSerialNumbers);
 		// Update whether the device is selected or not. (locally)
 		deviceKeys.forEach(function(deviceKey) {
 			var attributes = self.devices[deviceKey].savedAttributes;
 			var serialNumber = attributes.serialNumber;
 			var serialNumberStr = serialNumber.toString();
 			var newVal;
-			console.log('in selectDevices updating sn', serialNumber, deviceSerialNumbers.indexOf(serialNumberStr));
+			// console.log('in selectDevices updating sn', serialNumber, deviceSerialNumbers.indexOf(serialNumberStr));
 			if(deviceSerialNumbers.indexOf(serialNumberStr) >= 0 ) {
 				newVal = true;
 			} else {
