@@ -406,6 +406,9 @@ var parseConstants = function(LJMJSONFileLocation) {
 			luaTypeInt = -1;
 		}
 
+		// Save data to the regEntry
+		regEntry.luaTypeInt = luaTypeInt;
+
 		if(regEntry.readwrite.indexOf(direction) != -1) {
 			validity = 1;
 		} else {
