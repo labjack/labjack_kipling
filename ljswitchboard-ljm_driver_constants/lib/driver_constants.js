@@ -18,6 +18,7 @@ exports.LJM_DT_T4 = 4;
 exports.LJM_DT_T7 = 7;
 exports.LJM_DT_SKYMOTE_BRIDGE = 1000;
 exports.LJM_DT_DIGIT = 200;
+exports.LJM_DT_TSERIES = 84;
 
 //Max string size
 exports.LJM_MAX_STRING_SIZE = 50;
@@ -254,6 +255,13 @@ exports.deviceTypes = {
 	Digit: 200,
 	digit: 200,
 	200:200
+	LJM_DTTSERIES: 84,
+	LJM_dtTSERIES: 84,
+	LJM_dttSERIES: 84,
+	LJM_dtTSeries: 84,
+	ljm_dtTSeries: 84,
+	ljm_dttseries: 84,
+	84:84,
 };
 exports.connectionTypes = {
 	LJM_CTANY: 0,
