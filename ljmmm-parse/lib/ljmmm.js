@@ -25,6 +25,16 @@ var DATA_TYPE_SIZES = {
     FLOAT32: 2
 };
 
+var LUA_INTEGER_TYPES = {
+    UINT16: 0,
+    UINT32: 1,
+    INT32: 2,
+    FLOAT32: 3,
+    STRING: 98,
+    BYTE: 99,
+    UINT64: -1,
+}
+
 
 // TODO: This is slow and lazy would have been preferred. However, need an
 //       alternative for those pesky synchronous options.
@@ -66,6 +76,20 @@ function getTypeRegSize(typeName)
     return DATA_TYPE_SIZES[typeName];
 }
 
+/**
+ * Get the Lua Integer type constant for a given data type.
+ *
+ * @param {String} typeName The name of the type to get the Lua Int. Type for.
+ * @return {Number} The Lua type number that relates to the given type.  -1 is
+ *      returned if the type could not be found.
+**/
+function getLuaTypeInt(typeName) {
+    if(LUA_INTEGER_TYPES[typeName] === undefined) {
+        return -1;
+    } else {
+        return LUA_INTEGER_TYPES[typeName];
+    }
+}
 
 /**
  * Enumerates / interprets an LJMMM field.
@@ -187,6 +211,7 @@ exports.expandLJMMMEntry = function(entry, onError, onSuccess)
             var expandedEntries = [];
 
             var regTypeSize = getTypeRegSize(entry.type);
+            var luaType = getLuaTypeInt(entry.type);
             var numNameSets = nameSets.length;
 
             for (var i=0; i<numNameSets; i++) {
@@ -200,6 +225,7 @@ exports.expandLJMMMEntry = function(entry, onError, onSuccess)
                     newEntry.name = name;
                     newEntry.address = address;
                     newEntry.group = entry.name;
+                    newEntry.luaTypeInt = luaType;
                     address += regTypeSize;
                     delete newEntry.altnames;
                     expandedEntries.push(newEntry);
@@ -231,6 +257,7 @@ exports.expandLJMMMEntrySync = function(entry)
 
     var address = entry.address;
     var regTypeSize = getTypeRegSize(entry.type);
+    var luaType = getLuaTypeInt(entry.type);
 
     if (entry.altnames !== undefined)
         numAltNames = entry.altnames.length
@@ -253,6 +280,7 @@ exports.expandLJMMMEntrySync = function(entry)
             newEntry.name = name;
             newEntry.address = address;
             newEntry.group = entry.name;
+            newEntry.luaTypeInt = luaType;
             address += regTypeSize;
             delete newEntry.altnames;
             expandedEntries.push(newEntry);
@@ -281,6 +309,7 @@ exports.expandPrimaryLJMMMEntrySync = function(entry)
 
     var address = entry.address;
     var regTypeSize = getTypeRegSize(entry.type);
+    var luaType = getLuaTypeInt(entry.type);
 
     nameSets.push(exports.expandLJMMMName(entry.name));
 
@@ -297,6 +326,7 @@ exports.expandPrimaryLJMMMEntrySync = function(entry)
             newEntry.name = name;
             newEntry.address = address;
             newEntry.group = entry.name;
+            newEntry.luaTypeInt = luaType;
             address += regTypeSize;
             expandedEntries.push(newEntry);
         }
