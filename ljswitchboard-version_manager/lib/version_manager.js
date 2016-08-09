@@ -26,8 +26,19 @@ var eventList = {
     'WARNING': 'WARNING',
     'ERROR': 'ERROR',
 };
-function labjackVersionManager() {
 
+var version_manager_pkg_info = require('../package.json');
+
+function labjackVersionManager() {
+    this.getVersionManagerVersion = function() {
+        var version = 0.000;
+        if(version_manager_pkg_info.version) {
+            version = version_manager_pkg_info.version;
+        } else {
+            console.log('pkg info', version_manager_pkg_info);
+        }
+        return version;
+    }
     this.kiplingUpdateLinks = {
         "current_win":      "https://s3.amazonaws.com/ljrob/win32/kipling/kipling_win.zip",
         "beta_win":         "https://s3.amazonaws.com/ljrob/win32/kipling/beta/kipling_beta_win.zip",

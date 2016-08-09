@@ -27,6 +27,32 @@ function addExecutionTime(name, startTime, endTime) {
 		'durationStr': durationStr,
 	});
 }
+
+function printVersions(versionData) {
+	var keys = Object.keys(versionData);
+	keys.forEach(function(key) {
+		var firmwares = versionData[key];
+		if(firmwares.forEach) {
+			firmwares.forEach(function(firmware) {
+				var linkPartials = firmware.upgradeLink.split('/');
+				var finalPartial = linkPartials[linkPartials.length-1];
+				var str = '  - ';
+				str += 'V:' + firmware.version.toString();
+				str += 'T:'+ firmware.type;
+				str += 'K:'+ firmware.key;
+				str += 'F:'+ finalPartial;
+				// console.log(str);
+				console.log(
+					'  - ',
+					'V:', firmware.version,
+					'T:', firmware.type,
+					'K:', firmware.key,
+					'F:', finalPartial
+				);
+			})
+		}
+	});
+}
 exports.tests = {
 	'require version_manager': function(test) {
 		version_manager = require('../lib/version_manager');
@@ -77,6 +103,7 @@ exports.tests = {
 		
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
+		printVersions(data);
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;
@@ -96,7 +123,8 @@ exports.tests = {
 		];
 		
 		// Print out data
-		console.log(' - T4 Test Output:', JSON.stringify(data, null, 2));
+		// console.log(' - T4 Test Output:', JSON.stringify(data, null, 2));
+		printVersions(data);
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;
@@ -118,6 +146,7 @@ exports.tests = {
 		
 		// Print out data
 		// console.log(' - Digit Test Output:', JSON.stringify(data, null, 2));
+		printVersions(data);
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;
@@ -134,6 +163,7 @@ exports.tests = {
 		
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
+		printVersions(data);
 		test.ok(data.isValid, 'LJM Versions data should be valid');
 		var requiredKeys = ['current_win', 'current_mac', 'current_linux32', 'current_linux64'];
 		var givenKeys = Object.keys(data);
@@ -151,6 +181,7 @@ exports.tests = {
 
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
+		printVersions(data);
 		test.ok(data.isValid, 'Kipling Versions data should be valid');
 		var requiredKeys = ['current_win', 'current_mac', 'current_linux32', 'current_linux64'];
 		var givenKeys = Object.keys(data);
