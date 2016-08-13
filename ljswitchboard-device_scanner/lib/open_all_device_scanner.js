@@ -59,7 +59,10 @@ var DEBUG_ORGANIZE_SCAN_DATA = false;
 var DEBUG_CONNECTION_TYPE_SORTING = false;
 
 /* Mark active connection types */
-var DEBUG_MARKING_ACTIVE_CONNECTION_TYPES = true;
+var DEBUG_MARKING_ACTIVE_CONNECTION_TYPES = false;
+
+/* Debug Last Found Devices Scan Steps */
+var DEBUG_LAST_FOUND_DEVICES_SCAN_STEPS = false;
 
 var DEBUG_MOCK_DEVICES = false;
 
@@ -79,6 +82,7 @@ var debugDC = getLogger(DEBUG_DEVICE_CORRELATING);
 var debugVCT = getLogger(DEBUG_VERIFY_CONNECTION_TYPE);
 var debugOSD = getLogger(DEBUG_ORGANIZE_SCAN_DATA);
 var debugMACT = getLogger(DEBUG_MARKING_ACTIVE_CONNECTION_TYPES);
+var debugLFDS = getLogger(DEBUG_LAST_FOUND_DEVICES_SCAN_STEPS);
 var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
 
 
@@ -522,6 +526,7 @@ function openAllDeviceScanner() {
 
     function createScannedDeviceManager(bundle) {
         debugSS('in createScannedDeviceManager');
+        debugLFDS('in createScannedDeviceManager');
         var defered = q.defer();
         self.deviceManager = new createDeviceManager();
         defered.resolve(bundle);
@@ -533,6 +538,7 @@ function openAllDeviceScanner() {
     */
     function markAndAddActiveDevices(bundle) {
         debugSS('in markAndAddActiveDevices');
+        debugLFDS('in markAndAddActiveDevices');
         var defered = q.defer();
         var promises = self.deviceManager.addCuratedDevices(
             self.cachedCurrentDevices
@@ -1174,6 +1180,7 @@ function openAllDeviceScanner() {
 
     function organizeCollectedDeviceData(bundle) {
         debugSS('in organizeCollectedDeviceData');
+        debugLFDS('in organizeCollectedDeviceData');
         var defered = q.defer();
         var deviceTypes = [];
         var scannedData = bundle.scannedData;
@@ -1191,6 +1198,7 @@ function openAllDeviceScanner() {
         var defered = q.defer();
         var deviceTypes = bundle.deviceTypes;
         debugSS('in sortResultConnectionTypes');
+        debugLFDS('in sortResultConnectionTypes');
         var compare = function(a,b) {
             var usbCT = driver_const.connectionTypes.usb;
             var ethCT = driver_const.connectionTypes.ethernet;
@@ -1257,6 +1265,7 @@ function openAllDeviceScanner() {
     */
     function returnResults(bundle) {
         debugSS('in returnResults');
+        debugLFDS('in returnResults');
         self.cachedScanBundle = bundle;
         self.scanInProgress = false;
         var defered = q.defer();
@@ -1348,6 +1357,7 @@ function openAllDeviceScanner() {
                 mockDeviceScanningLib.inspectMockDevices();
             }
         }
+        // This work flow works for both Mock and Live device scanning.
         if(LIVE_DEVICE_SCANNING_ENABLED || true) {
             // Create the device manager object.
             createScannedDeviceManager(bundle)
@@ -1382,6 +1392,7 @@ function openAllDeviceScanner() {
 
             .catch(function(err) {
                 console.log('Error!!! LIVE_DEVICE_SCANNING_ENABLED', err);
+                defered.reject(err);
             });
             // console.log('hasOpenAll');
             // createInternalFindAllDevices(
@@ -1417,15 +1428,178 @@ function openAllDeviceScanner() {
     //     defered.resolve(bundle.deviceTypes);
     //     return defered.promise;
     // }
-    this.getLastFoundDevices = function() {
+
+    function printScannedDataConnectionTypes(scannedData) {
+        var keys = Object.keys(scannedData);
+        keys.forEach(function(key) {
+            var dev = scannedData[key];
+            var cts = dev.connectionTypes;
+            debugLFDS(key, cts);
+        });
+    }
+    /*
+     * This function adds the previously scanned data to the scannedData object
+     * in the bundle.
+    */
+    function addCachedScanResults(bundle) {
+        debugLFDS('In Add Cached Scan Results');
+        
+        var defered = q.defer();
+        var scannedData = bundle.scannedData;
+        var cScannedData;
         if(self.cachedScanBundle) {
-            return returnResults(self.cachedScanBundle);
+            if(self.cachedScanBundle.scannedData) {
+                cScannedData = self.cachedScanBundle.scannedData;
+            } else {
+                cScannedData = {};
+            }
         } else {
-            var defered = q.defer();
-            defered.resolve([]);
+            cScannedData = {};
+        }
+
+        debugLFDS('Cached Connection Types:');
+        printScannedDataConnectionTypes(cScannedData);
+        debugPrintFlatScannedData(cScannedData, debugLFDS);
+        // console.log('Current Devices', self.cachedCurrentDevices);
+        // console.log('Current bundle', bundle.scannedData);
+        
+
+        var cKeys = Object.keys(cScannedData);
+        cKeys.forEach(function(cKey) {
+            if(scannedData[cKey]) {
+                debugLFDS('We already have the key', cKey);
+                // If the key exists we need to transfer data about the device
+                // connection types.  The only reason why the key would exist
+                // already is if the device is open due to no scans having been
+                // performed.  
+
+                // The situation that this branch needs to cover is if a currently
+                // connected device is found to have valid Ethernet/WiFi connections.
+                // Due to no scan having been performed, the types WILL show up
+                // as "added by attribute".  If the cached scan had them showing
+                // up as 'scan' then that information should be indicated as such.
+                /* 
+                 * Need to update the following keys:
+                 * numConnectionTypes (int) ex: 1
+                 * connectionTypeNames (String Array) ex: ['Ethernet']
+                 * unverifiedConnectionTypes (Object array) [object]
+                 * unverifiedConnectionTypeNames (String Array) ex: ['Ethernet']
+                 * verifiedConnectionTypeNames: [],
+                 * connectionTypes (object array) [object]
+                 */
+
+                 // On second thought, due to this case being run into due to
+                 // the device's handle being open.  Lets ignore it.  The previous
+                 // scan data may be invalid and we should only use the latest
+                 // scan data.  If a user wants re-freshed data, then they should
+                 // perform a new scan.
+            } else {
+                debugLFDS('We dont have the key', cKey);
+                // If the key doesn't exist then copy over the data.
+                scannedData[cKey] = cScannedData[cKey];
+            }
+        });
+
+        bundle.scannedData = scannedData;
+        // console.log('New bundle', bundle);
+        defered.resolve(bundle);
+        return defered.promise;
+    }
+
+    function createLastFoundDevicesBundle() {
+        return {
+            'findAllBundle': 'me!!',
+            'secondaryIPAddresses': [],
+            'scannedData': {},
+            'unverifiedConnectionTypes': [],
+            'deviceTypes': [],
+        };
+    }
+    this.getLastFoundDevices = function(currentDevices) {
+        // Parse the supplied currentDevices Object or array into an array.
+        var innerCurrentDevices = [];
+        if(currentDevices) {
+            var cdKeys = Object.keys(currentDevices);
+            cdKeys.forEach(function(cdKey) {
+                innerCurrentDevices.push(currentDevices[cdKey]);
+            });
+        }
+
+        debugSS('Getting last found devices');
+        
+        // Update the mock device scanner.
+        mockDeviceScanningLib.updateCurrentDevices(innerCurrentDevices);
+
+        var defered = q.defer();
+
+        // Check to see if a scan is currently running.
+        if (self.scanInProgress) {
+            defered.reject('Scan in progress');
             return defered.promise;
         }
-        
+
+        // Indicate that a scan is running before setting some variables.
+        self.scanInProgress = true;
+        if(innerCurrentDevices) {
+            if(Array.isArray(innerCurrentDevices)) {
+                self.cachedCurrentDevices = innerCurrentDevices;
+            } else {
+                self.cachedCurrentDevices = [];
+            }
+        } else {
+            self.cachedCurrentDevices = [];
+        }
+
+        // Define an error handling function.
+        function getOnError (msg) {
+            return function getLastFoundDevicesErrorHandler (err) {
+                console.error('An Error', err, msg, err.stack);
+                var errDefered = q.defer();
+                errDefered.reject(err);
+                return errDefered.promise;
+            };
+        }
+
+        // --- Start the scan process ---
+        // Create the bundle.
+        var bundle = createLastFoundDevicesBundle();
+
+        // Create the device manager object.
+        createScannedDeviceManager(bundle)
+
+        // Mark and add the devices that are currently open and should not be closed.
+        .then(markAndAddActiveDevices, getOnError('createScannedDeviceManager'))
+
+        // Collect the required information about each opened device.
+        .then(collectRequiredDeviceInfo, getOnError('markAndAddActiveDevices'))
+
+        // Verify the un-verified device connection types.
+        .then(verifyDeviceConnections, getOnError('collectRequiredDeviceInfo'))
+
+        // Add the cached scan results to the device manager.
+        .then(addCachedScanResults, getOnError('verifyDeviceConnections'))
+
+        // Organize the collected device data.
+        .then(organizeCollectedDeviceData, getOnError('addCachedScanResults'))
+
+        // Sort the found connection types.
+        .then(sortResultConnectionTypes, getOnError('organizeCollectedDeviceData'))
+
+        // Close the devices that aren't currently open.
+        .then(closeInactiveDevices, getOnError('sortResultConnectionTypes'))
+
+        // Compile the data that needs to be returned to the user.
+        .then(returnResults, getOnError('closeInactiveDevices'))
+
+        // Resolve or reject the promise.
+        .then(defered.resolve, defered.reject)
+
+        .catch(function(err) {
+            console.log('Error!!! LIVE_DEVICE_SCANNING_ENABLED', err);
+            defered.reject(err);
+        });
+
+        return defered.promise;
     };
 
     this.addMockDevice = function(device) {

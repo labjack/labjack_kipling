@@ -31,6 +31,14 @@ exports.expectedDevices = {
         }
         ]
     },
+    'T4': {
+        'devices': [{
+            'connectionTypes': [{
+                'name': 'USB',
+                'insertionMethod': 'scan',
+            }]
+        }]
+    }
     // 'Digit': {
     //     'devices': [{
     //         'connectionTypes': [{

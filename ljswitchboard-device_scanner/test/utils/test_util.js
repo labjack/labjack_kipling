@@ -420,3 +420,49 @@ var testScanResults = function(deviceTypes, expDeviceTypes, test, debug) {
 	}
 };
 exports.testScanResults = testScanResults;
+
+function testRequiredDevices(deviceTypes, requiredDeviceTypes, test, debug) {
+	try {
+		// Verify that each required device type and its connection type are
+		// found in the device types.
+		requiredDeviceTypes.forEach(function(reqDevType) {
+			// Verify that the device type was found.
+			var isReqDevTypeFound = false;
+			deviceTypes.forEach(function(deviceType) {
+				var isFound = true;
+				if(deviceType.deviceType != reqDevType.deviceType) {
+					isFound = false;
+				}
+				if(deviceType.deviceTypeString != reqDevType.deviceTypeString) {
+					isFound = false;
+				}
+				if(deviceType.deviceTypeName != reqDevType.deviceTypeName) {
+					isFound = false;
+				}
+				
+				if(isFound) {
+					isReqDevTypeFound = true;
+				}
+			});
+			test.ok(isReqDevTypeFound, 'We should have found the device type: ' + reqDevType.deviceTypeName);
+
+
+			var reqDevices = reqDevType.devices;
+			reqDevices.forEach(function(reqDevice) {
+				// Check to make sure the required device connection types have
+				// been found.
+				var foundRequiredCTs = true;
+				var reqConnectionTypes = reqDevice.connectionTypes;
+				var reqCTRes = reqConnectionTypes.map(function(reqConnectionType) {
+
+				});
+			});
+		});
+		return true;
+	} catch(err) {
+		console.log('Error testing for required device types', err);
+		test.ok(false, 'Should not have encountered an error');
+		return false;
+	}
+}
+exports.testRequiredDevices = testRequiredDevices;

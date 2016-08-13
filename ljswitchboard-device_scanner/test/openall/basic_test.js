@@ -42,7 +42,7 @@ exports.tests = {
 			test.done();
 		});
 	},
-	'basic test': function(test) {
+	'perform scan': function(test) {
 		var currentDeviceList = [];
 		var startTime = new Date();
 		deviceScanner.findAllDevices(devices)
@@ -58,6 +58,7 @@ exports.tests = {
 			test.done();
 		}, function(err) {
 			console.log('Scanning Error');
+			test.ok(false, 'Scan should have worked properly');
 			test.done();
 		});
 	},
@@ -75,6 +76,23 @@ exports.tests = {
 		} else {
 			test.done();
 		}
+	},
+	'perform secondary cached read': function(test) {
+		var startTime = new Date();
+		deviceScanner.getLastFoundDevices(devices)
+		.then(function(deviceTypes) {
+			console.log('Finished scanning, scan data', deviceTypes);
+			printScanResultsData(deviceTypes);
+
+			var endTime = new Date();
+			console.log('  - Duration'.cyan, (endTime - startTime)/1000);
+
+			test.done();
+		}, function(err) {
+			console.log('Scanning Error');
+			test.ok(false, 'Scan should have worked properly');
+			test.done();
+		});
 	},
 	'close device': function(test) {
 		if(devices[0]) {

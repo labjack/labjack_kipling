@@ -1431,7 +1431,7 @@ var deviceScanner = function() {
 		}
 		return defered.promise;
 	};
-	this.getLastFoundDevices = function() {
+	this.getLastFoundDevices = function(currentDevices) {
 		var defered = q.defer();
 		if(!self.scanInProgress) {
 			defered.resolve(self.sortedResults);
