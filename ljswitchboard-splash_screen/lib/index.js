@@ -68,7 +68,7 @@ function initIOManager() {
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
 
-
+console.log('Run the command: window_manager.windowManager.managedWindows.kipling.win.show() to force the K3 window to appear.');
 
 // Require persistent_data_manager
 var persistent_data_manager = require('./persistent_data_manager');
