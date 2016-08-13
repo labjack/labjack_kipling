@@ -21,7 +21,7 @@ var testGroups = {
 	// 	'basic_eth_test': true,
 	// },
 	'test_openall': true,
-	'test_listall': false,
+	'test_listall': true,
 };
 
 

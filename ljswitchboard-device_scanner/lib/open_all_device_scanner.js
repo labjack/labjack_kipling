@@ -1515,6 +1515,12 @@ function openAllDeviceScanner() {
             'deviceTypes': [],
         };
     }
+    this.clearCachedScanResults = function() {
+        var defered = q.defer();
+        self.cachedCurrentDevices = [];
+        defered.resolve();
+        return defered.promise;
+    };
     this.getLastFoundDevices = function(currentDevices) {
         // Parse the supplied currentDevices Object or array into an array.
         var innerCurrentDevices = [];
