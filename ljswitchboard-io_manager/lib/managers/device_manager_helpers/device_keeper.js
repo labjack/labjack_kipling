@@ -586,12 +586,16 @@ function createDeviceKeeper(io_delegator, link) {
 	
 	this.listAllDevices = function() {
 		var defered = q.defer();
+
+		// Build array of currently connected devices.
 		var currentDevices = [];
 		var keys = Object.keys(self.devices);
 		keys.forEach(function(key) {
 			var dev = self.devices[key].device;
 			currentDevices.push(dev);
 		});
+
+		// Start device scan
 		deviceScanner.findAllDevices(currentDevices)
 		.then(function(data) {
 			defered.resolve(data);
@@ -601,7 +605,16 @@ function createDeviceKeeper(io_delegator, link) {
 
 	this.getCachedListAllDevices = function() {
 		var defered = q.defer();
-		deviceScanner.getLastFoundDevices()
+
+		// Build array of currently connected devices.
+		var currentDevices = [];
+		var keys = Object.keys(self.devices);
+		keys.forEach(function(key) {
+			var dev = self.devices[key].device;
+			currentDevices.push(dev);
+		});
+		
+		deviceScanner.getLastFoundDevices(currentDevices)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
