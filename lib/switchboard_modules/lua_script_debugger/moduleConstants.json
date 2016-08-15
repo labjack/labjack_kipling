@@ -61,7 +61,7 @@
                     "name": "ADXL345 3-axis Accel (SPI)",
                     "location": "lua_script_debugger/premade_scripts/Sensor_Examples/ADXL345 3-axis Accel (SPI).lua"
                 }, {
-                    "name": "SRF02 Range Finder (I2C)",
+                    "name": "OLD - SRF02 Range Finder (I2C)",
                     "location": "lua_script_debugger/premade_scripts/Sensor_Examples/SRF02 Range Finder (I2C).lua"
                 }, {
                     "name": "FGPMMOPA6H Adafruit GPS (UART)",
@@ -70,11 +70,58 @@
                     "name": "TP-01 Thermocouple (AIN_EF)",
                     "location": "lua_script_debugger/premade_scripts/Sensor_Examples/TP-01 Thermocouple (AIN_EF).lua"
                 }, {
-                    "name": "HMC6352 Magnetometer (I2C)",
+                    "name": "OLD - HMC6352 Magnetometer (I2C)",
                     "location": "lua_script_debugger/premade_scripts/Sensor_Examples/HMC6352 Magnetometer (I2C).lua"
                 }, {
                     "name": "ES08AII Servo Motor (PWM)",
                     "location": "lua_script_debugger/premade_scripts/Sensor_Examples/ES08AII Servo Motor (PWM).lua"
+                }
+            ]
+        }, {
+            "name": "I2C",
+            "subScripts": [
+                {
+                    "name": "I2C_Utils",
+                    "location": "lua_script_debugger/premade_scripts/I2C/i2c_utils.lua"
+                }, {
+                    "name": "I2C_Utils-min",
+                    "location": "lua_script_debugger/premade_scripts/I2C/i2c_utils-min.lua"
+                }, {
+                    "name": "10DOF Adafruit PN:1604",
+                    "location": "lua_script_debugger/premade_scripts/I2C/10DOF-adafruit-1604.lua"
+                }, {
+                    "name": "Accel & Compas LSM303DLHC",
+                    "location": "lua_script_debugger/premade_scripts/I2C/accel-and-compas-LSM303DLHC.lua"
+                }, {
+                    "name": "Compas LSM303DLHC",
+                    "location": "lua_script_debugger/premade_scripts/I2C/compas-LSM303DLHC.lua"
+                }, {
+                    "name": "Accelerometer LSM303DLHC",
+                    "location": "lua_script_debugger/premade_scripts/I2C/accelerometer-LSM303DLHC.lua"
+                }, {
+                    "name": "Accelerometer ADXL345",
+                    "location": "lua_script_debugger/premade_scripts/I2C/accelerometer-ADXL345.lua"
+                }, {
+                    "name": "Color Sensor TCS34725",
+                    "location": "lua_script_debugger/premade_scripts/I2C/color-sensor-TCS34725.lua"
+                }, {
+                    "name": "Gyro L3GD20H",
+                    "location": "lua_script_debugger/premade_scripts/I2C/gyro-L3GD20H.lua"
+                }, {
+                    "name": "Gyro PS-ITG-3200",
+                    "location": "lua_script_debugger/premade_scripts/I2C/gyro-PS-ITG-3200.lua"
+                }, {
+                    "name": "Proximity VL6180X",
+                    "location": "lua_script_debugger/premade_scripts/I2C/proximity-VL6180X.lua"
+                }, {
+                    "name": "Ranging SRF02",
+                    "location": "lua_script_debugger/premade_scripts/I2C/ranging-SRF02.lua"
+                }, {
+                    "name": "Temperature & Pressure BMP180",
+                    "location": "lua_script_debugger/premade_scripts/I2C/temp-and-pressure-BMP180.lua"
+                }, {
+                    "name": "IO Expander SX1059",
+                    "location": "lua_script_debugger/premade_scripts/I2C/io-expander-SX1059.lua"
                 }
             ]
         }, {
