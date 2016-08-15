@@ -162,7 +162,8 @@ function createDriverManager(io_delegator) {
 		'controlLog': 2,
 		'enableLog': 0,
 		'disableLog': 0,
-		'driverVersion': 0
+		'driverVersion': 0,
+		'closeAll': 0,
 	};
 
 	var self = this;

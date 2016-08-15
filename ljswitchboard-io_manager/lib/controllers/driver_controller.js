@@ -90,6 +90,9 @@ function createDriverController(io_interface) {
 	this.disableLog = function() {
 		return callFunc('disableLog');
 	};
+	this.closeAll = function() {
+		return callFunc('closeAll');
+	};
 	this.getFuncs = function() {
 		return callFunc('getFuncs');
 	};
@@ -116,6 +119,7 @@ function createDriverController(io_interface) {
 			return callFunc('specialAddressesGetDefaultFilePath');
 		},
 	};
+	
 	var self = this;
 }
 
