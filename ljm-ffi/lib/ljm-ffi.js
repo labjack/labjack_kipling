@@ -27,6 +27,7 @@ var DEBUG_LJM_LIBRARY_LOCATION_SELECTION = false;
 var DEBUG_SEARCHING_FOR_LJM_LIB_LOCATIONS = false;
 var DEBUG_LOAD_CUSTOM_LJM = false;
 var VERBOSE_LJM_FUNCTION_LINKING = false;
+var SILENT_LJM_FUNCTION_LINKING = true;
 
 function convertLJFunctionInfoToFFI(functionInfo) {
     // Define the array to store data types into
@@ -979,7 +980,9 @@ function loadLJMMultiple(ljmVersion) {
                 if(VERBOSE_LJM_FUNCTION_LINKING) {
                     console.log('Warning: Failed to link function', functionName, err);
                 } else {
-                    console.log('Warning: Failed to link function', functionName);
+                    if(!SILENT_LJM_FUNCTION_LINKING) {
+                        console.log('Warning: Failed to link function', functionName);
+                    }
                 }
                 
                 // Create functions that go in the liblabjack object.

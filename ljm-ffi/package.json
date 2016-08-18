@@ -1,6 +1,6 @@
 {
     "name": "ljm-ffi",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
