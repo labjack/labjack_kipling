@@ -722,8 +722,49 @@ exports.ljmDriver = function() {
         var failedOpens = [];
         results.numErrors = numErrors;
         results.failedOpens = failedOpens;
+
+        // Parse the errorHandle
+        var errorHandle = me.errorHandle.readInt32LE(0);
+
+        // Read the errors string
+        var pointerToCharStar = ref.readPointer(me.errors, 0, ARCH_POINTER_SIZE);
+        var parsedCharStar = ref.readCString(pointerToCharStar, 0);
+        var errorsString = parsedCharStar;
+        var errorsObj = {};
+        try {
+            errorsObj = JSON.parse(errorsString);
+        } catch(err) {
+            errorsObj = {
+                'exceptions': [],
+                'networkInterfaces': [],
+                'returnedDevices': [],
+                'specificIPs': [],
+            };
+        }
+
+        // console.log('Parsed Data', errorHandle, errorsObj);
+        // Save the errors to the results.
+        results.errorHandle = errorHandle;
+        results.errors = errorsObj;
+
         return results;
     };
+
+    function asyncUnallocateErrorsHandle(handle, callback) {
+        self.ljm.LJM_CleanInfo.async(
+            handle,
+            function (err, res) {
+                callback();
+            });
+    }
+    function syncUnallocateErrorsHandle(handle) {
+        try {
+            self.ljm.LJM_CleanInfo(handle);
+        } catch(err) {
+            // Error...
+        }
+        return;
+    }
 
     /**
      * Desc: Opens all LabJacks of the specified device type and connection type.
@@ -752,7 +793,14 @@ exports.ljmDriver = function() {
             function (err, res) {
                 if (err) throw err;
                 if (res !== 0) return onError(res);
-                return onSuccess(extractOpenAllResults(me));
+                var results = extractOpenAllResults(me);
+                // return onSuccess(extractOpenAllResults(me));
+                asyncUnallocateErrorsHandle(
+                    results.errorHandle,
+                    function unallocatingCB() {
+                        console.log('finishing openAll', results);
+                        onSuccess(results);
+                    });
             }
         );
     };
@@ -772,8 +820,9 @@ exports.ljmDriver = function() {
         if (errorResult !== 0) {
             throw new DriverOperationError(errorResult);
         }
-
-        return extractOpenAllResults(me);
+        var results = extractOpenAllResults(me);
+        syncUnallocateErrorsHandle(results.errorHandle);
+        return results;
     };
 
     /**

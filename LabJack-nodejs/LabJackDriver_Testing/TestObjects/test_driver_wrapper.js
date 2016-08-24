@@ -10,6 +10,7 @@
 
 var ljmJsonManager = require('ljswitchboard-modbus_map');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
+var ref = require('ref');
 
 var fakeDriverB
 {
@@ -19,7 +20,6 @@ var fakeDriverB
 		{
 			console.log("Async-Open Function Called");
 		}
-		console.log
 	}
 };
 function createCallableObject (defaultFunction, asyncFunction) {
@@ -78,7 +78,17 @@ var LJM_Close = createCallableObject(
 		argumentsList.push(arguments);
 		reportEnd(callback);
 	});
-
+var LJM_CleanInfo = createCallableObject(
+	function(handle) {
+		lastFunctionCall.push("LJM_CleanInfo");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(handle,callback) {
+		lastFunctionCall.push("LJM_CleanInfoAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
 var LJM_GetHandleInfo = createCallableObject(
 	function(handle,devT, conT, sN, ipAddr, port, maxB) {
 		lastFunctionCall.push("LJM_GetHandleInfo");
@@ -595,6 +605,12 @@ function populateOpenAllValues(NumOpened, aHandles, NumErrors, InfoHandle, Info)
 	InfoHandle.writeInt32LE(infoHandle);
 
 	// Write Info String...
+	var userData = '{"exceptions": [], "networkInterfaces": [], "returnedDevices": [], "specificIPs": []}';
+
+	var strBuffer = new Buffer(userData.length + 1);
+    strBuffer.fill(0);
+    ref.writeCString(strBuffer, 0, userData);
+    ref.writePointer(Info, 0, strBuffer);
 }
 var Internal_LJM_OpenAll = createCallableObject(
 	function(DeviceType, ConnectionType, NumOpened, aHandles, NumErrors, InfoHandle, Info) {
@@ -818,6 +834,7 @@ var fakeDriver = {
 	'LJM_WriteLibraryConfigStringS': LJM_WriteLibraryConfigStringS,
 	'LJM_Log': LJM_Log,
 	'LJM_ResetLog': LJM_ResetLog,
+	'LJM_CleanInfo': LJM_CleanInfo,
 
 	
 };

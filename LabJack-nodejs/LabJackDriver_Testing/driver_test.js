@@ -198,16 +198,22 @@ module.exports = {
         //Create test-variables
         var testList = testOptions.map(generateTestListStr);
 
+        //Expected info combines both sync & async
+        var syncFuncList = [];
         function generateFuncListSync() {
-            return 'Internal_LJM_OpenAll';
+            syncFuncList.push('Internal_LJM_OpenAll');
+            syncFuncList.push('LJM_CleanInfo');
         }
+        testOptions.forEach(generateFuncListSync);
+
+        var asyncFuncList = [];
         function generateFuncListAsync() {
-            return 'Internal_LJM_OpenAllAsync';
+            syncFuncList.push('Internal_LJM_OpenAllAsync');
+            syncFuncList.push('LJM_CleanInfoAsync');
         }
 
-        //Expected info combines both sync & async
-        var syncFuncList = testOptions.map(generateFuncListSync);
-        var asyncFuncList = testOptions.map(generateFuncListAsync);
+        testOptions.forEach(generateFuncListAsync);
+
         var expectedFunctionList = syncFuncList.concat(asyncFuncList);
         
 
@@ -223,6 +229,13 @@ module.exports = {
                 'handles': [0],
                 'numErrors': 0,
                 'failedOpens': [],
+                'errorHandle': 0,
+                'errors': {
+                    'exceptions': [],
+                    'networkInterfaces': [],
+                    'returnedDevices': [],
+                    'specificIPs': [],
+                }
             };
 
         }
