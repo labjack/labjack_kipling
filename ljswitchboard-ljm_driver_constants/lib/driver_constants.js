@@ -33,6 +33,8 @@ exports.LJM_CT_TCP = 2;
 exports.LJM_CT_ETHERNET = 3;
 exports.LJM_CT_WIFI = 4;
 exports.LJM_CT_UDP = 5;
+exports.LJM_CT_ETHERNET_UDP = 6;
+exports.LJM_CT_WIFI_UDP = 7;
 
 // Modbus Port
 exports.LJM_MODBUS_PORT = 502;
