@@ -798,7 +798,6 @@ exports.ljmDriver = function() {
                 asyncUnallocateErrorsHandle(
                     results.errorHandle,
                     function unallocatingCB() {
-                        console.log('finishing openAll', results);
                         onSuccess(results);
                     });
             }

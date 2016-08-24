@@ -12,16 +12,7 @@ var ljmJsonManager = require('ljswitchboard-modbus_map');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 var ref = require('ref');
 
-var fakeDriverB
-{
-	this.open = function(deviceType, connectionType, identifier)
-	{
-		this.async = function(deviceType, connectionType, identifier, callback)
-		{
-			console.log("Async-Open Function Called");
-		}
-	}
-};
+
 function createCallableObject (defaultFunction, asyncFunction) {
     var retFunction = function () {
         return defaultFunction.apply(this, arguments);

@@ -3135,12 +3135,11 @@ exports.labjack = function () {
 	this.checkStatus = function(onError) {
 		if (!self.isHandleValid) {
 			if ( (self.handle === null) && (self.deviceType === null) ) {
-				if ( onError ) {
-					onError("Device Never Opened");
-					return true;
-					
-				} else {
+				if ( onError === null ) {
 					throw new DriverInterfaceError("Device Never Opened");
+					return true;
+				} else {
+					onError("Device Never Opened");
 					return true;
 				}
 			} else {
@@ -3161,11 +3160,11 @@ exports.labjack = function () {
 			
 		} else {
 			if ( (self.handle === null) && (self.deviceType === null) ) {
-				if ( onError ) {
-					onError("Device Never Opened");
+				if ( onError === null ) {
+					throw new DriverInterfaceError("Device Never Opened");
 					return true;
 				} else {
-					throw new DriverInterfaceError("Device Never Opened");
+					onError("Device Never Opened");
 					return true;
 				}
 			}
@@ -3174,10 +3173,10 @@ exports.labjack = function () {
 	this.checkStatusCloseOnly = function(onError) {
 		if ( (self.handle === null) && (self.deviceType === null) ) {
 			if ( onError === null ) {
-				onError("Device Never Opened");
+				throw new DriverInterfaceError("Device Never Opened");
 				return true;
 			} else {
-				throw new DriverInterfaceError("Device Never Opened");
+				onError("Device Never Opened");
 				return true;
 			}
 		}
