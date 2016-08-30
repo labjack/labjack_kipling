@@ -555,6 +555,64 @@ function openAllDeviceScanner() {
         return defered.promise;
     }
 
+    function parseOutErroniusDevices(openAllData) {
+        // console.log('OpenAll Error Info .numErrors', openAllData.numErrors);
+        // console.log('OpenAll Error Info .errors', openAllData.errors);
+        var openAllErrors = openAllData.errors;
+        var openAllExceptions = openAllErrors.exceptions;
+        var erroniusDevices = [];
+
+        function parseException(exception) {
+            try {
+                var deviceHints = exception.initFailure.deviceHints;
+                // console.log('Exception', exception);
+                // console.log('Device Hints', deviceHints);
+
+                var dt = driver_const.deviceTypes[deviceHints.knownDeviceType];
+                var dtString = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
+                var dtName = driver_const.DEVICE_TYPE_NAMES[dt];
+
+                var ip = deviceHints.ip;
+                var port = deviceHints.port;
+
+                var ct = driver_const.connectionTypes[deviceHints.initProtocol];
+                if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_WIFI_UDP_PORT) {
+                    ct = driver_const.LJM_CT_WIFI_UDP;
+                } else if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_ETH_UDP_PORT) {
+                    ct = driver_const.LJM_CT_ETHERNET_UDP;
+                }
+                var ctString = driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct];
+                var ctName = driver_const.CONNECTION_TYPE_NAMES[ct];
+                
+                
+                erroniusDevices.push({
+                    'dt': dt,
+                    'dtString': dtString,
+                    'dtName': dtName,
+
+                    'ct': ct,
+                    'ctString': ctString,
+                    'ctName': ctName,
+
+                    'ip': ip,
+                    'port': port,
+
+                    'errorCode': exception.errorCode,
+                    'errorMessage': exception.errorMessage,
+                });
+            } catch(err) {
+
+            }
+        }
+        if(openAllExceptions.length > 0) {
+            console.log('OpenAll...');
+            // console.log('Exceptions', openAllExceptions);
+            console.log('Analyzing Exceptions');
+            openAllExceptions.forEach(parseException);
+            console.log('Erronius Devices', erroniusDevices);
+        }
+        return erroniusDevices;
+    }
     /*
      * The function performOpenAllScanIteration does...
      */
@@ -567,7 +625,8 @@ function openAllDeviceScanner() {
             cb();
         }
         function onSuccess(openAllData) {
-            // console.log('OpenAll...', openAllData, dt, ct);
+            var erroniusDevices = parseOutErroniusDevices(openAllData);
+            
             debugOpenAllResults('OpenAll...', openAllData, dt, ct);
             var stopTime = new Date();
             var deltaTime = parseFloat(((stopTime - startTime)/1000).toFixed(2));
@@ -1280,6 +1339,8 @@ function openAllDeviceScanner() {
             'scannedData': {},
             'unverifiedConnectionTypes': [],
             'deviceTypes': [],
+            'openAllError': undefined,
+            'openAllErrors': [],
         };
     }
     this.originalOldfwState = 0;
