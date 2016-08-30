@@ -15,6 +15,11 @@ var device_curator = require('ljswitchboard-ljm_device_curator');
 
 var devices = [];
 
+var scanOptions = {
+    'scanUSB': true,
+    'scanEthernet': false,
+    'scanWiFi': false,
+};
 exports.tests = {
 	'Starting Basic Test': function(test) {
 		console.log('');
@@ -45,36 +50,24 @@ exports.tests = {
 	'perform scan': function(test) {
 		var currentDeviceList = [];
 		var startTime = new Date();
-		deviceScanner.findAllDevices(devices, {
-            'scanUSB': true,
-            'scanEthernet': true,
-            'scanWiFi': true,
-        })
+		deviceScanner.findAllDevices(devices, scanOptions)
 		.then(function(deviceTypes) {
 			console.log('finished scanning, scan data', deviceTypes);
 			printScanResultsData(deviceTypes);
 			console.log('Finished printing scan results');
 			verifyScanResults(deviceTypes, test, {debug: false});
 			var endTime = new Date();
+			var duration = (endTime - startTime)/1000;
 			// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
 			// test.ok(testStatus, 'Unexpected test result');
-			console.log('  - Duration'.cyan, (endTime - startTime)/1000);
+			test.ok(duration < 1.0, "A USB only scan should take less than 1 second");
+			console.log('  - Duration'.cyan, duration);
 			test.done();
 		}, function(err) {
 			console.log('Scanning Error');
 			test.ok(false, 'Scan should have worked properly');
 			test.done();
 		});
-	},
-	'get erronius devices': function(test) {
-		deviceScanner.getLastFoundErroniusDevices()
-		.then(function(erroniusDevices){
-			console.log('Num Erronius Devices', erroniusDevices.length);
-			test.done();
-		}, function(err) {
-			test.ok(false, 'Request should not have failed');
-			test.done();
-		})
 	},
 	'read device SERIAL_NUMBER': function(test) {
 		if(devices[0]) {

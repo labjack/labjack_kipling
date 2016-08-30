@@ -9,15 +9,16 @@ process.on('uncaughtException', function(err) {
 var testGroups = {
 	'get_ljm_version': true,
 	'openall': {
-		'basic_mock': false,
-		'mock_openall': false,
-		'mock_w_device': false,
-		'mock_scan_mix_mock_and_live_devices': false,
+		'basic_mock': true,
+		'mock_openall': true,
+		'mock_w_device': true,
+		'mock_scan_mix_mock_and_live_devices': true,
 		'basic_test': true,
-		'cached_scan_test': false,
-		'basic_test-open_T4': false,
-		'basic_eth_test': false,
-		'multiple_sequential_scans': false,
+		'cached_scan_test': true,
+		'basic_test-open_T4': true,
+		'basic_eth_test': true,
+		'multiple_sequential_scans': true,
+		'usb_only_test': true,
 	},
 };
 

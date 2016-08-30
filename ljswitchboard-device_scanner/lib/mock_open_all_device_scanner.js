@@ -241,6 +241,7 @@ function createMockDeviceScanner() {
 			var currentDT = driver_const.deviceTypes[device.deviceType];
 			var ctANY = driver_const.LJM_CT_ANY;
 			var scanCT = driver_const.connectionTypes[connectionType];
+			var scanCTMedium = driver_const.CONNECTION_MEDIUM[scanCT];
 			var currentCT = driver_const.connectionTypes[device.connectionType];
 			var ctUDP = driver_const.LJM_CT_UDP;
 			if(scanDT == dtANY) {
@@ -257,7 +258,7 @@ function createMockDeviceScanner() {
 				addDevice = false;
 				if(scanCT == ctANY) {
 					addDevice = true;
-				} else if(scanCT == currentCT) {
+				} else if(scanCTMedium == currentCT) {
 					addDevice = true;
 				} else if((scanCT == driver_const.LJM_CT_TCP) || (scanCT == ctUDP)) {
 					if(currentCT == driver_const.LJM_CT_ETHERNET) {

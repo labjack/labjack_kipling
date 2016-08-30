@@ -132,7 +132,14 @@ var OPEN_ALL_SCAN_REQUEST_LIST = [
     },
     {
         'deviceType': driver_const.LJM_DT_T7,
-        'connectionType': driver_const.LJM_CT_UDP,
+        'connectionType': driver_const.LJM_CT_ETHERNET_UDP,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
+        'numAttempts': 1,
+        'async': false,
+    },
+    {
+        'deviceType': driver_const.LJM_DT_T7,
+        'connectionType': driver_const.LJM_CT_WIFI_UDP,
         'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
         'numAttempts': 1,
         'async': false,
@@ -140,6 +147,14 @@ var OPEN_ALL_SCAN_REQUEST_LIST = [
     {
         'deviceType': driver_const.LJM_DT_T4,
         'connectionType': driver_const.LJM_CT_USB,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4,
+        'numAttempts': 1,
+        'async': false,
+    },
+
+    {
+        'deviceType': driver_const.LJM_DT_T4,
+        'connectionType': driver_const.LJM_CT_ETHERNET_UDP,
         'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4,
         'numAttempts': 1,
         'async': false,
@@ -558,8 +573,12 @@ function openAllDeviceScanner() {
     function parseOutErroniusDevices(openAllData) {
         // console.log('OpenAll Error Info .numErrors', openAllData.numErrors);
         // console.log('OpenAll Error Info .errors', openAllData.errors);
+        // console.log('OpenAllData', openAllData);
         var openAllErrors = openAllData.errors;
-        var openAllExceptions = openAllErrors.exceptions;
+        var openAllExceptions = [];
+        if(openAllErrors) {
+            openAllExceptions = openAllErrors.exceptions;
+        }
         var erroniusDevices = [];
 
         function parseException(exception) {
@@ -605,120 +624,127 @@ function openAllDeviceScanner() {
             }
         }
         if(openAllExceptions.length > 0) {
-            console.log('OpenAll...');
+            // console.log('OpenAll...');
             // console.log('Exceptions', openAllExceptions);
-            console.log('Analyzing Exceptions');
+            // console.log('Analyzing Exceptions');
             openAllExceptions.forEach(parseException);
-            console.log('Erronius Devices', erroniusDevices);
+            // console.log('Erronius Devices', erroniusDevices);
         }
         return erroniusDevices;
     }
     /*
      * The function performOpenAllScanIteration does...
      */
-    function performOpenAllScanIteration(scanMethod, cb) {
-        var dt = scanMethod.deviceType;
-        var ct = scanMethod.connectionType;
-        var requiredInfo = scanMethod.addresses;
+    function getPerformOpenAllScanIteration(bundle) {
+        return function performOpenAllScanIteration(scanMethod, cb) {
+            var dt = scanMethod.deviceType;
+            var ct = scanMethod.connectionType;
+            var requiredInfo = scanMethod.addresses;
 
-        function onErr(err) {
-            cb();
-        }
-        function onSuccess(openAllData) {
-            var erroniusDevices = parseOutErroniusDevices(openAllData);
-            
-            debugOpenAllResults('OpenAll...', openAllData, dt, ct);
-            var stopTime = new Date();
-            var deltaTime = parseFloat(((stopTime - startTime)/1000).toFixed(2));
-            debugSS('Successfully called OpenAll', deltaTime);
-            debugLJMCalls('Successfully called OpenAll', deltaTime);
-            debugOpenAll('Successfully called OpenAll', deltaTime);
-            var openedHandles = openAllData.handles;
-
-            var openedDevices = [];
-            openedHandles.forEach(function(openedHandle) {
-                openedDevices.push({
-                    'handle': openedHandle,
+            function onErr(err) {
+                cb();
+            }
+            function onSuccess(openAllData) {
+                var erroniusDevices = parseOutErroniusDevices(openAllData);
+                erroniusDevices.forEach(function(dev) {
+                    bundle.erroniusDevices.push(dev);
                 });
-            });
+
+                debugOpenAllResults('OpenAll...', openAllData, dt, ct);
+                var stopTime = new Date();
+                var deltaTime = parseFloat(((stopTime - startTime)/1000).toFixed(2));
+                debugSS('Successfully called OpenAll', deltaTime);
+                debugLJMCalls('Successfully called OpenAll', deltaTime);
+                debugOpenAll('Successfully called OpenAll', deltaTime);
+                var openedHandles = openAllData.handles;
+
+                var openedDevices = [];
+                openedHandles.forEach(function(openedHandle) {
+                    openedDevices.push({
+                        'handle': openedHandle,
+                    });
+                });
 
 
-            /* openedHandles is an array of objects aka [ {handle: 0}, {handle: 1}, ... ] */
-            debugOpenAll('OpenAll Finished, in onSuccess, data:', dt, ct, openAllData);
+                /* openedHandles is an array of objects aka [ {handle: 0}, {handle: 1}, ... ] */
+                debugOpenAll('OpenAll Finished, in onSuccess, data:', dt, ct, openAllData);
 
-            // Build an array of promises indicating when all opened devices are finished being opened.
-            var promises = openedDevices.map(function(openedDevice) {
-                var openInfo = {
-                    'deviceType': dt,
-                    'connectionType': ct,
-                    'identifier': 'LJM_idANY',
-                };
-                debugOpenAll('Managing device...', openedDevice);
-                var promise = self.deviceManager.addDevice(
-                    openedDevice,
-                    requiredInfo,
-                    openInfo
-                );
-                return promise;
-            });
+                // Build an array of promises indicating when all opened devices are finished being opened.
+                var promises = openedDevices.map(function(openedDevice) {
+                    var openInfo = {
+                        'deviceType': dt,
+                        'connectionType': ct,
+                        'identifier': 'LJM_idANY',
+                    };
+                    debugOpenAll('Managing device...', openedDevice);
+                    var promise = self.deviceManager.addDevice(
+                        openedDevice,
+                        requiredInfo,
+                        openInfo
+                    );
+                    return promise;
+                });
 
 
-            // When all devices have been added to the device manager we can return.
-            q.allSettled(promises)
-            .then(function() {
-                cb();
-            }, function(err) {
-                console.error('Error in performOpenAllScanIteration', err);
-                cb();
-            });
-        }
-        var startTime = new Date();
-        debugLJMCalls('Calling OpenAll', dt, ct);
+                // When all devices have been added to the device manager we can return.
+                q.allSettled(promises)
+                .then(function() {
+                    cb();
+                }, function(err) {
+                    console.error('Error in performOpenAllScanIteration', err);
+                    cb();
+                });
+            }
+            var startTime = new Date();
+            debugLJMCalls('Calling OpenAll', dt, ct);
 
-        if(LIVE_DEVICE_SCANNING_ENABLED) {
-            // Execute the LJM openAll function.
-            self.driver.openAll(dt, ct, onErr, onSuccess);
-        } else {
-            mockDeviceScanningLib.openAll(dt, ct, onErr, onSuccess);
+            if(LIVE_DEVICE_SCANNING_ENABLED) {
+                // Execute the LJM openAll function.
+                self.driver.openAll(dt, ct, onErr, onSuccess);
+            } else {
+                mockDeviceScanningLib.openAll(dt, ct, onErr, onSuccess);
+            }
         }
     }
 
     /*
      * The function performOpenAllScanMethod does...
      */
-    function performOpenAllScanMethod(scanMethod, cb) {
-        debugOpenAll('in performOpenAllScanMethod');
-        var scanIterations = [];
-        var numAttempts = scanMethod.numAttempts;
-        for(var i = 0; i < numAttempts; i++) {
-            scanIterations.push(scanMethod);
-        }
+    function getPerformOpenAllScanMethod(bundle) {
+        return function performOpenAllScanMethod(scanMethod, cb) {
+            debugOpenAll('in performOpenAllScanMethod');
+            var scanIterations = [];
+            var numAttempts = scanMethod.numAttempts;
+            for(var i = 0; i < numAttempts; i++) {
+                scanIterations.push(scanMethod);
+            }
 
-        var performAsync = scanMethod.async;
+            var performAsync = scanMethod.async;
 
-        function finishedScanning() {
-            debugOpenAll('Finished performing scanMethod...');
-            // We are finished scanning...
-            debugOpenAll(
-                'Finished performing openAll scans, sm:',
-                scanMethod.deviceType,
-                scanMethod.connectionType
-            );
-            cb();
-        }
+            function finishedScanning() {
+                debugOpenAll('Finished performing scanMethod...');
+                // We are finished scanning...
+                debugOpenAll(
+                    'Finished performing openAll scans, sm:',
+                    scanMethod.deviceType,
+                    scanMethod.connectionType
+                );
+                cb();
+            }
 
-        if(performAsync) {
-            async.each(
-                scanIterations,
-                performOpenAllScanIteration,
-                finishedScanning
-            );
-        } else {
-            async.eachSeries(
-                scanIterations,
-                performOpenAllScanIteration,
-                finishedScanning
-            );
+            if(performAsync) {
+                async.each(
+                    scanIterations,
+                    getPerformOpenAllScanIteration(bundle),
+                    finishedScanning
+                );
+            } else {
+                async.eachSeries(
+                    scanIterations,
+                    getPerformOpenAllScanIteration(bundle),
+                    finishedScanning
+                );
+            }
         }
     }
     /*
@@ -731,6 +757,32 @@ function openAllDeviceScanner() {
 
         // Save the scan request list to a local variable w/ a shorter name.
         var scanMethods = OPEN_ALL_SCAN_REQUEST_LIST;
+
+        var scanOptions = bundle.options;
+        var filteredScanMethods = scanMethods.filter(function(scanMethod) {
+            var enableScan = false;
+            if(scanMethod.connectionType == driver_const.LJM_CT_USB) {
+                if(scanOptions.scanUSB) {
+                    enableScan = true;
+                }
+            }
+            if(scanMethod.connectionType == driver_const.LJM_CT_ETHERNET_UDP) {
+                if(scanOptions.scanEthernet) {
+                    enableScan = true;
+                }
+            }
+            if(scanMethod.connectionType == driver_const.LJM_CT_WIFI_UDP) {
+                if(scanOptions.scanWiFi) {
+                    enableScan = true;
+                }
+            }
+            if(scanMethod.connectionType == driver_const.LJM_CT_UDP) {
+                if(scanOptions.scanWiFi || scanOptions.scanEthernet) {
+                    enableScan = true;
+                }
+            }
+            return enableScan;
+        })
 
         // Save async vs sync option to a local variable w/ a shorter name.
         var performAsync = PERFORM_SCAN_REQUESTS_ASYNCHRONOUSLY;
@@ -753,14 +805,14 @@ function openAllDeviceScanner() {
 
         if(performAsync) {
             async.each(
-                scanMethods,
-                performOpenAllScanMethod,
+                filteredScanMethods,
+                getPerformOpenAllScanMethod(bundle),
                 finishedScanning
             );
         } else {
             async.eachSeries(
-                scanMethods,
-                performOpenAllScanMethod,
+                filteredScanMethods,
+                getPerformOpenAllScanMethod(bundle),
                 finishedScanning
             );
         }
@@ -1323,6 +1375,7 @@ function openAllDeviceScanner() {
      * The function "returnResults" does...
     */
     function returnResults(bundle) {
+        // console.log('In return results!', bundle.erroniusDevices);
         debugSS('in returnResults');
         debugLFDS('in returnResults');
         self.cachedScanBundle = bundle;
@@ -1332,8 +1385,9 @@ function openAllDeviceScanner() {
         return defered.promise;
     }
 
-    function createFindAllDevicesBundle() {
+    function createFindAllDevicesBundle(options) {
         return {
+            'options': options,
             'findAllBundle': 'me!!',
             'secondaryIPAddresses': [],
             'scannedData': {},
@@ -1341,12 +1395,46 @@ function openAllDeviceScanner() {
             'deviceTypes': [],
             'openAllError': undefined,
             'openAllErrors': [],
+            'erroniusDevices': [],
         };
     }
+    function parseFindAllDevicesOptions(options) {
+        var parsedOptions = {
+            'scanUSB': true,
+            'scanEthernet': true,
+            'scanWiFi': true,
+        };
+        if(options) {
+            var keys = Object.keys(options);
+            keys.forEach(function(key) {
+                parsedOptions[key] = options[key];
+            });
+        }
+        return parsedOptions;
+    }
+    this.getLastFoundErroniusDevices = function() {
+        var defered = q.defer();
+
+        if (self.scanInProgress) {
+            defered.reject([]);
+            return defered.promise;
+        }
+
+        var erroniusDevices = [];
+        if(self.cachedScanBundle) {
+            if(self.cachedScanBundle.erroniusDevices) {
+                erroniusDevices = self.cachedScanBundle.erroniusDevices;
+            }
+        }
+        defered.resolve(erroniusDevices);
+        return defered.promise;
+    }
+
     this.originalOldfwState = 0;
     this.cachedScanBundle = undefined;
     this.cachedCurrentDevices = [];
-    this.findAllDevices = function(currentDevices) {
+    this.findAllDevices = function(currentDevices, options) {
+        var parsedOptions = parseFindAllDevicesOptions(options);
         var innerCurrentDevices = [];
         if(currentDevices) {
             var cdKeys = Object.keys(currentDevices);
@@ -1409,7 +1497,7 @@ function openAllDeviceScanner() {
             };
         };
 
-        var bundle = createFindAllDevicesBundle();
+        var bundle = createFindAllDevicesBundle(parsedOptions);
 
         debugSS('in findAllDevices');
         if(!LIVE_DEVICE_SCANNING_ENABLED) {
