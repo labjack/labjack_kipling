@@ -69,6 +69,13 @@ exports.tests = {
 			test.done();
 		});
 	},
+	'get erroneous devices': function(test) {
+		deviceScanner.getLastFoundErroniusDevices()
+		.then(function(res) {
+			console.log('Erroneous devices', res);
+			test.done();
+		});
+	},
 	'read device SERIAL_NUMBER': function(test) {
 		if(devices[0]) {
 			devices[0].iRead('SERIAL_NUMBER')
