@@ -32,6 +32,17 @@
 </div>
 <div class="device-selector-holder">
     <h1>Select Devices <button id="refresh_devices_button" class="btn btn-primary">Refresh Devices >></button></h1>
+    <div>
+        <div class="checkbox checkbox-inline">
+            <label><input id="usb_scan_enabled" type="checkbox" value="" checked>USB</label>
+        </div>
+        <div class="checkbox checkbox-inline">
+            <label><input id="ethernet_scan_enabled" type="checkbox" value="" checked>Ethernet</label>
+        </div>
+        <div class="checkbox checkbox-inline">
+            <label><input id="wifi_scan_enabled" type="checkbox" value="">WiFi</label>
+        </div>
+    </div>
     <div class="device-pane">
     	<div id="device_scan_status" class="device_scan_status_box">
     		<div class="progress progress-indeterminate">

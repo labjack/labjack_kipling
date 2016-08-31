@@ -10,6 +10,10 @@ div.link a {
     cursor:pointer;
 }
 
+/* Check boxes */
+.checkbox-inline+.checkbox-inline, .radio-inline+.radio-inline {
+  margin-top: 10px;
+}
 
 
 /* Device Selection Styles */
