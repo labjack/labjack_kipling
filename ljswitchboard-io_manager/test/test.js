@@ -7,7 +7,7 @@ var pResults = utils.pResults;
 var q = require('q');
 
 // enable/disable tests
-var ENABLE_BASIC_TEST = true;						// Passing
+var ENABLE_BASIC_TEST = false;						// Passing
 var ENABLE_SIMPLE_TEST = false;						// Passing
 var TEST_DRIVER_CONTROLLER = false;					// Passing
 
@@ -18,6 +18,7 @@ var TEST_SINGLE_DEVICE_CONTROLLER = false;			// incomplete
 var TEST_DEVICE_SCANNER = false;					// Passes but outputs a lot of text.
 var TEST_MOCK_DEVICE_SCANNER = false;
 var TEST_LIVE_DEVICE_SCANNER = false;
+var TEST_USB_ONLY_DEVICE_SCANNER = true;
 
 var TEST_DEVICE_CONTROLLER = false;					// incomplete
 var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing
@@ -63,6 +64,10 @@ if(TEST_MOCK_DEVICE_SCANNER) {
 if(TEST_LIVE_DEVICE_SCANNER) {
 	var live_device_scanner_test = require('./live_device_scanner_test');
 	exports.live_device_scanner_test = live_device_scanner_test.tests;
+}
+if(TEST_USB_ONLY_DEVICE_SCANNER) {
+	var usb_only_device_scanner_test = require('./usb_only_device_scanner_test');
+	exports.usb_only_device_scanner_test = usb_only_device_scanner_test.tests;
 }
 if(TEST_DEVICE_CONTROLLER) {
 	var device_controller_test = require('./device_controller_test');

@@ -584,7 +584,7 @@ function createDeviceKeeper(io_delegator, link) {
 		return defered.promise;
 	};
 	
-	this.listAllDevices = function() {
+	this.listAllDevices = function(options) {
 		var defered = q.defer();
 
 		// Build array of currently connected devices.
@@ -596,12 +596,20 @@ function createDeviceKeeper(io_delegator, link) {
 		});
 
 		// Start device scan
-		deviceScanner.findAllDevices(currentDevices)
+		console.log('Scan Options', options);
+		deviceScanner.findAllDevices(currentDevices, options)
 		.then(function(data) {
 			defered.resolve(data);
 		}, defered.reject);
 		return defered.promise;
 	};
+
+	this.getListAllDevicesErrors = function() {
+		var defered = q.defer();
+		deviceScanner.getLastFoundErroniusDevices()
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	}
 
 	this.getCachedListAllDevices = function() {
 		var defered = q.defer();

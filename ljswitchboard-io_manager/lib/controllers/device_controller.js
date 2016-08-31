@@ -128,8 +128,11 @@ function createDeviceController(io_interface) {
 	 * Get a list of devices currently visible by the caller.
 	 * @return {Array} An array of found devices and various attributes.
 	 */
-	this.listAllDevices = function() {
-		return callFunc('listAllDevices');
+	this.listAllDevices = function(options) {
+		return callFunc('listAllDevices', [options]);
+	};
+	this.getListAllDevicesErrors = function() {
+		return callFunc('getListAllDevicesErrors');
 	};
 	this.getCachedListAllDevices = function() {
 		return callFunc('getCachedListAllDevices');
