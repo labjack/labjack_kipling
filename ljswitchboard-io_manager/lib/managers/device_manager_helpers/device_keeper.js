@@ -596,7 +596,6 @@ function createDeviceKeeper(io_delegator, link) {
 		});
 
 		// Start device scan
-		console.log('Scan Options', options);
 		deviceScanner.findAllDevices(currentDevices, options)
 		.then(function(data) {
 			defered.resolve(data);
