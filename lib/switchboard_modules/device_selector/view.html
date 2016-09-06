@@ -34,13 +34,13 @@
     <h1>Select Devices <button id="refresh_devices_button" class="btn btn-primary">Refresh Devices >></button></h1>
     <div>
         <div class="checkbox checkbox-inline">
-            <label><input id="usb_scan_enabled" type="checkbox" value="" checked>USB</label>
+            <label><input id="usb_scan_enabled" type="checkbox" value="" checked/><span class="scan-medium">USB</span></br><span class="time-estimate">(1s)</span></label>
         </div>
         <div class="checkbox checkbox-inline">
-            <label><input id="ethernet_scan_enabled" type="checkbox" value="" checked>Ethernet</label>
+            <label><input id="ethernet_scan_enabled" type="checkbox" value="" checked/><span class="scan-medium">Ethernet</span></br><span class="time-estimate">(3-10s)</span></label>
         </div>
         <div class="checkbox checkbox-inline">
-            <label><input id="wifi_scan_enabled" type="checkbox" value="">WiFi</label>
+            <label><input id="wifi_scan_enabled" type="checkbox" value=""/><span class="scan-medium">WiFi</span></br><span class="time-estimate">(10-60s)</span></label>
         </div>
     </div>
     <div class="device-pane">

@@ -15,6 +15,12 @@ div.link a {
   margin-top: 10px;
 }
 
+.scan-medium {
+
+}
+.time-estimate {
+    font-size:12px;
+}
 
 /* Device Selection Styles */
 .connection-buttons-holder {
@@ -95,6 +101,9 @@ div.link a {
 }
 .device #info-holder {
     display: inline-block;
+    font-size: 12px;
+}
+.device #error-info-holder {
     font-size: 12px;
 }
 .wifiIPAddressText {
