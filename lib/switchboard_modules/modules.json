@@ -82,7 +82,7 @@
     }, {
         "name": "file_browser_fw",
         "description":"A SD Card file browser for the  T7.",
-        "active": false
+        "active": true
     }, {
         "name": "simple_logger_flot",
         "active": false

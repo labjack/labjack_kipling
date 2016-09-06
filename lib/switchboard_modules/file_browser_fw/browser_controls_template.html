@@ -1,0 +1,23 @@
+
+<div class="file-navigation row-fluid">
+<div class="folder-nav-buttons-left span3">
+<button type="button" class="btn btn-default"><span class="icon-arrow-left-2"/></button>
+<button type="button" class="btn btn-default"><span class="icon-arrow-up"/></button>
+<button type="button" class="btn btn-default"><span class="icon-refresh"/></button>
+</div>
+<div class="folder-nav-quick-links span9">
+<ol class="breadcrumb">
+{{#each extendedPartials}}
+{{#if active}}
+<li class="active">{{folder}}</li>
+{{else}}
+<li><a href="#">{{folder}}</a></li>
+{{/if}}
+{{/each}}
+</ol>
+</div>
+<!-- <div class="folder-nav-buttons-right span1">
+<button type="button" class="btn btn-default"><span class="icon-refresh"/></button>
+</div> -->
+</div>
+<pre>{{printContext}}</pre>
