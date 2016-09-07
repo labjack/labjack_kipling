@@ -7,9 +7,14 @@
     "jsFiles": [
         "view_generator.js",
         "data_formatter.js",
-        "data_table_helper.js"
+        "data_table_helper.js",
+        "browser_controls_manager.js",
+        "download_controls_manager.js",
+        "file_browser_manager.js"
     ],
     "htmlFiles": [
-    	"file_browser_template.html"
+    	"browser_controls_template.html",
+        "download_controls_template.html",
+        "file_browser_template.html"
     ]
 }

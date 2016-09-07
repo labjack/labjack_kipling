@@ -1,4 +1,13 @@
-<div>
+
+
+<p>Files on uSD Card (This should be a table):</p>
+<ul>
+{{#each files}}
+<li>{{name}}, {{sizeStr}}</li>
+{{/each}}
+</ul>
+{{!--<pre>{{printContext}}</pre>--}}
+<!-- <div>
   <div class="btn-group" role="group" aria-label="...">
     <button type="button" class="btn btn-default">Download</button>
     <span>selected files to</span>
@@ -18,4 +27,5 @@
 
   <div id="file_browser_table_holder" class="">
   </div>
-</div>
+</div> -->
+
