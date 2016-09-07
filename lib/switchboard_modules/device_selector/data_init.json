@@ -1,3 +1,7 @@
 {
-	"testVal": "AA"
+	"scanOptions": {
+		"scanUSB": true,
+		"scanEthernet": true,
+		"scanWiFi": false
+	}
 }
