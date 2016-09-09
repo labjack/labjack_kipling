@@ -29,17 +29,41 @@ var stdFilesToDelete = [
 	'CONTRIBUTING.md',
 	'HISTORY.md',
 	'Makefile',
+	'readme.md',
 	'Readme.md',
 	'README.md',
 	'test.js',
+	'.gitmodules',		// New 9/8/2016
+	'.gitattributes',	// New 9/8/2016
+	'.jscsrc',			// New 9/8/2016
+	'Makefile',			// New 9/8/2016
+	'History.md',		// New 9/8/2016
+	'AUTHORS',			// New 9/8/2016
+	'AUTHORS.md',			// New 9/8/2016
+	'CHANGES.md',		// New 9/8/2016
+	'ChangeLog',		// New 9/8/2016
+	'.eslintrc',		// New 9/8/2016
+	'.jscs.json',		// New 9/8/2016
+	'Makefile.deps',	// New 9/8/2016
+	'Makefile.targ',	// New 9/8/2016
+	'appveyor.yml',	// New 9/8/2016
+	'example.html',	// New 9/8/2016
+	'example.js',	// New 9/8/2016
+	'jsdoc.json',	// New 9/8/2016
 ];
 
 var stdFoldersToDelete = [
 	'benchmark',
 	'bin',
 	'example',
+	'examples',		// New 9/8/2016
 	'images',
 	'test',
+	'tests',		// New 9/8/2016
+	'support',		// New 9/8/2016
+	'scripts',		// New 9/8/2016
+	'doc',		// New 9/8/2016
+	'docs',		// New 9/8/2016
 ];
 
 var createStdCleanModules = function(names) {
@@ -83,6 +107,10 @@ var filesToDelete = {
 				'filesToDelete': ['CONTRIBUTING.md', 'HISTORY.md', 'NOTICE', 'README.md', 'ROADMAP.md'],
 				'foldersToDelete': ['test', 'examples', 'docs', 'bin', 'dist']
 			},
+			'javascript-natural-sort': {
+				'filesToDelete': ['index.html', 'speed-tests.html', 'unit-tests.html', '.gitattributes'],
+				'foldersToDelete': ['.idea']
+			},
 			'ljswitchboard-ljm_device_curator': {
 				'filesToDelete': ['.npmignore'],
 				'foldersToDelete': ['test'],
@@ -117,37 +145,134 @@ var filesToDelete = {
 				// 	'tough-cookie',
 				// 	'tunnel-agent',
 				// ]),
+			},
+			'lodash': {
+				'filesToSave': ['package.json', 'lodash.js'],
+				'foldersToSave': ['lib', 'node_modules'],
+			},
+			'cheerio': {
+				'filesToDelete': [],
+				'foldersToDelete': [],
+				'node_modules': {
+					'filesToDelete': [],
+					'foldersToDelete': [],
+					'lodash': {
+						'filesToSave': ['package.json', 'index.js'],
+					}
+				}
+			},
+			'form-data': {
+				'filesToDelete': [],
+				'foldersToDelete': [],
+				'node_modules': {
+					'filesToDelete': [],
+					'foldersToDelete': [],
+					'async': {
+						'filesToSave': ['package.json'],
+						'foldersToSave': ['dist'],
+					}
+				}
+			},
+			'json-schema': {
+				'filesToDelete': ['draft-zyp-json-schema-03.xml', 'draft-zyp-json-schema-04.xml'],
+				'foldersToDelete': ['draft-00','draft-01','draft-02','draft-03','draft-04'],
+			},
+			'nan': {
+				'filesToSave': [],
+				'foldersToSave': [],
+			},
+			'sprintf-js': {
+				'filesToSave': ['package.json', 'LICENSE'],
+				'foldersToSave': ['src'],
+			},
+			'sshpk': {
+				'filesToDelete': [],
+				'foldersToDelete': ['man'],
 			}
 		}
 	}
 };
 
 // Code that adds more cleaning requests...
-var requestModulesToClean = createStdCleanModules([
-	'aws-sign2',
-	'bl',
-	'caseless',
-	'combined-stream',
-	'forever-agent',
-	'form-data',
-	'har-validator',
-	'hawk',
-	'http-signature',
-	'isstream',
-	'json-stringify-safe',
-	'mime-types',
-	'node-uuid',
-	'oauth-sign',
-	'qs',
-	'stringstream',
-	'tough-cookie',
-	'tunnel-agent',
-]);
-var keys_requestModulesToClean = Object.keys(requestModulesToClean);
-keys_requestModulesToClean.forEach(function(key) {
-	var obj = requestModulesToClean[key];
+// var requestModulesToClean = createStdCleanModules([
+// 	'aws-sign2',
+// 	'bl',
+// 	'caseless',
+// 	'combined-stream',
+// 	'forever-agent',
+// 	'form-data',
+// 	'har-validator',
+// 	'hawk',
+// 	'http-signature',
+// 	'isstream',
+// 	'json-stringify-safe',
+// 	'mime-types',
+// 	'node-uuid',
+// 	'oauth-sign',
+// 	'qs',
+// 	'stringstream',
+// 	'tough-cookie',
+// 	'tunnel-agent',
+// ]);
+// var keys_requestModulesToClean = Object.keys(requestModulesToClean);
+// keys_requestModulesToClean.forEach(function(key) {
+// 	var obj = requestModulesToClean[key];
 
-	filesToDelete['ljswitchboard-io_manager'].node_modules[key] = obj;
+// 	filesToDelete['ljswitchboard-io_manager'].node_modules[key] = obj;
+// });
+
+function normalizeAndJoin(dirA, dirB) {
+	// console.log('HERE', dirA, dirB);
+	return path.normalize(path.join.apply(this, arguments));
+}
+
+
+// Get a list of the project parts
+var buildData = require('../package.json');
+var kipling_parts = buildData.kipling_dependencies;
+kipling_parts.forEach(function(kipling_part) {
+	var kiplingPartPath = normalizeAndJoin(DIRECTORY_OFFSET, kipling_part);
+	var kiplingPartNMPath = normalizeAndJoin(kiplingPartPath, 'node_modules');
+
+
+	var kiplingPartDeps;
+	try {
+		kiplingPartDeps = fs.readdirSync(kiplingPartNMPath);
+	} catch(err) {
+		console.error('Error reading current directory', directoryOffset);
+		console.error(err);
+		kiplingPartDeps = [];
+	}
+	// console.log('Kipling Part:', kipling_part);
+	// console.log('Kipling Part Deps:', kiplingPartDeps);
+
+	var stdCleanModulesObj = createStdCleanModules(kiplingPartDeps);
+
+	if(typeof(filesToDelete[kipling_part]) === 'undefined') {
+		filesToDelete[kipling_part] = {
+			'node_modules': stdCleanModulesObj,
+		};
+	} else {
+		var stdCleanModulesObjKeys = Object.keys(stdCleanModulesObj);
+		stdCleanModulesObjKeys.forEach(function(key) {
+			var obj = stdCleanModulesObj[key];
+			var newFilesToDelete = obj.filesToDelete;
+			var newFoldersToDelete = obj.foldersToDelete;
+
+			if(typeof(filesToDelete[kipling_part].node_modules[key]) === 'undefined') {
+				filesToDelete[kipling_part].node_modules[key] = obj;
+			} else {
+				var mFilesToDelete = filesToDelete[kipling_part].node_modules[key].filesToDelete;
+				var mFoldersToDelete = filesToDelete[kipling_part].node_modules[key].foldersToDelete;
+				if(typeof(mFilesToDelete) !== 'undefined') {
+					filesToDelete[kipling_part].node_modules[key].filesToDelete = mFilesToDelete.concat(newFilesToDelete);
+				}
+				if(typeof(mFoldersToDelete) !== 'undefined') {
+					filesToDelete[kipling_part].node_modules[key].foldersToDelete = mFoldersToDelete.concat(newFoldersToDelete);
+				}
+			}
+		});
+	}
 });
 
 var deleteOperations = [];
@@ -162,6 +287,10 @@ var operationKeys = [
 
 var numTimesCalled = 0;
 var createDeleteOperations = function(map, directoryOffset, searchOffset) {
+	// console.log('In createDeleteOperations', directoryOffset, searchOffset);
+	// if(searchOffset.indexOf('javascript-natural-sort') >= 0) {
+	// 	console.log('In createDeleteOperations JS-N-S', map, directoryOffset, searchOffset);
+	// }
 	numTimesCalled += 1;
 	// Debugging cleaning a flattened node_module's tree...
 	// console.log('Called...', numTimesCalled);

@@ -50,10 +50,13 @@ var filteredFilesAndFolders = [
 	'test_binaries',
 	// 'node_binaries/linux',
 	// 'node_binaries/win32',
-	'node_modules/nodeunit',
+	// 'node_modules/nodeunit',
 
 	// Filter out the node-webkit install
-	'node_modules/nw',
+	// 'node_modules/nw',
+
+	// Filter out all of the node_modules...
+	'node_modules',
 ];
 
 var os = {
@@ -73,6 +76,9 @@ var nodejsBinaryVersions = [
 	'5_4_1',
 	// '5_6_0',
 ];
+if(os === 'win32') {
+	nodejsBinaryVersions.push('5_6_0');
+}
 
 var addNodeVersionExclusions = function(os, arch) {
 	// Get the currently running node version
@@ -92,7 +98,7 @@ var addNodeVersionExclusions = function(os, arch) {
 			versionToDelete
 		);
 	});
-}
+};
 var addArchExclusions = function(os) {
 	var curArch = process.arch;
 	addNodeVersionExclusions(os, curArch);
@@ -307,8 +313,10 @@ var copyRelevantFilesFake = function(from, to, filters) {
 	defered.resolve();
 	return defered.promise;
 };
+
 var copyRequiredFiles = function() {
 	var promises = requiredFiles.map(function(required_file) {
+		try {
 		// console.log('Copying:', required_file);
 		var source_path = path.normalize(path.join(
 			PROJECT_FILES_SEARCH_PATH,
@@ -327,26 +335,29 @@ var copyRequiredFiles = function() {
 		)));
 
 		// Dev dependency list
-		var devFilters = [];
-		if(projectInfo.devDependencies) {
-			var devDeps = Object.keys(projectInfo.devDependencies);
-			devFilters = devDeps.map(function(devDep) {
-				return 'node_modules/' + devDep;
-			});
-		}
+		// var devFilters = [];
+		// if(projectInfo.devDependencies) {
+		// 	var devDeps = Object.keys(projectInfo.devDependencies);
+		// 	devFilters = devDeps.map(function(devDep) {
+		// 		return 'node_modules/' + devDep;
+		// 	});
+		// }
 
 		var folderFilters = [];
 
 		filteredFilesAndFolders.forEach(function(filter) {
 			folderFilters.push(filter);
 		});
-		devFilters.forEach(function(filter) {
-			folderFilters.push(filter);
-		});
+		// devFilters.forEach(function(filter) {
+		// 	folderFilters.push(filter);
+		// });
 		// fse.copySync(source_path, destination_path);
 		// console.log('Calling...',required_file, source_path, destination_path);
 		return copyRelevantFiles(source_path, destination_path, folderFilters);
 		// return copyRelevantFilesFake(source_path, destination_path, folderFilters);
+	} catch(err) {
+		console.log('Error...', err);
+	}
 	});
 	return q.allSettled(promises);
 };
