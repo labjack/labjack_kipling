@@ -293,6 +293,7 @@ var T7_LIST = {
 			var pcTime = new Date();
 			var t7Time = new Date(res*1000);
 			var t7TimeStr = t7Time.toLocaleString();
+			var pcTimeStr = pcTime.toLocaleString();
 			var timeDifference = pcTime - t7Time;
 			var timeDiffSec = Number((timeDifference/1000).toFixed(2));
 			return {
@@ -300,9 +301,9 @@ var T7_LIST = {
 				'val': t7TimeStr,
 				'str': t7TimeStr,
 				't7Time': t7Time.getTime(),
-				't7TimeStr': t7Time.toString(),
+				't7TimeStr': t7TimeStr,
 				'pcTime': pcTime.getTime(),
-				'pcTimeStr': pcTime.toString(),
+				'pcTimeStr': pcTimeStr,
 				'timeDifferenceSec': timeDiffSec,
 			};
 		}

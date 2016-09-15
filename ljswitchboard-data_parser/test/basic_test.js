@@ -616,7 +616,7 @@ exports.tests = {
 	},
 	'check RTC_TIME_S register': function(test) {
 		var vals = [
-			{'val': 1473967452, 'str': '9/15/2016, 1:24:12 PM', 't7TimeStr': 'Thu Sep 15 2016 13:24:12 GMT-0600 (Mountain Daylight Time)', 't7Time': 1473967452000},
+			{'val': 1473967452, 'str': '9/15/2016, 1:24:12 PM', 't7Time': 1473967452000},
 		];
 
 		var results = [];
@@ -635,7 +635,7 @@ exports.tests = {
 				'val': val.str,
 				'str': val.str,
 				't7Time': val.t7Time,
-				't7TimeStr': val.t7TimeStr,
+				't7TimeStr': val.str,
 				'pcTime': res.pcTime,
 				'pcTimeStr': res.pcTimeStr,
 				'timeDifferenceSec': res.timeDifferenceSec,
