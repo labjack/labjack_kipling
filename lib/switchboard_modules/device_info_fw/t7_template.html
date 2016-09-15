@@ -184,6 +184,45 @@
 			</span>
 		</div>
 		{{/if}}
+
+
+		<div class="block-separator"/>
+		<div class="pane-popover">
+			Current Time
+		</div>
+		<div class="device-detail selectableText">
+			Device Time: 
+			<span id="rtc-device-time" class="">
+				{{RTC_TIME_S.t7TimeStr}}
+			</span>
+		</div>
+		<div class="device-detail selectableText">
+			System Time: 
+			<span id="rtc-system-time" class="">
+				{{RTC_TIME_S.pcTimeStr}}
+			</span>
+		</div>
+		<div class="device-detail selectableText">
+			SNTP Update Interval: 
+			<span id="rtc-system-time" class="">
+				{{SNTP_UPDATE_INTERVAL.str}}
+			</span>
+		</div>
+		
+		<!-- <div class="device-detail selectableText">
+			Time Difference (s): 
+			<span id="rtc-time-difference" class="">
+				{{RTC_TIME_S.timeDifferenceSec}}
+			</span>
+		</div> -->
+		<div>
+		<button id="set_rtc_time" class="btn btn-mini">Set Device Time to System Time.</button>
+		</div>
+		{{#unless HARDWARE_INSTALLED.rtc }}
+		<div class="device-detail selectableText">
+			Device time is not kept by a battery-backed</br> RTC. It will be reset on power-cycle!
+		</div>
+		{{/unless}}
 	</div>
 </div>
 <div class="device-links-div">

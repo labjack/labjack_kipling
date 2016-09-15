@@ -2,7 +2,7 @@
     "name": "lua_script_debugger",
     "humanName": "Lua Script Debugger",
     "version": "0.0.1",
-    "supportedDevices": [{"type":"T7","minFW":"1.0078"}],
+    "supportedDevices": [{"type":"T7","minFW":"1.0078"}, {"type":"T4","minFW":"0.2000"}],
     "framework":"singleDevice",
     "jsFiles":["luaDeviceController.js", "aceTextEditor.js"]
 }

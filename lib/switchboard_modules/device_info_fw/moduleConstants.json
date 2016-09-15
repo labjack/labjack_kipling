@@ -17,12 +17,18 @@
     		"id": "wifi_rssi_image",
     		"isPeriodic": true
     	},{
-    		"register": "TEMPERATURE_DEVICE_K",
-    		"name": "TEMPERATURE_DEVICE_K",
-    		"id": "internal-device-temperature",
-    		"isPeriodic": true,
-    		"dataKey": "val"
-    	}
+            "register": "TEMPERATURE_DEVICE_K",
+            "name": "TEMPERATURE_DEVICE_K",
+            "id": "internal-device-temperature",
+            "isPeriodic": true,
+            "dataKey": "val"
+        },{
+            "register": "RTC_TIME_S",
+            "name": "RTC_TIME_S",
+            "id": "rtc-time",
+            "isPeriodic": true,
+            "dataKey": "rtcTime"
+        }
     ],
     "Digit": [{
             "register": "DGT_LIGHT_RAW",

@@ -34,6 +34,17 @@
                 }
             ]
         }, {
+            "name": "T4 Examples",
+            "subScripts": [
+                {
+                    "name": "SPI Loop-Back",
+                    "location": "lua_script_debugger/premade_scripts/T4/spi_loop_back.lua"
+                }, {
+                    "name": "SPI Modes Testing",
+                    "location": "lua_script_debugger/premade_scripts/T4/spi_modes_testing.lua"
+                }
+            ]
+        }, {
             "name": "Sensor Examples",
             "subScripts": [
                 {
