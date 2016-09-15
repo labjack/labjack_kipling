@@ -644,6 +644,32 @@ exports.tests = {
 		test.deepEqual(results, reqResults, 'RTC Registers failed.');
 		test.done();
 	},
+	'check SNTP_UPDATE_INTERVAL register': function(test) {
+		var vals = [
+			{'val': 0, 'str': 'Disabled'},
+			{'val': 10, 'str': '10 sec.'},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			// Query the data parser.
+			var reg = 'SNTP_UPDATE_INTERVAL';
+			var res = data_parser.parseResult(reg, val.val);
+			results.push(res);
+
+			reqResults.push({
+				'register': reg,
+				'name': reg,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.val,
+				'str': val.str,
+			});
+		});
+		test.deepEqual(results, reqResults, 'SNTP Register failed.');
+		test.done();
+	},
 	'check DGT_LOG_ITEMS_DATASET register': function(test) {
 		var vals = [
 			{'val': 0, 'temperature': false, 'light': false, 'humidity': false, 'isValid': false},

@@ -308,6 +308,22 @@ var T7_LIST = {
 			};
 		}
 	},
+	'SNTP_UPDATE_INTERVAL': {
+		'decode': function(res) {
+			var val = res;
+			var str = '';
+			if(res === 0) {
+				str = 'Disabled';
+			} else {
+				str = res.toString() + ' sec.';
+			}
+			return {
+				'res': res,
+				'val': val,
+				'str': str,
+			};
+		}
+	},
 
 	// WiFi IP registers using the ipDataType
 	// & DHCP as custom systemEnabledType
