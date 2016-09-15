@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-static_files",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
     "name": "Chris Johnson",
