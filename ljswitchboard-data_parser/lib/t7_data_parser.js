@@ -288,6 +288,26 @@ var T7_LIST = {
 		},
 	},
 
+	'RTC_TIME_S': {
+		'decode': function(res) {
+			var pcTime = new Date();
+			var t7Time = new Date(res*1000);
+			var t7TimeStr = t7Time.toLocaleString();
+			var timeDifference = pcTime - t7Time;
+			var timeDiffSec = Number((timeDifference/1000).toFixed(2));
+			return {
+				'res': res,
+				'val': t7TimeStr,
+				'str': t7TimeStr,
+				't7Time': t7Time.getTime(),
+				't7TimeStr': t7Time.toString(),
+				'pcTime': pcTime.getTime(),
+				'pcTimeStr': pcTime.toString(),
+				'timeDifferenceSec': timeDiffSec,
+			};
+		}
+	},
+
 	// WiFi IP registers using the ipDataType
 	// & DHCP as custom systemEnabledType
 	'WIFI_IP': ipDataType,

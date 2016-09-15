@@ -614,6 +614,36 @@ exports.tests = {
 		test.deepEqual(results, reqResults, 'File I/O registers: FILE_IO_DISK_FORMAT_INDEX failed');
 		test.done();
 	},
+	'check RTC_TIME_S register': function(test) {
+		var vals = [
+			{'val': 1473967452, 'str': '9/15/2016, 1:24:12 PM', 't7TimeStr': 'Thu Sep 15 2016 13:24:12 GMT-0600 (Mountain Daylight Time)', 't7Time': 1473967452000},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			// Query the data parser.
+			var reg = 'RTC_TIME_S';
+			var res = data_parser.parseResult(reg, val.val);
+			results.push(res);
+
+			reqResults.push({
+				'register': reg,
+				'name': reg,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.str,
+				'str': val.str,
+				't7Time': val.t7Time,
+				't7TimeStr': val.t7TimeStr,
+				'pcTime': res.pcTime,
+				'pcTimeStr': res.pcTimeStr,
+				'timeDifferenceSec': res.timeDifferenceSec,
+			});
+		});
+		test.deepEqual(results, reqResults, 'RTC Registers failed.');
+		test.done();
+	},
 	'check DGT_LOG_ITEMS_DATASET register': function(test) {
 		var vals = [
 			{'val': 0, 'temperature': false, 'light': false, 'humidity': false, 'isValid': false},
