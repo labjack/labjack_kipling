@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-io_manager",
-  "version": "0.0.91",
+  "version": "0.0.92",
   "description": "A promise based distributed ljm wrapper with extra logging based functionality for the ljswitchboard project",
   "main": "lib/io_manager",
   "scripts": {

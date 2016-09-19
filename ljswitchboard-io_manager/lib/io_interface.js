@@ -365,9 +365,9 @@ function createIOInterface() {
 		// var version = '0_10_33';
 		// Force execution of node 0_10_35
 		// version = '0_10_35';
-		var version = '6_3_1';
+		var version = '6_6_0';
 		version = {
-			'win32': '6_3_1',
+			'win32': '6_6_0',
 			'darwin': '5_6_0',
 			'linux': '5_6_0'
 		}[os];
