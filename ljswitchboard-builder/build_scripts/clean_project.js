@@ -147,7 +147,7 @@ var filesToDelete = {
 				// ]),
 			},
 			'lodash': {
-				'filesToSave': ['package.json', 'lodash.js'],
+				'filesToSave': ['package.json', 'lodash.js', 'index.js'],
 				'foldersToSave': ['lib', 'node_modules'],
 			},
 			'cheerio': {

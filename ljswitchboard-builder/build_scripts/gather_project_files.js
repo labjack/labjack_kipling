@@ -78,6 +78,7 @@ var nodejsBinaryVersions = [
 ];
 if(os === 'win32') {
 	nodejsBinaryVersions.push('5_6_0');
+	nodejsBinaryVersions.push('6_3_1');
 }
 
 var addNodeVersionExclusions = function(os, arch) {
