@@ -4,6 +4,7 @@
 		<div class="settingsTopDiv">
 			<div class="currentStatusInfo">
 				<span>Connection Status: </span><b><span id="ethernet_connection_status">{{ ethernetConnectionStatus}}</span></b>
+				{{#if hasPowerEthernet}}
 				<div class="powerButtonDiv">
 					<div class="btn-group">
 						<button id="ethernetPowerButton" class="btn" title="{{ ethernetPowerButtonString }}">
@@ -11,6 +12,7 @@
 						</button>
 					</div>
 				</div>
+				{{/if}}
 			</div>
 			<div class="connectionStatusMessage">
 				<span id="ethernetStatusMessage" class="selectableText">{{ ethernetStatusMessage }}<span>

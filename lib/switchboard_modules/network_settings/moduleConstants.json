@@ -1,42 +1,42 @@
 {
     "configOnlyRegisters": [
-        {"name":"ETHERNET_MAC","title":"","heading":"","id":"","type":""},
-        {"name":"WIFI_MAC","title":"","heading":"","id":"","type":""},
-        {"name":"WIFI_VERSION","title":"","heading":"","id":"","type":""}
+        {"name":"ETHERNET_MAC","title":"","heading":"","id":"","type":"", "deviceTypes": ["T7", "T4"]},
+        {"name":"WIFI_MAC","title":"","heading":"","id":"","type":"", "deviceTypes": ["T7"]},
+        {"name":"WIFI_VERSION","title":"","heading":"","id":"","type":"", "deviceTypes": ["T7"]}
     ],
     "ethernetRegisters": [
-        {"name":"POWER_ETHERNET","title":"","heading":"","id":"","type":"status","isPeriodic":true},
-        {"name":"ETHERNET_IP","title":"","humanName":"IP","heading":"","id":"","type":"ip","isConfig":true,"isPeriodic":true},
-        {"name":"ETHERNET_SUBNET","title":"","humanName":"Subnet","heading":"","id":"","type":"ip","isConfig":true,"isPeriodic":true},
-        {"name":"ETHERNET_GATEWAY","title":"","humanName":"Gateway","heading":"","id":"","type":"ip","isConfig":true,"isPeriodic":true},
-        {"name":"ETHERNET_DNS","title":"","humanName":"DNS","heading":"","id":"","type":"ip","isConfig":true},
-        {"name":"ETHERNET_ALTDNS","title":"","humanName":"Alt-DNS","heading":"","id":"","type":"ip","isConfig":true},
-        {"name":"ETHERNET_DHCP_ENABLE","title":"","heading":"","id":"","type":"status","isConfig":true},
-        {"name":"POWER_ETHERNET_DEFAULT","title":"","heading":"","id":"","type":"status"},
-        {"name":"ETHERNET_IP_DEFAULT","title":"","heading":"","id":"","type":"ip"},
-        {"name":"ETHERNET_SUBNET_DEFAULT","title":"","heading":"","id":"","type":"ip"},
-        {"name":"ETHERNET_GATEWAY_DEFAULT","title":"","heading":"","id":"","type":"ip"},
-        {"name":"ETHERNET_DNS_DEFAULT","title":"","heading":"","id":"","type":"ip"},
-        {"name":"ETHERNET_ALTDNS_DEFAULT","title":"","heading":"","id":"","type":"ip"},
-        {"name":"ETHERNET_DHCP_ENABLE_DEFAULT","title":"","heading":"","id":"","type":"status"}
+        {"name":"POWER_ETHERNET","title":"","heading":"","id":"","type":"status","isPeriodic":true, "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_IP","title":"","humanName":"IP","heading":"","id":"","type":"ip","isConfig":true,"isPeriodic":true, "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_SUBNET","title":"","humanName":"Subnet","heading":"","id":"","type":"ip","isConfig":true,"isPeriodic":true, "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_GATEWAY","title":"","humanName":"Gateway","heading":"","id":"","type":"ip","isConfig":true,"isPeriodic":true, "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_DNS","title":"","humanName":"DNS","heading":"","id":"","type":"ip","isConfig":true, "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_ALTDNS","title":"","humanName":"Alt-DNS","heading":"","id":"","type":"ip","isConfig":true, "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_DHCP_ENABLE","title":"","heading":"","id":"","type":"status","isConfig":true, "deviceTypes": ["T7", "T4"]},
+        {"name":"POWER_ETHERNET_DEFAULT","title":"","heading":"","id":"","type":"status", "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_IP_DEFAULT","title":"","heading":"","id":"","type":"ip", "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_SUBNET_DEFAULT","title":"","heading":"","id":"","type":"ip", "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_GATEWAY_DEFAULT","title":"","heading":"","id":"","type":"ip", "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_DNS_DEFAULT","title":"","heading":"","id":"","type":"ip", "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_ALTDNS_DEFAULT","title":"","heading":"","id":"","type":"ip", "deviceTypes": ["T7", "T4"]},
+        {"name":"ETHERNET_DHCP_ENABLE_DEFAULT","title":"","heading":"","id":"","type":"status", "deviceTypes": ["T7", "T4"]}
     ],
     "wifiRegisters": [
-        {"name":"WIFI_STATUS","title":"","heading":"","id":"","type":"wifiStatus","isPeriodic":true},
-        {"name":"POWER_WIFI","title":"","heading":"","id":"","type":"status"},
-        {"name":"WIFI_IP","title":"","humanName":"IP","heading":"","id":"","type":"ip","isConfig":true},
-        {"name":"WIFI_SUBNET","title":"","humanName":"Subnet","heading":"","id":"","type":"ip","isConfig":true},
-        {"name":"WIFI_GATEWAY","title":"","humanName":"Gateway","heading":"","id":"","type":"ip","isConfig":true},
-        {"name":"WIFI_DHCP_ENABLE","title":"","heading":"","id":"","type":"status","isConfig":true},
-        {"name":"POWER_WIFI_DEFAULT","title":"","heading":"","id":"","type":"status"},
-        {"name":"WIFI_IP_DEFAULT","title":"","heading":"","id":"","type":"ip"},
-        {"name":"WIFI_SUBNET_DEFAULT","title":"","heading":"","id":"","type":"ip"},
-        {"name":"WIFI_GATEWAY_DEFAULT","title":"","heading":"","id":"","type":"ip"},
-        {"name":"WIFI_DHCP_ENABLE_DEFAULT","title":"","heading":"","id":"","type":"status"},
-        {"name":"WIFI_RSSI","title":"","heading":"","id":"","type":"rssi"},
-        {"name":"WIFI_SSID","title":"","heading":"","id":"","type":"networkName"},
-        {"name":"WIFI_SSID_DEFAULT","title":"","heading":"","id":"","type":"networkName","isConfig":true}
+        {"name":"WIFI_STATUS","title":"","heading":"","id":"","type":"wifiStatus","isPeriodic":true, "deviceTypes": ["T7"]},
+        {"name":"POWER_WIFI","title":"","heading":"","id":"","type":"status", "deviceTypes": ["T7"]},
+        {"name":"WIFI_IP","title":"","humanName":"IP","heading":"","id":"","type":"ip","isConfig":true, "deviceTypes": ["T7"]},
+        {"name":"WIFI_SUBNET","title":"","humanName":"Subnet","heading":"","id":"","type":"ip","isConfig":true, "deviceTypes": ["T7"]},
+        {"name":"WIFI_GATEWAY","title":"","humanName":"Gateway","heading":"","id":"","type":"ip","isConfig":true, "deviceTypes": ["T7"]},
+        {"name":"WIFI_DHCP_ENABLE","title":"","heading":"","id":"","type":"status","isConfig":true, "deviceTypes": ["T7"]},
+        {"name":"POWER_WIFI_DEFAULT","title":"","heading":"","id":"","type":"status", "deviceTypes": ["T7"]},
+        {"name":"WIFI_IP_DEFAULT","title":"","heading":"","id":"","type":"ip", "deviceTypes": ["T7"]},
+        {"name":"WIFI_SUBNET_DEFAULT","title":"","heading":"","id":"","type":"ip", "deviceTypes": ["T7"]},
+        {"name":"WIFI_GATEWAY_DEFAULT","title":"","heading":"","id":"","type":"ip", "deviceTypes": ["T7"]},
+        {"name":"WIFI_DHCP_ENABLE_DEFAULT","title":"","heading":"","id":"","type":"status", "deviceTypes": ["T7"]},
+        {"name":"WIFI_RSSI","title":"","heading":"","id":"","type":"rssi", "deviceTypes": ["T7"]},
+        {"name":"WIFI_SSID","title":"","heading":"","id":"","type":"networkName", "deviceTypes": ["T7"]},
+        {"name":"WIFI_SSID_DEFAULT","title":"","heading":"","id":"","type":"networkName","isConfig":true, "deviceTypes": ["T7"]}
     ],
     "extraRegs": [
-        {"name":"WIFI_PASSWORD_DEFAULT","title":"","heading":"","id":"","type":"password","isConfig":false}
+        {"name":"WIFI_PASSWORD_DEFAULT","title":"","heading":"","id":"","type":"password","isConfig":false, "deviceTypes": ["T7"]}
     ]
 }

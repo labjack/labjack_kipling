@@ -1,7 +1,7 @@
 <div id="network_settings">
   <ul class="nav nav-tabs" id="myTab">
     <li class="active"><a href="#ethernet_settings_tab">Ethernet</a></li>
-    {{# if custom.isPro }}
+    {{# if custom.hasWiFi }}
     <li><a href="#wifi_settings_tab">WiFi</a></li>
     {{/if}}
     {{!--<li><a href="#current_pc_settings_tab">Current PC Settings</a></li>--}}
@@ -11,7 +11,7 @@
       {{{custom.ethernet_settings}}}
     </div>
 
-    {{# if custom.isPro }}
+    {{# if custom.hasWiFi }}
     <div class="tab-pane" id="wifi_settings_tab">
       {{{custom.wifi_settings}}}
     </div>

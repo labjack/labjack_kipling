@@ -3,7 +3,7 @@
     "humanName": "Power-up Defaults",
     "version": "0.0.1",
     "framework":"multipleDevices",
-    "supportedDevices": [{"type":"T7"}],
+    "supportedDevices": [{"type":"T7"}, {"type":"T4"}],
     "jsFiles": [
     ],
     "htmlFiles": [
