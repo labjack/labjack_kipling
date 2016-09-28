@@ -15,6 +15,7 @@ exports.LJM_DT_UE9 = 9;
 exports.LJM_DT_U3 = 3;
 exports.LJM_DT_U6 = 6;
 exports.LJM_DT_T4 = 4;
+exports.LJM_DT_T5 = 5;
 exports.LJM_DT_T7 = 7;
 exports.LJM_DT_SKYMOTE_BRIDGE = 1000;
 exports.LJM_DT_DIGIT = 200;
@@ -235,6 +236,12 @@ exports.deviceTypes = {
 	T4: 4,
 	t4: 4,
 	4:4,
+	LJM_DTT5: 5,
+	LJM_dtT5: 5,
+	LJM_dtt5: 5,
+	T5: 5,
+	t5: 5,
+	5:5,
 	LJM_DTU6: 6,
 	LJM_dtU6: 6,
 	LJM_dtu6: 6,
@@ -423,6 +430,7 @@ exports.LJM_LIBRARY_CONSTANTS = {
 exports.DEVICE_TYPE_NAMES = {
     '3': 'U3',
     '4': 'T4',
+    '5': 'T5',
     '6': 'U6',
     '7': 'T7',
     '9': 'UE9',
@@ -431,6 +439,7 @@ exports.DEVICE_TYPE_NAMES = {
 exports.DRIVER_DEVICE_TYPE_NAMES = {
     '3': 'LJM_dtU3',
     '4': 'LJM_dtT4',
+    '5': 'LJM_dtT5',
     '6': 'LJM_dtU6',
     '7': 'LJM_dtT7',
     '9': 'LJM_dtUE9',
@@ -440,6 +449,7 @@ exports.DRIVER_DEVICE_TYPE_NAMES = {
 exports.DEVICE_TYPE_NAMES_BY_DRIVER_NAME = {
     'LJM_dtU3': 'U3',
     'LJM_dtT4': 'T4',
+    'LJM_dtT5': 'T5',
     'LJM_dtU6': 'U6',
     'LJM_dtT7': 'T7',
     'LJM_dtUE9': 'UE9',
@@ -488,6 +498,7 @@ exports.WIFI_STATUS_DISPLAY_DATA = {
 
 exports.serialNumberOffsets = {
 	'LJM_dtT4': 440010000,
+	'LJM_dtT5': 450010000,
 	'LJM_dtT7': 470010000,
 	'LJM_dtDIGIT': 220010000,
 };
