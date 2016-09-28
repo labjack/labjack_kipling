@@ -1,4 +1,6 @@
 
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var q = require('q');
 var fs = require('fs');
 var path = require('path');
@@ -1101,4 +1103,6 @@ function getDashboardOperations(self) {
 	};
 }
 
-module.exports.get = getFileSystemOperations;
+util.inherits(getDashboardOperations, EventEmitter);
+
+module.exports.get = getDashboardOperations;
