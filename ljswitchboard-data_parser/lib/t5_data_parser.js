@@ -52,7 +52,7 @@ function decodeByteSizeRegisters(val) {
 	return res;
 }
 
-var T4_LIST = {
+var T5_LIST = {
 	'AIN#(0:254)': {
 		'decode': function(val) {
 			var res = {
@@ -146,7 +146,7 @@ var T4_LIST = {
 			2909: 'Other'
 		},
 		'decode': function(res) {
-			var str = checkStr(T4_LIST.WIFI_STATUS.valToString[res]);
+			var str = checkStr(T5_LIST.WIFI_STATUS.valToString[res]);
 			var isConnected = false;
 			if(res === 2900) {
 				isConnected = true;
@@ -169,7 +169,7 @@ var T4_LIST = {
 			var unit = 'dB';
 			var imgName = '';
 			var str = res.toString() + 'dB';
-			var WIFI_RSSI_IMAGES = T4_LIST.WIFI_RSSI.images;
+			var WIFI_RSSI_IMAGES = T5_LIST.WIFI_RSSI.images;
 
 			if(res < WIFI_RSSI_IMAGES[0].val) {
 				WIFI_RSSI_IMAGES.some(function(rssiData){
@@ -233,11 +233,11 @@ var T4_LIST = {
 				// 	'isPro': isPro,
 				// 	'productType': productType
 				// };
-				// T4 stuff...
+				// T5 stuff...
 				return {
 					'res': res,
 					'subclass': '',
-					'productType': 'T4',
+					'productType': 'T5',
 				};
 			},
 	},
@@ -377,4 +377,4 @@ var T4_LIST = {
 	'ASYNCH_ENABLE': systemEnabledType,
 };
 
-exports.T4_LIST = T4_LIST;
+exports.T5_LIST = T5_LIST;

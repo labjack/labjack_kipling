@@ -7,6 +7,7 @@ var list = {
 	// '6': {}, // U6
 	// '9': {}, // UE9
 	'4': {}, // T4
+	'5': {}, // T5
 	'7': {}, // T7
 	'200': {}, // Digit
 };
@@ -16,6 +17,7 @@ var errorList = {
 	// '6': {}, // U6
 	// '9': {}, // UE9
 	'4': {}, // T4
+	'5': {}, // T5
 	'7': {}, // T7
 	'200': {}, // Digit
 };
@@ -70,6 +72,9 @@ populateList(list, t7List, '7');
 var t4List = require('./t4_data_parser').T4_LIST;
 populateList(list, t4List, '4');
 
+var t5List = require('./t5_data_parser').T5_LIST;
+populateList(list, t5List, '5');
+
 var digitList = require('./digit_data_parser').DIGIT_LIST;
 populateList(list, digitList, '200');
 
@@ -86,6 +91,9 @@ populateErrorList(errorList, t7ErrorsList, '7', false);
 
 var t4ErrorsList = require('./t4_error_parser').T4_LIST;
 populateErrorList(errorList, t4ErrorsList, '4', false);
+
+var t5ErrorsList = require('./t5_error_parser').T5_LIST;
+populateErrorList(errorList, t5ErrorsList, '5', false);
 
 var digitErrorsList = require('./digit_error_parser').DIGIT_LIST;
 populateErrorList(errorList, digitErrorsList, '200');
