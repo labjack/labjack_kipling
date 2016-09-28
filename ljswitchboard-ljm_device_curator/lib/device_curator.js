@@ -44,6 +44,7 @@ var lua_script_operations = require('./lua_script_operations');
 var device_value_checker = require('./device_value_checker');
 var file_system_operations = require('./file_system_operations');
 var manufacturing_info_operations = require('./manufacturing_info_operations');
+var dashboard_operations = require('./dashboard_operations');
 
 var device_events = driver_const.device_curator_constants;
 
@@ -53,6 +54,7 @@ var DEVICE_ERROR = device_events.DEVICE_ERROR;
 var DEVICE_RECONNECTING = device_events.DEVICE_RECONNECTING;
 var DEVICE_ATTRIBUTES_CHANGED = device_events.DEVICE_ATTRIBUTES_CHANGED;
 var DEVICE_INITIALIZING = device_events.DEVICE_INITIALIZING;
+var DASHBOARD_DATA_UPDATE = device_events.DASHBOARD_DATA_UPDATE;
 
 
 
@@ -2306,6 +2308,19 @@ function device(useMockDevice) {
 	for(i = 0; i < manufacturingInfoKeys.length; i++) {
 		this[manufacturingInfoKeys[i]] = manufacturingInfoOperations[manufacturingInfoKeys[i]];
 	}
+
+	/**
+	 * Dashboard back-end functions:
+	**/
+	var dashboardOperations = new dashboard_operations.get(this);
+	var dashboardOperationKeys = Object.keys(dashboardOperations);
+	for(i = 0; i < dashboardOperationKeys.length; i++) {
+		this["dashboard_" + dashboardOperationKeys[i]] = dashboardOperations[dashboardOperationKeys[i]];
+	}
+	dashboardOperations.on(DASHBOARD_DATA_UPDATE, function dashboardDataUpdate(data) {
+		console.log('!! Received data update from dashboard', data);
+		self.emit(DASHBOARD_DATA_UPDATE, data);
+	});
 
 	/**
 	 * Digit Specific functions:

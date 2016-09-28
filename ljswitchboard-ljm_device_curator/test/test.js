@@ -161,12 +161,16 @@ var testGroups = {
 
 	// These are T4 specific tests.
 	't4': {
-		't4_basic_test.js': false,
+		't4_basic_test': false,
 		't4_upgrade_test': false,
 		't4_dac_and_ain_test': false,
 	},
 	't4_mock_tests': {
-		't4_basic_mock': true,
+		't4_basic_mock': false,
+	},
+
+	'dashboard': {
+		'basic_test': true,
 	},
 };
 
