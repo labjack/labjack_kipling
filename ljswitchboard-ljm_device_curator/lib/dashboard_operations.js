@@ -31,7 +31,38 @@ var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
  * is available on the webpage:
  * https://labjack.com/support/datasheets/t7/sd-card
 */
+/*
+ * This object is an event-emitter.  It emits events that should also
+ * be emitted by the curated device object.
+ */
 function getDashboardOperations(self) {
+	/*
+	 * This function starts the dashboard-ops procedure and registers a listener.
+	 * This function returns data required to initialize the dashboard page.  If
+	 * the listener already exists then its uid isn't added (since it is already
+	 * there).
+	*/
+	this.start = function(uid){};
+
+	/*
+	 * These functions "pause" and "resume" the data-reporting
+	 */
+	this.pauseReporting = function(){};
+	this.resumeReporting = function(){};
+
+	/*
+	 * These functions "pause" and "resume" the DAQ loop collecting data from
+	 * the device.
+	 */
+	this.pauseCollecting = function(){};
+	this.resumeCollecting = function(){};
+
+
+	/* 
+	 * This function stops the dashboard-ops procedure and un-registers a listener.
+	 * If there are zero remaining listeners than the DAQ loop actually stops running.
+	 */
+	this.stop = function(uid){};
 	
 
 	/*
