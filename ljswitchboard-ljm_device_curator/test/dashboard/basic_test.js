@@ -5,7 +5,9 @@ var utils = require('../utils/utils');
 var qExec = utils.qExec;
 
 
-var device;
+var t4Device;
+var t5Device;
+var t7Device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
@@ -15,11 +17,40 @@ var stopTest = function(test, err) {
 };
 
 var deviceInfo = {
-	'serialNumber': 44001000,
-	'DEVICE_NAME_DEFAULT': 'My Test Device',
-	'ipAddress': '192.168.1.101',
-	'ETHERNET_IP': '192.168.1.101',
+	't4': {
+		'serialNumber': 44001000,
+		'DEVICE_NAME_DEFAULT': 'My Test T4',
+		'ipAddress': '192.168.1.101',
+		'ETHERNET_IP': '192.168.1.101',
+	},
+	't5': {
+		'serialNumber': 45001000,
+		'DEVICE_NAME_DEFAULT': 'My Test T5',
+		'ipAddress': '192.168.1.101',
+		'ETHERNET_IP': '192.168.1.101',
+	},
+	't7': {
+		'serialNumber': 47001000,
+		'DEVICE_NAME_DEFAULT': 'My Test T7',
+		'ipAddress': '192.168.1.101',
+		'ETHERNET_IP': '192.168.1.101',
+	}
 };
+var devicesToMake = [];
+var deviceInfoKeys = Object.keys(deviceInfo);
+for(var i = 0; i < deviceInfoKeys.length; i++) {
+	var deviceInfoKey = deviceInfoKeys[i];
+	var devInfo = deviceInfo[deviceInfoKey];
+	devicesToMake.push({
+		'dt': deviceInfoKey,
+		'ct': 'USB',
+		'sn': devInfo.serialNumber,
+		'data': devInfo,
+	});
+}
+
+var devices = {};
+
 var infoMapping = {
 	'SERIAL_NUMBER': 'serialNumber',
 };
@@ -41,83 +72,184 @@ exports.tests = {
 	'tearDown': function(callback) {
 		callback();
 	},
-	'createDevice': function(test) {
+	'createDevices': function(test) {
 		console.log('');
 		console.log('**** mock_device_test ****');
+
 		try {
-			device = new device_curator.device(true);
+			devicesToMake.forEach(function(deviceToMake) {
+				devices[deviceToMake.sn] = new device_curator.device(true);
+			});
 		} catch(err) {
 			stopTest(test, err);
 		}
 		test.done();
 	},
-	'configure mock device': function(test) {
-		device.configureMockDevice(deviceInfo)
+	'configure mock devices': function(test) {
+		var promises = [];
+		devicesToMake.forEach(function(deviceToMake) {
+			promises.push(devices[deviceToMake.sn].configureMockDevice(deviceToMake.data));
+		});
+
+		q.allSettled(promises)
 		.then(function(res) {
 			test.done();
 		});
 	},
-	'openDevice - ctANY device': function(test) {
-		var td = {
-			'dt': 'LJM_dtT4',
-			'ct': 'LJM_ctANY',
-			'id': 'LJM_idANY'
-		};
+	'openDevices': function(test) {
+		var promises = [];
+		var errors = [];
 
-		device.open(td.dt, td.ct, td.id)
+		devicesToMake.forEach(function(deviceToMake) {
+			var td = {
+				'dt': deviceToMake.dt,
+				'ct': deviceToMake.ct,
+				'id': deviceToMake.sn.toString(),
+			};
+			var openDefered = q.defer();
+
+			// Open the device.
+			devices[deviceToMake.sn].open(td.dt, td.ct, td.id)
+			.then(function(res) {
+				openDefered.resolve();
+			}, function(err) {
+				errors.push(err);
+				openDefered.resolve();
+			});
+
+			// Save the promise
+			promises.push(openDefered.promise);
+		});
+
+		q.allSettled(promises)
 		.then(function(res) {
-			deviceFound = true;
-			test.done();
-		}, function(err) {
-			test.done();
+			if(errors.length === 0) {
+				test.done();
+			} else {
+				test.ok(false, 'there was an error: ' + JSON.stringify(errors));
+				test.done();
+			}
 		});
 	},
 	'checkDeviceInfo': function(test) {
-		device.getDeviceAttributes()
-		.then(function(res) {
-			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 4);
-			test.strictEqual(res.deviceTypeName, 'T4');
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT4');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
-			test.strictEqual(res.ip, '0.0.0.0');
-			test.strictEqual(res.ipAddress, '0.0.0.0');
-			test.done();
-		});
-	},
-	'Read Device Attributes': function(test) {
-		var results = [];
-		// Setup and call functions
-		qExec(device, 'iRead', 'ETHERNET_IP')(results)
-		.then(qExec(device, 'iRead', 'SERIAL_NUMBER'))
-		.then(function(res) {
-			// console.log('Res', res);
-			res.forEach(function(readRes) {
-				var readData = readRes.retData;
-				var name = readData.name;
-				var resData;
-				if(appropriateResultMap[name]) {
-					resData = readData[appropriateResultMap[name]];
-				} else {
-					resData = readData.val;
-				}
+		var promises = [];
+		var errors = [];
 
-				if(deviceInfo[name]) {
-					test.strictEqual(resData, deviceInfo[name]);
-				} else if(infoMapping[name]) {
-					test.strictEqual(resData, deviceInfo[infoMapping[name]]);
-				}
-				// console.log(name, resData);
+		devicesToMake.forEach(function(deviceToMake) {
+			// Close the device
+			var openDefered = q.defer();
+			devices[deviceToMake.sn].getDeviceAttributes()
+			.then(function(res) {
+				var keys = ['deviceTypeName', 'productType', 'serialNumber'];
+				var info = {};
+				keys.forEach(function(key) {
+					info[key] = res[key];
+				});
+				console.log('device Attributes', info);
+				openDefered.resolve();
+			}, function(err) {
+				errors.push(err);
+				openDefered.resolve();
 			});
-			test.done();
+
+			// Save the promise;
+			promises.push(openDefered.promise);
+		});
+
+		q.allSettled(promises)
+		.then(function(res) {
+			if(errors.length === 0) {
+				test.done();
+			} else {
+				test.ok(false, 'there was an error: ' + JSON.stringify(errors));
+				test.done();
+			}
 		});
 	},
-	'closeDevice': function(test) {
-		device.close()
-		.then(function() {
-			test.done();
+	'execute dashboard_testFunc': function(test) {
+		var promises = [];
+		var errors = [];
+
+		devicesToMake.forEach(function(deviceToMake) {
+			// Close the device
+			var openDefered = q.defer();
+			devices[deviceToMake.sn].dashboard_testFunc()
+			.then(function(res) {
+				console.log('dashboard_testFunc', res);
+				openDefered.resolve();
+			}, function(err) {
+				errors.push(err);
+				openDefered.resolve();
+			});
+
+			// Save the promise;
+			promises.push(openDefered.promise);
+		});
+
+		q.allSettled(promises)
+		.then(function(res) {
+			if(errors.length === 0) {
+				test.done();
+			} else {
+				test.ok(false, 'there was an error: ' + JSON.stringify(errors));
+				test.done();
+			}
+		});
+	},
+	// 'Read Device Attributes': function(test) {
+	// 	var results = [];
+	// 	// Setup and call functions
+	// 	qExec(device, 'iRead', 'ETHERNET_IP')(results)
+	// 	.then(qExec(device, 'iRead', 'SERIAL_NUMBER'))
+	// 	.then(function(res) {
+	// 		// console.log('Res', res);
+	// 		res.forEach(function(readRes) {
+	// 			var readData = readRes.retData;
+	// 			var name = readData.name;
+	// 			var resData;
+	// 			if(appropriateResultMap[name]) {
+	// 				resData = readData[appropriateResultMap[name]];
+	// 			} else {
+	// 				resData = readData.val;
+	// 			}
+
+	// 			if(deviceInfo[name]) {
+	// 				test.strictEqual(resData, deviceInfo[name]);
+	// 			} else if(infoMapping[name]) {
+	// 				test.strictEqual(resData, deviceInfo[infoMapping[name]]);
+	// 			}
+	// 			// console.log(name, resData);
+	// 		});
+	// 		test.done();
+	// 	});
+	// },
+	'closeDevices': function(test) {
+		var promises = [];
+		var errors = [];
+
+		devicesToMake.forEach(function(deviceToMake) {
+			// Close the device
+			var openDefered = q.defer();
+			devices[deviceToMake.sn].close()
+			.then(function(res) {
+				openDefered.resolve();
+			}, function(err) {
+				errors.push(err);
+				openDefered.resolve();
+			});
+
+			// Save the promise;
+			promises.push(openDefered.promise);
+		});
+
+		q.allSettled(promises)
+		.then(function(res) {
+			if(errors.length === 0) {
+				test.done();
+			} else {
+				test.ok(false, 'there was an error: ' + JSON.stringify(errors));
+				test.done();
+			}
 		});
 	},
 };

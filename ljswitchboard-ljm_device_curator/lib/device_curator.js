@@ -419,6 +419,24 @@ function device(useMockDevice) {
 				return retResult;
 			},
 		},
+		'5': {
+			'HARDWARE_INSTALLED': function(res, isErr, errData) {
+				var retResult = {};
+				var dt = self.savedAttributes.deviceType;
+				var parsedResult = data_parser.parseResult('HARDWARE_INSTALLED', res, dt);
+
+				// Save results
+				var parsedResultKeys = Object.keys(parsedResult);
+				parsedResultKeys.forEach(function(key) {
+					retResult[key] = parsedResult[key];
+				});
+
+				self.savedAttributes.subclass = parsedResult.subclass;
+				self.savedAttributes.productType = parsedResult.productType;
+
+				return retResult;
+			}
+		},
 		'4': {
 			'HARDWARE_INSTALLED': function(res, isErr, errData) {
 				var retResult = {};
@@ -2317,10 +2335,11 @@ function device(useMockDevice) {
 	for(i = 0; i < dashboardOperationKeys.length; i++) {
 		this["dashboard_" + dashboardOperationKeys[i]] = dashboardOperations[dashboardOperationKeys[i]];
 	}
-	dashboardOperations.on(DASHBOARD_DATA_UPDATE, function dashboardDataUpdate(data) {
-		console.log('!! Received data update from dashboard', data);
-		self.emit(DASHBOARD_DATA_UPDATE, data);
-	});
+	// This shouldn't be necessary since we pass "this" into the dashboard_operations object.
+	// dashboardOperations.on(DASHBOARD_DATA_UPDATE, function dashboardDataUpdate(data) {
+	// 	console.log('!! Received data update from dashboard', data);
+	// 	self.emit(DASHBOARD_DATA_UPDATE, data);
+	// });
 
 	/**
 	 * Digit Specific functions:

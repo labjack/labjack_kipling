@@ -7,6 +7,8 @@ var path = require('path');
 var modbusMap = require('ljswitchboard-modbus_map').getConstants();
 
 var DEBUG_DASHBOARD_OPERATIONS = false;
+var DEBUG_DASHBOARD_GET_ALL = false;
+var DEBUG_DASHBOARD_UPDATE = false;
 var DEBUG_FILE_SYSTEM_GET_CWD = false;
 var DEBUG_FILE_SYSTEM_GET_LS = false;
 var DEBUG_FILE_SYSTEM_GET_CD = false;
@@ -38,13 +40,75 @@ var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
  * be emitted by the curated device object.
  */
 function getDashboardOperations(self) {
+	var dashboardListeners = {};
+	function addListener(uid) {
+		var addedListener = false;
+		if(typeof(dashboardListeners[uid]) === 'undefined') {
+			dashboardListeners[uid] = {
+				'startTime': new Date(),
+				'numIterations': 0,
+				'uid': uid,
+				'numStarts': 1,
+			};
+			addedListener = true;
+		} else {
+			// Don't add the listener.
+			dashboardListeners[uid].numStarts += 1;
+		}
+		return addedListener;
+	}
+
+	function removeListener(uid) {
+		var removedListener = false;
+		if(typeof(dashboardListeners[uid]) !== 'undefined') {
+			dashboardListeners[uid] = undefined;
+			delete dashboardListeners[uid];
+			removedListener = true;
+		}
+		return removedListener;
+	}
+
+	function getNumListeners() {
+		return Object.keys(dashboardListeners).length;
+	}
+
+	this.testFunc = function() {
+		var defered = q.defer();
+		console.log("In Dashboard testFunc",
+			self.savedAttributes.productType,
+			self.savedAttributes.serialNumber,
+			self.savedAttributes.serialNumber
+		);
+		defered.resolve();
+		return defered.promise;
+	};
+
+	var dataCollector = undefined;
+	
+	var loopRunning = false;
+	var daqLoopIntervalHandler = undefined;
+
 	/*
 	 * This function starts the dashboard-ops procedure and registers a listener.
 	 * This function returns data required to initialize the dashboard page.  If
 	 * the listener already exists then its uid isn't added (since it is already
 	 * there).
 	*/
-	this.start = function(uid){};
+	this.start = function(uid){
+		var defered = q.defer();
+		var addedListener = addListener(uid);
+		var numListeners = getNumListeners();
+		if(addedListener && (numListeners == 1)) {
+			// We need to start the dashboard-service and we need to return 
+			// the current state of all of the channels.
+			defered.resolve();
+		} else {
+			// We don't need to start the dashboard-service.  We just need to
+			// return the current state of all of the channels.
+			defered.resolve();
+		}
+		return defered.promise;
+	};
 
 	/*
 	 * These functions "pause" and "resume" the data-reporting
