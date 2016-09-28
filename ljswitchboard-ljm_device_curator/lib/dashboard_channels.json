@@ -1,0 +1,40 @@
+{
+	"comments": [
+		"Define a unique channel mapping for reporting and displaying data"
+	],
+	"T7": {
+		"preReadRegs": [],
+		"onBoard": {
+			"0:3": {
+				"ioType": "AIN"
+			},
+			"14:15": {
+				"ioType": "AO"
+			},
+			"16:19": {
+				"ioType": "DIO"
+			}
+		},
+		"external": [{
+			"db15": {
+				"24:35": {
+					"ioType": "DIO"
+				}
+			},
+			"db37": {
+				"0:13": {
+					"ioType": "AIN"
+				},
+				"14:15": {
+					"ioType": "AO"
+				},
+				"16:23": {
+					"ioType": "DIO"
+				},
+				"36:38": {
+					"ioType": "DIO"
+				}
+			}
+		}]
+	}
+}
