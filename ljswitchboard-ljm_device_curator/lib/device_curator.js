@@ -44,7 +44,7 @@ var lua_script_operations = require('./lua_script_operations');
 var device_value_checker = require('./device_value_checker');
 var file_system_operations = require('./file_system_operations');
 var manufacturing_info_operations = require('./manufacturing_info_operations');
-var dashboard_operations = require('./dashboard_operations');
+var dashboard_operations = require('./dashboard/dashboard_operations');
 
 var device_events = driver_const.device_curator_constants;
 

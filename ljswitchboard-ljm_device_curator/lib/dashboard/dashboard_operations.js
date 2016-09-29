@@ -5,6 +5,7 @@ var q = require('q');
 var fs = require('fs');
 var path = require('path');
 var modbusMap = require('ljswitchboard-modbus_map').getConstants();
+var dashboard_data_collector = require('./dashboard_data_collector');
 
 var DEBUG_DASHBOARD_OPERATIONS = false;
 var DEBUG_DASHBOARD_GET_ALL = false;
@@ -40,7 +41,11 @@ var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
  * be emitted by the curated device object.
  */
 function getDashboardOperations(self) {
+	// Object that stores the registered listeners.  When there are
+	// no listeners, the dashboard data collection should be stopped.
 	var dashboardListeners = {};
+
+	// Function that adds a data listener.
 	function addListener(uid) {
 		var addedListener = false;
 		if(typeof(dashboardListeners[uid]) === 'undefined') {
@@ -58,6 +63,7 @@ function getDashboardOperations(self) {
 		return addedListener;
 	}
 
+	// Function that removes a data listener.  
 	function removeListener(uid) {
 		var removedListener = false;
 		if(typeof(dashboardListeners[uid]) !== 'undefined') {
@@ -68,6 +74,7 @@ function getDashboardOperations(self) {
 		return removedListener;
 	}
 
+	// Function that gets the number of listeners.
 	function getNumListeners() {
 		return Object.keys(dashboardListeners).length;
 	}
@@ -83,29 +90,81 @@ function getDashboardOperations(self) {
 		return defered.promise;
 	};
 
-	var dataCollector = undefined;
-	
-	var loopRunning = false;
-	var daqLoopIntervalHandler = undefined;
+	// variable that stores the dataCollector
+	var dataCollector;
 
+	// Function that handles the data collection "data" events.  This
+	// data is the data returned by the read-commands that are performed.
+	// This data still needs to be interpreted saved, cached, and organized
+	// into "channels".
+	// Maybe?? The dashboard_data_collector has logic for each of the devices.
+	// This logic should probably be put there?
+	function dataCollectorHandler(data) {
+		console.log('We have recieved more data', data);
+	}
+
+	// Function that creates the "bundle" that is built-up and passed between
+	// the steps that perform the "start" method.
+	function createStartBundle(uid) {
+		return {
+			'uid': uid,
+		};
+	}
+
+	// This function 
+	function innerStart (bundle) {
+		var defered = q.defer();
+
+		// Device Type is either T4, T5, or T7
+		var deviceType = self.savedAttributes.deviceTypeName;
+
+		// Save the created data collector object
+		dataCollector = new dashboard_data_collector.create(deviceType);
+
+		// Listen to only the next 'data' event emitted by the dataCollector.
+		dataCollector.once('data', function(data) {
+			console.log('We have recieved the first bit of data!');
+			defered.resolve(bundle);
+
+			// Listen to future data.
+			dataCollector.on('data', dataCollectorHandler);
+		});
+
+		
+
+		// Start the data collector.
+		dataCollector.start(self);
+
+		return defered.promise;
+	}
 	/*
 	 * This function starts the dashboard-ops procedure and registers a listener.
 	 * This function returns data required to initialize the dashboard page.  If
 	 * the listener already exists then its uid isn't added (since it is already
 	 * there).
 	*/
-	this.start = function(uid){
+	this.start = function(uid) {
 		var defered = q.defer();
 		var addedListener = addListener(uid);
 		var numListeners = getNumListeners();
+		var bundle = createStartBundle(uid);
+
+		function onSuccess(rBundle) {
+			defered.resolve(rBundle);
+		}
+		function onError(rBundle) {
+			defered.resolve(rBundle);
+		}
+
 		if(addedListener && (numListeners == 1)) {
 			// We need to start the dashboard-service and we need to return 
 			// the current state of all of the channels.
-			defered.resolve();
+			innerStart(bundle)
+			.then(onSuccess, onError);
 		} else {
 			// We don't need to start the dashboard-service.  We just need to
 			// return the current state of all of the channels.
-			defered.resolve();
+			onSuccess(bundle);
 		}
 		return defered.promise;
 	};
@@ -124,11 +183,50 @@ function getDashboardOperations(self) {
 	this.resumeCollecting = function(){};
 
 
+	function createStopBundle(uid) {
+		return {
+			'uid': uid,
+			'isStopped': false,
+		};
+	}
+	function innerStop(bundle) {
+		var defered = q.defer();
+
+		var isStopped = dataCollector.stop();
+		bundle.isStopped = isStopped;
+		defered.resolve(bundle);
+
+		return defered.promise;
+	}
+
 	/* 
 	 * This function stops the dashboard-ops procedure and un-registers a listener.
 	 * If there are zero remaining listeners than the DAQ loop actually stops running.
 	 */
-	this.stop = function(uid){};
+	this.stop = function(uid){
+		var defered = q.defer();
+		var removedListener = removeListener(uid);
+		var numListeners = getNumListeners();
+		var bundle = createStopBundle(uid);
+
+		function onSuccess(rBundle) {
+			defered.resolve(rBundle);
+		}
+		function onError(rBundle) {
+			defered.resolve(rBundle);
+		}
+
+		if(removedListener && (numListeners === 0)) {
+			// We need to stop the dashboard-service.
+			innerStop(bundle)
+			.then(onSuccess, onError);
+		} else {
+			// We don't need to stop the dashboard-service.  It should already
+			// be stopped.
+			onSuccess(bundle);
+		}
+		return defered.promise;
+	};
 	
 
 	/*

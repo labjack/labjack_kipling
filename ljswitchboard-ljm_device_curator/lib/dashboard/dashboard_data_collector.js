@@ -12,13 +12,34 @@ function t4DataCollector(device) {
 	var firstRead = ['DIO_ANALOG_ENABLE'];
 
 	// Conditionally read AIN#(0:11)
+	var defered = q.defer();
+
 	var secondRead = ['AIN#(0:11)', 'DAC#(0:1)', 'DIO_STATE', 'DIO_DIRECTION'];
+	var data = {
+		'testData': 'test',
+	};
+	defered.resolve(data);
+	return defered.promise;
 }
 function t5DataCollector(device) {
+	var defered = q.defer();
+
 	var dataToRead = ['AIN#(0:7)', 'DAC#(0:1)', 'DIO_STATE', 'DIO_DIRECTION'];
+	var data = {
+		'testData': 'test',
+	};
+	defered.resolve(data);
+	return defered.promise;
 }
 function t7DataCollector(device) {
+	var defered = q.defer();
+
 	var dataToRead = ['AIN#(0:13)', 'DAC#(0:1)', 'DIO_STATE', 'DIO_DIRECTION'];
+	var data = {
+		'testData': 'test',
+	};
+	defered.resolve(data);
+	return defered.promise;
 }
 
 var dataCollectors = {
@@ -28,6 +49,7 @@ var dataCollectors = {
 };
 
 function createDashboardDataCollector(deviceType) {
+	console.log('Creating a dashboard data collector object for:', deviceType);
 	var dataCollector = dataCollectors[deviceType];
 
 	this.daqInterval = 1000;
@@ -43,7 +65,8 @@ function createDashboardDataCollector(deviceType) {
 			self.isCollecting = true;
 			dataCollector(device)
 			.then(function(res) {
-				console.log('dashboard_data_collector collected data - success');
+				console.log('dashboard_data_collector collected data - success', res);
+				self.emit('data', res);
 				// We have data
 				self.isCollecting = false;
 			}, function(err) {
@@ -61,6 +84,7 @@ function createDashboardDataCollector(deviceType) {
 		} else {
 			started = true;
 			self.isRunning = true;
+			// setInterval args: callback, interval, args...
 			self.intervalHandler = setInterval(self.collectionManager, self.daqInterval, curatedDevice);
 			return started;
 		}

@@ -61,6 +61,8 @@ var appropriateResultMap = {
 };
 deviceFound = false;
 
+var dashboardUID = 'basic-test-dashboard';
+
 exports.tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
@@ -174,6 +176,66 @@ exports.tests = {
 			// Close the device
 			var openDefered = q.defer();
 			devices[deviceToMake.sn].dashboard_testFunc()
+			.then(function(res) {
+				console.log('dashboard_testFunc', res);
+				openDefered.resolve();
+			}, function(err) {
+				errors.push(err);
+				openDefered.resolve();
+			});
+
+			// Save the promise;
+			promises.push(openDefered.promise);
+		});
+
+		q.allSettled(promises)
+		.then(function(res) {
+			if(errors.length === 0) {
+				test.done();
+			} else {
+				test.ok(false, 'there was an error: ' + JSON.stringify(errors));
+				test.done();
+			}
+		});
+	},
+	'start dashboard listeners': function(test) {
+		var promises = [];
+		var errors = [];
+
+		devicesToMake.forEach(function(deviceToMake) {
+			// Close the device
+			var openDefered = q.defer();
+			devices[deviceToMake.sn].dashboard_start(dashboardUID)
+			.then(function(res) {
+				console.log('dashboard_testFunc', res);
+				openDefered.resolve();
+			}, function(err) {
+				errors.push(err);
+				openDefered.resolve();
+			});
+
+			// Save the promise;
+			promises.push(openDefered.promise);
+		});
+
+		q.allSettled(promises)
+		.then(function(res) {
+			if(errors.length === 0) {
+				test.done();
+			} else {
+				test.ok(false, 'there was an error: ' + JSON.stringify(errors));
+				test.done();
+			}
+		});
+	},
+	'stop dashboard listeners': function(test) {
+		var promises = [];
+		var errors = [];
+
+		devicesToMake.forEach(function(deviceToMake) {
+			// Close the device
+			var openDefered = q.defer();
+			devices[deviceToMake.sn].dashboard_stop(dashboardUID)
 			.then(function(res) {
 				console.log('dashboard_testFunc', res);
 				openDefered.resolve();
