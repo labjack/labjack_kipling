@@ -195,6 +195,16 @@ var firmwareVersionRounder = function(res) {
 		'str': res.toFixed(4)
 	};
 };
+
+function bitmaskParser(res) {
+	return {
+		'res': res,
+		'val': res,
+		'str': res.toString(10),
+		'binaryStr': 'b' + res.toString(2),
+		'hexStr': '0x' + res.toString(16),
+	};
+}
 exports.firmwareVersionRounder = firmwareVersionRounder;
 
 var SHARED_LIST = {
@@ -204,6 +214,16 @@ var SHARED_LIST = {
 	'BOOTLOADER_VERSION': {
 		'decode': firmwareVersionRounder,
 	},
+	'DIO_STATE': {
+		'decode': bitmaskParser,
+	},
+	'DIO_DIRECTION': {
+		'decode': bitmaskParser,
+	},
+	'DIO_ANALOG_ENABLE': {
+		'decode': bitmaskParser,
+	},
+	
 };
 
 exports.SHARED_LIST = SHARED_LIST;

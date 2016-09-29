@@ -670,6 +670,37 @@ exports.tests = {
 		test.deepEqual(results, reqResults, 'SNTP Register failed.');
 		test.done();
 	},
+	'check shared bitmaskRegister parser': function(test) {
+		var vals = [
+			{'val': 0, 'reg': 'DIO_STATE'},
+			{'val': 0, 'reg': 'DIO_DIRECTION'},
+			{'val': 0, 'reg': 'DIO_ANALOG_ENABLE'},
+			{'val': 4, 'reg': 'DIO_ANALOG_ENABLE'},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			// Query the data parser.
+			var reg = val.reg;
+
+			var res = data_parser.parseResult(reg, val.val);
+			results.push(res);
+
+			reqResults.push({
+				'register': reg,
+				'name': reg,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.val,
+				'str': val.val.toString(10),
+				'binaryStr': 'b' + val.val.toString(2),
+				'hexStr': '0x' + val.val.toString(16),
+			});
+		});
+		test.deepEqual(results, reqResults, 'bitmaskRegisters failed.');
+		test.done();
+	},
 	'check DGT_LOG_ITEMS_DATASET register': function(test) {
 		var vals = [
 			{'val': 0, 'temperature': false, 'light': false, 'humidity': false, 'isValid': false},
