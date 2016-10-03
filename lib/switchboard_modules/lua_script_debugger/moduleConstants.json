@@ -173,6 +173,12 @@
                 }, {
                     "name": "Zerocrossing Detect & Pulse Response",
                     "location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Zerocrossing Pulse Response.lua"
+                }, {
+                    "name": "Task Scheduler",
+                    "location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Task-Scheduler_1.0.lua"
+                }, {
+                    "name": "Waveform Generator",
+                    "location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Waveform-Generator_1.0.lua"
                 }
             ]
         },  {
