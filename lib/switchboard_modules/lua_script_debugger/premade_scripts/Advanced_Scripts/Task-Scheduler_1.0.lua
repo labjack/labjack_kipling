@@ -77,13 +77,14 @@ while true do
       -- of elapsed intervals since last check.  In most cases Intvlcnt will normally
       -- equal 1, unless some delay causes script to go multiple intervals between
       -- checks.  Adjust function counter accordingly to maintain function timing.
+      delay = IntvlCnt - SchTbl[i][1]
       SchTbl[i][1] = SchTbl[i][1] - IntvlCnt   
     
       -- Call function when counter reaches zero.
       if(SchTbl[i][1] <= 0) then
         -- Post a message if we see the function execution time was delayed too long
-        if (IntvlCnt > 1) then
-          print("Warning:  Function", i,  "delayed too long", IntvlCnt, "ms")
+        if (SchTbl[i][1] < 0) then
+          print("Warning:  Function", i,  "delayed by", delay, "ms")
         end
         
         -- Execute Task
