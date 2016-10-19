@@ -5,40 +5,446 @@ var q = require('q');
 var fs = require('fs');
 var path = require('path');
 var modbusMap = require('ljswitchboard-modbus_map').getConstants();
+var dashboard_channels = require('./dashboard_channels.json');
+var dashboard_channel_parser = require('./dashboard_channel_parser');
 
+var DEBUG_T4_DATA_COLLECTOR = false;
+var DEBUG_T4_COLLECTED_DATA = false; //Enable print statements to debug collected & organized data.
+var DEBUG_T4_READ_DATA = false;
 
+var DEBUG_T5_DATA_COLLECTOR = false;
+var DEBUG_T5_COLLECTED_DATA = false; //Enable print statements to debug collected & organized data.
 
-function t4DataCollector(device) {
-	var firstRead = ['DIO_ANALOG_ENABLE'];
+var DEBUG_T7_DATA_COLLECTOR = false;
+var DEBUG_T7_COLLECTED_DATA = false; //Enable print statements to debug collected & organized data.
 
-	// Conditionally read AIN#(0:11)
-	var defered = q.defer();
+var DEBUG_COLLECTION_MANAGER = false;
+var ENABLE_ERROR_OUTPUT = true;
 
-	var secondRead = ['AIN#(0:11)', 'DAC#(0:1)', 'DIO_STATE', 'DIO_DIRECTION'];
-	var data = {
-		'testData': 'test',
+function getLogger(bool) {
+	return function logger() {
+		if(bool) {
+			console.log.apply(console, arguments);
+		}
 	};
-	defered.resolve(data);
+}
+
+var debugT4DC = getLogger(DEBUG_T4_DATA_COLLECTOR);
+var debugT4RD = getLogger(DEBUG_T4_READ_DATA);
+var debugT4CD = getLogger(DEBUG_T4_COLLECTED_DATA);
+var debugT5DC = getLogger(DEBUG_T5_DATA_COLLECTOR);
+var debugT5CD = getLogger(DEBUG_T5_COLLECTED_DATA);
+var debugT7DC = getLogger(DEBUG_T7_DATA_COLLECTOR);
+var debugT7CD = getLogger(DEBUG_T7_COLLECTED_DATA);
+var debugCM = getLogger(DEBUG_COLLECTION_MANAGER);
+var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
+
+var T4_NUM_ANALOG_CHANNELS = 12;
+var T5_NUM_ANALOG_CHANNELS = 8;
+var T7_NUM_ANALOG_CHANNELS = 14;
+
+var t4Channels = {
+	"0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
+	// "1": {"ioNum": 1, "type": "AO", "name": "DAC1"},
+
+	"2": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
+	// "3": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
+	// "4": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
+	// "5": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
+
+	"6": {"ioNum": 4, "type": "FLEX", "name": "FIO4"},
+	// "7": {"ioNum": 5, "type": "FLEX", "name": "FIO5"},
+	// "8": {"ioNum": 6, "type": "FLEX", "name": "FIO6"},
+	// "9": {"ioNum": 7, "type": "FLEX", "name": "FIO7"},
+	"14": {"ioNum": 12, "type": "DIO", "name": "EIO4"},
+	// "15": {"ioNum": 13, "type": "DIO", "name": "EIO5"},
+	// "16": {"ioNum": 14, "type": "DIO", "name": "EIO6"},
+	// "17": {"ioNum": 15, "type": "DIO", "name": "EIO7"},
+};
+t4Channels = dashboard_channel_parser.channels.T4;
+
+var t5Channels = {
+	"0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
+	"2": {"ioNum": 5, "type": "AIN", "name": "AIN5"},
+	"6": {"ioNum": 5, "type": "DIO", "name": "FIO5"},
+	"14": {"ioNum": 14, "type": "DIO", "name": "EIO5"},
+};
+t5Channels = dashboard_channel_parser.channels.T5;
+var t7Channels = {
+	"0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
+	"2": {"ioNum": 7, "type": "AIN", "name": "AIN7"},
+	"6": {"ioNum": 0, "type": "DIO", "name": "FIO0"},
+	"14": {"ioNum": 15, "type": "DIO", "name": "EIO7"},
+};
+t7Channels = dashboard_channel_parser.channels.T7;
+
+function t4CollectGeneralData(bundle) {
+	var defered = q.defer();
+	var device = bundle.device;
+
+	var registersToRead = ['DIO_ANALOG_ENABLE', 'DIO_STATE', 'DIO_DIRECTION'];
+	var i = 0;
+	// Add analog output registers
+	for(i = 0; i < 2; i++) {
+		registersToRead.push('DAC' + i.toString());
+	}
+
+	device.sReadMany(registersToRead)
+	.then(function(results) {
+		debugT4RD('Collected T4 General Data', results);
+
+		// Transfer the collected data to the "data" object.
+		results.forEach(function(result) {
+			bundle.rawData[result.name] = result;
+		});
+
+		// String starts out as 'b101010'
+		// Remove the 'b' from the binary string.
+		var binaryStr = bundle.rawData.DIO_ANALOG_ENABLE.binaryStr.split('b').join('');
+
+		// Flip the string so that it can be traversed for AIN0 -> AINxx order.
+		var flippedStr = binaryStr.split('').reverse().join('');
+
+		var channelsToRead = [];
+		var ainChannels = {};
+		var numADCChannels = T4_NUM_ANALOG_CHANNELS;
+		for(var i = 0; i < numADCChannels; i++) {
+			var channelEnabled = false;
+			if(typeof(flippedStr[i]) !== 'undefined') {
+				if(flippedStr[i] === '1') {
+					channelEnabled = true;
+				} else {
+					channelEnabled = false;
+				}
+			}
+			
+
+			var channelStr = 'AIN' + i.toString();
+			ainChannels[channelStr] = {
+				'ainEnabled': channelEnabled,
+				'channelName': channelStr,
+				'val': 0,
+			};
+
+			if(channelEnabled) {
+				channelsToRead.push(channelStr);
+			}
+		}
+		bundle.ainChannelsToRead = channelsToRead;
+		bundle.ainChannelsData = ainChannels;
+		defered.resolve(bundle);
+	})
+	.catch(function(err) {
+		errorLog('T4 Dash-DataCollector-GenData-Error', err);
+		defered.resolve(bundle);
+	}).done();
+	
 	return defered.promise;
 }
+
+function t4CollectAINData(bundle) {
+	var defered = q.defer();
+	var device = bundle.device;
+	var channelsToRead = bundle.ainChannelsToRead;
+
+	debugT4DC('AIN Channels to read', channelsToRead);
+	device.sReadMany(channelsToRead)
+	.then(function(results) {
+		debugT4RD('Collected T4 AIN Data', results);
+
+		// Transfer the collected data to the "data" object.
+		results.forEach(function(result) {
+			bundle.rawData[result.name] = result;
+			bundle.ainChannelsData[result.name].val = result.val;
+		});
+		defered.resolve(bundle);
+	})
+	.catch(function(err) {
+		defered.resolve(bundle);
+	})
+	.done();
+
+	return defered.promise;
+}
+
+function genericOrganizeDIOData(bundle) {
+	var defered = q.defer();
+	// Binary Strings start out as 'b101010'
+	// Remove the 'b' from the binary string.
+	var dioStateBinStr = bundle.rawData.DIO_STATE.binaryStr.split('b').join('');
+	var dioDirBinStr = bundle.rawData.DIO_DIRECTION.binaryStr.split('b').join('');
+
+	// Flip the strings so that they can be traversed xx0 -> xx100.
+	var dioStateFlipStr = dioStateBinStr.split('').reverse().join('');
+	var dioDirFlipStr = dioDirBinStr.split('').reverse().join('');
+
+	var dioChannels = {};
+	var numDIOChannels = 23; // FIO0 -> MIO2
+	for(var i = 0; i < numDIOChannels; i++) {
+		// Logic to populate dioState
+		var dioState = 0;
+		var dioStateStr = 'Low';
+		if(typeof(dioStateFlipStr[i]) !== 'undefined') {
+			if(dioStateFlipStr[i] === '1') {
+				dioState = 1;
+				dioStateStr = 'High';
+			} else {
+				dioState = 0;
+				dioStateStr = 'Low';
+			}
+		}
+
+		// Logic to populate dioDirection
+		var dioDirection = 0;
+		var dioDirectionStr = 'Input';
+		if(typeof(dioDirFlipStr[i]) !== 'undefined') {
+			if(dioDirFlipStr[i] === '1') {
+				dioDirection = 1;
+				dioDirectionStr = 'Output';
+			} else {
+				dioDirection = 0;
+				dioDirectionStr = 'Input';
+			}
+		}
+		
+		var strPrefix = 'DIO';
+		var strChNumOffset = 0;
+		if(0 <= i && i <= 7) {
+			strChNumOffset = 0;
+			strPrefix = 'FIO';
+		} else  if(8 <= i && i <= 15) {
+			strChNumOffset = 8;
+			strPrefix = 'EIO';
+		} else  if(16 <= i && i <= 19) {
+			strChNumOffset = 16;
+			strPrefix = 'CIO';
+		} else  if(20 <= i && i <= 22) {
+			strChNumOffset = 20;
+			strPrefix = 'MIO';
+		}
+		var channelStr = 'DIO' + i.toString();
+		var channelNameStr = strPrefix + (i-strChNumOffset).toString();
+		dioChannels[channelStr] = {
+			// 'state': {'val': dioState, 'str': dioStateStr},
+			'state': dioState,
+			'stateStr': dioStateStr,
+			'direction': dioDirection,
+			'directionStr': dioDirectionStr,
+			// 'direction': {'val': dioDirection, 'str': dioDirectionStr},
+			'channelName': channelNameStr,
+			'channelStr': channelStr,
+		};
+	}
+	bundle.dioChannelsData = dioChannels;
+
+	defered.resolve(bundle);
+	return defered.promise;
+}
+
+
+
+function getDataOrganizer(deviceChannels) {
+	return function dataOrganizer(bundle) {
+		var defered = q.defer();
+
+		// console.log('ainChannelsData', bundle.ainChannelsData);
+		// console.log('dioChannelsData', bundle.dioChannelsData);
+
+		var allAINData = bundle.ainChannelsData;
+		var allDIOData = bundle.dioChannelsData;
+		// var ainKeys = Object.keys(allAINData);
+		// var dioKeys = Object.keys(allDIOData);
+
+		// Loop through the t4 "channels" to organize the collected data.
+		Object.keys(deviceChannels).forEach(function(key, i) {
+			var channelData = {};
+			var deviceChannel = deviceChannels[key];
+			var type = deviceChannel.type;
+			var ioNum = deviceChannel.ioNum;
+			var chName = deviceChannel.name;
+			
+			var ainData = {};
+			var ainKey = 'AIN' + ioNum;
+			var dioData = {};
+			var dioKey = 'DIO' + ioNum;
+
+			// Handle the different channel types, AIN, FLEX, DIO, and AO.
+			if(type === 'AIN') {
+				// Add the collected AIN data if it exists.
+				if(typeof(allAINData[ainKey]) !== 'undefined') {
+					Object.keys(allAINData[ainKey]).forEach(function(key) {
+						channelData[key] = allAINData[ainKey][key];
+					});
+				}
+			} else if(type === 'FLEX') {
+				// Add the collected AIN data if it exists.
+				if(typeof(allAINData[ainKey]) !== 'undefined') {
+					Object.keys(allAINData[ainKey]).forEach(function(key) {
+						channelData[key] = allAINData[ainKey][key];
+					});
+				}
+				// Add the collected DIO data if it exists.
+				if(typeof(allDIOData[dioKey]) !== 'undefined') {
+					Object.keys(allDIOData[dioKey]).forEach(function(key) {
+						channelData[key] = allDIOData[dioKey][key];
+					});
+				}
+			} else if(type === 'DIO') {
+				// Add the collected DIO data if it exists.
+				if(typeof(allDIOData[dioKey]) !== 'undefined') {
+					Object.keys(allDIOData[dioKey]).forEach(function(key) {
+						channelData[key] = allDIOData[dioKey][key];
+					});
+				}
+			} else if(type === 'AO') {
+				channelData.val = bundle.rawData[chName].val;
+				channelData.channelName = chName;
+			}
+
+			// Save the channel data to the bundle channelData object.  The
+			// data should be organized by the channel's "name".
+			channelData.channelName = chName;
+			channelData.type = type;
+			channelData.ioNum = ioNum;
+			bundle.channelData[chName] = channelData;
+		});
+
+		defered.resolve(bundle);
+		return defered.promise;
+	};
+}
+
+function t4DataCollector(device) {
+	var defered = q.defer();
+	
+	var data = {
+		'device': device,
+		'testData': 'test',
+		'channelData': {},
+		'rawData': {},
+		'ainChannelsToRead': [],
+		'ainChannelsData': {},
+		'dioChannelsData': {},
+	};
+
+	t4CollectGeneralData(data)
+	.then(t4CollectAINData)
+	.then(genericOrganizeDIOData)
+	.then(getDataOrganizer(t4Channels))
+	.then(function(bundle) {
+		debugT4CD('T4 Channel Data', bundle.channelData);
+		defered.resolve(bundle.channelData);
+	})
+	.catch(function(err) {
+		errorLog('t4DataCollector ERROR', err);
+		defered.resolve(err);
+	})
+	.done();
+
+	return defered.promise;
+}
+
+function getGeneralDataCollector(numAnalogChannels) {
+	var registersToRead = ['DIO_STATE', 'DIO_DIRECTION'];
+	var i = 0;
+	// Add analog input registers
+	for(i = 0; i < numAnalogChannels; i++) {
+		registersToRead.push('AIN' + i.toString());
+	}
+	// Add analog output registers
+	for(i = 0; i < 2; i++) {
+		registersToRead.push('DAC' + i.toString());
+	}
+
+	return function collectGeneralData(bundle) {
+		var defered = q.defer();
+
+		var device = bundle.device;
+
+		device.sReadMany(registersToRead)
+		.then(function(results) {
+			var dt = device.savedAttributes.deviceType;
+			if(dt === 5) {
+				debugT5DC('Collected T5 Data', results);
+			} else if(dt === 7) {
+				debugT7DC('Collected T7 Data', results);
+			} else {
+				errorLog('Unknown dt Results:', dt, results);
+			}
+
+			// Transfer the collected data to the "data" object.
+			results.forEach(function(result) {
+				bundle.rawData[result.name] = result;
+			});
+
+			for(var i = 0; i < numAnalogChannels; i++) {
+				var channelStr = 'AIN' + i.toString();
+				bundle.ainChannelsData[channelStr] = {
+					'channelName': channelStr,
+					'val': bundle.rawData[channelStr].val,
+				};
+			}
+			defered.resolve(bundle);
+		})
+		.catch(function(err) {
+			errorLog('T5 & T7 Dash-DataCollector-Error', err);
+			defered.resolve(bundle);
+		}).done();
+
+		return defered.promise;
+	};
+}
+
 function t5DataCollector(device) {
 	var defered = q.defer();
 
-	var dataToRead = ['AIN#(0:7)', 'DAC#(0:1)', 'DIO_STATE', 'DIO_DIRECTION'];
 	var data = {
-		'testData': 'test',
+		'device': device,
+		'channelData': {},
+		'rawData': {},
+		'ainChannelsData': {},
+		'dioChannelsData': {},
 	};
-	defered.resolve(data);
+
+	getGeneralDataCollector(T5_NUM_ANALOG_CHANNELS)(data)
+	.then(genericOrganizeDIOData)
+	.then(getDataOrganizer(t5Channels))
+	.then(function(bundle) {
+		debugT5CD('T5 Channel Data', bundle.channelData);
+		defered.resolve(bundle.channelData);
+	})
+	.catch(function(err) {
+		errorLog('t5DataCollector ERROR', err);
+		defered.resolve(err);
+	})
+	.done();
+
 	return defered.promise;
 }
 function t7DataCollector(device) {
 	var defered = q.defer();
 
-	var dataToRead = ['AIN#(0:13)', 'DAC#(0:1)', 'DIO_STATE', 'DIO_DIRECTION'];
 	var data = {
-		'testData': 'test',
+		'device': device,
+		'channelData': {},
+		'rawData': {},
+		'ainChannelsData': {},
+		'dioChannelsData': {},
 	};
-	defered.resolve(data);
+
+	getGeneralDataCollector(T7_NUM_ANALOG_CHANNELS)(data)
+	.then(genericOrganizeDIOData)
+	.then(getDataOrganizer(t7Channels))
+	.then(function(bundle) {
+		debugT7CD('T7 Channel Data', bundle.channelData);
+		defered.resolve(bundle.channelData);
+	})
+	.catch(function(err) {
+		errorLog('t7DataCollector ERROR', err);
+		defered.resolve(err);
+	})
+	.done();
+
 	return defered.promise;
 }
 
@@ -49,7 +455,7 @@ var dataCollectors = {
 };
 
 function createDashboardDataCollector(deviceType) {
-	console.log('Creating a dashboard data collector object for:', deviceType);
+	debugCM('Creating a dashboard data collector object for:', deviceType);
 	var dataCollector = dataCollectors[deviceType];
 
 	this.daqInterval = 1000;
@@ -59,21 +465,30 @@ function createDashboardDataCollector(deviceType) {
 
 	this.collectionManager = function(device) {
 		if(self.isCollecting) {
-			console.log('dashboard_data_collector is already collecting');
+			errorLog('dashboard_data_collector is already collecting');
 			return false;
 		} else {
 			self.isCollecting = true;
-			dataCollector(device)
-			.then(function(res) {
-				console.log('dashboard_data_collector collected data - success', res);
-				self.emit('data', res);
-				// We have data
-				self.isCollecting = false;
-			}, function(err) {
-				console.log('dashboard_data_collector collected data - error');
-				// We have problems...
-				self.isCollecting = false;
-			});
+			try {
+				dataCollector(device)
+				.then(function(res) {
+					var dt = device.savedAttributes.deviceType;
+					debugCM('dashboard_data_collector collected data - success', dt, res);
+					self.emit('data', res);
+					// We have data
+					self.isCollecting = false;
+				}, function(err) {
+					errorLog('dashboard_data_collector collected data - error');
+					// We have problems...
+					self.isCollecting = false;
+				})
+				.catch(function(err) {
+					console.error('Error executing...', err);
+					self.isCollecting = false;
+				});
+			} catch(err) {
+				errorLog('Error executing data collector: ' + deviceType, err);
+			}
 		}
 	};
 

@@ -9,67 +9,60 @@
 			"DIO_INHIBIT"
 		],
 		"onBoard": {
-			"0": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
-			"1": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
-			"2": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
-			"3": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
-
-			"14": {"ioNum": 0, "type": "AO", "name": "DAC0"},
-			"15": {"ioNum": 1, "type": "AO", "name": "DAC1"},
-
-			"16": {"ioNum": 0, "type": "DIO", "name": "FIO0"},
-			"17": {"ioNum": 1, "type": "DIO", "name": "FIO1"},
-			"18": {"ioNum": 2, "type": "DIO", "name": "FIO2"},
-			"19": {"ioNum": 3, "type": "DIO", "name": "FIO3"}
+			"AIN0": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
+			"AIN1": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
+			"AIN2": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
+			"AIN3": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
+			"DAC0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
+			"DAC1": {"ioNum": 1, "type": "AO", "name": "DAC1"},
+			"FIO0": {"ioNum": 0, "type": "DIO", "name": "FIO0"},
+			"FIO1": {"ioNum": 1, "type": "DIO", "name": "FIO1"},
+			"FIO2": {"ioNum": 2, "type": "DIO", "name": "FIO2"},
+			"FIO3": {"ioNum": 3, "type": "DIO", "name": "FIO3"}
 		},
 		"external": {
 			"db15": {
-				"24": {"ioNum": 8,  "type": "DIO", "name": "EIO0", "conditions": ["isEnabled"]},
-				"25": {"ioNum": 9,  "type": "DIO", "name": "EIO1", "conditions": ["isEnabled"]},
-				"26": {"ioNum": 10, "type": "DIO", "name": "EIO2", "conditions": ["isEnabled"]},
-				"27": {"ioNum": 11, "type": "DIO", "name": "EIO3", "conditions": ["isEnabled"]},
-
-				"28": {"ioNum": 12, "type": "DIO", "name": "EIO4", "conditions": ["isEnabled"]},
-				"29": {"ioNum": 13, "type": "DIO", "name": "EIO5", "conditions": ["isEnabled"]},
-				"30": {"ioNum": 14, "type": "DIO", "name": "EIO6", "conditions": ["isEnabled"]},
-				"31": {"ioNum": 15, "type": "DIO", "name": "EIO7", "conditions": ["isEnabled"]},
-
-				"32": {"ioNum": 16, "type": "DIO", "name": "CIO0", "conditions": ["isEnabled"]},
-				"33": {"ioNum": 17, "type": "DIO", "name": "CIO1", "conditions": ["isEnabled"]},
-				"34": {"ioNum": 18, "type": "DIO", "name": "CIO2", "conditions": ["isEnabled"]},
-				"35": {"ioNum": 19, "type": "DIO", "name": "CIO3", "conditions": ["isEnabled"]}
+				"EIO0": {"ioNum": 8,  "type": "DIO", "name": "EIO0"},
+				"EIO1": {"ioNum": 9,  "type": "DIO", "name": "EIO1"},
+				"EIO2": {"ioNum": 10, "type": "DIO", "name": "EIO2"},
+				"EIO3": {"ioNum": 11, "type": "DIO", "name": "EIO3"},
+				"EIO4": {"ioNum": 12, "type": "DIO", "name": "EIO4"},
+				"EIO5": {"ioNum": 13, "type": "DIO", "name": "EIO5"},
+				"EIO6": {"ioNum": 14, "type": "DIO", "name": "EIO6"},
+				"EIO7": {"ioNum": 15, "type": "DIO", "name": "EIO7"},
+				"CIO0": {"ioNum": 16, "type": "DIO", "name": "CIO0"},
+				"CIO1": {"ioNum": 17, "type": "DIO", "name": "CIO1"},
+				"CIO2": {"ioNum": 18, "type": "DIO", "name": "CIO2"},
+				"CIO3": {"ioNum": 19, "type": "DIO", "name": "CIO3"}
 			},
 			"db37": {
-				"0": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
-				"1": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
-				"2": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
-				"3": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
-				"4": {"ioNum": 4, "type": "AIN", "name": "AIN4"},
-				"5": {"ioNum": 5, "type": "AIN", "name": "AIN5"},
-				"6": {"ioNum": 6, "type": "AIN", "name": "AIN6"},
-				"7": {"ioNum": 7, "type": "AIN", "name": "AIN7"},
-				"8": {"ioNum": 8, "type": "AIN", "name": "AIN8"},
-				"9": {"ioNum": 9, "type": "AIN", "name": "AIN9"},
-				"10": {"ioNum": 10, "type": "AIN", "name": "AIN10"},
-				"11": {"ioNum": 11, "type": "AIN", "name": "AIN11"},
-				"12": {"ioNum": 12, "type": "AIN", "name": "AIN12"},
-				"13": {"ioNum": 13, "type": "AIN", "name": "AIN13"},
-
-				"14": {"ioNum": 0, "type": "AO", "name": "DAC0"},
-				"15": {"ioNum": 1, "type": "AO", "name": "DAC1"},
-
-				"16": {"ioNum": 0, "type": "DIO", "name": "FIO0"},
-				"17": {"ioNum": 1, "type": "DIO", "name": "FIO1"},
-				"18": {"ioNum": 2, "type": "DIO", "name": "FIO2"},
-				"19": {"ioNum": 3, "type": "DIO", "name": "FIO3"},
-				"20": {"ioNum": 4, "type": "DIO", "name": "FIO4"},
-				"21": {"ioNum": 5, "type": "DIO", "name": "FIO5"},
-				"22": {"ioNum": 6, "type": "DIO", "name": "FIO6"},
-				"23": {"ioNum": 7, "type": "DIO", "name": "FIO7"},
-
-				"36": {"ioNum": 20, "type": "DIO", "name": "MIO0"},
-				"37": {"ioNum": 21, "type": "DIO", "name": "MIO1"},
-				"38": {"ioNum": 22, "type": "DIO", "name": "MIO2"}
+				"AIN0": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
+				"AIN1": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
+				"AIN2": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
+				"AIN3": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
+				"AIN4": {"ioNum": 4, "type": "AIN", "name": "AIN4"},
+				"AIN5": {"ioNum": 5, "type": "AIN", "name": "AIN5"},
+				"AIN6": {"ioNum": 6, "type": "AIN", "name": "AIN6"},
+				"AIN7": {"ioNum": 7, "type": "AIN", "name": "AIN7"},
+				"AIN8": {"ioNum": 8, "type": "AIN", "name": "AIN8"},
+				"AIN9": {"ioNum": 9, "type": "AIN", "name": "AIN9"},
+				"AIN10": {"ioNum": 10, "type": "AIN", "name": "AIN10"},
+				"AIN11": {"ioNum": 11, "type": "AIN", "name": "AIN11"},
+				"AIN12": {"ioNum": 12, "type": "AIN", "name": "AIN12"},
+				"AIN13": {"ioNum": 13, "type": "AIN", "name": "AIN13"},
+				"DAC0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
+				"DAC1": {"ioNum": 1, "type": "AO", "name": "DAC1"},
+				"FIO0": {"ioNum": 0, "type": "DIO", "name": "FIO0"},
+				"FIO1": {"ioNum": 1, "type": "DIO", "name": "FIO1"},
+				"FIO2": {"ioNum": 2, "type": "DIO", "name": "FIO2"},
+				"FIO3": {"ioNum": 3, "type": "DIO", "name": "FIO3"},
+				"FIO4": {"ioNum": 4, "type": "DIO", "name": "FIO4"},
+				"FIO5": {"ioNum": 5, "type": "DIO", "name": "FIO5"},
+				"FIO6": {"ioNum": 6, "type": "DIO", "name": "FIO6"},
+				"FIO7": {"ioNum": 7, "type": "DIO", "name": "FIO7"},
+				"MIO0": {"ioNum": 20, "type": "DIO", "name": "MIO0"},
+				"MIO1": {"ioNum": 21, "type": "DIO", "name": "MIO1"},
+				"MIO2": {"ioNum": 22, "type": "DIO", "name": "MIO2"}
 			}
 		}
 	},
@@ -80,39 +73,35 @@
 			"DIO_INHIBIT"
 		],
 		"onBoard": {
-			"0": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
-			"1": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
-			"2": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
-			"3": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
-			"4": {"ioNum": 4, "type": "AIN", "name": "AIN4"},
-			"5": {"ioNum": 5, "type": "AIN", "name": "AIN5"},
-			"6": {"ioNum": 6, "type": "AIN", "name": "AIN6"},
-			"7": {"ioNum": 7, "type": "AIN", "name": "AIN7"},
-
-			"8": {"ioNum": 0, "type": "AO", "name": "DAC0"},
-			"9": {"ioNum": 1, "type": "AO", "name": "DAC1"},
-
-			"10": {"ioNum": 0, "type": "DIO", "name": "FIO0"},
-			"11": {"ioNum": 1, "type": "DIO", "name": "FIO1"},
-			"12": {"ioNum": 2, "type": "DIO", "name": "FIO2"},
-			"13": {"ioNum": 3, "type": "DIO", "name": "FIO3"}
+			"AIN0": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
+			"AIN1": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
+			"AIN2": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
+			"AIN3": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
+			"AIN4": {"ioNum": 4, "type": "AIN", "name": "AIN4"},
+			"AIN5": {"ioNum": 5, "type": "AIN", "name": "AIN5"},
+			"AIN6": {"ioNum": 6, "type": "AIN", "name": "AIN6"},
+			"AIN7": {"ioNum": 7, "type": "AIN", "name": "AIN7"},
+			"DAC0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
+			"DAC1": {"ioNum": 1, "type": "AO", "name": "DAC1"},
+			"FIO0": {"ioNum": 0, "type": "DIO", "name": "FIO0"},
+			"FIO1": {"ioNum": 1, "type": "DIO", "name": "FIO1"},
+			"FIO2": {"ioNum": 2, "type": "DIO", "name": "FIO2"},
+			"FIO3": {"ioNum": 3, "type": "DIO", "name": "FIO3"}
 		},
 		"external": {
 			"db15": {
-				"14": {"ioNum": 8,  "type": "DIO", "name": "EIO0", "conditions": ["isEnabled"]},
-				"15": {"ioNum": 9,  "type": "DIO", "name": "EIO1", "conditions": ["isEnabled"]},
-				"16": {"ioNum": 10, "type": "DIO", "name": "EIO2", "conditions": ["isEnabled"]},
-				"17": {"ioNum": 11, "type": "DIO", "name": "EIO3", "conditions": ["isEnabled"]},
-
-				"18": {"ioNum": 12, "type": "DIO", "name": "EIO4", "conditions": ["isEnabled"]},
-				"19": {"ioNum": 13, "type": "DIO", "name": "EIO5", "conditions": ["isEnabled"]},
-				"20": {"ioNum": 14, "type": "DIO", "name": "EIO6", "conditions": ["isEnabled"]},
-				"21": {"ioNum": 15, "type": "DIO", "name": "EIO7", "conditions": ["isEnabled"]},
-
-				"22": {"ioNum": 16, "type": "DIO", "name": "CIO0", "conditions": ["isEnabled"]},
-				"23": {"ioNum": 17, "type": "DIO", "name": "CIO1", "conditions": ["isEnabled"]},
-				"24": {"ioNum": 18, "type": "DIO", "name": "CIO2", "conditions": ["isEnabled"]},
-				"25": {"ioNum": 19, "type": "DIO", "name": "CIO3", "conditions": ["isEnabled"]}
+				"EIO0": {"ioNum": 8,  "type": "DIO", "name": "EIO0"},
+				"EIO1": {"ioNum": 9,  "type": "DIO", "name": "EIO1"},
+				"EIO2": {"ioNum": 10, "type": "DIO", "name": "EIO2"},
+				"EIO3": {"ioNum": 11, "type": "DIO", "name": "EIO3"},
+				"EIO4": {"ioNum": 12, "type": "DIO", "name": "EIO4"},
+				"EIO5": {"ioNum": 13, "type": "DIO", "name": "EIO5"},
+				"EIO6": {"ioNum": 14, "type": "DIO", "name": "EIO6"},
+				"EIO7": {"ioNum": 15, "type": "DIO", "name": "EIO7"},
+				"CIO0": {"ioNum": 16, "type": "DIO", "name": "CIO0"},
+				"CIO1": {"ioNum": 17, "type": "DIO", "name": "CIO1"},
+				"CIO2": {"ioNum": 18, "type": "DIO", "name": "CIO2"},
+				"CIO3": {"ioNum": 19, "type": "DIO", "name": "CIO3"}
 			}
 		}
 	},
@@ -124,35 +113,31 @@
 			"DIO_INHIBIT"
 		],
 		"onBoard": {
-			"0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
-			"1": {"ioNum": 1, "type": "AO", "name": "DAC1"},
-
-			"2": {"ioNum": 0, "type": "AIN", "name": "AIN0", "conditions": ["isEnabled"]},
-			"3": {"ioNum": 1, "type": "AIN", "name": "AIN1", "conditions": ["isEnabled"]},
-			"4": {"ioNum": 2, "type": "AIN", "name": "AIN2", "conditions": ["isEnabled"]},
-			"5": {"ioNum": 3, "type": "AIN", "name": "AIN3", "conditions": ["isEnabled"]},
-
-			"6": {"ioNum": 4, "type": "FLEX", "name": "FIO4", "conditions": ["isAnalog", "isEnabled"]},
-			"7": {"ioNum": 5, "type": "FLEX", "name": "FIO5", "conditions": ["isAnalog", "isEnabled"]},
-			"8": {"ioNum": 6, "type": "FLEX", "name": "FIO6", "conditions": ["isAnalog", "isEnabled"]},
-			"9": {"ioNum": 7, "type": "FLEX", "name": "FIO7", "conditions": ["isAnalog", "isEnabled"]}
+			"DAC0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
+			"DAC1": {"ioNum": 1, "type": "AO", "name": "DAC1"},
+			"AIN0": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
+			"AIN1": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
+			"AIN2": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
+			"AIN3": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
+			"FIO4": {"ioNum": 4, "type": "FLEX", "name": "FIO4"},
+			"FIO5": {"ioNum": 5, "type": "FLEX", "name": "FIO5"},
+			"FIO6": {"ioNum": 6, "type": "FLEX", "name": "FIO6"},
+			"FIO7": {"ioNum": 7, "type": "FLEX", "name": "FIO7"}
 		},
 		"external": {
 			"db15": {
-				"10": {"ioNum": 8,  "type": "FLEX", "name": "EIO0", "conditions": ["isAnalog", "isEnabled"]},
-				"11": {"ioNum": 9,  "type": "FLEX", "name": "EIO1", "conditions": ["isAnalog", "isEnabled"]},
-				"12": {"ioNum": 10, "type": "FLEX", "name": "EIO2", "conditions": ["isAnalog", "isEnabled"]},
-				"13": {"ioNum": 11, "type": "FLEX", "name": "EIO3", "conditions": ["isAnalog", "isEnabled"]},
-
-				"14": {"ioNum": 12, "type": "DIO", "name": "EIO4", "conditions": ["isEnabled"]},
-				"15": {"ioNum": 13, "type": "DIO", "name": "EIO5", "conditions": ["isEnabled"]},
-				"16": {"ioNum": 14, "type": "DIO", "name": "EIO6", "conditions": ["isEnabled"]},
-				"17": {"ioNum": 15, "type": "DIO", "name": "EIO7", "conditions": ["isEnabled"]},
-
-				"18": {"ioNum": 16, "type": "DIO", "name": "CIO0", "conditions": ["isEnabled"]},
-				"19": {"ioNum": 17, "type": "DIO", "name": "CIO1", "conditions": ["isEnabled"]},
-				"20": {"ioNum": 18, "type": "DIO", "name": "CIO2", "conditions": ["isEnabled"]},
-				"21": {"ioNum": 19, "type": "DIO", "name": "CIO3", "conditions": ["isEnabled"]}
+				"EIO0": {"ioNum": 8,  "type": "FLEX", "name": "EIO0"},
+				"EIO1": {"ioNum": 9,  "type": "FLEX", "name": "EIO1"},
+				"EIO2": {"ioNum": 10, "type": "FLEX", "name": "EIO2"},
+				"EIO3": {"ioNum": 11, "type": "FLEX", "name": "EIO3"},
+				"EIO4": {"ioNum": 12, "type": "DIO", "name": "EIO4"},
+				"EIO5": {"ioNum": 13, "type": "DIO", "name": "EIO5"},
+				"EIO6": {"ioNum": 14, "type": "DIO", "name": "EIO6"},
+				"EIO7": {"ioNum": 15, "type": "DIO", "name": "EIO7"},
+				"CIO0": {"ioNum": 16, "type": "DIO", "name": "CIO0"},
+				"CIO1": {"ioNum": 17, "type": "DIO", "name": "CIO1"},
+				"CIO2": {"ioNum": 18, "type": "DIO", "name": "CIO2"},
+				"CIO3": {"ioNum": 19, "type": "DIO", "name": "CIO3"}
 			}
 		}
 	}
