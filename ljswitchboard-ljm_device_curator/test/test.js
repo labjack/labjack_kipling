@@ -149,9 +149,9 @@ var testGroups = {
 		// saved in flash.
 		't7_manufacturing_info_test': true,
 	},
-	't7': {
-		't7_upgrade_test': false,
-	},
+	// 't7': {
+	// 	't7_upgrade_test': false,
+	// },
 
 	// These are production-line tests.
 	'production_line': {
@@ -161,12 +161,12 @@ var testGroups = {
 
 	// These are T4 specific tests.
 	't4': {
-		't4_basic_test': false,
-		't4_upgrade_test': false,
-		't4_dac_and_ain_test': false,
+		't4_basic_test': true,
+		't4_upgrade_test': true,
+		't4_dac_and_ain_test': true,
 	},
 	't4_mock_tests': {
-		't4_basic_mock': false,
+		't4_basic_mock': true,
 	},
 
 	'dashboard': {
