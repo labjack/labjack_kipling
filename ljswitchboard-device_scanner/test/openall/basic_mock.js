@@ -39,6 +39,16 @@ exports.tests = {
 				'serialNumber': 1,
 			},
 			{
+				'deviceType': 'LJM_dtT5',
+				'connectionType': 'LJM_ctUSB',
+				'serialNumber': 5,
+			},
+			{
+				'deviceType': 'LJM_dtT4',
+				'connectionType': 'LJM_ctUSB',
+				'serialNumber': 4,
+			},
+			{
 				'deviceType': 'LJM_dtDIGIT',
 				'connectionType': 'LJM_ctUSB'
 			}
@@ -70,6 +80,28 @@ exports.tests = {
 					'connectionTypes': [{
 						'name': 'USB',
 						'insertionMethod': 'scan',
+					}]
+				}]
+			},
+			'T5': {
+				'devices': [{
+					'connectionTypes': [{
+						'name': 'USB',
+						'insertionMethod': 'scan',
+					}, {
+						'name': 'Ethernet',
+						'insertionMethod': 'attribute'
+					}]
+				}]
+			},
+			'T4': {
+				'devices': [{
+					'connectionTypes': [{
+						'name': 'USB',
+						'insertionMethod': 'scan',
+					}, {
+						'name': 'Ethernet',
+						'insertionMethod': 'attribute'
 					}]
 				}]
 			},

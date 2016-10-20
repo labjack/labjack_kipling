@@ -160,6 +160,14 @@ var OPEN_ALL_SCAN_REQUEST_LIST = [
         'async': false,
     },
 ];
+var ENABLE_BETA_MOCK_T5_USB_SCAN = true;
+var EXTRA_T5_MOCK_SCAN = {
+    'deviceType': driver_const.LJM_DT_T5,
+    'connectionType': driver_const.LJM_CT_USB,
+    'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT5,
+    'numAttempts': 1,
+    'async': false,
+};
 
 var curatedDeviceEvents = [
     'DEVICE_DISCONNECTED',
@@ -756,8 +764,20 @@ function openAllDeviceScanner() {
         var defered = q.defer();
 
         // Save the scan request list to a local variable w/ a shorter name.
-        var scanMethods = OPEN_ALL_SCAN_REQUEST_LIST;
+        // If enabling extra T5 mock stanning...
+        var scanMethods;
+        if(LIVE_DEVICE_SCANNING_ENABLED) {
+            scanMethods = OPEN_ALL_SCAN_REQUEST_LIST;
+        } else {
+            scanMethods = OPEN_ALL_SCAN_REQUEST_LIST;
+            if(ENABLE_BETA_MOCK_T5_USB_SCAN) {
+                scanMethods.push(EXTRA_T5_MOCK_SCAN);
+            }
+        }
 
+        // Default... aka when the T5 has been added.
+        // var scanMethods = OPEN_ALL_SCAN_REQUEST_LIST
+        
         var scanOptions = bundle.options;
         var filteredScanMethods = scanMethods.filter(function(scanMethod) {
             var enableScan = false;

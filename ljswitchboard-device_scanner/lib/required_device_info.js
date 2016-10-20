@@ -19,6 +19,12 @@ var REQUIRED_INFO_BY_DEVICE = {
         'HARDWARE_INSTALLED',
         'ETHERNET_IP',
         'FIRMWARE_VERSION'
+	],
+	'LJM_dtT5': [
+		'DEVICE_NAME_DEFAULT',
+        'HARDWARE_INSTALLED',
+        'ETHERNET_IP',
+        'FIRMWARE_VERSION'
 	]
 };
 module.exports.requiredInfo = REQUIRED_INFO_BY_DEVICE;

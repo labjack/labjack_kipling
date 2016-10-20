@@ -379,6 +379,10 @@ function createMockDeviceScanner() {
 	function getProductType(deviceInfo) {
 		if(deviceInfo.dt === 7) {
 			return deviceInfo.HARDWARE_INSTALLED.productType;
+		} else if(deviceInfo.dt === 4) {
+			return deviceInfo.HARDWARE_INSTALLED.productType;
+		} else if(deviceInfo.dt === 5) {
+			return deviceInfo.HARDWARE_INSTALLED.productType;
 		} else if(deviceInfo.dt === 200) {
 			return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 		} else {
@@ -390,6 +394,12 @@ function createMockDeviceScanner() {
 		var pt = deviceInfo.deviceTypeName;
 		var sc = '';
 		if(deviceInfo.dt === 7) {
+			pt = deviceInfo.HARDWARE_INSTALLED.productType;
+			sc = deviceInfo.HARDWARE_INSTALLED.subclass;
+		} else if(deviceInfo.dt === 4) {
+			pt = deviceInfo.HARDWARE_INSTALLED.productType;
+			sc = deviceInfo.HARDWARE_INSTALLED.subclass;
+		} else if(deviceInfo.dt === 5) {
 			pt = deviceInfo.HARDWARE_INSTALLED.productType;
 			sc = deviceInfo.HARDWARE_INSTALLED.subclass;
 		} else if(deviceInfo.dt === 200) {

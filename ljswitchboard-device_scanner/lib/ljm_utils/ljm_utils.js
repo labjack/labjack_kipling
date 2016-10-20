@@ -132,6 +132,8 @@ function getProductType(deviceInfo) {
 		return deviceInfo.HARDWARE_INSTALLED.productType;
 	} else if(deviceInfo.dt === 4) {
 		return deviceInfo.HARDWARE_INSTALLED.productType;
+	} else if(deviceInfo.dt === 5) {
+		return deviceInfo.HARDWARE_INSTALLED.productType;
 	} else if(deviceInfo.dt === 200) {
 		return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
@@ -146,10 +148,12 @@ function getModelType(deviceInfo) {
 		pt = deviceInfo.HARDWARE_INSTALLED.productType;
 	} else if(deviceInfo.dt === 4) {
 		return deviceInfo.HARDWARE_INSTALLED.productType;
+	} else if(deviceInfo.dt === 5) {
+		return deviceInfo.HARDWARE_INSTALLED.productType;
 	} else if(deviceInfo.dt === 200) {
 		pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
-		console.log('Failed to get product type');
+		console.log('Failed to get model type');
 	}
 	return pt;
 }
