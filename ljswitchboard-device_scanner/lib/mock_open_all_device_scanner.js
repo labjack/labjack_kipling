@@ -65,7 +65,7 @@ function createMockDeviceScanner() {
 			'address': info.data.address,
 			'val': defaultVal
 		};
-		res = data_parser.parseResult(address, defaultVal);
+		res = data_parser.parseResult(address, defaultVal, deviceInfo.dt);
 		return res;
 	};
 	var getSerialNumberOffset = function(dt) {
@@ -380,9 +380,11 @@ function createMockDeviceScanner() {
 		if(deviceInfo.dt === 7) {
 			return deviceInfo.HARDWARE_INSTALLED.productType;
 		} else if(deviceInfo.dt === 4) {
-			return deviceInfo.HARDWARE_INSTALLED.productType;
+			// return deviceInfo.HARDWARE_INSTALLED.productType;
+			return 'T4';
 		} else if(deviceInfo.dt === 5) {
-			return deviceInfo.HARDWARE_INSTALLED.productType;
+			// return deviceInfo.HARDWARE_INSTALLED.productType;
+			return 'T5';
 		} else if(deviceInfo.dt === 200) {
 			return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 		} else {
@@ -397,11 +399,15 @@ function createMockDeviceScanner() {
 			pt = deviceInfo.HARDWARE_INSTALLED.productType;
 			sc = deviceInfo.HARDWARE_INSTALLED.subclass;
 		} else if(deviceInfo.dt === 4) {
-			pt = deviceInfo.HARDWARE_INSTALLED.productType;
-			sc = deviceInfo.HARDWARE_INSTALLED.subclass;
+			// pt = deviceInfo.HARDWARE_INSTALLED.productType;
+			// sc = deviceInfo.HARDWARE_INSTALLED.subclass;
+			pt = 'T4';
+			sc = '';
 		} else if(deviceInfo.dt === 5) {
-			pt = deviceInfo.HARDWARE_INSTALLED.productType;
-			sc = deviceInfo.HARDWARE_INSTALLED.subclass;
+			// pt = deviceInfo.HARDWARE_INSTALLED.productType;
+			// sc = deviceInfo.HARDWARE_INSTALLED.subclass;
+			pt = 'T5';
+			sc = '';
 		} else if(deviceInfo.dt === 200) {
 			pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 			sc = deviceInfo.DGT_INSTALLED_OPTIONS.subclass;

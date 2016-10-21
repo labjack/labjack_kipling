@@ -131,9 +131,11 @@ function getProductType(deviceInfo) {
 	if(deviceInfo.dt === 7) {
 		return deviceInfo.HARDWARE_INSTALLED.productType;
 	} else if(deviceInfo.dt === 4) {
-		return deviceInfo.HARDWARE_INSTALLED.productType;
+		// return deviceInfo.HARDWARE_INSTALLED.productType;
+		return 'T4';
 	} else if(deviceInfo.dt === 5) {
-		return deviceInfo.HARDWARE_INSTALLED.productType;
+		// return deviceInfo.HARDWARE_INSTALLED.productType;
+		return 'T5';
 	} else if(deviceInfo.dt === 200) {
 		return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
@@ -147,9 +149,11 @@ function getModelType(deviceInfo) {
 	if(deviceInfo.dt === 7) {
 		pt = deviceInfo.HARDWARE_INSTALLED.productType;
 	} else if(deviceInfo.dt === 4) {
-		return deviceInfo.HARDWARE_INSTALLED.productType;
+		// pt = deviceInfo.HARDWARE_INSTALLED.productType;
+		pt = 'T4';
 	} else if(deviceInfo.dt === 5) {
-		return deviceInfo.HARDWARE_INSTALLED.productType;
+		// pt = deviceInfo.HARDWARE_INSTALLED.productType;
+		pt = 'T5';
 	} else if(deviceInfo.dt === 200) {
 		pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
