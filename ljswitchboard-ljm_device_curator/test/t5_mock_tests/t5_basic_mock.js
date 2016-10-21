@@ -15,7 +15,7 @@ var stopTest = function(test, err) {
 };
 
 var deviceInfo = {
-	'serialNumber': 44001000,
+	'serialNumber': 45001000,
 	'DEVICE_NAME_DEFAULT': 'My Test Device',
 	'ipAddress': '192.168.1.101',
 	'ETHERNET_IP': '192.168.1.101',
@@ -43,7 +43,7 @@ exports.tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** T4 - mock_device_test ****');
+		console.log('**** T5 - mock_device_test ****');
 		try {
 			device = new device_curator.device(true);
 		} catch(err) {
@@ -59,7 +59,7 @@ exports.tests = {
 	},
 	'openDevice - ctANY device': function(test) {
 		var td = {
-			'dt': 'LJM_dtT4',
+			'dt': 'LJM_dtT5',
 			'ct': 'LJM_ctANY',
 			'id': 'LJM_idANY'
 		};
@@ -76,9 +76,9 @@ exports.tests = {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 4);
-			test.strictEqual(res.deviceTypeName, 'T4');
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT4');
+			test.strictEqual(res.deviceType, 5);
+			test.strictEqual(res.deviceTypeName, 'T5');
+			test.strictEqual(res.deviceTypeString, 'LJM_dtT5');
 			test.strictEqual(res.connectionType, 1);
 			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
 			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
