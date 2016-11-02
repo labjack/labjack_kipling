@@ -44,7 +44,8 @@
     "ljswitchboard-data_parser": "0.0.x",
     "ljmmm-parse": "0.x",
     "mathjs": "1.6.x",
-    "request": "~2"
+    "request": "~2",
+    "lodash": "4.x"
   },
   "devDependencies": {
     "nodeunit": "0.9.x",
