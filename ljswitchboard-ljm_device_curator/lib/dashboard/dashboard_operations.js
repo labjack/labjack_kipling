@@ -151,8 +151,9 @@ function getDashboardOperations(self) {
 		});
 
 		var numKeys = Object.keys(data);
-		console.log('Num Keys for new data', numKeys);
-		console.log('Data Difference', diffObj['FIO0']);
+		var numNewKeys = Object.keys(diffObj);
+		console.log('Num Keys for new data', numKeys, numNewKeys);
+		console.log('Data Difference', diffObj);
 		self.dataCache = data;
 
 		self.emit(device_events.DASHBOARD_DATA_UPDATE, diffObj);
