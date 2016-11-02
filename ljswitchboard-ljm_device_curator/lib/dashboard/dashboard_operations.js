@@ -162,6 +162,7 @@ function getDashboardOperations(self) {
 		// Create and define the bundle object.
 		return {
 			'uid': uid,
+			'data': {},
 		};
 	}
 
@@ -184,6 +185,7 @@ function getDashboardOperations(self) {
 
 			// Save the data to the data cache.
 			self.dataCache = data;
+			bundle.data = data;
 
 			// Declare the innerStart function to be finished.
 			defered.resolve(bundle);
