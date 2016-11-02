@@ -144,7 +144,7 @@ function getDashboardOperations(self) {
 		// debugDDC('New data', data['FIO0']);
 		var diffObj = _.diff(data, self.dataCache);
 
-		// console.log('Data Difference', diffObj['FIO0']);
+		// console.log('Data Difference - diff', diffObj);
 		// Clean the object to get rid of empty results.
 		diffObj = _.pickBy(diffObj, function(value, key) {
 			return Object.keys(value).length > 0;
@@ -152,8 +152,8 @@ function getDashboardOperations(self) {
 
 		var numKeys = Object.keys(data);
 		var numNewKeys = Object.keys(diffObj);
-		console.log('Num Keys for new data', numKeys, numNewKeys);
-		console.log('Data Difference', diffObj);
+		// console.log('Num Keys for new data', numKeys, numNewKeys);
+		// console.log('Data Difference - pickBy', diffObj);
 		self.dataCache = data;
 
 		self.emit(device_events.DASHBOARD_DATA_UPDATE, diffObj);
