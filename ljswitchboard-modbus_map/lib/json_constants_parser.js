@@ -164,6 +164,13 @@ function reindexConstantsByRegister(constants) {
 		devices:["T7", "T4"],
 		readwrite:"RW"
 	};
+	retDict[driver_const.T7_FLASH_CHIP_VERSION] = {
+		address:driver_const.T7_FLASH_CHIP_VERSION,
+		name:"T7_FLASH_CHIP_VERSION",
+		type:"UINT32",
+		devices:["T7"],
+		readwrite:"R"
+	};
 	retDictName["T7_MA_EXF_KEY"] = {
 		address:driver_const.T7_MA_EXF_KEY,
 		name:"T7_MA_EXF_KEY",
@@ -205,6 +212,13 @@ function reindexConstantsByRegister(constants) {
 		type:"UINT32",
 		devices:["T7", "T4"],
 		readwrite:"RW"
+	};
+	retDictName["T7_FLASH_CHIP_VERSION"] = {
+		address:driver_const.T7_FLASH_CHIP_VERSION,
+		name:"T7_FLASH_CHIP_VERSION",
+		type:"UINT32",
+		devices:["T7"],
+		readwrite:"R"
 	};
 	
 

@@ -70,6 +70,7 @@ exports.tests = {
       constants.getAddressInfo("AIN0",'W'),
       constants.getAddressInfo("FIO0",'W'),
       constants.getAddressInfo("DIO0",'W'),
+      constants.getAddressInfo("T7_FLASH_CHIP_VERSION",'R'),
     ];
     var tests = [
       {type: 3, directionValid: 1, typeString: 'FLOAT32'},
@@ -77,6 +78,7 @@ exports.tests = {
       {type: 3, directionValid: 0, typeString: 'FLOAT32'},
       {type: 0, directionValid: 1, typeString: 'UINT16'},
       {type: 0, directionValid: 1, typeString: 'UINT16'},
+      {type: 1, directionValid: 1, typeString: 'UINT32'},
     ];
 
     test.equal(info.length, tests.length);
