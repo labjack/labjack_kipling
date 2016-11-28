@@ -143,7 +143,7 @@ exports.T7_REQUEST_FW_UPGRADE				= 0x4C4A0020;
 exports.T7_MA_REQ_FWUPG 					= 61996;
 exports.T7_MA_REQ_RESTART 					= 61998;
 
-
+exports.T7_FLASH_CHIP_VERSION				= 60040;
 // Header Positions
 exports.HEADER_CODE							= 0;
 exports.HEADER_TARGET						= 4;
