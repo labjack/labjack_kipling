@@ -146,6 +146,9 @@ exports.T7_MA_REQ_RESTART 					= 61998;
 exports.T7_FLASH_CHIP_VERSION				= 60040;
 exports.T7_FLASH_IS_25F						= 0x4A;
 exports.T7_FLASH_IS_26F						= 0x42;
+exports.T7_FLASH_25F_BL_VER					= 0.94;
+exports.T7_FLASH_26F_BL_VER					= 0.95;
+
 
 // Header Positions
 exports.HEADER_CODE							= 0;
