@@ -94,7 +94,7 @@ var device_tests = {
 		});
 	},
 	'upgradeFirmware': function(test) {
-		var fwVersionNum = 1.0070;
+		var fwVersionNum = 1.0215;
 
 		function performUpdate() {
 			var fwURL = fws[fwVersionNum.toFixed(4)];
