@@ -36,39 +36,8 @@ var devices = [];
 var deviceSerials = [];
 
 function createDeviceUpdater(test) {
-	this.fwVersionNum = 0.6606;
-	this.determineRequiredRevoveryFW = function(device, upgradeIsReady) {
-		device.read('T7_FLASH_CHIP_VERSION')
-		.then(function(res) {
-			console.log(device.savedAttributes.serialNumber, 'T7 flash chip version!!', res);
-			//
-			if(res == driver_const.T7_FLASH_IS_25F) {
-				self.fwVersionNum = 0.6604;
-			} else {
-				self.fwVersionNum = 0.6606;
-			}
-			upgradeIsReady();
-		}, function(err) {
-			console.log(device.savedAttributes.serialNumber, 'Error getting flash chip version', err);
-			
-			device.read('BOOTLOADER_VERSION')
-			.then(function(res) {
-				blVersion = parseFloat(res.toFixed(4));
-				console.log(device.savedAttributes.serialNumber, 'T7 BL Version', res);
-				if(blVersion <= driver_const.T7_FLASH_25F_BL_VER) {
-					self.fwVersionNum = 0.6604;
-				} else {
-					self.fwVersionNum = 0.6606;
-				}
-				upgradeIsReady();
-			}, function(err) {
-				self.fwVersionNum = 0.6604;
-				upgradeIsReady();
-			});
-		});
-	};
+	var fwVersionNum = 1.0215;
 	this.performDeviceUpdate = function(device, upgradeIsFinished) {
-		console.log(device.savedAttributes.serialNumber, 'Updating to', self.fwVersionNum);
 		function pInfo() {
 			var dataToPrint = [
 				'  - ',
@@ -80,7 +49,7 @@ function createDeviceUpdater(test) {
 			console.log.apply(console, dataToPrint);
 		}
 		function performUpdate() {
-			var fwURL = fws[self.fwVersionNum.toFixed(4)];
+			var fwURL = fws[fwVersionNum.toFixed(4)];
 			pInfo('  - fwURL:', fwURL);
 			var lastPercent = 0;
 			var percentListener = function(value) {
@@ -122,21 +91,13 @@ function createDeviceUpdater(test) {
 					// 	ljmDevice.isHandleValid
 					// );
 
-					device.getRecoveryFirmwareVersion()
+					// Make sure that the device disconnect & reconnect events get
+					// fired.
+					test.ok(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
+					test.ok(deviceReconnectEventReceived, 'Reconnect event should have been detected');
+					device.read('FIRMWARE_VERSION')
 					.then(function(res) {
-						try {
-							pInfo('  - Currently Loaded Recovery FW', res);
-							test.strictEqual(
-								parseFloat(res).toFixed(4),
-								parseFloat(self.fwVersionNum).toFixed(4),
-								'Firmware Not Upgraded');
-							upgradeIsFinished();
-						} catch(err) {
-							pInfo('Error', err);
-							upgradeIsFinished();
-						}
-					}, function(err) {
-						pInfo('Error', err);
+						test.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
 						upgradeIsFinished();
 					});
 				}, function(err) {
@@ -146,27 +107,30 @@ function createDeviceUpdater(test) {
 					test.ok(true, 'Failed to upgrade device: ' + JSON.stringify(err));
 					device.read('FIRMWARE_VERSION')
 					.then(function(res) {
-						pInfo('Device is still responding to messages', res);
+						pInfo('Device is still responding to messages', device.savedAttributes.serialNumber, res);
 						upgradeIsFinished();
 					}, function(err) {
-						pInfo('Device is not responding anymore', err);
+						pInfo('Device is not responding anymore', device.savedAttributes.serialNumber, err);
 						upgradeIsFinished();
 					});
 				}
 			);
 		}
-		device.getRecoveryFirmwareVersion()
+		device.iRead('FIRMWARE_VERSION')
 		.then(function(res) {
-			if(res != self.fwVersionNum) {
-				performUpdate();
+			if(res.val != fwVersionNum) {
+				try {
+					performUpdate();
+				} catch(err) {
+					console.log('Error...', err);
+				}
 			} else {
-				console.log('  - Skipping Recovery FW Update T7:', device.savedAttributes.serialNumber,'already has fw:', res.val);
+				console.log('  - Skipping Primary FW Update T7:', device.savedAttributes.serialNumber,'already has fw:', res.val);
 				test.ok(true);
 				upgradeIsFinished();
 			}
 		});
 	};
-	var self = this;
 }
 
 var device_tests = {
@@ -182,7 +146,7 @@ var device_tests = {
 	},
 	'initialization': function(test) {
 		console.log('');
-		console.log('**** mult_upgrade_recovery_firmware ****');
+		console.log('**** mult_upgrade_primary_firmware ****');
 		test.done();
 	},
 	'list all digits...': function(test) {
@@ -249,17 +213,7 @@ var device_tests = {
 			function(device, cb) {
 				console.log('Updating Device:', device.savedAttributes.serialNumber);
 				var deviceUpdater = new createDeviceUpdater(test);
-				var steps = ['determineRequiredRevoveryFW', 'performDeviceUpdate'];
-				async.eachSeries(
-					steps,
-					function(step, innerCB) {
-						deviceUpdater[step](device, innerCB);
-					},
-					function(err) {
-						cb();
-					}
-				);
-				// deviceUpdater.performDeviceUpdate(device, cb);
+				deviceUpdater.performDeviceUpdate(device, cb);
 			},
 			function(err) {
 				test.done();
@@ -305,6 +259,19 @@ var device_tests = {
 				test.done();
 			});
 	},
+	// 'closeDevice': function(test) {
+	// 	// setTimeout(function() {
+	// 		device.close()
+	// 		.then(function() {
+	// 			test.done();
+	// 		}, function(err) {
+	// 			console.log("Failure");
+	// 			test.ok(false);
+	// 			test.done();
+	// 		});
+	// 	// }, 5000);
+		
+	// },
 };
 
 var tests = {};

@@ -6,7 +6,7 @@ process.on('uncaughtException', function(err) {
 
 
 /********************** Require tests *****************************************/
-var install_calibration_firmware = require('./install_calibration_firmware');
+var install_calibration_firmware = require('./mult_install_calibration_firmware');
 
 
 /********************** Perform tests *****************************************/

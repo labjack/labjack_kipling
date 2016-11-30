@@ -207,6 +207,7 @@ function getFileSystemOperations(self) {
 			'startingDir': '',
 			'fileNames': [],
 			'files': [],
+			'noFilesOnCard': false,
 			'isError': false,
 			'errorStep': '',
 			'error': undefined,
@@ -255,11 +256,26 @@ function getFileSystemOperations(self) {
 			defered.resolve(bundle);
 		}, function(err) {
 			debugLS('in startReaddirOperation err', err);
-			bundle.isError = true;
-			bundle.errorStep = 'startReaddirOperation';
-			bundle.error = modbusMap.getErrorInfo(err);
-			bundle.errorCode = err;
-			defered.reject(bundle);
+			// bundle.isError = true;
+			// bundle.errorStep = 'startReaddirOperation';
+			// bundle.error = modbusMap.getErrorInfo(err);
+			// bundle.errorCode = err;
+			// defered.reject(bundle);
+
+			// Determine if there are more files to look for.
+			if(acceptableCheckForMoreFilesErrCodes.indexOf(err) >= 0) {
+				debugLS('in startReaddirOperation: no files on uSD card', err);
+				bundle.noFilesOnCard = true;
+				defered.resolve(bundle);
+			} else {
+				// There was some weird issue...
+				debugLS('in startReaddirOperation err', err);
+				bundle.isError = true;
+				bundle.errorStep = 'startReaddirOperation';
+				bundle.error = modbusMap.getErrorInfo(err);
+				bundle.errorCode = err;
+				defered.reject(bundle);
+			}
 		});
 		return defered.promise;
 	}
@@ -306,7 +322,9 @@ function getFileSystemOperations(self) {
 				}
 			});
 			// Save the file name.
-			bundle.fileNames.push(fileName);
+			if(!bundle.noFilesOnCard) {
+				bundle.fileNames.push(fileName);
+			}
 			debugLS('Debug CWD:', bundle.cwd, fileName);
 			var filePath = path.posix.join(bundle.cwd, fileName);
 			var pathInfo = path.posix.parse(filePath);
@@ -321,7 +339,9 @@ function getFileSystemOperations(self) {
 				'sizeStr': bundle.FILE_IO_SIZE.str,
 			};
 			// Save the file's info.
-			bundle.files.push(fileInfo);
+			if(!bundle.noFilesOnCard) {
+				bundle.files.push(fileInfo);
+			}
 			
 			debugLS('in readAndSaveFileListing fileInfo', fileInfo);
 			defered.resolve(bundle);
