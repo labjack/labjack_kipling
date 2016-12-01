@@ -43,7 +43,7 @@ function createDeviceUpdater(test) {
 			console.log(device.savedAttributes.serialNumber, 'T7 flash chip version!!', res);
 			//
 			if(res == driver_const.T7_FLASH_IS_25F) {
-				self.fwVersionNum = 0.6604;
+				self.fwVersionNum = 0.6606;
 			} else {
 				self.fwVersionNum = 0.6606;
 			}
@@ -56,13 +56,13 @@ function createDeviceUpdater(test) {
 				blVersion = parseFloat(res.toFixed(4));
 				console.log(device.savedAttributes.serialNumber, 'T7 BL Version', res);
 				if(blVersion <= driver_const.T7_FLASH_25F_BL_VER) {
-					self.fwVersionNum = 0.6604;
+					self.fwVersionNum = 0.6606;
 				} else {
 					self.fwVersionNum = 0.6606;
 				}
 				upgradeIsReady();
 			}, function(err) {
-				self.fwVersionNum = 0.6604;
+				self.fwVersionNum = 0.6606;
 				upgradeIsReady();
 			});
 		});
