@@ -19,6 +19,9 @@
         "name": "dashboard",
         "active": true
     }, {
+        "name": "dashboard_v2",
+        "active": true
+    }, {
         "name": "dashboard_logger",
         "active": false
     }, {

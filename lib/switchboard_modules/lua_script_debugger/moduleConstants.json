@@ -179,6 +179,9 @@
                 }, {
                     "name": "Waveform Generator",
                     "location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Waveform-Generator_1.0.lua"
+                }, {
+                    "name": "Stream AIN0 and Log to File",
+                    "location": "lua_script_debugger/premade_scripts/Advanced_Scripts/lua-stream-and-log-v3.lua"
                 }
             ]
         },  {
@@ -192,6 +195,9 @@
                     "location": "lua_script_debugger/premade_scripts/digital_io_ef/PWM Library.lua"
                 }
             ]
+        }, {
+            "name": "Voltage Follower",
+            "location": "lua_script_debugger/premade_scripts/1 Get Device Temperature.lua"
         }, {
             "name": "Get Device Temperature",
             "location": "lua_script_debugger/premade_scripts/1 Get Device Temperature.lua"

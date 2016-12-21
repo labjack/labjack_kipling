@@ -1,11 +1,14 @@
 {
-    "name": "dashboard",
-    "humanName": "Dashboard",
+    "name": "dashboard_v2",
+    "humanName": "Dashboard_v2",
     "version": "0.0.1",
     "framework":"singleDevice",
     "third_party_code":[],
-    "supportedDevices": [{"type":"T7","subclass":["Pro",""],"minFW":"0.01"}, {"type":"T4","minFW":"0.01"}],
-    "jsFiles":["deviceDashboardController.js"],
+    "supportedDevices": [{"type":"T7","subclass":["Pro",""],"minFW":"0.01"}, {"type":"T4","minFW":"0.01"}, {"type":"T5","minFW":"0.01"}],
+    "jsFiles":[
+        "deviceDashboardController.js",
+        "deviceControlLocationDefinitions.js"
+    ],
     "htmlFiles": [
         "resources/ain-in.html",
         "resources/dac-out.html",
