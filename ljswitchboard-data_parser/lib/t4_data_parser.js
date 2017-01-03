@@ -56,7 +56,7 @@ var T4_LIST = {
 	'AIN#(0:254)': {
 		'decode': function(val) {
 			var res = {
-				'val': parseFloat(val.toFixed(6)),
+				'val': parseFloat(val.toFixed(4)),
 				'rounded': 0,
 				'unit': 'V',
 				'str': ''
@@ -68,10 +68,10 @@ var T4_LIST = {
 			if((-0.1 < val) && (val < 0.1) && convertSigFigs) {
 				var rVal = val * 1000;
 				res.unit = 'mV';
-				res.str = rVal.toFixed(6);
+				res.str = rVal.toFixed(4);
 				res.rounded = parseFloat(res.str);
 			} else {
-				res.str = val.toFixed(6);
+				res.str = val.toFixed(4);
 				res.rounded = parseFloat(res.str);
 			}
 			if(val == -9999) {
