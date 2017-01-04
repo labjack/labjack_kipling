@@ -17,7 +17,7 @@
         "active": false
     }, {
         "name": "dashboard",
-        "active": true
+        "active": false
     }, {
         "name": "dashboard_v2",
         "active": true

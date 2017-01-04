@@ -6,6 +6,9 @@
     width: 128px;
   	margin-left: 0px;
 }
+.register-overlay .ainValue {
+  padding-left: 2px;
+}
 .device-register-overlay {
 	font-size: 12px;
     position: absolute;
@@ -19,6 +22,9 @@
 	float:right;
 	position: absolute;
 	right: -9px;
+}
+.device-register-overlay .ainValue {
+  padding-left: 2px;
 }
 .analogInputDisplay {
 	padding-right: 7px;
@@ -38,8 +44,8 @@
 	font-size: 10px;
 	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, Sans-Serif;*/
 
-	padding: 3px 8px 2px 8px;
-	margin-top: -1px;
+	padding: 1px 8px 1px 8px;
+	margin-top: 0px;
 	min-width: 20px;
 	font-size: 10px;
 	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, Sans-Serif;

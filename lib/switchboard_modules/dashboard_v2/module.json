@@ -1,6 +1,6 @@
 {
     "name": "dashboard_v2",
-    "humanName": "Dashboard_v2",
+    "humanName": "Dashboard",
     "version": "0.0.1",
     "framework":"singleDevice",
     "third_party_code":[],
