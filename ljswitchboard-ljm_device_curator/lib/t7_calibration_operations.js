@@ -49,11 +49,103 @@ var T7_NominalCalValues = [
     {"name": "I Bias", "nominal": 0.000000015, "variance": 3.0}
 ];
 
+/* T4 cal data sample...
+  0.0003228967252653092,
+  0.0003226623230148107,
+  0.0003225223335903138,
+  0.0003225999535061419,
+  -10.487683296203613,
+  -10.49667739868164,
+  -10.473978996276855,
+  -10.474691390991211,
+  0.0000381646714231465,
+  0.0005189368384890258,
+  0,
+  0,
+  13248.3173828125,
+  -425.10382080078125,
+  13245.5849609375,
+  -422.54327392578125,
+  1,
+  0,
+  0,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  NaN,
+  -92.5999984741211,
+  467.6000061035156,
+  NaN,
+  NaN,
+  NaN
+*/
+var T4_NominalCalValues = [
+    {"name": "Ch0 HV Slope", "nominal": 0.000315805780, "variance": 0.05},  // 0
+    {"name": "Ch1 HV Slope", "nominal": 0.000315805780, "variance": 0.05},  // 4
+    {"name": "Ch2 HV Slope", "nominal": 0.000315805780, "variance": 0.05},  // 8
+    {"name": "Ch3 HV Slope", "nominal": 0.000315805780, "variance": 0.05},  // 12
+    {"name": "Ch0 HV Offset", "nominal": 0.000315805780, "variance": 0.05}, // 16
+    {"name": "Ch1 HV Offset", "nominal": 0.000315805780, "variance": 0.05}, // 20
+    {"name": "Ch2 HV Offset", "nominal": 0.000315805780, "variance": 0.05}, // 24
+    {"name": "Ch3 HV Offset", "nominal": 0.000315805780, "variance": 0.05}, // 28
+    {"name": "LV Slope", "nominal": 0.000315805780, "variance": 0.05},      // 32
+    {"name": "LV Offset", "nominal": 0.000315805780, "variance": 0.05},     // 36
+    {"name": "SpecV Slope", "nominal": 0, "variance": 0.05},                // 40
+    {"name": "SpecV Offset", "nominal": 0, "variance": 0.05},               // 44
+    {"name": "DAC0 Slope", "nominal": 0.000315805780, "variance": 0.05},    // 48
+    {"name": "DAC0 Offset", "nominal": 0.000315805780, "variance": 0.05},   // 52
+    {"name": "DAC1 Slope", "nominal": 0.000315805780, "variance": 0.05},    // 56
+    {"name": "DAC1 Offset", "nominal": 0.000315805780, "variance": 0.05},   // 60
+    {"name": "N/A"}, // 64
+    {"name": "N/A"}, // 68
+    {"name": "N/A"}, // 72
+    {"name": "N/A"}, // 76
+    {"name": "N/A"}, // 80
+    {"name": "N/A"}, // 84
+    {"name": "N/A"}, // 88
+    {"name": "N/A"}, // 92
+    {"name": "N/A"}, // 96
+    {"name": "N/A"}, // 100
+    {"name": "N/A"}, // 104
+    {"name": "N/A"}, // 108
+    {"name": "N/A"}, // 112
+    {"name": "N/A"}, // 116
+    {"name": "N/A"}, // 120
+    {"name": "N/A"}, // 124
+    {"name": "N/A"}, // 128
+    {"name": "N/A"}, // 132
+    {"name": "N/A"}, // 136
+    {"name": "N/A"}, // 140
+    {"name": "Temp Slope", "nominal": 0.000315805780, "variance": 0.05}, // 144
+    {"name": "Temp Offset", "nominal": 0.000315805780, "variance": 0.05}, // 148
+    {"name": "I Bias", "nominal": 0.000315805780, "variance": 0.05}, // 152
+    {"name": "N/A"}, // 156
+    {"name": "N/A"}, // 160
+];
+
+var NOMINAL_CALIBRATION_VALUES = {
+    'T7': T7_NominalCalValues,
+    'T4': T4_NominalCalValues,
+};
+
 var T7_HIGH_RESOLUTION_START_INDEX = 16;
 var T7_HIGH_RESOLUTION_END_INDEX = 31;
 
 
-var getInvalidCalibrationValues = function (checkHighRes, calValues) {
+var getInvalidCalibrationValues = function (deviceTypeName, checkHighRes, calValues) {
     var withinRange = function(calValue, min, max) {
         if (isNaN(calValue)) {
             return false;
@@ -67,7 +159,9 @@ var getInvalidCalibrationValues = function (checkHighRes, calValues) {
         return true;
     };
     var badCals = [];
-    T7_NominalCalValues.forEach(function(nominalVal, index) {
+    var nomCalValues = NOMINAL_CALIBRATION_VALUES[deviceTypeName];
+
+    nomCalValues.forEach(function(nominalVal, index) {
         var min, max, absPlusMinus;
         
         if (!checkHighRes && (index >= T7_HIGH_RESOLUTION_START_INDEX) && (index <= T7_HIGH_RESOLUTION_END_INDEX)) {
@@ -79,6 +173,7 @@ var getInvalidCalibrationValues = function (checkHighRes, calValues) {
             max = nominalVal.nominal + absPlusMinus;
 
             if (!withinRange(calValues[index], min, max)) {
+                // console.log('Val not w/in range.', calValues[index], min, max)
                 badCals.push(nominalVal.name);
             }
         }
@@ -98,9 +193,19 @@ var getInterpretFlashResults = function(curatedDevice) {
             floatingPointData.push(floatVal);
         });
 
+        // console.log('Calibration Flash Results:', data, floatingPointData);
+
         // Check the values to see if they are valid
-        var checkHighRes = curatedDevice.savedAttributes.HARDWARE_INSTALLED.highResADC;
-        var calCheckResult = getInvalidCalibrationValues(checkHighRes, floatingPointData);
+        var checkHighRes = false;
+        try {
+            checkHighRes = curatedDevice.savedAttributes.HARDWARE_INSTALLED.highResADC;
+        } catch(err) {
+            checkHighRes = false;
+        }
+        var deviceTypeName = curatedDevice.savedAttributes.deviceTypeName;
+        // console.log('Checking values', deviceTypeName, checkHighRes, floatingPointData);
+        var calCheckResult = getInvalidCalibrationValues(deviceTypeName, checkHighRes, floatingPointData);
+        // console.log('Result:',calCheckResult)
         var calibrationStatus;
         // If there are any invalid values set calibration validity to be false
         if(calCheckResult.length > 0) {
@@ -319,7 +424,7 @@ var getAndInterpretAINResults = function(curatedDevice) {
 **/
 exports.getDeviceCalibrationStatus = function(curatedDevice) {
     var defered = q.defer();
-
+    // console.log('in t7_calibration_operations.js getDeviceCalibrationStatus');
     var getErrFunc = function(msg) {
         var errFunc = function(err) {
             console.log('in getDeviceCalibrationStatus, error', err, msg);

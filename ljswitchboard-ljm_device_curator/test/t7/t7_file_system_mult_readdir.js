@@ -67,11 +67,11 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t7_file_system_basic ****');
-		console.log('**** Please connect 1x T7-Pro via USB ****');
-		console.log('**** This test executes basic file system calls ****');
-		console.log('**** but does not require there to be any files ****');
-		console.log('**** already on the uSD card.                   ****');
+		console.log('**** t7_file_system_mult_readdir                 ****');
+		console.log('**** Please connect 1x T7-Pro via USB            ****');
+		console.log('**** This test executes basic file system calls. ****');
+		console.log('**** It requires there to be a folder/file of    ****');
+		console.log('**** "/testDir/txtFile.txt"                      ****');
 		try {
 			device = new device_curator.device();
 		} catch(err) {

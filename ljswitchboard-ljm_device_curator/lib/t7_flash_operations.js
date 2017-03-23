@@ -151,8 +151,21 @@ var createFlashOperation = function (bundle, startAddress, lengthInts, sizeInts,
                 directions,
                 numValues,
                 values,
-                createSafeReject(innerDeferred),
-                function (newResults) { 
+                // createSafeReject(innerDeferred),
+                function(err) {
+                    // console.log('tseries_upgrade: calling rwMany', isReadOp, addresses, directions, numValues, values);
+                    // console.log('tseries_upgrade: rwMany Error', err);
+                    // console.log('Throwing Upgrade Error', err);
+                    if(!isReadOp) {
+                        // console.log('Failed to write flash data', addresses, numValues, values, err);
+                    }
+                    var callFunc = createSafeReject(innerDeferred);
+                    callFunc(err);
+                },
+                function (newResults) {
+                    if(!isReadOp) {
+                        // console.log('Successfully wrote flash data', addresses, numValues, values);
+                    }
                     lastResults.push.apply(lastResults, newResults);
                     innerDeferred.resolve(lastResults);
                 }
@@ -258,7 +271,6 @@ var createFlashOperation = function (bundle, startAddress, lengthInts, sizeInts,
  * @param {DeviceFirwareBundle} bundle The bundle with the device to read from.
  * @param {Number} startAddress The address to start reading at.
  * @param {Number} length Number of integers to read.
- * @param {Number} size The number of reads to combine in a single read call.
 **/
 exports.readFlash = function(device, startAddress, length)
 {
@@ -287,3 +299,136 @@ exports.readFlash = function(device, startAddress, length)
     return flashDefered.promise;
 };
 
+/**
+ * Creates a new flash operation that writes data to flash with a key.
+ *
+ * @param {DeviceFirmwareBundle} bundle The bundle with the device to write to.
+ * @param {Number} startAddress The flash memory address to start writing at.
+ * @param {Number} length The number of 4 byte values (integers) to write. This
+ *      could be the size of the firmware image file to write for example.
+ * @param {Number} size The full block size to write. This could be the flash
+ *      block write size for eaxmple.
+ * @param {Number} key The key that is provides access to the flash memory. This
+ *      is specific to the region of flash being written.
+ * @param {Buffer} data The data to write to flash at the given address.  Can also be an array of integers.
+ * @param {q.promise} Promise that resolves after the flash write operation
+ *      finishes successfully or fails due to error (will reject on error).
+**/
+exports.writeFlash = function(device, startAddress, length, size, key, data) {
+    // console.log('writing flash...',
+    //     startAddress,
+    //     length,
+    //     size,
+    //     key,
+    //     data
+    // );
+    var bufferData;
+    if(Buffer.isBuffer(data)) {
+        bufferData = data;
+    } else {
+        // Assume the data object is an array of unsigned integer (uint32) sized numbers.
+        bufferData = new Buffer(data.length*4);
+        var offset = 0;
+        data.forEach(function(val) {
+            bufferData.writeUInt32BE(val, offset);
+            offset += 4;
+        });
+    }
+    var writePtrAddress = driver_const.T7_MA_EXF_pWRITE;
+    var writeFlashAddress = driver_const.T7_MA_EXF_WRITE;
+    
+    var bundle = {};
+    bundle.getDevice = function() {
+        return device;
+    };
+    var size = driver_const.T7_FLASH_BLOCK_WRITE_SIZE;
+
+    var flashDefered = q.defer();
+    createFlashOperation(
+        bundle,
+        startAddress,
+        length,
+        size,
+        writePtrAddress,
+        writeFlashAddress,
+        false,
+        key,
+        bufferData
+    ).then(function(bundle) {
+        flashDefered.resolve(bundle);
+    }, function(err) {
+        flashDefered.reject(err);
+    });
+    return flashDefered.promise;
+};
+
+/**
+ * Create a range enumeration like in Python.
+ *
+ * @param {int} start The first number in the sequence (inclusive).
+ * @param {int} stop The last number in the sequence (non-inclusive).
+ * @param {int} step The integer distance between members of the returned
+ *      sequence.
+ * @return {Array} Array with the numerical sequence.
+ * @author Tadeck - http://stackoverflow.com/questions/8273047
+**/
+function range(start, stop, step) {
+    if (typeof stop=='undefined') {
+        // one param defined
+        stop = start;
+        start = 0;
+    }
+    if (typeof step=='undefined') {
+        step = 1;
+    }
+    if ((step>0 && start>=stop) || (step<0 && start<=stop)) {
+        return [];
+    }
+    var result = [];
+    for (var i=start; step>0 ? i<stop : i>stop; i+=step) {
+        result.push(i);
+    }
+    return result;
+}
+
+/**
+ * Erases n number of flash pages on the device within the provided bundle.
+ *
+ * @param {DeviceFirmwareBundle} bundle The bundle with the device to perform
+ *      the erase operation on.
+ * @param {Number} startAddress The address to start erasing flash pages on.
+ * @param {Number} numPages The number of pages to erase;
+ * @param {Number} key Permissions key for that range.
+ * @return {q.promise} Promise that resolves to the provided bundle after the
+ *      erase is complete.
+**/
+exports.eraseFlash = function(device, startAddress, numPages, key) {
+    var deferred = q.defer();
+
+    var bundle = {};
+    bundle.getDevice = function() {
+        return device;
+    };
+
+    var pages = range(numPages);
+    async.eachSeries(
+        pages,
+        function (page, callback) {
+            device.writeMany(
+                [driver_const.T7_MA_EXF_KEY, driver_const.T7_MA_EXF_ERASE],
+                [key, startAddress + page * driver_const.T7_FLASH_PAGE_SIZE],
+                function (err) { callback(err); },
+                function () { callback(null); }
+            );
+        },
+        function (err) {
+            if (err) {
+                safelyReject(deferred, err);
+            } else {
+                deferred.resolve(bundle);
+            }
+        }
+    );
+
+    return deferred.promise;
+};

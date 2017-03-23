@@ -3,9 +3,14 @@ var q = require('q');
 var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');
 var qExec = utils.qExec;
+var ljm_ffi = require('ljm-ffi');
+var ljm = ljm_ffi.load();
+var ljmb = require('ljswitchboard-modbus_map');
+var modbus_map = ljmb.getConstants();
 
 
 var device;
+var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
@@ -32,8 +37,8 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t7_check_calibration_test ****');
-		console.log('**** Please connect 1x T7 via USB ****');
+		console.log('**** t4_recovery_fw_test ****');
+		console.log('**** Please connect 1x T4 via USB ****');
 		try {
 			device = new device_curator.device();
 		} catch(err) {
@@ -41,9 +46,13 @@ var device_tests = {
 		}
 		test.done();
 	},
+	'close all open devices': function(test) {
+		ljm.LJM_CloseAll();
+		test.done();
+	},
 	'openDevice': function(test) {
 		var td = {
-			'dt': 'LJM_dtT7',
+			'dt': 'LJM_dtT4',
 			'ct': 'LJM_ctUSB',
 			'id': 'LJM_idANY'
 		};
@@ -52,17 +61,23 @@ var device_tests = {
 		.then(function(res) {
 			if(DEBUG_TEST) {
 				console.log(
-					"  - Opened T7:",
+					"  - Opened T4:",
 					res.productType,
 					res.connectionTypeName,
 					res.serialNumber
 				);
 			}
+			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
 			test.done();
 		}, function(err) {
 			console.log('Failed to open device', err);
+			var info = modbus_map.getErrorInfo(err);
+			console.log('Error Code', err);
+			console.log('Error Name', info.string);
+			console.log('Error Description', info.description);
 			performTests = false;
+			device.destroy();
 			test.done();
 		});
 	},
@@ -71,26 +86,36 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.ok(res.calibrationStatus.overall, 'Device Not Calibrated');
-			test.strictEqual(res.calibrationStatus.message, 'Device Calibration is Good');
-			test.strictEqual(res.calibrationStatus.shortMessage, 'Good');
+			test.strictEqual(res.deviceType, 4);
+			test.strictEqual(res.deviceTypeString, 'LJM_dtT4');
 			test.done();
 		});
 	},
-	'check t7 calibration': function(test) {
-		device.getCalibrationStatus()
-		.then(function(calStatus) {
-			console.log('  - Cal Status:'.green, calStatus);
-			var keys = Object.keys(calStatus);
-			keys.forEach(function(key) {
-				test.ok(calStatus[key], 'T7 Cal Check Failed: ' + key.toString());
-			});
+	'Test T4 Func: getRecoveryFirmwareVersion': function(test) {
+		device.getRecoveryFirmwareVersion()
+		.then(function(res) {
+			console.log('getRecoveryFirmwareVersion res:', res);
 			test.done();
-		}, function(err) {
-			console.log('Error', err);
-			test.ok(false, 'Failed to get the devices calibration status: ' + err.toString());
+		});
+	},
+	'Test T4 Func: getPrimaryFirmwareVersion': function(test) {
+		device.getPrimaryFirmwareVersion()
+		.then(function(res) {
+			console.log('getPrimaryFirmwareVersion res:', res);
+			test.done();
+		});
+	},
+	'Test T4 Func: getInternalFWVersion': function(test) {
+		device.getInternalFWVersion()
+		.then(function(res) {
+			console.log('getInternalFWVersion res:', res);
+			test.done();
+		});
+	},
+	'Test T4 Func: getCalibrationStatus': function(test) {
+		device.getCalibrationStatus()
+		.then(function(res) {
+			console.log('getCalibrationStatus res:', res);
 			test.done();
 		});
 	},

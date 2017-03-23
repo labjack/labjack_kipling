@@ -44,6 +44,7 @@ var lua_script_operations = require('./lua_script_operations');
 var device_value_checker = require('./device_value_checker');
 var file_system_operations = require('./file_system_operations');
 var manufacturing_info_operations = require('./manufacturing_info_operations');
+var startup_config_operations = require('./startup_config_operations');
 var dashboard_operations = require('./dashboard/dashboard_operations');
 
 var device_events = driver_const.device_curator_constants;
@@ -1957,7 +1958,7 @@ function device(useMockDevice) {
 
 		return shouldRetry;
 	};
-	this.retryFlashError = function(cmdType, arg0, arg1, arg2, arg3, arg4) {
+	this.retryFlashError = function(cmdType, arg0, arg1, arg2, arg3, arg4, arg5) {
 		var rqControlDeferred = q.defer();
 		var device = self;
 		var numRetries = 0;
@@ -1975,6 +1976,8 @@ function device(useMockDevice) {
 			'qReadUINT64':'readUINT64',
 			'readFlash':'internalReadFlash',
 			'qReadArray': 'readArray',
+			'writeFlash':'internalWriteFlash',
+			'eraseFlash':'internalEraseFlash',
 			// 'updateFirmware': 'internalUpdateFirmware'
 		}[cmdType];
 		var errType = {
@@ -1986,6 +1989,8 @@ function device(useMockDevice) {
 			'qReadUINT64':'value',
 			'readFlash':'value',
 			'qReadArray': 'object',
+			'writeFlash':'value',
+			'eraseFlash':'value',
 			// 'updateFirmware': 'value'
 		}[cmdType];
 		var supportedFunctions = [
@@ -1997,13 +2002,15 @@ function device(useMockDevice) {
 			'qReadUINT64',
 			'readFlash',
 			'qReadArray',
+			'writeFlash',
+			'eraseFlash',
 			// 'updateFirmware'
 		];
 
 		var control = function() {
 			// console.log('in dRead.read');
 			var ioDeferred = q.defer();
-			device[type](arg0,arg1,arg2,arg3)
+			device[type](arg0,arg1,arg2,arg3, arg4)
 			.then(function(result){
 				// console.log('Read Succeded',result);
 				ioDeferred.resolve({isErr: false, val:result});
@@ -2018,7 +2025,7 @@ function device(useMockDevice) {
 			var innerControl = function() {
 				// console.log('in dRead.read');
 				var innerIODeferred = q.defer();
-				device[type](arg0,arg1,arg2,arg3)
+				device[type](arg0,arg1,arg2,arg3,arg4)
 				.then(function(result){
 					innerIODeferred.resolve({isErr: false, val:result});
 				}, function(err) {
@@ -2047,9 +2054,9 @@ function device(useMockDevice) {
 				return timerDeferred.promise;
 			};
 			// console.log('in delayAndRead');
-			if(arg4) {
+			if(arg5) {
 				console.log('Attempting to Recover from 2358 Error');
-				console.log('Function Arguments',type,arg0,arg1,arg2,arg3);
+				console.log('Function Arguments',type,arg0,arg1,arg2,arg3,arg4);
 			}
 			qDelay()
 			.then(innerControl,qDelayErr)
@@ -2262,11 +2269,53 @@ function device(useMockDevice) {
 			return defered.promise;
 		}
 	};
+	this.writeFlash = function(startAddress, length, size, key, data) {
+		return self.retryFlashError('writeFlash', startAddress, length, size, key, data);
+	};
+	this.internalWriteFlash = function(startAddress, length, size, key, data) {
+		var dt = self.savedAttributes.deviceType;
+		if(dt === driver_const.LJM_DT_T7) {
+			return lj_t7_flash_operations.writeFlash(ljmDevice, startAddress, length, size, key, data);
+		} else if(dt === driver_const.LJM_DT_T4) {
+			return lj_t7_flash_operations.writeFlash(ljmDevice, startAddress, length, size, key, data);
+		} else if(dt === driver_const.LJM_DT_DIGIT) {
+			var digitDefered = q.defer();
+			digitDefered.resolve();
+			return digitDefered.promise;
+		} else {
+			var defered = q.defer();
+			defered.resolve();
+			return defered.promise;
+		}
+	};
+	this.eraseFlash = function(startAddress, numPages, key) {
+		return self.retryFlashError('eraseFlash', startAddress, numPages, key);
+	};
+	this.internalEraseFlash = function(startAddress, numPages, key) {
+		var dt = self.savedAttributes.deviceType;
+		if(dt === driver_const.LJM_DT_T7) {
+			return lj_t7_flash_operations.eraseFlash(ljmDevice, startAddress, numPages, key);
+		} else if(dt === driver_const.LJM_DT_T4) {
+			return lj_t7_flash_operations.eraseFlash(ljmDevice, startAddress, numPages, key);
+		} else if(dt === driver_const.LJM_DT_DIGIT) {
+			var digitDefered = q.defer();
+			digitDefered.resolve();
+			return digitDefered.promise;
+		} else {
+			var defered = q.defer();
+			defered.resolve();
+			return defered.promise;
+		}
+	};
+
 	this.getRecoveryFirmwareVersion = function() {
 		return lj_t7_get_flash_fw_versions.getRecoveryFWVersion(self);
 	};
 	this.getPrimaryFirmwareVersion = function() {
 		return lj_t7_get_flash_fw_versions.getPrimaryFWVersion(self);
+	};
+	this.getInternalFWVersion = function() {
+		return lj_t7_get_flash_fw_versions.getInternalFWVersion(self);
 	};
 	this.getCalibrationStatus = function() {
 		var dt = self.savedAttributes.deviceType;
@@ -2280,6 +2329,8 @@ function device(useMockDevice) {
 			return defered.promise;
 		} else {
 			if(dt === 7) {
+				return lj_t7_cal_operations.getDeviceCalibrationStatus(self);
+			} else if(dt === 4) {
 				return lj_t7_cal_operations.getDeviceCalibrationStatus(self);
 			} else {
 				defered.resolve({'overall': false});
@@ -2325,6 +2376,15 @@ function device(useMockDevice) {
 	var manufacturingInfoKeys = Object.keys(manufacturingInfoOperations);
 	for(i = 0; i < manufacturingInfoKeys.length; i++) {
 		this[manufacturingInfoKeys[i]] = manufacturingInfoOperations[manufacturingInfoKeys[i]];
+	}
+
+	/**
+	 * Loading of Start-up configuration functions:
+	**/
+	var startupConfigOperations = new startup_config_operations.get(this);
+	var startupConfigKeys = Object.keys(startupConfigOperations);
+	for(i = 0; i < startupConfigKeys.length; i++) {
+		this[startupConfigKeys[i]] = startupConfigOperations[startupConfigKeys[i]];
 	}
 
 	/**

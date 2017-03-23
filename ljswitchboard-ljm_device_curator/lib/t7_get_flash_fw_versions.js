@@ -59,6 +59,7 @@ function getRecoveryFWVersion(device) {
     ).then(function(data) {
     	// Parse the data.
     	var info = parseData(data.results);
+    	// console.log('In t7_get_flash_fw_versions.getRecoveryFWVersion', info);
     	//Resolve to the firmware version
     	defered.resolve(parseFloat(info.containedVersion));
     }, function(err) {
@@ -84,7 +85,7 @@ function getPrimaryFWVersion(device) {
     ).then(function(data) {
     	// Parse the data.
     	var info = parseData(data.results);
-
+    	// console.log('In t7_get_flash_fw_versions.getPrimaryFWVersion', info);
     	//Resolve to the firmware version
     	defered.resolve(parseFloat(info.containedVersion));
     }, function(err) {
@@ -97,6 +98,32 @@ function getPrimaryFWVersion(device) {
 
 	return defered.promise;
 }
+function getInternalFWVersion(device) {
+	var defered = q.defer();
+    var imgHeaderSize = driver_const.T7_IMG_HEADER_LENGTH;
+
+    device.readFlash(
+        // driver_const.T7_EFAdd_EmerFirmwareImgInfo,
+        // driver_const.T7_EFAdd_IntFirmwareImgInfo,
+        driver_const.T7_EFAdd_IntFirmwareImgInfo,
+        imgHeaderSize/4
+    ).then(function(data) {
+    	// Parse the data.
+    	var info = parseData(data.results);
+    	// console.log('In t7_get_flash_fw_versions.getInternalFWVersion', info);
+    	//Resolve to the firmware version
+    	defered.resolve(parseFloat(info.containedVersion));
+    }, function(err) {
+    	// report fw version 0 when there is an error.
+    	defered.resolve(0.0000);
+    }).catch(function(err) {
+    	console.error('t7GetFlashFWVersions: getInternalFWVersion', err);
+    	defered.reject(err);
+    });
+
+	return defered.promise;
+}
 
 exports.getRecoveryFWVersion = getRecoveryFWVersion;
 exports.getPrimaryFWVersion = getPrimaryFWVersion;
+exports.getInternalFWVersion = getInternalFWVersion;

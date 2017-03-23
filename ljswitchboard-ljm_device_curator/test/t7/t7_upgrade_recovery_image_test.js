@@ -95,7 +95,7 @@ var device_tests = {
 		});
 	},
 	'upgradeFirmware': function(test) {
-		var fwVersionNum = 0.6604;
+		var fwVersionNum = 0.6606;
 		var fwURL = fws[fwVersionNum.toFixed(4)];
 		console.log('  - fwURL:', fwURL);
 		var lastPercent = 0;

@@ -37,7 +37,7 @@ var deviceSerials = [];
 
 function createDeviceUpdater(test) {
 	var fwVersionNum = 1.0188;
-	fwVersionNum = 1.0216;
+	fwVersionNum = 1.0218;
 	this.performDeviceUpdate = function(device, upgradeIsFinished) {
 		function pInfo() {
 			var dataToPrint = [
@@ -150,9 +150,9 @@ var device_tests = {
 		console.log('**** mult_upgrade_primary_firmware ****');
 		test.done();
 	},
-	'list all digits...': function(test) {
+	'list all devices...': function(test) {
 		var foundDevices = driver.listAllSync('LJM_dtT7', 'LJM_ctUSB');
-		console.log('We found digits!', foundDevices.length);
+		console.log('We found devices!', foundDevices.length);
 		deviceSerials = foundDevices.map(function(foundDevice) {
 			return foundDevice.serialNumber;
 		});
