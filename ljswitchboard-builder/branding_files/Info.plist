@@ -7,21 +7,21 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>nwjs</string>
+	<string>Kipling 3</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleTypeIconFile</key>
 			<string>nw.icns</string>
 			<key>CFBundleTypeName</key>
-			<string>nwjs App</string>
+			<string>Kipling 3 App</string>
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>LSHandlerRank</key>
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>io.nwjs.nw.app</string>
+				<string>com.labjack.kipling.app</string>
 			</array>
 		</dict>
 		<dict>
@@ -42,17 +42,17 @@
 	<key>CFBundleIconFile</key>
 	<string>Kipling3.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>io.nwjs.nw</string>
+	<string>com.labjack.kipling</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Kipling</string>
+	<string>Kipling 3</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>3.1.0</string>
+	<string>3.1.5</string>
 	<key>CFBundleVersion</key>
-	<string>3.1.0</string>
+	<string>3.1.5</string>
 	<key>DTSDKBuild</key>
 	<string>13F34</string>
 	<key>DTSDKName</key>
@@ -79,23 +79,23 @@
 				<string>com.pkware.zip-archive</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>nwjs App</string>
+			<string>Kipling 3 App</string>
 			<key>UTTypeIconFile</key>
 			<string>nw.icns</string>
 			<key>UTTypeIdentifier</key>
-			<string>io.nwjs.nw.app</string>
+			<string>com.labjack.kipling.app</string>
 			<key>UTTypeReferenceURL</key>
 			<string>https://github.com/rogerwang/node-webkit/wiki/How-to-package-and-distribute-your-apps</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>com.apple.ostype</key>
-				<string>nwjs</string>
+				<string>Kipling 3</string>
 				<key>public.filename-extension</key>
 				<array>
 					<string>nw</string>
 				</array>
 				<key>public.mime-type</key>
-				<string>application/x-nwjs-app</string>
+				<string>application/kipling-3-app</string>
 			</dict>
 		</dict>
 	</array>

@@ -175,15 +175,62 @@ var brandingOperationsMap = {
 };
 
 
-var darwinBrandingOps = [{
+var darwinEHHelperName = 'Info-nwjs-helper-EH.plist';
+var darwinNPHelperName = 'Info-nwjs-helper-NP.plist';
+var darwinBaseHelperName = 'Info-nwjs-helper.plist';
+var darwinEHHelperBasePath = 'nwjs.app/Contents/Frameworks/nwjs Helper EH.app/Contents';
+var darwinNPHelperBasePath = 'nwjs.app/Contents/Frameworks/nwjs Helper NP.app/Contents';
+var darwinBaseHelperBasePath = 'nwjs.app/Contents/Frameworks/nwjs Helper.app/Contents';
+var darwinEHHelperPath = path.join(darwinEHHelperBasePath, darwinEHHelperName);
+var darwinNPHelperPath = path.join(darwinNPHelperBasePath, darwinNPHelperName);
+var darwinBaseHelperPath = path.join(darwinBaseHelperBasePath, darwinBaseHelperName);
+var darwinEHHelperRenameToPath = path.join(darwinEHHelperBasePath, 'Info.plist');
+var darwinNPHelperRenameToPath = path.join(darwinNPHelperBasePath, 'Info.plist');
+var darwinBaseHelperRenameToPath = path.join(darwinBaseHelperBasePath, 'Info.plist');
+
+
+var darwinBrandingOps = [
+{
 	'operation': 'copy',
 	'from': 'Kipling3.icns',
 	'to': 'nwjs.app/Contents/Resources',
-}, {
+},
+{
 	'operation': 'copy',
 	'from': 'Info.plist',
 	'to': 'nwjs.app/Contents',
-}, {
+},
+{
+	'operation': 'copy',
+	'from': darwinEHHelperName,
+	'to': darwinEHHelperBasePath,
+},
+{
+	'operation': 'copy',
+	'from': darwinNPHelperName,
+	'to': darwinNPHelperBasePath,
+},
+{
+	'operation': 'copy',
+	'from': darwinBaseHelperName,
+	'to': darwinBaseHelperBasePath,
+},
+{
+	'operation': 'rename',
+	'from': darwinEHHelperPath,
+	'to': darwinEHHelperRenameToPath,
+},
+{
+	'operation': 'rename',
+	'from': darwinNPHelperPath,
+	'to': darwinNPHelperRenameToPath,
+},
+{
+	'operation': 'rename',
+	'from': darwinBaseHelperPath,
+	'to': darwinBaseHelperRenameToPath,
+},
+{
 	'operation': 'rename',
 	'from': 'nwjs.app',
 	'to': desiredProjectName + '.app',
