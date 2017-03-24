@@ -120,11 +120,11 @@ this.test_device_selector = {
 	'check displayed scan results': function(test) {
 		// Verify there being two found device types
 		var deviceTypes = $('.device-type');
-		test.strictEqual(deviceTypes.length, 2, 'Unexpected number of device types');
+		test.strictEqual(deviceTypes.length, 4, 'Unexpected number of device types');
 
 		// Verify that there were 3 found devices
 		var devices = $('.device');
-		test.strictEqual(devices.length, 3, 'Unexpected number of devices');
+		test.strictEqual(devices.length, 5, 'Unexpected number of devices');
 
 		// Verify that there was 1 found digit
 		var digits = $('.DEVICE_TYPE_Digit .device');
@@ -132,7 +132,15 @@ this.test_device_selector = {
 
 		// Verify that there were 2 found T7s
 		var t7s = $('.DEVICE_TYPE_T7 .device');
-		test.strictEqual(t7s.length, 2, 'Unexpected number of T7\'s found');
+		test.strictEqual(t7s.length, 2, 'Unexpected number of T7s found');
+
+		// Verify that there was 1 found T4
+		var t4s = $('.DEVICE_TYPE_T4 .device');
+		test.strictEqual(t4s.length, 1, 'Unexpected number of T4s found');
+
+		// Verify that there was 1 found T4
+		var t5s = $('.DEVICE_TYPE_T5 .device');
+		test.strictEqual(t5s.length, 1, 'Unexpected number of T5s found');
 
 		test.done();
 	},

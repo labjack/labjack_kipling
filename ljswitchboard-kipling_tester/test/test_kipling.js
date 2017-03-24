@@ -38,9 +38,9 @@ this.test_kipling = {
 
 			window_manager = global.require('ljswitchboard-window_manager');
 			var loadedEvent = window_manager.eventList.LOADED_WINDOW;
-			window_manager.on(loadedEvent, function(data) {
-				console.log('Test Detected Load Event', data);
-			});
+			// window_manager.on(loadedEvent, function(data) {
+			// 	console.log('Test Detected Load Event', data);
+			// });
 
 			var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;
 			testerWin = managedTesterWindow.win;

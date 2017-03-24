@@ -33,6 +33,9 @@ var testFiles = [
 	// 'mock_module_tests/mock_register_matrix.js',
 	// 'mock_module_tests/mock_simple_logger.js',
 
+	/* T4 Mock Tests */
+	
+
 	// Execute Mock-Settings test.
 	// 'mock_module_tests/settings.js',
 	
@@ -40,7 +43,7 @@ var testFiles = [
 	// 'mock_module_tests/mock_file_browser.js',
 
 	// Execute Live-Device tests
-	'module_tests/test_device_info.js',
+	'module_tests/test_device_info.js', //Perform a live-device scan and select a USB-T7
 	// 'module_tests/test_device_updater.js',
 
 	// 'mock_module_tests/mock_lua_script_debugger.js',

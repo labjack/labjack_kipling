@@ -40,6 +40,18 @@ var mockDevices = [{
 		'POWER_LED': 1,
 	},
 }, {
+	'deviceType': 'LJM_dtT4',
+	'connectionType': 'LJM_ctUSB',
+	'serialNumber': 44001000,
+	'deviceConfig': {
+	},
+}, {
+	'deviceType': 'LJM_dtT5',
+	'connectionType': 'LJM_ctUSB',
+	'serialNumber': 45001000,
+	'deviceConfig': {
+	},
+}, {
 	'deviceType': 'LJM_dtDIGIT',
 	'connectionType': 'LJM_ctUSB'
 }];
