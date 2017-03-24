@@ -157,7 +157,8 @@ var filesToDelete = {
 					'filesToDelete': [],
 					'foldersToDelete': [],
 					'lodash': {
-						'filesToSave': ['package.json', 'index.js'],
+						'filesToSave': ['package.json', 'index.js', 'lodash.js'],
+						'foldersToSave': ['lib', 'node_modules'],
 					}
 				}
 			},
