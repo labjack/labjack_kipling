@@ -43,6 +43,7 @@
     "process_manager": "0.0.x",
     "labjack-nodejs": "0.0.x",
     "ljswitchboard-ljm_device_curator": "0.0.x",
+    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master",
     "ljswitchboard-ljm_driver_checker": "0.0.x",
     "ljswitchboard-ljm_driver_constants": "*",
     "ljswitchboard-ljm_special_addresses": "1.x.x",

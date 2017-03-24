@@ -18,7 +18,7 @@ var TEST_SINGLE_DEVICE_CONTROLLER = false;			// incomplete
 var TEST_DEVICE_SCANNER = false;					// Passes but outputs a lot of text.
 var TEST_MOCK_DEVICE_SCANNER = false;
 var TEST_LIVE_DEVICE_SCANNER = false;
-var TEST_USB_ONLY_DEVICE_SCANNER = true;
+var TEST_USB_ONLY_DEVICE_SCANNER = false;
 
 var TEST_DEVICE_CONTROLLER = false;					// incomplete
 var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing
@@ -34,6 +34,8 @@ var MOCK_DEVICE_SPEED_TEST = false;
 var T7_DEVICE_SPEED_TEST = false;
 
 var TEST_SPECIAL_ADDRESSES_INTERFACE = false;
+
+var TEST_DEVICE_DASHBOARD_COMMANDS = true;
 
 if(ENABLE_BASIC_TEST) {
 	var basic_test = require('./basic_test');
@@ -120,4 +122,9 @@ if(T7_DEVICE_SPEED_TEST) {
 if(TEST_SPECIAL_ADDRESSES_INTERFACE) {
 	var ljm_special_addresses_test = require('./special_addresses/ljm_special_addresses_test');
 	exports.ljm_special_addresses_test = ljm_special_addresses_test.tests;
+}
+
+if(TEST_DEVICE_DASHBOARD_COMMANDS) {
+	var device_dashboard_commands_test = require('./dashboard/dashboard_test.js');
+	exports.device_dashboard_commands_test = device_dashboard_commands_test.tests;
 }

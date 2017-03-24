@@ -101,7 +101,7 @@ exports.tests = {
 	},
 	'open mock device': function(test) {
 		var params = {
-			'deviceType': 'LJM_dtT7',
+			'deviceType': 'LJM_dtT5',
 			'connectionType': 'LJM_ctUSB',
 			'identifier': '470010549',
 			'mockDevice': true
@@ -124,7 +124,7 @@ exports.tests = {
 	},
 	'open mock deviceB': function(test) {
 		var params = {
-			'deviceType': 'LJM_dtT7',
+			'deviceType': 'LJM_dtT5',
 			'connectionType': 'LJM_ctUSB',
 			'identifier': '470010548',
 			'mockDevice': true
@@ -150,7 +150,9 @@ exports.tests = {
 		// mock devices are enabled.
 		device_controller.getDeviceListing()
 		.then(function(res) {
-			test.deepEqual(res,[],'Device listing should be empty, only mockDevices are open');
+			test.strictEqual(res.length,2,'Device listing should not be empty');
+			test.strictEqual(res[0].serialNumber, 470010549, 'Wrong Serial Number');
+			test.strictEqual(res[1].serialNumber, 470010548, 'Wrong Serial Number');
 			test.done();
 		});
 	},
@@ -158,6 +160,7 @@ exports.tests = {
 		// Perform the first query with
 		device_controller.getDeviceListing([{'enableMockDevices': true}])
 		.then(function(res) {
+			console.log('Data', res);
 			test.strictEqual(res.length,2,'Device listing should not be empty');
 			test.strictEqual(res[0].serialNumber, 470010549, 'Wrong Serial Number');
 			test.strictEqual(res[1].serialNumber, 470010548, 'Wrong Serial Number');

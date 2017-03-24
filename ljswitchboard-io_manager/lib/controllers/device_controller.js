@@ -20,6 +20,7 @@ var io_endpoint_key = constants.device_endpoint_key;
 var ljm_device_creator = require('./device_helpers/ljm_device');
 var t7_device_creator = require('./device_helpers/t7_device');
 var t4_device_creator = require('./device_helpers/t4_device');
+var t5_device_creator = require('./device_helpers/t5_device');
 var digit_device_creator = require('./device_helpers/digit_device');
 
 // var ljm_device_controller = require('./device_helpers/ljm_device');
@@ -416,6 +417,8 @@ function createDeviceController(io_interface) {
 			deviceCreator = t7_device_creator;
 		} else if (deviceInfo.deviceType == driver_constants.deviceTypes.t4) {
 			deviceCreator = t4_device_creator;
+		} else if (deviceInfo.deviceType == driver_constants.deviceTypes.t5) {
+			deviceCreator = t5_device_creator;
 		} else if (deviceInfo.deviceType == driver_constants.deviceTypes.digit) {
 			deviceCreator = digit_device_creator;
 		} else {

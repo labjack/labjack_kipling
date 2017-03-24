@@ -625,6 +625,7 @@ function createDeviceKeeper(io_delegator, link) {
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
+	
 	this.enableMockDeviceScanning = function() {
 		var defered = q.defer();
 		deviceScanner.disableDeviceScanning()
