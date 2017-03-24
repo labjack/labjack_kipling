@@ -93,6 +93,7 @@ var ioManagerMonitor = function(data) {
 		errorString += '</p>';
 
 		showCriticalAlert(errorString);
+		console.log('Critical alert errorString', errorString);
 		if(MODULE_LOADER) {
 			MODULE_LOADER.loadModuleByName('crash_module');
 		}
@@ -103,6 +104,17 @@ var ioManagerMonitor = function(data) {
 		console.log('subprocess exited and not restarting');
 	}
 };
+
+// Add monitors to the other error events.
+// io_interface.on(io_interface.eventList.PROCESS_ERROR, getIOManagerListener('PROCESS_ERROR'));
+// io_interface.on(io_interface.eventList.PROCESS_EXIT, getIOManagerListener('PROCESS_EXIT'));
+// io_interface.on(io_interface.eventList.PROCESS_DISCONNECT, getIOManagerListener('PROCESS_DISCONNECT'));
+
+function getIOManagerListener(eventName) {
+	return function ioInterfaceProcessMonitor(data) {
+		console.log('Recieved event from io_interface:', eventName, data, (new Date()).toString());
+	};
+}
 
 
 var startIOManager = function(){
@@ -127,6 +139,11 @@ var startIOManager = function(){
 	// Attach monitor
 	GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
 	io_interface.on(io_interface.eventList.PROCESS_CLOSE, ioManagerMonitor);
+
+	// Add monitors to the other error events.
+	io_interface.on(io_interface.eventList.PROCESS_ERROR, getIOManagerListener('PROCESS_ERROR'));
+	io_interface.on(io_interface.eventList.PROCESS_EXIT, getIOManagerListener('PROCESS_EXIT'));
+	io_interface.on(io_interface.eventList.PROCESS_DISCONNECT, getIOManagerListener('PROCESS_DISCONNECT'));
 
 	io_interface.initialize()
 	.then(saveGlobalSubprocessReference,reportIOInitializationError)
