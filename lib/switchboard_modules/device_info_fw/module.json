@@ -4,10 +4,11 @@
     "version": "0.0.1",
     "framework":"singleDevice",
     "third_party_code":[],
-    "supportedDevices": [{"type":"T7"},{"type":"Digit"}],
+    "supportedDevices": [{"type":"T7"},{"type":"Digit"},{"type":"T4"}],
     "htmlFiles": [
     	"t7_template.html",
     	"digit_template.html",
+        "t4_template.html",
     	"unknown_device_template.html"
     ]
 }

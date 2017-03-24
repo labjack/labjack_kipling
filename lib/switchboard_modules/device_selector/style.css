@@ -18,6 +18,9 @@ div.link a {
 .scan-medium {
 
 }
+.lj-link-holder {
+    cursor: pointer;
+}
 .time-estimate {
     font-size:12px;
 }
@@ -43,6 +46,7 @@ div.link a {
 }
 .device-selector-holder {
     margin-left: 50px;
+    z-index:1;
 }
 .devices-enumeration-scroller {
     width: 100%;
@@ -58,7 +62,7 @@ div.link a {
     text-align: right;
     width: 100px;
     height: 10px;
-    z-index: 99;
+    z-index: 1000;
     position: relative;
     /*top: 50px;*/
     top:12px;
@@ -75,6 +79,8 @@ div.link a {
 }
 .device-pane-popover .label {
     float: right;
+    position: relative;
+    z-index: 1001;
 }
 .device #image {
     vertical-align: top;

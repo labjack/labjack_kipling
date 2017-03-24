@@ -1,4 +1,18 @@
-<p>Please refresh devices, no devices found</p>
+<p><br></p>
+<p>Kipling did not find any devices.  Double check your scanning options (USB, Ethernet, WiFi), make sure the device is powered on, and press the "refresh devices" button to try again.  If your device is still not found, try connecting it to your computer via USB.</p>
+<p>If your device is reporting a yellow or grey Ethernet or WiFi connection button then you are experiencing connection issues.  Please go to our website for device setup and troubleshooting tips:</p>
+<ul>
+    <li><a title="Open the LabJack Setup Ethernet and WiFi for the T7 page in your default browser" id="lj-setup-eth-and-wifi" class="lj-link-holder">Setup Ethernet & WiFi</a></li>
+    <li><a title="Open the LabJack Basic Networking & Troubleshooting page in your default browser" id="lj-basic-network-troubleshooting" class="lj-link-holder">Basic Networking & Troubleshooting</a></li>
+    <li><a title="Open the LabJack Kipling Selecting Devices page in your default browser" id="lj-kipling-selecting-devices" class="lj-link-holder">Kipling Selecting Devices</a></li>
+    <li><a title="Open the LabJack T7 Ethernet Datasheet page in your default browser" id="lj-t7-ethernet-datasheet" class="lj-link-holder">Ethernet Settings</a></li>
+</ul>
+<p>If you are connected over USB and still can't find your device, look at the device's LEDs to make sure they are blinking properly.  You may need to re-set your device using the SPC screw terminal.</p>
+<ul>
+    <li><a title="Open the LabJack T7 LEDs Datasheet page in your default browser" id="lj-t7-leds-datasheet" class="lj-link-holder">T7 LEDs</a></li>
+    <li><a title="Open the LabJack T7 SPC Datasheet page in your default browser" id="lj-t7-spc-datasheet" class="lj-link-holder">T7 SPC Terminal</a></li>
+</ul>
+<p><br></p>
 <p>Kipling supports the following LabJack devices:</p>
 <ul>
 <li>T7/T7-Pro</li>
@@ -11,4 +25,39 @@
 <li>U12</li>
 <li>Digit-TL/Digit-TLH</li>
 </ul>
-</table>
+<p>Navigate to LabJack's <a title="Open the LabJack Applications page in your default browser" id="lj-applications" class="lj-link-holder">LabJack Applications</a> website page to determine the correct application for your device.</p>
+<script>
+    var linksToBindTo = [{
+        'id': '#lj-applications',
+        'url': "https://labjack.com/support/software/applications"
+    }, {
+        'id': '#lj-setup-eth-and-wifi',
+        'url': "https://labjack.com/support/app-notes/wifi-and-ethernet-t7-and-t7-pro"
+    }, {
+        'id': '#lj-basic-network-troubleshooting',
+        'url': "https://labjack.com/support/app-notes/basic-networking-troubleshooting"
+    }, {
+        'id': '#lj-kipling-selecting-devices',
+        'url': "https://labjack.com/support/software/applications/kipling/selecting-devices"
+    }, {
+        'id': '#lj-t7-ethernet-datasheet',
+        'url': "https://labjack.com/support/datasheets/t7/ethernet"
+    }, {
+        'id': '#lj-t7-leds-datasheet',
+        'url': "https://labjack.com/support/datasheets/t7/leds"
+    }, {
+        'id': '#lj-t7-spc-datasheet',
+        'url': "https://labjack.com/support/datasheets/t7/spc"
+    }];
+
+
+    linksToBindTo.forEach(function(linkToBindTo) {
+        $(linkToBindTo.id).unbind();
+        $(linkToBindTo.id).bind('click',function(){
+            if(typeof(gui) === 'undefined') {
+                gui = require('nw.gui');
+            }
+            gui.Shell.openExternal(linkToBindTo.url);
+        });
+    });
+</script>

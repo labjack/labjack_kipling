@@ -31,30 +31,112 @@
             <label class="radio">
                 <input type="radio" name="source" value="current" checked>
                 <span class="metro-radio">Current Device Settings</span>
+                {{#if custom.isMultipleDevices}}
                 <p class="option-description">
-                    Take a snapshot of the settings the device has right now
+                    Instruct the selected devices to take a snapshot of their current settings and use that 
+                    snapshot to re-configure itself after a reboot.
+                </p>
+                {{else}}
+                <p class="option-description">
+                    Instruct the selected device to take a snapshot of the settings the device has right now
                     and use that snapshot of settings after the device is
                     rebooted.
                 </p>
+                {{/if}}
             </label>
         </div>
         <div>
             <label class="radio">
                 <input type="radio" name="source" value="factory">
                 <span class="metro-radio">Factory Defaults</span>
+                {{#if custom.isMultipleDevices}}
+                <p class="option-description">
+                    Configure the selected devices to use factory default settings after they get rebooted.
+                </p>
+                {{else}}
                 <p class="option-description">
                     Configure the device to use the factory settings after the device is rebooted.
                 </p>
+                {{/if}}
             </label>
+        </div>
+        <div>
+            <label class="radio">
+                <input type="radio" name="source" value="factory">
+                <span class="metro-radio">Load From File</span>
+                <p class="option-description">
+                    Configure the selected device(s) power-up defaults from a file.  The power-up defaults 
+                    are used to configure the device after it gets rebooted.
+                </p>
+                <div class="small-section">
+                    <a id="select-file-button" class="btn">Select File</a>
+                    <div class="loading-file-notice" id="loading-file-indicator">Loading...</div>
+                </div>
+                <div class="selected-file-details" style="display:none">
+                    <div class="file-detail">File Name: <span class="selectableText"></span></div>
+                    <div class="file-detail">Intended Product Type: <span class="selectableText"></span></div>
+                    <div class="file-detail">Intended Firmware Version: <span class="selectableText"></span></div>
+                </div>
+            </label>
+        </div>
+        <div class="section">
+            <a id="configure-button" class="btn">Configure Power-up Defaults</a>
+            <div class="saving-notice" id="saving-indicator">Saving...</div>
         </div>
     </div>
 
-    <div class="section">
-        <a id="configure-button" class="btn">Save Defaults</a>
-        <div class="saving-notice" id="saving-indicator">Saving...</div>
+    
+
+    <div class ="section">
+        <h3>Save Power-up Defaults to File</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="4"><p>Select Device(s)</p></th>
+                    <th><p>Output File Name</p></th>
+                <tr>
+            </thead>
+        <tbody>
+            {{#each devices}}
+            <tr>
+                <td>
+                    <label class="checkbox" style="display:block">
+                        <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{serialNumber}}-selector" type="checkbox" value="{{serialNumber}}">
+                        <span class="metro-checkbox" title="Select {{productType}}, {{serialNumber}}"></span>
+                    </label>
+                </td>
+                <td>{{savedAttributes.productType}}</td>
+                <td>{{savedAttributes.serialNumber}}</td>
+                <td>{{savedAttributes.DEVICE_NAME_DEFAULT}}</td>
+                <td>{{savedAttributes.productType}}_{{savedAttributes.serialNumber}}_{{savedAttributes.DEVICE_NAME_DEFAULT}}.json<td>
+                <!--<td><input type="text" id="new-name-input" placeholder="output file name"></td>-->
+            </tr>
+            {{/each}}
+            </tbody>
+        </table>
+        <input type="file" webkitdirectory />
+        <div id="output-directory-display-holder">
+            Device settings will be saved to the following directory:
+            <div id="output-directory-display">
+                <span id="current-directory-display" class="selectableText">C:\\Blabla\bla\bla\{{DEFAULT_OUTPUT_DIRECTORY}}</span>
+                <button id="change-directory-link" class="icon-pencil btn btn-link" title="Edit Output Directory"></button>
+            </div>
+        </div>
+        <div class="section">
+            <a id="save-defaults-button" class="btn">Save Power-up Defaults</a>
+            <div class="saving-to-file-notice" id="saving-to-file-indicator">Saving...</div>
+        </div>
+        
+        <!--{{#if custom.isMultipleDevices}}
+        <p>Please select only 1 device.  Currently {{custom.numDevices}} devices are selected.</p>
+        {{else}}
+        <a id="save-defaults-button" class="btn">Save Power-up Defaults</a>
+        <div class="saving-to-file-notice" id="saving-to-file-indicator">Saving...</div>
+        {{/if}}-->
     </div>
     {{else}}
     <h3>Please slect a device</h3>
     <p>Currently no devices are selected so this module has been disabled. Please Select a device to continue.</p>
     {{/if}}
 </div>
+<pre>{{printContext}}</pre>

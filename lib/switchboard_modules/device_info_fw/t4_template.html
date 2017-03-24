@@ -34,26 +34,6 @@
 				{{ETHERNET_MAC.val}}
 			</span>
 		</div>
-		{{#if HARDWARE_INSTALLED.wifi }}
-		<div class="device-detail">
-			WiFi Mac Address: 
-			<span class="selectableText">
-				{{WIFI_MAC.val}}
-			</span>
-		</div>
-		{{/if}}
-		<div class="device-detail">
-			200 uA Current Source Cal: 
-			<span class="selectableText">
-				{{CURRENT_SOURCE_200UA_CAL_VALUE.val}} uA
-			</span>
-		</div>
-		<div class="device-detail">
-			10 uA Current Source Cal: 
-			<span class="selectableText">
-				{{CURRENT_SOURCE_10UA_CAL_VALUE.val}} uA
-			</span>
-		</div>
 		{{#if calibrationStatus}}
 		<div class="device-detail">
 			Calibration Status: 
@@ -78,14 +58,6 @@
 					{{BOOTLOADER_VERSION}}
 			</span>
 		</div>
-		{{#if HARDWARE_INSTALLED.wifi }}
-		<div id="wifi-firmware-display-holder" class="device-detail selectableText">
-			WiFi Firmware Version: 
-			<span id="bootloader-display" class="">
-				{{WIFI_VERSION}}
-			</span>
-		</div>
-		{{/if}}
 		<div id="recovery-firmware-display-holder" class="device-detail selectableText">
 			Recovery Firmware Version: 
 			<span id="bootloader-display" class="">
@@ -103,87 +75,21 @@
 				{{#if ETHERNET_IP.isReal}}{{ETHERNET_IP.val}}{{else}}Not Connected{{/if}}
 			</span>
 		</div>
-		{{#if HARDWARE_INSTALLED.wifi }}
-		<div class="device-detail selectableText">
-			WiFi IP Address: 
-			<span id="wifi-ip-address" class="">
-				{{#if WIFI_IP.isReal}}{{WIFI_IP.val}}{{else}}Not Connected{{/if}}
-			</span>
-			<div id="wifi_rssi_val" class="wifi-rssi-val">
-				<img id="wifi_rssi_image" class="wifi-rssi-image" src="{{staticFiles}}img/{{WIFI_RSSI.imageName}}.png" title="Signal Strength: {{WIFI_RSSI.str}}">
-			</div>
-		</div>
-		{{/if}}
 		<div class="device-detail selectableText">
 			Device Temperature:
 			<span id="internal-device-temperature" class="">
 				{{TEMPERATURE_DEVICE_K.val}}
 			</span> K
 		</div>
-		
-		<div class="block-separator"/>
-		<div class="pane-popover">
-			Hardware Installed
-		</div>
-		<div id="installed-hardware-overview">
-			<div>
-				<span class="installed-hardware-indicator {{#if HARDWARE_INSTALLED.sdCard }}isa_success icon-checkmark-3{{else}}icon-close isa_error{{/if}}"></span>
-				SD Card {{#if HARDWARE_INSTALLED.sdCard }}Installed{{/if}} {{#unless HARDWARE_INSTALLED.sdCard}}Not Installed{{/unless}}
-			</div>
-			{{#if isPro}}
-			<div>
-				<span class="installed-hardware-indicator {{#if HARDWARE_INSTALLED.highResADC }}isa_success icon-checkmark-3{{else}}icon-close isa_error{{/if}}"></span>
-				High Res ADC {{#if HARDWARE_INSTALLED.highResADC }}Installed{{/if}} {{#unless HARDWARE_INSTALLED.highResADC}}Not Installed{{/unless}}
-			</div>
-			<div>
-				<span class="installed-hardware-indicator {{#if HARDWARE_INSTALLED.rtc }}isa_success icon-checkmark-3{{else}}icon-close isa_error{{/if}}"></span>
-				Real Time Clock {{#if HARDWARE_INSTALLED.rtc }}Installed{{/if}} {{#unless HARDWARE_INSTALLED.rtc}}Not Installed{{/unless}}
-			</div>
-			<div>
-				<span class="installed-hardware-indicator {{#if HARDWARE_INSTALLED.wifi }}isa_success icon-checkmark-3{{else}}icon-close isa_error{{/if}}"></span>
-				WiFi {{#if HARDWARE_INSTALLED.wifi }}Installed{{/if}} {{#unless HARDWARE_INSTALLED.wifi}}Not Installed{{/unless}}
-			</div>
-			{{/if}}
-		</div>
+
 		<div class="block-separator"/>
 		<div class="pane-popover">
 			Enabled Features
 		</div>
 		<div id="power-overview">
-			<div><span class="power-indicator {{#if POWER_ETHERNET.val }}powered{{/if}}"></span> Ethernet {{#if POWER_ETHERNET.val }}Powered{{/if}} {{#unless POWER_ETHERNET.val}}Not Powered{{/unless}}</div>
-			{{#if isPro}}
-			<div><span class="power-indicator {{#if POWER_WIFI.val }}powered{{/if}}"></span> WiFi {{#if POWER_WIFI.val }}Powered{{/if}} {{#unless POWER_WIFI.val}}Not Powered{{/unless}}</div>
-			{{/if}}
-			<div><span class="power-indicator {{#if POWER_AIN.val }}powered{{/if}}"></span> Analog Input Module {{#if POWER_AIN.val }}Powered{{/if}} {{#unless POWER_AIN.val}}Not Powered{{/unless}}</div>
 			<div><span class="power-indicator {{#if WATCHDOG_ENABLE_DEFAULT.val }}powered{{/if}}"></span> Watchdog {{#if WATCHDOG_ENABLE_DEFAULT.val }}Enabled{{/if}} {{#unless WATCHDOG_ENABLE_DEFAULT.val}}Disabled{{/unless}}</div>
 			<div><span class="power-indicator {{#if POWER_LED.val }}powered{{/if}}"></span> Device LED {{#if POWER_LED.val }}Powered{{/if}} {{#unless POWER_LED.val}}Not Powered{{/unless}}</div>
 		</div>
-
-		{{#if HARDWARE_INSTALLED.sdCard }}
-		<div class="block-separator"/>
-		<div class="pane-popover">
-			SD Card Info
-		</div>
-		<div class="device-detail selectableText">
-			Free Space: 
-			<span id="sd-card-free-space" class="">
-
-				{{diskInfo.freeSpace.str}}
-			</span>
-		</div>
-		<div class="device-detail selectableText">
-			Total Size: 
-			<span id="sd-card-total-size" class="">
-				{{diskInfo.totalSize.str}}
-			</span>
-		</div>
-		<div class="device-detail selectableText">
-			File System: 
-			<span id="sd-card-file-system" class="">
-				{{diskInfo.fileSystem}}
-			</span>
-		</div>
-		{{/if}}
 
 
 		<div class="block-separator"/>
@@ -241,7 +147,6 @@
 	<ul>
 		<li><div title="Open the LJLogM application documentation page in your default browser"><a id="lj-link-holder-ljLogMApp" class="lj-link-holder">LJLogM</a>- data logging</div></li>
 		<li><div title="Open the LJStreamM application documentation page in your default browser"><a id="lj-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM</a>- high speed data logging</div></li>
-		<li><div title="Open the MicroSD Card Utility application documentation page in your default browser"><a id="lj-link-holder-microSDApp" class="lj-link-holder">T7 microSD Card Utility</a>- file downloader</div></li>
 	</ul>
 	<h3>Example Code</h3>
 	<ul>
