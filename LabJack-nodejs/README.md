@@ -1,13 +1,13 @@
 LabJack-nodejs
 ==============
-'LabJack-nodejs' makes LabJack's [LJM library](http://labjack.com/ljm) available for node.js.  The library uses [ffi](https://www.npmjs.com/package/ffi) to link to the LabJackLJM.dll or appropriate .dynlib file that must be installed with one of [LabJack's installers](https://labjack.com/support/software/installers/ljm).  Currently, they are available for Windows, Mac OS X, Linux 32-bit & 64-bit, and a few builds for ARMv6 and ARMV7 architectures.
+'LabJack-nodejs' makes LabJack's [LJM library](http://labjack.com/ljm) available for node.js.  The library uses [ffi](https://www.npmjs.com/package/ffi) to link to the appropriate library file (LabJackM.dll, LabJackM.dylib, or LabJackM.so) which must be installed with one of [LabJack's installers](https://labjack.com/support/software/installers/ljm).  Currently, installers are available for Windows, Mac OS X, Linux 32-bit & 64-bit, and a few builds for ARMv6 and ARMV7 architectures.
 
-This library exposes the LJM driver slightly different than our standard [LJM Library](https://labjack.com/support/software/examples/ljm) wrappers because it was created primarily for use in Kipling.  If this library were to be re-written it would be split into two modules, one that directly exposes the LJM Library functions, and another that performs some of the abstractions.  A breif summary of how this library exposes the LJM Library:
+This library exposes the LJM driver slightly different than our standard [LJM Library](https://labjack.com/support/software/examples/ljm) wrappers because it was created primarily for use in [Kipling](https://labjack.com/support/software/applications/kipling).  If this library were to be re-written it would be split into two modules, one that directly exposes the LJM Library functions, and another that performs some of the abstractions.  A brief summary of how this library exposes the LJM Library:
  * Created two different objects, device.js and driver.js, that can be imported individually.
  * Was created to function much like the [LabJack Python driver](http://labjack.com/support/labjackpython) for LabJack UD devices.
  * For more information about what each function does, please look at the LabJackM.h file that can be downloaded & installed from LabJacks [Software & Driver](http://labjack.com/support/software) page.
 
-Currently this wrapper only supports the [T7](http://labjack.com/products/t7), [T7-Pro](http://labjack.com/products/t7), [Digit-TL](http://labjack.com/products/digit), and[Digit-TLH](http://labjack.com/products/digit) LabJack devices. (Which are low cost, high-quality, multifunction USB / Ethernet / 802.11b/g Wifi DAQ devices.)  Devices using the UD library (Windows only) aka U3, U6, and UE9 are not supported.  Additionally, the U12 is not supported.
+Currently this wrapper only supports the [T7](http://labjack.com/products/t7), [T7-Pro](http://labjack.com/products/t7), [Digit-TL](http://labjack.com/products/digit), and [Digit-TLH](http://labjack.com/products/digit) LabJack devices. (Which are low cost, high-quality, multifunction USB / Ethernet / 802.11b/g WiFi DAQ devices.)  Devices using the UD library (Windows only) aka U3, U6, and UE9 are not supported.  Additionally, the U12 is not supported.
 
 Notes:
 ------
@@ -19,7 +19,7 @@ Requirements
 ------------
 
 * LabJack's [LJM Library](https://labjack.com/support/software/installers/ljm).
-* Ability to build native modules, for windows this requires visual studio.
+* Ability to build native modules, for Windows this requires Visual Studio.
 * Look at the [ffi](https://www.npmjs.com/package/ffi) library for more requirements.
 * Look at the [node-gyp installation notes](https://github.com/nodejs/node-gyp#installation) for various requirements.
 * Also look at the [ref](https://www.npmjs.com/package/ref) library as it too is a native module.
@@ -36,10 +36,10 @@ before trying to install LabJack-nodejs.  Once you can do that simply install vi
 $ npm install labjack-nodejs
 ```
 
-Installation notes for windows:
+Installation notes for Windows:
 -------------------------------
 Make sure that [node-gyp is properlly installed](http://stackoverflow.com/questions/21365714/nodejs-error-installing-with-npm).
-Peforming the standard npm install command will fail on windows.  It will hopefully complain about not having proper "TargetFrameworkVersion or PlatformToolset variables not being set.  If this is true, set them:
+Performing the standard npm install command will fail on Windows.  It will hopefully complain about not having proper "TargetFrameworkVersion or PlatformToolset variables not being set.  If this is true, set them:
 "npm install --msvs_version=2012" or 2013.
 
 This hint came from someone building [couchbase](http://www.bitcrunch.de/install-couchbase-node-js-windows-8-machine/)
@@ -97,7 +97,7 @@ you get access to several attributes, the two most important ones are:
 * ljn.driver()
 * ljn.getDriver()
 
-Look at the lib/labjack_nodejs.js file for what gets exported.  There are a few subtile differences between the functions in terms of creating new objects.
+Look at the lib/labjack_nodejs.js file for what gets exported.  There are a few subtle differences between the functions in terms of creating new objects.
 
 In general, LJM functions that require the passing of a device handle are implemented in the device object.  Functions that are device-agnostic are implemented in the driver object.
 
@@ -138,7 +138,7 @@ Special/Streaming
 #### open():
 Uses LJM_Open and LJM_OpenS
 ```javascript
-device.openSync(); //opens the first found labjack device, LJM_OpenS('LJM_dtANY', 'LJM_ctANY', 'LJM_idANY')
+device.openSync(); //opens the first found LabJack device, LJM_OpenS('LJM_dtANY', 'LJM_ctANY', 'LJM_idANY')
 device.openSync('LJM_dtANY', 'LJM_ctANY', 'LJM_idANY'); //Connect to first-found device
 device.openSync('LJM_dtT7', 'LJM_USB', '470010642'); //Connect to T7 w/ serial number 470010642 connected via USB
 device.openSync('LJM_dtT7', 'LJM_ETHERNET', '470010642'); //Connect to T7 w/ serial number 470010642 connected via ETHERNET
