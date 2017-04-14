@@ -88,11 +88,11 @@
     
 
     <div class ="section">
-        <h3>Save Power-up Defaults to File</h3>
+        <h3>Save Power-up Defaults to File-e</h3>
         <table>
             <thead>
                 <tr>
-                    <th colspan="4"><p>Select Device(s)</p></th>
+                    <th colspan="2"><p>Select Device(s)</p></th>
                     <th><p>Output File Name</p></th>
                 <tr>
             </thead>
@@ -105,9 +105,8 @@
                         <span class="metro-checkbox" title="Select {{productType}}, {{serialNumber}}"></span>
                     </label>
                 </td>
-                <td>{{savedAttributes.productType}}</td>
-                <td>{{savedAttributes.serialNumber}}</td>
-                <td>{{savedAttributes.DEVICE_NAME_DEFAULT}}</td>
+                <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
+                <!--<td>{{savedAttributes.DEVICE_NAME_DEFAULT}}</td>-->
                 <td>{{savedAttributes.productType}}_{{savedAttributes.serialNumber}}_{{savedAttributes.DEVICE_NAME_DEFAULT}}.json<td>
                 <!--<td><input type="text" id="new-name-input" placeholder="output file name"></td>-->
             </tr>
