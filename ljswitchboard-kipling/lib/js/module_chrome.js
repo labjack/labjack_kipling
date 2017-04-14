@@ -514,7 +514,14 @@ function createModuleChrome() {
 			self.allowModuleToLoad = false;
 
 			try {
-				if(gui.App.manifest.test) {
+				var clearCaches = false;
+				if(typeof(gui.App.manifest.clearCachesOnModuleLoad) !== "undefined") {
+					clearCaches = clearCaches || gui.App.manifest.clearCachesOnModuleLoad;
+				}
+				if(typeof(gui.App.manifest.test) !== "undefined") {
+					clearCaches = clearCaches || gui.App.manifest.test;
+				}
+				if(clearCaches) {
 					if(CLEAR_CACHES) {
 						console.log('clearing caches');
 						CLEAR_CACHES();
