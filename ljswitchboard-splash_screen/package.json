@@ -81,6 +81,7 @@
 	"enableStartupConfig":false,
 	"buildType": "release",
 	"test": false,
+	"clearCachesOnModuleLoad": true,
 	"testPersistentDataFolderName": "K3_DEV",
 	"performLiveTests": false,
 	"webkit": {
