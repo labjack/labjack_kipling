@@ -1,4 +1,8 @@
 <div class="device-info-div">
+	<img id="device-image" class="product-image" src="{{staticFiles}}/img/devices/{{productType}}.png">
+	<p/>
+	<p class="todo-paragraph">TODO: Select a specific device image for being connected over Ethernet, USB.  Have it detect whether or not the Ethernet cable should be plugged in by determining if the device has an IP address.  The image should switch when a user connects/disconnects their ethernet cable.</p>
+	<h3>Device Overview</h3>
 	<div class="info-section" id="general-section">
 		<div class="pane-popover">
 			General
@@ -132,9 +136,8 @@
 	</div>
 </div>
 <div class="device-links-div">
-	<img id="device-image" class="product-image" src="{{staticFiles}}/img/devices/{{productType}}.png">
-	<p/>
-	<h3>Important Device Links</h3>
+	<h2>{{deviceTypeName}} Support Resources</h2>
+	<h3>Important Device Website Links</h3>
 	<ul>
 		<li><div title="Open the {{deviceTypeName}} product page in your default browser"><a id="lj-link-holder-productPage" class="lj-link-holder">Product Page</a></div></li>
 		<li><div title="Open the {{deviceTypeName}} getting started/quickstart guide in your default browser"><a id="lj-link-holder-gettingStarted" class="lj-link-holder">Getting Started/Quickstart</a></div></li>
@@ -164,6 +167,10 @@
 		<li><div title="Open the modbus map page in your default browser"><a id="lj-link-holder-modbusMap" class="lj-link-holder">LJM Modbus Map</a></div></li>
 		<li><div title="Open the LJM Library Documents page in your default browser"><a id="lj-link-holder-ljmAPIDocs" class="lj-link-holder">LJM Library Docs</a></div></li>
 	</ul>
+	<p>Note 1: Clicking on these links will open up your computer's default web browser and take you to the labjack.com website.<br>
+	Note 2: When running a secondary application (LJLogM/LJStreamM) you may need to disconnect from the device in Kipling so that it can be opened in the secondary application.</br><br>
+	TODO: Add button/config-tool that lets user configure LJLogM/LJStreamM to open the currently connected device.  Consider just opening the file in a user's default text editor and telling them what the file path is.  The tool can automatically search the user's Let the user configure Kipling to remember where each application's default directory is.  You can do this by running a bash command: http://stackoverflow.com/questions/8066679/how-to-do-a-simple-file-search-in-cmd, On Windows: "dir /b/s LJLogM.cfg".	Add a quick-disconnect/re-connect button to the module-header section.  Add an Open-Application button for LJLogM/LJStreamM/T7uSDCardUtility.
+	</p>
 	<script>
 
 		

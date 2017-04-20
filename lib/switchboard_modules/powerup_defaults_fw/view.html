@@ -24,7 +24,7 @@
             </script>
         </div>
     </div>
-    
+    <h2>Configure Device Power-Up Defaults</h2>
     <div class="section">
         <h3>Select Defaults Source</h3>
         <div>
@@ -79,6 +79,30 @@
                 </div>
             </label>
         </div>
+        <h3>Select Devices to Configure</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="padding-right:5px"></th>
+                    <th style="padding-right:20px"><p>Select Device(s)</p></th>
+                    <th><p>Operation to be performed</p></th>
+                <tr>
+            </thead>
+        <tbody>
+            {{#each devices}}
+            <tr>
+                <td>
+                    <label class="checkbox" style="display:block">
+                        <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{serialNumber}}-selector" type="checkbox" value="{{serialNumber}}">
+                        <span class="metro-checkbox" title="Select {{productType}}, {{serialNumber}}"></span>
+                    </label>
+                </td>
+                <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
+                <td hover="Do Nothing.  Configure Current/Factory Defaults/Settings from File as the power-up defaults for the device the next time it starts.">None</td>
+             </tr>
+            {{/each}}
+            </tbody>
+        </table>
         <div class="section">
             <a id="configure-button" class="btn">Configure Power-up Defaults</a>
             <div class="saving-notice" id="saving-indicator">Saving...</div>
@@ -86,13 +110,16 @@
     </div>
 
     
-
+    <h2>Back-up/Download Device Power-Up Defaults</h2>
     <div class ="section">
+        <h3>Select Output Directory</h3>
         <h3>Save Power-up Defaults to File-e</h3>
+        <p>Select which devices Kipling should create back-up power-up configuration files for and configure the directory these files should be placed in.</p>
         <table>
             <thead>
                 <tr>
-                    <th colspan="2"><p>Select Device(s)</p></th>
+                    <th style="padding-right:5px"></th>
+                    <th style="padding-right:20px"><p>Select Device(s)</p></th>
                     <th><p>Output File Name</p></th>
                 <tr>
             </thead>
@@ -113,7 +140,12 @@
             {{/each}}
             </tbody>
         </table>
-        <input type="file" webkitdirectory />
+        <!--<input type="file" webkitdirectory -->
+        <div class="section">
+            <a id="configure-button" class="btn">Browse for Output Directory</a>
+            <div class="saving-notice" id="saving-indicator">Browsing...</div>
+        </div>
+        <p>Select the "Choose File" button below to configure where to save desired files containing T7 flash data pertaining to the device's power-up configurations.</p>
         <div id="output-directory-display-holder">
             Device settings will be saved to the following directory:
             <div id="output-directory-display">

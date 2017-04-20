@@ -117,3 +117,9 @@
 #current-name-display{
     word-wrap:break-word;
 }
+ .todo-paragraph {
+     width: 300px;
+ }
+/*.device-info-div p{
+    width: 300px;
+}*/
