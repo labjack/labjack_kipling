@@ -30,7 +30,16 @@
 #defaults-holder p{
     max-width:800px;
 }
+.primary-step {
+    padding-left:20px;
+}
+.primary-step-content {
+    padding-left:33px;
+}
 .small-section{
     padding-bottom:20px;
     padding-left: 33px;
+}
+.selected-config-file-information {
+    padding-left:33px;
 }
