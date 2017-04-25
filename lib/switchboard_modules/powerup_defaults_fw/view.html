@@ -104,7 +104,7 @@
                     <tr>
                         <td>
                             <label class="checkbox" style="display:block">
-                                <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{serialNumber}}-selector" type="checkbox" value="{{serialNumber}}">
+                                <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{savedAttributes.serialNumber}}-selector" type="checkbox" value="{{savedAttributes.serialNumber}}">
                                 <span class="metro-checkbox" title="Select {{savedAttributes.productType}}, {{savedAttributes.serialNumber}}"></span>
                             </label>
                         </td>
@@ -144,12 +144,12 @@
                     <tr>
                         <td>
                             <label class="checkbox" style="display:block">
-                                <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{serialNumber}}-selector" type="checkbox" value="{{serialNumber}}">
+                                <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{savedAttributes.serialNumber}}-selector" type="checkbox" value="{{savedAttributes.serialNumber}}">
                                 <span class="metro-checkbox" title="Select {{savedAttributes.productType}}, {{savedAttributes.serialNumber}}"></span>
                             </label>
                         </td>
                         <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
-                        <td>{{savedAttributes.productType}}_{{savedAttributes.serialNumber}}_{{savedAttributes.DEVICE_NAME_DEFAULT}}.json<td>
+                        <td>YYYY-MM-DD_{{savedAttributes.productType}}_{{savedAttributes.serialNumber}}_{{savedAttributes.DEVICE_NAME_DEFAULT}}.json<td>
                     </tr>
                     {{/each}}
                     </tbody>
