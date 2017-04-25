@@ -64,7 +64,7 @@
                 </div>
                 <div>
                     <label class="radio">
-                        <input type="radio" name="source" value="factory">
+                        <input type="radio" name="source" value="file">
                         <span class="metro-radio">Load From File</span>
                         <p class="option-description">
                             Configure the selected device(s) power-up defaults from a file.  The power-up defaults 
@@ -91,7 +91,7 @@
         <div class="primary-step">
             <h3>2. Select Which Devices to Configure</h3>
             <div class="primary-step-content">
-                <table class="primary-step-content">
+                <table  id="configure-defaults-device-selection-table" class="primary-step-content">
                     <thead>
                         <tr>
                             <th style="padding-right:5px"></th>
@@ -105,7 +105,7 @@
                         <td>
                             <label class="checkbox" style="display:block">
                                 <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{serialNumber}}-selector" type="checkbox" value="{{serialNumber}}">
-                                <span class="metro-checkbox" title="Select {{productType}}, {{serialNumber}}"></span>
+                                <span class="metro-checkbox" title="Select {{savedAttributes.productType}}, {{savedAttributes.serialNumber}}"></span>
                             </label>
                         </td>
                         <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
@@ -131,7 +131,7 @@
         <div class="primary-step">
             <h3>1. Select which devices to back-up</h3>
             <div class="primary-step-content">
-                <table>
+                <table id="save-defaults-device-selection-table">
                     <thead>
                         <tr>
                             <th style="padding-right:5px"></th>
@@ -145,7 +145,7 @@
                         <td>
                             <label class="checkbox" style="display:block">
                                 <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{serialNumber}}-selector" type="checkbox" value="{{serialNumber}}">
-                                <span class="metro-checkbox" title="Select {{productType}}, {{serialNumber}}"></span>
+                                <span class="metro-checkbox" title="Select {{savedAttributes.productType}}, {{savedAttributes.serialNumber}}"></span>
                             </label>
                         </td>
                         <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
@@ -162,7 +162,6 @@
                 <div id="output-directory-display-holder">
                     <span>Selected output folder path:</span>
                     <div id="output-directory-display">
-                                </div>
                         <span id="current-directory-display" class="selectableText">{{#if json.data_init.selected_output_directory}}{{json.data_init.selected_output_directory}}{{else}}No folder Selected. Please browse for an output directory.{{/if}}</span>
                     </div>
                 </div>
@@ -175,7 +174,7 @@
             <h3>3. Save Power-up Defaults</h3>
             <div class="section primary-step-content">
                 <a id="save-defaults-button" class="btn">Save Power-up Defaults</a>
-                <div class="saving-to-file-notice" id="saving-to-file-indicator">Saving...</div>
+                <div class="backup-notice" id="saving-to-file-indicator">Saving...</div>
             </div>
         </div>
         

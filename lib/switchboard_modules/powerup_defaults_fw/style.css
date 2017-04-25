@@ -17,6 +17,10 @@
     display: none;
 }
 
+.backup-notice
+{
+    display: none;
+}
 .flash-notice
 {
     margin: 5px;
