@@ -72,7 +72,7 @@
                         </p>
                         <div class="selected-config-file-information shifted-element">
                             <div class="no-config-file-selected">
-                                <div>File Path: <span>{{#if json.data_init.selected_config_file_directory}}{{json.data_init.selected_config_file_directory}}{{else}}No File Selected. To load settings from a file, please browse for a file.{{/if}}</span> 
+                                <div>File Path: <span>{{#if custom.selected_config_file_directory}}{{custom.selected_config_file_directory}}{{else}}No File Selected. To load settings from a file, please browse for a file.{{/if}}</span> 
                                 </div>
                             </div>
                             <div class="selected-file-details" style="display:none">
@@ -96,6 +96,7 @@
                         <tr>
                             <th style="padding-right:5px"></th>
                             <th style="padding-right:20px"><p>Select Device(s)</p></th>
+                            <th style="padding-right:20px"><p>FW Version</p></th>
                             <th><p>Operation to be performed</p></th>
                         <tr>
                     </thead>
@@ -109,6 +110,7 @@
                             </label>
                         </td>
                         <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
+                        <td>{{savedAttributes.FIRMWARE_VERSION}}</td>
                         <td hover="Do Nothing.  Configure Current/Factory Defaults/Settings from File as the power-up defaults for the device the next time it starts.">None</td>
                     </tr>
                     {{/each}}
@@ -144,7 +146,7 @@
                     <tr>
                         <td>
                             <label class="checkbox" style="display:block">
-                                <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{savedAttributes.serialNumber}}-selector" type="checkbox" value="{{savedAttributes.serialNumber}}">
+                                <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{savedAttributes.serialNumber}}-selector" type="checkbox" value="{{savedAttributes.serialNumber}}" checked>
                                 <span class="metro-checkbox" title="Select {{savedAttributes.productType}}, {{savedAttributes.serialNumber}}"></span>
                             </label>
                         </td>
@@ -162,7 +164,7 @@
                 <div id="output-directory-display-holder">
                     <span>Selected output folder path:</span>
                     <div id="output-directory-display">
-                        <span id="current-directory-display" class="selectableText">{{#if json.data_init.selected_output_directory}}{{json.data_init.selected_output_directory}}{{else}}No folder Selected. Please browse for an output directory.{{/if}}</span>
+                        <span id="current-directory-display" class="selectableText">{{#if custom.selected_output_directory}}{{custom.selected_output_directory}}{{else}}No folder Selected. Please browse for an output directory.{{/if}}</span>
                     </div>
                 </div>
                 <div class="section">
