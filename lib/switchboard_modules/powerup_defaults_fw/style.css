@@ -1,7 +1,7 @@
 .section
 {
-    margin-top: 10px;
-    margin-bottom: 40px;
+    /*margin-top: 10px;*/
+    margin-bottom: 10px;
 }
 
 .option-description
@@ -10,6 +10,10 @@
     color: #A0A0A0;
     margin-bottom: 10px;
     margin-left: 36px;
+}
+.file-info-text {
+    font-size: 13px;
+    color: #A0A0A0;
 }
 
 .saving-notice
@@ -41,9 +45,24 @@
     padding-left:33px;
 }
 .small-section{
-    padding-bottom:20px;
+    /*padding-bottom:20px;*/
     padding-left: 33px;
 }
 .selected-config-file-information {
     padding-left:33px;
+}
+
+#defaults-holder .metro-checkbox::after {
+  top: 0px;
+  left: 0px;
+  width: 22px;
+  height: 22px;
+  padding-left: 2px;
+  font-size: 14px;
+}
+#defaults-holder table th p {
+    margin:0px;
+}
+#defaults-holder table td p {
+    margin:0px;
 }

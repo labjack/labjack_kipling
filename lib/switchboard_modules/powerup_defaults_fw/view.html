@@ -24,11 +24,18 @@
             </script>
         </div>
     </div>
+    
+    <ul class="nav nav-tabs" id="myTab">
+        <li class="active"><a href="#configure_defaults_tab">Configure Defaults</a></li>
+        <li><a href="#save_defaults_tab">Save Defaults</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="configure_defaults_tab">
     <h2>Configure Device Power-Up Defaults</h2>
     <div class="section">
         <div class="primary-step">
             <h3>1. Select Defaults Source</h3>
-            <div class="primary-step-content">
+            <div id="select-defaults-source" class="primary-step-content">
                 <div>
                     <label class="radio">
                         <input type="radio" name="source" value="current" checked>
@@ -71,14 +78,15 @@
                             are used to configure the device after it gets rebooted.
                         </p>
                         <div class="selected-config-file-information shifted-element">
-                            <div class="no-config-file-selected">
-                                <div>File Path: <span>{{#if custom.selected_config_file_directory}}{{custom.selected_config_file_directory}}{{else}}No File Selected. To load settings from a file, please browse for a file.{{/if}}</span> 
+                            <!--<span>File Info:</span>-->
+                            <div class="no-config-file-selected file-info-text">
+                                <div><span>No File Selected. To load settings from a file, please browse for a file.</span> 
                                 </div>
                             </div>
-                            <div class="selected-file-details" style="display:none">
-                                <div class="file-detail">File Name: <span class="selectableText"></span></div>
-                                <div class="file-detail">Intended Product Type: <span class="selectableText"></span></div>
-                                <div class="file-detail">Intended Firmware Version: <span class="selectableText"></span></div>
+                            <div class="selected-file-details file-info-text" style="display:none">
+                                <div class="file-name file-detail">File Name: <span class="selectableText"></span></div>
+                                <div class="product-name file-detail">Intended Product Name: <span class="selectableText"></span></div>
+                                <div class="fw-version file-detail">Intended Firmware Version: <span class="selectableText"></span></div>
                             </div>
                         </div>
                         <div class="small-section shifted-element">
@@ -97,7 +105,8 @@
                             <th style="padding-right:5px"></th>
                             <th style="padding-right:20px"><p>Select Device(s)</p></th>
                             <th style="padding-right:20px"><p>FW Version</p></th>
-                            <th><p>Operation to be performed</p></th>
+                            <!--<th><p>Operation to be performed</p></th>-->
+
                         <tr>
                     </thead>
                     <tbody>
@@ -105,13 +114,13 @@
                     <tr>
                         <td>
                             <label class="checkbox" style="display:block">
-                                <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{savedAttributes.serialNumber}}-selector" type="checkbox" value="{{savedAttributes.serialNumber}}">
+                                <input name="selected-device" class="configure-device-defaults-device-checkbox" id="{{savedAttributes.serialNumber}}-selector" type="checkbox" value="{{savedAttributes.FIRMWARE_VERSION}}_{{savedAttributes.deviceTypeName}}_{{savedAttributes.serialNumber}}">
                                 <span class="metro-checkbox" title="Select {{savedAttributes.productType}}, {{savedAttributes.serialNumber}}"></span>
                             </label>
                         </td>
                         <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
                         <td>{{savedAttributes.FIRMWARE_VERSION}}</td>
-                        <td hover="Do Nothing.  Configure Current/Factory Defaults/Settings from File as the power-up defaults for the device the next time it starts.">None</td>
+                        <!--<td hover="Do Nothing.  Configure Current/Factory Defaults/Settings from File as the power-up defaults for the device the next time it starts.">None</td>-->
                     </tr>
                     {{/each}}
                     </tbody>
@@ -125,13 +134,20 @@
                 <div class="saving-notice" id="saving-indicator">Saving...</div>
             </div>
         </div>
+        <div class="primary-step">
+            <h3>4. Reboot Device (Optional)</h3>
+            <div class="section primary-step-content">
+                <a id="perform-system-reboot-button" class="btn">Perform System Reboot</a>
+            </div>
+            <p class="option-description">WARNING: This writes 0x4C4A0004 to the 'SYSTEM_REBOOT' register which instructs your device to perform a software-triggered reboot 200ms (50ms*4) after the instruction is recieved by the device.</p>
+        </div>
     </div>
-
-    
-    <h2>Back-up/Download Device Power-Up Defaults</h2>
+        </div>
+        <div class="tab-pane" id="save_defaults_tab">
+    <h2>Save/Back-up/Download Device Power-Up Defaults</h2>
     <div class ="section">
         <div class="primary-step">
-            <h3>1. Select which devices to back-up</h3>
+            <h3>1. Select which devices</h3>
             <div class="primary-step-content">
                 <table id="save-defaults-device-selection-table">
                     <thead>
@@ -161,7 +177,7 @@
         <div class="primary-step">
             <h3>2. Select Output Directory</h3>
             <div class="primary-step-content">
-                <div id="output-directory-display-holder">
+                <div id="output-directory-display-holder" class="file-info-text">
                     <span>Selected output folder path:</span>
                     <div id="output-directory-display">
                         <span id="current-directory-display" class="selectableText">{{#if custom.selected_output_directory}}{{custom.selected_output_directory}}{{else}}No folder Selected. Please browse for an output directory.{{/if}}</span>
@@ -175,6 +191,16 @@
         <div class="primary-step">
             <h3>3. Save Power-up Defaults</h3>
             <div class="section primary-step-content">
+                <table>
+                    <tr><td>
+                        <label class="checkbox" style="display:block">
+                            <input name="prevent-file-overwriting" class="prevent-file-overwriting-checkbox" id="prevent-file-overwriting-selector" type="checkbox" value="true" checked>
+                            <span class="metro-checkbox" title="Create xxx(1,2,..).json files instead of overwriting them."></span>
+                        </label>
+                    </td><td>
+                        <p>Avoid over-writing existing files by adding (1,2...).</p>
+                    </td></tr>
+                </table>
                 <a id="save-defaults-button" class="btn">Save Power-up Defaults</a>
                 <div class="backup-notice" id="saving-to-file-indicator">Saving...</div>
             </div>
@@ -191,5 +217,13 @@
     <h3>Please slect a device</h3>
     <p>Currently no devices are selected so this module has been disabled. Please Select a device to continue.</p>
     {{/if}}
+        </div>
+    </div>
+    <script>
+        $('#myTab a').click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        })
+  </script>
 </div>
-<pre>{{printContext}}</pre>
+{{!--<pre>{{printContext}}</pre>--}}
