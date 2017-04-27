@@ -614,8 +614,10 @@ function openAllDeviceScanner() {
                 
                 var includeErrorCode = true;
                 try {
-                    if(!exception.initFailure.deviceHints.discovered) {
-                        includeErrorCode = false;
+                    if(typeof(exception.initFailure.deviceHints.discovered) !== 'undefined') {
+                        if(!exception.initFailure.deviceHints.discovered) {
+                            includeErrorCode = false;
+                        }
                     }
                 } catch(err) {
 
@@ -623,6 +625,7 @@ function openAllDeviceScanner() {
                 
                 // if(errorCodesToReport.indexOf(exception.errorCode) >= 0) {
                 if(includeErrorCode) {
+                    // console.log('Saved Exception', exception);
                     erroniusDevices.push({
                         'dt': dt,
                         'dtString': dtString,
