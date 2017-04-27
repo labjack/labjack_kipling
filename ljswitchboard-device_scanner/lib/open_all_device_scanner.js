@@ -612,8 +612,17 @@ function openAllDeviceScanner() {
                 var ctString = driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct];
                 var ctName = driver_const.CONNECTION_TYPE_NAMES[ct];
                 
+                var includeErrorCode = true;
+                try {
+                    if(!exception.initFailure.deviceHints.discovered) {
+                        includeErrorCode = false;
+                    }
+                } catch(err) {
+
+                }
                 
-                if(errorCodesToReport.indexOf(exception.errorCode) >= 0) {
+                // if(errorCodesToReport.indexOf(exception.errorCode) >= 0) {
+                if(includeErrorCode) {
                     erroniusDevices.push({
                         'dt': dt,
                         'dtString': dtString,
