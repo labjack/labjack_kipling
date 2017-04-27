@@ -16,7 +16,7 @@ var testGroups = {
 		'basic_test': false,
 		'cached_scan_test': false,
 		'basic_test-open_T4': false,
-		'basic_eth_test': false,
+		'basic_eth_test': true,
 		'multiple_sequential_scans': false,
 		'usb_only_test': false,
 	},

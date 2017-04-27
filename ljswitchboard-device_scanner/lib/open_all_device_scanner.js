@@ -589,6 +589,7 @@ function openAllDeviceScanner() {
         }
         var erroniusDevices = [];
 
+        var errorCodesToReport = [1230, 1226];
         function parseException(exception) {
             try {
                 var deviceHints = exception.initFailure.deviceHints;
@@ -612,21 +613,23 @@ function openAllDeviceScanner() {
                 var ctName = driver_const.CONNECTION_TYPE_NAMES[ct];
                 
                 
-                erroniusDevices.push({
-                    'dt': dt,
-                    'dtString': dtString,
-                    'dtName': dtName,
+                if(errorCodesToReport.indexOf(exception.errorCode) >= 0) {
+                    erroniusDevices.push({
+                        'dt': dt,
+                        'dtString': dtString,
+                        'dtName': dtName,
 
-                    'ct': ct,
-                    'ctString': ctString,
-                    'ctName': ctName,
+                        'ct': ct,
+                        'ctString': ctString,
+                        'ctName': ctName,
 
-                    'ip': ip,
-                    'port': port,
+                        'ip': ip,
+                        'port': port,
 
-                    'errorCode': exception.errorCode,
-                    'errorMessage': exception.errorMessage,
-                });
+                        'errorCode': exception.errorCode,
+                        'errorMessage': exception.errorMessage,
+                    });
+                }
             } catch(err) {
 
             }
