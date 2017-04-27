@@ -27,7 +27,7 @@
     
     <ul class="nav nav-tabs" id="myTab">
         <li class="active"><a href="#configure_defaults_tab">Configure Defaults</a></li>
-        <li><a href="#save_defaults_tab">Save Defaults</a></li>
+        <li><a href="#save_defaults_tab">Save Defaults to File</a></li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane active" id="configure_defaults_tab">
@@ -36,14 +36,14 @@
         <div class="primary-step">
             <h3>1. Select Defaults Source</h3>
             <div id="select-defaults-source" class="primary-step-content">
-                <div>
+                <div style="padding-top: 5px;">
                     <label class="radio">
                         <input type="radio" name="source" value="current" checked>
                         <span class="metro-radio">Current Device Settings</span>
                         {{#if custom.isMultipleDevices}}
                         <p class="option-description">
                             Instruct the selected devices to take a snapshot of their current settings and use that 
-                            snapshot to re-configure itself after a reboot.
+                            snapshot to reconfigure itself after a reboot.
                         </p>
                         {{else}}
                         <p class="option-description">
@@ -86,7 +86,9 @@
                             <div class="selected-file-details file-info-text" style="display:none">
                                 <div class="file-name file-detail">File Name: <span class="selectableText"></span></div>
                                 <div class="product-name file-detail">Intended Product Name: <span class="selectableText"></span></div>
-                                <div class="fw-version file-detail">Intended Firmware Version: <span class="selectableText"></span></div>
+                                <div class="fw-version file-detail">Intended Firmware Version: <span class="user-fw-warning-text selectableText"></span></div>
+                                <div class="user-fw-warning-text file-detail">** The intended firmware version and the device firmware version must match. **</div>
+                                <!--The firmware version in the saved defaults file and on the device must match.-->
                             </div>
                         </div>
                         <div class="small-section shifted-element">
@@ -97,13 +99,13 @@
             </div>
         </div>
         <div class="primary-step">
-            <h3>2. Select Which Devices to Configure</h3>
+            <h3>2. Select Devices</h3>
             <div class="primary-step-content">
                 <table  id="configure-defaults-device-selection-table" class="primary-step-content">
                     <thead>
                         <tr>
                             <th style="padding-right:5px"></th>
-                            <th style="padding-right:20px"><p>Select Device(s)</p></th>
+                            <th style="padding-right:20px; min-width: 140px;"><p>Device</p></th>
                             <th style="padding-right:20px"><p>FW Version</p></th>
                             <!--<th><p>Operation to be performed</p></th>-->
 
@@ -119,7 +121,7 @@
                             </label>
                         </td>
                         <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
-                        <td>{{savedAttributes.FIRMWARE_VERSION}}</td>
+                        <td class="device-fw-version">{{savedAttributes.FIRMWARE_VERSION}}</td>
                         <!--<td hover="Do Nothing.  Configure Current/Factory Defaults/Settings from File as the power-up defaults for the device the next time it starts.">None</td>-->
                     </tr>
                     {{/each}}
@@ -144,17 +146,17 @@
     </div>
         </div>
         <div class="tab-pane" id="save_defaults_tab">
-    <h2>Save/Back-up/Download Device Power-Up Defaults</h2>
+    <h2>Save Power-Up Defaults to File</h2>
     <div class ="section">
         <div class="primary-step">
-            <h3>1. Select which devices</h3>
+            <h3>1. Select Devices</h3>
             <div class="primary-step-content">
                 <table id="save-defaults-device-selection-table">
                     <thead>
                         <tr>
                             <th style="padding-right:5px"></th>
-                            <th style="padding-right:20px"><p>Select Device(s)</p></th>
-                            <th><p>Output File Name</p></th>
+                            <th style="padding-right:20px; min-width: 140px;"><p>Device</p></th>
+                            <th><p>File Name</p></th>
                         <tr>
                     </thead>
                     <tbody>
@@ -175,30 +177,22 @@
             </div>
         </div>
         <div class="primary-step">
-            <h3>2. Select Output Directory</h3>
+            <h3>2. Select Directory</h3>
             <div class="primary-step-content">
                 <div id="output-directory-display-holder" class="file-info-text">
-                    <span>Selected output folder path:</span>
+                    <span>Selected Directory:</span>
                     <div id="output-directory-display">
-                        <span id="current-directory-display" class="selectableText">{{#if custom.selected_output_directory}}{{custom.selected_output_directory}}{{else}}No folder Selected. Please browse for an output directory.{{/if}}</span>
+                        <span id="current-directory-display" class="selectableText">{{#if custom.selected_output_directory}}{{custom.selected_output_directory}}{{else}}No directory selected. Please browse for an output directory.{{/if}}</span><button id="browse-for-output-directory-button" class="icon-pencil btn btn-link" title="Edit Device Name"></button>
                     </div>
                 </div>
-                <div class="section">
-                    <a id="browse-for-output-directory-button" class="btn">Browse for Output Directory</a>
-                </div>
-            </div>
-        </div>
-        <div class="primary-step">
-            <h3>3. Save Power-up Defaults</h3>
-            <div class="section primary-step-content">
                 <table>
                     <tr><td>
                         <label class="checkbox" style="display:block">
-                            <input name="prevent-file-overwriting" class="prevent-file-overwriting-checkbox" id="prevent-file-overwriting-selector" type="checkbox" value="true" checked>
-                            <span class="metro-checkbox" title="Create xxx(1,2,..).json files instead of overwriting them."></span>
+                            <input name="prevent-file-overwriting" class="prevent-file-overwriting-checkbox" id="prevent-file-overwriting-selector" type="checkbox" value="true">
+                            <span class="metro-checkbox" title="Overwrite Existing Files."></span>
                         </label>
                     </td><td>
-                        <p>Avoid over-writing existing files by adding (1,2...).</p>
+                        <p>Overwrite Existing Files.</p>
                     </td></tr>
                 </table>
                 <a id="save-defaults-button" class="btn">Save Power-up Defaults</a>

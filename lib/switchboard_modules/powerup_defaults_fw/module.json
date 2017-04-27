@@ -1,6 +1,6 @@
 {
     "name": "powerup_defaults_fw",
-    "humanName": "Power-up Defaults",
+    "humanName": "Power-Up Defaults",
     "version": "0.0.1",
     "framework":"multipleDevices",
     "supportedDevices": [{"type":"T7"}, {"type":"T4"}],

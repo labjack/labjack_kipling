@@ -66,3 +66,6 @@
 #defaults-holder table td p {
     margin:0px;
 }
+#defaults-holder .primary-step-content table thead {
+  border-bottom: 1px solid #ccc;
+}
