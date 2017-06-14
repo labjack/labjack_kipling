@@ -49,6 +49,10 @@ Performing the standard npm install command will fail on Windows.  It will hopef
 
 This hint came from someone building [couchbase](http://www.bitcrunch.de/install-couchbase-node-js-windows-8-machine/)
 
+For higher/newer versions of node, visual studio 14.0 is required aka msvs_version=2015.
+
+Also, consider using the command "npm config set msvs_version 2015 --global" instead of the non global version [node-gyp install issues](https://github.com/nodejs/node-gyp/issues/802).
+
 ## General Information (Async vs sync function calls)
 This driver wrapper was created supporting both synchronous and asynchronous function calls to support both functional and object-oriented programing styles. The general format is shown below:
 ```javascript
