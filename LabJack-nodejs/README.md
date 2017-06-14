@@ -23,6 +23,11 @@ Requirements
 * Look at the [ffi](https://www.npmjs.com/package/ffi) library for more requirements.
 * Look at the [node-gyp installation notes](https://github.com/nodejs/node-gyp#installation) for various requirements.
 * Also look at the [ref](https://www.npmjs.com/package/ref) library as it too is a native module.
+* Look at the windows [nodejs-guidelines](https://github.com/Microsoft/nodejs-guidelines/blob/master/windows-environment.md#compiling-native-addon-modules) page for compiling native addon modules. 
+* Make sure that you have node-gyp installed by running the command "node-gyp" if not:
+```bash
+$ npm install -g node-gyp
+```
 
 Installation
 ------------
