@@ -120,8 +120,8 @@ var testGroups = {
 	't7': {
 		't7_basic_test': false,
 		't7_array_test': false,
-		't7_check_calibration_test': true,
-		't7_read_recovery_fw_version_test': true,
+		't7_check_calibration_test': false,
+		't7_read_recovery_fw_version_test': false,
 		't7_upgrade_recovery_image_test':  false,
 		't7_upgrade_test':  false,
 		
@@ -179,6 +179,9 @@ var testGroups = {
 	},
 	'dashboard': {
 		'basic_test': false,
+	},
+	'external_app_tests': {
+		'basic_test': true,
 	},
 };
 

@@ -46,6 +46,7 @@ var file_system_operations = require('./file_system_operations');
 var manufacturing_info_operations = require('./manufacturing_info_operations');
 var startup_config_operations = require('./startup_config_operations');
 var dashboard_operations = require('./dashboard/dashboard_operations');
+var external_application_operations = require('./external_app_operations');
 
 var device_events = driver_const.device_curator_constants;
 
@@ -83,6 +84,7 @@ function device(useMockDevice) {
 	this.isMockDevice = false;
 	this.allowReconnectManager = false;
 	this.allowConnectionManager = false;
+	this.deviceConnectionSuspended = false;
 
 	this.deviceErrors = [];
 	this.maxNumErrors = 20;
@@ -213,6 +215,9 @@ function device(useMockDevice) {
 				}
 			}
 		}
+		if(self.deviceConnectionSuspended) {
+			allowLJMFunctionExecution = false;
+		}
 		return allowLJMFunctionExecution;
 	};
 
@@ -240,6 +245,9 @@ function device(useMockDevice) {
 	var declareDeviceReconnected = function() {
 		self.savedAttributes.isConnected = true;
 		self.emit(DEVICE_RECONNECTED, self.savedAttributes);
+	};
+	this.extDeclareDeviceReconnected = function() {
+		declareDeviceReconnected();
 	};
 	var handleReconnectHardwareInstalledError = function(err) {
 		// console.error(
@@ -870,6 +878,7 @@ function device(useMockDevice) {
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
+
 	this.simpleOpen = function(deviceType, connectionType, identifier) {
 		var defered = q.defer();
 		var getOnError = function(msg) {
@@ -2139,6 +2148,89 @@ function device(useMockDevice) {
 		return self.internalUpdateFirmware(firmwareFileLocation, percentListener, stepListener);
 	};
 
+	this.suspendDeviceConnection = function() {
+		var defered = q.defer();
+
+		// Disable LJM Function Calls
+        self.deviceConnectionSuspended = true;
+
+        // Declare device Disconnected
+        self.declareDeviceDisconnected();
+
+        // Disconnect from device & declare device to be disconnected.
+        var device = self.getDevice();
+		var handle = device.handle;
+        var dt = device.deviceType;
+		var ct = device.connectionType;
+		var id = device.identifier;
+        device.close(function(err) {
+            defered.reject();
+        }, function() {
+			// Temporarily restore handle & other device info...
+            device.handle = handle;
+			device.deviceType = dt;
+			device.connectionType = ct;
+			device.identifier = id;
+
+			defered.resolve();
+        });
+		return defered.promise;
+	}
+
+	this.resumeDeviceConnection = function() {
+		var defered = q.defer();
+
+		
+
+		 var dt = self.savedAttributes.openParameters.deviceType;
+		 var ct = self.savedAttributes.openParameters.connectionType;
+		 var id = self.savedAttributes.openParameters.identifier;
+
+		 var device = self.getDevice();
+
+		 var numAttempts = 0;
+        function onError(err) {
+            numAttempts += 1;
+            if(numAttempts < 4) {
+                device.open(dt, ct, id, onError, onSuccess);
+            } else {
+                bundle.isError = true;
+                bundle.error = err;
+                bundle.errorStep = 'resumeDeviceConnection';
+                defered.resolve(bundle);
+            }
+        }
+        function onSuccess() {
+            var handleInitializeError = function() {
+				var innerDeferred = q.defer();
+				innerDeferred.reject();
+				return innerDeferred.promise;
+			};
+			var finishFunc = function() {
+				defered.resolve();
+			};
+
+			// Enable LJM Function Calls
+        	self.deviceConnectionSuspended = false;
+
+			// Declare the device to be re-connected
+			declareDeviceReconnected();
+
+			self.restartConnectionManager();
+
+			// Wait for the device to initialize before updating the devices saved
+			// attributes.
+			self.waitForDeviceToInitialize()
+			.then(
+				self.updateSavedAttributes,
+				handleInitializeError
+			).then(finishFunc, finishFunc);
+        }
+		device.handle = null;
+        device.open(dt, ct, id, onError, onSuccess);
+
+		return defered.promise;
+	}
 	this.finishFirmwareUpdate = function(results) {
 		var defered = q.defer();
 		var handleInitializeError = function() {
@@ -2400,6 +2492,15 @@ function device(useMockDevice) {
 	// 	console.log('!! Received data update from dashboard', data);
 	// 	self.emit(DASHBOARD_DATA_UPDATE, data);
 	// });
+
+	/**
+	 * External application operations.
+	 */
+	var externalApplicationOperations = new external_application_operations.get(this);
+	var externalApplicationOperationKeys = Object.keys(externalApplicationOperations);
+	for(i = 0; i < externalApplicationOperationKeys.length; i++) {
+		this[externalApplicationOperationKeys[i]] = externalApplicationOperations[externalApplicationOperationKeys[i]];
+	}
 
 	/**
 	 * Digit Specific functions:

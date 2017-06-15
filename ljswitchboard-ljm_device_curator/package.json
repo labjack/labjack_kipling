@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_device_curator",
-  "version": "0.0.82",
+  "version": "0.0.83",
   "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
   "main": "./lib/device_curator.js",
   "scripts": {
@@ -35,6 +35,7 @@
   },
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_curator",
   "dependencies": {
+    "lj-apps-win-registry-info": "git://github.com/chrisJohn404/lj-apps-win-registry-info.git#master",
     "async": "~0",
     "dict": "1.4.0",
     "q": "~1",
