@@ -100,14 +100,14 @@ var device_tests = {
 		});
 	},
 	'check firmware version': function(test) {
-		var fwVersionNum = 1.0218;
+		var fwVersionNum = 1.0225;
 		device.iRead('FIRMWARE_VERSION')
 		.then(function(fwVersion) {
 			console.log('  - Primary FW:'.green, fwVersion.val);
 			if(fwVersion.val == fwVersionNum) {
 				test.ok(true);
 			} else {
-				test.ok(false, 'T7 Firmware version should be 1.0218, it is: ' + fwVersion.str);
+				test.ok(false, 'T7 Firmware version should be 1.0225, it is: ' + fwVersion.str);
 			}
 			test.done();
 		}, function(err) {
