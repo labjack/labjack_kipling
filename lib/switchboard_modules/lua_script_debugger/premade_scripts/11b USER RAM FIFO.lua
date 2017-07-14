@@ -14,28 +14,32 @@ print("Transfer an array of ordered information to/from an external computer usi
 --add this USER_RAM_FIFO1_DATA_F32 register to the active watch area, and
 --view each element coming out in sequence at the update rate of the software.
 
-aF32_Out= {}  --array of 5 values(floats)
+local mbRead=MB.R			--local functions for faster processing
+local mbWrite=MB.W
+
+local aF32_Out= {}  --array of 5 values(floats)
 aF32_Out[1] = 10.0
 aF32_Out[2] = 20.1
 aF32_Out[3] = 30.2
 aF32_Out[4] = 40.3
 aF32_Out[5] = 50.4
 
-aF32_In = {}
-numValuesFIO0 = 5
-ValueSizeInBytes = 4
-numBytesAllocFIFO0 = numValuesFIO0*ValueSizeInBytes
-MB.W(47900, 1, numBytesAllocFIFO0) --allocate USER_RAM_FIFO0_NUM_BYTES_IN_FIFO to 20 bytes
+local aF32_In = {}
+local numValuesFIO0 = 5
+local ValueSizeInBytes = 4
+local numBytesAllocFIFO0 = numValuesFIO0*ValueSizeInBytes
+mbWrite(47900, 1, numBytesAllocFIFO0) --allocate USER_RAM_FIFO0_NUM_BYTES_IN_FIFO to 20 bytes
 
 LJ.IntervalConfig(0, 2000)
+local checkInterval=LJ.CheckInterval
 while true do
-  if LJ.CheckInterval(0) then
+  if checkInterval(0) then
     --write out to the host with FIFO0
     for i=1, numValuesFIO0 do
       ValOutOfLua = aF32_Out[i]
-      numBytesFIFO0 = MB.R(47910, 1)
+      numBytesFIFO0 = mbRead(47910, 1)
       if (numBytesFIFO0 < numBytesAllocFIFO0) then
-        MB.W(47030, 3, ValOutOfLua)  --provide a new array of size numValuesFIO0 to host
+        mbWrite(47030, 3, ValOutOfLua)  --provide a new array of size numValuesFIO0 to host
         print ("Next Value FIFO0: ", ValOutOfLua)
       else
         print ("FIFO0 buffer is full.")
@@ -43,12 +47,12 @@ while true do
     end
     --read in new data from the host with FIFO1
     --Note that an external computer must have previously written to FIFO1
-    numBytesFIFO1 = MB.R(47912, 1) --USER_RAM_FIFO1_NUM_BYTES_IN_FIFO
+    numBytesFIFO1 = mbRead(47912, 1) --USER_RAM_FIFO1_NUM_BYTES_IN_FIFO
     if (numBytesFIFO1 == 0) then
       print ("FIFO1 buffer is empty.")
     end
     for i=1, ((numBytesFIFO1+1)/ValueSizeInBytes) do
-      ValIntoLua = MB.R(47032, 3)
+      ValIntoLua = mbRead(47032, 3)
       aF32_In[i] = ValIntoLua
       print ("Next Value FIFO1: ", ValIntoLua)
     end

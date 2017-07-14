@@ -16,11 +16,11 @@ print("LabJack Lua Task Scheduler Example. Version 1.0")
 --         [n][3] - Optional parameters to pass to the function if necessary.  
 --                  Pass array if multiple parameters are required.
 
-NumFuncs = 2                      -- Number of functions being executed in scheduler.  Must equal number of fuction defined in the scheduler table.
-MsgThresh = 1                     -- Allowable number of scheduler tics beyond function period before posting a warning. 
-IntvlCnt = 0
+local NumFuncs = 2                      -- Number of functions being executed in scheduler.  Must equal number of fuction defined in the scheduler table.
+local MsgThresh = 1                     -- Allowable number of scheduler tics beyond function period before posting a warning. 
+local IntvlCnt = 0
 
-SchTbl = {}                       -- Empty table
+local SchTbl = {}                       -- Empty table
 SchTbl[0] = {}                    -- New row (1 row per function)
 SchTbl[1] = {}                    -- New row (1 row per function)
 
@@ -35,8 +35,9 @@ SchTbl[1][2] = 500                -- Function2 period
 SchTbl[1][3] = {}                 -- Function2 parameters (if required)
 
 LJ.IntervalConfig(0, 1)           --Define scheduler resolution (1 ms).  Increase if necessary.
+local checkInterval=LJ.CheckInterval
 
-Test = 0
+local Test = 0
 
 --==============================================================================
 -- Task function definitions
@@ -66,7 +67,7 @@ Func2 = function (args)
 --==============================================================================
 while true do
   
-  IntvlCnt = LJ.CheckInterval(0)  -- Save interval count to catch missed interval servicing.
+  IntvlCnt = checkInterval(0)  -- Save interval count to catch missed interval servicing.
   
   if (IntvlCnt) then
     
@@ -77,7 +78,7 @@ while true do
       -- of elapsed intervals since last check.  In most cases Intvlcnt will normally
       -- equal 1, unless some delay causes script to go multiple intervals between
       -- checks.  Adjust function counter accordingly to maintain function timing.
-      delay = IntvlCnt - SchTbl[i][1]
+      local delay = IntvlCnt - SchTbl[i][1]
       SchTbl[i][1] = SchTbl[i][1] - IntvlCnt   
     
       -- Call function when counter reaches zero.

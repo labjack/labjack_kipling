@@ -4,15 +4,18 @@ print("Log voltage to file.  Voltage measured on AIN1.  Store value every 1 seco
 --Older firmware uses 'assert' command: file=assert(io.open(Filename, "w"))
 --timestamp (real-time-clock) available on T7-Pro only
 
-Filename = "log1.csv"
-voltage = 0
-count = 0
-delimiter = ","
-dateStr = ""
-voltageStr = ""
+local mbRead=MB.R			--local functions for faster processing
+local mbReadArray=MB.RA
+
+local Filename = "log1.csv"
+local voltage = 0
+local count = 0
+local delimiter = ","
+local dateStr = ""
+local voltageStr = ""
 
 
-table = {}
+local table = {}
 table[1] = 0    --year
 table[2] = 0    --month
 table[3] = 0    --day
@@ -20,7 +23,7 @@ table[4] = 0    --hour
 table[5] = 0    --minute
 table[6] = 0    --second
 
-file = io.open(Filename, "w")   --create and open file for write access
+local file = io.open(Filename, "w")   --create and open file for write access
 -- Make sure that the file was opened properly.
 if file then
   print("Opened File on uSD Card")
@@ -32,11 +35,12 @@ end
 MB.W(48005, 0, 1)                       --ensure analog is on
 
 LJ.IntervalConfig(0, 1000)              --set interval to 1000 for 1000ms
+local checkInterval=LJ.CheckInterval
 
 while true do
-  if LJ.CheckInterval(0) then     	    --interval completed
-    voltage = MB.R(2, 3)        	      --voltage on AIN1, address is 2, type is 3
-    table, error = MB.RA(61510, 0, 6)   --Read the RTC timestamp, -Pro only
+  if checkInterval(0) then     	    --interval completed
+    voltage = mbRead(2, 3)        	      --voltage on AIN1, address is 2, type is 3
+    table, error = mbReadArray(61510, 0, 6)   --Read the RTC timestamp, -Pro only
     print("AIN1: ", voltage, "V")
     dateStr = string.format("%04d/%02d/%02d %02d:%02d.%02d", table[1], table[2], table[3], table[4], table[5], table[6])
     voltageStr = string.format("%.6f", voltage)
