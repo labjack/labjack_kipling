@@ -16,13 +16,15 @@ print("Save some data to RAM for subsequent access by an external computer.")
 --add this USER_RAM0_F32 register to the active watch area, and
 --view CoolData changing in real-time!
 
-CoolData = 0    --Data that will be availalbe to external computers
+local CoolData = 0    --Data that will be availalbe to external computers
 
 LJ.IntervalConfig(0, 100)   --Define a data collection interval 100 = 100ms
+local checkInterval=LJ.CheckInterval
+local mbWrite=MB.W
 
 while true do
-  if LJ.CheckInterval(0) then
-    MB.W(46000, 3, CoolData)    --USER_RAM0_F32 is address 46000
+  if checkInterval(0) then
+    mbWrite(46000, 3, CoolData)    --USER_RAM0_F32 is address 46000
     print("CoolData:", CoolData, "\n")
     CoolData = CoolData + 1
     --CoolData = CoolData + math.random()

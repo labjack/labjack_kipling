@@ -10,21 +10,24 @@ print("Grab the temperature from a TP-01 thermocouple.")
 --It's a bit awkward to connect to the screw terminals of a T7, for this example
 --it was necessary to reshape the prongs with some pliers.
 
---Configure the T7 -------------------------------------------------------------
-TempK = 0           --Thermocouple is wired to AIN1 and GND
-TempF = 0
+local mbRead=MB.R			--local functions for faster processing
+local mbWrite=MB.W
 
-MB.W(48005, 0, 1)   --ensure analog system is powered on
-MB.W(9002, 1, 22)   --AIN1_EF_INDEX set to 22 (type K)
-MB.W(40002, 3, 0.1) --AIN1_RANGE set to ±0.1V
-MB.W(41501, 0, 0)   --AIN1_RESOLUTION_INDEX set to 0 (auto)
-MB.W(9302, 1, 0)    --set AIN1_EF_CONFIG_A to deg K (1=degC, 2=degF)
+--Configure the T7 -------------------------------------------------------------
+local TempK = 0           --Thermocouple is wired to AIN1 and GND
+local TempF = 0
+
+mbWrite(48005, 0, 1)   --ensure analog system is powered on
+mbWrite(9002, 1, 22)   --AIN1_EF_INDEX set to 22 (type K)
+mbWrite(40002, 3, 0.1) --AIN1_RANGE set to ±0.1V
+mbWrite(41501, 0, 0)   --AIN1_RESOLUTION_INDEX set to 0 (auto)
+mbWrite(9302, 1, 0)    --set AIN1_EF_CONFIG_A to deg K (1=degC, 2=degF)
 
 LJ.IntervalConfig(0, 1000)          --set interval to 1000ms
-
+local checkInterval=LJ.CheckInterval
 while true do
-  if LJ.CheckInterval(0) then       --interval completed
-    TempK = MB.R(7002, 3)           --AIN1_EF_READ_A, the temperature in Kelvin
+  if checkInterval(0) then       --interval completed
+    TempK = mbRead(7002, 3)           --AIN1_EF_READ_A, the temperature in Kelvin
     print("Temperature: ", TempK, "K")
     TempF = (TempK * 1.8) - 459.67
     print ("Temperature:", TempF, "°F\n")

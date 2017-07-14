@@ -12,28 +12,31 @@ print("Get temperature from a DS18B20 1-wire sensor.")
 --The data line(DQ) needs a pullup resister of 2.2-4.7 kΩ to VS.
 --This example used a 3.3kΩ resistor between VS and EIO0
 
+local mbRead=MB.R		--Local functions for faster processing
+local mbWrite=MB.W
+
 --From the "1-Wire Read ROM ID" example, the 64-bit ID is:
-target_rom = {}
+local target_rom = {}
 target_rom[0] = 21248 --MW
 target_rom[1] = 4     --UW
 target_rom[2] =	52728 --HW
 target_rom[3] =	9000  --LW
 
-SensorPinNum = 8		  --Digital I/O 8 (EIO0)
+local SensorPinNum = 8		  --Digital I/O 8 (EIO0)
 
-ConversionFactorDS18B20 = 0.0625    --12-bit default
+local ConversionFactorDS18B20 = 0.0625    --12-bit default
 --ConversionFactorDS18S20 = 0.5       --9-bit default
-ConversionDelayDS18B20 = 6    --conversion delay in 100 ms.  6 = 600ms for conversion
+local ConversionDelayDS18B20 = 6    --conversion delay in 100 ms.  6 = 600ms for conversion
 --ConversionDelayDS18S20 = 8    --conversion delay in 100 ms.  8 = 800ms for conversion
 
 --initializing some other variables
-sensorNotFound = 0
-sensorFound = 1
-invalidReading = 2
-curStep = 0
-curDelay = 0
-tempC = 0
-tempF = 0
+local sensorNotFound = 0
+local sensorFound = 1
+local invalidReading = 2
+local curStep = 0
+local curDelay = 0
+local tempC = 0
+local tempF = 0
 
 
 function round(num, idp)
@@ -42,21 +45,21 @@ function round(num, idp)
 end
 
 function DS18xx_Start(target_rom)
-  MB.W(5307,0, 85)              --ONEWIRE_FUNCTION Set to 85=Match ROM, 51=Read, 240=Search, 204=Skip
+  mbWrite(5307,0, 85)              --ONEWIRE_FUNCTION Set to 85=Match ROM, 51=Read, 240=Search, 204=Skip
   
-  MB.W(5320, 0, target_rom[0])  --ONEWIRE_ROM_MATCH_H
-  MB.W(5321, 0, target_rom[1])
-  MB.W(5322, 0, target_rom[2])  --ONEWIRE_ROM_MATCH_L
-  MB.W(5323, 0, target_rom[3])
+  mbWrite(5320, 0, target_rom[0])  --ONEWIRE_ROM_MATCH_H
+  mbWrite(5321, 0, target_rom[1])
+  mbWrite(5322, 0, target_rom[2])  --ONEWIRE_ROM_MATCH_L
+  mbWrite(5323, 0, target_rom[3])
 
-  MB.W(5300, 0, SensorPinNum)   --ONEWIRE_DQ_DIONUM data line (DQ)
-  MB.W(5302, 0, 0)              --ONEWIRE_OPTIONS, DPU Enable, DPU Polarity unused = 0
-  MB.W(5308, 0, 1)              --ONEWIRE_NUM_BYTES_TX Write one byte
-  MB.W(5309, 0, 0)              --ONEWIRE_NUM_BYTES_RX Read no bytes
+  mbWrite(5300, 0, SensorPinNum)   --ONEWIRE_DQ_DIONUM data line (DQ)
+  mbWrite(5302, 0, 0)              --ONEWIRE_OPTIONS, DPU Enable, DPU Polarity unused = 0
+  mbWrite(5308, 0, 1)              --ONEWIRE_NUM_BYTES_TX Write one byte
+  mbWrite(5309, 0, 0)              --ONEWIRE_NUM_BYTES_RX Read no bytes
 
-  MB.W(5340, 0, 0x4400)         --ONEWIRE_DATA_TX Send to the DS18B20 the start temperature conversion command (0x44)
+  mbWrite(5340, 0, 0x4400)         --ONEWIRE_DATA_TX Send to the DS18B20 the start temperature conversion command (0x44)
 
-  return MB.W(5310, 0, 1)       --ONEWIRE_GO
+  return mbWrite(5310, 0, 1)       --ONEWIRE_GO
 end
 
 function DS18xx_Read(target_rom)
@@ -65,23 +68,23 @@ function DS18xx_Read(target_rom)
   local msb = 0
   local lsb = 0
 
-  MB.W(5307,0, 85)              --ONEWIRE_FUNCTION Set to 85=Match ROM, 51=Read, 240=Search, 204=Skip
+  mbWrite(5307,0, 85)              --ONEWIRE_FUNCTION Set to 85=Match ROM, 51=Read, 240=Search, 204=Skip
   
-  MB.W(5320, 0, target_rom[0])  --ONEWIRE_ROM_MATCH_H
-  MB.W(5321, 0, target_rom[1])
-  MB.W(5322, 0, target_rom[2])  --ONEWIRE_ROM_MATCH_L
-  MB.W(5323, 0, target_rom[3])
+  mbWrite(5320, 0, target_rom[0])  --ONEWIRE_ROM_MATCH_H
+  mbWrite(5321, 0, target_rom[1])
+  mbWrite(5322, 0, target_rom[2])  --ONEWIRE_ROM_MATCH_L
+  mbWrite(5323, 0, target_rom[3])
 
-  MB.W(5300, 0, SensorPinNum)   --ONEWIRE_DQ_DIONUM data line (DQ)
-  MB.W(5302, 0, 0)              --ONEWIRE_OPTIONS, DPU Enable, DPU Polarity unused = 0
-  MB.W(5308, 0, 1)              --ONEWIRE_NUM_BYTES_TX Write one byte
-  MB.W(5309, 0, 9)              --ONEWIRE_NUM_BYTES_RX Read nine bytes
+  mbWrite(5300, 0, SensorPinNum)   --ONEWIRE_DQ_DIONUM data line (DQ)
+  mbWrite(5302, 0, 0)              --ONEWIRE_OPTIONS, DPU Enable, DPU Polarity unused = 0
+  mbWrite(5308, 0, 1)              --ONEWIRE_NUM_BYTES_TX Write one byte
+  mbWrite(5309, 0, 9)              --ONEWIRE_NUM_BYTES_RX Read nine bytes
   
-  MB.W(5340, 0, 0xBE00)         --ONEWIRE_DATA_TX Send to the DS18B20 the read command (0xBE)
+  mbWrite(5340, 0, 0xBE00)         --ONEWIRE_DATA_TX Send to the DS18B20 the read command (0xBE)
     
-  MB.W(5310, 0, 1)              --ONEWIRE_GO
+  mbWrite(5310, 0, 1)              --ONEWIRE_GO
 
-  temp = MB.R(5370, 0)          --ONEWIRE_DATA_RX Read two bytes
+  temp = mbRead(5370, 0)          --ONEWIRE_DATA_RX Read two bytes
 
   --handle some conversion steps
   lsb = temp / 256
@@ -107,9 +110,10 @@ end
 
 
 LJ.IntervalConfig(0, 100)      --set interval to 100 for 100ms
+local checkInterval = LJ.CheckInterval
 
 while true do
-  if LJ.CheckInterval(0) then   --interval completed
+  if checkInterval(0) then   --interval completed
 
     if(curStep == 0) then
       print('Starting Conversion...')
@@ -145,7 +149,7 @@ while true do
         print("Reading:","Unknown State")
       end
       --save the temperature value in User RAM so an external PC running simple logging software can easily read the temperature
-      MB.W(46000, tempF)  --USER_RAM0_F32
+      mbWrite(46000, tempF)  --USER_RAM0_F32
       curStep = 0
     else
       print("Err")

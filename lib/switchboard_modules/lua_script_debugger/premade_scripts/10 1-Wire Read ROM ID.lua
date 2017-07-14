@@ -11,8 +11,8 @@ print ("Read the ROM ID of a single DS18B20 1-Wire sensor.")
 --FIO lines can NOT be used for 1-Wire. They have too much impedance 
 --which prevent the signal from reaching logic thresholds
 
-SensorPinNum = 8	-- EIO0 aka digital I/O 8
-ROM = {}          -- The sensor registration number stored in ROM, it's 64-bits so requires 4 16-bit numbers
+local SensorPinNum = 8	-- EIO0 aka digital I/O 8
+local ROM = {}          -- The sensor registration number stored in ROM, it's 64-bits so requires 4 16-bit numbers
 ROM[1] = 0
 ROM[2] = 0
 ROM[3] = 0

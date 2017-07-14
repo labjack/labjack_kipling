@@ -13,6 +13,9 @@ print("Communicate with several DS18S20 1-wire sensors")
 --FIO lines can NOT be used for 1-Wire. They have too much impedance 
 --which prevent the signal from reaching logic thresholds
 
+local mbRead=MB.R
+local mbWrite=MB.W
+
 function round(num, idp)
   local mult = 10^(idp or 0)
   return math.floor(num * mult + 0.5) / mult
@@ -20,26 +23,26 @@ end
 
 function DS18xx_Start(target_rom)
   if target_rom[3] == 0 then
-    MB.W(5307, 0, 0xCC) -- Set to skip ROM
+    mbWrite(5307, 0, 0xCC) -- Set to skip ROM
   else
-    MB.W(5307, 0, 0x55) -- Set to match ROM
+    mbWrite(5307, 0, 0x55) -- Set to match ROM
   end
   -- ONEWIRE_ROM_MATCH_H
-  MB.W(5320, 0, target_rom[0])
-  MB.W(5321, 0, target_rom[1])
+  mbWrite(5320, 0, target_rom[0])
+  mbWrite(5321, 0, target_rom[1])
   -- ONEWIRE_ROM_MATCH_L
-  MB.W(5322, 0, target_rom[2])
-  MB.W(5323, 0, target_rom[3])
+  mbWrite(5322, 0, target_rom[2])
+  mbWrite(5323, 0, target_rom[3])
 
-  MB.W(5300, 0, SensPinNum)     -- Set the DQ pin
-  MB.W(5302, 0, 0)       -- Set the options
-  MB.W(5308, 0, 1)       -- Write one byte
-  MB.W(5309, 0, 0)       -- Read no bytes
+  mbWrite(5300, 0, SensPinNum)     -- Set the DQ pin
+  mbWrite(5302, 0, 0)       -- Set the options
+  mbWrite(5308, 0, 1)       -- Write one byte
+  mbWrite(5309, 0, 0)       -- Read no bytes
   -- ONEWIRE_DATA_WRITE
-  MB.W(5340, 0, 0x4400) -- Send the start conv command
+  mbWrite(5340, 0, 0x4400) -- Send the start conv command
 
   -- ONEWIRE_GO
-  return MB.W(5310, 0, 1)       -- GO
+  return mbWrite(5310, 0, 1)       -- GO
 end
 function DS18xx_GlobStart()
   local data = {}
@@ -56,27 +59,27 @@ function DS18xx_Read(target_rom)
   local msb = 0
   local lsb = 0
   if target_rom[3] == 0 then
-    MB.W(5307, 0, 0xCC) -- Set to skip ROM
+    mbWrite(5307, 0, 0xCC) -- Set to skip ROM
   else
-    MB.W(5307, 0, 0x55) -- Set to match ROM
+    mbWrite(5307, 0, 0x55) -- Set to match ROM
   end
   
-  MB.W(5320, 0, target_rom[0])
-  MB.W(5321, 0, target_rom[1])
-  MB.W(5322, 0, target_rom[2])
-  MB.W(5323, 0, target_rom[3])
+  mbWrite(5320, 0, target_rom[0])
+  mbWrite(5321, 0, target_rom[1])
+  mbWrite(5322, 0, target_rom[2])
+  mbWrite(5323, 0, target_rom[3])
   
-  MB.W(5300, 0, SensPinNum)     -- Set the DQ pin
-  MB.W(5302, 0, 0)       -- Set the options
-  MB.W(5308, 0, 1)       -- Write one byte
-  MB.W(5309, 0, 9)       -- Read nine bytes
+  mbWrite(5300, 0, SensPinNum)     -- Set the DQ pin
+  mbWrite(5302, 0, 0)       -- Set the options
+  mbWrite(5308, 0, 1)       -- Write one byte
+  mbWrite(5309, 0, 9)       -- Read nine bytes
   -- ONEWIRE_DATA_WRITE
-  MB.W(5340, 0, 0xBE00) -- Send the read command
+  mbWrite(5340, 0, 0xBE00) -- Send the read command
   
   -- ONEWIRE_GO
-  MB.W(5310, 0, 1)       -- GO
+  mbWrite(5310, 0, 1)       -- GO
   
-  temp, error = MB.R(5370, 0, 1)        -- Read two bytes
+  temp, error = mbRead(5370, 0, 1)        -- Read two bytes
   
   lsb = temp / 256
   lsb = math.floor(lsb)
@@ -129,7 +132,8 @@ function DS18xx_Exec(target_rom,i)
 end
 
 
-LJ.IntervalConfig(0, 100)       --configure script interval for 100ms
+LJ.IntervalConfig(0, 100)       		--configure script interval for 100ms
+local checkInterval=LJ.CheckInterval	--create local function for faster proccessing
 
 eioNum = 0
 --Some ROM IDs of DS18S20s
@@ -172,7 +176,7 @@ curStep = 0
 curDelay = 0
 
 while true do
-  if LJ.CheckInterval(0) then
+  if checkInterval(0) then
     if(curStep == 0) then
       print('Starting Conversion')
       DS18xx_GlobStart()
@@ -192,13 +196,13 @@ while true do
           print("Reading sensors:")
         end
         print(curName, temp, "F")
-        MB.W(46000+curProbe*2, temp)  --USER_RAM#_F32
+        mbWrite(46000+curProbe*2, temp)  --USER_RAM#_F32
       elseif(err == sensorNotFound) then
         print(curName,"N/A")
-        MB.W(46000+curProbe*2, 0)     --USER_RAM#_F32
+        mbWrite(46000+curProbe*2, 0)     --USER_RAM#_F32
       elseif(err == invalidReading) then
         print(curName,"Inv")
-        MB.W(46000+curProbe*2, 0)     --USER_RAM#_F32
+        mbWrite(46000+curProbe*2, 0)     --USER_RAM#_F32
       else
         print(curName,"Unknown State")
       end

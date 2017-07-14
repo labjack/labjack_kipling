@@ -1,12 +1,14 @@
 print("Output triangle wave centered on 2V. Analog output is DAC0. Update at 100Hz")
-OutputVoltage = 0
-Step = 0.02
-increasing = 1
+local OutputVoltage = 0
+local Step = 0.02
+local increasing = 1
 
+local checkInterval=LJ.CheckInterval
 LJ.IntervalConfig(0, 10)                   --set interval to 10 for 10ms
+local mbWrite=MB.W
 
 while true do
-  if LJ.CheckInterval(0) then               --interval completed
+  if checkInterval(0) then               --interval completed
     if increasing == 1 then
       OutputVoltage = OutputVoltage + Step
     else
@@ -23,7 +25,7 @@ while true do
       OutputVoltage = 0
     end
 
-    MB.W(1000, 3, OutputVoltage)            --Set DAC0. Address is 1000, type is 3
+    mbWrite(1000, 3, OutputVoltage)            --Set DAC0. Address is 1000, type is 3
     print(OutputVoltage)
   end
 end

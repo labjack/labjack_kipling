@@ -47,8 +47,9 @@ FIO0PWM.init(FIO0PWM, 0, 50, 50, 0, 1)--init
 FIO0PWM.enable(FIO0PWM)
 
 LJ.IntervalConfig(1, 500)      --set interval to 500 for 500ms
+local checkInterval=LJ.CheckInterval
 while true do               --test the function an osciliscope on FIO0
-  if LJ.CheckInterval(1) then
+  if checkInterval(1) then
     state1 = MB.R(2003)--buttons on FIO2 and FIO3
     state2 = MB.R(2002)
     if state1 == 1 then
