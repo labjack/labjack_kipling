@@ -17,7 +17,7 @@ mbWrite(5003, 0, 3)  --MOSI
 
 mbWrite(5004, 0, 0)  --Mode
 mbWrite(5005, 0, 0)  --Speed
-mbWrite(5006, 0, 1)  --Options, enable CS
+mbWrite(5006, 0, 1)  --Options, disable CS
 mbWrite(5009, 0, 1)  --Num Bytes to Tx/Rx
 
 fioState = 0    --Configure FIO state for frequency
