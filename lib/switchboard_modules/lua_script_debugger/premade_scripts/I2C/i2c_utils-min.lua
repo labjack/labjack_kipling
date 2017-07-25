@@ -81,7 +81,7 @@ myI2C.configure(myI2C, 13, 12, 0, i2cOptions, 0x69, 0)
 --Find connected I2C slave device addresses.
 addrs = myI2C.find_all(myI2C, 0, 127)
 --Print out the found I2C slave devices.
-print(string.format('Num Found Addresses %d', table.getn(addrs)))
-for key,val in pairs(addrs) do print(string.format('%d: 0x%x, %d (dec)',key,val,val)) end
+print(string.format("Num Found Addresses %d", table.getn(addrs)))
+for key,val in pairs(addrs) do print(string.format("%d: 0x%x, %d (dec)",key,val,val)) end
 --Stop the Lua Script
 MB.W(6000, 1, 0)

@@ -11,7 +11,7 @@ local mbRead=MB.R
 
 local OStreamBuffSize = 1024      -- number of bytes to allocate to the buffer
 
-local streamScanFreq = 10000      -- How often the DAC's value will be updated
+local streamScanFreq = 10000      -- How often the DACs value will be updated
 local waveFreq = 100              -- Frequency of the sine wave.
 local waveShape = 0               -- 0=sine, 1=square, 2=triangle
 local waveAmp = 1.0               -- Wave amplitude
@@ -109,7 +109,7 @@ while true do
       mbWrite(4004, 1, 1)                  -- 1 Chn per scan
       mbWrite(4008, 3, 0)                  -- Automatic Settling
       mbWrite(4010, 1, 0)                  -- Automatic Resolution
-      mbWrite(4012, 1, 256)                -- Use a real small buffer, because we don't care about any data.
+      mbWrite(4012, 1, 256)                -- Use a real small buffer, because we do not care about any data.
       mbWrite(4014, 1, 0)                  -- No advanced clocking options
       mbWrite(4016, 1, 0)                  -- No advanced targets
       mbWrite(4020, 1, 0)                  -- Continuous operation; disable burst.
