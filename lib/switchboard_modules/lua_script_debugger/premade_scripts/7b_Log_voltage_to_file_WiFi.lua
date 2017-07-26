@@ -74,7 +74,7 @@ while true do
     local i = 1
     local fg = 0
     indexVal = 1
-    fg = LJ.CheckFileFlag()           --host software wants to read Lua's active file? Is FILE_IO_LUA_SWITCH_FILE=1?
+    fg = LJ.CheckFileFlag()           --host software wants to read LUAs active file? Is FILE_IO_LUA_SWITCH_FILE=1?
     if fg == 1 then
       NumFn = NumFn + 1               --increment filename
       Filename = Filepre..string.format("%02d", NumFn)..Filesuf

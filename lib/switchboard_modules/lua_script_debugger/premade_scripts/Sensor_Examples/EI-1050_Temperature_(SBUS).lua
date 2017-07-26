@@ -12,7 +12,7 @@ print("Communicate with an EI-1050 digital temperature and humidity probe")
 --White Wire (Clock) FIO1
 --Brown Wire (Enable) N/C
 
---Note: A second sensor could share the clock & data lines, but you'd need to 
+--Note: A second sensor could share the clock & data lines, but you would need to 
 --begin using the enable wire
 
 local mbRead=MB.R			--local functions for faster processing

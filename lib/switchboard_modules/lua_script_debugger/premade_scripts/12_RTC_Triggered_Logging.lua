@@ -64,7 +64,7 @@ while true do
     Modulo = Minute - math.floor(Minute/Loginterval_min)*Loginterval_min
     PollCount = PollCount + 1
     print ("RTC poll events since last save: ", PollCount)
-    fg = checkFileFlag()           --host software wants to read Lua's active file? W 1 to address 6500, U32
+    fg = checkFileFlag()           --host software wants to read LUAs active file? W 1 to address 6500, U32
     if fg == 1 then
       NumFn = NumFn + 1               --increment filename
       Filename = Filepre..string.format("%02d", NumFn)..Filesuf

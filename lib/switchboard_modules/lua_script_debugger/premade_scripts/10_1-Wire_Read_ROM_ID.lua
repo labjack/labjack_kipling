@@ -12,13 +12,13 @@ print ("Read the ROM ID of a single DS18B20 1-Wire sensor.")
 --which prevent the signal from reaching logic thresholds
 
 local SensorPinNum = 8	-- EIO0 aka digital I/O 8
-local ROM = {}          -- The sensor registration number stored in ROM, it's 64-bits so requires 4 16-bit numbers
+local ROM = {}          -- The sensor registration number stored in ROM, its 64-bits so requires 4 16-bit numbers
 ROM[1] = 0
 ROM[2] = 0
 ROM[3] = 0
 ROM[4] = 0
 
---Configure T7's 1-wire settings
+--Configure T7s 1-wire settings
 MB.W(5300, 0, SensorPinNum)	    --ONEWIRE_DQ_DIONUM data line (DQ)
 MB.W(5307, 0, 51)	              --ONEWIRE_FUNCTION set to 51=Read, 240=Search
 

@@ -71,7 +71,7 @@ while runApp do
         dataStr = dataStr .. dataChar
       end
       
-      print('Data:',dataStr)
+      print("Data:",dataStr)
     end
     
     -- Decide when to exit
@@ -83,5 +83,5 @@ while runApp do
   end
 end
 
-print('Script Finished')
+print("Script Finished")
 mbWrite(6000, 1, 0)

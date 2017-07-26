@@ -14,9 +14,9 @@ function PWM.init (self, ichan, ifreq, iduty, iclk, idivisor)--duty should be in
   self.clk = iclk
   self.divisor = idivisor--store local values for future use ^^^^
   MB.W(44900+iclk*10, 0, 0)--Disable clock source
-  --Set Clock#'s divisor and roll value to configure frequency
-  MB.W(44901+iclk*10, 0, idivisor)--Configure Clock#'s divisor
-  MB.W(44904+iclk*10, 1, irollValue)--Configure Clock#'s roll value
+  --Set Clock# divisor and roll value to configure frequency
+  MB.W(44901+iclk*10, 0, idivisor)--Configure Clock# divisor
+  MB.W(44904+iclk*10, 1, irollValue)--Configure Clock# roll value
   MB.W(44900+iclk*10, 0, 1)--enable clock source
   --Configure EF Channel Registers:
   MB.W(44000+ichan*2, 1, 0)--Disable the EF system for initial configuration
@@ -34,7 +34,7 @@ function PWM.changeFreq (self, ifreq)
   irollValue = (80000000/ifreq)/self.divisor
   self.rollValue = irollValue--store local values for future use
   self.freq = ifreq
-  MB.W(44904+self.clk*10, 1, self.rollValue)--Configure Clock#'s roll value
+  MB.W(44904+self.clk*10, 1, self.rollValue)--Configure Clock# roll value
   MB.W(44300+self.chan*2, 1, self.rollValue*self.duty/100)--reconfigure duty cycle
 end
 function PWM.changeDutyCycle (self, iduty)

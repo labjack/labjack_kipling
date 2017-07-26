@@ -15,11 +15,11 @@ print("Welcome, please Load an example to get started!")
 
 --Helpful tips-------------------------------------------------------------
 
---'if' statements should be followed by 'then'
---'while' and 'if' statements require an 'end' after the code block
+--"if" statements should be followed by "then"
+--"while" and "if" statements require an "end" after the code block
 --We recommend limiting script length to ~300 lines or less
 --Some functions of Lua are not available (to reduce stack size)
---See 'LabJack Lua functions' code example for a list of integrated functions
+--See "LabJack Lua functions" code example for a list of integrated functions
 --Functions are limited to those in eLua core (embedded Lua)
 
 --Register Matrix(Modbus Map) http://labjack.com/support/modbus/map

@@ -1,7 +1,7 @@
 print("Log voltage to file.  Voltage measured on AIN1.  Store value every 1 second for 10 seconds")
 --Requires SD Card installed inside the T7 or T7-Pro.
 --Requires FW 1.0150 or newer. On older firmware the file must exist already on the SD card
---Older firmware uses 'assert' command: file=assert(io.open(Filename, "w"))
+--Older firmware uses "assert" command: file=assert(io.open(Filename, "w"))
 --timestamp (real-time-clock) available on T7-Pro only
 
 local mbRead=MB.R			--local functions for faster processing

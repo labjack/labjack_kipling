@@ -22,13 +22,13 @@
 		"name": "Helpful Information",
 		"subScripts": [{
 			"name": "Hello World",
-			"location": "lua_script_debugger/premade_scripts/Helpful_Information/Hello World.lua"
+			"location": "lua_script_debugger/premade_scripts/Helpful_Information/Hello_World.lua"
 		}, {
 			"name": "List of LabJack functions",
-			"location": "lua_script_debugger/premade_scripts/Helpful_Information/List of LabJack functions.lua"
+			"location": "lua_script_debugger/premade_scripts/Helpful_Information/List_of_LabJack_functions.lua"
 		}, {
 			"name": "Welcome Screen",
-			"location": "lua_script_debugger/premade_scripts/Helpful_Information/Welcome Screen.lua"
+			"location": "lua_script_debugger/premade_scripts/Helpful_Information/Welcome_Screen.lua"
 		}]
 	}, {
 		"name": "T4 Examples",
@@ -43,43 +43,43 @@
 		"name": "Sensor Examples",
 		"subScripts": [{
 			"name": "DS18B20 Temperature (1-Wire)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/DS18B20 Temperature (1-Wire).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/DS18B20_Temperature_(1-Wire).lua"
 		}, {
 			"name": "DS18S20 (1-Wire) - Advanced",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/DS18S20 (1-Wire) - Advanced.lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/DS18S20_(1-Wire)-Advanced.lua"
 		}, {
 			"name": "EI-1050 Temperature (SBUS)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/EI-1050 Temperature (SBUS).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/EI-1050_Temperature_(SBUS).lua"
 		}, {
 			"name": "LM34CAZ Temperature (voltage)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/LM34CAZ Temperature (voltage).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/LM34CAZ_Temperature_(voltage).lua"
 		}, {
 			"name": "LM34CAZ (voltage) - Advanced",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/LM34CAZ (voltage) - Advanced.lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/LM34CAZ_(voltage)-Advanced.lua"
 		}, {
 			"name": "MB1000 Range Finder (PWM)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/MB1000 Range Finder (PWM).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/MB1000_Range_Finder_(PWM).lua"
 		}, {
 			"name": "MS-360LP PIR Motion (logic)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/MS-360LP PIR Motion (logic).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/MS-360LP_PIR_Motion_(logic).lua"
 		}, {
 			"name": "ADXL345 3-axis Accel (SPI)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/ADXL345 3-axis Accel (SPI).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/ADXL345_3-axis_Accel_(SPI).lua"
 		}, {
 			"name": "OLD - SRF02 Range Finder (I2C)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/SRF02 Range Finder (I2C).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/SRF02_Range_Finder_(I2C).lua"
 		}, {
 			"name": "FGPMMOPA6H Adafruit GPS (UART)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/FGPMMOPA6H Adafruit GPS (UART).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/FGPMMOPA6H_Adafruit_GPS_(UART).lua"
 		}, {
 			"name": "TP-01 Thermocouple (AIN_EF)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/TP-01 Thermocouple (AIN_EF).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/TP-01_Thermocouple_(AIN_EF).lua"
 		}, {
 			"name": "OLD - HMC6352 Magnetometer (I2C)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/HMC6352 Magnetometer (I2C).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/HMC6352_Magnetometer_(I2C).lua"
 		}, {
 			"name": "ES08AII Servo Motor (PWM)",
-			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/ES08AII Servo Motor (PWM).lua"
+			"location": "lua_script_debugger/premade_scripts/Sensor_Examples/ES08AII_Servo_Motor_(PWM).lua"
 		}]
 	}, {
 		"name": "I2C",
@@ -130,40 +130,40 @@
 		"name": "Benchmarking Tests",
 		"subScripts": [{
 			"name": "Speed Test - DIO",
-			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed Test - DIO.lua"
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed_Test-DIO.lua"
 		}, {
 			"name": "Speed Test - DAC",
-			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed Test - DAC.lua"
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed_Test-DAC.lua"
 		}, {
 			"name": "Speed Test - AIN",
-			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed Test - AIN.lua"
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed_Test-AIN.lua"
 		}, {
 			"name": "Speed Test - AIN & PWM",
-			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed Test - AIN and PWM.lua"
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed_Test-AIN_and_PWM.lua"
 		}, {
 			"name": "Speed Test - AIN & DAC",
-			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed Test - AIN and DAC.lua"
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Speed_Test-AIN_and_DAC.lua"
 		}, {
 			"name": "Low-lvl Speed Test - DIO",
-			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Low Level Speed Test - DIO.lua"
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Low_Level_Speed_Test-DIO.lua"
 		}, {
 			"name": "Low-lvl Speed Test - DAC",
-			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Low Level Speed Test - DAC.lua"
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Low_Level_Speed_Test-DAC.lua"
 		}, {
 			"name": "Low-lvl Speed Test - AIN",
-			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Low Level Speed Test - AIN.lua"
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Low_Level_Speed_Test-AIN.lua"
 		}, {
 			"name": "Low-lvl Speed Test - LED",
-			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Low Level Speed Test - Toggle LED.lua"
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/Low_Level_Speed_Test-Toggle_LED.lua"
 		}]
 	}, {
 		"name": "Advanced Scripts",
 		"subScripts": [{
 			"name": "PID Example",
-			"location": "lua_script_debugger/premade_scripts/Advanced_Scripts/13 PID Example.lua"
+			"location": "lua_script_debugger/premade_scripts/Advanced_Scripts/13_PID_Example.lua"
 		}, {
 			"name": "Zerocrossing Detect & Pulse Response",
-			"location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Zerocrossing Pulse Response.lua"
+			"location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Zerocrossing_Pulse_Response.lua"
 		}, {
 			"name": "Task Scheduler",
 			"location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Task-Scheduler_1.0.lua"
@@ -178,65 +178,65 @@
 		"name": "Digital IO EF",
 		"subScripts": [{
 			"name": "High Speed Counter",
-			"location": "lua_script_debugger/premade_scripts/digital_io_ef/High Speed Counter.lua"
+			"location": "lua_script_debugger/premade_scripts/digital_io_ef/High_Speed_Counter.lua"
 		}, {
 			"name": "PWM Library & Example",
-			"location": "lua_script_debugger/premade_scripts/digital_io_ef/PWM Library.lua"
+			"location": "lua_script_debugger/premade_scripts/digital_io_ef/PWM_Library.lua"
 		}]
 	}, {
 		"name": "Voltage Follower",
-		"location": "lua_script_debugger/premade_scripts/0 Voltage Follower.lua"
+		"location": "lua_script_debugger/premade_scripts/0_Voltage_Follower.lua"
 	}, {
 		"name": "Get Device Temperature",
-		"location": "lua_script_debugger/premade_scripts/1 Get Device Temperature.lua"
+		"location": "lua_script_debugger/premade_scripts/1_Get_Device_Temperature.lua"
 	}, {
 		"name": "Toggle DIO 1Hz",
-		"location": "lua_script_debugger/premade_scripts/2 Toggle DIO 1Hz.lua"
+		"location": "lua_script_debugger/premade_scripts/2_Toggle_DIO_1Hz.lua"
 	}, {
 		"name": "Set DAC based on voltage",
-		"location": "lua_script_debugger/premade_scripts/3 Set DAC based on voltage.lua"
+		"location": "lua_script_debugger/premade_scripts/3_Set_DAC_based_on_voltage.lua"
 	}, {
 		"name": "Set DIO based on voltage",
-		"location": "lua_script_debugger/premade_scripts/4 Set DIO based on voltage.lua"
+		"location": "lua_script_debugger/premade_scripts/4_Set_DIO_based_on_voltage.lua"
 	}, {
 		"name": "Output sine wave",
-		"location": "lua_script_debugger/premade_scripts/5 Output sine wave.lua"
+		"location": "lua_script_debugger/premade_scripts/5_Output_sine_wave.lua"
 	}, {
 		"name": "Output triangle wave",
-		"location": "lua_script_debugger/premade_scripts/6 Output triangle wave.lua"
+		"location": "lua_script_debugger/premade_scripts/6_Output_triangle_wave.lua"
 	}, {
 		"name": "Log voltage to file",
-		"location": "lua_script_debugger/premade_scripts/7 Log voltage to file.lua"
+		"location": "lua_script_debugger/premade_scripts/7_Log_voltage_to_file.lua"
 	}, {
 		"name": "Log to file with WiFi",
-		"location": "lua_script_debugger/premade_scripts/7b Log voltage to file WiFi.lua"
+		"location": "lua_script_debugger/premade_scripts/7b_Log_voltage_to_file_WiFi.lua"
 	}, {
 		"name": "Read RTC",
-		"location": "lua_script_debugger/premade_scripts/8 Read RTC.lua"
+		"location": "lua_script_debugger/premade_scripts/8_Read_RTC.lua"
 	}, {
 		"name": "SPI Example",
-		"location": "lua_script_debugger/premade_scripts/9 SPI Example.lua"
+		"location": "lua_script_debugger/premade_scripts/9_SPI_Example.lua"
 	}, {
 		"name": "1-Wire Read ROM ID",
-		"location": "lua_script_debugger/premade_scripts/10 1-Wire Read ROM ID.lua"
+		"location": "lua_script_debugger/premade_scripts/10_1-Wire_Read_ROM_ID.lua"
 	}, {
 		"name": "RTC Triggered Logging",
-		"location": "lua_script_debugger/premade_scripts/12 RTC Triggered Logging.lua"
+		"location": "lua_script_debugger/premade_scripts/12_RTC_Triggered_Logging.lua"
 	}, {
 		"name": "Lua IO USER RAM",
-		"location": "lua_script_debugger/premade_scripts/11 Lua IO RAM.lua"
+		"location": "lua_script_debugger/premade_scripts/11_Lua_IO_RAM.lua"
 	}, {
 		"name": "Lua IO USER RAM FIFO",
-		"location": "lua_script_debugger/premade_scripts/11b USER RAM FIFO.lua"
+		"location": "lua_script_debugger/premade_scripts/11b_USER_RAM_FIFO.lua"
 	}, {
 		"name": "UART Example",
-		"location": "lua_script_debugger/premade_scripts/13 UART Example.lua"
+		"location": "lua_script_debugger/premade_scripts/13_UART_Example.lua"
 	}, {
 		"name": "Average Min Max",
-		"location": "lua_script_debugger/premade_scripts/14 Average Min Max.lua"
+		"location": "lua_script_debugger/premade_scripts/14_Average_Min_Max.lua"
 	}, {
 		"name": "PWM Library",
-		"location": "lua_script_debugger/premade_scripts/15 PWM Library.lua"
+		"location": "lua_script_debugger/premade_scripts/15_PWM_Library.lua"
 	}],
 	"scriptOptions": {
 		"scriptTypeID": "active-lua-script-type",
