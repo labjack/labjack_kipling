@@ -163,7 +163,7 @@
 			"location": "lua_script_debugger/premade_scripts/Advanced_Scripts/13_PID_Example.lua"
 		}, {
 			"name": "Zerocrossing Detect & Pulse Response",
-			"location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Zerocrossing_Pulse_Response.lua"
+			"location": "lua_script_debugger/premade_scripts/Advanced_Scripts/14_Zerocrossing_Pulse_Response.lua"
 		}, {
 			"name": "Task Scheduler",
 			"location": "lua_script_debugger/premade_scripts/Advanced_Scripts/Task-Scheduler_1.0.lua"
