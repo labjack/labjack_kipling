@@ -59,3 +59,6 @@ file = io.open(Filename, "r")
 local line = file:read("*all")
 file:close()
 print(line)
+
+print("Finished Script")
+MB.W(6000, 1, 0);
