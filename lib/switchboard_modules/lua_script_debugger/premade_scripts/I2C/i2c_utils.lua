@@ -86,7 +86,7 @@ myI2C = I2C_Utils
 
 --Calculate the I2C Options value
 i2cOptions = myI2C.calc_options(myI2C,0,1,0)
-print(string.format("I2C Options: %d", i2cOptions))
+print(string.format('I2C Options: %d', i2cOptions))
 
 --Configure the I2C Utility
 myI2C.configure(myI2C, 12, 13, 0, i2cOptions, 0x69, 1)
@@ -95,8 +95,8 @@ myI2C.configure(myI2C, 12, 13, 0, i2cOptions, 0x69, 1)
 addrs = myI2C.find_all(myI2C, 0, 127)
 
 --Print out the found I2C slave devices.
-print(string.format("Num Found Addresses %d", table.getn(addrs)))
-for key,val in pairs(addrs) do print(string.format("%d: 0x%x, %d (dec)",key,val,val)) end
+print(string.format('Num Found Addresses %d', table.getn(addrs)))
+for key,val in pairs(addrs) do print(string.format('%d: 0x%x, %d (dec)',key,val,val)) end
 
 --Stop the Lua Script
 MB.W(6000, 1, 0)

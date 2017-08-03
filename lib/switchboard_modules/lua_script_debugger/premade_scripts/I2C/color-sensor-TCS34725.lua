@@ -23,13 +23,15 @@ I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)--configure the I2C Bus
 
 addrs = I2C.search(0, 127)
 addrsLen = table.getn(addrs)
+found = 0
 for i=1, addrsLen do--verify that the target device was found     
   if addrs[i] == SLAVE_ADDRESS then
     print("I2C Slave Detected")
+    found = 1
     break
   end
 end
-if addrsLen == 0 then
+if found == 0 then
   print("No I2C Slave detected, program stopping")
   MB.W(6000, 1, 0)
 end

@@ -25,13 +25,15 @@ I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)--configure the I2C Bus
 
 addrs = I2C.search(0, 127)
 addrsLen = table.getn(addrs)
+found = 0
 for i=1, addrsLen do--verify that the target device was found     
   if addrs[i] == SLAVE_ADDRESS then
     print("I2C Slave Detected")
+    found = 1
     break
   end
 end
-if addrsLen == 0 then
+if found == 0 then
   print("No I2C Slave detected, program stopping")
   MB.W(6000, 1, 0)
 end
@@ -54,7 +56,7 @@ while true do
       for i=0, 2 do
         table.insert(data, convert_16_bit(raw[(2*i)+2], raw[(2*i)+1], 233))
       end
-      MB.W(46000, 3, data[1])--add X value, in Gs, to the user_ram register
+      MB.W(46000, 3, data[1])--add X value, in G's, to the user_ram register
       MB.W(46002, 3, data[2])--add Y
       MB.W(46004, 3, data[3])--add Z
       print("X", data[1])

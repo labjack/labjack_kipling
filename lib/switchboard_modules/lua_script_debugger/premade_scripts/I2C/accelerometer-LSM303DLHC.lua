@@ -4,6 +4,12 @@
 --Y accel = 46008
 --Z accel = 46010
 
+fwver = MB.R(60004, 3)
+if fwver < 1.0224 then
+  print("This lua script requires a firmware version of 1.0224 or higher. Program Stopping")
+  MB.W(6000, 1, 0)
+end
+
 function convert_16_bit(msb, lsb, conv)--Returns a number, adjusted using the conversion factor. Use 1 if not desired  
   res = 0
   if msb >= 128 then
@@ -19,11 +25,17 @@ I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)--configure the I2C Bus
 
 addrs = I2C.search(0, 127)
 addrsLen = table.getn(addrs)
+found = 0
 for i=1, addrsLen do--verify that the target device was found     
   if addrs[i] == SLAVE_ADDRESS then
     print("I2C Slave Detected")
+    found = 1
     break
   end
+end
+if found == 0 then
+  print("No I2C Slave detected, program stopping")
+  MB.W(6000, 1, 0)
 end
 
 --init slave
@@ -39,7 +51,8 @@ while true do
     -- dataIn = I2C.read(6)[2]  
     for i=0, 5 do
       I2C.write({0x28+i})
-      dataIn = I2C.read(1)
+      dataIn, errorIn = I2C.read(1)
+      print(dataIn[1])
       table.insert(dataRaw, dataIn[1])
     end
     data = {}
@@ -47,9 +60,9 @@ while true do
       table.insert(data, convert_16_bit(dataRaw[1+i*2], dataRaw[2+i*2], (0x7FFF/2)))
       MB.W(46006+i*2, 3, data[i+1])
     end
-    print("X: "..data[1])
-    print("Y: "..data[2])
-    print("Z: "..data[3])
-    print("------")
+    --print("X: "..data[1])
+    --print("Y: "..data[2])
+    --print("Z: "..data[3])
+    --print("------")
   end
 end
