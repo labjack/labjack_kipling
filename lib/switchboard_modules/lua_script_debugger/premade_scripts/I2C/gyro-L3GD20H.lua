@@ -4,6 +4,12 @@
 --Y gyro = 46014
 --Z gyro = 46016
 
+fwver = MB.R(60004, 3)
+if fwver < 1.0224 then
+  print("This lua script requires a firmware version of 1.0224 or higher. Program Stopping")
+  MB.W(6000, 1, 0)
+end
+
 function convert_16_bit(msb, lsb, conv)--Returns a number, adjusted using the conversion factor. Use 1 if not desired  
   res = 0
   if msb >= 128 then
@@ -34,12 +40,12 @@ end
 
 
 --init slave
-I2C.write({0x21, 0x00})--1. Write CTRL2
-I2C.write({0x22, 0x00})--2. Write CTRL3
-I2C.write({0x23, 0x60})--3. Write CTRL4
-I2C.write({0x25, 0x00})--5. Write Reference
-I2C.write({0x24, 0x00})--9. Write CTRL5
-I2C.write({0x20, 0xBF})--10. Write CTRL1
+I2C.write({0x21, 0x00})--1. Write CTRL2, disable filtering
+I2C.write({0x22, 0x00})--2. Write CTRL3, disable interupts
+I2C.write({0x23, 0x60})--3. Write CTRL4, continuous update, MSB at lower addr,2000 deg per second 
+I2C.write({0x25, 0x00})--5. Write Reference to default 0
+I2C.write({0x24, 0x00})--9. Write CTRL5, disable FIFO and interupts
+I2C.write({0x20, 0xBF})--10. Write CTRL1, enable all axes, 380Hz ODR
 
 LJ.IntervalConfig(0, 200)
 while true do
@@ -48,8 +54,8 @@ while true do
     dataRaw = {}
     for i=0, 5 do
       I2C.write({0x28+i})
-      dataIn = I2C.read(1)[2][1]  
-      table.insert(dataRaw, dataIn)
+      dataIn, errorIn = I2C.read(2)
+      table.insert(dataRaw, dataIn[1])
     end
     data = {}
     for i=0, 2 do

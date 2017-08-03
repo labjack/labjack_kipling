@@ -1,0 +1,1 @@
+This directyory is for files that are not Lua scripts themselves, but can be run in conjunction with a lua script to allow a computer to display values or do calculations.

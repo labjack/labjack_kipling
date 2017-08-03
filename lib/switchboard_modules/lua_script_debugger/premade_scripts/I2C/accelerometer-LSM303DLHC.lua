@@ -39,30 +39,29 @@ if found == 0 then
 end
 
 --init slave
-I2C.write({0x20, 0x27})
-I2C.write({0x23, 0x49})
+I2C.write({0x20, 0x27})--Data Rate: 10Hz, disable low-power, enable all axes
+I2C.write({0x23, 0x49})--continuous update, LSB at lower addr, +/- 2g, Hi-Res disable
 
 LJ.IntervalConfig(0, 500)
 while true do
   if LJ.CheckInterval(0) then
-
     dataRaw = {}
-    -- I2C.write({0x28})
-    -- dataIn = I2C.read(6)[2]  
-    for i=0, 5 do
+    for i=0, 5 do --sequentially read the addresses containing the accel data
       I2C.write({0x28+i})
-      dataIn, errorIn = I2C.read(1)
-      print(dataIn[1])
+      dataIn, errorIn = I2C.read(2)
       table.insert(dataRaw, dataIn[1])
     end
     data = {}
-    for i=0, 2 do
+    for i=0, 2 do--convert the data into G's
       table.insert(data, convert_16_bit(dataRaw[1+i*2], dataRaw[2+i*2], (0x7FFF/2)))
       MB.W(46006+i*2, 3, data[i+1])
     end
-    --print("X: "..data[1])
-    --print("Y: "..data[2])
-    --print("Z: "..data[3])
-    --print("------")
+    MB.W(46006, 3, data[1])--add X value, in G's, to the user_ram register
+    MB.W(46008, 3, data[2])--add Y
+    MB.W(46010, 3, data[3])--add Z
+    print("X: "..data[1])
+    print("Y: "..data[2])
+    print("Z: "..data[3])
+    print("------")
   end
 end
