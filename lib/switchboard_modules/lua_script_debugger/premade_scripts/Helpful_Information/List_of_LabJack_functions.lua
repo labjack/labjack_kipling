@@ -94,7 +94,7 @@ end
 --IntervalConfig and CheckInterval work together to make an easy-to-use timing function.
 --Set the desired interval time with IntervalConfig, then use CheckInterval to watch for timeouts. 
 --The interval period will have some jitter but no overall error. Jitter is typically ±30 µs but can be greater depending on 
---processor loading. A small amount of error is induced when the processor's core speed is changed.
+--processor loading. A small amount of error is induced when the processors core speed is changed.
 --Up to 8 different intervals can be active at a time.
 
 

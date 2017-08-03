@@ -11,8 +11,8 @@ local dutyCycle=10--as a percentage
 print("duty cycle:", dutyCycle)
 --configure clock
 mbWrite(44900, 0, 0)     --turn off clk0 for config
-mbWrite(44901, 0, 8)    --Configure Clock0's divisor
-mbWrite(44904, 1, roll) --Configure Clock0's roll value
+mbWrite(44901, 0, 8)    --Configure Clock0 divisor
+mbWrite(44904, 1, roll) --Configure Clock0 roll value
 mbWrite(44900, 0, 1)     --enable clock0
 
 --configure FIO0
@@ -30,7 +30,7 @@ while processing~=3 do
       mbWrite(44000, 1, 1)         --Enable the EF system, PWM wave is now being outputted
       print("duty cycle:", dutyCycle+10)
       processing=1
-    elseif processing==1 then   --'off' state. 
+    elseif processing==1 then   --"off" state.
       mbWrite(44000, 1, 0)         --disable FIO0 after 3 seconds to set the servo position
       dutyCycle=dutyCycle+10    --set NEW DUTY CYCLE TO 10% more than previous
       processing=0

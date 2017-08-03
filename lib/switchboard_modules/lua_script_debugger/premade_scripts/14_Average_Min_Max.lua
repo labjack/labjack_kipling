@@ -39,7 +39,7 @@ while iter<numScans do          --loop as fast as possible until number of scans
     avgData=data0+avgData       --add data to previous data readings (divide to get average later)
   end
 end
-local avg=avgData/numScans            --divide add'd data by the number of scans to get average
+local avg=avgData/numScans            --divide added data by the number of scans to get average
 
 mbWrite(46000,3,avg)                --Write average, min, and max into userRAM
 mbWrite(46002,3,maxV) 

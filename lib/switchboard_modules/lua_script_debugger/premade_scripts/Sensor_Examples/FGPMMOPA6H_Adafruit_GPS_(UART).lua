@@ -33,7 +33,7 @@ mbWrite(5400, 0, 1)      --enable ASYNCH
 PMTK_SET_NMEA_UPDATE_1HZ = "$PMTK220,1000*1F"
 PMTK_API_SET_FIX_CTL_1HZ ="$PMTK300,1000,0,0,0,0*1C"
 PMTK_SET_BAUD_9600 = "$PMTK251,9600*17"
---Lua seems to respond better when variables aren't defined on-the-fly, or reused?
+--Lua seems to respond better when variables are not defined on-the-fly, or reused?
 --in any case, it was working better when these were all explicit and globals
 local strLen = 0
 local strLen1 = 0

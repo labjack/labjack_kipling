@@ -1,7 +1,7 @@
 print("Benchmarking Test: Mirror AIN1 on DAC1 as fast as possible.")
 --This example will output whatever is on AIN1 and mirror it as fast as possible on DAC1
 --Note: Most commonly users should throttle their code execution using the functions:
---'LJ.IntervalConfig(0, 1000)', and 'if LJ.CheckInterval(0) then' ...
+--"LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0) then" ...
 
 
 --The throttle setting can correspond roughly with the length of the Lua script.

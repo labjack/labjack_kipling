@@ -2,7 +2,7 @@ print("Benchmarking Test: Toggle the digital I/O called FIO3 as fast as possible
 --This example will output a digital waveform at ~16kHz to ~18kHz on FIO3
 --It is NOT RECOMMENDED for users to structure their code as is done in this benchmarking test.
 --Most commonly users should throttle their code execution using the functions:
---'LJ.IntervalConfig(0, 1000)', and 'if LJ.CheckInterval(0) then' ...
+--"LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0) then" ...
 
 
 --The throttle setting can correspond roughly with the length of the Lua script.

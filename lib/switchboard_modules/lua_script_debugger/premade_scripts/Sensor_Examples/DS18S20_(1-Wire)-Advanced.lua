@@ -117,14 +117,14 @@ function DS18xx_Exec(target_rom,i)
     local sign = 1
     local signBit = temp / 0x8000
     signBit = math.floor(signBit,0)
-    -- print('raw',temp)
-    -- print('raw',temp,'signBit',signBit)
+    -- print("raw",temp)
+    -- print("raw",temp,"signBit",signBit)
     if(signBit == 1) then
       sign = -1
       temp = 0xFFFF-temp+1
     end
     temp = sign * temp * convMult[i]
-    -- print('temp',temp)
+    -- print("temp",temp)
     retVal = (temp * 1.8) + 32
     isValue = sensorFound
   end
@@ -178,7 +178,7 @@ curDelay = 0
 while true do
   if checkInterval(0) then
     if(curStep == 0) then
-      print('Starting Conversion')
+      print("Starting Conversion")
       DS18xx_GlobStart()
       curDelay = 0
       curStep = 1

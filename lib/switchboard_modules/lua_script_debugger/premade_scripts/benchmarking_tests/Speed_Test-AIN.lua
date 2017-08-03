@@ -1,7 +1,7 @@
-print("Benchmarking Test: Set DAC0 to 2.5V, then 0V as fast as possible.")
---This example will output a waveform at ~13kHz to ~15kHz on DAC0
---Note: Most commonly users should throttle their code execution using the functions:
---'LJ.IntervalConfig(0, 1000)', and 'if LJ.CheckInterval(0) then' ...
+print("Benchmarking Test: Read AIN0 as fast as possible.")
+--This example will read AIN0 at a rate between ~12kHz and ~18kHz
+--Most commonly users should throttle their code execution using the functions:
+--"LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0) then" ...
 
 
 --The throttle setting can correspond roughly with the length of the Lua script.
@@ -12,13 +12,18 @@ LJ.setLuaThrottle(ThrottleSetting)
 ThrottleSetting = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", ThrottleSetting)
 
+--For fastest AIN speeds, T7-PROs must use the 16-bit 
+--high speed converter, instead of the slower 24-bit converter
+MB.W(48005, 0, 1)     --Ensure analog is on
+MB.W(43903, 0, 1)     --set AIN_ALL_RESOLUTION_INDEX to 1(fastest)
+AIN0 = 0
+
 Print_interval_ms = 2000
 c = 0
 LJ.IntervalConfig(0, Print_interval_ms)
 
 while true do
-  MB.W(1000, 3, 2.5)    --write 2.5V to DAC0. Address is 1000, type is 3
-  MB.W(1000, 3, 0.0)    --write 0.0V to DAC0. Address is 1000, type is 3
+  AIN0 = MB.R(0, 3)   --Address of AIN0 is 0, type is 3
   c = c + 1
   if LJ.CheckInterval(0) then
     c = c / (Print_interval_ms / 1000)

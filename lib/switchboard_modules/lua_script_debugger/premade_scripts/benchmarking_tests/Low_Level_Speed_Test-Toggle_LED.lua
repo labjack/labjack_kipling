@@ -1,7 +1,7 @@
 print("Benchmarking Test: Low-Level toggle of orange Status LED as fast as possible.")
 --This example will toggle the orange LED at 30-40kHz
 --Note: Most commonly users should throttle their code execution using the functions:
---'LJ.IntervalConfig(0, 1000)', and 'if LJ.CheckInterval(0) then' ...
+--"LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0) then" ...
 
 
 --The throttle setting can correspond roughly with the length of the Lua script.

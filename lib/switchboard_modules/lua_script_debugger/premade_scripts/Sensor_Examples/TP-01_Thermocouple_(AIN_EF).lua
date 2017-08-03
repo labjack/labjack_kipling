@@ -2,12 +2,12 @@ print("Grab the temperature from a TP-01 thermocouple.")
 --The voltage output from the thermocouple is automatically converted into degK
 --by the T7s AIN Extended Feature for thermocouples.
 --http://labjack.com/support/datasheets/t7/ain/extended-features
---The cold junction compensation is automatically handled by the T7's integrated
+--The cold junction compensation is automatically handled by the T7s integrated
 --temperature sensor, and calculations performed by firmware.
 
 --The TP-01 is a type K thermocouple, which is very affordable on Amazon
 --http://www.amazon.com/Type-Thermocouple-Thermometer-Sensor-TP01/dp/B0087ZR81O
---It's a bit awkward to connect to the screw terminals of a T7, for this example
+--It is a bit awkward to connect to the screw terminals of a T7, for this example
 --it was necessary to reshape the prongs with some pliers.
 
 local mbRead=MB.R			--local functions for faster processing

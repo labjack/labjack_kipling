@@ -116,7 +116,7 @@ while true do
   if checkInterval(0) then   --interval completed
 
     if(curStep == 0) then
-      print('Starting Conversion...')
+      print("Starting Conversion...")
       DS18xx_Start(target_rom)
       curDelay = 0
       curStep = 1
@@ -130,14 +130,14 @@ while true do
       local sign = 1
       local signBit = tempC / 0x8000
       signBit = math.floor(signBit,0)
-      -- print('raw',tempC)
-      -- print('raw',tempC,'signBit',signBit)
+      -- print("raw",tempC)
+      -- print("raw",tempC,"signBit",signBit)
       if(signBit == 1) then
         sign = -1
         tempC = 0xFFFF-tempC+1
       end
       tempC = sign * tempC * ConversionFactorDS18B20
-      -- print('tempC',tempC)
+      -- print("tempC",tempC)
       tempF = (tempC * 1.8) + 32
       if(err == sensorFound) then
         print("Reading:", tempF, "°F\n")

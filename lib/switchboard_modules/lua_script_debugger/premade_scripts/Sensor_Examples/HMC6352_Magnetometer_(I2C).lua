@@ -23,7 +23,7 @@ dataRX[2] = 0x0
 
 mbWrite(5100, 0, 0) --SDA digital I/O. Address is 5100, type is 0, value is 0 (FIO0)
 mbWrite(5101, 0, 1) --SCL digital I/O. Address is 5101, type is 0, value is 1 (FIO1)
-                 -- Don't forget 10kΩ pull-up resistors
+                 -- Do not forget the 10kΩ pull-up resistors
 mbWrite(5102, 0, 60000) --I2C throttle. Set throttle to help with timing
 mbWrite(5103, 0, 0) --I2C options. Restarts will use a stop and a start
 
