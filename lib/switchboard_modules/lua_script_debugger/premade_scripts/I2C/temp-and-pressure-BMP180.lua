@@ -6,8 +6,9 @@
 --46022 thru 46042 = calibration constants
 
 fwver = MB.R(60004, 3)
-if fwver < 1.0224 then
-  print("This lua script requires a firmware version of 1.0224 or higher. Program Stopping")
+devType = MB.R(60000, 3)
+if (fwver < 1.0224 and devType == 7) or (fwver < 0.2037 and devType == 4) then
+  print("This lua script requires a higher firmware version (T7 Requires 1.0224 or higher, T4 requires 0.2037 or higher). Program Stopping")
   MB.W(6000, 1, 0)
 end
 
@@ -21,7 +22,9 @@ function convert_16_bit(msb, lsb, conv)--Returns a number, adjusted using the co
   return res
 end
 
-I2C.config(13, 12, 65516, 0, 0x77, 0)--configure the I2C Bus
+
+SLAVE_ADDRESS = 0x77
+I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)--configure the I2C Bus
 
 addrs = I2C.search(0, 127)
 addrsLen = table.getn(addrs)
@@ -43,9 +46,7 @@ I2C.write({0xF4, 0x2E})
 --verify operation
 I2C.write({0xD0})
 raw = I2C.read(2)
-if raw[1] == 0x55 then
-  print("I2C Slave Detected")
-end
+
 --get calibration data
 cal = {}
 for i=0xAA, 0xBF do

@@ -4,8 +4,9 @@
 -- Value in inches: 46002
 
 fwver = MB.R(60004, 3)
-if fwver < 1.0224 then
-  print("This lua script requires a firmware version of 1.0224 or higher. Program Stopping")
+devType = MB.R(60000, 3)
+if (fwver < 1.0224 and devType == 7) or (fwver < 0.2037 and devType == 4) then
+  print("This lua script requires a higher firmware version (T7 Requires 1.0224 or higher, T4 requires 0.2037 or higher). Program Stopping")
   MB.W(6000, 1, 0)
 end
 
