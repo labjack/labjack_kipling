@@ -3,7 +3,7 @@
 User RAM registers- change these in another program (LabVIEW, Python, C++ and more) to change the state of pins
 To understand this script, it is very important to be familiar with the datasheet
 This script uses only a small amount of features available on the slave devices. 
-Modification of the script can utilize the keypad engine and PWM functionalities of the slave device.
+Modification of the script is needed to utilize the keypad engine and PWM functionalities of the slave device.
 
 chanAdata  = 46080 (USER_RAM0_I32)
 chanBdata  = 46082 (USER_RAM1_I32)
@@ -38,6 +38,7 @@ if found == 0 then
   print("No I2C Slave detected, program stopping")
   MB.W(6000, 1, 0)
 end
+
 --Channel A is 0-7, Channel B is 8-15
 chanAdir = MB.R(46084, 2)--1 = output, 0 = input
 chanBdir = MB.R(46086, 2)
@@ -69,12 +70,10 @@ while true do
   if LJ.CheckInterval(0) then
     if MB.R(46080, 2) ~= data then
       --Read Inputs
-      I2C.write({0x27})
-      print(I2C.read(1)[1])
       I2C.write({0x11})
-      chanAinput = I2C.read(1)
+      chanAinput = I2C.read(2)
       I2C.write({0x11-1})
-      chanBinput = I2C.read(1)
+      chanBinput = I2C.read(2)
       print(chanBinput[1])
       MB.W(46088, 2, chanAinput)
       MB.W(46090, 2, chanBinput)
