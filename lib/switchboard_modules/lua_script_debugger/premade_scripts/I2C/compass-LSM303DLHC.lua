@@ -1,8 +1,8 @@
 --This is an example that uses the LSM303DLHC Accelerometer & Magnetometer on the I2C Bus on EIO4(SCL) and EIO5(SDA)
 --Outputs data to Registers:
---X gyro = 46012
---Y gyro = 46014
---Z gyro = 46016
+--X mag = 46000
+--Y mag = 46002
+--Z mag = 46004
 
 fwver = MB.R(60004, 3)
 devType = MB.R(60000, 3)
@@ -21,7 +21,7 @@ function convert_16_bit(msb, lsb, conv)--Returns a number, adjusted using the co
   return res
 end
 
-SLAVE_ADDRESS = 0x6B
+SLAVE_ADDRESS = 0x1E
 I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)--configure the I2C Bus
 
 addrs = I2C.search(0, 127)
@@ -39,30 +39,28 @@ if found == 0 then
   MB.W(6000, 1, 0)
 end
 
-
 --init slave
-I2C.write({0x21, 0x00})--1. Write CTRL2, disable filtering
-I2C.write({0x22, 0x00})--2. Write CTRL3, disable interupts
-I2C.write({0x23, 0x60})--3. Write CTRL4, continuous update, MSB at lower addr,2000 deg per second 
-I2C.write({0x25, 0x00})--5. Write Reference to default 0
-I2C.write({0x24, 0x00})--9. Write CTRL5, disable FIFO and interupts
-I2C.write({0x20, 0xBF})--10. Write CTRL1, enable all axes, 380Hz ODR
+I2C.write({0x00, 0x14})--Data Output Rate set (30Hz), disable temp sensor
+I2C.write({0x01, 0x20})--Amplifier Gain set (+/-1.3 Gauss)
+I2C.write({0x02, 0x00})-- set mode (continous conversion)
 
-LJ.IntervalConfig(0, 200)
+LJ.IntervalConfig(0, 500)
 while true do
   if LJ.CheckInterval(0) then
 
     dataRaw = {}
     for i=0, 5 do
-      I2C.write({0x28+i})
-      dataIn, errorIn = I2C.read(2)
+      I2C.write({0x03+i})--sequentially read the addresses containing the magnetic field data
+      dataIn = I2C.read(2)  
       table.insert(dataRaw, dataIn[1])
     end
     data = {}
-    for i=0, 2 do
-      table.insert(data, convert_16_bit(dataRaw[1+i*2], dataRaw[2+i*2], (0x7FFF/2000)))
-      MB.W(46012+i*2, 3, data[i+1])
-    end
+    table.insert(data, convert_16_bit(dataRaw[1], dataRaw[2], 1100))--convert the data into useful gauss values
+    table.insert(data, convert_16_bit(dataRaw[3], dataRaw[4], 11000))
+    table.insert(data, convert_16_bit(dataRaw[5], dataRaw[6], 980))
+    MB.W(46000, 3, data[1])--add X value, in Gauss, to the user_ram registers
+    MB.W(46002, 3, data[2])--add Y
+    MB.W(46004, 3, data[3])--add Z
     print("X: "..data[1])
     print("Y: "..data[2])
     print("Z: "..data[3])

@@ -1,3 +1,9 @@
+local hardware = MB.R(60010, 1)
+if(bit.band(hardware, 8) ~= 8) then
+  print("This Lua script requires a microSD card, but a microSD card is not detected. These cards are only preinstalled on the T7-Pro, but can be added to the T7. Power-cycling may be required to detect a newly installed card. Script Stopping")
+  MB.W(6000, 1, 0)--stop script
+end
+
 print("Log voltage to file.  Voltage measured on AIN1.  Store value every 1 second for 10 seconds")
 --Requires SD Card installed inside the T7 or T7-Pro.
 --Requires FW 1.0150 or newer. On older firmware the file must exist already on the SD card

@@ -1,3 +1,21 @@
+local hardware = MB.R(60010, 1)
+local passed = 1
+if(bit.band(hardware, 8) ~= 8) then
+  print("uSD card not detected")
+  passed = 0
+end
+
+if(bit.band(hardware, 2) ~= 2) then
+  print("Wifi module not detected")
+  passed = 0
+end
+if(passed == 0) then
+  print("This Lua script requires a Wifi and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping")
+  MB.W(6000, 1, 0)--stop script
+end
+
+
+
 print("Log voltage to file.  Voltage measured on AIN1 every 50ms.  Store values every 5 seconds")
 --Requires micro SD Card installed inside the T7 or T7-Pro.
 --Requires FW 1.0150 or newer.

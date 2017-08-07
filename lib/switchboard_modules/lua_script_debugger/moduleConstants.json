@@ -84,46 +84,46 @@
 	}, {
 		"name": "I2C",
 		"subScripts": [{
-			"name": "I2C_Utils",
+			"name": "I2C Utilities",
 			"location": "lua_script_debugger/premade_scripts/I2C/i2c_utils.lua"
 		}, {
-			"name": "I2C_Utils-min",
+			"name": "I2C Utilities-Minimal",
 			"location": "lua_script_debugger/premade_scripts/I2C/i2c_utils-min.lua"
 		}, {
-			"name": "10DOF Adafruit PN:1604",
+			"name": "Adafruit 10-DOF IMU Breakout",
 			"location": "lua_script_debugger/premade_scripts/I2C/10DOF-adafruit-1604.lua"
 		}, {
-			"name": "Accel & Compas LSM303DLHC",
-			"location": "lua_script_debugger/premade_scripts/I2C/accel-and-compas-LSM303DLHC.lua"
+			"name": "Accel & Compass Module- LSM303DLHC",
+			"location": "lua_script_debugger/premade_scripts/I2C/accel-and-compass-LSM303DLHC.lua"
 		}, {
-			"name": "Compas LSM303DLHC",
-			"location": "lua_script_debugger/premade_scripts/I2C/compas-LSM303DLHC.lua"
+			"name": "Compass Module- LSM303DLHC",
+			"location": "lua_script_debugger/premade_scripts/I2C/compass-LSM303DLHC.lua"
 		}, {
-			"name": "Accelerometer LSM303DLHC",
+			"name": "Accelerometer- LSM303DLHC",
 			"location": "lua_script_debugger/premade_scripts/I2C/accelerometer-LSM303DLHC.lua"
 		}, {
-			"name": "Accelerometer ADXL345",
+			"name": "Accelerometer- ADXL345",
 			"location": "lua_script_debugger/premade_scripts/I2C/accelerometer-ADXL345.lua"
 		}, {
-			"name": "Color Sensor TCS34725",
+			"name": "Color Sensor- TCS34725",
 			"location": "lua_script_debugger/premade_scripts/I2C/color-sensor-TCS34725.lua"
 		}, {
-			"name": "Gyro L3GD20H",
+			"name": "Gyro- L3GD20H",
 			"location": "lua_script_debugger/premade_scripts/I2C/gyro-L3GD20H.lua"
 		}, {
-			"name": "Gyro PS-ITG-3200",
+			"name": "Gyro- PS-ITG-3200",
 			"location": "lua_script_debugger/premade_scripts/I2C/gyro-PS-ITG-3200.lua"
 		}, {
-			"name": "Proximity VL6180X",
+			"name": "Time-Of-Flight Proximity Sensor- VL6180X",
 			"location": "lua_script_debugger/premade_scripts/I2C/proximity-VL6180X.lua"
 		}, {
-			"name": "Ranging SRF02",
+			"name": "Ultrasonic Ranging Sensor- SRF02",
 			"location": "lua_script_debugger/premade_scripts/I2C/ranging-SRF02.lua"
 		}, {
-			"name": "Temperature & Pressure BMP180",
+			"name": "Temperature & Barometric Pressure Sensor- BMP180",
 			"location": "lua_script_debugger/premade_scripts/I2C/temp-and-pressure-BMP180.lua"
 		}, {
-			"name": "IO Expander SX1059",
+			"name": "Output I/O Expander- SX1059",
 			"location": "lua_script_debugger/premade_scripts/I2C/io-expander-SX1059.lua"
 		}]
 	}, {
