@@ -51,13 +51,13 @@ end
 --init mag slave
 MB.W(5104, 0, magAddr)--change target to accelerometer
 I2C.write({0x00, 0x14})--Data Output Rate set (30Hz), disable temp sensor
-I2C.write({0x01, 0x20})--Amplifier Gain set (+/-1.3 Gauss)
+I2C.write({0x01, 0x20})--Amplifier Gain set (+-1.3 Gauss)
 I2C.write({0x02, 0x00})-- set mode (continous conversion)
 
 --init accel slave
 MB.W(5104, 0, accelAddr)--change target to accelerometer
 I2C.write({0x20, 0x27})--Data Rate: 10Hz, disable low-power, enable all axes
-I2C.write({0x23, 0x49})--continuous update, LSB at lower addr, +/- 2g, Hi-Res disable
+I2C.write({0x23, 0x49})--continuous update, LSB at lower addr, +- 2g, Hi-Res disable
 
 LJ.IntervalConfig(0, 500)
 while true do
@@ -84,7 +84,7 @@ while true do
       table.insert(dataAccelRaw, dataAccelIn[1])
     end
     dataAccel = {}
-    for i=0, 2 do--convert the data into G's
+    for i=0, 2 do--convert the data into Gs
       table.insert(dataAccel, convert_16_bit(dataAccelRaw[1+i*2], dataAccelRaw[2+i*2], (0x7FFF/2)))
       MB.W(46006+i*2, 3, dataAccel[i+1])
     end
@@ -93,7 +93,7 @@ while true do
     MB.W(46000, 3, dataMag[1])--add magX value, in Gauss, to the user_ram registers
     MB.W(46002, 3, dataMag[2])--add magY
     MB.W(46004, 3, dataMag[3])--add magZ
-    MB.W(46006, 3, dataAccel[1])--add accelX value, in G's, to the user_ram register
+    MB.W(46006, 3, dataAccel[1])--add accelX value, in Gs, to the user_ram register
     MB.W(46008, 3, dataAccel[2])--add accelY
     MB.W(46010, 3, dataAccel[3])--add accelZ
     print("Accel X: "..dataAccel[1].." Mag X: "..dataMag[1])
