@@ -41,7 +41,7 @@ end
 
 --init slave
 I2C.write({0x20, 0x27})--Data Rate: 10Hz, disable low-power, enable all axes
-I2C.write({0x23, 0x49})--continuous update, LSB at lower addr, +/- 2g, Hi-Res disable
+I2C.write({0x23, 0x49})--continuous update, LSB at lower addr, +- 2g, Hi-Res disable
 
 LJ.IntervalConfig(0, 500)
 while true do
@@ -53,11 +53,11 @@ while true do
       table.insert(dataRaw, dataIn[1])
     end
     data = {}
-    for i=0, 2 do--convert the data into G's
+    for i=0, 2 do--convert the data into Gs
       table.insert(data, convert_16_bit(dataRaw[1+i*2], dataRaw[2+i*2], (0x7FFF/2)))
       MB.W(46006+i*2, 3, data[i+1])
     end
-    MB.W(46006, 3, data[1])--add X value, in G's, to the user_ram register
+    MB.W(46006, 3, data[1])--add X value, in Gs, to the user_ram register
     MB.W(46008, 3, data[2])--add Y
     MB.W(46010, 3, data[3])--add Z
     print("X: "..data[1])

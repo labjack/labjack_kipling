@@ -1,4 +1,4 @@
---This is an example that uses the LSM303DLHC Accelerometer & Magnetometer on the I2C Bus on EIO4(SCL) and EIO5(SDA)
+--This is an example that uses the L3GD20H Gyroscope on the I2C Bus on EIO4(SCL) and EIO5(SDA)
 --Outputs data to Registers:
 --X gyro = 46012
 --Y gyro = 46014

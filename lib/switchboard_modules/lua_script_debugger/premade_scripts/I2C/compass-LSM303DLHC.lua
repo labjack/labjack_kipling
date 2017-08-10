@@ -41,7 +41,7 @@ end
 
 --init slave
 I2C.write({0x00, 0x14})--Data Output Rate set (30Hz), disable temp sensor
-I2C.write({0x01, 0x20})--Amplifier Gain set (+/-1.3 Gauss)
+I2C.write({0x01, 0x20})--Amplifier Gain set (+-1.3 Gauss)
 I2C.write({0x02, 0x00})-- set mode (continous conversion)
 
 LJ.IntervalConfig(0, 500)
