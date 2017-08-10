@@ -1,6 +1,6 @@
 --This is an example that uses the Adafruit 10-DOF IMU BREAKOUT, which contains the BMP180 Pressure sensor, L3GD20H Gyro, and the LSM303DLHC Accelerometer & Magnetometer
---BMP180 was not implimented into this script
---This example is a combination of the L3GD20H Gyro, LSM303 Accelerometer, and LSM303 Magentometer Lua scripts
+--BMP180 was not implemented into this script
+--This example is a combination of the L3GD20H Gyro, LSM303 Accelerometer, and LSM303 Magnetometer Lua scripts
 --This is configured for the I2C Bus on EIO4(SCL) and EIO5(SDA)
 --Outputs data to Registers:
 --X mag = 46000
@@ -76,7 +76,7 @@ I2C.write({0x24, 0x00})--9. Write CTRL5, disable FIFO and interupts
 I2C.write({0x20, 0xBF})--10. Write CTRL1, enable all axes, 380Hz ODR
 
 --Begin loop
-LJ.IntervalConfig(0, 100)
+LJ.IntervalConfig(0, 10)
 while true do
   if LJ.CheckInterval(0) then
     --begin Magnetometer data read--
