@@ -15,9 +15,6 @@ mbWrite(5005, 0, 0)  --Speed
 mbWrite(5006, 0, 1)  --Options, disable CS
 mbWrite(5009, 0, 1)  --Num Bytes to Tx/Rx
 
-fioState = 0    --Configure FIO state for frequency
-mbWrite(2000, 0, fioState)
-
 local testData = {{0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0x1, 0x7}, 
                   {0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF}}
 local dataSelect = 2-- 1 or 2 for each dataset, change this for different data sets
