@@ -6,6 +6,12 @@ local mbRead=MB.R
 local InputVoltage = 0
 local NoMotion = 0
 
+local inPin = 2002--FIO2. Changed if T4 instead of T7
+devType = MB.R(60000, 3)
+if devType == 4 then
+	inPin = 2004--FIO4
+end
+
 LJ.IntervalConfig(0, 1000)           --set interval to 1000 for 1000ms
 local checkInterval=LJ.CheckInterval
 while true do
@@ -13,7 +19,7 @@ while true do
     InputVoltage = mbRead(0, 3)           --read address 0 (AIN0), type is 3
     print("Ambient light, AIN1: ", InputVoltage, "V")
     --ConvertVoltageToLux(InputVoltage) function not yet made, depends on pull-down resistor (see datasheet link above)
-    NoMotion = mbRead(2002, 0)			--read address 2002 (FIO2), type is 0
+    NoMotion = mbRead(inPin, 0)			--read address 2002 (FIO2), type is 0
     if NoMotion == 0 then
       --code response to motion here
       print("Motion Detected!")

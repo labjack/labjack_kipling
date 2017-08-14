@@ -9,6 +9,12 @@ print("Benchmarking Test: Toggle the digital I/O called FIO3 as fast as possible
 --A rule of thumb for deciding a throttle setting is Throttle = (3*NumLinesCode) + 20
 ThrottleSetting = 48    --Default throttle setting is 10 instructions
 
+local outPin = 2003--FIO3. Changed if T4 instead of T7
+devType = MB.R(60000, 3)
+if devType == 4 then
+	outPin = 2005--FIO5
+end
+
 LJ.setLuaThrottle(ThrottleSetting)
 ThrottleSetting = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", ThrottleSetting)
@@ -18,8 +24,8 @@ c = 0
 LJ.IntervalConfig(0, Print_interval_ms)
 
 while true do
-  MB.W(2003, 0, 1)      --write 1 to FIO3. Address is 2003, type is 0
-  MB.W(2003, 0, 0)      --write 0 to FIO3. Address is 2003, type is 0
+  MB.W(outPin, 0, 1)      --write 1 to FIO3. Address is 2003, type is 0
+  MB.W(outPin, 0, 0)      --write 0 to FIO3. Address is 2003, type is 0
   c = c + 1
   if LJ.CheckInterval(0) then
     c = c / (Print_interval_ms / 1000)

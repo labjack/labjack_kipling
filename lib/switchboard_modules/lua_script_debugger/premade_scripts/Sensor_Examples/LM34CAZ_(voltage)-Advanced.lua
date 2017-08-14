@@ -13,6 +13,12 @@ local Temperature_Threshold_F = 80
 local above_thresh_DIO_state = 1      --1 is output high 3.3V
 local under_thresh_DIO_state = 0      --0 is output low 0V
 
+local outPin = 2003--FIO3. Changed if T4 instead of T7
+devType = MB.R(60000, 3)
+if devType == 4 then
+	outPin = 2005--FIO5
+end
+
 mbWrite(48005, 0, 1)               --Ensure analog is on
 mbWrite(43903, 0, 0)               --Set AIN_ALL_RESOLUTION_INDEX to auto
 
@@ -28,10 +34,10 @@ while true do
     
     --Code response to temperature changes
     if Temperature_F > Temperature_Threshold_F then
-      mbWrite(2003, 0, above_thresh_DIO_state)  --Address is 2003 (FIO3), type is 0
+      mbWrite(outPin, 0, above_thresh_DIO_state)  --Address is 2003 or 2005, type is 0
       print("Above Thresh!")
     else
-      mbWrite(2003, 0, under_thresh_DIO_state)  --Address is 2003 (FIO3), type is 0
+      mbWrite(outPin, 0, under_thresh_DIO_state)  --Address is 2003 or 2005, type is 0
       print("Under Threshold")
     end
     

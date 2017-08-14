@@ -1,3 +1,4 @@
+--NOTE: THIS EXAMPLE IS OLD. Updated I2C examples can be found in the I2C folder.
 print("Communicate with a HMC6352 via I2C")
 --When using I2C remember to wire SDA and SCL to VS through a resistor (pull-up).
 --Usually something in the range of 1.8kΩ to 20kΩ will work, but HMC6352 documentation
@@ -21,8 +22,8 @@ local dataRX = {}
 dataRX[1] = 0x0    --initialize receive array to all 0s
 dataRX[2] = 0x0
 
-mbWrite(5100, 0, 0) --SDA digital I/O. Address is 5100, type is 0, value is 0 (FIO0)
-mbWrite(5101, 0, 1) --SCL digital I/O. Address is 5101, type is 0, value is 1 (FIO1)
+mbWrite(5100, 0, 13) --SDA digital I/O. Address is 5100, type is 0, value is 13 (EIO5)
+mbWrite(5101, 0, 12) --SCL digital I/O. Address is 5101, type is 0, value is 12 (EIO4)
                  -- Do not forget the 10kΩ pull-up resistors
 mbWrite(5102, 0, 60000) --I2C throttle. Set throttle to help with timing
 mbWrite(5103, 0, 0) --I2C options. Restarts will use a stop and a start
