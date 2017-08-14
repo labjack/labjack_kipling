@@ -16,7 +16,7 @@ print("Save some data to RAM for subsequent access by an external computer.")
 --add this USER_RAM0_F32 register to the active watch area, and
 --view CoolData changing in real-time!
 
-local CoolData = 0    --Data that will be availalbe to external computers
+local CoolData = 0    --Data that will be available to external computers
 
 LJ.IntervalConfig(0, 100)   --Define a data collection interval 100 = 100ms
 local checkInterval=LJ.CheckInterval

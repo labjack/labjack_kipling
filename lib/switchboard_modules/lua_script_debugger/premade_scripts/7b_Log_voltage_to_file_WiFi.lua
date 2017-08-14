@@ -1,3 +1,12 @@
+print("Log voltage to file.  Voltage measured on AIN1 every 50ms.  Store values every 5 seconds")
+--Requires micro SD Card installed inside the T7 or T7-Pro.
+--Requires FW 1.0150 or newer.
+--This example is for logging to file while using WiFi, since WiFi needs 5s or more to initialize
+--without comm. to/from the uSD card. http://labjack.com/support/datasheets/t7/sd-card
+--Timestamp (real-time-clock) available on T7-Pro only
+--Some helpful Lua file operations in section 5.7 http://www.lua.org/manual/5.1/manual.html#5.7
+--Some file info docs in 21.2 of the Lua documentation http://www.lua.org/pil/21.2.html
+
 local hardware = MB.R(60010, 1)
 local passed = 1
 if(bit.band(hardware, 8) ~= 8) then
@@ -13,17 +22,6 @@ if(passed == 0) then
   print("This Lua script requires a Wifi and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping")
   MB.W(6000, 1, 0)--stop script
 end
-
-
-
-print("Log voltage to file.  Voltage measured on AIN1 every 50ms.  Store values every 5 seconds")
---Requires micro SD Card installed inside the T7 or T7-Pro.
---Requires FW 1.0150 or newer.
---This example is for logging to file while using WiFi, since WiFi needs 5s or more to initialize
---without comm. to/from the uSD card. http://labjack.com/support/datasheets/t7/sd-card
---Timestamp (real-time-clock) available on T7-Pro only
---Some helpful Lua file operations in section 5.7 http://www.lua.org/manual/5.1/manual.html#5.7
---Some file info docs in 21.2 of the Lua documentation http://www.lua.org/pil/21.2.html
 
 local Filepre = "FWi_"
 local Filesuf = ".csv"

@@ -7,6 +7,7 @@ local OutputVoltage = 0
 
 local mbWrite=MB.W
 
+--If max amplitude is needed, use 2.5V centerline and 2.25V amplitude. VS ranges from 4.75-5.00V depending on setup.
 local amplitude = 2           --amplitude in volts (maximum of 5V for VS)
 local offset = 2.5            --offset, or centerline voltage in volts
 local frequency = 1           --frequency in Hz

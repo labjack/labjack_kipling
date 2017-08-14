@@ -1,5 +1,5 @@
-print("Sampling average/min/max: Read AIN1 at set rate for certian number of samples. Outputs average, minimum, and maximum")
---Example program that samples an analog input at a set frequency for a certian number of samples.
+print("Sampling average/min/max: Read AIN1 at set rate for certain number of samples. Outputs average, minimum, and maximum")
+--Example program that samples an analog input at a set frequency for a certain number of samples.
 --Takes the average, minimum, and maximum of sampled data and prints it to the console as well as saving them to the first 3 addresses of user RAM
 
 --------------------------------------------------------------

@@ -1,5 +1,10 @@
 print("Read the real-time-clock RTC, print the timestamp.")
---The RTC is only inluded on the -Pro variant of the T7
+local hardware = MB.R(60010, 1)
+if(bit.band(hardware, 4) ~= 4) then
+  print("This Lua script requires a Real-Time Clock (RTC), but an RTC is not detected. These modules are only preinstalled on the T7-Pro, and cannt be added to the T7 or T4. Script Stopping")
+  MB.W(6000, 1, 0)--stop script
+end
+--The RTC is only included on the -Pro variant of the T7
 --Address 61510 has the timestamp in a format that can be read by Lua scripts
 --Address 61500 should not be used due to truncation during conversion from u32 to float
 --Requires FW 1.0128 or newer
