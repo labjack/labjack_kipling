@@ -1,6 +1,7 @@
 --NOTE: This example does not use the PWM library (found under Digital IO EF) but is fully functional
 print("Example for servo motor using PWM output.")
 --Users must first configure a digital I/O for PWM out
+--NOTE: Servos draw a significant amount of current. Capacitors may be needed to prevent brownout conditions. 
 --After PWM output is enabled, the duty cycle can be updated easily by changing DIO0_EF_CONFIG_A
 --http://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
 --default for most servo motors is 50 Hz or one cycle every 20ms
@@ -21,7 +22,7 @@ devType = MB.R(60000, 3)
 if devType == 7 then--if T7
 	DIO_EF_pin_offset = 0--for FIO 0
 elseif devType == 4 then--if T4
-	DIO_EF_pin_offset = 8--for FIO4
+	DIO_EF_pin_offset = 12--for FIO6
 end
 
 --configure FIO

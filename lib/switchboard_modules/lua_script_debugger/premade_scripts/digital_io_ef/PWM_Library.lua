@@ -3,22 +3,22 @@
 --See the device datasheet for more information on PWM output.
 
 --Functions to configure T7/T4
-LJ.IntervalConfig(1, 40)
-local outPin = 0--FIO0. Changed if T4 instead of T7
-devType = MB.R(60000, 3)
-if devType == 4 then
-	outPin = 6--FIO6 on T4
-end
+
+outPin = 0--FIO0. Changed if T4 instead of T7
+-- devType = MB.R(60000, 3)
+-- if devType == 4 then
+-- 	outPin = 6--FIO6 on T4
+-- end
+-- Create PWM library.
 PWM = {}--add local variables here
-myPWM = PWM
 function PWM.init (self, ichan, ifreq, iduty, iclk, idivisor)--duty should be in %, not decimal
   irollValue = (80000000/ifreq)/idivisor
-  self.rollValue = irollValue--store local values for future use
+  self.rollValue = irollValue--store local values for future use vvvv
   self.chan = ichan
   self.freq = ifreq
   self.duty = iduty
   self.clk = iclk
-  self.divisor = idivisor--store local values for future use
+  self.divisor = idivisor--store local values for future use ^^^^
   MB.W(44900+iclk*10, 0, 0)--Disable clock source
   --Set Clock# divisor and roll value to configure frequency
   MB.W(44901+iclk*10, 0, idivisor)--Configure Clock# divisor
@@ -48,17 +48,22 @@ function PWM.changeDutyCycle (self, iduty)
   MB.W(44300+self.chan*2, 1, self.rollValue*self.duty/100)--Configure duty cycle
 end
 
-myPWM.init(myPWM, outPin, 50, 50, 0, 1)--init on outPin with 50Hz (20ms) and 50% duty cycle
+myPWM = PWM
+
+myPWM.init(myPWM, 0, 50, 5, 0, 1)--init on outPin with 50Hz (20ms) and 50% duty cycle
 myPWM.enable(myPWM)
 
+LJ.IntervalConfig(1, 1000)
 while true do               --you can test the function an using an LED or an oscilloscope on the FIO pin
   if LJ.CheckInterval(1) then
+    newDC = MB.R(46000, 3)
+    newFreq = MB.R(46002, 3)
     if myPWM.duty ~= newDC then
       myPWM.changeDutyCycle(myPWM, newDC)
-	end
-	if myPWM.freq ~= newFreq then
-	  myPWM.changeFreq(myPWM, newFreq)
-	end
+    end
+    if (myPWM.freq ~= newFreq and newFreq ~= 0) then
+      myPWM.changeFreq(myPWM, newFreq)
+    end
     print("On FIO0 a ", myPWM.freq, "Hz signal at a ", myPWM.duty, "% duty cycle has been generated")--print out what is being generated
   end
 end
