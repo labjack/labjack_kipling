@@ -22,8 +22,16 @@ mbWrite(5400, 0, 0)      --disable ASYNCH during config
 --4800,9600,14400,19200,38400,57600,115200
 mbWrite(5420, 1, 9600)   --baud, 9600 is default of FGPMMOPA6H
 
-mbWrite(5405, 0, 1)      --RX set to FIO1
-mbWrite(5410, 0, 0)      --TX set to FIO0
+devType = MB.R(60000, 3)
+if devType == 7 then--if T7
+	mbWrite(5405, 0, 1)      --RX set to FIO1
+	mbWrite(5410, 0, 0)      --TX set to FIO0
+elseif devType == 4 then--if T4
+	mbWrite(5405, 0, 5)      --RX set to FIO5
+	mbWrite(5410, 0, 4)      --TX set to FIO4
+end
+
+
 mbWrite(5460, 0, 0)      --ASYNCH_PARITY set to 0=none
 mbWrite(5430, 0, 600)    --ASYNCH_RX_BUFFER_SIZE_BYTES set to 600
 

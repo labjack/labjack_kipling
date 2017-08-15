@@ -13,6 +13,11 @@ print("Grab the temperature from a TP-01 thermocouple.")
 local mbRead=MB.R			--local functions for faster processing
 local mbWrite=MB.W
 
+devType = MB.R(60000, 3)--Check that this is a T7
+if devType == 4 then
+	print("This script is compatable only with T7 devices. Check T4 documentation for Thermocouple capability.")
+end
+
 --Configure the T7 -------------------------------------------------------------
 local TempK = 0           --Thermocouple is wired to AIN1 and GND
 local TempF = 0

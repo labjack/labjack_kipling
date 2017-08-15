@@ -8,7 +8,7 @@ local NoMotion = 0
 
 local inPin = 2002--FIO2. Changed if T4 instead of T7
 devType = MB.R(60000, 3)
-if devType == 4 then
+if devType == 4 then--if T4
 	inPin = 2004--FIO4
 end
 

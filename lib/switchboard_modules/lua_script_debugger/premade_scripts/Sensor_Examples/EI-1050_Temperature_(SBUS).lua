@@ -6,10 +6,10 @@ print("Communicate with an EI-1050 digital temperature and humidity probe")
 --For more on the EI-1050, see http://labjack.com/support/ei-1050/datasheet
 
 --WIRES
---Red Wire (Power) FIO2 set to output high
+--Red Wire (Power) FIO2 (FIO6 on T4) set to output high
 --Black Wire (GND) GND
---Green Wire (Data) FIO0
---White Wire (Clock) FIO1
+--Green Wire (Data) FIO0 (FIO4 on T4)
+--White Wire (Clock) FIO1  (FIO5 on T4)
 --Brown Wire (Enable) N/C
 
 --Note: A second sensor could share the clock & data lines, but you would need to 
@@ -22,9 +22,17 @@ local Temperature_K = 0
 local Temperature_F = 0
 local Relative_Humidity = 0
 
-mbWrite(30277, 0, 2)				--SBUS_ALL_POWER_DIONUM, set to FIO2
-mbWrite(30200, 0, 0)				--SBUS0_DATA_DIONUM, set to FIO0
-mbWrite(30225, 0, 1)				--SBUS0_CLOCK_DIONUM, set to FIO1
+--Configure T7s SPI pins
+devType = MB.R(60000, 3)
+if devType == 7 then--if T7
+	mbWrite(30277, 0, 2)  --SBUS_ALL_POWER_DIONUM, set to FIO2
+	mbWrite(30200, 0, 0)  --SBUS0_DATA_DIONUM, set to FIO0
+	mbWrite(30225, 0, 1)  --SBUS0_CLOCK_DIONUM, set to FIO1
+elseif devType == 4 then--if T4
+	mbWrite(30277, 0, 6)  --SBUS_ALL_POWER_DIONUM, set to FIO2
+	mbWrite(30200, 0, 4)  --SBUS0_DATA_DIONUM, set to FIO0
+	mbWrite(30225, 0, 5)  --SBUS0_CLOCK_DIONUM, set to FIO1
+end
 
 LJ.IntervalConfig(0, 2000)           --set interval to 2000ms, 2s
 local checkInterval=LJ.CheckInterval

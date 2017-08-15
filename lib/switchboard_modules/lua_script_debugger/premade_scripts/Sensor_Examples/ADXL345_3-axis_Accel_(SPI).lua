@@ -1,4 +1,5 @@
 print("Communicate with an ADXL345 SPI accelerometer")
+--An I2C version of this script is available under the I2C Lua script folder
 --For more information about SPI on the T7, see the T7 datasheet
 --http://labjack.com/support/datasheets/t7/digital-io/spi
 --For more information on the ADXL345, see the datasheet
@@ -12,19 +13,24 @@ local mbWriteArray=MB.WA
 
 --T7 SPI configuration----------------------------------------------------------
 --Using 4 wire SPI (typical)
-local DIO_CS = 3      --Chip Select pin is wired to FIO3 (if auto CS)
-local DIO_CLK = 2     --Clock pin is wired to FIO2
-local DIO_MISO = 1    --Master In, Slave Out is wired to FIO1
-local DIO_MOSI = 0    --Master Out, Slave In is wired to FIO0
 
 local SPI_MODE = 3    --CPOL/CPHA = 1/1
 local SPI_SPEED = 0   --Default=0 corresponds to 65536, which  is ~1MHz xfer speed
 local AUTO_CS_DIS = 0 --Default=0 corresponds with automatic chip select enabled
 
-mbWrite(5000, 0, DIO_CS)       --SPI_CS_DIONUM is address 5000, type is 0
-mbWrite(5001, 0, DIO_CLK)      --SPI_CLK_DIONUM is address 5001
-mbWrite(5002, 0, DIO_MISO)     --SPI_MISO_DIONUM is 5002
-mbWrite(5003, 0, DIO_MOSI)     --SPI_MOSI_DIONUM is 5003
+--Configure T7s SPI pins
+devType = MB.R(60000, 3)
+if devType == 7 then--if T7
+	mbWrite(5000, 0, 0)  --CS (FIO0)
+	mbWrite(5001, 0, 1)  --CLK
+	mbWrite(5002, 0, 2)  --MISO
+	mbWrite(5003, 0, 3)  --MOSI (FIO3)
+elseif devType == 4 then--if T4
+	mbWrite(5000, 0, 4)  --CS (FIO4)
+	mbWrite(5001, 0, 5)  --CLK
+	mbWrite(5002, 0, 6)  --MISO
+	mbWrite(5003, 0, 7)  --MOSI (FIO7)
+end
 
 mbWrite(5004, 0, SPI_MODE)     --SPI_MODE is address 5004
 mbWrite(5005, 0, SPI_SPEED)    --SPI_SPEED_THROTTLE is address 5005

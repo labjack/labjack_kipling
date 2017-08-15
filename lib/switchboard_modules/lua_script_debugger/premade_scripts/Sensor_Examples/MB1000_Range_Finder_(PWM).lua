@@ -20,19 +20,26 @@ mbWrite(44901, 0, 1)			--DIO_EF_CLOCK0_DIVISOR, set to 1, PWM resolution is 12.5
 mbWrite(44904, 1, 0)			--DIO_EF_CLOCK0_ROLL_VALUE,
 mbWrite(44900, 0, 1)			--DIO_EF_CLOCK0_ENABLE, re-enable the clock
 
+DIO_EF_pin_offset = 0
+devType = MB.R(60000, 3)
+if devType == 7 then--if T7
+	DIO_EF_pin_offset = 0--for FIO 0
+elseif devType == 4 then--if T4
+	DIO_EF_pin_offset = 8--for FIO4
+end
 --configure the extended feature
-mbWrite(44000, 1, 0)     --DIO0_EF_ENABLE, disable the extended feature during config
-mbWrite(44100, 1, 5)			--DIO0_EF_INDEX, index 5 corresponds with the PWM input mode
-mbWrite(44200, 1, 0)     --DIO0_EF_OPTIONS, configure what clock source to use, use clock0.
+mbWrite(44000+DIO_EF_pin_offset, 1, 0)     --DIO0_EF_ENABLE, disable the extended feature during config
+mbWrite(44100+DIO_EF_pin_offset, 1, 5)     --DIO0_EF_INDEX, index 5 corresponds with the PWM input mode
+mbWrite(44200+DIO_EF_pin_offset, 1, 0)     --DIO0_EF_OPTIONS, configure what clock source to use, use clock0.
 
-mbWrite(44000, 1, 1)			--DIO0_EF_ENABLE enable PWM input
+mbWrite(44000+DIO_EF_pin_offset, 1, 1)			--DIO0_EF_ENABLE enable PWM input
 --END CONFIG SETTINGS--------------------------------------------------------------------------------
 
 LJ.IntervalConfig(0, 333)      --set interval to 333 for 333ms
 local checkInterval=LJ.CheckInterval
 while true do
   if checkInterval(0) then		    --interval completed
-    PulseWidth = mbRead(3600, 3)	    --DIO0_EF_READ_A_F_AND_RESET gets the measured high time in seconds
+    PulseWidth = mbRead(3600+DIO_EF_pin_offset, 3)	    --DIO0_EF_READ_A_F_AND_RESET gets the measured high time in seconds
     Range = PulseWidth / 0.000147   --apply scale factor
     print("Range: ", Range, "inches")
   end
