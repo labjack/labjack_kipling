@@ -13,13 +13,16 @@ if(bit.band(hardware, 8) ~= 8) then
   print("uSD card not detected")
   passed = 0
 end
-
+if(bit.band(hardware, 4) ~= 4) then
+  print("RTC module not detected")
+  passed = 0
+end
 if(bit.band(hardware, 2) ~= 2) then
   print("Wifi module not detected")
   passed = 0
 end
 if(passed == 0) then
-  print("This Lua script requires a Wifi and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping")
+  print("This Lua script requires an RTC module, Wifi, and a microSD card, but one or many are not detected. These features are only preinstalled on the T7-Pro. Script Stopping")
   MB.W(6000, 1, 0)--stop script
 end
 

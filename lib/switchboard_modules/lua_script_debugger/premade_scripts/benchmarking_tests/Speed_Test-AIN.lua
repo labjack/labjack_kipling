@@ -15,7 +15,7 @@ print ("Current Lua Throttle Setting: ", ThrottleSetting)
 --For fastest AIN speeds, T7-PROs must use the 16-bit 
 --high speed converter, instead of the slower 24-bit converter
 MB.W(48005, 0, 1)     --Ensure analog is on
-MB.W(43903, 0, 1)     --set AIN_ALL_RESOLUTION_INDEX to 1(fastest)
+MB.W(43903, 0, 1)     --set AIN_ALL_RESOLUTION_INDEX to 1(fastest, on both T7 and T4)
 AIN0 = 0
 
 Print_interval_ms = 2000

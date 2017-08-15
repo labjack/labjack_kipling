@@ -7,6 +7,13 @@ print("Benchmarking Test: Read AIN0 as fast as possible, and configure Duty Cycl
 --A rule of thumb for deciding a throttle setting is Throttle = (3*NumLinesCode) + 20
 ThrottleSetting = 50    --Default throttle setting is 10 instructions
 
+devType = MB.R(60000, 3)
+if devType == 7 then--if T7
+	dio_ef_chan = 44300--FIO0 on the T7
+elseif devType == 4 then--if T4
+	dio_ef_chan = 44308--FIO4 on the T4
+end
+
 LJ.setLuaThrottle(ThrottleSetting)
 ThrottleSetting = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", ThrottleSetting)
@@ -28,7 +35,7 @@ while true do
   --Insert logic for determining the new duty cycle
   NewDC=4000;
   --end Logic
-  MB.W(44300, 1, NewDC)  --Change duty cycle to 50% DIO0_EF_CONFIG_A
+  MB.W(dio_ef_chan, 1, NewDC)  --Change duty cycle to 50% DIO0_EF_CONFIG_A
   c = c + 1
   if LJ.CheckInterval(0) then
     c = c / (Print_interval_ms / 1000)

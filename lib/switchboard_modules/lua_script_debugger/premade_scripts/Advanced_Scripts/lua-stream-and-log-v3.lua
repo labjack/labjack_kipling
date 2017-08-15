@@ -1,15 +1,24 @@
-local hardware = MB.R(60010, 1)
-if(bit.band(hardware, 8) ~= 8) then
-  print("This Lua script requires a microSD card, but a microSD card is not detected. These cards are only preinstalled on the T7-Pro, but can be added to the T7. Power-cycling may be required to detect a newly installed card. Script Stopping")
-  MB.W(6000, 1, 0)--stop script
-end
-
 print("Stream and log AIN0 at 4kS/s to file, nominal cal constants")
 dateStr = ""
 
 local mbWrite=MB.W
 local mbReadArray=MB.RA
 local checkInterval=LJ.CheckInterval
+
+local hardware = MB.R(60010, 1)
+local passed = 1
+if(bit.band(hardware, 8) ~= 8) then
+  print("uSD card not detected")
+  passed = 0
+end
+if(bit.band(hardware, 4) ~= 4) then
+  print("RTC module not detected")
+  passed = 0
+end
+if(passed == 0) then
+  print("This Lua script requires an RTC module and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping")
+  MB.W(6000, 1, 0)--stop script
+end
 
 local table = {}
 table[1] = 0    

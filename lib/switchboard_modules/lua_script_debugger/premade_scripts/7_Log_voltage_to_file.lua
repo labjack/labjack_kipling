@@ -1,14 +1,24 @@
-local hardware = MB.R(60010, 1)
-if(bit.band(hardware, 8) ~= 8) then
-  print("This Lua script requires a microSD card, but a microSD card is not detected. These cards are only preinstalled on the T7-Pro, but can be added to the T7. Power-cycling may be required to detect a newly installed card. Script Stopping")
-  MB.W(6000, 1, 0)--stop script
-end
-
 print("Log voltage to file.  Voltage measured on AIN1.  Store value every 1 second for 10 seconds")
 --Requires SD Card installed inside the T7 or T7-Pro.
 --Requires FW 1.0150 or newer. On older firmware the file must exist already on the SD card
 --Older firmware uses "assert" command: file=assert(io.open(Filename, "w"))
 --timestamp (real-time-clock) available on T7-Pro only
+
+local hardware = MB.R(60010, 1)
+local passed = 1
+if(bit.band(hardware, 8) ~= 8) then
+  print("uSD card not detected")
+  passed = 0
+end
+
+if(bit.band(hardware, 4) ~= 4) then
+  print("RTC module not detected")
+  passed = 0
+end
+if(passed == 0) then
+  print("This Lua script requires an RTC module and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping")
+  MB.W(6000, 1, 0)--stop script
+end
 
 local mbRead=MB.R			--local functions for faster processing
 local mbReadArray=MB.RA

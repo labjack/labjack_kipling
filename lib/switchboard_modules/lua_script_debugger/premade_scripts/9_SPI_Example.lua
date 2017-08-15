@@ -5,10 +5,18 @@ print ("SPI Example. Jumper FIO2 (MISO) and FIO3 (MOSI) together")
 local mbWrite = MB.W
 
 --Configure T7s SPI pins
-mbWrite(5000, 0, 0)  --CS
-mbWrite(5001, 0, 1)  --CLK
-mbWrite(5002, 0, 2)  --MISO
-mbWrite(5003, 0, 3)  --MOSI
+devType = MB.R(60000, 3)
+if devType == 7 then--if T7
+	mbWrite(5000, 0, 0)  --CS (FIO0)
+	mbWrite(5001, 0, 1)  --CLK
+	mbWrite(5002, 0, 2)  --MISO
+	mbWrite(5003, 0, 3)  --MOSI (FIO3)
+elseif devType == 4 then--if T4
+	mbWrite(5000, 0, 4)  --CS (FIO4)
+	mbWrite(5001, 0, 5)  --CLK
+	mbWrite(5002, 0, 6)  --MISO
+	mbWrite(5003, 0, 7)  --MOSI (FIO7)
+end
 
 mbWrite(5004, 0, 0)  --Mode
 mbWrite(5005, 0, 0)  --Speed

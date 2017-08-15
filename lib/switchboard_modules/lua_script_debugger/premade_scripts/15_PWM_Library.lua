@@ -48,7 +48,7 @@ function PWM.changeDutyCycle (self, iduty)
 end
 myPWM.init(myPWM, outPin, 50, 50, 0, 1)--init
 myPWM.enable(myPWM)
-while true do               --test the function an using an osciliscope on the FIO pin
+while true do               --test the function an using an oscilloscope on the FIO pin
   if LJ.CheckInterval(1) then
     state1 = MB.R(2003)--buttons on FIO2 and FIO3
     state2 = MB.R(2002)

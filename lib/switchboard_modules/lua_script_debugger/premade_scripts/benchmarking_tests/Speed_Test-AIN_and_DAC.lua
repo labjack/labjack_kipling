@@ -16,7 +16,7 @@ local mbw=MB.W
 local mbr=MB.R
 
 mbw(48005, 0, 1)     --Ensure analog is on
-mbw(43903, 0, 1)     --set AIN_ALL_RESOLUTION_INDEX to 1 (default is 8 on t7, 9 on PRO)
+mbw(43903, 0, 1)     --set AIN_ALL_RESOLUTION_INDEX to 1 (fastest on T7 and T4)
 mbw(43900, 3,10)     --set range to +-10V
 
 local numCycles = 30000

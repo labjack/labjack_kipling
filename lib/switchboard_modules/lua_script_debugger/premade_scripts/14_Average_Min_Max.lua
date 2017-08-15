@@ -14,8 +14,15 @@ local mbWrite=MB.W        --create local functions for reading/writing at faster
 local mbRead=MB.R
 
 mbWrite(48005, 0, 1)     --Ensure analog is on
-mbWrite(43903, 0, 8)     --set AIN_ALL_RESOLUTION_INDEX to 8 (default is 8 on t7, 9 on PRO)
-mbWrite(43900, 3,10)     --set range to +-10V 
+
+devType = MB.R(60000, 3)
+if devType == 7 then--if T7
+	mbWrite(43903, 0, 8)     --set AIN_ALL_RESOLUTION_INDEX to 8 (default is 8 on t7, 9 on PRO)
+	mbWrite(43900, 3,10)     --set range to +-10V 
+elseif devType == 4 then--if T4
+	mbWrite(43903, 0, 0)     --set AIN_ALL_RESOLUTION_INDEX to Automatic (Usually highest available)
+end
+
 
 local avgData=0
 local iter=0
