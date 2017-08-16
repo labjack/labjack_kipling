@@ -6,6 +6,21 @@ print("Log voltage of AIN1 to file every 10 minutes. RTC value checked every 100
 --Note that as of Firmware v1.0150, some SD cards do not work.
 --Check for the latest firwmare updates http://labjack.com/support/firmware/t7/beta
 
+local hardware = MB.R(60010, 1)
+local passed = 1
+if(bit.band(hardware, 8) ~= 8) then
+  print("uSD card not detected")
+  passed = 0
+end
+if(bit.band(hardware, 4) ~= 4) then
+  print("RTC module not detected")
+  passed = 0
+end
+if(passed == 0) then
+  print("This Lua script requires an RTC and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping.")
+  MB.W(6000, 1, 0)--stop script
+end
+
 local mbRead=MB.R			--local functions for faster processing
 local mbWrite=MB.W
 local mbReadArray=MB.RA

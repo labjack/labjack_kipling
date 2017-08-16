@@ -1,5 +1,5 @@
 print("This is a PID example script that sets a DAC0 output.")
---Requires FW 1.0166 or greater
+--Requires FW 1.0166 or greater on the T7
 --Gets a setpoint from a host computer.  Host computer writes new setpoint to modbus address 46000
 
 local timeStep = 2000 --timestep of the loop in ms, change according to your process (see theory on sampling rate in PID control)

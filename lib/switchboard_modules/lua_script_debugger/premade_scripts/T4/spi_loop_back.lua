@@ -75,8 +75,8 @@ spi = SPI_Utils
 --Define DIO Numbers
 spiCS=8
 spiCLK=9
-spiMISO=10
-spiMOSI=11
+spiMISO=6
+spiMOSI=7
 
 --Define SPI Options
 spiMode = spi.calc_mode(spi, false, false)

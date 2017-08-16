@@ -1,18 +1,26 @@
 print("Basic UART example.")
-print("Please connect a jumper wire between FIO0 and FIO1")
+print("Please connect a jumper wire between FIO0 and FIO1 (FIO4 and FIO5 on T4)")
 print("")
 --UART part of the T7 datasheet http://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
 
 local mbRead=MB.R			--local functions for faster processing
 local mbWrite=MB.W
 
+local RXPin = 1--FIO1. Changed if T4 instead of T7
+local TXPin = 0--FIO0
+devType = MB.R(60000, 3)
+if devType == 4 then
+	RXPin = 5--FIO5 on T4
+	TXPin = 4--FIO4
+end
+
 mbWrite(5400, 0, 0)      --disable ASYNCH during config
 
 -- Baud Example Options: 4800,9600,14400,19200,38400,57600,115200
 mbWrite(5420, 1, 9600)   --baud, 9600 is default of FGPMMOPA6H
 
-mbWrite(5405, 0, 1)      --RX set to FIO1
-mbWrite(5410, 0, 0)      --TX set to FIO0
+mbWrite(5405, 0, RXPin)      --RX set to FIO1 (FIO5 on T4)
+mbWrite(5410, 0, TXPin)      --TX set to FIO0 (FIO4 on T4)
 mbWrite(5460, 0, 0)      --ASYNCH_PARITY set to 0=none
 mbWrite(5430, 0, 600)    --ASYNCH_RX_BUFFER_SIZE_BYTES set to 600
 

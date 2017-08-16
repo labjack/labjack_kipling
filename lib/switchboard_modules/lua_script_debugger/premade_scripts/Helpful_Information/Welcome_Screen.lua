@@ -4,7 +4,7 @@ print("Welcome, please Load an example to get started!")
 
 --Overview----------------------------------------------------------------
 
---The T7 has an internal Lua v5.1 interpreter and compiler which are
+--The T7 and T4 both have an internal Lua v5.1 interpreter and compiler which are
 --used to build and execute small Lua scripts.  This section
 --of Kipling is dedicated to transferring the script files to the
 --T7, and then reading the interpreted output in the console.  Because 
@@ -12,6 +12,13 @@ print("Welcome, please Load an example to get started!")
 --the T7, not the Kipling IDE.  LabJack recommends firmware 1.0134 or newer.
 --Old firmware is not good at handling Lua syntax and compiler errors.
 
+--What Lua can do for your LabJack-----------------------------------------
+
+--Lua scripts are especially useful for fail-safe design, standalone logging,
+--time-sensitive I/O, and wave generation. Example Lua scripts are a very
+--helpful starting place for developing your own system. Data can be passed
+--from Lua to a program running on a computer using the USER_RAM registers,
+--allowing Lua to be part of a much larger system.
 
 --Helpful tips-------------------------------------------------------------
 
@@ -24,6 +31,8 @@ print("Welcome, please Load an example to get started!")
 
 --Register Matrix(Modbus Map) http://labjack.com/support/modbus/map
 --Scripting information       http://labjack.com/support/datasheets/t7/scripting
+--Example Scripts are built in to Kipling, under the </> tab above
+--Examples are also online: https://labjack.com/support/software/examples/lua-scripting
 
 
 --Other Comments-----------------------------------------------------------

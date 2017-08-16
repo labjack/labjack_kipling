@@ -1,5 +1,5 @@
-print("Sampling average/min/max: Read AIN1 at set rate for certian number of samples. Outputs average, minimum, and maximum")
---Example program that samples an analog input at a set frequency for a certian number of samples.
+print("Sampling average/min/max: Read AIN1 at set rate for certain number of samples. Outputs average, minimum, and maximum")
+--Example program that samples an analog input at a set frequency for a certain number of samples.
 --Takes the average, minimum, and maximum of sampled data and prints it to the console as well as saving them to the first 3 addresses of user RAM
 
 --------------------------------------------------------------
@@ -14,8 +14,15 @@ local mbWrite=MB.W        --create local functions for reading/writing at faster
 local mbRead=MB.R
 
 mbWrite(48005, 0, 1)     --Ensure analog is on
-mbWrite(43903, 0, 8)     --set AIN_ALL_RESOLUTION_INDEX to 8 (default is 8 on t7, 9 on PRO)
-mbWrite(43900, 3,10)     --set range to +-10V 
+
+devType = MB.R(60000, 3)
+if devType == 7 then--if T7
+	mbWrite(43903, 0, 8)     --set AIN_ALL_RESOLUTION_INDEX to 8 (default is 8 on t7, 9 on PRO)
+	mbWrite(43900, 3,10)     --set range to +-10V 
+elseif devType == 4 then--if T4
+	mbWrite(43903, 0, 0)     --set AIN_ALL_RESOLUTION_INDEX to Automatic (Usually highest available)
+end
+
 
 local avgData=0
 local iter=0

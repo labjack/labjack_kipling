@@ -1,4 +1,4 @@
---Documentation updated for T7 firmware 1.0161 or newer
+--Documentation updated for T7 firmware 1.0161 or newer, T4 firmware 1.0 or newer
 --This is the list of LabJack-specific functions.  There are many more native Lua functions
 --http://www.lua.org/manual/5.2/manual.html#3
 --All LabJack addresses can be found in the Register Matrix(Modbus Map)

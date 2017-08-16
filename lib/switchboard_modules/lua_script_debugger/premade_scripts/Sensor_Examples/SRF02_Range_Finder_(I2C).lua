@@ -1,3 +1,4 @@
+--This is an old example. The newer, easier to use version is located in the I2C folder.
 print("Communicate with an SRF02 I2C ultrasonic range sensor")
 --When using I2C remember to wire SDA and SCL to VS through a resistor (pull-up).
 --Usually something in the range of 1.8kΩ to 4.7kΩ will work, but SRF02 documentation

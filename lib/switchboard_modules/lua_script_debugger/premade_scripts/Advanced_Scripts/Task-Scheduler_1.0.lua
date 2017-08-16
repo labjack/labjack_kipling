@@ -1,5 +1,5 @@
 print("LabJack Lua Task Scheduler Example. Version 1.0")
--- Requires Firmware 1.0199 or higher
+-- Requires Firmware 1.0199 or higher (for T7)
 -- This script demonstrates a simple task scheduler used to execute multiple tasks
 -- at regular intervals to 1ms resolution.
 -- Note:  Increase scheduler resolution to reduce CPU load on the T7 processor.

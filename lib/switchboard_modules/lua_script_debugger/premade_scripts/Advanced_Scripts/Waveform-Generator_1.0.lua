@@ -3,7 +3,7 @@ print("LabJack Lua Waveform Generator Example. Version 1.0")
 -- User memory is used to set the scan frequency,
 -- wave frequency, wave shape, amplitude and offset.
 -- Once the script is running switch to the "Register Matrix" tab and add
--- regsierst 46000, 46002, 46004, 46006, and 46008. See below for which register
+-- registers 46000, 46002, 46004, 46006, and 46008. See below for which register
 -- affects which attribute. Updating those values will update the output wave.
 
 local mbWrite=MB.W				  --create local functions for faster processing

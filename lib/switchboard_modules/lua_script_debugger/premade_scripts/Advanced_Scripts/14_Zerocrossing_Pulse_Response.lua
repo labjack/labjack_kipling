@@ -1,9 +1,17 @@
---This example will output a pulse on FIO1 a specified amout of time after a 
--- rising edge is detected on FIO0. The delay between detection of a crossing 
+--This example will output a pulse on FIO1 (FIO4 for T4) a specified amount of time after a 
+-- rising edge is detected on FIO0 (FIO5 on T4). The delay between detection of a crossing 
 -- and the beginning of the pulse is controlled by the F32 value in USER_RAM at 
 -- modbus address 46000-46001. 
 print("Begin")
 local state = "pulseUpdate"
+
+local inPin = 2000--FIO0
+local outPin = 2001--FIO1. Changed if T4 instead of T7
+devType = MB.R(60000, 3)
+if devType == 4 then
+	inPin = 2004--FIO4
+	outPin = 2005--FIO5
+end
 
 local mbRead=MB.R						--Create local functions for faster processing
 local mbWrite=MB.W

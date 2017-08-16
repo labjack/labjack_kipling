@@ -1,5 +1,5 @@
 print("Communicate with several DS18S20 1-wire sensors")
---Requires Firmware 1.0161 or newer
+--Requires Firmware 1.0161 or newer on the T7. FW 1.0 or newer required on T4
 --First change the ROM IDs of each sensor to use this example. Also change eioNum
 --Discover the ROM IDs using the "1-Wire Read ROM ID" example.
 --Note, there are several kinds of 1-wire sensors from Maxim.
