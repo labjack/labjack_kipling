@@ -85,7 +85,7 @@
 		"name": "I2C",
 		"subScripts": [{
 			"name": "I2C Library Tutorial & HW Check",
-            "location": "lua_script_debugger/premade_scripts/I2C/i2c_library_tutorial.lua"
+      "location": "lua_script_debugger/premade_scripts/I2C/i2c_library_tutorial.lua"
 		}, {
 			"name": "Adafruit 10-DOF IMU Breakout",
 			"location": "lua_script_debugger/premade_scripts/I2C/10DOF-adafruit-1604.lua"
@@ -123,12 +123,12 @@
 			"name": "Output I/O Expander- SX1059",
 			"location": "lua_script_debugger/premade_scripts/I2C/io-expander-SX1059.lua"
 		}, {
-            "name": "OLD - I2C_Utils",
-            "location": "lua_script_debugger/premade_scripts/I2C/i2c_utils.lua"
-        }, {
-            "name": "OLD - I2C_Utils-min",
-            "location": "lua_script_debugger/premade_scripts/I2C/i2c_utils-min.lua"
-        }]
+      "name": "OLD - I2C_Utils",
+      "location": "lua_script_debugger/premade_scripts/I2C/i2c_utils.lua"
+    }, {
+      "name": "OLD - I2C_Utils-min",
+      "location": "lua_script_debugger/premade_scripts/I2C/i2c_utils-min.lua"
+    }]
 	}, {
 		"name": "Benchmarking Tests",
 		"subScripts": [{
