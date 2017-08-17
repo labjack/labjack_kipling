@@ -136,9 +136,18 @@ var device_tests = {
 		debugLS('  - Getting File Listing, "ls".');
 		device.readdir()
 		.then(function(res) {
-			test.equal(res.fileNames.length, 0, 'SD Card should not have any files on it');
+			if(res.fileNames.length === 0) {
+				test.ok(true, 'SD Card should have 0 files/folders on it.');
+			} else {
+				if(res.fileNames.length == 1) {
+					test.deepEqual(res.fileNames, ['System Volume Information'], 'SD Card should only have the "System Volume Information" folder.');
+				} else {
+					test.ok(false, 'SD Card should have at most 1 folder on it.  There are: ' + res.fileNames.length.toString() + ' files/folders on the card.');
+				}
+			}
+			// test.equal(res.fileNames.length, 0, 'SD Card should not have any files on it');
 			debugLS('  - Got ls:', res.fileNames);
-			testLog('  - Got ls:', res.fileNames);
+			testLog('  - Got ls:'.green, res.fileNames);
 			test.done();
 		}, function(err) {
 			errorLog('ERROR!!', err);

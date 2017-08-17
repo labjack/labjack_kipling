@@ -183,7 +183,7 @@ var device_tests = {
 		device.deleteFile({'path': testFileName})
 		.then(function(res) {
 			debugDF('  - Deleted Test File', res);
-			testLog('  - Deleted Test File');
+			testLog('  - Deleted Test File'.green);
 			test.done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
@@ -208,7 +208,7 @@ var device_tests = {
 		device.readdir()
 		.then(function(res) {
 			debugLS('  - Got ls:', res.fileNames);
-			testLog('  - Got ls:', res.fileNames);
+			testLog('  - Got ls:'.green, res.fileNames);
 
 			var testFileName = 'log1.csv';
 			var foundFile = false;
