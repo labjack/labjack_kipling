@@ -589,58 +589,74 @@ function openAllDeviceScanner() {
         }
         var erroniusDevices = [];
 
-        var errorCodesToReport = [1230, 1226];
+        // var errorCodesToReport = [1230, 1226];
         function parseException(exception) {
-            try {
-                var deviceHints = exception.initFailure.deviceHints;
-                // console.log('Exception', exception);
-                // console.log('Device Hints', deviceHints);
+            function createErroniusDevice(dt, ct, ip, port, errorCode, errorMessage) {
+                return {
+                    'dt': dt,
+                    'dtString': driver_const.DRIVER_DEVICE_TYPE_NAMES[dt],
+                    'dtName': driver_const.DEVICE_TYPE_NAMES[dt],
 
-                var dt = driver_const.deviceTypes[deviceHints.knownDeviceType];
-                var dtString = driver_const.DRIVER_DEVICE_TYPE_NAMES[dt];
-                var dtName = driver_const.DEVICE_TYPE_NAMES[dt];
+                    'ct': ct,
+                    'ctString': driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct],
+                    'ctName': driver_const.CONNECTION_TYPE_NAMES[ct],
 
-                var ip = deviceHints.ip;
-                var port = deviceHints.port;
+                    'ip': ip,
+                    'port': port,
 
-                var ct = driver_const.connectionTypes[deviceHints.initProtocol];
-                if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_WIFI_UDP_PORT) {
-                    ct = driver_const.LJM_CT_WIFI_UDP;
-                } else if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_ETH_UDP_PORT) {
-                    ct = driver_const.LJM_CT_ETHERNET_UDP;
+                    'errorCode': exception.errorCode,
+                    'errorMessage': exception.errorMessage,
+
+                    'includeError': true,
                 }
-                var ctString = driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct];
-                var ctName = driver_const.CONNECTION_TYPE_NAMES[ct];
-                
-                var includeErrorCode = true;
+            }
+
+            try {
+                // console.log('Exception', exception);
+
+                var errorCode = exception.errorCode;
+                var errorMessage = exception.errorMessage;
+
+                var erroniusDev = null;
                 try {
+                    var deviceHints = exception.initFailure.deviceHints;
+                    // console.log('Device Hints', deviceHints);
+
+                    var dt = driver_const.deviceTypes[deviceHints.knownDeviceType];
+                    var ip = deviceHints.ip;
+                    var port = deviceHints.port;
+                    var ct = driver_const.connectionTypes[deviceHints.initProtocol];
+                    if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_WIFI_UDP_PORT) {
+                        ct = driver_const.LJM_CT_WIFI_UDP;
+                    } else if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_ETH_UDP_PORT) {
+                        ct = driver_const.LJM_CT_ETHERNET_UDP;
+                    }
+
                     if(typeof(exception.initFailure.deviceHints.discovered) !== 'undefined') {
-                        if(!exception.initFailure.deviceHints.discovered) {
-                            includeErrorCode = false;
+                        if(exception.initFailure.deviceHints.discovered) {
+                            erroniusDev = createErroniusDevice(
+                                dt, ct, ip, port, errorCode, errorMessage
+                            );
                         }
                     }
-                } catch(err) {
-
                 }
-                
+                catch(err) {
+                    var dev = exception.device;
+                    // console.log('Error device', dev);
+                    erroniusDev = createErroniusDevice(
+                        driver_const.deviceTypes[dev.deviceType],
+                        driver_const.connectionTypes[dev.ljmConnectionType],
+                        dev.ip,
+                        dev.port,
+                        errorCode,
+                        errorMessage
+                    );
+                }
+
                 // if(errorCodesToReport.indexOf(exception.errorCode) >= 0) {
-                if(includeErrorCode) {
+                if(erroniusDev.includeError) {
                     // console.log('Saved Exception', exception);
-                    erroniusDevices.push({
-                        'dt': dt,
-                        'dtString': dtString,
-                        'dtName': dtName,
-
-                        'ct': ct,
-                        'ctString': ctString,
-                        'ctName': ctName,
-
-                        'ip': ip,
-                        'port': port,
-
-                        'errorCode': exception.errorCode,
-                        'errorMessage': exception.errorMessage,
-                    });
+                    erroniusDevices.push(erroniusDev);
                 }
             } catch(err) {
 
