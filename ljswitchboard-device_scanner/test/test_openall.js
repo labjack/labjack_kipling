@@ -19,6 +19,7 @@ var testGroups = {
 		'basic_eth_test': true,
 		'multiple_sequential_scans': false,
 		'usb_only_test': false,
+		'open_all_device_scanner': true,
 	},
 };
 

@@ -29,6 +29,8 @@ var ljmUtils;
 // A variable that will store a reference to the labjack-nodejs driver
 var ljmDriver;
 
+var unitTestExports = {};
+
 /** DEBUGGING OPTIONS **/
 var ENABLE_ERROR_OUTPUT = false;
 /* Enable debugging for the individual scanning steps */
@@ -241,6 +243,101 @@ function parseDeviceInfo(info, registers) {
         // console.log(regName, val);
     });
 }
+
+function parseOutErroniusDevices(openAllData) {
+    // console.log('OpenAll Error Info .numErrors', openAllData.numErrors);
+    // console.log('OpenAll Error Info .errors', openAllData.errors);
+    // console.log('OpenAllData', openAllData);
+    var openAllErrors = openAllData.errors;
+    var openAllExceptions = [];
+    if(openAllErrors) {
+        openAllExceptions = openAllErrors.exceptions;
+    }
+    var erroniusDevices = [];
+
+    // var errorCodesToReport = [1230, 1226];
+    function parseException(exception) {
+        function createErroniusDevice(dt, ct, ip, port, errorCode, errorMessage) {
+            return {
+                'dt': dt,
+                'dtString': driver_const.DRIVER_DEVICE_TYPE_NAMES[dt],
+                'dtName': driver_const.DEVICE_TYPE_NAMES[dt],
+
+                'ct': ct,
+                'ctString': driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct],
+                'ctName': driver_const.CONNECTION_TYPE_NAMES[ct],
+
+                'ip': ip,
+                'port': port,
+
+                'errorCode': exception.errorCode,
+                'errorMessage': exception.errorMessage,
+
+                'includeError': true,
+            }
+        }
+
+        try {
+            // console.log('Exception', exception);
+
+            var errorCode = exception.errorCode;
+            var errorMessage = exception.errorMessage;
+
+            var erroniusDev = null;
+            try {
+                var deviceHints = exception.initFailure.deviceHints;
+                // console.log('Device Hints', deviceHints);
+
+                var dt = driver_const.deviceTypes[deviceHints.knownDeviceType];
+                var ip = deviceHints.ip;
+                var port = deviceHints.port;
+                var ct = driver_const.connectionTypes[deviceHints.initProtocol];
+                if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_WIFI_UDP_PORT) {
+                    ct = driver_const.LJM_CT_WIFI_UDP;
+                } else if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_ETH_UDP_PORT) {
+                    ct = driver_const.LJM_CT_ETHERNET_UDP;
+                }
+
+                if(typeof(exception.initFailure.deviceHints.discovered) !== 'undefined') {
+                    if(exception.initFailure.deviceHints.discovered) {
+                        erroniusDev = createErroniusDevice(
+                            dt, ct, ip, port, errorCode, errorMessage
+                        );
+                    }
+                }
+            }
+            catch(err) {
+                var dev = exception.device;
+                // console.log('Error device', dev);
+                erroniusDev = createErroniusDevice(
+                    driver_const.deviceTypes[dev.deviceType],
+                    driver_const.connectionTypes[dev.ljmConnectionType],
+                    dev.ip,
+                    dev.port,
+                    errorCode,
+                    errorMessage
+                );
+            }
+
+            // if(errorCodesToReport.indexOf(exception.errorCode) >= 0) {
+            if(erroniusDev.includeError) {
+                // console.log('Saved Exception', exception);
+                erroniusDevices.push(erroniusDev);
+            }
+        } catch(err) {
+
+        }
+    }
+    if(openAllExceptions.length > 0) {
+        // console.log('OpenAll...');
+        // console.log('Exceptions', openAllExceptions);
+        // console.log('Analyzing Exceptions');
+        openAllExceptions.forEach(parseException);
+        // console.log('Erronius Devices', erroniusDevices);
+    }
+    return erroniusDevices;
+}
+unitTestExports.parseOutErroniusDevices = parseOutErroniusDevices;
 
 function createManagedDevice(openedDevice, openParameters, curatedDevice) {
     this.log = function() {
@@ -578,99 +675,6 @@ function openAllDeviceScanner() {
         return defered.promise;
     }
 
-    function parseOutErroniusDevices(openAllData) {
-        // console.log('OpenAll Error Info .numErrors', openAllData.numErrors);
-        // console.log('OpenAll Error Info .errors', openAllData.errors);
-        // console.log('OpenAllData', openAllData);
-        var openAllErrors = openAllData.errors;
-        var openAllExceptions = [];
-        if(openAllErrors) {
-            openAllExceptions = openAllErrors.exceptions;
-        }
-        var erroniusDevices = [];
-
-        // var errorCodesToReport = [1230, 1226];
-        function parseException(exception) {
-            function createErroniusDevice(dt, ct, ip, port, errorCode, errorMessage) {
-                return {
-                    'dt': dt,
-                    'dtString': driver_const.DRIVER_DEVICE_TYPE_NAMES[dt],
-                    'dtName': driver_const.DEVICE_TYPE_NAMES[dt],
-
-                    'ct': ct,
-                    'ctString': driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct],
-                    'ctName': driver_const.CONNECTION_TYPE_NAMES[ct],
-
-                    'ip': ip,
-                    'port': port,
-
-                    'errorCode': exception.errorCode,
-                    'errorMessage': exception.errorMessage,
-
-                    'includeError': true,
-                }
-            }
-
-            try {
-                // console.log('Exception', exception);
-
-                var errorCode = exception.errorCode;
-                var errorMessage = exception.errorMessage;
-
-                var erroniusDev = null;
-                try {
-                    var deviceHints = exception.initFailure.deviceHints;
-                    // console.log('Device Hints', deviceHints);
-
-                    var dt = driver_const.deviceTypes[deviceHints.knownDeviceType];
-                    var ip = deviceHints.ip;
-                    var port = deviceHints.port;
-                    var ct = driver_const.connectionTypes[deviceHints.initProtocol];
-                    if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_WIFI_UDP_PORT) {
-                        ct = driver_const.LJM_CT_WIFI_UDP;
-                    } else if(ct == driver_const.LJM_CT_UDP && port == driver_const.LJM_ETH_UDP_PORT) {
-                        ct = driver_const.LJM_CT_ETHERNET_UDP;
-                    }
-
-                    if(typeof(exception.initFailure.deviceHints.discovered) !== 'undefined') {
-                        if(exception.initFailure.deviceHints.discovered) {
-                            erroniusDev = createErroniusDevice(
-                                dt, ct, ip, port, errorCode, errorMessage
-                            );
-                        }
-                    }
-                }
-                catch(err) {
-                    var dev = exception.device;
-                    // console.log('Error device', dev);
-                    erroniusDev = createErroniusDevice(
-                        driver_const.deviceTypes[dev.deviceType],
-                        driver_const.connectionTypes[dev.ljmConnectionType],
-                        dev.ip,
-                        dev.port,
-                        errorCode,
-                        errorMessage
-                    );
-                }
-
-                // if(errorCodesToReport.indexOf(exception.errorCode) >= 0) {
-                if(erroniusDev.includeError) {
-                    // console.log('Saved Exception', exception);
-                    erroniusDevices.push(erroniusDev);
-                }
-            } catch(err) {
-
-            }
-        }
-        if(openAllExceptions.length > 0) {
-            // console.log('OpenAll...');
-            // console.log('Exceptions', openAllExceptions);
-            // console.log('Analyzing Exceptions');
-            openAllExceptions.forEach(parseException);
-            // console.log('Erronius Devices', erroniusDevices);
-        }
-        return erroniusDevices;
-    }
     /*
      * The function performOpenAllScanIteration does...
      */
@@ -1834,3 +1838,5 @@ var createDeviceScanner = function(driver) {
 };
 
 exports.createDeviceScanner = createDeviceScanner;
+
+exports.unitTestExports = unitTestExports;
