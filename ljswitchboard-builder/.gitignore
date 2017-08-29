@@ -15,3 +15,4 @@ build_tools/resource_hacker/ResourceHacker.ini
 build_tools/resource_hacker/ResourceHacker.log
 
 Kipling*.zip
+package-lock.json

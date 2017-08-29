@@ -162,18 +162,6 @@ var filesToDelete = {
 					}
 				}
 			},
-			'form-data': {
-				'filesToDelete': [],
-				'foldersToDelete': [],
-				'node_modules': {
-					'filesToDelete': [],
-					'foldersToDelete': [],
-					'async': {
-						'filesToSave': ['package.json'],
-						'foldersToSave': ['dist'],
-					}
-				}
-			},
 			'json-schema': {
 				'filesToDelete': ['draft-zyp-json-schema-03.xml', 'draft-zyp-json-schema-04.xml'],
 				'foldersToDelete': ['draft-00','draft-01','draft-02','draft-03','draft-04'],
