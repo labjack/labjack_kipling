@@ -17,8 +17,8 @@
     ],
     "homepage": "https://github.com/chrisJohn404/ljswitchboard-driver_constants",
     "repository": {
-        "type" : "git",
-        "url" : "https://github.com/chrisJohn404/ljswitchboard-driver_constants.git"
+        "type": "git",
+        "url": "https://github.com/chrisJohn404/ljswitchboard-driver_constants.git"
     },
     "files": [
         "lib"
