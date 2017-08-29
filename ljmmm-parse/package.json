@@ -22,7 +22,8 @@
   "contributors": [
     {
       "name": "Chris Johnson",
-      "email": "chris.s.johnson4@gmail.com"
+      "email": "chris.s.johnson4@gmail.com",
+      "url": "https://github.com/chrisJohn404"
     }
   ],
   "main": "./lib/ljmmm",
@@ -32,10 +33,10 @@
     "LJMMM",
     "MODBUS"
   ],
-  "homepage": "https://github.com/samnsparky/ljmmm-parse",
+  "homepage": "https://github.com/chrisJohn404/ljmmm-parse",
   "repository": {
     "type": "git",
-    "url": "http://github.com/samnsparky/ljmmm-parse.git"
+    "url": "https://github.com/chrisJohn404/ljmmm-parse.git"
   },
   "files": [
     "lib"

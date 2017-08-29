@@ -327,23 +327,6 @@ exports.testExpandLJMMMEntriesSync = function(test)
 {
     var testInput = [
         {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'},
-        {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE'}
-    ];
-    var expectedResult = [
-        {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
-        {name: 'Test1', address: 4, type: 'TEST_TYPE', group: testInput[0].name, luaTypeInt: 4},
-        {name: 'Another0', address: 0, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2},
-        {name: 'Another1', address: 2, type: 'ANOTHER_TYPE', group: testInput[1].name, luaTypeInt: 2}
-    ];
-
-    var result = ljmmm.expandLJMMMEntriesSync(testInput);
-    test.deepEqual(result, expectedResult);
-    test.done();
-};
-exports.testExpandLJMMMEntriesSync = function(test)
-{
-    var testInput = [
-        {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'},
         {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE', altnames:['Again#(0:1)']}
     ];
     var expectedResult = [
