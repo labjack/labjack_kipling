@@ -2,3 +2,4 @@ node_modules
 npm-debug.log
 
 test_extraction_folder/*
+package-lock.json
