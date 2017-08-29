@@ -17,8 +17,8 @@
     ],
     "homepage": "https://github.com/chrisJohn404/ljswitchboard-data_parser",
     "repository": {
-        "type" : "git",
-        "url" : "https://github.com/chrisJohn404/ljswitchboard-data_parser.git"
+        "type": "git",
+        "url": "https://github.com/chrisJohn404/ljswitchboard-data_parser.git"
     },
     "files": [
         "lib"
