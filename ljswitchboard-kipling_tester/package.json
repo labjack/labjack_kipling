@@ -47,9 +47,9 @@
     "width": 1120,
     "height-a": 730,
     "height": 400,
-    "min_width":600,
-    "a-min_width":785,
-    "min_height":400,
+    "min_width": 600,
+    "a-min_width": 785,
+    "min_height": 400,
     "show": false
   }
 }
