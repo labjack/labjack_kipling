@@ -1,2 +1,3 @@
 node_modules
 test/npm_test
+package-lock.json
