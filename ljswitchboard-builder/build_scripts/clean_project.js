@@ -427,12 +427,19 @@ var getDeleteThing = function(deleteOperation) {
 
 		fsex.rmrf(path, function(err) {
 			if(err) {
-				console.log('ERROR Deleting File/Folder!', err);
-				deleteOperation.isError = true;
-				deleteOperation.isFinished = true;
-				deleteOperation.message = err.toString();
+				fsex.rmrf(path, function(err) {
+					if(err) {
+						console.log('ERROR Deleting File/Folder!', err);
+						deleteOperation.isError = true;
+						deleteOperation.isFinished = true;
+						deleteOperation.message = err.toString();
 
-				defered.resolve(deleteOperation);
+						defered.resolve(deleteOperation);
+					} else {
+						deleteOperation.isFinished = true;
+						defered.resolve(deleteOperation);
+					}
+				});
 			} else {
 				deleteOperation.isFinished = true;
 				defered.resolve(deleteOperation);
