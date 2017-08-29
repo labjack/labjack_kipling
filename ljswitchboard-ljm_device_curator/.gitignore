@@ -8,3 +8,4 @@ logs
 node_modules
 
 desktop.ini
+package-lock.json
