@@ -17,8 +17,8 @@
     ],
     "homepage": "https://github.com/chrisJohn404/ljswitchboard-modbus_map",
     "repository": {
-        "type" : "git",
-        "url" : "https://github.com/chrisJohn404/ljswitchboard-modbus_map.git"
+        "type": "git",
+        "url": "https://github.com/chrisJohn404/ljswitchboard-modbus_map.git"
     },
     "files": [
         "lib"
