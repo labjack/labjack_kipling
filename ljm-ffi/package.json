@@ -26,7 +26,7 @@
         "async": "~0",
         "extend": "3.x.x",
         "ffi": "2.x.x",
-        "ref": "*",
+        "ref": "1.3.4",
         "ljswitchboard-modbus_map":"0.0.x",
         "ljswitchboard-ljm_driver_constants":"0.0.x",
         "q": "~1"
