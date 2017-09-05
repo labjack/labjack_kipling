@@ -54,7 +54,7 @@ function parseOpenAllData(openAllData, userStr) {
 function performListAllTCP() {
 	// Perform the open-all call.
 	console.log('Performing OpenAll TCP')
-	openAllData = ljm.LJM_OpenAll(7, 2, 0, aHandles, 0,0, '');
+	openAllData = ljm.Internal_LJM_OpenAll(7, 2, 0, aHandles, 0,0, '');
 
 	parseOpenAllData(openAllData, 'Opened Devices TCP:');
 }
@@ -62,7 +62,7 @@ function performListAllTCP() {
 function performListAllUDP() {
 	// Perform the open-all call.
 	console.log('Performing OpenAll UDP')
-	openAllData = ljm.LJM_OpenAll(7, 5, 0, aHandles, 0,0, '');
+	openAllData = ljm.Internal_LJM_OpenAll(7, 5, 0, aHandles, 0,0, '');
 
 	parseOpenAllData(openAllData, 'Opened Devices UDP:');
 }

@@ -34,7 +34,7 @@ var getHandleInfos = test_utils.getHandleInfos;
 
 
 
-module.exports.LJM_OpenAll = {
+module.exports.Internal_LJM_OpenAll = {
 	'min_ljm_version': 1.1200,
 	'test_args': [
 		{'DeviceType': 				0},
