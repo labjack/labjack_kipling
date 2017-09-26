@@ -49,7 +49,8 @@
                 <p><br></p>
                 <p>Kipling is Searching for the following devices, if your device is not found please try again.</p>
                 <ul>
-                <li>T7/T7-Pro</li>
+                    <li><a title="Open the T7 product page in your default browser" id="lj-t7-pp-link" class="lj-link-holder">T7/T7-Pro</a></li>
+                    <li><a title="Open the T4 product page in your default browser" id="lj-t4-pp-link" class="lj-link-holder">T4</a></li>
                 </ul>
                 <p>Kipling does not support the following LabJack devices:</p>
                 <ul>
@@ -74,7 +75,13 @@
         var linksToBindTo = [{
 			'id': '#lj-applications',
 			'url': "https://labjack.com/support/software/applications"
-		}];
+		},  {
+            'id': '#lj-t7-pp-link',
+            'url': "https://labjack.com/products/t7"
+        }, {
+            'id': '#lj-t4-pp-link',
+            'url': "https://labjack.com/products/t4"
+        }];
 
 
 		linksToBindTo.forEach(function(linkToBindTo) {
