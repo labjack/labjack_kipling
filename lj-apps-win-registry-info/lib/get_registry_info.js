@@ -1,7 +1,7 @@
 
 /* Require external libraries */
 var async = require('async');
-var Registry = require('winreg')
+var Registry = require('winreg');
 
 
 function getLJAppRegistryInfo(appName, cb) {
@@ -13,7 +13,7 @@ function getLJAppRegistryInfo(appName, cb) {
   regKey.values(function (err, items) {
     var returnInfo = {
       // 'isFound': false,
-    }
+    };
     if(err) {
     } else {
       for (var i=0; i<items.length; i++) {
