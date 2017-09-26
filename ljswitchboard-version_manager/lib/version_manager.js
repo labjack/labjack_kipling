@@ -133,11 +133,11 @@ function labjackVersionManager() {
             "upgradeReference": "https://labjack.com/support/firmware/t4",
             "platformDependent": false,
             "urls":[
-                {"url": "https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
-                // {"url": "https://labjack.com/support/firmware/t4", "type": "organizer-current"},
-                // {"url": "https://labjack.com/support/firmware/t4", "type": "current"},
-                // {"url": "https://labjack.com/support/firmware/t4/beta", "type": "beta"},
-                // {"url": "https://labjack.com/support/firmware/t4/old", "type": "old"},
+                // {"url": "https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
+                {"url": "https://labjack.com/support/firmware/t4", "type": "organizer-current"},
+                {"url": "https://labjack.com/support/firmware/t4", "type": "current"},
+                {"url": "https://labjack.com/support/firmware/t4/beta", "type": "beta"},
+                {"url": "https://labjack.com/support/firmware/t4/old", "type": "old"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -253,6 +253,7 @@ function labjackVersionManager() {
             // Parse out actual file data
             if(isValid) {
                 var fileSearchStr = '.file a';
+
                 retData.upgradeLink = currentNode.find(fileSearchStr).attr('href');
 
                 var fileName = path.basename(retData.upgradeLink);
@@ -369,24 +370,72 @@ function labjackVersionManager() {
             return;
         },
         t4FirmwarePage: function(listingArray, pageData, urlInfo, name) {
-            if(urlInfo.type === 'static-t4-alpha-organizer') {
-                try {
-                    var jsonData = JSON.parse(pageData);
-                    var versions = jsonData.versions;
-                    versions.forEach(function(version) {
-                        listingArray.push({
-                            'upgradeLink': version.link,
-                            'version': version.version,
-                            'type': 'alpha',
-                            'key': 'alpha' + '-' + version.version,
-                            'isValid': true,
-                        });
+            if(urlInfo.type === 'organizer-current') {
+                var parsedData = self.advancedPageParser({
+                    'url': urlInfo.url,
+                    'pageData': pageData,
+                    'pageType': 'firmware',
+                    'releaseType': 'stable',
+                });
+                
+                if(parsedData.isValid) {
+                    listingArray.push({
+                        'upgradeLink': parsedData.upgradeLink,
+                        'version': parsedData.version,
+                        'type': urlInfo.type,
+                        'key': urlInfo.type + '-' + parsedData.version,
+                        'isValid': true,
                     });
-                } catch(err) {
-                    console.log('Error Parsing T4 static-t4-alpha-organizer', err);
+                } else {
+                    // OLD T7 CODE...
+                    // Insert a defined reference to the 1.0146 firmware version
+                    // to define it as the "default current version" just incase
+                    // website parsing breaks.
+                    // listingArray.push({
+                    //     'upgradeLink': 'https://labjack.com/sites/default/files/firmware/T4firmware_010146_2015-01-19.bin',
+                    //     'version': '1.0146',
+                    //     'type': urlInfo.type,
+                    //     'key': urlInfo.type + '-' + parsedData.version,
+                    //     'isValid': false,
+                    // });
                 }
+                // console.log('!!! T4 organizer-current'.green, listingArray);
             } else {
+                var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T4firmware\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
+                var match = FIRMWARE_LINK_REGEX.exec(pageData);
 
+                while (match !== null) {
+                    var $ = cheerio.load(match[0]);
+                    var linkElements = $('a');
+
+                    linkElements.each(function(i, linkElement){
+                        var ele = $(linkElement);
+                        var targetURL = ele.attr('href');
+                        var fileName = path.basename(targetURL);
+                        var FIRMWARE_FILE_REGEX = /http.*T4firmware\_([\d\-]+).*\.bin/g;
+                        var isValidFWLink = FIRMWARE_FILE_REGEX.test(targetURL);
+                        if(isValidFWLink) {
+                            // console.log('Adding...', targetURL, targetURL.length);
+                            // var targetURL = match[0].replace(/href\=\"/g, '');
+                            // targetURL = targetURL.replace(/\"/g, '');
+                            var version = (parseFloat(fileName.split('_')[1])/10000).toFixed(4);
+                            listingArray.push({
+                                "upgradeLink":targetURL,
+                                "version":version,
+                                "type":urlInfo.type,
+                                "key":urlInfo.type + '-' + version
+                            });
+                        } else {
+                            // console.log('Invalid URL', targetURL, targetURL.length);
+                        }
+                        // console.log('T4 FW Versions', version);
+                        // console.log('Type....', urlInfo.type);
+                        // console.log('targetURL', targetURL);
+                        // console.log('fileName', fileName);
+                    });
+                    match = FIRMWARE_LINK_REGEX.exec(pageData);
+                }
+                // console.log('T4:', urlInfo.type, 'data:', listingArray.length);
             }
             return;
         },
@@ -424,6 +473,7 @@ function labjackVersionManager() {
                         'isValid': false,
                     });
                 }
+                // console.log('!!! T7 organizer-current'.green, listingArray.length);
             } else {
                 var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
                 var match = FIRMWARE_LINK_REGEX.exec(pageData);
@@ -459,6 +509,7 @@ function labjackVersionManager() {
                     });
                     match = FIRMWARE_LINK_REGEX.exec(pageData);
                 }
+                // console.log('!!! T7:'.green, urlInfo.type, 'data:', listingArray);
             }
             return;
         },
@@ -532,6 +583,7 @@ function labjackVersionManager() {
                         var message = '';
                         var err = null;
                         if (error) {
+                            // console.log('!!! request page ERROR!!!', error);
                             // Report a TCP Level error likely means computer is not
                             // connected to the internet.
                             if (error.code === 'ENOTFOUND') {
@@ -746,7 +798,7 @@ function labjackVersionManager() {
 
                 // function to asynchronously execute the list of prefetchQuerys
                 var execPrefetchQuerys = function() {
-                    async.each(prefetchQuerys,
+                    async.eachSeries(prefetchQuerys,
                         function(query, callback) {
                             query(callback);
                         }, function(err) {
@@ -764,7 +816,7 @@ function labjackVersionManager() {
 
                 // function to asynchronously execute the list of remainder
                 var execRemainder = function() {
-                    async.each(querys,
+                    async.eachSeries(querys,
                         function(query, callback) {
                             query(callback);
                         }, function(err) {
@@ -787,7 +839,7 @@ function labjackVersionManager() {
 
                 // execute prefetchQuerys
                 execPrefetchQuerys();
-                // var numQuerys = prefetchQuerys.length + querys.length;
+                var numQuerys = prefetchQuerys.length + querys.length;
                 // console.log('Num Querys:', numQuerys, 'Num Cached', prefetchQuerys.length);
             } else {
                 // if the strategies object is undefined report an error
@@ -799,7 +851,6 @@ function labjackVersionManager() {
         }
         return defered.promise;
     };
-
 
 
     this.getKiplingVersions = function() {

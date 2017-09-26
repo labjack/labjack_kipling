@@ -49,7 +49,7 @@ function printVersions(versionData) {
 					'K:', firmware.key,
 					'F:', finalPartial
 				);
-			})
+			});
 		}
 	});
 }
@@ -119,7 +119,9 @@ exports.tests = {
 		var data = version_manager.lvm.getCachedT4Versions();
 		test.ok(data.isValid, 'T4 Firmware data should be valid');
 		var requiredKeys = [
-			'alpha',
+			'current',
+			// 'old',
+			// 'beta'
 		];
 		
 		// Print out data
