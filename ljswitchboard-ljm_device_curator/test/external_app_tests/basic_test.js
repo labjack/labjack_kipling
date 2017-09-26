@@ -52,7 +52,7 @@ exports.tests = {
         var td = {
             'dt': 'LJM_dtT4',
             'ct': 'LJM_ctUSB',
-            'id': 440010000,
+            'id': 'LJM_idANY',
         };
 
         // Open the device.
@@ -113,7 +113,7 @@ exports.tests = {
             console.error('LJM Error:', err);
             test.ok(false, 'device should still be connected');
             test.done();
-        })
+        });
     },
 	'closeDevices': function(test) {
         device.close()

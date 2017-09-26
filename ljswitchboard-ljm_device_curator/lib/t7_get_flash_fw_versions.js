@@ -57,6 +57,7 @@ function getRecoveryFWVersion(device) {
         // driver_const.T7_EFAdd_ExtFirmwareImgInfo,
         imgHeaderSize/4
     ).then(function(data) {
+        // console.log('T4 Testing: We Are HERE!', data);
     	// Parse the data.
     	var info = parseData(data.results);
     	// console.log('In t7_get_flash_fw_versions.getRecoveryFWVersion', info);
