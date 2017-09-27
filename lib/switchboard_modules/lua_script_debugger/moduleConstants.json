@@ -187,9 +187,6 @@
 			"location": "lua_script_debugger/premade_scripts/digital_io_ef/PWM_Library.lua"
 		}]
 	}, {
-		"name": "Voltage Follower",
-		"location": "lua_script_debugger/premade_scripts/0_Voltage_Follower.lua"
-	}, {
 		"name": "Get Device Temperature",
 		"location": "lua_script_debugger/premade_scripts/1_Get_Device_Temperature.lua"
 	}, {
@@ -237,6 +234,10 @@
 	}, {
 		"name": "Average Min Max",
 		"location": "lua_script_debugger/premade_scripts/14_Average_Min_Max.lua"
+	}],
+	"unknown_scripts": [{
+		"name": "Voltage Follower",
+		"location": "lua_script_debugger/premade_scripts/0_Voltage_Follower.lua"
 	}],
 	"scriptOptions": {
 		"scriptTypeID": "active-lua-script-type",
