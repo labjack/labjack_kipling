@@ -120,7 +120,7 @@ var testGroups = {
 	't7': {
 		't7_basic_test': false,
 		't7_array_test': false,
-		't7_check_calibration_test': false,
+		't7_check_calibration_test': true,
 		't7_read_recovery_fw_version_test': false,
 		't7_upgrade_recovery_image_test':  false,
 		't7_upgrade_test':  false,
@@ -170,6 +170,7 @@ var testGroups = {
 		't4_upgrade_test': false,
 		't4_dac_and_ain_test': false,
 		't4_flash_based_data_test': false,
+		't4_check_calibration_test': true,
 		't4_read_recovery_fw_version_test': true,
 	},
 	't4_mock_tests': {

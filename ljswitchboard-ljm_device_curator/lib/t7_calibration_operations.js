@@ -92,26 +92,66 @@ var T7_NominalCalValues = [
   NaN,
   NaN
 */
+
+var T4_AIN0_SLOPE =   3.235316E-04;
+var T4_AIN1_SLOPE =   3.236028E-04;
+var T4_AIN2_SLOPE =   3.235439E-04;
+var T4_AIN3_SLOPE =   3.236133E-04;
+var T4_LV_SLOPE =     3.826692E-05;
+var T4_SPECV_SLOPE = -3.839420E-05;
+var T4_DAC0_SLOPE =   1.310768E+04;
+var T4_DAC1_SLOPE =   1.310767E+04;
+var T4_TEMP_SLOPE =  -9.260000E+01;
+ 
+var T4_AIN0_OFFSET =   -10.532965;
+var T4_AIN1_OFFSET =   -10.534480;
+var T4_AIN2_OFFSET =   -10.530597;
+var T4_AIN3_OFFSET =   -10.530210;
+var T4_LV_OFFSET =       0.002484;
+var T4_SPECV_OFFSET =    2.507430;
+var T4_DAC0_OFFSET =    54.091066;
+var T4_DAC1_OFFSET =    54.044314;
+var T4_TEMP_OFFSET =   467.600000;
+ 
+var T4_I_BIAS = 0.000000015;
+ 
+// Variance - 3-sigma times 10
+var T4_AIN_SLOPE_VARIANCE =   0.0394;
+var T4_LV_SLOPE_VARIANCE =    0.0224;
+var T4_SPECV_SLOPE_VARIANCE = 0.0220;
+var T4_DAC0_SLOPE_VARIANCE =  0.0430;
+var T4_DAC1_SLOPE_VARIANCE =  0.0433;
+var T4_TEMP_SLOPE_VARIANCE =  0.01;
+ 
+var T4_AIN_OFFSET_VARIANCE =    0.0330;
+var T4_LV_OFFSET_VARIANCE =     4.8533;
+var T4_SPECV_OFFSET_VARIANCE =  0.0205;
+var T4_DAC0_OFFSET_VARIANCE =  11.6813;
+var T4_DAC1_OFFSET_VARIANCE =  11.8758;
+var T4_TEMP_OFFSET_VARIANCE =   0.01;
+
+var T4_I_BIAS_VARIANCE = 3; // Arbitrarily high, not sure what the 3.0, 0.05 meant... {"I Bias",      I_BIAS, 3.0,  0.05}
+
 var T4_NominalCalValues = [
-    {"name": "Ch0 HV Slope", "nominal": 0.000315805780, "variance": 0.05},  // 0
-    {"name": "Ch1 HV Slope", "nominal": 0.000315805780, "variance": 0.05},  // 4
-    {"name": "Ch2 HV Slope", "nominal": 0.000315805780, "variance": 0.05},  // 8
-    {"name": "Ch3 HV Slope", "nominal": 0.000315805780, "variance": 0.05},  // 12
-    {"name": "Ch0 HV Offset", "nominal": 0.000315805780, "variance": 0.05}, // 16
-    {"name": "Ch1 HV Offset", "nominal": 0.000315805780, "variance": 0.05}, // 20
-    {"name": "Ch2 HV Offset", "nominal": 0.000315805780, "variance": 0.05}, // 24
-    {"name": "Ch3 HV Offset", "nominal": 0.000315805780, "variance": 0.05}, // 28
-    {"name": "LV Slope", "nominal": 0.000315805780, "variance": 0.05},      // 32
-    {"name": "LV Offset", "nominal": 0.000315805780, "variance": 0.05},     // 36
-    {"name": "SpecV Slope", "nominal": 0, "variance": 0.05},                // 40
-    {"name": "SpecV Offset", "nominal": 0, "variance": 0.05},               // 44
-    {"name": "DAC0 Slope", "nominal": 0.000315805780, "variance": 0.05},    // 48
-    {"name": "DAC0 Offset", "nominal": 0.000315805780, "variance": 0.05},   // 52
-    {"name": "DAC1 Slope", "nominal": 0.000315805780, "variance": 0.05},    // 56
-    {"name": "DAC1 Offset", "nominal": 0.000315805780, "variance": 0.05},   // 60
-    {"name": "N/A"}, // 64
-    {"name": "N/A"}, // 68
-    {"name": "N/A"}, // 72
+    {"name": "Ch0 HV Slope", "nominal": T4_AIN0_SLOPE, "variance": T4_AIN_SLOPE_VARIANCE},    // 0
+    {"name": "Ch0 HV Offset", "nominal": T4_AIN0_OFFSET, "variance": T4_AIN_OFFSET_VARIANCE}, // 4
+    {"name": "Ch1 HV Slope", "nominal": T4_AIN1_SLOPE, "variance": T4_AIN_SLOPE_VARIANCE},    // 8
+    {"name": "Ch1 HV Offset", "nominal": T4_AIN1_OFFSET, "variance": T4_AIN_OFFSET_VARIANCE}, // 12
+    {"name": "Ch2 HV Slope", "nominal": T4_AIN2_SLOPE, "variance": T4_AIN_SLOPE_VARIANCE},    // 16
+    {"name": "Ch2 HV Offset", "nominal": T4_AIN2_OFFSET, "variance": T4_AIN_OFFSET_VARIANCE}, // 20
+    {"name": "Ch3 HV Slope", "nominal": T4_AIN3_SLOPE, "variance": T4_AIN_SLOPE_VARIANCE},    // 24
+    {"name": "Ch3 HV Offset", "nominal": T4_AIN3_OFFSET, "variance": T4_AIN_OFFSET_VARIANCE}, // 28
+    {"name": "LV Slope", "nominal": T4_LV_SLOPE, "variance": T4_LV_SLOPE_VARIANCE},      // 32
+    {"name": "LV Offset", "nominal": T4_LV_OFFSET, "variance": T4_LV_OFFSET_VARIANCE},     // 36
+    {"name": "SpecV Slope", "nominal": T4_SPECV_SLOPE, "variance": T4_SPECV_SLOPE_VARIANCE},                // 40
+    {"name": "SpecV Offset", "nominal": T4_SPECV_OFFSET, "variance": T4_SPECV_OFFSET_VARIANCE},               // 44
+    {"name": "DAC0 Slope", "nominal": T4_DAC0_SLOPE, "variance": T4_DAC0_SLOPE_VARIANCE},    // 48
+    {"name": "DAC0 Offset", "nominal": T4_DAC0_OFFSET_VARIANCE, "variance": T4_DAC0_OFFSET_VARIANCE},   // 52
+    {"name": "DAC1 Slope", "nominal": T4_DAC1_SLOPE, "variance": T4_DAC1_SLOPE_VARIANCE},    // 56
+    {"name": "DAC1 Offset", "nominal": T4_DAC1_OFFSET_VARIANCE, "variance": T4_DAC1_OFFSET_VARIANCE},   // 60
+    {"name": "Temp Slope", "nominal": T4_TEMP_SLOPE, "variance": T4_TEMP_SLOPE_VARIANCE}, // 64
+    {"name": "Temp Offset", "nominal": T4_TEMP_OFFSET, "variance": T4_TEMP_OFFSET_VARIANCE}, // 68
+    {"name": "I Bias", "nominal": T4_I_BIAS, "variance": 3, "varianceConstant": 0.05}, // 72
     {"name": "N/A"}, // 76
     {"name": "N/A"}, // 80
     {"name": "N/A"}, // 84
@@ -129,9 +169,9 @@ var T4_NominalCalValues = [
     {"name": "N/A"}, // 132
     {"name": "N/A"}, // 136
     {"name": "N/A"}, // 140
-    {"name": "Temp Slope", "nominal": 0.000315805780, "variance": 0.05}, // 144
-    {"name": "Temp Offset", "nominal": 0.000315805780, "variance": 0.05}, // 148
-    {"name": "I Bias", "nominal": 0.000315805780, "variance": 0.05}, // 152
+    {"name": "N/A"}, // 144
+    {"name": "N/A"}, // 148
+    {"name": "N/A"}, // 152
     {"name": "N/A"}, // 156
     {"name": "N/A"}, // 160
 ];
@@ -160,21 +200,49 @@ var getInvalidCalibrationValues = function (deviceTypeName, checkHighRes, calVal
     };
     var badCals = [];
     var nomCalValues = NOMINAL_CALIBRATION_VALUES[deviceTypeName];
+    // console.log('Loaded nomCalValues', nomCalValues);
+    // console.log('Loaded calValues', calValues);
 
     nomCalValues.forEach(function(nominalVal, index) {
-        var min, max, absPlusMinus;
-        
-        if (!checkHighRes && (index >= T7_HIGH_RESOLUTION_START_INDEX) && (index <= T7_HIGH_RESOLUTION_END_INDEX)) {
-            // console.log('Skipping', isPro, index, nominalVal.name);
-        } else {
-            // console.log('Checking', isPro, index, nominalVal.name);
-           absPlusMinus = Math.abs(nominalVal.nominal * nominalVal.variance);
-            min = nominalVal.nominal - absPlusMinus;
-            max = nominalVal.nominal + absPlusMinus;
+        var min, max, absPlusMinus, name, nominal, variance, varianceConstant;
+        name = nominalVal.name;
+        nominal = nominalVal.nominal;
+        variance = nominalVal.variance;
 
-            if (!withinRange(calValues[index], min, max)) {
-                // console.log('Val not w/in range.', calValues[index], min, max)
-                badCals.push(nominalVal.name);
+        if(typeof(nominalVal.varianceConstant) === 'undefined') {
+            varianceConstant = 0;
+        } else {
+            varianceConstant = nominalVal.varianceConstant;
+        }
+        
+        if(name !== 'N/A') {
+            // console.log('Testing Cal Val', name, nominal, calValues[index]);
+            if(deviceTypeName === 'T7') {
+                if (!checkHighRes && (index >= T7_HIGH_RESOLUTION_START_INDEX) && (index <= T7_HIGH_RESOLUTION_END_INDEX)) {
+                    // console.log('Skipping', isPro, index, nominalVal.name);
+                } else {
+                    // console.log('Checking', isPro, index, nominalVal.name);
+                    absPlusMinus = Math.abs(nominal * variance);
+                    min = nominal - absPlusMinus;
+                    max = nominal + absPlusMinus;
+
+                    if (!withinRange(calValues[index], min, max)) {
+                        // console.log('Val not w/in range.', calValues[index], min, max)
+                        badCals.push(name);
+                    }
+                }
+            } else if(deviceTypeName === 'T4') {
+                absPlusMinus = Math.abs(nominal * variance + varianceConstant);
+                min = nominal - absPlusMinus;
+                max = nominal + absPlusMinus;
+                // console.log('Testing Cal Val', name, nominal, calValues[index]);
+                // console.log('min',min);
+                // console.log('max',max);
+                if (!withinRange(calValues[index], min, max)) {
+                    // console.log('Testing Cal Val', name, nominal, calValues[index]);
+                    // console.log(name, 'Val not w/in range.', calValues[index], min, max);
+                    badCals.push(name);
+                }
             }
         }
     });
