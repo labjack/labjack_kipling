@@ -16,6 +16,7 @@ var functionLocation = {
 	'streamStart': 'device',
 	'streamRead': 'device',
 	'streamStop': 'device',
+	'isAuthorized': 'device',
 
 	//Driver Functions
 	'listAll': 'driver',

@@ -1549,6 +1549,53 @@ module.exports = {
             },false,false
         );
     },
+    /**
+	 * This test tests the LJM_IsAuth synchronous and 
+	 * LJM_IsAuth asynchronous function calls of LJM.
+	 * @param  {[type]} test The test object.
+	 */
+	IsAuthorized: function(test) {		
+		//Configure running-engines
+		asyncRun.config(dev, null);
+		syncRun.config(dev, null);
+
+		//Create test-variables
+		var testList = [
+			'isAuthorized()',
+		];
+		//Expected info combines both sync & async
+		var expectedFunctionList = [ 
+			'LJM_IsAuth',
+
+			'LJM_IsAuthAsync',
+		];
+
+		//Run the desired commands
+		syncRun.run(testList);
+		asyncRun.run(testList,
+			function(res) {
+				//Error
+			}, function(res) {
+				//Success
+				var funcs = fakeDriver.getLastFunctionCall();
+				var results = asyncRun.getResults();
+				var argList = fakeDriver.getArgumentsList();
+				var i,j;
+				var offsetSync = 1;		
+
+				// console.log("Function Calls", funcs);
+				// console.log("Results",results);
+				// console.log("Arguments",argList);
+
+				//Make sure we called the proper test-driver functions
+				test.deepEqual(expectedFunctionList,funcs);
+
+				//Make sure we get the proper results back
+				// test.deepEqual(expectedResultList,results);
+				
+				test.done();
+			});	
+	},
 
 	/**
 	 * This test tests the  asynchronous function call of LJM.

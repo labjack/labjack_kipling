@@ -3060,6 +3060,81 @@ exports.labjack = function () {
 	
 
 	/**
+	 * Checks to see if a device is authorized.
+	 * 
+	 * @param {function} onError function called when finishing with an error.
+	 * @param {function} onSuccess Function called when finishing successfully.
+	 *		Should take a single parameter: a boolean set to true if the device
+	 *		is authorized or false if the device is not authorized.
+	 */
+	this.isAuthorized = function(onError, onSuccess) {
+		//Check to make sure a device has been opened.
+		if(self.checkStatus(onError)) {return;}
+		// Wrap user onError and onSuccess functions to prevent un-wanted
+		// callback executions.
+		onError = wrapUserFunction(onError);
+		onSuccess = wrapUserFunction(onSuccess);
+
+		// Allocate buffer space:
+		var isAuthorized = new Buffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
+
+		// Clear the buffers
+		isAuthorized.fill(0);
+
+		// Call the ljm IsAuth function
+		self.ljm.LJM_IsAuth.async(
+			self.handle,
+			isAuthorized,
+			function(err,res) {
+				if(err) {
+					return onError('Weird Error isAuthorized' + JSON.stringify(err), err);
+				}
+				if(res === 0) {
+					var isAuthVal = isAuthorized.readInt32LE(0);
+					var isAuth = false;
+					if(isAuthVal == 1) {
+						isAuth = true;
+					}
+					return onSuccess(isAuth);
+				} else {
+					//Error
+					return onError(res);
+				}
+			}
+		);
+	};
+	this.isAuthorizedSync = function() {
+		//Check to make sure a device has been opened
+		self.checkStatus();
+
+		// Allocate buffer space:
+		var isAuthorized = new Buffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
+
+		// Clear the buffers
+		isAuthorized.fill(0);
+		
+		var isAuth = false;
+		
+		output = self.ljm.LJM_IsAuth(
+			self.handle,
+			isAuthorized
+		);
+		if (output === 0) {
+			var isAuthVal = isAuthorized.readInt32LE(0);
+			isAuth = false;
+			if(isAuthVal == 1) {
+				isAuth = true;
+			}
+		}
+
+		if (output === 0) {
+			return isAuth;
+		} else {
+			throw new DriverOperationError(output);
+		}
+	};
+
+	/**
 	 * Closes the device if it is currently open asynchronously.
 	 *
 	 * @param {function} onError function called when finishing with an error.

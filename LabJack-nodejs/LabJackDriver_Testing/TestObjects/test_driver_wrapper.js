@@ -779,6 +779,17 @@ var LJM_eStreamStop = createCallableObject(
 		argumentsList.push(arguments);
 		reportEnd(callback);
 	});
+var LJM_IsAuth = createCallableObject(
+	function(handle, isAuthorized) {
+		lastFunctionCall.push("LJM_IsAuth");
+		argumentsList.push(arguments);
+		return expectedResult;
+	},
+	function(handle, isAuthorized, callback) {
+		lastFunctionCall.push("LJM_IsAuthAsync");
+		argumentsList.push(arguments);
+		reportEnd(callback);
+	});
 
 //******************************************************************************
 //*********************		Driver Dict-Object	********************************
@@ -810,6 +821,7 @@ var fakeDriver = {
 	'LJM_eStreamStart': LJM_eStreamStart,
 	'LJM_eStreamRead': LJM_eStreamRead,
 	'LJM_eStreamStop': LJM_eStreamStop,
+	'LJM_IsAuth': LJM_IsAuth,
 
 	//Driver Functions
 	'LJM_ListAll': LJM_ListAll,
