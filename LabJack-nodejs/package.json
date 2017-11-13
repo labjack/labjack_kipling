@@ -28,11 +28,11 @@
     ],
     "dependencies": {
         "async": "~0",
-        "ljm-ffi": "1.x.x",
-        "ref": "1.3.4",
-        "ljswitchboard-modbus_map": "0.0.x",
+        "ljm-ffi": "^1.0.8",
         "ljswitchboard-ljm_driver_constants": "0.0.x",
-        "q": "~1"
+        "ljswitchboard-modbus_map": "0.0.x",
+        "q": "^1.5.1",
+        "ref": "1.3.4"
     },
     "devDependencies": {
         "rewire": "~1",
