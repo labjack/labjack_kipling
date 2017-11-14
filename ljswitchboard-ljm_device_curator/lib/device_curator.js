@@ -1583,6 +1583,24 @@ function device(useMockDevice) {
 		}
 		return defered.promise;
 	};
+
+	this.isAuthorized = function() {
+		var defered = q.defer();
+		if(allowExecution()) {
+			ljmDevice.isAuthorized(
+				function(err) {
+					captureDeviceError('isAuthorized', err, {});
+					defered.reject(err);
+				},
+				defered.resolve
+			);
+		} else {
+			setImmediate(function() {
+				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
+			});
+		}
+		return defered.promise;
+	}
 	
 
 	function removeProcessListeners() {
@@ -2146,6 +2164,28 @@ function device(useMockDevice) {
 		// TODO: Not using retryFlashError for updater atm.  Need to handle errors better.
 		// return self.retryFlashError('updateFirmware', firmwareFileLocation, percentListener, stepListener);
 		return self.internalUpdateFirmware(firmwareFileLocation, percentListener, stepListener);
+	};
+	this.checkAuthAndUpdateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
+		var defered = q.defer();
+
+		function onSuccess(res) {
+			console.log('In isAuthorized onSuccess', res)
+			if(res) { // If the device is authorized...
+				self.updateFirmware(firmwareFileLocation, percentListener, stepListener)
+				.then(defered.resolve, defered.reject);
+			} else {
+				defered.reject("Device is not Authorized");
+			}
+		}
+		function onError(err) {
+			console.log('In isAuthorized onError')
+			defered.reject(err);
+		}
+
+		self.isAuthorized()
+		.then(onSuccess, onError);
+
+		return defered.promise;
 	};
 
 	this.suspendDeviceConnection = function() {

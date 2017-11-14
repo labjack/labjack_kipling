@@ -41,7 +41,7 @@ var device_tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** t4_upgrade_test ****');
+		console.log('**** t4_check_auth_and_upgrade_test ****');
 		console.log('**** Please connect 1x T4 via USB ****');
 		try {
 			device = new device_curator.device();
@@ -112,7 +112,7 @@ var device_tests = {
 			deviceReconnectEventReceived = true;
 		});
 
-		device.updateFirmware(fwURL, percentListener, stepListener)
+		device.checkAuthAndUpdateFirmware(fwURL, percentListener, stepListener)
 		.then(
 			function(res) {
 				// The result is a new device object

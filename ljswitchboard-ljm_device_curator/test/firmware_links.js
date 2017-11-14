@@ -20,7 +20,7 @@ exports.firmwareLinks = {
 	},
 	'Digit': {},
 	'T4': {
-		'10.1301': 'https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/T4firmware_101301_2016-08-01.bin',
-		'10.1401': 'https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/T4firmware_101401_2016-08-01.bin',
+		'0.9908': 'https://labjack.com/sites/default/files/firmware/T4firmware_009908_2017-10-25.bin',
+		'1.0002': 'https://labjack.com/sites/default/files/firmware/T4firmware_010002_2017-11-07.bin',
 	}
 };
