@@ -37,29 +37,28 @@
   "dependencies": {
     "async": "~0",
     "dict": "1.4.0",
-    "q": "~1",
     "ffi": "*",
-    "ref": "1.3.4",
-    "process_manager": "0.0.x",
-    "labjack-nodejs": "0.0.x",
-    "ljswitchboard-ljm_device_curator": "0.0.x",
+    "json-parser": "0.2.4",
+    "labjack-nodejs": "0.0.58",
+    "ljmmm-parse": "0.x",
+    "ljswitchboard-data_parser": "0.0.x",
+    "ljswitchboard-device_scanner": "0.0.49",
+    "ljswitchboard-firmware_verifier": "0.0.x",
+    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master",
     "ljswitchboard-ljm_driver_checker": "0.0.x",
     "ljswitchboard-ljm_driver_constants": "*",
     "ljswitchboard-ljm_special_addresses": "1.x.x",
-    "ljswitchboard-device_scanner": "0.0.x",
-    "ljswitchboard-data_parser": "0.0.x",
     "ljswitchboard-modbus_map": "0.0.x",
-    "ljswitchboard-firmware_verifier": "0.0.x",
-    "ljswitchboard-version_manager": "0.0.x",
-    "json-parser": "0.2.4",
-    "ljmmm-parse": "0.x"
+    "ljswitchboard-version_manager": "0.0.18",
+    "process_manager": "0.0.x",
+    "q": "^1.5.1",
+    "ref": "1.3.4"
   },
   "devDependencies": {
     "nodeunit": "0.9.x"
   },
   "custom-deps": {
-    "ljswitchboard-ljm_device_curator": "0.0.x",
-    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master"
+    "ljswitchboard-ljm_device_curator": "0.0.84"
   },
   "directories": {
     "lib": "./lib",
