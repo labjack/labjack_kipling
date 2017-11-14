@@ -9,7 +9,8 @@
     "prep_for_cal": "node ./node_modules/nodeunit/bin/nodeunit ./test/production_line/prep_for_cal.js",
     "production_line_test": "node ./node_modules/nodeunit/bin/nodeunit ./test/production_line_test.js",
     "production_digit_test": "node ./node_modules/nodeunit/bin/nodeunit ./test/production_digit_testing.js",
-    "digit_LED_test": "node ./node_modules/nodeunit/bin/nodeunit ./test/digit_LED_test.js"
+    "digit_LED_test": "node ./node_modules/nodeunit/bin/nodeunit ./test/digit_LED_test.js",
+    "digit_TEMP_test": "node ./node_modules/nodeunit/bin/nodeunit ./test/digit_TEMP_test.js"
   },
   "packagesDirectory": "/packages",
   "repository": {

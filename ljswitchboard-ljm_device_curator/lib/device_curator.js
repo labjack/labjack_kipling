@@ -2539,6 +2539,13 @@ function device(useMockDevice) {
 		var dt = self.savedAttributes.deviceType;
 		var digitDeviceNum = driver_const.deviceTypes.digit;
 		var defered = q.defer();
+		var startTime = new Date();
+		function finishedSuccessfully(data) {
+			var endTime = new Date();
+			var duration = endTime - startTime;
+			console.log('LJM-DC duration', duration, data);
+			defered.resolve(data);
+		}
 		if(dt === digitDeviceNum) {
 			self.iReadMultiple([
 				'DGT_TEMPERATURE_LATEST_RAW',
@@ -2547,7 +2554,7 @@ function device(useMockDevice) {
 				
 			])
 			.then(applyDigitFormatterFunctions, defered.reject)
-			.then(defered.resolve, defered.reject);
+			.then(finishedSuccessfully, defered.reject);
 		} else {
 			defered.reject(getDeviceTypeMessage(dt));
 		}
