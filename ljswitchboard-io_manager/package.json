@@ -44,7 +44,7 @@
     "ljswitchboard-data_parser": "0.0.x",
     "ljswitchboard-device_scanner": "0.0.49",
     "ljswitchboard-firmware_verifier": "0.0.x",
-    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master",
+    "ljswitchboard-ljm_device_curator": "0.0.x",
     "ljswitchboard-ljm_driver_checker": "0.0.x",
     "ljswitchboard-ljm_driver_constants": "*",
     "ljswitchboard-ljm_special_addresses": "1.x.x",
@@ -58,6 +58,7 @@
     "nodeunit": "0.9.x"
   },
   "custom-deps": {
+    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master",
     "ljswitchboard-ljm_device_curator": "0.0.84"
   },
   "directories": {
