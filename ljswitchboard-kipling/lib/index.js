@@ -12,8 +12,10 @@ var window_manager = require('ljswitchboard-window_manager');
 var GLOBAL_SUBPROCESS_REFERENCE = undefined;
 var GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
 
+
 var K3_ON_APPLICATION_EXIT_LISTENER = function() {
 	GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = false;
+
 	io_interface.off(io_interface.eventList.PROCESS_CLOSE);
 	// console.log(JSON.stringify(['Quitting Application', GLOBAL_ALLOW_SUBPROCESS_TO_RESTART, GLOBAL_SUBPROCESS_REFERENCE]));
 	try {
@@ -28,6 +30,86 @@ var K3_ON_APPLICATION_EXIT_LISTENER = function() {
 window_manager.on(
 	window_manager.eventList.QUITTING_APPLICATION,
 	K3_ON_APPLICATION_EXIT_LISTENER
+);
+
+// Prevent application from auto-closing so that we can have an asynchronous hook
+// aka close app manually.
+window_manager.windowManager.managedWindows.kipling.runInBackground = true;
+
+
+/*
+SCRATCH PAD:
+// Prevent app from closing
+window_manager.windowManager.managedWindows.kipling.runInBackground = true;
+
+// quit app.
+window_manager.windowManager.managedWindows.kipling.win.close(true)
+*/
+var K3_EXIT_LISTENERS = {};
+function ADD_K3_EXIT_LISTENER(name, func) {
+	K3_EXIT_LISTENERS[name] = func;
+}
+function DELETE_K3_EXIT_LISTENER(name) {
+	delete(K3_EXIT_LISTENERS[name]);
+}
+function GET_ALL_K3_EXIT_LISTENERS() {
+	var listeners = [];
+	var keys = Object.keys(K3_EXIT_LISTENERS);
+	keys.forEach(function(key) {
+		listeners.push(K3_EXIT_LISTENERS[key]);
+	});
+	return listeners;
+}
+function K3_ON_APPLICATION_EXIT_WINDOW_LISTENER() {
+
+	var asyncProcesses = GET_ALL_K3_EXIT_LISTENERS();
+	async.eachSeries(
+		asyncProcesses,
+		function closeAppAsyncProcess(process, cb) {
+			try {
+				process().then(function(res) {
+					cb();
+				}, function(err) {
+					cb();
+				}).catch(function(err) {
+					cb();
+				});
+			} catch(err) {
+				// Error...
+				cb();
+			}
+		},
+		function finishedClosingAsyncProcesses(err) {
+			// Close app.
+			// K3_ON_APPLICATION_EXIT_LISTENER();
+			// window_manager.windowManager.managedWindows.kipling.win.close(true);
+			closeApp();
+		});
+
+	function closeApp() {
+		var interval;
+		var numWaited = 0;
+		var numToWait = 2;
+		function waitToClose() {
+			if(numWaited < numToWait) {
+				numWaited += 1;
+				console.log('Waiting to close.....', numWaited);
+			} else {
+				// Close app.
+				try {
+					K3_ON_APPLICATION_EXIT_LISTENER();
+				} catch(err) {
+					console.error('Error exiting things...', err);
+				}
+				window_manager.windowManager.managedWindows.kipling.win.close(true);
+			}
+		}
+		interval = setInterval(waitToClose, 1000);
+	}
+}
+window_manager.on(
+	window_manager.eventList.PREVENTING_WINDOW_FROM_CLOSING,
+	K3_ON_APPLICATION_EXIT_WINDOW_LISTENER
 );
 var startDir = global[gns].info.startDir;
 
