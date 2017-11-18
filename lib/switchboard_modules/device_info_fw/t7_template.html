@@ -59,6 +59,7 @@
 				{{CURRENT_SOURCE_10UA_CAL_VALUE.val}} uA
 			</span>
 		</div>
+		{{#unless calibrationStatus.overall}}
 		{{#if calibrationStatus}}
 		<div class="device-detail">
 			Calibration Status: 
@@ -67,6 +68,7 @@
 			</span>
 		</div>
 		{{/if}}
+		{{/unless}}
 		<div class="block-separator"/>
 		<div class="pane-popover">
 			Versions
@@ -280,6 +282,11 @@
 	<ul>
 		<li><div title="Open the LJLogM open config file in your default text editor"><a id="lj-file-link-holder-ljLogMApp" class="lj-link-holder">LJLogM_open.cfg</a></div></li>
 		<li><div title="Open the LJStreamM open config file in your default text editor"><a id="lj-file-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM_open.cfg</a></div></li>
+	</ul>
+	<h3>Auto-Config-and-Open Logging Applications</h3>
+	<ul>
+		<li><div title="Open the LJLogM app after configuring the _open.cgf file."><a id="lj-config-and-open-link-holder-ljLogMApp" class="lj-link-holder">LJLogM</a></div></li>
+		<li><div title="Open the LJStreamM app after configuring the _open.cgf file."><a id="lj-config-and-open-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM</a></div></li>
 	</ul>
 	{{/if}}
 	{{/if}}

@@ -38,11 +38,22 @@
 				{{ETHERNET_MAC.val}}
 			</span>
 		</div>
+		{{#unless calibrationStatus.overall}}
 		{{#if calibrationStatus}}
 		<div class="device-detail">
 			Calibration Status: 
 			<span id="calibration-status-display" class="calibration-message selectableText {{#if calibrationStatus.overall}}isa_success{{else}}isa_error{{/if}}" title="{{calibrationStatus.message}}">
 				{{calibrationStatus.shortMessage}}&nbsp;&nbsp;<span class="{{#if calibrationStatus.overall}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
+			</span>
+		</div>
+		{{/if}}
+		{{/unless}}
+
+		{{#if isAuthorized}}
+		<div class="device-detail">
+			Authorization Status: 
+			<span id="authorization-status-display" class="authorization-message selectableText {{#if isAuthorized.val}}isa_success{{else}}isa_error{{/if}}" title="{{isAuthorized.message}}">
+				{{isAuthorized.shortMessage}}&nbsp;&nbsp;<span class="{{#if isAuthorized.val}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
 			</span>
 		</div>
 		{{/if}}
@@ -80,14 +91,14 @@
 			</span>
 		</div>
 
-		<!-- Not applicable for T4
+		 <!-- Not applicable for T4 -->
 		<div class="device-detail selectableText">
 			Device Temperature:
 			<span id="internal-device-temperature" class="">
 				{{TEMPERATURE_DEVICE_K.val}}
 			</span> K
 		</div>
-		-->
+		
 
 		<div class="block-separator"/>
 		<div class="block-separator"/>
@@ -191,6 +202,11 @@
 		<li><div title="Open the LJLogM open config file in your default text editor"><a id="lj-file-link-holder-ljLogMApp" class="lj-link-holder">LJLogM_open.cfg</a></div></li>
 		<li><div title="Open the LJStreamM open config file in your default text editor"><a id="lj-file-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM_open.cfg</a></div></li>
 	</ul>
+	<h3>Auto-Config-and-Open Logging Applications</h3>
+	<ul>
+		<li><div title="Open the LJLogM app after configuring the _open.cgf file."><a id="lj-config-and-open-link-holder-ljLogMApp" class="lj-link-holder">LJLogM</a></div></li>
+		<li><div title="Open the LJStreamM app after configuring the _open.cgf file."><a id="lj-config-and-open-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM</a></div></li>
+	</ul>
 	{{/if}}
 	{{/if}}
 	
@@ -206,10 +222,12 @@
 			'url': "https://labjack.com/support/quickstart/{{deviceTypeName}}"
 		}, {
 			'id': '#lj-link-holder-datasheet',
-			'url': "https://labjack.com/support/datasheets/{{deviceTypeName}}"
+			'url': "https://labjack.com/support/datasheets/t-series"
+			// 'url': "https://labjack.com/support/datasheets/{{deviceTypeName}}"
 		}, {
 			'id': '#lj-link-holder-luaScripting',
-			'url': "https://labjack.com/support/datasheets/{{deviceTypeName}}/scripting"
+			'url': "https://labjack.com/support/datasheets/t-series/scripting"
+			// 'url': "https://labjack.com/support/datasheets/{{deviceTypeName}}/scripting"
 		}, {
 			'id': '#lj-link-holder-supportPage',
 			'url': "https://labjack.com/support/{{deviceTypeName}}"
