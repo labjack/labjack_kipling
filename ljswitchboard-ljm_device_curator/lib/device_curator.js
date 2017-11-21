@@ -1600,7 +1600,7 @@ function device(useMockDevice) {
 			});
 		}
 		return defered.promise;
-	}
+	};
 	
 
 	function removeProcessListeners() {
