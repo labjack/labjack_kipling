@@ -660,6 +660,52 @@ function openAllDeviceScanner() {
         debugSS('in markAndAddActiveDevices');
         debugLFDS('in markAndAddActiveDevices');
         var defered = q.defer();
+
+        // self.cachedScanBundle.scannedData
+        debugMACT('Checking for any previously marked active devices in the last scan cache');
+
+        function isDeviceStillActive(sn) {
+            var isActive = false;
+            self.cachedCurrentDevices.forEach(function(cachedDevice) {
+                var savedAttributes = cachedDevice.savedAttributes;
+                var serialNumber = savedAttributes.serialNumber;
+                if(sn === serialNumber) {
+                    isActive = true;
+                }
+            });
+            return isActive;
+        }
+        // We need to un-mark any active devices that are no longer active.
+
+        if(self.cachedScanBundle) {
+            if(self.cachedScanBundle.scannedData) {
+                // debugMACT('We have previously found scanned data', self.cachedScanBundle.scannedData);
+                debugMACT('We have previously found scanned data');
+                debugPrintFlatScannedData(self.cachedScanBundle.scannedData, debugMACT);
+                var scannedData = self.cachedScanBundle.scannedData;
+                var dKeys = Object.keys(self.cachedScanBundle.scannedData);
+                dKeys.forEach(function(dKey) {
+                    var dInfo = scannedData[dKey];
+                    var isDeviceActive = dInfo.isActive;
+                    var isActuallyActive = isDeviceStillActive(dInfo.serialNumber);
+                    debugMACT('SN', dInfo.serialNumber, 'active?',isActuallyActive);
+                    // Check to see if the device has the correct active state
+                    if(dInfo.isActive != isActuallyActive) {
+                        // The device is not actually active...
+                        dInfo.isActive = false;
+                        // loop through the connection types & fix the active connection.
+                        var ctKeys = Object.keys(dInfo.connectionTypes);
+                        ctKeys.forEach(function(ctKey) {
+                            if(dInfo.connectionTypes[ctKey].isActive) {
+                                dInfo.connectionTypes[ctKey].isActive = false;
+                                dInfo.connectionTypes[ctKey].insertionMethod = 'scan';
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
         var promises = self.deviceManager.addCuratedDevices(
             self.cachedCurrentDevices
         );
@@ -886,6 +932,28 @@ function openAllDeviceScanner() {
             'connectionTypes',
             'unverifiedConnectionTypeNames',
         ];
+
+        if(DEBUG_MARKING_ACTIVE_CONNECTION_TYPES) {
+            pInfo.push('handle');
+            pInfo.push('dt');
+            pInfo.push('deviceType');
+            pInfo.push('deviceTypeStr');
+            pInfo.push('deviceTypeString');
+            pInfo.push('deviceTypeName');
+            pInfo.push('handleConnectionType');
+            pInfo.push('handleConnectionTypeStr');
+            pInfo.push('handleConnectionTypeName');
+            pInfo.push('ct');
+            pInfo.push('connectionType');
+            pInfo.push('connectionTypeStr');
+            pInfo.push('connectionTypeName');
+            pInfo.push('serialNumber');
+            pInfo.push('ip');
+            pInfo.push('port');
+            pInfo.push('maxBytesPerMB');
+            pInfo.push('maxBytesPerMB');
+            pInfo.push('isActive');
+        }
         var pData = {};
         var keys = Object.keys(data);
         keys.forEach(function(key) {
@@ -893,7 +961,9 @@ function openAllDeviceScanner() {
             var dKeys = Object.keys(dData);
             pData[key] = {};
             var otherKeys = [];
+            // loop through each available device.
             dKeys.forEach(function(dKey) {
+                // Save the requested key's info.
                 if(pInfo.indexOf(dKey) >= 0) {
                     pData[key][dKey] = dData[dKey];
                 } else {
@@ -1664,6 +1734,8 @@ function openAllDeviceScanner() {
         debugLFDS('Cached Connection Types:');
         printScannedDataConnectionTypes(cScannedData);
         debugPrintFlatScannedData(cScannedData, debugLFDS);
+        debugMACT('!!! In addCachedScanResults');
+        debugPrintFlatScannedData(cScannedData, debugMACT);
         // console.log('Current Devices', self.cachedCurrentDevices);
         // console.log('Current bundle', bundle.scannedData);
         
@@ -1706,6 +1778,32 @@ function openAllDeviceScanner() {
 
         bundle.scannedData = scannedData;
         // console.log('New bundle', bundle);
+        // console.log('Scanned Data', scannedData);
+        if(DEBUG_MARKING_ACTIVE_CONNECTION_TYPES) {
+            var sDKeys = Object.keys(scannedData);
+            var foundActiveConnection = false;
+            var activeConnection = {
+                'sn': 0,
+                'ct': {},
+            };
+
+            sDKeys.forEach(function(key) {
+                var dev = scannedData[key];
+                dev.connectionTypes.forEach(function(ctInfo) {
+                    if(ctInfo.isActive) {
+                        foundActiveConnection = true;
+                        activeConnection.sn = dev.serialNumber;
+                        activeConnection.ct = ctInfo;
+                    }
+                });
+                // console.log('Device:',dev.serialNumber,'CTs',dev.connectionTypes);
+            });
+            if(foundActiveConnection) {
+                debugMACT('!!! We found an active CT', activeConnection);
+            } else {
+                debugMACT('!!! We did not find an active CT');
+            }
+        }
         defered.resolve(bundle);
         return defered.promise;
     }
