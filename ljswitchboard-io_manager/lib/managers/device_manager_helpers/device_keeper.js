@@ -608,7 +608,7 @@ function createDeviceKeeper(io_delegator, link) {
 		deviceScanner.getLastFoundErroniusDevices()
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
-	}
+	};
 
 	this.getCachedListAllDevices = function() {
 		var defered = q.defer();

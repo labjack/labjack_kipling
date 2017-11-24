@@ -5,14 +5,14 @@
 	library.
 **/
 
-var utils = require('./utils/utils');
+var utils = require('../utils/utils');
 var qRunner = utils.qRunner;
 var qExec = utils.qExec;
 var pResults = utils.pResults;
 var q = require('q');
-var constants = require('../lib/common/constants');
+var constants = require('../../lib/common/constants');
 
-var test_util = require('./utils/scanner_test_util');
+var test_util = require('../utils/scanner_test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var testScanResults = test_util.testScanResults;
 
@@ -42,7 +42,7 @@ var getDeviceControllerEventListener = function(eventKey) {
 exports.tests = {
 	'initialization': function(test) {
 		// Require the io_manager library
-		io_manager = require('../lib/io_manager');
+		io_manager = require('../../lib/io_manager');
 
 		// Require the io_interface that gives access to the ljm driver, 
 		// device controller, logger, and file_io_controller objects.

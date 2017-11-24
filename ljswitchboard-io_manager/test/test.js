@@ -19,6 +19,7 @@ var TEST_DEVICE_SCANNER = false;					// Passes but outputs a lot of text.
 var TEST_MOCK_DEVICE_SCANNER = false;
 var TEST_LIVE_DEVICE_SCANNER = false;
 var TEST_USB_ONLY_DEVICE_SCANNER = false;
+var TEST_USB_ONLY_DEVICE_SCANNER_CACHING = true;
 
 var TEST_DEVICE_CONTROLLER = false;					// incomplete
 var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing
@@ -35,7 +36,7 @@ var T7_DEVICE_SPEED_TEST = false;
 
 var TEST_SPECIAL_ADDRESSES_INTERFACE = false;
 
-var TEST_DEVICE_DASHBOARD_COMMANDS = true;
+var TEST_DEVICE_DASHBOARD_COMMANDS = false;			// Passing 11/21/2017
 
 if(ENABLE_BASIC_TEST) {
 	var basic_test = require('./basic_test');
@@ -56,20 +57,25 @@ if(TEST_SINGLE_DEVICE_CONTROLLER) {
 	exports.single_device_controller_test = single_device_controller_test.tests;
 }
 if(TEST_DEVICE_SCANNER) {
-	var device_scanner_test = require('./device_scanner_test');
+	var device_scanner_test = require('./device_scanning/device_scanner_test');
 	exports.device_scanner_test = device_scanner_test.tests;
 }
 if(TEST_MOCK_DEVICE_SCANNER) {
-	var mock_device_scanner_test = require('./mock_device_scanner_test');
+	var mock_device_scanner_test = require('./device_scanning/mock_device_scanner_test');
 	exports.mock_device_scanner_test = mock_device_scanner_test.tests;
 }
 if(TEST_LIVE_DEVICE_SCANNER) {
-	var live_device_scanner_test = require('./live_device_scanner_test');
+	var live_device_scanner_test = require('./device_scanning/live_device_scanner_test');
 	exports.live_device_scanner_test = live_device_scanner_test.tests;
 }
 if(TEST_USB_ONLY_DEVICE_SCANNER) {
-	var usb_only_device_scanner_test = require('./usb_only_device_scanner_test');
+	var usb_only_device_scanner_test = require('./device_scanning/usb_only_device_scanner_test');
 	exports.usb_only_device_scanner_test = usb_only_device_scanner_test.tests;
+}
+
+if(TEST_USB_ONLY_DEVICE_SCANNER_CACHING) {
+	var usb_only_device_scanner_caching_test = require('./device_scanning/usb_only_device_scanner_caching_test');
+	exports.usb_only_device_scanner_caching_test = usb_only_device_scanner_caching_test.tests;
 }
 if(TEST_DEVICE_CONTROLLER) {
 	var device_controller_test = require('./device_controller_test');
