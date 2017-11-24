@@ -59,11 +59,22 @@
                 <table class="device SERIAL_NUMBER_{{serialNumber}}"><tr>
                     <td id="image"><img src="{{../../../staticFiles}}img/devices/{{productType}}.png" alt="dir: {{../../staticFiles}}"></td>
                     <td class="connection-buttons-holder">
+                        <div class="connecting_to_device_circle" style="display:none;">
+                            <div class="progress progress-indeterminate">
+                                <div class="win-ring small"></div>
+                            </div>
+                        </div>
                         <div class="disconnect_buttons_class {{disconnect_buttons_class}}">
                             <div class="connection-button-holder"><button class="btn btn-danger disconnect-button" id="{{serial}}-disconnect">
                                 Disconnect
                             </button></div>
-                            <div class="current-connection-indicator"></div>
+                            
+                            <div class="current-connection-indicator">
+                                <span>Active Connection:</span><br><span id="active_connection_type">{{#connectionTypes}}
+                            {{#if isActive}}{{connectionTypeName}}{{/if}}
+                            {{/connectionTypes}}</span>
+                            </div>
+                            
                         </div>
                         <div class="connect_buttons_class {{connect_buttons_class}}">
                             {{#connectionTypes}}
@@ -76,6 +87,7 @@
                             {{/connectionTypes}}
                         </div>
                     </td>
+                    <!-- Info to the right of the connection buttons -->
                     <td id="info-holder">
                         <div id="info">
                             <table>

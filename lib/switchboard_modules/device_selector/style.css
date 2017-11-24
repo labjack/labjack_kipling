@@ -112,6 +112,9 @@ div.link a {
 .device #error-info-holder {
     font-size: 12px;
 }
+.device .current-connection-indicator {
+    font-size:12px;
+}
 .wifiIPAddressText {
     width: 85px;
     display: inline-block;
