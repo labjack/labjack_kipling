@@ -1089,7 +1089,7 @@ exports.labjack = function () {
 				if ((res === 0)) {
 					return onSuccess(returnResults);
 				} else {
-					return onError({retError:res, errFrame:errors.deref()});
+					return onError({retError:res, errFrame:errors.deref(), results:returnResults});
 				}
 			}
 		);
@@ -1223,7 +1223,8 @@ exports.labjack = function () {
 			throw new DriverInterfaceError(
 				{
 					retError:errorResult,
-					errFrame:errors.deref()
+					errFrame:errors.deref(),
+					results: returnResults
 				}
 			);
 		}
