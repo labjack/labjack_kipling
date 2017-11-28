@@ -1802,6 +1802,19 @@ function device(useMockDevice) {
 		});
 		return defered.promise;
 	};
+
+	/* 
+	 * This function intelligently re-tries the iReadMany function call to build 
+	 * a "best possible" result object organized by register name.  This function
+	 * uses the iReadMany function call for efficiency and will collect errors 
+	 * for each individual register.
+	*/
+	this.irReadMany = function(addresses) {
+		var defered = q.defer();
+		defered.resolve();
+		return defered.promise;
+	};
+
 	this.iReadMultiple = function(addresses) {
 		var defered = q.defer();
 		// this.readMultiple uses the qRead command to automatically retry _DEFAULT registers.

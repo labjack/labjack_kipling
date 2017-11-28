@@ -38,7 +38,7 @@
   "dependencies": {
     "async": "~0",
     "dict": "1.4.0",
-    "labjack-nodejs": "0.0.58",
+    "labjack-nodejs": "0.0.59",
     "lj-apps-win-registry-info": "git://github.com/chrisJohn404/lj-apps-win-registry-info.git#master",
     "ljm-ffi": "^1.0.8",
     "ljmmm-parse": "0.x",
