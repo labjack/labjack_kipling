@@ -20,6 +20,7 @@ var DATA_COLLECTOR_EVENTS_MAP = [
 	{'eventName': 'REQUIRED_DEVICE_NOT_FOUND', 'funcName': 'onDataCollectorError'},
 	{'eventName': 'COLLECTOR_WARNING', 'funcName': 'onDataCollectorError'},
 	{'eventName': 'COLLECTOR_ERROR', 'funcName': 'onDataCollectorError'},
+
 ];
 
 // Code that logs data to files.
@@ -39,14 +40,16 @@ var VIEW_DATA_REPORTER_EVENTS_MAP = [
 ];
 
 var eventList = require('./events').events;
-
+var ENABLE_PRINT_OUTPUT = false;
 function print() {
-	var dataToPrint = [];
-	dataToPrint.push('(coordinator.js)');
-	for(var i = 0; i < arguments.length; i++) {
-		dataToPrint.push(arguments[i]);
+	if(ENABLE_PRINT_OUTPUT) {
+		var dataToPrint = [];
+		dataToPrint.push('(coordinator.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
 	}
-	console.log.apply(console, dataToPrint);
 }
 function warn() {
 	var dataToPrint = [];
@@ -76,6 +79,7 @@ function CREATE_COORDINATOR () {
 	this.initializeStats = function() {
 		// Initialize the num_collected variable.
 		self.stats.num_collected = {};
+		print('initializing stats',self.config);
 		self.config.data_groups.forEach(function(data_group) {
 			self.stats.num_collected[data_group] = 0;
 		});
@@ -155,10 +159,15 @@ function CREATE_COORDINATOR () {
 		print('in onDataCollectorError', data);
 		self.emit(eventList.DATA_COLLECTOR_ERROR, data);
 	};
+	this.onDataLoggerStateUpdate = function(data) {
+		print('in onDataLoggerStateUpdate', data);
+		self.emit(eventList.DATA_LOGGER_STATE_UPDATE, data);
+	};
 
 	// Events that get linked to the dataReporter object.
 	this.onDataReporterViewData = function(data) {
 		print('in onDataReporterViewData', data);
+		self.emit(eventList.NEW_VIEW_DATA, data);
 	};
 
 	function getAttachListener(emitter) {
@@ -240,10 +249,12 @@ function CREATE_COORDINATOR () {
 				// Don't emit a CONFIGURATION_ERROR event.  The caller needs to
 				// report the errors. 
 				// self.emit(eventList.CONFIGURATION_ERROR, errBundle);
+				console.error('in innerConfigureCoordinator err', errBundle);
 				defered.reject(errBundle);
 			}
 
 			// Configure dataCollector object
+			print('Configuring the datacollector, data logger, and viewDataReporter');
 			self.dataCollector.configureDataCollector(config)
 			.then(self.dataLogger.configure, onError)
 			.then(self.viewDataReporter.configure, onError)

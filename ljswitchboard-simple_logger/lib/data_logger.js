@@ -129,6 +129,18 @@ function debugDataSaving() {
 	}
 }
 
+var DEBUG_SAVING_DATA = true;
+function debugSavingData() {
+	if(DEBUG_SAVING_DATA) {
+		var dataToPrint = [];
+		dataToPrint.push('(data_logger.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+
 function CREATE_DATA_LOGGER() {
 	// Default Root Directory
 	this.rootDirectory = DEFAULTS.ROOT_DIRECTORY;
@@ -400,6 +412,7 @@ function CREATE_DATA_LOGGER() {
 
 	function initializeFileWriteStream(filePath) {
 		var defered = q.defer();
+		debugSavingData('Creating file', filePath);
 		var file = fs.createWriteStream(filePath);
 		file.on('open', function(fd) {
 			debugLogFiles('Initialized file write stream');
@@ -786,6 +799,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function saveNewDataToBuffer(data) {
+
 		var groupData = self.logData[data.groupKey];
 		var line_ending = groupData.line_ending;
 		var value_separator = groupData.value_separator;
@@ -845,6 +859,7 @@ function CREATE_DATA_LOGGER() {
 		groupData.file_stream_buffer.push(dataToWrite);
 	}
 	function saveNewData(data) {
+		debugSavingData('saving data, group:', data.groupKey,'numWrittenLines:', self.logData[data.groupKey].num_written_lines);
 		debugDataSaving('Saving Data!!', data.groupKey, self.logData[data.groupKey].num_written_lines);
 
 		// Format data & add it to the file_stream_buffer

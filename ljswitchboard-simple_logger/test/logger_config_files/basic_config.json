@@ -33,7 +33,7 @@
 	],
 	"basic_data_group": {
 		"group_name": "Basic Data Group",
-		"group_period_ms": 100,
+		"group_period_ms": 1000,
 		"is_stream": false,
 
 		"device_serial_numbers": ["1", "2"],
@@ -65,6 +65,7 @@
 				"exec_method": "sync",
 				"func": " val = 273.15 + data['1'].results.AIN0.result",
 				"func": "val = require('./file.js').getTemp(data);",
+				"func": "val = data['1'].results.AIN0.result",
 				"enable_logging": true,
 				"enable_view": true
 			},
@@ -73,6 +74,7 @@
 				"human_name": "RH %",
 				"exec_method": "async",
 				"func": "require('./sub_dir/sub_file.js').getHumidity(data, cb)",
+				"func": "val = data['1'].results.AIN0.result",
 				"enable_logging": true,
 				"enable_view": true
 			},
@@ -100,7 +102,7 @@
 	"stop_trigger": {
 		"relation": "and",
 		"triggers": [{
-			"attr_type": "num_logged", "data_group": "basic_data_group", "val": 4
+			"attr_type": "num_logged", "data_group": "basic_data_group", "val": 1
 		}]
 	}
 }

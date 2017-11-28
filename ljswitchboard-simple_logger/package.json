@@ -4,6 +4,7 @@
   "description": "A simple data logger for LabJack devices.",
   "main": "./lib/ljswitchboard-simple_logger",
   "scripts": {
+    "start": "node ./examples/hello_world.js",
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-simple_logger",

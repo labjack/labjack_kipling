@@ -12,15 +12,35 @@ var view_type_manager = require('./view_type_manager');
 
 var events = {};
 exports.events = events;
-
+var ENABLE_PRINT_OUTPUT = false;
 function print() {
-	var dataToPrint = [];
-	dataToPrint.push('(view_data_reporter.js)');
-	for(var i = 0; i < arguments.length; i++) {
-		dataToPrint.push(arguments[i]);
+	if(ENABLE_PRINT_OUTPUT) {
+		var dataToPrint = [];
+		dataToPrint.push('(view_data_reporter.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
 	}
-	console.log.apply(console, dataToPrint);
 }
+
+var DEBUG_DATA_REPORTING = false;
+function debugDataReporting() {
+	if(DEBUG_DATA_REPORTING) {
+		var dataToPrint = [];
+		dataToPrint.push('(view_data_reporter.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+
+var VIEW_DATA_REPORTER_EVENTS = {
+	// Event indicating that the data logger wants to display new data.
+	UPDATE_VIEW_DATA: 'UPDATE_VIEW_DATA',
+
+};
 
 function CREATE_VIEW_DATA_REPORTER() {
 	
@@ -99,6 +119,7 @@ function CREATE_VIEW_DATA_REPORTER() {
 				'window_size': window_size,
 				'group': view_data.group,
 				'data_cache': data_cache,
+				'lastTimeUpdated': new Date(),
 			}
 
 			// Add the view key to the groupEndpoints variable
@@ -209,6 +230,7 @@ function CREATE_VIEW_DATA_REPORTER() {
 		return {'dataArray': dataArray, 'keyValueStore': dataKeyValueStore};
 	}
 	function manageBasicGraphData(dataArray, view) {
+		// print('in manageBasicGraphData');
 		var numSaved = view.data_cache.length;
 
 		// Determine how to save the new data point.
@@ -224,6 +246,7 @@ function CREATE_VIEW_DATA_REPORTER() {
 		}
 	}
 	function manageCurrentValuesData(keyValueStore, view) {
+		// print('in manageBasicGraphData');
 		// Throw out the old data by defining the data_cache to be undefined
 		view.data_cache = undefined;
 
@@ -231,13 +254,13 @@ function CREATE_VIEW_DATA_REPORTER() {
 		view.data_cache = keyValueStore;
 	}
 	function manageNewData(data) {
-		print('Managing Data', data.groupKey);
+		debugDataReporting('Managing Data, new data for group:', data.groupKey);
 
 		var filteredData = filterGroupData(
 			data.data,
 			self.dataMap[data.groupKey]
 		);
-		print(filteredData);
+		debugDataReporting('New Filtered Data to be saved:', filteredData);
 
 		var endpoint_keys = self.groupEndpoints[data.groupKey];
 		endpoint_keys.forEach(function(endpoint_key) {
@@ -257,7 +280,32 @@ function CREATE_VIEW_DATA_REPORTER() {
 			} else if(view.view_type === 'current_values') {
 				manageCurrentValuesData(filteredData.keyValueStore, view);
 			}
+
+			debugDataReporting('Check to see if we need to report data...');
+			var curTime = new Date();
+			var minUpdateRate = 50;
+			var timeElapsed;
+			if(self.config.view_config.update_rate_ms) {
+				if(self.config.view_config.update_rate_ms > minUpdateRate) {
+					timeElapsed = self.config.view_config.update_rate_ms;
+				} else {
+					timeElapsed = minUpdateRate;
+				}
+			} else {
+				minUpdateRate = minUpdateRate;
+			}
+			// -10 is to account for jitter...
+			if(curTime - view.lastTimeUpdated >= timeElapsed-10) {
+				debugDataReporting('Reporting data!');
+				view.lastTimeUpdated = curTime;
+				self.emit(VIEW_DATA_REPORTER_EVENTS.UPDATE_VIEW_DATA, view);
+			} else {
+				debugDataReporting('Not emitting event', curTime - view.lastTimeUpdated, self.config.view_config.update_rate_ms)
+			}
+			debugDataReporting('Finished reporting data');
 		});
+
+		
 	}
 	/* Externally Accessable functions */
 	this.onNewData = function(data) {

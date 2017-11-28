@@ -4,7 +4,7 @@ var VIEW_TYPE_CONSTANTS = {
 	'basic_graph': {
 		'window_size': {
 			'default_value': 20,
-			'min': 10,
+			'min': 5,
 			'max': 1000,
 		}
 	},
@@ -38,7 +38,7 @@ function getWindowSize(view_data) {
 			// Force the window size to be within the bounds.
 			if (desiredSize < ws_constants.min) {
 				desiredSize = ws_constants.min;
-			} else if(desiredSize > ws.ws_constants.max) {
+			} else if(desiredSize > ws_constants.max) {
 				desiredSize = ws_constants.max;
 			}
 		}

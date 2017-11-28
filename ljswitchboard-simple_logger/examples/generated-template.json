@@ -1,0 +1,97 @@
+{
+  "logging_config": {
+    "name": "Basic Config Auto-Template",
+    "file_prefix": "basic_config Auto-Template",
+    "write_to_file": true,
+    "default_result_view": "0",
+    "default_result_file": "0"
+  },
+  "view_config": {
+    "update_rate_ms": 200
+  },
+  "views": [
+    "basic_view",
+    "current_values_view"
+  ],
+  "basic_view": {
+    "name": "Basic Graph",
+    "view_type": "basic_graph",
+    "window_size": 5,
+    "group": "basic_data_group"
+  },
+  "current_values_view": {
+    "name": "Current Values",
+    "view_type": "current_values",
+    "group": "basic_data_group"
+  },
+  "data_groups": [
+    "basic_data_group"
+  ],
+  "basic_data_group": {
+    "470010414": {
+      "registers": [
+        {
+          "name": "AIN0",
+          "human_name": "AIN0",
+          "format": "default",
+          "enable_logging": true,
+          "enable_view": true
+        },
+        {
+          "name": "AIN1",
+          "human_name": "AIN1",
+          "format": "default",
+          "enable_logging": true,
+          "enable_view": true
+        }
+      ]
+    },
+    "group_name": "Basic Data Group",
+    "group_period_ms": 100,
+    "is_stream": false,
+    "device_serial_numbers": [
+      470010414
+    ],
+    "defined_user_values": [
+      "custom-AIN0",
+      "custom-AIN1"
+    ],
+    "user_values": {
+      "custom-AIN0": {
+        "name": "custom-AIN0",
+        "human_name": "custom-AIN0",
+        "exec_method": "sync",
+        "func": "val = data['470010414'].results.AIN0.result",
+        "enable_logging": false,
+        "enable_view": true
+      },
+      "custom-AIN1": {
+        "name": "custom-AIN1",
+        "human_name": "custom-AIN1",
+        "exec_method": "sync",
+        "func": "val = data['470010414'].results.AIN1.result",
+        "enable_logging": false,
+        "enable_view": true
+      }
+    },
+    "logging_options": {
+      "write_to_file": true,
+      "file_prefix": "basic_group",
+      "max_samples_per_file": 3,
+      "data_collector_config": {
+        "REPORT_DEVICE_IS_ACTIVE_VALUES": true,
+        "REPORT_DEFAULT_VALUES_WHEN_LATE": false
+      }
+    }
+  },
+  "stop_trigger": {
+    "relation": "and",
+    "triggers": [
+      {
+        "attr_type": "num_logged",
+        "data_group": "basic_data_group",
+        "val": 8
+      }
+    ]
+  }
+}

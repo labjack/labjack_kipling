@@ -7,6 +7,7 @@ var gcd = require('compute-gcd');
 var vm = require('vm');
 var user_code_executor = require('./user_code_executor');
 
+
 // Constants
 var COLLECTOR_MODES = {
 	COLLECTING: 'COLLECTING',
@@ -65,6 +66,29 @@ var device_data_collector = require('./device_data_collector');
 var ENABLE_DEBUG_LOG = false;
 function debugLog() {
 	if(ENABLE_DEBUG_LOG) {
+		var dataToPrint = [];
+		dataToPrint.push('(data_collector.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+var ENABLE_INITIALIZATION_STEP_DEBUGGING = false;
+function stepDebug() {
+	if(ENABLE_INITIALIZATION_STEP_DEBUGGING) {
+		var dataToPrint = [];
+		dataToPrint.push('(data_collector.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+
+var DEBUG_DATA_ACQISITION = false;
+function debugDataAcquisition() {
+	if(DEBUG_DATA_ACQISITION) {
 		var dataToPrint = [];
 		dataToPrint.push('(data_collector.js)');
 		for(var i = 0; i < arguments.length; i++) {
@@ -143,7 +167,7 @@ function CREATE_DATA_COLLECTOR() {
 		if(execMethod === 'sync') {
 			timeoutMS = 50;
 		}
-
+		stepDebug('in createUserValueFunction', self.config);
 		var executor = new user_code_executor.create(
 			self.config.config_file_path,
 			funcText,
@@ -201,6 +225,7 @@ function CREATE_DATA_COLLECTOR() {
 	}
 
 	function initializeUserFunctions() {
+		stepDebug('in initializeUserFunctions');
 		var errors = [];
 		var data_group_keys = self.config.data_groups;
 		data_group_keys.forEach(function(data_group_key) {
@@ -229,6 +254,7 @@ function CREATE_DATA_COLLECTOR() {
 					var userValue = data_group.user_values[user_value_key];
 					var execMethod = userValue.exec_method;
 					var func = userValue.func;
+					stepDebug('executing createUserValueFunction',execMethod, func, errors);
 					userValue.userFunc = createUserValueFunction(execMethod, func, errors);
 				});
 			}
@@ -236,6 +262,7 @@ function CREATE_DATA_COLLECTOR() {
 		return errors;
 	}
 	var saveLoggerConfigReference = function(config) {
+		stepDebug('in saveLoggerConfigReference');
 		var defered = q.defer();
 
 		// Remove old reference
@@ -273,7 +300,7 @@ function CREATE_DATA_COLLECTOR() {
 
 	var calculateTimerData = function(bundle) {
 		var defered = q.defer();
-
+		stepDebug('in calculateTimerData');
 		// Get a list of all required periods.
 		var periods = [];
 		self.config.dataGroups.forEach(function(dataGroup) {
@@ -303,6 +330,7 @@ function CREATE_DATA_COLLECTOR() {
 
 	this.dataGroupManagers = [];
 	var createDataGroupManagers = function(bundle) {
+		stepDebug('in createDataGroupManagers');
 		var defered = q.defer();
 
 		// Un-reference the old dataGroupManagers
@@ -320,6 +348,7 @@ function CREATE_DATA_COLLECTOR() {
 
 	this.deviceDataCollectors = {};
 	var createDeviceDataCollectors = function(bundle) {
+		stepDebug('in createDeviceDataCollectors');
 		var defered = q.defer();
 
 		// Un-reference the old deviceDataCollectors
@@ -337,6 +366,7 @@ function CREATE_DATA_COLLECTOR() {
 	};
 
 	var updateDeviceDataCollectorDeviceListings = function(bundle) {
+		stepDebug('in updateDeviceDataCollectorDeviceListings');
 		var defered = q.defer();
 
 		var keys = Object.keys(self.deviceDataCollectors);
@@ -358,6 +388,7 @@ function CREATE_DATA_COLLECTOR() {
 	};
 
 	var linkDeviceDataCollectorsToDevices = function(bundle) {
+		stepDebug('in linkDeviceDataCollectorsToDevices');
 		var defered = q.defer();
 
 		var serialNumbers = Object.keys(self.deviceDataCollectors);
@@ -393,6 +424,7 @@ function CREATE_DATA_COLLECTOR() {
 	};
 
 	var attachDeviceDataCollectorListeners = function(bundle) {
+		stepDebug('in attachDeviceDataCollectorListeners');
 		var defered = q.defer();
 
 		var keys = Object.keys(self.deviceDataCollectors);
@@ -414,7 +446,7 @@ function CREATE_DATA_COLLECTOR() {
 
 	var finishDataCollectorConfig = function(bundle) {
 		var defered = q.defer();
-
+		stepDebug('in finishDataCollectorConfig');
 		// Report that the data collector has been configured.
 		self.emit(self.eventList.COLLECTOR_CONFIGURED, {
 			'requiredDeviceSerialNumbers': self.requiredDeviceSerialNumbers,
@@ -424,6 +456,7 @@ function CREATE_DATA_COLLECTOR() {
 		return defered.promise;
 	};
 	this.configureDataCollector = function(config) {
+		debugLog('in configureDataCollector');
 		return innerStopLoggingSession(config)
 		.then(saveLoggerConfigReference)
 		.then(calculateTimerData)
@@ -444,7 +477,7 @@ function CREATE_DATA_COLLECTOR() {
 	this.deviceDataCollectorDataListener = function(data) {
 		if(self.isActive) {
 			var deviceData = data.results;
-			console.log('Acquired New Data', data);
+			debugDataAcquisition('Acquired New Data', data);
 			debugLog('Acquired Data from deviceDataCollector', data.serialNumber, deviceData.registers);
 			var sn = data.serialNumber.toString();
 			if(self.activeDataStore[sn]) {
@@ -644,8 +677,10 @@ function CREATE_DATA_COLLECTOR() {
 					});
 				}
 
+				debugLog('Waiting for reportCollectedData promises');
 				q.allSettled(promises)
 				.then(function(results) {
+					debugLog('Completed for reportCollectedData promises', results);
 					if(results) {
 						// Save the returned results into the organizedGroupData object.
 						// If there was an error use the default value of zero.
@@ -665,12 +700,24 @@ function CREATE_DATA_COLLECTOR() {
 					}
 
 					
-					var data = {};
-					var keys = Object.keys(organizedGroupData['1'].results);
-					keys.forEach(function(key) {
-						data[key] = organizedGroupData['1'].results[key].index;
-					});
-					console.log('Collected Data',activeGroupKey, data);
+					/* some debugging information... */
+					// try {
+					// 	var data = {};
+					// 	console.log('HERE!!!!', organizedGroupData);
+					// 	var degSNs = Object.keys(organizedGroupData);
+					// 	degSNs.forEach(function(sn) {
+					// 		data[sn] = {};
+					// 		var keys = Object.keys(organizedGroupData[sn].results);
+					// 		keys.forEach(function(key) {
+					// 			data[sn][key] = organizedGroupData[sn].results[key].index;
+					// 		});
+					// 	})
+						
+					// 	console.log('Collected Data',activeGroupKey, data);
+
+					// } catch(err) {
+					// 	console.error('Error...', err);
+					// }
 					// console.log('  - data', data);
 					// console.log('  - register', organizedGroupData['1'].results.AIN1.register);
 					// console.log('  - index', organizedGroupData['1'].results.AIN1.index);
@@ -738,7 +785,7 @@ function CREATE_DATA_COLLECTOR() {
 
 			var deviceDataCollector = self.deviceDataCollectors[serialNumber];
 			var dataToRead = requiredData[serialNumber];
-			console.log(
+			debugDataAcquisition(
 				'Starting a new read',
 				self.dataCollectionCounter,
 				serialNumber,
@@ -763,13 +810,15 @@ function CREATE_DATA_COLLECTOR() {
 			'serialNumbers': serialNumbers,
 		};
 
-
+		debugLog('Waiting for read promises');
 		q.allSettled(promises)
 		.then(function() {
+			debugLog('Completed read promises');
 			if(self.isFirstDataCollectionIteration) {
 				self.isFirstDataCollectionIteration = false;
 			} else {
 				try {
+					debugLog('Executing reportCollectedData');
 					self.reportCollectedData(dataCollectionObj);
 				} catch(err) {
 					console.log('Error reporting collected data', err, err.stack);
