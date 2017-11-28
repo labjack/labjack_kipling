@@ -36,6 +36,8 @@ var logger_config_file_path = path.normalize(path.join(
 ));
 
 var eventMap = require('../lib/events').events;
+eventMap = simple_logger.eventList;
+
 var ignoreErrorsList = [
 	eventMap.STOPPED_LOGGER,
 	eventMap.CONFIGURATION_SUCCESSFUL,
