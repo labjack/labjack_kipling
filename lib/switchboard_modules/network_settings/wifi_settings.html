@@ -16,7 +16,10 @@
 				<span id="wifiStatusMessage" class="selectableText">{{ wifiStatusMessage }}<span>
 			</div>
 		</div>
+		<br>
 		<hr>
+		<br>
+		<h3>Configure</h3>
 		<div class="configSettingsDiv">
 			<table class="table table-non-striped configSettingsTable">
 				<thead>
@@ -92,20 +95,44 @@
 				</tbody>
 			</table>
 			<div class="applyAndCancelButtons">
-					<div class="btn-group">
-						<button id="wifiApplyButton" class="btn" title="Apply Changes">
-							<span class="buttonText">{{#if showWifiWarning}}<span class="text-warning icon-warning" title="{{../wifiWarningMessage }}"></span>{{/if}}Apply<!-- {{#if showWifiWarning}}<span class="text-warning icon-warning" title="{{../wifiWarningMessage }}"></span>{{/if}} --></span>
+				<div class="btn-group">
+					<button id="wifiApplyButton" class="btn" title="Apply Changes">
+						<span class="buttonText">{{#if showWifiWarning}}<span class="text-warning icon-warning" title="{{../wifiWarningMessage }}"></span>{{/if}}Apply<!-- {{#if showWifiWarning}}<span class="text-warning icon-warning" title="{{../wifiWarningMessage }}"></span>{{/if}} --></span>
+					</button>
+					<button id="wifiCancelButton" class="btn" title="Cancel Changes">
+						<span class="buttonText">Cancel</span>
+					</button>
+					<div class="networkConfigHelpButtonDiv">
+						<button id="wifiHelpButton" class="networkConfigHelpButton win-command win-command-small" rel="tootlip" title="WiFi Configuration Help, Opens Link in Default Browser">
+							<span class="win-commandicon win-commandring icon-question-2"></span>
 						</button>
-						<button id="wifiCancelButton" class="btn" title="Cancel Changes">
-							<span class="buttonText">Cancel</span>
-						</button>
-						<div class="networkConfigHelpButtonDiv">
-							<button id="wifiHelpButton" class="networkConfigHelpButton win-command win-command-small" rel="tootlip" title="WiFi Configuration Help, Opens Link in Default Browser">
-								<span class="win-commandicon win-commandring icon-question-2"></span>
-							</button>
-						</div>
 					</div>
 				</div>
+			</div>
+			<br>
+			<hr>
+			<br>
+			<h3>Detailed Status</h3>
+			<table class="table table-sm table-hover currentStateTable">
+				<thead>
+					<th class="attribute"/>
+					<th class="currentStateRegisters">Current</th>
+					<th class="defaultValueRegisters">Defaults</th>
+				</thead>
+				<tbody style="background-color:transparent">
+					{{#each wifiStatusRegisters}}
+						<tr id="{{name}}_VALS" class="currentNetworkSettings">
+							<td>{{humanName}}: </td>
+							<td>
+								<span id="CURRENT_VAL_{{current.reg}}" class="current_{{name}}_val selectableText">{{ current.val }}</span>
+							</td>
+							<td>
+								<span id="DEFAULT_VAL_{{current.reg}}" class="default_{{name}}_val selectableText">{{ default.val }}</span>
+							</td>
+						</tr>
+					{{/each}}
+				</tbody>
+			</table>
 		</div>
 	</div>
 </div>
