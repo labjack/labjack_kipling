@@ -184,9 +184,22 @@
 		<li><div title="Open the modbus map page in your default browser"><a id="lj-link-holder-modbusMap" class="lj-link-holder">LJM Modbus Map</a></div></li>
 		<li><div title="Open the LJM Library Documents page in your default browser"><a id="lj-link-holder-ljmAPIDocs" class="lj-link-holder">LJM Library Docs</a></div></li>
 	</ul>
+	{{#if isPlatformWindows}}
+	<p style="padding: 0px;margin: 0px;}"><strong>BETA FEATURE</strong> (Windows Only)</p>
+	<h3>Launch Applications</h3>
+	<ul>
+		<!-- <li><div title="Open the LJLogM app after configuring the _open.cgf file."><a id="lj-config-and-open-link-holder-ljLogMApp" class="lj-link-holder">LJLogM</a></div></li>
+
+		<li><div title="Open the LJStreamM app after configuring the _open.cgf file."><a id="lj-config-and-open-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM</a></div></li> -->
+		<button id="lj-config-and-open-link-holder-ljLogMApp" class="btn btn-mini lj-link-holder" title="Open the LJLogM app after configuring the _open.cgf file.">LJLogM</button>
+		<button id="lj-config-and-open-link-holder-ljStreamMApp" class="btn btn-mini lj-link-holder" title="Open the LJStreamM app after configuring the _open.cgf file.">LJStreamM</button>
+	</ul>
+	{{/if}}
 	<p>Note 1: Clicking on these links will open up your computer's default web browser and take you to the labjack.com website.<br>
-	Note 2: When running a secondary application (LJLogM/LJStreamM) you may need to disconnect from the device in Kipling so that it can be opened in the secondary application.</br><br>
+	Note 2: When running a secondary application (LJLogM/LJStreamM) you will need to close the application in order for it to be used in Kipling again.</br><br>
 	</p>
+
+
 	{{#if enableBetaFeatures}}
 	<p><strong>BETA FEATURE, APP OPENING</strong></p>
 	{{#if isPlatformWindows}}
@@ -201,11 +214,6 @@
 	<ul>
 		<li><div title="Open the LJLogM open config file in your default text editor"><a id="lj-file-link-holder-ljLogMApp" class="lj-link-holder">LJLogM_open.cfg</a></div></li>
 		<li><div title="Open the LJStreamM open config file in your default text editor"><a id="lj-file-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM_open.cfg</a></div></li>
-	</ul>
-	<h3>Auto-Config-and-Open Logging Applications</h3>
-	<ul>
-		<li><div title="Open the LJLogM app after configuring the _open.cgf file."><a id="lj-config-and-open-link-holder-ljLogMApp" class="lj-link-holder">LJLogM</a></div></li>
-		<li><div title="Open the LJStreamM app after configuring the _open.cgf file."><a id="lj-config-and-open-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM</a></div></li>
 	</ul>
 	{{/if}}
 	{{/if}}
