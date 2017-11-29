@@ -46,6 +46,24 @@
     "ljswitchboard-module_manager",
     "ljswitchboard-static_files"
   ],
+  "splash_screen_build_keys": {
+    "window": {
+      "title": "Kipling",
+      "icon": "lib/Kipling_128x128.png",
+      "toolbar": false,
+      "frame": false,
+      "width": 480,
+      "height": 300,
+      "min_width": 480,
+      "min_height": 300,
+      "show": true,
+      "resizable": false
+    },
+    "enableStartupConfig": false,
+    "buildType": "release",
+    "test": false,
+    "clearCachesOnModuleLoad": false
+  },
   "kipling_test_dependencies": [
     "ljswitchboard-kipling_tester"
   ],
@@ -63,6 +81,7 @@
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
     "prepare_build": "node build_scripts/prepare_build.js",
     "gather_project_files": "node build_scripts/gather_project_files.js",
+    "edit_k3_startup_settings": "node build_scripts/edit_k3_startup_settings.js",
     "gather_test_project_files": "node build_scripts/gather_project_files.js test",
     "install_production_dependencies": "node build_scripts/install_production_dependencies.js",
     "rebuild_native_modules": "node build_scripts/rebuild_native_modules",
