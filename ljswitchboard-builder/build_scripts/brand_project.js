@@ -6,11 +6,23 @@ var path = require('path');
 var fse = require('fs-extra');
 var async = require('async');
 var child_process = require('child_process');
+var handlebars = require('handlebars');
 
 var startingDir = process.cwd();
 
 var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
 var TEMP_PROJECT_FILES_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY);
+
+var K3_VERSION_FILE_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY, 'ljswitchboard-kipling','package.json');
+var k3Data;
+var k3VersionStr = '';
+try {
+	k3Data = require(K3_VERSION_FILE_PATH);
+	k3VersionStr = k3Data.version;
+	console.log('Branding project files for K3 Version:', k3VersionStr);
+} catch(err) {
+	console.error('Error getting K3 info', err);
+}
 
 var OUTPUT_PROJECT_FILES_DIRECTORY = 'output';
 var OUTPUT_PROJECT_FILES_PATH = path.normalize(path.join(startingDir, OUTPUT_PROJECT_FILES_DIRECTORY));
@@ -81,6 +93,72 @@ function copyBrandingFiles(bundle) {
 				defered.resolve();
 			}
 		});
+	});
+	return defered.promise;
+}
+
+function getUpdateK3Version(bundle) {
+	function updateK3Version() {
+		var defered = q.defer();
+
+		var toName = bundle.to;
+		var to = path.normalize(path.join(
+			OUTPUT_PROJECT_FILES_PATH,
+			toName,
+			path.basename(path.normalize(fromName))
+		));
+		debugLog('Editing file', to);
+
+		function editFileContents(data) {
+			var template = handlebars.compile(data);
+			var compiledData = template({k3Version:k3VersionStr});
+			console.log('We have opened a file!', data);
+			console.log('it is now',compiledData);
+			return compiledData;
+		}
+		function editAndSaveFile(data) {
+			var newData = editFileContents(data);
+			fse.outputFile(to, newData, function(err) {
+				if(err) {
+					fse.outputFile(to, newData, function(err) {
+						if(err) {
+							defered.reject();
+						} else {
+							defered.resolve();
+						}
+					});
+				} else {
+					defered.resolve();
+				}
+			});
+		}
+		fse.readFile(to, function(err, data) {
+			if(err) {
+				fse.readFile(to, function(err, data) {
+					if(err) {
+						defered.reject(err);
+					} else {
+						editAndSaveFile(data);
+					}
+				});
+			} else {
+				editAndSaveFile(data);
+			}
+		});
+		return defered.promise;
+	}
+	return updateK3Version;
+}
+function copyAndUpdateK3Version(bundle) {
+	var defered = q.defer();
+	copyBrandingFiles(bundle)
+	.then(getUpdateK3Version(bundle), function(err) {
+		defered.reject(err);
+	})
+	.then(function(res) {
+		defered.resolve();
+	}, function(err) {
+		defered.reject(err);
 	});
 	return defered.promise;
 }
@@ -170,6 +248,7 @@ function winExecuteResourceHacker(bundle) {
 
 var brandingOperationsMap = {
 	'copy': copyBrandingFiles,
+	'copyAndUpdateK3Version': copyAndUpdateK3Version,
 	'rename': renameFileBrandingOp,
 	'resHacker': winExecuteResourceHacker,
 };
@@ -196,7 +275,7 @@ var darwinBrandingOps = [
 	'to': 'nwjs.app/Contents/Resources',
 },
 {
-	'operation': 'copy',
+	'operation': 'copyAndUpdateK3Version',
 	'from': 'Info.plist',
 	'to': 'nwjs.app/Contents',
 },
