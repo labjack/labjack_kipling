@@ -104,7 +104,7 @@ function K3_ON_APPLICATION_EXIT_WINDOW_LISTENER() {
 				window_manager.windowManager.managedWindows.kipling.win.close(true);
 			}
 		}
-		interval = setInterval(waitToClose, 1000);
+		interval = setInterval(waitToClose, 500);
 	}
 }
 window_manager.on(
