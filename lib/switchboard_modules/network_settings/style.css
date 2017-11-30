@@ -35,12 +35,7 @@
 	min-width: 30px;
 	width:30px;
 }
-.table.table-sm td{
-	padding:0px;
-}
-.table.table-sm thead th{
-	padding: 8px 0px 0px 0px;
-}
+
 .currentStateTable {
 	max-width: 325px;
 }
