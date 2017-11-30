@@ -89,5 +89,6 @@
 	"js-flags": "--expose-gc",
 	"persistentDataFolderName": "K3",
 	"persistentDataVersion": "0.0.1",
-	"forceRefreshOfPersistentData": false
+	"forceRefreshOfPersistentData": false,
+	"enableBetaOptions": true
 }
