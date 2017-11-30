@@ -81,7 +81,7 @@
     }, {
         "name": "simple_logger",
         "description": "A starting point for the device logger.",
-        "active": true
+        "active": false
     }, {
         "name": "file_browser_fw",
         "description":"A SD Card file browser for the  T7.",
@@ -124,7 +124,7 @@
         "isTask": true
     }, {
         "name": "task_simple_logger_collector",
-        "active": true,
+        "active": false,
         "isTask": true
     }, {
         "name": "task_ljm_controller",
