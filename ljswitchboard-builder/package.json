@@ -62,7 +62,8 @@
     "enableStartupConfig": false,
     "buildType": "release",
     "test": false,
-    "clearCachesOnModuleLoad": false
+    "clearCachesOnModuleLoad": false,
+    "enableBetaOptions": false
   },
   "kipling_test_dependencies": [
     "ljswitchboard-kipling_tester"
