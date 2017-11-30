@@ -118,22 +118,22 @@ var testGroups = {
 
 	// These are T7 specific tests.
 	't7': {
-		't7_basic_test': false,
-		't7_array_test': false,
+		't7_basic_test': true,
+		't7_array_test': true,
 		't7_check_calibration_test': true,
-		't7_read_recovery_fw_version_test': false,
-		't7_upgrade_recovery_image_test':  false,
-		't7_upgrade_test':  false,
+		't7_read_recovery_fw_version_test': true,
+		't7_upgrade_recovery_image_test':  true,
+		't7_upgrade_test':  true,
 		
 		// These two tests should be enabled and disabled together.  The first
 		// test loads and runs a lua script that creates a file.  The second
 		// test verifies that the file was created and then deletes it.  They
 		// are used together to test uSD card compatibility with the T7/T7-Pro.
-		't7_load_and_run_lua_script': false, // Runs script & creates test file "log1.csv"
-		't7_verify_lua_script_created_file': false, // Checks for and deletes file.
+		't7_load_and_run_lua_script': true, // Runs script & creates test file "log1.csv"
+		't7_verify_lua_script_created_file': true, // Checks for and deletes file.
 		
 		// This test prints out what files are on the uSD card.
-		't7_file_system_basic': false,
+		't7_file_system_basic': true,
 
 		// This test performs multiple readdir commands and two read file
 		// commands to test file I/O commands.  Requires there to be a folder
@@ -147,16 +147,16 @@ var testGroups = {
 
 		// This test checks the ability to read the T7's manufacturing info 
 		// saved in flash.
-		't7_manufacturing_info_test': false,
+		't7_manufacturing_info_test': true,
 
 		// This test checks the ability to save and restore T7's power-up default
 		// settings saved in flash.
 		't7_startup_configs_save_and_restore': false, // Requires 2x T7s w/ specific SNs.  Same FW version.
 
-		// Test cached reading functions.
-		't7_cached_values_test': false,
+		// Test cached reading functions. Requires one T7 via USB.
+		't7_cached_values_test': true,
 
-		// get available connections.
+		// get available connections. Requires one T7 via USB.
 		't7_available_connections_test': true,
 	},
 	// T7 over-ride tests...
@@ -191,7 +191,7 @@ var testGroups = {
 		'basic_test': false,
 	},
 	'external_app_tests': {
-		'basic_test': true, // Opens device and shares it with LJLogM and LJStreamM. (Starts and stops the apps to verify functionality)
+		'basic_test': false, // Opens device and shares it with LJLogM and LJStreamM. (Starts and stops the apps to verify functionality)
 	},
 };
 
