@@ -35,8 +35,12 @@
 	min-width: 30px;
 	width:30px;
 }
+
+.currentStateTable {
+	max-width: 325px;
+}
 #network_settings .table {
-	margin-bottom: 0px;
+	margin-bottom: 8px;
 }
 .Auto_Value {
 	/*display:none;*/
