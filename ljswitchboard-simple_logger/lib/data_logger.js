@@ -129,7 +129,7 @@ function debugDataSaving() {
 	}
 }
 
-var DEBUG_SAVING_DATA = true;
+var DEBUG_SAVING_DATA = false;
 function debugSavingData() {
 	if(DEBUG_SAVING_DATA) {
 		var dataToPrint = [];

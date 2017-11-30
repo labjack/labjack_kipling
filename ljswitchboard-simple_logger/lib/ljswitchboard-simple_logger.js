@@ -376,7 +376,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		],
 		"basic_data_group": {
 			"group_name": "Basic Data Group",
-			"group_period_ms": 100,
+			"group_period_ms": 500,
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
@@ -393,12 +393,12 @@ exports.generateBasicConfig = function(basicData, devices) {
 				}
 			}
 		},
-		"stop_trigger": {
-			"relation": "and",
-			"triggers": [{
-				"attr_type": "num_logged", "data_group": "basic_data_group", "val": 8
-			}]
-		}
+		// "stop_trigger": {
+		// 	"relation": "and",
+		// 	"triggers": [{
+		// 		"attr_type": "num_logged", "data_group": "basic_data_group", "val": 8
+		// 	}]
+		// }
 	};
 
 	var validSN;
