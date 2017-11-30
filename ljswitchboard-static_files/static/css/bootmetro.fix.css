@@ -170,3 +170,17 @@ input[type=radio] ~ span.metro-radio::before {
 .win-command.red:hover .win-commandring {
    background-color: #f2dede;
 }
+
+/* Fix for drop-down button dividers */
+.dropdown-menu .divider {
+    height:2px;
+}
+
+/* Bootmetro Fix things for network_settings*/
+.table.table-sm td{
+  padding:0px;
+}
+.table.table-sm thead th{
+  padding: 8px 0px 0px 0px;
+}
+/* End of Bootmetro fix things */
