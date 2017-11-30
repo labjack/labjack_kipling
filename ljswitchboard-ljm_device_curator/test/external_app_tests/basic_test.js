@@ -50,9 +50,12 @@ exports.tests = {
 	},
 	'openDevices': function(test) {
         var td = {
-            'dt': 'LJM_dtT4',
+            'dt': 'LJM_dtT7',
             'ct': 'LJM_ctUSB',
             'id': 'LJM_idANY',
+            // 'ct': 'LJM_ctEthernet',
+            // 'id': 'LJM_idANY',
+            // 'id': '470010414'
         };
 
         // Open the device.
@@ -81,29 +84,30 @@ exports.tests = {
         });
 	},
     'open device in LJLogM': function(test) {
-        device.openDeviceInExternalApplication('LJLogM')
+        device.openDeviceInExternalApplication('LJLogM','USB')
         .then(function(res) {
+            // console.log('Open in App (external_app_tests/basic_test.js)', res);
             test.done();
         }, function(err) {
             test.done();
         });
     },
-    'open device in LJLogM(2)': function(test) {
-        device.openDeviceInLJLogM()
-        .then(function(res) {
-            test.done();
-        }, function(err) {
-            test.done();
-        });
-    },
-    'open device in LJStreamM': function(test) {
-        device.openDeviceInLJStreamM()
-        .then(function(res) {
-            test.done();
-        }, function(err) {
-            test.done();
-        });
-    },
+    // 'open device in LJLogM(2)': function(test) {
+    //     device.openDeviceInLJLogM()
+    //     .then(function(res) {
+    //         test.done();
+    //     }, function(err) {
+    //         test.done();
+    //     });
+    // },
+    // 'open device in LJStreamM': function(test) {
+    //     device.openDeviceInLJStreamM()
+    //     .then(function(res) {
+    //         test.done();
+    //     }, function(err) {
+    //         test.done();
+    //     });
+    // },
     'perform test read': function(test) {
         device.read('AIN0')
         .then(function(res) {

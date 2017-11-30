@@ -152,6 +152,12 @@ var testGroups = {
 		// This test checks the ability to save and restore T7's power-up default
 		// settings saved in flash.
 		't7_startup_configs_save_and_restore': false, // Requires 2x T7s w/ specific SNs.  Same FW version.
+
+		// Test cached reading functions.
+		't7_cached_values_test': false,
+
+		// get available connections.
+		't7_available_connections_test': true,
 	},
 	// T7 over-ride tests...
 	// 't7': {
@@ -170,10 +176,10 @@ var testGroups = {
 		't4_upgrade_test': false,
 		't4_dac_and_ain_test': false,
 		't4_flash_based_data_test': false,
-		't4_is_auth_test': true,
-		't4_check_auth_and_upgrade_test': true,
-		't4_check_calibration_test': true,
-		't4_read_recovery_fw_version_test': true,
+		't4_is_auth_test': false,
+		't4_check_auth_and_upgrade_test': false,
+		't4_check_calibration_test': false,
+		't4_read_recovery_fw_version_test': false,
 	},
 	't4_mock_tests': {
 		't4_basic_mock': false,
@@ -185,7 +191,7 @@ var testGroups = {
 		'basic_test': false,
 	},
 	'external_app_tests': {
-		'basic_test': false, // Opens device and shares it with LJLogM and LJStreamM. (Starts and stops the apps to verify functionality)
+		'basic_test': true, // Opens device and shares it with LJLogM and LJStreamM. (Starts and stops the apps to verify functionality)
 	},
 };
 

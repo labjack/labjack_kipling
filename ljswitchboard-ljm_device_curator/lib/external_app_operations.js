@@ -7,6 +7,7 @@ var path = require('path');
 var modbusMap = require('ljswitchboard-modbus_map').getConstants();
 var async = require('async');
 var lj_apps_win_registry_info = require('lj-apps-win-registry-info');
+var driver_const = require('ljswitchboard-ljm_driver_constants');
 var getLJAppsRegistryInfo = lj_apps_win_registry_info.getLJAppsRegistryInfo;
 var ljAppNames = lj_apps_win_registry_info.ljAppNames;
 
@@ -60,16 +61,34 @@ function getExternalAppOperations(self) {
 	};
 
     function createOpenDeviceInExtAppBundle(options) {
+        var ctStr;
+        if(options.ct) {
+            if(options.ct === 'current') {
+                ctStr = self.savedAttributes.connectionType;
+            } else {
+               ctStr = options.ct; 
+            }
+        } else {
+            ctStr = self.savedAttributes.connectionType;
+        }
+        var ct = driver_const.connectionTypes[ctStr];
+
         var bundle = {
             'appName': options.appName,
             'appWorkingDir': '',
             'openConfigFilePath': '',
             'appExePath': appExePaths[options.appName],
             'deviceInfo': {
-                'dt': self.savedAttributes.openParameters.deviceType,
-                'ct': self.savedAttributes.openParameters.connectionType,
-                'id': self.savedAttributes.openParameters.identifier,
+                'dt': self.savedAttributes.deviceType,
+                'ct': ct,
+                'id': undefined,
             },
+            'ctName': driver_const.CONNECTION_TYPE_NAMES[ct],
+            'availableConnections': [],
+            'closeAndOpenDevice': true,
+
+            'currentAppOpenCFG': '',
+            'appExists': false,
             'registryInfo': {},
             'isError': false,
             'errorStep': '',
@@ -78,6 +97,50 @@ function getExternalAppOperations(self) {
         return bundle;
     }
 
+    function getAvailableConnectionsAndDetermineSharability(bundle) {
+        debugOA('in getAvailableConnectionsAndDetermineSharability');
+        var defered = q.defer();
+        self.cGetAvailableConnectionTypes()
+        .then(function(res) {
+            bundle.availableConnections = res.connections;
+            defered.resolve(bundle);
+        }, function(err) {
+            // Not a valid case...
+            defered.resolve(bundle);
+        });
+        return defered.promise;
+    }
+    function determineConnectionSharability(bundle) {
+        
+        var defered = q.defer();
+        var connections = bundle.availableConnections;
+        // If the user is requesting a not-found connection type we don't need to close/open the device.
+        // aka default value should be True.
+        // console.log('Desired CT', bundle.ctName);
+
+        var desiredCTIsActiveCT = false;
+
+        var isConnectable = true; 
+        var deviceID = self.savedAttributes.serialNumber.toString();
+        connections.forEach(function(connection) {
+            if(connection.type === bundle.ctName) {
+                isConnectable = connection.isConnectable;
+                deviceID = connection.id;
+            }
+        });
+
+        // save device identifier string.
+        bundle.deviceInfo.id = deviceID;
+        
+        if(isConnectable) {
+            bundle.closeAndOpenDevice = false;
+        } else {
+            bundle.closeAndOpenDevice = true;
+        }
+
+        defered.resolve(bundle);
+        return defered.promise;
+    }
     function getApplicationWorkingDirectories(bundle) {
         var defered = q.defer();
 
@@ -93,6 +156,41 @@ function getExternalAppOperations(self) {
                 bundle.errorStep = 'getApplicationWorkingDirectories';
             }
             defered.resolve(bundle);
+        });
+
+        return defered.promise;
+    }
+    function getOpenConfigFileData(bundle) {
+        var defered = q.defer();
+        
+        var filePath = bundle.openConfigFilePath;
+        debugOA('in getOpenConfigFileData:', filePath);
+
+        fs.readFile(filePath, function(err, data) {
+            if(err) {
+                fs.readFile(filePath, function(err, data) {
+                    if(err) {
+                        fs.readFile(filePath, function(err, data) {
+                            if(err) {
+                                console.error('Error Reading File', err, filePath);
+                                bundle.isError = true;
+                                bundle.error = err;
+                                bundle.errorStep = 'readOpenConfigFile';
+                                defered.resolve(bundle);
+                            } else {
+                                bundle.currentAppOpenCFG = data.toString();
+                                defered.resolve(bundle);
+                            }
+                        });
+                    } else {
+                        bundle.currentAppOpenCFG = data.toString();
+                        defered.resolve(bundle);
+                    }
+                });
+            } else {
+                bundle.currentAppOpenCFG = data.toString();
+                defered.resolve(bundle);
+            }
         });
 
         return defered.promise;
@@ -119,7 +217,7 @@ function getExternalAppOperations(self) {
 					if(err) {
 						fs.writeFile(filePath, data, function(err) {
 							if(err) {
-								console.error('Error Reading File', err, filePath);
+								console.error('Error Writing File', err, filePath);
                                 bundle.isError = true;
                                 bundle.error = err;
                                 bundle.errorStep = 'editOpenConfigFile';
@@ -139,20 +237,77 @@ function getExternalAppOperations(self) {
 
         return defered.promise;
     }
+    function restoreOpenConfigFileData(bundle) {
+        var defered = q.defer();
+        
+        var filePath = bundle.openConfigFilePath;
+        var data = bundle.currentAppOpenCFG;
+        debugOA('in restoreOpenConfigFileData:', filePath, data);
 
+        fs.writeFile(filePath, data, function(err) {
+            if(err) {
+                fs.writeFile(filePath, data, function(err) {
+                    if(err) {
+                        fs.writeFile(filePath, data, function(err) {
+                            if(err) {
+                                console.error('Error Writing File', err, filePath);
+                                bundle.isError = true;
+                                bundle.error = err;
+                                bundle.errorStep = 'restoreOpenConfigFileData';
+                                defered.resolve(bundle);
+                            } else {
+                                defered.resolve(bundle);
+                            }
+                        });
+                    } else {
+                        defered.resolve(bundle);
+                    }
+                });
+            } else {
+                defered.resolve(bundle);
+            }
+        });
+
+        return defered.promise;
+    }
+    function verifyAppexists(bundle) {
+        var defered = q.defer();
+        var filePath = bundle.appExePath;
+        debugOA('in verifyAppexists',filePath);
+
+        fs.access(filePath, fs.constants.F_OK, function(err) {
+            if(err) {
+                bundle.appExists = false;
+                bundle.isError = true;
+                bundle.error = 'App does not exist at path: '+filePath;
+                bundle.errorStep = 'verifyAppexists';
+
+            } else {
+                bundle.appExists = true;
+            }
+            defered.resolve(bundle);
+        });
+
+        return defered.promise;
+    }
     function suspendDeviceConnection(bundle) {
         var defered = q.defer();
 
         debugOA('in suspendDeviceConnection');
-        self.suspendDeviceConnection()
-        .then(function() {
+
+        if(bundle.closeAndOpenDevice) {
+            self.suspendDeviceConnection()
+            .then(function() {
+                defered.resolve(bundle);
+            }, function(err) {
+                bundle.isError = true;
+                bundle.error = err;
+                bundle.errorStep = 'suspendDeviceConnection';
+                defered.resolve(bundle);
+            });
+        } else {
             defered.resolve(bundle);
-        }, function(err) {
-            bundle.isError = true;
-            bundle.error = err;
-            bundle.errorStep = 'suspendDeviceConnection';
-            defered.resolve(bundle);
-        });
+        }
         return defered.promise;
     }
 
@@ -164,6 +319,9 @@ function getExternalAppOperations(self) {
         var execFile = require('child_process').execFile;
         var child = execFile(bundle.appExePath, function(error, stdout, stderr) {
             debugOA('Finished executing external application');
+            if(error) {
+                console.log('ERROR!',error);
+            }
             defered.resolve(bundle);
         })
         
@@ -173,23 +331,52 @@ function getExternalAppOperations(self) {
     function resumeDeviceConnection(bundle) {
         var defered = q.defer();
         debugOA('in resumeDeviceConnection');
-        self.resumeDeviceConnection()
-        .then(function() {
+
+        if(bundle.closeAndOpenDevice) {
+            self.resumeDeviceConnection()
+            .then(function() {
+                defered.resolve(bundle);
+            }, function(err) {
+                bundle.isError = true;
+                bundle.error = err;
+                bundle.errorStep = 'resumeDeviceConnection';
+                defered.resolve(bundle);
+            });
+        } else {
             defered.resolve(bundle);
-        }, function(err) {
-            bundle.isError = true;
-            bundle.error = err;
-            bundle.errorStep = 'resumeDeviceConnection';
-            defered.resolve(bundle);
-        });
+        }
         return defered.promise;
     }
 
-	this.openDeviceInExternalApplication = function(ljmApplicationName) {
+    function skipOnError(func) {
+        return function checkForError(bundle) {
+            if(bundle.isError) {
+                var defered = q.defer();
+                defered.resolve(bundle);
+                return defered.promise;
+            } else {
+                return func(bundle);
+            }
+        };
+    }
+	this.openDeviceInExternalApplication = function(ljmApplicationName,ct) {
         var defered = q.defer();
 
+        var connectionType = 'current';
+        if(ct) {
+            if(ct === 'current') {
+                connectionType = ct;
+            } else {
+                try {
+                    connectionType = driver_const.connectionTypes[ct];
+                } catch(err) {
+                    // Do nothing.
+                }
+            }
+        }
         var options = {
             'appName': ljmApplicationName,
+            'ct': connectionType,
         };
         var bundle = createOpenDeviceInExtAppBundle(options);
 
@@ -200,20 +387,25 @@ function getExternalAppOperations(self) {
         function onError(errorBundle) {
             defered.reject(errorBundle);
         }
-        getApplicationWorkingDirectories(bundle)
-        .then(editOpenConfigFile)
-        .then(suspendDeviceConnection)
-        .then(openExternalApplication)
-        .then(resumeDeviceConnection)
+        getAvailableConnectionsAndDetermineSharability(bundle)
+        .then(skipOnError(determineConnectionSharability))
+        .then(skipOnError(getApplicationWorkingDirectories))
+        .then(skipOnError(getOpenConfigFileData))
+        .then(skipOnError(verifyAppexists))
+        .then(skipOnError(editOpenConfigFile))
+        .then(skipOnError(suspendDeviceConnection))
+        .then(skipOnError(openExternalApplication))
+        .then(skipOnError(resumeDeviceConnection))
+        // .then(skipOnError(restoreOpenConfigFileData))
         .then(onSuccess, onError);
 
         return defered.promise;
 	};
-    this.openDeviceInLJLogM = function() {
-        return self.openDeviceInExternalApplication('LJLogM');
+    this.openDeviceInLJLogM = function(ct) {
+        return self.openDeviceInExternalApplication('LJLogM',ct);
     }
-    this.openDeviceInLJStreamM = function() {
-        return self.openDeviceInExternalApplication('LJStreamM');
+    this.openDeviceInLJStreamM = function(ct) {
+        return self.openDeviceInExternalApplication('LJStreamM',ct);
     }
 }
 

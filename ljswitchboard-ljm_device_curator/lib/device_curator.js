@@ -9,6 +9,7 @@ var async = require('async');
 var vm = require('vm');
 var fs = require('fs');
 
+
 var data_parser = require('ljswitchboard-data_parser');
 
 // Requires & definitions involving the labjack-nodejs library
@@ -16,6 +17,8 @@ var ljm = require('labjack-nodejs');
 var ljmDeviceReference = ljm.getDevice();
 var modbusMap = ljm.modbusMap.getConstants();
 var driver_const = require('ljswitchboard-ljm_driver_constants');
+var ljm_ffi_req = require('ljm-ffi');
+var ljm_ffi = ljm_ffi_req.load();
 
 
 // Special T7 additional functions/operations
@@ -47,6 +50,7 @@ var manufacturing_info_operations = require('./manufacturing_info_operations');
 var startup_config_operations = require('./startup_config_operations');
 var dashboard_operations = require('./dashboard/dashboard_operations');
 var external_application_operations = require('./external_app_operations');
+var available_connections_operations = require('./available_connections_operations');
 
 var device_events = driver_const.device_curator_constants;
 
@@ -2555,6 +2559,108 @@ function device(useMockDevice) {
 		this[externalApplicationOperationKeys[i]] = externalApplicationOperations[externalApplicationOperationKeys[i]];
 	}
 
+	/**
+	 * Get available device connection types.
+	 */
+	var availableConnectionsOperations = new available_connections_operations.get(this);
+	var availableConnectionsOperationKeys = Object.keys(availableConnectionsOperations);
+	for(i = 0; i < availableConnectionsOperationKeys.length; i++) {
+		this[availableConnectionsOperationKeys[i]] = availableConnectionsOperations[availableConnectionsOperationKeys[i]];
+	}
+
+	/* cRead functions return cached values first and then attempt to read if they don't exist. */
+	this.cRead = function(address) {
+		var defered = q.defer();
+		var info = modbusMap.getAddressInfo(address);
+		var regName = info.data.name;
+		if(self.cachedValues[regName]) {
+			var res = data_parser.parseResult(
+				address,
+				self.cachedValues[regName],
+				self.savedAttributes.deviceType
+			);
+			defered.resolve(res);
+		} else {
+			self.sRead(address)
+			.then(defered.resolve, defered.reject);
+			// defered.resolve({});
+		}
+		return defered.promise;
+	}
+	this.cReadMany = function(addresses) {
+		var defered = q.defer();
+		var orderedRegs = [];
+		var results = [];
+		var missingResults = [];
+		var resultsObj = {};
+
+		function mapResultsAndReturn() {
+			orderedRegs.forEach(function(reg) {
+				results.push(resultsObj[reg]);
+			});
+			defered.resolve(results);
+		}
+		addresses.forEach(function(address) {
+			var info = modbusMap.getAddressInfo(address);
+			var regName = info.data.name;
+			orderedRegs.push(regName);
+			if(self.cachedValues[regName]) {
+				var res = data_parser.parseResult(
+					address,
+					self.cachedValues[regName],
+					self.savedAttributes.deviceType
+				);
+				resultsObj[regName] = res;
+			} else {
+				missingResults.push(regName);
+			}
+		});
+		if(missingResults.length === 0) {
+			mapResultsAndReturn();
+		} else {
+			self.sReadMany(missingResults)
+			.then(function(results) {
+				results.forEach(function(result) {
+					resultsObj[result.name] = result;
+				});
+				mapResultsAndReturn();
+			}, function(err) {
+				mapResultsAndReturn();
+			});
+		}
+		return defered.promise;
+	}
+	this.getCachedValue = function(address) {
+		var defered = q.defer();
+		var info = modbusMap.getAddressInfo(address);
+		var regName = info.data.name;
+		if(self.cachedValues[regName]) {
+			var res = data_parser.parseResult(
+				address,
+				self.cachedValues[regName],
+				self.savedAttributes.deviceType
+			);
+			defered.resolve(res);
+		} else {
+			defered.resolve({});
+		}
+		return defered.promise;
+	}
+	function internalGetCachedValue (address) {
+		var info = modbusMap.getAddressInfo(address);
+		var regName = info.data.name;
+		if(self.cachedValues[regname]) {
+			var res = data_parser.parseResult(
+				address,
+				self.cachedValues[regname],
+				self.savedAttributes.deviceType
+			);
+			return res;
+		} else {
+			return {};
+		}
+	}
+	
 	/**
 	 * Digit Specific functions:
 	**/
