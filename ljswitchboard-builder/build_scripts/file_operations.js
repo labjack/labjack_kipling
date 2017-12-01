@@ -9,7 +9,9 @@ var q = require('q');
 
 var zip = require('node-zip');
 var AdmZip = require('adm-zip');
+var targz = require('targz');
 
+var yazl = require('yazl');
 
 
 exports.debug = false;
@@ -77,7 +79,7 @@ function walkDirectory (bundle) {
 
     return defered.promise;
 }
-var yazl = require('yazl');
+
 function performCompressionWithYazl (bundle) {
     var defered = q.defer();
 
@@ -212,8 +214,17 @@ function compressFolderWithAdmZip (from, to) {
 }
 
 function compressFolder (folder) {
+    if(folder.outputType) {
+        if(folder.outputType === '.tar.gz') {
+            return compressFolderWithtargz(folder.from, folder.to);
+        } else {
+            return compressFolderWithYazl(folder.from, folder.to);
+        }
+    } else {
+        return compressFolderWithYazl(folder.from, folder.to);
+    }
     // return compressFolderWithArchiver(folder.from, folder.to);
-    return compressFolderWithYazl(folder.from, folder.to);
+    // return compressFolderWithYazl(folder.from, folder.to);
     
 }
 exports.compressFolder = compressFolder;
@@ -234,6 +245,8 @@ function compressFolders (folders) {
     return defered.promise;
 }
 exports.compressFolders = compressFolders;
+
+
 
 function copySingleFile (from, to) {
     var defered = q.defer();
@@ -274,6 +287,49 @@ function copyFolders (folders) {
     return defered.promise;
 }
 exports.copyFolders = copyFolders;
+
+
+/* Move operations */
+
+function moveSingleFile (from, to) {
+    var defered = q.defer();
+    if(fs.statSync(from).isDirectory()) {
+        fse.ensureDirSync(to);
+    }
+    // console.log('in moveSingleFile', from, to);
+    fse.move(from, to, {overwrite:true}, function(isErr) {
+        // console.log('Finished copying', from, to);
+        defered.resolve();
+    });
+    return defered.promise;
+}
+exports.moveSingleFile = moveSingleFile;
+
+function moveFolder (folder) {
+    var defered = q.defer();
+    if(exports.debug) {
+        console.log('Moving', JSON.stringify(folder, null, 2));
+    }
+    moveSingleFile(folder.from, folder.to)
+    .then(defered.resolve);
+    return defered.promise;
+}
+exports.moveFolder = moveFolder;
+
+function moveFolders (folders) {
+    var defered = q.defer();
+
+    var promises = folders.map(function(folder) {
+        return moveFolder(folder);
+    });
+
+    q.allSettled(promises)
+    .then(function() {
+        defered.resolve();
+    });
+    return defered.promise;
+}
+exports.moveFolders = moveFolders;
 
 
 

@@ -31,7 +31,8 @@
     "concat-stream": "^1.4.6",
     "extract-zip": "1.0.3",
     "request": "2.55.0",
-    "request-progress": "0.3.1"
+    "request-progress": "0.3.1",
+    "targz": "^1.0.1"
   },
   "un-managed-dependencies": {
     "semver": "4.2.0",
@@ -89,6 +90,7 @@
     "clean_project": "node build_scripts/clean_project.js",
     "organize_project_files": "node build_scripts/organize_project_files.js",
     "brand_project": "node build_scripts/brand_project.js",
+    "compress_output": "node build_scripts/compress_output.js",
     "build_project": "node build_scripts/build_project.js",
     "quick_build_project": "node build_scripts/quick_build_project.js"
   }

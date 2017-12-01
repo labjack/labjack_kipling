@@ -28,6 +28,7 @@ var buildScripts = [
 	{'script': 'clean_project', 'text': 'Cleaning Project'},
 	{'script': 'organize_project_files', 'text': 'Organizing Project Files & compress into packages.'},
 	{'script': 'brand_project', 'text': 'Branding Project Files'},
+	{'script': 'compress_output', 'text': 'Compressing Output and renaming'},
 ];
 buildScripts.forEach(function(buildScript) {
 	buildScript.scriptPath = path.normalize(path.join(
