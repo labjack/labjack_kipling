@@ -17,13 +17,13 @@
                 <tr class="SERIAL_NUMBER_{{serialNumber}} {{#unless isConnected}}text-error{{/unless}}">
                     <td class="device-selector-table-device-selector">
                         {{#if ../framework_options.device_selection}}
-                            {{#if ../../frameworkType.singleDevice}}
+                            {{#if ../frameworkType.singleDevice}}
                             <label class="radio" style="display:none">
                                 <input name="selected-device" class="device-selection-radio" id="{{serialNumber}}-selector" type="radio" value="{{serialNumber}}">
                                 <span class="metro-radio" title="Select {{productType}}, {{serialNumber}}"></span>
                             </label>
                             {{/if}}
-                            {{#if ../../frameworkType.multipleDevices}}
+                            {{#if ../frameworkType.multipleDevices}}
                             <label class="checkbox" style="display:none">
                                 <input name="selected-device" class="device-selection-checkbox" id="{{serialNumber}}-selector" type="checkbox" value="{{serialNumber}}">
                                 <span class="metro-checkbox" title="Select {{productType}}, {{serialNumber}}"></span>
