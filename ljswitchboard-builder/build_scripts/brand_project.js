@@ -100,7 +100,7 @@ function copyBrandingFiles(bundle) {
 function getUpdateK3Version(bundle) {
 	function updateK3Version() {
 		var defered = q.defer();
-
+		var fromName = bundle.from;
 		var toName = bundle.to;
 		var to = path.normalize(path.join(
 			OUTPUT_PROJECT_FILES_PATH,
@@ -110,10 +110,10 @@ function getUpdateK3Version(bundle) {
 		debugLog('Editing file', to);
 
 		function editFileContents(data) {
-			var template = handlebars.compile(data);
+			var template = handlebars.compile(data.toString());
 			var compiledData = template({k3Version:k3VersionStr});
-			console.log('We have opened a file!', data);
-			console.log('it is now',compiledData);
+			// console.log('We have opened a file!', data);
+			// console.log('it is now',compiledData);
 			return compiledData;
 		}
 		function editAndSaveFile(data) {
@@ -180,8 +180,17 @@ function renameFileBrandingOp(bundle) {
 
 	fs.rename(from, to, function fileRenamed(err) {
 		if(err) {
-			console.error('Error renaming file', err);
-			defered.reject(err);
+			var fsOutput = fs.statSync(to);
+			var isFile = fsOutput.isFile();
+			var isDir = fsOutput.isDirectory();
+			var exists = isFile || isDir;
+			if(!exists) {
+				console.error('Error renaming file', err);
+				defered.reject(err);
+			} else {
+				console.log('File already exists', to);
+				defered.resolve();
+			}
 		} else {
 			defered.resolve();
 		}
