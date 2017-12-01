@@ -150,8 +150,8 @@ function editPackageKeys(bundle) {
 		var str = data.toString();
 		var obj = JSON.parse(str);
 		var reqKeys = bundle.required_keys;
-		console.log('Project Info', obj);
-		console.log('Required keys',reqKeys);
+		debugLog('Project Info', obj);
+		debugLog('Required keys',reqKeys);
 
 		// Replace info with required info.
 		var keys = Object.keys(reqKeys);
@@ -160,7 +160,7 @@ function editPackageKeys(bundle) {
 		});
 
 		var newStr = JSON.stringify(obj, null, 2);
-		console.log('new str', newStr);
+		debugLog('new str', newStr);
 		
 
 		// var template = handlebars.compile(data);
@@ -210,7 +210,7 @@ var genericBrandingOps = [{
 	'operation': 'editPackageKeys',
 	'project_part': 'ljswitchboard-splash_screen',
 	'required_keys': requiredSplashScreenKeys,
-}]
+}];
 
 var brandingOperations = {
 	'darwin': genericBrandingOps,
