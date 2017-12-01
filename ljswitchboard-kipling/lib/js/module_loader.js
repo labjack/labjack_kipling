@@ -323,9 +323,12 @@ function createModuleLoader() {
 			'js': [],
 			'html': [],
 		};
+		// coppied directory of the static_files project location.
+		var cpdDir = JSON.parse(JSON.stringify(static_files.getDir()));
+		// console.log('coppied directory', cpdDir);
 		moduleData.context = {
 			'stats': self.stats,
-			'staticFiles': static_files.getDir(),
+			'staticFiles': cpdDir,
 			'devices': undefined,
 		};
 		moduleData.outputLocation = {
