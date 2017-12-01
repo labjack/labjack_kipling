@@ -52,7 +52,8 @@
     "ljswitchboard-version_manager": "0.0.x",
     "process_manager": "0.0.x",
     "q": "^1.5.1",
-    "ref": "1.3.4"
+    "ref": "1.3.4",
+    "handlebars": "^4.0.3"
   },
   "devDependencies": {
     "nodeunit": "0.9.x"

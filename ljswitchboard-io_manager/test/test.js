@@ -7,8 +7,8 @@ var pResults = utils.pResults;
 var q = require('q');
 
 // enable/disable tests
-var ENABLE_BASIC_TEST = false;						// Passing
-var ENABLE_SIMPLE_TEST = false;						// Passing
+var ENABLE_BASIC_TEST = true;						// Passing
+var ENABLE_SIMPLE_TEST = true;						// Passing
 var TEST_DRIVER_CONTROLLER = false;					// Passing
 
 // Tests the creation of a sub-sub process (for each device being its own process)
@@ -19,7 +19,7 @@ var TEST_DEVICE_SCANNER = false;					// Passes but outputs a lot of text.
 var TEST_MOCK_DEVICE_SCANNER = false;
 var TEST_LIVE_DEVICE_SCANNER = false;
 var TEST_USB_ONLY_DEVICE_SCANNER = false;
-var TEST_USB_ONLY_DEVICE_SCANNER_CACHING = true;
+var TEST_USB_ONLY_DEVICE_SCANNER_CACHING = false;
 
 var TEST_DEVICE_CONTROLLER = false;					// incomplete
 var TEST_DEVICE_CONTROLLER_OPEN_CLOSE = false;		// Passing

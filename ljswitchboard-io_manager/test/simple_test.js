@@ -86,9 +86,9 @@ exports.tests = {
 	'open mock device': function(test) {
 		var params = {
 			'deviceType': 'LJM_dtT7',
-			'connectionType': 'LJM_ctUSB',
+			'connectionType': 'LJM_ctEthernet',
 			'identifier': 'LJM_idANY',
-			'mockDevice': true
+			'mockDevice': false
 		};
 
 		device_controller.openDevice(params)
