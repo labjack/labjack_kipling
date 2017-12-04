@@ -40,20 +40,20 @@
         {"name":"WIFI_PASSWORD_DEFAULT","title":"","heading":"","id":"","type":"password","isConfig":false, "deviceTypes": ["T7"]}
     ],
     "ethernetStatusRegisters": [
-        {"name": "powered", "humanName": "Powered", "current": {"reg": "POWER_ETHERNET"}, "default": {"reg": "POWER_ETHERNET_DEFAULT"}},
-        {"name": "dhcp", "humanName": "DHCP", "current": {"reg": "ETHERNET_DHCP_ENABLE"}, "default": {"reg": "ETHERNET_DHCP_ENABLE_DEFAULT"}},
-        {"name": "ip", "humanName": "IP", "current": {"reg": "ETHERNET_IP"}, "default": {"reg": "ETHERNET_IP_DEFAULT"}},
-        {"name": "subnet", "humanName": "Subnet", "current": {"reg": "ETHERNET_SUBNET"}, "default": {"reg": "ETHERNET_SUBNET_DEFAULT"}},
-        {"name": "gateway", "humanName": "Gateway", "current": {"reg": "ETHERNET_GATEWAY"}, "default": {"reg": "ETHERNET_GATEWAY_DEFAULT"}},
-        {"name": "dns", "humanName": "DNS", "current": {"reg": "ETHERNET_DNS"}, "default": {"reg": "ETHERNET_DNS_DEFAULT"}},
-        {"name": "alt", "humanName": "Alt", "current": {"reg": "ETHERNET_ALTDNS"}, "default": {"reg": "ETHERNET_ALTDNS_DEFAULT"}}
+        {"name": "powered", "humanName": "Powered", "current": {"reg": "POWER_ETHERNET"}, "default": {"reg": "POWER_ETHERNET_DEFAULT"}, "deviceTypes": ["T7"]},
+        {"name": "dhcp", "humanName": "DHCP", "current": {"reg": "ETHERNET_DHCP_ENABLE"}, "default": {"reg": "ETHERNET_DHCP_ENABLE_DEFAULT"}, "deviceTypes": ["T7", "T4"]},
+        {"name": "ip", "humanName": "IP", "current": {"reg": "ETHERNET_IP"}, "default": {"reg": "ETHERNET_IP_DEFAULT"}, "deviceTypes": ["T7", "T4"]},
+        {"name": "subnet", "humanName": "Subnet", "current": {"reg": "ETHERNET_SUBNET"}, "default": {"reg": "ETHERNET_SUBNET_DEFAULT"}, "deviceTypes": ["T7", "T4"]},
+        {"name": "gateway", "humanName": "Gateway", "current": {"reg": "ETHERNET_GATEWAY"}, "default": {"reg": "ETHERNET_GATEWAY_DEFAULT"}, "deviceTypes": ["T7", "T4"]},
+        {"name": "dns", "humanName": "DNS", "current": {"reg": "ETHERNET_DNS"}, "default": {"reg": "ETHERNET_DNS_DEFAULT"}, "deviceTypes": ["T7", "T4"]},
+        {"name": "alt", "humanName": "Alt", "current": {"reg": "ETHERNET_ALTDNS"}, "default": {"reg": "ETHERNET_ALTDNS_DEFAULT"}, "deviceTypes": ["T7", "T4"]}
     ],
     "wifiStatusRegisters": [
-        {"name": "ssid", "humanName": "SSID", "current": {"reg": "WIFI_SSID"}, "default": {"reg": "WIFI_SSID_DEFAULT"}},
-        {"name": "powered", "humanName": "Powered", "current": {"reg": "POWER_WIFI"}, "default": {"reg": "POWER_WIFI_DEFAULT"}},
-        {"name": "dhcp", "humanName": "DHCP", "current": {"reg": "WIFI_DHCP_ENABLE"}, "default": {"reg": "WIFI_DHCP_ENABLE_DEFAULT"}},
-        {"name": "ip", "humanName": "IP", "current": {"reg": "WIFI_IP"}, "default": {"reg": "WIFI_IP_DEFAULT"}},
-        {"name": "subnet", "humanName": "Subnet", "current": {"reg": "WIFI_SUBNET"}, "default": {"reg": "WIFI_SUBNET_DEFAULT"}},
-        {"name": "gateway", "humanName": "Gateway", "current": {"reg": "WIFI_GATEWAY"}, "default": {"reg": "WIFI_GATEWAY_DEFAULT"}}
+        {"name": "ssid", "humanName": "SSID", "current": {"reg": "WIFI_SSID"}, "default": {"reg": "WIFI_SSID_DEFAULT"}, "deviceTypes": ["T7"]},
+        {"name": "powered", "humanName": "Powered", "current": {"reg": "POWER_WIFI"}, "default": {"reg": "POWER_WIFI_DEFAULT"}, "deviceTypes": ["T7"]},
+        {"name": "dhcp", "humanName": "DHCP", "current": {"reg": "WIFI_DHCP_ENABLE"}, "default": {"reg": "WIFI_DHCP_ENABLE_DEFAULT"}, "deviceTypes": ["T7"]},
+        {"name": "ip", "humanName": "IP", "current": {"reg": "WIFI_IP"}, "default": {"reg": "WIFI_IP_DEFAULT"}, "deviceTypes": ["T7"]},
+        {"name": "subnet", "humanName": "Subnet", "current": {"reg": "WIFI_SUBNET"}, "default": {"reg": "WIFI_SUBNET_DEFAULT"}, "deviceTypes": ["T7"]},
+        {"name": "gateway", "humanName": "Gateway", "current": {"reg": "WIFI_GATEWAY"}, "default": {"reg": "WIFI_GATEWAY_DEFAULT"}, "deviceTypes": ["T7"]}
     ]
 }

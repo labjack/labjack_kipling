@@ -10,7 +10,40 @@ div.link a {
     cursor:pointer;
 }
 
+/* Scan Options */
+.scan-options-and-info {
+    height:130px;
+}
+
+.scanOptionsTableDiv {
+    float:left;
+}
+.connectButtonColorsLegendDiv {
+    float:right;
+    margin-right:20px;
+}
+
+@media screen and (max-width: 695px) {
+    .scan-options-and-info {
+        height:inherit;
+    }
+    .scanOptionsTableDiv {
+        float:none;
+        display:inline-block;
+    }
+    .connectButtonColorsLegendDiv {
+        float:none;
+        display:inline-block;
+    }
+}
+
 /* Check boxes */
+.scanOptionsTable {
+    width:150px;
+}
+.scanOptionsTable input {
+    margin-top:-2px;
+}
 .checkbox-inline+.checkbox-inline, .radio-inline+.radio-inline {
   margin-top: 10px;
 }
@@ -24,6 +57,46 @@ div.link a {
 .time-estimate {
     font-size:12px;
 }
+
+/* Legend */
+
+.connectButtonColorsLegend  {
+    width:320px;
+}
+.connectButtonColorsLegend td div {
+    width:15px;
+    height:15px;
+    margin: 3px 5px 0px 0px;
+}
+.green-button-color {
+    background-color: #51a351;
+    border-color: #51a351;
+}
+.yellow-button-color {
+    background-color: #f89406;
+    border-color: #f89406;
+}
+.grey-button-color {
+    background-color: #e6e6e6;
+    border-color: #e6e6e6;
+}
+.red-button-color {
+    background-color: #bd362f;
+    border-color: #bd362f;
+}
+
+/*.device-selector-holder .selector-header {
+    height:30px;
+}
+.device-selector-holder .selector-header .refresh-button {
+    float:right;
+    margin-right:20px;
+}
+@media screen and (max-width: 725px) {
+    .device-selector-holder .selector-header .refresh-button {
+    float:left;
+}
+}*/
 
 /* Device Selection Styles */
 .connection-buttons-holder {

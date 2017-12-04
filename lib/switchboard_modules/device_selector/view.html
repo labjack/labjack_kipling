@@ -10,7 +10,6 @@
             gui.Shell.openExternal("https://labjack.com");
         });
     </script>
-    
     <div id="versionNumbers" class="labjackVersions" style="display:none">
         <table class="table">
             <tr id="kipling" class="lvm_link">
@@ -30,19 +29,95 @@
         </table>
     </div>
 </div>
+<div class="scan-options-and-info" style="margin:0px 0px 0px 0px">
+    <div class="scanOptionsTableDiv">
+        <table class="table table-sm table-hover scanOptionsTable" style="margin:0px 0px 10px 20px">
+            <thead>
+                <th class="enabled"/>
+                <th colspan="2" class="connectionType">Scan Options</th>
+                <th class="estimatedScanTime"/>
+            </thead>
+            <tbody style="background-color:transparent">
+                <tr title="Search for devices with a USB connection.">
+                    <td><input id="usb_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanUSB}}checked{{/if}}/></td>
+                    <td><span class="scan-medium">USB</span></td>
+                    <td><span class="time-estimate">(1s)</span></td>
+                </tr>
+                <tr title="Search for devices with a Ethernet connection.">
+                    <td><input id="ethernet_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanEthernet}}checked{{/if}}/></td>
+                    <td><span class="scan-medium">Ethernet</span></td>
+                    <td><span class="time-estimate">(3-10s)</span></td>
+                </tr>
+                <tr title="Search for devices with a WiFi connection.">
+                    <td><input id="wifi_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanWiFi}}checked{{/if}}/></td>
+                    <td><span class="scan-medium">WiFi</span></td>
+                    <td><span class="time-estimate">(10-60s)</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <button id="refresh_devices_button" class="btn btn-primary" style="width:150px; margin:0px 0px 0px 20px"><span class="icon-refresh-3"/> Refresh Devices</button>
+    </div>
+    <div class="connectButtonColorsLegendDiv">
+        <table class="table table-sm table-hover connectButtonColorsLegend" style="margin:0px 0px 0px 20px">
+            <thead>
+                <th class="enabled"/>
+                <th class="foundMethod" colspan="2">Connection Button Colors</th>
+                <th class="connectionVerification"></th>
+            </thead>
+            <tbody style="background-color:transparent">
+                <tr>
+                    <td/>
+                    <td title="Devices can be found using an LJM scan function or by reading its attributes.">Discovery Method</td>
+                    <td title="Connections are verified by opening and closing a device.">Verified Connection</td>
+                </tr>
+                <tr>
+                    <td><div class="green-button-color"></div></td>
+                    <td title="Device was discovered using an LJM ListAll function.">LJM Scan</td>
+                    <td title="Device was successfully opened and closed.">Yes</td>
+                </tr>
+                <tr>
+                    <td><div class="yellow-button-color"></div></td>
+                    <td title="Connection type was found by reading a device's IP address registers.">Device Attributes</td>
+                    <td title="Device was successfully opened and closed.">Yes</td>
+                </tr>
+                <tr>
+                    <td><div class="grey-button-color"></div></td>
+                    <td title="Connection type was found by either the ListAll function or through its attributes.">Scan or Attributes</td>
+                    <td title="Device was not able to be opened and closed using this connection type.">No</td>
+                </tr>
+                <!-- <tr>
+                    <td><div class="red-button-color"></div></td>
+                    <td>Disconnect from device</td>
+                </tr> -->
+            </tbody>
+        </table>
+        <div id="ct-info-link-holder" class="link" style="margin:0px 0px 10px 20px"><a id="ct-info-text" title="Open the Kipling device selector support page your default browser">More Information...</a></div>
+        <script>
+            $('#ct-info-text').unbind();
+            $('#ct-info-text').bind('click',function(){
+                if(typeof(gui) === 'undefined') {
+                    gui = require('nw.gui');
+                }
+                gui.Shell.openExternal("https://labjack.com/support/software/applications/t-series/kipling/device-selector");
+            });
+        </script>
+    </div>
+</div>
 <div class="device-selector-holder">
-    <h1>Select Devices <button id="refresh_devices_button" class="btn btn-primary">Refresh Devices >></button></h1>
-    <div>
-        <div class="checkbox checkbox-inline">
-            <label><input id="usb_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanUSB}}checked{{/if}}/><span class="scan-medium">USB</span></br><span class="time-estimate">(1s)</span></label>
-        </div>
-        <div class="checkbox checkbox-inline">
-            <label><input id="ethernet_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanEthernet}}checked{{/if}}/><span class="scan-medium">Ethernet</span></br><span class="time-estimate">(3-10s)</span></label>
-        </div>
-        <div class="checkbox checkbox-inline">
-            <label><input id="wifi_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanWiFi}}checked{{/if}}/><span class="scan-medium">WiFi</span></br><span class="time-estimate">(10-60s)</span></label>
+    <div class="selector-header">
+        <!-- <div class="select-devices-title">
+            <h3>Select Devices</h3>
+        </div> -->
+        <div class="refresh-button">
+            
         </div>
     </div>
+
+    <!-- <div class="selector-header row">
+        
+        
+    </div> -->
+
     <div class="device-pane">
     	<div id="device_scan_status" class="device_scan_status_box">
     		<div>
