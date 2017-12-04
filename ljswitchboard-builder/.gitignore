@@ -15,6 +15,9 @@ build_tools/resource_hacker/ResourceHacker.ini
 build_tools/resource_hacker/ResourceHacker.log
 
 Kipling*.zip
+kipling*.zip
+kipling*.tar.gz
 package-lock.json
 
 Kipling.3.*
+kipling.3.*
