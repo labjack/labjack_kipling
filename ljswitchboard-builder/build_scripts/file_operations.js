@@ -212,6 +212,27 @@ function compressFolderWithAdmZip (from, to) {
 
     });
 }
+function compressFolderWithtargz (from, to) {
+    var defered = q.defer();
+
+    // compress files into tar.gz archive 
+    targz.compress({
+        src: from,
+        dest: to,
+        }, function(err){
+            if(err) {
+                console.log('Error creating archive', err);
+                defered.reject();
+            } else {
+                if(exports.debug) {
+                    console.log(archive.pointer() + ' total bytes');
+                    console.log('archiver has been finalized and the output file descriptor has closed.');
+                }
+                defered.resolve();
+            }
+        });
+    return defered.promise;
+}
 
 function compressFolder (folder) {
     if(folder.outputType) {

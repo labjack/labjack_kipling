@@ -22,7 +22,7 @@ var kiplingPackagePath = path.join(TEMP_PROJECT_FILES_PATH,'ljswitchboard-kiplin
 var kiplingPackageInfo = require(kiplingPackagePath);
 var k3Version = kiplingPackageInfo.version;
 
-console.log('Compressing info for k3', k3Version);
+console.log('Compression info for k3', k3Version);
 
 
 // Add a few extra paths if we are building for mac-osx
@@ -84,6 +84,7 @@ var osOutputType = {
 
 var OUTPUT_COMPRESSED_PATH = path.join(startingDir, outputFileName+osOutputType);
 
+console.log('Output compressed folder', OUTPUT_COMPRESSED_PATH);
 var operations = [
 	{'op': 'rename', 'from': OUTPUT_PROJECT_FILES_PATH, 'to': OUTPUT_FOLDER_PATH},
 	{'op': 'compress', 'from': OUTPUT_PROJECT_FILES_PATH, 'to': OUTPUT_COMPRESSED_PATH, 'outputType': osOutputType}
