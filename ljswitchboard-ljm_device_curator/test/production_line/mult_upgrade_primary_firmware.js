@@ -35,8 +35,12 @@ var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;
 var devices = [];
 var deviceSerials = [];
 
+var shipping_fw = require('./shipping_fw_constants.js');
+var t7fwVersionNum = shipping_fw.fwVersionNum;
+var fwVersionStr = shipping_fw.fwVersionStr;
+
 function createDeviceUpdater(test) {
-	var fwVersionNum = 1.0225;
+	var fwVersionNum = t7fwVersionNum;
 	
 	this.performDeviceUpdate = function(device, upgradeIsFinished) {
 		function pInfo() {
@@ -50,7 +54,7 @@ function createDeviceUpdater(test) {
 			console.log.apply(console, dataToPrint);
 		}
 		function performUpdate() {
-			var fwURL = fws[fwVersionNum.toFixed(4)];
+			var fwURL = fws[fwVersionStr];
 			pInfo('  - fwURL:', fwURL);
 			var lastPercent = 0;
 			var percentListener = function(value) {
@@ -120,6 +124,7 @@ function createDeviceUpdater(test) {
 		device.iRead('FIRMWARE_VERSION')
 		.then(function(res) {
 			if(res.val != fwVersionNum) {
+				console.log('Currently:', res.val, 'Upgrading to:', fwVersionNum);
 				try {
 					performUpdate();
 				} catch(err) {

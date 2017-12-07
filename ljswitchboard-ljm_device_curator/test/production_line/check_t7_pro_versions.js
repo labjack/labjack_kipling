@@ -28,6 +28,10 @@ var device_events = driver_const.device_curator_constants;
 var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
 var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;
 
+var shipping_fw = require('./shipping_fw_constants.js');
+var fwVersionNum = shipping_fw.fwVersionNum;
+var fwVersionStr = shipping_fw.fwVersionStr;
+
 var device_tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
@@ -98,16 +102,17 @@ var device_tests = {
 		}, function(err) {
 			test.done();
 		});
+
 	},
 	'check firmware version': function(test) {
-		var fwVersionNum = 1.0225;
+		var fwVersionNum = fwVersionNum;
 		device.iRead('FIRMWARE_VERSION')
 		.then(function(fwVersion) {
 			console.log('  - Primary FW:'.green, fwVersion.val);
 			if(fwVersion.val == fwVersionNum) {
 				test.ok(true);
 			} else {
-				test.ok(false, 'T7 Firmware version should be 1.0225, it is: ' + fwVersion.str);
+				test.ok(false, 'T7 Firmware version should be '+fwVersionStr+', it is: ' + fwVersion.str);
 			}
 			test.done();
 		}, function(err) {

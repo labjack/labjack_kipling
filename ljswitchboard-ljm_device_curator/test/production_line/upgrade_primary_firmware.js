@@ -28,6 +28,10 @@ var device_events = driver_const.device_curator_constants;
 var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
 var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;
 
+var shipping_fw = require('./shipping_fw_constants.js');
+var fwVersionNum = shipping_fw.fwVersionNum;
+var fwVersionStr = shipping_fw.fwVersionStr;
+
 var device_tests = {
 	'setUp': function(callback) {
 		if(criticalError) {
@@ -94,7 +98,7 @@ var device_tests = {
 		});
 	},
 	'upgradeFirmware': function(test) {
-		var fwVersionNum = 1.0225;
+		var fwVersionNum = fwVersionNum;
 
 		function performUpdate() {
 			var fwURL = fws[fwVersionNum.toFixed(4)];
