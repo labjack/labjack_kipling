@@ -1,0 +1,11 @@
+{
+  "name": "ljswitchboard-device_manager",
+  "version": "1.0.0",
+  "description": "Device manager for Kipling.",
+  "main": "device_manager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
