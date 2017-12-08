@@ -234,6 +234,9 @@
 	}, {
 		"name": "Average Min Max",
 		"location": "lua_script_debugger/premade_scripts/14_Average_Min_Max.lua"
+	}, {
+		"name": "Blink LEDs",
+		"location": "lua_script_debugger/premade_scripts/15_Blink_LEDs.lua"
 	}],
 	"unknown_scripts": [{
 		"name": "Voltage Follower",
