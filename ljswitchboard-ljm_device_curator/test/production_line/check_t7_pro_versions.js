@@ -105,7 +105,7 @@ var device_tests = {
 
 	},
 	'check firmware version': function(test) {
-		var fwVersionNum = fwVersionNum;
+		// var fwVersionNum = fwVersionNum;
 		device.iRead('FIRMWARE_VERSION')
 		.then(function(fwVersion) {
 			console.log('  - Primary FW:'.green, fwVersion.val);
