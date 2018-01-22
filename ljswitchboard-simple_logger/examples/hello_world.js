@@ -13,7 +13,7 @@ console.log('Hello World.js!!');
 */
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
-var device_manager = require('./device_manager');
+var device_manager = require('ljswitchboard-device_manager');
 var async = require('async');
 var q = require('q');
 var path = require('path');
@@ -153,7 +153,7 @@ function loggerApp() {
 			defered.resolve();
 		});
 		return defered.promise;
-	}
+	};
 	this.updateDeviceListing = function() {
 		debugLog('--- In Func: updateDeviceListing');
 		debugLog('Connected Devices', self.deviceManager.getDevices());
@@ -163,11 +163,11 @@ function loggerApp() {
 			debugLog('Device listing has been passwd to the logger',res);
 			defered.resolve();
 		}, function(err) {
-			console.error('Failed to save the device listing to the logger',err)
+			console.error('Failed to save the device listing to the logger',err);
 			defered.resolve();
 		});
 		return defered.promise;
-	}
+	};
 	this.configureLogger = function() {
 		debugLog('--- In Func: configureLogger');
 		var defered = q.defer();

@@ -40,13 +40,13 @@ function CREATE_DEVICE_MANAGER() {
 			});
 
 		return defered.promise;
-	}
+	};
 	this.getDevices = function() {
 		return self.devices;
-	}
+	};
 	this.forceCloseAllDevices = function() {
 		return ljm.LJM_CloseAll();
-	}
+	};
 	this.closeDevices = function() {
 		var defered = q.defer();
 
@@ -59,7 +59,7 @@ function CREATE_DEVICE_MANAGER() {
 				defered.resolve();
 			});
 		return defered.promise;
-	}
+	};
 	var self = this;
 }
 exports.create = function() {
