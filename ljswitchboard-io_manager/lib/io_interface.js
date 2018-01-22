@@ -580,7 +580,7 @@ function createIOInterface() {
 			// If the options argument was supplied copy over any relevant
 			// options to the results object.
 			if(options.cwdOverride) {
-				results.cwdOverride = cwdOverride;
+				results.cwdOverride = options.cwdOverride;
 			}
 			if(options.silent) {
 				results.silent = options.silent;
