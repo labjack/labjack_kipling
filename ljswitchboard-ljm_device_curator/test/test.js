@@ -118,22 +118,22 @@ var testGroups = {
 
 	// These are T7 specific tests.
 	't7': {
-		't7_basic_test': true,
-		't7_array_test': true,
+		't7_basic_test': false,
+		't7_array_test': false,
 		't7_check_calibration_test': true,
-		't7_read_recovery_fw_version_test': true,
-		't7_upgrade_recovery_image_test':  true,
-		't7_upgrade_test':  true,
+		't7_read_recovery_fw_version_test': false,
+		't7_upgrade_recovery_image_test':  false,
+		't7_upgrade_test':  false,
 		
 		// These two tests should be enabled and disabled together.  The first
 		// test loads and runs a lua script that creates a file.  The second
 		// test verifies that the file was created and then deletes it.  They
 		// are used together to test uSD card compatibility with the T7/T7-Pro.
-		't7_load_and_run_lua_script': true, // Runs script & creates test file "log1.csv"
-		't7_verify_lua_script_created_file': true, // Checks for and deletes file.
+		't7_load_and_run_lua_script': false, // Runs script & creates test file "log1.csv"
+		't7_verify_lua_script_created_file': false, // Checks for and deletes file.
 		
 		// This test prints out what files are on the uSD card.
-		't7_file_system_basic': true,
+		't7_file_system_basic': false,
 
 		// This test performs multiple readdir commands and two read file
 		// commands to test file I/O commands.  Requires there to be a folder
@@ -147,17 +147,17 @@ var testGroups = {
 
 		// This test checks the ability to read the T7's manufacturing info 
 		// saved in flash.
-		't7_manufacturing_info_test': true,
+		't7_manufacturing_info_test': false,
 
 		// This test checks the ability to save and restore T7's power-up default
 		// settings saved in flash.
 		't7_startup_configs_save_and_restore': false, // Requires 2x T7s w/ specific SNs.  Same FW version.
 
 		// Test cached reading functions. Requires one T7 via USB.
-		't7_cached_values_test': true,
+		't7_cached_values_test': false,
 
 		// get available connections. Requires one T7 via USB.
-		't7_available_connections_test': true,
+		't7_available_connections_test': false,
 	},
 	// T7 over-ride tests...
 	// 't7': {
@@ -178,7 +178,7 @@ var testGroups = {
 		't4_flash_based_data_test': false,
 		't4_is_auth_test': false,
 		't4_check_auth_and_upgrade_test': false,
-		't4_check_calibration_test': false,
+		't4_check_calibration_test': true,
 		't4_read_recovery_fw_version_test': false,
 	},
 	't4_mock_tests': {

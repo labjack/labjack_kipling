@@ -710,6 +710,12 @@ function device(useMockDevice) {
 		});
 		return defered.promise;
 	};
+	var dummyGetAndSaveCalibration = function(bundle) {
+		var defered = q.defer();
+		// self.savedAttributes.calibrationStatus = {};
+		defered.resolve(self.savedAttributes);
+		return defered.promise;
+	};
 	var finalizeOpenProcedure = function(bundle) {
 		var defered = q.defer();
 		self.allowReconnectManager = true;
@@ -877,8 +883,10 @@ function device(useMockDevice) {
 		privateOpen(openParameters)
 		.then(self.waitForDeviceToInitialize, getOnError('openStep'))
 		.then(saveAndLoadAttributes(openParameters), getOnError('hardwareInitialization'))
-		.then(getAndSaveCalibration, getOnError('saveAndLoadAttrs'))
-		.then(finalizeOpenProcedure, getOnError('getAndSaveCalibration'))
+		// .then(getAndSaveCalibration, getOnError('saveAndLoadAttrs'))
+		// .then(finalizeOpenProcedure, getOnError('getAndSaveCalibration')) // Removed loading of cal constants on device open.
+		.then(dummyGetAndSaveCalibration, getOnError('saveAndLoadAttrs'))
+		.then(finalizeOpenProcedure, getOnError('dummyGetAndSaveCalibration'))
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
@@ -2466,6 +2474,18 @@ function device(useMockDevice) {
 	this.getInternalFWVersion = function() {
 		return lj_t7_get_flash_fw_versions.getInternalFWVersion(self);
 	};
+	var cachedCalAndHWInfo = {
+		calStatusValid: false,
+		calStatusInfo: null,
+
+		hwIssuesValid: false,
+		hwIssuesInfo: null,
+	};
+	this.clearCachedCalAndHWInfo = function() {
+		var defered = q.defer();
+		cachedCalAndHWInfo.calStatusValid = false;
+		cachedCalAndHWInfo.hwIssuesValid = false;
+	};
 	this.getCalibrationStatus = function() {
 		var dt = self.savedAttributes.deviceType;
 		var defered = q.defer();
@@ -2475,18 +2495,63 @@ function device(useMockDevice) {
 				'flashVerification': true,
 				'ainVerification': false
 			});
-			return defered.promise;
 		} else {
-			if(dt === 7) {
-				return lj_t7_cal_operations.getDeviceCalibrationStatus(self);
+			if(cachedCalAndHWInfo.hwIssuesValid) {
+				defered.resolve(cachedCalAndHWInfo.hwIssuesInfo);
+			} else if(dt === 7) {
+				lj_t7_cal_operations.getDeviceCalibrationStatus(self)
+				.then(function(res) {
+					cachedCalAndHWInfo.calStatusValid = true;
+					cachedCalAndHWInfo.calStatusInfo = res;
+					self.savedAttributes.calibrationStatus = res;
+					defered.resolve(res);
+				}, defered.reject);
 			} else if(dt === 4) {
-				return lj_t7_cal_operations.getDeviceCalibrationStatus(self);
+				lj_t7_cal_operations.getDeviceCalibrationStatus(self)
+				.then(function(res) {
+					cachedCalAndHWInfo.calStatusValid = true;
+					cachedCalAndHWInfo.calStatusInfo = res;
+					self.savedAttributes.calibrationStatus = res;
+					defered.resolve(res);
+				}, defered.reject);
 			} else {
 				defered.resolve({'overall': false});
-				return defered.promise;
 			}
 		}
+		return defered.promise;
+	};
+	this.checkForHardwareIssues = function() {
+		var dt = self.savedAttributes.deviceType;
+		var defered = q.defer();
+		if(cachedCalAndHWInfo.hwIssuesValid) {
+			defered.resolve(cachedCalAndHWInfo.hwIssuesInfo);
+		} else if(dt === 7) {
+			lj_t7_cal_operations.checkForHardwareIssues(self)
+			.then(function(res) {
+				cachedCalAndHWInfo.hwIssuesValid = true;
+				cachedCalAndHWInfo.hwIssuesInfo = res;
+				defered.resolve(res);
+			}, defered.reject);
+		} else if(dt === 4) {
+			lj_t7_cal_operations.checkForHardwareIssues(self)
+			.then(function(res) {
+				cachedCalAndHWInfo.hwIssuesValid = true;
+				cachedCalAndHWInfo.hwIssuesInfo = res;
+				defered.resolve(res);
+			}, defered.reject);
+		} else {
+			var fakeResults = {
+		        overallResult: false,
+		        overallMessage: 'Skipping Test',
+		        shortMessage: 'Skipping Test',
 
+		        calibrationInfo: [],
+		        calibrationInfoValid: false,
+		        testResults: {},
+		    };
+		    defered.resolve(fakeResults);
+		}
+		return defered.promise;
 	};
 
 	var i;

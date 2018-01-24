@@ -4,6 +4,20 @@ var async = require('async');
 var dict = require('dict');
 var q = require('q');
 var driver_const = require('labjack-nodejs').driver_const;
+var stats = require('stats-lite');
+
+var DEBUG_HW_TESTS = false;
+var ENABLE_ERROR_OUTPUT = false;
+function getLogger(bool) {
+    return function logger() {
+        if(bool) {
+            console.log.apply(console, arguments);
+        }
+    };
+}
+var dbgHWTest = getLogger(DEBUG_HW_TESTS);
+var printErrorInfo = getLogger(ENABLE_ERROR_OUTPUT);
+
 
 var T7_NominalCalValues = [
     {"name": "HS 10.0V PSlope", "nominal": 0.000315805780, "variance": 0.05},
@@ -512,3 +526,879 @@ exports.getDeviceCalibrationStatus = function(curatedDevice) {
 };
 
 
+function configureAndGetValue(device, ainNum, ainRange, ainResolution, ainSettling, getRaw) {
+    var defered = q.defer();
+    var result = 0;
+    var isError = false;
+
+    var ainNumStr = ainNum.toString();
+    var configRegisters = [
+        'AIN' + ainNumStr + '_RANGE',
+        'AIN' + ainNumStr + '_RESOLUTION_INDEX',
+        'AIN' + ainNumStr + '_SETTLING_US',
+    ];
+    var configVals = [ainRange, ainResolution, ainSettling];
+    var ainReg = 'AIN' + ainNumStr;
+    if(getRaw) {
+        ainReg += '_BINARY';
+    }
+    var retInfo = {
+        name: ainReg,
+        value: 0,
+        isError: false,
+    };
+    function onSuccess() {
+        defered.resolve(retInfo);
+    }
+    function onError() {
+        defered.reject(retInfo);
+    }
+    function configDevice() {
+        var innerDefered = q.defer();
+        if(device.savedAttributes.FIRMWARE_VERSION > driver_const.T7_LIMITED_FW_VERSION) {
+            device.iWriteMany(configRegisters,configVals)
+            .then(function(res) {
+                innerDefered.resolve();
+            }, function(err) {
+                retInfo.isError = true;
+                innerDefered.reject();
+            });
+        } else {
+            device.iWriteMultiple(configRegisters, configVals)
+            .then(function(results) {
+                var isError = false;
+                results.forEach(function(result) {
+                    if(result.isErr) {
+                        retInfo.isError = true;
+                    }
+                });
+                if(retInfo.isError) {
+                    innerDefered.reject();
+                } else {
+                    innerDefered.resolve();
+                }
+            }, function(err) {
+                retInfo.isError = true;
+                innerDefered.reject();
+            });
+        }
+        return innerDefered.promise;
+    }
+    function getValue() {
+        device.iRead(ainReg)
+        .then(function(res) {
+            retInfo.value = res.val;
+            onSuccess();
+        }, function(err) {
+            retInfo.isError = true;
+            onError();
+        });
+    }
+
+    configDevice()
+    .then(getValue, onError);
+
+    return defered.promise;
+}
+function configureAndGetValues(device, ainNum, ainRange, ainResolution, ainSettling, getRaw, numValues) {
+    var defered = q.defer();
+    var result = 0;
+    var isError = false;
+
+    var ainNumStr = ainNum.toString();
+    var configRegisters = [
+        'AIN' + ainNumStr + '_RANGE',
+        'AIN' + ainNumStr + '_RESOLUTION_INDEX',
+        'AIN' + ainNumStr + '_SETTLING_US',
+    ];
+    var configVals = [ainRange, ainResolution, ainSettling];
+    var ainReg = 'AIN' + ainNumStr;
+    if(getRaw) {
+        ainReg += '_BINARY';
+    }
+    var ainRegs = [];
+    var ainValues = [];
+    for(var i = 0; i < numValues; i++) {
+        ainRegs.push(ainReg);
+    }
+
+    var retInfo = {
+        name: ainReg,
+        values: [],
+        mean: 0,
+        variance: 0,
+        isError: false,
+    };
+    function onSuccess() {
+        retInfo.mean = stats.mean(retInfo.values);
+        // retInfo.variance = stats.variance(retInfo.values);
+        // console.log('Calculating variance:', retInfo.values);
+        // console.log('Max:', Math.max.apply(null, retInfo.values));
+        // console.log('Min:', Math.min.apply(null, retInfo.values));
+        retInfo.variance = Math.max.apply(null, retInfo.values) - Math.min.apply(null, retInfo.values);
+        defered.resolve(retInfo);
+    }
+    function onError() {
+        defered.reject(retInfo);
+    }
+    function configDevice() {
+        var innerDefered = q.defer();
+        if(device.savedAttributes.FIRMWARE_VERSION > driver_const.T7_LIMITED_FW_VERSION) {
+            device.iWriteMany(configRegisters,configVals)
+            .then(function(res) {
+                innerDefered.resolve();
+            }, function(err) {
+                retInfo.isError = true;
+                innerDefered.reject();
+            });
+        } else {
+            device.iWriteMultiple(configRegisters, configVals)
+            .then(function(results) {
+                var isError = false;
+                results.forEach(function(result) {
+                    if(result.isErr) {
+                        retInfo.isError = true;
+                    }
+                });
+                if(retInfo.isError) {
+                    innerDefered.reject();
+                } else {
+                    innerDefered.resolve();
+                }
+            }, function(err) {
+                retInfo.isError = true;
+                innerDefered.reject();
+            });
+        }
+        return innerDefered.promise;
+    }
+    function getValues() {
+        if(device.savedAttributes.FIRMWARE_VERSION > driver_const.T7_LIMITED_FW_VERSION) {
+            device.readMany(ainRegs)
+            .then(function(results) {
+                results.forEach(function(result) {
+                    retInfo.values.push(result);
+                });
+                onSuccess();
+            }, function(err) {
+                retInfo.isError = true;
+                onError();
+            });
+        } else {
+            device.readMultiple(ainRegs)
+            .then(function(results) {
+                retInfo.isError = results.some(function(result) {
+                    return result.isErr;
+                });
+
+                if(!retInfo.isError) {
+                    results.forEach(function(result) {
+                        retInfo.values.push(result.data);
+                    });
+                }
+                onSuccess();
+            }, function(err) {
+                retInfo.isError = true;
+                onError();
+            });
+        }
+    }
+
+    configDevice()
+    .then(getValues, onError);
+
+    return defered.promise;
+}
+
+
+
+function getCheckForHardwareIssuesBundle(curatedDevice) {
+    var bundle = {
+        device: curatedDevice,
+        calibrationInfo: null,
+        calibrationInfoValid: false,
+
+        // currentDeviceConfig: {
+        //     0: {range:null, settling:null, res: null},
+        //     14: {range:null, settling:null, res: null},
+        //     15: {range:null, settling:null, res: null},
+        // },
+        currentDeviceConfigs: {},  // Gets filled with Register->result pairs.  Ex: AIN0_RANGE:<data>
+        infoToCache: [
+            'AIN0_RANGE', 'AIN0_SETTLING_US', 'AIN0_RESOLUTION_INDEX', 
+            'AIN14_RANGE', 'AIN14_SETTLING_US', 'AIN14_RESOLUTION_INDEX', 
+            'AIN15_RANGE', 'AIN15_SETTLING_US', 'AIN15_RESOLUTION_INDEX', 
+        ],
+        overallResult: false,
+        overallMessage: 'Device is not working correctly.',
+        shortMessage: 'Bad',
+
+        hardwareTests: {
+            flashVerification: {
+                name: 'Verify Cal Constants',
+                description: 'Make sure saved device calibration constants are somewhat reasonable and not blank.',
+                productTypes: ['T4', 'T7', 'T7-Pro'],
+                testFunctions: [verifyCalibrationConstants],
+                status: false, executed: false, testMessage: 'Not Executed.', shortMessage: '',
+                passMessage: 'Cal Constants OK',
+                failMessage: 'Cal Constants BAD',
+            },
+            ain15NoiseCheck: {
+                name: 'AIN15 Noise Check',
+                description: 'Verify that AIN15 readings at resolutions 1 and 9 aren\'t static and are close to zero.',
+                productTypes: ['T7', 'T7-Pro'],
+                testFunctions: [performHSBasicNoiseCheck, performHRBasicNoiseCheck],
+                status: false, executed: false, testMessage: 'Not Executed.', shortMessage: '',
+                passMessage: 'GND Readings OK',
+                failMessage: 'GND Readings BAD',
+            },
+            'temperatureBoundsCheck': {
+                name: 'Verify Device Temperature',
+                description: 'Verify that device is reporting a temperature within the device\'s operating range (-40C to +85C).',
+                productTypes: ['T4', 'T7', 'T7-Pro'],
+                testFunctions: [performDeviceTemperatureCheck],
+                status: false, executed: false, testMessage: 'Not Executed.', shortMessage: '',
+                passMessage: 'Temp Readings OK',
+                failMessage: 'Temp Readings BAD',
+            },
+            'rawTemperatureNoiseCheck': {
+                name: 'AIN14 Noise Check',
+                description: 'Verify that AIN14 readings at resolution 1 and 9 aren\'t static.',
+                productTypes: ['T7', 'T7-Pro'],
+                testFunctions: [performHSTempNoiseCheck, performHRTempNoiseCheck],
+                status: false, executed: false, testMessage: 'Not Executed.', shortMessage: '',
+                passMessage: 'No AIN14 Issues Detected',
+                failMessage: 'AIN14 Issues Detected',
+            },
+            proOnlyHSHRComparisonCheck: {
+                name: 'HS/HR Comparison Test',
+                description: 'Compare HS and HR converter results.',
+                productTypes: ['T7-Pro'],
+                testFunctions: [performHSHRGNDComparisonCheck, performHSHRTempComparisonCheck],
+                status: false, executed: false, testMessage: 'Not Executed.', shortMessage: '',
+                passMessage: 'HS Converter is OK',
+                failMessage: 'HS Converter issues detected',
+            },
+            // proOnlyGndCheck: {
+            //     name: 'Internal GND Comparison Check',
+            //     description: 'Compare HS and HR converters results when reading internal GND.',
+            //     productTypes: ['T7-Pro'],
+            //     testFunction: getInterpretFlashResults,
+            //     status: false, executed: false, testMessage: 'Not Executed.',
+            // },
+            // proOnlyTempCheck: {
+            //     name: 'Device Temperature Comparison Check',
+            //     description: 'Compare HS and HR converter results when reading device temperature.',
+            //     productTypes: ['T7-Pro'],
+            //     testFunction: getInterpretFlashResults,
+            //     status: false, executed: false, testMessage: 'Not Executed.',
+            // },
+            
+            // 'rawGroundValCheck': {
+            //     name: 'Verify Ground Measurements',
+            //     description: 'Using raw ADC results, check that HS and HR converters (w/ range settings) are reporting reasonable results using cal constants.',
+            //     productTypes: ['T4', 'T7', 'T7-Pro'],
+            //     testFunctions: [verifyInputAmplifierFunctionality],
+            //     status: false, executed: false, testMessage: 'Not Executed.',
+            // },
+        },
+
+        testsToRun: [],// Fill array with tests to be run.
+    };
+
+    // Populate the "testsToRun" array with the list of tests that need to be run.
+    var productType = curatedDevice.savedAttributes.productType;
+    var testKeys = Object.keys(bundle.hardwareTests);
+    testKeys.forEach(function(testKey) {
+        test = bundle.hardwareTests[testKey];
+        supportedProductTypes = test.productTypes;
+        if(supportedProductTypes.indexOf(productType) >= 0) {
+            bundle.testsToRun.push(testKey);
+        }
+    });
+    return bundle;
+}
+
+
+/****************** BEGIN DEFINING HARDWARE TESTS ***************/
+/**
+ * This test performs a basic check of the calibration constants.
+**/
+function verifyCalibrationConstants(bundle, testName) {
+    var defered = q.defer();
+    var msg = '';
+    if(bundle.calibrationInfoValid) {
+        var checkHighRes = false;
+        try {
+            checkHighRes = bundle.device.savedAttributes.HARDWARE_INSTALLED.highResADC;
+        } catch(err) {
+            checkHighRes = false;
+        }
+        var deviceTypeName = bundle.device.savedAttributes.deviceTypeName;
+        // console.log('Checking values', deviceTypeName, checkHighRes, bundle.calibrationInfo);
+        var calCheckResult = getInvalidCalibrationValues(deviceTypeName, checkHighRes, bundle.calibrationInfo);
+        // console.log('Result:',calCheckResult)
+
+        
+        if(calCheckResult.length > 0) {
+            msg = calCheckResult.length.toString();
+            msg += ' calibration constants are out of range.';
+            bundle.hardwareTests[testName].status = false;
+            bundle.hardwareTests[testName].executed = true;
+            bundle.hardwareTests[testName].testMessage = msg;
+        } else {
+            msg = 'Device calibration constants are in range.';
+            bundle.hardwareTests[testName].status = true;
+            bundle.hardwareTests[testName].executed = true;
+            bundle.hardwareTests[testName].testMessage = msg;
+        }
+    } else {
+        msg = 'Skipped due to invalid calibration info';
+        bundle.hardwareTests[testName].status = false;
+        bundle.hardwareTests[testName].executed = true;
+        bundle.hardwareTests[testName].testMessage = msg;
+    }
+    defered.resolve(bundle);
+    return defered.promise;
+}
+/**
+ * This test reads AIN15 (internal GND) to make sure it is not stuck at zero (HS Converter).
+**/
+function performHSBasicNoiseCheck(bundle, testName) {
+    var defered = q.defer();
+    var productType = bundle.device.savedAttributes.productType;
+    var device = bundle.device;
+    var ainNum = 15;
+    var ainRange = 10;
+    var ainResolution = 1;
+    var ainSettling = 0;
+    var getRaw = false;
+    var numValues = 10;
+    configureAndGetValues(device, ainNum, ainRange, ainResolution, ainSettling, getRaw, numValues)
+    .then(function(res) {
+        var mean = res.mean;
+        var absMean = Math.abs(mean);
+        var variance = res.variance;
+        var msg = '';
+        if((absMean < 0.1) && (variance > 0.00001)) {
+            msg = 'HS Converter AIN15 values are OK';
+            bundle.hardwareTests[testName].status = true;
+        } else {
+            msg = 'HS Converter AIN15 values are BAD, (10 vals) mean: ';
+            msg += absMean.toFixed(5) + ', variance: ' + variance.toFixed(5);
+            bundle.hardwareTests[testName].status = false;
+        }
+        if(productType === 'T7') {
+            // Only conclude test if we are testing a T7.  -Pros need 2nd test.
+            bundle.hardwareTests[testName].executed = true;
+        }
+        bundle.hardwareTests[testName].testMessage = msg;
+        defered.resolve(bundle);
+    }, function(err) {
+        var msg = 'Error getting AIN values.';
+        bundle.hardwareTests[testName].status = false;
+        bundle.hardwareTests[testName].executed = true;
+        bundle.hardwareTests[testName].testMessage = msg;
+        defered.resolve(bundle);
+    });
+    return defered.promise;
+}
+function performHRBasicNoiseCheck(bundle, testName) {
+    var defered = q.defer();
+    var productType = bundle.device.savedAttributes.productType;
+    var device = bundle.device;
+    var ainNum = 15;
+    var ainRange = 10;
+    var ainResolution = 9;
+    var ainSettling = 0;
+    var getRaw = false;
+    var numValues = 10;
+    var runTest = false;
+    if(productType === 'T7-Pro') {
+        // Only run test if HS converter passed.
+        if(bundle.hardwareTests[testName].status) {
+            runTest = true;
+        }
+    }
+    
+    if(runTest) {
+        configureAndGetValues(device, ainNum, ainRange, ainResolution, ainSettling, getRaw, numValues)
+        .then(function(res) {
+            var mean = res.mean;
+            var absMean = Math.abs(mean);
+            var variance = res.variance;
+            var msg = '';
+            if((absMean < 0.1) && (variance > 0.00001)) {
+                msg = 'HS & HR Converter AIN15 values are OK';
+                bundle.hardwareTests[testName].status = true;
+            } else {
+                msg = 'HR Converter AIN15 values are BAD';
+                bundle.hardwareTests[testName].status = false;
+            }
+            bundle.hardwareTests[testName].executed = true;
+            bundle.hardwareTests[testName].testMessage = msg;
+            defered.resolve(bundle);
+        }, function(err) {
+            var msg = 'Error getting AIN values.';
+            bundle.hardwareTests[testName].status = false;
+            bundle.hardwareTests[testName].executed = true;
+            bundle.hardwareTests[testName].testMessage = msg;
+            defered.resolve(bundle);
+        });
+    } else {
+        defered.resolve(bundle);
+    }
+    return defered.promise;
+}
+function performHSHRGNDComparisonCheck(bundle, testName) {
+    var defered = q.defer();
+    var productType = bundle.device.savedAttributes.productType;
+    var device = bundle.device;
+    var ainNum = 15;
+    var ainRange = 10;
+    var ainResolution = 0;
+    var ainSettling = 0;
+    var getRaw = false;
+    var runTest = false;
+
+    var isError = false;
+    var msg = '';
+    var hsVal = 0;
+    var hrVal = 0;
+    function getHSVal(cb) {
+        ainResolution = 7;
+        configureAndGetValue(device, ainNum, ainRange, ainResolution, ainSettling, getRaw)
+        .then(function(res) {
+            hsVal = res.value;
+            cb();
+        }, function(err) {
+            isError = true;
+            msg = 'Failed to get HS AIN15 Val';
+            cb(true);
+        });
+    }
+    function getHRVal(cb) {
+        ainResolution = 11;
+        configureAndGetValue(device, ainNum, ainRange, ainResolution, ainSettling, getRaw)
+        .then(function(res) {
+            hrVal = res.value;
+            cb();
+        }, function(err) {
+            isError = true;
+            msg = 'Failed to get HR AIN15 Val';
+            cb(true);
+        });
+    }
+    function performTest(cb) {
+        var testRes = Math.abs(hsVal - hrVal);
+        if(testRes > 0.002) {
+            // Test Fails
+            isError = true;
+            msg = 'HS/HR Ground Comparison Check Failed, diff: ' + testRes.toFixed(5);
+            cb(true);
+        } else {
+            // Test Passes
+            msg = 'HS/HR Ground Comparison Check Passes';
+            cb();
+        }
+    }
+    var steps = [getHSVal, getHRVal, performTest];
+    async.eachSeries(
+        steps,
+        function(step, cb) {
+            step(cb);
+        },
+        function(err) {
+            bundle.hardwareTests[testName].status = !isError;
+            bundle.hardwareTests[testName].executed = true;
+            bundle.hardwareTests[testName].testMessage = msg;
+            defered.resolve(bundle);
+        });
+    return defered.promise;
+}
+function performHSHRTempComparisonCheck(bundle, testName) {
+    var defered = q.defer();
+
+    var productType = bundle.device.savedAttributes.productType;
+    var device = bundle.device;
+    var ainNum = 14;
+    var ainRange = 10;
+    var ainResolution = 0;
+    var ainSettling = 0;
+    var getRaw = false;
+    var runTest = false;
+
+    var isError = false;
+    var msg = '';
+    var hsVal = 0;
+    var hrVal = 0;
+    function getHSVal(cb) {
+        ainResolution = 7;
+        configureAndGetValue(device, ainNum, ainRange, ainResolution, ainSettling, getRaw)
+        .then(function(res) {
+            hsVal = res.value;
+            cb();
+        }, function(err) {
+            isError = true;
+            msg = 'Failed to get HS AIN14 Val';
+            cb(true);
+        });
+    }
+    function getHRVal(cb) {
+        ainResolution = 11;
+        configureAndGetValue(device, ainNum, ainRange, ainResolution, ainSettling, getRaw)
+        .then(function(res) {
+            hrVal = res.value;
+            cb();
+        }, function(err) {
+            isError = true;
+            msg = 'Failed to get HR AIN14 Val';
+            cb(true);
+        });
+    }
+    function performTest(cb) {
+        var testRes = Math.abs(hsVal - hrVal);
+        if(testRes > 0.002) {
+            // Test Fails
+            isError = true;
+            msg = 'Internal Temp Comparison Check Failed, diff: ' + testRes.toFixed(5);
+            cb(true);
+        } else {
+            // Test Passes
+            msg = 'HS/HR Ground Comparison Check Passes';
+            cb();
+        }
+    }
+    // Only run test if HS/HR GND Test passed.
+    if(bundle.hardwareTests[testName].status) {
+        runTest = true;
+    }
+    if(runTest) {
+        var steps = [getHSVal, getHRVal, performTest];
+        async.eachSeries(
+            steps,
+            function(step, cb) {
+                step(cb);
+            },
+            function(err) {
+                bundle.hardwareTests[testName].status = !isError;
+                bundle.hardwareTests[testName].executed = true;
+                bundle.hardwareTests[testName].testMessage = msg;
+                defered.resolve(bundle);
+            });
+    } else {
+        defered.resolve(bundle);
+    }
+    return defered.promise;
+}
+function performDeviceTemperatureCheck(bundle, testName) {
+    var defered = q.defer();
+    bundle.device.iRead('TEMPERATURE_DEVICE_K')
+    .then(function(res) {
+        var tempK = res.val;
+        var tempC = tempK - 273.15;
+        var msg = '';
+        if((tempC > -40) && (tempC < 85)) {
+            msg = 'Device calibration constants are in range.';
+            bundle.hardwareTests[testName].status = true;
+            bundle.hardwareTests[testName].executed = true;
+            bundle.hardwareTests[testName].testMessage = msg;
+        } else {
+            msg = 'Device Temperature out of range: ' + tempC.toString() + 'C';
+            bundle.hardwareTests[testName].status = false;
+            bundle.hardwareTests[testName].executed = true;
+            bundle.hardwareTests[testName].testMessage = msg;
+        }
+        defered.resolve(bundle);
+    }, function(err) {
+        defered.resolve(bundle);
+    });
+    return defered.promise;
+}
+function performHSTempNoiseCheck(bundle, testName) {
+    var defered = q.defer();
+    var productType = bundle.device.savedAttributes.productType;
+    var device = bundle.device;
+    var ainNum = 14;
+    var ainRange = 10;
+    var ainResolution = 1;
+    var ainSettling = 0;
+    var getRaw = false;
+    var numValues = 10;
+    configureAndGetValues(device, ainNum, ainRange, ainResolution, ainSettling, getRaw, numValues)
+    .then(function(res) {
+        var mean = res.mean;
+        var absMean = Math.abs(mean);
+        var variance = res.variance;
+        var msg = '';
+        if(variance > 0.00001) {
+            msg = 'HS Converter AIN14 values are OK';
+            bundle.hardwareTests[testName].status = true;
+        } else {
+            msg = 'HS Converter AIN14 values are BAD';
+            bundle.hardwareTests[testName].status = false;
+        }
+        if(productType === 'T7') {
+            // Only conclude test if we are testing a T7.  -Pros need 2nd test.
+            bundle.hardwareTests[testName].executed = true;
+        }
+        bundle.hardwareTests[testName].testMessage = msg;
+        defered.resolve(bundle);
+    }, function(err) {
+        var msg = 'Error getting AIN values.';
+        bundle.hardwareTests[testName].status = false;
+        bundle.hardwareTests[testName].executed = true;
+        bundle.hardwareTests[testName].testMessage = msg;
+        defered.resolve(bundle);
+    });
+    return defered.promise;
+}
+function performHRTempNoiseCheck(bundle, testName) {
+    var defered = q.defer();
+    var productType = bundle.device.savedAttributes.productType;
+    var device = bundle.device;
+    var ainNum = 14;
+    var ainRange = 10;
+    var ainResolution = 9;
+    var ainSettling = 0;
+    var getRaw = false;
+    var numValues = 10;
+    var runTest = false;
+    if(productType === 'T7-Pro') {
+        // Only run test if HS converter passed.
+        if(bundle.hardwareTests[testName].status) {
+            runTest = true;
+        }
+    }
+    
+    if(runTest) {
+        configureAndGetValues(device, ainNum, ainRange, ainResolution, ainSettling, getRaw, numValues)
+        .then(function(res) {
+            var mean = res.mean;
+            var absMean = Math.abs(mean);
+            var variance = res.variance;
+            var msg = '';
+            if(variance > 0.00001) {
+                msg = 'HS & HR Converter AIN14 values are OK';
+                bundle.hardwareTests[testName].status = true;
+            } else {
+                msg = 'HR Converter AIN14 values are BAD';
+                bundle.hardwareTests[testName].status = false;
+            }
+            bundle.hardwareTests[testName].executed = true;
+            bundle.hardwareTests[testName].testMessage = msg;
+            defered.resolve(bundle);
+        }, function(err) {
+            var msg = 'Error getting AIN values.';
+            bundle.hardwareTests[testName].status = false;
+            bundle.hardwareTests[testName].executed = true;
+            bundle.hardwareTests[testName].testMessage = msg;
+            defered.resolve(bundle);
+        });
+    } else {
+        defered.resolve(bundle);
+    }
+    return defered.promise;
+}
+function verifyInputAmplifierFunctionality(bundle, testName) {
+    var defered = q.defer();
+    defered.resolve(bundle);
+    return defered.promise;
+}
+/****************** END DEFINING HARDWARE TESTS ***************/
+
+// Read device calibration constants & save it to the bundle.
+function getCalValues(bundle) {
+    dbgHWTest('getCalValues');
+    var defered = q.defer();
+    var numUint32sToRead = 41;  // See basecamp somewhere...
+    bundle.device.readFlash(0x3C4000, numUint32sToRead)
+    .then(function(data) {
+        // Convert the read calibration data to floating point values
+        var floatingPointData = [];
+        data.results.forEach(function(result){
+            var buf = new Buffer(4);
+            buf.writeUInt32BE(result,0);
+            var floatVal = buf.readFloatBE(0);
+            floatingPointData.push(floatVal);
+        });
+        bundle.calibrationInfo = floatingPointData;
+        bundle.calibrationInfoValid = true;
+        defered.resolve(bundle);
+    }, function(err) {
+        bundle.calibrationInfo = [];
+        var i = 0;
+        for(i = 0; i < numUint32sToRead; i++) {
+            bundle.calibrationInfo.push(0);
+        }
+        bundle.calibrationInfoValid = false;
+        bundle.overallResult = false;
+        bundle.overallMessage = 'Failed to read device cal info.';
+        bundle.shortMessage = 'Failed';
+        defered.resolve(bundle);
+    });
+    return defered.promise;
+}
+// Read current device configuration & save it to the bundle.
+function getCurrentConfigs(bundle) {
+    dbgHWTest('getCurrentConfigs', bundle.calibrationInfoValid);
+    var defered = q.defer();
+
+    bundle.device.sReadMany(bundle.infoToCache)
+    .then(function(results) {
+        // bundle.currentDeviceConfigs
+        results.forEach(function(result) {
+            bundle.currentDeviceConfigs[result.name] = result;
+        });
+        defered.resolve(bundle);
+    }, function(err) {
+        bundle.overallResult = false;
+        bundle.overallMessage = 'Failed to read current device configs.';
+        bundle.shortMessage = 'Failed';
+        defered.resolve(bundle);
+    });
+    return defered.promise;
+}
+function runTest(bundle, testName) {
+    var defered = q.defer();
+
+    async.eachSeries(
+        bundle.hardwareTests[testName].testFunctions,
+        function(testFunction, cb) {
+            try {
+                dbgHWTest('Running Test', testName);
+                testFunction(bundle, testName)
+                .then(function(bundle) {
+                    cb();
+                }, function(bundle) {
+                    cb(true);
+                });
+            } catch(err) {
+                console.error('Error Running Test', testName, err);
+                cb(true);
+            }
+        }, function(err) {
+            defered.resolve(bundle);
+        });
+    return defered.promise;
+}
+function performHardwareTests(bundle) {
+    dbgHWTest('performHardwareTests');
+    var defered = q.defer();
+
+    async.eachSeries(
+        bundle.testsToRun,
+        function(testKey, cb) {
+            dbgHWTest('Running Test', testKey);
+            runTest(bundle, testKey)
+            .then(function(bundle) {
+                dbgHWTest('Finished running test', bundle.hardwareTests[testKey]);
+                // Check to see if the test failed, then report failure & stop future tests.
+                if(!bundle.hardwareTests[testKey].status) {
+                    // Update test's short message
+                    bundle.hardwareTests[testKey].shortMessage = bundle.hardwareTests[testKey].failMessage;
+
+                    // Update overall HW test result
+                    bundle.overallResult = false;
+                    bundle.overallMessage = bundle.hardwareTests[testKey].testMessage;
+                    bundle.shortMessage = bundle.hardwareTests[testKey].failMessage;
+                    cb(true);
+                } else {
+                    bundle.hardwareTests[testKey].shortMessage = bundle.hardwareTests[testKey].passMessage;
+                    cb();
+                }
+            }, function(bundle) {
+                cb(true);
+            });
+        }, function(err) {
+            var allTestsPass = true;
+            bundle.testsToRun.forEach(function(key) {
+                if(!bundle.hardwareTests[key].status) {
+                    allTestsPass = false;
+                }
+            });
+            if(allTestsPass) {
+                bundle.overallResult = true;
+                bundle.overallMessage = 'No HW issues detected';
+                bundle.shortMessage = 'OK';
+            }
+            defered.resolve(bundle);
+        });
+    return defered.promise;
+}
+function restoreCurrentConfigs(bundle) {
+    dbgHWTest('Restoring Configs');
+    var defered = q.defer();
+    var registersToWrite = [];
+    var valuesToWrite = [];
+    var configRegKeys = Object.keys(bundle.currentDeviceConfigs);
+    configRegKeys.forEach(function(key) {
+        registersToWrite.push(bundle.currentDeviceConfigs[key].name);
+        valuesToWrite.push(bundle.currentDeviceConfigs[key].val);
+    });
+    bundle.device.iWriteMany(registersToWrite, valuesToWrite)
+    .then(function(result) {
+        defered.resolve(bundle);
+    }, function(err) {
+        bundle.overallResult = false;
+        bundle.overallMessage = 'Failed to restore device configs.';
+        bundle.shortMessage = 'Failed';
+        defered.resolve(bundle);
+    });
+    return defered.promise;
+}
+function finalizeResults(bundle) {
+    dbgHWTest('Finalizing results');
+    
+    var defered = q.defer();
+    var results = {
+        overallResult: bundle.overallResult,
+        overallMessage: bundle.overallMessage,
+        shortMessage: bundle.shortMessage,
+
+        // calibrationInfo: bundle.calibrationInfo,
+        calibrationInfoValid: bundle.calibrationInfoValid,
+        testResults: {},
+    };
+
+    bundle.testsToRun.forEach(function(testKey) {
+        results.testResults[testKey] = {
+            name: bundle.hardwareTests[testKey].name,
+            description: bundle.hardwareTests[testKey].description,
+            status: bundle.hardwareTests[testKey].status,
+            executed: bundle.hardwareTests[testKey].executed,
+            testMessage: bundle.hardwareTests[testKey].testMessage,
+            shortMessage: bundle.hardwareTests[testKey].shortMessage,
+        };
+    });
+
+    dbgHWTest('Final resolve');
+    defered.resolve(results);
+    return defered.promise;
+}
+
+/**
+ * ONLY RUN ON T7-Pro.  Performs a check to determine if the T7 & T7-Pro's analog
+ * front end is still working correctly.
+**/
+exports.checkForHardwareIssues = function(curatedDevice) {
+    var defered = q.defer();
+    // console.log('in t7_calibration_operations.js getDeviceCalibrationStatus');
+    var getErrFunc = function(msg) {
+        var errFunc = function(err) {
+            console.log('in getDeviceCalibrationStatus, error', err, msg);
+            defered.reject(err);
+        };
+        return errFunc;
+    };
+
+    var bundle = getCheckForHardwareIssuesBundle(curatedDevice);
+
+    getCalValues(bundle)
+    .then(getCurrentConfigs)
+    .then(performHardwareTests)
+    .then(restoreCurrentConfigs)
+    .then(finalizeResults)
+    .then(defered.resolve);
+    return defered.promise;
+};

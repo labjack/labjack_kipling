@@ -73,13 +73,13 @@ var device_tests = {
 
 			test.strictEqual(res.deviceType, 4);
 			test.strictEqual(res.deviceTypeString, 'LJM_dtT4');
-			test.ok(res.calibrationStatus.overall, 'Device Not Calibrated');
-			test.strictEqual(res.calibrationStatus.message, 'Device Calibration is Good');
-			test.strictEqual(res.calibrationStatus.shortMessage, 'Good');
+			// test.ok(res.calibrationStatus.overall, 'Device Not Calibrated');
+			// test.strictEqual(res.calibrationStatus.message, 'Device Calibration is Good');
+			// test.strictEqual(res.calibrationStatus.shortMessage, 'Good');
 			test.done();
 		});
 	},
-	'check t7 calibration': function(test) {
+	'check t4 calibration': function(test) {
 		device.getCalibrationStatus()
 		.then(function(calStatus) {
 			console.log('  - Cal Status:'.green, calStatus);
@@ -87,6 +87,21 @@ var device_tests = {
 			keys.forEach(function(key) {
 				test.ok(calStatus[key], 'T4 Cal Check Failed: ' + key.toString());
 			});
+			test.done();
+		}, function(err) {
+			console.log('Error', err);
+			test.ok(false, 'Failed to get the devices calibration status: ' + err.toString());
+			test.done();
+		});
+	},
+	'run HW tests': function(test) {
+		device.checkForHardwareIssues()
+		.then(function(result) {
+			if(!result.overallResult) {
+				console.log('  - HW Issues Results'.red, result);
+			}
+			test.ok(result.overallResult, 'Device should pass');
+			
 			test.done();
 		}, function(err) {
 			console.log('Error', err);
