@@ -244,6 +244,7 @@ function device(useMockDevice) {
 	};
 	this.declareDeviceDisconnected = function() {
 		self.savedAttributes.isConnected = false;
+		internalClearCachedCalAndHWInfo() // Force Cal/HW info to be re-read on next attempt.
 		self.emit(DEVICE_DISCONNECTED, self.savedAttributes);
 	};
 	var declareDeviceReconnected = function() {
@@ -2481,10 +2482,16 @@ function device(useMockDevice) {
 		hwIssuesValid: false,
 		hwIssuesInfo: null,
 	};
+	function internalClearCachedCalAndHWInfo() {
+		cachedCalAndHWInfo.calStatusValid = false;
+		cachedCalAndHWInfo.hwIssuesValid = false;
+	}
 	this.clearCachedCalAndHWInfo = function() {
 		var defered = q.defer();
 		cachedCalAndHWInfo.calStatusValid = false;
 		cachedCalAndHWInfo.hwIssuesValid = false;
+		defered.resolve();
+		return defered.promise;
 	};
 	this.getCalibrationStatus = function() {
 		var dt = self.savedAttributes.deviceType;
@@ -2501,17 +2508,21 @@ function device(useMockDevice) {
 			} else if(dt === 7) {
 				lj_t7_cal_operations.getDeviceCalibrationStatus(self)
 				.then(function(res) {
-					cachedCalAndHWInfo.calStatusValid = true;
-					cachedCalAndHWInfo.calStatusInfo = res;
-					self.savedAttributes.calibrationStatus = res;
+					if(self.savedAttributes.isConnected) {
+						cachedCalAndHWInfo.calStatusValid = true;
+						cachedCalAndHWInfo.calStatusInfo = res;
+						self.savedAttributes.calibrationStatus = res;
+					}
 					defered.resolve(res);
 				}, defered.reject);
 			} else if(dt === 4) {
 				lj_t7_cal_operations.getDeviceCalibrationStatus(self)
 				.then(function(res) {
-					cachedCalAndHWInfo.calStatusValid = true;
-					cachedCalAndHWInfo.calStatusInfo = res;
-					self.savedAttributes.calibrationStatus = res;
+					if(self.savedAttributes.isConnected) {
+						cachedCalAndHWInfo.calStatusValid = true;
+						cachedCalAndHWInfo.calStatusInfo = res;
+						self.savedAttributes.calibrationStatus = res;
+					}
 					defered.resolve(res);
 				}, defered.reject);
 			} else {
@@ -2528,15 +2539,19 @@ function device(useMockDevice) {
 		} else if(dt === 7) {
 			lj_t7_cal_operations.checkForHardwareIssues(self)
 			.then(function(res) {
-				cachedCalAndHWInfo.hwIssuesValid = true;
-				cachedCalAndHWInfo.hwIssuesInfo = res;
+				if(self.savedAttributes.isConnected) {
+					cachedCalAndHWInfo.hwIssuesValid = true;
+					cachedCalAndHWInfo.hwIssuesInfo = res;
+				}
 				defered.resolve(res);
 			}, defered.reject);
 		} else if(dt === 4) {
 			lj_t7_cal_operations.checkForHardwareIssues(self)
 			.then(function(res) {
-				cachedCalAndHWInfo.hwIssuesValid = true;
-				cachedCalAndHWInfo.hwIssuesInfo = res;
+				if(self.savedAttributes.isConnected) {
+					cachedCalAndHWInfo.hwIssuesValid = true;
+					cachedCalAndHWInfo.hwIssuesInfo = res;
+				}
 				defered.resolve(res);
 			}, defered.reject);
 		} else {
