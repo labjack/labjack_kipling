@@ -274,7 +274,7 @@ function parseOutErroniusDevices(openAllData) {
                 'errorMessage': exception.errorMessage,
 
                 'includeError': true,
-            }
+            };
         }
 
         try {

@@ -53,72 +53,120 @@ function getHandleInfo(handle, cb) {
 }
 module.exports.getHandleInfo = getHandleInfo;
 
-function readDeviceRegister(handle, deviceType, register, cb) {
-	// console.log('VCT - ', handle, register);
+
+function readCachedDeviceRegister(device, handle, deviceType, register, cb) {
+	// If we made it into this function we can assume that we are working
+	// with a curated device.
+	var savedAttributes = device.curatedDevice.savedAttributes;
+
+	// info about the register we are trying to read.
 	var info = modbus_map.getAddressInfo(register, 0);
-	if(info.typeString !== 'STRING') {
-		// data_parser.parseResult
-		ljm.LJM_eReadAddress.async(
-			handle, // Handle
-			info.address,
-			info.type,
-			0,
-			function(results) {
-				if(results.ljmError === 0) {
-					var pRes = data_parser.parseResult(
-						info.address,
-						results.Value,
-						deviceType
-					);
-					cb(pRes);
-				} else {
-					var pErr = data_parser.parseError(
-						info.address,
-						results.ljmError,
-						deviceType
-					);
-					var keys = Object.keys(pErr.defaultValue);
-					keys.forEach(function(key) {
-						pErr[key] = pErr.defaultValue[key];
-					});
-					cb(pErr);
-				}
-			}
-		);
+}
+function readDeviceRegister(device, handle, deviceType, register, cb) {
+	if(device.curatedDevice) {
+		// console.log('VCT - ', handle, register);
+		// var savedAttributes = device.curatedDevice.savedAttributes;
+		// if(savedAttributes[register]) {
+		// 	console.log('Cached info for', register, savedAttributes[register]);
+		// } else {
+		// 	console.log('Missing info for', register);
+		// 	if(register === 'ETHERNET_IP') {
+
+		// 	}
+		// }
+		device.curatedDevice.cRead(register)
+		.then(function(result) {
+			cb(pRes);
+		}, function(err) {
+			console.error('ljs-device_scanner ljm_utils: ERROR Cached READING', register, err);
+			cb(pErr);
+		});
 	} else {
-		// data_parser.parseResult
-		ljm.LJM_eReadAddressString.async(
-			handle, // Handle
-			info.address,
-			'',
-			function(results) {
-				if(results.ljmError === 0) {
-					var pRes = data_parser.parseResult(
-						info.address,
-						results.String,
-						deviceType
-					);
-					cb(pRes);
-				} else {
-					var pErr = data_parser.parseError(
-						info.address,
-						results.ljmError,
-						deviceType
-					);
-					cb(pErr);
+		var info = modbus_map.getAddressInfo(register, 0);
+		if(info.typeString !== 'STRING') {
+			// data_parser.parseResult
+			ljm.LJM_eReadAddress.async(
+				handle, // Handle
+				info.address,
+				info.type,
+				0,
+				function(results) {
+					if(results.ljmError === 0) {
+						var pRes = data_parser.parseResult(
+							info.address,
+							results.Value,
+							deviceType
+						);
+						if(false) {
+							console.log('READ REGISTER:', register, pRes);
+						}
+						cb(pRes);
+					} else {
+						console.log('ERROR READING INFO DURING OPENALL_SCAN', handle, register, results.ljmError);
+
+						var pErr = data_parser.parseError(
+							info.address,
+							results.ljmError,
+							deviceType
+						);
+						var keys = Object.keys(pErr.defaultValue);
+						keys.forEach(function(key) {
+							pErr[key] = pErr.defaultValue[key];
+						});
+						cb(pErr);
+					}
 				}
-			}
-		);
+			);
+		} else {
+			// data_parser.parseResult
+			ljm.LJM_eReadAddressString.async(
+				handle, // Handle
+				info.address,
+				'',
+				function(results) {
+					if(results.ljmError === 0) {
+						var pRes = data_parser.parseResult(
+							info.address,
+							results.String,
+							deviceType
+						);
+						if(false) {
+							console.log('READ REGISTER:', register, pRes);
+						}
+						cb(pRes);
+					} else {
+						console.log('ERROR READING INFO DURING OPENALL_SCAN', handle, register, results.ljmError);
+						var pErr = data_parser.parseError(
+							info.address,
+							results.ljmError,
+							deviceType
+						);
+						cb(pErr);
+					}
+				}
+			);
+		}
 	}
 }
 
-function readAndParseRegisters(handle, deviceType, registers, cb) {
+function readAndParseRegisters(device, handle, deviceType, registers, cb) {
 	var data = {};
 	function getData(register, innerCB) {
-		readDeviceRegister(handle, deviceType, register, function(regData) {
-			data[regData.name] = regData;
-			innerCB();
-		});
+		if(device.curatedDevice) {
+			// readCachedDeviceRegister(device, handle, deviceType, register, function(regData) {
+			// 	data[regData.name] = regData;
+			// 	innerCB();
+			// });
+			readDeviceRegister(device, handle, deviceType, register, function(regData) {
+				data[regData.name] = regData;
+				innerCB();
+			});
+		} else {
+			readDeviceRegister(device, handle, deviceType, register, function(regData) {
+				data[regData.name] = regData;
+				innerCB();
+			});
+		}
 	}
 	function returnResults(err) {
 		cb(data);
@@ -139,7 +187,7 @@ function getProductType(deviceInfo) {
 	} else if(deviceInfo.dt === 200) {
 		return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
-		console.log('Failed to get product type', deviceInfo.dt);
+		console.log('Failed to get product type', deviceInfo.dt, 'for handle:', deviceInfo.handle);
 		return deviceInfo.deviceTypeName;
 	}
 }
@@ -157,13 +205,53 @@ function getModelType(deviceInfo) {
 	} else if(deviceInfo.dt === 200) {
 		pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
-		console.log('Failed to get model type');
+		console.log('Failed to get model type', 'for handle:', deviceInfo.handle);
 	}
 	return pt;
 }
 function getDeviceInfo(device, handle, registers, cb) {
+	var DEBUG_ALREADY_CONNECTED_DEVICE = false;
 	// console.log('getDeviceInfo DEVICE', device);
-	console.log('TODO: search for .isActive, and do similar things for device.savedAttributes.isConnected??')
+	// console.log('ljswitchboard-device_scanner/~/ljm_utils.js TODO: search for .isActive, and do similar things for device.savedAttributes.isConnected??')
+	
+	var previouslyAcquiredHandleInfo = {
+		isValid: false,
+		DeviceType: null,
+		ConnectionType: null,
+		SerialNumber: null,
+		IPAddress: null,
+		Port: null,
+		MaxBytesPerMB: null,
+		productType: null,
+		modelType: null,
+	};
+	if(device.curatedDevice) {
+		// This case happens when a device has already been connected.
+		// console.log('Device Info', device.curatedDevice.savedAttributes.serialNumber);
+		// console.log('Device Info:', Object.keys(device.curatedDevice.savedAttributes));
+		// console.log('Device Handle', handle);
+
+		// Build previously acquired handle info object to be used instead of LJM call.
+		previouslyAcquiredHandleInfo.DeviceType = device.curatedDevice.savedAttributes.deviceType;
+		previouslyAcquiredHandleInfo.ConnectionType = device.curatedDevice.savedAttributes.connectionType;
+		previouslyAcquiredHandleInfo.SerialNumber = device.curatedDevice.savedAttributes.serialNumber;
+		previouslyAcquiredHandleInfo.IPAddress = device.curatedDevice.savedAttributes.ipAddress;
+		previouslyAcquiredHandleInfo.Port = device.curatedDevice.savedAttributes.port;
+		previouslyAcquiredHandleInfo.MaxBytesPerMB = device.curatedDevice.savedAttributes.maxBytesPerMB;
+		previouslyAcquiredHandleInfo.isValid = true;
+		
+		// Print out saved device attribute keys.
+		// var attrsToPrint = [
+		// 	'isConnected', 'productType', 'deviceType', 'connectionType',
+		// ];
+		// attrsToPrint.forEach(function(attr) {
+		// 	console.log(attr, device.curatedDevice.savedAttributes[attr]);
+		// });
+	} else {
+		// This case happens when a device has been found by a scan.
+		// console.log('Weird Connection???', device);
+	}
+
 	var deviceInfo = {};
 	function handleReadData(results) {
 		var isError = false;
@@ -207,19 +295,26 @@ function getDeviceInfo(device, handle, registers, cb) {
 		deviceInfo.ip = parseIPAddress(handleInfo.IPAddress);
 		deviceInfo.port = handleInfo.Port;
 		deviceInfo.maxBytesPerMB = handleInfo.MaxBytesPerMB;
-		readAndParseRegisters(handle, dt, registers, handleReadData);
+		readAndParseRegisters(device, handle, dt, registers, handleReadData);
 	}
 
-	var res = ljm.LJM_GetHandleInfo.async(
-		handle, // Handle
-		0, // DeviceType
-		0, // ConnectionType
-		0, // SerialNumber
-		0, // IPAddress
-		0, // Port
-		0, // MaxBytesPerMB
-		handleGetHandleInfo
-	);
+	if(previouslyAcquiredHandleInfo.isValid) {
+		setImmediate(function() {
+			handleGetHandleInfo(previouslyAcquiredHandleInfo);
+		});
+	} else {
+		var res = ljm.LJM_GetHandleInfo.async(
+			handle, // Handle
+			0, // DeviceType
+			0, // ConnectionType
+			0, // SerialNumber
+			0, // IPAddress
+			0, // Port
+			0, // MaxBytesPerMB
+			handleGetHandleInfo
+		);
+	}
+	
 }
 module.exports.getDeviceInfo = getDeviceInfo;
 
