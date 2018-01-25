@@ -880,7 +880,7 @@ function performHSBasicNoiseCheck(bundle, testName) {
         var absMean = Math.abs(mean);
         var variance = res.variance;
         var msg = '';
-        if((absMean < 0.1) && (variance > 0.00001)) {
+        if((absMean < 0.004) && (variance > 0.00001)) {
             msg = 'HS Converter AIN15 values are OK';
             bundle.hardwareTests[testName].status = true;
         } else {
@@ -928,7 +928,7 @@ function performHRBasicNoiseCheck(bundle, testName) {
             var absMean = Math.abs(mean);
             var variance = res.variance;
             var msg = '';
-            if((absMean < 0.1) && (variance > 0.00001)) {
+            if((absMean < 0.004) && (variance > 0.00001)) {
                 msg = 'HS & HR Converter AIN15 values are OK';
                 bundle.hardwareTests[testName].status = true;
             } else {
@@ -991,7 +991,7 @@ function performHSHRGNDComparisonCheck(bundle, testName) {
     }
     function performTest(cb) {
         var testRes = Math.abs(hsVal - hrVal);
-        if(testRes > 0.002) {
+        if(testRes > 0.004) {
             // Test Fails
             isError = true;
             msg = 'HS/HR Ground Comparison Check Failed, diff: ' + testRes.toFixed(5);
@@ -1058,7 +1058,7 @@ function performHSHRTempComparisonCheck(bundle, testName) {
     }
     function performTest(cb) {
         var testRes = Math.abs(hsVal - hrVal);
-        if(testRes > 0.002) {
+        if(testRes > 0.004) {
             // Test Fails
             isError = true;
             msg = 'Internal Temp Comparison Check Failed, diff: ' + testRes.toFixed(5);
