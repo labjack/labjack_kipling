@@ -162,7 +162,8 @@ function getModelType(deviceInfo) {
 	return pt;
 }
 function getDeviceInfo(device, handle, registers, cb) {
-	console.log('getDeviceInfo DEVICE', device);
+	// console.log('getDeviceInfo DEVICE', device);
+	console.log('TODO: search for .isActive, and do similar things for device.savedAttributes.isConnected??')
 	var deviceInfo = {};
 	function handleReadData(results) {
 		var isError = false;
