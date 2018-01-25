@@ -20,13 +20,14 @@ function printScanResultsData(deviceTypes) {
 					return name.slice(0,4);
 				});
 			} catch(err) {
-
+ 
 			}
 			// console.log('Keys:', Object.keys(device));
 			console.log(' - Device', {
 				dt: device.deviceTypeName,
 				sn: device.serialNumber,
 				cts: device.connectionTypeNames,
+				name: device.DEVICE_NAME_DEFAULT.res,
 				// cts: shortNames,
 				// act: device.isActive,
 				// mock: device.isMockDevice,

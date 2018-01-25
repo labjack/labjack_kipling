@@ -75,6 +75,7 @@ function readCachedDeviceRegister(device, handle, deviceType, register, cb) {
 	var info = modbus_map.getAddressInfo(register, 0);
 }
 function readDeviceRegister(device, handle, deviceType, register, cb) {
+	var info = modbus_map.getAddressInfo(register, 0);
 	if(device.curatedDevice) {
 		// console.log('VCT - ', handle, register);
 		// var savedAttributes = device.curatedDevice.savedAttributes;
@@ -86,17 +87,29 @@ function readDeviceRegister(device, handle, deviceType, register, cb) {
 
 		// 	}
 		// }
-		debugCuratedDeviceReads('Reading Register',register);
-		device.curatedDevice.cRead(register)
-		.then(function(result) {
+		// Try pulling data out of the savedAttributes object first
+		var savedAttributes = device.curatedDevice.savedAttributes;
+		if(savedAttributes[register] && register !== 'HARDWARE_INSTALLED') { // force HW-Installed reg to be c-read.
+			debugCuratedDeviceReads('Cached info for', register, savedAttributes[register]);
+			var pRes = data_parser.parseResult(
+				info.address,
+				savedAttributes[register],
+				savedAttributes.deviceType
+			);
+			cb(pRes);
+		} else {
+			// If info wasn't in savedAttributes then try seeing if the value has been cached.
 			debugCuratedDeviceReads('Reading Register',register);
-			cb(result);
-		}, function(err) {
-			console.error('ljs-device_scanner ljm_utils: ERROR Cached READING', register, err);
-			cb(err);
-		});
+			device.curatedDevice.cRead(register)
+			.then(function(result) {
+				debugCuratedDeviceReads('Reading Register',register);
+				cb(result);
+			}, function(err) {
+				console.error('ljs-device_scanner ljm_utils: ERROR Cached READING', register, err);
+				cb(err);
+			});
+		}
 	} else {
-		var info = modbus_map.getAddressInfo(register, 0);
 		if(info.typeString !== 'STRING') {
 			// data_parser.parseResult
 			ljm.LJM_eReadAddress.async(
