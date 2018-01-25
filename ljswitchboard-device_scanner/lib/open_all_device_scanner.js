@@ -1503,6 +1503,7 @@ function openAllDeviceScanner() {
         // console.log('In return results!', bundle.erroniusDevices);
         debugSS('in returnResults');
         debugLFDS('in returnResults');
+        console.log('IN RETURN RESULTS TEST')
         self.cachedScanBundle = bundle;
         self.scanInProgress = false;
         var defered = q.defer();
