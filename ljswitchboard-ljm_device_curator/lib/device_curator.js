@@ -2536,7 +2536,7 @@ function device(useMockDevice) {
 		var defered = q.defer();
 		if(cachedCalAndHWInfo.hwIssuesValid) {
 			defered.resolve(cachedCalAndHWInfo.hwIssuesInfo);
-		} else if(dt === 7) {
+		} else if(dt === 7 && self.savedAttributes.isConnected) {
 			lj_t7_cal_operations.checkForHardwareIssues(self)
 			.then(function(res) {
 				if(self.savedAttributes.isConnected) {
@@ -2545,7 +2545,7 @@ function device(useMockDevice) {
 				}
 				defered.resolve(res);
 			}, defered.reject);
-		} else if(dt === 4) {
+		} else if(dt === 4 && self.savedAttributes.isConnected) {
 			lj_t7_cal_operations.checkForHardwareIssues(self)
 			.then(function(res) {
 				if(self.savedAttributes.isConnected) {
@@ -2666,7 +2666,7 @@ function device(useMockDevice) {
 			// defered.resolve({});
 		}
 		return defered.promise;
-	}
+	};
 	this.cReadMany = function(addresses) {
 		var defered = q.defer();
 		var orderedRegs = [];
