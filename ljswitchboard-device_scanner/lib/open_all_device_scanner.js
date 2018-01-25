@@ -34,9 +34,9 @@ var unitTestExports = {};
 /** DEBUGGING OPTIONS **/
 var ENABLE_ERROR_OUTPUT = false;
 /* Enable debugging for the individual scanning steps */
-var DEBUG_SCAN_STEP = true;
+var DEBUG_SCAN_STEP = false;
 /* Enable debugging for the OpenAll calls */
-var DEBUG_OPEN_ALL_SCAN = true;
+var DEBUG_OPEN_ALL_SCAN = false;
 var DEBUG_OPEN_ALL_RESULTS = false;
 /* Enable debugging for the LJM Calls */
 var DEBUG_LJM_CALLS = false;
@@ -551,7 +551,6 @@ function createDeviceManager() {
             // Unlike the case of adding a device handle, we already have a
             // curated device...
             self.log('Adding curated device', deviceHandle);
-
             // Create a new managed device.
             var newDevice = new createManagedDevice({
                     'handle': deviceHandle,

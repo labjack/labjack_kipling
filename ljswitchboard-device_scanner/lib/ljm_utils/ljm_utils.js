@@ -9,6 +9,18 @@ var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 var ljm_ffi = require('ljm-ffi');
 var ljm = ljm_ffi.load();
 
+var DEBUG_CURATED_DEVICE_READS = false;
+
+function getLogger(bool) {
+    return function logger() {
+        if(bool) {
+            console.log.apply(console, arguments);
+        }
+    };
+}
+
+var debugCuratedDeviceReads = getLogger(DEBUG_CURATED_DEVICE_READS);
+
 function parseIPAddress(ipInt) {
 	var ipAddr = new Buffer(4);
 	ipAddr.writeUInt32LE(ipInt, 0);
@@ -74,12 +86,14 @@ function readDeviceRegister(device, handle, deviceType, register, cb) {
 
 		// 	}
 		// }
+		debugCuratedDeviceReads('Reading Register',register);
 		device.curatedDevice.cRead(register)
 		.then(function(result) {
-			cb(pRes);
+			debugCuratedDeviceReads('Reading Register',register);
+			cb(result);
 		}, function(err) {
 			console.error('ljs-device_scanner ljm_utils: ERROR Cached READING', register, err);
-			cb(pErr);
+			cb(err);
 		});
 	} else {
 		var info = modbus_map.getAddressInfo(register, 0);
@@ -212,8 +226,8 @@ function getModelType(deviceInfo) {
 function getDeviceInfo(device, handle, registers, cb) {
 	var DEBUG_ALREADY_CONNECTED_DEVICE = false;
 	// console.log('getDeviceInfo DEVICE', device);
-	// console.log('ljswitchboard-device_scanner/~/ljm_utils.js TODO: search for .isActive, and do similar things for device.savedAttributes.isConnected??')
-	
+	// debugCuratedDeviceReads('ljswitchboard-device_scanner/~/ljm_utils.js TODO: search for .isActive, and do similar things for device.savedAttributes.isConnected??');
+	debugCuratedDeviceReads('getDeviceInfo for',handle);
 	var previouslyAcquiredHandleInfo = {
 		isValid: false,
 		DeviceType: null,
@@ -227,9 +241,9 @@ function getDeviceInfo(device, handle, registers, cb) {
 	};
 	if(device.curatedDevice) {
 		// This case happens when a device has already been connected.
-		// console.log('Device Info', device.curatedDevice.savedAttributes.serialNumber);
-		// console.log('Device Info:', Object.keys(device.curatedDevice.savedAttributes));
-		// console.log('Device Handle', handle);
+		debugCuratedDeviceReads('Device Info', device.curatedDevice.savedAttributes.serialNumber);
+		debugCuratedDeviceReads('Device Info:', Object.keys(device.curatedDevice.savedAttributes));
+		debugCuratedDeviceReads('Device Handle', handle);
 
 		// Build previously acquired handle info object to be used instead of LJM call.
 		previouslyAcquiredHandleInfo.DeviceType = device.curatedDevice.savedAttributes.deviceType;
@@ -240,6 +254,7 @@ function getDeviceInfo(device, handle, registers, cb) {
 		previouslyAcquiredHandleInfo.MaxBytesPerMB = device.curatedDevice.savedAttributes.maxBytesPerMB;
 		previouslyAcquiredHandleInfo.isValid = true;
 		
+		debugCuratedDeviceReads('Info',previouslyAcquiredHandleInfo);
 		// Print out saved device attribute keys.
 		// var attrsToPrint = [
 		// 	'isConnected', 'productType', 'deviceType', 'connectionType',
@@ -266,7 +281,7 @@ function getDeviceInfo(device, handle, registers, cb) {
 		deviceInfo.productType = getProductType(deviceInfo);
 		deviceInfo.modelType = getModelType(deviceInfo);
 
-		// console.log('Device Info', deviceInfo);
+		debugCuratedDeviceReads('Device Info', deviceInfo.handle, Object.keys(deviceInfo));
 		cb(deviceInfo);
 	}
 

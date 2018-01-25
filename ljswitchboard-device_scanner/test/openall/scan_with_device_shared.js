@@ -39,32 +39,55 @@ exports.tests = {
 		});
 	},
 	'open device in ljlogm': function(test) {
+		var scanFinished = false;
+		var ljlogmFinished = false;
+		function finishTest() {
+			if(scanFinished && ljlogmFinished) {
+				console.log('  - Scan & LJLogM Finished'.green);
+				test.done();
+			} else {
+				console.log(
+					'  - Trying to finish step...'.yellow,
+					'scanFinished:',scanFinished,
+					'ljlogmFinished:',ljlogmFinished
+				);
+			}
+		}
 		setTimeout(function() {
             var startTime = new Date();
             console.log('  - Starting LJM Scan'.green, startTime);
             console.log('  - Exit LJLogM to continue test'.yellow);
 			deviceScanner.findAllDevices(devices)
 			.then(function(deviceTypes) {
+				console.log('  - Finished Scanning!'.green);
 				printScanResultsData(deviceTypes);
 				verifyScanResults(deviceTypes, test, {debug: false});
 				var endTime = new Date();
 				// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
 				// test.ok(testStatus, 'Unexpected test result');
 				console.log('  - Duration'.cyan, (endTime - startTime)/1000);
-				// test.done();
+				test.ok(true, 'Scan Finished');
+				scanFinished = true;
+				finishTest();
 			}, function(err) {
 				console.log('Scanning Error', err);
+				test.ok(false, 'Reported a scan error');
+				scanFinished = true;
+				finishTest();
 				// test.done();
 			});
         },
         3000);
 		device.openDeviceInLJLogM()
 		.then(function() {
-			test.done();
+			test.ok(true, 'LJLogM Finished');
+			ljlogmFinished = true;
+			finishTest();
 		}, function(err) {
-			test.ok(false, 'should not fail to open in LJLogM');
+			test.ok(false, 'Should not fail to open in LJLogM');
 			console.log('ERROR', err);
-			test.done();
+			ljlogmFinished = true;
+			finishTest();
 		});
 	},
 	'enable device scanning': function(test) {
