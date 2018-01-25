@@ -161,8 +161,8 @@ function getModelType(deviceInfo) {
 	}
 	return pt;
 }
-function getDeviceInfo(handle, registers, cb) {
-
+function getDeviceInfo(device, handle, registers, cb) {
+	console.log('getDeviceInfo DEVICE', device);
 	var deviceInfo = {};
 	function handleReadData(results) {
 		var isError = false;

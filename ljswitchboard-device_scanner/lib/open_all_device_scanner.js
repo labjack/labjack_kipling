@@ -379,6 +379,7 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
         // console.log('Getting Device Info...', self.handle, self.isActive, self.isMockDevice);
         if(!self.isMockDevice) {
             ljmUtils.getDeviceInfo(
+                self,
                 self.handle,
                 self.requiredInfo,
                 function(data) {
@@ -1503,7 +1504,6 @@ function openAllDeviceScanner() {
         // console.log('In return results!', bundle.erroniusDevices);
         debugSS('in returnResults');
         debugLFDS('in returnResults');
-        console.log('IN RETURN RESULTS TEST')
         self.cachedScanBundle = bundle;
         self.scanInProgress = false;
         var defered = q.defer();
