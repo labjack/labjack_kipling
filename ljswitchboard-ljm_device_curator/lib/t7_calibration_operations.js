@@ -1131,7 +1131,6 @@ function performHSTempNoiseCheck(bundle, testName) {
         var absMean = Math.abs(mean);
         var variance = res.variance;
         var msg = '';
-        console.log('!!!! mean HS', mean);
         if((0 < mean) && (mean < 5) && (variance > 0.00001)) {
             console.log("OK");
             msg = 'HS Converter AIN14 values are OK';
@@ -1185,7 +1184,6 @@ function performHRTempNoiseCheck(bundle, testName) {
             var absMean = Math.abs(mean);
             var variance = res.variance;
             var msg = '';
-            console.log('!!!! mean HR', mean);
             if((0 < mean) && (mean < 5) && (variance > 0.00001)) {
                 if(bundle.hardwareTests[testName].status) {
                     msg = 'HS & HR Converter AIN14 values are OK';
