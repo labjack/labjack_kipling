@@ -735,7 +735,7 @@ function getCheckForHardwareIssuesBundle(curatedDevice) {
 
         hardwareTests: {
             flashVerification: {
-                name: 'Verify Cal Constants',
+                name: 'Check Cal Constants',
                 description: 'Make sure saved device calibration constants are somewhat reasonable and not blank.',
                 productTypes: ['T4', 'T7', 'T7-Pro'],
                 testFunctions: [verifyCalibrationConstants],
@@ -753,7 +753,7 @@ function getCheckForHardwareIssuesBundle(curatedDevice) {
                 failMessage: 'GND Readings BAD',
             },
             'temperatureBoundsCheck': {
-                name: 'Verify Device Temperature',
+                name: 'Check Temperature Sensor',
                 description: 'Verify that device is reporting a temperature within the device\'s operating range (-40C to +85C).',
                 productTypes: ['T4', 'T7', 'T7-Pro'],
                 testFunctions: [performDeviceTemperatureCheck],
@@ -1104,7 +1104,7 @@ function performDeviceTemperatureCheck(bundle, testName) {
             bundle.hardwareTests[testName].executed = true;
             bundle.hardwareTests[testName].testMessage = msg;
         } else {
-            msg = 'Device Temperature out of range: ' + tempC.toString() + 'C';
+            msg = 'Device Temperature out of range: ' + tempC.toFixed(2) + 'C';
             bundle.hardwareTests[testName].status = false;
             bundle.hardwareTests[testName].executed = true;
             bundle.hardwareTests[testName].testMessage = msg;
@@ -1122,7 +1122,7 @@ function performHSTempNoiseCheck(bundle, testName) {
     var ainNum = 14;
     var ainRange = 10;
     var ainResolution = 1;
-    var ainSettling = 0;
+    var ainSettling = 50;
     var getRaw = false;
     var numValues = 10;
     configureAndGetValues(device, ainNum, ainRange, ainResolution, ainSettling, getRaw, numValues)
@@ -1131,11 +1131,18 @@ function performHSTempNoiseCheck(bundle, testName) {
         var absMean = Math.abs(mean);
         var variance = res.variance;
         var msg = '';
-        if((0 < absMean < 5) && (variance > 0.00001)) {
+        console.log('!!!! mean HS', mean);
+        if((0 < mean) && (mean < 5) && (variance > 0.00001)) {
+            console.log("OK");
             msg = 'HS Converter AIN14 values are OK';
             bundle.hardwareTests[testName].status = true;
         } else {
-            msg = 'HS Converter AIN14 values are BAD';
+            console.log("BAD");
+            msg = 'HS Converter AIN14 values are BAD, (10 vals)';
+            msg += ' mean: ';
+            msg +=mean.toFixed(2);
+            msg += ', variance: ';
+            msg +=variance.toFixed(4);
             bundle.hardwareTests[testName].status = false;
         }
         if(productType === 'T7') {
@@ -1178,11 +1185,18 @@ function performHRTempNoiseCheck(bundle, testName) {
             var absMean = Math.abs(mean);
             var variance = res.variance;
             var msg = '';
-            if((0 < absMean < 5) && (variance > 0.00001)) {
-                msg = 'HS & HR Converter AIN14 values are OK';
-                bundle.hardwareTests[testName].status = true;
+            console.log('!!!! mean HR', mean);
+            if((0 < mean) && (mean < 5) && (variance > 0.00001)) {
+                if(bundle.hardwareTests[testName].status) {
+                    msg = 'HS & HR Converter AIN14 values are OK';
+                    bundle.hardwareTests[testName].status = true;
+                }
             } else {
-                msg = 'HR Converter AIN14 values are BAD';
+                msg = 'HR Converter AIN14 values are BAD, (10 vals)';
+                msg += ' mean: ';
+                msg +=mean.toFixed(2);
+                msg += ', variance: ';
+                msg +=variance.toFixed(4);
                 bundle.hardwareTests[testName].status = false;
             }
             bundle.hardwareTests[testName].executed = true;
@@ -1293,7 +1307,7 @@ function performHardwareTests(bundle) {
             runTest(bundle, testKey)
             .then(function(bundle) {
                 dbgHWTest('Finished running test', bundle.hardwareTests[testKey]);
-                // Check to see if the test failed, then report failure & stop future tests.
+                // Check to see if the test failed, then report failure.
                 if(!bundle.hardwareTests[testKey].status) {
                     // Update test's short message
                     bundle.hardwareTests[testKey].shortMessage = bundle.hardwareTests[testKey].failMessage;
@@ -1302,7 +1316,7 @@ function performHardwareTests(bundle) {
                     bundle.overallResult = false;
                     bundle.overallMessage = bundle.hardwareTests[testKey].testMessage;
                     bundle.shortMessage = bundle.hardwareTests[testKey].failMessage;
-                    cb(true);
+                    cb();
                 } else {
                     bundle.hardwareTests[testKey].shortMessage = bundle.hardwareTests[testKey].passMessage;
                     cb();
