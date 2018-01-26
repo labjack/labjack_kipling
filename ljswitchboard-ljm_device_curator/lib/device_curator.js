@@ -2466,14 +2466,61 @@ function device(useMockDevice) {
 		}
 	};
 
+	var cachedFlashFWInfo = {
+		recoveryFW: null,
+		primaryFW: null,
+		internalFW: null,
+	};
 	this.getRecoveryFirmwareVersion = function() {
-		return lj_t7_get_flash_fw_versions.getRecoveryFWVersion(self);
+		var defered = q.defer();
+		if(self.savedAttributes.isConnected) {
+			lj_t7_get_flash_fw_versions.getRecoveryFWVersion(self)
+			.then(function(res) {
+				cachedFlashFWInfo.recoveryFW = res;
+				defered.resolve(res);
+			}, defered.reject);
+		} else {
+			var defRes = 0;
+			if(cachedFlashFWInfo.recoveryFW) {
+				defRes = cachedFlashFWInfo.recoveryFW;
+			}
+			defered.resolve(defRes);
+		}
+		return defered.promise;
 	};
 	this.getPrimaryFirmwareVersion = function() {
-		return lj_t7_get_flash_fw_versions.getPrimaryFWVersion(self);
+		var defered = q.defer();
+		if(self.savedAttributes.isConnected) {
+			lj_t7_get_flash_fw_versions.getPrimaryFWVersion(self)
+			.then(function(res) {
+				cachedFlashFWInfo.primaryFW = res;
+				defered.resolve(res);
+			}, defered.reject);
+		} else {
+			var defRes = 0;
+			if(cachedFlashFWInfo.primaryFW) {
+				defRes = cachedFlashFWInfo.primaryFW;
+			}
+			defered.resolve(defRes);
+		}
+		return defered.promise;
 	};
 	this.getInternalFWVersion = function() {
-		return lj_t7_get_flash_fw_versions.getInternalFWVersion(self);
+		var defered = q.defer();
+		if(self.savedAttributes.isConnected) {
+			lj_t7_get_flash_fw_versions.getInternalFWVersion(self)
+			.then(function(res) {
+				cachedFlashFWInfo.internalFW = res;
+				defered.resolve(res);
+			}, defered.reject);
+		} else {
+			var defRes = 0;
+			if(cachedFlashFWInfo.internalFW) {
+				defRes = cachedFlashFWInfo.internalFW;
+			}
+			defered.resolve(defRes);
+		}
+		return defered.promise;
 	};
 	var cachedCalAndHWInfo = {
 		calStatusValid: false,
