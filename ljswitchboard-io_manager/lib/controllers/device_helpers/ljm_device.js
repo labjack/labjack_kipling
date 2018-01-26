@@ -7,7 +7,6 @@ var driver_const = require('ljswitchboard-ljm_driver_constants');
 var device_events = driver_const.device_curator_constants;
 
 function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDeviceFunc) {
-
 	this.eventList = driver_const.device_curator_constants;
 	this.savedAttributes = savedAttributes;
 	this.device_comm_key = savedAttributes.device_comm_key;

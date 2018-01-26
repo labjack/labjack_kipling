@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-io_manager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A promise based distributed ljm wrapper with extra logging based functionality for the ljswitchboard project",
   "main": "lib/io_manager",
   "scripts": {
@@ -38,30 +38,36 @@
     "async": "~0",
     "dict": "1.4.0",
     "ffi": "*",
+    "handlebars": "^4.0.3",
     "json-parser": "0.2.4",
     "labjack-nodejs": "0.0.x",
     "ljmmm-parse": "0.x",
     "ljswitchboard-data_parser": "0.0.x",
-    "ljswitchboard-device_scanner": "0.0.50",
+    "ljswitchboard-device_scanner": "0.0.x",
     "ljswitchboard-firmware_verifier": "0.0.x",
-    "ljswitchboard-ljm_device_curator": "0.0.x",
+    "ljswitchboard-ljm_device_curator": "0.1.x",
     "ljswitchboard-ljm_driver_checker": "0.0.x",
     "ljswitchboard-ljm_driver_constants": "*",
     "ljswitchboard-ljm_special_addresses": "1.x.x",
     "ljswitchboard-modbus_map": "0.0.x",
-    "ljswitchboard-version_manager": "0.0.x",
     "ljswitchboard-simple_logger": "0.0.1",
+    "ljswitchboard-version_manager": "0.0.x",
     "process_manager": "0.0.x",
     "q": "^1.5.1",
     "ref": "1.3.4",
-    "handlebars": "^4.0.3"
+    "walk": "^2.3.9"
   },
   "devDependencies": {
     "nodeunit": "0.9.x"
   },
   "custom-deps": {
+    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-device_scanner.git#master",
+    "ljswitchboard-device_scanner": "0.0.52",
+    "ljswitchboard-device_scanner": "0.0.x",
+    "ljswitchboard-ljm_device_curator": "0.1.x",
+    "ljswitchboard-ljm_device_curator": "0.0.84",
     "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master",
-    "ljswitchboard-ljm_device_curator": "0.0.84"
+    "dont delete": "do not delete"
   },
   "directories": {
     "lib": "./lib",
