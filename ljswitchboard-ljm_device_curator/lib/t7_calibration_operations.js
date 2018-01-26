@@ -1131,7 +1131,7 @@ function performHSTempNoiseCheck(bundle, testName) {
         var absMean = Math.abs(mean);
         var variance = res.variance;
         var msg = '';
-        if(variance > 0.00001) {
+        if((0 < absMean < 5) && (variance > 0.00001)) {
             msg = 'HS Converter AIN14 values are OK';
             bundle.hardwareTests[testName].status = true;
         } else {
@@ -1178,7 +1178,7 @@ function performHRTempNoiseCheck(bundle, testName) {
             var absMean = Math.abs(mean);
             var variance = res.variance;
             var msg = '';
-            if(variance > 0.00001) {
+            if((0 < absMean < 5) && (variance > 0.00001)) {
                 msg = 'HS & HR Converter AIN14 values are OK';
                 bundle.hardwareTests[testName].status = true;
             } else {
