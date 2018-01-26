@@ -38,16 +38,6 @@
 				{{ETHERNET_MAC.val}}
 			</span>
 		</div>
-		{{#unless calibrationStatus.overall}}
-		{{#if calibrationStatus}}
-		<div class="device-detail">
-			Calibration Status: 
-			<span id="calibration-status-display" class="calibration-message selectableText {{#if calibrationStatus.overall}}isa_success{{else}}isa_error{{/if}}" title="{{calibrationStatus.message}}">
-				{{calibrationStatus.shortMessage}}&nbsp;&nbsp;<span class="{{#if calibrationStatus.overall}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
-			</span>
-		</div>
-		{{/if}}
-		{{/unless}}
 
 		{{#if isAuthorized}}
 		<div class="device-detail">
@@ -57,6 +47,39 @@
 			</span>
 		</div>
 		{{/if}}
+
+		{{!--{{#unless calibrationStatus.overall}}
+		{{#if calibrationStatus}}
+		<div class="device-detail">
+			Calibration Status: 
+			<span id="calibration-status-display" class="calibration-message selectableText {{#if calibrationStatus.overall}}isa_success{{else}}isa_error{{/if}}" title="{{calibrationStatus.message}}">
+				{{calibrationStatus.shortMessage}}&nbsp;&nbsp;<span class="{{#if calibrationStatus.overall}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
+			</span>
+		</div>
+		{{/if}}
+		{{/unless}}--}}
+		
+		{{#if hwIssues}}
+		{{#unless hwIssues.overallResult}}
+		<div class="device-detail">
+			Hardware Status: 
+			<span id="calibration-status-display" class="calibration-message selectableText {{#if hwIssues.overallResult}}isa_success{{else}}isa_error{{/if}}" title="{{hwIssues.overallMessage}}">
+				{{hwIssues.shortMessage}}&nbsp;&nbsp;<span class="{{#if hwIssues.overallResult}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
+			</span>
+		</div>
+		{{#each hwIssues.testResults}}
+		{{#unless status}}
+		<div class="device-detail">
+			<span title="{{description}}" style="cursor: wait;"> - {{name}}</span>: <strong><span title="{{testMessage}}" style="cursor: wait;">{{shortMessage}}</span></strong>
+		</div>
+		{{/unless}}
+		{{/each}}
+		<div class="device-detail">
+			<span>Hardware issues have been detected, please <a id="lj-link-holder-hw-issues-detected" class="lj-link-holder">visit our website</a> for more details..</span>
+		</div>
+		{{/unless}}
+		{{/if}}
+		
 		<div class="block-separator"/>
 		<div class="pane-popover">
 			Versions
@@ -285,6 +308,9 @@
 		}, {
 			'id': '#lj-link-holder-supportPage',
 			'url': "https://labjack.com/support/{{deviceTypeName}}"
+		}, {
+			'id': '#lj-link-holder-hw-issues-detected',
+			'url': "https://labjack.com/support/software/applications/t-series/kipling/device-information/hardware-issues-detected"
 		}, {
 			'id': '#lj-link-holder-firmwarePage',
 			'url': "https://labjack.com/support/firmware/{{deviceTypeName}}"
