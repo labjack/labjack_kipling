@@ -396,7 +396,10 @@ function device(useMockDevice) {
 		saveDeviceError(funcName, errCode, data, err);
 	};
 
-	this.savedAttributes = {};
+	this.savedAttributes = {
+		isShared: false,
+		sharedAppName: '',
+	};
 	var getVersionNumberParser = function(reg) {
 		var parser = function(res, isErr, errData) {
 			var dt = self.savedAttributes.deviceType;

@@ -298,8 +298,11 @@ function getExternalAppOperations(self) {
         debugOA('in suspendDeviceConnection');
 
         if(bundle.closeAndOpenDevice) {
+            self.savedAttributes.isShared = true;
+            self.savedAttributes.sharedAppName = bundle.appName;
             self.suspendDeviceConnection()
             .then(function() {
+                console.log('Emitting device released event', bundle.appName);
                 self.emit(events.DEVICE_RELEASED, {
                     attrs: self.savedAttributes,
                     shared: true,
@@ -340,8 +343,11 @@ function getExternalAppOperations(self) {
         debugOA('in resumeDeviceConnection');
 
         if(bundle.closeAndOpenDevice) {
+            self.savedAttributes.isShared = false;
+            self.savedAttributes.sharedAppName = bundle.appName;
             self.resumeDeviceConnection()
             .then(function() {
+                console.log('Emitting device acquired event', bundle.appName);
                 self.emit(events.DEVICE_ACQUIRED, {
                     attrs: self.savedAttributes,
                     shared: false,
