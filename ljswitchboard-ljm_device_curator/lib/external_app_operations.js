@@ -302,7 +302,6 @@ function getExternalAppOperations(self) {
             self.savedAttributes.sharedAppName = bundle.appName;
             self.suspendDeviceConnection()
             .then(function() {
-                console.log('Emitting device released event', bundle.appName);
                 self.emit(events.DEVICE_RELEASED, {
                     attrs: self.savedAttributes,
                     shared: true,

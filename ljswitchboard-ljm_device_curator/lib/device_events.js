@@ -22,3 +22,5 @@ exports.DASHBOARD_DATA_UPDATE = 'DASHBOARD_DATA_UPDATE';
 /* Events designed for device sharing/opening in external apps */
 exports.DEVICE_RELEASED = 'DEVICE_RELEASED';
 exports.DEVICE_ACQUIRED = 'DEVICE_ACQUIRED';
+
+/* MAKE SURE TO ADD EVENTS TO THE ljswitchboard-ljm_driver_constants repo */
