@@ -2556,7 +2556,7 @@ function device(useMockDevice) {
 			}, defered.reject);
 		} else {
 			var fakeResults = {
-		        overallResult: false,
+		        overallResult: true,
 		        overallMessage: 'Skipping Test',
 		        shortMessage: 'Skipping Test',
 
