@@ -213,24 +213,48 @@ function compressFolderWithAdmZip (from, to) {
     });
 }
 function compressFolderWithtargz (from, to) {
+    // the targz compression doesn't make a folder inside the .tar.gz file
+    // where all data is coppied to.  This is required by LJM's build system.
+    // Therefore we need to make an output2 folder, make a k3xxx folder inside it
+    // and then copy data from the /output folder to the created folder before
+    // compressing.
     var defered = q.defer();
-
-    // compress files into tar.gz archive 
-    targz.compress({
-        src: from,
-        dest: to,
-        }, function(err){
-            if(err) {
-                console.log('Error creating archive', err);
-                defered.reject();
-            } else {
-                if(exports.debug) {
-                    console.log(archive.pointer() + ' total bytes');
-                    console.log('archiver has been finalized and the output file descriptor has closed.');
+    var outputName = path.parse(path.parse(to).name).name;
+    var prevDir = path.dirname(from);
+    var tempOutputPath = path.join(prevDir, 'output2',outputName);
+    var extractFromPath = path.join(prevDir, 'output2');
+    
+    // Create an empty directory
+    fse.emptyDir(tempOutputPath, function(err) {
+        // Copy folder contents to new directory
+        copyFolder({
+            from: from,
+            to: tempOutputPath
+        })
+        .then(function(res) {
+            // compress files into tar.gz archive 
+            targz.compress({
+                src: extractFromPath,
+                dest: to,
+            }, function(err){
+                if(err) {
+                    console.log('Error creating archive', err);
+                    defered.reject();
+                } else {
+                    if(exports.debug) {
+                        console.log(archive.pointer() + ' total bytes');
+                        console.log('archiver has been finalized and the output file descriptor has closed.');
+                    }
+                    defered.resolve();
                 }
-                defered.resolve();
-            }
-        });
+            });
+        }, function(err) {
+            console.log('Error moving folders', err);
+            defered.reject();
+        })
+        
+    })
+    
     return defered.promise;
 }
 
