@@ -1313,7 +1313,7 @@ function performHardwareTests(bundle) {
                     // Update overall HW test result
                     bundle.overallResult = false;
                     bundle.overallMessage = bundle.hardwareTests[testKey].testMessage;
-                    bundle.shortMessage = bundle.hardwareTests[testKey].failMessage;
+                    bundle.shortMessage = 'Possible Issues Detected';
                     cb();
                 } else {
                     bundle.hardwareTests[testKey].shortMessage = bundle.hardwareTests[testKey].passMessage;
