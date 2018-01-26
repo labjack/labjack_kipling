@@ -62,8 +62,8 @@ var DEVICE_RECONNECTING = device_events.DEVICE_RECONNECTING;
 var DEVICE_ATTRIBUTES_CHANGED = device_events.DEVICE_ATTRIBUTES_CHANGED;
 var DEVICE_INITIALIZING = device_events.DEVICE_INITIALIZING;
 var DASHBOARD_DATA_UPDATE = device_events.DASHBOARD_DATA_UPDATE;
-var DEVICE_RELEASED = device_events.DEVICE_RELEASED;
-var DEVICE_ACQUIRED = device_events.DEVICE_ACQUIRED;
+var DEVICE_RELEASED = device_events.DEVICE_RELEASED; // Events thrown in the external_app_operations.js file
+var DEVICE_ACQUIRED = device_events.DEVICE_ACQUIRED; // Events thrown in the external_app_operations.js file
 
 
 
@@ -2235,7 +2235,6 @@ function device(useMockDevice) {
         device.close(function(err) {
             defered.reject();
         }, function() {
-        	self.emit(DEVICE_RELEASED, self.savedAttributes);
 			// Temporarily restore handle & other device info...
             device.handle = handle;
 			device.deviceType = dt;
@@ -2277,7 +2276,6 @@ function device(useMockDevice) {
 				return innerDeferred.promise;
 			};
 			var finishFunc = function() {
-				self.emit(DEVICE_ACQUIRED, self.savedAttributes);
 				defered.resolve();
 			};
 

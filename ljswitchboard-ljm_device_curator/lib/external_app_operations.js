@@ -11,6 +11,8 @@ var driver_const = require('ljswitchboard-ljm_driver_constants');
 var getLJAppsRegistryInfo = lj_apps_win_registry_info.getLJAppsRegistryInfo;
 var ljAppNames = lj_apps_win_registry_info.ljAppNames;
 
+var events = require('./device_events');
+
 var DEBUG_EXTERNAL_APPLICATION_OPERATIONS = false;
 var DEBUG_OPEN_APPLICATION_OPERATION = false;
 var ENABLE_ERROR_OUTPUT = false;
@@ -298,6 +300,11 @@ function getExternalAppOperations(self) {
         if(bundle.closeAndOpenDevice) {
             self.suspendDeviceConnection()
             .then(function() {
+                self.emit(events.DEVICE_RELEASED, {
+                    attrs: self.savedAttributes,
+                    shared: true,
+                    appName: bundle.appName,
+                });
                 defered.resolve(bundle);
             }, function(err) {
                 bundle.isError = true;
@@ -323,7 +330,7 @@ function getExternalAppOperations(self) {
                 console.log('ERROR!',error);
             }
             defered.resolve(bundle);
-        })
+        });
         
         return defered.promise;
     }
@@ -335,6 +342,11 @@ function getExternalAppOperations(self) {
         if(bundle.closeAndOpenDevice) {
             self.resumeDeviceConnection()
             .then(function() {
+                self.emit(events.DEVICE_ACQUIRED, {
+                    attrs: self.savedAttributes,
+                    shared: false,
+                    appName: bundle.appName,
+                });
                 defered.resolve(bundle);
             }, function(err) {
                 bundle.isError = true;

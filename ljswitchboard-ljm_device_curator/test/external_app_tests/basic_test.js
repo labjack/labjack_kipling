@@ -30,12 +30,12 @@ var device = undefined;
 var got_DEVICE_RELEASED = false;
 var got_DEVICE_ACQUIRED = false;
 
-function deviceReleasedCB() {
-    console.log('Got DEVICE_RELEASED CB'.yellow);
+function deviceReleasedCB(data) {
+    console.log('Got DEVICE_RELEASED CB'.yellow, data);
     got_DEVICE_RELEASED = true;
 }
-function deviceAcquiredCB() {
-    console.log('Got DEVICE_ACQUIRED CB'.green);
+function deviceAcquiredCB(data) {
+    console.log('Got DEVICE_ACQUIRED CB'.green, data);
     got_DEVICE_ACQUIRED = true;
 }
 
