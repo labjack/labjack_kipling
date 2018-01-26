@@ -18,3 +18,7 @@ exports.DEVICE_FINISHED_FIRMWARE_UPGRADE = 'DEVICE_FINISHED_FIRMWARE_UPGRADE';
 
 /* Events designed for the Kipling3 dashboard */
 exports.DASHBOARD_DATA_UPDATE = 'DASHBOARD_DATA_UPDATE';
+
+/* Events designed for device sharing/opening in external apps */
+exports.DEVICE_RELEASED = 'DEVICE_RELEASED';
+exports.DEVICE_ACQUIRED = 'DEVICE_ACQUIRED';
