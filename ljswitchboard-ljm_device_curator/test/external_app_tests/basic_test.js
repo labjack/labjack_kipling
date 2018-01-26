@@ -5,6 +5,7 @@ var utils = require('../utils/utils');
 var qExec = utils.qExec;
 
 var ENABLE_ERROR_OUTPUT = true;
+var events = device_curator.device_events;
 
 function getLogger(bool) {
 	return function logger() {
@@ -25,6 +26,18 @@ var stopTest = function(test, err) {
 };
 
 var device = undefined;
+
+var got_DEVICE_RELEASED = false;
+var got_DEVICE_ACQUIRED = false;
+
+function deviceReleasedCB() {
+    console.log('Got DEVICE_RELEASED CB'.yellow);
+    got_DEVICE_RELEASED = true;
+}
+function deviceAcquiredCB() {
+    console.log('Got DEVICE_ACQUIRED CB'.green);
+    got_DEVICE_ACQUIRED = true;
+}
 
 exports.tests = {
 	'setUp': function(callback) {
@@ -68,6 +81,9 @@ exports.tests = {
             stopTest(test, err);
             test.done();
         });
+
+        device.on(events.DEVICE_RELEASED, deviceReleasedCB);
+        device.on(events.DEVICE_ACQUIRED, deviceAcquiredCB);
 	},
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
@@ -86,6 +102,8 @@ exports.tests = {
     'open device in LJLogM': function(test) {
         device.openDeviceInExternalApplication('LJLogM','USB')
         .then(function(res) {
+            test.ok(got_DEVICE_RELEASED, 'should have gotten DEVICE_RELEASED cb');
+            test.ok(got_DEVICE_ACQUIRED, 'should have gotten DEVICE_ACQUIRED cb');
             // console.log('Open in App (external_app_tests/basic_test.js)', res);
             test.done();
         }, function(err) {
