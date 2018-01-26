@@ -11,7 +11,9 @@ var gns = package_loader.getNameSpace();
 var window_manager = require('ljswitchboard-window_manager');
 var GLOBAL_SUBPROCESS_REFERENCE = undefined;
 var GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
-
+var UPDATE_K3_WINDOW_VERSION_NUMBER_STR = function(str) {
+	win.title = 'Kipling '+str;
+};
 
 var K3_ON_APPLICATION_EXIT_LISTENER = function() {
 	GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = false;
@@ -36,7 +38,28 @@ window_manager.on(
 // aka close app manually.
 window_manager.windowManager.managedWindows.kipling.runInBackground = true;
 
-
+function restartIOInterface() {
+	if(MODULE_LOADER) {
+		MODULE_LOADER.loadModuleByName('crash_module');
+	}
+	// global[gns].ljm.io_interface.destroy()
+	// .then(global[gns].ljm.io_interface.initialize)
+	// .then(saveGlobalSubprocessReference)
+	// .then(MODULE_CHROME.reloadModuleChrome);
+	// // .then(startCoreApp)
+	if(MODULE_LOADER) {
+		MODULE_LOADER.loadModuleByName('crash_module');
+	}
+	// K3_ON_APPLICATION_EXIT_WINDOW_LISTENER(true)
+	// .then(global[gns].ljm.io_interface.destroy)
+	// .then(function() {
+	// 	return ;
+	// })
+	global[gns].ljm.io_interface.destroy()
+	.then(function() {
+		window_manager.windowManager.managedWindows.kipling.win.reload();
+	});
+}
 /*
 SCRATCH PAD:
 // Prevent app from closing
@@ -60,8 +83,11 @@ function GET_ALL_K3_EXIT_LISTENERS() {
 	});
 	return listeners;
 }
-function K3_ON_APPLICATION_EXIT_WINDOW_LISTENER() {
-
+function K3_ON_APPLICATION_EXIT_WINDOW_LISTENER(enablePromise) {
+	var defered;
+	if(enablePromise) {
+		defered = q.defer();
+	}
 	var asyncProcesses = GET_ALL_K3_EXIT_LISTENERS();
 	async.eachSeries(
 		asyncProcesses,
@@ -97,7 +123,12 @@ function K3_ON_APPLICATION_EXIT_WINDOW_LISTENER() {
 			} else {
 				// Close app.
 				try {
-					K3_ON_APPLICATION_EXIT_LISTENER();
+					if(enablePromise) {
+						K3_ON_APPLICATION_EXIT_LISTENER();
+					} else {
+						defered.resolve();
+					}
+					
 				} catch(err) {
 					console.error('Error exiting things...', err);
 				}
@@ -105,6 +136,9 @@ function K3_ON_APPLICATION_EXIT_WINDOW_LISTENER() {
 			}
 		}
 		interval = setInterval(waitToClose, 500);
+	}
+	if(enablePromise) {
+		return defered.promise;
 	}
 }
 window_manager.on(
@@ -308,6 +342,7 @@ var getHandleError = function(msg) {
 };
 var numLoadDelay = 0;
 var startCoreApp = function() {
+	var defered = q.defer();
 	if(coreResourcesLoaded && localResourcesLoaded) {
 		// win.showDevTools();
 		// Start the application
@@ -332,7 +367,8 @@ var startCoreApp = function() {
 		.then(TASK_LOADER.loadTasks, getHandleError('showKiplingWindow'))
 
 		// Report remaining errors
-		.then(function(){}, getHandleError('TASK_LOADER.loadTasks'));
+		.then(defered.resolve, getHandleError('TASK_LOADER.loadTasks'))
+		.then(defered.resolve, defered.resolve);
 
 	} else {
 		numLoadDelay += 1;
@@ -346,6 +382,7 @@ var startCoreApp = function() {
 			setTimeout(startCoreApp, 10);
 		}
 	}
+	return defered.promise;
 };
 
 /*

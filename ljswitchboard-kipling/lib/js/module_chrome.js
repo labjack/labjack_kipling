@@ -664,6 +664,9 @@ function createModuleChrome() {
 		// Report that the module chrome has started
 		.then(reportModuleChromeStarted)
 
+		// Update the module chrome window with applicable modules
+		.then(self.updateModuleListing)
+
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
