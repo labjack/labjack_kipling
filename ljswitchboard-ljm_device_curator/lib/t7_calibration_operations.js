@@ -885,7 +885,7 @@ function performHSBasicNoiseCheck(bundle, testName) {
             bundle.hardwareTests[testName].status = true;
         } else {
             msg = 'HS Converter AIN15 values are BAD, (10 vals) mean: ';
-            msg += absMean.toFixed(5) + ', variance: ' + variance.toFixed(5);
+            msg += absMean.toFixed(5) + ', range: ' + variance.toFixed(5);
             bundle.hardwareTests[testName].status = false;
         }
         if(productType === 'T7') {
@@ -1140,7 +1140,7 @@ function performHSTempNoiseCheck(bundle, testName) {
             msg = 'HS Converter AIN14 values are BAD, (10 vals)';
             msg += ' mean: ';
             msg +=mean.toFixed(2);
-            msg += ', variance: ';
+            msg += ', range: ';
             msg +=variance.toFixed(4);
             bundle.hardwareTests[testName].status = false;
         }
@@ -1193,7 +1193,7 @@ function performHRTempNoiseCheck(bundle, testName) {
                 msg = 'HR Converter AIN14 values are BAD, (10 vals)';
                 msg += ' mean: ';
                 msg +=mean.toFixed(2);
-                msg += ', variance: ';
+                msg += ', range: ';
                 msg +=variance.toFixed(4);
                 bundle.hardwareTests[testName].status = false;
             }
