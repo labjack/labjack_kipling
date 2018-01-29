@@ -298,16 +298,20 @@ function getExternalAppOperations(self) {
         debugOA('in suspendDeviceConnection');
 
         if(bundle.closeAndOpenDevice) {
-            self.savedAttributes.isShared = true;
-            self.savedAttributes.sharedAppName = bundle.appName;
             self.suspendDeviceConnection()
             .then(function() {
+                self.savedAttributes.isShared = true;
+                self.savedAttributes.sharedAppName = bundle.appName;
                 self.emit(events.DEVICE_RELEASED, {
                     attrs: self.savedAttributes,
                     shared: true,
                     appName: bundle.appName,
                 });
-                defered.resolve(bundle);
+                // Also emit new saved attributes event.
+                self.updateSavedAttributes()
+                .then(function() {
+                    defered.resolve(bundle);
+                });
             }, function(err) {
                 bundle.isError = true;
                 bundle.error = err;
@@ -342,17 +346,21 @@ function getExternalAppOperations(self) {
         debugOA('in resumeDeviceConnection');
 
         if(bundle.closeAndOpenDevice) {
-            self.savedAttributes.isShared = false;
-            self.savedAttributes.sharedAppName = bundle.appName;
             self.resumeDeviceConnection()
             .then(function() {
-                console.log('Emitting device acquired event', bundle.appName);
+                // console.log('Emitting device acquired event', bundle.appName);
+                self.savedAttributes.isShared = false;
+                self.savedAttributes.sharedAppName = bundle.appName;
                 self.emit(events.DEVICE_ACQUIRED, {
                     attrs: self.savedAttributes,
                     shared: false,
                     appName: bundle.appName,
                 });
-                defered.resolve(bundle);
+                // Also emit new saved attributes event.
+                self.updateSavedAttributes()
+                .then(function() {
+                    defered.resolve(bundle);
+                });
             }, function(err) {
                 bundle.isError = true;
                 bundle.error = err;

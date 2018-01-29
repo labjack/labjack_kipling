@@ -626,16 +626,16 @@ function configureAndGetValues(device, ainNum, ainRange, ainResolution, ainSettl
         name: ainReg,
         values: [],
         mean: 0,
-        variance: 0,
+        range: 0,
         isError: false,
     };
     function onSuccess() {
         retInfo.mean = stats.mean(retInfo.values);
-        // retInfo.variance = stats.variance(retInfo.values);
-        // console.log('Calculating variance:', retInfo.values);
+        // retInfo.range = stats.range(retInfo.values);
+        // console.log('Calculating range:', retInfo.values);
         // console.log('Max:', Math.max.apply(null, retInfo.values));
         // console.log('Min:', Math.min.apply(null, retInfo.values));
-        retInfo.variance = Math.max.apply(null, retInfo.values) - Math.min.apply(null, retInfo.values);
+        retInfo.range = Math.max.apply(null, retInfo.values) - Math.min.apply(null, retInfo.values);
         defered.resolve(retInfo);
     }
     function onError() {
@@ -878,14 +878,14 @@ function performHSBasicNoiseCheck(bundle, testName) {
     .then(function(res) {
         var mean = res.mean;
         var absMean = Math.abs(mean);
-        var variance = res.variance;
+        var range = res.range;
         var msg = '';
-        if((absMean < 0.004) && (variance > 0.00001)) {
+        if((absMean < 0.004) && (range > 0.00001)) {
             msg = 'HS Converter AIN15 values are OK';
             bundle.hardwareTests[testName].status = true;
         } else {
             msg = 'HS Converter AIN15 values are BAD, (10 vals) mean: ';
-            msg += absMean.toFixed(5) + ', range: ' + variance.toFixed(5);
+            msg += absMean.toFixed(5) + ', range: ' + range.toFixed(5);
             bundle.hardwareTests[testName].status = false;
         }
         if(productType === 'T7') {
@@ -926,9 +926,9 @@ function performHRBasicNoiseCheck(bundle, testName) {
         .then(function(res) {
             var mean = res.mean;
             var absMean = Math.abs(mean);
-            var variance = res.variance;
+            var range = res.range;
             var msg = '';
-            if((absMean < 0.004) && (variance > 0.00001)) {
+            if((absMean < 0.004) && (range > 0.00001)) {
                 msg = 'HS & HR Converter AIN15 values are OK';
                 bundle.hardwareTests[testName].status = true;
             } else {
@@ -1129,9 +1129,9 @@ function performHSTempNoiseCheck(bundle, testName) {
     .then(function(res) {
         var mean = res.mean;
         var absMean = Math.abs(mean);
-        var variance = res.variance;
+        var range = res.range;
         var msg = '';
-        if((0 < mean) && (mean < 5) && (variance > 0.00001)) {
+        if((0 < mean) && (mean < 5) && (range > 0.00001)) {
             console.log("OK");
             msg = 'HS Converter AIN14 values are OK';
             bundle.hardwareTests[testName].status = true;
@@ -1141,7 +1141,7 @@ function performHSTempNoiseCheck(bundle, testName) {
             msg += ' mean: ';
             msg +=mean.toFixed(2);
             msg += ', range: ';
-            msg +=variance.toFixed(4);
+            msg +=range.toFixed(4);
             bundle.hardwareTests[testName].status = false;
         }
         if(productType === 'T7') {
@@ -1182,9 +1182,9 @@ function performHRTempNoiseCheck(bundle, testName) {
         .then(function(res) {
             var mean = res.mean;
             var absMean = Math.abs(mean);
-            var variance = res.variance;
+            var range = res.range;
             var msg = '';
-            if((0 < mean) && (mean < 5) && (variance > 0.00001)) {
+            if((0 < mean) && (mean < 5) && (range > 0.00001)) {
                 if(bundle.hardwareTests[testName].status) {
                     msg = 'HS & HR Converter AIN14 values are OK';
                     bundle.hardwareTests[testName].status = true;
@@ -1194,7 +1194,7 @@ function performHRTempNoiseCheck(bundle, testName) {
                 msg += ' mean: ';
                 msg +=mean.toFixed(2);
                 msg += ', range: ';
-                msg +=variance.toFixed(4);
+                msg +=range.toFixed(4);
                 bundle.hardwareTests[testName].status = false;
             }
             bundle.hardwareTests[testName].executed = true;
