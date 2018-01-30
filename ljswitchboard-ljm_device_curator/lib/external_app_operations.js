@@ -298,12 +298,18 @@ function getExternalAppOperations(self) {
         debugOA('in suspendDeviceConnection');
 
         if(bundle.closeAndOpenDevice) {
-            var FWVer = self.savedAttributes.FIRMWARE_VERSION;
-            var devName = self.savedAttributes.DEVICE_NAME_DEFAULT;
+            var infoToCache = ['FIRMWARE_VERSION', 'DEVICE_NAME_DEFAULT', 'WIFI_VERSION'];
+            var infoCache = {};
+            infoToCache.forEach(function(key) {
+                infoCache[key] = Jself.savedAttributes[key];
+            });
             self.suspendDeviceConnection()
             .then(function() {
                 self.savedAttributes.isShared = true;
                 self.savedAttributes.sharedAppName = bundle.appName;
+                infoToCache.forEach(function(key) {
+                    self.savedAttributes[key] = infoCache[key];
+                });
                 self.savedAttributes.FIRMWARE_VERSION = FWVer;
                 self.savedAttributes.DEVICE_NAME_DEFAULT = devName;
                 self.emit(events.DEVICE_RELEASED, {
