@@ -9,6 +9,7 @@
 .device-info-div {
     display:block;
     float:left;
+    max-width:410px;
 }
 .device-links-div {
     display:block;

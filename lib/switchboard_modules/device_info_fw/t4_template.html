@@ -60,9 +60,10 @@
 		{{/unless}}--}}
 		
 		{{#if hwIssues}}
+		<div class="selectableText">
 		{{#unless hwIssues.overallResult}}
 		<div class="device-detail">
-			Hardware Status: 
+			Hardware Status:
 			<span id="calibration-status-display" class="calibration-message selectableText {{#if hwIssues.overallResult}}isa_success{{else}}isa_error{{/if}}" title="{{hwIssues.overallMessage}}">
 				{{hwIssues.shortMessage}}&nbsp;&nbsp;<span class="{{#if hwIssues.overallResult}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
 			</span>
@@ -70,14 +71,16 @@
 		{{#each hwIssues.testResults}}
 		{{#unless status}}
 		<div class="device-detail">
-			<span title="{{description}}" style="cursor: wait;"> - {{name}}</span>: <strong><span title="{{testMessage}}" style="cursor: wait;">{{shortMessage}}</span></strong>
+			<strong><span title="{{description}}">{{name}}</span></strong>
+			<br>- <span>{{testMessage}}</span>
 		</div>
 		{{/unless}}
 		{{/each}}
 		<div class="device-detail">
-			<span>Hardware issues have been detected, please <a id="lj-link-holder-hw-issues-detected" class="lj-link-holder">visit our website</a> for more details..</span>
+			<span>Possible hardware issues have been detected, please <a id="lj-link-holder-hw-issues-detected" class="lj-link-holder">click here</a> for more details.</span>
 		</div>
 		{{/unless}}
+		</div>
 		{{/if}}
 		
 		<div class="block-separator"/>
