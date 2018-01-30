@@ -298,10 +298,14 @@ function getExternalAppOperations(self) {
         debugOA('in suspendDeviceConnection');
 
         if(bundle.closeAndOpenDevice) {
+            var FWVer = self.savedAttributes.FIRMWARE_VERSION;
+            var devName = self.savedAttributes.DEVICE_NAME_DEFAULT;
             self.suspendDeviceConnection()
             .then(function() {
                 self.savedAttributes.isShared = true;
                 self.savedAttributes.sharedAppName = bundle.appName;
+                self.savedAttributes.FIRMWARE_VERSION = FWVer;
+                self.savedAttributes.DEVICE_NAME_DEFAULT = devName;
                 self.emit(events.DEVICE_RELEASED, {
                     attrs: self.savedAttributes,
                     shared: true,
