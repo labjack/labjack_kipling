@@ -34,24 +34,24 @@ var numDisconnects = 0;
 var numConnects = 0;
 
 function deviceReleasedCB(data) {
-    console.log('Got DEVICE_RELEASED CB'.yellow);
+    console.log('  - Got DEVICE_RELEASED CB'.yellow);
     got_DEVICE_RELEASED = true;
 }
 function deviceAcquiredCB(data) {
-    console.log('Got DEVICE_ACQUIRED CB'.green);
+    console.log('  - Got DEVICE_ACQUIRED CB'.green);
     got_DEVICE_ACQUIRED = true;
 }
 function deviceAttrsChangedCB(data) {
     numAttrsChanged += 1;
-    console.log('Got DEVICE_ATTRIBUTES_CHANGED CB'.red);
+    console.log('  - Got DEVICE_ATTRIBUTES_CHANGED CB'.red);
 }
 function deviceDisconnectedCB(data) {
     numDisconnects += 1;
-    console.log('Got DEVICE_DISCONNECTED CB'.yellow);
+    console.log('  - Got DEVICE_DISCONNECTED CB'.yellow);
 }
 function deviceReconnectedCB(data) {
     numConnects += 1;
-    console.log('Got DEVICE_RECONNECTED CB'.green);
+    console.log('  - Got DEVICE_RECONNECTED CB'.green);
 }
 
 exports.tests = {

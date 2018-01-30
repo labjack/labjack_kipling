@@ -390,6 +390,7 @@ function device(useMockDevice) {
 		if(errCode === 1239) {
 			if(self.savedAttributes.isConnected) {
 				self.declareDeviceDisconnected();
+				self.updateSavedAttributes();
 				setImmediate(reconnectManager);
 			}
 		}
