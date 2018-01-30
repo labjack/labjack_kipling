@@ -33,25 +33,31 @@ var numAttrsChanged = 0;
 var numDisconnects = 0;
 var numConnects = 0;
 
+
 function deviceReleasedCB(data) {
     console.log('  - Got DEVICE_RELEASED CB'.yellow);
+    // console.log('Device Name',data.attrs.DEVICE_NAME_DEFAULT); // Print out device attribute.
     got_DEVICE_RELEASED = true;
 }
 function deviceAcquiredCB(data) {
     console.log('  - Got DEVICE_ACQUIRED CB'.green);
+    // console.log('Device Name',data.attrs.DEVICE_NAME_DEFAULT); // Print out device attribute.
     got_DEVICE_ACQUIRED = true;
 }
 function deviceAttrsChangedCB(data) {
     numAttrsChanged += 1;
     console.log('  - Got DEVICE_ATTRIBUTES_CHANGED CB'.red);
+    // console.log('Device Name',data.DEVICE_NAME_DEFAULT); // Print out device attribute.
 }
 function deviceDisconnectedCB(data) {
     numDisconnects += 1;
     console.log('  - Got DEVICE_DISCONNECTED CB'.yellow);
+    // console.log('Device Name',data.DEVICE_NAME_DEFAULT); // Print out device attribute.
 }
 function deviceReconnectedCB(data) {
     numConnects += 1;
     console.log('  - Got DEVICE_RECONNECTED CB'.green);
+    // console.log('Device Name',data.DEVICE_NAME_DEFAULT); // Print out device attribute.
 }
 
 exports.tests = {

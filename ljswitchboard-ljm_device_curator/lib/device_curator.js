@@ -497,45 +497,49 @@ function device(useMockDevice) {
 	};
 	var saveCustomAttributes = function(addresses, dt, formatters) {
 		var defered = q.defer();
-		self.readMultiple(addresses)
-		.then(function(results) {
-			results.forEach(function(res) {
-				var hasFormatter = false;
-				if(formatters[res.address]) {
-					hasFormatter = true;
-				}
-				var info = modbusMap.getAddressInfo(res.address);
-				// to get IF-STRING, info.typeString
-				if(hasFormatter) {
-					var output;
-					if(res.isErr) {
-						var argA;
-						if(info.typeString === 'STRING') {
-							argA = '';
-						} else {
-							argA = 0;
-						}
-						output = formatters[res.address](argA, res.isErr, res.data);
-					} else {
-						output = formatters[res.address](res.data, res.isErr);
+		if(self.savedAttributes.isConnected) {
+			self.readMultiple(addresses)
+			.then(function(results) {
+				results.forEach(function(res) {
+					var hasFormatter = false;
+					if(formatters[res.address]) {
+						hasFormatter = true;
 					}
-					self.savedAttributes[res.address] = output;
-				} else {
-					if(res.isErr) {
-						if(info.typeString === 'STRING') {
-							self.savedAttributes[res.address] = '';
+					var info = modbusMap.getAddressInfo(res.address);
+					// to get IF-STRING, info.typeString
+					if(hasFormatter) {
+						var output;
+						if(res.isErr) {
+							var argA;
+							if(info.typeString === 'STRING') {
+								argA = '';
+							} else {
+								argA = 0;
+							}
+							output = formatters[res.address](argA, res.isErr, res.data);
 						} else {
-							self.savedAttributes[res.address] = 0;
+							output = formatters[res.address](res.data, res.isErr);
 						}
+						self.savedAttributes[res.address] = output;
 					} else {
-						self.savedAttributes[res.address] = res.data;
+						if(res.isErr) {
+							if(info.typeString === 'STRING') {
+								self.savedAttributes[res.address] = '';
+							} else {
+								self.savedAttributes[res.address] = 0;
+							}
+						} else {
+							self.savedAttributes[res.address] = res.data;
+						}
 					}
-				}
+				});
+				defered.resolve(self.savedAttributes);
+			}, function(err) {
+				defered.resolve(self.savedAttributes);
 			});
+		} else {
 			defered.resolve(self.savedAttributes);
-		}, function(err) {
-			defered.resolve(self.savedAttributes);
-		});
+		}
 		return defered.promise;
 	};
 	var innerUpdateSavedAttributes = function() {
