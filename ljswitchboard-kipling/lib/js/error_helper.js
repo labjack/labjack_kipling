@@ -34,7 +34,7 @@ function showInfoMessage(message) {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
 		$('#info-message .close').one('click', hideAlert);
 	}
-	setTimeout(hideInfoMessage, 2000);
+	setTimeout(hideInfoMessage, 5000);
 }
 
 function hideCriticalAlert() {

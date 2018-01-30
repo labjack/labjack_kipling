@@ -508,28 +508,38 @@ function createModuleChrome() {
 		self.allowModuleToLoad = true;
 	};
 	this.allowModuleToLoad = true;
+	this.conditionallyClearCaches = function() {
+		try {
+			var clearCaches = false;
+			if(typeof(gui.App.manifest.clearCachesOnModuleLoad) !== "undefined") {
+				clearCaches = clearCaches || gui.App.manifest.clearCachesOnModuleLoad;
+			}
+			if(typeof(gui.App.manifest.test) !== "undefined") {
+				clearCaches = clearCaches || gui.App.manifest.test;
+			}
+			if(clearCaches) {
+				if(CLEAR_CACHES) {
+					console.log('clearing caches');
+					CLEAR_CACHES();
+				}
+			} else {
+				console.log('not clearing caches', 
+					clearCaches,
+					gui.App.manifest.clearCachesOnModuleLoad,
+					gui.App.manifest.test
+				);
+			}
+		} catch(err) {
+			console.error('Not Clearing Caches due to error', err);
+		}
+	};
 	var moduleChromeTabClickHandler = function(res) {
 		// console.log('Clicked Tab', res.data.name);
 		if(self.allowModuleToLoad) {
 			self.allowModuleToLoad = false;
 
-			try {
-				var clearCaches = false;
-				if(typeof(gui.App.manifest.clearCachesOnModuleLoad) !== "undefined") {
-					clearCaches = clearCaches || gui.App.manifest.clearCachesOnModuleLoad;
-				}
-				if(typeof(gui.App.manifest.test) !== "undefined") {
-					clearCaches = clearCaches || gui.App.manifest.test;
-				}
-				if(clearCaches) {
-					if(CLEAR_CACHES) {
-						console.log('clearing caches');
-						CLEAR_CACHES();
-					}
-				}
-			} catch(err) {
-				console.error('Not Clearing Caches due to error', err);
-			}
+			self.conditionallyClearCaches();
+
 			// Clear all selected module styling classes
 			$('.module-chrome-tab').removeClass('selected');
 			var tabID = '#' + res.data.name + '-tab';

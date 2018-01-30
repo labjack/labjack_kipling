@@ -125,11 +125,18 @@ function keyboardEventHandler() {
     //     });
     // };
     this.reloadCurrentModule = function(info) {
-        var curModuleName = MODULE_LOADER.current_module_data.name;
-        MODULE_LOADER.loadModuleByName(curModuleName).then(pr,pe);
+        // Using jquery, search for selected tab & trigger the click event.
+        var selectedTab = $('.module-chrome-tab.selected');
+        if(selectedTab.length == 1) {
+            selectedTab.click();
+        } else {
+            var curModuleName = MODULE_LOADER.current_module_data.name;
+            MODULE_LOADER.loadModuleByName(curModuleName).then(pr,pe);
+        }
     };
     this.forceReloadCurrentModule = function(info) {
-        MODULE_CHROME.allowModuleToLoad = true;
+        MODULE_CHROME.enableModuleLoading();
+        MODULE_CHROME.conditionallyClearCaches();
         self.reloadCurrentModule();
     };
     this.reloading = false;
@@ -140,6 +147,7 @@ function keyboardEventHandler() {
     };
     this.devReLoadIOManager = function(info) {
         if(!self.reloading) {
+            showCriticalAlert('Restarting subprocess and re-loading Kipling.');
             self.reloading = true;
             console.log('Trying to restart subprocess');
             function startReload() {
@@ -149,6 +157,7 @@ function keyboardEventHandler() {
 
                     console.log('Restarting!');
                     if(self.performUpgrade) {
+                        showCriticalAlert('DEV ONLY: Restarting/Updating Subprocess (IO_Manager).  Then re-loading Kipling.');
                         self.performUpgrade = false;
                     // defered.resolve();
                     // var options = {
