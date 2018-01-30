@@ -21,28 +21,6 @@ var window_manager = require('ljswitchboard-window_manager');
  
 var walk = require('walk');
 
-//     , fs = require('fs')
-//     , walker
-//     ;
- 
-//   walker = walk.walk("/tmp", options);
- 
-//   walker.on("file", function (root, fileStats, next) {
-//     fs.readFile(fileStats.name, function () {
-//       // doStuff 
-//       next();
-//     });
-//   });
- 
-//   walker.on("errors", function (root, nodeStatsArray, next) {
-//     next();
-//   });
- 
-//   walker.on("end", function () {
-//     console.log("all done");
-//   });
-// }());
-
 /**
  * keyboardEventHandler is an object that allows easy window-wide keypress 
  * handling.  Initialize object at the start of the program.
