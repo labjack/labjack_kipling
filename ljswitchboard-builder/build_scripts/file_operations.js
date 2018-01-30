@@ -221,39 +221,43 @@ function compressFolderWithtargz (from, to) {
     var defered = q.defer();
     var outputName = path.parse(path.parse(to).name).name;
     var prevDir = path.dirname(from);
+    var out2Path = path.join(prevDir,'output2');
     var tempOutputPath = path.join(prevDir, 'output2',outputName);
     var extractFromPath = path.join(prevDir, 'output2');
     
-    // Create an empty directory
-    fse.emptyDir(tempOutputPath, function(err) {
-        // Copy folder contents to new directory
-        copyFolder({
-            from: from,
-            to: tempOutputPath
-        })
-        .then(function(res) {
-            // compress files into tar.gz archive 
-            targz.compress({
-                src: extractFromPath,
-                dest: to,
-            }, function(err){
-                if(err) {
-                    console.log('Error creating archive', err);
-                    defered.reject();
-                } else {
-                    if(exports.debug) {
-                        console.log(archive.pointer() + ' total bytes');
-                        console.log('archiver has been finalized and the output file descriptor has closed.');
+    fse.emptyDir(out2Path, function(err) {
+        // Create an empty directory
+        fse.emptyDir(tempOutputPath, function(err) {
+            // Copy folder contents to new directory
+            copyFolder({
+                from: from,
+                to: tempOutputPath
+            })
+            .then(function(res) {
+                // compress files into tar.gz archive 
+                targz.compress({
+                    src: extractFromPath,
+                    dest: to,
+                }, function(err){
+                    if(err) {
+                        console.log('Error creating archive', err);
+                        defered.reject();
+                    } else {
+                        if(exports.debug) {
+                            console.log(archive.pointer() + ' total bytes');
+                            console.log('archiver has been finalized and the output file descriptor has closed.');
+                        }
+                        defered.resolve();
                     }
-                    defered.resolve();
-                }
+                });
+            }, function(err) {
+                console.log('Error moving folders', err);
+                defered.reject();
             });
-        }, function(err) {
-            console.log('Error moving folders', err);
-            defered.reject();
-        })
-        
-    })
+            
+        });
+    });
+    
     
     return defered.promise;
 }
