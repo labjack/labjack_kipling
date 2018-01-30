@@ -301,7 +301,7 @@ function getExternalAppOperations(self) {
             var infoToCache = ['FIRMWARE_VERSION', 'DEVICE_NAME_DEFAULT', 'WIFI_VERSION'];
             var infoCache = {};
             infoToCache.forEach(function(key) {
-                infoCache[key] = Jself.savedAttributes[key];
+                infoCache[key] = self.savedAttributes[key];
             });
             self.suspendDeviceConnection()
             .then(function() {
@@ -310,8 +310,6 @@ function getExternalAppOperations(self) {
                 infoToCache.forEach(function(key) {
                     self.savedAttributes[key] = infoCache[key];
                 });
-                self.savedAttributes.FIRMWARE_VERSION = FWVer;
-                self.savedAttributes.DEVICE_NAME_DEFAULT = devName;
                 self.emit(events.DEVICE_RELEASED, {
                     attrs: self.savedAttributes,
                     shared: true,
