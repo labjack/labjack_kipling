@@ -159,66 +159,66 @@ function keyboardEventHandler() {
                     if(self.performUpgrade) {
                         showCriticalAlert('DEV ONLY: Restarting/Updating Subprocess (IO_Manager).  Then re-loading Kipling.');
                         self.performUpgrade = false;
-                    // defered.resolve();
-                    // var options = {
-                    //     followLinks: false
-                    //     // directories with these keys will be skipped 
-                    //   , filters: ["Temp", "_Temp"]
-                    //   };
-                    // walker = walk.walk("C:\\ProgramData\\LabJack\\K3\\ljswitchboard-io_manager", options);
-                    // foundFiles = [];
-                    // walker.on("file", function (root, fileStats, next) {
-                    //     foundFiles.push(fileStats.name);
-                    //     // console.log('Found FIle', fileStats.name);
-                    //     next();
-                    // // fs.readFile(fileStats.name, function () {
-                    // //   // doStuff 
-                    // //   next();
-                    // // });
-                    // });
-                    // walker.on("end", function () {
-                        
-                    // });
-                    path = require('path');
-                    var cwd = process.cwd();
-                    cwd = path.join(process.cwd(), '..', 'ljswitchboard-io_manager');
-                    console.log('CWD', cwd);
-                    console.log('Updating io_manager node_modules');
-                    var child_process = require('child_process');
-                    var proc = child_process.exec(
-                        'npm update', {
-                            // cwd: 'C:\\ProgramData\\LabJack\\K3\\ljswitchboard-io_manager',
-                            cwd: cwd,
-                        }
-                        // },
-                        // function (error, stdout, stderr) {
-                        //     console.log('finished executing');
-                        //     if (error) {
-                        //         console.error('exec error: ',error);
-                        //         return;
-                        //     }
-                        //     console.log('stdout: ',stdout);
-                        //     console.log('stderr: ',stderr);
-                        //     // console.log("all done found files: ", foundFiles.length);
-                        //  } 
-                        );
-                    proc.stdout.on('data', function (data) {
-                        console.log('data from stdout', data.toString());
-                    });
+                        // defered.resolve();
+                        // var options = {
+                        //     followLinks: false
+                        //     // directories with these keys will be skipped 
+                        //   , filters: ["Temp", "_Temp"]
+                        //   };
+                        // walker = walk.walk("C:\\ProgramData\\LabJack\\K3\\ljswitchboard-io_manager", options);
+                        // foundFiles = [];
+                        // walker.on("file", function (root, fileStats, next) {
+                        //     foundFiles.push(fileStats.name);
+                        //     // console.log('Found FIle', fileStats.name);
+                        //     next();
+                        // // fs.readFile(fileStats.name, function () {
+                        // //   // doStuff 
+                        // //   next();
+                        // // });
+                        // });
+                        // walker.on("end", function () {
+                            
+                        // });
+                        path = require('path');
+                        var cwd = process.cwd();
+                        cwd = path.join(process.cwd(), '..', 'ljswitchboard-io_manager');
+                        console.log('CWD', cwd);
+                        console.log('Updating io_manager node_modules');
+                        var child_process = require('child_process');
+                        var proc = child_process.exec(
+                            'npm update', {
+                                // cwd: 'C:\\ProgramData\\LabJack\\K3\\ljswitchboard-io_manager',
+                                cwd: cwd,
+                            }
+                            // },
+                            // function (error, stdout, stderr) {
+                            //     console.log('finished executing');
+                            //     if (error) {
+                            //         console.error('exec error: ',error);
+                            //         return;
+                            //     }
+                            //     console.log('stdout: ',stdout);
+                            //     console.log('stderr: ',stderr);
+                            //     // console.log("all done found files: ", foundFiles.length);
+                            //  } 
+                            );
+                        proc.stdout.on('data', function (data) {
+                            console.log('data from stdout', data.toString());
+                        });
 
-                    proc.stderr.on('data', function (data) {
-                        console.log('data from stderr', data.toString());
-                    });
+                        proc.stderr.on('data', function (data) {
+                            console.log('data from stderr', data.toString());
+                        });
 
-                    proc.on('exit', function (code) {
-                        console.log('Child exited with code ${code}',code);
-                        console.log('DELAYING.....');
-                        setTimeout(function() {
-                            console.log('HERE!');
-                            defered.resolve();
-                        },
-                        10);
-                    });
+                        proc.on('exit', function (code) {
+                            console.log('Child exited with code ${code}',code);
+                            console.log('DELAYING.....');
+                            setTimeout(function() {
+                                console.log('HERE!');
+                                defered.resolve();
+                            },
+                            10);
+                        });
 
                     } // IF
                     else {
@@ -247,11 +247,15 @@ function keyboardEventHandler() {
             })
             .then(global[gns].ljm.io_interface.destroy)
             .then(function() {
+                // Destroy io_manager cache
+                var decache = require('decache');
+                decache('ljswitchboard-io_manager');
                 window_manager.windowManager.managedWindows.kipling.win.reload();
                 // self.reloading = false;
             });
         }
     };
+
     var specialElements = [
         {
             "className": "escapableInput typeahead tt-input",
