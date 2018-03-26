@@ -50,7 +50,7 @@ end
 
 myPWM = PWM
 
-myPWM.init(myPWM, 0, 50, 5, 0, 1)--init on outPin with 50Hz (20ms) and 50% duty cycle
+myPWM.init(myPWM, 0, 50, 5, 0, 1)--init on outPin with 50Hz (20ms) and 5% duty cycle
 myPWM.enable(myPWM)
 
 LJ.IntervalConfig(1, 1000)
