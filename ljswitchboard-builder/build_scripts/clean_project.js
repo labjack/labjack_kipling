@@ -228,7 +228,7 @@ kipling_parts.forEach(function(kipling_part) {
 	try {
 		kiplingPartDeps = fs.readdirSync(kiplingPartNMPath);
 	} catch(err) {
-		console.error('Error reading current directory', directoryOffset);
+		console.error('Error reading current directory', kiplingPartNMPath);
 		console.error(err);
 		kiplingPartDeps = [];
 	}
