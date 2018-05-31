@@ -4,7 +4,8 @@
   "description": "",
   "main": "./lib/ljm_device_manager.js",
   "directories": {
-    "test": "test"
+    "test": "test",
+    "lib": "./lib"
   },
   "scripts": {
     "start": "node ./apps/app.js",
@@ -19,9 +20,6 @@
   },
   "devDependencies": {
     "nodeunit": "0.9.x"
-  },
-  "directories": {
-    "lib": "./lib"
   },
   "repository": {
     "type": "git",
