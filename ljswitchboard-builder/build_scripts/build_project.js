@@ -10,12 +10,6 @@ var cwd = process.cwd();
 var child_process = require('child_process');
 
 
-// It is required that anode/io.js version with child_process.execSync implemented
-if(typeof(child_process.execSync) !== 'function') {
-	console.log('Please install a version of node/io.js with child_process.execSync');
-	process.exit();
-}
-
 var BUILD_SCRIPTS_DIR = 'build_scripts';
 
 var commands = {};
@@ -43,6 +37,7 @@ buildScripts.forEach(function(buildScript) {
 	try {
 		console.log('Starting Step:', buildScript.text);
 		var execOutput = child_process.execSync(buildScript.cmd);
+		console.log('execOutput: ' , execOutput.toString());
 	} catch(err) {
 		console.log('Error Executing', buildScript.script, buildScript.text);
 	}

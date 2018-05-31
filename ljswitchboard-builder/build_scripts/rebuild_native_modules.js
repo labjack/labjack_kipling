@@ -11,12 +11,6 @@ var child_process = require('child_process');
 var async = require('async');
 
 
-// It is required that anode/io.js version with child_process.execSync implemented
-if(typeof(child_process.execSync) !== 'function') {
-	console.log('Please install a version of node/io.js with child_process.execSync');
-	process.exit();
-}
-
 var commands = {};
 
 var NATIVE_MODULES_BASE_LOCATION = path.normalize(path.join(
