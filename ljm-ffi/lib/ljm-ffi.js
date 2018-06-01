@@ -176,7 +176,7 @@ if(typeof(approxPlatform) === 'undefined') {
 function linuxHelperCheckLJMVersion(libLocation, libPathInfo, ljmVersion) {
     var isCorrectVersion = false;
     var libraryName = libPathInfo.base;
-    var expectedIndex = undefined;
+    var expectedIndex;
     var index = libraryName.indexOf(ljmVersion);
     // We need to perform a switch based on the ending...
     if(libPathInfo.ext === '.so') {
@@ -372,8 +372,8 @@ var checkLJMLibForVersion = {
         // a .dll file's version number.
         // http://stackoverflow.com/questions/31149104/node-js-read-file-properties
         var wmicLibVersion = '';
+        var cmdStr = "wmic datafile where name='";
         try {
-            var cmdStr = "wmic datafile where name='";
             cmdStr += libLocation.split('\\').join('\\\\');
             cmdStr += "' get Version";
 
@@ -467,7 +467,6 @@ function chooseLJMLibFile(libLocations, ljmVersion, requireExactVersion) {
             console.error('Required version of LJM:', ljmVersion);
             console.error('Found LJM Library Locations:', libLocations);
             throw new Error('Did not find the version: ' + ljmVersion + ', of the LJM Library.');
-            return '';
         } else {
             return libPath;
         }
@@ -895,10 +894,14 @@ function createSafeAsyncFunction(functionName, functionInfo) {
             errStr += '.';
             throw new LJMFFIError(errStr);
         } else {
-            // Make sure that the last argument is a function.  This is
-            // mandatory for all async function calls.
             if(typeof(arguments[functionInfo.args.length]) !== 'function') {
-                arguments[functionInfo.args.length] = function undef() {};
+                // Throw an error if the last argument is not a function.  This
+                // is mandatory for all async function calls.
+                errStr = 'Invalid argument; last argument must be a function ';
+                errStr += 'but was not. Function name: \'';
+                errStr += functionName;
+                errStr += '\'.';
+                throw new LJMFFIError(errStr);
             }
 
             // Get a reference to the LJM function being called.

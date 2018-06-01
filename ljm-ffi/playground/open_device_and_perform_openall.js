@@ -53,7 +53,7 @@ function parseOpenAllData(openAllData, userStr) {
 }
 function performListAllTCP() {
 	// Perform the open-all call.
-	console.log('Performing OpenAll TCP')
+	console.log('Performing OpenAll TCP');
 	openAllData = ljm.Internal_LJM_OpenAll(7, 2, 0, aHandles, 0,0, '');
 
 	parseOpenAllData(openAllData, 'Opened Devices TCP:');
@@ -61,7 +61,7 @@ function performListAllTCP() {
 
 function performListAllUDP() {
 	// Perform the open-all call.
-	console.log('Performing OpenAll UDP')
+	console.log('Performing OpenAll UDP');
 	openAllData = ljm.Internal_LJM_OpenAll(7, 5, 0, aHandles, 0,0, '');
 
 	parseOpenAllData(openAllData, 'Opened Devices UDP:');
@@ -79,11 +79,11 @@ console.log('I believe this means that the handles were upgraded to TCP handles?
 console.log();
 
 performListAllUDP();
-console.log('Performed a second OpenAll UDP call.  The second call results in consistent results which is good.')
+console.log('Performed a second OpenAll UDP call.  The second call results in consistent results which is good.');
 console.log();
 
 performListAllTCP();
-console.log('Performed a second OpenAll TCP call.  The second call results in consistent results which is good.')
+console.log('Performed a second OpenAll TCP call.  The second call results in consistent results which is good.');
 console.log();
 
 console.log('Closing All handles via LJM_CloseAll...');
@@ -101,11 +101,11 @@ console.log('Why aren\'t any handles returned?  The devices should still be disc
 console.log();
 
 performListAllTCP();
-console.log('Performed a second OpenAll TCP call.  The second call results in consistent results which is good.')
+console.log('Performed a second OpenAll TCP call.  The second call results in consistent results which is good.');
 console.log();
 
 performListAllUDP();
-console.log('Performed a second OpenAll UDP call.  The second call results in consistent results which is good.')
+console.log('Performed a second OpenAll UDP call.  The second call results in consistent results which is good.');
 console.log();
 
 

@@ -84,8 +84,8 @@ var test_cases = {
 	'Execute LJM_NameToAddress (Sync) - Safe': function(test) {
 		// Allocate and fill buffers required to execute LJM calls with ffi.
 		var addrName = 'AIN0';
-		var Name = ljTypeOps['string'].allocate(addrName);
-		Name = ljTypeOps['string'].fill(Name, addrName);
+		var Name = ljTypeOps.string.allocate(addrName);
+		Name = ljTypeOps.string.fill(Name, addrName);
 
 		var Address = ljTypeOps['int*'].allocate(0);
 		Address = ljTypeOps['int*'].fill(Address, 0);
@@ -99,7 +99,7 @@ var test_cases = {
 		// Parse returned data
 		var addressInfo = {
 			'ljmError': ljmError,
-			'Name': ljTypeOps['string'].parse(Name),
+			'Name': ljTypeOps.string.parse(Name),
 			'Address': ljTypeOps['int*'].parse(Address),
 			'Type': ljTypeOps['int*'].parse(Type),
 		};
@@ -119,7 +119,7 @@ var test_cases = {
 			// Parse returned data
 			var addressInfo = {
 				'ljmError': ljmError,
-				'Name': ljTypeOps['string'].parse(Name),
+				'Name': ljTypeOps.string.parse(Name),
 				'Address': ljTypeOps['int*'].parse(Address),
 				'Type': ljTypeOps['int*'].parse(Type),
 			};
@@ -137,8 +137,8 @@ var test_cases = {
 
 		// Allocate and fill buffers required to execute LJM calls with ffi.
 		var addrName = 'AIN0';
-		var Name = ljTypeOps['string'].allocate(addrName);
-		Name = ljTypeOps['string'].fill(Name, addrName);
+		var Name = ljTypeOps.string.allocate(addrName);
+		Name = ljTypeOps.string.fill(Name, addrName);
 
 		var Address = ljTypeOps['int*'].allocate(0);
 		Address = ljTypeOps['int*'].fill(Address, 0);
@@ -153,8 +153,8 @@ var test_cases = {
 	'Execute LJM_NameToAddress (Sync) - Raw': function(test) {
 		// Allocate and fill buffers required to execute LJM calls with ffi.
 		var addrName = 'AIN0';
-		var Name = ljTypeOps['string'].allocate(addrName);
-		Name = ljTypeOps['string'].fill(Name, addrName);
+		var Name = ljTypeOps.string.allocate(addrName);
+		Name = ljTypeOps.string.fill(Name, addrName);
 
 		var Address = ljTypeOps['int*'].allocate(0);
 		Address = ljTypeOps['int*'].fill(Address, 0);
@@ -168,7 +168,7 @@ var test_cases = {
 		// Parse returned data
 		var addressInfo = {
 			'ljmError': ljmError,
-			'Name': ljTypeOps['string'].parse(Name),
+			'Name': ljTypeOps.string.parse(Name),
 			'Address': ljTypeOps['int*'].parse(Address),
 			'Type': ljTypeOps['int*'].parse(Type),
 		};
@@ -188,7 +188,7 @@ var test_cases = {
 			// Parse returned data
 			var addressInfo = {
 				'ljmError': ljmError,
-				'Name': ljTypeOps['string'].parse(Name),
+				'Name': ljTypeOps.string.parse(Name),
 				'Address': ljTypeOps['int*'].parse(Address),
 				'Type': ljTypeOps['int*'].parse(Type),
 			};
@@ -206,8 +206,8 @@ var test_cases = {
 
 		// Allocate and fill buffers required to execute LJM calls with ffi.
 		var addrName = 'AIN0';
-		var Name = ljTypeOps['string'].allocate(addrName);
-		Name = ljTypeOps['string'].fill(Name, addrName);
+		var Name = ljTypeOps.string.allocate(addrName);
+		Name = ljTypeOps.string.fill(Name, addrName);
 
 		var Address = ljTypeOps['int*'].allocate(0);
 		Address = ljTypeOps['int*'].fill(Address, 0);

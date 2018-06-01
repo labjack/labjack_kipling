@@ -71,8 +71,6 @@ function getHandleInfoSync(handle) {
 module.exports.getHandleInfoSync = getHandleInfoSync;
 
 function getDeviceInfoSync(handle) {
-	var deviceData = {};
-
 	var handleInfo = ljm.LJM_GetHandleInfo(
 		handle, // Handle
 		0, // DeviceType

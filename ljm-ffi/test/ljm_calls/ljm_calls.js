@@ -209,8 +209,8 @@ function addTests() {
 	var functionNames = Object.keys(function_tests);
 
 	functionNames.forEach(function(functionName) {
+		var testName;
 		try {
-			var testName;
 			var testInfo = function_tests[functionName];
 			var nameAppend;
 			if(enabled_tests.sync.ljm) {
@@ -225,7 +225,7 @@ function addTests() {
 			}
 			if(enabled_tests.sync.liblabjack) {
 				// Add the liblabjack call
-				nameAppend = '-liblabjack-sync'
+				nameAppend = '-liblabjack-sync';
 				testName = functionName + nameAppend;
 				test_cases[testName] = create_liblabjack_sync_test(
 					functionName,

@@ -92,18 +92,18 @@ var test_cases = {
 		}
 	},
 	'Execute LJM_SPECIAL_ADDRESSES_FILE': function(test) {
-		if(has_special_addresses) {
-			function testData(ljmSpecialAddressesFileLocation) {
-				var isOk = true;
-				if(ljmSpecialAddressesFileLocation.ljmError) {
-					isOk = false;
-				}
-				test.ok(isOk, 'Failed to read the LJM_SPECIAL_ADDRESSES_FILE register');
-				// console.log('Result', ljmSpecialAddressesFileLocation);
-				// console.log('Res Str Len', ljmSpecialAddressesFileLocation.String.length);
-				test.done();
+		function testData(ljmSpecialAddressesFileLocation) {
+			var isOk = true;
+			if(ljmSpecialAddressesFileLocation.ljmError) {
+				isOk = false;
 			}
+			test.ok(isOk, 'Failed to read the LJM_SPECIAL_ADDRESSES_FILE register');
+			// console.log('Result', ljmSpecialAddressesFileLocation);
+			// console.log('Res Str Len', ljmSpecialAddressesFileLocation.String.length);
+			test.done();
+		}
 
+		if(has_special_addresses) {
 			// Execute LJM Function
 			ljm.LJM_ReadLibraryConfigStringS.async('LJM_SPECIAL_ADDRESSES_FILE', '', testData);
 		} else {

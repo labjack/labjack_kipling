@@ -88,7 +88,7 @@ var test_cases = {
 		var ljm_ffi = require('../lib/ljm-ffi');
 
 		// var ljmVersion = '1.11.0';
-		var ljmVersion = undefined;
+		var ljmVersion;
 		var loadOptions = {
 			// ljmVersion: 1.1100,
 			// ljmVersion: '1-9-1',
