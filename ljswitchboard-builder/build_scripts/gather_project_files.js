@@ -163,7 +163,7 @@ var addWorkingDir = function(dir) {
 		}
 	}
 
-}
+};
 var fixNameStr = function(nameStr) {
 	var minLength = 40;
 	var splitName = nameStr.split(']');
@@ -179,7 +179,7 @@ var fixNameStr = function(nameStr) {
 		outStr += ' ';
 	}
 	return outStr;
-}
+};
 var getHeaderStr = function() {
 	var outputText = [];
 	var startStr = 'Status:';

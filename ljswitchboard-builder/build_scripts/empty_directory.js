@@ -52,4 +52,4 @@ exports.emptyDirectoryOrDie = function(directoryName) {
 		console.log('Failed to ensure directory is empty', err);
 		process.exit(1);
 	}
-}
+};
