@@ -74,7 +74,7 @@ var nodejsBinaryVersions = [
 	'0_12_7',
 	'1_2_0',
 	'5_4_1',
-	// '5_6_0',
+	'5_6_0',
 ];
 if(os === 'win32') {
 	nodejsBinaryVersions.push('5_6_0');
