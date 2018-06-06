@@ -43,7 +43,7 @@ var testFiles = [
 	// 'mock_module_tests/mock_file_browser.js',
 
 	// Execute Live-Device tests
-	'module_tests/test_device_info.js', //Perform a live-device scan and select a USB-T7
+	// 'module_tests/test_device_info.js', //Perform a live-device scan and select a USB-T7
 	// 'module_tests/test_device_updater.js',
 
 	// 'mock_module_tests/mock_lua_script_debugger.js',
@@ -154,13 +154,14 @@ var getRunTest = function(testFile, testDiv) {
 				getUpdateTestResults('#' + divID),
 				function(err) {
 					var testResults = $('#' + divID);
+					var status;
 					if(err) {
 						console.log('Error running test', err, testFile);
-						var status = $('#' + divID + '_status');
+						status = $('#' + divID + '_status');
 						status.text('Error');
 						status.css('color', 'red');
 					} else {
-						var status = $('#' + divID + '_status');
+						status = $('#' + divID + '_status');
 						status.text('Success');
 						status.css('color', 'green');
 						testResults.slideUp();

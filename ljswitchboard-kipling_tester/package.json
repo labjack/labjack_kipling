@@ -38,7 +38,6 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "window": {
     "title": "Kipling Tester",

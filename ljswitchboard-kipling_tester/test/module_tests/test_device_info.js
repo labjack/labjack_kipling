@@ -88,7 +88,7 @@ this.test_device_selector = {
 				disconnectButton.trigger('click');
 			});
 			return testDefered.promise;
-		}
+		};
 		for(i = 0; i < num; i++) {
 			if(buttonClasses.eq(i).css('display') !== 'none') {
 				activeNums.push(i);

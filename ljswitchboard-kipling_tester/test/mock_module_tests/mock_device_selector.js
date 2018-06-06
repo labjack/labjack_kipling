@@ -117,34 +117,15 @@ this.test_device_selector = {
 
 		test.done();
 	},
-	'check displayed scan results': function(test) {
-		// Verify there being two found device types
-		var deviceTypes = $('.device-type');
-		test.strictEqual(deviceTypes.length, 4, 'Unexpected number of device types');
-
-		// Verify that there were 3 found devices
-		var devices = $('.device');
-		test.strictEqual(devices.length, 5, 'Unexpected number of devices');
-
-		// Verify that there was 1 found digit
-		var digits = $('.DEVICE_TYPE_Digit .device');
-		test.strictEqual(digits.length, 1, 'Unexpected number of digits found');
-
-		// Verify that there were 2 found T7s
-		var t7s = $('.DEVICE_TYPE_T7 .device');
-		test.strictEqual(t7s.length, 2, 'Unexpected number of T7s found');
-
-		// Verify that there was 1 found T4
-		var t4s = $('.DEVICE_TYPE_T4 .device');
-		test.strictEqual(t4s.length, 1, 'Unexpected number of T4s found');
-
-		// Verify that there was 1 found T4
-		var t5s = $('.DEVICE_TYPE_T5 .device');
-		test.strictEqual(t5s.length, 1, 'Unexpected number of T5s found');
-
-		test.done();
-	},
 	'refresh device list': function(test) {
+		function ensureChecked(elName) {
+			var checkbox = $(elName);
+			checkbox.prop('checked', true);
+		}
+		ensureChecked('#usb_scan_enabled');
+		ensureChecked('#ethernet_scan_enabled');
+		ensureChecked('#wifi_scan_enabled');
+
 		if(testOptions.refreshDevices) {
 			var startedScanEventCaught = false;
 			activeModule.once(
@@ -161,7 +142,7 @@ this.test_device_selector = {
 				});
 			var viewGen = activeModule.viewGen;
 			var refreshButton = viewGen.pageElements.refresh_devices_button.ref;
-			
+
 			// Trigger the click event for the refresh button and make sure the scan
 			// happens.
 			refreshButton.trigger('click');
@@ -169,6 +150,29 @@ this.test_device_selector = {
 		} else {
 			test.done();
 		}
+	},
+
+	'check displayed scan results': function(test) {
+		// Verify there being some number of found device types
+		var deviceTypes = $('.device-type');
+		test.strictEqual(deviceTypes.length, 4, 'Unexpected number of device types');
+
+		var devices = $('.device');
+		test.strictEqual(devices.length, 5, 'Unexpected number of devices');
+
+		var digits = $('.DEVICE_TYPE_Digit .device');
+		test.strictEqual(digits.length, 1, 'Unexpected number of digits found');
+
+		var t7s = $('.DEVICE_TYPE_T7 .device');
+		test.strictEqual(t7s.length, 2, 'Unexpected number of T7s found');
+
+		var t4s = $('.DEVICE_TYPE_T4 .device');
+		test.strictEqual(t4s.length, 1, 'Unexpected number of T4s found');
+
+		var t5s = $('.DEVICE_TYPE_T5 .device');
+		test.strictEqual(t5s.length, 1, 'Unexpected number of T5s found');
+
+		test.done();
 	},
 	'Enable device scanning': function(test) {
 		if(testOptions.realRefresh) {
