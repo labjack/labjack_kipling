@@ -14,8 +14,11 @@ if(processArgs.length > 3) {
 }
 
 // Force process to use a custom binary
-nodeBinaryPath = process.cwd() + '/node_binaries/darwin/x64/0_11_14/node';
-nodeBinaryPath = path.join(process.cwd(), 'node_binaries', process.platform, process.arch, '0_11_14', 'node.exe');
+nodeBinaryPath = path.join(process.cwd(), 'node_binaries', process.platform, process.arch, '0_11_14', 'node');
+if (process.platform === 'win32') {
+	nodeBinaryPath = nodeBinaryPath + '.exe';
+}
+// Create a string that looks like '<cwd>/node_binaries/darwin/x64/0_11_14/node'
 
 var process_manager = require('./lib/process_manager');
 var utils = require('./examples/common/utils');
