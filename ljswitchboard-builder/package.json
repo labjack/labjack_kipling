@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-builder",
-  "description": "LabJack Desktop Utilities",
+  "description": "Building and packing for the ljswitchboard program.",
   "version": "3.0.7",
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-builder",
   "repository": {

@@ -14,8 +14,6 @@ var startingDir = process.cwd();
 var TEMP_PROJECT_FILES_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY);
 
 var DEBUG_FILE_COPYING = false;
-// Because not all projects are on npm yet, simply get data from their github
-// projects.
 var PROJECT_FILES_SEARCH_PATH = path.normalize(path.join(startingDir, '..'));
 
 // Empty the temp files dir.
@@ -23,7 +21,6 @@ emptyDirectory.emptyDirectoryOrDie(TEMP_PROJECT_FILES_PATH);
 
 var buildData = require('../package.json');
 var isTest = false;
-// console.log('Args', process.argv);
 if(process.argv.length > 2) {
 	if(process.argv[2] === 'test') {
 		isTest = true;
@@ -36,13 +33,9 @@ if(isTest) {
 	requiredFiles = requiredFiles.concat(buildData.kipling_test_dependencies);
 }
 
-// requiredFiles = [
-// 	'ljswitchboard-io_manager'
-// ];
-// console.log('Project Files', requiredFiles);
-
 // A list of files and folders to not copy
 var filteredFilesAndFolders = [
+	'outFile.txt',
 	'.git',
 	'.gitignore',
 	'.npmignore',
@@ -150,7 +143,6 @@ var getFinishedFunc = function(savedKey) {
 	return finishWorkingDir;
 };
 var addWorkingDir = function(dir) {
-	var incrementalOffset = 0;
 	var i;
 
 	var savedKey = '';
@@ -203,7 +195,7 @@ var getHeaderStr = function() {
 	return outputText;
 };
 
-var ENABLE_STATUS_UPDATES = true;
+var ENABLE_STATUS_UPDATES = false;
 var innerPrintStatus = function() {
 	if(ENABLE_STATUS_UPDATES) {
 		console.log('');
@@ -308,12 +300,6 @@ var copyRelevantFiles = function(from, to, filters) {
 		}, defered.reject);
 	return defered.promise;
 };
-var copyRelevantFilesFake = function(from, to, filters) {
-	var defered = q.defer();
-
-	defered.resolve();
-	return defered.promise;
-};
 
 var copyRequiredFiles = function() {
 	var promises = requiredFiles.map(function(required_file) {
@@ -329,11 +315,11 @@ var copyRequiredFiles = function() {
 		));
 		fs.mkdirSync(destination_path);
 
-		var projectInfo = require(path.normalize(path.join(
-			PROJECT_FILES_SEARCH_PATH,
-			required_file,
-			'package.json'
-		)));
+		// var projectInfo = require(path.normalize(path.join(
+		// 	PROJECT_FILES_SEARCH_PATH,
+		// 	required_file,
+		// 	'package.json'
+		// )));
 
 		// Dev dependency list
 		// var devFilters = [];
@@ -355,7 +341,6 @@ var copyRequiredFiles = function() {
 		// fse.copySync(source_path, destination_path);
 		// console.log('Calling...',required_file, source_path, destination_path);
 		return copyRelevantFiles(source_path, destination_path, folderFilters);
-		// return copyRelevantFilesFake(source_path, destination_path, folderFilters);
 	} catch(err) {
 		console.log('Error...', err);
 	}
@@ -366,9 +351,5 @@ copyRequiredFiles()
 .then(function() {
 	console.log('Finished Copying required files');
 });
-
-
-
-// console.log('Preparing node-webkit version:', nwjs_version);
 
 

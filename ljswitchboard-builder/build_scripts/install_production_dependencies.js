@@ -71,7 +71,7 @@ function getHeaderStr() {
 	outputText.push('Duration: '+ curDuration.toString() + ' seconds');
 	return outputText;
 }
-var ENABLE_STATUS_UPDATES = true;
+var ENABLE_STATUS_UPDATES = false;
 var printStatus = function() {
 	if(ENABLE_STATUS_UPDATES) {
 		console.log('');

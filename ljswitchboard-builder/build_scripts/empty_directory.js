@@ -12,7 +12,7 @@ exports.emptyDirectoryOrDie = function(directoryName) {
 	var deleteDirectory = function() {
 		var repeatExecution = false;
 		try {
-			console.log('Cleaning temp project files directory', numDeleteAttempts);
+			console.log('Cleaning temp project files directory. Attempt:', numDeleteAttempts);
 			// fse.emptyDirSync(directoryName);
 			fsex.rmrfSync(directoryName);
 		} catch(err) {

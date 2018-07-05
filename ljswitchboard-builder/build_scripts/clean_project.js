@@ -78,9 +78,35 @@ var createStdCleanModules = function(names) {
 
 
 var filesToDelete = {
+    'ljswitchboard-core': {
+		'node_modules': {
+			'foldersToDelete': ['.bin'],
+		},
+	},
+    'ljswitchboard-kipling': {
+		'node_modules': {
+			'foldersToDelete': ['.bin'],
+		},
+	},
+    'ljswitchboard-static_files': {
+		'node_modules': {
+			'foldersToDelete': ['.bin'],
+		},
+	},
+	'ljswitchboard-splash_screen': {
+		'node_modules': {
+			'foldersToDelete': ['.bin'],
+		},
+	},
+	'ljswitchboard-module_manager': {
+		'node_modules': {
+			'foldersToDelete': ['.bin'],
+		},
+	},
 	'ljswitchboard-io_manager': {
 		'foldersToDelete': ['.bin'],
 		'node_modules': {
+			'foldersToDelete': ['.bin'],
 			'ffi': {
 				'filesToSave': ['LICENSE', 'package.json',],
 				'foldersToSave': ['build', 'lib', 'node_modules'],
@@ -177,7 +203,7 @@ var filesToDelete = {
 			'sshpk': {
 				'filesToDelete': [],
 				'foldersToDelete': ['man'],
-			}
+			},
 		}
 	}
 };

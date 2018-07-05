@@ -62,7 +62,12 @@ function walkDirectory (bundle) {
         return fileHandler;
     }
     function errorsHandler(root, nodeStatsArray, next) {
-        console.log('ERROR!!! Walking', from);
+        console.log('[ERROR] Errors occurred while walking', from, ':');
+        nodeStatsArray.forEach(function (n) {
+            console.error("[ERROR] " + n.name);
+            console.error(n.error.message || (n.error.code + ": " + n.error.path));
+        });
+        console.log('');
         next();
     }
     function endHandler() {
@@ -140,8 +145,7 @@ function compressFolderWithYazl (from, to) {
         innerDebug = true;
     }
 
-    debugCompression('Compressing...', from);
-    debugCompression('YaY!!!');
+    debugCompression('Yazl Compressing', from, 'to', to);
 
     var fileListing = [];
 
@@ -263,18 +267,12 @@ function compressFolderWithtargz (from, to) {
 }
 
 function compressFolder (folder) {
-    if(folder.outputType) {
-        if(folder.outputType === '.tar.gz') {
-            return compressFolderWithtargz(folder.from, folder.to);
-        } else {
-            return compressFolderWithYazl(folder.from, folder.to);
-        }
+    if(folder.outputType && folder.outputType === '.tar.gz') {
+        return compressFolderWithtargz(folder.from, folder.to);
     } else {
         return compressFolderWithYazl(folder.from, folder.to);
     }
     // return compressFolderWithArchiver(folder.from, folder.to);
-    // return compressFolderWithYazl(folder.from, folder.to);
-    
 }
 exports.compressFolder = compressFolder;
 
@@ -430,7 +428,7 @@ function extractFiles (files) {
     q.allSettled(promises)
     .then(function() {
         var endTime = new Date();
-        console.log('Duration', ((endTime - startTime)/1000).toFixed(4));
+        console.log('Duration', ((endTime - startTime)/1000).toFixed(4), 'seconds');
         defered.resolve();
     });
     return defered.promise;
@@ -455,7 +453,9 @@ function parseZipFile (file) {
     // parseWithUnzip(file.path)
     parseWithYauzl(file.path)
     .then(function(data) {
-        console.log('Parsed Data', data.name, data.version);
+        if (exports.debug) {
+            console.log('Parsed Data', data.name, data.version);
+        }
         defered.resolve();
     });
     return defered.promise;

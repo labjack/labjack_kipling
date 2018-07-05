@@ -46,6 +46,18 @@ exports.tests = {
     },
     'verify that there is data to test on': function(test) {
         var folders = fs.readdirSync(PATH_OF_FILES_TO_ZIP);
+
+        var testFolderInFolders = function(expectedFolder) {
+            var str = 'Expected ' + expectedFolder + ' in ' + PATH_OF_FILES_TO_ZIP;
+            test.ok(folders.indexOf(expectedFolder) != -1, str);
+        };
+        testFolderInFolders('ljswitchboard-core');
+        testFolderInFolders('ljswitchboard-io_manager');
+        testFolderInFolders('ljswitchboard-kipling');
+        testFolderInFolders('ljswitchboard-module_manager');
+        testFolderInFolders('ljswitchboard-splash_screen');
+        testFolderInFolders('ljswitchboard-static_files');
+
         folders.forEach(function(folder) {
             var origin = path.normalize(path.join(PATH_OF_FILES_TO_ZIP, folder));
             var zipPath = path.normalize(path.join(TEMP_ZIP_TEST_PATH, folder + '.zip'));
@@ -57,7 +69,7 @@ exports.tests = {
                 'extractPath': extractPath,
             });
         });
-        // testFolders = [testFolders[0]];
+
         test.done();
     },
     'create test .zip files': function(test) {
@@ -67,7 +79,7 @@ exports.tests = {
             });
             fileOps.compressFolders(folders)
             .then(function() {
-                console.log('Finished Compressing (test)');
+                // console.log('Finished Compressing (test)');
                 test.done();
             });
         } else {
@@ -82,7 +94,7 @@ exports.tests = {
             });
             fileOps.parseZipFiles(files)
             .then(function() {
-                console.log('Finished Parsing');
+                // console.log('Finished Parsing');
                 test.done();
             });
         } else {
@@ -97,7 +109,7 @@ exports.tests = {
             });
             fileOps.extractFiles(files)
             .then(function() {
-                console.log('Finished Extracting (test)');
+                // console.log('Finished Extracting (test)');
                 test.done();
             });
         } else {

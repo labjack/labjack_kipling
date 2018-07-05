@@ -26,9 +26,6 @@ try {
 var OUTPUT_PROJECT_FILES_DIRECTORY = 'output';
 var OUTPUT_PROJECT_FILES_PATH = path.normalize(path.join(startingDir, OUTPUT_PROJECT_FILES_DIRECTORY));
 
-var BUILD_TOOLS_DIRECTORY = 'build_tools';
-var BUILD_TOOLS_PATH = path.normalize(path.join(startingDir, BUILD_TOOLS_DIRECTORY));
-
 // Figure out what OS we are building for
 var buildOS = {
 	'darwin': 'darwin',
@@ -45,96 +42,6 @@ function debugLog() {
 	}
 }
 
-// function copyBrandingFiles(bundle) {
-// 	var fromName = bundle.from;
-// 	var toName = bundle.to;
-
-// 	var defered = q.defer();
-// 	var from = path.normalize(path.join(
-// 		// BRANDING_FILES_PATH,
-// 		fromName
-// 	));
-
-// 	var to = path.normalize(path.join(
-// 		OUTPUT_PROJECT_FILES_PATH,
-// 		toName,
-// 		path.basename(path.normalize(fromName))
-// 	));
-
-// 	debugLog('Copying File from', from);
-// 	debugLog('Copying File to', to);
-// 	// If the file already exists, remove it.
-	
-// 	// Copy the desired file
-	
-// 	fse.remove(to, function fileRemoved(err) {
-// 		if(err) {
-// 			console.log('Error removing', err);
-// 		}
-// 		fse.copy(from, to, function fileCoppied(err) {
-// 			if(err) {
-// 				console.error('Error coppying file', err);
-// 				defered.reject(err);
-// 			} else {
-// 				defered.resolve();
-// 			}
-// 		});
-// 	});
-// 	return defered.promise;
-// }
-
-// function getEditSplashscreenPackageKeys(bundle) {
-// 	function editSplashscreenPackageKeys() {
-// 		var defered = q.defer();
-
-// 		var toName = bundle.to;
-// 		var to = path.normalize(path.join(
-// 			TEMP_PROJECT_FILES_PATH,
-// 			toName,
-// 			path.basename(path.normalize(fromName))
-// 		));
-// 		debugLog('Editing file', to);
-
-// 		function editFileContents(data) {
-// 			var template = handlebars.compile(data);
-// 			var compiledData = template({k3Version:k3VersionStr});
-// 			console.log('We have opened a file!', data);
-// 			console.log('it is now',compiledData);
-// 			return compiledData;
-// 		}
-// 		function editAndSaveFile(data) {
-// 			var newData = editFileContents(data);
-// 			fse.outputFile(to, newData, function(err) {
-// 				if(err) {
-// 					fse.outputFile(to, newData, function(err) {
-// 						if(err) {
-// 							defered.reject();
-// 						} else {
-// 							defered.resolve();
-// 						}
-// 					});
-// 				} else {
-// 					defered.resolve();
-// 				}
-// 			});
-// 		}
-// 		fse.readFile(to, function(err, data) {
-// 			if(err) {
-// 				fse.readFile(to, function(err, data) {
-// 					if(err) {
-// 						defered.reject(err);
-// 					} else {
-// 						editAndSaveFile(data);
-// 					}
-// 				});
-// 			} else {
-// 				editAndSaveFile(data);
-// 			}
-// 		});
-// 		return defered.promise;
-// 	}
-// 	return editSplashscreenPackageKeys;
-// }
 function editPackageKeys(bundle) {
 	var defered = q.defer();
 
