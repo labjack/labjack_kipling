@@ -39,6 +39,11 @@ exports.tests = {
 		});
 	},
 	'open device in ljlogm': function(test) {
+		if (process.platform !== 'win32') {
+			console.warn('Test \'open device in ljlogm\' not supported except on Windows');
+			test.done();
+			return;
+		}
 		var scanFinished = false;
 		var ljlogmFinished = false;
 		function finishTest() {
