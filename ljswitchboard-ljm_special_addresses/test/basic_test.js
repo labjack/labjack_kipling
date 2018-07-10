@@ -6,8 +6,6 @@ var fs = require('fs');
 var path = require('path');
 var ljm_special_addresses;
 
-var DEBUG_TEST = false;
-
 var testFiles = [];
 var expectedDataTestFiles = [];
 
@@ -154,17 +152,34 @@ function generateVerifyLoadWithLJMTest(fileName, filePath) {
 	};
 }
 
-function generateLJMLoadSpecialAddressesFile(fileName, filePath) {
+function generateLJMLoadSpecialAddressesFile(fileName, filePath, expFileDataObj) {
 	return function ljmLoadSpecialAddressesFile(test) {
 		// console.log('Testing...', fileName);
 		ljm_special_addresses.load({'filePath': filePath})
 		.then(function(res) {
-			console.log('File Loaded', res);
-			// test.deepEqual(res.fileData, expFileData);
+			var foundIPs = [];
+			res.fileData.forEach(function(ipInfo) {
+				foundIPs.push(ipInfo.ip);
+			});
+
+			var missingIPs = [];
+			expFileDataObj.forEach(function(ipInfo) {
+				if(foundIPs.indexOf(ipInfo.ip) < 0) {
+					// Not found
+					missingIPs.push(ipInfo.ip);
+				}
+			});
+
+			if(missingIPs.length === 0) {
+				test.ok(true);
+			} else {
+				test.ok(false, 'Missing IPs: ' + JSON.stringify(missingIPs));
+			}
+
 			test.done();
 		}, function(err) {
 			console.log('Error parsing', err);
-			// test.ok(false, 'Should have parsed file...');
+			test.ok(false, 'Should have parsed file...');
 			test.done();
 		});
 	};
@@ -219,7 +234,8 @@ filesToTest.forEach(function(fileName, i) {
 
 		tests['Load With LJM Test - ' + fileName] = generateLJMLoadSpecialAddressesFile(
 			fileName,
-			outputTestFilePath
+			outputTestFilePath,
+			outputData
 		);
 
 		
