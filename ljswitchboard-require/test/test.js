@@ -74,14 +74,7 @@ exports.basic_test = {
 		}
 		test.done();
 	},
-	'require "test-file.js"': function(test) {
-		try {
-			var tM = require('./test_File.js');
-			var tMa = require('C:/Users/chris/git/LabJack/Kipling/ljswitchboard-require/test/test_File.js');
-			// console.log(" - tM", tM, tMa);
-		} catch(err) {
-			console.log(" * tM Err", err);
-		}
+	'require "test_file.js"': function(test) {
 		try {
 			var test_module = req('test_file.js');
 
