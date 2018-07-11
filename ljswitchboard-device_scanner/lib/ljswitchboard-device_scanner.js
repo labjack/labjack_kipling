@@ -25,7 +25,7 @@ var openAllNames = [
 ];
 var POTENTIALLY_ENABLE_OPEN_ALL_SCANNER = false;
 
-var ENABLE_SELECTION_DEBUGGING = true;
+var ENABLE_SELECTION_DEBUGGING = false;
 function debug () {
     if(ENABLE_SELECTION_DEBUGGING) {
         console.log.apply(console, arguments);
