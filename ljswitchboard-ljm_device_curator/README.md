@@ -13,21 +13,21 @@ var device_curator = require('ljswitchboard-ljm_device_curator');
 var device = new device_curator.device();
 
 // Opening a device, first found device.
-device.open()
+device.open('ANY', 'ANY', 'ANY')
 .then(function(deviceInfo){
 	// Successfully opened device case
 }, function(err) {
 	// Failed to properly open device
 }).done();
 
-// Reading a devices analog input address.  Value gets automatically rounded to 6 digits of precision.
+// Reading a device's analog input address.  Value gets automatically rounded to 6 digits of precision.
 device.iRead('AIN0')
 .then(function(result) {
 	console.log('Rounded Value', result.val);
 	console.log('Raw Value', result.res);
 }).done();
 
-// Reading a devices IP address.  IP Address formatting gets automatically applied.
+// Reading a device's IP address.  IP Address formatting gets automatically applied.
 device.iRead('ETHERNET_IP')
 .then(function(result) {
 	console.log('IP Address', result.val);
@@ -56,7 +56,7 @@ device.once('DEVICE_ERROR', function() {
 
 // Device re-connecting
 device.once('DEVICE_RECONNECTING', function() {
-	console.log('  - Device Reconnected');
+	console.log('  - Device Reconnecting');
 });
 
 // Device re-connected event
@@ -71,9 +71,9 @@ device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
 ```
 
 Other important abstractions that are made with this library are:
-* A devices calibration status is checked every time it gets opened.
-* If a device becomes disconnected and a user is using the i* functions they will get returned the last-read values.  This allowed Kipling to remain usable even when devices became disconnected.
-* "Buffer" registers can be properly read written to with the readArray and writeArray functions that aren't implemented in the LJM library yet.
+* A device's calibration status is checked every time it gets opened.
+* If a device becomes disconnected and a user is using the i* functions they will get returned the last-read values.  This allows Kipling to remain usable even when devices became disconnected.
+* "Buffer" registers can be properly read/written with the readArray and writeArray functions that aren't implemented in the LJM library yet.
 * It is possible to do two bulk read/write operations. readMultiple, readMany as well as writeMultiple and writeMany. The *Multiple functions perform their operations by executing multiple single reads to ensure users get individual errors for each register being written to/read.  The *Many functions use LJM's [multiple value functions](https://labjack.com/support/software/api/ljm/function-reference/multiple-value-functions) and only return one error.  Currently any data acquired when an error occurs is deamed to be invalid which is not true. 
 
 
@@ -90,24 +90,26 @@ This wrapper breaks device IO calls into four categories,
 3. Functions that automatically apply formatting that converts ip address values into ip strings, rounding, etc.
 4. Functions that automatically integrate with the last-read value cache to not return any errors.  Errors are still produced via the DEVICE_ERROR event.
 
-Generic Opening/Closing
+### Generic Opening/Closing
 * open
 * getDeviceAttributes
 * close
 
+### Undecorated functions
 LabJack-nodejs Functions wrapped by q
 * read
 * readArray
 * readMany
 * readMultiple
-* readUINT64 // For reading a devices MAC address (Ethernet & WiFi)
+* readUINT64 // For reading a device's MAC address (Ethernet & WiFi)
 * write
 * writeArray
 * writeMany
 * writeMultiple
 * rwMany
 
-Functions that automatically re-try on flash un-available errors that commonly happen on T7-Pro devices when writing/reading _DEFAULT registers
+### q functions
+Functions that automatically re-try on INTFLASH_UNAVAILABLE errors that commonly happen on T7-Pro devices when writing/reading _DEFAULT registers
 * qRead
 * qReadMany
 * qReadUINT64
@@ -115,6 +117,7 @@ Functions that automatically re-try on flash un-available errors that commonly h
 * qWriteMany
 * qrwMany
 
+### i functions
 Functions that automatically apply "intelligent" result formatting.  Happens on both reads and writes
 * iRead
 * iReadMany
@@ -123,14 +126,16 @@ Functions that automatically apply "intelligent" result formatting.  Happens on 
 * iWriteMany
 * iWriteMultiple
 
+### s functions
 Functions that don't return errors because they automatically return the last-read values.
 * sRead
 * sReadMany
 * sReadMultiple
 
-Other functions:
+### Other functions
 * getCalibrationStatus
 * writeDeviceName
+* and more
 
 Beta/Un-stable functions:
 * updateFirmware

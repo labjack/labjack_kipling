@@ -13,16 +13,6 @@ var device;
 var capturedEvents = [];
 
 var criticalError = false;
-var stopTest = function(test, err) {
-	test.ok(false, err);
-	criticalError = true;
-	test.done();
-};
-
-var deviceFound = false;
-var performTests = true;
-
-var DEBUG_TEST = false;
 
 var device_tests = {
 	'setUp': function(callback) {
@@ -42,7 +32,10 @@ var device_tests = {
 		try {
 			device = new device_curator.device();
 		} catch(err) {
-			stopTest(test, err);
+			test.ok(false, err);
+			criticalError = true;
+			test.done();
+			return;
 		}
 		test.done();
 	},
@@ -59,16 +52,13 @@ var device_tests = {
 
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
-			if(DEBUG_TEST) {
-				console.log(
-					"  - Opened T7:",
-					res.productType,
-					res.connectionTypeName,
-					res.serialNumber
-				);
-			}
+			// console.log(
+			// 	"  - Opened T7:",
+			// 	res.productType,
+			// 	res.connectionTypeName,
+			// 	res.serialNumber
+			// );
 			// console.log('in t7_basic_test.js, openDevice', res);
-			deviceFound = true;
 			test.done();
 		}, function(err) {
 			console.log('Failed to open device', err);
@@ -76,7 +66,7 @@ var device_tests = {
 			console.log('Error Code', err);
 			console.log('Error Name', info.string);
 			console.log('Error Description', info.description);
-			performTests = false;
+			criticalError = true;
 			device.destroy();
 			test.done();
 		});
@@ -276,29 +266,4 @@ var device_tests = {
 	}
 };
 
-var tests = {};
-var functionKeys = Object.keys(device_tests);
-var getTest = function(testFunc, key) {
-	var execTest = function(test) {
-		// console.log("  > t7_basic_test - " + key);
-		if(performTests) {
-			testFunc(test);
-		} else {
-			console.log("  * Not Executing!!");
-			try {
-				test.done();
-			} catch(err) {
-				console.log("HERE", err);
-			}
-		}
-	};
-	return execTest;
-};
-functionKeys.forEach(function(functionKey) {
-	if ((functionKey !== 'setUp') && (functionKey !== 'tearDown')) {
-		tests[functionKey] = getTest(device_tests[functionKey], functionKey);
-	} else {
-		tests[functionKey] = device_tests[functionKey];
-	}
-});
-exports.tests = tests;
+exports.tests = device_tests;

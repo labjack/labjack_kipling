@@ -105,11 +105,11 @@ process.on('uncaughtException', function(err) {
 var testGroups = {
 	'get_ljm_version': true,
 	'mock_device': {
-		'mock_device_test': false,
-		'mock_device_defaults_cache_test': false,
-		'mock_device_attrs_test': false,
-		'mock_device_upgrade_test': false,
-		'multiple_mock_device_upgrade_test': false,
+		'mock_device_test': true,
+		'mock_device_defaults_cache_test': true,
+		'mock_device_attrs_test': true,
+		'mock_device_upgrade_test': true,
+		'multiple_mock_device_upgrade_test': true,
 	},
 	'digit': {
 		'digit_basic_test': false,
@@ -120,7 +120,7 @@ var testGroups = {
 	't7': {
 		't7_basic_test': false,
 		't7_array_test': false,
-		't7_check_calibration_test': true,
+		't7_check_calibration_test': false,
 		't7_read_recovery_fw_version_test': false,
 		't7_upgrade_recovery_image_test':  false,
 		't7_upgrade_test':  false,
@@ -195,6 +195,11 @@ var testGroups = {
 		'basic_test': true, // Opens device and shares it with LJLogM and LJStreamM. (Starts and stops the apps to verify functionality)
 	},
 };
+
+if (process.platform !== 'win32') {
+	console.warn('LJLogM-based test not supported on non-Windows platforms');
+	testGroups.external_app_tests.basic_test = false;
+}
 
 
 var fileNameBase = './';
