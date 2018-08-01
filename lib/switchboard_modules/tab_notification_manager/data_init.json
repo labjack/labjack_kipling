@@ -1,5 +1,5 @@
 {
 	"settings": ["message"],
 	"initialMessages": {},
-	"enableBetaFeatures": false,
+	"enableBetaFeatures": false
 }
