@@ -187,6 +187,21 @@
 			"location": "lua_script_debugger/premade_scripts/digital_io_ef/PWM_Library.lua"
 		}]
 	}, {
+		"name": "Counter Examples",
+		"subScripts": [{
+			"name": "107 Counters",
+			"location": "lua_script_debugger/premade_scripts/Counter_Examples/107_Counters.lua"
+		}, {
+			"name": "23 Counters",
+			"location": "lua_script_debugger/premade_scripts/Counter_Examples/23_Counters.lua"
+		}, {	
+			"name": "23 Counters with Debounce",
+			"location": "lua_script_debugger/premade_scripts/Counter_Examples/23_Counters_with_Debounce.lua"
+		}, {
+			"name": "37 Counters",
+			"location": "lua_script_debugger/premade_scripts/Counter_Examples/37_Counters.lua"
+		}]
+	}, {
 		"name": "Get Device Temperature",
 		"location": "lua_script_debugger/premade_scripts/1_Get_Device_Temperature.lua"
 	}, {
