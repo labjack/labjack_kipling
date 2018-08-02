@@ -189,17 +189,17 @@
 	}, {
 		"name": "Counter Examples",
 		"subScripts": [{
-			"name": "107 Counters",
-			"location": "lua_script_debugger/premade_scripts/Counter_Examples/107_Counters.lua"
-		}, {
 			"name": "23 Counters",
-			"location": "lua_script_debugger/premade_scripts/Counter_Examples/23_Counters.lua"
-		}, {	
+			"location": "lua_script_debugger/premade_scripts/counter_examples/23_counters.lua"
+		}, {
 			"name": "23 Counters with Debounce",
-			"location": "lua_script_debugger/premade_scripts/Counter_Examples/23_Counters_with_Debounce.lua"
+			"location": "lua_script_debugger/premade_scripts/counter_examples/23_counters_with_debounce.lua"
 		}, {
 			"name": "37 Counters",
-			"location": "lua_script_debugger/premade_scripts/Counter_Examples/37_Counters.lua"
+			"location": "lua_script_debugger/premade_scripts/counter_examples/37_counters.lua"
+		}, {
+			"name": "107 Counters",
+			"location": "lua_script_debugger/premade_scripts/counter_examples/107_counters.lua"
 		}]
 	}, {
 		"name": "Get Device Temperature",
