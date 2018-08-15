@@ -149,7 +149,7 @@ while true do
         print("Reading:","Unknown State")
       end
       --save the temperature value in User RAM so an external PC running simple logging software can easily read the temperature
-      mbWrite(46000, tempF)  --USER_RAM0_F32
+      mbWrite(46000, 3, tempF)  --USER_RAM0_F32
       curStep = 0
     else
       print("Err")
