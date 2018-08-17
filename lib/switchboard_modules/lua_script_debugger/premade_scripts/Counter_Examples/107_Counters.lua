@@ -58,6 +58,11 @@ print("Create and read 107 counters.")
 local mbRead=MB.R               --Local functions for faster processing
 local mbWrite=MB.W
 
+if (mbRead(60000, 3) ~= 7) then
+  print("This example is only for the T7. Exiting Lua Script.")
+  mbWrite(6000, 1, 0)
+end
+
 local threshold = {}
 
 for i=1, 107 do
