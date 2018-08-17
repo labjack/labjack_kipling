@@ -32,6 +32,11 @@ print("Create and read 23 counters.")
 local mbRead=MB.R               --Local functions for faster processing
 local mbWrite=MB.W
 
+if (mbRead(60000, 3) ~= 7) then
+  print("This example is only for the T7. Exiting Lua Script.")
+  mbWrite(6000, 1, 0)
+end
+
 --1 = Rising edge, 0 = falling
 local edge = {}
 for i = 1, 23 do
