@@ -1,9 +1,8 @@
---This program extends the 37 Counters example, adding counters for the
---additional analog inputs of the Mux80 AIN Expansion Board. This example is
---only for the T7 and T7-Pro.
+--The loop runs at about 130 Hz, meaning that frequencies up to about 65 Hz can
+-- be accurately counted.
 --The index of each counter within an array is 1 more than its
---associated counter.  E.g. counter 10 (AIN113) corresponds with an array
---index of 11.
+-- associated counter.  E.g. counter 10 (AIN113) corresponds with an array
+-- index of 11.
 --Counters 0-3 correspond with AIN0-AIN3
 --Counters 4-13 correspond with AIN107-116 as the following:
 	--Counter:  4             Channel:  AIN107
