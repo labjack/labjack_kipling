@@ -27,6 +27,7 @@ while true do
     OutputVoltage = ( (math.sin(rads) ) * amplitude) + offset
     rads = rads + rad_step
     mbWrite(1000, 3, OutputVoltage)            --Set DAC0. Address is 1000, type is 3
+    mbWrite(46000, 3, OutputVoltage)        -- Set register "USER_RAM0_F32".  Address 46000, type 3
     print(OutputVoltage)
   end
 end
