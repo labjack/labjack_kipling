@@ -1,7 +1,8 @@
 --This program demonstrates how to configure counters, with debounce, using DIO
---channels. The debounce time for each counter will be between 20 and 40
---milliseconds. The debounce time is determined by the duration of the interval
---and when in the interval the first input is received.
+--channels. The debounce time for each counter will be between debounceInt and 
+--2*debounceInt milliseconds. The debounce time is determined by the duration
+--of the interval and when in the interval the first input is received.
+--This example is only for the T7 and T7-Pro.
 
 --Array indeces 1-23 correspond with DIO0-22 as the following:
   --Index:  1             Channel:  FIO0  (DIO0)
@@ -28,8 +29,10 @@
   --Index:  22            Channel:  MIO1  (DIO21)
   --Index:  23            Channel:  MIO2  (DIO22)
 
+
 print("Create and read 23 counters with debounce.")
 
+local debounceInt = 50  --50 ms debounce interval
 local mbRead=MB.R               --Local functions for faster processing
 local mbWrite=MB.W
 
@@ -92,7 +95,7 @@ for i=1, 23 do
   recentIncr[i] = 0
 end
 
-LJ.IntervalConfig(0, 20)          --set interval to 20ms
+LJ.IntervalConfig(0, debounceInt)          --set interval to debounceInt (ms)
 local checkInterval=LJ.CheckInterval
 
 while true do
