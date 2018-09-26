@@ -202,6 +202,15 @@
 			"location": "lua_script_debugger/premade_scripts/counter_examples/107_counters.lua"
 		}]
 	}, {
+		"name": "RTC & Device Time",
+		"subScripts": [{
+			"name": "Print Device Time",
+			"location": "lua_script_debugger/premade_scripts/RTC_and_Device_Time/print_device_time.lua"
+		}, {
+			"name": "Num Sec Since Epoch",
+			"location": "lua_script_debugger/premade_scripts/RTC_and_Device_Time/num_seconds_since_epoch.lua"
+		}]
+	}, {
 		"name": "Get Device Temperature",
 		"location": "lua_script_debugger/premade_scripts/1_Get_Device_Temperature.lua"
 	}, {
