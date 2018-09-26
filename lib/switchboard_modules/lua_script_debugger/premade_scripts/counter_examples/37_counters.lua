@@ -1,5 +1,4 @@
---This program demonstrates how to use AINs as counters, building onto the
---23 Counters example. This example is only for the T7 and T7-Pro.
+--This program demonstrates how to use AINs as counters.
 --Most commonly users should throttle their code execution using the functions:
 --'LJ.IntervalConfig(0, 1000)', and 'if LJ.CheckInterval(0) then' ...
 --Array indeces 1-14 correspond with AIN0-13
@@ -27,7 +26,6 @@
   --Index:  35            Channel:  MIO0  (DIO20)
   --Index:  36            Channel:  MIO1  (DIO21)
   --Index:  37            Channel:  MIO2  (DIO22)
-
 
 print("Create and read 37 counters.")
 
