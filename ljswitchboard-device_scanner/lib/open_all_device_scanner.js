@@ -1086,7 +1086,8 @@ function openAllDeviceScanner() {
                 ethInfo = createDeviceConnectionObj(
                     deviceInfo.dt,
                     deviceInfo.ct,
-                    deviceInfo.ip
+                    // deviceInfo.ip
+                    deviceInfo.ethernetIP
                 );
                 ethInfo.isScanned = true;
                 ethInfo.insertionMethod = 'scan';
@@ -1101,7 +1102,8 @@ function openAllDeviceScanner() {
                 wifiInfo = createDeviceConnectionObj(
                     deviceInfo.dt,
                     deviceInfo.ct,
-                    deviceInfo.ip
+                    // deviceInfo.ip
+                    deviceInfo.wifiIP
                 );
                 wifiInfo.isScanned = true;
                 wifiInfo.insertionMethod = 'scan';
