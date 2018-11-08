@@ -18,6 +18,7 @@ exports.firmwareLinks = {
 		'1.0218': 'https://labjack.com/sites/default/files/firmware/T7firmware_010218_2017-01-05.bin',
 		'1.0225': 'https://labjack.com/sites/default/files/firmware/T7firmware_010225_2017-04-04_0.bin',
 		'1.0242': 'https://labjack.com/sites/default/files/firmware/T7firmware_010242_2017-10-27_3.bin',
+		'1.0255': 'https://labjack.com/sites/default/files/firmware/T7firmware_010255_2018-06-28_0.bin',
 	},
 	'Digit': {},
 	'T4': {
