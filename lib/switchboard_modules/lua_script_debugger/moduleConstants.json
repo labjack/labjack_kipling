@@ -33,6 +33,9 @@
 	}, {
 		"name": "T4 Examples",
 		"subScripts": [{
+			"name": "T4 Basic I/O",
+			"location": "lua_script_debugger/premade_scripts/T4/t4_basic_io.lua"
+		}, {
 			"name": "SPI Loop-Back",
 			"location": "lua_script_debugger/premade_scripts/T4/spi_loop_back.lua"
 		}, {
