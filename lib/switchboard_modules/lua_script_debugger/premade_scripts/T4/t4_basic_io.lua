@@ -48,8 +48,8 @@ while true do
 		MB.W(2005, 0, dioState)
 		
 		print('Set DAC0 to:', dacVal)
-    print('Set FIO5 to:', dioState)
-    print('') -- Print a new-line
+    		print('Set FIO5 to:', dioState)
+    		print('') -- Print a new-line
 	end
 end
 
