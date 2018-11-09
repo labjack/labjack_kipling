@@ -2,7 +2,7 @@ print("T4 Basic I/O Example")
 
 -- This is a basic lua script example that interacts with analog and digital I/O
 -- on the T4 once per second.  During initialization, all of the flexible I/O
--- lines get configured as digital I/O.  Once running, twice per second, an
+-- lines get configured as digital I/O.  Once running, once per second, an
 -- analog value is read from AIN0 and written to DAC0.  FIO4 is read and its
 -- state is written to FIO5.
 
