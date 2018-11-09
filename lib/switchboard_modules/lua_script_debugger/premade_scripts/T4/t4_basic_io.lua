@@ -17,7 +17,7 @@ end
 print('Val:', 0x0F0)
 MB.W(2880, 1, 0x000)
 
--- Set up a 0.5 second timer
+-- Set up a 1 second timer
 LJ.IntervalConfig(0, 1000)
 
 -- define used variables.
