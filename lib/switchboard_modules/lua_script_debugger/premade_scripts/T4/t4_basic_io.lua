@@ -15,7 +15,8 @@ end
 
 -- Configure flexible I/O lines as digital inputs and outputs.
 print('Val:', 0x0F0)
-MB.W(2880, 1, 0x000)
+MB.W(2880, 1, 0x000) -- Write to the DIO_ANALOG_ENABLE register: https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
+-- to configure all flexible I/O lines (FIO4->FIO7 and EIO0->EIO3)
 
 -- Set up a 1 second timer
 LJ.IntervalConfig(0, 1000)
