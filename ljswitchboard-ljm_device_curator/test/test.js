@@ -168,6 +168,9 @@ var testGroups = {
 	'production_line': {
 		'check_t7_pro_versions': false,
 		'check_t7_pro_versions_flex_fw': false,
+		'mult_upgrade_recovery_firmware': false,
+		'mult_upgrade_primary_firmware': false,
+		'mult_install_calibration_firmware': false,
 	},
 
 	// These are T4 specific tests.
@@ -192,7 +195,7 @@ var testGroups = {
 		'basic_test': false,
 	},
 	'external_app_tests': {
-		'basic_test': true, // Opens device and shares it with LJLogM and LJStreamM. (Starts and stops the apps to verify functionality)
+		'basic_test': false, // Opens device and shares it with LJLogM and LJStreamM. (Starts and stops the apps to verify functionality)
 	},
 };
 

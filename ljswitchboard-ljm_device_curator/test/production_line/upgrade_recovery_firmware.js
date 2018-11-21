@@ -7,6 +7,7 @@ var labjack_nodejs = require('labjack-nodejs');
 var ljDevice = labjack_nodejs.getDeviceRef();
 var ljm = labjack_nodejs.driver();
 var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+var async = require('async');
 
 
 var device;
