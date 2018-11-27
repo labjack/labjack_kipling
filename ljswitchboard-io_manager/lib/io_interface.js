@@ -14,7 +14,6 @@ var get_cwd = require('./common/get_cwd');
 // Include the io controllers
 var driver_controller = require('./controllers/driver_controller');
 var device_controller = require('./controllers/device_controller');
-var logger_controller = require('./controllers/logger_controller');
 var file_io_controller = require('./controllers/file_io_controller');
 
 // Include the LJM installation verification function
@@ -35,7 +34,7 @@ function runGarbageCollector() {
 			global.gc();
 		}
 	}
-};
+}
 var io_interface_gc = setInterval(runGarbageCollector, 5000);
 
 function createIOInterface() {
@@ -45,7 +44,6 @@ function createIOInterface() {
 
 	this.driver_controller = null;
 	this.device_controller = null;
-	this.logger_controller = null;
 	this.file_io_controller = null;
 
 	this.DEBUG_SUBPROCESS_START = false;
@@ -66,9 +64,6 @@ function createIOInterface() {
 	};
 	var createDeviceController = function() {
 		self.device_controller = new device_controller.createNewDeviceController(self);
-	};
-	var createLoggerController = function() {
-		self.logger_controller = new logger_controller.createNewLoggerController(self);
 	};
 	var createFileIOController = function() {
 		self.file_io_controller = new file_io_controller.createNewFileIOController(self);
@@ -367,7 +362,7 @@ function createIOInterface() {
 		// version = '0_10_35';
 		var version = '6_6_0';
 		version = {
-			'win32': '6_6_0',
+			'win32': '8_9_3',
 			'darwin': '8_9_1',
 			'linux': '5_6_0'
 		}[os];
@@ -491,7 +486,6 @@ function createIOInterface() {
 		// Create Controllers
 		createDriverController();
 		createDeviceController();
-		// createLoggerController();
 		// createFileIOController();
 
 		var options = {
@@ -550,11 +544,10 @@ function createIOInterface() {
 		})
 		.then(getDriverConstants)
 		.then(function(res) {
-			console.log('Initializing Controllers...');
+			// console.log('Initializing Controllers... (io_interface.js)');
 			// Initialize Controllers
 			self.driver_controller.init()
 			.then(self.device_controller.init)
-			// .then(self.logger_controller.init)
 			// .then(self.file_io_controller.init)
 			.then(defered.resolve);
 
@@ -723,9 +716,6 @@ function createIOInterface() {
 	};
 	this.getDeviceController = function() {
 		return self.device_controller;
-	};
-	this.getLoggerController = function() {
-		return self.logger_controller;
 	};
 	this.getFileIOController = function() {
 		return self.file_io_controller;

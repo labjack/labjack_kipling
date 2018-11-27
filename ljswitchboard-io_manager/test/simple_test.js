@@ -88,7 +88,7 @@ exports.tests = {
 			'deviceType': 'LJM_dtT7',
 			'connectionType': 'LJM_ctEthernet',
 			'identifier': 'LJM_idANY',
-			'mockDevice': false
+			'mockDevice': true
 		};
 
 		device_controller.openDevice(params)

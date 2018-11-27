@@ -64,7 +64,7 @@ function runGarbageCollector() {
 			global.gc();
 		}
 	}
-};
+}
 var outputCrashLogBuffer = [];
 var clearProcessTimers = function() {
 	if(io_delegator_gc) {
@@ -114,7 +114,7 @@ function detectIfProcessShouldQuit() {
 	}
 	// console.log('Typeof process.send', typeof(process.send));
 	// console.log('cwd', process.cwd());
-};
+}
 detectIfProcessShouldQuit();
 var io_delegator_gc = setInterval(runGarbageCollector, 5000);
 var procesQuitChecker = setInterval(detectIfProcessShouldQuit, 5000);
@@ -150,7 +150,7 @@ function createIODelegator(slave_process) {
 			defered.resolve(m);
 		} else {
 			print('sendReceive message sent to invalid endpoint', m.endpoint);
-			print('valid endpoints', self.endpoints)
+			print('valid endpoints', self.endpoints);
 			defered.reject(m);
 		}
 		return defered.promise;

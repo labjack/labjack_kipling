@@ -135,7 +135,7 @@ function createSingleDeviceInterface() {
 			'send': send
 		};
 
-		console.log('sdi.js end of establishLink')
+		console.log('sdi.js end of establishLink');
 		defered.resolve(link);
 		return defered.promise;
 	};

@@ -23,6 +23,43 @@ var data_parser = require('ljswitchboard-data_parser');
 var modbus_map = require('ljswitchboard-modbus_map');
 var ljmConstants = modbus_map.getConstants();
 
+var simple_logger = require('ljswitchboard-simple_logger');
+
+
+var ENABLE_PRINTING = false;
+function print() {
+	if(ENABLE_DEBUG_LOG) {
+		var dataToPrint = [];
+		dataToPrint.push('(device_keeper.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+var ENABLE_DEBUG_LOGGER = false;
+function debugLogger() {
+	if(ENABLE_DEBUG_LOGGER) {
+		var dataToPrint = [];
+		dataToPrint.push('(device_keeper.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+var ENABLE_NEW_LOGGER_DATA_REPORTING = false;
+function printNewData() {
+	if(ENABLE_NEW_LOGGER_DATA_REPORTING) {
+		var dataToPrint = [];
+		dataToPrint.push('(device_keeper.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+
 
 function createDeviceKeeper(io_delegator, link) {
 	var send = link.send;
@@ -83,8 +120,8 @@ function createDeviceKeeper(io_delegator, link) {
 	};
 
 
-	/********************* Exposed Functions **********************************/
 
+	/********************* Exposed Functions **********************************/
 	/**
 	 *	Function that gets called to open a new device.  It uses the 
 	 *	accessory device_generator.js file to create device objects and abstract
@@ -648,6 +685,188 @@ function createDeviceKeeper(io_delegator, link) {
 		var defered = q.defer();
 		deviceScanner.addMockDevice(deviceInfo)
 		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+
+
+	/* Logger Functions/Logic */
+	this.simpleLogger;
+	this.logConfigs;
+
+	function getLoggerCuratedDeviceArray() {
+		var deviceListing = []
+		var devKeys = Object.keys(self.devices);
+		devKeys.forEach(function(devKey) {
+			deviceListing.push(self.devices[devKey].device);
+		});
+		return deviceListing;
+	}
+
+	function attachLoggerListeners(loggerObject) {
+		// console.log('--- Attaching logger listeners...',simple_logger);
+		// console.log('');
+		var eventMap = simple_logger.eventList;
+		var eventKeys = Object.keys(eventMap);
+		var ignoreErrorsList = [];
+
+		eventKeys.forEach(function(eventKey) {
+			var key = eventMap[eventKey];
+			loggerObject.on(key, function loggerEvtListener(data) {
+				// Send event to master process.
+				sendEvent(eventKey, data);
+
+				// printNewData('Captured Event', key, data);
+
+				// if(ignoreErrorsList.indexOf(key) < 0) {
+				// 	debugLogger('Captured Event!!', key, data);
+				// }
+				// var handeledEvent = false
+				// print('Captured Event', key, data, Object.keys(data));
+				// if(key === 'NEW_VIEW_DATA') {
+				// 	if(data.view_type === 'current_values') {
+				// 		printCurValsData('New View Data', {
+				// 			data: data.data_cache
+				// 		});
+				// 		handeledEvent = true;
+				// 	} else if(data.view_type === 'basic_graph') {
+				// 		printNewData('New Graph Data', {
+				// 			numValsLogged: data.data_cache.length
+				// 		});
+				// 		handeledEvent = true;
+				// 	} else {
+				// 		console.error('un-handled... data.view_type', data.view_type)
+				// 	}
+				// } else if(key === 'CONFIGURATION_SUCCESSFUL') {
+				// 	// Long output... block for now...
+				// 	handeledEvent = true;
+				// } else {
+				// 	// console.log('un-handled... key', key)
+				// }
+				// if(!handeledEvent) {
+				// 	printNewData('Captured Event', key, data);
+				// }
+
+			});
+		});
+	}
+
+	this.initializeLogger = function() {
+		debugLogger('--- In Func: initializeLogger');
+		var defered = q.defer();
+
+		self.simpleLogger = simple_logger.create();
+		attachLoggerListeners(self.simpleLogger);
+
+		self.simpleLogger.initialize()
+		.then(function(res) {
+			debugLogger('--- Logger Initialized',res);
+			defered.resolve();
+		}, function(err) {
+			console.error('Failed to initialize the logger',err);
+			defered.resolve();
+		});
+		return defered.promise;
+	};
+	this.updateLoggerDeviceListing = function() {
+		debugLogger('--- In Func: updateDeviceListing');
+		debugLogger('Connected Devices', self.devices);
+		var defered = q.defer();
+
+		self.simpleLogger.updateDeviceListing(getLoggerCuratedDeviceArray())
+		.then(function(res) {
+			debugLogger('Device listing has been passwd to the logger',res);
+			defered.resolve();
+		}, function(err) {
+			console.error('Failed to save the device listing to the logger',err);
+			defered.resolve();
+		});
+		return defered.promise;
+	};
+	this.configureLogger = function() {
+		debugLogger('--- In Func: configureLogger');
+		console.log('TODO: IMPLEMENT ME! (device_keeper:configureLogger).')
+		var defered = q.defer();
+
+		defered.resolve();
+		
+		return defered.promise;
+	};
+
+	// This func configures logger with hard-coded configs for demo
+	// purposes.
+	this.configLoggerWithBasicConfigs = function(cwd,name) {
+		debugLogger('--- In Func: configLoggerWithBasicConfigs', cwd);
+		var defered = q.defer();
+		
+		self.logConfigs = simple_logger.generateBasicConfig({
+			'same_vals_all_devices': true,
+			'registers': ['AIN0','AIN1'],
+			'update_rate_ms': 100,
+		},getLoggerCuratedDeviceArray());
+		
+		// Over-write config object default name & file prefix.
+		self.logConfigs.logging_config.name = name;
+		self.logConfigs.logging_config.file_prefix = name;
+
+		// Over-write data separator
+		self.logConfigs.logging_config.value_separator = ',\t';
+
+		// Can be configured at the group or log level.  Group level over-writes
+		// log level.
+		// self.logConfigs.basic_data_group.logging_options.value_separator = ',\t';
+
+		self.simpleLogger.configureLogger({
+			configType: 'object',
+			configData: self.logConfigs,
+			filePath: cwd
+		})
+		.then(function(res) {
+			debugLogger('Logger has been configured.',res);
+			defered.resolve();
+		}, function(err) {
+			console.error('Logger failed to be configured.',err);
+			defered.resolve();
+		});
+		return defered.promise;
+	};
+	function onStoppedHandler(stopData) {
+		debugLogger('Logger Stopped');
+	}
+	this.startLogger = function() {
+		debugLogger('--- In Func: startLogger');
+		var defered = q.defer();
+		// self.simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
+		// 	debugLogger('Logger Stopped');
+		// 	// console.log('(hello_world.js) Logger has stopped!!')
+		// 	defered.resolve();
+		// });
+		// self.simpleLogger.once(eventMap.STOPPED_LOGGER, onStoppedHandler);
+		
+
+		self.simpleLogger.startLogger()
+		.then(function succ() {
+			debugLogger('Logger Started');
+			defered.resolve();
+		}, function err() {
+			debugLogger('Logger Started');
+			defered.resolve();
+		});
+
+		return defered.promise;
+	};
+	this.stopLogger = function() {
+		debugLogger('--- In Func: stopLogger');
+		var defered = q.defer();
+
+		self.simpleLogger.stopLogger()
+		.then(function succ() {
+			debugLogger('Logger Stopped-succ');
+			defered.resolve();
+		}, function err() {
+			debugLogger('Logger Stopped-err');
+			defered.resolve();
+		});
+
 		return defered.promise;
 	};
 

@@ -150,6 +150,26 @@ function createDeviceController(io_interface) {
 	this.addMockDevice = function(deviceInfo) {
 		return callFunc('addMockDevice', [deviceInfo]);
 	};
+	this.initializeLogger = function() {
+		return callFunc('initializeLogger');
+	};
+	this.updateLoggerDeviceListing = function() {
+		return callFunc('updateLoggerDeviceListing');
+	};
+	this.configureLogger = function() {
+		return callFunc('configureLogger');
+	};
+	// This func configures logger with hard-coded configs for demo
+	// purposes.
+	this.configLoggerWithBasicConfigs = function(cwd, name) {
+		return callFunc('configLoggerWithBasicConfigs', [cwd, name]);
+	};
+	this.startLogger = function() {
+		return callFunc('startLogger');
+	};
+	this.stopLogger = function() {
+		return callFunc('stopLogger');
+	};
 
 	var getCachedDeviceObject = function(key) {
 		var defered = q.defer();

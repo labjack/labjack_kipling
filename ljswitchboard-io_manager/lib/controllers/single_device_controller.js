@@ -16,7 +16,7 @@ function createSingleDeviceController(single_device_interface) {
 	var saveLink = function(link) {
 		var defered = q.defer();
 
-		console.log("in sdc.js saveLink")
+		console.log("in sdc.js saveLink");
 		callFunc = link.callFunc;
 		sendReceive = link.sendReceive;
 		sendMessage = link.sendMessage;

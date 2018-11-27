@@ -73,7 +73,7 @@ var mockDevices = [{
 		},
 }];
 var printDeviceInfo = function(device) {
-	console.log('Attributes:')
+	console.log('Attributes:');
 	var attributes = device.savedAttributes;
 	var attrKeys = Object.keys(attributes);
 	attrKeys.forEach(function(key) {
