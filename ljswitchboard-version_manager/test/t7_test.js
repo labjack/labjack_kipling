@@ -89,7 +89,7 @@ exports.tests = {
 		
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
-		printVersions(data);
+		// printVersions(data);
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;

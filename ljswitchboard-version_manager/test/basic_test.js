@@ -103,7 +103,7 @@ exports.tests = {
 		
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
-		printVersions(data);
+		// printVersions(data);
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;
@@ -126,7 +126,7 @@ exports.tests = {
 		
 		// Print out data
 		// console.log(' - T4 Test Output:', JSON.stringify(data, null, 2));
-		printVersions(data);
+		// printVersions(data);
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;
@@ -148,7 +148,7 @@ exports.tests = {
 		
 		// Print out data
 		// console.log(' - Digit Test Output:', JSON.stringify(data, null, 2));
-		printVersions(data);
+		// printVersions(data);
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;
@@ -165,7 +165,7 @@ exports.tests = {
 		
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
-		printVersions(data);
+		// printVersions(data);
 		test.ok(data.isValid, 'LJM Versions data should be valid');
 		var requiredKeys = ['current_win', 'current_mac', 'current_linux32', 'current_linux64'];
 		var givenKeys = Object.keys(data);
@@ -183,7 +183,7 @@ exports.tests = {
 
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
-		printVersions(data);
+		// printVersions(data);
 		test.ok(data.isValid, 'Kipling Versions data should be valid');
 		var requiredKeys = ['current_win', 'current_mac', 'current_linux32', 'current_linux64'];
 		var givenKeys = Object.keys(data);
