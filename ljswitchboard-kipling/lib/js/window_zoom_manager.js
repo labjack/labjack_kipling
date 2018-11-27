@@ -3,6 +3,9 @@
 var q = require('q');
 var async = require('async');
 
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
+
 // Define the window zoom manager
 function createWindowZoomManager() {
     this.zoomLevel = 1;
@@ -16,11 +19,15 @@ function createWindowZoomManager() {
     function zoomIn() {
         self.zoomLevel = self.zoomLevel + self.zoomIncrement;
         window.document.body.style.zoom = self.zoomLevel;
+        self.emit('zoomIn', self.zoomLevel);
+        self.emit('zoom', self.zoomLevel);
     }
     
     function zoomOut() {
         self.zoomLevel = self.zoomLevel - self.zoomIncrement;
         window.document.body.style.zoom = self.zoomLevel;
+        self.emit('zoomOut', self.zoomLevel);
+        self.emit('zoom', self.zoomLevel);
     }
     
 
@@ -38,4 +45,6 @@ function createWindowZoomManager() {
     };
     var self = this;
 }
+util.inherits(createWindowZoomManager, EventEmitter);
+
 var WINDOW_ZOOM_MANAGER = new createWindowZoomManager();
