@@ -148,7 +148,10 @@ function cmdApp() {
 	function openFirstFoundDevice() {
 		var defered = q.defer();
 		function openSuccess(data) {
-			console.log('Opened Device Attributes', Object.keys(data));
+			// console.log('Opened Device Attributes', Object.keys(data));
+			console.log('Opened Device Saved Attributes', Object.keys(data.savedAttributes));
+			console.log('Opened Device:');
+			// data.savedAttributes.ser
 			// console.log('In openSuccess');
 			replServer.context.device = data;
 			defered.resolve();
@@ -182,7 +185,7 @@ function cmdApp() {
 		var defered = q.defer();
 
 		function openSuccess(data) {
-			console.log('Opened Device Attributes', Object.keys(data));
+			// console.log('Opened Device Attributes', Object.keys(data));
 			var sn = data.savedAttributes.serialNumber.toString();
 			var dt = data.savedAttributes.deviceTypeName;
 			var ct = data.savedAttributes.connectionTypeName;
@@ -200,7 +203,7 @@ function cmdApp() {
 			console.log('In openError', data);
 			defered.resolve();
 		}
-		console.log('Device Data to open', deviceData);
+		console.log('Device Data to open', Object.keys(deviceData));
 		var openParameters = {};
 		openParameters = {
 			'deviceType': deviceData.dt,
