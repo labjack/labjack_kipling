@@ -196,6 +196,14 @@ var firmwareVersionRounder = function(res) {
 	};
 };
 
+var hardwareVersionRounder = function(res) {
+	var val = parseFloat(res.toFixed(2));
+	return {
+		'val': val,
+		'str': val.toPrecision(3),
+	};
+};
+
 function bitmaskParser(res) {
 	return {
 		'res': res,
@@ -213,6 +221,9 @@ var SHARED_LIST = {
 	},
 	'BOOTLOADER_VERSION': {
 		'decode': firmwareVersionRounder,
+	},
+	'HARDWARE_VERSION': {
+		'decode': hardwareVersionRounder,
 	},
 	'DIO_STATE': {
 		'decode': bitmaskParser,

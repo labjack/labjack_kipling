@@ -397,9 +397,11 @@ exports.tests = {
 	},
 	'check _VERSION Parsers': function(test) {
 		var vals = [
-			{'reg': 'FIRMWARE_VERSION', 'val': 1.01234567, 'res': 1.0123},
-			{'reg': 'BOOTLOADER_VERSION', 'val': 1.01234567, 'res': 1.0123},
-			{'reg': 'WIFI_VERSION', 'val': 1.01234567, 'res': 1.0123},
+			{'reg': 'FIRMWARE_VERSION', 'val': 1.01234567, 'res': 1.0123, 'str': '1.0123'},
+			{'reg': 'BOOTLOADER_VERSION', 'val': 1.01234567, 'res': 1.0123, 'str': '1.0123'},
+			{'reg': 'WIFI_VERSION', 'val': 1.01234567, 'res': 1.0123, 'str': '1.0123'},
+			{'reg': 'HARDWARE_VERSION', 'val': 1.01234567, 'res': 1.01, 'str': '1.01'},
+			{'reg': 'HARDWARE_VERSION', 'val': 1.30001, 'res': 1.30, 'str': '1.30'},
 		];
 		var results = [];
 		var reqResults = [];
@@ -412,7 +414,7 @@ exports.tests = {
 				'address': constants.getAddressInfo(reg).data.address,
 				'res': val.val,
 				'val': val.res,
-				'str': val.res.toString()
+				'str': val.str,
 			});
 		});
 
