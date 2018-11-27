@@ -60,7 +60,7 @@ function createFileBrowser() {
         });
 
         self.fileBrowserDialog.trigger('click');
-    };
+    }
     this.browseForFile = function(options) {
         var fileFilters = '';
         var workingDirectory = fs_facade.getDefaultFilePath();
@@ -185,7 +185,7 @@ function createFileBrowser() {
         });
 
         self.fileSaveDialog.trigger('click');
-    };
+    }
     this.saveFile = function(options) {
         var fileFilters = '';
         var suggestedName = '';

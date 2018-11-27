@@ -9,7 +9,7 @@ var win = gui.Window.get();
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
 var window_manager = require('ljswitchboard-window_manager');
-var GLOBAL_SUBPROCESS_REFERENCE = undefined;
+var GLOBAL_SUBPROCESS_REFERENCE;
 var GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
 var UPDATE_K3_WINDOW_VERSION_NUMBER_STR = function(str) {
 	win.title = 'Kipling '+str;
@@ -325,8 +325,8 @@ var getHandleError = function(msg) {
 			}
 		}
 
+		var defered = q.defer();
 		if(reportError) {
-			var defered = q.defer();
 			console.error('Error on step', msg);
 			defered.reject({
 				'loadError': true,

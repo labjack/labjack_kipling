@@ -450,7 +450,7 @@ function keyboardEventHandler() {
         q_KEY, r_KEY, s_KEY, w_KEY];
 
     this.convertKeyCode = function(code) {
-        if(typeof(self.keyMap[code]) !== 'unified') {
+        if(typeof(self.keyMap[code]) !== 'undefined') {
             return self.keyMap[code].key;
         } else {
             return '';
