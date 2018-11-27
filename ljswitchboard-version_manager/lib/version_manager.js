@@ -183,7 +183,7 @@ function labjackVersionManager() {
             if(isValid) {
                 var platformSelector = {
                     'win': '.platform-windows',
-                    'mac': '.platform-mac-os-x',
+                    'mac': '.platform-macos',
                     'linux32': '.platform-linux-32-bit',
                     'linux64': '.platform-linux-64-bit',
                 }[platformType];
