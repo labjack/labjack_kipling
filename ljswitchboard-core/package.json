@@ -32,7 +32,7 @@
     "q": "~1"
   },
   "devDependencies": {
-    "nodeunit": "0.9.x"
+    "nodeunit": "0.11.x"
   },
   "directories": {
     "lib": "./lib"
