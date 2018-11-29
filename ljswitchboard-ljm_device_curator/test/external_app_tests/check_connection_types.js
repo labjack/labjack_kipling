@@ -84,7 +84,7 @@ exports.tests = {
 	},
 	'openDevices': function(test) {
         var td = {
-            'dt': 'LJM_dtT7',
+            'dt': 'LJM_dtANY',
             'ct': 'LJM_ctUSB',
             'id': 'LJM_idANY',
             // 'ct': 'LJM_ctEthernet',
@@ -123,35 +123,27 @@ exports.tests = {
             test.done();
         });
 	},
-    'open device in LJLogM': function(test) {
-        device.openDeviceInExternalApplication('LJLogM','USB')
+    'check device connection types': function(test) {
+        device.cGetAvailableConnectionTypes()
         .then(function(res) {
-            test.ok(got_DEVICE_RELEASED, 'should have gotten DEVICE_RELEASED cb');
-            test.ok(got_DEVICE_ACQUIRED, 'should have gotten DEVICE_ACQUIRED cb');
-            console.log('  - Num Times Attrs Changed (3 is expected but not required)'.green, numAttrsChanged);
-            // console.log('Open in App (external_app_tests/basic_test.js)', res);
+            console.log('Available CTs'.green, res);
             test.done();
         }, function(err) {
             test.done();
         });
     },
-    'open device in LJLogM (2)': function(test) {
-        console.log('  - NOTE: Trying to open an Ethernet connection...'.yellow);
-        device.openDeviceInExternalApplicationOptions({
-            ct: 'Ethernet',
-            preventCloseAndOpen: true,
-            appName: 'LJLogM',
-        })
-        .then(function(res) {
-            test.ok(got_DEVICE_RELEASED, 'should have gotten DEVICE_RELEASED cb');
-            test.ok(got_DEVICE_ACQUIRED, 'should have gotten DEVICE_ACQUIRED cb');
-            console.log('  - Num Times Attrs Changed (3 is expected but not required)'.green, numAttrsChanged);
-            // console.log('Open in App (external_app_tests/basic_test.js)', res);
-            test.done();
-        }, function(err) {
-            test.done();
-        });
-    },
+    // 'open device in LJLogM': function(test) {
+    //     device.openDeviceInExternalApplication('LJLogM','USB')
+    //     .then(function(res) {
+    //         test.ok(got_DEVICE_RELEASED, 'should have gotten DEVICE_RELEASED cb');
+    //         test.ok(got_DEVICE_ACQUIRED, 'should have gotten DEVICE_ACQUIRED cb');
+    //         console.log('Num Times Attrs Changed'.green, numAttrsChanged);
+    //         // console.log('Open in App (external_app_tests/basic_test.js)', res);
+    //         test.done();
+    //     }, function(err) {
+    //         test.done();
+    //     });
+    // },
     // 'open device in LJLogM(2)': function(test) {
     //     device.openDeviceInLJLogM()
     //     .then(function(res) {

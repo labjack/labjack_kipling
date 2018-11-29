@@ -196,6 +196,7 @@ var testGroups = {
 	},
 	'external_app_tests': {
 		'basic_test': false, // Opens device and shares it with LJLogM and LJStreamM. (Starts and stops the apps to verify functionality)
+		'check_connection_types': false, // This test checks the available connection types of the first found LJ USB device.
 	},
 };
 

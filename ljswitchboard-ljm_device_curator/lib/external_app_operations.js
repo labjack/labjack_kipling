@@ -64,6 +64,10 @@ function getExternalAppOperations(self) {
 
     function createOpenDeviceInExtAppBundle(options) {
         var ctStr;
+        var preventCloseAndOpen = false;
+        var appName = 'NONE';
+
+        // Check "connection type"
         if(options.ct) {
             if(options.ct === 'current') {
                 ctStr = self.savedAttributes.connectionType;
@@ -73,13 +77,24 @@ function getExternalAppOperations(self) {
         } else {
             ctStr = self.savedAttributes.connectionType;
         }
+
+        // Check "preventCloseAndOpen" flag
+        if(typeof(options.preventCloseAndOpen) === 'boolean') {
+            preventCloseAndOpen = options.preventCloseAndOpen;
+        }
+
+        // Check application name option
+        if(options.appName) {
+            appName = options.appName;
+        }
+
         var ct = driver_const.connectionTypes[ctStr];
 
         var bundle = {
-            'appName': options.appName,
+            'appName': appName,
             'appWorkingDir': '',
             'openConfigFilePath': '',
-            'appExePath': appExePaths[options.appName],
+            'appExePath': appExePaths[appName],
             'deviceInfo': {
                 'dt': self.savedAttributes.deviceType,
                 'ct': ct,
@@ -88,6 +103,7 @@ function getExternalAppOperations(self) {
             'ctName': driver_const.CONNECTION_TYPE_NAMES[ct],
             'availableConnections': [],
             'closeAndOpenDevice': true,
+            'preventCloseAndOpen': preventCloseAndOpen,
 
             'currentAppOpenCFG': '',
             'appExists': false,
@@ -138,6 +154,12 @@ function getExternalAppOperations(self) {
             bundle.closeAndOpenDevice = false;
         } else {
             bundle.closeAndOpenDevice = true;
+        }
+
+        // If user specified to disable this feature than make sure the active
+        // device isn't opened/closed.
+        if(bundle.preventCloseAndOpen) {
+            bundle.closeAndOpenDevice = false;
         }
 
         defered.resolve(bundle);
@@ -384,25 +406,9 @@ function getExternalAppOperations(self) {
             }
         };
     }
-	this.openDeviceInExternalApplication = function(ljmApplicationName,ct) {
+    this.openDeviceInExternalApplicationOptions = function(options) {
         var defered = q.defer();
 
-        var connectionType = 'current';
-        if(ct) {
-            if(ct === 'current') {
-                connectionType = ct;
-            } else {
-                try {
-                    connectionType = driver_const.connectionTypes[ct];
-                } catch(err) {
-                    // Do nothing.
-                }
-            }
-        }
-        var options = {
-            'appName': ljmApplicationName,
-            'ct': connectionType,
-        };
         var bundle = createOpenDeviceInExtAppBundle(options);
 
         function onSuccess(successBundle) {
@@ -425,12 +431,39 @@ function getExternalAppOperations(self) {
         .then(onSuccess, onError);
 
         return defered.promise;
-	};
-    this.openDeviceInLJLogM = function(ct) {
-        return self.openDeviceInExternalApplication('LJLogM',ct);
     }
-    this.openDeviceInLJStreamM = function(ct) {
-        return self.openDeviceInExternalApplication('LJStreamM',ct);
+	this.openDeviceInExternalApplication = function(ljmApplicationName,ct, pCO) {
+        
+
+        var connectionType = 'current';
+        if(ct) {
+            if(ct === 'current') {
+                connectionType = ct;
+            } else {
+                try {
+                    connectionType = driver_const.connectionTypes[ct];
+                } catch(err) {
+                    // Do nothing.
+                }
+            }
+        }
+        var preventCloseAndOpen = false;
+        if(typeof(pCO) === 'boolean') {
+            preventCloseAndOpen = pCO;
+        }
+
+        var options = {
+            'appName': ljmApplicationName,
+            'ct': connectionType,
+            'preventCloseAndOpen': preventCloseAndOpen,
+        };
+        return this.openDeviceInExternalApplicationOptions(options);
+	};
+    this.openDeviceInLJLogM = function(ct, pCO) {
+        return self.openDeviceInExternalApplication('LJLogM',ct, pCO);
+    }
+    this.openDeviceInLJStreamM = function(ct, pCO) {
+        return self.openDeviceInExternalApplication('LJStreamM',ct, pCO);
     }
 }
 
