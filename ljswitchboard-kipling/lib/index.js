@@ -115,7 +115,7 @@ function K3_ON_APPLICATION_EXIT_WINDOW_LISTENER(enablePromise) {
 	function closeApp() {
 		var interval;
 		var numWaited = 0;
-		var numToWait = 2;
+		var numToWait = 1;
 		function waitToClose() {
 			if(numWaited < numToWait) {
 				numWaited += 1;

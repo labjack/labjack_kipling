@@ -173,3 +173,21 @@ var TAKE_SCREENSHOTS = function() {
 		});
 	
 };
+
+function CLIPBOARD_FUNCTION_WRAPPER() {
+	var nw = require('nw.gui');
+	var clipboard = nw.Clipboard.get();
+	function get() {
+		return clipboard.get('text');
+	};
+	function set(txt) {
+		clipboard.set(txt,'text');
+	};
+	function clear(){
+		clipboard.clear();
+	}
+	this.get = get;
+	this.set = set;
+	this.clear = clear;
+}
+var CLIPBOARD_MANAGER = new CLIPBOARD_FUNCTION_WRAPPER();

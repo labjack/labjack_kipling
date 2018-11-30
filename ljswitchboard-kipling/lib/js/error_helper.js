@@ -32,7 +32,7 @@ function showInfoMessage(message) {
 	alertMessageHolder.html(message);
 	if(alertMessageObj.css('display') === 'none') {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
-		$('#info-message .close').one('click', hideAlert);
+		$('#info-message .close').one('click', hideInfoMessage);
 	}
 	setTimeout(hideInfoMessage, 5000);
 }
