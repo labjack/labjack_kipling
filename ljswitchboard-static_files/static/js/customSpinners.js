@@ -1,4 +1,7 @@
 function customSpinners(owner, infoArray, writeFunc, updateFunc) {
+    var maxVal = 5.05;
+    var minVal = -0.05;
+
     var dacListerners = {};
     infoArray.forEach(function(info){
         dacListerners[info.spinnerID] = {};
@@ -8,16 +11,16 @@ function customSpinners(owner, infoArray, writeFunc, updateFunc) {
     });
     this.dacListerners = dacListerners;
     this.writeDACSpinner = function(spinner, value) {
-        if(value < 0) {
-            value = 0;
+        if(value < minVal) {
+            value = minVal;
         }
         if(typeof(value) !== 'undefined') {
             spinner.val(value.toFixed(3));
         }
     };
     this.writeSpinner = function(spinner,value) {
-        if(value < 0) {
-            value = 0;
+        if(value < minVal) {
+            value = minVal;
         }
         if(typeof(value) !== 'undefined') {
             spinner.val(value.toFixed(3));
@@ -49,10 +52,10 @@ function customSpinners(owner, infoArray, writeFunc, updateFunc) {
                 var val = element.spinner('value');
                 var reg = self.dacListerners[id].reg;
                 if(typeof(val) === 'number') {
-                    if (val < 0) {
-                        val = 0;
-                    } else if (val > 5) {
-                        val = 5;
+                    if (val < minVal) {
+                        val = minVal;
+                    } else if (val > maxVal) {
+                        val = maxVal;
                     }
                     self.writeSpinner(element,val);
                     writeFunc(reg,val)
@@ -146,8 +149,8 @@ function customSpinners(owner, infoArray, writeFunc, updateFunc) {
         $( ".spinner" ).spinner({
             'step': 0.001,
             'numberFormat': "n",
-            'max': 5,
-            'min': 0,
+            'max': maxVal,
+            'min': minVal,
             'change': self.onVoltageSelectedChange,
             'spin': self.onVoltageSelectedSpin,
             'stop': self.onVoltageSelectedSpinStop
