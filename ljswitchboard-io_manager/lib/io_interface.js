@@ -363,8 +363,13 @@ function createIOInterface() {
 		var version = '6_6_0';
 		version = {
 			'win32': '8_9_4',
+<<<<<<< HEAD
 			'darwin': '8_9_1',
 			'linux': '5_6_0'
+=======
+			'darwin': '8_9_4',
+			'linux': '8_9_4',
+>>>>>>> be9d416bdb136d8ce79507b6cce8ebba2bd934a9
 		}[os];
 
 		// If the labjack-nodejs lib`rary isn't built for the version defined
