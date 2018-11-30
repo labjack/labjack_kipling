@@ -102,13 +102,13 @@ var T7_LIST = {
 	'DIO#(0:22)_EF_READ_A_F': analogFloatReg,
 	'DIO#(0:22)_EF_READ_A_F_AND_RESET': analogFloatReg,
 	'DIO#(0:22)_EF_READ_B_F': analogFloatReg,
-	'DIO#(0:22)_EF_EASY_FREQUENCY_IN': analogFloatReg,
 
 	'TDAC#(0:22)': analogFloatReg,
 	'SBUS#(0:22)_TEMP': analogFloatReg,
 	'SBUS#(0:22)_RH': analogFloatReg,
 	'USER_RAM#(0:39)_F32': analogFloatReg,
 	'USER_RAM_FIFO#(0:3)_DATA_F32': analogFloatReg,
+	'DIO#(0:22)_EF_EASY_FREQUENCY_IN': analogFloatReg,
 
 	'DAC#(0:1)': {
 		'decode': function(val) {
@@ -306,8 +306,9 @@ var T7_LIST = {
 		'decode': function(res) {
 			var pcTime = new Date();
 			var t7Time = new Date(res*1000);
-			var t7TimeStr = t7Time.toLocaleString();
-			var pcTimeStr = pcTime.toLocaleString();
+			// nodejs changed the behavior in ~ node v 8.x.x to revert back to 24hr/UTC time formatting.
+			var t7TimeStr = t7Time.toLocaleString('en-us',{hour12:true});
+			var pcTimeStr = pcTime.toLocaleString('en-us',{hour12:true});
 			var timeDifference = pcTime - t7Time;
 			var timeDiffSec = Number((timeDifference/1000).toFixed(2));
 			return {

@@ -643,6 +643,8 @@ exports.tests = {
 				'timeDifferenceSec': res.timeDifferenceSec,
 			});
 		});
+		// console.log('results', results);
+		// console.log('reqResults', reqResults);
 		test.deepEqual(results, reqResults, 'RTC Registers failed.');
 		test.done();
 	},
