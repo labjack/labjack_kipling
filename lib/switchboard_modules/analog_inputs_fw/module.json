@@ -10,6 +10,7 @@
 		"ainEFTypeSecondaryRegTemplate.html",
 		"ainEFTypeConfigTemplateStr_value.html",
 		"ainEFTypeConfigTemplateStr_modbusRegister.html",
-		"ainEFTypeConfigTemplateStr_select.html"
+		"ainEFTypeConfigTemplateStr_select.html",
+		"ainEFTypeHelperTextTemplate.html"
 	]
 }

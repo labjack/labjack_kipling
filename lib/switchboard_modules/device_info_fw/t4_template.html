@@ -88,6 +88,12 @@
 			Versions
 		</div>
 		<div id="firmware-display-holder" class="device-detail selectableText">
+			Hardware Version: 
+			<span id="firmware-display" class="">
+					{{HARDWARE_VERSION.str}}
+			</span>
+		</div>
+		<div id="firmware-display-holder" class="device-detail selectableText">
 			Firmware Version: 
 			<span id="firmware-display" class="">
 					{{FIRMWARE_VERSION}}
@@ -262,6 +268,10 @@
 		<li><div title="Open the {{deviceTypeName}} Node.js Examples page in your default browser"><a id="lj-link-holder-nodejs-examples" class="lj-link-holder">Node.js</a></div></li>
 		<li><div title="Open the {{deviceTypeName}} More Examples page in your default browser"><a id="lj-link-holder-all-examples" class="lj-link-holder">More</a></div></li>
 	</ul>
+	<h3>Lua Script Examples</h3>
+	<ul>
+		<li><div title="Open the {{deviceTypeName}} Lua Scripting Examples page in your default browser"><a id="lj-link-holder-lua-scripting-examples" class="lj-link-holder">Lua Scripting</a></div></li>
+	</ul>
 	<h3>Programming Resources</h3>
 	<ul>
 		<li><div title="Open the modbus map page in your default browser"><a id="lj-link-holder-modbusMap" class="lj-link-holder">LJM Modbus Map</a></div></li>
@@ -356,6 +366,9 @@
 		}, {
 			'id': '#lj-link-holder-ljmAPIDocs',
 			'url': "https://labjack.com/support/software/api/ljm"
+		}, {
+			'id': '#lj-link-holder-lua-scripting-examples',
+			'url': "https://labjack.com/support/software/examples/lua-scripting"
 		}];
 
 
