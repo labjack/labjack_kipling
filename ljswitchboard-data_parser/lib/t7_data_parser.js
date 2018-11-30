@@ -95,6 +95,14 @@ var T7_LIST = {
 	'AIN#(0:149)_EF_CONFIG_E': analogFloatReg,
 	'AIN#(0:149)_EF_CONFIG_F': analogFloatReg,
 	'AIN#(0:149)_EF_CONFIG_G': analogFloatReg,
+	'AIN#(0:149)_EF_CONFIG_H': analogFloatReg,
+	'AIN#(0:149)_EF_CONFIG_I': analogFloatReg,
+	'AIN#(0:149)_EF_CONFIG_J': analogFloatReg,
+
+	'DIO#(0:22)_EF_READ_A_F': analogFloatReg,
+	'DIO#(0:22)_EF_READ_A_F_AND_RESET': analogFloatReg,
+	'DIO#(0:22)_EF_READ_B_F': analogFloatReg,
+	'DIO#(0:22)_EF_EASY_FREQUENCY_IN': analogFloatReg,
 
 	'DAC#(0:1)': {
 		'decode': function(val) {
