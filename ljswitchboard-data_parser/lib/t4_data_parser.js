@@ -104,6 +104,12 @@ var T4_LIST = {
 	'DIO#(0:22)_EF_READ_B_F': analogFloatReg,
 	'DIO#(0:22)_EF_EASY_FREQUENCY_IN': analogFloatReg,
 
+	'TDAC#(0:22)': analogFloatReg,
+	'SBUS#(0:22)_TEMP': analogFloatReg,
+	'SBUS#(0:22)_RH': analogFloatReg,
+	'USER_RAM#(0:39)_F32': analogFloatReg,
+	'USER_RAM_FIFO#(0:3)_DATA_F32': analogFloatReg,
+
 	'DAC#(0:1)': {
 		'decode': function(val) {
 			var res = {
