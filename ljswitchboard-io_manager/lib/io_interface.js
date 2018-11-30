@@ -362,7 +362,7 @@ function createIOInterface() {
 		// version = '0_10_35';
 		var version = '6_6_0';
 		version = {
-			'win32': '8_9_3',
+			'win32': '8_9_4',
 			'darwin': '8_9_1',
 			'linux': '5_6_0'
 		}[os];
