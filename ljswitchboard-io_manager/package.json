@@ -36,22 +36,22 @@
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-io_manager",
   "dependencies": {
     "async": "~0",
-    "decache": "^4.3.0",
+    "decache": "^4.5.0",
     "dict": "1.4.0",
     "ffi": "*",
-    "handlebars": "^4.0.3",
+    "handlebars": "^4.0.12",
     "json-parser": "0.2.4",
     "labjack-nodejs": "0.0.59",
     "ljmmm-parse": "0.x",
-    "ljswitchboard-data_parser": "0.0.x",
+    "ljswitchboard-data_parser": "0.0.49",
     "ljswitchboard-device_scanner": "0.0.x",
     "ljswitchboard-firmware_verifier": "0.0.x",
-    "ljswitchboard-ljm_device_curator": "0.1.x",
+    "ljswitchboard-ljm_device_curator": "^0.1.19",
     "ljswitchboard-ljm_driver_checker": "0.0.x",
     "ljswitchboard-ljm_driver_constants": "0.0.36",
     "ljswitchboard-ljm_special_addresses": "1.x.x",
     "ljswitchboard-modbus_map": "0.0.x",
-    "ljswitchboard-simple_logger": "0.0.x",
+    "ljswitchboard-simple_logger": "0.0.1",
     "ljswitchboard-version_manager": "0.0.18",
     "process_manager": "0.0.x",
     "q": "^1.5.1",
@@ -59,15 +59,14 @@
     "walk": "^2.3.14"
   },
   "devDependencies": {
-    "colors": "*",
+    "colors": "^1.3.2",
     "fs-extra": "^6.0.1",
     "nodeunit": "0.11.x"
   },
   "custom-deps": {
     "ljswitchboard-device_scanner": "git://github.com/chrisJohn404/ljswitchboard-device_scanner.git#master",
-    "ljswitchboard-simple_logger": "git://github.com/chrisJohn404/ljswitchboard-simple_logger.git#io_manager_integration_issues",
-    "ljswitchboard-ljm_device_curator": "0.1.x",
     "ljswitchboard-simple_logger": "0.0.1",
+    "ljswitchboard-ljm_device_curator": "0.1.x",
     "dont delete": "do not delete"
   },
   "directories": {
