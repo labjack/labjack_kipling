@@ -347,6 +347,22 @@ exports.tests = {
 			{'reg': 'AIN149_EF_READ_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 			{'reg': 'AIN0_EF_CONFIG_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 			{'reg': 'AIN149_EF_CONFIG_G', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+
+			{'reg': 'AIN0_EF_READ_B', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_EF_READ_C', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_EF_READ_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+
+			{'reg': 'AIN0_EF_CONFIG_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_EF_CONFIG_E', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_EF_CONFIG_F', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_EF_CONFIG_G', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_EF_CONFIG_H', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_EF_CONFIG_I', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'AIN0_EF_CONFIG_J', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+
+			{'reg': 'DIO0_EF_READ_A_F', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'DIO0_EF_READ_A_F_AND_RESET', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			{'reg': 'DIO0_EF_READ_B_F', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 		];
 
 		var results = ainValues.map(function(tVal) {
