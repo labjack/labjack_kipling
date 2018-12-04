@@ -27,7 +27,6 @@
   --Index:  22            Channel:  MIO1  (DIO21)
   --Index:  23            Channel:  MIO2  (DIO22)
 
-
 print("Create and read 23 counters.")
 
 local mbRead=MB.R               --Local functions for faster processing
