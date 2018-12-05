@@ -24,6 +24,8 @@ v8: "3.31.31"
 zlib: "1.2.5"
 */
 
+var ENABLE_BREAKS_TO_DEV_NW_31 = false;
+
 console.log('Starting K3, in testK3/index.js');
 
 // Load native UI library
@@ -60,6 +62,14 @@ function initIOManager() {
 		console.log('failed', err);
 	});
 }
+
+if(ENABLE_BREAKS_TO_DEV_NW_31) {
+	// 9/19/2018, this is just before where the app breaks w/ NW 31.
+	console.log('Defined initIOManager()');
+	// TODO: Delete Me.
+	// throw new Error();
+}
+
 // Require the package loader
 // Load the local repository for development purposes
 // console.log('Loading Dev version of the package_loader');
@@ -67,6 +77,12 @@ function initIOManager() {
 // Load the library from the node_module dirctory:
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
+
+if(ENABLE_BREAKS_TO_DEV_NW_31) {
+	// 9/19/2018, this is currently where the app breaks w/ NW 31.
+	console.log('Included ljswitchboard-package_loader');
+	throw new Error();
+}
 
 console.log('Run the command: window_manager.windowManager.managedWindows.kipling.win.show() to force the K3 window to appear.');
 
@@ -99,11 +115,17 @@ window_manager.on(window_manager.eventList.QUITTING_APPLICATION, function() {
 	gui.App.quit();
 });
 
+if(ENABLE_BREAKS_TO_DEV_NW_31) {
+	console.log('Initialized window_manager');
+	throw new Error();
+}
+
+
 var plEvents = package_loader.eventList;
 
 var show3DevTools = function() {
 	window_manager.windowManager.managedWindows.kipling.win.showDevTools();
-}
+};
 
 // Define the splash screen updater
 var createSplashScreenUpdater = function() {
@@ -129,9 +151,18 @@ var createSplashScreenUpdater = function() {
 	};
 	var self = this;
 };
+if(ENABLE_BREAKS_TO_DEV_NW_31) {
+	console.log('Define createSplashScreenUpdater');
+	throw new Error();
+}
+
+// TODO: Re-Integrate
 var splashScreenUpdater = new createSplashScreenUpdater();
 
-
+if(ENABLE_BREAKS_TO_DEV_NW_31) {
+	console.log('Create new SplashScreenUpdater()');
+	throw new Error();
+}
 
 // Attach various event listeners to the package_loader
 // package_loader.on('opened_window', windowManager.addWindow);
@@ -372,9 +403,16 @@ var loadSecondaryPackages = function() {
 
 
 win.on('loaded', function() {
-	console.log('LJSwitchboard Window Loaded!');
-	initializeProgram()
-	.then(loadSecondaryPackages, errorHandler);
+	if(ENABLE_BREAKS_TO_DEV_NW_31) {
+		console.log('LJSwitchboard Window Loaded!');
+
+
+		console.log('Windows has loaded.  Time to initialize program. Yay!');
+		throw new Error();
+	} else {
+		initializeProgram()
+		.then(loadSecondaryPackages, errorHandler);
+	}
 });
 
 
