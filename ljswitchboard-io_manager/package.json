@@ -56,7 +56,8 @@
     "process_manager": "0.x",
     "q": "^1.5.1",
     "ref": "1.3.4",
-    "walk": "^2.3.14"
+    "walk": "^2.3.14",
+    "co": "^4.6.0"
   },
   "devDependencies": {
     "colors": "^1.3.2",
