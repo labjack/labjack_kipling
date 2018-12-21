@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-io_manager",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "A promise based distributed ljm wrapper with extra logging based functionality for the ljswitchboard project",
   "main": "lib/io_manager",
   "scripts": {
@@ -45,7 +45,7 @@
     "labjack-nodejs": "^0.x",
     "ljmmm-parse": "^0.x",
     "ljswitchboard-data_parser": "^0.x",
-    "ljswitchboard-device_scanner": ">0.0.55",
+    "ljswitchboard-device_scanner": ">0.0.54",
     "ljswitchboard-firmware_verifier": "^0.x",
     "ljswitchboard-ljm_device_curator": "^0.x",
     "ljswitchboard-ljm_driver_checker": "^0.x",
