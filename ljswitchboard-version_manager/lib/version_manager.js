@@ -401,41 +401,38 @@ function labjackVersionManager() {
                 }
                 // console.log('!!! T4 organizer-current'.green, listingArray);
             } else {
-                var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T4firmware\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
-                var match = FIRMWARE_LINK_REGEX.exec(pageData);
+                // var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T4firmware\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
+                // var match = FIRMWARE_LINK_REGEX.exec(pageData);
 
-                while (match !== null) {
-                    var $ = cheerio.load(match[0]);
-                    var linkElements = $('a');
+                var $ = cheerio.load(pageData);
 
-                    linkElements.each(function(i, linkElement){
-                        var ele = $(linkElement);
-                        var targetURL = ele.attr('href');
+                var linkElements = $('a');
+                linkElements.each(function(i, linkElement){
+                    var ele = $(linkElement);
+                    var targetURL = ele.attr('href');
+                    var FIRMWARE_FILE_REGEX = /http.*T4firmware\_([\d\-]+).*\.bin/g;
+                    var isValidFWLink = FIRMWARE_FILE_REGEX.test(targetURL);
+                    if(isValidFWLink) {
                         var fileName = path.basename(targetURL);
-                        var FIRMWARE_FILE_REGEX = /http.*T4firmware\_([\d\-]+).*\.bin/g;
-                        var isValidFWLink = FIRMWARE_FILE_REGEX.test(targetURL);
-                        if(isValidFWLink) {
-                            // console.log('Adding...', targetURL, targetURL.length);
-                            // var targetURL = match[0].replace(/href\=\"/g, '');
-                            // targetURL = targetURL.replace(/\"/g, '');
-                            var version = (parseFloat(fileName.split('_')[1])/10000).toFixed(4);
-                            listingArray.push({
-                                "upgradeLink":targetURL,
-                                "version":version,
-                                "type":urlInfo.type,
-                                "key":urlInfo.type + '-' + version
-                            });
-                        } else {
-                            // console.log('Invalid URL', targetURL, targetURL.length);
-                        }
-                        // console.log('T4 FW Versions', version);
-                        // console.log('Type....', urlInfo.type);
-                        // console.log('targetURL', targetURL);
-                        // console.log('fileName', fileName);
-                    });
-                    match = FIRMWARE_LINK_REGEX.exec(pageData);
-                }
-                // console.log('T4:', urlInfo.type, 'data:', listingArray.length);
+                        // console.log('Ele....', fileName);
+                        // console.log('Adding...', targetURL, targetURL.length);
+                        // var targetURL = match[0].replace(/href\=\"/g, '');
+                        // targetURL = targetURL.replace(/\"/g, '');
+                        var version = (parseFloat(fileName.split('_')[1])/10000).toFixed(4);
+                        listingArray.push({
+                            "upgradeLink":targetURL,
+                            "version":version,
+                            "type":urlInfo.type,
+                            "key":urlInfo.type + '-' + version
+                        });
+                    } else {
+                        // console.log('Invalid URL', targetURL, targetURL.length);
+                    }
+                    // console.log('T7 FW Versions', version);
+                    // console.log('Type....', urlInfo.type);
+                    // console.log('targetURL', targetURL);
+                    // console.log('fileName', fileName);
+                });
             }
             return;
         },
@@ -475,41 +472,37 @@ function labjackVersionManager() {
                 }
                 // console.log('!!! T7 organizer-current'.green, listingArray.length);
             } else {
-                var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
-                var match = FIRMWARE_LINK_REGEX.exec(pageData);
+                // var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
+                // var match = FIRMWARE_LINK_REGEX.exec(pageData);
+                var $ = cheerio.load(pageData);
 
-                while (match !== null) {
-                    var $ = cheerio.load(match[0]);
-                    var linkElements = $('a');
-
-                    linkElements.each(function(i, linkElement){
-                        var ele = $(linkElement);
-                        var targetURL = ele.attr('href');
+                var linkElements = $('a');
+                linkElements.each(function(i, linkElement){
+                    var ele = $(linkElement);
+                    var targetURL = ele.attr('href');
+                    var FIRMWARE_FILE_REGEX = /http.*T7firmware\_([\d\-]+).*\.bin/g;
+                    var isValidFWLink = FIRMWARE_FILE_REGEX.test(targetURL);
+                    if(isValidFWLink) {
                         var fileName = path.basename(targetURL);
-                        var FIRMWARE_FILE_REGEX = /http.*T7firmware\_([\d\-]+).*\.bin/g;
-                        var isValidFWLink = FIRMWARE_FILE_REGEX.test(targetURL);
-                        if(isValidFWLink) {
-                            // console.log('Adding...', targetURL, targetURL.length);
-                            // var targetURL = match[0].replace(/href\=\"/g, '');
-                            // targetURL = targetURL.replace(/\"/g, '');
-                            var version = (parseFloat(fileName.split('_')[1])/10000).toFixed(4);
-                            listingArray.push({
-                                "upgradeLink":targetURL,
-                                "version":version,
-                                "type":urlInfo.type,
-                                "key":urlInfo.type + '-' + version
-                            });
-                        } else {
-                            // console.log('Invalid URL', targetURL, targetURL.length);
-                        }
-                        // console.log('T7 FW Versions', version);
-                        // console.log('Type....', urlInfo.type);
-                        // console.log('targetURL', targetURL);
-                        // console.log('fileName', fileName);
-                    });
-                    match = FIRMWARE_LINK_REGEX.exec(pageData);
-                }
-                // console.log('!!! T7:'.green, urlInfo.type, 'data:', listingArray);
+                        // console.log('Ele....', fileName);
+                        // console.log('Adding...', targetURL, targetURL.length);
+                        // var targetURL = match[0].replace(/href\=\"/g, '');
+                        // targetURL = targetURL.replace(/\"/g, '');
+                        var version = (parseFloat(fileName.split('_')[1])/10000).toFixed(4);
+                        listingArray.push({
+                            "upgradeLink":targetURL,
+                            "version":version,
+                            "type":urlInfo.type,
+                            "key":urlInfo.type + '-' + version
+                        });
+                    } else {
+                        // console.log('Invalid URL', targetURL, targetURL.length);
+                    }
+                    // console.log('T7 FW Versions', version);
+                    // console.log('Type....', urlInfo.type);
+                    // console.log('targetURL', targetURL);
+                    // console.log('fileName', fileName);
+                });
             }
             return;
         },

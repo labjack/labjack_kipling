@@ -28,6 +28,16 @@ var testGroups = {
 
 var fileNameBase = './';
 
+var cmds = [
+'npm run get_t4',
+'npm run get_t7',
+];
+console.log('For debugging information, run the following commands:'.green);
+cmds.forEach(function(cmd) {
+	console.log(cmd.green);
+});
+console.log('');
+
 function requireTest(groupName, fileNamePartials, isEnabled, destObj) {
 	var filePath = '';
 	var i;

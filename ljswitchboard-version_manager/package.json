@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-version_manager",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "A simple module to collect and cache important device firmware and software version numbers available for users to download.",
   "author": {
     "name": "Chris Johnson",
@@ -40,6 +40,8 @@
     "lib": "./lib"
   },
   "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+    "get_t7": "node ./node_modules/nodeunit/bin/nodeunit ./test/report/t7.js",
+    "get_t4": "node ./node_modules/nodeunit/bin/nodeunit ./test/report/t4.js"
   }
 }
