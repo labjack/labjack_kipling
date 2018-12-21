@@ -1,5 +1,9 @@
-console.log('Hello World.js!!');
-
+console.log('');
+console.log('***************************');
+console.log('This example requires there to be atleast 1 LJ device available (ANY,ANY,ANY).');
+console.log('This example will run for 5 seconds');
+console.log('***************************');
+console.log('');
 
 /*
  * This is a hello world application for the simple_logger node.js app.
@@ -30,7 +34,7 @@ function getPrinter(enable) {
 	return function print() {
 		if(enable) {
 			var dataToPrint = [];
-			dataToPrint.push('(hello_world.js)');
+			dataToPrint.push('(timed_finish.js)');
 			for(var i = 0; i < arguments.length; i++) {
 				dataToPrint.push(arguments[i]);
 			}
@@ -53,6 +57,12 @@ var logger_config_file = 'basic_config.json';
 var LOGGER_FILES_DIR = '/test/logger_config_files';
 var TEMPLATE_LOGGER_CONFIG_FILE = '/examples/generated-template.json';
 var cwd = process.cwd();
+var splitCWD = cwd.split(path.sep);
+if(splitCWD.indexOf('examples') >= 0) {
+	splitCWD.splice(splitCWD.indexOf('examples'), 1);
+	cwd = path.join.apply(path, splitCWD);
+}
+
 var example_path = path.normalize(path.join(
 	cwd,
 	'examples'

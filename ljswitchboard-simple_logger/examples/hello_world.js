@@ -1,5 +1,10 @@
 console.log('Hello World.js!!');
-
+console.log('');
+console.log('***************************');
+console.log('This example requires there to be atleast 1 LJ device available (ANY,ANY,ANY).');
+console.log('This example will run FOREVER (until killed)');
+console.log('***************************');
+console.log('');
 
 /*
  * This is a hello world application for the simple_logger node.js app.
@@ -63,6 +68,13 @@ var logger_config_file = 'basic_config.json';
 var LOGGER_FILES_DIR = '/test/logger_config_files';
 var TEMPLATE_LOGGER_CONFIG_FILE = '/examples/generated-template.json';
 var cwd = process.cwd();
+var splitCWD = cwd.split(path.sep);
+if(splitCWD.indexOf('examples') >= 0) {
+	splitCWD.splice(splitCWD.indexOf('examples'), 1);
+	cwd = path.join.apply(path, splitCWD);
+}
+
+
 var example_path = path.normalize(path.join(
 	cwd,
 	'examples'
@@ -100,7 +112,8 @@ function attachListeners(loggerObject) {
 					handeledEvent = true;
 				} else if(data.view_type === 'basic_graph') {
 					printNewData('New Graph Data', {
-						numValsLogged: data.data_cache.length
+						numValsLogged: data.data_cache.length,
+						// vals: data.data_cache,
 					});
 					handeledEvent = true;
 				} else {
@@ -125,17 +138,23 @@ function loggerApp() {
 	this.initializeLogger = function(){
 		debugLog('--- In Func: initializeLogger');
 		var defered = q.defer();
+
 		self.simpleLogger = simple_logger.create();
 		attachListeners(self.simpleLogger);
 
-		self.simpleLogger.initialize()
-		.then(function(res) {
-			debugLog('--- App Initialized',res);
-			defered.resolve();
-		}, function(err) {
-			console.error('Failed to initialize the logger',err);
-			defered.resolve();
-		});
+		// Intentionally delay to allow user to read start-up message.
+		setTimeout(function() {
+			self.simpleLogger.initialize()
+			.then(function(res) {
+				debugLog('--- App Initialized',res);
+				defered.resolve();
+			}, function(err) {
+				console.error('Failed to initialize the logger',err);
+				defered.resolve();
+			});
+		}, 5000);
+		
+		
 		return defered.promise;
 	};
 	this.initializeDeviceManager = function() {

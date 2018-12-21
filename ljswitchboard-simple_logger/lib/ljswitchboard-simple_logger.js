@@ -28,7 +28,7 @@ var ENABLE_DEBUG_LOG = false;
 function debugLog() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];
-		dataToPrint.push('(data_collector.js)');
+		dataToPrint.push('(-simple_logger.js)');
 		for(var i = 0; i < arguments.length; i++) {
 			dataToPrint.push(arguments[i]);
 		}
@@ -224,7 +224,7 @@ function CREATE_SIMPLE_LOGGER () {
 		var configType = '';
 		var isValidCall = false;
 
-		debugLog('defined some data');
+		debugLog('Checking to see if logger config data valid.');
 		if(loggerConfig.configType) {
 			configType = loggerConfig.configType;
 
@@ -253,7 +253,7 @@ function CREATE_SIMPLE_LOGGER () {
 			// event system.
 			defered.reject(data);
 		}
-		debugLog('defined some functions', isValidCall);
+		debugLog('Is loggerConfig obj valid:', isValidCall);
 		if(isValidCall) {
 			verifyAndLoadConfiguration(loggerConfig)
 			.then(resolveToConfigData, rippleError)

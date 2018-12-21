@@ -63,9 +63,9 @@
 				"name": "temp",
 				"human_name": "Temp. K",
 				"exec_method": "sync",
-				"func": " val = 273.15 + data['1'].results.AIN0.result",
-				"func": "val = require('./file.js').getTemp(data);",
-				"func": "val = data['1'].results.AIN0.result",
+				"func": " val = 273.15 + data['1'].results.AIN0.result; // Fill the 'val' variable with the calculated value",
+				"func": "val = require('./file.js').getTemp(data); // Fill the 'val' variable with the calculated value",
+				"func": "val = data['1'].results.AIN0.result; // Fill the 'val' variable with the calculated values",
 				"enable_logging": true,
 				"enable_view": true
 			},
@@ -73,8 +73,8 @@
 				"name": "humidity",
 				"human_name": "RH %",
 				"exec_method": "async",
-				"func": "require('./sub_dir/sub_file.js').getHumidity(data, cb)",
-				"func": "val = data['1'].results.AIN0.result",
+				"func": "require('./sub_dir/sub_file.js').getHumidity(data, cb); // finish by calling the cb function.",
+				"func": "cb(data['1'].results.AIN0.result); // finish by calling the cb function.",
 				"enable_logging": true,
 				"enable_view": true
 			},

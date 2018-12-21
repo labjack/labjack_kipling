@@ -1,5 +1,10 @@
-console.log('Hello World.js!!');
-
+console.log('faster_view_than_log.js');
+console.log('');
+console.log('***************************');
+console.log('This example requires there to be atleast 1 LJ device available (ANY,ANY,ANY).');
+console.log('This example will run FOREVER (until killed)');
+console.log('***************************');
+console.log('');
 
 /*
  * This is a hello world application for the simple_logger node.js app.
@@ -30,7 +35,7 @@ var ENABLE_PRINTING = false;
 function print() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];
-		dataToPrint.push('(hello_world.js)');
+		dataToPrint.push('(faster_view_than_log.js)');
 		for(var i = 0; i < arguments.length; i++) {
 			dataToPrint.push(arguments[i]);
 		}
@@ -40,7 +45,7 @@ function print() {
 function debugLog() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];
-		dataToPrint.push('(hello_world.js)');
+		dataToPrint.push('(faster_view_than_log.js)');
 		for(var i = 0; i < arguments.length; i++) {
 			dataToPrint.push(arguments[i]);
 		}
@@ -51,7 +56,7 @@ var ENABLE_NEW_DATA_REPORTING = true;
 function printNewData() {
 	if(ENABLE_NEW_DATA_REPORTING) {
 		var dataToPrint = [];
-		dataToPrint.push('(hello_world.js)');
+		dataToPrint.push('(faster_view_than_log.js)');
 		for(var i = 0; i < arguments.length; i++) {
 			dataToPrint.push(arguments[i]);
 		}
@@ -63,6 +68,12 @@ var logger_config_file = 'basic_config.json';
 var LOGGER_FILES_DIR = '/test/logger_config_files';
 var TEMPLATE_LOGGER_CONFIG_FILE = '/examples/generated-template.json';
 var cwd = process.cwd();
+var splitCWD = cwd.split(path.sep);
+if(splitCWD.indexOf('examples') >= 0) {
+	splitCWD.splice(splitCWD.indexOf('examples'), 1);
+	cwd = path.join.apply(path, splitCWD);
+}
+
 var example_path = path.normalize(path.join(
 	cwd,
 	'examples'
