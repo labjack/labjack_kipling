@@ -67,15 +67,18 @@ var example_path = path.normalize(path.join(
 	cwd,
 	'examples'
 ));
+
 var logger_config_file_path = path.normalize(path.join(
 	cwd,
 	LOGGER_FILES_DIR,
 	logger_config_file
 ));
+
 var template_logger_config_file = path.normalize(path.join(
 	cwd,
 	TEMPLATE_LOGGER_CONFIG_FILE
 ));
+
 console.log('--- Application CWD:',cwd);
 console.log('--- Logger config file path:',logger_config_file_path);
 
@@ -87,7 +90,7 @@ function attachListeners(loggerObject) {
 			if(ignoreErrorsList.indexOf(key) < 0) {
 				debugLog('Captured Event!!', key, data);
 			}
-			var handeledEvent = false
+			var handeledEvent = false;
 			// print('Captured Event', key, data, Object.keys(data));
 			if(key === 'NEW_VIEW_DATA') {
 				if(data.view_type === 'current_values') {
@@ -273,7 +276,7 @@ loggerAppSteps.forEach(function(step) {
 		console.error('App Step', step, 'is not defined!');
 		process.exit();
 	}
-})
+});
 
 var isTerminated = false;
 async.eachSeries(

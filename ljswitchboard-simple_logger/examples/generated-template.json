@@ -28,7 +28,7 @@
     "basic_data_group"
   ],
   "basic_data_group": {
-    "470010620": {
+    "470015175": {
       "registers": [
         {
           "name": "AIN0",
@@ -50,7 +50,7 @@
     "group_period_ms": 500,
     "is_stream": false,
     "device_serial_numbers": [
-      470010620
+      470015175
     ],
     "defined_user_values": [
       "custom-AIN0",
@@ -61,7 +61,7 @@
         "name": "custom-AIN0",
         "human_name": "custom-AIN0",
         "exec_method": "sync",
-        "func": "val = data['470010620'].results.AIN0.result",
+        "func": "val = data['470015175'].results.AIN0.result",
         "enable_logging": false,
         "enable_view": true
       },
@@ -69,7 +69,7 @@
         "name": "custom-AIN1",
         "human_name": "custom-AIN1",
         "exec_method": "sync",
-        "func": "val = data['470010620'].results.AIN1.result",
+        "func": "val = data['470015175'].results.AIN1.result",
         "enable_logging": false,
         "enable_view": true
       }
