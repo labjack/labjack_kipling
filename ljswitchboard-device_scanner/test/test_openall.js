@@ -13,14 +13,14 @@ var testGroups = {
 		'mock_openall': false,
 		'mock_w_device': false,
 		'mock_scan_mix_mock_and_live_devices': false,
-		'basic_test': false,
+		'basic_test': true,
 		'cached_scan_test': false,
 		'basic_test-open_T4': false,
 		'basic_eth_test': false,
 		'multiple_sequential_scans': false,
 		'usb_only_test': false,
 		'open_all_device_scanner': false,
-		'scan_with_device_shared': true,
+		'scan_with_device_shared': false,
 	},
 };
 
