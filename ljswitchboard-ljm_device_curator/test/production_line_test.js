@@ -134,8 +134,8 @@ var testGroups = {
 
 	// These are production-line tests.
 	'production_line': {
-		'check_t7_pro_versions': true,
-		'check_t7_pro_versions_flex_fw': false,
+		'check_t7_pro_versions': false,
+		'check_t7_pro_versions_flex_fw': true,
 	}
 };
 

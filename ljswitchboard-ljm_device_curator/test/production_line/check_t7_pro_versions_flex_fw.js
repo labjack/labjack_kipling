@@ -119,10 +119,13 @@ var device_tests = {
 	'check recovery firmware version': function(test) {
 		device.getRecoveryFirmwareVersion()
 		.then(function(res) {
+			console.log('  - Recovery FW:'.green, res);
 			if(res == 0.6604) {
 				test.ok(true);
-			} else {
-				test.ok(false, 'T7 Recovery FW should be 0.6604, it is: ' + res.toString());
+			} else if(res == 0.6606) {
+				test.ok(true);
+			}else {
+				test.ok(false, 'T7 Recovery FW should be 0.6604 or 0.6606, it is: ' + res.toString());
 			}
 			test.done();
 		}, function(err) {
