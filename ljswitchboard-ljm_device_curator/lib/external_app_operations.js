@@ -105,6 +105,11 @@ function getExternalAppOperations(self) {
                 'ct': ct,
                 'id': undefined,
             },
+            'curDeviceInfo': {
+                'dt': self.savedAttributes.deviceType,
+                'ct': self.savedAttributes.connectionType,
+                'id': undefined,
+            },
             'ctName': driver_const.CONNECTION_TYPE_NAMES[ct],
             'availableConnections': [],
             'closeAndOpenDevice': true,
@@ -141,7 +146,6 @@ function getExternalAppOperations(self) {
         var connections = bundle.availableConnections;
         // If the user is requesting a not-found connection type we don't need to close/open the device.
         // aka default value should be True.
-        // console.log('Desired CT', bundle.ctName);
 
         var desiredCTIsActiveCT = false;
 
@@ -163,12 +167,18 @@ function getExternalAppOperations(self) {
             bundle.closeAndOpenDevice = true;
         }
 
+        // Check to see if the desired CT is the same as the current CT to 
+        // see if opening and closing the CT is even necessary...
+        if(bundle.deviceInfo.ct != bundle.curDeviceInfo.ct) {
+            bundle.closeAndOpenDevice = false;
+        }
+
         // If user specified to disable this feature than make sure the active
         // device isn't opened/closed.
         if(bundle.preventCloseAndOpen) {
             bundle.closeAndOpenDevice = false;
         }
-
+        
         defered.resolve(bundle);
         return defered.promise;
     }
