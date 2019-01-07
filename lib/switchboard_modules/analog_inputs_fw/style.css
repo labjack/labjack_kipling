@@ -56,6 +56,11 @@
 .efExtendedInfo li {
 	margin-bottom:5px;
 }
+.efExtendedInfoHelperText {
+  line-height: 20px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
 .ainEFConfigA-LINK {
 	width: 70px;
 }

@@ -33,6 +33,9 @@
 	}, {
 		"name": "T4 Examples",
 		"subScripts": [{
+			"name": "T4 Basic I/O",
+			"location": "lua_script_debugger/premade_scripts/T4/t4_basic_io.lua"
+		}, {
 			"name": "SPI Loop-Back",
 			"location": "lua_script_debugger/premade_scripts/T4/spi_loop_back.lua"
 		}, {
@@ -185,6 +188,30 @@
 		}, {
 			"name": "PWM Library & Example",
 			"location": "lua_script_debugger/premade_scripts/digital_io_ef/PWM_Library.lua"
+		}]
+	}, {
+		"name": "Counter Examples",
+		"subScripts": [{
+			"name": "23 Counters",
+			"location": "lua_script_debugger/premade_scripts/counter_examples/23_counters.lua"
+		}, {
+			"name": "23 Counters with Debounce",
+			"location": "lua_script_debugger/premade_scripts/counter_examples/23_counters_with_debounce.lua"
+		}, {
+			"name": "37 Counters",
+			"location": "lua_script_debugger/premade_scripts/counter_examples/37_counters.lua"
+		}, {
+			"name": "107 Counters",
+			"location": "lua_script_debugger/premade_scripts/counter_examples/107_counters.lua"
+		}]
+	}, {
+		"name": "RTC & Device Time",
+		"subScripts": [{
+			"name": "Print Device Time",
+			"location": "lua_script_debugger/premade_scripts/RTC_and_Device_Time/print_device_time.lua"
+		}, {
+			"name": "Num Sec Since Epoch",
+			"location": "lua_script_debugger/premade_scripts/RTC_and_Device_Time/num_seconds_since_epoch.lua"
 		}]
 	}, {
 		"name": "Get Device Temperature",

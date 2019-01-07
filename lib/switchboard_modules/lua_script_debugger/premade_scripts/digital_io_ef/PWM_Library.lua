@@ -1,10 +1,15 @@
 --This script can be used as a library of functions to configure the PWM registers for output and write new duty cycles to the PWM channel.
 --PWM is available on the T7 on FIO0-FIO5 (T4 PWM is on FIO6 & FIO7)
 --See the device datasheet for more information on PWM output.
+-- Details about compatible DIO channels (tables 13.2-1 and -2): https://labjack.com/support/datasheets/t-series/digital-io/extended-features
+-- PWM specific details: https://labjack.com/support/datasheets/t-series/digital-io/extended-features/pwm-out
 
 --Functions to configure T7/T4
 
 outPin = 0--FIO0. Changed if T4 instead of T7
+pwmFrequency = 50 -- 50 Hz
+pwmDutyCycle = 5 -- 5%
+
 -- devType = MB.R(60000, 3)
 -- if devType == 4 then
 -- 	outPin = 6--FIO6 on T4
@@ -50,8 +55,12 @@ end
 
 myPWM = PWM
 
-myPWM.init(myPWM, 0, 50, 5, 0, 1)--init on outPin with 50Hz (20ms) and 50% duty cycle
+myPWM.init(myPWM, 0, pwmFrequency, pwmDutyCycle, 0, 1)--init on outPin with 50Hz (20ms) and 50% duty cycle
 myPWM.enable(myPWM)
+
+-- Initialize the user RAM registers 46000 and 46002 registers.
+MB.W(46002, 3, pwmFrequency)
+MB.W(46000, 3, pwmDutyCycle)
 
 LJ.IntervalConfig(1, 1000)
 while true do               --you can test the function an using an LED or an oscilloscope on the FIO pin
