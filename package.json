@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-module_manager",
-  "version": "0.0.31",
+  "version": "0.1.01",
   "startupDataVersion": "0.0.1",
   "description": "A project that is dedicated to rendering, loading, and managing modules for the ljswitchboard project",
   "author": {
