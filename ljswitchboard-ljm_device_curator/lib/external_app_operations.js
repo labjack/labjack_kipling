@@ -66,6 +66,7 @@ function getExternalAppOperations(self) {
         var ctStr;
         var preventCloseAndOpen = false;
         var appName = 'NONE';
+        var detached = true;
 
         // Check "connection type"
         if(options.ct) {
@@ -88,6 +89,10 @@ function getExternalAppOperations(self) {
             appName = options.appName;
         }
 
+        if(typeof(options.detached) === 'boolean') {
+            detached = options.detached;
+        }
+
         var ct = driver_const.connectionTypes[ctStr];
 
         var bundle = {
@@ -104,6 +109,8 @@ function getExternalAppOperations(self) {
             'availableConnections': [],
             'closeAndOpenDevice': true,
             'preventCloseAndOpen': preventCloseAndOpen,
+
+            'detached': detached,
 
             'currentAppOpenCFG': '',
             'appExists': false,
@@ -351,6 +358,10 @@ function getExternalAppOperations(self) {
         debugOA('in openExternalApplication', bundle);
 
 
+        
+        // console.log('Exec Path...', bundle.appExePath);
+        /*
+        // Start program using execFile
         var execFile = require('child_process').execFile;
         var child = execFile(bundle.appExePath, function(error, stdout, stderr) {
             debugOA('Finished executing external application');
@@ -359,6 +370,24 @@ function getExternalAppOperations(self) {
             }
             defered.resolve(bundle);
         });
+        */
+        
+        var spawn = require('child_process').spawn;
+        var child = spawn(bundle.appExePath, [], {
+            detached:bundle.detached,
+        });
+        child.stdout.on('data', function cpStdout(data) {
+
+        });
+        child.stderr.on('data', function cpStdErr(data) {
+
+        });
+        child.on('close', function cpClose(code) {
+            debugOA('Finished executing external application');
+            defered.resolve(bundle);
+        });
+        child.unref();
+        // console.log('App-PID:', child.pid);
         
         return defered.promise;
     }
