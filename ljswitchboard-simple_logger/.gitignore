@@ -1,2 +1,3 @@
 node_modules
 examples/generated-template.json
+package-lock.json
