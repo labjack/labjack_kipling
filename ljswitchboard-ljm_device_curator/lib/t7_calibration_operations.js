@@ -871,7 +871,7 @@ function performHSBasicNoiseCheck(bundle, testName) {
     var ainNum = 15;
     var ainRange = 10;
     var ainResolution = 1;
-    var ainSettling = 0;
+    var ainSettling = 10000;
     var getRaw = false;
     var numValues = 10;
     configureAndGetValues(device, ainNum, ainRange, ainResolution, ainSettling, getRaw, numValues)
@@ -910,7 +910,7 @@ function performHRBasicNoiseCheck(bundle, testName) {
     var ainNum = 15;
     var ainRange = 10;
     var ainResolution = 9;
-    var ainSettling = 0;
+    var ainSettling = 10000;
     var getRaw = false;
     var numValues = 10;
     var runTest = false;
@@ -957,7 +957,7 @@ function performHSHRGNDComparisonCheck(bundle, testName) {
     var ainNum = 15;
     var ainRange = 10;
     var ainResolution = 0;
-    var ainSettling = 0;
+    var ainSettling = 10000;
     var getRaw = false;
     var runTest = false;
 
@@ -1024,7 +1024,7 @@ function performHSHRTempComparisonCheck(bundle, testName) {
     var ainNum = 14;
     var ainRange = 10;
     var ainResolution = 0;
-    var ainSettling = 0;
+    var ainSettling = 10000;
     var getRaw = false;
     var runTest = false;
 
@@ -1122,7 +1122,7 @@ function performHSTempNoiseCheck(bundle, testName) {
     var ainNum = 14;
     var ainRange = 10;
     var ainResolution = 1;
-    var ainSettling = 50;
+    var ainSettling = 10000;
     var getRaw = false;
     var numValues = 10;
     configureAndGetValues(device, ainNum, ainRange, ainResolution, ainSettling, getRaw, numValues)
@@ -1166,7 +1166,7 @@ function performHRTempNoiseCheck(bundle, testName) {
     var ainNum = 14;
     var ainRange = 10;
     var ainResolution = 9;
-    var ainSettling = 0;
+    var ainSettling = 10000;
     var getRaw = false;
     var numValues = 10;
     var runTest = false;
