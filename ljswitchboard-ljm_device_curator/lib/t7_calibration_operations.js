@@ -1093,26 +1093,37 @@ function performHSHRTempComparisonCheck(bundle, testName) {
 }
 function performDeviceTemperatureCheck(bundle, testName) {
     var defered = q.defer();
-    bundle.device.iRead('TEMPERATURE_DEVICE_K')
-    .then(function(res) {
-        var tempK = res.val;
-        var tempC = tempK - 273.15;
-        var msg = '';
-        if((tempC > -40) && (tempC < 85)) {
-            msg = 'Device calibration constants are in range.';
-            bundle.hardwareTests[testName].status = true;
-            bundle.hardwareTests[testName].executed = true;
-            bundle.hardwareTests[testName].testMessage = msg;
-        } else {
-            msg = 'Device Temperature out of range: ' + tempC.toFixed(2) + 'C';
-            bundle.hardwareTests[testName].status = false;
-            bundle.hardwareTests[testName].executed = true;
-            bundle.hardwareTests[testName].testMessage = msg;
-        }
-        defered.resolve(bundle);
-    }, function(err) {
-        defered.resolve(bundle);
-    });
+    var regName = 'TEMPERATURE_DEVICE_K';
+    var regArray = [];
+    for(var i = 0; i < 3; i++) {
+        regArray.push(regName);
+    }
+    bundle.device.iReadMultiple(regArray).then(
+        function(res) {
+            bundle.device.iRead('TEMPERATURE_DEVICE_K')
+            .then(function(res) {
+                var tempK = res.val;
+                var tempC = tempK - 273.15;
+                var msg = '';
+                if((tempC > -40) && (tempC < 85)) {
+                    msg = 'Device calibration constants are in range.';
+                    bundle.hardwareTests[testName].status = true;
+                    bundle.hardwareTests[testName].executed = true;
+                    bundle.hardwareTests[testName].testMessage = msg;
+                } else {
+                    msg = 'Device Temperature out of range: ' + tempC.toFixed(2) + 'C';
+                    bundle.hardwareTests[testName].status = false;
+                    bundle.hardwareTests[testName].executed = true;
+                    bundle.hardwareTests[testName].testMessage = msg;
+                }
+                defered.resolve(bundle);
+            }, function(err) {
+                defered.resolve(bundle);
+            });
+        }, function(err) {
+            defered.resolve(bundle);
+        });
+    
     return defered.promise;
 }
 function performHSTempNoiseCheck(bundle, testName) {
