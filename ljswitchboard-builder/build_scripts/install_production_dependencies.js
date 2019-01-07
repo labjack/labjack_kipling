@@ -109,7 +109,19 @@ function innerInstallProductionDependency(name, directory) {
 				'stderr': stderr,
 			});
 		}
-		defered.resolve();
+		exec('npm update', {
+			'cwd': directory,
+		}, function(error, stdout, stderr) {
+			if(DEBUG_INSTALLATION) {
+				console.log('Finished updating', name);
+				console.log({
+					'error': error,
+					'stdout': stdout,
+					'stderr': stderr,
+				});
+			}
+			defered.resolve();
+		});
 	});
 	return defered.promise;
 }

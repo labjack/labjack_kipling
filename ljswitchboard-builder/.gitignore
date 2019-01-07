@@ -20,3 +20,5 @@ kipling*.tar.gz
 
 Kipling.3.*
 kipling.3.*
+
+package-lock.json
