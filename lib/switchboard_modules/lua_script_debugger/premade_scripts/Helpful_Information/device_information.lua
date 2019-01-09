@@ -9,13 +9,13 @@ isPro = 0
 pid = MB.R(60000, 3) -- Read the PRODUCT_ID register
 hwInstalled = MB.R(60010, 1) -- Read the HARDWARE_INSTALLED register
 if (pid == 4) then
-	model = 'T4'
+  model = 'T4'
 elseif (pid == 7) then
-	model = 'T7'
-	isPro = bit.band(hwInstalled,1)
-	if(isPro == 1) then
-		model = model..'-Pro'
-	end
+  model = 'T7'
+  isPro = bit.band(hwInstalled,1)
+  if(isPro == 1) then
+    model = model..'-Pro'
+  end
 end
 print('- Model', model)
 
@@ -37,14 +37,14 @@ print('- Device Name',devNameStr)
 
 function getIPFromArray(t)
   local s = ''
-	s = string.format("%d",t[1])
-	s = s..'.'
-	s = s..string.format("%d",t[2])
-	s = s..'.'
-	s = s..string.format("%d",t[3])
-	s = s..'.'
-	s = s..string.format("%d",t[4])
-	return s
+  s = string.format("%d",t[1])
+  s = s..'.'
+  s = s..string.format("%d",t[2])
+  s = s..'.'
+  s = s..string.format("%d",t[3])
+  s = s..'.'
+  s = s..string.format("%d",t[4])
+  return s
 end
 ethIPBytes = MB.RA(49100,99,4) -- Read the ETHERNET_IP register
 ethIP = getIPFromArray(ethIPBytes) -- Parse the IP address into a string
