@@ -1,5 +1,5 @@
 print('')
-print('Helpful Device Information:');
+print('Device Information:');
 
 
 print('- Serial Number:', MB.R(60028,1))
