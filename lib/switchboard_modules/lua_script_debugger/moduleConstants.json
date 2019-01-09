@@ -29,6 +29,9 @@
 		}, {
 			"name": "Welcome Screen",
 			"location": "lua_script_debugger/premade_scripts/Helpful_Information/Welcome_Screen.lua"
+		}, {
+			"name": "Device Information",
+			"location": "lua_script_debugger/premade_scripts/Helpful_Information/device_information.lua"
 		}]
 	}, {
 		"name": "T4 Examples",
