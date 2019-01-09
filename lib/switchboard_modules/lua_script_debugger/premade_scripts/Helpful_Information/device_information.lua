@@ -18,7 +18,7 @@ end
 print('- Model', model)
 
 devNameTable = MB.RA(60500, 99, 50)
-function utf8_from(t)
+function parseStringFromTable(t)
   local s = ''
   for i=1, table.getn(t) do
     if(t[i] == 0) then
@@ -29,7 +29,7 @@ function utf8_from(t)
   end
   return s
 end
-print('- Device Name',utf8_from(devNameTable))
+print('- Device Name',parseStringFromTable(devNameTable))
 
 function getIPFromArray(t)
   local s = ''
