@@ -12,7 +12,7 @@ if (pid == 4) then
   model = 'T4'
 elseif (pid == 7) then
   model = 'T7'
-  isPro = bit.band(hwInstalled,1)
+  isPro = bit.band(hwInstalled,1) -- Check to see if the high res ADC is installed.
   if(isPro == 1) then
     model = model..'-Pro'
   end
