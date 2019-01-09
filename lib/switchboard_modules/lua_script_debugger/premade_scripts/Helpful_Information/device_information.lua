@@ -1,11 +1,13 @@
 print('')
 print('Device Information:');
 
+sn = MB.R(60028,1) -- Read the SERIAL_NUMBER register
+print('- Serial Number:',string.format("%d",sn))
 
-print('- Serial Number:', MB.R(60028,1))
 model = ''
-pid = MB.R(60000, 3)
-hwInstalled = MB.R(60010, 1)
+isPro = 0
+pid = MB.R(60000, 3) -- Read the PRODUCT_ID register
+hwInstalled = MB.R(60010, 1) -- Read the HARDWARE_INSTALLED register
 if (pid == 4) then
 	model = 'T4'
 elseif (pid == 7) then
@@ -17,7 +19,7 @@ elseif (pid == 7) then
 end
 print('- Model', model)
 
-devNameTable = MB.RA(60500, 99, 50)
+
 function parseStringFromTable(t)
   local s = ''
   for i=1, table.getn(t) do
@@ -29,7 +31,9 @@ function parseStringFromTable(t)
   end
   return s
 end
-print('- Device Name',parseStringFromTable(devNameTable))
+devNameTable = MB.RA(60500, 99, 50) -- Read the DEVICE_NAME_DEFAULT register
+devNameStr = parseStringFromTable(devNameTable) -- Parse the device name into a str.
+print('- Device Name',devNameStr)
 
 function getIPFromArray(t)
   local s = ''
@@ -42,16 +46,34 @@ function getIPFromArray(t)
 	s = s..string.format("%d",t[4])
 	return s
 end
-ethIPBytes = MB.RA(49100,99,4)
-ethIP = getIPFromArray(ethIPBytes)
+ethIPBytes = MB.RA(49100,99,4) -- Read the ETHERNET_IP register
+ethIP = getIPFromArray(ethIPBytes) -- Parse the IP address into a string
 print('- Ethernet IP', ethIP)
 
-hwVersion = MB.R(60002,3) 
-print('- Hardware Version', hwVersion)
-fwVersion = MB.R(60004,3)
-print('- Firmware Version', fwVersion)
-devTemp = MB.R(60052,3)
-print('- Device Temperature', devTemp,'(K)')
+function getMacFromArray(t)
+  local s = ''
+  local tLen = table.getn(t)
+  for i=3, tLen do
+    s = s..string.format("%02x",t[i])
+    if (i<tLen) then
+      s = s..':'
+    end
+  end
+  return s
+end
+ethMACBytes = MB.RA(60020,99,8) -- Read the ETHERNET_MAC register
+ethMAC = getMacFromArray(ethMACBytes) -- Parse the MAC address into a string
+print('- Ethernet MAC', ethMAC)
+
+hwVersion = MB.R(60002,3) -- Read the HARDWARE_VERSION register
+print('- Hardware Version', string.format("%.2f",hwVersion))
+
+fwVersion = MB.R(60004,3) -- Read the FIRMWARE_VERSION register
+print('- Firmware Version', string.format("%.4f",fwVersion))
+
+devTemp = MB.R(60052,3) -- Read the TEMPERATURE_DEVICE_K register
+print('- Device Temperature', string.format("%.2f",devTemp),'(K)')
+
 
 print('')
 print("Exiting Lua Script")
