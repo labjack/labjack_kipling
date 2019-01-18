@@ -26,7 +26,7 @@ if(passed == 0) then
   MB.W(6000, 1, 0)--stop script
 end
 
-local Filepre = "FWi_"
+local Filepre = "/FWi_"
 local Filesuf = ".csv"
 local NumFn = 0
 local Filename = Filepre..string.format("%02d", NumFn)..Filesuf

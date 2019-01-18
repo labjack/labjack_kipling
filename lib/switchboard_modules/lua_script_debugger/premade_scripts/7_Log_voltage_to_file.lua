@@ -23,7 +23,7 @@ end
 local mbRead=MB.R			--local functions for faster processing
 local mbReadArray=MB.RA
 
-local Filename = "log1.csv"
+local Filename = "/log1.csv"
 local voltage = 0
 local count = 0
 local delimiter = ","
