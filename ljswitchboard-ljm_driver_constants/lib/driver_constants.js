@@ -31,13 +31,19 @@ exports.LJM_MAX_NAME_SIZE = 256;
 exports.LJM_CT_ANY = 0;
 exports.LJM_CT_USB = 1;
 exports.LJM_CT_TCP = 2;
+exports.LJM_CT_NETWORK_TCP = 2;
 exports.LJM_CT_ETHERNET = 3;
 exports.LJM_CT_ETHERNET_TCP = 3;
 exports.LJM_CT_WIFI = 4;
 exports.LJM_CT_WIFI_TCP = 4;
 exports.LJM_CT_UDP = 5;
+exports.LJM_CT_NETWORK_UDP = 5;
 exports.LJM_CT_ETHERNET_UDP = 6;
 exports.LJM_CT_WIFI_UDP = 7;
+exports.LJM_CT_NETWORK_ANY = 8;
+exports.LJM_CT_ETHERNET_ANY = 9;
+exports.LJM_CT_WIFI_ANY = 10;
+
 
 // Modbus Port
 exports.LJM_MODBUS_PORT = 502;
