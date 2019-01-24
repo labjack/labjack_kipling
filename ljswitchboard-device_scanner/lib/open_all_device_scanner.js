@@ -139,9 +139,24 @@ var OPEN_ALL_SCAN_REQUEST_LIST = [
         'numAttempts': 1,
         'async': false,
     },
+
+    {
+        'deviceType': driver_const.LJM_DT_T7,
+        'connectionType': driver_const.LJM_CT_ETHERNET_TCP,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
+        'numAttempts': 1,
+        'async': false,
+    },
     {
         'deviceType': driver_const.LJM_DT_T7,
         'connectionType': driver_const.LJM_CT_WIFI_UDP,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
+        'numAttempts': 1,
+        'async': false,
+    },
+    {
+        'deviceType': driver_const.LJM_DT_T7,
+        'connectionType': driver_const.LJM_CT_WIFI_TCP,
         'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
         'numAttempts': 1,
         'async': false,
@@ -153,10 +168,16 @@ var OPEN_ALL_SCAN_REQUEST_LIST = [
         'numAttempts': 1,
         'async': false,
     },
-
     {
         'deviceType': driver_const.LJM_DT_T4,
         'connectionType': driver_const.LJM_CT_ETHERNET_UDP,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4,
+        'numAttempts': 1,
+        'async': false,
+    },
+    {
+        'deviceType': driver_const.LJM_DT_T4,
+        'connectionType': driver_const.LJM_CT_ETHERNET_TCP,
         'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4,
         'numAttempts': 1,
         'async': false,
@@ -859,31 +880,34 @@ function openAllDeviceScanner() {
         // Default... aka when the T5 has been added.
         // var scanMethods = OPEN_ALL_SCAN_REQUEST_LIST
         
+        // Determine which scan options to enable given the input options.
         var scanOptions = bundle.options;
         var filteredScanMethods = scanMethods.filter(function(scanMethod) {
             var enableScan = false;
-            if(scanMethod.connectionType == driver_const.LJM_CT_USB) {
+            var smct = scanMethod.connectionType;
+
+            if(smct == driver_const.LJM_CT_USB) {
                 if(scanOptions.scanUSB) {
                     enableScan = true;
                 }
             }
-            if(scanMethod.connectionType == driver_const.LJM_CT_ETHERNET_UDP) {
+            if(smct == driver_const.LJM_CT_ETHERNET_UDP || smct == driver_const.LJM_CT_ETHERNET_TCP) {
                 if(scanOptions.scanEthernet) {
                     enableScan = true;
                 }
             }
-            if(scanMethod.connectionType == driver_const.LJM_CT_WIFI_UDP) {
+            if(smct == driver_const.LJM_CT_WIFI_UDP || smct == driver_const.LJM_CT_WIFI_TCP) {
                 if(scanOptions.scanWiFi) {
                     enableScan = true;
                 }
             }
-            if(scanMethod.connectionType == driver_const.LJM_CT_UDP) {
+            if(smct == driver_const.LJM_CT_UDP || smct == driver_const.LJM_CT_TCP) {
                 if(scanOptions.scanWiFi || scanOptions.scanEthernet) {
                     enableScan = true;
                 }
             }
             return enableScan;
-        })
+        });
 
         // Save async vs sync option to a local variable w/ a shorter name.
         var performAsync = PERFORM_SCAN_REQUESTS_ASYNCHRONOUSLY;
@@ -1575,13 +1599,15 @@ function openAllDeviceScanner() {
         // Update the mock device scanner.
         mockDeviceScanningLib.updateCurrentDevices(innerCurrentDevices);
 
+        // Make sure that two can's can't be running at the same time.
         var defered = q.defer();
         if (self.scanInProgress) {
             defered.reject('Scan in progress');
             return defered.promise;
         }
-
         self.scanInProgress = true;
+
+        // Update list of currently connected devices.
         if(innerCurrentDevices) {
             if(Array.isArray(innerCurrentDevices)) {
                 self.cachedCurrentDevices = innerCurrentDevices;
@@ -1592,9 +1618,9 @@ function openAllDeviceScanner() {
             self.cachedCurrentDevices = [];
         }
 
+        // Empty the cached scanResults
         var numToDelete;
         var i;
-        // Empty the cached scanResults
         numToDelete = self.scanResults.length;
         for(i = 0; i < numToDelete; i++) {
             delete self.scanResults[i];
@@ -1615,6 +1641,7 @@ function openAllDeviceScanner() {
         }
         self.sortedResults = [];
 
+        // Define an error handling function.
         var getOnError = function(msg) {
             return function(err) {
                 console.error('An Error', err, msg, err.stack);
@@ -1624,6 +1651,8 @@ function openAllDeviceScanner() {
             };
         };
 
+        // Create a bundle object that will get passed between all of the
+        // steps.
         var bundle = createFindAllDevicesBundle(parsedOptions);
 
         debugSS('in findAllDevices');
@@ -1633,6 +1662,7 @@ function openAllDeviceScanner() {
                 mockDeviceScanningLib.inspectMockDevices();
             }
         }
+
         // This work flow works for both Mock and Live device scanning.
         if(LIVE_DEVICE_SCANNING_ENABLED || true) {
             // Create the device manager object.
