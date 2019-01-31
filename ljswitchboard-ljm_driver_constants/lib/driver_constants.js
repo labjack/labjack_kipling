@@ -442,6 +442,7 @@ exports.LJM_LIBRARY_CONSTANTS = {
 };
 
 exports.DEVICE_TYPE_NAMES = {
+	'0': 'ANY',
     '3': 'U3',
     '4': 'T4',
     '5': 'T5',
@@ -451,6 +452,7 @@ exports.DEVICE_TYPE_NAMES = {
     '200': 'Digit'
 };
 exports.DRIVER_DEVICE_TYPE_NAMES = {
+	'0': 'ANY',
     '3': 'LJM_dtU3',
     '4': 'LJM_dtT4',
     '5': 'LJM_dtT5',
@@ -461,6 +463,7 @@ exports.DRIVER_DEVICE_TYPE_NAMES = {
 };
 
 exports.DEVICE_TYPE_NAMES_BY_DRIVER_NAME = {
+	'LJM_dtANY': 'ANY',
     'LJM_dtU3': 'U3',
     'LJM_dtT4': 'T4',
     'LJM_dtT5': 'T5',
