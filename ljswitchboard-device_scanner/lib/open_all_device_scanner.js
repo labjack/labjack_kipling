@@ -891,18 +891,33 @@ function openAllDeviceScanner() {
                     enableScan = true;
                 }
             }
-            if(smct == driver_const.LJM_CT_ETHERNET_UDP || smct == driver_const.LJM_CT_ETHERNET_TCP) {
+            if(smct == driver_const.LJM_CT_ETHERNET_UDP) {
                 if(scanOptions.scanEthernet) {
                     enableScan = true;
                 }
             }
-            if(smct == driver_const.LJM_CT_WIFI_UDP || smct == driver_const.LJM_CT_WIFI_TCP) {
+            if(smct == driver_const.LJM_CT_ETHERNET_TCP) {
+                if(scanOptions.scanEthernetTCP) {
+                    enableScan = true;
+                }
+            }
+            if(smct == driver_const.LJM_CT_WIFI_UDP) {
                 if(scanOptions.scanWiFi) {
                     enableScan = true;
                 }
             }
-            if(smct == driver_const.LJM_CT_UDP || smct == driver_const.LJM_CT_TCP) {
+            if(smct == driver_const.LJM_CT_WIFI_TCP) {
+                if(scanOptions.scanWiFiTCP) {
+                    enableScan = true;
+                }
+            }
+            if(smct == driver_const.LJM_CT_UDP) {
                 if(scanOptions.scanWiFi || scanOptions.scanEthernet) {
+                    enableScan = true;
+                }
+            }
+            if(smct == driver_const.LJM_CT_TCP) {
+                if(scanOptions.scanWiFiTCP || scanOptions.scanEthernetTCP) {
                     enableScan = true;
                 }
             }
