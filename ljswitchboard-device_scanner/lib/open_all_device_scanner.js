@@ -379,16 +379,18 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
     }
     this.isActive = false;
     this.activeConnectionType = -1;
+    this.deviceType = this.openParameters.deviceType;
     if(curatedDevice) {
         this.openParameters = curatedDevice.savedAttributes.openParameters;
         this.isMockDevice = curatedDevice.savedAttributes.isMockDevice;
         this.isActive = true;
         this.activeConnectionType = curatedDevice.savedAttributes.connectionType;
+        this.deviceType = curatedDevice.savedAttributes.deviceType;
     }
     this.curatedDevice = curatedDevice;
 
 
-    var dt = driver_const.deviceTypes[this.openParameters.deviceType];
+    var dt = driver_const.deviceTypes[this.deviceType];
     var dcNames = driver_const.DRIVER_DEVICE_TYPE_NAMES;
     var ljmDTName = dcNames[dt];
     this.requiredInfo = REQUIRED_INFO_BY_DEVICE[ljmDTName];
@@ -396,7 +398,7 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
 
     function getDeviceInfo() {
         var defered = q.defer();
-        debugLJMCalls('Getting Device Info:', self.handle);
+        debugLJMCalls('Getting Device Info:', self.handle, self.requiredInfo);
         // console.log('Getting Device Info...', self.handle, self.isActive, self.isMockDevice);
         if(!self.isMockDevice) {
             ljmUtils.getDeviceInfo(

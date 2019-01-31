@@ -240,7 +240,7 @@ function getDeviceInfo(device, handle, registers, cb) {
 	var DEBUG_ALREADY_CONNECTED_DEVICE = false;
 	// console.log('getDeviceInfo DEVICE', device);
 	// debugCuratedDeviceReads('ljswitchboard-device_scanner/~/ljm_utils.js TODO: search for .isActive, and do similar things for device.savedAttributes.isConnected??');
-	debugCuratedDeviceReads('getDeviceInfo for',handle);
+	debugCuratedDeviceReads('getDeviceInfo for',handle, registers);
 	var previouslyAcquiredHandleInfo = {
 		isValid: false,
 		DeviceType: null,
