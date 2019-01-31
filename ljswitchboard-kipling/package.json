@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-kipling",
-  "version": "3.1.15",
+  "version": "3.1.16",
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
     "name": "Chris Johnson",
@@ -28,10 +28,11 @@
     "url": "https://github.com/chrisJohn404/ljswitchboard-kipling/issues"
   },
   "dependencies": {
-    "sprintf": "~0.1.3",
     "dict": "1.4.0",
+    "ljswitchboard-ljm_driver_constants": "0.0.x",
+    "ljswitchboard-modbus_map": "0.0.x",
     "q": "~1",
-    "ljswitchboard-modbus_map": "0.0.x"
+    "sprintf": "~0.1.3"
   },
   "devDependencies": {
     "nodeunit": "0.9.x",
