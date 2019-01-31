@@ -452,7 +452,7 @@ exports.DEVICE_TYPE_NAMES = {
     '200': 'Digit'
 };
 exports.DRIVER_DEVICE_TYPE_NAMES = {
-	'0': 'ANY',
+	'0': 'LJM_dtANY',
     '3': 'LJM_dtU3',
     '4': 'LJM_dtT4',
     '5': 'LJM_dtT5',
@@ -484,7 +484,7 @@ exports.DRIVER_CONNECTION_TYPE_NAMES = {
     '7': 'LJM_ctWIFI_UDP',
 };
 exports.CONNECTION_TYPE_NAMES = {
-    '0': 'Any',
+    '0': 'ANY',
     '1': 'USB',
     '2': 'TCP',
     '3': 'Ethernet',
