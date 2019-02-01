@@ -867,16 +867,82 @@ function device(useMockDevice) {
 	};
 	var privateOpen = function(openParameters) {
 		var defered = q.defer();
+		function onSuccess(res) {
+			try {
+			var curHandle = ljmDevice.handle;
+			var numSameHandles = 0;
+
+			// console.log(
+			// '!! dev_curator: Opened a device',
+			// ljmDevice.handle,
+			// ljmDevice.connectionType,
+			// ljmDevice.identifier,
+			// ljmDevice.deviceType,
+			// ljmDevice.getHandleInfoSync(),
+			// Object.keys(ljmDevice)
+			// );
+			var devKeys = Object.keys(openParameters.knownDevices);
+			devKeys.forEach(function(devKey) {
+				var ljmDev = openParameters.knownDevices[devKey].getDevice();
+				var handle = ljmDev.handle;
+
+				if(handle == curHandle) {
+					numSameHandles += 1;
+				}
+			});
+
+			if(numSameHandles > 1) {
+				var devInfo = ljmDevice.getHandleInfoSync();
+				var openParams = {
+					'dt': ljmDevice.deviceType,
+					'ct': ljmDevice.connectionType,
+					'id': ljmDevice.identifier,
+				}
+
+				// Clear referenced ljmDevice...
+				ljmDevice.handle = null;
+				ljmDevice.deviceType = null;
+				ljmDevice.connectionType = null;
+				ljmDevice.identifier = null;
+				ljmDevice.isHandleValid = false;
+
+				defered.reject({
+					'isError': true,
+					'errorMessage': 'device object already created for handle: ' + curHandle.toString(),
+					'message': 'device object already created for handle: ' + curHandle.toString(),
+					'description': 'device object already created for handle: ' + curHandle.toString(),
+					'errorLocation': 'device_curator::privateOpen',
+					'deviceInfo': devInfo,
+					'openParameters': openParams,
+				});
+			} else {
+				defered.resolve(res);
+			}
+		}catch(err) {
+			console.err('err',err);
+		}
+		}
+		function onError(err) {
+			console.log('Error opening device...', err);
+			defered.reject(err);
+		}
 		ljmDevice.open(
 			openParameters.deviceType,
 			openParameters.connectionType,
 			openParameters.identifier,
-			defered.reject,
-			defered.resolve
+			onError,
+			onSuccess
 		);
 		return defered.promise;
 	};
-	this.open = function(deviceType, connectionType, identifier) {
+	/*
+	 * This function requires the following information:
+	 * deviceType: 'T7', 'ANY', 7
+	 * connectionType: 'USB', 'ANY', 1
+	 * identifier: 'ANY', [SN], [Device Name], [ipAddress]
+	 * knownDevices: *optionalArg* {'0': curatedDevice, '1': curatedDevice, .. }
+	 */
+	this.open = function(deviceType, connectionType, identifier, knownDevices) {
 		var defered = q.defer();
 		var getOnError = function(msg) {
 			return function(err) {
@@ -886,11 +952,29 @@ function device(useMockDevice) {
 				return innerDefered.promise;
 			};
 		};
+
+
 		var openParameters = {
 			'deviceType': deviceType,
 			'connectionType': connectionType,
-			'identifier': identifier
+			'identifier': identifier,
 		};
+
+		var devices = {};
+		var devKeys = [];
+		var containsValidDevices = false;
+		if(typeof(knownDevices) !== 'undefined') {
+			devKeys = Object.keys(knownDevices);
+			devKeys.forEach(function(key) {
+				var device = knownDevices[key];
+				var devHandle = self.savedAttributes.handle;
+			});
+			containsValidDevices = true;
+
+			if(containsValidDevices) {
+				openParameters.knownDevices = knownDevices;
+			}
+		}
 
 		privateOpen(openParameters)
 		.then(self.waitForDeviceToInitialize, getOnError('openStep'))

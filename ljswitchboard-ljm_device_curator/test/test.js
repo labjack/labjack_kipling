@@ -119,6 +119,7 @@ var testGroups = {
 	// These are T7 specific tests.
 	't7': {
 		't7_basic_test': false,
+		't7_multiple_dev_any_test': false,
 		't7_array_test': false,
 		't7_check_calibration_test': false,
 		't7_read_recovery_fw_version_test': false,
