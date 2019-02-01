@@ -884,6 +884,9 @@ function device(useMockDevice) {
 
 				if(numSameHandles > 1) {
 					var devInfo = ljmDevice.getHandleInfoSync();
+					devInfo.deviceTypeName = driver_const.DEVICE_TYPE_NAMES[devInfo.deviceType];
+					devInfo.connectionTypeName = driver_const.CONNECTION_TYPE_NAMES[devInfo.connectionType];
+					
 					var openParams = {
 						'dt': ljmDevice.deviceType,
 						'ct': ljmDevice.connectionType,
