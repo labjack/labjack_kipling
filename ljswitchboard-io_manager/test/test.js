@@ -26,8 +26,8 @@ var testGroups = {
 	// Device Controller tests
 	'device_controller': {
 		// Mock devices, no LabJacks required.
-		'two_mock_devs_test': false,				// Passing
-		'basic_mock_dev_test': false,				// Passing
+		'two_mock_devs_test': true,				// Passing
+		'basic_mock_dev_test': true,				// Passing
 
 		// Requires LabJack devices.
 		'basic_live_test': false,					// Passing
@@ -36,6 +36,7 @@ var testGroups = {
 		'device_keeper_test': false,				// 
 		'device_keeper_live_test': false,			// 
 		'device_errors_test': false,				// 
+		'two_dev_live_test': true,
 	},
 
 	'update_mock_device_test': false,				// 
@@ -52,7 +53,7 @@ var testGroups = {
 	},
 
 	'simple_logger': {
-		'simple_logger_basic_test': true,			// 
+		'simple_logger_basic_test': false,			// 
 	},
 };
 

@@ -431,7 +431,6 @@ function createDeviceController(io_interface) {
 
 		var newDevice;
 		var deviceCreator;
-
 		// Create device object based on what type of device we just opened
 		if(deviceInfo.deviceType == driver_constants.deviceTypes.t7) {
 			deviceCreator = t7_device_creator;
@@ -529,7 +528,8 @@ function createDeviceController(io_interface) {
 
 		callFunc('openDevice', [options])
 		.then(createDeviceObject, handleError)
-		.then(defered.resolve, defered.reject);
+		.then(defered.resolve, defered.reject)
+		.catch(handleError);
 		return defered.promise;
 	};
 

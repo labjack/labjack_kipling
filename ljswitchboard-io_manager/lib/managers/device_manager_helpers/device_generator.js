@@ -31,12 +31,16 @@ function newDevice(newProcess, mockDevice, mockDeviceConfig, sendFunc) {
 	this.oneWayListener = function(m) {
 		console.log('device_generator oneWayListener', self.device_comm_key, m);
 	};
-
-	this.open = function(deviceType, connectionType, identifier) {
+	// This is a function that returns the LJM device of the curated device.
+	this.getDevice = function() {
+		var ljmDevice = self.device.getDevice();
+		return ljmDevice;
+	}
+	this.open = function(deviceType, connectionType, identifier, devices) {
 		var defered = q.defer();
 		var performOpenDevice = function() {
 			var innerDefered = q.defer();
-			self.device.open(deviceType, connectionType, identifier)
+			self.device.open(deviceType, connectionType, identifier, devices)
 			.then(function(res) {
 				self.device.savedAttributes['isSelected-Radio'] = false;
 				self.device.savedAttributes['isSelected-CheckBox'] = true;

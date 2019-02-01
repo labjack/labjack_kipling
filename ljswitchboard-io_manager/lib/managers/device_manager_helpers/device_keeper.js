@@ -181,9 +181,8 @@ function createDeviceKeeper(io_delegator, link) {
 		var errorFunc = function(err) {
 			// The device failed to open, therefore remove it from the list of
 			// open devices.
-			self.devices[err.device_comm_key] = null;
-			self.devices[err.device_comm_key] = undefined;
-			delete self.devices[err.device_comm_key];
+			removeDeviceReference(err.device_comm_key);
+
 			defered.reject(err.err);
 		};
 
@@ -221,7 +220,8 @@ function createDeviceKeeper(io_delegator, link) {
 
 		// Call the LJM open command to open the desired device
 		try {
-			self.devices[newKey].open(deviceType, connectionType, identifier)
+			self.devices[newKey].open(deviceType, connectionType, identifier, self.devices)
+			// self.devices[newKey].open(deviceType, connectionType, identifier) // Switch to passing in the list of managed devices.
 			.then(successFunc, errorFunc);
 		} catch(err) {
 			defered.reject({
@@ -239,10 +239,12 @@ function createDeviceKeeper(io_delegator, link) {
 	 *	of devices.
 	 */
 	var removeDeviceReference = function(comKey) {
+		self.devices[comKey].device.destroy();
 		self.devices[comKey] = null;
 		self.devices[comKey] = undefined;
 		delete self.devices[comKey];
 	};
+
 	this.close = function(comKey) {
 		var defered = q.defer();
 
@@ -693,7 +695,15 @@ function createDeviceKeeper(io_delegator, link) {
 	this.simpleLogger;
 	this.logConfigs;
 
-	function getLoggerCuratedDeviceArray() {
+	function getCuratedDeviceObject() {
+		var devices = {};
+		var devKeys = Object.keys(self.devices);
+		devKeys.forEach(function(devKey) {
+			deviceListing[devKey] = self.devices[devKey].device;
+		});
+		return devices;
+	}
+	function getCuratedDeviceArray() {
 		var deviceListing = []
 		var devKeys = Object.keys(self.devices);
 		devKeys.forEach(function(devKey) {
@@ -772,7 +782,7 @@ function createDeviceKeeper(io_delegator, link) {
 		debugLogger('Connected Devices', self.devices);
 		var defered = q.defer();
 
-		self.simpleLogger.updateDeviceListing(getLoggerCuratedDeviceArray())
+		self.simpleLupdateDeviceListing(getLoggerCuratedDeviceArray())
 		.then(function(res) {
 			debugLogger('Device listing has been passwd to the logger',res);
 			defered.resolve();
@@ -802,7 +812,7 @@ function createDeviceKeeper(io_delegator, link) {
 			'same_vals_all_devices': true,
 			'registers': ['AIN0','AIN1'],
 			'update_rate_ms': 100,
-		},getLoggerCuratedDeviceArray());
+		},getLoggerCDeviceArray());
 		
 		// Over-write config object default name & file prefix.
 		self.logConfigs.logging_config.name = name;
