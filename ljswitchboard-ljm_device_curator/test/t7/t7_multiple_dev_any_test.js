@@ -112,8 +112,8 @@ var device_tests = {
 			var keys = Object.keys(err);
 			if(keys.length > 0) {
 				test.ok(true);
-				var dt = driver_const.DEVICE_TYPE_NAMES[err.deviceInfo.deviceType];
-				var ct = driver_const.CONNECTION_TYPE_NAMES[err.deviceInfo.connectionType];
+				var dt = err.deviceInfo.deviceTypeName;
+				var ct = err.deviceInfo.connectionTypeName;
 				var sn = err.deviceInfo.serialNumber;
 				var str = '  - Prevented open of: ';
 				str += dt + '[??] '
