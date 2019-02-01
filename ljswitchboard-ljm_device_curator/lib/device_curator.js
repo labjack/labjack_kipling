@@ -865,16 +865,16 @@ function device(useMockDevice) {
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
-	var privateOpen = function(openParameters) {
+	var privateOpen = function(openParameters, knownDevices) {
 		var defered = q.defer();
 		function onSuccess(res) {
 			var curHandle = ljmDevice.handle;
 			var numSameHandles = 0;
 			
-			if(typeof(openParameters.knownDevices) !== 'undefined') {
-				var devKeys = Object.keys(openParameters.knownDevices);
+			if(typeof(knownDevices) !== 'undefined') {
+				var devKeys = Object.keys(knownDevices);
 				devKeys.forEach(function(devKey) {
-					var ljmDev = openParameters.knownDevices[devKey].getDevice();
+					var ljmDev = knownDevices[devKey].getDevice();
 					var handle = ljmDev.handle;
 
 					if(handle == curHandle) {
@@ -950,23 +950,7 @@ function device(useMockDevice) {
 			'identifier': identifier,
 		};
 
-		var devices = {};
-		var devKeys = [];
-		var containsValidDevices = false;
-		if(typeof(knownDevices) !== 'undefined') {
-			devKeys = Object.keys(knownDevices);
-			devKeys.forEach(function(key) {
-				var device = knownDevices[key];
-				var devHandle = self.savedAttributes.handle;
-			});
-			containsValidDevices = true;
-
-			if(containsValidDevices) {
-				openParameters.knownDevices = knownDevices;
-			}
-		}
-
-		privateOpen(openParameters)
+		privateOpen(openParameters, knownDevices)
 		.then(self.waitForDeviceToInitialize, getOnError('openStep'))
 		.then(saveAndLoadAttributes(openParameters), getOnError('hardwareInitialization'))
 		// .then(getAndSaveCalibration, getOnError('saveAndLoadAttrs'))
@@ -977,7 +961,7 @@ function device(useMockDevice) {
 		return defered.promise;
 	};
 
-	this.simpleOpen = function(deviceType, connectionType, identifier) {
+	this.simpleOpen = function(deviceType, connectionType, identifier, knownDevices) {
 		var defered = q.defer();
 		var getOnError = function(msg) {
 			return function(err) {
@@ -993,7 +977,7 @@ function device(useMockDevice) {
 			'identifier': identifier
 		};
 
-		privateOpen(openParameters)
+		privateOpen(openParameters, knownDevices)
 		.then(saveAndLoadAttributes(openParameters), getOnError('openStep'))
 		.then(finalizeOpenProcedure, getOnError('saveAndLoadAttrs'))
 		.then(defered.resolve, defered.reject);
