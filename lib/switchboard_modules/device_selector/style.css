@@ -10,30 +10,103 @@ div.link a {
     cursor:pointer;
 }
 
+.advanced-scan-options-toggle {
+    cursor:pointer;
+    color:#333;
+    font-size: 15px;
+}
+.advanced-scan-options-toggle:hover {
+    color:grey;
+}
+
+.direct-connect-options-toggle {
+    cursor:pointer;
+    color:#333;
+    font-size: 15px;
+}
+
+.direct-connect-options-toggle:hover {
+    color:grey;
+}
+td.direct-connect-table-desc {
+    font-size:12px;
+    min-width:110px;
+    text-align: right;
+}
+td.direct-connect-table-desc span {
+    line-height: 28px;
+    padding-right: 5px;
+}
 /* Scan Options */
 .scan-options-and-info {
-    height:130px;
+    height:160px;
+    display:table;
+    width:100%;
 }
-
+.scan-options-and-info-tr {
+    display:table-row;
+    width:100%;
+}
+.directConnectOptionsDiv .description {
+    width:40px;
+}
 .scanOptionsTableDiv {
-    float:left;
+    /*float:left;*/
+    display:table-cell;
+    width:180px;
+    /*width:33%;*/
+}
+.directConnectOptionsDiv {
+    /*float:left;*/
+    display:table-cell;
+    width:33%;
+    padding-right: 10px;
+    /*position: absolute;*/
+    /*left: 163px;*/
 }
 .connectButtonColorsLegendDiv {
-    float:right;
-    margin-right:20px;
+    /*float:right;*/
+    display:table-cell;
+    /*margin-right:20px;*/
+    width:365px;
 }
 
-@media screen and (max-width: 695px) {
+.direct-connect-options input {
+    margin: 0px 0px 5px 0px;
+}
+.direct-connect-options a {
+    margin: 0px 0px 0px 0px;
+}
+.directConnectOptionsDiv table {
+    max-width: 320px;
+    min-width:320px;
+}
+
+#attempt_direct_connect_btn {
+    width:113px;
+    /*margin:0px 0px 0px 150px*/
+    margin:0px 0px 0px 0px;
+}
+.drop-down-select {
+    width:30px;
+}
+/* max-width: 695... before DC options */
+@media screen and (max-width: 950px) {
     .scan-options-and-info {
-        height:inherit;
+        height:290px;
     }
     .scanOptionsTableDiv {
         float:none;
-        display:inline-block;
+        display:inline-table;
+    }
+    .directConnectOptionsDiv {
+        float:none;
+        display:inline-table;
+        position: inherit;
     }
     .connectButtonColorsLegendDiv {
         float:none;
-        display:inline-block;
+        display:inline-table;
     }
 }
 
@@ -61,7 +134,7 @@ div.link a {
 /* Legend */
 
 .connectButtonColorsLegend  {
-    width:320px;
+    width:345px;
 }
 .connectButtonColorsLegend td div {
     width:15px;
@@ -168,6 +241,9 @@ div.link a {
     vertical-align: top;
     border: 1px solid #ddd;
     padding: 3px;
+}
+.black-border {
+    border: 1px solid #000;
 }
 .device #image img {
     width: 100px;

@@ -29,39 +29,137 @@
         </table>
     </div>
 </div>
-<div class="scan-options-and-info" style="margin:0px 0px 0px 0px">
-    <div class="scanOptionsTableDiv">
-        <table class="table table-sm table-hover scanOptionsTable" style="margin:0px 0px 10px 20px">
-            <thead>
-                <th class="enabled"/>
-                <th colspan="2" class="connectionType">Scan Options</th>
-                <th class="estimatedScanTime"/>
-            </thead>
-            <tbody style="background-color:transparent">
-                <tr title="Search for devices with a USB connection.">
-                    <td><input id="usb_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanUSB}}checked{{/if}}/></td>
-                    <td><span class="scan-medium">USB</span></td>
-                    <td><span class="time-estimate">(1s)</span></td>
-                </tr>
-                <tr title="Search for devices with a Ethernet connection.">
-                    <td><input id="ethernet_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanEthernet}}checked{{/if}}/></td>
-                    <td><span class="scan-medium">Ethernet</span></td>
-                    <td><span class="time-estimate">(3-10s)</span></td>
-                </tr>
-                <tr title="Search for devices with a WiFi connection.">
-                    <td><input id="wifi_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanWiFi}}checked{{/if}}/></td>
-                    <td><span class="scan-medium">WiFi</span></td>
-                    <td><span class="time-estimate">(10-60s)</span></td>
-                </tr>
-            </tbody>
+<div class="scan-options-and-info" style="margin:0px 0px 0px 0px;">
+    <div class="scan-options-and-info-tr">
+        <div class="scanOptionsTableDiv">
+            <table class="table table-sm table-hover scanOptionsTable" style="margin:0px 0px 5px 20px">
+                <thead>
+                    <th class="enabled"/>
+                    <th colspan="2" class="connectionType">Scan Options <span id="advancedOptions" class="advanced-scan-options-toggle {{#if advancedScanOptions}}icon-minus{{else}}icon-plus{{/if}}" title="Show Advanced Options"/></th>
+                    <th class="estimatedScanTime"/>
+                </thead>
+                <tbody style="background-color:transparent">
+                    <tr title="Search for devices with a USB connection.">
+                        <td><input id="usb_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanUSB}}checked{{/if}}/></td>
+                        <td><span class="scan-medium">USB</span></td>
+                        <td><span class="time-estimate">(1s)</span></td>
+                    </tr>
+                    <tr title="Search for devices with a Ethernet connection.">
+                        <td><input id="ethernet_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanEthernet}}checked{{/if}}/></td>
+                        <td><span class="scan-medium">Ethernet</span></td>
+                        <td><span class="time-estimate">(3-10s)</span></td>
+                    </tr>
+                    <tr title="Search for devices with a WiFi connection.">
+                        <td><input id="wifi_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanWiFi}}checked{{/if}}/></td>
+                        <td><span class="scan-medium">WiFi</span></td>
+                        <td><span class="time-estimate">(10-60s)</span></td>
+                    </tr>
+                    <tr class="advanced-scan-option" id="ethernet_tcp_scan_option" title="Search for devices with a Ethernet connection with TCP open calls." style="{{#if advancedScanOptions}}{{else}}display:none;{{/if}}">
+                        <td><input id="ethernet_tcp_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanEthernetTCP}}checked{{/if}}/></td>
+                        <td><span class="scan-medium">Eth. TCP</span></td>
+                        <td><span class="time-estimate">(3-10s)</span></td>
+                    </tr>
+                    <tr class="advanced-scan-option" id="wifi_tcp_scan_option" title="Search for devices with a WiFi connection with TCP open calls." style="{{#if advancedScanOptions}}{{else}}display:none;{{/if}}">
+                        <td><input id="wifi_tcp_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanWiFiTCP}}checked{{/if}}/></td>
+                        <td><span class="scan-medium">WiFi TCP</span></td>
+                        <td><span class="time-estimate">(10-60s)</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button id="refresh_devices_button" class="btn btn-primary" style="width:150px; margin:0px 0px 0px 20px;display:none;"><span class="icon-refresh-3"/> Refresh Devices</button>
+        </div>
+        <div class="directConnectOptionsDiv">
+            <table class="table table-sm table-hover direct-connect-options" style="margin:0px 0px 0px 20px">
+                <thead>
+                    <!-- <th class="description"></th> -->
+                    <th colspan="2" class="direct-connect-input">Direct Connect Options <span id="direct_connect_options" class="direct-connect-options-toggle {{#if showDirectConnectOptions}}icon-minus{{else}}icon-plus{{/if}}" title="Show Direct Connect Options"/></th>
+                    <th class="drop-down-select"></th>
+                </thead>
+                <tbody style="background-color:transparent;{{#unless showDirectConnectOptions}}display:none;{{/unless}}" class="direct-connect-options-page-data">
+                    <tr title="LJM Device Type ex: ANY/T4/T7">
+                        <td class="direct-connect-table-desc"><span>Device Type:</span></td>
+                        <td class="device-type-input-cell">
+                            <input class="device-type-input direct-connect-input input-medium" id="device_type_input" type="text" placeholder="LJM Device Type" ljtype="deviceType" value="{{directConnectParams.dt}}"/>
+                        </td>
+                        <td class="device-type-dropdown-cell">
+                            <div id="device_type_dropdown" class="btn-group device-type-dropdown">
+                                <a style="font-size:12px;" class="btn dropdown-toggle -LINK" data-toggle="dropdown" title="Set Device Type"><span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a style="font-size:12px;" class="menuOption" title="Device Type Any" value="ANY">ANY</a>
+                                    </li>
+                                    <li>
+                                        <a style="font-size:12px;" class="menuOption" title="Device Type T7" value="T7">T7</a>
+                                    </li>
+                                    <li>
+                                        <a style="font-size:12px;" class="menuOption" title="Device Type T4" value="T4">T4</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr title="LJM Connection Type ex: ANY/USB/Ethernet/WiFi">
+                         <td class="direct-connect-table-desc"><span>Connection Type:</span></td>
+                        <td class="connection-type-input-cell">
+                            <input class="connection-type-input direct-connect-input input-medium" id="connection_type_input" type="text" placeholder="LJM Connection Type" ljtype="deviceType" value="{{directConnectParams.ct}}"/>
+                        </td>
+                        <td class="connection-type-dropdown-cell">
+                            <div id="connection_type_dropdown" class="btn-group connection-type-dropdown">
+                                <a style="font-size:12px;" class="btn dropdown-toggle -LINK" data-toggle="dropdown" title="Set Connection Type"><span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a style="font-size:12px;" class="menuOption" title="Connection Type Any" value="ANY">ANY</a>
+                                    </li>
+                                    <li>
+                                        <a style="font-size:12px;" class="menuOption" title="Connection Type USB" value="USB">USB</a>
+                                    </li>
+                                    <li>
+                                        <a style="font-size:12px;" class="menuOption" title="Connection Type Ethernet" value="Ethernet">Ethernet</a>
+                                    </li>
+                                    <li>
+                                        <a style="font-size:12px;" class="menuOption" title="Connection Type WiFi" value="WiFi">WiFi</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr title="LJM Identifier ex: ANY/IP Address/SN/Device Name">
+                         <td class="direct-connect-table-desc"><span>Identifier:</span></td>
+                        <td class="identifier-input-cell">
+                            <input class="identifier-input direct-connect-input input-medium" id="identifier_input" type="text" placeholder="LJM Identifier" ljtype="deviceType" value="{{directConnectParams.id}}"/>
+                        </td>
+                        <td class="identifier-dropdown-cell">
+                            <div id="identifier_dropdown" class="btn-group identifier-dropdown">
+                                <a style="font-size:12px;" class="btn dropdown-toggle -LINK" data-toggle="dropdown" title="Set Identifier"><span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a style="font-size:12px;" class="menuOption" title="Identifier Any" value="ANY">ANY</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot class="direct-connect-options-page-data" style="{{#unless showDirectConnectOptions}}display:none;{{/unless}}">
+                    <td style="min-width: 130px;">
+                        <div id="dco-info-link-holder" class="link"><a id="dco-info-text" title="Open the Direct Connection Options support page your default browser">More Information...</a></div>
+                    </td>
+                    <td colspan="1" style="text-align:right;">
+                        <button id="attempt_direct_connect_btn" class="btn btn-primary" style="display:none;"><span class="icon-power-cord"/> Connect</button>
+                    </td>
+                </tfoot>
         </table>
-        <button id="refresh_devices_button" class="btn btn-primary" style="width:150px; margin:0px 0px 0px 20px"><span class="icon-refresh-3"/> Refresh Devices</button>
+        <table>
+            <tr>
+                
+            </tr>
+        </table>
     </div>
     <div class="connectButtonColorsLegendDiv">
         <table class="table table-sm table-hover connectButtonColorsLegend" style="margin:0px 0px 0px 20px">
             <thead>
                 <th class="enabled"/>
-                <th class="foundMethod" colspan="2">Connection Button Colors</th>
+                <th class="foundMethod" >Connection Button Colors</th>
                 <th class="connectionVerification"></th>
             </thead>
             <tbody style="background-color:transparent">
@@ -103,8 +201,9 @@
         </script>
     </div>
 </div>
+</div>
 <div class="device-selector-holder">
-    <div class="selector-header">
+    <div class="selector-header" style="display:none">
         <!-- <div class="select-devices-title">
             <h3>Select Devices</h3>
         </div> -->
@@ -120,31 +219,13 @@
 
     <div class="device-pane">
     	<div id="device_scan_status" class="device_scan_status_box">
-    		<div>
-                <p><br></p>
-                <p>Kipling is Searching for the following devices, if your device is not found please try again.</p>
-                <ul>
-                    <li><a title="Open the T7 product page in your default browser" id="lj-t7-pp-link" class="lj-link-holder">T7/T7-Pro</a></li>
-                    <li><a title="Open the T4 product page in your default browser" id="lj-t4-pp-link" class="lj-link-holder">T4</a></li>
-                </ul>
-                <p>Kipling does not support the following LabJack devices:</p>
-                <ul>
-                    <li>U6/U6-Pro</li>
-                    <li>U3-HV/U3-LV</li>
-                    <li>UE9/UE9-Pro</li>
-                    <li>U12</li>
-                    <li>Digit-TL/Digit-TLH</li>
-                </ul>
-                <p>Navigate to LabJack's <a title="Open the LabJack Applications page in your default browser" id="lj-applications" class="lj-link-holder">LabJack Applications</a> website page to determine the correct application for your device.</p>
-            </div>
-            <div class="progress progress-indeterminate">
-				<div class="win-ring"></div>
-			</div>
+    		
     	</div>
     	<div id="device_scan_results">
 	    	<!-- <p>Device Selector View!</p> -->
 		</div>
 		{{!--<pre>{{printContext}}</pre>--}}
+
     </div>
     <script>
         var linksToBindTo = [{
@@ -156,6 +237,9 @@
         }, {
             'id': '#lj-t4-pp-link',
             'url': "https://labjack.com/products/t4"
+        }, {
+            'id': '#dco-info-link-holder',
+            'url': 'https://labjack.com/support/software/applications/t-series/kipling/direct-connect'
         }];
 
 

@@ -8,6 +8,8 @@
     "htmlFiles": [
     	"no_devices_found.html",
     	"found_devices.html",
-    	"wifi_image.html"
+    	"wifi_image.html",
+        "scanning_for_devices.html",
+        "direct_opening_device.html"
     ]
 }
