@@ -1,34 +1,34 @@
-<div class="module-chrome unselectable fullPage">
+<div class="module-chrome unselectable fullPage unselectable-tex">
     <div id="module-chrome-header">
         
         <input style="display:none;" id="file-dialog-hidden" type="file" />
         <input style="display:none;" id="folder-select-dialog-hidden" type="file" nwdirectory/>
         <input style="display:none;" id="folder-select-dialog-hiddenB" type="file" nwdirectory/>
         <input style="display:none;" id="file-save-dialog-hidden" type="file" nwsaveas="luaScript.lua" accept=".lua"/>
-        <div id="alert-message-holder" class="alert-holder">
+        <div id="alert-message-holder" class="alert-holder unselectable-tex">
             <div id="info-message" class="alert alert-info" style="display:none;">
               <button type="button" class="close close-alert-button"></button>
-              <div class="error-display"></div>
+              <div class="error-display-ele unselectable-text"><p class="error-display"></p></div>
             </div>
             <div id="alert-message" class="alert" style="display:none;">
               <button type="button" class="close close-alert-button"></button>
-              <div class="error-display"></div>
+              <div class="error-display-ele unselectable-text"><p class="error-display"></p></div>
             </div>
             <div id="alert-error-message" class="alert alert-error" style="display:none;">
               <button type="button" class="close close-alert-button"></button>
-              <div class="error-display"></div>
+              <div class="error-display-ele unselectable-text"><p class="error-display"></p></div>
             </div>
         </div>
     </div>
-    <div id="module-chrome-tab-holder" class="module-chrome-tabs fullPage">
+    <div id="module-chrome-tab-holder" class="module-chrome-tabs fullPage unselectable-tex unselectable">
         <div class="fullPage">
-            <div id="system-navigation" class="unselectable fullPage">
+            <div id="system-navigation" class="unselectable fullPage unselectable-text">
                 <div id="header-modules" class="module-tab-holder module-chrome-header-tabs">
                     <ul id="header_tabs" class="module-chrome-header-tab-list module-list">
                         {{!--
                             Logic moved to module_tab.html template.
                             {{#header_modules}}
-                            <li class="header-tab"><span id="{{name}}" class="module-chrome-tab">{{humanName}}</span></li>
+                            <li class="header-tab"><span id="{{name}}" class="module-chrome-tab unselectable-text">{{humanName}}</span></li>
                             {{/header_modules}}
                         --}}
                     </ul>
@@ -38,7 +38,7 @@
                         {{!--
                             Logic moved to module_tab.html template.
                             {{#modules}}
-                            <li class="body-tab"><span id="{{name}}" class="module-chrome-tab">{{humanName}}</span></li>
+                            <li class="body-tab"><span id="{{name}}" class="module-chrome-tab unselectable-text">{{humanName}}</span></li>
                             {{/modules}}
                         --}}
                     </ul>
@@ -48,7 +48,7 @@
                         {{!--
                             Logic moved to module_tab.html template.
                             {{#footer_modules}}
-                            <li class="footer-tab"><span id="{{name}}" class="module-chrome-tab">{{humanName}}</span></li>
+                            <li class="footer-tab"><span id="{{name}}" class="module-chrome-tab unselectable-text">{{humanName}}</span></li>
                             {{/footer_modules}}
                         --}}
                     </ul>
@@ -56,10 +56,10 @@
             </div>
         </div>
     </div>
-    <div id="module-chrome-body-holder" class="fullPage module-chrome-body">
-        <div id="module-chrome-block" class="fullPage">
-            <div id="module-chrome-contents-holder" class="fullPage">
-                <div id="module-chrome-contents" class="fullPage unselectable">
+    <div id="module-chrome-body-holder" class="fullPage module-chrome-body unselectable unselectable-text">
+        <div id="module-chrome-block" class="fullPage unselectable unselectable-text">
+            <div id="module-chrome-contents-holder" class="fullPage unselectable unselectable-text">
+                <div id="module-chrome-contents" class="fullPage unselectable unselectable-text">
                     <div id="module-chrome-loaded-module-css"></div>
                     <div id="module-chrome-loaded-module-js"></div>
                     <div id="module-chrome-loaded-module-view"></div>

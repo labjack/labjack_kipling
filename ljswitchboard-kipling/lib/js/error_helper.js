@@ -16,7 +16,17 @@ function showAlert(message) {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
 		$('#alert-message .close').one('click', hideAlert);
 	}
-	setTimeout(hideAlert, 5000);
+	setTimeout(hideAlert, 10000);
+}
+function showAlertNoTimeout(message) {
+	var alertMessageObj = $('#alert-message');
+	var alertMessageHolder = $('#alert-message .error-display');
+	
+	alertMessageHolder.html(message);
+	if(alertMessageObj.css('display') === 'none') {
+		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
+		$('#alert-message .close').one('click', hideAlert);
+	}
 }
 
 function hideInfoMessage() {
@@ -35,6 +45,16 @@ function showInfoMessage(message) {
 		$('#info-message .close').one('click', hideInfoMessage);
 	}
 	setTimeout(hideInfoMessage, 5000);
+}
+function showInfoMessageNoTimeout(message) {
+	var alertMessageObj = $('#info-message');
+	var alertMessageHolder = $('#info-message .error-display');
+	
+	alertMessageHolder.html(message);
+	if(alertMessageObj.css('display') === 'none') {
+		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
+		$('#info-message .close').one('click', hideInfoMessage);
+	}
 }
 
 function hideCriticalAlert() {

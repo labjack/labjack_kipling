@@ -92,6 +92,31 @@
     -ms-user-select: none;
     user-select: none;
 }
+.selectable-text {
+    cursor: text;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -o-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+.unselectable-text {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.unselectable-text table, tr, td, p, a, div, li, ul, span {
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
 /*
 Styling for the contents/body data
@@ -120,4 +145,9 @@ Styling for the contents/body data
 
 .module-chrome-task-view {
     display:none;
+}
+
+.error-display-ele p {
+    padding:0px;
+    margin:0px;
 }
