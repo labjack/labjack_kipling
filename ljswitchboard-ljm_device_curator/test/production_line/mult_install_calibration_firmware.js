@@ -36,7 +36,7 @@ var devices = [];
 var deviceSerials = [];
 
 function createDeviceUpdater(test) {
-	var fwVersionNum = 1.0216;
+	var fwVersionNum = 1.0255;
 	this.performDeviceUpdate = function(device, upgradeIsFinished) {
 		function pInfo() {
 			var dataToPrint = [
