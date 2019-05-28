@@ -32,7 +32,7 @@ Chris 5/28: I believe the code looks for the "subScripts" and the "location" key
   }],
 }]
 ```
-*follows .json syntax....*
+
 
 ## Test Changes before commiting:
 Copy and replace the ljswitchboard-module_manager/lib folder to (on windows 7+):
@@ -42,3 +42,5 @@ Start Kipling on user's computer and make sure the example script can be loaded 
 https://jsonlint.com/
 
 is very useful for debugging...
+
+*Notes: follows .json syntax.... The examples list is cached on first-program-load.  Try copying/pasting a line-item that already exists & re-start K3.  Re-loading just the module will only work if you are in "dev" mode.  I forget what happens if the .json file isn't formatted correctly but your computer will most likely not emit blue smoke, no promises :)*
