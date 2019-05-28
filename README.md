@@ -17,7 +17,7 @@ Chris 5/28: I believe the code looks for the "subScripts" and the "location" key
   "location": "...xxx..."
 }]
 ```
- - This will display the entry as a file.
+This will display the entry as a file.
  
  ```
 "preBuiltScripts":[{
@@ -28,7 +28,7 @@ Chris 5/28: I believe the code looks for the "subScripts" and the "location" key
   }],
 }]
 ```
- - This will make a tree item with a "test Script" under it.
+This will make a tree item with a "test Script" under it.
 
 ## Test Changes before commiting:
 Copy and replace the ljswitchboard-module_manager/lib folder to (on windows 7+):
