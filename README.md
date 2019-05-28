@@ -2,14 +2,33 @@
 A project that is dedicated to rendering, loading, and managing modules for the ljswitchboard project
 
 ## Adding Lua Script Examples to Kipling
-All of the examples that Kipling ships with are located here:
-https://github.com/chrisJohn404/ljswitchboard-module_manager/tree/master/lib/switchboard_modules/lua_script_debugger/premade_scripts
+All of the examples that Kipling ships with are located in the [lib/switchboard_modules/lua_script_debugger/premade_scripts](https://github.com/chrisJohn404/ljswitchboard-module_manager/tree/master/lib/switchboard_modules/lua_script_debugger/premade_scripts) folder.  
 
-If a folder needs to be created for organizational purposes, then make one.
+Simply add a .lua file to the repo and then edit the [moduleConstants.json](https://github.com/chrisJohn404/ljswitchboard-module_manager/blob/master/lib/switchboard_modules/lua_script_debugger/moduleConstants.json) file (under the "preBuiltScripts") key to have the file listed in the drop-down menu in [Kipling](https://labjack.com/support/software/applications/t-series/kipling/lua-scripting).
 
-After adding the .lua file, edit this file:
-https://github.com/chrisJohn404/ljswitchboard-module_manager/blob/master/lib/switchboard_modules/lua_script_debugger/moduleConstants.json
-Hint, edit the variable "preBuiltScripts".  Its essentially a big array of objects that define what folders/scripts should be displayed.
+## Organizing Lua Script Examples
+
+The file system organization of lua scripts was kept intentionally decoupled from what gets displayed to users in the drop-down menu for re-naming flexibility purposes.  Add/organize the .lua script file that needs to be added to the .git repo.  Then edit the "preBuiltScripts" key/variable (which is essentially a big array of objects...).
+
+Chris 5/28: I believe the code looks for the "subScripts" and the "location" keys to determine if an entry is a file or a sub-directory/tree-entry.  
+```
+"preBuiltScripts":[{
+  "name":"Test Script",
+  "location": "...xxx..."
+}]
+```
+ - This will display the entry as a file.
+ 
+ ```
+"preBuiltScripts":[{
+  "name":"Test Script",
+  "subScripts":[{
+    "name":"Test Script",
+    "location": "...xxx..."
+  }],
+}]
+```
+ - This will make a tree item with a "test Script" under it.
 
 ## Test Changes before commiting:
 Copy and replace the ljswitchboard-module_manager/lib folder to (on windows 7+):
