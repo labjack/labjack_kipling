@@ -32,7 +32,7 @@ Chris 5/28: I believe the code looks for the "subScripts" and the "location" key
   }],
 }]
 ```
-
+*follows .json syntax....*
 
 ## Test Changes before commiting:
 Copy and replace the ljswitchboard-module_manager/lib folder to (on windows 7+):
