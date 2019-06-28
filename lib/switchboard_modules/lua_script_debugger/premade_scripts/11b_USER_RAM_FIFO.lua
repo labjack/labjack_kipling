@@ -26,9 +26,12 @@ aF32_Out[5] = 50.4
 
 local aF32_In = {}
 local numValuesFIO0 = 5
+local numValuesFIO1 = 5
 local ValueSizeInBytes = 4
 local numBytesAllocFIFO0 = numValuesFIO0*ValueSizeInBytes
+local numBytesAllocFIFO1 = numValuesFIO1*ValueSizeInBytes
 mbWrite(47900, 1, numBytesAllocFIFO0) --allocate USER_RAM_FIFO0_NUM_BYTES_IN_FIFO to 20 bytes
+mbWrite(47902, 1, numBytesAllocFIFO1) --allocate USER_RAM_FIFO1_NUM_BYTES_IN_FIFO to 20 bytes
 
 LJ.IntervalConfig(0, 2000)
 local checkInterval=LJ.CheckInterval
