@@ -117,6 +117,9 @@
 			"name": "Gyro- PS-ITG-3200",
 			"location": "lua_script_debugger/premade_scripts/I2C/gyro-PS-ITG-3200.lua"
 		}, {
+			"name": "IR Temperature Sensor - MLX90616",
+			"location": "lua_script_debugger/premade_scripts/I2C/ir-temp-sensor-mlx90614.lua"
+		}, {
 			"name": "Time-Of-Flight Proximity Sensor- VL6180X",
 			"location": "lua_script_debugger/premade_scripts/I2C/proximity-VL6180X.lua"
 		}, {
