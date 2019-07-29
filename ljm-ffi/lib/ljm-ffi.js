@@ -107,8 +107,9 @@ var defaultWindowsLibraryLoc = {
     ];},
     'x64': function() {return [path.join(process.env.SystemRoot, 'System32')];},
 };
-var DEFAULT_LIBRARY_LOC;
 
+var DEFAULT_LIBRARY_LOC;
+var DEFAULT_LIBRARY_PATH;
 try {
     var DEFAULT_LIBRARY_LOCATIONS = {
         'linux': defaultLinuxLibraryLoc,
@@ -123,6 +124,7 @@ try {
     }[process.platform][process.arch]();
     var exists = DEFAULT_LIBRARY_LOCATIONS.some(function(loc) {
         DEFAULT_LIBRARY_LOC = loc;
+        DEFAULT_LIBRARY_PATH = path.join(loc, LIBRARY_LOC);
         return fs.existsSync(loc);
     });
 } catch(err) {
@@ -132,6 +134,16 @@ try {
         process.arch,
         err
     );
+}
+
+function custLoadFFILib(libraryLocation, funcInfo) {
+    var retInfo = null;
+    try {
+        retInfo = ffi.Library(ljmLibraryLocation, funcInfo);
+    } catch(err) {
+        retInfo = ffi.Library(DEFAULT_LIBRARY_PATH, funcInfo);
+    }
+    return retInfo;
 }
 
 function getLibraryName(ljmVersion) {
@@ -965,7 +977,7 @@ function loadLJMMultiple(ljmVersion) {
                     );
 
                     // Create a reference to the function with FFI.
-                    var ljmFunctionBinding = ffi.Library(ljmLibraryLocation, funcInfo);
+                    var ljmFunctionBinding = custLoadFFILib(ljmLibraryLocation, funcInfo);
                     ffi_liblabjack[functionName] = ljmFunctionBinding[functionName];
 
                     fn = functionName;
@@ -1026,7 +1038,7 @@ function loadLJMSingle(ljmVersion) {
             }
         });
         
-        ffi_liblabjack = ffi.Library(ljmLibraryLocation, ffiFuncInfo);
+        ffi_liblabjack = custLoadFFILib(ljmLibraryLocation, ffiFuncInfo);
 
         var ljmFunctionNames = Object.keys(ffi_liblabjack);
         ljmFunctionNames.forEach(function(functionName) {
@@ -1047,16 +1059,16 @@ function loadLJMSingle(ljmVersion) {
     }
 }
 
-exports.load = function(options) {
+exports.load = function load(options) {
     // loadLJMSingle(options);
     loadLJMMultiple(options);
     return ljm;
 };
-exports.loadSafe = function(options) {
+exports.loadSafe = function loadSafe(options) {
     loadLJMMultiple(options);
     return liblabjack;
 };
-exports.loadRaw = function(options) {
+exports.loadRaw = function loadRaw(options) {
     // loadLJMSingle(options);
     loadLJMMultiple(options);
     return ffi_liblabjack;
