@@ -28,11 +28,15 @@
     ],
     "dependencies": {
         "async": "~0",
-        "ljm-ffi": "^1.0.8",
+        "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#fixes-to-signed-execution",
         "ljswitchboard-ljm_driver_constants": "0.0.x",
         "ljswitchboard-modbus_map": "0.0.x",
-        "q": "^1.5.1",
-        "ref": "1.3.4"
+        "q": "^1.x",
+        "ref": "^1.x"
+    },
+    "tempDependencies": {
+        "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#fixes-to-signed-execution",
+        "ljm-ffi": "^1.x"
     },
     "devDependencies": {
         "rewire": "~1",
