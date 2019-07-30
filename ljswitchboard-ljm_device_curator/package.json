@@ -38,9 +38,9 @@
   "dependencies": {
     "async": "~0",
     "dict": "1.4.0",
-    "labjack-nodejs": "0.x",
+    "labjack-nodejs": "git://github.com/chrisJohn404/labjack-nodejs.git#fix-osx-signing",
     "lj-apps-win-registry-info": "git+https://github.com/chrisJohn404/lj-apps-win-registry-info.git#master",
-    "ljm-ffi": "1.x",
+    "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#fixes-to-signed-execution",
     "ljmmm-parse": "0.x",
     "ljswitchboard-data_parser": "0.x",
     "ljswitchboard-ljm_driver_constants": "0.x",
@@ -50,6 +50,13 @@
     "q": "^1.5.1",
     "request": "^2.88.0",
     "stats-lite": "^2.2.0"
+  },
+  "custom-deps": {
+    "labjack-nodejs": "git://github.com/chrisJohn404/labjack-nodejs.git#fix-osx-signing",
+    "labjack-nodejs": "0.x",
+    "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#fixes-to-signed-execution",
+    "ljm-ffi": "1.x",
+    "dont delete": "do not delete"
   },
   "devDependencies": {
     "colors": "^1.3.2",
