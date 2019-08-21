@@ -188,6 +188,12 @@
 		}, {
 			"name": "Stream AIN0 and Log to File",
 			"location": "lua_script_debugger/premade_scripts/advanced_scripts/lua-stream-and-log-v3.lua"
+		}, {
+			"name": "Unipolar Stepper Motor: Full Step",
+			"location": "lua_script_debugger/premade_scripts/advanced_scripts/unipolar_full_step.lua"
+		}, {
+			"name": "Unipolar Stepper Motor: Half Step",
+			"location": "lua_script_debugger/premade_scripts/advanced_scripts/unipolar_half_step.lua"
 		}]
 	}, {
 		"name": "Digital IO EF",
