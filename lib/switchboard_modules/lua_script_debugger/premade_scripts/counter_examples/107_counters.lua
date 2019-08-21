@@ -3,6 +3,7 @@
 --The index of each counter within an array is 1 more than its
 -- associated counter.  E.g. counter 10 (AIN113) corresponds with an array
 -- index of 11.
+
 --Counters 0-3 correspond with AIN0-AIN3
 --Counters 4-13 correspond with AIN107-116 as the following:
 	--Counter:  4             Channel:  AIN107
