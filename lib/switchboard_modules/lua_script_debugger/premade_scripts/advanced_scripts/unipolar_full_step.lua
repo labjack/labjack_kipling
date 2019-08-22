@@ -1,4 +1,4 @@
--- The unipolar_full_step example script was written as part of LabJack's 
+-- The unipolar_full_step example script was written as part of LabJacks 
 -- "Stepper Motor Controller" App-Note. There is an accompanying python script 
 -- as well as a (Windows Only) LabVIEW example application that should be run
 -- in conjunction wth this script.
