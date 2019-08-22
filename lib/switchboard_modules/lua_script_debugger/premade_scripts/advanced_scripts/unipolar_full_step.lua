@@ -36,10 +36,10 @@ mbW(chC, 0, 0) --EIO4 = DIO12
 mbW(chD, 0, 0) --EIO5 = DIO13
 
 --Define the Full Step Sequence
-local a = {1,0,0,0}
-local b = {0,0,1,0}
-local c = {0,1,0,0}
-local d = {0,0,0,1}
+local a = {1,0,0,0} -- This is the control logic for line A
+local b = {0,0,1,0} -- This is the control logic for line A'
+local c = {0,1,0,0} -- This is the control logic for line B
+local d = {0,0,0,1} -- This is the control logic for line B'
 local numSteps =table.getn(a)
 
 local i = 0
