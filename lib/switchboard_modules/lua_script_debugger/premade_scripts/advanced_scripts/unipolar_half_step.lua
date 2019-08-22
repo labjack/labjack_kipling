@@ -1,4 +1,4 @@
--- The unipolar_half_step example script was written as part of LabJack's 
+-- The unipolar_half_step example script was written as part of LabJack''s 
 -- "Stepper Motor Controller" App-Note. There is an accompanying python script 
 -- as well as a (Windows Only) LabVIEW example application that should be run
 -- in conjunction wth this script.
@@ -37,9 +37,9 @@ mbW(chD, 0, 0) --EIO5 = DIO13
 
 --Define the Half Step Sequence
 local a = {1,1,0,0,0,0,0,1} -- This is the control logic for line A
-local b = {0,0,0,1,1,1,0,0} -- This is the control logic for line A'
+local b = {0,0,0,1,1,1,0,0} -- This is the control logic for line A''
 local c = {0,1,1,1,0,0,0,0} -- This is the control logic for line B
-local d = {0,0,0,0,0,1,1,1} -- This is the control logic for line B'
+local d = {0,0,0,0,0,1,1,1} -- This is the control logic for line B''
 local numSteps =table.getn(a)
 
 local i = 0
