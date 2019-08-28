@@ -91,15 +91,15 @@ while true do
       mbW(46100, 1, numAveraged)
     end
 
-    -- Compute the average
+    -- Compute the average value for each channel
     for i=1,numChs do
       sums[i] = 0
-      for j=1,numSamplesToAverage do
+      for j=1,numAveraged do
         sums[i] = sums[i] + vals[i][j]
       end
 
       avgVal = sums[i]/numAveraged
-      mbW(46000 + channels[i], 3, avgVal)
+      mbW(46000 + channels[i], 3, avgVal) -- save result to USER_RAMx_F32 register
       if printAverage then
         print(string.format("The average AIN%d reading is: %.5f, (%d samples)",channels[i], avgVal, numAveraged))
       end
