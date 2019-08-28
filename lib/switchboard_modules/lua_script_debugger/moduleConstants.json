@@ -194,6 +194,15 @@
 		}, {
 			"name": "Unipolar Stepper Motor: Half Step",
 			"location": "lua_script_debugger/premade_scripts/advanced_scripts/unipolar_half_step.lua"
+		}, {
+			"name": "Moving Average Compute",
+			"location": "lua_script_debugger/premade_scripts/advanced_scripts/moving_average_compute.lua"
+		}, {
+			"name": "Moving Average: Interval Compute LS",
+			"location": "lua_script_debugger/premade_scripts/advanced_scripts/moving_average_interval_compute_LS.lua"
+		}, {
+			"name": "Moving Average: Interval Compute HS",
+			"location": "lua_script_debugger/premade_scripts/advanced_scripts/moving_average_interval_compute_HS.lua"
 		}]
 	}, {
 		"name": "Digital IO EF",
