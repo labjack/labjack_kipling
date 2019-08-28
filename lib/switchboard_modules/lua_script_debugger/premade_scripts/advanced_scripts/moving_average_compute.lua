@@ -4,16 +4,24 @@
 --
 -- The number of values currently cached & used for averaging
 -- can be read through the USER_RAM0_U32 register.
+--
+--Please note, performance of this script highly depends on what other functions
+-- a T-Series device is performing and how frequently the device
+-- is being read.  A rough max is hit on a T4, when sampling data
+-- at 20Hz and 500 samples. Testing was performed with a T4, FW 1.0022, 
+-- and Kipling 3.1.17 open to the Lua Script Debugger tab.
 
-local sampleIntervalHZ = 4 -- Sampling interval in HZ
+local sampleIntervalHZ = 10 -- Sampling interval in HZ
 local sampleIntervalMS = math.floor(1/sampleIntervalHZ * 1000)
-local numSamplesToAverage = 10
+local numSamplesToAverage = 100
 local channels = {0, 2}
 local numChs = table.getn(channels)
 
-local statusIONum = 0
+local statusIONum = 0 -- Blinks LED at rate of data collection
+local busyIONum = 1 -- Turns LED on during analog DAQ & summing equation
 if MB.R(60000, 3) == 4 then
   statusIONum = 4 -- On T4s, DIO0 -> 3 are analog only
+  busyIONum = 5
 end
 
 -- Print program information
@@ -51,6 +59,7 @@ local checkInterval=LJ.CheckInterval
 
 local dioSW = LJ.DIO_S_W
 LJ.DIO_D_W(statusIONum, 1)
+LJ.DIO_D_W(busyIONum, 1)
 
 -- Initialize interval timers
 LJ.IntervalConfig(0, sampleIntervalMS)
@@ -58,6 +67,7 @@ LJ.IntervalConfig(0, sampleIntervalMS)
 -- Begin loop
 while true do
   if checkInterval(0) then --interval completed, collect AIN values
+    dioSW(busyIONum, 1) -- Turn on LED to indicate processing is active
     for i=1,numChs do
       tVal = mbR(channels[i], 3) -- Read AIN channel
       if dbg then
@@ -104,6 +114,7 @@ while true do
         print(string.format("The average AIN%d reading is: %.5f, (%d samples)",channels[i], avgVal, numAveraged))
       end
     end
+    dioSW(busyIONum, 0) -- Turn off LED to indicate processing has been completed.
   end
 end
 
