@@ -3,16 +3,25 @@
 -- The number of values currently cached & used for averaging
 -- can be read through the USER_RAM0_U32 register.
 
-local sampleIntervalHZ = 10 -- Sampling interval in HZ
+local sampleIntervalHZ = 100 -- Sampling interval in HZ
+local numSamplesToAverage = 100 -- Number of samples to cached & average
+local userRAMUpdateRateMS = 500 -- Update rate in ms
+local channels = {0, 2} -- Which analog inputs/registers to read & average
+
+-- General performance metrics:
+-- On a T4 running HW 1.0022, it takes
+-- 7.9ms to calculate the average value for 2 channels with a buffer of 100 samples.
+-- 8.8ms to calculate the average value for 2 channels with a buffer of 110 samples.
+-- 9.3ms to calculate the average value for 2 channels with a buffer of 120 samples.
+
 local sampleIntervalMS = math.floor(1/sampleIntervalHZ * 1000)
-local numSamplesToAverage = 10
-local userRAMUpdateRateMS = 1000 -- Update rate in ms
-local channels = {0, 2}
 local numChs = table.getn(channels)
 
-local statusIONum = 0
+local statusIONum = 0 -- Blinks LED at rate of data collection
+local busyIONum = 1 -- Turns LED on during analog DAQ & summing equation
 if MB.R(60000, 3) == 4 then
   statusIONum = 4 -- On T4s, DIO0 -> 3 are analog only
+  busyIONum = 5
 end
 
 -- Print program information
@@ -51,6 +60,7 @@ local checkInterval=LJ.CheckInterval
 
 local dioSW = LJ.DIO_S_W
 LJ.DIO_D_W(statusIONum, 1)
+LJ.DIO_D_W(busyIONum, 1)
 
 -- Initialize interval timers
 LJ.IntervalConfig(0, sampleIntervalMS)
@@ -94,6 +104,7 @@ while true do
   end
 
   if checkInterval(1) then -- calculate & save averages
+    dioSW(busyIONum, 1)
     for i=1,numChs do
       sums[i] = 0
       for j=1,numAveraged do
@@ -106,6 +117,7 @@ while true do
         print(string.format("The average AIN%d reading is: %.5f, (%d samples)",channels[i], avgVal, numAveraged))
       end
     end
+    dioSW(busyIONum, 0)
   end
 end
 

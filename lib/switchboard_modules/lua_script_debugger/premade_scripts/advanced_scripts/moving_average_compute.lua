@@ -12,9 +12,10 @@
 -- and Kipling 3.1.17 open to the Lua Script Debugger tab.
 
 local sampleIntervalHZ = 10 -- Sampling interval in HZ
+local numSamplesToAverage = 100 -- Number of samples to cached & average
+local channels = {0, 2} -- Which analog inputs/registers to read & average
+
 local sampleIntervalMS = math.floor(1/sampleIntervalHZ * 1000)
-local numSamplesToAverage = 100
-local channels = {0, 2}
 local numChs = table.getn(channels)
 
 local statusIONum = 0 -- Blinks LED at rate of data collection
@@ -112,6 +113,10 @@ while true do
       mbW(46000 + channels[i], 3, avgVal) -- save result to USER_RAMx_F32 register
       if printAverage then
         print(string.format("The average AIN%d reading is: %.5f, (%d samples)",channels[i], avgVal, numAveraged))
+
+        print(string.format("Cosine: %.5f",math.cos(avgVal)))
+        print(string.format("Cosine: %.5f",math.sin(avgVal)))
+        print(string.format("Cosine: %.5f",math.tan(avgVal)))
       end
     end
     dioSW(busyIONum, 0) -- Turn off LED to indicate processing has been completed.
