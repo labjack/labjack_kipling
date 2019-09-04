@@ -10,18 +10,18 @@
 -- https://labjack.com/support/app-notes/thermocouples
 
 tcTypes = {}
-tcTypes['E']=20
-tcTypes['J']=21
-tcTypes['K']=22
-tcTypes['R']=23
-tcTypes['T']=24
-tcTypes['S']=25
-tcTypes['C']=30
+tcTypes["E"]=20
+tcTypes["J"]=21
+tcTypes["K"]=22
+tcTypes["R"]=23
+tcTypes["T"]=24
+tcTypes["S"]=25
+tcTypes["C"]=30
 
 tempUnits = {}
-tempUnits['K']=0
-tempUnits['C']=1
-tempUnits['F']=2
+tempUnits["K"]=0
+tempUnits["C"]=1
+tempUnits["F"]=2
 
 function ainEFConfigTC(chNum, tcType, unit, cjcMBAddr, cjcSlope, cjcOffset)
     MB.W(9000 + chNum * 2, 1, 0) -- Disable AIN_EF
@@ -58,7 +58,7 @@ end
 ainChannels = {0, 2} -- Enable AIN0 and AIN2
 tcType = "J"
 tempUnit = "K"
-cjcAddr = 60052 -- Use the device's internal temp sensor, TEMPERATURE_DEVICE_K
+cjcAddr = 60052 -- Use the device"s internal temp sensor, TEMPERATURE_DEVICE_K
 range = 0.1
 resolution = 8
 settling = 0 -- Default
