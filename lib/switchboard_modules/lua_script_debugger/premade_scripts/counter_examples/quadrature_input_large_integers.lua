@@ -3,7 +3,7 @@
 -- tracking and reporting counts in two registers.
 
 --Note: Could modify with the DIO0_EF_READ_AF register for float mode
---Note: Does not take into effect counter-clockwise revolutions or two's complement conversion
+--Note: Does not take into effect counter-clockwise revolutions or two''s complement conversion
 print("quadrature_input_large_integers.lua")
 
 devType = MB.R(60000, 3)
