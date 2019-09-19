@@ -2,7 +2,7 @@
 --Purpose: This is a simple example of how to read quadrature input data.
 
 --Note: Could modify with the DIO0_EF_READ_AF register for float mode
---Note: Does not take into effect counter-clockwise revolutions or two's complement conversion
+--Note: Does not take into effect counter-clockwise revolutions or two''s complement conversion
 print("simple_quadrature_input.lua")
 print("Note: This script only supports 23-bit counts.")
 
