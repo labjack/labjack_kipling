@@ -15,7 +15,7 @@ local NUM_ITERATIONS = 10
 --  Desc: Sample function and description
 --
 --  Note: Use snake_case for functions and try to
---        keep function definitions at the top 
+--        keep function definitions at the top
 --        of the files
 -------------------------------------------------
 local function my_function(register, regtype, iterations)
