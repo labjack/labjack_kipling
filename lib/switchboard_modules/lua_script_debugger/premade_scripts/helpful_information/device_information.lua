@@ -3,6 +3,7 @@
     Desc: Reads device information from the LabJack device and prints it out
 --]]
 
+-- Assign functions locally for faster processing
 local modbus_read = MB.R
 local modbus_read_array = MB.RA
 local modbus_write = MB.W
