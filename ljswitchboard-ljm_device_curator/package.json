@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_device_curator",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
   "main": "./lib/device_curator.js",
   "scripts": {
@@ -38,13 +38,13 @@
   "dependencies": {
     "async": "~0",
     "dict": "1.4.0",
-    "labjack-nodejs": "git://github.com/chrisJohn404/labjack-nodejs.git#fix-osx-signing",
+    "labjack-nodejs": "git://github.com/chrisJohn404/labjack-nodejs.git#master",
     "lj-apps-win-registry-info": "git+https://github.com/chrisJohn404/lj-apps-win-registry-info.git#master",
-    "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#fixes-to-signed-execution",
-    "ljmmm-parse": "0.x",
-    "ljswitchboard-data_parser": "0.x",
-    "ljswitchboard-ljm_driver_constants": "0.x",
-    "ljswitchboard-modbus_map": "0.x",
+    "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#master",
+    "ljmmm-parse": "git://github.com/chrisJohn404/ljmmm-parse.git#master",
+    "ljswitchboard-data_parser": "git://github.com/chrisJohn404/ljswitchboard-data_parser.git#master",
+    "ljswitchboard-modbus_map": "git://github.com/chrisJohn404/ljswitchboard-modbus_map.git#master",
+    "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master",
     "lodash": "^4.17.11",
     "mathjs": "1.6.x",
     "q": "^1.5.1",
@@ -52,6 +52,10 @@
     "stats-lite": "^2.2.0"
   },
   "custom-deps": {
+    "ljmmm-parse": "0.x",
+    "ljswitchboard-data_parser": "0.x",
+    "ljswitchboard-modbus_map": "0.0.x",
+    "ljswitchboard-ljm_driver_constants": "0.0.x",
     "labjack-nodejs": "git://github.com/chrisJohn404/labjack-nodejs.git#fix-osx-signing",
     "labjack-nodejs": "0.x",
     "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#fixes-to-signed-execution",
