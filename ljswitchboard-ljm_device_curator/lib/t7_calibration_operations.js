@@ -297,6 +297,10 @@ var getInterpretFlashResults = function(curatedDevice) {
                 'ainVerification': false,
                 'message': 'Device Calibration is Bad',
                 'shortMessage': 'Bad',
+                'data': {
+                    'calCheckResult': calCheckResult,
+                    'rawData': floatingPointData,
+                }
             };
         } else {
             calibrationStatus = {
@@ -305,6 +309,10 @@ var getInterpretFlashResults = function(curatedDevice) {
                 'ainVerification': false,
                 'message': 'Device Calibration is Good',
                 'shortMessage': 'Good',
+                'data': {
+                    'calCheckResult': calCheckResult,
+                    'rawData': floatingPointData,
+                }
             };
         }
         // return the device object
