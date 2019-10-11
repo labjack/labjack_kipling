@@ -35,9 +35,9 @@
     "sprintf": "~0.1.3"
   },
   "old-dependencies": {
-      "ljswitchboard-ljm_driver_constants": "0.0.x",
-      "ljswitchboard-modbus_map": "0.0.x",
-    },
+    "ljswitchboard-ljm_driver_constants": "0.0.x",
+    "ljswitchboard-modbus_map": "0.0.x"
+  },
   "devDependencies": {
     "nodeunit": "0.9.x",
     "csslint": "0.10.0"
