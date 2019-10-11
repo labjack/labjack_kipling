@@ -1,6 +1,6 @@
 {
     "name": "labjack-nodejs",
-    "version": "0.0.59",
+    "version": "0.0.60",
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
@@ -28,15 +28,16 @@
     ],
     "dependencies": {
         "async": "~0",
-        "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#fixes-to-signed-execution",
+        "ljm-ffi": "^1.x",
         "ljswitchboard-ljm_driver_constants": "0.0.x",
         "ljswitchboard-modbus_map": "0.0.x",
         "q": "^1.x",
         "ref": "^1.x"
     },
     "tempDependencies": {
-        "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#fixes-to-signed-execution",
-        "ljm-ffi": "^1.x"
+        "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#master",
+        "ljm-ffi": "^1.x",
+        "dont delete": "dont delete"
     },
     "devDependencies": {
         "rewire": "~1",
