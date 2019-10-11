@@ -1,6 +1,6 @@
 {
     "name": "ljm-ffi",
-    "version": "1.0.8",
+    "version": "1.0.10",
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
@@ -27,14 +27,18 @@
         "extend": "3.x.x",
         "ffi": "2.x.x",
         "ref": "1.3.4",
-        "ljswitchboard-modbus_map": "0.0.x",
-        "ljswitchboard-ljm_driver_constants": "0.0.x",
+        "ljswitchboard-modbus_map": "git://github.com/chrisJohn404/ljswitchboard-modbus_map.git#master",
+        "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master",
         "q": "~1"
     },
     "devDependencies": {
         "colors": "*",
         "nodeunit": "~0.9.0",
         "rewire": "~1"
+    },
+    "tempDependencies": {
+        "ljswitchboard-modbus_map": "0.0.x",
+        "ljswitchboard-ljm_driver_constants": "0.0.x"
     },
     "script_notes": "to run a script w/o using npm test, use npm run [script name]",
     "scripts": {
