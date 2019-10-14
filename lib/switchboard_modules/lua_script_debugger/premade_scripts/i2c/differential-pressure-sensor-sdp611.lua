@@ -9,13 +9,13 @@ if (fwver < 1.0224 and devType == 7) or (fwver < 0.2037 and devType == 4) then
 end
 
 -- This function will convert the binary values from the SDP611 to a pressure. The binary
--- data consists of two bytes which must be joined and interpreted as 2`s complement. The
+-- data consists of two bytes which must be joined and interpreted as 2''s complement. The
 -- resulting signed binary value is then converted to pascals.
 function binToPa(a,b)
   -- Join the two bytes
   rawValue = a*256+b  
   
-  -- Interpret as 2`s complement
+  -- Interpret as 2''s complement
   if rawValue >0x8000 then
     value = bit.band(bit.bnot(rawValue), 0xFFFF) +1
     value = value*-1
