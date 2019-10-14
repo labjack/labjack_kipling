@@ -106,7 +106,7 @@ window_manager.addWindow({
 	'name': 'main',
 	'win': win,
 	'initialVisibility': initialAppVisibility,
-	'title': 'mainWindow'
+	'title': 'Kipling'
 });
 
 // Attach to the "Quitting Application" event
