@@ -340,11 +340,11 @@ var initializeProgram = function() {
 			persistentDataManager.init(forceRefresh)
 			.then(function(res) {
 				console.log('Re-Initialized Data:', res);
-				console.log('Write-access required for: ' + global.ljswitchboard.appDataPath.toString());
 				defered.resolve();
 			}, function(err) {
 				appExtractionFailed = true;
 				console.log('Failed to initialize data', err);
+				console.log('Write-access required for:',global.ljswitchboard.appDataPath.toString());
 				splashScreenUpdater.update('App Failed: write-access required for: ' + global.ljswitchboard.appDataPath.toString());
 				defered.reject({'code': 'persistentData', 'data': err});
 			});
