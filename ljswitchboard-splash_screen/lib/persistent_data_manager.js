@@ -92,15 +92,23 @@ var createDataManager = function(baseDirectory, folderName, curVersion) {
 		}
 
 		if(!isValid || forceRefresh) {
-			var getOnErr = function(msg) {
+			function getOnErr(msg) {
 				return function(err) {
 					var innerDefered = q.defer();
-					console.log('Error!', err, msg);
+					console.error('Error!', err, msg);
 					innerDefered.reject(err);
+					return innerDefered.promise;
 				};
 			};
 			initializeDirectory()
 			.then(initializeVersionFile, getOnErr('error initializing dir'))
+			// .then(function(res) {
+			// 	console.log('Resolving in pdm', res);
+			// 	defered.resolve(res);
+			// }, function(err) {
+			// 	console.log('Rejecting in pdm', err);
+			// 	defered.reject(err);
+			// });
 			.then(defered.resolve, defered.reject);
 		} else {
 			defered.resolve(false);

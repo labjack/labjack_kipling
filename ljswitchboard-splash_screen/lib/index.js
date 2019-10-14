@@ -164,6 +164,8 @@ if(ENABLE_BREAKS_TO_DEV_NW_31) {
 	throw new Error();
 }
 
+var appExtractionFailed = false;
+
 // Attach various event listeners to the package_loader
 // package_loader.on('opened_window', windowManager.addWindow);
 package_loader.on('loaded_package', function(packageName) {
@@ -183,6 +185,7 @@ package_loader.on('finished_extraction', function(packageInfo) {
 });
 
 package_loader.on('failed_to_initialize_package_manager', function(message) {
+	appExtractionFailed = true;
 	console.log('Failed to initialize pagkage_manager', message);
 	splashScreenUpdater.update(message.toString());
 });
@@ -337,9 +340,12 @@ var initializeProgram = function() {
 			persistentDataManager.init(forceRefresh)
 			.then(function(res) {
 				console.log('Re-Initialized Data:', res);
+				console.log('Write-access required for: ' + global.ljswitchboard.appDataPath.toString());
 				defered.resolve();
 			}, function(err) {
+				appExtractionFailed = true;
 				console.log('Failed to initialize data', err);
+				splashScreenUpdater.update('App Failed: write-access required for: ' + global.ljswitchboard.appDataPath.toString());
 				defered.reject({'code': 'persistentData', 'data': err});
 			});
 		} else {
@@ -356,47 +362,53 @@ var initializeProgram = function() {
 
 var loadSecondaryPackages = function() {
 	var defered = q.defer();
-	console.log('Loading Secondary Packages');
 
-	// Get the appDataPath
-	var appDataPath = global.ljswitchboard.appDataPath;
+	if(appExtractionFailed) {
+		defered.reject();
+	} else {
+		console.log('Loading Secondary Packages');
 
-	// Configure the package_loader with this path
-	package_loader.setExtractionPath(appDataPath);
+		// Get the appDataPath
+		var appDataPath = global.ljswitchboard.appDataPath;
 
-	secondaryPackages.forEach(function(packageInfo) {
-		package_loader.loadPackage(packageInfo);
-	});
-	package_loader.runPackageManager()
-	.then(function(packages) {
-		console.log('Managed Packages', packages);
-		var managedPackageKeyss = Object.keys(packages);
-		managedPackageKeyss.forEach(function(managedPackageKey) {
-			// Add the managed packages root locations to the req library.
-			var baseDir = packages[managedPackageKey].packageInfo.location;
-			var extraPaths = [
-				'',
-				'node_modules',
-				'lib',
-				path.join('lib', 'node_modules')
-			];
-			extraPaths.forEach(function(extraPath) {
-				var modulesDirToAdd = path.normalize(path.join(baseDir, extraPath));
-				global.ljswitchboard.req.addDirectory(modulesDirToAdd);
-			});
+		// Configure the package_loader with this path
+		package_loader.setExtractionPath(appDataPath);
+
+		secondaryPackages.forEach(function(packageInfo) {
+			package_loader.loadPackage(packageInfo);
 		});
 
-		// Instruct the window_manager to open any managed nwApps
-		window_manager.openManagedApps(packages);
+		package_loader.runPackageManager()
+		.then(function(packages) {
+			console.log('Managed Packages', packages);
+			var managedPackageKeyss = Object.keys(packages);
+			managedPackageKeyss.forEach(function(managedPackageKey) {
+				// Add the managed packages root locations to the req library.
+				var baseDir = packages[managedPackageKey].packageInfo.location;
+				var extraPaths = [
+					'',
+					'node_modules',
+					'lib',
+					path.join('lib', 'node_modules')
+				];
+				extraPaths.forEach(function(extraPath) {
+					var modulesDirToAdd = path.normalize(path.join(baseDir, extraPath));
+					global.ljswitchboard.req.addDirectory(modulesDirToAdd);
+				});
+			});
+
+			// Instruct the window_manager to open any managed nwApps
+			window_manager.openManagedApps(packages);
 
 
-		// Execute test function to proove that io_manager can be used.
-		// global.require('../../test.js').runProgram();
+			// Execute test function to proove that io_manager can be used.
+			// global.require('../../test.js').runProgram();
 
-	}, function(err) {
-		console.log('Failed to run package manager (sp)', err);
-		splashScreenUpdater.update('Failed to run package manager (sp)');
-	});
+		}, function(err) {
+			console.log('Failed to run package manager (sp)', err);
+			splashScreenUpdater.update('Failed to run package manager (sp)');
+		});
+	}
 
 	return defered.promise;
 };
