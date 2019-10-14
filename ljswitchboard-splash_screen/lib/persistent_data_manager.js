@@ -6,6 +6,7 @@ var path = require('path');
 
 // Require 3rd party libaries
 var rmdir = require('rimraf');
+var fse = require('fs-extra');
 
 var createDataManager = function(baseDirectory, folderName, curVersion) {
 	var basePath = path.join(baseDirectory, folderName);
@@ -20,19 +21,40 @@ var createDataManager = function(baseDirectory, folderName, curVersion) {
 		var defered = q.defer();
 		fs.exists(basePath, function(exists) {
 			if(exists) {
-				rmdir(basePath, function(err) {
+				// Empty directory by deleting all items in it.
+				fse.emptyDir(basePath, function(err) {
 					if(err) {
-						defered.reject('failed to remove dir:' + basePath);
-					} else {
-						fs.mkdir(basePath, function(err) {
+						fse.emptyDir(basePath, function(err) {
 							if(err) {
-								defered.reject('failed to make dir:' + basePath);
+								fse.emptyDir(basePath, function(err) {
+									if(err) {
+										defered.reject('failed to empty dir:' + basePath);
+									} else {
+										defered.resolve();
+									}
+								});
 							} else {
 								defered.resolve();
 							}
 						});
+					} else {
+						defered.resolve();
 					}
 				});
+				// Empty directory by deleting it & making it again.
+				// rmdir(basePath, function(err) {
+				// 	if(err) {
+				// 		defered.reject('failed to remove dir:' + basePath);
+				// 	} else {
+				// 		fs.mkdir(basePath, function(err) {
+				// 			if(err) {
+				// 				defered.reject('failed to make dir:' + basePath);
+				// 			} else {
+				// 				defered.resolve();
+				// 			}
+				// 		});
+				// 	}
+				// });
 			} else {
 				fs.mkdir(basePath, function(err) {
 					if(err) {
