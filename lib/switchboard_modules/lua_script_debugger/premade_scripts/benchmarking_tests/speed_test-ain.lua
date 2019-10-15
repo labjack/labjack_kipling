@@ -26,7 +26,7 @@ print ("Current Lua Throttle Setting: ", throttle)
 -- high speed converter, instead of the slower 24-bit converter
 -- Ensure analog is on
 modbus_write(48005, 0, 1)
---set AIN_ALL_RESOLUTION_INDEX to 1(fastest, on both T7 and T4)
+-- Set AIN_ALL_RESOLUTION_INDEX to 1(fastest, on both T7 and T4)
 modbus_write(43903, 0, 1)
 
 -- Use an interval of 2000ms
