@@ -87,7 +87,7 @@ if flag == 1 then
   f = io.open(Filename, "w")      --create or replace a new file
   print ("Command issued by host to create new file")
 end
- 
+
 
 --LJ.IntervalConfig & LJ.CheckInterval------------------------------------------
 
@@ -112,15 +112,10 @@ end
 
 --EXAMPLE
 LJ.IntervalConfig(0, 1000)
-
 while true do
-
   if LJ.CheckInterval(0) then
-
     --Code to run once per second here.
-
   end
-
 end
 --end LJ.IntervalConfig & LJ.CheckInterval--------------------------------------
 
@@ -159,8 +154,8 @@ end
 
 --USER_RAM EXAMPLE
 
-Enable = MB.R(46000, 3) --host may disable portion of the script with USER_RAM0_F32
-if Enable >= 1 then
+enable = MB.R(46000, 3) --host may disable portion of the script with USER_RAM0_F32
+if enable >= 1 then
   val = val + 1
   print("New value:", val)
   MB.W(46002, 3, val)  --provide a new value to host with USER_RAM1_F32
@@ -177,22 +172,22 @@ end
 
 --User RAM FIFO EXAMPLE
 
-aF32_Out= {}  --array of 5 values(floats)
-aF32_In = {}
-numValuesFIO0 = 5
-ValueSizeInBytes = 4
-numBytesInFIFO0 = numValuesFIO0*ValueSizeInBytes
-MB.W(47900, 1, numBytesInFIFO0) --allocate FIFO0 to 20 bytes
+af32out= {}  --array of 5 values(floats)
+af32in = {}
+numvalsfio0 = 5
+bytesperval = 4
+fifo0bytes = numvalsfio0*bytesperval
+MB.W(47900, 1, fifo0bytes) --allocate FIFO0 to 20 bytes
 
 --write out to the host with FIFO0
-for i=1, (numValuesFIO0+1) do
-  MB.W(47030, 3, aF32_Out[i])  --provide a new array of 4 float values to host
+for i=1, (numvalsfio0+1) do
+  MB.W(47030, 3, af32out[i])  --provide a new array of 4 float values to host
 end
 
 --read in from the host with FIFO1
-numBytesFIFO1 = MB.R(47912, 1)
-for i=1, ((numBytesFIFO1+1)/ValueSizeInBytes) do
-  aF32_In[i] = MB.R(47032, 3)
+fifo1bytes = MB.R(47912, 1)
+for i=1, ((fifo1bytes+1)/bytesperval) do
+  af32in[i] = MB.R(47032, 3)
 end
 
 --end User RAM discussion-------------------------------------------------------------

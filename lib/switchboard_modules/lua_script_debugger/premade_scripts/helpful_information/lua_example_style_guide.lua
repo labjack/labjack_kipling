@@ -1,7 +1,7 @@
 --[[
     Name: lua_example_style_guide.lua
     Desc: A template / style guide for lua script examples
-    Note: I tried to model this guide off of the style used in the Lua manuals
+    Note: This guide is modeled off of the style used in the Lua manuals
 --]]
 
 -- Try to use locals rather than globals whenever possible

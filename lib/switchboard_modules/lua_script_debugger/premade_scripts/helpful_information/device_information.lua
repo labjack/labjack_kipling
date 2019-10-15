@@ -4,9 +4,9 @@
 --]]
 
 -- Assign functions locally for faster processing
-local modbus_read = MB.R
+local modbus_read_name = MB.readName
 local modbus_read_array = MB.RA
-local modbus_write = MB.W
+local modbus_write_name = MB.writeName
 
 -------------------------------------------------
 --  Desc: Takes an array of characters and parses
@@ -59,14 +59,15 @@ end
 print('')
 print('Device Information:');
 
-local serialnum = modbus_read(60028,1) -- Read the SERIAL_NUMBER register
+-- Read the SERIAL_NUMBER register
+local serialnum = modbus_read_name("SERIAL_NUMBER")
 print('- Serial Number:',string.format("%d",serialnum))
 
 local model = ''
 -- Read the PRODUCT_ID register
-local pid = modbus_read(60000, 3)
+local pid = modbus_read_name("PRODUCT_ID")
 -- Read the HARDWARE_INSTALLED register
-local hwinstalled = modbus_read(60010, 1)
+local hwinstalled = modbus_read_name("HARDWARE_INSTALLED")
 
 if (pid == 4) then
   model = 'T4'
@@ -97,19 +98,19 @@ ethernetmac = get_mac_from_array(macarr)
 print('- Ethernet MAC', ethernetmac)
 
 -- Read the HARDWARE_VERSION register
-hwversion = modbus_read(60002,3)
+hwversion = modbus_read_name("HARDWARE_VERSION")
 print('- Hardware Version', string.format("%.2f",hwversion))
 
 -- Read the FIRMWARE_VERSION register
-fwversion = modbus_read(60004,3)
+fwversion = modbus_read_name("FIRMWARE_VERSION")
 print('- Firmware Version', string.format("%.4f",fwversion))
 
 -- Read the TEMPERATURE_DEVICE_K register
-devtemp = modbus_read(60052,3)
+devtemp = modbus_read_name("TEMPERATURE_DEVICE_K")
 print('- Device Temperature', string.format("%.2f",devtemp),'(K)')
 
 
 print('')
 print("Exiting Lua Script")
--- Write 0 to LUA_RUN, stopping the script
-modbus_write(6000, 1, 0)
+-- Writing 0 to LUA_RUN stops the script
+modbus_write_name("LUA_RUN", 0)

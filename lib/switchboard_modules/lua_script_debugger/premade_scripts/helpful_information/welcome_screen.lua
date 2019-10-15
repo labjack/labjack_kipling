@@ -41,4 +41,5 @@ print("Welcome, please Load an example to get started!")
 --Send questions and feedback to support@labjack.com
 
 print("Exiting Lua Script")
-MB.W(6000, 1, 0)
+-- Writing 0 to LUA_RUN stops the script
+MB.writeName("LUA_RUN", 0)
