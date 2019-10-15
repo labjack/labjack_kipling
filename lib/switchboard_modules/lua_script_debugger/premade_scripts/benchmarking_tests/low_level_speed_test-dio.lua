@@ -2,7 +2,7 @@
     Name: low_level_speed_test-dio.lua
     Desc: This example will output a digital waveform at at 20-25kHz on outdio
     Note: In most cases, users should throttle their code execution using the
-          functions: "interval_config(0, 1000)", and "if check_interval(0)"
+          functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
 --]]
 
 -- Assign functions locally for faster processing
@@ -14,7 +14,7 @@ local dio_state_write = LJ.DIO_S_W
 local interval_config = LJ.IntervalConfig
 local check_interval = LJ.CheckInterval
 
-print("Benchmarking Test: Low-Level toggle of outdio/DIO3 (FIO5/DIO5 on T4) as fast as possible.")
+print("Low-Level Benchmarking Test: toggle FIO3/DIO3 (FIO5/DIO5 on T4) as fast as possible.")
 -- Change the DIO pin if using a T4 instead of a T7
 local outdio = 3
 local devtype = modbus_read_name("PRODUCT_NAME")
