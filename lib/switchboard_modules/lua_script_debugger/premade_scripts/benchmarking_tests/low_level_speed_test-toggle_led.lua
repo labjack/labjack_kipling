@@ -5,6 +5,7 @@
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
 --]]
 
+-- Assign functions locally for faster processing
 local set_lua_throttle = LJ.setLuaThrottle
 local get_lua_throttle = LJ.getLuaThrottle
 local interval_config = LJ.IntervalConfig

@@ -22,7 +22,7 @@ if devtype == 4 then
   outdio = 5--FIO5
 end
 
---Change outdio direction to output
+-- Change outdio direction to output
 dio_direction_write(outdio, 1)
 
 -- The throttle setting can correspond roughly with the length of the Lua
@@ -39,9 +39,9 @@ local numwrites = 0
 
 interval_config(0, interval)
 while true do
-  --Change the state of outdio to 0
+  -- Change the state of outdio to 0
   dio_state_write(outdio, 0)
-  --Change the state of outdio to 1
+  -- Change the state of outdio to 1
   dio_state_write(outdio, 1)
   numwrites = numwrites + 1
   -- If the 2000ms interval is done
