@@ -17,7 +17,7 @@ local check_interval = LJ.CheckInterval
 --        section:
 --          https://labjack.com/support/datasheets/t-series/ain
 -------------------------------------------------------------------------------
-function ain_channel_config(ainchannel, range, resolution, settling, isdifferential)
+local function ain_channel_config(ainchannel, range, resolution, settling, isdifferential)
   -- Set AIN range
   modbus_write(40000 + ainchannel * 2, 3, range)
   -- Set resolution index
@@ -26,7 +26,7 @@ function ain_channel_config(ainchannel, range, resolution, settling, isdifferent
   modbus_write(42000 + ainchannel * 2, 3, settling)
 
   -- Read the device type
-  devicetype = modbus_read(60000, 3)
+  local devicetype = modbus_read(60000, 3)
   -- Setup the negative channel if using a differential input
   if isdifferential and (ainchannel%2 == 0) and (devicetype == 7) then
     -- The negative channels setting is only valid for even
@@ -47,28 +47,27 @@ end
 
 print("Configure & Read Analog Input")
 -- Use AIN0 and AIN1 for our analog inputs
-ainchannels = {0,1}
+local ainchannels = {0,1}
 -- Use +/-10V for analog input range
-ainrange = 10
+local ainrange = 10
 -- Resolution of 1 is the fastest setting
-ainresolution = 1
+local ainresolution = 1
 -- Use the default settling time
-ainsettling = 0
+local ainsettling = 0
 
 -- Configure each analog input
 for i=1,table.getn(ainchannels) do
-    ain_channel_config(ainchannels[i], ainrange, ainresolution, ainsettling)
+  ain_channel_config(ainchannels[i], ainrange, ainresolution, ainsettling)
 end
 
 interval_config(0, 500) -- Configure interval
-
 while true do
   -- The interval is finished
   if check_interval(0) then
     -- Read & Print out each read AIN channel
     for i=1, table.getn(ainchannels) do
-        ainval = modbus_read(ainchannels[i] * 2, 3)
-        print(string.format("AIN%d: %.3f", ainchannels[i], ainval))
+      local ainval = modbus_read(ainchannels[i] * 2, 3)
+      print(string.format("AIN%d: %.3f", ainchannels[i], ainval))
     end
   end
 end
