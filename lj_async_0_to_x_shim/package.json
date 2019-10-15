@@ -1,0 +1,22 @@
+{
+  "name": "lj_async_0_to_x_shim",
+  "version": "0.0.1",
+  "description": "A repository to make it easier to switch from async 0 to async 2,3 ++",
+  "main": "lj_async_shim.js",
+  "scripts": {
+    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+  },
+  "homepage": "https://github.com/chrisJohn404/lj_async_0_to_x_shim",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrisJohn404/lj_async_0_to_x_shim"
+  },
+  "author": "Chris Johnson",
+  "license": "MIT",
+  "devDependencies": {
+    "nodeunit": "^0.11.3"
+  },
+  "dependencies": {
+    "async": "^3.1.0"
+  }
+}
