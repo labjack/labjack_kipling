@@ -29,6 +29,10 @@
         "ljswitchboard-ljm_driver_constants": "0.0.x"
     },
     "custDependencies": {
+        "ljmmm-parse": "git://github.com/chrisJohn404/ljmmm-parse.git#master",
+        "ljswitchboard-modbus_map": "git://github.com/chrisJohn404/ljswitchboard-modbus_map.git#master",
+        "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master",
+
         "ljmmm-parse": "0.1.x",
         "ljswitchboard-modbus_map": "0.0.x",
         "ljswitchboard-ljm_driver_constants": "0.0.x"
