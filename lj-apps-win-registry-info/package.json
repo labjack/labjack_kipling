@@ -1,13 +1,13 @@
 {
   "name": "lj-apps-win-registry-info",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This is a node.js library utilizing the winreg library to query for windows registry keys which are used by the LabJack logging applications to determine their current working directories.",
   "author": {
     "name": "Chris Johnson",
     "url": "http://labjack.com"
   },
   "main": "./lib/get_registry_info.js",
-  "homepage": "https://github.com/chrisJohn404/lj-apps-win-registry-info", 
+  "homepage": "https://github.com/chrisJohn404/lj-apps-win-registry-info",
   "repository": {
     "type": "git",
     "url": "https://github.com/chrisJohn404/lj-apps-win-registry-info"
@@ -26,11 +26,11 @@
     "url": "https://github.com/chrisJohn404/lj-apps-win-registry-info/issues"
   },
   "dependencies": {
-      "async": "~0",
-      "winreg": "^1.2.3"
+    "async": "3.x",
+    "winreg": "1.x.x"
   },
   "devDependencies": {
-    "nodeunit": "0.9.x"
+    "nodeunit": "0.11.x"
   },
   "directories": {
     "lib": "./lib"
