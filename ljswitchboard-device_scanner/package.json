@@ -34,17 +34,23 @@
     "url": "https://github.com/chrisJohn404/ljswitchboard-device_scanning/issues"
   },
   "dependencies": {
-    "async": "~0",
+    "async": "~3",
     "q": "~1",
+    "labjack-nodejs": "git://github.com/chrisJohn404/labjack-nodejs.git#master",
+    "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#master",
+    "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master",
+    "ljswitchboard-modbus_map": "git://github.com/chrisJohn404/ljswitchboard-modbus_map.git#master",
+    "ljswitchboard-data_parser": "git://github.com/chrisJohn404/ljswitchboard-data_parser.git#master",
+    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master"
+  },
+  "custom-deps": {
+    "ljswitchboard-ljm_device_curator": "^0.x",
     "labjack-nodejs": "^0.x",
     "ljm-ffi": "^1.x",
     "ljswitchboard-ljm_driver_constants": "^0.x",
     "ljswitchboard-modbus_map": "^0.x",
     "ljswitchboard-data_parser": "^0.x",
-    "ljswitchboard-ljm_device_curator": "^0.x"
-  },
-  "custom-deps": {
-    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master"
+    "dontDelete": "dontDelete"
   },
   "devDependencies": {
     "nodeunit": "^0.11.x",
