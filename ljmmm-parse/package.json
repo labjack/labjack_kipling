@@ -1,6 +1,6 @@
 {
   "name": "ljmmm-parse",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Library for parsing LabJack Modbus Map Markup documents.",
   "scripts": {
     "basicTest": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
@@ -8,12 +8,11 @@
   },
   "dependencies": {
     "async": "0.9.x",
-    "node.extend": "~1",
-    "sprintf-js": ">=0.0.7"
+    "sprintf-js": "1.x.x"
   },
   "devDependencies": {
-    "rewire": "*",
-    "nodeunit": "*"
+    "nodeunit": "0.11.x",
+    "rewire": "4.x"
   },
   "author": {
     "name": "Sam Pottinger",

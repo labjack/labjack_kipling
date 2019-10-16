@@ -12,7 +12,7 @@
 **/
 
 var async = require('async');
-var extend = require('node.extend');
+var extend = require('extend');
 var sprintf = require('sprintf-js');
 
 // Sizes in number of MODBUS registers (2 bytes each).
