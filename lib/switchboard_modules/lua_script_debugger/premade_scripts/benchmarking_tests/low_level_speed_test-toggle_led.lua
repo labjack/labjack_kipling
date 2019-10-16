@@ -15,7 +15,7 @@ local toggle_led = LJ.ledtog
 print("Low-Level Benchmarking Test: toggle orange status LED as fast as possible.")
 -- The throttle setting can correspond roughly with the length of the Lua
 -- script. A rule of thumb for deciding a throttle setting is
--- Throttle = (3*NumLinesCode)+20. Default throttle setting is 10 instructions
+-- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
 local throttle = 40
 set_lua_throttle(throttle)
 throttle = get_lua_throttle()
