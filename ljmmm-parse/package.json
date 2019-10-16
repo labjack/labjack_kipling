@@ -1,13 +1,13 @@
 {
   "name": "ljmmm-parse",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Library for parsing LabJack Modbus Map Markup documents.",
   "scripts": {
     "basicTest": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
     "test": "npm run basicTest"
   },
   "dependencies": {
-    "async": "0.9.x",
+    "async": "3.x",
     "sprintf-js": "1.x.x"
   },
   "devDependencies": {
