@@ -10,7 +10,7 @@
             http://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
 --]]
 
--- Assign functions locally for faster processing
+-- Assign global functions locally for faster processing
 local modbus_read = MB.R
 local modbus_write = MB.W
 local set_lua_throttle = LJ.setLuaThrottle

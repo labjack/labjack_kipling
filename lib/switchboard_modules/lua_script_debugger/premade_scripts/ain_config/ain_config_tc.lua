@@ -11,7 +11,7 @@
             https://labjack.com/support/app-notes/thermocouples
 --]]
 
--- Assign functions locally for faster processing
+-- Assign global functions locally for faster processing
 local modbus_read = MB.R
 local modbus_write = MB.W
 local interval_config = LJ.IntervalConfig

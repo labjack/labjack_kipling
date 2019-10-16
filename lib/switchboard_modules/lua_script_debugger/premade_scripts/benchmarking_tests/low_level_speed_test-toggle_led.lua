@@ -1,11 +1,11 @@
 --[[
     Name: low_level_speed_test-toggle_led.lua
-    Desc: This example will toggle the orange LED at 30-40kHz
+    Desc: This example will toggle the orange LED as fast as possible
     Note: In most cases, users should throttle their code execution using the
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
 --]]
 
--- Assign functions locally for faster processing
+-- Assign global functions locally for faster processing
 local set_lua_throttle = LJ.setLuaThrottle
 local get_lua_throttle = LJ.getLuaThrottle
 local interval_config = LJ.IntervalConfig

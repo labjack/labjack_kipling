@@ -1,11 +1,11 @@
 --[[
     Name: speed_test-dac.lua
-    Desc: This example will output a waveform at ~13kHz to ~15kHz on DAC0
+    Desc: This example will output a waveform on DAC0 as fast as possible
     Note: In most cases, users should throttle their code execution using the
           functions: "interval_config(0, 1000)", and "if check_interval(0)"
 --]]
 
--- Assign functions locally for faster processing
+-- Assign global functions locally for faster processing
 local modbus_read = MB.R
 local modbus_write = MB.W
 local set_lua_throttle = LJ.setLuaThrottle

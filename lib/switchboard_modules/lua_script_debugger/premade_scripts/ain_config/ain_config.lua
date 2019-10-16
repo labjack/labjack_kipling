@@ -4,7 +4,7 @@
           T-Series devices.
 --]]
 
--- Assign functions locally for faster processing
+-- Assign global functions locally for faster processing
 local modbus_read = MB.R
 local modbus_write = MB.W
 local interval_config = LJ.IntervalConfig

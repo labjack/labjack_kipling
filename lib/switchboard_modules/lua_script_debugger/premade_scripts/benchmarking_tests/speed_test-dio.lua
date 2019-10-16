@@ -1,35 +1,54 @@
-print("Benchmarking Test: Toggle the digital I/O called FIO3 (FIO5 on T4) as fast as possible.")
---This example will output a digital waveform at ~16kHz to ~18kHz on FIO3 (FIO5 on T4)
---It is NOT RECOMMENDED for users to structure their code as is done in this benchmarking test.
---Most commonly users should throttle their code execution using the functions:
---"LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0) then" ...
+--[[
+    Name: speed_test-dio.lua
+    Desc: This example will output a digital waveform on FIO3
+          (FIO5 if using a T4) as fast as possible
+    Note: In most cases, users should throttle their code execution using the
+          functions: "interval_config(0, 1000)", and "if check_interval(0)"
+--]]
 
+-- Assign global functions locally for faster processing
+local modbus_read_name = MB.readName
+local modbus_write = MB.W
+local set_lua_throttle = LJ.setLuaThrottle
+local get_lua_throttle = LJ.getLuaThrottle
+local interval_config = LJ.IntervalConfig
+local check_interval = LJ.CheckInterval
 
---The throttle setting can correspond roughly with the length of the Lua script.
---A rule of thumb for deciding a throttle setting is Throttle = (3*NumLinesCode) + 20
-ThrottleSetting = 48    --Default throttle setting is 10 instructions
+print("Benchmarking Test: Toggle the digital I/O pin FIO3 (FIO5 on the T4) as fast as possible.")
+-- It is NOT RECOMMENDED for users to structure their code as is done in this benchmarking test.
+-- The throttle setting can correspond roughly with the length of the Lua
+-- script. A rule of thumb for deciding a throttle setting is
+-- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
+local throttle = 48
+set_lua_throttle(throttle)
+throttle = get_lua_throttle()
+print ("Current Lua Throttle Setting: ", throttle)
 
-local outPin = 2003--FIO3. Changed if T4 instead of T7
-devType = MB.R(60000, 3)
-if devType == 4 then
-	outPin = 2005--FIO5
+-- The PRODUCT_ID register holds the device type
+local devtype = modbus_read_name("PRODUCT_ID")
+-- Assume the device being used is a T7, use FIO3 pin (address = 2003)
+local outpin = 2003
+-- If actually using a T4
+if devtype == 4 then
+  -- Use FIO5 pin (address = 2005)
+  outpin = 2005
 end
 
-LJ.setLuaThrottle(ThrottleSetting)
-ThrottleSetting = LJ.getLuaThrottle()
-print ("Current Lua Throttle Setting: ", ThrottleSetting)
+-- Use a 2000ms interval
+local interval = 2000
+local numwrites = 0
 
-Print_interval_ms = 2000
-c = 0
-LJ.IntervalConfig(0, Print_interval_ms)
-
+interval_config(0, interval)
 while true do
-  MB.W(outPin, 0, 1)      --write 1 to FIO3. Address is 2003, type is 0
-  MB.W(outPin, 0, 0)      --write 0 to FIO3. Address is 2003, type is 0
-  c = c + 1
-  if LJ.CheckInterval(0) then
-    c = c / (Print_interval_ms / 1000)
-    print ("Frequency in Hz: ", c)
-    c = 0
+  -- Write 1 to the outpin. Type is 0 (UINT16)
+  modbus_write(outpin, 0, 1)
+  -- Write 0 to outpin. Type is 0 (UINT16)
+  modbus_write(outpin, 0, 0)
+  numwrites = numwrites + 1
+  if check_interval(0) then
+    -- Convert the number of writes per interval to a frequency
+    numwrites = numwrites / (interval / 1000)
+    print ("Frequency in Hz: ", numwrites)
+    numwrites = 0
   end
 end

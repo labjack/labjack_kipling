@@ -3,7 +3,7 @@
     Desc: Reads device information from the LabJack device and prints it out
 --]]
 
--- Assign functions locally for faster processing
+-- Assign global functions locally for faster processing
 local modbus_read_name = MB.readName
 local modbus_read_array = MB.RA
 local modbus_write_name = MB.writeName

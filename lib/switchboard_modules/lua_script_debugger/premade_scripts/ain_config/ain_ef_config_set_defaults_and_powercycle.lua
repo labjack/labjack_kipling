@@ -10,7 +10,7 @@
     Note: This should not be run multiple times. It will gradually cause flash wear
 --]]
 
--- Assign functions locally for faster processing
+-- Assign global functions locally for faster processing
 local modbus_write = MB.W
 
 -------------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 --[[
     Name: speed_test-ain.lua
-    Desc: This example will read AIN0 at a rate between ~12kHz and ~18kHz
+    Desc: This example will read AIN0 as fast as possible
     Note: In most cases, users should throttle their code execution using the
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
 --]]
 
--- Assign functions locally for faster processing
+-- Assign global functions locally for faster processing
 local modbus_read = MB.R
 local modbus_write = MB.W
 local set_lua_throttle = LJ.setLuaThrottle

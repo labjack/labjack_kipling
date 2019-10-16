@@ -5,7 +5,7 @@
     Note: See the full Lua functions list at http://www.lua.org/manual/5.2/manual.html#3
 --]]
 
--- Assign functions locally for faster processing
+-- Assign global functions locally for faster processing
 local interval_config = LJ.IntervalConfig
 local check_interval = LJ.CheckInterval
 local modbus_write_name = MB.writeName
