@@ -1,28 +1,42 @@
+--[[
+    Name: speed_test-dac.lua
+    Desc: This example will output a waveform at ~13kHz to ~15kHz on DAC0
+    Note: In most cases, users should throttle their code execution using the
+          functions: "interval_config(0, 1000)", and "if check_interval(0)"
+--]]
+
+-- Assign functions locally for faster processing
+local modbus_read = MB.R
+local modbus_write = MB.W
+local set_lua_throttle = LJ.setLuaThrottle
+local get_lua_throttle = LJ.getLuaThrottle
+local interval_config = LJ.IntervalConfig
+local check_interval = LJ.CheckInterval
+
 print("Benchmarking Test: Set DAC0 to 2.5V, then 0V as fast as possible.")
---This example will output a waveform at ~13kHz to ~15kHz on DAC0
---Note: Most commonly users should throttle their code execution using the functions:
---"LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0) then" ...
+-- The throttle setting can correspond roughly with the length of the Lua
+-- script. A rule of thumb for deciding a throttle setting is
+-- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
+local throttle = 36
+set_lua_throttle(throttle)
+throttle = get_lua_throttle()
+print ("Current Lua Throttle Setting: ", throttle)
 
+-- Use a 2000ms interval
+local interval = 2000
+local numwrites = 0
 
---The throttle setting can correspond roughly with the length of the Lua script.
---A rule of thumb for deciding a throttle setting is Throttle = (3*NumLinesCode) + 20
-ThrottleSetting = 36    --Default throttle setting is 10 instructions
-
-LJ.setLuaThrottle(ThrottleSetting)
-ThrottleSetting = LJ.getLuaThrottle()
-print ("Current Lua Throttle Setting: ", ThrottleSetting)
-
-Print_interval_ms = 2000
-c = 0
-LJ.IntervalConfig(0, Print_interval_ms)
-
+interval_config(0, interval)
 while true do
-  MB.W(1000, 3, 2.5)    --write 2.5V to DAC0. Address is 1000, type is 3
-  MB.W(1000, 3, 0.0)    --write 0.0V to DAC0. Address is 1000, type is 3
-  c = c + 1
-  if LJ.CheckInterval(0) then
-    c = c / (Print_interval_ms / 1000)
-    print ("Frequency in Hz: ", c)
-    c = 0
+  -- Write 2.5V to DAC0. Address is 1000, type is 3 (FLOAT32)
+  modbus_write(1000, 3, 2.5)
+  -- Write 0.0V to DAC0. Address is 1000, type is 3 (FLOAT32)
+  modbus_write(1000, 3, 0.0)
+  numwrites = numwrites + 1
+  if check_interval(0) then
+    -- Convert the number of writes per interval to a frequency
+    numwrites = numwrites / (interval / 1000)
+    print ("Frequency in Hz: ", numwrites)
+    numwrites = 0
   end
 end
