@@ -1,43 +1,43 @@
 {
-  "name": "process_manager",
-  "version": "0.0.15",
-  "author": {
-    "name": "Chris Johnson",
-    "url": "http://labjack.com"
-  },
-  "main": "lib/process_manager.js",
-  "license": {
-    "type": "MIT",
-    "url": "https://raw.githubusercontent.com/chrisJohn404/LabJack-process_manager/master/LICENSE"
-  },
-  "keywords": [
-    "LabJack",
-    "Child Process Management",
-    "IPC Messaging"
-  ],
-  "homepage": "https://github.com/chrisJohn404/LabJack-process_manager",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/chrisJohn404/LabJack-process_manager.git"
-  },
-  "files": [
-    "lib",
-    "LICENSE",
-    "node_modules"
-  ],
-  "dependencies": {
-    "async": "~0",
-    "dict": "1.4.0",
-    "q": "~1"
-  },
-  "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test.js"
-  },
-  "devDependencies": {
-    "nodeunit": "0.9.x"
-  },
-  "directories": {
-    "lib": "./lib",
-    "test": "test"
-  }
+    "name": "process_manager",
+    "version": "0.0.16",
+    "author": {
+        "name": "Chris Johnson",
+        "url": "http://labjack.com"
+    },
+    "main": "lib/process_manager.js",
+    "license": {
+        "type": "MIT",
+        "url": "https://raw.githubusercontent.com/chrisJohn404/LabJack-process_manager/master/LICENSE"
+    },
+    "keywords": [
+        "LabJack",
+        "Child Process Management",
+        "IPC Messaging"
+    ],
+    "homepage": "https://github.com/chrisJohn404/LabJack-process_manager",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/chrisJohn404/LabJack-process_manager.git"
+    },
+    "files": [
+        "lib",
+        "LICENSE",
+        "node_modules"
+    ],
+    "dependencies": {
+        "async": "3.x",
+        "dict": "1.4.0",
+        "q": "1.x"
+    },
+    "scripts": {
+        "test": "node ./node_modules/nodeunit/bin/nodeunit ./test.js"
+    },
+    "devDependencies": {
+        "nodeunit": "0.11.x"
+    },
+    "directories": {
+        "lib": "./lib",
+        "test": "test"
+    }
 }
