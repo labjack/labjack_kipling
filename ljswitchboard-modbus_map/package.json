@@ -28,7 +28,8 @@
         "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master"
     },
     "devDependencies": {
-        "nodeunit": "0.11.x"
+        "nodeunit": "0.11.x",
+        "divv": ">=3.5.0"
     },
     "scripts": {
         "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
