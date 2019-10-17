@@ -10,9 +10,6 @@
     Note: This should not be run multiple times. It will gradually cause flash wear
 --]]
 
--- Assign global functions locally for faster processing
-local modbus_write = MB.W
-
 -------------------------------------------------------------------------------
 --  Desc: Generic function that can be used to configure general analog input
 --        settings such as range, resolution, and settling. More information
@@ -35,19 +32,19 @@ local function ain_ef_config(
   configj
 )
   -- Disable AIN_EF
-  modbus_write(9000 + channelnum * 2, 1, 0)
+  MB.W(9000 + channelnum * 2, 1, 0)
   -- Enable AIN_EF
-  modbus_write(9000 + channelnum * 2, 1, index)
-  modbus_write(9300 + channelnum * 2, 1, configa)
-  modbus_write(9600 + channelnum * 2, 1, configb)
-  modbus_write(9900 + channelnum * 2, 1, configc)
-  modbus_write(10200 + channelnum * 2, 3, configd)
-  modbus_write(10500 + channelnum * 2, 3, confige)
-  modbus_write(10800 + channelnum * 2, 3, configf)
-  modbus_write(11100 + channelnum * 2, 3, configg)
-  modbus_write(11400 + channelnum * 2, 3, configh)
-  modbus_write(11700 + channelnum * 2, 3, configi)
-  modbus_write(12000 + channelnum * 2, 3, configj)
+  MB.W(9000 + channelnum * 2, 1, index)
+  MB.W(9300 + channelnum * 2, 1, configa)
+  MB.W(9600 + channelnum * 2, 1, configb)
+  MB.W(9900 + channelnum * 2, 1, configc)
+  MB.W(10200 + channelnum * 2, 3, configd)
+  MB.W(10500 + channelnum * 2, 3, confige)
+  MB.W(10800 + channelnum * 2, 3, configf)
+  MB.W(11100 + channelnum * 2, 3, configg)
+  MB.W(11400 + channelnum * 2, 3, configh)
+  MB.W(11700 + channelnum * 2, 3, configi)
+  MB.W(12000 + channelnum * 2, 3, configj)
 end
 
 print("Generic Config AIN_EF & set power-up defaults")
@@ -66,11 +63,11 @@ end
 
 -- Set as power-up default
 print("Saving settings as power-up defaults")
-modbus_write(49002, 1, 1)
+MB.W(49002, 1, 1)
 
 -- Re-set device
 print("Rebooting Device")
 -- Write to SYSTEM_REBOOT so the system reboots after 200ms (last 4 bytes of
 -- the write value tells the device how many 50ms ticks to wait before reboot)
-modbus_write(61998, 1, 0x4C4A0004)
+MB.W(61998, 1, 0x4C4A0004)
 
