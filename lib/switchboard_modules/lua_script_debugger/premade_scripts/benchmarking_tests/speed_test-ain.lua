@@ -5,12 +5,9 @@
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
 --]]
 
--- Assign global functions locally for faster processing
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
 local modbus_read = MB.R
-local modbus_write = MB.W
-local set_lua_throttle = LJ.setLuaThrottle
-local get_lua_throttle = LJ.getLuaThrottle
-local interval_config = LJ.IntervalConfig
 local check_interval = LJ.CheckInterval
 
 print("Benchmarking Test: Read AIN0 as fast as possible.")
@@ -18,22 +15,22 @@ print("Benchmarking Test: Read AIN0 as fast as possible.")
 -- script. A rule of thumb for deciding a throttle setting is
 -- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
 local throttle = 36
-set_lua_throttle(throttle)
-throttle = get_lua_throttle()
+LJ.setLuaThrottle(throttle)
+throttle = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", throttle)
 
 -- For the fastest AIN speeds, T7-PROs must use the 16-bit
 -- high speed converter, instead of the slower 24-bit converter
 -- Make sure the POWER_AIN register is "on"
-modbus_write(48005, 0, 1)
--- Set AIN_ALL_RESOLUTION_INDEX to 1(fastest, on both T7 and T4)
-modbus_write(43903, 0, 1)
+MB.writeName(POWER_AIN, 1)
+-- Set AIN_ALL_RESOLUTION_INDEX to 1(fastest setting on both the T7 and T4)
+MB.writeName(AIN_ALL_RESOLUTION_INDEX, 1)
 
 -- Use an interval of 2000ms
 local interval = 2000
 local numwrites = 0
 
-interval_config(0, interval)
+LJ.IntervalConfig(0, interval)
 while true do
   -- Address of AIN0 is 0, type is 3 (FLOAT32)
   local ain0 = modbus_read(0, 3)

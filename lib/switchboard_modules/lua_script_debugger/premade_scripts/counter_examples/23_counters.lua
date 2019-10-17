@@ -30,11 +30,10 @@
   --Index:  22            Channel:  MIO1  (DIO21)
   --Index:  23            Channel:  MIO2  (DIO22)
 
--- Assign global functions locally for faster processing
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
 local modbus_read = MB.R
 local modbus_write = MB.W
-local set_lua_throttle = LJ.setLuaThrottle
-local get_lua_throttle = LJ.getLuaThrottle
 
 print("Create and read 23 counters.")
 -- Read the PRODUCT_ID register to get the device type. This script will not
@@ -60,8 +59,8 @@ local count = {}
 -- script. A rule of thumb for deciding a throttle setting is
 -- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
 local throttle = 100
-set_lua_throttle(throttle)
-throttle = get_lua_throttle()
+LJ.setLuaThrottle(throttle)
+throttle = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", throttle)
 
 -- Set FIO registers to input (by writing 0 to FIO_DIRECTION)
@@ -87,7 +86,7 @@ while true do
 
   --Compare newbits to bits for each counter
   for i=1, 23 do
-    -- If bits are different from newbits the counter state changed
+    -- If bits[i] is different from newbits[i] the counter state changed
     if bits[i] ~= newbits[i] then
       -- If the counter should increase on a rising edge
       if edge[i] == 1 then

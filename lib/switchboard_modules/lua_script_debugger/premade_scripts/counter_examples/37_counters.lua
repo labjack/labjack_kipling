@@ -28,8 +28,9 @@
   --Index:  37            Channel:  MIO2  (DIO22)
 
 print("Create and read 37 counters.")
-
-local mbRead=MB.R               --Local functions for faster processing
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
+local mbRead=MB.R
 local mbWrite=MB.W
 
 if (mbRead(60000, 3) ~= 7) then

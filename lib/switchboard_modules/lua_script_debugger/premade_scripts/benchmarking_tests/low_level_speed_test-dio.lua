@@ -5,13 +5,9 @@
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
 --]]
 
--- Assign global functions locally for faster processing
-local modbus_read_name = MB.readName
-local set_lua_throttle = LJ.setLuaThrottle
-local get_lua_throttle = LJ.getLuaThrottle
-local dio_direction_write = LJ.DIO_D_W
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
 local dio_state_write = LJ.DIO_S_W
-local interval_config = LJ.IntervalConfig
 local check_interval = LJ.CheckInterval
 
 print("Low-Level Benchmarking Test: toggle FIO3/DIO3 (FIO5/DIO5 on T4) as fast as possible.")
@@ -19,12 +15,12 @@ print("Low-Level Benchmarking Test: toggle FIO3/DIO3 (FIO5/DIO5 on T4) as fast a
 -- script. A rule of thumb for deciding a throttle setting is
 -- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
 local throttle = 40
-set_lua_throttle(throttle)
-throttle = get_lua_throttle()
+LJ.setLuaThrottle(throttle)
+throttle = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", throttle)
 
 -- The PRODUCT_ID register holds the device type
-local devtype = modbus_read_name("PRODUCT_ID")
+local devtype = MB.readName("PRODUCT_ID")
 -- Assume the device being used is a T7, use FIO3 pin (address = 2003)
 local outpin = 2003
 -- If actually using a T4
@@ -34,13 +30,13 @@ if devtype == 4 then
 end
 
 -- Change outdio direction to output
-dio_direction_write(outdio, 1)
+LJ.DIO_D_W(outdio, 1)
 
 -- Use an interval of 2000ms
 local interval = 2000
 local numwrites = 0
 
-interval_config(0, interval)
+LJ.IntervalConfig(0, interval)
 while true do
   -- Change the state of outdio to 0
   dio_state_write(outdio, 0)

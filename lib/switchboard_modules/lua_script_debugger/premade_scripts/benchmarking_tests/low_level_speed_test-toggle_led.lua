@@ -5,10 +5,8 @@
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
 --]]
 
--- Assign global functions locally for faster processing
-local set_lua_throttle = LJ.setLuaThrottle
-local get_lua_throttle = LJ.getLuaThrottle
-local interval_config = LJ.IntervalConfig
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
 local check_interval = LJ.CheckInterval
 local toggle_led = LJ.ledtog
 
@@ -17,15 +15,15 @@ print("Low-Level Benchmarking Test: toggle orange status LED as fast as possible
 -- script. A rule of thumb for deciding a throttle setting is
 -- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
 local throttle = 40
-set_lua_throttle(throttle)
-throttle = get_lua_throttle()
+LJ.setLuaThrottle(throttle)
+throttle = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", throttle)
 
 -- Use an interval of 2000ms
 local interval = 2000
 local numwrites = 0
 
-interval_config(0, interval)
+LJ.IntervalConfig(0, interval)
 while true do
   toggle_led()
   numwrites = numwrites + 1
