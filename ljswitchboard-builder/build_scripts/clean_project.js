@@ -12,7 +12,7 @@ var TEMP_FILES_DIR_NAME = 'temp_project_files';
 var DIRECTORY_OFFSET = path.normalize(path.join(cwd, TEMP_FILES_DIR_NAME));
 
 var DEBUG_DIRECTORY_SEARCHING = false;
-var PRINT_FILES_BEING_DELETED = true;
+var PRINT_FILES_BEING_DELETED = false;
 var PERFORM_DELETES = true;
 
 

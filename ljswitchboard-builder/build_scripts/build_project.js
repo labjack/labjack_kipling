@@ -19,6 +19,14 @@ if(typeof(buildOS) === 'undefined') {
 	buildOS = 'linux';
 }
 
+var mac_notarize = false;
+if(process.argv.some((arg)=>{return process.argv.indexOf('mac_sign') > 0;})) {
+	mac_notarize = true;
+	console.log('**************************\n ****Signing ****\n**************************');
+} else {
+	console.log('**************************\n**** Not Signing ****\n**************************');
+}
+
 
 var BUILD_SCRIPTS_DIR = 'build_scripts';
 
@@ -36,7 +44,7 @@ var conditionalMacBuildSteps = [
 	{'script': 'sign_mac_build_before_compression', 'text': 'Signing Mac OS Build.'},
 ];
 
-if(buildOS === 'darwin') {
+if((buildOS === 'darwin') && mac_notarize) {
 	buildScripts = buildScripts.concat(conditionalMacBuildSteps);
 }
 
@@ -51,7 +59,7 @@ var conditionalMacBuildStepsActerCompression = [
 	{'script': 'sign_mac_build_after_compression', 'text': 'Signing Mac OS Build.'},
 ];
 
-if(buildOS === 'darwin') {
+if((buildOS === 'darwin') && mac_notarize) {
 	buildScripts = buildScripts.concat(conditionalMacBuildStepsActerCompression);
 }
 
