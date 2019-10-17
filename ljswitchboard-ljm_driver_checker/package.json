@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_driver_checker",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "author": {
     "name": "Chris Johnson",
     "url": "http://labjack.com"
@@ -8,31 +8,30 @@
   "main": "lib/ljm_driver_checker.js",
   "license": {
     "type": "MIT",
-    "url": "https://raw.githubusercontent.com/chrisJohn404/LabJack-process_manager/master/LICENSE"
+    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_driver_checker/master/LICENSE"
   },
   "keywords": [
     "LabJack",
-    "Child Process Management",
-    "IPC Messaging"
   ],
-  "homepage": "https://github.com/chrisJohn404/LabJack-process_manager",
+  "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_driver_checker",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/LabJack-process_manager.git"
+    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_driver_checker.git"
   },
   "files": [
     "lib",
     "LICENSE"
   ],
   "dependencies": {
-    "async": "~0",
-    "q": "~1"
+    "async": "3.x",
+    "q": "1.x"
   },
   "scripts": {
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "devDependencies": {
-    "nodeunit": "0.9.x"
+    "nodeunit": "0.11.x",
+    "diff": ">=3.5.0"
   },
   "directories": {
     "lib": "./lib"
