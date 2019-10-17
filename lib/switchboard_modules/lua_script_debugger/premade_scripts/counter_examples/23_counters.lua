@@ -1,8 +1,11 @@
---This program demonstrates how to use digital lines as simple counters.
---Most commonly users should throttle their code execution using the functions:
---'LJ.IntervalConfig(0, 1000)', and 'if LJ.CheckInterval(0) then' ...
+--[[
+    Name: 23_counters.lua
+    Desc: This program demonstrates how to use digital lines as simple counters
+    Note: In most cases, users should throttle their code execution using the
+          functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
+--]]
 
---Array indeces 1-23 correspond with DIO0-22 as the following:
+--Array indexes 1-23 correspond with DIO0-22 as the following:
   --Index:  1             Channel:  FIO0  (DIO0)
   --Index:  2             Channel:  FIO1  (DIO1)
   --Index:  3             Channel:  FIO2  (DIO2)
@@ -27,66 +30,86 @@
   --Index:  22            Channel:  MIO1  (DIO21)
   --Index:  23            Channel:  MIO2  (DIO22)
 
+-- Assign global functions locally for faster processing
+local modbus_read = MB.R
+local modbus_write = MB.W
+local set_lua_throttle = LJ.setLuaThrottle
+local get_lua_throttle = LJ.getLuaThrottle
+
 print("Create and read 23 counters.")
-
-local mbRead=MB.R               --Local functions for faster processing
-local mbWrite=MB.W
-
-if (mbRead(60000, 3) ~= 7) then
+-- Read the PRODUCT_ID register to get the device type. This script will not
+-- run correctly on devices other than the T7
+if (modbus_read(60000, 3) ~= 7) then
   print("This example is only for the T7. Exiting Lua Script.")
-  mbWrite(6000, 1, 0)
+  -- Write a 0 to LUA_RUN to stop the script if not using a T7
+  modbus_write(6000, 1, 0)
 end
 
---1 = Rising edge, 0 = falling
+-- 1 = Rising edge, 0 = falling
 local edge = {}
 for i = 1, 23 do
-  edge[i] = 0 --sets all 23 counters to increment on falling edges
+  -- Set all 23 counters to increment on falling edges
+  edge[i] = 0
 end
 
 local bits = {}
-local bits_new = {}
+local newbits = {}
 local count = {}
 
---The throttle setting can correspond roughly with the length of the Lua
---script. A rule of thumb for deciding a throttle setting is
---throttle = (3*NumLinesCode) + 20
-local throttleSetting = 100    --Default throttle setting is 10 instructions
-LJ.setLuaThrottle(throttleSetting)
-local throttleSetting = LJ.getLuaThrottle()
-print ("Current Lua Throttle Setting: ", throttleSetting)
+-- The throttle setting can correspond roughly with the length of the Lua
+-- script. A rule of thumb for deciding a throttle setting is
+-- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
+local throttle = 100
+set_lua_throttle(throttle)
+throttle = get_lua_throttle()
+print ("Current Lua Throttle Setting: ", throttle)
 
-mbWrite(2600, 0, 0)  --FIO to input
-mbWrite(2601, 0, 0)  --EIO to input
-mbWrite(2602, 0, 0)  --COI to input
-mbWrite(2603, 0, 0)  --MIO to input
+-- Set FIO registers to input (by writing 0 to FIO_DIRECTION)
+modbus_write(2600, 0, 0)
+-- Set EIO registers to input (by writing 0 to EIO_DIRECTION)
+modbus_write(2601, 0, 0)
+-- Set COI registers to input (by writing 0 to CIO_DIRECTION)
+modbus_write(2602, 0, 0)
+-- Set MIO registers to input (by writing 0 to MIO_DIRECTION)
+modbus_write(2603, 0, 0)
 
 for i=1, 23 do
   bits[i] = 0
-  bits_new[i] = 99
+  newbits[i] = 99
   count[i] = 0
 end
 
 while true do
+  -- Read digital channels DIO0-22
   for i=1, 23 do
-    bits_new[i] = mbRead((i-1)+2000, 0)
+    newbits[i] = modbus_read((i-1)+2000, 0)
   end
 
-  --Compare bits_new to bits
+  --Compare newbits to bits for each counter
   for i=1, 23 do
-    if bits[i] ~= bits_new[i] then
+    -- If bits are different from newbits the counter state changed
+    if bits[i] ~= newbits[i] then
+      -- If the counter should increase on a rising edge
       if edge[i] == 1 then
+        -- If the last counter state was 0 then there was a rising edge, increment
+        -- the counter
         if bits[i] == 0 then
           count[i] = count[i] + 1
-          print ("Counter: ", i, " Rising: ", count[i])
+          print ("Counter: ", i-1, " Rising: ", count[i])
         end
+      -- If the counter should increase on a falling edge
       else
+        -- If the last counter state was 1 then there was a falling edge,
+        -- increment the counter
         if bits[i] == 1 then
           count[i] = count[i] + 1
-          print ("Counter: ", i, " Falling: ", count[i])
+          print ("Counter: ", i-1, " Falling: ", count[i])
         end
       end
-      bits[i] = bits_new[i]
-      mbWrite(((i-1)*2)+46000, 3, count[i]) --Save in User RAM
+      -- Adjust bits to reflect the new counter state
+      bits[i] = newbits[i]
+      -- Write the counter values to USER_RAM
+      modbus_write(((i-1)*2)+46000, 3, count[i])
     end
   end
 end

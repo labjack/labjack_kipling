@@ -1,6 +1,6 @@
 --[[
     Name: 107_counters.lua
-    Desc: Sets up and reads 107 counters
+    Desc: This program sets up and reads 107 counters
     Note: The loop runs at about 130 Hz, meaning that frequencies up to about
           65 Hz can be accurately counted.
           The index of each counter within an array is 1 more than its
@@ -70,7 +70,7 @@ local get_lua_throttle = LJ.getLuaThrottle
 -- run correctly on devices other than the T7
 if (modbus_read(60000, 3) ~= 7) then
   print("This example is only for the T7. Exiting Lua Script.")
-  -- Write a 0 to LUA_RUN to stop the script
+  -- Write a 0 to LUA_RUN to stop the script if not using a T7
   modbus_write(6000, 1, 0)
 end
 
@@ -95,7 +95,7 @@ local count = {}
 -- The throttle setting can correspond roughly with the length of the Lua
 -- script. A rule of thumb for deciding a throttle setting is
 -- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
-local throttle = 40
+local throttle = 100
 set_lua_throttle(throttle)
 throttle = get_lua_throttle()
 print ("Current Lua Throttle Setting: ", throttle)
