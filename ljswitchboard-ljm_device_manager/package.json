@@ -12,14 +12,19 @@
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "dependencies": {
+    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master",
+    "ljswitchboard-device_scanner": "git://github.com/chrisJohn404/ljswitchboard-device_scanner.git#master",
+    "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master",
+    "async": "3.x",
+    "q": "1.x"
+  },
+  "customDeps": {
     "ljswitchboard-ljm_device_curator": "0.x.x",
     "ljswitchboard-device_scanner": "0.x.x",
-    "ljswitchboard-ljm_driver_constants": "0.x.x",
-    "async": "~0",
-    "q": "~1"
+    "ljswitchboard-ljm_driver_constants": "0.x.x"
   },
   "devDependencies": {
-    "nodeunit": "0.9.x"
+    "nodeunit": "0.11.x"
   },
   "repository": {
     "type": "git",
