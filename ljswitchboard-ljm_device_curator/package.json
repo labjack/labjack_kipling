@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_device_curator",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
   "main": "./lib/device_curator.js",
   "scripts": {
@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_curator",
   "dependencies": {
-    "async": "~0",
+    "async": "3.x",
     "dict": "1.4.0",
     "labjack-nodejs": "git://github.com/chrisJohn404/labjack-nodejs.git#master",
     "lj-apps-win-registry-info": "git+https://github.com/chrisJohn404/lj-apps-win-registry-info.git#master",
@@ -46,8 +46,8 @@
     "ljswitchboard-modbus_map": "git://github.com/chrisJohn404/ljswitchboard-modbus_map.git#master",
     "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master",
     "lodash": "^4.17.11",
-    "mathjs": "1.6.x",
-    "q": "^1.5.1",
+    "mathjs": "3.x",
+    "q": "1.x",
     "request": "^2.88.0",
     "stats-lite": "^2.2.0"
   },
@@ -56,9 +56,7 @@
     "ljswitchboard-data_parser": "0.x",
     "ljswitchboard-modbus_map": "0.0.x",
     "ljswitchboard-ljm_driver_constants": "0.0.x",
-    "labjack-nodejs": "git://github.com/chrisJohn404/labjack-nodejs.git#fix-osx-signing",
     "labjack-nodejs": "0.x",
-    "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#fixes-to-signed-execution",
     "ljm-ffi": "1.x",
     "dont delete": "do not delete"
   },
