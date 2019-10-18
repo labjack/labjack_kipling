@@ -28,8 +28,6 @@ if(devtype == 7) then
   modbus_write(44000, 1, 0)
   -- Disable DIO1 (this is necessary for configuration)
   modbus_write(44002, 1, 0)
-  -- Note: these DIO registers do not need to be enabled to use the quadrature
-  -- read feature
   -- Set DIO0_EF_INDEX to 10 (use the quadrature in feature)
   modbus_write(44100, 1, 10)
   -- Set DIO1_EF_INDEX to 10 (use the quadrature in feature)
@@ -50,8 +48,6 @@ elseif(devtype == 4) then
   modbus_write(44008, 1, 0)
   -- Disable DIO5 (this is necessary for configuration)
   modbus_write(44010, 1, 0)
-  -- Note: these DIO registers do not need to be enabled to use the quadrature
-  -- read feature
   -- Set DIO4_EF_INDEX to 10 (use the quadrature in feature)
   modbus_write(44108, 1, 10)
   -- Set DIO5_EF_INDEX to 10 (use the quadrature in feature)

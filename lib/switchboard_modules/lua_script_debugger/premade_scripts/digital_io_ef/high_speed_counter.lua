@@ -1,42 +1,50 @@
+--[[
+    Name: high_speed_counter.lua
+    Desc: This example demonstrates how to configure and use the high speed
+          counters
+--]]
+
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
+local modbus_read=MB.R
+local modbus_write=MB.W
+local check_interval = LJ.checkInterval
+
 print("Enable the high speed counter on CIO0")
 print("Please attach a jumper wire between EIO0 and CIO0")
-
-local mbRead=MB.R
-local mbWrite=MB.W
-
 local count = 0
-local eioState = 0
-
+local eiostate = 0
 -- Enable CounterA on DIO16/CIO0
-mbWrite(44032, 1, 0) -- disable the DIO16_EF_ENABLE
-mbWrite(44132, 1, 7) -- Configure to be a high speed counter DIO16_EF_INDEX
-mbWrite(44032, 1, 1) -- enable the DIO16_EF_ENABLE
+-- Disable DIO16 by writing  0 to DIO16_EF_ENABLE (necessary for configuration)
+modbus_write(44032, 1, 0)
+-- Write 7 to DIO16_EF_INDEX (use the high speed counter feature)
+modbus_write(44132, 1, 7)
+-- Re-enable DIO16
+modbus_write(44032, 1, 1)
+-- Set EIO0
+modbus_write(2008, 0, eiostate)
+-- Configure whether to read and reset or only read the count
+local clearcount = true
 
--- configure EIO state
-mbWrite(2008, 0, eioState)
-
-LJ.IntervalConfig(0, 500)      --set interval to 1000 for 1000ms
-local checkInterval=LJ.CheckInterval
-
--- Allow user to configure whether or not a read and reset or just a read is
--- performed.
-local clearCount = true
-
+-- Setup an interval of 500ms
+LJ.IntervalConfig(0, 500)
 while true do
-  if eioState==1 then
-    eioState = 0
+  if eiostate==1 then
+    eiostate = 0
   else
-    eioState = 1
+    eiostate = 1
   end
-  mbWrite(2008, 0, eioState)
-  
-  if checkInterval(0) then   --interval completed
-    if clearCount then
-      -- Read DIO16_EF_READ_A_AND_RESET to return the current count & reset the value
-      count = mbRead(3132, 1)
+  modbus_write(2008, 0, eiostate)
+
+  -- If the interval is done
+  if check_interval(0) then
+    if clearcount then
+      -- Read DIO16_EF_READ_A_AND_RESET to return the current count and reset
+      -- the value
+      count = modbus_read(3132, 1)
     else
       -- read DIO16_EF_READ_A to return the current count
-      count = mbRead(3032, 1)
+      count = modbus_read(3032, 1)
     end
     print("Current Count", count)
   end
