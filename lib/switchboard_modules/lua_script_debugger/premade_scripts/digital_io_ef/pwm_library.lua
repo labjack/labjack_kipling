@@ -85,7 +85,7 @@ local dutycycle = 5
 
 -- Read the PRODUCT_ID register to get the device type
 local devtype = modbus_read(60000, 3)
--- Assume the device being used is a T7, use FIO0 for PWM
+-- Assume that the device being used is a T7, use FIO0 for PWM
 local outpin = 0
 -- If the device is actually a T4
 if devtype == 4 then
