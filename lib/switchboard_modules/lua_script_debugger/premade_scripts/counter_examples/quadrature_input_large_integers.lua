@@ -2,10 +2,11 @@
     Name: quadrature_input_large_integers.lua
     Desc: Program for handling quadrature input counts that overflow 32 bit
           floats by tracking and reporting counts in two registers
-    Note: Could modify with the DIO0_EF_READ_AF register for float mode
+    Note: It is possible to modify this example to use the DIO0_EF_READ_A_F
+          register to return counts as single precision floats
 
-          Does not take into effect counter-clockwise revolutions or two's
-          complement conversion
+          This example does not take into account counter-clockwise revolutions
+          or two's complement conversion
 --]]
 
 -- For sections of code that require precise timing assign global functions
@@ -15,18 +16,20 @@ local modbus_read = MB.R
 local modbus_write = MB.W
 
 print("quadrature_input_large_integers.lua")
+local efreadreg = 0
+local efreadresetreg = 0
 
 -- Get the device type by reading the PRODUCT_ID register
-devtype = modbus_read(60000, 3)
-efreadreg = 0
-efreadresetreg = 0
+local devtype = modbus_read(60000, 3)
 if(devtype == 7) then
   print("T7: Enabling quadrature input on DIO0 and DIO1")
   -- Formatting for quadrature input if using a T7
-  -- Disable DIO0
+  -- Disable DIO0 (this is necessary for configuration)
   modbus_write(44000, 1, 0)
-  -- Disable DIO1
+  -- Disable DIO1 (this is necessary for configuration)
   modbus_write(44002, 1, 0)
+  -- Note: these DIO registers do not need to be enabled to use the quadrature
+  -- read feature
   -- Set DIO0_EF_INDEX to 10 (use the quadrature in feature)
   modbus_write(44100, 1, 10)
   -- Set DIO1_EF_INDEX to 10 (use the quadrature in feature)
@@ -40,13 +43,15 @@ if(devtype == 7) then
   -- Use DIO0_EF_READ_A_AND_RESET (same as DIO0_EF_READ_A but it resets the
   -- count back to 0 after getting the input value)
   efreadresetreg = 3100
-else if(devtype == 4) then
+elseif(devtype == 4) then
   print("T4: Enabling quadrature input on DIO4 and DIO5")
   -- Formatting for quadrature input if using a T4
-  -- Disable DIO4
+  -- Disable DIO4 (this is necessary for configuration)
   modbus_write(44008, 1, 0)
-  -- Disable DIO5
+  -- Disable DIO5 (this is necessary for configuration)
   modbus_write(44010, 1, 0)
+  -- Note: these DIO registers do not need to be enabled to use the quadrature
+  -- read feature
   -- Set DIO4_EF_INDEX to 10 (use the quadrature in feature)
   modbus_write(44108, 1, 10)
   -- Set DIO5_EF_INDEX to 10 (use the quadrature in feature)
@@ -65,13 +70,13 @@ end
 -- Update data every 500ms
 LJ.IntervalConfig(0, 500)
 -- Number used to store the new value polled from the LabJack register
-newcount = 0
+local newcount = 0
 -- Number used to keep the higher precision lower 22 bits of the number
-lownum = 0
+local lownum = 0
 -- Number used to store the residual number of counts after conversion
-residual = 0
+local residual = 0
 -- Number used to store how many multiples of 2^22 have been reached
-multiplier = 0
+local multiplier = 0
 
 while true do
   -- It is possible to take out CheckInterval or make the interval very small
@@ -80,7 +85,6 @@ while true do
     -- Read the DIO#_EF_READ_A register and combine it with any residual from
     -- the last conversion
     lownum = modbus_read(efreadreg, 1) + residual
-
     -- Once the register has a number of counts large enough that the
     -- precision could be compromised (greater than  22 bits), convert by
     -- resetting the register and split it into separate values
@@ -98,11 +102,9 @@ while true do
       -- Prepare to store the residual
       lownum = residual
     end
-
     -- Save the number of counts to USER_RAM0_U32 and USER_RAM1_U32
     modbus_write(46100,1,lownum)
     modbus_write(46102,1,multiplier)
-
     -- To get the full number of counts from an external application:
     --  counts = (2^22 * USER_RAM1_U32) + USER_RAM0_U32
     -- USER_RAM1_U32 can now also be used as a boolean register to see whether
