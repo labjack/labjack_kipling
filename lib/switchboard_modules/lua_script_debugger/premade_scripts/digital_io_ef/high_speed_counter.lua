@@ -8,7 +8,7 @@
 -- locally (local definitions of globals are marginally faster)
 local modbus_read=MB.R
 local modbus_write=MB.W
-local check_interval = LJ.checkInterval
+local check_interval = LJ.CheckInterval
 
 print("Enable the high speed counter on CIO0")
 print("Please attach a jumper wire between EIO0 and CIO0")
