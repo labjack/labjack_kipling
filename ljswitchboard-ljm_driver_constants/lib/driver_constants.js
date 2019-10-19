@@ -17,6 +17,7 @@ exports.LJM_DT_U6 = 6;
 exports.LJM_DT_T4 = 4;
 exports.LJM_DT_T5 = 5;
 exports.LJM_DT_T7 = 7;
+exports.LJM_DT_T8 = 8;
 exports.LJM_DT_SKYMOTE_BRIDGE = 1000;
 exports.LJM_DT_DIGIT = 200;
 exports.LJM_DT_TSERIES = 84;
@@ -268,6 +269,12 @@ exports.deviceTypes = {
 	T7: 7,
 	t7: 7,
 	7:7,
+	LJM_DTT8: 8,
+	LJM_dtT8: 8,
+	LJM_dtt8: 8,
+	T8: 8,
+	t8: 8,
+	8:8,
 	LJM_dtSKYMOTE_BRIDGE: 1000,
 	1000:1000,
 	LJM_DTDIGIT: 200,
@@ -448,6 +455,7 @@ exports.DEVICE_TYPE_NAMES = {
     '5': 'T5',
     '6': 'U6',
     '7': 'T7',
+    '8': 'T8',
     '9': 'UE9',
     '200': 'Digit'
 };
@@ -458,6 +466,7 @@ exports.DRIVER_DEVICE_TYPE_NAMES = {
     '5': 'LJM_dtT5',
     '6': 'LJM_dtU6',
     '7': 'LJM_dtT7',
+    '8': 'LJM_dtT8',
     '9': 'LJM_dtUE9',
     '200': 'LJM_dtDIGIT'
 };
@@ -469,6 +478,7 @@ exports.DEVICE_TYPE_NAMES_BY_DRIVER_NAME = {
     'LJM_dtT5': 'T5',
     'LJM_dtU6': 'U6',
     'LJM_dtT7': 'T7',
+    'LJM_dtT8': 'T8',
     'LJM_dtUE9': 'UE9',
     'LJM_dtDIGIT': 'Digit'
 };
@@ -517,6 +527,7 @@ exports.serialNumberOffsets = {
 	'LJM_dtT4': 440010000,
 	'LJM_dtT5': 450010000,
 	'LJM_dtT7': 470010000,
+	'LJM_dtT8': 480010000, // Not sure 10/19
 	'LJM_dtDIGIT': 220010000,
 };
 
