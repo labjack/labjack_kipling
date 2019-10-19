@@ -9,6 +9,7 @@ var list = {
 	'4': {}, // T4
 	'5': {}, // T5
 	'7': {}, // T7
+	'8': {}, // T7
 	'200': {}, // Digit
 };
 
@@ -19,6 +20,7 @@ var errorList = {
 	'4': {}, // T4
 	'5': {}, // T5
 	'7': {}, // T7
+	'8': {}, // T7
 	'200': {}, // Digit
 };
 
@@ -66,6 +68,9 @@ function populateErrorList(destination, newList, endKey, debug) {
 	});
 }
 // Populate List
+var t8List = require('./t8_data_parser').T8_LIST;
+populateList(list, t8List, '8');
+
 var t7List = require('./t7_data_parser').T7_LIST;
 populateList(list, t7List, '7');
 
@@ -86,6 +91,9 @@ devKeys.forEach(function(devKey) {
 exports.list = list;
 
 // Populate errorList
+var t8ErrorsList = require('./t8_error_parser').T8_LIST;
+populateErrorList(errorList, t8ErrorsList, '8', false);
+
 var t7ErrorsList = require('./t7_error_parser').T7_LIST;
 populateErrorList(errorList, t7ErrorsList, '7', false);
 

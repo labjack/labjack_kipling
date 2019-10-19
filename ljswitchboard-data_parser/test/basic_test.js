@@ -3,6 +3,7 @@ var data_parser = require('../lib/data_parser');
 var modbus_map = require('ljswitchboard-modbus_map');
 var constants = modbus_map.getConstants();
 
+var deviceTypes = ['T4','T5','T7','T8'];
 
 exports.tests = {
 	'check IP registers - encode': function(test) {
@@ -306,80 +307,101 @@ exports.tests = {
 		test.done();
 	},
 	'check AINx registers for high-precision rounding': function(test) {
-		var ainValues = [
-			{'reg': 'AIN0', 'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
-			{'reg': 'AIN0', 'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
-			{'reg': 'AIN254', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN254', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-		];
+		deviceTypes.forEach(function(deviceType) {
+			var intDeviceType = 'all';
+			var precision = 6;
+			if(deviceType === 'T4') {
+				intDeviceType = deviceType;
+				precision = 4;
+			}
+			var ainValues = {
+				'all': [
+					{'reg': 'AIN0', 'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
+					{'reg': 'AIN0', 'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
+					{'reg': 'AIN254', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+					{'reg': 'AIN254', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				],
+				'T4': [
+					{'reg': 'AIN0', 'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
+					{'reg': 'AIN0', 'res': 1.123456789, 'val': 1.1235, 'rounded': 1.1235, 'unit': 'V'},
+					{'reg': 'AIN254', 'res': 0.0123456789012, 'val': 0.0123, 'rounded': 0.0123, 'unit': 'V'},
+					{'reg': 'AIN254', 'res': 0.0123456789012, 'val': 0.0123, 'rounded': 0.0123, 'unit': 'V'},
+				],
+			}[intDeviceType];
 
-		var results = ainValues.map(function(tVal) {
-			return data_parser.parseResult(tVal.reg, tVal.res);
+
+			var results = ainValues.map(function(tVal) {
+				return data_parser.parseResult(tVal.reg, tVal.res, deviceType);
+			});
+			var reqResults = ainValues.map(function(tVal) {
+				return {
+					'register': tVal.reg,
+					'name': tVal.reg,
+					'address': constants.getAddressInfo(tVal.reg).data.address,
+					'res': tVal.res,
+					'val': tVal.val,
+					'rounded': tVal.rounded,
+					'unit': tVal.unit,
+					'str': tVal.rounded.toFixed(precision),
+				};
+			});
+			// console.log('Results', results);
+			test.deepEqual(results, reqResults, 'AINx Values are bad: '+deviceType);
 		});
-		var reqResults = ainValues.map(function(tVal) {
-			return {
-				'register': tVal.reg,
-				'name': tVal.reg,
-				'address': constants.getAddressInfo(tVal.reg).data.address,
-				'res': tVal.res,
-				'val': tVal.val,
-				'rounded': tVal.rounded,
-				'unit': tVal.unit,
-				'str': tVal.rounded.toFixed(6),
-			};
-		});
-		// console.log('Results', results);
-		test.deepEqual(results, reqResults, 'AINx Values are bad');
 		test.done();
 	},
 	'check other AINx related registers for rounding': function(test) {
-		var ainValues = [
-			{'reg': 'AIN_ALL_RANGE', 'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
-			{'reg': 'AIN_ALL_RANGE', 'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
-			{'reg': 'AIN_ALL_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN_ALL_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-		
-			{'reg': 'AIN_ALL_SETTLING_US', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN254_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+		deviceTypes.forEach(function(deviceType) {
 
-			{'reg': 'AIN0_EF_READ_A', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN149_EF_READ_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_EF_CONFIG_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN149_EF_CONFIG_G', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			var ainValues = [
+				{'reg': 'AIN_ALL_RANGE', 'res': 1, 'val': 1, 'rounded': 1, 'unit': 'V'},
+				{'reg': 'AIN_ALL_RANGE', 'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
+				{'reg': 'AIN_ALL_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN_ALL_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			
+				{'reg': 'AIN_ALL_SETTLING_US', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN254_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 
-			{'reg': 'AIN0_EF_READ_B', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_EF_READ_C', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_EF_READ_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_READ_A', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN149_EF_READ_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_CONFIG_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN149_EF_CONFIG_G', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 
-			{'reg': 'AIN0_EF_CONFIG_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_EF_CONFIG_E', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_EF_CONFIG_F', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_EF_CONFIG_G', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_EF_CONFIG_H', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_EF_CONFIG_I', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'AIN0_EF_CONFIG_J', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_READ_B', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_READ_C', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_READ_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 
-			{'reg': 'DIO0_EF_READ_A_F', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'DIO0_EF_READ_A_F_AND_RESET', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			{'reg': 'DIO0_EF_READ_B_F', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-		];
+				{'reg': 'AIN0_EF_CONFIG_D', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_CONFIG_E', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_CONFIG_F', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_CONFIG_G', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_CONFIG_H', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_CONFIG_I', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'AIN0_EF_CONFIG_J', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 
-		var results = ainValues.map(function(tVal) {
-			return data_parser.parseResult(tVal.reg, tVal.res);
-		});
-		var reqResults = ainValues.map(function(tVal) {
-			return {
-				'register': tVal.reg,
-				'name': tVal.reg,
-				'address': constants.getAddressInfo(tVal.reg).data.address,
-				'res': tVal.res,
-				'val': tVal.val,
-				'str': tVal.rounded.toFixed(6),
-			};
-		});
-		// console.log('Results', results);
-		test.deepEqual(results, reqResults, 'AINx Values are bad');
+				{'reg': 'DIO0_EF_READ_A_F', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'DIO0_EF_READ_A_F_AND_RESET', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+				{'reg': 'DIO0_EF_READ_B_F', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
+			];
+
+			var results = ainValues.map(function(tVal) {
+				return data_parser.parseResult(tVal.reg, tVal.res, deviceType);
+			});
+			var reqResults = ainValues.map(function(tVal) {
+				return {
+					'register': tVal.reg,
+					'name': tVal.reg,
+					'address': constants.getAddressInfo(tVal.reg).data.address,
+					'res': tVal.res,
+					'val': tVal.val,
+					'str': tVal.rounded.toFixed(6),
+				};
+			});
+			// console.log('Results', results);
+			test.deepEqual(results, reqResults, 'AINx Values are bad');
+
+		})
 		test.done();
 	},
 	'check DACx registers for rounding': function(test) {
@@ -632,7 +654,7 @@ exports.tests = {
 		test.deepEqual(results, reqResults, 'File I/O registers: FILE_IO_DISK_FORMAT_INDEX failed');
 		test.done();
 	},
-	'check RTC_TIME_S register': function(test) {
+	'check RTC_TIME_S register (T7)': function(test) {
 		var vals = [
 			{'val': 1473967452, 'str': '9/15/2016, 1:24:12 PM', 't7Time': 1473967452000},
 		];
@@ -642,7 +664,7 @@ exports.tests = {
 		vals.forEach(function(val) {
 			// Query the data parser.
 			var reg = 'RTC_TIME_S';
-			var res = data_parser.parseResult(reg, val.val);
+			var res = data_parser.parseResult(reg, val.val, 'T7');
 			results.push(res);
 
 			reqResults.push({
@@ -654,6 +676,38 @@ exports.tests = {
 				'str': val.str,
 				't7Time': val.t7Time,
 				't7TimeStr': val.str,
+				'pcTime': res.pcTime,
+				'pcTimeStr': res.pcTimeStr,
+				'timeDifferenceSec': res.timeDifferenceSec,
+			});
+		});
+		// console.log('results', results);
+		// console.log('reqResults', reqResults);
+		test.deepEqual(results, reqResults, 'RTC Registers failed.');
+		test.done();
+	},
+	'check RTC_TIME_S register (T8)': function(test) {
+		var vals = [
+			{'val': 1473967452, 'str': '9/15/2016, 1:24:12 PM', 't8Time': 1473967452000},
+		];
+
+		var results = [];
+		var reqResults = [];
+		vals.forEach(function(val) {
+			// Query the data parser.
+			var reg = 'RTC_TIME_S';
+			var res = data_parser.parseResult(reg, val.val, 'T8');
+			results.push(res);
+
+			reqResults.push({
+				'register': reg,
+				'name': reg,
+				'address': constants.getAddressInfo(reg).data.address,
+				'res': val.val,
+				'val': val.str,
+				'str': val.str,
+				't8Time': val.t8Time,
+				't8TimeStr': val.str,
 				'pcTime': res.pcTime,
 				'pcTimeStr': res.pcTimeStr,
 				'timeDifferenceSec': res.timeDifferenceSec,
