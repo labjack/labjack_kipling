@@ -9,7 +9,7 @@ process.on('uncaughtException', function(err) {
 var testGroups = {
 	'test_type_helpers': true,
 	'get_ljm_version': true,
-	'basic_ljm_calls': false,
+	'basic_ljm_calls': true,
 	'ljm_calls': {
 		'ljm_calls': true,
 		'open_all': true,
