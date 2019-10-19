@@ -14,6 +14,7 @@
 var async = require('async');
 var extend = require('extend');
 var sprintf = require('sprintf-js');
+// var util = require('util');  // Consider switching to node's util.format function.
 
 // Sizes in number of MODBUS registers (2 bytes each).
 var DATA_TYPE_SIZES = {
@@ -136,6 +137,7 @@ exports.expandLJMMMName = function(name, onError, onSuccess)
 
     fullyQualifiedNames = regNums.map(function(regNum){
         return sprintf.sprintf('%s%d%s', before, regNum, after);
+        // return util.format('%s%d%s', before, regNum, after);
     });
 
     if (onSuccess !== undefined)
