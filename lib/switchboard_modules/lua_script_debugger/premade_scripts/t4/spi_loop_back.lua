@@ -1,11 +1,18 @@
---This is an SPI example for the T4.  It tests SPI functionality using the
---standard loop-back methidology where a user must connect the MISO and MOSI
---data lines together.
+--[[
+    Name: spi_loop_back.lua
+    Desc: This is an SPI example for the T4.  It tests SPI functionality using
+          the standard loop-back methodology where a user must connect the MISO
+          and MOSI data lines together.
+    Note: See our T-Series SPI page for more detailed info on SPI settings:
+            https://labjack.com/support/datasheets/t-series/digital-io/spi
+--]]
+
 print ("T4 SPI Loop-Back Example")
 
 
-SPI_Utils={}
-function SPI_Utils.configure(self, cs, clk, miso, mosi, mode, speed, options, debug)
+spiutils={}
+
+function spiutils.configure(self, cs, clk, miso, mosi, mode, speed, options, debug)
   self.cs=cs
   self.clk=clk
   self.miso=miso
@@ -15,81 +22,91 @@ function SPI_Utils.configure(self, cs, clk, miso, mosi, mode, speed, options, de
   self.options=options
   self.debug=debug
 
-  MB.W(5000, 0, cs)  --CS
-  MB.W(5001, 0, clk)  --CLK
-  MB.W(5002, 0, miso)  --MISO
-  MB.W(5003, 0, mosi)  --MOSI
-
-  MB.W(5004, 0, mode)  --Mode
-  MB.W(5005, 0, speed)  --Speed
-  MB.W(5006, 0, options)  --Options, enable CS
-  
+  -- Write the DIO register number for chip select to SPI_CS_DIONUM
+  MB.W(5000, 0, cs)
+  -- Write the DIO register number for  clock to SPI_CLK_DIONUM
+  MB.W(5001, 0, clk)
+  -- Write the DIO register number for  MISO to SPI_MISO_DIONUM
+  MB.W(5002, 0, miso)
+  -- Write the DIO register number for  MOSI to SPI_MOSI_DIONUM
+  MB.W(5003, 0, mosi)
+  -- Write the desired SPI mode to SPI_MODE
+  MB.W(5004, 0, mode)
+  -- Write the desired clock speed to SPI_SPEED_THROTTLE
+  MB.W(5005, 0, speed)
+  -- Write the desired SPI_OPTIONS
+  MB.W(5006, 0, options)
 end
-function SPI_Utils.transfer(self, txData)
-  local numBytes = table.getn(txData)
 
-  --Configure num bytes to read/write
-  MB.W(5009, 0, numBytes)  --Num Bytes to Tx/Rx
-  local errorVal = MB.WA(5010, 99, numBytes, txData) --SPI_DATA_TX
-  MB.W(5007, 0, 1) --SPI_GO
-  local rxData = MB.RA(5050, 99, numBytes) --SPI_DATA_RX
-  return rxData
+function spiutils.transfer(self, txdata)
+  local numbytes = table.getn(txdata)
+
+  -- Configure the number of bytes to read/write (write to SPI_NUM_BYTES)
+  MB.W(5009, 0, numbytes)
+-- SPI_DATA_TX is a buffer for data to send to slave devices
+  local errorval = MB.WA(5010, 99, numbytes, txdata)
+  -- Write 1 to SPI_GO to begin the SPI transaction
+  MB.W(5007, 0, 1)
+  -- Read SPI_DATA_RX to capture data sent back from the slave device
+  local rxdata = MB.RA(5050, 99, numbytes)
+  return rxdata
 end
-function SPI_Utils.transferString(self, txString)
-  local numBytes = string.len(txString)
 
-  local txData={}
-  for i=1,numBytes do
-    txData[i]=string.byte(txString,i)
+function spiutils.stringtransfer(self, txstring)
+  local numbytes = string.len(txstring)
+  -- Convert the transfer string to bytes
+  local txdata={}
+  for i=1,numbytes do
+    txdata[i]=string.byte(txstring,i)
   end
-  
-  --Append a null character
-  -- numBytes += 1
-  -- txData[numBytes]=0
+  -- Append a null character
+  --   numbytes += 1
+  --   txdata[numbytes]=0
 
-  --Configure num bytes to read/write
-  MB.W(5009, 0, numBytes)  --Num Bytes to Tx/Rx
-  local errorVal = MB.WA(5010, 99, numBytes, txData) --SPI_DATA_TX
-  MB.W(5007, 0, 1) --SPI_GO
-  local rxData = MB.RA(5050, 99, numBytes) --SPI_DATA_RX
-
+  -- Get return data from the slave device
+  local rxdata = self.transfer(self, txdata)
+  -- Convert the data to a string
   local rxString = ""
-  for i=1,numBytes do
-    rxString = rxString..string.char(rxData[i])
+  for i=1,numbytes do
+    rxString = rxString..string.char(rxdata[i])
   end
   return rxString
 end
-function SPI_Utils.calc_options(self, autoCSDisable)
-  autoCSDisableVal = autoCSDisable and 1 or 0
-  return autoCSDisableVal*1
-end
-function SPI_Utils.calc_mode(self, cpol, cpha)
-  cpolVal = cpol and 1 or 0
-  cphaVal = cpha and 1 or 0
-  return cpolVal*2 + cphaVal*1
+
+function spiutils.calculateoptions(self, autodisable)
+  local autodisableval = autodisable and 1 or 0
+  return autodisableval*1
 end
 
+function spiutils.calculatemode(self, cpol, cpha)
+  local cpolval = cpol and 1 or 0
+  local cphaval = cpha and 1 or 0
+  return cpolval*2 + cphaval*1
+end
 
-spi = SPI_Utils
+local spi = spiutils
+-- Use DIO8 for chip select
+local cs=8
+-- Use DIO9 for clock
+local clk=9
+-- Use DIO6 for MISO
+local miso=6
+-- Use DIO7 for MOSI
+local mosi=7
 
---Define DIO Numbers
-spiCS=8
-spiCLK=9
-spiMISO=6
-spiMOSI=7
+-- Set the mode such that the clock idles at 0 with polarity 0
+local mode = spi.calculatemode(spi, false, false)
+-- Set the clock at default speed (~800KHz)
+local speed = 0
+-- Set the options such that there are no special operation (such as disabling CS)
+local options = spi.calculateoptions(spi, false)
 
---Define SPI Options
-spiMode = spi.calc_mode(spi, false, false)
-spiSpeed = 0
-spiOptions = spi.calc_options(spi, false)
-
---Configure SPI bus
-spi.configure(spi, spiCS, spiCLK, spiMISO, spiMOSI, spiMode, spiSpeed, spiOptions, false)
-
-txString = "Hello_world"
-print("Transfered String: "..txString)
-rxString = spi.transferString(spi, txString)
+-- Configure the SPI bus
+spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
+local txstring = "Hello_world"
+print("Transfered String: "..txstring)
+local rxString = spi.stringtransfer(spi, txstring)
 print("Received String: "..rxString)
 
---Stop the Lua Script
+-- Write 0 to LUA_RUN to stop the script
 MB.W(6000, 1, 0)
