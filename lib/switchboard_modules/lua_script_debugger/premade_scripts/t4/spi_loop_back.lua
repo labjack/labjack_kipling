@@ -7,9 +7,6 @@
             https://labjack.com/support/datasheets/t-series/digital-io/spi
 --]]
 
-print ("T4 SPI Loop-Back Example")
-
-
 spiutils={}
 
 function spiutils.configure(self, cs, clk, miso, mosi, mode, speed, options, debug)
@@ -73,7 +70,7 @@ function spiutils.stringtransfer(self, txstring)
   return rxString
 end
 
-function spiutils.calculateoptions(self, autodisable)
+function spiutils.csdisable(self, autodisable)
   local autodisableval = autodisable and 1 or 0
   return autodisableval*1
 end
@@ -84,7 +81,9 @@ function spiutils.calculatemode(self, cpol, cpha)
   return cpolval*2 + cphaval*1
 end
 
+print ("T4 SPI Loop-Back Example")
 local spi = spiutils
+
 -- Use DIO8 for chip select
 local cs=8
 -- Use DIO9 for clock
@@ -94,12 +93,12 @@ local miso=6
 -- Use DIO7 for MOSI
 local mosi=7
 
--- Set the mode such that the clock idles at 0 with polarity 0
+-- Set the mode such that the clock idles at 0 with phase 0
 local mode = spi.calculatemode(spi, false, false)
 -- Set the clock at default speed (~800KHz)
 local speed = 0
 -- Set the options such that there are no special operation (such as disabling CS)
-local options = spi.calculateoptions(spi, false)
+local options = spi.csdisable(spi, false)
 
 -- Configure the SPI bus
 spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
