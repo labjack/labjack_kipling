@@ -91,7 +91,7 @@ end
 
 --Setup an interval(in ms) for the counter debounce
 LJ.IntervalConfig(0, debounceinterval)
-
+-- Run the program in an infinite loop
 while true do
   -- Read digital channels DIO0-22
   for i=1, 23 do

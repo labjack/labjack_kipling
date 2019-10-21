@@ -54,7 +54,9 @@ for i=1,table.getn(ainchannels) do
   ain_channel_config(ainchannels[i], ainrange, ainresolution, ainsettling)
 end
 
-LJ.IntervalConfig(0, 500) -- Configure interval
+-- Configure an interval of 500ms
+LJ.IntervalConfig(0, 500)
+-- Run the program in an infinite loop
 while true do
   -- The interval is finished
   if LJ.CheckInterval(0) then

@@ -9,6 +9,9 @@
 
 spiutils={}
 
+-------------------------------------------------------------------------------
+--  Desc: Configures the registers necessary to use the SPI protocol
+-------------------------------------------------------------------------------
 function spiutils.configure(self, cs, clk, miso, mosi, mode, speed, options, debug)
   self.cs=cs
   self.clk=clk
@@ -35,6 +38,9 @@ function spiutils.configure(self, cs, clk, miso, mosi, mode, speed, options, deb
   MB.W(5006, 0, options)
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Performs a transaction with SPI
+-------------------------------------------------------------------------------
 function spiutils.transfer(self, txdata)
   local numbytes = table.getn(txdata)
 
@@ -49,6 +55,9 @@ function spiutils.transfer(self, txdata)
   return rxdata
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Performs a transaction with SPI using strings for input and return
+-------------------------------------------------------------------------------
 function spiutils.stringtransfer(self, txstring)
   local numbytes = string.len(txstring)
   -- Convert the transfer string to bytes
@@ -63,18 +72,24 @@ function spiutils.stringtransfer(self, txstring)
   -- Get return data from the slave device
   local rxdata = self.transfer(self, txdata)
   -- Convert the data to a string
-  local rxstring = ""
+  local rxString = ""
   for i=1,numbytes do
-    rxstring = rxstring..string.char(rxdata[i])
+    rxString = rxString..string.char(rxdata[i])
   end
-  return rxstring
+  return rxString
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Returns a value for SPI_OPTIONS with either CS enabled or disabled
+-------------------------------------------------------------------------------
 function spiutils.csdisable(self, autodisable)
   local autodisableval = autodisable and 1 or 0
   return autodisableval*1
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Returns a value for SPI_MODE to configure clock polarity and phase
+-------------------------------------------------------------------------------
 function spiutils.calculatemode(self, cpol, cpha)
   local cpolval = cpol and 1 or 0
   local cphaval = cpha and 1 or 0
@@ -98,17 +113,15 @@ local speed = 0
 -- Set the options such that there are no special operation (such as disabling CS)
 local options = spi.csdisable(spi, false)
 
---Configure SPI bus
 local txstring = "!cpol&!cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 0 with phase 0
-mode = spi.calculatemode(spi, false, false)
+local mode = spi.calculatemode(spi, false, false)
 spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 -- Get a return string from the slave device
 local rxstring = spi.stringtransfer(spi, txstring)
 print("Received String: "..rxstring)
 
---Configure SPI bus
 txstring = "!cpol&cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 0 with phase 1
@@ -118,7 +131,6 @@ spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 rxstring = spi.stringtransfer(spi, txstring)
 print("Received String: "..rxstring)
 
---Configure SPI bus
 txstring = "cpol&!cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 1 with phase 0
@@ -128,7 +140,6 @@ spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 rxstring = spi.stringtransfer(spi, txstring)
 print("Received String: "..rxstring)
 
---Configure SPI bus
 txstring = "cpol&cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 1 with phase 1
@@ -138,8 +149,7 @@ spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 rxstring = spi.stringtransfer(spi, txstring)
 print("Received String: "..rxstring)
 
---Configure SPI bus
-txstring = "disable CS"
+txstring = "disable CS, !cpol&!cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 0 with phase 0
 mode = spi.calculatemode(spi, false, false)
@@ -150,5 +160,5 @@ spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 rxstring = spi.stringtransfer(spi, txstring)
 print("Received String: "..rxstring)
 
---Stop the Lua Script
+-- Write 0 to LUA_RUN to stop the script
 MB.W(6000, 1, 0)

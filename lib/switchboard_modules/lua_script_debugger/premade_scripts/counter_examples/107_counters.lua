@@ -58,13 +58,35 @@
   --Counter:  47            Channel:  AIN127
 --Counters 48-106 correspond with AIN48-106
 
-print("Create and read 107 counters.")
-
 -- For sections of code that require precise timing assign global functions
 -- locally (local definitions of globals are marginally faster)
 local modbus_read = MB.R
 local modbus_write = MB.W
 
+-------------------------------------------------------------------------------
+--  Desc: This function reads AIN lines associated to counters and
+--        stores the counter value in newbits.
+--  Args:
+--        newbits: array that holds all of the new counter readings
+--        threshold: array of thresholds for all of the ain channels
+--        lowerbound: the lower bound of the counters you want to read
+--        upperbound: the upper bound of the counters you want to read
+--        offset: the offset you must apply to the counter numbers to get the
+--                proper AIN register number; offset+counternum = AIN number
+--                AIN number * 2 = AIN address
+-------------------------------------------------------------------------------
+local function getainbits(newbits, threshold, lowerbound, upperbound, offset)
+  for i=lowerbound, upperbound do
+    -- If the channels value is above the threshold
+    if modbus_read((i+offset)*2, 3) > threshold[i] then
+      newbits[i]=1
+    else
+      newbits[i]=0
+    end
+  end
+end
+
+print("Create and read 107 counters.")
 -- Read the PRODUCT_ID register to get the device type. This script will not
 -- run correctly on devices other than the T7
 if (modbus_read(60000, 3) ~= 7) then
@@ -74,15 +96,14 @@ if (modbus_read(60000, 3) ~= 7) then
 end
 
 local threshold = {}
-
-for i=1, 107 do
+for i=0, 106 do
   -- Thresholds can be changed to be specific to each analog input
   threshold[i] = 1.4
 end
 
 -- 1 = Rising edge, 0 = falling
 local edge = {}
-for i=1, 107 do
+for i=0, 106 do
   -- Sets all 107 counters to increment on falling edges
   edge[i] = 0
 end
@@ -110,56 +131,42 @@ modbus_write(2603, 0, 0)
 -- Set AIN_ALL_RESOLUTION_INDEX to 1 (fastest setting)
 modbus_write(43903, 0, 1)
 
-for i=1, 107 do
+for i=0, 106 do
   bits[i] = 0
   newbits[i] = 99
   count[i] = 0
 end
 
+-- Run the program in an infinite loop
 while true do
-  -- Analog channels AIN0-AIN3
-  for i=1, 4 do
-    -- If the channels value is above the threshold
-    if modbus_read((i-1)*2, 3) > threshold[i] then
-      newbits[i]=1
-    else
-      newbits[i]=0
-    end
+  -- Read analog channels AIN0-AIN3 (counters 0-3)
+  local regtype = 3
+  local lowerbound = 0
+  local upperbound = 3
+  local offset = 0
+  getainbits(newbits, threshold, lowerbound, upperbound, offset)
+  -- Read analog channels AIN107-AIN116 (counters 4-13)
+  lowerbound = 4
+  upperbound = 13
+  offset = 103
+  getainbits(newbits, threshold, lowerbound, upperbound, offset)
+  -- Read digital channels DIO0-22 (counters 14-36)
+  for i=14, 36 do
+    newbits[i] = modbus_read((i-14)+2000, 0)
   end
-  -- Analog channels AIN107-AIN116
-  for i=5, 14 do
-    -- If the channels value is above the threshold
-    if modbus_read((i+102)*2, 3) > threshold[i] then
-      newbits[i]=1
-    else
-      newbits[i]=0
-    end
-  end
-  -- Digital channels DIO0-22
-  for i=15, 37 do
-    newbits[i] = modbus_read((i-15)+2000, 0)
-  end
-  -- Analog channels AIN117-AIN127
-  for i=38, 48 do
-    -- If the channels value is above the threshold
-    if modbus_read((i+79)*2, 3) > threshold[i] then
-      newbits[i]=1
-    else
-      newbits[i]=0
-    end
-  end
-  --Analog channels AIN48-AIN106
-  for i=49, 107 do
-    -- If the channels value is above the threshold
-    if modbus_read((i-1)*2, 3) > threshold[i] then
-      newbits[i]=1
-    else
-      newbits[i]=0
-    end
-  end
+  -- Read analog channels AIN117-AIN127 (counters 37-47)
+  lowerbound = 37
+  upperbound = 47
+  offset = 80
+  getainbits(newbits, threshold, lowerbound, upperbound, offset)
+  -- Read analog channels AIN48-AIN106 (counters 48-106)
+  lowerbound = 48
+  upperbound = 106
+  offset = 0
+  getainbits(newbits, threshold, lowerbound, upperbound, offset)
 
-  --Compare newbits to bits for each counter
-  for i=1, 107 do
+  -- Compare newbits to bits for each counter
+  for i=0, 106 do
     -- If bits[i] is different from newbits[i] the counter state changed
     if bits[i] ~= newbits[i] then
       -- If the counter should increase on a rising edge

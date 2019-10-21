@@ -9,6 +9,9 @@
 
 spiutils={}
 
+-------------------------------------------------------------------------------
+--  Desc: Configures the registers necessary to use the SPI protocol
+-------------------------------------------------------------------------------
 function spiutils.configure(self, cs, clk, miso, mosi, mode, speed, options, debug)
   self.cs=cs
   self.clk=clk
@@ -35,6 +38,9 @@ function spiutils.configure(self, cs, clk, miso, mosi, mode, speed, options, deb
   MB.W(5006, 0, options)
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Performs a transaction with SPI
+-------------------------------------------------------------------------------
 function spiutils.transfer(self, txdata)
   local numbytes = table.getn(txdata)
 
@@ -49,6 +55,9 @@ function spiutils.transfer(self, txdata)
   return rxdata
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Performs a transaction with SPI using strings for input and return
+-------------------------------------------------------------------------------
 function spiutils.stringtransfer(self, txstring)
   local numbytes = string.len(txstring)
   -- Convert the transfer string to bytes
@@ -70,11 +79,17 @@ function spiutils.stringtransfer(self, txstring)
   return rxString
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Returns a value for SPI_OPTIONS with either CS enabled or disabled
+-------------------------------------------------------------------------------
 function spiutils.csdisable(self, autodisable)
   local autodisableval = autodisable and 1 or 0
   return autodisableval*1
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Returns a value for SPI_MODE to configure clock polarity and phase
+-------------------------------------------------------------------------------
 function spiutils.calculatemode(self, cpol, cpha)
   local cpolval = cpol and 1 or 0
   local cphaval = cpha and 1 or 0

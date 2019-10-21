@@ -22,6 +22,10 @@ local check_interval = LJ.CheckInterval
 pwm = {}--add local variables here
 
 --duty should be in %, not decimal
+-------------------------------------------------------------------------------
+--  Desc: This function initializes the registers necessary to start the PWM
+--        feature
+-------------------------------------------------------------------------------
 function pwm.init (self, ichan, ifreq, iduty, iclk, idivisor)
   irollvalue = (80000000/ifreq)/idivisor
   -- Store the local values for future use
@@ -50,16 +54,24 @@ function pwm.init (self, ichan, ifreq, iduty, iclk, idivisor)
   modbus_write(44300+ichan*2, 1, irollvalue*iduty/100)
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Writes 1 to DIO#_EF_ENABLE in order to enable the EF system for PWM
+-------------------------------------------------------------------------------
 function pwm.enable (self)
-  -- Write 1 to DIO#_EF_ENABLE to enable the EF system
   modbus_write(44000+self.chan*2, 1, 1)
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Writes 0 to DIO#_EF_ENABLE in order to disable the EF system for PWM
+-------------------------------------------------------------------------------
 function pwm.disable (self)
   -- Write 0 to DIO#_EF_ENABLE to disable the EF system
   modbus_write(44000+self.chan*2, 1, 0)
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Changes the frequency of the PWM waveform
+-------------------------------------------------------------------------------
 function pwm.change_frequency (self, ifreq)
   irollvalue = (80000000/ifreq)/self.divisor
   -- Store the new local PWM values
@@ -71,6 +83,9 @@ function pwm.change_frequency (self, ifreq)
   modbus_write(44300+self.chan*2, 1, self.rollvalue*self.duty/100)
 end
 
+-------------------------------------------------------------------------------
+--  Desc: Changes the duty cycle of the PWM waveform
+-------------------------------------------------------------------------------
 function pwm.change_duty_cycle (self, iduty)
   -- Store the new duty cycle percentage
   self.duty = iduty
@@ -103,7 +118,8 @@ modbus_write(46000, 3, dutycycle)
 
 -- Configure a 1000ms interval
 LJ.IntervalConfig(1, 1000)
--- You can test this function using an LED or oscilloscope connected to outpin
+-- You can test this program using an LED or oscilloscope connected to outpin
+-- Run the program in an infinite loop
 while true do
   -- If the interval is over
   if check_interval(0) then

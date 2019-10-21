@@ -45,6 +45,7 @@ timetable[6] = 0    --second
 
 -- Configure an interval of 500ms
 LJ.IntervalConfig(0, 500)
+-- Run the program in an infinite loop
 while true do
   -- If the interval is done print the time
   if check_interval(0) then

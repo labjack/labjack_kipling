@@ -63,24 +63,22 @@ elseif(devtype == 4) then
   efreadresetreg = 3108
 end
 
--- Update data every 500ms
-LJ.IntervalConfig(0, 500)
--- Number used to store the new value polled from the LabJack register
-local newcount = 0
--- Number used to keep the higher precision lower 22 bits of the number
-local lownum = 0
 -- Number used to store the residual number of counts after conversion
 local residual = 0
 -- Number used to store how many multiples of 2^22 have been reached
 local multiplier = 0
+-- lownum: Number used to keep the higher precision lower 22 bits of the number
 
+-- Configure an interval of 500ms
+LJ.IntervalConfig(0, 500)
+-- Run the program in an infinite loop
 while true do
   -- It is possible to take out CheckInterval or make the interval very small
   -- for nearly continuous data polling
   if check_interval(0) then
     -- Read the DIO#_EF_READ_A register and combine it with any residual from
     -- the last conversion
-    lownum = modbus_read(efreadreg, 1) + residual
+    local lownum = modbus_read(efreadreg, 1) + residual
     -- Once the register has a number of counts large enough that the
     -- precision could be compromised (greater than  22 bits), convert by
     -- resetting the register and split it into separate values

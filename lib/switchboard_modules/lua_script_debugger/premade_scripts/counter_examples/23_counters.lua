@@ -78,6 +78,7 @@ for i=1, 23 do
   count[i] = 0
 end
 
+-- Run the program in an infinite loop
 while true do
   -- Read digital channels DIO0-22
   for i=1, 23 do

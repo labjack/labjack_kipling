@@ -56,8 +56,9 @@ elseif(devtype == 4) then
   efreadreg = 3008
 end
 
--- Update data every 500ms
+-- Configure an interval of 500ms
 LJ.IntervalConfig(0, 500)
+-- Run the program in an infinite loop
 while true do
   -- It is possible to take out CheckInterval or make the interval very small
   -- for nearly continuous data polling

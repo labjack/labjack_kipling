@@ -30,6 +30,9 @@ modbus_write(43903, 0, 1)
 modbus_write(43900, 3,10)
 local numcycles = 30000
 
+-- Configure an interval of 2000ms
+LJ.IntervalConfig(0, 2000)
+-- Run the program in an infinite loop
 while true do
   -- Read the CORE_TIMER register
   local starttime = modbus_read(61520,1)

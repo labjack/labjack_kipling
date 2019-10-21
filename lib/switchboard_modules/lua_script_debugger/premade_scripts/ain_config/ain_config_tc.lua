@@ -106,7 +106,7 @@ end
 --Configure a 500ms interval
 LJ.IntervalConfig(0, 500)
 local checkInterval=LJ.CheckInterval
-
+-- Run the program in an infinite loop
 while true do
   --If the interval has finished
   if LJ.CheckInterval(0) then

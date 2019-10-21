@@ -28,6 +28,7 @@ local clearcount = true
 
 -- Setup an interval of 500ms
 LJ.IntervalConfig(0, 500)
+-- Run the program in an infinite loop
 while true do
   if eiostate==1 then
     eiostate = 0

@@ -19,11 +19,11 @@ LJ.setLuaThrottle(throttle)
 throttle = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", throttle)
 
--- Use a 2000ms interval
-local interval = 2000
 local numwrites = 0
 
-LJ.IntervalConfig(0, interval)
+-- Configure an interval of 2000ms
+LJ.IntervalConfig(0, 2000)
+-- Run the program in an infinite loop
 while true do
   -- Write 2.5V to DAC0. Address is 1000, type is 3 (FLOAT32)
   modbus_write(1000, 3, 2.5)

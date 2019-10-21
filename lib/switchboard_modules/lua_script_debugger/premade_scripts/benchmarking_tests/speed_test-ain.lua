@@ -26,11 +26,11 @@ MB.writeName(POWER_AIN, 1)
 -- Set AIN_ALL_RESOLUTION_INDEX to 1(fastest setting on both the T7 and T4)
 MB.writeName(AIN_ALL_RESOLUTION_INDEX, 1)
 
--- Use an interval of 2000ms
-local interval = 2000
 local numwrites = 0
 
-LJ.IntervalConfig(0, interval)
+-- Configure an interval of 2000ms
+LJ.IntervalConfig(0, 2000)
+-- Run the program in an infinite loop
 while true do
   -- Address of AIN0 is 0, type is 3 (FLOAT32)
   local ain0 = modbus_read(0, 3)

@@ -31,11 +31,11 @@ if devtype == 4 then
   outpin = 2005
 end
 
--- Use a 2000ms interval
-local interval = 2000
 local numwrites = 0
 
-LJ.IntervalConfig(0, interval)
+-- Configure an interval of 2000ms
+LJ.IntervalConfig(0, 2000)
+-- Run the program in an infinite loop
 while true do
   -- Write 1 to the outpin. Type is 0 (UINT16)
   modbus_write(outpin, 0, 1)

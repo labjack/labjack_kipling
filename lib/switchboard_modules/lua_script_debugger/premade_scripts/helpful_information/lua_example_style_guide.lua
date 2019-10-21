@@ -37,3 +37,6 @@ local regtype = 0
 local register = 2000
 local printval = my_function(register, regtype, NUM_ITERATIONS)
 print(name, printval)
+
+  -- Write a 0 to LUA_RUN to stop the script whenever possible
+  MB.W(6000, 1, 0)

@@ -19,11 +19,11 @@ LJ.setLuaThrottle(throttle)
 throttle = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", throttle)
 
--- Use an interval of 2000ms
-local interval = 2000
 local numwrites = 0
 
-LJ.IntervalConfig(0, interval)
+-- Configure an interval of 2000ms
+LJ.IntervalConfig(0, 2000)
+-- Run the program in an infinite loop
 while true do
   toggle_led()
   numwrites = numwrites + 1

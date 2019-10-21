@@ -97,6 +97,7 @@ for i=1, 37 do
   count[i] = 0
 end
 
+-- Run the program in an infinite loop
 while true do
   --Analog channels AIN0-13
   for i=1, 14 do

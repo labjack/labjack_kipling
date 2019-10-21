@@ -32,11 +32,11 @@ end
 -- Change outdio direction to output
 LJ.DIO_D_W(outdio, 1)
 
--- Use an interval of 2000ms
-local interval = 2000
 local numwrites = 0
 
-LJ.IntervalConfig(0, interval)
+-- Configure an interval of 2000ms
+LJ.IntervalConfig(0, 2000)
+-- Run the program in an infinite loop
 while true do
   -- Change the state of outdio to 0
   dio_state_write(outdio, 0)
