@@ -35,7 +35,7 @@ local SLAVE_ADDRESS = 0x40
 --stretching "master hold." The sensor needs to clock stretch for ~4.5ms. The clock needs to be ~20kHz or slower.
 local SCL_DIO = 12
 local SDA_DIO = 13
--- I2C.config(SCL_DIO, SDA_DIO, 65450, 0, SLAVE_ADDRESS, 0)
+I2C.config(SCL_DIO, SDA_DIO, 65450, 0, SLAVE_ADDRESS, 0)
 
 local rawT = {}
 
