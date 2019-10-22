@@ -457,7 +457,8 @@ exports.DEVICE_TYPE_NAMES = {
     '7': 'T7',
     '8': 'T8',
     '9': 'UE9',
-    '200': 'Digit'
+    '84': 'TSeries',
+    '200': 'Digit',
 };
 exports.DRIVER_DEVICE_TYPE_NAMES = {
 	'0': 'LJM_dtANY',
@@ -468,6 +469,7 @@ exports.DRIVER_DEVICE_TYPE_NAMES = {
     '7': 'LJM_dtT7',
     '8': 'LJM_dtT8',
     '9': 'LJM_dtUE9',
+    '84': 'LJM_dtTSERIES',
     '200': 'LJM_dtDIGIT'
 };
 
@@ -480,6 +482,7 @@ exports.DEVICE_TYPE_NAMES_BY_DRIVER_NAME = {
     'LJM_dtT7': 'T7',
     'LJM_dtT8': 'T8',
     'LJM_dtUE9': 'UE9',
+    'LJM_dtTSERIES': 'TSeries',
     'LJM_dtDIGIT': 'Digit'
 };
 
