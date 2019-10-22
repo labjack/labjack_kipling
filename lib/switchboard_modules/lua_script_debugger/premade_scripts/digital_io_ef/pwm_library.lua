@@ -121,7 +121,7 @@ LJ.IntervalConfig(1, 1000)
 -- You can test this program using an LED or oscilloscope connected to outpin
 -- Run the program in an infinite loop
 while true do
-  -- If the interval is over
+  -- If an interval is done
   if check_interval(0) then
     -- Read USER_RAM0_F32 to get a duty cycle for the PWM output
     newdc = modbus_read(46000, 3)

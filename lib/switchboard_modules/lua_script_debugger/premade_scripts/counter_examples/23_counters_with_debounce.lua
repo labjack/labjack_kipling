@@ -122,7 +122,7 @@ while true do
   end
 
   -- Update the debounced counter
-  -- If the debounce interval is done
+  -- If a debounce interval is done
   if check_interval(0) then
     for i=1, 23 do
       -- If the counter did not increase recently any new counts are not due to

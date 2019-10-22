@@ -27,7 +27,7 @@ LJ.IntervalConfig(0, 2000)
 while true do
   toggle_led()
   numwrites = numwrites + 1
-  -- If the 2000ms interval is done
+  -- If a 2000ms interval is done
   if check_interval(0) then
     -- Convert the number of writes per interval into a frequency
     numwrites = numwrites / (interval / 1000)

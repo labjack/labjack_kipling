@@ -27,7 +27,7 @@ MB.W(2880, 1, 0x000)
 LJ.IntervalConfig(0, 1000)
 -- Run the program in an infinite loop
 while true do
-  -- If the interval is done
+  -- If an interval is done
   if LJ.CheckInterval(0) then
     -- Read AIN0
     local ainval = MB.R(0, 3)

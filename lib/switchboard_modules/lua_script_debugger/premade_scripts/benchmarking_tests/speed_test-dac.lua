@@ -30,6 +30,7 @@ while true do
   -- Write 0.0V to DAC0. Address is 1000, type is 3 (FLOAT32)
   modbus_write(1000, 3, 0.0)
   numwrites = numwrites + 1
+  -- If an interval is done
   if check_interval(0) then
     -- Convert the number of writes per interval to a frequency
     numwrites = numwrites / (interval / 1000)

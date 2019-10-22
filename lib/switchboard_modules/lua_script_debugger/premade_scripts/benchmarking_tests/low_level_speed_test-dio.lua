@@ -43,7 +43,7 @@ while true do
   -- Change the state of outdio to 1
   dio_state_write(outdio, 1)
   numwrites = numwrites + 1
-  -- If the 2000ms interval is done
+  -- If a 2000ms interval is done
   if check_interval(0) then
     -- Convert the number of writes per interval into a frequency
     numwrites = numwrites / (interval / 1000)

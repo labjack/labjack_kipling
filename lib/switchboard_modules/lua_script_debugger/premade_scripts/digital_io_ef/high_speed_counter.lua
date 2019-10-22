@@ -37,7 +37,7 @@ while true do
   end
   modbus_write(2008, 0, eiostate)
 
-  -- If the interval is done
+  -- If an interval is done
   if check_interval(0) then
     if clearcount then
       -- Read DIO16_EF_READ_A_AND_RESET to return the current count and reset

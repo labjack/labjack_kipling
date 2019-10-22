@@ -42,6 +42,7 @@ while true do
   -- Write 0 to outpin. Type is 0 (UINT16)
   modbus_write(outpin, 0, 0)
   numwrites = numwrites + 1
+  -- If an interval is done
   if check_interval(0) then
     -- Convert the number of writes per interval to a frequency
     numwrites = numwrites / (interval / 1000)

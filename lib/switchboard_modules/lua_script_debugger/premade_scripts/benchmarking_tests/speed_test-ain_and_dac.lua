@@ -30,26 +30,29 @@ modbus_write(43903, 0, 1)
 modbus_write(43900, 3,10)
 local numcycles = 30000
 
--- Configure an interval of 2000ms
-LJ.IntervalConfig(0, 2000)
+-- Configure an interval of 1000ms
+LJ.IntervalConfig(0, 1000)
 -- Run the program in an infinite loop
 while true do
-  -- Read the CORE_TIMER register
-  local starttime = modbus_read(61520,1)
-  for i=1,numcycles do
-    -- Read AIN1, write it to DAC0.
-    -- DAC0 is at address 1000 and has a type of 3 (FLOAT32)
-    modbus_write(1000, 3, modbus_read(2,3))
+  -- If a 1000ms interval is done
+  if LJ.CheckInterval(0) then
+    -- Read the CORE_TIMER register
+    local starttime = modbus_read(61520,1)
+    for i=1,numcycles do
+      -- Read AIN1, write it to DAC0.
+      -- DAC0 is at address 1000 and has a type of 3 (FLOAT32)
+      modbus_write(1000, 3, modbus_read(2,3))
+    end
+    local endtime = modbus_read(61520,1)
+    -- The core timer returns the number of 25ns ticks that have occurred (the
+    -- core timer has a tick frequency of 40MHz, which translates to 25ns per
+    -- tick). Convert the number of ticks that have occurred to seconds
+    local totaltime = (endtime-starttime)*25/(10^9)
+    print(
+      string.format("Time to execute %d",numcycles),
+      "read+writes (s): ",
+      totaltime
+    )
+    print("Freq (Hz): ",numcycles/totaltime)
   end
-  local endtime = modbus_read(61520,1)
-  -- The core timer returns the number of 25ns ticks that have occurred (the
-  -- core timer has a tick frequency of 40MHz, which translates to 25ns per
-  -- tick). Convert the number of ticks that have occurred to seconds
-  local totaltime = (endtime-starttime)*25/(10^9)
-  print(
-    string.format("Time to execute %d",numcycles),
-    "read+writes (s): ",
-    totaltime
-  )
-  print("Freq (Hz): ",numcycles/totaltime)
 end

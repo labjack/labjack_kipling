@@ -58,7 +58,7 @@ end
 LJ.IntervalConfig(0, 500)
 -- Run the program in an infinite loop
 while true do
-  -- The interval is finished
+  -- If an interval is done
   if LJ.CheckInterval(0) then
     -- Read & Print out each read AIN channel
     for i=1, table.getn(ainchannels) do
