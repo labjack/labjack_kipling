@@ -27,7 +27,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "nodeunit": "0.9.x"
+    "diff": ">=3.5.0",
+    "nodeunit": "0.11.3"
   },
   "directories": {
     "lib": "./lib"
