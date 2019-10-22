@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_device_manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "./lib/ljm_device_manager.js",
   "directories": {
@@ -12,19 +12,20 @@
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "dependencies": {
-    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master",
-    "ljswitchboard-device_scanner": "git://github.com/chrisJohn404/ljswitchboard-device_scanner.git#master",
-    "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master",
-    "async": "3.x",
-    "q": "1.x"
+    "ljswitchboard-ljm_device_curator": "^1.0.0",
+    "ljswitchboard-device_scanner": "^1.0.0",
+    "ljswitchboard-ljm_driver_constants": "^1.0.0",
+    "async": "3.1.0",
+    "q": "1.5.1"
   },
   "customDeps": {
-    "ljswitchboard-ljm_device_curator": "0.x.x",
-    "ljswitchboard-device_scanner": "0.x.x",
-    "ljswitchboard-ljm_driver_constants": "0.x.x"
+    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master",
+    "ljswitchboard-device_scanner": "git://github.com/chrisJohn404/ljswitchboard-device_scanner.git#master",
+    "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master"
   },
   "devDependencies": {
-    "nodeunit": "0.11.x"
+    "diff": ">=3.5.0",
+    "nodeunit": "0.11.3"
   },
   "repository": {
     "type": "git",
