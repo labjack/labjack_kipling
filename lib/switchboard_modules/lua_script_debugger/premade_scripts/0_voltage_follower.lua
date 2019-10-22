@@ -22,8 +22,8 @@ LJ.IntervalConfig(0, 500)
 while true do
     -- If an interval is done
   if LJ.CheckInterval(0) then
-    -- Read the TEMPERATURE_DEVICE_K register (type is 3)
-    local tempk = MB.R(60052, 3)
+    -- Get the temperature in K from the TEMPERATURE_DEVICE_K register
+    local tempk = MB.readName("TEMPERATURE_DEVICE_K")
     local tempf = convert_k_to_f(tempk)
     print(tempf, "°F")
   end
