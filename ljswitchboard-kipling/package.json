@@ -31,16 +31,16 @@
     "dict": "1.4.0",
     "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master",
     "ljswitchboard-modbus_map": "git://github.com/chrisJohn404/ljswitchboard-modbus_map.git#master",
-    "q": "~1",
-    "sprintf": "~0.1.3"
+    "q": "1.5.1"
   },
   "old-dependencies": {
-    "ljswitchboard-ljm_driver_constants": "0.0.x",
-    "ljswitchboard-modbus_map": "0.0.x"
+    "ljswitchboard-ljm_driver_constants": "^1.0.0",
+    "ljswitchboard-modbus_map": "^1.0.0"
   },
   "devDependencies": {
-    "nodeunit": "0.9.x",
-    "csslint": "0.10.0"
+    "diff": ">=3.5.0",
+    "nodeunit": "0.11.3",
+    "csslint": "1.0.5"
   },
   "directories": {
     "lib": "./lib"
