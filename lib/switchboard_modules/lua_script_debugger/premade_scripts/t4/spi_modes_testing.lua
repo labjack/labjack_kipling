@@ -58,7 +58,7 @@ end
 -------------------------------------------------------------------------------
 --  Desc: Performs a transaction with SPI using strings for input and return
 -------------------------------------------------------------------------------
-function spiutils.stringtransfer(self, txstring)
+function spiutils.transfer_string(self, txstring)
   local numbytes = string.len(txstring)
   -- Convert the transfer string to bytes
   local txdata={}
@@ -82,7 +82,7 @@ end
 -------------------------------------------------------------------------------
 --  Desc: Returns a value for SPI_OPTIONS with either CS enabled or disabled
 -------------------------------------------------------------------------------
-function spiutils.csdisable(self, autodisable)
+function spiutils.disable_cs(self, autodisable)
   local autodisableval = autodisable and 1 or 0
   return autodisableval*1
 end
@@ -90,7 +90,7 @@ end
 -------------------------------------------------------------------------------
 --  Desc: Returns a value for SPI_MODE to configure clock polarity and phase
 -------------------------------------------------------------------------------
-function spiutils.calculatemode(self, cpol, cpha)
+function spiutils.calculate_mode(self, cpol, cpha)
   local cpolval = cpol and 1 or 0
   local cphaval = cpha and 1 or 0
   return cpolval*2 + cphaval*1
@@ -111,53 +111,53 @@ local mosi=11
 -- Set the clock at default speed (~800KHz)
 local speed = 0
 -- Set the options such that there are no special operation (such as disabling CS)
-local options = spi.csdisable(spi, false)
+local options = spi.disable_cs(spi, false)
 
 local txstring = "!cpol&!cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 0 with phase 0
-local mode = spi.calculatemode(spi, false, false)
+local mode = spi.calculate_mode(spi, false, false)
 spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 -- Get a return string from the slave device
-local rxstring = spi.stringtransfer(spi, txstring)
+local rxstring = spi.transfer_string(spi, txstring)
 print("Received String: "..rxstring)
 
 txstring = "!cpol&cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 0 with phase 1
-mode = spi.calculatemode(spi, false, true)
+mode = spi.calculate_mode(spi, false, true)
 spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 -- Get a return string from the slave device
-rxstring = spi.stringtransfer(spi, txstring)
+rxstring = spi.transfer_string(spi, txstring)
 print("Received String: "..rxstring)
 
 txstring = "cpol&!cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 1 with phase 0
-mode = spi.calculatemode(spi, true, false)
+mode = spi.calculate_mode(spi, true, false)
 spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 -- Get a return string from the slave device
-rxstring = spi.stringtransfer(spi, txstring)
+rxstring = spi.transfer_string(spi, txstring)
 print("Received String: "..rxstring)
 
 txstring = "cpol&cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 1 with phase 1
-mode = spi.calculatemode(spi, true, true)
+mode = spi.calculate_mode(spi, true, true)
 spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 -- Get a return string from the slave device
-rxstring = spi.stringtransfer(spi, txstring)
+rxstring = spi.transfer_string(spi, txstring)
 print("Received String: "..rxstring)
 
 txstring = "disable CS, !cpol&!cpha"
 print("Configuring for case: "..txstring)
 -- Set the mode such that the clock idles at 0 with phase 0
-mode = spi.calculatemode(spi, false, false)
+mode = spi.calculate_mode(spi, false, false)
 -- Set the options such that CS is disabled
-options = spi.csdisable(spi, true)
+options = spi.disable_cs(spi, true)
 spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 -- Get a return string from the slave device
-rxstring = spi.stringtransfer(spi, txstring)
+rxstring = spi.transfer_string(spi, txstring)
 print("Received String: "..rxstring)
 
 -- Write 0 to LUA_RUN to stop the script

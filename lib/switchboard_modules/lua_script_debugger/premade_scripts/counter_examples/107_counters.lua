@@ -75,7 +75,7 @@ local modbus_write = MB.W
 --                proper AIN register number; offset+counternum = AIN number
 --                AIN number * 2 = AIN address
 -------------------------------------------------------------------------------
-local function getainbits(newbits, threshold, lowerbound, upperbound, offset)
+local function get_ain_bits(newbits, threshold, lowerbound, upperbound, offset)
   for i=lowerbound, upperbound do
     -- If the channels value is above the threshold
     if modbus_read((i+offset)*2, 3) > threshold[i] then
@@ -144,12 +144,12 @@ while true do
   local lowerbound = 0
   local upperbound = 3
   local offset = 0
-  getainbits(newbits, threshold, lowerbound, upperbound, offset)
+  get_ain_bits(newbits, threshold, lowerbound, upperbound, offset)
   -- Read analog channels AIN107-AIN116 (counters 4-13)
   lowerbound = 4
   upperbound = 13
   offset = 103
-  getainbits(newbits, threshold, lowerbound, upperbound, offset)
+  get_ain_bits(newbits, threshold, lowerbound, upperbound, offset)
   -- Read digital channels DIO0-22 (counters 14-36)
   for i=14, 36 do
     newbits[i] = modbus_read((i-14)+2000, 0)
@@ -158,12 +158,12 @@ while true do
   lowerbound = 37
   upperbound = 47
   offset = 80
-  getainbits(newbits, threshold, lowerbound, upperbound, offset)
+  get_ain_bits(newbits, threshold, lowerbound, upperbound, offset)
   -- Read analog channels AIN48-AIN106 (counters 48-106)
   lowerbound = 48
   upperbound = 106
   offset = 0
-  getainbits(newbits, threshold, lowerbound, upperbound, offset)
+  get_ain_bits(newbits, threshold, lowerbound, upperbound, offset)
 
   -- Compare newbits to bits for each counter
   for i=0, 106 do
