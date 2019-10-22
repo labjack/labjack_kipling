@@ -150,6 +150,7 @@ var tests = {
 		// add the staticFiles package to the packageManager
 		package_loader.loadPackage(testPackages.staticFilesStdDirBeforeNewZip);
 
+		// console.log('Running package manager');
 		package_loader.runPackageManager()
 		.then(function(updatedPackages) {
 			// console.log('Results', updatedPackages);

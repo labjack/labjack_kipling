@@ -1234,7 +1234,7 @@ function createPackageLoader() {
 			var getOnErr = function(msg) {
 				return function(err) {
 					var innerDefered = q.defer();
-					console.log('manageSinglePackage err', msg, err, bundle);
+					console.error('manageSinglePackage err', msg, err, bundle);
 					innerDefered.reject(err);
 					return innerDefered.promise;
 				};
@@ -1316,7 +1316,6 @@ function createPackageLoader() {
 		//     console.log('Finished Managing err', err);
 		//     defered.reject(err);
 		// });
-		
 		// Execute each operation one at a time
 		if(manageOps.length > 0) {
 			var results = {};

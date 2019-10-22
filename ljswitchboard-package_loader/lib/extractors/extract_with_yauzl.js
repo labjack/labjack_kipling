@@ -58,125 +58,136 @@ function extractWithYauzl (bundle, self, EVENTS) {
     };
 
     yauzl.open(from, {autoClose: false}, function(err, zipfile) {
-    if (err) {
-        resolveError(err);
-        return;
-    }
-    
-    var cancelled = false;
-    var finished = false;
-    
-    var asyncQueue = async.queue(extractEntry, 1);
-    
-    asyncQueue.drain = function() {
-        if (!finished) return;
-        debug('zip extraction complete');
-        resolveSuccess();
-    };
-    
-    zipfile.on("entry", function(entry) {
-        debug('zipfile entry', entry.fileName);
-        
-        if (/\/$/.test(entry.fileName)) {
-            // directory file names end with '/'
+        if (err) {
+            console.error('Error opening zip', err);
+            resolveError(err);
             return;
         }
-        
-        if (/^__MACOSX\//.test(entry.fileName)) {
-            // dir name starts with __MACOSX/
-            return;
-        }
-        
-        asyncQueue.push(entry, function(err) {
-            debug('finished processing', entry.fileName, {err: err});
-        });
-    });
-    zipfile.on('error', function(err) {
-        resolveError(err);
-    });
-    zipfile.on('end', function() {
-        finished = true;
-    });
-    
-    function extractEntry(entry, done) {
-        if (cancelled) {
-            debug('skipping entry', entry.fileName, {cancelled: cancelled});
-            return setImmediate(done);
-        } else {
-            debug('extracting entry', entry.fileName);
-        }
-        
-        var dest = path.join(to, entry.fileName);
-        var destDir = path.dirname(dest);
-        
-        // convert external file attr int into a fs stat mode int
-        var mode = (entry.externalFileAttributes >> 16) & 0xFFFF;
-        // check if it's a symlink or dir (using stat mode constants)
-        var IFMT = 61440;
-        var IFDIR = 16384;
-        var IFLNK = 40960;
-        var symlink = (mode & IFMT) === IFLNK;
-        var isDir = (mode & IFMT) === IFDIR;
-        
-        // if no mode then default to readable
-        if (mode === 0) {
-            if (isDir) mode = 0555;
-            else mode = 0444;
-        }
-        
-        // reverse umask first (~)
-        var umask = ~process.umask();
-        // & with processes umask to override invalid perms
-        var procMode = mode & umask;
 
-        zipfile.openReadStream(entry, function(err, readStream) {
-            if (err) {
-                logError('openReadStream error', err);
-                cancelled = true;
-                return done(err);
+        var cancelled = false;
+        var finished = false;
+        
+        var asyncQueue = async.queue(extractEntry, 1);
+        
+        function drain() {
+            if (!finished){
+                return;
+            }
+            debug('zip extraction complete');
+            resolveSuccess();
+        };
+        asyncQueue.drain(drain);
+
+        asyncQueue.error(function(err, task) {
+            console.error('!!! Task experienced an error', err, task);
+            resolveError(err);
+        })
+        
+        zipfile.on("entry", function(entry) {
+            debug('zipfile entry', entry.fileName);
+            
+            if (/\/$/.test(entry.fileName)) {
+                // directory file names end with '/'
+                return;
             }
             
-            readStream.on('error', function(err) {
-                logError('readStream error', err);
+            if (/^__MACOSX\//.test(entry.fileName)) {
+                // dir name starts with __MACOSX/
+                return;
+            }
+            
+            asyncQueue.push(entry, function(err) {
+                debug('finished processing', entry.fileName, {err: err});
             });
+        });
+        zipfile.on('error', function(err) {
+            console.error('Error opening zip', err);
+            resolveError(err);
+        });
+        zipfile.on('end', function() {
+            finished = true;
+        });
+        
+        function extractEntry(entry, done) {
+            if (cancelled) {
+                debug('skipping entry', entry.fileName, {cancelled: cancelled});
+                return setImmediate(done);
+            } else {
+                debug('extracting entry', entry.fileName);
+            }
+            
+            var dest = path.join(to, entry.fileName);
+            var destDir = path.dirname(dest);
+            
+            // convert external file attr int into a fs stat mode int
+            var mode = (entry.externalFileAttributes >> 16) & 0xFFFF;
+            // check if it's a symlink or dir (using stat mode constants)
+            var IFMT = 61440;
+            var IFDIR = 16384;
+            var IFLNK = 40960;
+            var symlink = (mode & IFMT) === IFLNK;
+            var isDir = (mode & IFMT) === IFDIR;
+            
+            // if no mode then default to readable
+            if (mode === 0) {
+                if (isDir) mode = 0555;
+                else mode = 0444;
+            }
+            
+            // reverse umask first (~)
+            var umask = ~process.umask();
+            // & with processes umask to override invalid perms
+            var procMode = mode & umask;
 
-            mkdirp(destDir, function(err) {
+            zipfile.openReadStream(entry, function(err, readStream) {
                 if (err) {
-                    logError('mkdirp error', destDir, {error: err});
+                    logError('openReadStream error', err);
                     cancelled = true;
                     return done(err);
                 }
 
-                if (symlink) writeSymlink();
-                else writeStream();
-            });
-            
-            function writeStream() {
-                var createdWriteStream = fs.createWriteStream(dest, {mode: procMode});
-                readStream.pipe(createdWriteStream);
-                createdWriteStream.on('finish', function() {
-                    done();
+                readStream.on('error', function(err) {
+                    logError('readStream error', err);
                 });
-                createdWriteStream.on('error', function(err) {
-                    logError('write error', {error: err});
-                    cancelled = true;
-                    return done(err);
+
+                mkdirp(destDir, function(err) {
+                    if (err) {
+                        logError('mkdirp error', destDir, {error: err});
+                        cancelled = true;
+                        return done(err);
+                    }
+
+                    if (symlink) writeSymlink();
+                    else writeStream();
                 });
-            }
-            
-            // AFAICT the content of the symlink file itself is the symlink target filename string
-            function writeSymlink() {
-                readStream.pipe(concat(function(data) {
-                    var link = data.toString();
-                    debug('creating symlink', link, dest);
-                    fs.symlink(link, dest, function(err) {
-                        if (err) cancelled = true;
-                        done(err);
+                
+                function writeStream() {
+                    var createdWriteStream = fs.createWriteStream(dest, {mode: procMode});
+                    readStream.pipe(createdWriteStream);
+                    createdWriteStream.on('finish', function() {
+                        readStream.destroy();
+                        done();
                     });
-                }));
-            }
-        });
-    }
+                    createdWriteStream.on('error', function(err) {
+                        logError('write error', {error: err});
+                        cancelled = true;
+                        return done(err);
+                    });
+                }
+                
+                // AFAICT the content of the symlink file itself is the symlink target filename string
+                function writeSymlink() {
+                    readStream.pipe(concat(function(data) {
+                        var link = data.toString();
+                        debug('creating symlink', link, dest);
+                        fs.symlink(link, dest, function(err) {
+                            if (err) cancelled = true;
+                            done(err);
+                        });
+                    }));
+                }
+            });
+        }
 
     });
     return defered.promise;
