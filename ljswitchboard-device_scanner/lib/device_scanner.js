@@ -49,6 +49,24 @@ var getModelType = {
 			}
 		}
 		return name;
+	},
+	'LJM_dtT5': function(attrs) {
+		var name = 'T5-Variant';
+		if(attrs.HARDWARE_INSTALLED) {
+			if(attrs.HARDWARE_INSTALLED.productType) {
+				name = attrs.HARDWARE_INSTALLED.productType;
+			}
+		}
+		return name;
+	},
+	'LJM_dtT8': function(attrs) {
+		var name = 'T8-Variant';
+		if(attrs.HARDWARE_INSTALLED) {
+			if(attrs.HARDWARE_INSTALLED.productType) {
+				name = attrs.HARDWARE_INSTALLED.productType;
+			}
+		}
+		return name;
 	}
 };
 var getProductType = {
@@ -70,6 +88,24 @@ var getProductType = {
 	},
 	'LJM_dtT4': function(attrs) {
 		var name = 'T4-Variant';
+		if(attrs.HARDWARE_INSTALLED) {
+			if(attrs.HARDWARE_INSTALLED.productType) {
+				name = attrs.HARDWARE_INSTALLED.productType;
+			}
+		}
+		return name;
+	},
+	'LJM_dtT5': function(attrs) {
+		var name = 'T5-Variant';
+		if(attrs.HARDWARE_INSTALLED) {
+			if(attrs.HARDWARE_INSTALLED.productType) {
+				name = attrs.HARDWARE_INSTALLED.productType;
+			}
+		}
+		return name;
+	},
+	'LJM_dtT8': function(attrs) {
+		var name = 'T8-Variant';
 		if(attrs.HARDWARE_INSTALLED) {
 			if(attrs.HARDWARE_INSTALLED.productType) {
 				name = attrs.HARDWARE_INSTALLED.productType;
@@ -108,6 +144,16 @@ var SCAN_REQUEST_LIST = [
         'deviceType': 'LJM_dtT4',
         'connectionType': 'LJM_ctANY',
         'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4
+    },
+    {
+        'deviceType': 'LJM_dtT5',
+        'connectionType': 'LJM_ctANY',
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT5
+    },
+    {
+        'deviceType': 'LJM_dtT8',
+        'connectionType': 'LJM_ctANY',
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT8
     },
     // {
     //     'deviceType': 'LJM_dtT7',

@@ -126,64 +126,43 @@ var OPEN_ALL_SCAN_REQUEST_LIST = [
         'async': false,
     },
     {
-        'deviceType': driver_const.LJM_DT_T7,
+        'deviceType': driver_const.LJM_DT_TSERIES,
         'connectionType': driver_const.LJM_CT_USB,
-        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtTSERIES,
         'numAttempts': 1,
         'async': false,
     },
     {
-        'deviceType': driver_const.LJM_DT_T7,
+        'deviceType': driver_const.LJM_DT_TSERIES,
         'connectionType': driver_const.LJM_CT_ETHERNET_UDP,
-        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtTSERIES,
         'numAttempts': 1,
         'async': false,
     },
 
     {
-        'deviceType': driver_const.LJM_DT_T7,
+        'deviceType': driver_const.LJM_DT_TSERIES,
         'connectionType': driver_const.LJM_CT_ETHERNET_TCP,
-        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtTSERIES,
         'numAttempts': 1,
         'async': false,
     },
     {
-        'deviceType': driver_const.LJM_DT_T7,
+        'deviceType': driver_const.LJM_DT_TSERIES,
         'connectionType': driver_const.LJM_CT_WIFI_UDP,
-        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtTSERIES,
         'numAttempts': 1,
         'async': false,
     },
     {
-        'deviceType': driver_const.LJM_DT_T7,
+        'deviceType': driver_const.LJM_DT_TSERIES,
         'connectionType': driver_const.LJM_CT_WIFI_TCP,
-        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT7,
-        'numAttempts': 1,
-        'async': false,
-    },
-    {
-        'deviceType': driver_const.LJM_DT_T4,
-        'connectionType': driver_const.LJM_CT_USB,
-        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4,
-        'numAttempts': 1,
-        'async': false,
-    },
-    {
-        'deviceType': driver_const.LJM_DT_T4,
-        'connectionType': driver_const.LJM_CT_ETHERNET_UDP,
-        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4,
-        'numAttempts': 1,
-        'async': false,
-    },
-    {
-        'deviceType': driver_const.LJM_DT_T4,
-        'connectionType': driver_const.LJM_CT_ETHERNET_TCP,
-        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtT4,
+        'addresses': REQUIRED_INFO_BY_DEVICE.LJM_dtTSERIES,
         'numAttempts': 1,
         'async': false,
     },
 ];
-var ENABLE_BETA_MOCK_T5_USB_SCAN = true;
+var ENABLE_BETA_MOCK_T5_USB_SCAN = false; // Disable... 10/21/2019.  Not needed.
 var EXTRA_T5_MOCK_SCAN = {
     'deviceType': driver_const.LJM_DT_T5,
     'connectionType': driver_const.LJM_CT_USB,
@@ -232,7 +211,10 @@ var deviceDataParsers = {
     }
 };
 
-function parseDeviceInfo(info, registers) {
+function parseDeviceInfo(info, genericRegisters) {
+    var dtn = driver_const.DRIVER_DEVICE_TYPE_NAMES[info.dt];
+    var registers = REQUIRED_INFO_BY_DEVICE[dtn];
+
     registers.forEach(function(register) {
         var regName = register.split('_').map(function(str) {
             str = str.toLowerCase();
@@ -398,7 +380,7 @@ function createManagedDevice(openedDevice, openParameters, curatedDevice) {
 
     function getDeviceInfo() {
         var defered = q.defer();
-        debugLJMCalls('Getting Device Info:', self.handle, self.requiredInfo);
+        // debugLJMCalls('Getting Device Info:', self.handle, self.requiredInfo, ljmDTName, self.deviceType, dt);
         // console.log('Getting Device Info...', self.handle, self.isActive, self.isMockDevice);
         if(!self.isMockDevice) {
             ljmUtils.getDeviceInfo(
@@ -961,9 +943,6 @@ function openAllDeviceScanner() {
         return defered.promise;
     }
 
-    /*
-     * The function "collectRequiredDeviceInfo" does...
-    */
     
     function debugPrintFlatScannedData(data, printer) {
         var pInfo = [
@@ -1019,6 +998,9 @@ function openAllDeviceScanner() {
             console.log('Scanned Data', pData);
         }
     }
+    /*
+     * The function "collectRequiredDeviceInfo" does...
+    */
     function collectRequiredDeviceInfo(bundle) {
         debugSS('in collectRequiredDeviceInfo');
         // We need to make sure that we have collected the required information

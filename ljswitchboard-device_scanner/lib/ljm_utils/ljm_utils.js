@@ -5,6 +5,8 @@ var async = require('async');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 var data_parser = require('ljswitchboard-data_parser');
 var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+var REQUIRED_INFO_BY_DEVICE = require('../required_device_info').requiredInfo;
+
 // var modbus_map = data_parser.getConstants();
 var ljm_ffi = require('ljm-ffi');
 var ljm = ljm_ffi.load();
@@ -129,7 +131,7 @@ function readDeviceRegister(device, handle, deviceType, register, cb) {
 						}
 						cb(pRes);
 					} else {
-						console.log('ERROR READING INFO DURING OPENALL_SCAN', handle, register, results.ljmError);
+						console.log('ERROR READING INFO DURING OPENALL_SCAN (eRA)', handle, register, results.ljmError);
 
 						var pErr = data_parser.parseError(
 							info.address,
@@ -162,7 +164,7 @@ function readDeviceRegister(device, handle, deviceType, register, cb) {
 						}
 						cb(pRes);
 					} else {
-						console.log('ERROR READING INFO DURING OPENALL_SCAN', handle, register, results.ljmError);
+						console.log('ERROR READING INFO DURING OPENALL_SCAN (eRAS)', handle, register, results.ljmError);
 						var pErr = data_parser.parseError(
 							info.address,
 							results.ljmError,
@@ -211,6 +213,9 @@ function getProductType(deviceInfo) {
 	} else if(deviceInfo.dt === 5) {
 		// return deviceInfo.HARDWARE_INSTALLED.productType;
 		return 'T5';
+	} else if(deviceInfo.dt === 8) {
+		// return deviceInfo.HARDWARE_INSTALLED.productType;
+		return 'T8';
 	} else if(deviceInfo.dt === 200) {
 		return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
@@ -229,6 +234,9 @@ function getModelType(deviceInfo) {
 	} else if(deviceInfo.dt === 5) {
 		// pt = deviceInfo.HARDWARE_INSTALLED.productType;
 		pt = 'T5';
+	} else if(deviceInfo.dt === 8) {
+		// pt = deviceInfo.HARDWARE_INSTALLED.productType;
+		pt = 'T8';
 	} else if(deviceInfo.dt === 200) {
 		pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 	} else {
@@ -236,6 +244,9 @@ function getModelType(deviceInfo) {
 	}
 	return pt;
 }
+/*
+ * The "registers" argument is no longer valid.  It is over-written in function. 10/21/2019.
+ */
 function getDeviceInfo(device, handle, registers, cb) {
 	var DEBUG_ALREADY_CONNECTED_DEVICE = false;
 	// console.log('getDeviceInfo DEVICE', device);
@@ -290,6 +301,7 @@ function getDeviceInfo(device, handle, registers, cb) {
 				isError = true;
 			}
 		});
+
 		deviceInfo.acquiredRequiredData = !isError;
 		deviceInfo.productType = getProductType(deviceInfo);
 		deviceInfo.modelType = getModelType(deviceInfo);
@@ -323,7 +335,9 @@ function getDeviceInfo(device, handle, registers, cb) {
 		deviceInfo.ip = parseIPAddress(handleInfo.IPAddress);
 		deviceInfo.port = handleInfo.Port;
 		deviceInfo.maxBytesPerMB = handleInfo.MaxBytesPerMB;
-		readAndParseRegisters(device, handle, dt, registers, handleReadData);
+
+		var reqRegisters = REQUIRED_INFO_BY_DEVICE[deviceInfo.deviceTypeStr];
+		readAndParseRegisters(device, handle, dt, reqRegisters, handleReadData);
 	}
 
 	if(previouslyAcquiredHandleInfo.isValid) {
