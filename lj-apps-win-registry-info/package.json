@@ -26,11 +26,12 @@
     "url": "https://github.com/chrisJohn404/lj-apps-win-registry-info/issues"
   },
   "dependencies": {
-    "async": "3.x",
-    "winreg": "1.x.x"
+    "async": "3.1.0",
+    "winreg": "1.2.4"
   },
   "devDependencies": {
-    "nodeunit": "0.11.x"
+    "diff": ">=3.5.0",
+    "nodeunit": "0.11.3"
   },
   "directories": {
     "lib": "./lib"
