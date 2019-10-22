@@ -25,5 +25,6 @@ exports.firmwareLinks = {
 	'T4': {
 		'0.9908': 'https://labjack.com/sites/default/files/firmware/T4firmware_009908_2017-10-25.bin',
 		'1.0002': 'https://labjack.com/sites/default/files/firmware/T4firmware_010002_2017-11-07.bin',
+		'1.0023': 'https://labjack.com/sites/default/files/firmware/T4firmware_010023_2019-10-15.bin',
 	}
 };
