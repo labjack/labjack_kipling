@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-core",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
     "name": "Chris Johnson",
@@ -28,11 +28,12 @@
     "url": "https://github.com/chrisJohn404/ljswitchboard-core/issues"
   },
   "dependencies": {
-    "async": "~0",
-    "q": "~1"
+    "async": "3.1.0",
+    "q": "1.5.1"
   },
   "devDependencies": {
-    "nodeunit": "0.11.x"
+    "diff": ">=3.5.0",
+    "nodeunit": "0.11.3"
   },
   "directories": {
     "lib": "./lib"
