@@ -11,17 +11,17 @@
 
 print("T4 Basic I/O Example")
 -- Get the device type by reading the PRODUCT_ID register
-local devtype = MB.R(60000, 3)
+local devtype = MB.readName("PRODUCT_ID")
 -- If the user is not using a T4 exit the script
 if devtype ~= 4 then
   print("Device is not a T4")
   -- Write 0 to LUA_RUN to stop the script
-  MB.W(6000, 1, 0);
+  MB.writeName("LUA_RUN", 0);
 end
 
 -- Write 0 to the DIO_ANALOG_ENABLE register to configure all FIO lines as
 -- digital I/O
-MB.W(2880, 1, 0x000)
+MB.writeName("DIO_ANALOG_ENABLE", 0x000)
 
 -- Set up a 1 second interval
 LJ.IntervalConfig(0, 1000)
@@ -30,7 +30,7 @@ while true do
   -- If an interval is done
   if LJ.CheckInterval(0) then
     -- Read AIN0
-    local ainval = MB.R(0, 3)
+    local ainval = MB.readName("AIN0")
     -- Ensure the AIN0 value is between 0V and 5V
     local dacval = ainval
     if(ainval > 5) then
@@ -40,10 +40,10 @@ while true do
       dacval = 0
     end
     -- Write the AIN0 value to DAC0.
-    MB.W(1000, 3, dacval)
+    MB.writeName("DAC0", dacval)
     -- Read FIO4 and write its value to FIO5
-    local fioval = MB.R(2004, 0)
-    MB.W(2005, 0, fioval)
+    local fioval = MB.readName("FIO4")
+    MB.writeName("FIO5", fioval)
     print('Set DAC0 to:', dacval)
         print('Set FIO5 to:', fioval)
         print('') -- Print a new-line

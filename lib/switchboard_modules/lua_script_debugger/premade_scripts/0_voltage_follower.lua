@@ -14,7 +14,7 @@ end
 print("Read and display the device temperature at 0.5 Hz.")
 
 -- Write 1 to the POWER_AIN register to ensure the analog input module is on
-MB.W(48005, 0, 1)
+MB.writeName("POWER_AIN", 1)
 
 -- Configure an interval of 500ms
 LJ.IntervalConfig(0, 500)

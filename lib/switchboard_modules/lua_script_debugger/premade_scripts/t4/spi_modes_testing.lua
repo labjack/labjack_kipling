@@ -23,19 +23,19 @@ function spiutils.configure(self, cs, clk, miso, mosi, mode, speed, options, deb
   self.debug=debug
 
   -- Write the DIO register number for chip select to SPI_CS_DIONUM
-  MB.W(5000, 0, cs)
+  MB.writeName("SPI_CS_DIONUM", cs)
   -- Write the DIO register number for  clock to SPI_CLK_DIONUM
-  MB.W(5001, 0, clk)
+  MB.writeName("SPI_CLK_DIONUM", clk)
   -- Write the DIO register number for  MISO to SPI_MISO_DIONUM
-  MB.W(5002, 0, miso)
+  MB.writeName("SPI_MISO_DIONUM", miso)
   -- Write the DIO register number for  MOSI to SPI_MOSI_DIONUM
-  MB.W(5003, 0, mosi)
+  MB.writeName("SPI_MOSI_DIONUM", mosi)
   -- Write the desired SPI mode to SPI_MODE
-  MB.W(5004, 0, mode)
+  MB.writeName("SPI_MODE", mode)
   -- Write the desired clock speed to SPI_SPEED_THROTTLE
-  MB.W(5005, 0, speed)
+  MB.writeName("SPI_SPEED_THROTTLE", speed)
   -- Write the desired SPI_OPTIONS
-  MB.W(5006, 0, options)
+  MB.writeName("SPI_OPTIONS", options)
 end
 
 -------------------------------------------------------------------------------
@@ -45,11 +45,11 @@ function spiutils.transfer(self, txdata)
   local numbytes = table.getn(txdata)
 
   -- Configure the number of bytes to read/write (write to SPI_NUM_BYTES)
-  MB.W(5009, 0, numbytes)
+  MB.writeName("SPI_NUM_BYTES", numbytes)
 -- SPI_DATA_TX is a buffer for data to send to slave devices
   local errorval = MB.WA(5010, 99, numbytes, txdata)
   -- Write 1 to SPI_GO to begin the SPI transaction
-  MB.W(5007, 0, 1)
+  MB.writeName("SPI_GO", 1)
   -- Read SPI_DATA_RX to capture data sent back from the slave device
   local rxdata = MB.RA(5050, 99, numbytes)
   return rxdata
@@ -161,4 +161,4 @@ rxstring = spi.transfer_string(spi, txstring)
 print("Received String: "..rxstring)
 
 -- Write 0 to LUA_RUN to stop the script
-MB.W(6000, 1, 0)
+MB.writeName("LUA_RUN", 0)

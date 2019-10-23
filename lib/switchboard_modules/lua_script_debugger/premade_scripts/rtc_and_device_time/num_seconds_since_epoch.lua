@@ -28,13 +28,13 @@ local check_interval = LJ.CheckInterval
 
 print("Read the RTC_TIME_S register and SYSTEM_COUNTER_10KHZ to get a ms value.")
 -- Read the HARDWARE_INSTALLED register to get the RTC module status
-local hardware = MB.R(60010, 1)
+local hardware = MB.readName("HARDWARE_INSTALLED")
 -- The third bit in hardware correlates to the RTC module status
 -- If this third bit is not 1, the RTC module is not installed, exit the script
 if(bit.band(hardware, 4) ~= 4) then
   print("This Lua script requires a Real-Time Clock (RTC), but an RTC is not detected. These modules are only preinstalled on the T7-Pro, and cannot be added to the T7 or T4. Stopping Script")
   -- Write a 0 to LUA_RUN to stop the script
-  MB.W(6000, 1, 0)
+  MB.writeName("LUA_RUN", 0)
 end
 
 local numseconds = {}
