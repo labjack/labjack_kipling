@@ -1,6 +1,6 @@
 --[[
     Name: 11_lua_io_ram.lua
-    Desc: Example showing how to read the internal device temperature
+    Desc: Example showing how to save and access data in USER RAM
     Note: The USER_RAM registers are useful in situations when a script is
           collecting readings, but external software running on a remote
           computer also needs to log or view the data. *formerly called LUA_IO_MEM
