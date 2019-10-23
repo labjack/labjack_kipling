@@ -26,20 +26,20 @@ zlib: "1.2.5"
 
 console.log('Starting K3, in testK3/index.js');
 
-// Load native UI library
-var gui = require('nw.gui');
+// // Load native UI library
+// var gui = require('nw.gui');
 
-// Add copy & paste support on mac
-if (process.platform === "darwin") {
-  var mb = new gui.Menu({type: 'menubar'});
-  mb.createMacBuiltin('Kipling', {
-    hideEdit: false,
-  });
-  gui.Window.get().menu = mb;
-}
+// // Add copy & paste support on mac
+// if (process.platform === "darwin") {
+//   var mb = new gui.Menu({type: 'menubar'});
+//   mb.createMacBuiltin('Kipling', {
+//     hideEdit: false,
+//   });
+//   gui.Window.get().menu = mb;
+// }
 
-// Get an instance of the startup window
-var win = gui.Window.get();
+// // Get an instance of the startup window
+// var win = gui.Window.get();
 
 // perform other requires
 var path = require('path');

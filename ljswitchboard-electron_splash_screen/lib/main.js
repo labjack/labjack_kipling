@@ -1,9 +1,15 @@
-var app = require('app');  // Module to control application life.
-var BrowserWindow = require('browser-window');  // Module to create native browser window.
+const electron = require('electron');
+const async = require('async');
+const q = require('q');
+const path = require('path')
+const url = require('url')
+
+// Module to control application life.
+const app = electron.app
+// Module to create native browser window.
+const BrowserWindow = electron.BrowserWindow;
 
 var packageData = require('../package.json');
-// Report crashes to our server.
-require('crash-reporter').start();
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -32,11 +38,19 @@ app.on('ready', function() {
     title: windowData.title,
     icon: windowData.icon,
     frame: windowData.frame,
+    webPreferences: {
+      nodeIntegration: true,
+    },
   });
 
   console.log('Displaying Splash-Screen', packageData);
+
   // and load the index.html of the app.
-  mainWindow.loadUrl('file://' + __dirname + '/index.html');
+  mainWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'index.html'),
+    protocol: 'file:',
+    slashes: true
+  }))
 
   // Open the DevTools.
   // mainWindow.openDevTools();
@@ -48,4 +62,19 @@ app.on('ready', function() {
     // when you should delete the corresponding element.
     mainWindow = null;
   });
+
+  mainWindow.webContents.openDevTools();
 });
+
+app.on('activate', function () {
+  // On OS X it's common to re-create a window in the app when the
+  // dock icon is clicked and there are no other windows open.
+  if (mainWindow === null) {
+    createWindow()
+  }
+})
+
+// In this file you can include the rest of your app's specific main process
+// code. You can also put them in separate files and require them here.
+
+
