@@ -17,14 +17,15 @@
   },
   "homepage": "https://github.com/chrisJohn404/ljm-shell_logger",
   "dependencies": {
-    "async": "~0",
+    "async": "3.1.0",
     "chalk": "1.1.x",
-    "q": "~1",
+    "q": "1.5.1",
     "shell": "0.3.x",
     "terminal-control": "0.0.4"
   },
   "devDependencies": {
-    "nodeunit": "0.9.x",
+    "diff": ">=3.5.0",
+    "nodeunit": "0.11.3",
     "supports-color": "3.1.0"
   },
   "directories": {
