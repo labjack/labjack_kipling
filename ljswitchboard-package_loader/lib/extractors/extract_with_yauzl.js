@@ -14,12 +14,17 @@ var debug = function() {
         console.log.apply(this, arguments);
     }
 };
+var enableDebuggingFileExtraction = false;
+var debugFileExtract = function() {
+    if(enableDebuggingFileExtraction) {
+        console.log.apply(this, arguments);
+    }
+};
 var logError = function() {
     console.error.apply(this, arguments);
 };
 
 function extractWithYauzl (bundle, self, EVENTS) {
-    
     var from = bundle.chosenUpgrade.location;
     var to = bundle.currentPackage.location;
     debug('opening', from, 'extracting to', to);
@@ -76,12 +81,16 @@ function extractWithYauzl (bundle, self, EVENTS) {
             debug('zip extraction complete');
             resolveSuccess();
         };
-        asyncQueue.drain(drain);
+        try {
+            asyncQueue.drain(drain);
 
-        asyncQueue.error(function(err, task) {
-            console.error('!!! Task experienced an error', err, task);
-            resolveError(err);
-        })
+            asyncQueue.error(function(err, task) {
+                console.error('!!! Task experienced an error', err, task);
+                resolveError(err);
+            })
+        } catch(err) {
+            asyncQueue.drain = drain;
+        }
         
         zipfile.on("entry", function(entry) {
             debug('zipfile entry', entry.fileName);
@@ -113,7 +122,7 @@ function extractWithYauzl (bundle, self, EVENTS) {
                 debug('skipping entry', entry.fileName, {cancelled: cancelled});
                 return setImmediate(done);
             } else {
-                debug('extracting entry', entry.fileName);
+                debug('extracting entry', entry.fileName, to);
             }
             
             var dest = path.join(to, entry.fileName);
@@ -140,6 +149,7 @@ function extractWithYauzl (bundle, self, EVENTS) {
             var procMode = mode & umask;
 
             zipfile.openReadStream(entry, function(err, readStream) {
+                debugFileExtract('openReadStream opened', err);
                 if (err) {
                     logError('openReadStream error', err);
                     cancelled = true;
@@ -151,6 +161,7 @@ function extractWithYauzl (bundle, self, EVENTS) {
                 });
 
                 mkdirp(destDir, function(err) {
+                    debugFileExtract('made directory');
                     if (err) {
                         logError('mkdirp error', destDir, {error: err});
                         cancelled = true;
@@ -162,10 +173,15 @@ function extractWithYauzl (bundle, self, EVENTS) {
                 });
                 
                 function writeStream() {
+                    debugFileExtract('writing file', dest);
                     var createdWriteStream = fs.createWriteStream(dest, {mode: procMode});
                     readStream.pipe(createdWriteStream);
                     createdWriteStream.on('finish', function() {
-                        readStream.destroy();
+                        try {
+                            readStream.destroy();
+                        } catch(err) {
+                            // ignore this error.
+                        }
                         done();
                     });
                     createdWriteStream.on('error', function(err) {

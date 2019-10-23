@@ -30,7 +30,7 @@
     "static": "./static"
   },
   "ljswitchboardDependencies": {
-    "ljswitchboard-package_loader": "0.0.x",
-    "ljswitchboard-static_files": "0.0.x"
+    "ljswitchboard-package_loader": "x.x.x",
+    "ljswitchboard-static_files": "x.x.x"
   }
 }

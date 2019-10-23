@@ -16,6 +16,18 @@ global[gns] = {};
 
 var useYauzl = true;
 
+var DEBUG_PACKAGE_EXTRACTION_STEPS = false;
+function debugSteps () {
+    if(DEBUG_PACKAGE_EXTRACTION_STEPS) {
+        console.log.apply(console, arguments);
+    }
+}
+function debugPackageChecking () {
+    if(DEBUG_PACKAGE_EXTRACTION_STEPS) {
+        console.log.apply(console, arguments);
+    }
+}
+
 var EVENTS = {
 	// Events emitted during the loadPackage function, they all return the
 	// name of the package being handled.
@@ -535,6 +547,7 @@ function createPackageLoader() {
 	};
 
 	var checkForExtractionErrors = function(bundle) {
+		debugSteps('in checkForExtractionErrors');
 		var defered = q.defer();
 		var defaultData = {};
 
@@ -694,6 +707,7 @@ function createPackageLoader() {
 	}
 	var getPackageVersionOfZip = function(packageInfo) {
 		// return parseWithUnzip(packageInfo);
+		debugPackageChecking('in getPackageVersionOfZip', packageInfo);
 		return parseWithYauzl(packageInfo);
 	};
 	var checkPackageVersion = function(packageInfo) {
@@ -715,6 +729,7 @@ function createPackageLoader() {
 		return defered.promise;
 	};
 	var checkPackageValidity = function(packageInfo) {
+		debugPackageChecking('in checkPackageValidity');
 		var defered = q.defer();
 
 		if(packageInfo.exists) {
@@ -729,6 +744,7 @@ function createPackageLoader() {
 	};
 
 	var checkForValidPackage = function(location) {
+		debugPackageChecking('in checkForValidPackage', location);
 		var defered = q.defer();
 
 		var packageInfo = {
@@ -751,6 +767,8 @@ function createPackageLoader() {
 	};
 
 	var checkForUpgradeOptions = function(bundle) {
+		debugSteps('in checkForUpgradeOptions');
+
 		var defered = q.defer();
 		var dirsToCheck = bundle.packageInfo.locations;
 
@@ -815,6 +833,8 @@ function createPackageLoader() {
 	};
 
 	var chooseValidUpgrade = function(bundle) {
+		debugSteps('in chooseValidUpgrade');
+		
 		var defered = q.defer();
 
 		var chosenUpgrade;
