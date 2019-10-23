@@ -31,13 +31,14 @@
   },
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_special_addresses#readme",
   "dependencies": {
-    "q": "~1",
+    "q": "1.5.1",
     "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#master",
     "javascript-natural-sort": "0.x.x",
-    "fs-extra": "0.x.x"
+    "fs-extra": "0.18.4"
   },
   "devDependencies": {
-    "nodeunit": "0.x.x"
+    "diff": ">=3.5.0",
+    "nodeunit": "0.11.3"
   },
   "old-dependencies": {
     "ljm-ffi": "1.x.x",
