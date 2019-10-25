@@ -3,6 +3,9 @@
     Desc: This example will output a digital waveform on as fast as possible
     Note: In most cases, users should throttle their code execution using the
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
+
+          On a T7 (FW 1.0282) this example runs at around 28kHz
+          On a T4 (FW 1.0023) this example runs at around 29kHz
 --]]
 
 -- For sections of code that require precise timing assign global functions
@@ -33,9 +36,10 @@ end
 LJ.DIO_D_W(outdio, 1)
 
 local numwrites = 0
+local interval = 2000
 
 -- Configure an interval of 2000ms
-LJ.IntervalConfig(0, 2000)
+LJ.IntervalConfig(0, interval)
 -- Run the program in an infinite loop
 while true do
   -- Change the state of outdio to 0

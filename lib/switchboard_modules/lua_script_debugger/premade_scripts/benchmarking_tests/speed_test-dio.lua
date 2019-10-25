@@ -4,6 +4,9 @@
           (FIO5 if using a T4) as fast as possible
     Note: In most cases, users should throttle their code execution using the
           functions: "LJ.IntervalConfig(0, 1000)", and "if check_interval(0)"
+
+          On a T7 (FW 1.0282) this example runs at around 23kHz
+          On a T4 (FW 1.0023) this example runs at around 24kHz
 --]]
 
 -- For sections of code that require precise timing assign global functions
@@ -32,9 +35,10 @@ if devtype == 4 then
 end
 
 local numwrites = 0
+local interval = 2000
 
 -- Configure an interval of 2000ms
-LJ.IntervalConfig(0, 2000)
+LJ.IntervalConfig(0, interval)
 -- Run the program in an infinite loop
 while true do
   -- Write 1 to the outpin. Type is 0 (UINT16)

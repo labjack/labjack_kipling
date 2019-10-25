@@ -4,6 +4,9 @@
           possible on DAC1
     Note: In most cases, users should throttle their code execution using the
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
+
+          On a T7 (FW 1.0282) this example runs at around 14kHz
+          On a T4 (FW 1.0023) this example runs at around 11kHz
 --]]
 
 -- For sections of code that require precise timing assign global functions

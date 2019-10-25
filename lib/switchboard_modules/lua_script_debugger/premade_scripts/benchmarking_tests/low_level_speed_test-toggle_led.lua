@@ -3,6 +3,9 @@
     Desc: This example will toggle the orange LED as fast as possible
     Note: In most cases, users should throttle their code execution using the
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
+
+          On a T7 (FW 1.0282) this example runs at around 59kHz
+          On a T4 (FW 1.0023) this example runs at around 60kHz
 --]]
 
 -- For sections of code that require precise timing assign global functions
@@ -20,9 +23,10 @@ throttle = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", throttle)
 
 local numwrites = 0
+local interval = 2000
 
 -- Configure an interval of 2000ms
-LJ.IntervalConfig(0, 2000)
+LJ.IntervalConfig(0, interval)
 -- Run the program in an infinite loop
 while true do
   toggle_led()
