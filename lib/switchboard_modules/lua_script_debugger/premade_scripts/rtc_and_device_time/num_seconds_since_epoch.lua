@@ -17,7 +17,7 @@
           For more details see the datasheet page:
             https://labjack.com/support/datasheets/t-series/rtc
 
-          This example requires FW 1.0128 or newer
+          This example requires firmware 1.0282
 --]]
 
 -- For sections of code that require precise timing assign global functions

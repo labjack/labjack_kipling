@@ -1,6 +1,7 @@
 --[[
     Name: device_information.lua
     Desc: Reads device information from the LabJack device and prints it out
+    Note: This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 -------------------------------------------------

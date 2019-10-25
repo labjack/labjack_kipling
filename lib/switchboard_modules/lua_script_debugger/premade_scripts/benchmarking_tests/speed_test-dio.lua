@@ -7,6 +7,8 @@
 
           On a T7 (FW 1.0282) this example runs at around 23kHz
           On a T4 (FW 1.0023) this example runs at around 24kHz
+
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 -- For sections of code that require precise timing assign global functions

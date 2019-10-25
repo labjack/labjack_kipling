@@ -12,6 +12,8 @@
           This example used a 3.3kΩ resistor between VS and EIO0
           FIO lines can NOT be used for 1-Wire. They have too much impedance
           which prevent the signal from reaching logic thresholds
+
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 

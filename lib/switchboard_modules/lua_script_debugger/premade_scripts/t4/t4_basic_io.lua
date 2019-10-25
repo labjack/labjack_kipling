@@ -7,6 +7,8 @@
           and its state is written to FIO5.
     Note: See our website for more information on flexible I/O:
             https://labjack.com/support/datasheets/t-series/digital-io/flexible-io
+
+          This example requires firmware 1.0023
 --]]
 
 print("T4 Basic I/O Example")

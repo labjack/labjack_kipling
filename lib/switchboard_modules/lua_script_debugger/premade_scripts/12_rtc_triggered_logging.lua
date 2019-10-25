@@ -12,7 +12,7 @@
           Check for the latest firwmare updates at:
             http://labjack.com/support/firmware/t7/beta
 
-          Requires FW 1.0150 or newer
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 print("Log voltage of AIN1 to file every 10 minutes. RTC value checked every 1000ms.")

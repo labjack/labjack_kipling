@@ -11,7 +11,7 @@
           See the datasheet for more on USER RAM
             http://labjack.com/support/datasheets/t7/scripting
 
-          Requires Firmware 1.0161 or newer
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 

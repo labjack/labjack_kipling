@@ -5,6 +5,8 @@
           and MOSI data lines together.
     Note: See our T-Series SPI page for more detailed info on SPI settings:
             https://labjack.com/support/datasheets/t-series/digital-io/spi
+
+          This example requires firmware 1.0023
 --]]
 
 spiutils={}

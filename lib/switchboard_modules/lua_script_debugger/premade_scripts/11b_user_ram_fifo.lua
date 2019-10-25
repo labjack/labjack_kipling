@@ -15,7 +15,7 @@
           See the datasheet for more on USER RAM FIFO buffers:
             http://labjack.com/support/datasheets/t7/scripting
 
-          Requires Firmware 1.0161 or newer
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 print("Transfer an array of ordered information to/from an external computer using a FIFO buffer.")

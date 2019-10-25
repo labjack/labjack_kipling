@@ -1,6 +1,7 @@
 --[[
     Name: 0_voltage_follower.lua
     Desc: Example showing how to read the internal device temperature
+    Note: This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 ------------------------------------------
