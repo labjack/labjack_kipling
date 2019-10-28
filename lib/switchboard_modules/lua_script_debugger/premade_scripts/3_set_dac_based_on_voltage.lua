@@ -1,24 +1,32 @@
+--[[
+    Name: 3_set_dac_based_on_voltage.lua
+    Desc: This example shows how to set a DAC according to an input voltage
+    Note: This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+--]]
+
 print("Read AIN3 input voltage and set DAC0 output voltage. Update at 10Hz")
-local InputVoltage = 0
-local ThresholdVoltage = 2.5                      --threshold is 2.5V
-local OutputVoltageA = 4.5
-local OutputVoltageB = 0
+local threshold = 2.5
+local vout0 = 4.5
+local vout1 = 0
 
-LJ.IntervalConfig(0, 100)                   --set interval to 100 for 100ms
-local checkInterval=LJ.CheckInterval
-local mbRead=MB.R			--local functions for faster processing
-local mbWrite=MB.W
-
+-- Configure a 100ms interval
+LJ.IntervalConfig(0, 100)
+-- Run the program in an infinite loop
 while true do
-  if LJ.CheckInterval(0) then               --interval completed
-    InputVoltage = mbRead(6, 3)               --read AIN3. Address is 6, type is 3
-    print("AIN3: ", InputVoltage, "V")
-    if InputVoltage > ThresholdVoltage then --if the input voltage exceeds 2.5V
-      mbWrite(1000, 3, OutputVoltageA)       --Set DAC0 to 4.5V. Address is 1000, type is 3
-      print ("DAC0: ", OutputVoltageA)
+  -- If an interval is done
+  if LJ.CheckInterval(0) then
+    -- Get an input voltage by reading AIN3
+    local vin = MB.readName("AIN3")
+    print("AIN3: ", vin, "V")
+    -- If vin exceeds the threshold (2.5V)
+    if vin > threshold then
+      -- Set DAC0 to 4.5V
+      MB.writeName("DAC0", vout0)
+      print ("DAC0: ", vout0)
     else
-      mbWrite(1000, 3, OutputVoltageB)       --Set DAC0 to 0V.
-      print ("DAC0: ", OutputVoltageB)
+      -- Set DAC0 to 0V
+      MB.writeName("DAC0", vout1)
+      print ("DAC0: ", vout1)
     end
   end
 end
