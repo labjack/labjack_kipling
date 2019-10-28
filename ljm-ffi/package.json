@@ -1,6 +1,6 @@
 {
     "name": "ljm-ffi",
-    "version": "1.0.12",
+    "version": "1.0.13",
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
@@ -23,7 +23,7 @@
         "lib"
     ],
     "dependencies": {
-        "async": "3.1.0",
+        "async": "1.5.2",
         "ffi": "2.3.0",
         "ljswitchboard-ljm_driver_constants": "^1.0.0",
         "ljswitchboard-modbus_map": "^1.0.1",

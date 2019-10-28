@@ -587,6 +587,14 @@ LJM_FUNCTIONS.Internal_LJM_GetHandles = {
 	]
 };
 
+LJM_FUNCTIONS.LJM_IsAuth = {
+	'ret': [{'LJM_ERROR_RETURN': 	'int'}],
+	'args': [
+		{'Handle':					'int'},
+		{'IsAuth':					'int*'},
+	]
+};
+
 
 
 var functionNames = Object.keys(LJM_FUNCTIONS);
