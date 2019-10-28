@@ -41,7 +41,7 @@ local scanrate = 50
 local numscans = 5000
 -- Configure an interval (in ms) to wait before acquiring new data
 LJ.IntervalConfig(0, 1000 / scanrate)
-print("Estimated time to execute (s): ",numscans / scanrate)
+print("Estimated time to execute (s): ", numscans / scanrate)
 
 -- Loop as fast as possible until the desired number of scans have been acquired
 while iter < numscans do
@@ -74,6 +74,6 @@ print("Min voltage: ",minv)
 print("Max voltage: ",maxv)
 
 print("")
-print("Stopping script")
+print("Finished")
 -- Writing 0 to LUA_RUN stops the script
 MB.writeName("LUA_RUN", 0)
