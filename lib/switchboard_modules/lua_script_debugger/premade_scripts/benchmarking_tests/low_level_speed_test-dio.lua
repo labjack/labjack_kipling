@@ -34,8 +34,8 @@ if devtype == 4 then
   outpin = 2005
 end
 
--- Change outdio direction to output
-LJ.DIO_D_W(outdio, 1)
+-- Change outpin direction to output
+LJ.DIO_D_W(outpin, 1)
 
 local numwrites = 0
 local interval = 2000
@@ -44,10 +44,10 @@ local interval = 2000
 LJ.IntervalConfig(0, interval)
 -- Run the program in an infinite loop
 while true do
-  -- Change the state of outdio to 0
-  dio_state_write(outdio, 0)
-  -- Change the state of outdio to 1
-  dio_state_write(outdio, 1)
+  -- Change the state of outpin to 0
+  dio_state_write(outpin, 0)
+  -- Change the state of outpin to 1
+  dio_state_write(outpin, 1)
   numwrites = numwrites + 1
   -- If a 2000ms interval is done
   if check_interval(0) then

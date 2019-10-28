@@ -1,28 +1,37 @@
+--[[
+    Name: 4_set_dio_based_on_voltage.lua
+    Desc: This example shows how to set DIO according to an input voltage
+    Note: This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+--]]
+
 print("Set a DIO based on voltage. Digital I/O is FIO3 (FIO5 on T4), voltage measured on AIN1. Update at 10Hz")
-local InputVoltage = 0
-local ThresholdVoltage = 2.5                      --threshold is 2.5V
-
-local mbRead=MB.R			--local functions for faster processing
-local mbWrite=MB.W
-
-local outPin = 2003--FIO3. Changed if T4 instead of T7
-devType = MB.R(60000, 3)
-if devType == 4 then
-	outPin = 2005--FIO5 on T4
+-- Assume the user is using a T7, toggle FIO3
+local outpin = "FIO3"
+local devtype = MB.readName("PRODUCT_ID")
+-- If the user is actually using a T4, toggle FIO5
+if devtype == 4 then
+  outpin = "FIO5"
 end
 
-LJ.IntervalConfig(0, 100)                   --set interval to 100 for 100ms
-local checkInterval=LJ.CheckInterval
+local threshold = 2.5
 
+-- Configure a 100ms interval
+LJ.IntervalConfig(0, 100)
+-- Run the program in an infinite loop
 while true do
-  if checkInterval(0) then               --interval completed
-    InputVoltage = mbRead(2, 3)               --read AIN1. Address is 2, type is 3
-    print("AIN1: ", InputVoltage, "V")
-    if InputVoltage > ThresholdVoltage then --if the input voltage exceeds 2.5V
-      mbWrite(outPin, 0, 1)                    --write 1 to FIO3 (FIO5 on T4). Address is 2003, type is 0, value is 1(output high)
+  -- If an interval is done
+  if LJ.CheckInterval(0) then
+    -- Get an input voltage by reading AIN1
+    local vin = MB.readName("AIN1")
+    print("AIN1: ", vin, "V")
+    -- If vin exceeds the threshold (2.5V)
+    if vin > threshold then
+      -- Set outpin high
+      MB.writeName(outpin, 1)
       print(1, "high")
     else
-      mbWrite(outPin, 0, 0)                    --write 0 to FIO3 (FIO5 on T4). Address is 2003, type is 0, value is 0(output low)
+      -- Set outpin low
+      MB.writeName(outpin, 0)
       print(0, "low")
     end
   end
