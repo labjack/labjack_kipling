@@ -3,7 +3,9 @@ var path = require('path');
 var fs = require('fs');
 var q = require('q');
 var async = require('async');
-var jsonParser = require('json-parser');
+// var jsonParser = require('json-parser');
+var commentJson = require('comment-json');
+
 var get_cwd = require('./get_cwd');
 
 var arch = process.arch;
@@ -104,7 +106,7 @@ var checkGYPIFile = function(directoryInfo) {
             	fileStr = splitStr.join('// ');
 
             	// Parse the file as a .json file
-            	var gypiFileInfo = jsonParser.parse(fileStr);
+            	var gypiFileInfo = commentJson.parse(fileStr);
 
             	// Get the arch and os types
             	var buildArch = getArch(gypiFileInfo.variables);
