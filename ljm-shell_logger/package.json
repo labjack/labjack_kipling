@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/chrisJohn404/ljm-shell_logger",
   "dependencies": {
-    "async": "3.1.0",
+    "async": "1.5.2",
     "chalk": "1.1.x",
     "q": "1.5.1",
     "shell": "0.3.x",
