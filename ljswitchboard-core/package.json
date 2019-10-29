@@ -28,7 +28,7 @@
     "url": "https://github.com/chrisJohn404/ljswitchboard-core/issues"
   },
   "dependencies": {
-    "async": "3.1.0",
+    "async": "1.5.2",
     "q": "1.5.1"
   },
   "devDependencies": {
@@ -48,7 +48,6 @@
     "width": 1120,
     "height": 730,
     "min_width": 600,
-    "a-min_width": 785,
     "min_height": 400,
     "show": false
   }
