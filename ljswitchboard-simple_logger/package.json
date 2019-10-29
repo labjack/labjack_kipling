@@ -30,7 +30,7 @@
     "url": "https://github.com/chrisJohn404/ljswitchboard-simple_logger/issues"
   },
   "dependencies": {
-    "async": "3.1.0",
+    "async": "1.5.2",
     "compute-gcd": "1.2.0",
     "fs-extra": "0.18.4",
     "labjack-nodejs": "^1.0.0",
