@@ -12,7 +12,7 @@
 **/
 
 var async = require('async');
-var extend = require('extend');
+var extend = require('./extend.js').extend;
 var sprintf = require('sprintf-js');
 // var util = require('util');  // Consider switching to node's util.format function.
 
