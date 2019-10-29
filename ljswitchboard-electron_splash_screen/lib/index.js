@@ -24,6 +24,8 @@ v8: "3.31.31"
 zlib: "1.2.5"
 */
 
+var isNode = Object.keys(process.versions).indexOf('node-webkit') >= 0;
+
 console.log('Starting K3, in testK3/index.js');
 
 // // Load native UI library
@@ -77,9 +79,11 @@ var persistentDataManager;
 // Require and initialize the window_manager
 var window_manager = require('ljswitchboard-window_manager');
 // Pass the window_manager a reference to the gui object
+
 window_manager.configure({
 	'gui': require('nw.gui')
 });
+
 
 // Add the -builder window to the window_manager to have it be managed.
 var initialAppVisibility = false;
