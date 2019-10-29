@@ -6,8 +6,6 @@
 
           On a T7 (FW 1.0282) this example runs at around 28kHz
           On a T4 (FW 1.0023) this example runs at around 29kHz
-
-          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 -- For sections of code that require precise timing assign global functions
@@ -16,6 +14,16 @@ local dio_state_write = LJ.DIO_S_W
 local check_interval = LJ.CheckInterval
 
 print("Low-Level Benchmarking Test: toggle FIO3/DIO3 (FIO5/DIO5 on T4) as fast as possible.")
+-- The PRODUCT_ID register holds the device type
+local devtype = MB.R(60000, 3)
+-- Assume the device being used is a T7, use FIO3 pin (address = 2003)
+local outpin = 3
+-- If actually using a T4
+if devtype == 4 then
+  -- Use FIO5 pin (address = 2005)
+  outpin = 5
+end
+
 -- The throttle setting can correspond roughly with the length of the Lua
 -- script. A rule of thumb for deciding a throttle setting is
 -- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
@@ -23,16 +31,6 @@ local throttle = 40
 LJ.setLuaThrottle(throttle)
 throttle = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", throttle)
-
--- The PRODUCT_ID register holds the device type
-local devtype = MB.readName("PRODUCT_ID")
--- Assume the device being used is a T7, use FIO3 pin (address = 2003)
-local outpin = 2003
--- If actually using a T4
-if devtype == 4 then
-  -- Use FIO5 pin (address = 2005)
-  outpin = 2005
-end
 
 -- Change outpin direction to output
 LJ.DIO_D_W(outpin, 1)

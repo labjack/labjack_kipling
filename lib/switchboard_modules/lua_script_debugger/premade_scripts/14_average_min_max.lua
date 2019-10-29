@@ -13,20 +13,46 @@
 --]]
 
 print("Sampling average/min/max: Read AIN1 at set rate for certain number of samples. Outputs average, minimum, and maximum")
+local t7minfirmware = 1.0282
+local t4minfirmware = 1.0023
+-- Read the firmware version
+local fwversion = MB.R(60004, 3)
+-- The PRODUCT_ID register holds the device type
+local devtype = MB.R(60000, 3)
+if devtype == 4 then
+  -- If using a T4 and the firmware does not meet the minimum requirement
+  if fwversion < t4minfirmware then
+    print("Error: this example requires firmware version", t4minfirmware, "or higher on the T4")
+    print("Stopping the script")
+    -- Writing a 0 to LUA_RUN stops the script
+    MB.W(6000, 1, 0)
+  end
+  -- Set the resolution index to Automatic (usually the highest available)
+  MB.writeName("AIN_ALL_RESOLUTION_INDEX", 0)
+elseif devtype == 7 then
+  -- If using a T7 and the firmware does not meet the minimum requirement
+  if fwversion < t7minfirmware then
+    print("Error: this example requires firmware version", t7minfirmware, "or higher on the T7")
+    print("Stopping the script")
+    -- Writing a 0 to LUA_RUN stops the script
+    MB.W(6000, 1, 0)
+  end
+  -- Set the resolution index to 8 (the default value is 8 on the T7, 9 on the PRO)
+  MB.writeName("AIN_ALL_RESOLUTION_INDEX", 8)
+  --set the input voltage range to +-10V
+  MB.writeName("AIN_ALL_RANGE",10)
+end
+
 -- Ensure analog is on
 MB.writeName("POWER_AIN", 1)
 
 local devtype = MB.readName("PRODUCT_ID")
 -- If using a T7
 if devtype == 7 then
-  -- Set the resolution index to 8 (the default value is 8 on the T7, 9 on the PRO)
-	MB.writeName("AIN_ALL_RESOLUTION_INDEX", 8)
-  --set the input voltage range to +-10V
-	MB.writeName("AIN_ALL_RANGE",10)
+
   -- If using a T4
 elseif devtype == 4 then
-  -- Set the resolution index to Automatic (usually the highest available)
-	MB.writeName("AIN_ALL_RESOLUTION_INDEX", 0)
+
 end
 
 local alldata = 0

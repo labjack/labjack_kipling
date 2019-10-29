@@ -23,6 +23,29 @@ print("Transfer an array of ordered information to/from an external computer usi
 -- Once the script is running, open up the Register Matrix, and search USER_RAM_FIFO1_DATA_F32
 -- add this USER_RAM_FIFO1_DATA_F32 register to the active watch area, and
 -- view each element coming out in sequence at the update rate of the software.
+local t7minfirmware = 1.0282
+local t4minfirmware = 1.0023
+-- Read the firmware version
+local fwversion = MB.R(60004, 3)
+-- The PRODUCT_ID register holds the device type
+local devtype = MB.R(60000, 3)
+if devtype == 4 then
+  -- If using a T4 and the firmware does not meet the minimum requirement
+  if fwversion < t4minfirmware then
+    print("Error: this example requires firmware version", t4minfirmware, "or higher on the T4")
+    print("Stopping the script")
+    -- Writing a 0 to LUA_RUN stops the script
+    MB.W(6000, 1, 0)
+  end
+elseif devtype == 7 then
+  -- If using a T7 and the firmware does not meet the minimum requirement
+  if fwversion < t7minfirmware then
+    print("Error: this example requires firmware version", t7minfirmware, "or higher on the T7")
+    print("Stopping the script")
+    -- Writing a 0 to LUA_RUN stops the script
+    MB.W(6000, 1, 0)
+  end
+end
 
 local f32out= {}
 f32out[1] = 10.0

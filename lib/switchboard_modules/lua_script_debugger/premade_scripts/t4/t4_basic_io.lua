@@ -12,13 +12,21 @@
 --]]
 
 print("T4 Basic I/O Example")
--- Get the device type by reading the PRODUCT_ID register
-local devtype = MB.readName("PRODUCT_ID")
+local t4minfirmware = 1.0023
+-- Read the firmware version
+local fwversion = MB.R(60004, 3)
+-- The PRODUCT_ID register holds the device type
+local devtype = MB.R(60000, 3)
 -- If the user is not using a T4 exit the script
 if devtype ~= 4 then
   print("Device is not a T4")
   -- Write 0 to LUA_RUN to stop the script
   MB.writeName("LUA_RUN", 0);
+elseif fwversion < t4minfirmware then
+  print("Error: this example requires firmware version", t4minfirmware, "or higher on the T4")
+  print("Stopping the script")
+  -- Writing a 0 to LUA_RUN stops the script
+  MB.W(6000, 1, 0)
 end
 
 -- Write 0 to the DIO_ANALOG_ENABLE register to configure all FIO lines as
