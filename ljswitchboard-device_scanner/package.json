@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-device_scanner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A node project dedicated to finding ALL LabJack devices that are able to be connected to.",
   "main": "./lib/ljswitchboard-device_scanner",
   "scripts": {
@@ -34,11 +34,11 @@
     "url": "https://github.com/chrisJohn404/ljswitchboard-device_scanning/issues"
   },
   "dependencies": {
-    "async": "3.1.0",
-    "labjack-nodejs": "^1.0.0",
-    "ljm-ffi": "^1.0.11",
+    "async": "1.5.2",
+    "labjack-nodejs": "^1.0.2",
+    "ljm-ffi": "^1.0.13",
     "ljswitchboard-data_parser": "^1.0.1",
-    "ljswitchboard-ljm_device_curator": "^1.0.0",
+    "ljswitchboard-ljm_device_curator": "^1.0.2",
     "ljswitchboard-ljm_driver_constants": "^1.0.0",
     "ljswitchboard-modbus_map": "^1.0.0",
     "q": "1.5.1"
