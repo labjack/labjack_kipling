@@ -172,20 +172,20 @@ var filesToDelete = {
 				// 	'tunnel-agent',
 				// ]),
 			},
-			'lodash': {
-				'filesToSave': ['package.json', 'lodash.js', 'index.js'],
-				'foldersToSave': ['lib', 'node_modules'],
-			},
+			// 'lodash': {
+			// 	'filesToSave': ['package.json', 'lodash.js', 'index.js'],
+			// 	'foldersToSave': ['lib', 'node_modules'],
+			// },
 			'cheerio': {
 				'filesToDelete': [],
 				'foldersToDelete': [],
 				'node_modules': {
 					'filesToDelete': [],
 					'foldersToDelete': [],
-					'lodash': {
-						'filesToSave': ['package.json', 'index.js', 'lodash.js'],
-						'foldersToSave': ['lib', 'node_modules'],
-					}
+					// 'lodash': {
+					// 	'filesToSave': ['package.json', 'index.js', 'lodash.js'],
+					// 	'foldersToSave': ['lib', 'node_modules'],
+					// }
 				}
 			},
 			'json-schema': {

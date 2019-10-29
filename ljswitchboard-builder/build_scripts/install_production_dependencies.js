@@ -10,7 +10,7 @@ var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
 var startingDir = process.cwd();
 var TEMP_PROJECT_FILES_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY);
 
-var DEBUG_INSTALLATION = false;
+var DEBUG_INSTALLATION = true;
 
 
 var buildData = require('../package.json');
@@ -109,19 +109,20 @@ function innerInstallProductionDependency(name, directory) {
 				'stderr': stderr,
 			});
 		}
-		exec('npm update', {
-			'cwd': directory,
-		}, function(error, stdout, stderr) {
-			if(DEBUG_INSTALLATION) {
-				console.log('Finished updating', name);
-				console.log({
-					'error': error,
-					'stdout': stdout,
-					'stderr': stderr,
-				});
-			}
-			defered.resolve();
-		});
+		// exec('npm update', {
+		// 	'cwd': directory,
+		// }, function(error, stdout, stderr) {
+		// 	if(DEBUG_INSTALLATION) {
+		// 		console.log('Finished updating', name);
+		// 		console.log({
+		// 			'error': error,
+		// 			'stdout': stdout,
+		// 			'stderr': stderr,
+		// 		});
+		// 	}
+		// 	defered.resolve();
+		// });
+		defered.resolve();
 	});
 	return defered.promise;
 }

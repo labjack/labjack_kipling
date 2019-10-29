@@ -70,6 +70,11 @@ var buildScripts = [{
 }, {
 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToChildPList+'"',
+		'"'+pathToKiplingApp+'/Contents/Frameworks/nwjs Framework.framework/Libraries/ffmpegsumo.so"'].join(' '),
+	'text': 'ffmpegsumo.so lib',
+}, {
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--deep --entitlements "'+pathToChildPList+'"',
 		'"'+pathToKiplingApp+'/Contents/Frameworks/nwjs Helper EH.app/Contents/MacOS/nwjs Helper EH"'].join(' '),
 	'text': 'nwjs Helper EH',
 }, {

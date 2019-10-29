@@ -50,6 +50,9 @@ var filteredFilesAndFolders = [
 
 	// Filter out all of the node_modules...
 	'node_modules',
+
+	// Filter out package-lock file.
+	// 'package-lock.json',
 ];
 
 var os = {

@@ -34,6 +34,24 @@ var pathToBinaryPartials = [
 	'node'
 ].join(path.sep);
 
+var pathToRefBindingNode = [
+	__dirname,
+	'..',
+	'temp_project_files',
+	'ljswitchboard-io_manager',
+	'node_modules',
+	'ref','build','Release','binding.node'
+].join(path.sep);
+
+var pathToFFIBindingNode = [
+	__dirname,
+	'..',
+	'temp_project_files',
+	'ljswitchboard-io_manager',
+	'node_modules',
+	'ffi','build','Release','ffi_bindings.node'
+].join(path.sep);
+
 var pathToParentPListPartials = [
 	__dirname,
 	'..',
@@ -48,9 +66,13 @@ var pathToChildPListPartials = [
 	'kipling_child.plist'
 ].join(path.sep);
 
-var nodePath = path.resolve(path.join(pathToBinaryPartials))
+var nodePath = path.resolve(path.join(pathToBinaryPartials));
+var refBindingPath = path.resolve(path.join(pathToRefBindingNode));
+var ffiBindingPath = path.resolve(path.join(pathToFFIBindingNode));
 var pathToParentPList = path.resolve(path.join(pathToParentPListPartials))
 var pathToChildPList = path.resolve(path.join(pathToChildPListPartials))
+
+
 
 if(typeof(process.argv) !== 'undefined') {
 	var cliArgs = process.argv;
@@ -62,12 +84,23 @@ if(typeof(process.argv) !== 'undefined') {
 	}
 }
 
+
 console.log('nodePath', nodePath);
 var buildScripts = [{
 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime', 
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + nodePath + '"'].join(' '),
 	'text': 'Signing Node.exe',
+}, {
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime', 
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + refBindingPath + '"'].join(' '),
+	'text': 'Signing ref: binding.node',
+}, {
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime', 
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + ffiBindingPath + '"'].join(' '),
+	'text': 'Signing ffi: ffi_binding.node',
 }];
 
 

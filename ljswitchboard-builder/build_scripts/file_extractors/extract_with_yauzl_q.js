@@ -28,11 +28,12 @@ function extractWithYauzlQ (from, to) {
     
     var asyncQueue = async.queue(extractEntry, 1);
     
-    asyncQueue.drain = function() {
+    function drain() {
       if (!finished) return;
       debug('zip extraction complete');
       defered.resolve();
     };
+    asyncQueue.drain(drain);
     
     zipfile.on("entry", function(entry) {
       debug('zipfile entry', entry.fileName);
