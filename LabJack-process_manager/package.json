@@ -1,6 +1,6 @@
 {
     "name": "process_manager",
-    "version": "0.0.16",
+    "version": "0.0.17",
     "author": {
         "name": "Chris Johnson",
         "url": "http://labjack.com"
@@ -26,15 +26,16 @@
         "node_modules"
     ],
     "dependencies": {
-        "async": "3.x",
+        "async": "1.5.2",
         "dict": "1.4.0",
-        "q": "1.x"
+        "q": "1.5.1"
     },
     "scripts": {
         "test": "node ./node_modules/nodeunit/bin/nodeunit ./test.js"
     },
     "devDependencies": {
-        "nodeunit": "0.11.x"
+        "diff": ">=3.5.0",
+        "nodeunit": "0.11.3"
     },
     "directories": {
         "lib": "./lib",
