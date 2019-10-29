@@ -1,6 +1,6 @@
 
 var q = require('q');
-var register_watcher = require('../lib/register_watcher');
+var register_watcher = require('../../lib/register_watcher');
 
 function createMockDevice() {
 	this.delay = 1;

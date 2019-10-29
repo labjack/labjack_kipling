@@ -1,8 +1,9 @@
 
 var q = require('q');
-var math = require('mathjs');
+// var math = require('mathjs');
+var gcd = require('compute-gcd');
 
-var DEBUG_DATA_COLLECTOR = true;
+var DEBUG_DATA_COLLECTOR = false;
 
 function createWatcherObject(watcherName, collectionFunction, callback, curatedDevice) {
 	this.timerRef = undefined;
@@ -20,6 +21,9 @@ function createWatcherObject(watcherName, collectionFunction, callback, curatedD
 
 	this.isDataCollectorActive = false;
 	var handleSuccessfulDataCollection = function(results) {
+		if(DEBUG_DATA_COLLECTOR) {
+			console.log('  - Successful Data Collection', results);
+		}
 		self.statistics.numReadResults += 1;
 		var newData = [];
 		// Parse data and determine if it is new.
@@ -70,6 +74,9 @@ function createWatcherObject(watcherName, collectionFunction, callback, curatedD
 		self.isDataCollectorActive = false;
 	};
 	var handleFailedDataCollection = function(errorData) {
+		if(DEBUG_DATA_COLLECTOR) {
+			console.log('  - Failed Data Collection', errorData);
+		}
 		// Ignore this data and indicate that the data collector isn't active
 		// anymore.
 		self.isDataCollectorActive = false;
@@ -175,7 +182,8 @@ function createWatcherObject(watcherName, collectionFunction, callback, curatedD
 			});
 			var coreRate;
 			if(collectionRates.length > 1) {
-				coreRate = math.gcd.apply(undefined, collectionRates);
+				// coreRate = math.gcd.apply(undefined, collectionRates);
+				coreRate = gcd(collectionRates);
 			} else {
 				coreRate = collectionRates[0];
 			}

@@ -105,11 +105,12 @@ process.on('uncaughtException', function(err) {
 var testGroups = {
 	'get_ljm_version': true,
 	'mock_device': {
-		'mock_device_test': true,
-		'mock_device_defaults_cache_test': true,
-		'mock_device_attrs_test': true,
-		'mock_device_upgrade_test': true,
-		'multiple_mock_device_upgrade_test': true,
+		'mock_device_test': false,
+		'mock_device_defaults_cache_test': false,
+		'mock_device_attrs_test': false,
+		'mock_device_upgrade_test': false,
+		'multiple_mock_device_upgrade_test': false,
+		'basic_watcher_test': false,
 	},
 	'digit': {
 		'digit_basic_test': false,
@@ -183,14 +184,20 @@ var testGroups = {
 		't4_is_auth_test': false,
 		't4_check_auth_and_upgrade_test': false,
 		't4_check_calibration_test': false,
+
+		// This is a windows only test as LJLogM is required.
 		't4_check_calibration_while_disconnected_test': false,
+
 		't4_read_recovery_fw_version_test': false,
 	},
 	't4_mock_tests': {
-		't4_basic_mock': false,
+		't4_basic_mock': true,
 	},
 	't5_mock_tests': {
-		't5_basic_mock': false,
+		't5_basic_mock': true,
+	},
+	't8_mock_tests': {
+		't8_basic_mock': true,
 	},
 	'dashboard': {
 		'basic_test': false,

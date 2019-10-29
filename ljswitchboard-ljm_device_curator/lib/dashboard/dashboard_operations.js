@@ -6,37 +6,55 @@ var fs = require('fs');
 var path = require('path');
 var modbusMap = require('ljswitchboard-modbus_map').getConstants();
 var dashboard_data_collector = require('./dashboard_data_collector');
-var _ = require('lodash');
 var device_events = require('../device_events');
 var dashboard_channel_parser = require('./dashboard_channel_parser');
 
+
 /*
- From here:
- http://jsfiddle.net/drzaus/9g5qoxwj/
+ * Two functions to generate an object-diff used to only report 
+ * values that have changed.
+
+ * General idea came from lodash/here:
+ * http://jsfiddle.net/drzaus/9g5qoxwj/
  */
-function deepDiff(a, b, r, reversible) {
-	_.each(a, function(v, k) {
-	  // already checked this or equal...
-	  if (r.hasOwnProperty(k) || b[k] === v) return;
-	  // but what if it returns an empty object? still attach?
-	  r[k] = _.isObject(v) ? _.diff(v, b[k], reversible) : v;
-	});
+
+function isObject(value) {
+	var type = typeof(value);
+	return value != null & (type === 'object' || type === 'function');
 }
 
-/* the function */
-_.mixin({
-	shallowDiff: function(a, b) {
-	  return _.omit(a, function(v, k) {
-	    return b[k] === v;
-	  });
-	},
-	diff: function(a, b, reversible) {
-	  var r = {};
-	  deepDiff(a, b, r, reversible);
-	  if(reversible) deepDiff(b, a, r, reversible);
-	  return r;
-	}
-});
+function objDiff(newObj, oldObj) {
+	var diffObj = {};
+
+	var newKeys = Object.keys(newObj);
+	var oldKeys = Object.keys(oldObj);
+	newKeys.forEach(function(newKey) {
+		var newObjProp = newObj[newKey];
+		var oldObjProp = undefined;
+		if(typeof(oldObj[newKey])) {
+			oldObjProp = oldObj[newKey];
+
+			if(isObject(oldObjProp)) {
+				diffObj[newKey] = {};
+				// If we are comparing two objects... recurse & extend.
+				var subDiffObj = objDiff(newObjProp, oldObjProp);
+				var subDiffKeys = Object.keys(subDiffObj);
+				subDiffKeys.forEach(function(key) {
+					diffObj[newKey][key] = subDiffObj[key];
+				});
+			} else {
+				// If we are comparing two ~values
+				if(newObjProp !== oldObjProp) {
+					diffObj[newKey] = newObjProp;
+				}
+			}
+		} else {
+			// The old object doesn't have this key.
+			diffObj[newKey] = newObjProp;
+		}
+	});
+	return diffObj;
+}
 
 var DEBUG_DASHBOARD_OPERATIONS = false;
 var DEBUG_DASHBOARD_GET_ALL = false;
@@ -142,21 +160,25 @@ function getDashboardOperations(self) {
 	// This logic should probably be put there?
 	function dataCollectorHandler(data) {
 		// debugDDC('New data', data['FIO0']);
-		var diffObj = _.diff(data, self.dataCache);
+		var diffObj = objDiff(data, self.dataCache);
 
 		// console.log('Data Difference - diff', diffObj);
+
 		// Clean the object to get rid of empty results.
-		diffObj = _.pickBy(diffObj, function(value, key) {
-			return Object.keys(value).length > 0;
+		var selectedResults = {};
+		Object.keys(diffObj).forEach(function(key) {
+			if(Object.keys(diffObj[key]).length > 0) {
+				selectedResults[key] = diffObj[key];
+			}
 		});
 
 		var numKeys = Object.keys(data);
-		var numNewKeys = Object.keys(diffObj);
+		var numNewKeys = Object.keys(selectedResults);
 		// console.log('Num Keys for new data', numKeys, numNewKeys);
-		// console.log('Data Difference - pickBy', diffObj);
+		// console.log('Data Difference - pickBy', selectedResults);
 		self.dataCache = data;
 
-		self.emit(device_events.DASHBOARD_DATA_UPDATE, diffObj);
+		self.emit(device_events.DASHBOARD_DATA_UPDATE, selectedResults);
 	}
 
 	// Function that creates the "bundle" that is built-up and passed between

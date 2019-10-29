@@ -45,7 +45,7 @@ var stopTest = function(test, err) {
 
 var deviceInfo = {
 	'T4': {
-		'isMockDevice': false,
+		'isMockDevice': true,
 		'ct': 'USB',
 		// 'serialNumber': 44001000,
 		'serialNumber': 440010006,
