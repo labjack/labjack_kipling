@@ -4,7 +4,7 @@ var fs = require('fs');
 var q = require('q');
 var async = require('async');
 // var jsonParser = require('json-parser');
-var commentJson = require('comment-json');
+// var commentJson = require('comment-json');
 
 var get_cwd = require('./get_cwd');
 
@@ -101,12 +101,32 @@ var checkGYPIFile = function(directoryInfo) {
             	// Convert the data buffer to a string
             	var fileStr = data.toString('ascii');
 
+                /* OLD (works if external json parser w/ comments works)
             	// Replace the '#' style comments with the '// ' style
-            	var splitStr = fileStr.split('# ');
-            	fileStr = splitStr.join('// ');
+            	// var splitStr = fileStr.split('# ');
+            	// fileStr = splitStr.join('// ');
 
             	// Parse the file as a .json file
-            	var gypiFileInfo = commentJson.parse(fileStr);
+            	// var gypiFileInfo = commentJson.parse(fileStr);
+                // var gypiFileInfo = jsonParser(fileStr);
+                */
+
+                /* New (10/28/2019): Parse w/ vanilla json parser.*/
+                var splitStr = fileStr.split('\n');
+                var concattedStr = '';
+                splitStr.forEach(function(str) {
+                    if(str.indexOf('#') < 0) {
+                        concattedStr += str;
+                    }
+                });
+
+                try{
+                    var gypiFileInfo = JSON.parse(concattedStr);
+                } catch(err) {
+                    directoryInfo.isValid = false;
+                    directoryInfo.error = 'Failed to parse file w/ JSON.parse: ' + directoryInfo.path;
+                    defered.resolve(directoryInfo);
+                }
 
             	// Get the arch and os types
             	var buildArch = getArch(gypiFileInfo.variables);
