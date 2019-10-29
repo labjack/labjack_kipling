@@ -42,6 +42,7 @@ if (process.platform === "darwin") {
 
 // Get an instance of the startup window
 var win = gui.Window.get();
+// win.showDevTools();
 
 // perform other requires
 var path = require('path');
@@ -397,16 +398,31 @@ var loadSecondaryPackages = function() {
 				});
 			});
 
-			// Instruct the window_manager to open any managed nwApps
-			window_manager.openManagedApps(packages);
+			console.log('Opening managed apps', packages);
+			try {
+				// Instruct the window_manager to open any managed nwApps
+				window_manager.linkOutput(console);
+				window_manager.openManagedApps(packages,console).then(
+					function(res) {
+						defered.resolve();
+					}, function(err) {
+						defered.reject(err);
+					})
+			} catch(err) {
+				console.error('Error opening', err);
+				console.log('Failed to open managed apps (sp)', err);
+				splashScreenUpdater.update('Failed to open managed apps (sp)');
+				defered.reject(err);
+			}
 
 
 			// Execute test function to proove that io_manager can be used.
 			// global.require('../../test.js').runProgram();
-
 		}, function(err) {
 			console.log('Failed to run package manager (sp)', err);
 			splashScreenUpdater.update('Failed to run package manager (sp)');
+
+			defered.reject();
 		});
 	}
 
@@ -423,7 +439,16 @@ win.on('loaded', function() {
 		throw new Error();
 	} else {
 		initializeProgram()
-		.then(loadSecondaryPackages, errorHandler);
+		.then(loadSecondaryPackages, errorHandler)
+		.then(function(res) {
+			// console.log('Finished starting...?', res);
+			// window_manager.windowManager.managedWindows.core.win.show();
+			// window_manager.windowManager.managedWindows.core.win.showDevTools();
+		}, function(err) {
+			console.error('Error loading', err);
+		}).catch(function(err) {
+			console.error('Big error loading', err);
+		})
 	}
 });
 
