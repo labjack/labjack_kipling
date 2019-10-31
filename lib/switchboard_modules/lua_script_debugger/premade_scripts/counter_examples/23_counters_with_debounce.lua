@@ -1,10 +1,14 @@
---This program demonstrates how to configure counters, with debounce, using DIO
---channels. The debounce time for each counter will be between debounceInt and 
---2*debounceInt milliseconds. The debounce time is determined by the duration
---of the interval and when in the interval the first input is received.
---This example is only for the T7 and T7-Pro.
+--[[
+    Name: 23_counters_with_debounce.lua
+    Desc: This program demonstrates how to configure counters, with debounce,
+          using DIO channels.
+    Note: The debounce time for each counter will be between debounceinterval and
+          2*debounceinterval milliseconds. The debounce time is determined by the
+          duration of the interval and when in the interval the first input
+          is received.
+--]]
 
---Array indeces 1-23 correspond with DIO0-22 as the following:
+--Array indexes 1-23 correspond with DIO0-22 as the following:
   --Index:  1             Channel:  FIO0  (DIO0)
   --Index:  2             Channel:  FIO1  (DIO1)
   --Index:  3             Channel:  FIO2  (DIO2)
@@ -29,113 +33,119 @@
   --Index:  22            Channel:  MIO1  (DIO21)
   --Index:  23            Channel:  MIO2  (DIO22)
 
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
+local modbus_read = MB.R
+local modbus_write = MB.W
+local check_interval = LJ.CheckInterval
 
 print("Create and read 23 counters with debounce.")
-
-local debounceInt = 50  --50 ms debounce interval
-local mbRead=MB.R               --Local functions for faster processing
-local mbWrite=MB.W
-
-if (mbRead(60000, 3) ~= 7) then
+-- Read the PRODUCT_ID register to get the device type. This script will not
+-- run correctly on devices other than the T7
+if (modbus_read(60000, 3) ~= 7) then
   print("This example is only for the T7. Exiting Lua Script.")
-  mbWrite(6000, 1, 0)
+  -- Write a 0 to LUA_RUN to stop the script if not using a T7
+  modbus_write(6000, 1, 0)
 end
 
---1 = Rising edge, 0 = falling
+-- Use a 50ms debounce interval
+local debounceinterval = 50
+-- 1 = Rising edge, 0 = falling
 local edge = {}
-edge[1] = 0
-edge[2] = 0
-edge[3] = 0
-edge[4] = 0
-edge[5] = 0
-edge[6] = 0
-edge[7] = 0
-edge[8] = 0
-edge[9] = 0
-edge[10] = 0
-edge[11] = 0
-edge[12] = 0
-edge[13] = 0
-edge[14] = 0
-edge[15] = 0
-edge[16] = 0
-edge[17] = 0
-edge[18] = 0
-edge[19] = 0
-edge[20] = 0
-edge[21] = 0
-edge[22] = 0
-edge[23] = 0
+for i = 1, 23 do
+  -- Set all 23 counters to increment on falling edges
+  edge[i] = 0
+end
 
 local bits = {}
-local bits_new = {}
+local newbits = {}
 local count = {}
-local debouncedCount = {}
---0 will mean that the counter has not recently been incremented
-local recentIncr = {}
+local debouncedcount = {}
+-- 0 will mean that the counter has not recently been incremented
+local recentlyinc = {}
 
---The throttle setting can correspond roughly with the length of the Lua
---script. A rule of thumb for deciding a throttle setting is
---throttle = (3*NumLinesCode) + 20
-local throttleSetting = 100    --Default throttle setting is 10 instructions
-mbWrite(2600, 0, 0)  --FIO to input
-mbWrite(2601, 0, 0)  --EIO to input
-mbWrite(2602, 0, 0)  --COI to input
-mbWrite(2603, 0, 0)  --MIO to input
+-- The throttle setting can correspond roughly with the length of the Lua
+-- script. A rule of thumb for deciding a throttle setting is
+-- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
+local throttle = 100
+LJ.setLuaThrottle(throttle)
+throttle = LJ.getLuaThrottle()
+print ("Current Lua Throttle Setting: ", throttle)
 
-LJ.setLuaThrottle(throttleSetting)
-ThrottleSetting = LJ.getLuaThrottle()
-print ("Current Lua Throttle Setting: ", throttleSetting)
+-- Set FIO registers to input (by writing 0 to FIO_DIRECTION)
+modbus_write(2600, 0, 0)
+-- Set EIO registers to input (by writing 0 to EIO_DIRECTION)
+modbus_write(2601, 0, 0)
+-- Set COI registers to input (by writing 0 to CIO_DIRECTION)
+modbus_write(2602, 0, 0)
+-- Set MIO registers to input (by writing 0 to MIO_DIRECTION)
+modbus_write(2603, 0, 0)
 
 for i=1, 23 do
   bits[i] = 0
-  bits_new[i] = 99
+  newbits[i] = 99
   count[i] = 0
-  debouncedCount[i] = 0
-  recentIncr[i] = 0
+  debouncedcount[i] = 0
+  recentlyinc[i] = 0
 end
 
-LJ.IntervalConfig(0, debounceInt)          --set interval to debounceInt (ms)
-local checkInterval=LJ.CheckInterval
-
+--Setup an interval(in ms) for the counter debounce
+LJ.IntervalConfig(0, debounceinterval)
+-- Run the program in an infinite loop
 while true do
+  -- Read digital channels DIO0-22
   for i=1, 23 do
-    bits_new[i] = mbRead((i-1)+2000, 0)
+    newbits[i] = modbus_read((i-1)+2000, 0)
   end
 
   for i=1, 23 do
-    if bits[i] ~= bits_new[i] then
+    -- If bits[i] is different from newbits[i] the counter state changed
+    if bits[i] ~= newbits[i] then
+      -- If the counter should increase on a rising edge
       if edge[i] == 1 then
+        -- If the last counter state was 0 then there was a rising edge, increment
+        -- the counter
         if bits[i] == 0 then
           count[i] = count[i] + 1
         end
+      -- If the counter should increase on a falling edge
       else
+        -- If the last counter state was 1 then there was a falling edge,
+        -- increment the counter
         if bits[i] == 1 then
           count[i] = count[i] + 1
         end
       end
-      bits[i] = bits_new[i]
+      -- Adjust bits to reflect the new counter state
+      bits[i] = newbits[i]
     end
   end
 
-  --update debounced counter
-  if checkInterval(0) then   --interval completed
+  -- Update the debounced counter
+  -- If a debounce interval is done
+  if check_interval(0) then
     for i=1, 23 do
-      if recentIncr[i] == 0 then
-        if count[i] > debouncedCount[i] then
-          recentIncr[i] = 1
-          debouncedCount[i] = debouncedCount[i] + 1
-          count[i] = debouncedCount[i]
+      -- If the counter did not increase recently any new counts are not due to
+      -- bounce
+      if recentlyinc[i] == 0 then
+        -- If there are new counts, add them to the debouncedcounts
+        if count[i] > debouncedcount[i] then
+          recentlyinc[i] = 1
+          debouncedcount[i] = debouncedcount[i] + 1
+          count[i] = debouncedcount[i]
           if edge[i] == 1 then
-            print ("Counter: ", i, " Rising: ", debouncedCount[i])
+            print ("Counter: ", i, " Rising: ", debouncedcount[i])
           else
-            print ("Counter: ", i, " Falling: ", debouncedCount[i])
+            print ("Counter: ", i, " Falling: ", debouncedcount[i])
           end
-          mbWrite(((i-1)*2)+46000, 3, debouncedCount[i]) --Save in User RAM
+          -- Write the debounced counter values to USER_RAM
+          modbus_write(((i-1)*2)+46000, 3, debouncedcount[i])
         end
+      -- If the counter did increase recently it is likely due to bounce,
+      -- ignore any increase to count
       else
-        count[i] = debouncedCount[i]
-        recentIncr[i] = 0
+        count[i] = debouncedcount[i]
+        recentlyinc[i] = 0
       end
     end
   end

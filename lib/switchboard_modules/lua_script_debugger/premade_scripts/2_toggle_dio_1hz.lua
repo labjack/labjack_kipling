@@ -1,31 +1,37 @@
+--[[
+    Name: 2_toggle_dio_1hz.lua
+    Desc: This example shows how to toggle DIO
+    Note: This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+--]]
+
 print("Toggle the digital I/O called FIO3 (FIO5 on T4) at 1 Hz. Generates a 0.5Hz square wave.")
-local count = 0
-local high = 0
-local mbWrite=MB.W
 
-LJ.IntervalConfig(0, 1000)      --set interval to 1000 for 1000ms
-local checkInterval=LJ.CheckInterval
-
-local outPin = 2003--FIO3. Changed if T4 instead of T7
-devType = MB.R(60000, 3)
-if devType == 4 then
-	outPin = 2005--FIO5 on T4
+-- Assume the user is using a T7, toggle FIO3
+local outpin = 2003
+local devtype = MB.readName("PRODUCT_ID")
+-- If the user is actually using a T4, toggle FIO5
+if devtype == 4 then
+	outpin = 2005
 end
 
+local diostatus = 0
+-- Configure a 1000ms interval
+LJ.IntervalConfig(0, 1000)
+-- Run the program in an infinite loop
 while true do
-  if checkInterval(0) then   --interval completed
-    if high == 1 then
-      high = 0
-      mbWrite(outPin, 0, 0)        --write 0 to FIO3 (FIO5 on T4). Address is 2003, type is 0, value is 0(output low)
-      print(high, "low")
-      mbWrite(46000, 3, 0)        -- Set register "USER_RAM0_F32".  Address 46000, type 3
-      mbWrite(46002, 3, 200)      -- Set register "USER_RAM1_F32".  Address 46002, type 3
+  -- If an interval is done
+  if LJ.CheckInterval(0) then
+    -- If the DIO pin is set high
+    if diostatus == 1 then
+      -- Set the DIO pin low
+      diostatus = 0
+      print(diostatus, "low")
     else
-      high = 1
-      mbWrite(outPin, 0, 1)        --write 1 to FIO3 (FIO5 on T4). Address is 2003, type is 0, value is 1(output high)
-      print(high, "high")
-      mbWrite(46000, 3, 200)      -- Set register "USER_RAM0_F32".  Address 46000, type 3
-      mbWrite(46002, 3, 0)        -- Set register "USER_RAM1_F32".  Address 46002, type 3
+      -- Set the DIO pin high
+      diostatus = 1
+      print(diostatus, "high")
     end
+    -- Apply the change to the DIO pin register (toggle on or off)
+    MB.W(outpin, diostatus)
   end
 end

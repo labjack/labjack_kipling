@@ -1,27 +1,41 @@
-print("Benchmarking Test: Low-Level toggle of orange Status LED as fast as possible.")
---This example will toggle the orange LED at 30-40kHz
---Note: Most commonly users should throttle their code execution using the functions:
---"LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0) then" ...
+--[[
+    Name: low_level_speed_test-toggle_led.lua
+    Desc: This example will toggle the orange LED as fast as possible
+    Note: In most cases, users should throttle their code execution using the
+          functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
 
+          On a T7 (FW 1.0282) this example runs at around 59kHz
+          On a T4 (FW 1.0023) this example runs at around 60kHz
+--]]
 
---The throttle setting can correspond roughly with the length of the Lua script.
---A rule of thumb for deciding a throttle setting is Throttle = (3*NumLinesCode) + 20
-ThrottleSetting = 40    --Default throttle setting is 10 instructions
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
+local check_interval = LJ.CheckInterval
+local toggle_led = LJ.ledtog
 
-LJ.setLuaThrottle(ThrottleSetting)
-ThrottleSetting = LJ.getLuaThrottle()
-print ("Current Lua Throttle Setting: ", ThrottleSetting)
+print("Low-Level Benchmarking Test: toggle orange status LED as fast as possible.")
+-- The throttle setting can correspond roughly with the length of the Lua
+-- script. A rule of thumb for deciding a throttle setting is
+-- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
+local throttle = 40
+LJ.setLuaThrottle(throttle)
+throttle = LJ.getLuaThrottle()
+print ("Current Lua Throttle Setting: ", throttle)
 
-Print_interval_ms = 2000
-c = 0
-LJ.IntervalConfig(0, Print_interval_ms)
+local numwrites = 0
+local interval = 2000
 
+-- Configure an interval of 2000ms
+LJ.IntervalConfig(0, interval)
+-- Run the program in an infinite loop
 while true do
-  LJ.ledtog()
-  c = c + 1
-  if LJ.CheckInterval(0) then
-    c = c / (Print_interval_ms / 1000)
-    print ("Frequency in Hz: ", c)
-    c = 0
+  toggle_led()
+  numwrites = numwrites + 1
+  -- If a 2000ms interval is done
+  if check_interval(0) then
+    -- Convert the number of writes per interval into a frequency
+    numwrites = numwrites / (interval / 1000)
+    print ("Frequency in Hz: ", numwrites)
+    numwrites = 0
   end
 end

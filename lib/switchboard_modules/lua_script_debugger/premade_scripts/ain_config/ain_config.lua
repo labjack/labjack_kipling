@@ -1,53 +1,69 @@
--- This is an example showing how to configure analog input settings on
--- on T-Series devices.
-print("Configure & Read Analog Input")
+--[[
+    Name: ain_config.lua
+    Desc: This is an example showing how to configure analog input settings on
+          T-Series devices.
+--]]
 
-ainChannels = {0,1} -- Read AIN0 and AIN1
-ainRange = 10 -- +/-10V
-ainResolution = 1 -- Fastest
-ainSettling = 0 -- Default
+-------------------------------------------------------------------------------
+--  Desc: This function can be used to configure general analog input settings
+--        such as range, resolution, and settling.  More information about
+--        these settings can be found on the LabJack website under the AIN
+--        section:
+--          https://labjack.com/support/datasheets/t-series/ain
+-------------------------------------------------------------------------------
+local function ain_channel_config(ainchannel, range, resolution, settling, isdifferential)
+  -- Set AIN range
+  MB.W(40000 + ainchannel * 2, 3, range)
+  -- Set resolution index
+  MB.W(41500 + ainchannel * 1, 0, resolution)
+  -- Set settling time
+  MB.W(42000 + ainchannel * 2, 3, settling)
 
--- This function can be used to configure general analog input settings such as
--- Range, Resolution, and Settling.  More information about these settings can
--- be found on the LabJack website under the AIN section:
--- https://labjack.com/support/datasheets/t-series/ain
-function ainChConfig(ainChNum, range, resolution, settling, isDifferential)
-    MB.W(40000 + ainChNum * 2, 3, range) -- Set AIN Range
-    MB.W(41500 + ainChNum * 1, 0, resolution) -- Set Resolution Index
-    MB.W(42000 + ainChNum * 2, 3, settling) -- Set Settling US
-
-    dt = MB.R(60000, 3) -- Read device type
-    if isDifferential and (ainChNum%2 == 0) and (dt == 7) then
-        -- The negative channels setting is only valid for even
-        -- analog input channels and is not valid for the T4.
-        if (ainChNum < 14) then
-            -- The negative channel is 1+ the channel for AIN0-13 on the T7
-            MB.W(41000 + ainChNum, 0, ainChNum + 1)
-        elseif (ainChNum > 47) then
-            -- The negative channel is 8+ the channel for AIN48-127 on the T7
-            -- when using a Mux80.
-            -- https://labjack.com/support/datasheets/accessories/mux80
-            MB.W(41000 + ainChNum, 0, ainChNum + 8)
-        else
-            print(string.format("Can not set negative channel for AIN%d",ainChNum))
-        end
+  -- Read the device type
+  local devicetype = MB.R(60000, 3)
+  -- Setup the negative channel if using a differential input
+  if isdifferential and (ainchannel%2 == 0) and (devicetype == 7) then
+    -- The negative channels setting is only valid for even
+    -- analog input channels and is not valid for the T4.
+    if (ainchannel < 14) then
+      -- The negative channel is 1+ the channel for AIN0-13 on the T7
+      MB.W(41000 + ainchannel, 0, ainchannel + 1)
+    elseif (ainchannel > 47) then
+      -- The negative channel is 8+ the channel for AIN48-127 on the T7
+      -- when using a Mux80.
+      -- https://labjack.com/support/datasheets/accessories/mux80
+      MB.W(41000 + ainchannel, 0, ainchannel + 8)
+    else
+      print(string.format("Can not set negative channel for AIN%d",ainchannel))
     end
+  end
 end
+
+print("Configure & Read Analog Input")
+-- Use AIN0 and AIN1 for our analog inputs
+local ainchannels = {0,1}
+-- Use +/-10V for analog input range
+local ainrange = 10
+-- Resolution of 1 is the fastest setting
+local ainresolution = 1
+-- Use the default settling time
+local ainsettling = 0
 
 -- Configure each analog input
-for i=1,table.getn(ainChannels) do
-    ainChConfig(ainChannels[i], ainRange, ainResolution, ainSettling)
+for i=1,table.getn(ainchannels) do
+  ain_channel_config(ainchannels[i], ainrange, ainresolution, ainsettling)
 end
 
-LJ.IntervalConfig(0, 500) -- Configure interval
-local checkInterval=LJ.CheckInterval
-
+-- Configure an interval of 500ms
+LJ.IntervalConfig(0, 500)
+-- Run the program in an infinite loop
 while true do
-  if checkInterval(0) then -- interval finished
+  -- If an interval is done
+  if LJ.CheckInterval(0) then
     -- Read & Print out each read AIN channel
-    for i=1, table.getn(ainChannels) do
-        ainVal = MB.R(ainChannels[i] * 2, 3)
-        print(string.format("AIN%d: %.3f", ainChannels[i], ainVal))
+    for i=1, table.getn(ainchannels) do
+      local ainval = MB.R(ainchannels[i] * 2, 3)
+      print(string.format("AIN%d: %.3f", ainchannels[i], ainval))
     end
   end
 end

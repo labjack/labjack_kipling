@@ -1,95 +1,97 @@
+--[[
+    Name: 13_uart_example.lua
+    Desc: Example showing how to use a UART
+    Note: This example requires you to connect a jumper between the RX and TX pins
+
+          See the UART section of the T7 datasheet:
+            http://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
+
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+--]]
+
 print("Basic UART example.")
 print("Please connect a jumper wire between FIO0 and FIO1 (FIO4 and FIO5 on T4)")
 print("")
---UART part of the T7 datasheet http://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
-
-local mbRead=MB.R			--local functions for faster processing
-local mbWrite=MB.W
-
-local RXPin = 1--FIO1. Changed if T4 instead of T7
-local TXPin = 0--FIO0
-devType = MB.R(60000, 3)
-if devType == 4 then
-	RXPin = 5--FIO5 on T4
-	TXPin = 4--FIO4
+-- Assume the device being used is a T7, use FIO1 for the RX pin
+local rxpin = 1
+-- Use FIO0 for the TX pin
+local txpin = 0
+local devtype = MB.readName("PRODUCT_ID")
+-- If actually using a T4
+if devtype == 4 then
+  -- Change the RX pin to FIO5
+  rxpin = 5
+  -- Change the TX pin to FIO4
+  txpin = 4
 end
 
-mbWrite(5400, 0, 0)      --disable ASYNCH during config
-
+--disable ASYNCH during configuration
+MB.writeName("ASYNCH_ENABLE", 0)
 -- Baud Example Options: 4800,9600,14400,19200,38400,57600,115200
-mbWrite(5420, 1, 9600)   --baud, 9600 is default of FGPMMOPA6H
+MB.writeName("ASYNCH_BAUD", 9600)
+-- Set the RX pin
+MB.writeName("ASYNCH_RX_DIONUM", rxpin)
+-- Set the TX pin
+MB.writeName("ASYNCH_TX_DIONUM", txpin)
+-- Set 0 parity
+MB.writeName("ASYNCH_PARITY", 0)
+-- Set the buffer size to be 600 bytes
+MB.writeName("ASYNCH_RX_BUFFER_SIZE_BYTES", 600)
+-- Enable ASYNCH
+MB.writeName("ASYNCH_ENABLE", 1)
 
-mbWrite(5405, 0, RXPin)      --RX set to FIO1 (FIO5 on T4)
-mbWrite(5410, 0, TXPin)      --TX set to FIO0 (FIO4 on T4)
-mbWrite(5460, 0, 0)      --ASYNCH_PARITY set to 0=none
-mbWrite(5430, 0, 600)    --ASYNCH_RX_BUFFER_SIZE_BYTES set to 600
+local teststring = "Hello World!"
+local strlen = string.len(teststring)
+print("Sending String of length:", strlen)
 
-mbWrite(5400, 0, 1)      --enable ASYNCH
-
--- Various variables
-local UART_TEST_STRING = "Hello World!"
-local strLen = 0
-local strData = {}
-
--- Set the baud rate
-local strLen = string.len(UART_TEST_STRING)
-print("Sending String of length:", strLen)
-
--- Allocate space for the string
-mbWrite(5440, 0, strLen) --ASYNCH_NUM_BYTES_TX, UINT16 (0)
---Convert and write string to the allocated UART TX buffer
-for i=1, strLen do
-  -- COnvert ASCII character to number
-  local ASCIIcharAsByte = string.byte(UART_TEST_STRING, i)
-  -- Write data to TX buffer
-  mbWrite(5490, 0, ASCIIcharAsByte) --ASYNCH_DATA_TX, UINT16 (0)
-end
--- Send data saved in TX buffer
-mbWrite(5450, 0, 1) --ASYNCH_TX_GO, UINT16(0)
-
-
-
--- Configure the interval timer for once per second.
+-- Configure an interval of 1000ms
 LJ.IntervalConfig(0, 1000)
-local checkInterval=LJ.CheckInterval
 
--- Variables used to end the program
-local maxNumIterations = 3
-local currentIteration = 0
-local runApp = true
+-- Variables used to stop the program
+local maxiterations = 3
+local currentiteration = 0
+local running = true
 
--- Enter while loop.
-while runApp do
+while running do
   -- Check to see if the interval is completed.
-  if checkInterval(0) then
-    -- Read the number of bytes in RX buffer
-    local numBytesRX = mbRead(5435, 0) --ASYNCH_NUM_BYTES_RX, UINT16(0)
-    
-    -- If there are more than zero bytes...
-    if numBytesRX > 0 then
-      print ("numBytesRX ", numBytesRX)
-      
-      -- Allocate a string to save data to
-      local dataStr = ""
-      
-      -- Read data from the T7 and conver to a string
-      for i=1, numBytesRX do
-        local dataByte = mbRead(5495, 0) --ASYNCH_DATA_RX, UINT16(0)
-        local dataChar = string.char(dataByte)
-        dataStr = dataStr .. dataChar
-      end
-      
-      print("Data:",dataStr)
+  if LJ.CheckInterval(0) then
+    -- Allocate space for the string
+    MB.writeName("ASYNCH_NUM_BYTES_TX", strlen)
+    -- Convert and write the string to the UART TX buffer
+    for i=1, strlen do
+      -- Convert ASCII character to number
+      local charbyte = string.byte(teststring, i)
+      -- Write data to the TX buffer
+      MB.writeName("ASYNCH_DATA_TX", charbyte)
     end
-    
-    -- Decide when to exit
-    if currentIteration < maxNumIterations then
-      currentIteration = currentIteration + 1
+    -- Send data saved in the TX buffer
+    MB.writeName("ASYNCH_TX_GO", 1)
+    -- Read the number of bytes in RX buffer
+    local rxbytes = MB.readName("ASYNCH_NUM_BYTES_RX")
+    -- If there are more than zero bytes...
+    if rxbytes > 0 then
+      print ("RX bytes ", rxbytes)
+      -- Allocate a string to save data to
+      local datastr = ""
+      -- Read data from the T7 and convert it to a string
+      for i=1, rxbytes do
+        local databyte = MB.readName("ASYNCH_DATA_RX")
+        local datachar = string.char(databyte)
+        -- Concatenate the data string with the data char
+        datastr = datastr .. datachar
+      end
+      print("Data:",datastr)
+      print("")
+    end
+    -- Exit after 3 iterations
+    if currentiteration < maxiterations then
+      currentiteration = currentiteration + 1
     else
-      runApp = false
+      running = false
     end
   end
 end
 
 print("Script Finished")
-mbWrite(6000, 1, 0)
+-- Writing 0 to LUA_RUN stops the script
+MB.writeName("LUA_RUN", 0)

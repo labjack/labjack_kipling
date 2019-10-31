@@ -21,7 +21,7 @@ local difterm = 0
 
 LJ.IntervalConfig(0, timeStep)              --set interval to 100 for 100ms
 
-local checkInterval = LJ.CheckInterval		--create local functions
+local checkInterval = LJ.CheckInterval      --create local functions
 local mbRead=MB.R
 local mbWrite=MB.W
 

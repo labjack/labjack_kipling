@@ -1,56 +1,79 @@
+--[[
+    Name: 14_average_min_max.lua
+    Desc: Example program that samples an analog input at a set frequency for a
+          certain number of samples. It takes the average, minimum, and maximum
+          of sampled data and prints it to the console as well as saving them
+          to the first 3 addresses of user RAM
+
+    Note: Change scanrate and numscans to achieve a desired time interval
+          The desired sampling time in seconds = numscans/scanrate
+          Change the AIN_RESOLUTION_INDEX if faster speeds are desired
+
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+--]]
+
 print("Sampling average/min/max: Read AIN1 at set rate for certain number of samples. Outputs average, minimum, and maximum")
---Example program that samples an analog input at a set frequency for a certain number of samples.
---Takes the average, minimum, and maximum of sampled data and prints it to the console as well as saving them to the first 3 addresses of user RAM
+-- Ensure analog is on
+MB.writeName("POWER_AIN", 1)
 
---------------------------------------------------------------
---Change scanRate and numScans to achive desired time interval
---Desired sampling time in seconds = numScans/scanRate
---Change the AIN_RESOLUTION_INDEX if faster speeds are desired
---------------------------------------------------------------
-local scanRate = 500      --Rate that data will be read in Hz
-local numScans = 5000     --number of scans to collect
-
-local mbWrite=MB.W        --create local functions for reading/writing at faster speeds
-local mbRead=MB.R
-
-mbWrite(48005, 0, 1)     --Ensure analog is on
-
-devType = MB.R(60000, 3)
-if devType == 7 then--if T7
-	mbWrite(43903, 0, 8)     --set AIN_ALL_RESOLUTION_INDEX to 8 (default is 8 on t7, 9 on PRO)
-	mbWrite(43900, 3,10)     --set range to +-10V 
-elseif devType == 4 then--if T4
-	mbWrite(43903, 0, 0)     --set AIN_ALL_RESOLUTION_INDEX to Automatic (Usually highest available)
+local devtype = MB.readName("PRODUCT_ID")
+-- If using a T7
+if devtype == 7 then
+  -- Set the resolution index to 8 (the default value is 8 on the T7, 9 on the PRO)
+	MB.writeName("AIN_ALL_RESOLUTION_INDEX", 8)
+  --set the input voltage range to +-10V
+	MB.writeName("AIN_ALL_RANGE",10)
+  -- If using a T4
+elseif devtype == 4 then
+  -- Set the resolution index to Automatic (usually the highest available)
+	MB.writeName("AIN_ALL_RESOLUTION_INDEX", 0)
 end
 
+local alldata = 0
+local iter = 0
+-- Initialize min to a large value so the first data value is set to min
+local minv = 1000
+-- Initialize max to a small value so the first data value is set to max
+local maxv = -1000
+-- The rate that data will be read in Hz
+local scanrate = 50
+-- The number of scans to collect
+local numscans = 5000
+-- Configure an interval (in ms) to wait before acquiring new data
+LJ.IntervalConfig(0, 1000 / scanrate)
+print("Estimated time to execute (s): ", numscans / scanrate)
 
-local avgData=0
-local iter=0
-local minV=1000                 --set large value so the minimum check sets first value
-local maxV=(-1000)              --set small value so the maximum check sets first value
-LJ.IntervalConfig(0, 1000/scanRate)   --Define the scan interval in ms.
-local checkInterval=LJ.CheckInterval  --create local function to check the interval for faster loop time
-
-print("Estimated time to execute (s): ",numScans/scanRate)
-
-while iter<numScans do          --loop as fast as possible until number of scans has been aquired
-  if checkInterval(0) then      --if interval time has been reached, add 1 to iter and take data reading
-    iter=1+iter
-    local data0 = mbRead(2,3)      --take a reading on the AIN1 line
-    if(data0>maxV) then         --maximum check, sets maxV if data is above previous maxV 
-      maxV=data0
+-- Loop as fast as possible until the desired number of scans have been acquired
+while iter < numscans do
+  -- If an interval is done increase iter and read data from AIN
+  if LJ.CheckInterval(0) then
+    iter = 1 + iter
+    -- Read AIN1
+    local newdata = MB.readName("AIN1")
+    -- Check if the new data is the new maximum
+    if (newdata > maxv) then
+      maxv = newdata
     end
-    if(data0<=minV) then        --minimum check, sets minV if data is below previous minV
-      minV=data0
+    -- Check if the new data is the new minimum
+    if (newdata <= minv) then
+      minv = newdata
     end
-    avgData=data0+avgData       --add data to previous data readings (divide to get average later)
+    -- Keep a summation of all acquired data in order to get an average later
+    alldata = newdata + alldata
   end
 end
-local avg=avgData/numScans            --divide added data by the number of scans to get average
+-- Calculate the average of all of the acquired data
+local avg = alldata / numscans
 
-mbWrite(46000,3,avg)                --Write average, min, and max into userRAM
-mbWrite(46002,3,maxV) 
-mbWrite(46004,3,minV)
+-- Write the average, min, and max values to USER RAM
+MB.writeName("USER_RAM0_F32",avg)
+MB.writeName("USER_RAM1_F32",maxv)
+MB.writeName("USER_RAM2_F32",minv)
 print("Average voltage: ",avg)
-print("Min voltage: ",minV)
-print("Max voltage: ",maxV)
+print("Min voltage: ",minv)
+print("Max voltage: ",maxv)
+
+print("")
+print("Finished")
+-- Writing 0 to LUA_RUN stops the script
+MB.writeName("LUA_RUN", 0)

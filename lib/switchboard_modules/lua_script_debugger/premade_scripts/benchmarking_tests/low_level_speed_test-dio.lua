@@ -1,33 +1,59 @@
-print("Benchmarking Test: Low-Level toggle of FIO3/DIO3 (FIO5/DIO5 on T4) as fast as possible.")
---This example will output a digital waveform at at 20-25kHz on FIO3
---Note: Most commonly users should throttle their code execution using the functions:
---"LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0) then" ...
-local outDIO = 3--FIO3. Changed if T4 instead of T7
-devType = MB.R(60000, 3)
-if devType == 4 then
-	outDIO = 5--FIO5
+--[[
+    Name: low_level_speed_test-dio.lua
+    Desc: This example will output a digital waveform on as fast as possible
+    Note: In most cases, users should throttle their code execution using the
+          functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
+
+          On a T7 (FW 1.0282) this example runs at around 28kHz
+          On a T4 (FW 1.0023) this example runs at around 29kHz
+
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+--]]
+
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
+local dio_state_write = LJ.DIO_S_W
+local check_interval = LJ.CheckInterval
+
+print("Low-Level Benchmarking Test: toggle FIO3/DIO3 (FIO5/DIO5 on T4) as fast as possible.")
+-- The throttle setting can correspond roughly with the length of the Lua
+-- script. A rule of thumb for deciding a throttle setting is
+-- Throttle = (3*NumLinesCode)+20. The default throttle setting is 10 instructions
+local throttle = 40
+LJ.setLuaThrottle(throttle)
+throttle = LJ.getLuaThrottle()
+print ("Current Lua Throttle Setting: ", throttle)
+
+-- The PRODUCT_ID register holds the device type
+local devtype = MB.readName("PRODUCT_ID")
+-- Assume the device being used is a T7, use FIO3 pin (address = 2003)
+local outpin = 2003
+-- If actually using a T4
+if devtype == 4 then
+  -- Use FIO5 pin (address = 2005)
+  outpin = 2005
 end
 
---The throttle setting can correspond roughly with the length of the Lua script.
---A rule of thumb for deciding a throttle setting is Throttle = (3*NumLinesCode) + 20
-ThrottleSetting = 40    --Default throttle setting is 10 instructions
-LJ.DIO_D_W(outDIO, 1)        --Change FIO3 direction _D_ to output. Low level IO number is 3
+-- Change outpin direction to output
+LJ.DIO_D_W(outpin, 1)
 
-LJ.setLuaThrottle(ThrottleSetting)
-ThrottleSetting = LJ.getLuaThrottle()
-print ("Current Lua Throttle Setting: ", ThrottleSetting)
+local numwrites = 0
+local interval = 2000
 
-Print_interval_ms = 2000
-c = 0
-LJ.IntervalConfig(0, Print_interval_ms)
-
+-- Configure an interval of 2000ms
+LJ.IntervalConfig(0, interval)
+-- Run the program in an infinite loop
 while true do
-  LJ.DIO_S_W(outDIO, 0)      --Change the state _S_ of FIO to 0
-  LJ.DIO_S_W(outDIO, 1)      --Change the state _S_ of FIO to 1
-  c = c + 1
-  if LJ.CheckInterval(0) then
-    c = c / (Print_interval_ms / 1000)
-    print ("Frequency in Hz: ", c)
-    c = 0
+  -- Change the state of outpin to 0
+  dio_state_write(outpin, 0)
+  -- Change the state of outpin to 1
+  dio_state_write(outpin, 1)
+  numwrites = numwrites + 1
+  -- If a 2000ms interval is done
+  if check_interval(0) then
+    -- Convert the number of writes per interval into a frequency
+    numwrites = numwrites / (interval / 1000)
+    print ("Frequency in Hz: ", numwrites)
+    numwrites = 0
   end
 end
