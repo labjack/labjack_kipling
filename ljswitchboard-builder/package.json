@@ -19,6 +19,7 @@
     "extract-zip": "1.0.3",
     "fs-extra": "0.18.4",
     "fs.extra": "1.3.2",
+    "handlebars": "^4.5.1",
     "jszip": "2.5.0",
     "lj_async_0_to_x_shim": "git://github.com/chrisJohn404/lj_async_0_to_x_shim.git#master",
     "ljswitchboard-ljm_driver_checker": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_checker.git#master",
@@ -73,7 +74,6 @@
   ],
   "kipling_primary_dependency": "ljswitchboard-splash_screen",
   "old-dependencies": {
-    "handlebars": "2.0.0",
     "handlebars": "4.0.0"
   },
   "devDependencies": {
