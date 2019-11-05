@@ -20,7 +20,7 @@
 	},
 	"min_names_fw_versions": {
 		"T4": 1.0023,
-		"T7": 1.0280
+		"T7": 1.0282
 	},
 	"preBuiltScripts": [{
 		"name": "Helpful Information",
