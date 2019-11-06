@@ -16,9 +16,6 @@
 --]]
 
 print("Log voltage of AIN1 to file every 10 minutes. RTC value checked every 1000ms.")
-local t7minfirmware = 1.0282
--- Read the firmware version
-local fwversion = MB.R(60004, 3)
 -- The PRODUCT_ID register holds the device type
 local devtype = MB.R(60000, 3)
 if devtype == 4 then
@@ -26,14 +23,6 @@ if devtype == 4 then
     print("Stopping the script")
     -- Writing a 0 to LUA_RUN stops the script
     MB.W(6000, 1, 0)
-elseif devtype == 7 then
-  -- If using a T7 and the firmware does not meet the minimum requirement
-  if fwversion < t7minfirmware then
-    print("Error: this example requires firmware version", t7minfirmware, "or higher on the T7")
-    print("Stopping the script")
-    -- Writing a 0 to LUA_RUN stops the script
-    MB.W(6000, 1, 0)
-  end
 end
 
 -- Get statuses of the device hardware modules

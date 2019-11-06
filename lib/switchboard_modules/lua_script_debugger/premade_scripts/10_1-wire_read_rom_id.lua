@@ -18,30 +18,6 @@
 
 
 print ("Read the ROM ID of a single DS18B20 1-Wire sensor.")
-local t7minfirmware = 1.0282
-local t4minfirmware = 1.0023
--- Read the firmware version
-local fwversion = MB.R(60004, 3)
--- The PRODUCT_ID register holds the device type
-local devtype = MB.R(60000, 3)
-if devtype == 4 then
-  -- If using a T4 and the firmware does not meet the minimum requirement
-  if fwversion < t4minfirmware then
-    print("Error: this example requires firmware version", t4minfirmware, "or higher on the T4")
-    print("Stopping the script")
-    -- Writing a 0 to LUA_RUN stops the script
-    MB.W(6000, 1, 0)
-  end
-elseif devtype == 7 then
-  -- If using a T7 and the firmware does not meet the minimum requirement
-  if fwversion < t7minfirmware then
-    print("Error: this example requires firmware version", t7minfirmware, "or higher on the T7")
-    print("Stopping the script")
-    -- Writing a 0 to LUA_RUN stops the script
-    MB.W(6000, 1, 0)
-  end
-end
-
 -- Use the EIO0 (DIO8) register for the data line
 local sensorpin = 8
 -- The sensor registration number stored in ROM is 64-bits, so it requires 4

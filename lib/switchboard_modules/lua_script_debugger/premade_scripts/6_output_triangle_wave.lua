@@ -1,32 +1,39 @@
+--[[
+    Name: 6_output_triangle_wave.lua
+    Desc: This example shows how to output a triangle wave on DAC0
+    Note: Faster(higher frequency) sine waves can be created using stream out:
+            https://labjack.com/support/datasheets/t-series/communication/stream-mode
+    This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+--]]
+
 print("Output triangle wave centered on 2V. Analog output is DAC0. Update at 100Hz")
-local OutputVoltage = 0
-local Step = 0.02
+local vout = 0
+local step = 0.02
 local increasing = 1
 
-local checkInterval=LJ.CheckInterval
-LJ.IntervalConfig(0, 10)                   --set interval to 10 for 10ms
-local mbWrite=MB.W
-
+-- configure a 10ms interval
+LJ.IntervalConfig(0, 10)
+-- Run an infinite loop
 while true do
-  if checkInterval(0) then               --interval completed
+  -- If an interval is done
+  if LJ.CheckInterval(0) then
     if increasing == 1 then
-      OutputVoltage = OutputVoltage + Step
+      vout = vout + step
     else
-      OutputVoltage = OutputVoltage - Step
+      vout = vout - step
     end
-
-    if OutputVoltage >= 4 then
+    -- Use 4V for the peak voltage
+    if vout >= 4 then
       increasing = 0
-      OutputVoltage = 4
+      vout = 4
     end
-
-    if OutputVoltage <= 0 then
+    -- Use 0V for the minimum voltage
+    if vout <= 0 then
       increasing = 1
-      OutputVoltage = 0
+      vout = 0
     end
-
-    mbWrite(1000, 3, OutputVoltage)            --Set DAC0. Address is 1000, type is 3
-    mbWrite(46000, 3, OutputVoltage)        -- Set register "USER_RAM0_F32".  Address 46000, type 3
-    print(OutputVoltage)
+    MB.writeName("DAC0", vout)
+    MB.writeName("USER_RAM0_F32", vout)
+    print(vout)
   end
 end

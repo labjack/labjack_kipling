@@ -58,8 +58,6 @@ print('Device Information:');
 local serialnum = MB.R(60028, 1)
 print('- Serial Number:',string.format("%d",serialnum))
 
-local t7minfirmware = 1.0282
-local t4minfirmware = 1.0023
 -- Read the firmware version
 local fwversion = MB.R(60004, 3)
 -- The PRODUCT_ID register holds the device type
@@ -69,13 +67,6 @@ local model = ''
 local hwinstalled = MB.R( 60010, 1)
 if devtype == 4 then
   model = 'T4'
-  -- If using a T4 and the firmware does not meet the minimum requirement
-  if fwversion < t4minfirmware then
-    print("Error: this example requires firmware version", t4minfirmware, "or higher on the T4")
-    print("Stopping the script")
-    -- Writing a 0 to LUA_RUN stops the script
-    MB.W(6000, 1, 0)
-  end
 elseif devtype == 7 then
   model = 'T7'
   local ispro = 0
@@ -83,13 +74,6 @@ elseif devtype == 7 then
   ispro = bit.band(hwinstalled,1)
   if(ispro == 1) then
     model = model..'-Pro'
-  end
-  -- If using a T7 and the firmware does not meet the minimum requirement
-  if fwversion < t7minfirmware then
-    print("Error: this example requires firmware version", t7minfirmware, "or higher on the T7")
-    print("Stopping the script")
-    -- Writing a 0 to LUA_RUN stops the script
-    MB.W(6000, 1, 0)
   end
 end
 print('- Model', model)
