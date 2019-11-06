@@ -14,7 +14,7 @@
 
 print("Sampling average/min/max: Read AIN1 at set rate for certain number of samples. Outputs average, minimum, and maximum")
 -- The PRODUCT_ID register holds the device type
-local devtype = MB.R(60000, 3)
+local devtype = MB.readName("PRODUCT_ID")
 if devtype == 4 then
   -- Set the resolution index to Automatic (usually the highest available)
   MB.writeName("AIN_ALL_RESOLUTION_INDEX", 0)

@@ -1,47 +1,73 @@
-print ("SPI Example. Jumper FIO2 (MISO) and FIO3 (MOSI) together (FIO4 and FIO5 on T4)")
---This example sends out a packet of data over SPI and reads it back.
---If the packet recieved matches the packet sent, SPI is working properly.
---Otherwise, there may be some issues with the SPI circuitry
-local mbWrite = MB.W
+--[[
+    Name: 9_spi_example.lua
+    Desc: This example sends out a packet of data over SPI and reads it back
+    Note: If the packet received matches the packet sent, SPI is working
+          properly. Otherwise, there may be some issues with the SPI circuitry
 
---Configure T7s SPI pins
-devType = MB.R(60000, 3)
-if devType == 7 then--if T7
-	mbWrite(5000, 0, 0)  --CS (FIO0)
-	mbWrite(5001, 0, 1)  --CLK
-	mbWrite(5002, 0, 2)  --MISO
-	mbWrite(5003, 0, 3)  --MOSI (FIO3)
-elseif devType == 4 then--if T4
-	mbWrite(5000, 0, 4)  --CS (FIO4)
-	mbWrite(5001, 0, 5)  --CLK
-	mbWrite(5002, 0, 6)  --MISO
-	mbWrite(5003, 0, 7)  --MOSI (FIO7)
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+--]]
+
+print ("SPI Example. Jumper FIO2 (MISO) and FIO3 (MOSI) together (FIO4 and FIO5 on T4)")
+-- Configure the SPI pins
+local devtype = MB.readName("PRODUCT_ID")
+-- If using a T7
+if devtype == 7 then
+  -- Use FIO0 for CS
+	MB.writeName("SPI_CS_DIONUM", 0)
+  -- Use FIO1 for CLK
+	MB.writeName("SPI_CLK_DIONUM", 1)
+  -- Use FIO2 for MISO
+	MB.writeName("SPI_MISO_DIONUM", 2)
+  -- Use FIO3 for MOSI
+	MB.writeName("SPI_MOSI_DIONUM", 3)
+-- If using a T4
+elseif devtype == 4 then
+  -- Use FIO4 for CS
+  MB.writeName("SPI_CS_DIONUM", 4)
+  -- Use FIO5 for CLK
+  MB.writeName("SPI_CLK_DIONUM", 5)
+  -- Use FIO6 for MISO
+  MB.writeName("SPI_MISO_DIONUM", 6)
+  -- Use FIO7 for MOSI
+  MB.writeName("SPI_MOSI_DIONUM", 7)
 end
 
-mbWrite(5004, 0, 0)  --Mode
-mbWrite(5005, 0, 0)  --Speed
-mbWrite(5006, 0, 1)  --Options, disable CS
-mbWrite(5009, 0, 1)  --Num Bytes to Tx/Rx
-
-local testData = {{0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0x1, 0x7}, 
+-- Set the mode such that the clock idles at 0 with phase 0 (default)
+MB.writeName("SPI_MODE", 0)
+-- Use the default throttle (~800kHz)
+MB.writeName("SPI_SPEED_THROTTLE", 0)
+-- Disable CS
+MB.writeName("SPI_OPTIONS", 1)
+-- The number of bytes to transfer
+MB.writeName("SPI_NUM_BYTES", 1)
+local data = {{0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0x1, 0x7},
                   {0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF}}
-local dataSelect = 2-- 1 or 2 for each dataset, change this for different data sets
-
-LJ.IntervalConfig(0, 100) --Configure Interval, in millis
-local checkInterval=LJ.CheckInterval
+-- Set which data set to use, 1 or 2
+local dataselect = 2
+-- Configure an interval of 100ms
+LJ.IntervalConfig(0, 100)
+-- Run the program in an infinite loop
 while true do
-  if checkInterval(0) then
-    local testLen = table.getn(testData[dataSelect])
-    MB.W(5009, 0, testLen)--load the number of bytes
-    MB.WA(5010, 99, testLen, testData[dataSelect])--load data into DATA_TX
-    MB.W(5007, 0, 1)--SPI_GO
-    local rxData = MB.RA(5050, 99, testLen)--read data from DATA_RX
-    
-    --Compare the data
+  -- If an interval is done
+  if LJ.CheckInterval(0) then
+    -- Get the number of data bytes
+    local numdata = table.getn(data[dataselect])
+    MB.W("SPI_NUM_BYTES", numdata)
+    -- Load the selected data into DATA_TX
+    MB.WA(5010, 99, numdata, data[dataselect])
+    -- Start an SPI transaction
+    MB.W("SPI_GO", 1)
+    -- Read data from DATA_RX
+    local rxdata = MB.RA(5050, 99, numdata)
+    -- Compare the data
     local pass = 1
-    for i=1,testLen do
-      if(testData[dataSelect][i] ~= rxData[i]) then
-        print(string.format("0x%x (tx) does not match 0x%x (rx)", testData[dataSelect][i], rxData[i]))--Show data recieved
+    for i=1,numdata do
+      if(data[dataselect][i] ~= rxdata[i]) then
+        print(string.format(
+          "0x%x (tx) does not match 0x%x (rx)",
+          data[dataselect][i],
+          rxdata[i])
+        )
         pass = 0
       end
     end

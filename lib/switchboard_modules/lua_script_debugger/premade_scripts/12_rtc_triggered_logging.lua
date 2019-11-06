@@ -17,7 +17,7 @@
 
 print("Log voltage of AIN1 to file every 10 minutes. RTC value checked every 1000ms.")
 -- The PRODUCT_ID register holds the device type
-local devtype = MB.R(60000, 3)
+local devtype = MB.readName("PRODUCT_ID")
 if devtype == 4 then
     print("Error: this example is meant for the T7")
     print("Stopping the script")

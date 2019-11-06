@@ -6,7 +6,7 @@
 
 print("Set a DIO based on voltage. Digital I/O is FIO3 (FIO5 on T4), voltage measured on AIN1. Update at 10Hz")
 -- The PRODUCT_ID register holds the device type
-local devtype = MB.R(60000, 3)
+local devtype = MB.readName("PRODUCT_ID")
 -- Assume the user is using a T7, toggle FIO3
 local outpin = "FIO3"
 -- If the user is actually using a T4, toggle FIO5
