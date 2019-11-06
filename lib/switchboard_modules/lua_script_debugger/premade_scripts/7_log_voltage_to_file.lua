@@ -1,34 +1,39 @@
-print("Log voltage to file.  Voltage measured on AIN1.  Store value every 1 second for 10 seconds")
---Requires SD Card installed inside the T7 or T7-Pro.
---Requires FW 1.0150 or newer. On older firmware the file must exist already on the SD card
---Older firmware uses "assert" command: file=assert(io.open(Filename, "w"))
---timestamp (real-time-clock) available on T7-Pro only
+--[[
+    Name: 7_log_voltage_to_file.lua
+    Desc: This example shows how to log voltage measurements to file
+    Note: Requires an SD Card installed inside the T7 or T7-Pro
 
-local hardware = MB.R(60010, 1)
+          This example requires firmware 1.0282 (T7)
+
+          Timestamp (real-time-clock) available on T7-Pro only
+--]]
+
+print("Log voltage to file.  Voltage measured on AIN1.  Store value every 1 second for 10 seconds")
+-- Read information about the hardware installed
+local hardware = MB.readName("HARDWARE_INSTALLED")
 local passed = 1
+-- If the seventh bit is not a 1 then an SD card is not installed
 if(bit.band(hardware, 8) ~= 8) then
   print("uSD card not detected")
   passed = 0
 end
-
+-- If the fourth bit is not a 1 then there is no RTC installed
 if(bit.band(hardware, 4) ~= 4) then
   print("RTC module not detected")
   passed = 0
 end
 if(passed == 0) then
   print("This Lua script requires an RTC module and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping")
-  MB.W(6000, 1, 0)--stop script
+  -- Writing a 0 to LUA_RUN stops the script
+  MB.W("LUA_RUN", 0)
 end
 
-local mbRead=MB.R			--local functions for faster processing
-local mbReadArray=MB.RA
-
-local Filename = "/log1.csv"
+local filename = "/log1.csv"
 local voltage = 0
 local count = 0
 local delimiter = ","
-local dateStr = ""
-local voltageStr = ""
+local strdate = ""
+local strvoltage = ""
 
 
 local table = {}
@@ -39,7 +44,8 @@ table[4] = 0    --hour
 table[5] = 0    --minute
 table[6] = 0    --second
 
-local file = io.open(Filename, "w")   --create and open file for write access
+-- Create and open a file for write access
+local file = io.open(filename, "w")
 -- Make sure that the file was opened properly.
 if file then
   print("Opened File on uSD Card")
@@ -48,20 +54,30 @@ else
   print("!! Failed to open file on uSD Card !!")
 end
 
-MB.W(48005, 0, 1)                       --ensure analog is on
-
-LJ.IntervalConfig(0, 1000)              --set interval to 1000 for 1000ms
-local checkInterval=LJ.CheckInterval
+-- Make sure analog is on
+MB.writeName("POWER_AIN", 1)
+-- Configure an interval of 1000ms
+LJ.IntervalConfig(0, 1000)
 
 while true do
-  if checkInterval(0) then     	    --interval completed
-    voltage = mbRead(2, 3)        	      --voltage on AIN1, address is 2, type is 3
-    table, error = mbReadArray(61510, 0, 6)   --Read the RTC timestamp, -Pro only
-    print("AIN1: ", voltage, "V")
-    dateStr = string.format("%04d/%02d/%02d %02d:%02d.%02d", table[1], table[2], table[3], table[4], table[5], table[6])
-    voltageStr = string.format("%.6f", voltage)
-    print(dateStr, "\n")
-    file:write(dateStr, delimiter, voltageStr, "\n")
+  -- If an interval is done
+  if LJ.CheckInterval(0) then
+    voltage = MB.readName("AIN1")
+    -- Read the RTC timestamp (T7-Pro only)
+    table, error = MB.RA(61510, 0, 6)
+    print("AIN1:", voltage, "V")
+    strdate = string.format(
+      "%04d/%02d/%02d %02d:%02d.%02d",
+      table[1],
+      table[2],
+      table[3],
+      table[4],
+      table[5],
+      table[6]
+    )
+    strvoltage = string.format("%.6f", voltage)
+    print(strdate, "\n")
+    file:write(strdate, delimiter, strvoltage, "\n")
     count = count + 1
   end
   if count >= 10 then
@@ -71,7 +87,7 @@ end
 
 file:close()
 print("Done acquiring data. Now read and display file contents. \n")
-file = io.open(Filename, "r")
+file = io.open(filename, "r")
 local line = file:read("*all")
 file:close()
 print(line)
