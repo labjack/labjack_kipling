@@ -1,49 +1,64 @@
---This example will output a pulse on FIO1 (FIO4 for T4) a specified amount of time after a 
--- rising edge is detected on FIO0 (FIO5 on T4). The delay between detection of a crossing 
--- and the beginning of the pulse is controlled by the F32 value in USER_RAM at 
--- modbus address 46000-46001. 
+--[[
+    Name: 14_zerocrossing_pulse_response.lua
+    Desc: This example will output a pulse on FIO1 (FIO4 for T4) a specified
+          amount of time after a rising edge is detected on FIO0 (FIO5 for T4)
+    Note: The delay between detection of a crossing and the beginning of the
+          pulse is controlled by the F32 value in USER_RAM at
+          modbus address 46000-46001
+
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+--]]
+
 print("Begin")
-local state = "pulseUpdate"
-
-local inPin = 2000--FIO0
-local outPin = 2001--FIO1. Changed if T4 instead of T7
-devType = MB.R(60000, 3)
-if devType == 4 then
-	inPin = 2004--FIO4
-	outPin = 2005--FIO5
+-- Assume that a T7 is being used, use FIO0 and FIO1 for I/O
+local inpin = "FIO0"
+local outpin = "FIO1"
+local devtype = MB.readName("PRODUCT_ID")
+-- If actually using a T4, use FIO4 and FIO5 for I/O
+if devtype == 4 then
+	inpin = "FIO4"
+	outpin = "FIO5"
 end
-
-local mbRead=MB.R						--Create local functions for faster processing
-local mbWrite=MB.W
-local checkInterval=LJ.ChekInterval
-local configInterval=LJ.IntervalConfig
-
-dio_LS = mbRead(2000, 0)                 --Read FIO0
-configInterval(1, 500)
+-- Set a 20ms pulse width
+local pulsewidth = 20
+-- Set the pulse low time to be 40ms by writing to USER_RAM
+MB.writeName("USER_RAM0_F32",40)
+local state = "pulseUpdate"
+-- Get an initial state of inpin
+lastval = MB.readName(inpin)
 while true do
-  dio_S = mbRead(2000, 0)                --Read FIO0
-  if state == "waitingForZero" then
-    if dio_LS == 0 and dio_S == 1 then --Rising edge detected?
-      configInterval(0, pulseDelay) --Start delay before starting pulse
+  -- Get the current state of inpin
+  inval = MB.readName(inpin)
+  if state == "pulseUpdate" then
+    -- Read a new pulse low time from USER_RAM
+    delay = MB.readName("USER_RAM0_F32")
+    state = "waitingForZero"
+    -- Enforce constraints on pulse low time. (This is the amount of time
+    -- between the zero crossing and the activation pulse)
+    print("new pulse", pulsewidth)
+  elseif state == "waitingForZero" then
+    -- If there was a rising edge
+    if lastval == 0 and inval == 1 then
+      -- Start the pulse low time delay
+      LJ.IntervalConfig(0, delay)
       state = "pulseStart"
     end
-  elseif state == "pulseStart" then    
-    if checkInterval(0) then
-      mbWrite(2001, 0, 1)                 --Start pulse on FIO1
-      configInterval(0, 1)          --Set delay for the pulse width 
+  elseif state == "pulseStart" then
+    -- If the pulse low time delay is finished
+    if LJ.CheckInterval(0) then
+      -- Start the outpin pulse
+      MB.writeName(outpin, 1)
+      -- Set a delay for the pulse width
+      LJ.IntervalConfig(0, pulsewidth)
       state = "pulseEnd"
     end
   elseif state == "pulseEnd" then
-    if checkInterval(0) then
-      mbWrite(2001, 0, 0)                 --End pulse on FIO1
+    -- If the pulse width delay is done
+    if LJ.CheckInterval(0) then
+      -- End the outpin pulse
+      MB.writeName(outpin, 0)
       state = "pulseUpdate"
     end
-  elseif state == "pulseUpdate" then   --Read new pulse low time from user RAM
-    pulseDelay = mbRead(46000, 3)        --Read 2 registers, interpret as a float.
-    state = "waitingForZero"
-    --Enforce constraints on pulse low time. (This is the amount of time between the 
-    -- zero crossing and the activation pulse.)
-    --print("new pulse", pulseLen)
   end
-  dio_LS = dio_S
+  lastval = inval
 end
