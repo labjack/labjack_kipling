@@ -130,6 +130,3 @@ while true do
     LJ.DIO_S_W(busyio, 0)
   end
 end
-print('Finished')
--- Write 0 to LUA_RUN to stop the script
-MB.Write(6000, 1, 0)
