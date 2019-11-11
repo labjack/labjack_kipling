@@ -1,5 +1,5 @@
 --[[
-    Name: moving_average_compute.lua
+    Name: moving_average_interval_compute_HS.lua
     Desc: Implements a moving-average script by keeping track of a moving sum
     Note: Alternate methods of implementing a moving-average are also available
 
