@@ -21,6 +21,7 @@ var testGroups = {
 		'usb_only_test': false,
 		'open_all_device_scanner': false,
 		'scan_with_device_shared': false,
+		'handle_active_device_disconnected': false,
 	},
 };
 

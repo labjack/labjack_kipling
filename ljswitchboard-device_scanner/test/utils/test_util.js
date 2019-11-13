@@ -1,3 +1,5 @@
+var driver_const = require('ljswitchboard-ljm_driver_constants');
+
 function printScanResultsData(deviceTypes) {
 	console.log('Scan Summary:', deviceTypes);
 	console.log();
@@ -235,10 +237,21 @@ function verifyScanResults(deviceTypes, test, options) {
 			passes = false;
 		}
 		results.push(dtTest);
+		var scannedDT = deviceType.deviceType;
 
 		var devices = deviceType.devices;
 		devices.forEach(function(device) {
 			var dts = device.deviceTypeString;
+
+			// Check to make sure various ~device strings~ are correct as per scan results
+			var dtn = driver_const.DEVICE_TYPE_NAMES[scannedDT];
+			var faultyString = false;
+			var strAttrKeysToCheck = ['deviceTypeStr', 'deviceTypeString', 'deviceTypeName', 'productType', 'modelType'];
+			for(var i = 0; i < strAttrKeysToCheck.length; i++) {
+				var strAttrKey = strAttrKeysToCheck[i];
+				test.ok(device[strAttrKeysToCheck[i]].indexOf(dtn) >= 0, 'Device Attr: '+strAttrKey+' should have chars '+dtn);
+			}
+
 			var requiredDevKeys = requiredDeviceKeys[dts];
 			if(debug) {
 				console.log('Checking Device', device.serialNumber, Object.keys(device), dts, device.isMockDevice, device.isActive);

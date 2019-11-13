@@ -205,44 +205,22 @@ function readAndParseRegisters(device, handle, deviceType, registers, cb) {
 
 
 function getProductType(deviceInfo) {
-	if(deviceInfo.dt === 7) {
-		return deviceInfo.HARDWARE_INSTALLED.productType;
-	} else if(deviceInfo.dt === 4) {
-		// return deviceInfo.HARDWARE_INSTALLED.productType;
-		return 'T4';
-	} else if(deviceInfo.dt === 5) {
-		// return deviceInfo.HARDWARE_INSTALLED.productType;
-		return 'T5';
-	} else if(deviceInfo.dt === 8) {
-		// return deviceInfo.HARDWARE_INSTALLED.productType;
-		return 'T8';
-	} else if(deviceInfo.dt === 200) {
-		return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
-	} else {
-		console.log('Failed to get product type', deviceInfo.dt, 'for handle:', deviceInfo.handle);
-		return deviceInfo.deviceTypeName;
-	}
-}
-function getModelType(deviceInfo) {
-	var pt = deviceInfo.deviceTypeName;
-	var sc = '';
+	var pt = driver_const.DEVICE_TYPE_NAMES[deviceInfo.dt];
 	if(deviceInfo.dt === 7) {
 		pt = deviceInfo.HARDWARE_INSTALLED.productType;
-	} else if(deviceInfo.dt === 4) {
-		// pt = deviceInfo.HARDWARE_INSTALLED.productType;
-		pt = 'T4';
-	} else if(deviceInfo.dt === 5) {
-		// pt = deviceInfo.HARDWARE_INSTALLED.productType;
-		pt = 'T5';
-	} else if(deviceInfo.dt === 8) {
-		// pt = deviceInfo.HARDWARE_INSTALLED.productType;
-		pt = 'T8';
 	} else if(deviceInfo.dt === 200) {
 		pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
-	} else {
-		console.log('Failed to get model type', 'for handle:', deviceInfo.handle);
 	}
 	return pt;
+}
+function getModelType(deviceInfo) {
+	var mt = driver_const.DEVICE_TYPE_NAMES[deviceInfo.dt];
+	if(deviceInfo.dt === 7) {
+		mt = deviceInfo.HARDWARE_INSTALLED.productType;
+	} else if(deviceInfo.dt === 200) {
+		mt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
+	}
+	return mt;
 }
 /*
  * The "registers" argument is no longer valid.  It is over-written in function. 10/21/2019.
