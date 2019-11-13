@@ -532,6 +532,11 @@ function device(useMockDevice) {
 							self.savedAttributes[res.address] = res.data;
 						}
 					}
+					
+					// Save values to cache:
+					if(!res.isErr) {
+						updateDeviceValueCacheSingle(res.address, res.data);
+					}
 				});
 				defered.resolve(self.savedAttributes);
 			}, function(err) {
