@@ -98,7 +98,7 @@ MB.writeName("POWER_AIN", 1)
 -- Make sure streaming is not enabled
 local streamrunning = MB.R("STREAM_ENABLE")
 if streamrunning == 1 then
-  MB.writeName("STREAM_ENABLE" 0)
+  MB.writeName("STREAM_ENABLE", 0)
 end
 
 -- Use +-10V for the AIN range
@@ -110,7 +110,7 @@ print(string.format("Scanrate %.8f",MB.R(4002, 3)))
 -- Use 1 channel for streaming
 MB.writeName("STREAM_NUM_ADDRESSES", 1)
 -- Enforce a 1uS settling time
-MB.writeName"STREAM_SETTLING_US", 1)
+MB.writeName("STREAM_SETTLING_US", 1)
 -- Use the default stream resolution
 MB.writeName("STREAM_RESOLUTION_INDEX", 0)
 -- Use a 1024 byte buffer size (must be a power of 2)

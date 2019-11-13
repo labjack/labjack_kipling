@@ -1,17 +1,19 @@
---This is an example that uses the LSM303DLHC Accelerometer & Magnetometer on the I2C Bus on EIO4(SCL) and EIO5(SDA)
+--[[
+    Name: accelerometer-lsm303dlhc.lua
+    Desc: This is an example that uses the LSM303DLHC Accelerometer on the I2C
+          Bus on EIO4(SCL) and EIO5(SDA)
+--]]
+
 --Outputs data to Registers:
---X accel = 46006
---Y accel = 46008
---Z accel = 46010
+--X = 46006
+--Y = 46008
+--Z = 46010
 
-fwver = MB.R(60004, 3)
-devType = MB.R(60000, 3)
-if (fwver < 1.0224 and devType == 7) or (fwver < 0.2037 and devType == 4) then
-  print("This lua script requires a higher firmware version (T7 Requires 1.0224 or higher, T4 requires 0.2037 or higher). Program Stopping")
-  MB.W(6000, 1, 0)
-end
-
-function convert_16_bit(msb, lsb, conv)--Returns a number, adjusted using the conversion factor. Use 1 if not desired  
+-------------------------------------------------------------------------------
+--  Desc: Returns a number adjusted using the conversion factor
+--        Use 1 if not desired
+-------------------------------------------------------------------------------
+local function convert_16_bit(msb, lsb, conv)
   res = 0
   if msb >= 128 then
     res = (-0x7FFF+((msb-128)*256+lsb))/conv
@@ -22,12 +24,14 @@ function convert_16_bit(msb, lsb, conv)--Returns a number, adjusted using the co
 end
 
 SLAVE_ADDRESS = 0x19
-I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)--configure the I2C Bus
 
-addrs = I2C.search(0, 127)
-addrsLen = table.getn(addrs)
-found = 0
-for i=1, addrsLen do--verify that the target device was found     
+-- Configure the I2C Bus
+I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)
+local addrs = I2C.search(0, 127)
+local addrslen = table.getn(addrs)
+local found = 0
+-- Make sure the device slave address is found
+for i=1, addrslen do
   if addrs[i] == SLAVE_ADDRESS then
     print("I2C Slave Detected")
     found = 1
@@ -36,33 +40,38 @@ for i=1, addrsLen do--verify that the target device was found
 end
 if found == 0 then
   print("No I2C Slave detected, program stopping")
-  MB.W(6000, 1, 0)
+  MB.writeName("LUA_RUN", 0)
 end
-
---init slave
-I2C.write({0x20, 0x27})--Data Rate: 10Hz, disable low-power, enable all axes
-I2C.write({0x23, 0x49})--continuous update, LSB at lower addr, +- 2g, Hi-Res disable
-
+--Data Rate: 10Hz, disable low-power, enable all axes
+I2C.write({0x20, 0x27})
+-- Continuous update, LSB at lower addr, +- 2g, Hi-Res disable
+I2C.write({0x23, 0x49})
+-- Configure a 500ms interval
 LJ.IntervalConfig(0, 500)
 while true do
+  -- If an interval is done
   if LJ.CheckInterval(0) then
-    dataRaw = {}
-    for i=0, 5 do --sequentially read the addresses containing the accel data
+    local rawacceldata = {}
+    -- Sequentially read the addresses containing the accel data
+    for i=0, 5 do
       I2C.write({0x28+i})
-      dataIn, errorIn = I2C.read(2)
-      table.insert(dataRaw, dataIn[1])
+      local indata = I2C.read(2)
+      table.insert(rawacceldata, indata[1])
     end
-    data = {}
-    for i=0, 2 do--convert the data into Gs
-      table.insert(data, convert_16_bit(dataRaw[1+i*2], dataRaw[2+i*2], (0x7FFF/2)))
-      MB.W(46006+i*2, 3, data[i+1])
+    local acceldata = {}
+    -- Convert the data into Gs
+    for i=0, 2 do
+      table.insert(acceldata, convert_16_bit(rawacceldata[1+i*2], rawacceldata[2+i*2], (0x7FFF/2)))
     end
-    MB.W(46006, 3, data[1])--add X value, in Gs, to the user_ram register
-    MB.W(46008, 3, data[2])--add Y
-    MB.W(46010, 3, data[3])--add Z
-    print("X: "..data[1])
-    print("Y: "..data[2])
-    print("Z: "..data[3])
+    -- Add accelX value, in Gs, to the user_ram register
+    MB.writeName("USER_RAM3_F32", acceldata[1])
+    -- Add accelY
+    MB.writeName("USER_RAM4_F32", acceldata[2])
+    -- Add accelZ
+    MB.writeName("USER_RAM5_F32", acceldata[3])
+    print("X: "..acceldata[1])
+    print("Y: "..acceldata[2])
+    print("Z: "..acceldata[3])
     print("------")
   end
 end
