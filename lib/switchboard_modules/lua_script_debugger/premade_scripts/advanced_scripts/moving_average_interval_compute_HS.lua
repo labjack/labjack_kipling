@@ -25,7 +25,6 @@ if MB.R(60000, 3) == 4 then
   -- DIO0-3 are analog only, use DIO4 for status
   statusio = 4
 end
-
 -- Print program information
 print("Calculate analog input moving averages for channels AIN0 and AIN2")
 print("Saving average values to USER_RAM0_F32 and USER_RAM2_F32")
@@ -39,7 +38,6 @@ print("NOTE: This averaging method is faster, but an accuracy issue occurs due t
 print("  saving calibrated values as float32 values instead of un-calibrated")
 print("  binary values and then calibrated upon saving values to the appropriate")
 print("  user ram register.  This example is published purely for educational purposes.")
-
 -- Initialize sum calculation variables
 local numaveraged = 0
 local index = 1
@@ -49,7 +47,6 @@ local avgval = 0
 local printavg = true
 local dbg = false
 local iostate = 0
-
 local vals = {}
 local sums = {}
 for i=1,table.getn(channels) do
@@ -59,13 +56,10 @@ for i=1,table.getn(channels) do
     vals[i][j]=0
   end
 end
-
 LJ.DIO_D_W(statusio, 1)
-
 -- Initialize interval timers
 LJ.IntervalConfig(0, intervalms)
 LJ.IntervalConfig(1, updateratems)
-
 -- Begin loop
 while true do
   -- If a sampling interval is done
@@ -83,7 +77,6 @@ while true do
       -- Add tval to cache, replacing the old value
       vals[i][index] = tval
     end
-
     -- Toggle I/O to enable debugging
     if iostate == 0 then
       iostate = 1

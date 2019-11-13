@@ -1,5 +1,5 @@
 --[[
-    Name: lua_stream_and-log_v3.lua
+    Name: lua-stream-and-log-v3.lua
     Desc: This example shows how to stream data to AIN0 and log to file
     Note: Streams at 4KS/s, using nominal cal constants
 
