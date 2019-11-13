@@ -100,7 +100,7 @@ end
 
 print ("T4 SPI Mode Testing Example")
 -- The PRODUCT_ID register holds the device type
-local devtype = MB.R(60000, 3)
+local devtype = MB.readName("PRODUCT_ID")
 -- If the user is not using a T4 exit the script
 if devtype ~= 4 then
   print("Device is not a T4")

@@ -41,7 +41,7 @@ MB.writeName("SPI_OPTIONS", 1)
 -- The number of bytes to transfer
 MB.writeName("SPI_NUM_BYTES", 1)
 local data = {{0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0x1, 0x7},
-                  {0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF}}
+              {0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF}}
 -- Set which data set to use, 1 or 2
 local dataselect = 2
 -- Configure an interval of 100ms
@@ -51,17 +51,17 @@ while true do
   -- If an interval is done
   if LJ.CheckInterval(0) then
     -- Get the number of data bytes
-    local numdata = table.getn(data[dataselect])
-    MB.W("SPI_NUM_BYTES", numdata)
+    local datasize = table.getn(data[dataselect])
+    MB.writeName("SPI_NUM_BYTES", datasize)
     -- Load the selected data into DATA_TX
-    MB.WA(5010, 99, numdata, data[dataselect])
+    MB.WA(5010, 99, datasize, data[dataselect])
     -- Start an SPI transaction
-    MB.W("SPI_GO", 1)
+    MB.writeName("SPI_GO", 1)
     -- Read data from DATA_RX
-    local rxdata = MB.RA(5050, 99, numdata)
+    local rxdata = MB.RA(5050, 99, datasize)
     -- Compare the data
     local pass = 1
-    for i=1,numdata do
+    for i=1,datasize do
       if(data[dataselect][i] ~= rxdata[i]) then
         print(string.format(
           "0x%x (tx) does not match 0x%x (rx)",

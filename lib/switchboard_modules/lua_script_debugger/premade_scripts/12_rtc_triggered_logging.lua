@@ -22,7 +22,7 @@ if devtype == 4 then
     print("Error: this example is meant for the T7")
     print("Stopping the script")
     -- Writing a 0 to LUA_RUN stops the script
-    MB.W(6000, 1, 0)
+    MB.writeName("LUA_RUN", 0)
 end
 
 -- Get statuses of the device hardware modules
@@ -40,7 +40,7 @@ if(bit.band(hardware, 4) ~= 4) then
 end
 if(passed == 0) then
   print("This Lua script requires an RTC and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping.")
-  MB.W(6000, 1, 0)
+  MB.writeName("LUA_RUN", 0)
 end
 
 local filepre = "RTWi_"

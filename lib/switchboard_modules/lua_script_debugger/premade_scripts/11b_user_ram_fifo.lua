@@ -49,8 +49,8 @@ while true do
   if LJ.CheckInterval(0) then
     -- Write to FIFO0 for the host computer to access
     for i=1, numvalsfio0 do
-      outval = f32out[i]
-      currentbytesfifo0 = MB.readName("USER_RAM_FIFO0_NUM_BYTES_IN_FIFO")
+      local outval = f32out[i]
+      currentbytesfifo0 = MB.readName("USER_RAM_FIFO0_ALLOCATE_NUM_BYTES")
       -- If there are less bytes in FIFO0 than we allocated for, send a new
       -- array of size numvalsfio0 to the host
       if (currentbytesfifo0 < fifo0bytes) then
@@ -62,7 +62,7 @@ while true do
     end
     --read in new data from the host with FIFO1
     --Note that an external computer must have previously written to FIFO1
-    currentbytesfifo1 = MB.readName("USER_RAM_FIFO1_NUM_BYTES_IN_FIFO")
+    currentbytesfifo1 = MB.readName("USER_RAM_FIFO1_ALLOCATE_NUM_BYTES")
     if (currentbytesfifo1 == 0) then
       print ("FIFO1 buffer is empty.")
     end
