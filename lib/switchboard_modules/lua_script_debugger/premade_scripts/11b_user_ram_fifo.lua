@@ -37,9 +37,9 @@ local fifo0bytes = numvalsfio0*bytesperval
 local fifo1bytes = numvalsfio1*bytesperval
 
 -- Allocate 20 bytes for FIFO0 by writing to USER_RAM_FIFO0_NUM_BYTES_IN_FIFO
-MB.writeName("USER_RAM_FIFO0_NUM_BYTES_IN_FIFO", fifo0bytes)
+MB.writeName("USER_RAM_FIFO0_ALLOCATE_NUM_BYTES", fifo0bytes)
 -- Allocate 20 bytes for FIFO1 by writing to USER_RAM_FIFO1_NUM_BYTES_IN_FIFO
-MB.writeName("USER_RAM_FIFO1_NUM_BYTES_IN_FIFO", fifo1bytes)
+MB.writeName("USER_RAM_FIFO1_ALLOCATE_NUM_BYTES", fifo1bytes)
 
 -- Configure an interval of 2000ms
 LJ.IntervalConfig(0, 2000)
@@ -50,7 +50,7 @@ while true do
     -- Write to FIFO0 for the host computer to access
     for i=1, numvalsfio0 do
       local outval = f32out[i]
-      currentbytesfifo0 = MB.readName("USER_RAM_FIFO0_ALLOCATE_NUM_BYTES")
+      local currentbytesfifo0 = MB.readName("USER_RAM_FIFO0_NUM_BYTES_IN_FIFO")
       -- If there are less bytes in FIFO0 than we allocated for, send a new
       -- array of size numvalsfio0 to the host
       if (currentbytesfifo0 < fifo0bytes) then
@@ -62,7 +62,7 @@ while true do
     end
     --read in new data from the host with FIFO1
     --Note that an external computer must have previously written to FIFO1
-    currentbytesfifo1 = MB.readName("USER_RAM_FIFO1_ALLOCATE_NUM_BYTES")
+    currentbytesfifo1 = MB.readName("USER_RAM_FIFO1_NUM_BYTES_IN_FIFO")
     if (currentbytesfifo1 == 0) then
       print ("FIFO1 buffer is empty.")
     end
