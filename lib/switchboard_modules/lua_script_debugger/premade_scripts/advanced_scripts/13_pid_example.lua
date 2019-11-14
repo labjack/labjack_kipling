@@ -1,54 +1,68 @@
 --[[
     Name: 13_pid_example.lua
-    Desc: This script sets a DAC0 output according to a PID controller
-    Note: Requires FW 1.0282 or greater on the T7
-    Gets a setpoint from a host computer.  Host computer writes new setpoint
-    to modbus address 46000
+    Desc: This is a PID example script that sets a DAC0 output using AIN2 for
+          feedback
+    Note: Gets a setpoint from a host computer.  Host computer writes the new
+          setpoint to modbus address 46000 (USER_RAM0_F32)
+
+          Requires FW 1.0282 or greater on the T7
 --]]
 
-print("This is a PID example script that sets a DAC0 output.")
--- timestep of the loop in ms, change according to your process (see theory on
--- sampling rate in PID control)
-local timestep = 2000
-local vin = 0
+print("This is a PID example script that sets a DAC0 output using AIN2 for feedback.")
+print("Write a non-zero value to USER_RAM0_F32 to change the set point.")
+-- Timestep of the loop in ms. Change according to your process
+-- (see theory on sampling rate in PID control)
+local timestep = 100
 local setpoint = 0
+local vin = 0
 local vout = 0
 -- Change the PID terms according to your process
-local kp = 1
-local ki = 0.05
-local kd = 0.5
--- Output polarity +1 or -1, i.e. for a positive error, negative output: -1
-local polout = 1
+local kp = 0.1
+local ki = 0.1
+local kd = 0.01
 -- Bounds for the output value
 local minout = 0
 local maxout = 5
-local outputcheck = 0
 local lastin = 0
 local intterm = 0
 local difterm = 0
-print("Running PID control on AIN2 with setpoint out at DAC0")
--- Configure an interval for the timestep
+-- Configure the timestep interval
 LJ.IntervalConfig(0, timestep)
--- First, set the output on the DAC to +5V
-MB.writeName("DAC0", 5.0)
-i = 0
+setpoint = MB.readName("USER_RAM0_F32")
+if setpoint > maxout then
+    setpoint = maxout
+    MB.writeName("USER_RAM0_F32", setpoint)
+elseif setpoint < minout then
+    setpoint = minout
+    MB.writeName("USER_RAM0_F32", setpoint)
+end
+-- First set the output on the DAC to +3V
+-- This will allow a user to see the PID loop in action
+-- on first-run.  This needs to be deleted for most
+-- use cases of a PID loop.
+MB.writeName("DAC0", 3)
+local i = 0
 while true do
-  -- If a timestep interval is done
+  -- If an interval is done
   if LJ.CheckInterval(0) then
     i = i + 1
-    -- Read AIN2 as the feedback source
-    vin = MB.readName("AIN2")
-    -- DAC0 connected to AIN0 as well
-    outputcheck = MB.readName("AIN0")
     -- Get a new setpoint from USER_RAM0_F32
     setpoint = MB.readName("USER_RAM0_F32")
-    print("AIN0 = DAC0 = ", outputcheck, "V")
+    if setpoint > maxout then
+        setpoint = maxout
+        MB.writeName("USER_RAM0_F32", setpoint)
+    elseif setpoint < minout then
+        setpoint = minout
+        MB.writeName("USER_RAM0_F32", setpoint)
+    end
+    print("Setpoint: ", setpoint)
+    -- Read AIN2 as the feedback source
+    vin = MB.readName("AIN2")
     print("AIN2 =", vin, "V")
-    intterm = setpoint
     err = setpoint - vin
     print("The error is ", err)
     intterm = intterm + ki * err
-    intterm = intterm * polout
+    -- Limit the integral term
     if intterm > maxout then
       intterm = maxout
     elseif intterm < minout then
@@ -56,16 +70,16 @@ while true do
     end
     print("The Int term is ", intterm)
     difterm = vin - lastin
-    difterm = polout * difterm
-    print("The Diff term is ", difterm * kd)
-    vout = polout* kp * err + intterm + kd * difterm
+    print("The Diff term is ", difterm)
+    vout = kp * err + intterm - kd * difterm
+    -- Limit the maximum output voltage
     if vout > maxout then
       vout = maxout
     elseif vout < minout then
       vout = minout
     end
     print("The output is ", vout)
-    -- Write vout to DAC0
+    -- Write the output voltage to DAC0
     MB.writeName("DAC0", vout)
     lastin = vin
     print("")
