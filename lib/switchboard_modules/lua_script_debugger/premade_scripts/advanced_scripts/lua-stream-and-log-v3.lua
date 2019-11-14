@@ -55,7 +55,6 @@ local filecount = 0
 local numfiles = 10
 local extension = ".csv"
 local filename = strdate .. extension
-local strnewdata = ""
 local datawritten = 0
 local dataperfile = 100
 local data = {}
@@ -96,7 +95,7 @@ MB.writeName("STREAM_RESOLUTION_INDEX", 0)
 -- Use a 1024 byte buffer size (must be a power of 2)
 MB.writeName("STREAM_BUFFER_SIZE_BYTES", 2^11)
 -- Use command-response mode (0b10000=16)
-MB.W("STREAM_AUTO_TARGET", 16)
+MB.writeName("STREAM_AUTO_TARGET", 16)
 -- Run continuously (can be limited)
 MB.writeName("STREAM_NUM_SCANS", 0)
 -- Scan AIN0
