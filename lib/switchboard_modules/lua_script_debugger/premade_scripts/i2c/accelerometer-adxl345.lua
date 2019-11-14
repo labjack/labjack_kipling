@@ -25,7 +25,12 @@ end
 
 local SLAVE_ADDRESS = 0x53
 
-I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)--configure the I2C Bus
+-- Use EIO3 for power
+MB.writeName("EIO3", 1)
+-- Use EIO2 to pull up CS
+MB.writeName("EIO2", 1)
+-- Use EOI5(DIO13) for SDA and EIO4(DIO12) for SCL
+I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)
 local addrs = I2C.search(0, 127)
 local addrslen = table.getn(addrs)
 local found = 0
