@@ -1,73 +1,85 @@
---[[
-    Name: 13_pid_example.lua
-    Desc: This script sets a DAC0 output according to a PID controller
-    Note: Requires FW 1.0282 or greater on the T7
-    Gets a setpoint from a host computer.  Host computer writes new setpoint
-    to modbus address 46000
---]]
+print("This is a PID example script that sets a DAC0 output using AIN2 for feedback.")
+print("Write a non-zero value to USER_RAM0_F32 to change the set point.")
+--Requires FW 1.0166 or greater on the T7
+--Gets a setpoint from a host computer.  Host computer writes new setpoint to modbus address 46000
 
-print("This is a PID example script that sets a DAC0 output.")
--- timestep of the loop in ms, change according to your process (see theory on
--- sampling rate in PID control)
-local timestep = 2000
-local vin = 0
+local timeStep = 100 --timestep of the loop in ms, change according to your process (see theory on sampling rate in PID control)
 local setpoint = 0
-local vout = 0
--- Change the PID terms according to your process
-local kp = 1
-local ki = 0.05
-local kd = 0.5
--- Output polarity +1 or -1, i.e. for a positive error, negative output: -1
-local polout = 1
--- Bounds for the output value
-local minout = 0
-local maxout = 5
-local outputcheck = 0
-local lastin = 0
+local inputV = 0
+local outputV = 0
+
+local kp = 0.1    --change the PID terms according to your process
+local ki = 0.1
+local kd = 0.01
+
+local outputMin = 0  --bounds for the output value
+local outputMax = 5
+
+local lastInput = 0
 local intterm = 0
 local difterm = 0
-print("Running PID control on AIN2 with setpoint out at DAC0")
--- Configure an interval for the timestep
-LJ.IntervalConfig(0, timestep)
--- First, set the output on the DAC to +5V
-MB.writeName("DAC0", 5.0)
+
+LJ.IntervalConfig(0, timeStep)              --set interval to 100 for 100ms
+
+local checkInterval = LJ.CheckInterval      --create local functions
+
+setpoint = MB.readName("USER_RAM0_F32")
+if setpoint > outputMax then
+    setpoint = outputMax
+    MB.writeName("USER_RAM0_F32", setpoint)
+elseif setpoint < outputMin then
+    setpoint = outputMin
+    MB.writeName("USER_RAM0_F32", setpoint)
+end
+
+--First set the output on the DAC to +3V
+-- This will allow a user to see the PID loop in action
+-- on first-run.  This needs to be deleted for most
+-- use cases of a PID loop.
+MB.writeName("DAC0", 3) --Set DAC0
+
 i = 0
 while true do
-  -- If a timestep interval is done
-  if LJ.CheckInterval(0) then
+  if checkInterval(0) then               --interval completed
     i = i + 1
-    -- Read AIN2 as the feedback source
-    vin = MB.readName("AIN2")
-    -- DAC0 connected to AIN0 as well
-    outputcheck = MB.readName("AIN0")
-    -- Get a new setpoint from USER_RAM0_F32
-    setpoint = MB.readName("USER_RAM0_F32")
-    print("AIN0 = DAC0 = ", outputcheck, "V")
-    print("AIN2 =", vin, "V")
-    intterm = setpoint
-    err = setpoint - vin
+    
+    setpoint = MB.readName("USER_RAM0_F32")       --get new setpoint from USER_RAM0_F32, address 46000
+    if setpoint > outputMax then
+        setpoint = outputMax
+        MB.writeName("USER_RAM0_F32", setpoint)
+    elseif setpoint < outputMin then
+        setpoint = outputMin
+        MB.writeName("USER_RAM0_F32", setpoint)
+    end
+    
+    print("Setpoint: ", setpoint)
+    inputV = MB.readName("AIN2")             --read AIN2 as the feedback source
+    print("AIN2 =", inputV, "V")
+    err = setpoint - inputV
     print("The error is ", err)
+    
     intterm = intterm + ki * err
-    intterm = intterm * polout
-    if intterm > maxout then
-      intterm = maxout
-    elseif intterm < minout then
-      intterm = minout
+    if intterm > outputMax then
+      intterm = outputMax
+    elseif intterm < outputMin then
+      intterm = outputMin
     end
     print("The Int term is ", intterm)
-    difterm = vin - lastin
-    difterm = polout * difterm
-    print("The Diff term is ", difterm * kd)
-    vout = polout* kp * err + intterm + kd * difterm
-    if vout > maxout then
-      vout = maxout
-    elseif vout < minout then
-      vout = minout
+    
+    difterm = inputV - lastInput
+    print("The Diff term is ", difterm)
+    
+    outputV = kp * err + intterm - kd * difterm
+    if outputV > outputMax then
+      outputV = outputMax
+    elseif outputV < outputMin then
+      outputV = outputMin
     end
-    print("The output is ", vout)
-    -- Write vout to DAC0
-    MB.writeName("DAC0", vout)
-    lastin = vin
+    print("The output is ", outputV)
+    
+    MB.writeName("DAC0") --Set DAC0
+    lastInput = inputV
+    
     print("")
   end
 end
