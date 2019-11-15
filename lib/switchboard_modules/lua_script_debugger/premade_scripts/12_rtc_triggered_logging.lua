@@ -12,18 +12,10 @@
           Check for the latest firwmare updates at:
             http://labjack.com/support/firmware/t7/beta
 
-          This example requires firmware 1.0282
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 print("Log voltage of AIN1 to file every 10 minutes. RTC value checked every 1000ms.")
--- The PRODUCT_ID register holds the device type
-local devtype = MB.readName("PRODUCT_ID")
-if devtype == 4 then
-    print("Error: this example is meant for the T7")
-    print("Stopping the script")
-    -- Writing a 0 to LUA_RUN stops the script
-    MB.writeName("LUA_RUN", 0)
-end
 
 -- Get statuses of the device hardware modules
 local hardware = MB.readName("HARDWARE_INSTALLED")
@@ -40,7 +32,7 @@ if(bit.band(hardware, 4) ~= 4) then
 end
 if(passed == 0) then
   print("This Lua script requires an RTC and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping.")
-  MB.writeName("LUA_RUN", 0)
+  MB.W(6000, 1, 0)
 end
 
 local filepre = "RTWi_"

@@ -3,6 +3,8 @@
     Desc: The first program in every language. Prints hello world every second
           for 5 seconds
     Note: See the full Lua functions list at http://www.lua.org/manual/5.2/manual.html#3
+
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 -- Set interval timer 0 with a 1000ms interval
@@ -25,4 +27,4 @@ end
 
 print("Exiting Lua Script")
 -- Writing 0 to LUA_RUN stops the script
-MB.W(6000, 1, 0)
+MB.writeName("LUA_RUN", 0)

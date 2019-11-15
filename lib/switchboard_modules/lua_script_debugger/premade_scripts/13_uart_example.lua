@@ -12,12 +12,12 @@
 print("Basic UART example.")
 print("Please connect a jumper wire between FIO0 and FIO1 (FIO4 and FIO5 on T4)")
 print("")
--- The PRODUCT_ID register holds the device type
-local devtype = MB.readName("PRODUCT_ID")
 -- Assume the device being used is a T7, use FIO1 for the RX pin
 local rxpin = 1
 -- Use FIO0 for the TX pin
 local txpin = 0
+local devtype = MB.readName("PRODUCT_ID")
+-- If actually using a T4
 if devtype == 4 then
   -- Change the RX pin to FIO5
   rxpin = 5

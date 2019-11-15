@@ -17,15 +17,21 @@
           For more details see the datasheet page:
             https://labjack.com/support/datasheets/t-series/rtc
 
-          This example requires FW 1.0282
+          This example requires firmware 1.0282
 --]]
 
+-- For sections of code that require precise timing assign global functions
+-- locally (local definitions of globals are marginally faster)
+local modbus_read_array = MB.RA
+local modbus_read = MB.R
+local check_interval = LJ.CheckInterval
+
 print("Read the RTC_TIME_S register and SYSTEM_COUNTER_10KHZ to get a ms value.")
--- Read the HARDWARE_INSTALLED register
-local hwinstalled = MB.readName("HARDWARE_INSTALLED")
+-- Read the HARDWARE_INSTALLED register to get the RTC module status
+local hardware = MB.readName("HARDWARE_INSTALLED")
 -- The third bit in hardware correlates to the RTC module status
 -- If this third bit is not 1, the RTC module is not installed, exit the script
-if(bit.band(hwinstalled, 4) ~= 4) then
+if(bit.band(hardware, 4) ~= 4) then
   print("This Lua script requires a Real-Time Clock (RTC), but an RTC is not detected. These modules are only preinstalled on the T7-Pro, and cannot be added to the T7 or T4. Stopping Script")
   -- Write a 0 to LUA_RUN to stop the script
   MB.writeName("LUA_RUN", 0)
@@ -42,12 +48,12 @@ LJ.IntervalConfig(0, 500)
 -- Run the program in an infinite loop
 while true do
   -- If the interval is done print the time since epoch
-  if LJ.CheckInterval(0) then
+  if check_interval(0) then
     -- Read RTC_TIME_S to get the time since epoch
-    numseconds, error = MB.RA(61500, 0, 2)
+    numseconds, error = modbus_read_array(61500, 0, 2)
     -- Read SYSTEM_COUNTER_10KHZ, which is synchronized with RTC_TIME_S, to get
     -- the decimal point of the time since epoch (up to .1ms resolution)
-    msec = MB.readName("SYSTEM_COUNTER_10KHZ")
+    msec = modbus_read(61502, 1)
     print(string.format("%d %d %f", numseconds[1], numseconds[2], msec, msec/10000))
   end
 end

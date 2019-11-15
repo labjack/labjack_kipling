@@ -13,19 +13,21 @@
 --]]
 
 print("Sampling average/min/max: Read AIN1 at set rate for certain number of samples. Outputs average, minimum, and maximum")
--- The PRODUCT_ID register holds the device type
+-- Ensure analog is on
+MB.writeName("POWER_AIN", 1)
+
 local devtype = MB.readName("PRODUCT_ID")
-if devtype == 4 then
-  -- Set the resolution index to Automatic (usually the highest available)
-  MB.writeName("AIN_ALL_RESOLUTION_INDEX", 0)
-elseif devtype == 7 then
+-- If using a T7
+if devtype == 7 then
   -- Set the resolution index to 8 (the default value is 8 on the T7, 9 on the PRO)
   MB.writeName("AIN_ALL_RESOLUTION_INDEX", 8)
   --set the input voltage range to +-10V
   MB.writeName("AIN_ALL_RANGE",10)
+  -- If using a T4
+elseif devtype == 4 then
+  -- Set the resolution index to Automatic (usually the highest available)
+  MB.writeName("AIN_ALL_RESOLUTION_INDEX", 0)
 end
--- Ensure analog is on
-MB.writeName("POWER_AIN", 1)
 
 local alldata = 0
 local iter = 0

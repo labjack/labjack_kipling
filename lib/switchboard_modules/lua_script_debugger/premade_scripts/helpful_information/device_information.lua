@@ -54,20 +54,20 @@ end
 
 print('')
 print('Device Information:');
+
 -- Read the SERIAL_NUMBER register
-local serialnum = MB.R(60028, 1)
+local serialnum = MB.readName("SERIAL_NUMBER")
 print('- Serial Number:',string.format("%d",serialnum))
 
--- Read the firmware version
-local fwversion = MB.R(60004, 3)
--- The PRODUCT_ID register holds the device type
-local devtype = MB.R(60000, 3)
 local model = ''
+-- Read the PRODUCT_ID register
+local pid = MB.readName("PRODUCT_ID")
 -- Read the HARDWARE_INSTALLED register
-local hwinstalled = MB.R( 60010, 1)
-if devtype == 4 then
+local hwinstalled = MB.readName("HARDWARE_INSTALLED")
+
+if (pid == 4) then
   model = 'T4'
-elseif devtype == 7 then
+elseif (pid == 7) then
   model = 'T7'
   local ispro = 0
   -- Check to see if the high res ADC is installed.

@@ -5,13 +5,13 @@
 --]]
 
 print("Toggle the digital I/O called FIO3 (FIO5 on T4) at 1 Hz. Generates a 0.5Hz square wave.")
--- The PRODUCT_ID register holds the device type
-local devtype = MB.readName("PRODUCT_ID")
+
 -- Assume the user is using a T7, toggle FIO3
-local outpin = "FIO3"
+local outpin = 2003
+local devtype = MB.readName("PRODUCT_ID")
+-- If the user is actually using a T4, toggle FIO5
 if devtype == 4 then
-  -- If the user is actually using a T4, toggle FIO5
-  outpin = "FIO5"
+  outpin = 2005
 end
 
 local diostatus = 0
@@ -32,6 +32,6 @@ while true do
       print(diostatus, "high")
     end
     -- Apply the change to the DIO pin register (toggle on or off)
-    MB.writeName(outpin, diostatus)
+    MB.W(outpin, diostatus)
   end
 end

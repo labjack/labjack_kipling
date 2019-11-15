@@ -23,6 +23,7 @@ print("Transfer an array of ordered information to/from an external computer usi
 -- Once the script is running, open up the Register Matrix, and search USER_RAM_FIFO1_DATA_F32
 -- add this USER_RAM_FIFO1_DATA_F32 register to the active watch area, and
 -- view each element coming out in sequence at the update rate of the software.
+
 local f32out= {}
 f32out[1] = 10.0
 f32out[2] = 20.1
@@ -37,9 +38,9 @@ local fifo0bytes = numvalsfio0*bytesperval
 local fifo1bytes = numvalsfio1*bytesperval
 
 -- Allocate 20 bytes for FIFO0 by writing to USER_RAM_FIFO0_NUM_BYTES_IN_FIFO
-MB.writeName("USER_RAM_FIFO0_ALLOCATE_NUM_BYTES", fifo0bytes)
+MB.writeName("USER_RAM_FIFO0_NUM_BYTES_IN_FIFO", fifo0bytes)
 -- Allocate 20 bytes for FIFO1 by writing to USER_RAM_FIFO1_NUM_BYTES_IN_FIFO
-MB.writeName("USER_RAM_FIFO1_ALLOCATE_NUM_BYTES", fifo1bytes)
+MB.writeName("USER_RAM_FIFO1_NUM_BYTES_IN_FIFO", fifo1bytes)
 
 -- Configure an interval of 2000ms
 LJ.IntervalConfig(0, 2000)
@@ -49,8 +50,8 @@ while true do
   if LJ.CheckInterval(0) then
     -- Write to FIFO0 for the host computer to access
     for i=1, numvalsfio0 do
-      local outval = f32out[i]
-      local currentbytesfifo0 = MB.readName("USER_RAM_FIFO0_NUM_BYTES_IN_FIFO")
+      outval = f32out[i]
+      currentbytesfifo0 = MB.readName("USER_RAM_FIFO0_NUM_BYTES_IN_FIFO")
       -- If there are less bytes in FIFO0 than we allocated for, send a new
       -- array of size numvalsfio0 to the host
       if (currentbytesfifo0 < fifo0bytes) then

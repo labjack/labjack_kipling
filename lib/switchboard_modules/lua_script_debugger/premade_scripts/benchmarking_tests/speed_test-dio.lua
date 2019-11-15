@@ -7,6 +7,8 @@
 
           On a T7 (FW 1.0282) this example runs at around 23kHz
           On a T4 (FW 1.0023) this example runs at around 24kHz
+
+          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 -- For sections of code that require precise timing assign global functions
@@ -25,7 +27,7 @@ throttle = LJ.getLuaThrottle()
 print ("Current Lua Throttle Setting: ", throttle)
 
 -- The PRODUCT_ID register holds the device type
-local devtype = MB.R(60000, 3)
+local devtype = MB.readName("PRODUCT_ID")
 -- Assume the device being used is a T7, use FIO3 pin (address = 2003)
 local outpin = 2003
 -- If actually using a T4
