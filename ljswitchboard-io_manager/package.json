@@ -47,7 +47,7 @@
     "ljswitchboard-data_parser": "^1.0.1",
     "ljswitchboard-device_scanner": "^1.0.1",
     "ljswitchboard-firmware_verifier": "^0.x",
-    "ljswitchboard-ljm_device_curator": "^1.0.2",
+    "ljswitchboard-ljm_device_curator": "^1.0.3",
     "ljswitchboard-ljm_driver_checker": "^1.0.1",
     "ljswitchboard-ljm_driver_constants": "^1.0.0",
     "ljswitchboard-ljm_special_addresses": "^1.0.0",
