@@ -9,13 +9,13 @@ if (fwver < 1.0224 and devType == 7) or (fwver < 0.2037 and devType == 4) then
 end
 
 -- This function will convert the binary values from the SDP611 to a pressure. The binary
--- data consists of two bytes which must be joined and interpreted as 2's complement. The
+-- data consists of two bytes which must be joined and interpreted as 2''s complement. The
 -- resulting signed binary value is then converted to pascals.
 function binToPa(a,b)
   -- Join the two bytes
   rawValue = a*256+b  
   
-  -- Interpret as 2's complement
+  -- Interpret as 2''s complement
   if rawValue >0x8000 then
     value = bit.band(bit.bnot(rawValue), 0xFFFF) +1
     value = value*-1
@@ -31,7 +31,7 @@ end
 
 SLAVE_ADDRESS = 0x40-- 64 or h40, is default for SDP611 differential pressure sensor
 I2C.config(12, 13, 65216, 0, SLAVE_ADDRESS, 0)-- Configure the I2C Bus... SCL=12(EIO4) SDA=13(EIO5)
---NOTE: The T7 won't allow more than 1000 clock cycles of clock stretching. The SDP611 datasheet calls clock --stretching "master hold." The sensor needs to clock stretch for ~4.5ms. The clock needs to be ~20kHz or slower.
+--NOTE: The T7 won''t allow more than 1000 clock cycles of clock stretching. The SDP611 datasheet calls clock --stretching "master hold." The sensor needs to clock stretch for ~4.5ms. The clock needs to be ~20kHz or slower.
 
 LJ.IntervalConfig(0, 1000)-- Sets timing interval to get pressure reading once per second.
   while true do
