@@ -42,8 +42,4 @@ print("Welcome, please Load an example to get started!")
 
 print("Exiting Lua Script")
 -- Writing 0 to LUA_RUN stops the script
-<<<<<<< HEAD
-MB.W(6000, 1, 0)
-=======
 MB.writeName("LUA_RUN", 0)
->>>>>>> master
