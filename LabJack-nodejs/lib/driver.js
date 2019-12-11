@@ -39,6 +39,7 @@ function DriverInterfaceError(description) {
 exports.ljmDriver = function() {
     this.ljm = driverLib.getDriver();
     this.hasOpenAll = driverLib.hasOpenAll();
+    this.hasGetHandles = driverLib.hasGetHandles();
     this.constants = jsonConstants.getConstants();
 
     /**
@@ -669,6 +670,148 @@ exports.ljmDriver = function() {
     };
 
     /**
+     * Asynchronously retrieves device information about this device.
+     *
+     * Retrieves device metadata information about the device whose handle this
+     * object encapsulates. Returns a DeviceInfo object with the following
+     * structure:
+     * 
+     * { 
+     *      deviceType {number} A device model type corresponding to a constant
+     *          in LabJackM.h. 
+     *      connectionType {number} A constant from LabJackM.h that defines
+     *          connection medium the driver is using to communicate with the
+     *          device.
+     *      serialNumber {number} The device unique integer serial number.
+     *      ipAddress {string} The IP address the device is located at. Defaults
+     *          to all zeros if not connected by the network (0.0.0.0).
+     *      port {number} The port at which the device is connected.
+     *      maxBytesPerMB {number} The maximum payload in bytes that the
+     *          driver can send to the device over the current connection
+     *          medium.
+     * }
+     * 
+     * @param {function} onError function Callback for error-case that takes a
+     *      single number or String argument.
+     * @param {function} onSuccess function Callback for success-case that takes
+     *      a single Object argument.
+     * @return {Object} DeviceInfo
+    **/
+    this.getHandleInfo = function(handle, onError, onSuccess) {
+        var errorResult;
+
+        var deviceType = ref.alloc('int', 1);
+        var connectionType = ref.alloc('int', 1);
+        var serialNumber = ref.alloc('int', 1);
+        var ipAddr = ref.alloc('int', 1);
+        var port = ref.alloc('int', 1);
+        var maxBytesPerMessage = ref.alloc('int', 1);
+
+        errorResult = self.ljm.LJM_GetHandleInfo.async(
+            handle,
+            deviceType,
+            connectionType,
+            serialNumber,
+            ipAddr,
+            port,
+            maxBytesPerMessage,
+            function (err, res) {
+                if(err) {
+                    return onError('Weird Error getHandleInfo', err);
+                }
+                if (res === 0) {
+                    var ipStr = "";
+                    
+                    ipStr += ipAddr.readUInt8(3).toString();
+                    ipStr += ".";
+                    ipStr += ipAddr.readUInt8(2).toString();
+                    ipStr += ".";
+                    ipStr += ipAddr.readUInt8(1).toString();
+                    ipStr += ".";
+                    ipStr += ipAddr.readUInt8(0).toString();
+                    
+                    return onSuccess(
+                        {
+                            deviceType: deviceType.deref(),
+                            connectionType: connectionType.deref(),
+                            serialNumber: serialNumber.deref(),
+                            ipAddress: ipStr,
+                            port: port.deref(),
+                            maxBytesPerMB: maxBytesPerMessage.deref()
+                        }
+                    );
+                } else {
+                    return onError(res);
+                }
+            }
+        );
+        return errorResult;
+    };
+
+    /**
+     * Synchronously retrieves device information about this device.
+     *
+     * Retrieves device metadata information about the device whose handle this
+     * object encapsulates. Returns a DeviceInfo object with the following
+     * structure:
+     * 
+     * { 
+     *      deviceType {number} A device model type corresponding to a constant
+     *          in LabJackM.h. 
+     *      connectionType {number} A constant from LabJackM.h that defines
+     *          connection medium the driver is using to communicate with the
+     *          device.
+     *      serialNumber {number} The device unique integer serial number.
+     *      ipAddress {string} The IP address the device is located at. Defaults
+     *          to all zeros if not connected by the network (0.0.0.0).
+     *      port {number} The port at which the device is connected.
+     *      maxBytesPerMB {number} The maximum payload in bytes that the
+     *          driver can send to the device over the current connection
+     *          medium.
+     * }
+     *
+     * @return {Object/Number} Object conforming to the DeviceInfo structure as
+     *      defined above.
+     * @throws {Error} Thrown if any errors are discovered.
+    **/
+    this.getHandleInfoSync = function(handle) {
+        var errorResult;
+
+        var devT = ref.alloc('int', 1);
+        var conT = ref.alloc('int', 1);
+        var sN = ref.alloc('int', 1);
+        var ipAddr = ref.alloc('int', 1);
+        var port = ref.alloc('int', 1);
+        var maxB = ref.alloc('int', 1);
+
+        //Perform device I/O Operation
+        errorResult = self.ljm.LJM_GetHandleInfo(
+            handle,
+            devT,
+            conT,
+            sN,
+            ipAddr,
+            port,
+            maxB
+        );
+        
+        //Check to see if there were any errors
+        if (errorResult !== 0) {
+            throw new DriverOperationError(errorResult);
+        }
+
+        var returnVariable = {
+            deviceType: devT.deref(),
+            connectionType: conT.deref(),
+            serialNumber: sN.deref(),
+            ipAddress: ipAddr.deref(),
+            port: port.deref(),
+            maxBytesPerMB: maxB.deref()
+        };
+        return returnVariable;
+    };
+
+    /**
      * Internal helper function to prepare the arguments for an OpenAll call.
      */
     var prepareOpenAll = function(me, deviceType, connectionType) {
@@ -750,18 +893,36 @@ exports.ljmDriver = function() {
         return results;
     };
 
-    function asyncUnallocateErrorsHandle(handle, callback) {
+    // function asyncUnallocateErrorsHandle(handle, callback) {
+    //     self.ljm.LJM_CleanInfo.async(
+    //         handle,
+    //         function (err, res) {
+    //             callback();
+    //         });
+    // }
+    // function syncUnallocateErrorsHandle(handle) {
+    //     try {
+    //         self.ljm.LJM_CleanInfo(handle);
+    //     } catch(err) {
+    //         // Error...
+    //     }
+    //     return;
+    // }
+    this.cleanInfo = function(handle, onError, onSuccess) {
+        var bHandle = new ref.alloc('int', handle);
         self.ljm.LJM_CleanInfo.async(
-            handle,
+            bHandle,
             function (err, res) {
-                callback();
+                if (err) throw err;
+                if (res !== 0) return onError(res);
+                onSuccess();
             });
     }
-    function syncUnallocateErrorsHandle(handle) {
-        try {
-            self.ljm.LJM_CleanInfo(handle);
-        } catch(err) {
-            // Error...
+    this.cleanInfoSync = function(handle) {
+        var bHandle = new ref.alloc('int', handle);
+        var errorResult = self.ljm.LJM_CleanInfo(bHandle);
+        if (errorResult !== 0) {
+            throw new DriverOperationError(errorResult);
         }
         return;
     }
@@ -795,11 +956,13 @@ exports.ljmDriver = function() {
                 if (res !== 0) return onError(res);
                 var results = extractOpenAllResults(me);
                 // return onSuccess(extractOpenAllResults(me));
-                asyncUnallocateErrorsHandle(
+                self.cleanInfo(
                     results.errorHandle,
-                    function unallocatingCB() {
+                    onError,
+                    function successFunc(res) {
                         onSuccess(results);
-                    });
+                    }
+                );
             }
         );
     };
@@ -820,9 +983,97 @@ exports.ljmDriver = function() {
             throw new DriverOperationError(errorResult);
         }
         var results = extractOpenAllResults(me);
-        syncUnallocateErrorsHandle(results.errorHandle);
+        self.cleanInfoSync(results.errorHandle);
         return results;
     };
+
+
+    /**
+     * Internal helper function to prepare the arguments for an getHandles call.
+     */
+    function prepareGetHandles(info) {
+        if (!self.hasGetHandles) {
+            throw new DriverInterfaceError(
+                'getHandles is not loaded. The installed LJM library needs to be updated.'
+            );
+        }
+
+        info.infoHandle = new ref.alloc('int', 0);
+        info.info = new Buffer(ARCH_POINTER_SIZE);
+        info.info.fill(0);
+        
+        return info;
+    };
+    function extractGetHandlesResults(info) {
+        var results = {
+            infoHandle: infoHandle,
+            info: info,
+            infoString: '',
+            infoObj: {},
+        };
+
+        // Parse the infoHandle
+        var infoHandle = info.infoHandle.readInt32LE(0);
+        // Read the errors string
+        var pointerToCharStar = ref.readPointer(info.info, 0, ARCH_POINTER_SIZE);
+        var parsedCharStar = ref.readCString(pointerToCharStar, 0);
+        
+        results.infoString = parsedCharStar;
+        
+        try {
+            results.infoObj = JSON.parse(parsedCharStar);
+        } catch(err) {
+            results.infoObj = {
+                'exceptions': [],
+                'networkInterfaces': [],
+                'returnedDevices': [],
+                'specificIPs': [],
+            };
+        }
+        
+        return results;
+    }
+    this.getHandles = function(onError, onSuccess) {
+        var info = {};
+        prepareGetHandles(info);
+        
+        self.ljm.Internal_LJM_GetHandles.async(
+            info.infoHandle,
+            info.info,
+            function (err, res) {
+                if (err) throw err;
+                if (res !== 0) return onError(res);
+                var results = extractGetHandlesResults(info);
+                
+                self.cleanInfo(
+                    results.infoHandle,
+                    onError,
+                    onSuccess
+                );
+            }
+        );
+
+        // var results = extractGetHandlesResults(info);
+
+    }
+
+    this.getHandlesSync = function() {
+        var info = {};
+        prepareGetHandles(info);
+        var errorResult = self.ljm.Internal_LJM_GetHandles(
+            info.infoHandle,
+            info.info
+        );
+
+        if (errorResult !== 0) {
+            throw new DriverOperationError(errorResult);
+        }
+
+        var results = extractGetHandlesResults(info);
+        self.cleanInfoSync(results.infoHandle);
+        return results.infoObj;
+
+    }
 
     /**
      * Converts an error number to a string asynchronously.

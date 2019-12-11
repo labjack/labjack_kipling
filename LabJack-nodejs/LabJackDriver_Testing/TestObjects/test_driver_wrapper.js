@@ -69,17 +69,6 @@ var LJM_Close = createCallableObject(
 		argumentsList.push(arguments);
 		reportEnd(callback);
 	});
-var LJM_CleanInfo = createCallableObject(
-	function(handle) {
-		lastFunctionCall.push("LJM_CleanInfo");
-		argumentsList.push(arguments);
-		return expectedResult;
-	},
-	function(handle,callback) {
-		lastFunctionCall.push("LJM_CleanInfoAsync");
-		argumentsList.push(arguments);
-		reportEnd(callback);
-	});
 var LJM_GetHandleInfo = createCallableObject(
 	function(handle,devT, conT, sN, ipAddr, port, maxB) {
 		lastFunctionCall.push("LJM_GetHandleInfo");
@@ -791,6 +780,68 @@ var LJM_IsAuth = createCallableObject(
 		reportEnd(callback);
 	});
 
+var strPtrs = {};
+var numAllocated = 0
+function allocateStrHandle(buf) {
+	var strHandle = numAllocated;
+	strPtrs[numAllocated] = buf;
+	numAllocated += 1;
+	return strHandle;
+}
+function unallocateStrHandle(handle) {
+	try {
+		ref.deref(strPtrs[handle]);
+		delete strPtrs[handle];
+	} catch(err) {
+		// Ignore the error...
+	}
+}
+
+
+var Internal_LJM_GetHandles = createCallableObject(
+	function(infoHandle, info) {
+		lastFunctionCall.push("Internal_LJM_GetHandles");
+		argumentsList.push(arguments);
+		
+		// Initialize a string.
+		var buf = ref.allocCString('{"handles":[]}');
+		ref.writePointer(info, 0, buf);
+
+		// Save the string pointer & generate a handle.
+		var strHandle = allocateStrHandle(buf);
+
+		infoHandle.writeInt32LE(strHandle);
+		return expectedResult;
+	},
+	function(infoHandle, info, callback) {
+		lastFunctionCall.push("Internal_LJM_GetHandlesAsync");
+		argumentsList.push(arguments);
+		
+		// Initialize a string.
+		var buf = ref.allocCString('{"handles":[]}');
+		ref.writePointer(info, 0, buf);
+
+		// Save the string pointer & generate a handle.
+		var strHandle = allocateStrHandle(buf);
+
+		infoHandle.writeInt32LE(strHandle);
+		reportEnd(callback);
+	});
+
+var LJM_CleanInfo = createCallableObject(
+	function(handle) {
+		lastFunctionCall.push("LJM_CleanInfo");
+		argumentsList.push(arguments);
+		unallocateStrHandle(handle.readInt32LE(0));
+		return expectedResult;
+	},
+	function(handle,callback) {
+		lastFunctionCall.push("LJM_CleanInfoAsync");
+		argumentsList.push(arguments);
+		unallocateStrHandle(handle.readInt32LE(0));
+		reportEnd(callback);
+	});
+
 //******************************************************************************
 //*********************		Driver Dict-Object	********************************
 //******************************************************************************
@@ -838,6 +889,7 @@ var fakeDriver = {
 	'LJM_Log': LJM_Log,
 	'LJM_ResetLog': LJM_ResetLog,
 	'LJM_CleanInfo': LJM_CleanInfo,
+	'Internal_LJM_GetHandles': Internal_LJM_GetHandles,
 
 	
 };
@@ -869,3 +921,6 @@ exports.clearArgumentsList = function(val) {
 exports.getArgumentsList = function(val) {
 	return argumentsList;
 };
+exports.hasGetHandles = function() {
+	return true;
+}

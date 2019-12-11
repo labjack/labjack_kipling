@@ -33,6 +33,9 @@ var functionLocation = {
 	'controlLog': 'driver',
 	'enableLog': 'driver',
 	'disableLog': 'driver',
+	'getHandles': 'driver',
+	'cleanInfo': 'driver'
+
 };
 exports.getList = function() {
 	return functionLocation;

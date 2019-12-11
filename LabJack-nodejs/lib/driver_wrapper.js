@@ -31,6 +31,11 @@ if(ljmLibraryVersion >= 1.1200) {
     openAllIsLoaded = true;
 }
 
+var getHandlesIsLoaded = false;
+if(ljmLibraryVersion >= 1.1300) {
+	getHandlesIsLoaded = true;
+}
+
 exports.getDriver = function() {
     return ffi_liblabjack;
 };
@@ -43,6 +48,9 @@ exports.parseRegisterNameString = function (name) {
 exports.hasOpenAll = function() {
     return openAllIsLoaded;
 };
+exports.hasGetHandles = function() {
+	return getHandlesIsLoaded;
+}
 
 /*
 LJM_SEND_RECEIVE_TIMEOUT_MS

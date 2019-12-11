@@ -604,6 +604,60 @@ module.exports = {
             },false,false
         );
     },
+    getHandleInfo: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        var testList = [
+            'getHandleInfo()',
+        ];
+
+        test.done();
+    },
+    getHandles: function(test) {
+        asyncRun.config(dev, driver,driver_const);
+        syncRun.config(dev, driver,driver_const);
+
+        var testList = [
+            'getHandles()',
+        ];
+        
+        var expectedResults = [
+            {handles: []}, // No handles are expected as per mock function.
+            'SUCCESS' // Added at the end of the test.
+        ];
+
+        var expectedFunctionList = [
+            'Internal_LJM_GetHandles',
+            'LJM_CleanInfo',
+            'Internal_LJM_GetHandlesAsync',
+            'LJM_CleanInfoAsync',
+        ];
+
+        //Run the desired commands
+        syncRun.run(testList,false,false);
+        asyncRun.run(testList,
+            function(res) {
+                //Error
+                console.log("Encountered an error:", res);
+            }, function(res) {
+                //Success
+                var funcs = fakeDriver.getLastFunctionCall();
+                var results = asyncRun.getResults();
+                var argList = fakeDriver.getArgumentsList();
+                
+                //Test to make sure expected results were returned.
+                test.deepEqual(expectedResults, asyncRun.getResults());
+                test.deepEqual(expectedResults, syncRun.getResults());
+
+                //Test to see appropriate functions were called:
+                test.deepEqual(expectedFunctionList,funcs);
+
+                //Report that test finished
+                test.done();
+            },false,false
+        );
+    },
     LJM_ListAllExtended: function(test) {
         var addrListN = [0,49100,49200,60500];
         var addrListS = ['AIN0','ETHERNET_IP','WIFI_IP','DEVICE_NAME_DEFAULT'];
