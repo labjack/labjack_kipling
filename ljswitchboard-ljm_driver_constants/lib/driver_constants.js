@@ -536,6 +536,9 @@ exports.serialNumberOffsets = {
 
 // Error codes for the device_curator:
 exports.LJN_DEVICE_NOT_CONNECTED = 99999;
+exports.LJN_UNEXPECTED_ASYNC_CALL_ERROR = 99998;
+exports.LJN_INVALID_IO_ATTEMPT = 99990;
+
 exports.device_curator_constants = {
 	'DEVICE_DISCONNECTED': 'DEVICE_DISCONNECTED',
 	'DEVICE_RECONNECTED': 'DEVICE_RECONNECTED',
