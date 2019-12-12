@@ -339,6 +339,18 @@ var parseConstants = function(LJMJSONFileLocation) {
 		'string': 'LJN_DEVICE_NOT_CONNECTED',
 		'description': 'The device is no longer connected, trying to reconnect'
 	});
+	// Append custom "forcing error b/c device not connected" error
+	constantsData.errors.push({
+		'error': driver_const.LJN_UNEXPECTED_ASYNC_CALL_ERROR,
+		'string': 'LJN_UNEXPECTED_ASYNC_CALL_ERROR',
+		'description': 'The Asynchronous ffi library returned an unexpected error.'
+	});
+	// Append custom "forcing error b/c device not connected" error
+	constantsData.errors.push({
+		'error': driver_const.LJN_INVALID_IO_ATTEMPT,
+		'string': 'LJN_INVALID_IO_ATTEMPT',
+		'description': 'The device is no longer connected, trying to reconnect'
+	});
 	
 	var numErrors = constantsData.errors.length;
 	for(i = 0; i < numErrors; i ++) {

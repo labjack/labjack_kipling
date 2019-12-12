@@ -15,6 +15,8 @@ var constants = jsonConstants.getConstants();
 var ljmmm_parse = require('ljmmm-parse');
 var bufferRegisters = require('../lib/buffer_registers').bufferRegisters;
 
+var driver_const = require('ljswitchboard-ljm_driver_constants');
+
 var expandedBufferRegisters = [];
 bufferRegisters.forEach(function(bufferRegister) {
   var newReg = ljmmm_parse.expandLJMMMName(bufferRegister);
@@ -100,6 +102,22 @@ exports.tests = {
 
     var errStr = constants.getErrorInfo('LJ_SUCCESS');
     test.deepEqual(errStr, {'error': 0, 'string': 'LJ_SUCCESS'});
+    test.done();
+  },
+
+  /**
+   * Test to make sure that additional error codes are properly inserted.
+   */
+  testAdditionalErrors: function(test) {
+    errorCodes = [
+      {'err': driver_const.LJN_DEVICE_NOT_CONNECTED, 'str': 'LJN_DEVICE_NOT_CONNECTED'},
+      {'err': driver_const.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'str': 'LJN_UNEXPECTED_ASYNC_CALL_ERROR'},
+      {'err': driver_const.LJN_INVALID_IO_ATTEMPT, 'str': 'LJN_INVALID_IO_ATTEMPT'},
+    ];
+    for(var i = 0; i < errorCodes.length; i++) {
+      test.equal(constants.getErrorInfo(errorCodes[i].err).string, errorCodes[i].str);
+    }
+
     test.done();
   },
 
