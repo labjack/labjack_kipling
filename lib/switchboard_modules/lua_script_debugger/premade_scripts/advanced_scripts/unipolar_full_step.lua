@@ -7,6 +7,7 @@
           with this script:
             https://labjack.com/support/app-notes/digital-IO/stepper-motor-controller
 --]]
+
 print("Use the following registers:")
 print("46080: Target Position (steps)")
 print("46082: Current Position (steps)")
@@ -73,7 +74,7 @@ while true do
         MB.writeName("USER_RAM0_U16", 0)
         print("reached new pos")
         -- Determine if the motor should be "held in place"
-        hold = MB.R(46182, 0)
+        hold = MB.readName("USER_RAM1_U16")
         if hold == 0 then
           -- Set all low to allow free movement
           m0 = 0

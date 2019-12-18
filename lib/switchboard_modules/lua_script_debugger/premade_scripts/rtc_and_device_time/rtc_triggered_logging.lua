@@ -16,7 +16,8 @@
 --]]
 
 print("Log voltage of AIN1 to file every 10 minutes. RTC value checked every 1000ms.")
-
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Get statuses of the device hardware modules
 local hardware = MB.readName("HARDWARE_INSTALLED")
 local passed = 1
@@ -32,7 +33,7 @@ if(bit.band(hardware, 4) ~= 4) then
 end
 if(passed == 0) then
   print("This Lua script requires an RTC and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping.")
-  MB.W(6000, 1, 0)
+  MB.writeName("LUA_RUN", 0)
 end
 
 local filepre = "RTWi_"
@@ -81,13 +82,12 @@ else
   print ("Creating new file")
 end
 
--- Run the program in an infinite loop
 while true do
   -- If the RTC polling interval completed
   if LJ.CheckInterval(0) then
     local fg = 0
     -- Read the RTC timestamp -Pro only
-    date, error = MB.RA(61510, 0, 6)
+    date, error = MB.readNameArray("RTC_TIME_CALENDAR", 6)
     stringdate = string.format(
       "%04d/%02d/%02d %02d:%02d.%02d",
       date[1],

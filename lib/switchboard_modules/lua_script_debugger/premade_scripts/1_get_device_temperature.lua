@@ -15,10 +15,9 @@ end
 print("Read and display the device temperature at 0.5 Hz.")
 -- Write 1 to the POWER_AIN register to ensure the analog input module is on
 MB.writeName("POWER_AIN", 1)
-
 -- Configure an interval of 500ms
 LJ.IntervalConfig(0, 500)
--- Run the program in an infinite loop
+
 while true do
     -- If an interval is done
   if LJ.CheckInterval(0) then

@@ -12,12 +12,10 @@ local devtype = MB.readName("PRODUCT_ID")
 if devtype == 4 then
   outpin = "FIO5"
 end
-
 local threshold = 2.5
-
 -- Configure a 100ms interval
 LJ.IntervalConfig(0, 100)
--- Run the program in an infinite loop
+
 while true do
   -- If an interval is done
   if LJ.CheckInterval(0) then

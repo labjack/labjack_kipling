@@ -49,11 +49,11 @@ function spiutils.transfer(self, txdata)
   -- Configure the number of bytes to read/write (write to SPI_NUM_BYTES)
   MB.writeName("SPI_NUM_BYTES", numbytes)
 -- SPI_DATA_TX is a buffer for data to send to slave devices
-  local errorval = MB.WA(5010, 99, numbytes, txdata)
+  local errorval = MB.writeNameArray("SPI_DATA_TX", numbytes, txdata)
   -- Write 1 to SPI_GO to begin the SPI transaction
   MB.writeName("SPI_GO", 1)
   -- Read SPI_DATA_RX to capture data sent back from the slave device
-  local rxdata = MB.RA(5050, 99, numbytes)
+  local rxdata = MB.readNameArray("SPI_DATA_RX", numbytes)
   return rxdata
 end
 
@@ -98,9 +98,11 @@ function spiutils.calculate_mode(self, cpol, cpha)
   return cpolval*2 + cphaval*1
 end
 
-print ("T4 SPI Mode Testing Example")
-spi = spiutils
 
+print ("T4 SPI Mode Testing Example")
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
+spi = spiutils
 -- Use DIO8 for chip select
 local cs=8
 -- Use DIO9 for clock
@@ -109,7 +111,6 @@ local clk=9
 local miso=10
 -- Use DIO11 for MOSI
 local mosi=11
-
 -- Set the clock at default speed (~800KHz)
 local speed = 0
 -- Set the options such that there are no special operation (such as disabling CS)

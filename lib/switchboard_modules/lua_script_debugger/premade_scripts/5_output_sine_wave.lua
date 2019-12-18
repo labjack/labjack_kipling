@@ -7,7 +7,6 @@
 --]]
 
 print("Output sine wave. Analog output is DAC0.")
-
 local vout = 0
 -- If max amplitude is needed, use 2.5V centerline and 2.25V amplitude.
 -- VS ranges from 4.75-5.00V depending on setup.
@@ -19,11 +18,10 @@ local offset = 2.5
 local frequency = 1
 -- Radians per step. A smaller number increases waveform resolution
 local radstep = .1
-
 local interval = 1000 / (2 * (frequency / radstep) )
 local rads = 0
 LJ.IntervalConfig(0, interval)
--- Run in an infinite loop
+
 while true do
   -- If an interval is done
   if LJ.CheckInterval(0) then

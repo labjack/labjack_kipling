@@ -12,6 +12,8 @@
 --]]
 
 print("T4 Basic I/O Example")
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Get the device type by reading the PRODUCT_ID register
 local devtype = MB.readName("PRODUCT_ID")
 -- If the user is not using a T4 exit the script

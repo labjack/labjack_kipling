@@ -12,27 +12,31 @@
 --          https://labjack.com/support/datasheets/t-series/ain
 -------------------------------------------------------------------------------
 local function ain_channel_config(ainchannel, range, resolution, settling, isdifferential)
+  local rangeaddress = MB.nameToAddress("AIN0_RANGE")
+  local resaddress = MB.nameToAddress("AIN0_RESOLUTION_INDEX")
+  local setaddress = MB.nameToAddress("AIN0_SETTLING_US")
+  local negchaddress = MB.nameToAddress("AIN0_NEGATIVE_CH")
   -- Set AIN range
-  MB.W(40000 + ainchannel * 2, 3, range)
+  MB.W(rangeaddress + ainchannel * 2, 3, range)
   -- Set resolution index
-  MB.W(41500 + ainchannel * 1, 0, resolution)
+  MB.W(resaddress + ainchannel * 1, 0, resolution)
   -- Set settling time
-  MB.W(42000 + ainchannel * 2, 3, settling)
+  MB.W(setaddress + ainchannel * 2, 3, settling)
 
   -- Read the device type
-  local devicetype = MB.R(60000, 3)
+  local devicetype = MB.readName("PRODUCT_ID")
   -- Setup the negative channel if using a differential input
   if isdifferential and (ainchannel%2 == 0) and (devicetype == 7) then
     -- The negative channels setting is only valid for even
     -- analog input channels and is not valid for the T4.
     if (ainchannel < 14) then
       -- The negative channel is 1+ the channel for AIN0-13 on the T7
-      MB.W(41000 + ainchannel, 0, ainchannel + 1)
+      MB.W(negchaddress + ainchannel, 0, ainchannel + 1)
     elseif (ainchannel > 47) then
       -- The negative channel is 8+ the channel for AIN48-127 on the T7
       -- when using a Mux80.
       -- https://labjack.com/support/datasheets/accessories/mux80
-      MB.W(41000 + ainchannel, 0, ainchannel + 8)
+      MB.W(negchaddress + ainchannel, 0, ainchannel + 8)
     else
       print(string.format("Can not set negative channel for AIN%d",ainchannel))
     end

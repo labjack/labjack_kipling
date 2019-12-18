@@ -17,12 +17,15 @@
           inchanb = 46090 (USER_RAM5_I32)
           pupchana   = 46092 (USER_RAM6_I32)
           pupchanb   = 46094 (USER_RAM7_I32)
+
+          I2C examples assume power is provided by a LJTick-LVDigitalIO at 3.3V
+          (a DAC set to 3.3V or a DIO line could also be used for power)
 --]]
 
 SLAVE_ADDRESS = 0x3E
 
--- Use EIO3 for power
-MB.writeName("EIO3", 1)
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Configure the I2C Bus
 I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)
 local addrs = I2C.search(0, 127)

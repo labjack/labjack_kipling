@@ -1,18 +1,22 @@
---This is an example that uses the BMP180 Barometric Pressure/Temperature/Altitude sensor on the I2C Bus on EIO4(SCL) and EIO5(SDA)
---See the datasheet (page 13-17) for calibration constant information & calculation information
+--[[
+    Name: temp-and-pressure-bmp180.lua
+    Desc: This is an example that uses the BMP180 Barometric Pressure/
+          Temperature / Altitude sensor on the I2C Bus on EIO4(SCL) and EIO5(SDA)
+    Note: See the datasheet (page 13-17) for calibration constant information
+          and calculation information:
+            https://cdn-shop.adafruit.com/datasheets/BST-BMP180-DS000-09.pdf
+--]]
+
 --Outputs data to Registers:
 --46018 = temp data
 --46020 = humidity data
---46022 thru 46042 = calibration constants
+--46022 - 46042 = calibration constants
 
-fwver = MB.R(60004, 3)
-devType = MB.R(60000, 3)
-if (fwver < 1.0224 and devType == 7) or (fwver < 0.2037 and devType == 4) then
-  print("This lua script requires a higher firmware version (T7 Requires 1.0224 or higher, T4 requires 0.2037 or higher). Program Stopping")
-  MB.W(6000, 1, 0)
-end
-
-function convert_16_bit(msb, lsb, conv)--Returns a number, adjusted using the conversion factor. Use 1 if not desired  
+-------------------------------------------------------------------------------
+--  Desc: Returns a number adjusted using the conversion factor
+--        Use 1 if not desired
+-------------------------------------------------------------------------------
+local function convert_16_bit(msb, lsb, conv)
   res = 0
   if msb >= 128 then
     res = (-0x7FFF+((msb-128)*256+lsb))/conv
@@ -22,14 +26,15 @@ function convert_16_bit(msb, lsb, conv)--Returns a number, adjusted using the co
   return res
 end
 
+local SLAVE_ADDRESS = 0x77
 
-SLAVE_ADDRESS = 0x77
-I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)--configure the I2C Bus
-
-addrs = I2C.search(0, 127)
-addrsLen = table.getn(addrs)
-found = 0
-for i=1, addrsLen do--verify that the target device was found     
+-- Configure the I2C Bus
+I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)
+local addrs = I2C.search(0, 127)
+local addrslen = table.getn(addrs)
+local found = 0
+-- Verify that the target device was found
+for i=1, addrslen do
   if addrs[i] == SLAVE_ADDRESS then
     print("I2C Slave Detected")
     found = 1
@@ -38,23 +43,22 @@ for i=1, addrsLen do--verify that the target device was found
 end
 if found == 0 then
   print("No I2C Slave detected, program stopping")
-  MB.W(6000, 1, 0)
+  MB.writeName("LUA_RUN", 0)
 end
-
---init slave
+-- Initialize the slave
 I2C.write({0xF4, 0x2E})
---verify operation
+-- Verify operation
 I2C.write({0xD0})
-raw = I2C.read(2)
-
---get calibration data
-cal = {}
+local raw = I2C.read(2)
+-- Get calibration data
+local cal = {}
 for i=0xAA, 0xBF do
   if i%2 == 0 then
     I2C.write({i})
     raw = I2C.read(2)
     if i == 0xB0 or  i == 0xB2 or i == 0xB4 then
-      data = raw[1]*256+raw[2]--for the 3 values that are unsigned
+      -- For the 3 values that are unsigned
+      data = raw[1]*256+raw[2]
     else
       data = convert_16_bit(raw[1], raw[2], 1)
     end
@@ -62,41 +66,52 @@ for i=0xAA, 0xBF do
   end
 end
 for i=1, 11 do
-  MB.W(46022+(i-1)*2, 3, cal[i])--add data to User RAM Registers
+  -- Add data to User RAM Registers
+  MB.W(46022+(i-1)*2, 3, cal[i])
 end
-
+-- Configure a 1000ms interval
 LJ.IntervalConfig(0, 1000)
-stage = 0 --used to control program progress
+-- Variable used to control program progress
+local stage = 0
+
 while true do
+  -- If an interval is done
   if LJ.CheckInterval(0) then
     if stage == 0 then
-      I2C.write({0xF4, 0x2E})--0x2E for temp, 0x34 for pressure
+      -- 0x2E is the code for temperature reading
+      I2C.write({0xF4, 0x2E})
+      -- Set a 50ms interval to give the sensor time to process
       LJ.IntervalConfig(0, 50)
       stage = 1
     elseif stage == 1 then
-      rawT = {}
-      I2C.write({0xF6})--MSB = F6
-      rawT[1] = I2C.read(2)[1]
-      I2C.write({0xF7})--LSB = F7
-      rawT[2] = I2C.read(2)[1]
-      UT = rawT[1]*256+rawT[2]
-      MB.W(46018, 3, UT) 
-      print("Temperature Data: "..UT)
+      rawtemp = {}
+      -- MSB = F6
+      I2C.write({0xF6})
+      rawtemp[1] = I2C.read(2)[1]
+      -- LSB = F7
+      I2C.write({0xF7})
+      rawtemp[2] = I2C.read(2)[1]
+      temp = rawtemp[1]*256+rawtemp[2]
+      MB.writeName("USER_RAM9_F32", temp)
+      print("Temperature Data: "..temp)
+      -- Set a 50ms interval
       LJ.IntervalConfig(0, 50)
       stage = 2
     elseif stage == 2 then
-      I2C.write({0xF4, 0x34})--0x2E for temp, 0x34 for pressure
+      -- 0x34 is the code for pressure reading
+      I2C.write({0xF4, 0x34})
       LJ.IntervalConfig(0, 50)
       stage = 3
     elseif stage == 3 then
-      rawP = {}
-      I2C.write({0xF6})--MSB = F6
-      rawP[1] = I2C.read(2)[1]
-      I2C.write({0xF7})--LSB = F7
-      rawP[2] = I2C.read(2)[1]
-      UP = rawP[1]*256+rawP[2]
-      MB.W(46020, 3, UP) 
-      print("Pressure Data: "..UP)
+      rawpressure = {}
+      I2C.write({0xF6})
+      rawpressure[1] = I2C.read(2)[1]
+      I2C.write({0xF7})
+      rawpressure[2] = I2C.read(2)[1]
+      pressure = rawpressure[1]*256+rawpressure[2]
+      MB.writeName("USER_RAM10_F32", pressure)
+      print("Pressure Data: "..pressure)
+      -- Set the original 1000ms interval
       LJ.IntervalConfig(0, 1000)
       stage = 0
     end

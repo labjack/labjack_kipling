@@ -31,20 +31,32 @@ local function ain_ef_config(
   configi,
   configj
 )
+
+  local indexaddress = MB.nameToAddress("AIN0_EF_INDEX")
+  local confaddressa = MB.nameToAddress("AIN0_EF_CONFIG_A")
+  local confaddressb = MB.nameToAddress("AIN0_EF_CONFIG_B")
+  local confaddressc = MB.nameToAddress("AIN0_EF_CONFIG_C")
+  local confaddressd = MB.nameToAddress("AIN0_EF_CONFIG_D")
+  local confaddresse = MB.nameToAddress("AIN0_EF_CONFIG_E")
+  local confaddressf = MB.nameToAddress("AIN0_EF_CONFIG_F")
+  local confaddressg = MB.nameToAddress("AIN0_EF_CONFIG_G")
+  local confaddressh = MB.nameToAddress("AIN0_EF_CONFIG_H")
+  local confaddressi = MB.nameToAddress("AIN0_EF_CONFIG_I")
+  local confaddressj = MB.nameToAddress("AIN0_EF_CONFIG_J")
   -- Disable AIN_EF
-  MB.W(9000 + channelnum * 2, 1, 0)
+  MB.W(indexaddress + channelnum * 2, 1, 0)
   -- Enable AIN_EF
-  MB.W(9000 + channelnum * 2, 1, index)
-  MB.W(9300 + channelnum * 2, 1, configa)
-  MB.W(9600 + channelnum * 2, 1, configb)
-  MB.W(9900 + channelnum * 2, 1, configc)
-  MB.W(10200 + channelnum * 2, 3, configd)
-  MB.W(10500 + channelnum * 2, 3, confige)
-  MB.W(10800 + channelnum * 2, 3, configf)
-  MB.W(11100 + channelnum * 2, 3, configg)
-  MB.W(11400 + channelnum * 2, 3, configh)
-  MB.W(11700 + channelnum * 2, 3, configi)
-  MB.W(12000 + channelnum * 2, 3, configj)
+  MB.W(indexaddress + channelnum * 2, 1, index)
+  MB.W(confaddressa + channelnum * 2, 1, configa)
+  MB.W(confaddressb + channelnum * 2, 1, configb)
+  MB.W(confaddressc + channelnum * 2, 1, configc)
+  MB.W(confaddressd + channelnum * 2, 3, configd)
+  MB.W(confaddresse + channelnum * 2, 3, confige)
+  MB.W(confaddressf + channelnum * 2, 3, configf)
+  MB.W(confaddressg + channelnum * 2, 3, configg)
+  MB.W(confaddressh + channelnum * 2, 3, configh)
+  MB.W(confaddressi + channelnum * 2, 3, configi)
+  MB.W(confaddressj + channelnum * 2, 3, configj)
 end
 
 print("Generic Config AIN_EF & set power-up defaults")
@@ -63,11 +75,11 @@ end
 
 -- Set as power-up default
 print("Saving settings as power-up defaults")
-MB.W(49002, 1, 1)
+MB.writeName("IO_CONFIG_SET_DEFAULT_TO_CURRENT", 1)
 
 -- Re-set device
 print("Rebooting Device")
--- Write to SYSTEM_REBOOT so the system reboots after 200ms (last 4 bytes of
+-- Write to SYSTEM_REBOOT so the system reboots after 200ms (last 4 hex vals of
 -- the write value tells the device how many 50ms ticks to wait before reboot)
-MB.W(61998, 1, 0x4C4A0004)
+MB.writeNameArray("SYSTEM_REBOOT", 2, {0x4C4A, 0x0004}, 0)
 

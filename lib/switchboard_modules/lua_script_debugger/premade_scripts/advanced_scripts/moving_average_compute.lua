@@ -117,7 +117,7 @@ while true do
         sums[i] = sums[i] + vals[i][j]
       end
       avgval = sums[i] / numaveraged
-      -- Save result to USER_RAMx_F32 register
+      -- Save result to USER_RAM#_F32 register
       MB.W(46000 + channels[i], 3, avgval)
       if printavg then
         print(string.format("The average AIN%d reading is: %.5f, (%d samples)",channels[i], avgval, numaveraged))

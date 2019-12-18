@@ -25,6 +25,8 @@ local lastwf = 0
 local lastws = 0
 local lastwa = 0
 local lastwo = 0
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Initialize IO memory
 MB.writeName("USER_RAM0_F32", scanfreq)
 MB.writeName("USER_RAM1_F32", wavefreq)

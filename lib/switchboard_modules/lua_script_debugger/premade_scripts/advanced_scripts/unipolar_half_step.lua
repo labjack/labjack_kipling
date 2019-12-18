@@ -74,7 +74,7 @@ while true do
         MB.writeName("USER_RAM0_U16", 0)
         print("reached new pos")
         -- Determine if the motor should be "held in place"
-        hold = MB.R(46182, 0)
+        hold = MB.R("USER_RAM1_U16")
         if hold == 0 then
           -- Set all low to allow free movement
           m0 = 0

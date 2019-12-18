@@ -21,6 +21,8 @@
 --]]
 
 print("Read the real-time-clock RTC, print the timestamp.")
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Read the HARDWARE_INSTALLED register to get the RTC module status
 local hardware = MB.readName("HARDWARE_INSTALLED")
 -- The third bit in hardware correlates to the RTC module status
@@ -47,7 +49,7 @@ while true do
   -- If the interval is done print the time
   if LJ.CheckInterval(0) then
     -- Read the RTC_TIME_CALENDAR register to get the device time
-    timetable, error = MB.RA(61510, 0, 6)
+    timetable, error = MB.readNameArray("RTC_TIME_CALENDAR", 6)
     print(string.format(
       "%04d/%02d/%02d %02d:%02d.%02d",
       timetable[1],
@@ -57,12 +59,12 @@ while true do
       timetable[5],
       timetable[6])
     )
-    -- print("Year: ", timetable[1])
-    -- print("Month: ", timetable[2])
-    -- print("Day: ", timetable[3])
-    -- print("Hour: ", timetable[4])
-    -- print("Minute:", timetable[5])
-    -- print("Second:", timetable[6])
-    -- print("\n")
+    print("Year: ", timetable[1])
+    print("Month: ", timetable[2])
+    print("Day: ", timetable[3])
+    print("Hour: ", timetable[4])
+    print("Minute:", timetable[5])
+    print("Second:", timetable[6])
+    print("\n")
   end
 end

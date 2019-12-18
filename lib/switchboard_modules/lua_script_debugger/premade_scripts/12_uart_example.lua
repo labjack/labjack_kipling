@@ -12,6 +12,8 @@
 print("Basic UART example.")
 print("Please connect a jumper wire between FIO0 and FIO1 (FIO4 and FIO5 on T4)")
 print("")
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Assume the device being used is a T7, use FIO1 for the RX pin
 local rxpin = 1
 -- Use FIO0 for the TX pin
@@ -39,18 +41,15 @@ MB.writeName("ASYNCH_PARITY", 0)
 MB.writeName("ASYNCH_RX_BUFFER_SIZE_BYTES", 600)
 -- Enable ASYNCH
 MB.writeName("ASYNCH_ENABLE", 1)
-
-local teststring = "Hello World!"
-local strlen = string.len(teststring)
-print("Sending String of length:", strlen)
-
--- Configure an interval of 1000ms
-LJ.IntervalConfig(0, 1000)
-
 -- Variables used to stop the program
 local maxiterations = 3
 local currentiteration = 0
 local running = true
+local teststring = "Hello World!"
+local strlen = string.len(teststring)
+print("Sending String of length:", strlen)
+-- Configure an interval of 1000ms
+LJ.IntervalConfig(0, 1000)
 
 while running do
   -- Check to see if the interval is completed.
@@ -66,6 +65,7 @@ while running do
     end
     -- Send data saved in the TX buffer
     MB.writeName("ASYNCH_TX_GO", 1)
+
     -- Read the number of bytes in RX buffer
     local rxbytes = MB.readName("ASYNCH_NUM_BYTES_RX")
     -- If there are more than zero bytes...
@@ -83,6 +83,7 @@ while running do
       print("Data:",datastr)
       print("")
     end
+
     -- Exit after 3 iterations
     if currentiteration < maxiterations then
       currentiteration = currentiteration + 1
@@ -91,7 +92,6 @@ while running do
     end
   end
 end
-
 print("Script Finished")
 -- Writing 0 to LUA_RUN stops the script
 MB.writeName("LUA_RUN", 0)

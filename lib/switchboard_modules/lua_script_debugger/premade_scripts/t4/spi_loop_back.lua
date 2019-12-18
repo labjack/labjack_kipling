@@ -23,7 +23,6 @@ function spiutils.configure(self, cs, clk, miso, mosi, mode, speed, options, deb
   self.speed=speed
   self.options=options
   self.debug=debug
-
   -- Write the DIO register number for chip select to SPI_CS_DIONUM
   MB.writeName("SPI_CS_DIONUM", cs)
   -- Write the DIO register number for  clock to SPI_CLK_DIONUM
@@ -49,11 +48,11 @@ function spiutils.transfer(self, txdata)
   -- Configure the number of bytes to read/write (write to SPI_NUM_BYTES)
   MB.writeName("SPI_NUM_BYTES", numbytes)
 -- SPI_DATA_TX is a buffer for data to send to slave devices
-  local errorval = MB.WA(5010, 99, numbytes, txdata)
+  local errorval = MB.writeNameArray("SPI_DATA_TX", numbytes, txdata)
   -- Write 1 to SPI_GO to begin the SPI transaction
   MB.writeName("SPI_GO", 1)
   -- Read SPI_DATA_RX to capture data sent back from the slave device
-  local rxdata = MB.RA(5050, 99, numbytes)
+  local rxdata = MB.readNameArray("SPI_DATA_RX", numbytes)
   return rxdata
 end
 
@@ -98,9 +97,11 @@ function spiutils.calculate_mode(self, cpol, cpha)
   return cpolval*2 + cphaval*1
 end
 
+
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 print ("T4 SPI Loop-Back Example")
 local spi = spiutils
-
 -- Use DIO8 for chip select
 local cs=8
 -- Use DIO9 for clock
@@ -109,20 +110,17 @@ local clk=9
 local miso=6
 -- Use DIO7 for MOSI
 local mosi=7
-
 -- Set the mode such that the clock idles at 0 with phase 0
 local mode = spi.calculate_mode(spi, false, false)
 -- Set the clock at default speed (~800KHz)
 local speed = 0
 -- Set the options such that there are no special operation (such as disabling CS)
 local options = spi.disable_cs(spi, false)
-
 -- Configure the SPI bus
 spi.configure(spi, cs, clk, miso, mosi, mode, speed, options, false)
 local txstring = "Hello_world"
 print("Transfered String: "..txstring)
 local rxString = spi.transfer_string(spi, txstring)
 print("Received String: "..rxString)
-
 -- Write 0 to LUA_RUN to stop the script
 MB.writeName("LUA_RUN", 0)

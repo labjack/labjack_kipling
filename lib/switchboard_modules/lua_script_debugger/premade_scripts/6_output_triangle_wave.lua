@@ -10,10 +10,9 @@ print("Output triangle wave centered on 2V. Analog output is DAC0. Update at 100
 local vout = 0
 local step = 0.02
 local increasing = 1
-
 -- configure a 10ms interval
 LJ.IntervalConfig(0, 10)
--- Run an infinite loop
+
 while true do
   -- If an interval is done
   if LJ.CheckInterval(0) then

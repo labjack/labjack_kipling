@@ -52,13 +52,13 @@ local function get_mac_from_array(arr)
   return s
 end
 
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 print('')
 print('Device Information:');
-
 -- Read the SERIAL_NUMBER register
 local serialnum = MB.readName("SERIAL_NUMBER")
 print('- Serial Number:',string.format("%d",serialnum))
-
 local model = ''
 -- Read the PRODUCT_ID register
 local pid = MB.readName("PRODUCT_ID")
@@ -77,34 +77,26 @@ elseif (pid == 7) then
   end
 end
 print('- Model', model)
-
--- Read the DEVICE_NAME_DEFAULT register
-namearr = MB.RA(60500, 99, 50)
+namearr = MB.readNameArray("DEVICE_NAME_DEFAULT", 50, 99)
 devname = parse_string_from_array(namearr)
 print('- Device Name',devname)
 
--- Read the ETHERNET_IP register
-iparr = MB.RA(49100,99,4)
+iparr = MB.readNameArray("ETHERNET_IP", 4, 99)
 ethernetip = get_ip_from_array(iparr)
 print('- Ethernet IP', ethernetip)
 
--- Read the ETHERNET_MAC register
-macarr = MB.RA(60020,99,8)
+macarr = MB.readNameArray("ETHERNET_MAC", 8, 99)
 ethernetmac = get_mac_from_array(macarr)
 print('- Ethernet MAC', ethernetmac)
 
--- Read the HARDWARE_VERSION register
 hwversion = MB.readName("HARDWARE_VERSION")
 print('- Hardware Version', string.format("%.2f",hwversion))
 
--- Read the FIRMWARE_VERSION register
 fwversion = MB.readName("FIRMWARE_VERSION")
 print('- Firmware Version', string.format("%.4f",fwversion))
 
--- Read the TEMPERATURE_DEVICE_K register
 devtemp = MB.readName("TEMPERATURE_DEVICE_K")
 print('- Device Temperature', string.format("%.2f",devtemp),'(K)')
-
 
 print('')
 print("Exiting Lua Script")

@@ -2,6 +2,8 @@
     Name: gyro-l3gd20h.lua
     Desc: This is an example that uses the L3GD20H Gyroscope on the I2C Bus on
           EIO4(SCL) and EIO5(SDA)
+    Note: I2C examples assume power is provided by a LJTick-LVDigitalIO at 3.3V
+          (a DAC set to 3.3V or a DIO line could also be used for power)
 --]]
 
 --Outputs data to Registers:
@@ -27,11 +29,13 @@ SLAVE_ADDRESS = 0x6B
 
 --Configure the I2C Bus
 I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 local addrs = I2C.search(0, 127)
-local addrsLen = table.getn(addrs)
+local addrslen = table.getn(addrs)
 local found = 0
 -- Verify that the target device was found
-for i=1, addrsLen do
+for i=1, addrslen do
   if addrs[i] == SLAVE_ADDRESS then
     print("I2C Slave Detected")
     found = 1
@@ -56,6 +60,7 @@ I2C.write({0x24, 0x00})
 I2C.write({0x20, 0xBF})
 -- Configure a 200ms interval
 LJ.IntervalConfig(0, 200)
+local ramaddress = MB.nameToAddress("USER_RAM6_F32")
 while true do
   -- If an interval is done
   if LJ.CheckInterval(0) then
@@ -69,7 +74,7 @@ while true do
     -- Get the gyro data and store it in USER_RAM
     for i=0, 2 do
       table.insert(gyrodata, convert_16_bit(rawgyrodata[1+i*2], rawgyrodata[2+i*2], (0x7FFF/2000)))
-      MB.W(46012+i*2, 3, gyrodata[i+1])
+      MB.W(ramaddress+i*2, 3, gyrodata[i+1])
     end
     print("X: "..gyrodata[1])
     print("Y: "..gyrodata[2])

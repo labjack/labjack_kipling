@@ -25,6 +25,8 @@ function applycal(b)
 end
 
 print("Stream and log AIN0 at 4kS/s to file, nominal cal constants")
+-- Disable truncation warnings (truncation is not a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 strdate = ""
 -- Check what hardware is installed
 local hardware = MB.readName("HARDWARE_INSTALLED")
@@ -49,7 +51,7 @@ table[3] = 0
 table[4] = 0
 table[5] = 0
 table[6] = 0
-local table, error = MB.RA(61510, 0, 6)
+local table, error = MB.readNameArray("RTC_TIME_CALENDAR", 6, 0)
 local strdate = string.format("%04d-%02d-%02d %02d-%02d-%02d",table[1],table[2],table[3],table[4],table[5],table[6])
 local filecount = 0
 local numfiles = 10
@@ -112,7 +114,7 @@ while running do
     MB.writeName("FIO1", 1)
     -- 4 (header)  + 1 (num channels)
     local numtoread = 4 + numinbuffer
-    data = MB.RA(4500, 0, numtoread)
+    data = MB.readNameArray("STREAM_DATA_CR", numtoread, 0)
     -- Calculate the number of samples remaining in the buffer
     numinbuffer = data[2]
     -- numinbuffer = bit.rshift(data[2],0) -- num/2 (num bytes in uint) /1 (num channels)

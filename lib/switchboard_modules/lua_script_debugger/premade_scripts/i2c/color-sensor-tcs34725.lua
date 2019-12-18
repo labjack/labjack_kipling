@@ -3,6 +3,9 @@
     Desc: This is an example that uses the TCS34725 Color Sensor on the I2C Bus
           on EIO4(SCL) and EIO5(SDA), LED pin to FIO6
     Note: See the TCS34725 datasheet for more information
+
+          I2C examples assume power is provided by a LJTick-LVDigitalIO at 3.3V
+          (a DAC set to 3.3V or a DIO line could also be used for power)
 --]]
 
 --Outputs data to Registers:
@@ -16,8 +19,10 @@
 --green: 46002
 --blue: 46004
 
-SLAVE_ADDRESS = 0x29
+local SLAVE_ADDRESS = 0x29
 
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Configure the I2C Bus
 I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)
 -- Turn the LED on
@@ -58,20 +63,23 @@ while true do
       stage = 2
     elseif stage == 2 then
       local indata = {}
+      local rawdata = {}
       for i=0,3 do
         I2C.write({0x80+0x14+2*i, 0x80+0x15+2*i})
         -- Read the raw sensor data
         local raw = I2C.read(2)
         table.insert(indata, raw[2]*256+raw[1])
+        table.insert(rawdata, raw)
+        print(raw)
       end
       -- Write the clear light value in raw form
-      MB.writeName("USER_RAM0_U32", indata[1])
+      MB.writeNameArray("USER_RAM0_U32", 2, rawdata[1], 0)
       --Write the red value
-      MB.writeName("USER_RAM1_U32", indata[2])
+      MB.writeNameArray("USER_RAM1_U32", 2, rawdata[2], 0)
       --Write the green value
-      MB.writeName("USER_RAM2_U32", indata[3])
+      MB.writeNameArray("USER_RAM2_U32", 2, rawdata[3], 0)
       --Write the blue value
-      MB.writeName("USER_RAM3_U32", indata[4])
+      MB.writeNameArray("USER_RAM3_U32", 2, rawdata[4], 0)
       red =   ((indata[2])/indata[1])
       MB.writeName("USER_RAM0_F32", red)
       green = ((indata[3])/indata[1])

@@ -1,5 +1,5 @@
 --[[
-    Name: 11_lua_io_ram.lua
+    Name: 10_lua_io_ram.lua
     Desc: Example showing how to save and access data in USER RAM
     Note: The USER_RAM registers are useful in situations when a script is
           collecting readings, but external software running on a remote
@@ -25,7 +25,6 @@ local cooldata = 0
 -- Configure an interval of 100ms
 LJ.IntervalConfig(0, 100)
 
--- Run the program in an infinite loop
 while true do
   -- If an interval is done
   if LJ.CheckInterval(0) then

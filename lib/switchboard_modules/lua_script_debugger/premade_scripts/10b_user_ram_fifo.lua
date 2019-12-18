@@ -1,5 +1,5 @@
 --[[
-    Name: 11b_user_ram_fifo.lua
+    Name: 10b_user_ram_fifo.lua
     Desc: Example showing how to use USER RAM FIFO buffers to transfer an array
           of data to/from an external computer
     Note: This system is considered an advanced topic. Simple data transfer
@@ -24,6 +24,8 @@ print("Transfer an array of ordered information to/from an external computer usi
 -- add this USER_RAM_FIFO1_DATA_F32 register to the active watch area, and
 -- view each element coming out in sequence at the update rate of the software.
 
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 local f32out= {}
 f32out[1] = 10.0
 f32out[2] = 20.1
@@ -36,15 +38,13 @@ local numvalsfio1 = 5
 local bytesperval = 4
 local fifo0bytes = numvalsfio0*bytesperval
 local fifo1bytes = numvalsfio1*bytesperval
-
 -- Allocate 20 bytes for FIFO0 by writing to USER_RAM_FIFO0_NUM_BYTES_IN_FIFO
-MB.writeName("USER_RAM_FIFO0_NUM_BYTES_IN_FIFO", fifo0bytes)
+MB.writeName("USER_RAM_FIFO0_ALLOCATE_NUM_BYTES", fifo0bytes)
 -- Allocate 20 bytes for FIFO1 by writing to USER_RAM_FIFO1_NUM_BYTES_IN_FIFO
-MB.writeName("USER_RAM_FIFO1_NUM_BYTES_IN_FIFO", fifo1bytes)
-
+MB.writeName("USER_RAM_FIFO1_ALLOCATE_NUM_BYTES", fifo1bytes)
 -- Configure an interval of 2000ms
 LJ.IntervalConfig(0, 2000)
--- Run the program in an infinite loop
+
 while true do
   -- If an interval is done
   if LJ.CheckInterval(0) then
@@ -61,6 +61,7 @@ while true do
         print ("FIFO0 buffer is full.")
       end
     end
+
     --read in new data from the host with FIFO1
     --Note that an external computer must have previously written to FIFO1
     currentbytesfifo1 = MB.readName("USER_RAM_FIFO1_NUM_BYTES_IN_FIFO")

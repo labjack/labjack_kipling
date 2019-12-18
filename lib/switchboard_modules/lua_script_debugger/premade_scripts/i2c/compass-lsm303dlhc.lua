@@ -2,6 +2,8 @@
     Name: compass-lsm303dlhc.lua
     Desc: This is an example that uses the LSM303DLHC Magnetometer on the I2C
           Bus on EIO4(SCL) and EIO5(SDA)
+    Note: I2C examples assume power is provided by a LJTick-LVDigitalIO at 3.3V
+          (a DAC set to 3.3V or a DIO line could also be used for power)
 --]]
 
 --Outputs data to Registers:
@@ -25,6 +27,8 @@ end
 
 SLAVE_ADDRESS = 0x1E
 
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Configure the I2C bus
 I2C.config(13, 12, 65516, 0, SLAVE_ADDRESS, 0)
 local addrs = I2C.search(0, 127)

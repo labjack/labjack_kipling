@@ -8,10 +8,9 @@ print("Read AIN3 input voltage and set DAC0 output voltage. Update at 10Hz")
 local threshold = 2.5
 local vout0 = 4.5
 local vout1 = 0
-
 -- Configure a 100ms interval
 LJ.IntervalConfig(0, 100)
--- Run the program in an infinite loop
+
 while true do
   -- If an interval is done
   if LJ.CheckInterval(0) then

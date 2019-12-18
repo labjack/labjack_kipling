@@ -27,4 +27,4 @@ end
 
 print("Exiting Lua Script")
 -- Writing 0 to LUA_RUN stops the script
-MB.writeName("LUA_RUN", 0)
+MB.writeNameArray("LUA_RUN",2,{0, 0}, 0)

@@ -1,10 +1,12 @@
 --[[
-    Name: blink_leds.lua
+    Name: 13_blink_leds.lua
     Desc: This example shows how to blink the status and COMM LEDs
     Note: This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
 print("Blink the COMM and Status LEDs at 1 Hz.")
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 local ledstatus = 0
 local i = 0
 local numiterations = 5

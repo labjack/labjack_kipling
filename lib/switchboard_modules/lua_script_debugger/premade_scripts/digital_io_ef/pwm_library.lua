@@ -93,11 +93,11 @@ function pwm.change_duty_cycle (self, iduty)
   modbus_write(44300+self.chan*2, 1, self.rollvalue*self.duty/100)
 end
 
+
 -- Use a 50 Hz frequency
 local pwmfrequency = 50
 -- Use a 5% duty cycle
 local dutycycle = 5
-
 -- Read the PRODUCT_ID register to get the device type
 local devtype = modbus_read(60000, 3)
 -- Assume that the device being used is a T7, use FIO0 for PWM
@@ -108,18 +108,16 @@ if devtype == 4 then
   outpin = 6
 end
 local mypwm = pwm
-
 -- Initialize PWM on outpin with a 50Hz frequency (20ms period) and 50% duty cycle
 mypwm.init(mypwm, outpin, pwmfrequency, dutycycle, 0, 1)
 mypwm.enable(mypwm)
 -- Store the duty cycle in USER_RAM0_F32 and the frequency in USER_RAM1_F32
 modbus_write(46002, 3, pwmfrequency)
 modbus_write(46000, 3, dutycycle)
-
 -- Configure a 1000ms interval
 LJ.IntervalConfig(1, 1000)
+
 -- You can test this program using an LED or oscilloscope connected to outpin
--- Run the program in an infinite loop
 while true do
   -- If an interval is done
   if check_interval(0) then

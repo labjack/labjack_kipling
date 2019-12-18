@@ -27,6 +27,8 @@ local modbus_read = MB.R
 local check_interval = LJ.CheckInterval
 
 print("Read the RTC_TIME_S register and SYSTEM_COUNTER_10KHZ to get a ms value.")
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Read the HARDWARE_INSTALLED register to get the RTC module status
 local hardware = MB.readName("HARDWARE_INSTALLED")
 -- The third bit in hardware correlates to the RTC module status

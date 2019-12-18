@@ -3,7 +3,10 @@
     Desc: This is an example that uses the Adafruit 10-DOF IMU BREAKOUT, which
           contains the BMP180 Pressure sensor, L3GD20H Gyro, and the
           LSM303DLHC Accelerometer & Magnetometer
-    Note: BMP180 was not implemented into this script
+    Note: I2C examples assume power is provided by a LJTick-LVDigitalIO at 3.3V
+          (a DAC set to 3.3V or a DIO line could also be used for power)
+
+          BMP180 was not implemented into this script
 
           This example is a combination of the L3GD20H Gyro, LSM303
           Accelerometer, and LSM303 Magnetometer Lua example scripts
@@ -22,6 +25,13 @@
 --Y gyro = 46014
 --Z gyro = 46016
 
+-- Address of the magnetometer
+local MAG_ADDRESS = 0x1E
+-- Address of the accelerometer
+local ACCEL_ADDRESS = 0x19
+-- Address of the gyroscope
+local GYRO_ADDRESS = 0x6B
+
 -------------------------------------------------------------------------------
 --  Desc: Returns a number adjusted using the conversion factor
 --        Use 1 if not desired
@@ -35,13 +45,6 @@ local function convert_16_bit(msb, lsb, conv)
   end
   return res
 end
-
--- Address of the magnetometer
-local MAG_ADDRESS = 0x1E
--- Address of the accelerometer
-local ACCEL_ADDRESS = 0x19
--- Address of the gyroscope
-local GYRO_ADDRESS = 0x6B
 
 -- Configure the I2C Bus
 I2C.config(13, 12, 65516, 0, MAG_ADDRESS, 0)

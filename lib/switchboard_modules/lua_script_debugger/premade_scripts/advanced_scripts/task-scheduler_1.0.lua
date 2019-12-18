@@ -7,6 +7,26 @@
           Increase scheduler resolution to reduce CPU load on the T7 processor
 --]]
 
+-------------------------------------------------------------------------------
+-- Desc:  Task function definitions
+-- Note:  Define tasks to run as individual functions.  Task functions must be
+--        defined in the task table and executed by the task scheduler.
+-------------------------------------------------------------------------------
+func1 = function (args)
+    print("Function1 Executed --")
+    -- Add functional code here.  Parameters may be passed thorugh the args
+    -- variable as an array.
+    return 0
+end
+
+func2 = function (args)
+    print("Function2 Executed --")
+    -- Add functional code here.  Parameters may be passed thorugh the args
+    -- variable as an array.
+    return 0
+end
+
+
 print("LabJack Lua Task Scheduler Example. Version 1.0")
 -- Directions:
 -- 1.  Define user functions as required.
@@ -57,27 +77,7 @@ schedule[1][2] = 500
 schedule[1][3] = {}
 -- Define the scheduler resolution (1 ms).  Increase if necessary
 LJ.IntervalConfig(0, 1)
-
 local test = 0
-
--------------------------------------------------------------------------------
--- Desc:  Task function definitions
--- Note:  Define tasks to run as individual functions.  Task functions must be
---        defined in the task table and executed by the task scheduler.
--------------------------------------------------------------------------------
-func1 = function (args)
-    print("Function1 Executed --")
-    -- Add functional code here.  Parameters may be passed thorugh the args
-    -- variable as an array.
-    return 0
-end
-
-func2 = function (args)
-    print("Function2 Executed --")
-    -- Add functional code here.  Parameters may be passed thorugh the args
-    -- variable as an array.
-    return 0
-end
 
 -------------------------------------------------------------------------------
 -- Desc:  Task Scheduler

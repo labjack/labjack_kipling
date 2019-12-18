@@ -9,6 +9,8 @@
 --]]
 
 print("Log voltage to file.  Voltage measured on AIN1.  Store value every 1 second for 10 seconds")
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Read information about the hardware installed
 local hardware = MB.readName("HARDWARE_INSTALLED")
 local passed = 1
@@ -34,8 +36,6 @@ local count = 0
 local delimiter = ","
 local strdate = ""
 local strvoltage = ""
-
-
 local table = {}
 table[1] = 0    --year
 table[2] = 0    --month
@@ -43,7 +43,6 @@ table[3] = 0    --day
 table[4] = 0    --hour
 table[5] = 0    --minute
 table[6] = 0    --second
-
 -- Create and open a file for write access
 local file = io.open(filename, "w")
 -- Make sure that the file was opened properly.
@@ -53,7 +52,6 @@ else
   -- If the file was not opened properly we probably have a bad SD card.
   print("!! Failed to open file on uSD Card !!")
 end
-
 -- Make sure analog is on
 MB.writeName("POWER_AIN", 1)
 -- Configure an interval of 1000ms
@@ -64,7 +62,7 @@ while true do
   if LJ.CheckInterval(0) then
     voltage = MB.readName("AIN1")
     -- Read the RTC timestamp (T7-Pro only)
-    table, error = MB.RA(61510, 0, 6)
+    table, error = MB.readNameArray("RTC_TIME_CALENDAR", 6)
     print("AIN1:", voltage, "V")
     strdate = string.format(
       "%04d/%02d/%02d %02d:%02d.%02d",
@@ -91,6 +89,5 @@ file = io.open(filename, "r")
 local line = file:read("*all")
 file:close()
 print(line)
-
 print("Finished Script")
 MB.W(6000, 1, 0);

@@ -25,10 +25,9 @@ modbus_write(44032, 1, 1)
 modbus_write(2008, 0, eiostate)
 -- Configure whether to read and reset or only read the count
 local clearcount = true
-
 -- Setup an interval of 500ms
 LJ.IntervalConfig(0, 500)
--- Run the program in an infinite loop
+
 while true do
   if eiostate==1 then
     eiostate = 0
@@ -36,7 +35,6 @@ while true do
     eiostate = 1
   end
   modbus_write(2008, 0, eiostate)
-
   -- If an interval is done
   if check_interval(0) then
     if clearcount then

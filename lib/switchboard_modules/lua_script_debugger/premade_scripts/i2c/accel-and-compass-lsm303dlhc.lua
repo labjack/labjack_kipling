@@ -4,6 +4,9 @@
           Magnetometer on the I2C Bus on EIO4(SCL) and EIO5(SDA)
     Note: This example is a combination of the LSM303 Accelerometer and
           LSM303 Magnetometer Lua scripts
+
+          I2C examples assume power is provided by a LJTick-LVDigitalIO at 3.3V
+          (a DAC set to 3.3V or a DIO line could also be used for power)
 --]]
 
 --Outputs data to Registers:
@@ -13,6 +16,9 @@
 --X accel = 46006
 --Y accel = 46008
 --Z accel = 46010
+
+local MAG_ADDRESS = 0x1E
+local ACCEL_ADDRESS = 0x19
 
 -------------------------------------------------------------------------------
 --  Desc: Returns a number adjusted using the conversion factor
@@ -28,8 +34,7 @@ local function convert_16_bit(msb, lsb, conv)
   return res
 end
 
-local MAG_ADDRESS = 0x1E
-local ACCEL_ADDRESS = 0x19
+
 -- Configure the I2C Bus
 I2C.config(13, 12, 65516, 0, MAG_ADDRESS, 0)
 local addrs = I2C.search(0, 127)

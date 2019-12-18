@@ -1,5 +1,5 @@
 --[[
-    Name: 14_zerocrossing_pulse_response.lua
+    Name: zerocrossing_pulse_response.lua
     Desc: This example will output a pulse on FIO1 (FIO4 for T4) a specified
           amount of time after a rising edge is detected on FIO0 (FIO5 for T4)
     Note: The delay between detection of a crossing and the beginning of the
@@ -36,6 +36,7 @@ while true do
     -- Enforce constraints on pulse low time. (This is the amount of time
     -- between the zero crossing and the activation pulse)
     print("new pulse", pulsewidth)
+
   elseif state == "waitingForZero" then
     -- If there was a rising edge
     if lastval == 0 and inval == 1 then
@@ -43,6 +44,7 @@ while true do
       LJ.IntervalConfig(0, delay)
       state = "pulseStart"
     end
+
   elseif state == "pulseStart" then
     -- If the pulse low time delay is finished
     if LJ.CheckInterval(0) then
@@ -52,6 +54,7 @@ while true do
       LJ.IntervalConfig(0, pulsewidth)
       state = "pulseEnd"
     end
+
   elseif state == "pulseEnd" then
     -- If the pulse width delay is done
     if LJ.CheckInterval(0) then

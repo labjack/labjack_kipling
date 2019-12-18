@@ -2,7 +2,7 @@
     Name: 7b_log_voltage_to_file_wifi.lua
     Desc: This example shows how to log voltage measurements to file if
           communicating over WiFi (WiFi needs 5s or more to initialize)
-without comm
+          without comm
     Note: Requires an SD Card installed inside the T7 or T7-Pro
 
           This example requires firmware 1.0282 (T7)
@@ -17,6 +17,8 @@ without comm
 --]]
 
 print("Log voltage to file.  Voltage measured on AIN1 every 50ms.  Store values every 5 seconds")
+-- Disable truncation warnings (truncation should not be a problem in this script)
+MB.writeName("LUA_NO_WARN_TRUNCATION", 1)
 -- Get info on the hardware that is installed
 local hardware = MB.readName("HARDWARE_INSTALLED")
 local passed = 1
@@ -48,22 +50,13 @@ local delimiter = ","
 local strdate = ""
 local strvoltage = ""
 local f = nil
-
--- Use a 50ms interval for writing DAC values
-local dacinterval = 50
+-- Use a 50ms interval for reading AIN
+local readinterval = 50
 -- Use a 5s interval for the sd card
 local sdinterval = 5000
-local numdacs = math.floor(sdinterval/dacinterval)
-
+local numreads = math.floor(sdinterval/readinterval)
 local data = {}
 local strings = {}
-
-for i=1, numdacs do
-  data[i] = 0
-  strings[i] = "bar"
-end
-
-
 local date = {}
 date[1] = 0    --year
 date[2] = 0    --month
@@ -72,10 +65,15 @@ date[4] = 0    --hour
 date[5] = 0    --minute
 date[6] = 0    --second
 
+for i=1, numreads do
+  data[i] = 0
+  strings[i] = "bar"
+end
+
 -- Make sure analog is on
 MB.writeName("POWER_AIN",1)
-
-LJ.IntervalConfig(0, dacinterval)
+-- Configure intervals for SD card wait time and reading AIN
+LJ.IntervalConfig(0, readinterval)
 LJ.IntervalConfig(1, sdinterval)
 
 f = io.open(filename, "r")
@@ -91,11 +89,11 @@ else
 end
 
 while true do
-  -- If a DAC interval is done
+  -- If a read interval is done
   if LJ.CheckInterval(0) then
     data[indexval] = MB.readName("AIN1")
     -- Read the RTC timestamp, (T7-Pro only)
-    date, error = MB.RA(61510, 0, 6)
+    date, error = MB.readNameArray("RTC_TIME_CALENDAR", 6)
     print("AIN1: ", data[indexval], "V")
     strdate = string.format(
       "%04d/%02d/%02d %02d:%02d.%02d",
@@ -110,6 +108,7 @@ while true do
     strings[indexval] = strdate..delimiter..strvoltage.."\n"
     indexval = indexval + 1
   end
+
   -- If the interval wait before writing to an sd card is done
   if LJ.CheckInterval(1) then
     local i = 1
@@ -129,7 +128,7 @@ while true do
       print ("Command issued by host to create new file")
     end
     print ("Appending to file")
-    for i=1, numdacs do
+    for i=1, numreads do
       f:write(strings[i])
     end
   end

@@ -19,18 +19,23 @@
 --        more information on these settings
 -------------------------------------------------------------------------------
 local function ain_ef_config_tc(ainchannel, tctype, unit, cjcaddressess, cjcslope, cjcoffset)
+  local indexaddress = MB.nameToAddress("AIN0_EF_INDEX")
+  local confaddressa = MB.nameToAddress("AIN0_EF_CONFIG_A")
+  local confaddressb = MB.nameToAddress("AIN0_EF_CONFIG_B")
+  local confaddressd = MB.nameToAddress("AIN0_EF_CONFIG_D")
+  local confaddresse = MB.nameToAddress("AIN0_EF_CONFIG_E")
   -- Disable AIN_EF
-  MB.W(9000 + ainchannel * 2, 1, 0)
+  MB.W(indexaddress + ainchannel * 2, 1, 0)
   -- Enable AIN_EF
-  MB.W(9000 + ainchannel * 2, 1, tctype)
-  -- Write to _EF_CONFIG_A
-  MB.W(9300 + ainchannel * 2, 1, unit)
-  -- Write to _EF_CONFIG_B
-  MB.W(9600 + ainchannel * 2, 1, cjcaddressess)
-  -- Write to _EF_CONFIG_D
-  MB.W(10200 + ainchannel * 2, 3, cjcslope)
-  -- Write to _EF_CONFIG_E
-  MB.W(10500 + ainchannel * 2, 3, cjcoffset)
+  MB.W(indexaddress + ainchannel * 2, 1, tctype)
+  -- Write to AIN_EF_CONFIG_A
+  MB.W(confaddressa + ainchannel * 2, 1, unit)
+  -- Write to AIN_EF_CONFIG_B
+  MB.W(confaddressb + ainchannel * 2, 1, cjcaddressess)
+  -- Write to AIN_EF_CONFIG_D
+  MB.W(confaddressd + ainchannel * 2, 3, cjcslope)
+  -- Write to AIN_EF_CONFIG_E
+  MB.W(confaddresse + ainchannel * 2, 3, cjcoffset)
 end
 
 -------------------------------------------------------------------------------
@@ -41,27 +46,31 @@ end
 --          https://labjack.com/support/datasheets/t-series/ain
 -------------------------------------------------------------------------------
 local function ain_channel_config(ainchannel, range, resolution, settling, isdifferential)
+  local rangeaddress = MB.nameToAddress("AIN0_RANGE")
+  local resaddress = MB.nameToAddress("AIN0_RESOLUTION_INDEX")
+  local setaddress = MB.nameToAddress("AIN0_SETTLING_US")
+  local negchaddress = MB.nameToAddress("AIN0_NEGATIVE_CH")
   -- Set AIN range
-  MB.W(40000 + ainchannel * 2, 3, range)
+  MB.W(rangeaddress + ainchannel * 2, 3, range)
   -- Set resolution index
-  MB.W(41500 + ainchannel * 1, 0, resolution)
+  MB.W(resaddress + ainchannel * 1, 0, resolution)
   -- Set settling time
-  MB.W(42000 + ainchannel * 2, 3, settling)
+  MB.W(setaddress + ainchannel * 2, 3, settling)
 
   -- Read the device type
-  local devicetype = MB.R(60000, 3)
+  local devicetype = MB.readName("PRODUCT_ID")
   -- Setup the negative channel if using a differential input
   if isdifferential and (ainchannel%2 == 0) and (devicetype == 7) then
     -- The negative channels setting is only valid for even
     -- analog input channels and is not valid for the T4.
     if (ainchannel < 14) then
       -- The negative channel is 1+ the channel for AIN0-13 on the T7
-      MB.W(41000 + ainchannel, 0, ainchannel + 1)
+      MB.W(negchaddress + ainchannel, 0, ainchannel + 1)
     elseif (ainchannel > 47) then
       -- The negative channel is 8+ the channel for AIN48-127 on the T7
       -- when using a Mux80.
       -- https://labjack.com/support/datasheets/accessories/mux80
-      MB.W(41000 + ainchannel, 0, ainchannel + 8)
+      MB.W(negchaddress + ainchannel, 0, ainchannel + 8)
     else
       print(string.format("Can not set negative channel for AIN%d",ainchannel))
     end
@@ -93,6 +102,7 @@ local resolution = 8
 -- Use default settling time
 local settling = 0
 local isdifferential = true
+local readconfaddressa = MB.nameToAddress("AIN0_EF_READ_A")
 
 -- Configure each analog input
 for i=1,table.getn(ainchannels) do
@@ -112,7 +122,7 @@ while true do
   if LJ.CheckInterval(0) then
     -- Read & Print out each read AIN channel
     for i=1, table.getn(ainchannels) do
-      local temperature = MB.R(7000 + ainchannels[i] * 2, 3)
+      local temperature = MB.R(readconfaddressa + ainchannels[i] * 2, 3)
       print(string.format("Temperature: %.3f %s", temperature, tempunit))
     end
   end
