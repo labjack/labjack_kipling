@@ -3,10 +3,18 @@ var async = require('async');
 var dict = require('dict');
 var q = require('q');
 var driver_const = require('labjack-nodejs').driver_const;
+var semver = require('semver');
+var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');
+
 
 function parseData(flashData) {
 	var imgHeaderSize = driver_const.T7_IMG_HEADER_LENGTH;
-	var headerBuffer = new Buffer(imgHeaderSize);
+	var headerBuffer;
+    if(USE_MODERN_BUFFER_ALLOC) {
+        headerBuffer = Buffer.alloc(imgHeaderSize);
+    } else {
+        headerBuffer = new Buffer(imgHeaderSize);
+    }
 	var offset = 0;
 
 	// Fill the buffer with data.
