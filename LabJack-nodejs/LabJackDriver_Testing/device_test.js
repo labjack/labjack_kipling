@@ -16,11 +16,24 @@ var rewire = require('rewire');
 var q = require('q');
 var ref = require('ref');
 var fakeDriver = require('./TestObjects/test_driver_wrapper');
+var fakeLJM = new fakeDriver.getDriver();
+
+// console.log('F-LJM', Object.keys(fakeLJM));
 
 var driver_wrapper = rewire('../lib/driver_wrapper');
 
+// NEW:
+var driverManager = rewire('../lib/driver');
+driverManager.__set__('driverLib',fakeDriver);
 var deviceManager = rewire('../lib/device');
 deviceManager.__set__('driverLib',fakeDriver);
+
+// OLD:
+var deviceManager = rewire('../lib/device');
+deviceManager.__set__('driverLib',fakeDriver);
+
+
+
 
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
@@ -28,6 +41,9 @@ var asyncRun = require('./UtilityCode/asyncUtility');
 var syncRun = require('./UtilityCode/syncUtility');
 
 var callSequenceChecker = require('./call_sequence_checker');
+
+var ljs_mm = require('ljswitchboard-modbus_map');
+var ljm_modbus_map = ljs_mm.getConstants();
 
 var dev;
 var autoOpen = false;
@@ -39,7 +55,7 @@ module.exports = {
 	setUp: function(callback) {
 		//this.mockDevice = new MockDevice();
 		if(autoOpen) {
-			dev = new deviceManager.labjack();
+			dev = new deviceManager.labjack(fakeLJM);
 			dev.open(function(res) {
 				console.log("Err-Setup/Teardown!!!");
 			},
@@ -90,7 +106,7 @@ module.exports = {
 	 * @return {[type]}
 	 */
 	testOpen: function(test) {
-		var device = new deviceManager.labjack();
+		var device = new deviceManager.labjack(fakeLJM);
 		device.open(
 			driver_const.LJM_DT_ANY,
 			driver_const.LJM_CT_ANY,
@@ -131,7 +147,7 @@ module.exports = {
 		});
 	},
 	testOpenWeirdA: function(test) {
-		var device = new deviceManager.labjack();
+		var device = new deviceManager.labjack(fakeLJM);
 		device.open(
 			"LJM_dtANY",	//Will be converted to an integer
 			driver_const.LJM_CT_ANY,
@@ -172,7 +188,7 @@ module.exports = {
 		});
 	},
 	testOpenWeirdB: function(test) {
-		var device = new deviceManager.labjack();
+		var device = new deviceManager.labjack(fakeLJM);
 		device.open(
 			driver_const.LJM_DT_ANY,	
 			"LJM_ctANY",	//Will be converted to an integer
@@ -213,7 +229,7 @@ module.exports = {
 		});
 	},
 	testOpenWeirdC: function(test) {
-		var device = new deviceManager.labjack();
+		var device = new deviceManager.labjack(fakeLJM);
 		var param = "0";
 		var paramB = param;
 		device.open(
@@ -256,7 +272,7 @@ module.exports = {
 		});
 	},
 	testOpenWeirdD: function(test) {
-		var device = new deviceManager.labjack();
+		var device = new deviceManager.labjack(fakeLJM);
 		var param = "0";
 		device.open(
 			driver_const.LJM_DT_ANY,	
@@ -309,7 +325,7 @@ module.exports = {
 	 * @return {[type]}
 	 */
 	testOpenS: function(test) {
-		var device = new deviceManager.labjack();
+		var device = new deviceManager.labjack(fakeLJM);
 		device.open("LJM_dtT7","LJM_ctUSB","LJM_idANY",
 		function(res) {
 			console.log("Opening Error");
@@ -356,7 +372,7 @@ module.exports = {
 	 * @return {[type]}
 	 */
 	testOpenEmpty: function(test) {
-		var device = new deviceManager.labjack();
+		var device = new deviceManager.labjack(fakeLJM);
 		device.open(
 		function(res) {
 			console.log("Opening Error");
@@ -406,7 +422,7 @@ module.exports = {
 		var erCode = 1;
 		fakeDriver.setExpectedResult(erCode);
 
-		var device = new deviceManager.labjack();
+		var device = new deviceManager.labjack(fakeLJM);
 		device.open("LJM_dtANY","LJM_ctANY","LJM_idANY",
 		function(res) {
 			test.equal(res,erCode);
@@ -505,12 +521,12 @@ module.exports = {
 		var expectedResultList = [
 			testVal,
 			testVal,
-			"TEST",
-			"TEST",
+			testVal.toString(),
+			testVal.toString(),
 			testVal,
 			testVal,
-			"TEST",
-			"TEST",
+			testVal.toString(),
+			testVal.toString(),
 		];
 		syncRun.run(testList);
 		asyncRun.run(testList,
@@ -555,12 +571,12 @@ module.exports = {
 		fakeDriver.setExpectedResult(erCode);
 
 		var testList = [
-		'read(-1)',//Test for invalid address
-		'read("AIN999")',//Test for invalid name
-		'read(49350)',//test for write only address-number read
-		'read("WIFI_PASSWORD_DEFAULT")',//Test for write only address-name read
-		'read(0)',
-		'read("AIN0")',
+			'read(-1)',//Test for invalid address
+			'read("AIN999")',//Test for invalid name
+			'read(49350)',//test for write only address-number read
+			'read("WIFI_PASSWORD_DEFAULT")',//Test for write only address-name read
+			'read(0)',
+			'read("AIN0")',
 		];
 		var expectedFunctionList = [ 
 			'LJM_eReadAddress',
@@ -652,6 +668,9 @@ module.exports = {
 				var i,j;
 				var offsetSync = 1;
 
+				console.log("Functions Called",funcs);
+				console.log("Results",results);
+				
 				//Figure out how many function calls should have been made:
 				var numDriverCalls = testList.length * 2;
 
@@ -1426,9 +1445,9 @@ module.exports = {
 		var errorText = 'Tried to read an array from a register that is not a buffer';
         var expectedData = [
 	        successData,
-	        errorText,
+	        ljm_modbus_map.errorsByName.LJN_INVALID_IO_ATTEMPT.error,
 	        successData,
-	        errorText
+	        ljm_modbus_map.errorsByName.LJN_INVALID_IO_ATTEMPT.error
         ];
 
         //Expected function list:
@@ -1566,7 +1585,6 @@ module.exports = {
 		//Expected info combines both sync & async
 		var expectedFunctionList = [ 
 			'LJM_IsAuth',
-
 			'LJM_IsAuthAsync',
 		];
 

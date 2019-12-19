@@ -36,6 +36,8 @@ var functionLocation = {
 	'getHandles': 'driver',
 	'cleanInfo': 'driver'
 
+	// Device class functions re-implemented in the driver class.
+	
 };
 exports.getList = function() {
 	return functionLocation;

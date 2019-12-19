@@ -9,6 +9,7 @@ var util = require('util');//
 var driverLib = require('./driver_wrapper');
 
 var jsonConstants = require('ljswitchboard-modbus_map');
+var ljm_mm = jsonConstants.getConstants();
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 
@@ -19,28 +20,84 @@ var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
 var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 var LJM_LIST_ALL_SIZE = driver_const.LJM_LIST_ALL_SIZE;
 
-// For problems encountered while in driver DLL
-function DriverOperationError(code,description) {
+
+/**
+ * Create a new DriverOperationError object.
+ *
+ * This encapsulates the code of an error and indicates that the
+ * error was thrown from the LabJack-nodejs library in the "driver"
+ * object.  For convenience, the error code's string and description 
+ * are pulled from the ljswitchboard-modbus_map library.
+ *
+ * @param {Number} code The raw / uinterpreted error code from LJM.
+**/
+function DriverOperationError(code, message, errFrame, results)
+{
     this.code = code;
-    this.description = description;
-    console.log('in DriverOperationError',code,description);
+    var errorInfo = ljm_mm.getErrorInfo(code);
+    this.string = errorInfo.string;
+    this.description = errorInfo.description;
+    if(typeof(message) !== 'undefined') {
+        this.message = message.toString();
+    }
+    if(typeof(errFrame) !== 'undefined') {
+        this.errFrame = errFrame;
+    }
+    if(typeof(results) !== 'undefined') {
+        this.results = results;
+    }
+}
+util.inherits(DriverOperationError, Error);
+DriverOperationError.prototype.name = 'Driver Operation Error - device';
+
+function buildAsyncError(code, message, errFrame) {
+    var errorInfo = ljm_mm.getErrorInfo(code);
+    var error = {
+        code: code,
+        string: errorInfo.string,
+        description: errorInfo.description,
+    };
+    if(typeof(message) !== 'undefined') {
+        this.message = message.toString();
+    }
+    if(typeof(errFrame) !== 'undefined') {
+        this.errFrame = errFrame;
+    }
+    return error;
 }
 
-
-// For problem with using this layer
+/**
+ * Create a new DriverInterfaceError object.
+ *
+ * Create a new DriverInterfaceError which encapsulates the code of an error
+ * encountered while communicating with the driver. This is an error thrown by
+ * labjack-nodejs, not within driver code.
+ *
+ * @param {String/Number} description The integer error code or string
+ *      description of the error encountered.
+**/
 function DriverInterfaceError(description) {
     this.description = description;
+    this.message = description;
 }
+util.inherits(DriverInterfaceError, Error);
+DriverInterfaceError.prototype.name = 'Driver Interface Error - device';
+
 
 
 /**
  * Constructor for an object acting as LJM driver wrapper.
  */
-exports.ljmDriver = function() {
-    this.ljm = driverLib.getDriver();
+exports.ljmDriver = function(ljmOverride) {
+    if(typeof(ljmOverride) !== 'undefined') {
+        this.ljm = ljmOverride;
+    } else {
+        this.ljm = driverLib.getDriver();
+    }
     this.hasOpenAll = driverLib.hasOpenAll();
     this.hasGetHandles = driverLib.hasGetHandles();
     this.constants = jsonConstants.getConstants();
+    this.errors = this.constants.errorsByName;
 
     /**
      * Dereferences buffers and zips arrays in building listAll return values.
@@ -145,7 +202,8 @@ exports.ljmDriver = function() {
                 aSerialNumbers, 
                 aIPAddresses, 
                 function (err, res) {
-                    if (err) throw err;
+                    // if (err) throw err;
+                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAll', err.toString()));
                     if (res === 0) {                        
                         var devArray = self.buildListAllArray(
                             numFound,
@@ -156,7 +214,7 @@ exports.ljmDriver = function() {
                             );
                         return onSuccess(devArray);
                     } else {
-                        return onError(res);
+                        return onError(buildAsyncError(res));
                     }
                 }
             );
@@ -171,7 +229,8 @@ exports.ljmDriver = function() {
                 aSerialNumbers, 
                 aIPAddresses, 
                 function (err, res){
-                    if(err) throw err;
+                    // if(err) throw err;
+                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAll', err.toString()));
                     if(res === 0) {
                         var devArray = self.buildListAllArray(
                             numFound,
@@ -182,13 +241,13 @@ exports.ljmDriver = function() {
                             );
                         return onSuccess(devArray);
                     } else {
-                        return onError(res);
+                        return onError(buildAsyncError(res));
                     }
                 }
             );
             return 0;
         } else {
-            return onError("Weird-Error, listAll");
+            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error,res));
         }
     };
 
@@ -203,10 +262,7 @@ exports.ljmDriver = function() {
      *      'LJM_ctANY'. May also be an integer constant corresponding to the
      *      appropriate connection medium to use.
      * @return {array} the listing of avilable devices as an array of object.
-     * @throws {DriverInterfaceError} Thrown if an exception is encountered in
-     *      the Node.js wrapper around the driver.
-     * @throws {DriverOperationError} Thrown if an exception is encountered in
-     *      the LJM driver itself.
+     * @throws {DriverOperationError} If the input args aren't correct or an error occurs.
     **/
     this.listAllSync = function(deviceType, connectionType) {
         var errorResult;
@@ -254,8 +310,7 @@ exports.ljmDriver = function() {
                 aIPAddresses
             );
         } else {
-            throw new DriverInterfaceError("Weird-Error, listAll");
-            return "Weird-Error, listAll";
+            throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error);
         }
         if (errorResult === 0) {
             var devArray = self.buildListAllArray(
@@ -268,7 +323,6 @@ exports.ljmDriver = function() {
             return devArray;
         } else {
             throw new DriverOperationError(errorResult);
-            return errorResult;
         }
 
     };
@@ -361,6 +415,7 @@ exports.ljmDriver = function() {
         var onSuc;
 
         var message;
+        var errorCode;
 
         // Intelligently parse the input arguments
         if (arguments.length == 2) {
@@ -389,12 +444,15 @@ exports.ljmDriver = function() {
             onSuc = arguments[4];
         } else {
             message = 'Invalid number of arguments passed to listAllExtra';
-            throw new DriverInterfaceError(message);
+            errorCode = self.errors.LJN_INVALID_ARGUMENTS.error;
+            throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, message);
+            return onErr(buildAsyncError(errorCode, message));
         }
 
         if (typeof(regs) !== 'object') {
             message = 'Invalid Argument parsed as desired read registers';
-            return onErr(message);
+            throw new DriverOperationError(errorCode, message);
+            return onErr(buildAsyncError(errorCode, message));
         }
 
         if(isNaN(devT)) {
@@ -495,7 +553,7 @@ exports.ljmDriver = function() {
             C_aIPAddresses,
             C_aBytes,
             function (err, res){
-                if (err) throw err;
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAllExtended', err.toString()));
                 if (res === 0) {
                     var devArray = self.buildListAllArray(
                         C_NumFound,
@@ -512,7 +570,7 @@ exports.ljmDriver = function() {
                 } else {
                     // console.log('LJM_ListAllExtended Err');
                     // console.log(self.errToStrSync(res));
-                    return onErr(res);
+                    return onErr(buildAsyncError(res));
                 }
             }
         );
@@ -525,6 +583,7 @@ exports.ljmDriver = function() {
         var regs;
 
         var message;
+        var errorCode;
         // Intelligently parse the input arguments
         if (arguments.length === 0) {
             devT = "LJM_dtANY";
@@ -544,13 +603,14 @@ exports.ljmDriver = function() {
             regs = arguments[2];
         } else {
             message = 'Invalid number of arguments passed to listAllExtendedSync';
-            throw new DriverInterfaceError(message);
+            errorCode = self.errors.LJN_INVALID_ARGUMENTS.error;
+            throw new DriverOperationError(errorCode, message);
         }
 
         if (typeof(regs) !== 'object') {
-            console.log(regs,typeof(regs));
             message = 'Invalid Argument parsed as desired read registers-listAllExtendedSync';
-            throw new DriverInterfaceError(message);
+            errorCode = self.errors.LJN_INVALID_ARGUMENTS.error;
+            throw new DriverOperationError(errorCode, message);
         }
 
         if(isNaN(devT)) {
@@ -663,156 +723,15 @@ exports.ljmDriver = function() {
                 numBytes,C_aBytes);
             return retArray;
         } else {
-            throw new DriverOperationError(errorResult,self.errToStrSync(errorResult));
-            return 'DriverOperationError: ' + errorResult.toString() + ', ' + self.errToStrSync(errorResult);
-        }
-        
-    };
-
-    /**
-     * Asynchronously retrieves device information about this device.
-     *
-     * Retrieves device metadata information about the device whose handle this
-     * object encapsulates. Returns a DeviceInfo object with the following
-     * structure:
-     * 
-     * { 
-     *      deviceType {number} A device model type corresponding to a constant
-     *          in LabJackM.h. 
-     *      connectionType {number} A constant from LabJackM.h that defines
-     *          connection medium the driver is using to communicate with the
-     *          device.
-     *      serialNumber {number} The device unique integer serial number.
-     *      ipAddress {string} The IP address the device is located at. Defaults
-     *          to all zeros if not connected by the network (0.0.0.0).
-     *      port {number} The port at which the device is connected.
-     *      maxBytesPerMB {number} The maximum payload in bytes that the
-     *          driver can send to the device over the current connection
-     *          medium.
-     * }
-     * 
-     * @param {function} onError function Callback for error-case that takes a
-     *      single number or String argument.
-     * @param {function} onSuccess function Callback for success-case that takes
-     *      a single Object argument.
-     * @return {Object} DeviceInfo
-    **/
-    this.getHandleInfo = function(handle, onError, onSuccess) {
-        var errorResult;
-
-        var deviceType = ref.alloc('int', 1);
-        var connectionType = ref.alloc('int', 1);
-        var serialNumber = ref.alloc('int', 1);
-        var ipAddr = ref.alloc('int', 1);
-        var port = ref.alloc('int', 1);
-        var maxBytesPerMessage = ref.alloc('int', 1);
-
-        errorResult = self.ljm.LJM_GetHandleInfo.async(
-            handle,
-            deviceType,
-            connectionType,
-            serialNumber,
-            ipAddr,
-            port,
-            maxBytesPerMessage,
-            function (err, res) {
-                if(err) {
-                    return onError('Weird Error getHandleInfo', err);
-                }
-                if (res === 0) {
-                    var ipStr = "";
-                    
-                    ipStr += ipAddr.readUInt8(3).toString();
-                    ipStr += ".";
-                    ipStr += ipAddr.readUInt8(2).toString();
-                    ipStr += ".";
-                    ipStr += ipAddr.readUInt8(1).toString();
-                    ipStr += ".";
-                    ipStr += ipAddr.readUInt8(0).toString();
-                    
-                    return onSuccess(
-                        {
-                            deviceType: deviceType.deref(),
-                            connectionType: connectionType.deref(),
-                            serialNumber: serialNumber.deref(),
-                            ipAddress: ipStr,
-                            port: port.deref(),
-                            maxBytesPerMB: maxBytesPerMessage.deref()
-                        }
-                    );
-                } else {
-                    return onError(res);
-                }
-            }
-        );
-        return errorResult;
-    };
-
-    /**
-     * Synchronously retrieves device information about this device.
-     *
-     * Retrieves device metadata information about the device whose handle this
-     * object encapsulates. Returns a DeviceInfo object with the following
-     * structure:
-     * 
-     * { 
-     *      deviceType {number} A device model type corresponding to a constant
-     *          in LabJackM.h. 
-     *      connectionType {number} A constant from LabJackM.h that defines
-     *          connection medium the driver is using to communicate with the
-     *          device.
-     *      serialNumber {number} The device unique integer serial number.
-     *      ipAddress {string} The IP address the device is located at. Defaults
-     *          to all zeros if not connected by the network (0.0.0.0).
-     *      port {number} The port at which the device is connected.
-     *      maxBytesPerMB {number} The maximum payload in bytes that the
-     *          driver can send to the device over the current connection
-     *          medium.
-     * }
-     *
-     * @return {Object/Number} Object conforming to the DeviceInfo structure as
-     *      defined above.
-     * @throws {Error} Thrown if any errors are discovered.
-    **/
-    this.getHandleInfoSync = function(handle) {
-        var errorResult;
-
-        var devT = ref.alloc('int', 1);
-        var conT = ref.alloc('int', 1);
-        var sN = ref.alloc('int', 1);
-        var ipAddr = ref.alloc('int', 1);
-        var port = ref.alloc('int', 1);
-        var maxB = ref.alloc('int', 1);
-
-        //Perform device I/O Operation
-        errorResult = self.ljm.LJM_GetHandleInfo(
-            handle,
-            devT,
-            conT,
-            sN,
-            ipAddr,
-            port,
-            maxB
-        );
-        
-        //Check to see if there were any errors
-        if (errorResult !== 0) {
             throw new DriverOperationError(errorResult);
         }
-
-        var returnVariable = {
-            deviceType: devT.deref(),
-            connectionType: conT.deref(),
-            serialNumber: sN.deref(),
-            ipAddress: ipAddr.deref(),
-            port: port.deref(),
-            maxBytesPerMB: maxB.deref()
-        };
-        return returnVariable;
+        
     };
 
     /**
      * Internal helper function to prepare the arguments for an OpenAll call.
+     * @throws {DriverInterfaceError} Thrown if the function can't be called.
+     * @throws {DriverOperationError} If the input args aren't correct or an error occurs.
      */
     var prepareOpenAll = function(me, deviceType, connectionType) {
         if (!self.hasOpenAll) {
@@ -822,7 +741,10 @@ exports.ljmDriver = function() {
         }
 
         if (deviceType === undefined || connectionType === undefined) {
-            throw 'Insufficient parameters for OpenAll - DeviceType and ConnectionType required';
+            throw new DriverOperationError(
+                self.errors.LJN_INVALID_ARGUMENTS.error,
+                'Insufficient parameters for OpenAll - DeviceType and ConnectionType required'
+            );
         }
 
         me.numOpened = new ref.alloc('int', 0);
@@ -913,8 +835,8 @@ exports.ljmDriver = function() {
         self.ljm.LJM_CleanInfo.async(
             bHandle,
             function (err, res) {
-                if (err) throw err;
-                if (res !== 0) return onError(res);
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'cleanInfo', err.toString()));
+                if (res !== 0) return onError(buildAsyncError(res));
                 onSuccess();
             });
     }
@@ -952,8 +874,8 @@ exports.ljmDriver = function() {
             me.errorHandle,
             me.errors,
             function (err, res) {
-                if (err) throw err;
-                if (res !== 0) return onError(res);
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'openAll', err.toString()));
+                if (res !== 0) return onError(buildAsyncError(res));
                 var results = extractOpenAllResults(me);
                 // return onSuccess(extractOpenAllResults(me));
                 self.cleanInfo(
@@ -990,6 +912,7 @@ exports.ljmDriver = function() {
 
     /**
      * Internal helper function to prepare the arguments for an getHandles call.
+     * @throws {DriverInterfaceError} Thrown if the function can't be called.
      */
     function prepareGetHandles(info) {
         if (!self.hasGetHandles) {
@@ -1041,8 +964,8 @@ exports.ljmDriver = function() {
             info.infoHandle,
             info.info,
             function (err, res) {
-                if (err) throw err;
-                if (res !== 0) return onError(res);
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'getHandles', err.toString()));
+                if (res !== 0) return onError(buildAsyncError(res));
                 var results = extractGetHandlesResults(info);
                 
                 self.cleanInfo(
@@ -1092,7 +1015,7 @@ exports.ljmDriver = function() {
             errNum, 
             strRes, 
             function (err, res){
-                if (err) throw err;
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'errToStr', err.toString()));
                 if (res === 0) {
                     //console.log('strRes: ',ref.readCString(strRes,0));
                     return onSuccess('Num: '+errNum+', '+ref.readCString(strRes,0));
@@ -1110,10 +1033,6 @@ exports.ljmDriver = function() {
      * @param {number} errNum Error number to be converted to a string.
      * @return {string} The string error description corresponding to the
      *      provided error numebr.
-     * @throws {DriverInterfaceError} Thrown if an exception is encountered in
-     *      the Node.js wrapper around the driver.
-     * @throws {DriverOperationError} Thrown if an exception is encountered in
-     *      the LJM driver itself.
      */
     this.errToStrSync = function(errNum) {
         var errorResult=0;
@@ -1142,11 +1061,11 @@ exports.ljmDriver = function() {
         var errorResult;
         errorResult = self.ljm.LJM_LoadConstants.async(
             function (err, res){
-                if (err) throw err;
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'loadConstants', err.toString()));
                 if (res === 0) {
                     return onSuccess();
                 } else {
-                    return onError(res);
+                    return onError(buildAsyncError(res));
                 }
             }
         );
@@ -1183,11 +1102,11 @@ exports.ljmDriver = function() {
         var errorResult;
         errorResult = self.ljm.LJM_CloseAll.async(
             function (err, res){
-                if (err) throw err;
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'closeAll', err.toString()));
                 if (res === 0) {
                     return onSuccess();
                 } else {
-                    return onError(res);
+                    return onError(buildAsyncError(res));
                 }
             }
         );
@@ -1196,11 +1115,6 @@ exports.ljmDriver = function() {
 
     /**
      * Synchronous version of closeAll.
-     *
-     * @throws {DriverInterfaceError} Thrown if an exception is encountered in
-     *      the Node.js wrapper around the driver.
-     * @throws {DriverOperationError} Thrown if an exception is encountered in
-     *      the LJM driver itself.
      */
     this.closeAllSync = function() {
         var errorResult;
@@ -1234,17 +1148,17 @@ exports.ljmDriver = function() {
                 parameter, 
                 returnVar, 
                 function (err, res){
-                    if (err) throw err;
+                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'readLibrary', err.toString()));
                     if (res === 0) {
                         return onSuccess(returnVar.deref());
                     } else {
-                        return onError(res);
+                        return onError(buildAsyncError(res));
                     }
                 }
             );
             return 0;
         } else {
-            return onError('Invalid Input Parameter Type');
+            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error));
         }
     };
     
@@ -1253,8 +1167,6 @@ exports.ljmDriver = function() {
      *
      * @param  {string} parameter The name of the configuration setting to read.
      * @return {number} The value of the provided configuration setting.
-     * @throws {DriverInterfaceError} Thrown if an exception is encountered in
-     *      the Node.js wrapper around the driver.
      * @throws {DriverOperationError} Thrown if an exception is encountered in
      *      the LJM driver itself.
      */
@@ -1276,8 +1188,7 @@ exports.ljmDriver = function() {
             }
             return returnVar.deref();
         } else {
-            throw DriverInterfaceError('Invalid Input Parameter Type');
-            return 'Invalid Input Parameter Type';
+            throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error);
         }
     };
     this.readLibraryS = function (parameter, onError, onSuccess) {
@@ -1293,7 +1204,7 @@ exports.ljmDriver = function() {
                 parameter,
                 strBuffer,
                 function (err, res){
-                    if (err) throw err;
+                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'readLibraryS', err.toString()));
                     if ( res === 0 ) {
                         //Calculate the length of the string
                         // var i=0;
@@ -1303,13 +1214,13 @@ exports.ljmDriver = function() {
                         // return onSuccess(strBuffer.toString('utf8',0,i));
                         return onSuccess(ref.readCString(strBuffer));
                     } else {
-                        return onError(res);
+                        return onError(buildAsyncError(res));
                     }
                 }
             );
             return 0;
         } else {
-            return onError('Invalid Input Parameter Type');
+            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error));
         }
     };
     this.readLibrarySSync = function (parameter) {
@@ -1336,8 +1247,7 @@ exports.ljmDriver = function() {
             // return strBuffer.toString('utf8',0,i);
             return errorResult;
         } else {
-            throw DriverInterfaceError('Invalid Input Parameter Type');
-            return 'Invalid Input Parameter Type';
+            throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error);
         }
     };
 
@@ -1361,16 +1271,17 @@ exports.ljmDriver = function() {
                 }
             }
         }
+
         if ((isNaN(parameter))&&(!isNaN(value))) {
             errorResult = self.ljm.LJM_WriteLibraryConfigS.async(
                 parameter, 
                 value, 
                 function (err, res) {
-                    if (err) throw err;
+                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'writeLibrary', err.toString()));
                     if (res === 0) {
                         return onSuccess();
                     } else {
-                        return onError(res);
+                        return onError(buildAsyncError(res));
                     }
                 }
             );
@@ -1381,17 +1292,17 @@ exports.ljmDriver = function() {
                 parameter, 
                 value, 
                 function (err, res) {
-                    if (err) throw err;
+                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'writeLibrary', err.toString()));
                     if (res === 0) {
                         return onSuccess();
                     } else {
-                        return onError(res);
+                        return onError(buildAsyncError(res));
                     }
                 }
             );
             return 0;
         } else {
-            return onError('Invalid Input Parameter Types');
+            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error));
         }
     };
 
@@ -1414,15 +1325,13 @@ exports.ljmDriver = function() {
                 value
             );
         } else {
-            throw DriverInterfaceError('Invalid Input Parameter Types');
-            return 'Invalid Input Parameter Types';
+            throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error);
         }
         //Check for an error from driver & throw error
         if (errorResult !== 0) {
             throw new DriverOperationError(errorResult);
-            return errorResult;
         } else {
-            return 0;
+            return errorResult;
         }
     };
 
@@ -1442,23 +1351,21 @@ exports.ljmDriver = function() {
     this.log = function(level, str, onError, onSuccess) {
         str = str.toString();
         if ((isNaN(level))||(!isNaN(str))) {
-            onError('wrong types');
-            return 0;
+            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error, 'wrong types'));
         }
         var errorResult;
         if(str.length >= driver_const.LJM_MAX_STRING_SIZE) {
-            onError('string to long');
-            return 0;
+            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error, 'string to long'));
         }
         errorResult = self.ljm.LJM_Log.async(
             level, 
             str,
             function (err, res) {
-                if (err) throw err;
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'log', err.toString()));
                 if (res === 0) {
                     return onSuccess();
                 } else {
-                    return onError(res);
+                    return onError(buildAsyncError(res));
                 }
             }
         );
@@ -1472,20 +1379,23 @@ exports.ljmDriver = function() {
      * @param {number} level The severity of the event to report. Should
      *      correspond to a driver severity level constant.
      * @param {string} str Description of the event.
-     * @throws {DriverInterfaceError} Thrown if an exception is encountered in
-     *      the Node.js wrapper around the driver.
      * @throws {DriverOperationError} Thrown if an exception is encountered in
      *      the LJM driver itself.
     **/
     this.logSync = function(level, str) {
         str = str.toString();
         if ((isNaN(level))||(!isNaN(str))) {
-            throw new DriverInterfaceError('wrong types');
-            return 'wrong types';
+            throw new DriverOperationError(
+                self.errors.LJN_INVALID_ARGUMENTS.error,
+                'wrong types'
+            );
         }
         var errorResult;
         if(str.length >= driver_const.LJM_MAX_STRING_SIZE) {
-            throw new DriverInterfaceError('string to long');
+            throw new DriverOperationError(
+                self.errors.LJN_INVALID_ARGUMENTS.error,
+                'string to long'
+            );
         }
 
         errorResult = self.ljm.LJM_Log(level, str);
@@ -1508,11 +1418,11 @@ exports.ljmDriver = function() {
         var errorResult;
         errorResult = self.ljm.LJM_ResetLog.async(
             function (err, res) {
-                if (err) throw err;
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'resetLog', err.toString()));
                 if (res === 0) {
                     return onSuccess();
                 } else {
-                    return onError(res);
+                    return onError(buildAsyncError(res));
                 }
             }
         );
@@ -1520,11 +1430,6 @@ exports.ljmDriver = function() {
 
     /**
      * Synchronously calls resetLog.
-     *
-     * @throws {DriverInterfaceError} Thrown if an exception is encountered in
-     *      the Node.js wrapper around the driver.
-     * @throws {DriverOperationError} Thrown if an exception is encountered in
-     *      the LJM driver itself.
      */
     this.resetLogSync = function() {
         var errorResult;
@@ -1615,5 +1520,733 @@ exports.ljmDriver = function() {
     //this.driver.LJM_WriteLibraryConfigS('LJM_LOG_LEVEL',2);
     //this.driver.LJM_Log(2,"LabJack-Device Enabled");
 
-    
+
+
+
+
+
+
+    /********************************************************************************************
+    *********************************************************************************************
+    *********************************************************************************************
+    *********************************************************************************************
+     *** Begin implementing device I/O functions exposed through the driver class to allow
+     *** functions to be called without having device objects.
+
+     *** These functions are all exposed with names closer to those defined by the LJM library.
+     ********************************************************************************************
+     ********************************************************************************************
+     ********************************************************************************************
+     ********************************************************************************************/
+
+     /**
+     * Asynchronously retrieves device information about this device.
+     *
+     * Retrieves device metadata information about the device whose handle this
+     * object encapsulates. Returns a DeviceInfo object with the following
+     * structure:
+     * 
+     * { 
+     *      deviceType {number} A device model type corresponding to a constant
+     *          in LabJackM.h. 
+     *      connectionType {number} A constant from LabJackM.h that defines
+     *          connection medium the driver is using to communicate with the
+     *          device.
+     *      serialNumber {number} The device unique integer serial number.
+     *      ipAddress {string} The IP address the device is located at. Defaults
+     *          to all zeros if not connected by the network (0.0.0.0).
+     *      port {number} The port at which the device is connected.
+     *      maxBytesPerMB {number} The maximum payload in bytes that the
+     *          driver can send to the device over the current connection
+     *          medium.
+     * }
+     * 
+     * @param {function} onError function Callback for error-case that takes a
+     *      single number or String argument.
+     * @param {function} onSuccess function Callback for success-case that takes
+     *      a single Object argument.
+     * @return {Object} DeviceInfo
+    **/
+    this.LJM_GetHandleInfo = function(handle, onError, onSuccess) {
+        var errorResult;
+
+        var deviceType = ref.alloc('int', 1);
+        var connectionType = ref.alloc('int', 1);
+        var serialNumber = ref.alloc('int', 1);
+        var ipAddr = ref.alloc('int', 1);
+        var port = ref.alloc('int', 1);
+        var maxBytesPerMessage = ref.alloc('int', 1);
+
+        errorResult = self.ljm.LJM_GetHandleInfo.async(
+            handle,
+            deviceType,
+            connectionType,
+            serialNumber,
+            ipAddr,
+            port,
+            maxBytesPerMessage,
+            function (err, res) {
+                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'LJM_GetHandleInfo', err.toString()));
+                if (res === 0) {
+                    var ipStr = "";
+                    
+                    ipStr += ipAddr.readUInt8(3).toString();
+                    ipStr += ".";
+                    ipStr += ipAddr.readUInt8(2).toString();
+                    ipStr += ".";
+                    ipStr += ipAddr.readUInt8(1).toString();
+                    ipStr += ".";
+                    ipStr += ipAddr.readUInt8(0).toString();
+                    
+                    return onSuccess(
+                        {
+                            deviceType: deviceType.deref(),
+                            connectionType: connectionType.deref(),
+                            serialNumber: serialNumber.deref(),
+                            ipAddress: ipStr,
+                            port: port.deref(),
+                            maxBytesPerMB: maxBytesPerMessage.deref()
+                        }
+                    );
+                } else {
+                    return onError(buildAsyncError(res));
+                }
+            }
+        );
+        return errorResult;
+    };
+
+    /**
+     * Synchronously retrieves device information about this device.
+     *
+     * Retrieves device metadata information about the device whose handle this
+     * object encapsulates. Returns a DeviceInfo object with the following
+     * structure:
+     * 
+     * { 
+     *      deviceType {number} A device model type corresponding to a constant
+     *          in LabJackM.h. 
+     *      connectionType {number} A constant from LabJackM.h that defines
+     *          connection medium the driver is using to communicate with the
+     *          device.
+     *      serialNumber {number} The device unique integer serial number.
+     *      ipAddress {string} The IP address the device is located at. Defaults
+     *          to all zeros if not connected by the network (0.0.0.0).
+     *      port {number} The port at which the device is connected.
+     *      maxBytesPerMB {number} The maximum payload in bytes that the
+     *          driver can send to the device over the current connection
+     *          medium.
+     * }
+     *
+     * @return {Object/Number} Object conforming to the DeviceInfo structure as
+     *      defined above.
+     * @throws {Error} Thrown if any errors are discovered.
+    **/
+    this.LJM_GetHandleInfoSync = function(handle) {
+        var errorResult;
+
+        var devT = ref.alloc('int', 1);
+        var conT = ref.alloc('int', 1);
+        var sN = ref.alloc('int', 1);
+        var ipAddr = ref.alloc('int', 1);
+        var port = ref.alloc('int', 1);
+        var maxB = ref.alloc('int', 1);
+
+        //Perform device I/O Operation
+        errorResult = self.ljm.LJM_GetHandleInfo(
+            handle,
+            devT,
+            conT,
+            sN,
+            ipAddr,
+            port,
+            maxB
+        );
+        
+        //Check to see if there were any errors
+        if (errorResult !== 0) {
+            throw new DriverOperationError(errorResult);
+        }
+
+        var returnVariable = {
+            deviceType: devT.deref(),
+            connectionType: conT.deref(),
+            serialNumber: sN.deref(),
+            ipAddress: ipAddr.deref(),
+            port: port.deref(),
+            maxBytesPerMB: maxB.deref()
+        };
+        return returnVariable;
+    };
+
+    /**
+     * Performs an asynchronous LJM_ReadRaw function call with the LJM driver.
+     *
+     * Reads the value of a modbus register without interpreting that value
+     * before returning.
+     * 
+     * @param {Array} data An appropriately sized number array indicating how
+     *      many bytes should be received from the LJM driver.
+     * @param {function} onError function to be called when successful.
+     * @param {function} onSuccess function to be called when an error occurs.
+    **/
+    this.LJM_ReadRaw = function(handle, data, onError, onSuccess) {
+
+        //Make sure the data is valid
+        if (typeof(data[0]) != "number") {
+            return onError("Data is not a number array");
+        }
+
+        //Create a blank array for data to be saved to & returned
+        var aData = new Buffer(data.length);
+        aData.fill(0);
+
+        errorResult = self.ljm.LJM_ReadRaw.async(
+            handle,
+            aData,
+            data.length,
+            function (err, res) {
+                if(err) {
+                    return onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_ReadRaw', err.toString()));
+                }
+
+                if (res === 0) {
+                    return onSuccess(aData);
+                } else {
+                    return onError(res);
+                }
+        });
+    };
+
+    /**
+     * The synchronous version of readRaw.
+     * 
+     * @param {Array} data an appropriately sized number array indicating how
+     *      many bytes should be received from the LJM driver.
+     * @return {Array} Number Array of data returned from the LJM_ReadRaw
+     *      function.
+     * @throws {DriverOperationError} If an LJM error occurs.
+     */
+    this.LJM_ReadRawSync = function(handle, data) {//Make sure the data is valid, a number array
+        if (typeof(data[0]) != "number") {
+            throw new DriverOperationError(
+                self.errors.LJN_INVALID_ARGUMENTS,
+                "Data is not a number array"
+            );
+        }
+
+        //Create a blank array for data to be saved to & returned
+        var bufferData = new Buffer(data.length);
+        bufferData.fill(0);
+
+        errorResult = self.ljm.LJM_ReadRaw(handle, bufferData,
+            data.length);
+
+        //Check for an error
+        if (errorResult !== 0) {
+            throw new DriverOperationError(errorResult);
+        }
+        return bufferData;
+    };
+
+    /**
+     * Asynchronously reads a single modbus address.  Converts address "Names" to addresses and calls either
+     * the LJM_eReadAddress or LJM_eReadAddressString functions depending on the data type.
+     *
+     * @param {number} handle An active LJM device handle.
+     * @param {Number/String} address Either an integer register address or a 
+     *      String name compatible with LJM.
+     * @param {function} onError Takes a single argument represenging
+     *      the LJM-Error, either an integer error number or a String.
+     * @param {Number/String} onSuccess Callback taking a single argument: an
+     *      array containging data (as number or string elements based on data
+     *      type) requested from the device.
+     */
+    this.LJN_Read = function(handle, address, onError, onSuccess) {
+
+        var info = self.constants.getAddressInfo(address, 'R');
+        var expectedReturnType = info.type;
+        var isReturningString = expectedReturnType == driver_const.LJM_STRING;
+        var isDirectionValid = info.directionValid == 1;
+        var resolvedAddress = info.address;
+
+        if (isDirectionValid && !isReturningString) {
+            return self.LJM_eReadAddress(handle, resolvedAddress, info.type, onError, onSuccess);
+        } else if (isDirectionValid && isReturningString) {
+            return self.LJM_eReadAddressString(handle, resolvedAddress, onError, onSuccess);
+        } else {
+            if (info.type == -1) {
+                return onError(buildAsyncError(self.errors.LJME_INVALID_ADDRESS.error));
+            } else if (info.directionValid === 0) {
+                return onError(buildAsyncError(self.errors.LJME_INVALID_DIRECTION.error));
+            } else {
+                return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error));
+            }
+        }
+    };
+    /**
+     * Synchronously read a single modbus address.  Handles name to address conversion
+     * and also reading string-type registers.
+     * 
+     * @param {number} handle An active LJM device handle.
+     * @param {Number/String} address Either an integer register address or a 
+     *      String name compatible with LJM.
+     * @throws {DriverOperationError} If the input args aren't correct or an error occurs.
+     */
+    this.LJN_ReadSync = function (handle, address) {
+        var info = self.constants.getAddressInfo(address, 'R');
+        var expectedReturnType = info.type;
+        var isReturningString = expectedReturnType == driver_const.LJM_STRING;
+        var isDirectionValid = info.directionValid == 1;
+        var resolvedAddress = info.address;
+
+        if (isDirectionValid && !isReturningString) {
+            return self.LJM_eReadAddressSync(handle, resolvedAddress, info.type);
+        } else if (isDirectionValid && isReturningString) {
+            return self.LJM_eReadAddressStringSync(handle, resolvedAddress);
+        } else {
+            if (info.type == -1) {
+                throw new DriverOperationError(self.errors.LJME_INVALID_ADDRESS.error);
+            } else if (info.directionValid === 0) {
+                throw new DriverOperationError(self.errors.LJME_INVALID_DIRECTION.error);
+            } else {
+                throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error);
+            }
+        }
+    };
+
+    /*
+     * Define functions to call the LJM_eReadAddress function.
+     */
+    this.LJM_eReadAddress = function(handle, address, type, onError, onSuccess) {
+        var result = new ref.alloc('double', 1);
+        self.ljm.LJM_eReadAddress.async(
+            handle,
+            resolvedAddress,
+            type,
+            result,
+            function(err, res) {
+                if(err) {
+                    return onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_eReadAddress', err.toString()));
+                }
+
+                if ( res === 0 ) {
+                    //Success
+                    return onSuccess(result.deref());
+                } else {
+                    //Error
+                    return onError(res);
+                }
+            });
+    };
+    this.LJM_eReadAddressSync = function(handle, address, type) {
+        var result = new ref.alloc('double',1);
+        var output = self.ljm.LJM_eReadAddress(
+            handle,
+            resolvedAddress,
+            type,
+            result
+        );
+
+        if (output === 0) {
+            result = result.deref();
+            return result;
+        } else {
+            throw new DriverOperationError(output);
+        }
+    }
+
+    /*
+     * Define functions to call the LJM_eReadAddressString function.
+     */
+    this.LJM_eReadAddressString = function(handle, address, onError, onSuccess) {
+        //Allocate space for the string-result
+        var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+        strBuffer.fill(0);
+
+        //Perform LJM Async function call
+        self.ljm.LJM_eReadAddressString.async(
+            handle,
+            resolvedAddress,
+            strBuffer,
+            function(err, res) {
+                if(err) {
+                    return onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_eReadAddressString', err.toString()));
+                }
+
+                // Check the output value.
+                if ( res === 0 ) {
+                    // Parse the string buffer and get the actual string.
+                    var receivedStrData = strBuffer.toString(
+                        'utf8',
+                        0,
+                        driver_const.LJM_MAX_STRING_SIZE
+                    );
+                    var actualStr = '';
+                    for(var i = 0; i < receivedStrData.length; i++) {
+                        if(receivedStrData.charCodeAt(i) === 0) {
+                            break;
+                        } else {
+                            actualStr += receivedStrData[i];
+                        }
+                    }
+                    return onSuccess(actualStr);
+                } else {
+                    return onError(res);
+                }
+            }
+        );
+    };
+
+    this.LJM_eReadAddressStringSync = function(handle, address) {
+        //Allocate space for the result
+        var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
+        strBuffer.fill(0);
+
+        output = self.ljm.LJM_eReadAddressString(
+            handle,
+            resolvedAddress,
+            strBuffer
+        );
+
+        // Check output value.
+        if (output === 0) {
+            // Parse the string buffer and get the actual string.
+            var receivedStrData = strBuffer.toString(
+                'utf8',
+                0,
+                driver_const.LJM_MAX_STRING_SIZE
+            );
+            var actualStr = '';
+            for(var i = 0; i < receivedStrData.length; i++) {
+                if(receivedStrData.charCodeAt(i) === 0) {
+                    break;
+                } else {
+                    actualStr += receivedStrData[i];
+                }
+            }
+            result = actualStr;
+        }
+
+        // If no error, return the result.  Otherwise throw an error.
+        if (output === 0) {
+            return result;
+        } else {
+            throw new DriverOperationError(output);
+        }
+    }
+
+    /**
+     * Asynchronously reads a single modbus buffer address.
+     *
+     * @param {Number/String} address Either an integer register address or a 
+     *      String name compatible with self.LJM.
+     * @param {Number} number The number of bytes to read from the device.
+     * @param {function} onError Takes a single argument represenging
+     *      the LJM-Error, either an integer error number or a String.
+     * @param {Number/String} onSuccess Callback taking a single argument: an
+     *      array containging data (as number or string elements based on data
+     *      type) requested from the device.
+     * @throws {DriverOperationError} If the input args aren't correct or an error occurs.
+    **/
+    this.LJN_readArray = function(handle, address, numReads, onError, onSuccess) {
+        var output;
+        var addressNumber = 0;
+        var numValues = numReads;
+        var addressType = driver_const.LJM_BYTE;
+        var info = self.constants.getAddressInfo(address, 'R');
+        // var expectedReturnType = info.type;
+        addressType = info.type;
+        var isDirectionValid = info.directionValid == 1;
+        var isBufferRegister = false;
+        if(info.data) {
+            if(info.data.isBuffer) {
+                isBufferRegister = true;
+            }
+        }
+
+        if (info.type >= 0) {
+            addressNumber = info.address;
+
+            // Return Variable
+            var errorResult = undefined;
+
+            return self.LJM_eReadAddressArray(handle, addressNumber, addressType, numValues, onError, onSuccess);
+            
+        } else {
+            return onError(buildAsyncError(self.errors.LJME_INVALID_ADDRESS.error));
+        }
+    };
+    this.LJN_readArraySync = function(handle, address, numReads) {
+        var output;
+        var addressNumber = 0;
+        var numValues = numReads;
+        var addressType = driver_const.LJM_BYTE;
+        var info = self.constants.getAddressInfo(address, 'R');
+        var expectedReturnType = info.type;
+        addressType = info.type;
+        var isDirectionValid = info.directionValid == 1;
+        var isBufferRegister = false;
+        var retData = [];
+        
+        if (info.type >= 0) {
+            addressNumber = info.address;
+
+            return self.LJM_eReadAddressArraySync(handle, addressNumber, info.type, numValues);
+        } else {
+            throw new DriverOperationError(self.errors.LJME_INVALID_ADDRESS.error);
+        }
+
+        if (output === 0) {
+            return retData;
+        } else {
+            throw new DriverOperationError(output);
+        }
+    };
+
+    this.LJM_eReadAddressArray = function(handle, address, type, numValues, onError, onSuccess) {
+        // Perform buffer allocations
+        var aValues = new Buffer(numValues * ARCH_DOUBLE_NUM_BYTES);         //Array of doubles
+        var errorVal = new ref.alloc('int',1);
+
+        // Clear all of the arrays
+        aValues.fill(0);
+        errorVal.fill(0);
+
+        // Call the LJM function
+        self.ljm.LJM_eReadAddressArray.async(
+            handle,
+            address,
+            type,
+            numValues,
+            aValues,
+            errorVal,
+            function(err, res) {
+                if(err) {
+                    return onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_eReadAddressArray', err.toString()));
+                }
+                if ( (res === 0) ) {
+                    var retData = [];
+                    var offset = 0;
+                    for (i = 0; i < numValues; i++) {
+                        retData[i] = aValues.readDoubleLE(offset);
+                        offset += ARCH_DOUBLE_NUM_BYTES;
+                    }
+                    return onSuccess(retData);
+                } else {
+                    return onError(buildAsyncError(res, 'LJM_eReadAddressArray error', errorVal.deref()));
+                }
+            });
+    };
+
+    this.LJM_eReadAddressArraySync = function(handle, address, type, numValues) {
+        // Perform buffer allocations
+        var aValues = new Buffer(numValues * ARCH_DOUBLE_NUM_BYTES);         //Array of doubles
+        var errorVal = new ref.alloc('int',1);
+
+        // Clear all of the arrays
+        aValues.fill(0);
+        errorVal.fill(0);
+
+        var ljmError = self.ljm.LJM_eReadAddressArrayArray(
+            handle,
+            address,
+            type,
+            numValues,
+            aValues,
+            errorVal
+        );
+
+        if (ljmError === 0) {
+            var retData = [];
+            var offset = 0;
+            for (i = 0; i < numValues; i++) {
+                retData[i] = aValues.readDoubleLE(offset);
+                offset += ARCH_DOUBLE_NUM_BYTES;
+            }
+            return retData;
+        } else {
+            throw new DriverOperationError(ljmError, errorVal.deref());
+        }
+    };
+
+    /**
+     * Read many addresses asynchronously.
+     *
+     * Function performs LJM_eReadNames and LJM_eReadAddresses driver calls
+     * when given certain arguments.  If addresses is type: number-array then it
+     * calls LJM_eReadAddresses and, if addresses is type string-array, then it 
+     * calls LJM_eReadNames.
+     *  
+     * @param {Array} addresses Collection of names or addresses to read.
+     *      An Array of String elements will be interepreted as a collection
+     *      of names while an Array of Number elements will be interepreted
+     *      as a collection of addresses.
+     * @param {function} onError Function to call if an error is encountered
+     *      while performing the read. Should take a single string parameter
+     *      describing the error encountered.
+     * @param {function} onSuccess Function to call if this operation completes
+     *      successfully. Not called if an error is encountered. This function
+     *      should take a single arugment of type array containing elements of
+     *      type number.
+     * @throws {DriverInterfaceError} Thrown if addresses argument is not an
+     *      Array containing at least 1 element.
+    **/
+    this.readMany = function(handle, addresses, onError, onSuccess) {
+        //Get important info & allocate argument variables
+        var length = addresses.length;
+        var returnResults = Array();
+
+        //Define buffers
+        var results = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
+        var errors = new ref.alloc('int',1);
+        
+        // Make sure buffers are empty.
+        results.fill(0);
+        errors.fill(0);
+
+        if(length < 1) {
+            // throw new DriverInterfaceError("Addresses array must contain data");
+            return onError("Addresses array must contain data");
+        }
+
+        var addrBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
+        var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
+        var inValidOperation = 0;
+
+        //Integer Returned by .dll function
+        var info;
+        var offset=0;
+        var constants = self.constants;
+        var i;
+        for ( i=0; i<length; i++ ) {
+            var address = addresses[i];
+
+            info = constants.getAddressInfo(address, 'R');
+            if (info.directionValid == 1) {
+                addrTypeBuff.writeInt32LE(info.type,offset);
+                addrBuff.writeInt32LE(info.address,offset);
+                offset += ARCH_INT_NUM_BYTES;
+            } else {
+                if(info.type == -1) {
+                    return onError(buildAsyncError(self.errors.LJME_INVALID_ADDRESS.error, 'LJM_eReadAddressArray error'));
+                } else if (info.directionValid === 0) {
+                    return onError(buildAsyncError(self.errors.LJME_INVALID_DIRECTION.error, 'LJM_eReadAddressArray error'));
+                } else {
+                    return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error, 'LJM_eReadAddressArray error'));
+                }
+            }
+        }
+        console.log('Calling LJM_eReadAddresses.async');
+        errorResult = self.ljm.LJM_eReadAddresses.async(
+            handle,
+            length,
+            addrBuff,
+            addrTypeBuff,
+            results,
+            errors,
+            function(err, res) {
+
+                console.log('Async Reporting an error...?', res);
+                if(err) {
+                    return onError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, err, 'LJM_eReadAddressArray');
+                }
+                var offset = 0;
+                for (i = 0; i < addresses.length; i++) {
+                    returnResults[i] = results.readDoubleLE(offset);
+                    offset += ARCH_DOUBLE_NUM_BYTES;
+                }
+                if ((res === 0)) {
+                    return onSuccess(returnResults);
+                } else {
+                    return onError(buildAsyncError(res, 'LJM_eReadAddressArray error', errorVal.deref()));
+                }
+            }
+        );
+    };
+
+    /**
+     * Read many addresses. Synchronous version of readMany.
+     *
+     * Function performs LJM_eReadNames and LJM_eReadAddresses driver calls
+     * when given certain arguments.  If addresses is type: number-array then it
+     * calls LJM_eReadAddresses and, if addresses is type string-array, then it 
+     * calls LJM_eReadNames.
+     *  
+     * @param {Array} addresses Collection of names or addresses to read.
+     *      An Array of String elements will be interepreted as a collection
+     *      of names while an Array of Number elements will be interepreted
+     *      as a collection of addresses.
+     * @return {Array} Array of double register values.
+     * @throws {DriverInterfaceError} Thrown if addresses argument is not an
+     *      Array containing at least 1 element.
+    **/
+    this.readManySync = function(handle, addresses) {
+        //Get important info & allocate argument variables
+        var length = addresses.length;
+        var returnResults = Array();
+
+        //Define buffers
+        var results = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
+        var errors = new ref.alloc('int',1);
+
+        //Make sure buffers are empty
+        results.fill(0);
+        errors.fill(0);
+
+        var i = 0;
+        var offset = 0;
+
+        if ( length < 1 ) {
+            throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, 'Addresses array must contain data', i);
+        }
+
+        var addrBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
+        var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
+        var inValidOperation = 0;
+        //Integer Returned by .dll function
+        var info;
+        var offset=0;
+        var constants = self.constants;
+        var i;
+        for ( i=0; i<length; i++ ) {
+            var address = addresses[i];
+
+            info = constants.getAddressInfo(address, 'R');
+            if (info.directionValid == 1) {
+                addrTypeBuff.writeInt32LE(info.type,offset);
+                addrBuff.writeInt32LE(info.address,offset);
+                offset += ARCH_INT_NUM_BYTES;
+            } else {
+                if(info.type == -1) {
+                    throw new DriverOperationError(self.errors.LJME_INVALID_ADDRESS.error, 'Invalid Address', i);
+                } else if (info.directionValid === 0) {
+                    throw new DriverOperationError(self.errors.LJME_INVALID_DIRECTION.error, 'Invalid Read Attempt', i);
+                } else {
+                    throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, 'Unexpected Error', i);
+                }
+            }
+        }
+        //Execute LJM command
+        errorResult = self.ljm.LJM_eReadAddresses(
+            handle,
+            length,
+            addrBuff,
+            addrTypeBuff,
+            results,
+            errors
+        );
+
+        if(errorResult === 0) {
+            offset = 0;
+            i = 0;
+            for(i in addresses) {
+                returnResults[i] = results.readDoubleLE(offset);
+                offset += ARCH_DOUBLE_NUM_BYTES;
+            }
+            return returnResults;
+        } else {
+            throw new DriverOperationError(self.errors.LJME_INVALID_ADDRESS.error,'Invalid Address',i,returnResults);
+        }
+    };
 };

@@ -28,16 +28,27 @@
     ],
     "dependencies": {
         "async": "1.5.2",
+        "diff": "^4.0.1",
         "ljm-ffi": "^1.0.13",
-        "ljswitchboard-ljm_driver_constants": "^1.0.0",
-        "ljswitchboard-modbus_map": "^1.0.1",
+        "ljswitchboard-ljm_driver_constants": "file:../ljswitchboard-ljm_driver_constants",
+        "ljswitchboard-modbus_map": "file:../ljswitchboard-modbus_map",
+        "nodeunit": "^0.11.3",
         "q": "1.5.1",
         "ref": "1.3.5"
     },
     "devDependencies": {
+        "chai": "^4.2.0",
+        "deep-eql": "^4.0.0",
+        "mocha": "^6.2.2",
+        "rewire": "4.0.1",
+        "diff": ">=3.5.0",
+        "nodeunit": "0.11.3"
+    },
+    "oldDevDependencies": {
         "diff": ">=3.5.0",
         "nodeunit": "0.11.3",
-        "rewire": "4.0.1"
+        "ljswitchboard-ljm_driver_constants": "file:../ljswitchboard-ljm_driver_constants",
+        "ljswitchboard-modbus_map": "file:../ljswitchboard-modbus_map"
     },
     "script_notes": "to run a script w/o using npm test, use npm run [script name]",
     "scripts": {
@@ -45,6 +56,7 @@
         "test_driver": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/driver_test.js",
         "test_device": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/device_test.js",
         "test_constantsParser": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/json_constants_parser_test.js",
-        "test": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/test.js"
+        "old-test": "node ./node_modules/nodeunit/bin/nodeunit ./LabJackDriver_Testing/test.js",
+        "test": "node ./node_modules/mocha/bin/mocha"
     }
 }

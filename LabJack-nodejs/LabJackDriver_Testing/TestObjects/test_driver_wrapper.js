@@ -171,14 +171,14 @@ var LJM_eReadAddressString = createCallableObject(
 	function(handle, address, strBuffer) {
 		lastFunctionCall.push("LJM_eReadAddressString");
 		argumentsList.push(arguments);
-		strBuffer.write("TEST");
+		strBuffer.write(expectedResultArg.toString());
 		strBuffer.writeUInt8(0,4);
 		return expectedResult;
 	},
 	function(handle, address, strBuffer, callback) {
 		lastFunctionCall.push("LJM_eReadAddressStringAsync");
 		argumentsList.push(arguments);
-		strBuffer.write("TEST");
+		strBuffer.write(expectedResultArg.toString());
 		strBuffer.writeUInt8(0,4);
 		reportEnd(callback);
 	});
@@ -189,14 +189,14 @@ var LJM_eReadNameString = createCallableObject(
 	function(handle, address, strBuffer) {
 		lastFunctionCall.push("LJM_eReadNameString");
 		argumentsList.push(arguments);
-		strBuffer.write("TEST");
+		strBuffer.write(expectedResultArg);
 		strBuffer.writeUInt8(0,4);
 		return expectedResult;
 	},
 	function(handle, address, strBuffer, callback) {
 		lastFunctionCall.push("LJM_eReadNameStringAsync");
 		argumentsList.push(arguments);
-		strBuffer.write("TEST");
+		strBuffer.write(expectedResultArg);
 		strBuffer.writeUInt8(0,4);
 		reportEnd(callback);
 	});
@@ -271,11 +271,12 @@ var LJM_eWriteAddressArray = createCallableObject(
  */
 var LJM_eReadAddresses = createCallableObject(
 	function(handle, length, addresses, types, results, errors) {
+		console.log('in LJM_eReadAddresses', expectedResult);
 		lastFunctionCall.push("LJM_eReadAddresses");
 		argumentsList.push(arguments);
 		var numReads = addresses.length;
 		if(addresses.length != types.length) {
-			console.log('ERROR!!!', numReads, types.length);
+			console.log('tdw - eReadAddresses - ERROR!!!', numReads, types.length);
 		}
 		for(var i = 0; i < length; i++) {
 			results.writeDoubleLE(expectedResultArg[i],i*8);
@@ -286,13 +287,14 @@ var LJM_eReadAddresses = createCallableObject(
 		return expectedResult;
 	},
 	function(handle, length, addresses, types, results, errors, callback) {
+		console.log('in LJM_eReadAddressesAsync', expectedResult);
 		lastFunctionCall.push("LJM_eReadAddressesAsync");
 		// console.log('Yodles\n',arguments);
 		argumentsList.push(arguments);
 		// console.log('ArgList\n',argumentsList);
 		var numReads = addresses.length;
 		if(addresses.length != types.length) {
-			console.log('ERROR!!!', numReads, types.length);
+			console.log('tdw - eReadAddressesAsync - ERROR!!!', numReads, types.length);
 		}
 		for(var i = 0; i < length; i++) {
 			results.writeDoubleLE(expectedResultArg[i],i*8);
@@ -311,7 +313,7 @@ var LJM_eReadNames = createCallableObject(
 		argumentsList.push(arguments);
 		var numReads = addresses.length;
 		if(addresses.length != results.length) {
-			console.log('ERROR!!!', numReads, results.length);
+			console.log('tdw - eReadNames - ERROR!!!', numReads, results.length, addresses);
 		}
 		for(var i = 0; i < length; i++) {
 			results.writeDoubleLE(expectedResultArg[i],i*8);
@@ -326,7 +328,7 @@ var LJM_eReadNames = createCallableObject(
 		argumentsList.push(arguments);
 		var numReads = addresses.length;
 		if(addresses.length != results.length) {
-			console.log('ERROR!!!', numReads, results.length);
+			console.log('tdw - eReadNamesAsync - ERROR!!!', numReads, results.length);
 		}
 		for(var i = 0; i < length; i++) {
 			results.writeDoubleLE(expectedResultArg[i],i*8);
