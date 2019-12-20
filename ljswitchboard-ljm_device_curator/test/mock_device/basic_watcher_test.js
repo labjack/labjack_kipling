@@ -33,6 +33,8 @@ exports.tests = {
 		test.done();
 	},
 	'create new watcher': function(test) {
+		mockDevice.delay = 1;
+
 		registerWatcher.createWatcher(
 			testWatcherName,
 			watcherReceiver
@@ -63,7 +65,7 @@ exports.tests = {
 		var finishWaiting = function() {
 			test.done();
 		};
-		var timer = setTimeout(finishWaiting, 500);
+		var timer = setTimeout(finishWaiting, 520);
 	},
 	'stop watcher': function(test) {
 		registerWatcher.stopWatcher(testWatcherName)
@@ -72,9 +74,9 @@ exports.tests = {
 				'name': result.name,
 				'statistics': {
 					numSkipped: 0,
-					numReads: 5,
+					numReads: 6,
 					numErrors: 0,
-					numReadResults: 5,
+					numReadResults: 6,
 					numUpdates: 1
 				}
 			};
@@ -121,7 +123,7 @@ exports.tests = {
 		var finishWaiting = function() {
 			test.done();
 		};
-		var timer = setTimeout(finishWaiting, 500);
+		var timer = setTimeout(finishWaiting, 520);
 	},
 	'stop watcher (2)': function(test) {
 		registerWatcher.stopWatcher(testWatcherName)
@@ -129,10 +131,10 @@ exports.tests = {
 			var expectedResult = {
 				'name': result.name,
 				'statistics': {
-					numSkipped: 3,
+					numSkipped: 4,
 					numReads: 2,
 					numErrors: 0,
-					numReadResults: 1,
+					numReadResults: 2,
 					numUpdates: 1
 				}
 			};
