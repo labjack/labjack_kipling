@@ -78,32 +78,32 @@ testCase('Device Reading', function() {
 	*******************************************************/
 	testCase('device.read', function() {
 		var tests = [
-			// {func: 'read', 			errCode: LJME_NO_ERROR,			args: [0], 						mockCalls: ['LJM_eReadAddressAsync'], 		testType: true, regType: driver_const.LJM_FLOAT32, 	res: testVal},
-			// {func: 'read', 			errCode: LJME_NO_ERROR,			args: ["AIN0"], 				mockCalls: ['LJM_eReadAddressAsync'], 		testType: true, regType: driver_const.LJM_FLOAT32, 	res: testVal},
-			// {func: 'readSync', 		errCode: LJME_NO_ERROR,			args: [0], 						mockCalls: ['LJM_eReadAddress'], 			testType: true, regType: driver_const.LJM_FLOAT32, 	res: testVal},
-			// {func: 'readSync', 		errCode: LJME_NO_ERROR,			args: ["AIN0"], 				mockCalls: ['LJM_eReadAddress'], 			testType: true, regType: driver_const.LJM_FLOAT32, 	res: testVal},
-			// {func: 'read', 			errCode: LJME_NO_ERROR,			args: [60500], 					mockCalls: ['LJM_eReadAddressStringAsync'], testType: false, regType: 0, 	res: testVal.toString()},
-			// {func: 'read', 			errCode: LJME_NO_ERROR,			args: ["DEVICE_NAME_DEFAULT"], 	mockCalls: ['LJM_eReadAddressStringAsync'], testType: false, regType: 0, 	res: testVal.toString()},
-			// {func: 'readSync',		errCode: LJME_NO_ERROR,			args: [60500], 					mockCalls: ['LJM_eReadAddressString'], 		testType: false, regType: 0, 	res: testVal.toString()},
-			// {func: 'readSync',		errCode: LJME_NO_ERROR,			args: ["DEVICE_NAME_DEFAULT"], 	mockCalls: ['LJM_eReadAddressString'], 		testType: false, regType: 0, 	res: testVal.toString()},
+			{func: 'read', 			errCode: LJME_NO_ERROR,			args: [0], 						mockCalls: ['LJM_eReadAddressAsync'], 		testType: true, regType: driver_const.LJM_FLOAT32, 	res: testVal},
+			{func: 'read', 			errCode: LJME_NO_ERROR,			args: ["AIN0"], 				mockCalls: ['LJM_eReadAddressAsync'], 		testType: true, regType: driver_const.LJM_FLOAT32, 	res: testVal},
+			{func: 'readSync', 		errCode: LJME_NO_ERROR,			args: [0], 						mockCalls: ['LJM_eReadAddress'], 			testType: true, regType: driver_const.LJM_FLOAT32, 	res: testVal},
+			{func: 'readSync', 		errCode: LJME_NO_ERROR,			args: ["AIN0"], 				mockCalls: ['LJM_eReadAddress'], 			testType: true, regType: driver_const.LJM_FLOAT32, 	res: testVal},
+			{func: 'read', 			errCode: LJME_NO_ERROR,			args: [60500], 					mockCalls: ['LJM_eReadAddressStringAsync'], testType: false, regType: 0, 	res: testVal.toString()},
+			{func: 'read', 			errCode: LJME_NO_ERROR,			args: ["DEVICE_NAME_DEFAULT"], 	mockCalls: ['LJM_eReadAddressStringAsync'], testType: false, regType: 0, 	res: testVal.toString()},
+			{func: 'readSync',		errCode: LJME_NO_ERROR,			args: [60500], 					mockCalls: ['LJM_eReadAddressString'], 		testType: false, regType: 0, 	res: testVal.toString()},
+			{func: 'readSync',		errCode: LJME_NO_ERROR,			args: ["DEVICE_NAME_DEFAULT"], 	mockCalls: ['LJM_eReadAddressString'], 		testType: false, regType: 0, 	res: testVal.toString()},
 			{func: 'read', 			errCode: LJME_INVALID_ADDRESS, 	args: [-1], 					mockCalls: [], 								testType: false, regType: 0, 	res: testVal},
 			{func: 'readSync', 		errCode: LJME_INVALID_ADDRESS, 	args: [-1], 					mockCalls: [], 								testType: false, regType: 0, 	res: testVal},
 			
 			// Read Many calls.
-			// {func: 'readMany', 		errCode: LJME_NO_ERROR,			args: [[0,2]], 					mockCalls: ['LJM_eReadAddressesAsync'], 	testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readMany', 		errCode: LJME_NO_ERROR,			args: [["AIN0","AIN1"]], 		mockCalls: ['LJM_eReadAddressesAsync'], 	testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readManySync', 	errCode: LJME_NO_ERROR,			args: [[0,2]], 					mockCalls: ['LJM_eReadAddresses'], 			testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readManySync', 	errCode: LJME_NO_ERROR,			args: [["AIN0","AIN1"]], 		mockCalls: ['LJM_eReadAddresses'], 			testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readMany', 		errCode: LJME_INVALID_ADDRESS,	args: [[-1, -2]], 				mockCalls: [], 								testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readManySync', 	errCode: LJME_INVALID_ADDRESS,	args: [[-1, -2]], 				mockCalls: [], 								testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readMany', 		errCode: LJME_NO_ERROR,			args: [[0,2]], 					mockCalls: ['LJM_eReadAddressesAsync'], 	testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readMany', 		errCode: LJME_NO_ERROR,			args: [["AIN0","AIN1"]], 		mockCalls: ['LJM_eReadAddressesAsync'], 	testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readManySync', 	errCode: LJME_NO_ERROR,			args: [[0,2]], 					mockCalls: ['LJM_eReadAddresses'], 			testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readManySync', 	errCode: LJME_NO_ERROR,			args: [["AIN0","AIN1"]], 		mockCalls: ['LJM_eReadAddresses'], 			testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readMany', 		errCode: LJME_INVALID_ADDRESS,	args: [[-1, -2]], 				mockCalls: [], 								testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readManySync', 	errCode: LJME_INVALID_ADDRESS,	args: [[-1, -2]], 				mockCalls: [], 								testType: false, regType: 0, 	res: [testVal, testVal+1]},
 			
 			// Read array calls.
-			// {func: 'readArray', 	errCode: LJME_NO_ERROR,			args: ["AIN0", 2], 				mockCalls: ['LJM_eReadAddressArrayAsync'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readArray', 	errCode: LJME_NO_ERROR,			args: [0, 2], 					mockCalls: ['LJM_eReadAddressArrayAsync'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readArraySync',	errCode: LJME_NO_ERROR,			args: ["AIN0", 2], 				mockCalls: ['LJM_eReadAddressArray'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readArraySync',	errCode: LJME_NO_ERROR,			args: [0, 2], 					mockCalls: ['LJM_eReadAddressArray'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readArray', 	errCode: LJME_INVALID_ADDRESS,	args: [-1, 2], 					mockCalls: [],								testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readArraySync',	errCode: LJME_INVALID_ADDRESS,	args: [-1, 2], 					mockCalls: [],								testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readArray', 	errCode: LJME_NO_ERROR,			args: ["AIN0", 2], 				mockCalls: ['LJM_eReadAddressArrayAsync'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readArray', 	errCode: LJME_NO_ERROR,			args: [0, 2], 					mockCalls: ['LJM_eReadAddressArrayAsync'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readArraySync',	errCode: LJME_NO_ERROR,			args: ["AIN0", 2], 				mockCalls: ['LJM_eReadAddressArray'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readArraySync',	errCode: LJME_NO_ERROR,			args: [0, 2], 					mockCalls: ['LJM_eReadAddressArray'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readArray', 	errCode: LJME_INVALID_ADDRESS,	args: [-1, 2], 					mockCalls: [],								testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			{func: 'readArraySync',	errCode: LJME_INVALID_ADDRESS,	args: [-1, 2], 					mockCalls: [],								testType: false, regType: 0, 	res: [testVal, testVal+1]},
 		];	
 
 		tests.forEach(function testGenerator(test, i) {

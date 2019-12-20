@@ -56,24 +56,6 @@ function DriverOperationError(code, message, errFrame, results)
 util.inherits(DriverOperationError, Error);
 DriverOperationError.prototype.name = 'Driver Operation Error - device';
 
-/**
- * Create an error object.
- */
-function buildAsyncError(code, message, errFrame) {
-    var errorInfo = ljm_mm.getErrorInfo(code);
-    var error = {
-        code: code,
-        string: errorInfo.string,
-        description: errorInfo.description,
-    };
-    if(typeof(message) !== 'undefined') {
-        this.message = message.toString();
-    }
-    if(typeof(errFrame) !== 'undefined') {
-        this.errFrame = errFrame;
-    }
-    return error;
-}
 
 /**
  * Create a new DriverInterfaceError object.
