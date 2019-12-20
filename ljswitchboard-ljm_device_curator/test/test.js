@@ -105,12 +105,12 @@ process.on('uncaughtException', function(err) {
 var testGroups = {
 	'get_ljm_version': true,
 	'mock_device': {
-		'mock_device_test': false,
-		'mock_device_defaults_cache_test': false,
-		'mock_device_attrs_test': false,
-		'mock_device_upgrade_test': false,
-		'multiple_mock_device_upgrade_test': false,
-		'basic_watcher_test': false,
+		'mock_device_test': true,
+		'mock_device_defaults_cache_test': true,
+		'mock_device_attrs_test': true,
+		'mock_device_upgrade_test': true,
+		'multiple_mock_device_upgrade_test': true,
+		'basic_watcher_test': true,
 	},
 	'digit': {
 		'digit_basic_test': false,
@@ -124,8 +124,8 @@ var testGroups = {
 		't7_array_test': false,
 		't7_check_calibration_test': false,
 		't7_read_recovery_fw_version_test': false,
-		't7_upgrade_recovery_image_test':  false,
-		't7_upgrade_test':  false,
+		't7_upgrade_recovery_image_test': false,
+		't7_upgrade_test': false,
 		
 		// These two tests should be enabled and disabled together.  The first
 		// test loads and runs a lua script that creates a file.  The second
@@ -163,7 +163,7 @@ var testGroups = {
 	},
 	// T7 over-ride tests...
 	// 't7': {
-	// 	't7_startup_configs_save_and_restore': true,
+	// 	't7_startup_configs_save_and_restore': false,
 	// },
 
 	// These are production-line tests.
@@ -198,6 +198,9 @@ var testGroups = {
 	},
 	't8_mock_tests': {
 		't8_basic_mock': true,
+	},
+	't8': {
+		't8_basic_test': false,
 	},
 	'dashboard': {
 		'basic_test': false,
