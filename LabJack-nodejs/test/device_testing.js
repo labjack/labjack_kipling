@@ -86,22 +86,22 @@ testCase('Device Reading', function() {
 			// {func: 'read', 			errCode: LJME_NO_ERROR,			args: ["DEVICE_NAME_DEFAULT"], 	mockCalls: ['LJM_eReadAddressStringAsync'], testType: false, regType: 0, 	res: testVal.toString()},
 			// {func: 'readSync',		errCode: LJME_NO_ERROR,			args: [60500], 					mockCalls: ['LJM_eReadAddressString'], 		testType: false, regType: 0, 	res: testVal.toString()},
 			// {func: 'readSync',		errCode: LJME_NO_ERROR,			args: ["DEVICE_NAME_DEFAULT"], 	mockCalls: ['LJM_eReadAddressString'], 		testType: false, regType: 0, 	res: testVal.toString()},
-			// {func: 'read', 			errCode: LJME_INVALID_ADDRESS, 	args: [-1], 					mockCalls: [], 								testType: false, regType: 0, 	res: testVal},
-			// {func: 'readSync', 		errCode: LJME_INVALID_ADDRESS, 	args: [-1], 					mockCalls: [], 								testType: false, regType: 0, 	res: testVal},
+			{func: 'read', 			errCode: LJME_INVALID_ADDRESS, 	args: [-1], 					mockCalls: [], 								testType: false, regType: 0, 	res: testVal},
+			{func: 'readSync', 		errCode: LJME_INVALID_ADDRESS, 	args: [-1], 					mockCalls: [], 								testType: false, regType: 0, 	res: testVal},
 			
 			// Read Many calls.
 			// {func: 'readMany', 		errCode: LJME_NO_ERROR,			args: [[0,2]], 					mockCalls: ['LJM_eReadAddressesAsync'], 	testType: false, regType: 0, 	res: [testVal, testVal+1]},
 			// {func: 'readMany', 		errCode: LJME_NO_ERROR,			args: [["AIN0","AIN1"]], 		mockCalls: ['LJM_eReadAddressesAsync'], 	testType: false, regType: 0, 	res: [testVal, testVal+1]},
 			// {func: 'readManySync', 	errCode: LJME_NO_ERROR,			args: [[0,2]], 					mockCalls: ['LJM_eReadAddresses'], 			testType: false, regType: 0, 	res: [testVal, testVal+1]},
 			// {func: 'readManySync', 	errCode: LJME_NO_ERROR,			args: [["AIN0","AIN1"]], 		mockCalls: ['LJM_eReadAddresses'], 			testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			{func: 'readMany', 		errCode: LJME_INVALID_ADDRESS,	args: [[-1, -2]], 				mockCalls: [], 								testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			{func: 'readManySync', 	errCode: LJME_INVALID_ADDRESS,	args: [[-1, -2]], 				mockCalls: [], 								testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			// {func: 'readMany', 		errCode: LJME_INVALID_ADDRESS,	args: [[-1, -2]], 				mockCalls: [], 								testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			// {func: 'readManySync', 	errCode: LJME_INVALID_ADDRESS,	args: [[-1, -2]], 				mockCalls: [], 								testType: false, regType: 0, 	res: [testVal, testVal+1]},
 			
 			// Read array calls.
 			// {func: 'readArray', 	errCode: LJME_NO_ERROR,			args: ["AIN0", 2], 				mockCalls: ['LJM_eReadAddressArrayAsync'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
 			// {func: 'readArray', 	errCode: LJME_NO_ERROR,			args: [0, 2], 					mockCalls: ['LJM_eReadAddressArrayAsync'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readArraySync',	errCode: LJME_NO_ERROR,			args: ["AIN0", 2], 				mockCalls: ['LJM_eReadAddressArrayAsync'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
-			// {func: 'readArraySync',	errCode: LJME_NO_ERROR,			args: [0, 2], 					mockCalls: ['LJM_eReadAddressArrayAsync'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			// {func: 'readArraySync',	errCode: LJME_NO_ERROR,			args: ["AIN0", 2], 				mockCalls: ['LJM_eReadAddressArray'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
+			// {func: 'readArraySync',	errCode: LJME_NO_ERROR,			args: [0, 2], 					mockCalls: ['LJM_eReadAddressArray'],	testType: false, regType: 0, 	res: [testVal, testVal+1]},
 			// {func: 'readArray', 	errCode: LJME_INVALID_ADDRESS,	args: [-1, 2], 					mockCalls: [],								testType: false, regType: 0, 	res: [testVal, testVal+1]},
 			// {func: 'readArraySync',	errCode: LJME_INVALID_ADDRESS,	args: [-1, 2], 					mockCalls: [],								testType: false, regType: 0, 	res: [testVal, testVal+1]},
 		];	
@@ -136,6 +136,10 @@ testCase('Device Reading', function() {
 						}
 					} catch(err) {
 						errorCode = err;
+						if(test.errCode === 0) {
+							console.log('Unexpected error encoutered when calling test, should have passed.', test, err);
+							assert.ok(false,"Unexpected read error");
+						}
 						equal(test.errCode, errorCode.code);
 
 						// Test for correct .dll call.
@@ -154,8 +158,9 @@ testCase('Device Reading', function() {
 					mockDriver.setResultArg(test.res);
 					mockDriver.setExpectedResult(test.errCode);
 					// Add onError callback argument.
-					test.args.push(function(err) {
+					test.args.push(function errorCB(err) {
 						if(test.errCode == 0) {
+							console.log('Unexpected error encoutered when calling test, should have passed.', test, err);
 							assert.ok(false, "Read Error");
 						} else {
 							equal(test.errCode, err.code);
@@ -171,7 +176,7 @@ testCase('Device Reading', function() {
 					});
 
 					// Add onSuccess callback argument.
-					test.args.push(function(res) {
+					test.args.push(function successCB(res) {
 						// Test result.
 						deepEqual(res, test.res);
 

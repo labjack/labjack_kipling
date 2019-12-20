@@ -26,10 +26,15 @@ var LJM_LIST_ALL_SIZE = driver_const.LJM_LIST_ALL_SIZE;
  *
  * This encapsulates the code of an error and indicates that the
  * error was thrown from the LabJack-nodejs library in the "driver"
- * object.  For convenience, the error code's string and description 
+ * object.  The error code's string and description 
  * are pulled from the ljswitchboard-modbus_map library.
  *
  * @param {Number} code The raw / uinterpreted error code from LJM.
+ * @param {string} message An optional string message.
+ * @param {number} errFrame In situations where array's are being parsed, 
+ *   this indicates the indicy.
+ * @param {array} results Optional parameter passed when some but not
+ *   all results may be valid.
 **/
 function DriverOperationError(code, message, errFrame, results)
 {
@@ -46,10 +51,14 @@ function DriverOperationError(code, message, errFrame, results)
     if(typeof(results) !== 'undefined') {
         this.results = results;
     }
+    
 }
 util.inherits(DriverOperationError, Error);
 DriverOperationError.prototype.name = 'Driver Operation Error - device';
 
+/**
+ * Create an error object.
+ */
 function buildAsyncError(code, message, errFrame) {
     var errorInfo = ljm_mm.getErrorInfo(code);
     var error = {
@@ -203,7 +212,7 @@ exports.ljmDriver = function(ljmOverride) {
                 aIPAddresses, 
                 function (err, res) {
                     // if (err) throw err;
-                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAll', err.toString()));
+                    if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAll', err.toString()));
                     if (res === 0) {                        
                         var devArray = self.buildListAllArray(
                             numFound,
@@ -214,7 +223,7 @@ exports.ljmDriver = function(ljmOverride) {
                             );
                         return onSuccess(devArray);
                     } else {
-                        return onError(buildAsyncError(res));
+                        return onError(new DriverOperationError(res));
                     }
                 }
             );
@@ -230,7 +239,7 @@ exports.ljmDriver = function(ljmOverride) {
                 aIPAddresses, 
                 function (err, res){
                     // if(err) throw err;
-                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAll', err.toString()));
+                    if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAll', err.toString()));
                     if(res === 0) {
                         var devArray = self.buildListAllArray(
                             numFound,
@@ -241,13 +250,13 @@ exports.ljmDriver = function(ljmOverride) {
                             );
                         return onSuccess(devArray);
                     } else {
-                        return onError(buildAsyncError(res));
+                        return onError(new DriverOperationError(res));
                     }
                 }
             );
             return 0;
         } else {
-            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error,res));
+            return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error,res));
         }
     };
 
@@ -553,7 +562,7 @@ exports.ljmDriver = function(ljmOverride) {
             C_aIPAddresses,
             C_aBytes,
             function (err, res){
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAllExtended', err.toString()));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAllExtended', err.toString()));
                 if (res === 0) {
                     var devArray = self.buildListAllArray(
                         C_NumFound,
@@ -835,8 +844,8 @@ exports.ljmDriver = function(ljmOverride) {
         self.ljm.LJM_CleanInfo.async(
             bHandle,
             function (err, res) {
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'cleanInfo', err.toString()));
-                if (res !== 0) return onError(buildAsyncError(res));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'cleanInfo', err.toString()));
+                if (res !== 0) return onError(new DriverOperationError(res));
                 onSuccess();
             });
     }
@@ -874,8 +883,8 @@ exports.ljmDriver = function(ljmOverride) {
             me.errorHandle,
             me.errors,
             function (err, res) {
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'openAll', err.toString()));
-                if (res !== 0) return onError(buildAsyncError(res));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'openAll', err.toString()));
+                if (res !== 0) return onError(new DriverOperationError(res));
                 var results = extractOpenAllResults(me);
                 // return onSuccess(extractOpenAllResults(me));
                 self.cleanInfo(
@@ -964,8 +973,8 @@ exports.ljmDriver = function(ljmOverride) {
             info.infoHandle,
             info.info,
             function (err, res) {
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'getHandles', err.toString()));
-                if (res !== 0) return onError(buildAsyncError(res));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'getHandles', err.toString()));
+                if (res !== 0) return onError(new DriverOperationError(res));
                 var results = extractGetHandlesResults(info);
                 
                 self.cleanInfo(
@@ -1015,7 +1024,7 @@ exports.ljmDriver = function(ljmOverride) {
             errNum, 
             strRes, 
             function (err, res){
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'errToStr', err.toString()));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'errToStr', err.toString()));
                 if (res === 0) {
                     //console.log('strRes: ',ref.readCString(strRes,0));
                     return onSuccess('Num: '+errNum+', '+ref.readCString(strRes,0));
@@ -1061,11 +1070,11 @@ exports.ljmDriver = function(ljmOverride) {
         var errorResult;
         errorResult = self.ljm.LJM_LoadConstants.async(
             function (err, res){
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'loadConstants', err.toString()));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'loadConstants', err.toString()));
                 if (res === 0) {
                     return onSuccess();
                 } else {
-                    return onError(buildAsyncError(res));
+                    return onError(new DriverOperationError(res));
                 }
             }
         );
@@ -1102,11 +1111,11 @@ exports.ljmDriver = function(ljmOverride) {
         var errorResult;
         errorResult = self.ljm.LJM_CloseAll.async(
             function (err, res){
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'closeAll', err.toString()));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'closeAll', err.toString()));
                 if (res === 0) {
                     return onSuccess();
                 } else {
-                    return onError(buildAsyncError(res));
+                    return onError(new DriverOperationError(res));
                 }
             }
         );
@@ -1148,17 +1157,17 @@ exports.ljmDriver = function(ljmOverride) {
                 parameter, 
                 returnVar, 
                 function (err, res){
-                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'readLibrary', err.toString()));
+                    if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'readLibrary', err.toString()));
                     if (res === 0) {
                         return onSuccess(returnVar.deref());
                     } else {
-                        return onError(buildAsyncError(res));
+                        return onError(new DriverOperationError(res));
                     }
                 }
             );
             return 0;
         } else {
-            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error));
+            return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error));
         }
     };
     
@@ -1204,7 +1213,7 @@ exports.ljmDriver = function(ljmOverride) {
                 parameter,
                 strBuffer,
                 function (err, res){
-                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'readLibraryS', err.toString()));
+                    if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'readLibraryS', err.toString()));
                     if ( res === 0 ) {
                         //Calculate the length of the string
                         // var i=0;
@@ -1214,13 +1223,13 @@ exports.ljmDriver = function(ljmOverride) {
                         // return onSuccess(strBuffer.toString('utf8',0,i));
                         return onSuccess(ref.readCString(strBuffer));
                     } else {
-                        return onError(buildAsyncError(res));
+                        return onError(new DriverOperationError(res));
                     }
                 }
             );
             return 0;
         } else {
-            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error));
+            return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error));
         }
     };
     this.readLibrarySSync = function (parameter) {
@@ -1277,11 +1286,11 @@ exports.ljmDriver = function(ljmOverride) {
                 parameter, 
                 value, 
                 function (err, res) {
-                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'writeLibrary', err.toString()));
+                    if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'writeLibrary', err.toString()));
                     if (res === 0) {
                         return onSuccess();
                     } else {
-                        return onError(buildAsyncError(res));
+                        return onError(new DriverOperationError(res));
                     }
                 }
             );
@@ -1292,17 +1301,17 @@ exports.ljmDriver = function(ljmOverride) {
                 parameter, 
                 value, 
                 function (err, res) {
-                    if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'writeLibrary', err.toString()));
+                    if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'writeLibrary', err.toString()));
                     if (res === 0) {
                         return onSuccess();
                     } else {
-                        return onError(buildAsyncError(res));
+                        return onError(new DriverOperationError(res));
                     }
                 }
             );
             return 0;
         } else {
-            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error));
+            return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error));
         }
     };
 
@@ -1351,21 +1360,21 @@ exports.ljmDriver = function(ljmOverride) {
     this.log = function(level, str, onError, onSuccess) {
         str = str.toString();
         if ((isNaN(level))||(!isNaN(str))) {
-            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error, 'wrong types'));
+            return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, 'wrong types'));
         }
         var errorResult;
         if(str.length >= driver_const.LJM_MAX_STRING_SIZE) {
-            return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error, 'string to long'));
+            return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, 'string to long'));
         }
         errorResult = self.ljm.LJM_Log.async(
             level, 
             str,
             function (err, res) {
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'log', err.toString()));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'log', err.toString()));
                 if (res === 0) {
                     return onSuccess();
                 } else {
-                    return onError(buildAsyncError(res));
+                    return onError(new DriverOperationError(res));
                 }
             }
         );
@@ -1418,11 +1427,11 @@ exports.ljmDriver = function(ljmOverride) {
         var errorResult;
         errorResult = self.ljm.LJM_ResetLog.async(
             function (err, res) {
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'resetLog', err.toString()));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'resetLog', err.toString()));
                 if (res === 0) {
                     return onSuccess();
                 } else {
-                    return onError(buildAsyncError(res));
+                    return onError(new DriverOperationError(res));
                 }
             }
         );
@@ -1586,7 +1595,7 @@ exports.ljmDriver = function(ljmOverride) {
             port,
             maxBytesPerMessage,
             function (err, res) {
-                if (err) onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'LJM_GetHandleInfo', err.toString()));
+                if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'LJM_GetHandleInfo', err.toString()));
                 if (res === 0) {
                     var ipStr = "";
                     
@@ -1609,7 +1618,7 @@ exports.ljmDriver = function(ljmOverride) {
                         }
                     );
                 } else {
-                    return onError(buildAsyncError(res));
+                    return onError(new DriverOperationError(res));
                 }
             }
         );
@@ -1707,7 +1716,7 @@ exports.ljmDriver = function(ljmOverride) {
             data.length,
             function (err, res) {
                 if(err) {
-                    return onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_ReadRaw', err.toString()));
+                    return onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_ReadRaw', err.toString()));
                 }
 
                 if (res === 0) {
@@ -1776,11 +1785,11 @@ exports.ljmDriver = function(ljmOverride) {
             return self.LJM_eReadAddressString(handle, resolvedAddress, onError, onSuccess);
         } else {
             if (info.type == -1) {
-                return onError(buildAsyncError(self.errors.LJME_INVALID_ADDRESS.error));
+                return onError(new DriverOperationError(self.errors.LJME_INVALID_ADDRESS.error));
             } else if (info.directionValid === 0) {
-                return onError(buildAsyncError(self.errors.LJME_INVALID_DIRECTION.error));
+                return onError(new DriverOperationError(self.errors.LJME_INVALID_DIRECTION.error));
             } else {
-                return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error));
+                return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error));
             }
         }
     };
@@ -1827,7 +1836,7 @@ exports.ljmDriver = function(ljmOverride) {
             result,
             function(err, res) {
                 if(err) {
-                    return onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_eReadAddress', err.toString()));
+                    return onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_eReadAddress', err.toString()));
                 }
 
                 if ( res === 0 ) {
@@ -1871,7 +1880,7 @@ exports.ljmDriver = function(ljmOverride) {
             strBuffer,
             function(err, res) {
                 if(err) {
-                    return onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_eReadAddressString', err.toString()));
+                    return onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_eReadAddressString', err.toString()));
                 }
 
                 // Check the output value.
@@ -1974,7 +1983,7 @@ exports.ljmDriver = function(ljmOverride) {
             return self.LJM_eReadAddressArray(handle, addressNumber, addressType, numValues, onError, onSuccess);
             
         } else {
-            return onError(buildAsyncError(self.errors.LJME_INVALID_ADDRESS.error));
+            return onError(new DriverOperationError(self.errors.LJME_INVALID_ADDRESS.error));
         }
     };
     this.LJN_readArraySync = function(handle, address, numReads) {
@@ -2023,7 +2032,7 @@ exports.ljmDriver = function(ljmOverride) {
             errorVal,
             function(err, res) {
                 if(err) {
-                    return onError(buildAsyncError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_eReadAddressArray', err.toString()));
+                    return onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, 'LJM_eReadAddressArray', err.toString()));
                 }
                 if ( (res === 0) ) {
                     var retData = [];
@@ -2034,7 +2043,7 @@ exports.ljmDriver = function(ljmOverride) {
                     }
                     return onSuccess(retData);
                 } else {
-                    return onError(buildAsyncError(res, 'LJM_eReadAddressArray error', errorVal.deref()));
+                    return onError(new DriverOperationError(res, 'LJM_eReadAddressArray error', errorVal.deref()));
                 }
             });
     };
@@ -2048,7 +2057,7 @@ exports.ljmDriver = function(ljmOverride) {
         aValues.fill(0);
         errorVal.fill(0);
 
-        var ljmError = self.ljm.LJM_eReadAddressArrayArray(
+        var ljmError = self.ljm.LJM_eReadAddressArray(
             handle,
             address,
             type,
@@ -2129,15 +2138,14 @@ exports.ljmDriver = function(ljmOverride) {
                 offset += ARCH_INT_NUM_BYTES;
             } else {
                 if(info.type == -1) {
-                    return onError(buildAsyncError(self.errors.LJME_INVALID_ADDRESS.error, 'LJM_eReadAddressArray error'));
+                    return onError(new DriverOperationError(self.errors.LJME_INVALID_ADDRESS.error, 'LJM_eReadAddressArray error'));
                 } else if (info.directionValid === 0) {
-                    return onError(buildAsyncError(self.errors.LJME_INVALID_DIRECTION.error, 'LJM_eReadAddressArray error'));
+                    return onError(new DriverOperationError(self.errors.LJME_INVALID_DIRECTION.error, 'LJM_eReadAddressArray error'));
                 } else {
-                    return onError(buildAsyncError(self.errors.LJN_INVALID_ARGUMENTS.error, 'LJM_eReadAddressArray error'));
+                    return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, 'LJM_eReadAddressArray error'));
                 }
             }
         }
-        console.log('Calling LJM_eReadAddresses.async');
         errorResult = self.ljm.LJM_eReadAddresses.async(
             handle,
             length,
@@ -2146,8 +2154,6 @@ exports.ljmDriver = function(ljmOverride) {
             results,
             errors,
             function(err, res) {
-
-                console.log('Async Reporting an error...?', res);
                 if(err) {
                     return onError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, err, 'LJM_eReadAddressArray');
                 }
@@ -2159,7 +2165,7 @@ exports.ljmDriver = function(ljmOverride) {
                 if ((res === 0)) {
                     return onSuccess(returnResults);
                 } else {
-                    return onError(buildAsyncError(res, 'LJM_eReadAddressArray error', errorVal.deref()));
+                    return onError(new DriverOperationError(res, 'LJM_eReadAddressArray error', errorVal.deref()));
                 }
             }
         );
