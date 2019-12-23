@@ -105,12 +105,12 @@ process.on('uncaughtException', function(err) {
 var testGroups = {
 	'get_ljm_version': true,
 	'mock_device': {
-		'mock_device_test': true,
-		'mock_device_defaults_cache_test': true,
-		'mock_device_attrs_test': true,
-		'mock_device_upgrade_test': true,
-		'multiple_mock_device_upgrade_test': true,
-		'basic_watcher_test': true,
+		'mock_device_test': false,
+		'mock_device_defaults_cache_test': false,
+		'mock_device_attrs_test': false,
+		'mock_device_upgrade_test': false,
+		'multiple_mock_device_upgrade_test': false,
+		'basic_watcher_test': false,
 	},
 	'digit': {
 		'digit_basic_test': false,
@@ -200,7 +200,7 @@ var testGroups = {
 		't8_basic_mock': true,
 	},
 	't8': {
-		't8_basic_test': false,
+		't8_basic_test': true,
 	},
 	'dashboard': {
 		'basic_test': false,

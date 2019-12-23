@@ -415,6 +415,31 @@ function device(useMockDevice) {
 		'FIRMWARE_VERSION': getVersionNumberParser('FIRMWARE_VERSION'),
 	};
 	var deviceCustomAttributes = {
+		'8': {
+			'WIFI_VERSION': getVersionNumberParser('WIFI_VERSION'),
+			'HARDWARE_INSTALLED': function(res, isErr, errData) {
+				var retResult = {};
+				var dt = self.savedAttributes.deviceType;
+				var parsedResult = data_parser.parseResult('HARDWARE_INSTALLED', res, dt);
+
+				// Save results
+				var parsedResultKeys = Object.keys(parsedResult);
+				parsedResultKeys.forEach(function(key) {
+					retResult[key] = parsedResult[key];
+				});
+				// Save results
+				// retResult.highResADC = parsedResult.highResADC;
+				// retResult.wifi = parsedResult.wifi;
+				// retResult.rtc = parsedResult.rtc;
+				// retResult.sdCard = parsedResult.sdCard;
+
+				self.savedAttributes.subclass = parsedResult.subclass;
+				self.savedAttributes.isPro = parsedResult.isPro;
+				self.savedAttributes.productType = parsedResult.productType;
+
+				return retResult;
+			},
+		},
 		'7': {
 			'WIFI_VERSION': getVersionNumberParser('WIFI_VERSION'),
 			'HARDWARE_INSTALLED': function(res, isErr, errData) {

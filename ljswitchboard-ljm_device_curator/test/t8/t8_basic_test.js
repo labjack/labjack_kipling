@@ -4,6 +4,7 @@ var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');
 var qExec = utils.qExec;
 var ljm_ffi = require('ljm-ffi');
+var async = require('async');
 var ljm = ljm_ffi.load();
 var ljmb = require('ljswitchboard-modbus_map');
 var modbus_map = ljmb.getConstants();
@@ -85,23 +86,68 @@ var device_tests = {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
+			var requiredAttributes = [
+				'deviceType',
+				'connectionType',
+				'serialNumber',
+				'ipAddress',
+				'port',
+				'maxBytesPerMB',
+				'deviceTypeString',
+				'deviceClass',
+				'openParameters',
+				'subclass',
+				'isPro',
+				'productType'
+			];
+			var givenAttributes = Object.keys(res);
+			requiredAttributes.forEach(function(requiredAttribute) {
+				var msg = 'Required key does not exist: ' + requiredAttribute;
+				test.ok((givenAttributes.indexOf(requiredAttribute) >= 0), msg);
+			});
 
 			test.strictEqual(res.deviceType, 8);
 			test.strictEqual(res.deviceTypeString, 'LJM_dtT8');
 			test.done();
+		}, function(err) {
+			test.ok(false, 'Error calling getDeviceAttributes', err);
+			test.done();
 		});
 	},
-	'performTestRead': function(test) {
-		var results = [];
-		// Setup and call functions
-		qExec(device, 'read', 'AIN0')(results)
-		.then(qExec(device, 'read', 'AIN0'))
-		.then(function(res) {
-			var expectedResult = [
-				{'functionCall': 'read', 'type': 'range', 'min': -11, 'max': 11},
-				{'functionCall': 'read', 'type': 'range', 'min': -11, 'max': 11}
-			];
-			utils.testResults(test, expectedResult, res);
+	// 'performTestRead': function(test) {
+	// 	var results = [];
+	// 	// Setup and call functions
+	// 	qExec(device, 'read', 'AIN0')(results)
+	// 	.then(qExec(device, 'read', 'AIN0'))
+	// 	.then(function(res) {
+	// 		var expectedResult = [
+	// 			{'functionCall': 'read', 'type': 'range', 'min': -11, 'max': 11},
+	// 			{'functionCall': 'read', 'type': 'range', 'min': -11, 'max': 11}
+	// 		];
+	// 		utils.testResults(test, expectedResult, res);
+	// 		test.done();
+	// 	});
+	// },
+	'readFirmwareVersion': function(test) {
+		var regs = [
+			'FIRMWARE_VERSION',
+			'BOOTLOADER_VERSION',
+			'DEVICE_NAME_DEFAULT',
+			'WIFI_VERSION'
+		];
+		var passes = true;
+		var errorMessage = '';
+		async.eachSeries(regs, function(reg, cb) {
+			device.iRead(reg).then(
+			function(res) {
+				cb();
+			}, function(err) {
+				passes = false;
+				errorMessage += 'Error reading: ' + reg + '\n';
+				cb();
+			});
+		}, function(err) {
+			test.ok(passes, errorMessage);
 			test.done();
 		});
 	},
