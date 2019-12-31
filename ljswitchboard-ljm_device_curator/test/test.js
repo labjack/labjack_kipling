@@ -103,15 +103,30 @@ process.on('uncaughtException', function(err) {
 // var utils = require('../utils/utils');
 
 var testGroups = {
+	/* START defining tests that are based off of mock-devices */
 	'get_ljm_version': true,
 	'mock_device': {
-		'mock_device_test': false,
-		'mock_device_defaults_cache_test': false,
-		'mock_device_attrs_test': false,
-		'mock_device_upgrade_test': false,
-		'multiple_mock_device_upgrade_test': false,
-		'basic_watcher_test': false,
+		'mock_device_test': true,
+		'mock_device_defaults_cache_test': true,
+		'mock_device_attrs_test': true,
+		'mock_device_upgrade_test': true,
+		'mock_t8_upgrade_test': true,
+		'multiple_mock_device_upgrade_test': true,
+		'basic_watcher_test': true,
 	},
+	't4_mock_tests': {
+		't4_basic_mock': true,
+	},
+	't5_mock_tests': {
+		't5_basic_mock': true,
+	},
+	't8_mock_tests': {
+		't8_basic_mock': true,
+	},
+
+	/* END defining tests that use mock-devices */
+
+	/* START defining tests that use live devices. */
 	'digit': {
 		'digit_basic_test': false,
 		'digit_variance_testing': false,
@@ -190,17 +205,10 @@ var testGroups = {
 
 		't4_read_recovery_fw_version_test': false,
 	},
-	't4_mock_tests': {
-		't4_basic_mock': true,
-	},
-	't5_mock_tests': {
-		't5_basic_mock': true,
-	},
-	't8_mock_tests': {
-		't8_basic_mock': true,
-	},
 	't8': {
-		't8_basic_test': true,
+		't8_basic_test': false,
+		't8_read_flash_data': false,
+		't8_upgrade_test': false,
 	},
 	'dashboard': {
 		'basic_test': false,
