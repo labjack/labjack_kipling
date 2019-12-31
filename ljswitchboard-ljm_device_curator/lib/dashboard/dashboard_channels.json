@@ -2,6 +2,49 @@
 	"comments": [
 		"Define a unique channel mapping for reporting and displaying data"
 	],
+	"T8": {
+		"preReadRegs": [
+			"DIO_STATE",
+			"DIO_DIRECTION",
+			"DIO_INHIBIT"
+		],
+		"onBoard": {
+			"AIN0": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
+			"AIN1": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
+			"AIN2": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
+			"AIN3": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
+			"AIN4": {"ioNum": 4, "type": "AIN", "name": "AIN4"},
+			"AIN5": {"ioNum": 5, "type": "AIN", "name": "AIN5"},
+			"AIN6": {"ioNum": 6, "type": "AIN", "name": "AIN6"},
+			"AIN7": {"ioNum": 7, "type": "AIN", "name": "AIN7"},
+			"DAC0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
+			"DAC1": {"ioNum": 1, "type": "AO", "name": "DAC1"},
+			"FIO0": {"ioNum": 0, "type": "DIO", "name": "FIO0"},
+			"FIO1": {"ioNum": 1, "type": "DIO", "name": "FIO1"},
+			"FIO2": {"ioNum": 2, "type": "DIO", "name": "FIO2"},
+			"FIO3": {"ioNum": 3, "type": "DIO", "name": "FIO3"},
+			"FIO4": {"ioNum": 4, "type": "DIO", "name": "FIO4"},
+			"FIO5": {"ioNum": 5, "type": "DIO", "name": "FIO5"},
+			"FIO6": {"ioNum": 6, "type": "DIO", "name": "FIO6"},
+			"FIO7": {"ioNum": 7, "type": "DIO", "name": "FIO7"}
+		},
+		"external": {
+			"db15": {
+				"EIO0": {"ioNum": 8,  "type": "DIO", "name": "EIO0"},
+				"EIO1": {"ioNum": 9,  "type": "DIO", "name": "EIO1"},
+				"EIO2": {"ioNum": 10, "type": "DIO", "name": "EIO2"},
+				"EIO3": {"ioNum": 11, "type": "DIO", "name": "EIO3"},
+				"EIO4": {"ioNum": 12, "type": "DIO", "name": "EIO4"},
+				"EIO5": {"ioNum": 13, "type": "DIO", "name": "EIO5"},
+				"EIO6": {"ioNum": 14, "type": "DIO", "name": "EIO6"},
+				"EIO7": {"ioNum": 15, "type": "DIO", "name": "EIO7"},
+				"CIO0": {"ioNum": 16, "type": "DIO", "name": "CIO0"},
+				"CIO1": {"ioNum": 17, "type": "DIO", "name": "CIO1"},
+				"CIO2": {"ioNum": 18, "type": "DIO", "name": "CIO2"},
+				"CIO3": {"ioNum": 19, "type": "DIO", "name": "CIO3"}
+			}
+		}
+	},
 	"T7": {
 		"preReadRegs": [
 			"DIO_STATE",

@@ -32,6 +32,10 @@ var debugDDC = getLogger(DEBUG_DASHBOARD_DATA_COLLECTOR);
 var debugDStop = getLogger(DEBUG_DASHBOARD_STOP);
 var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
 
+var t4Device;
+var t5Device;
+var t7Device;
+
 var criticalError = false;
 var stopTest = function(test, err) {
 	test.ok(false, err);
@@ -40,38 +44,12 @@ var stopTest = function(test, err) {
 };
 
 var deviceInfo = {
-	// 'T4': {
-	// 	'isMockDevice': true,
-	// 	'ct': 'USB',
-	// 	// 'serialNumber': 44001000,
-	// 	'serialNumber': 440010006,
-	// 	'DEVICE_NAME_DEFAULT': 'My Test T4',
-	// 	'ipAddress': '192.168.1.101',
-	// 	'ETHERNET_IP': '192.168.1.101',
-	// },
-	// 'T5': {
-	// 	'isMockDevice': true,
-	// 	'ct': 'USB',
-	// 	'serialNumber': 45001000,
-	// 	'DEVICE_NAME_DEFAULT': 'My Test T5',
-	// 	'ipAddress': '192.168.1.101',
-	// 	'ETHERNET_IP': '192.168.1.101',
-	// },
-	// 'T7': {
-	// 	'isMockDevice': false,
-	// 	'ct': 'USB',
-	// 	// 'serialNumber': 47001000,
-	// 	'serialNumber': 470010108,
-	// 	'DEVICE_NAME_DEFAULT': 'My Test T7',
-	// 	'ipAddress': '192.168.1.101',
-	// 	'ETHERNET_IP': '192.168.1.101',
-	// },
-	'T8': {
+	'T4': {
 		'isMockDevice': true,
 		'ct': 'USB',
 		// 'serialNumber': 44001000,
-		'serialNumber': 480010006,
-		'DEVICE_NAME_DEFAULT': 'My Test T8',
+		'serialNumber': 440010006,
+		'DEVICE_NAME_DEFAULT': 'My Test T4',
 		'ipAddress': '192.168.1.101',
 		'ETHERNET_IP': '192.168.1.101',
 	},
@@ -388,31 +366,6 @@ exports.tests = {
 			}],
 			'T5': [],
 			'T7': [{
-				channelName: 'FIO0',
-				attribute: 'digitalDirection',
-				value: 'output',
-			}, {
-				channelName: 'FIO0',
-				attribute: 'digitalState',
-				value: 'high',
-			}, {
-				channelName: 'FIO0',
-				attribute: 'digitalState',
-				value: 'low',
-			}, {
-				channelName: 'FIO0',
-				attribute: 'digitalDirection',
-				value: 'input',
-			}, {
-				channelName: 'DAC0',
-				attribute: 'analogValue',
-				value: 1.314,
-			}, {
-				channelName: 'DAC0',
-				attribute: 'analogValue',
-				value: 3.14,
-			}],
-			'T8': [{
 				channelName: 'FIO0',
 				attribute: 'digitalDirection',
 				value: 'output',

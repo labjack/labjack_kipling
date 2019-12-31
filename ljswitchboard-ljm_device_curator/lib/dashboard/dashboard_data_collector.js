@@ -18,6 +18,9 @@ var DEBUG_T5_COLLECTED_DATA = false; //Enable print statements to debug collecte
 var DEBUG_T7_DATA_COLLECTOR = false;
 var DEBUG_T7_COLLECTED_DATA = false; //Enable print statements to debug collected & organized data.
 
+var DEBUG_T8_DATA_COLLECTOR = false;
+var DEBUG_T8_COLLECTED_DATA = false; //Enable print statements to debug collected & organized data.
+
 var DEBUG_COLLECTION_MANAGER = false;
 var ENABLE_ERROR_OUTPUT = true;
 
@@ -36,47 +39,20 @@ var debugT5DC = getLogger(DEBUG_T5_DATA_COLLECTOR);
 var debugT5CD = getLogger(DEBUG_T5_COLLECTED_DATA);
 var debugT7DC = getLogger(DEBUG_T7_DATA_COLLECTOR);
 var debugT7CD = getLogger(DEBUG_T7_COLLECTED_DATA);
+var debugT8DC = getLogger(DEBUG_T8_DATA_COLLECTOR);
+var debugT8CD = getLogger(DEBUG_T8_COLLECTED_DATA);
 var debugCM = getLogger(DEBUG_COLLECTION_MANAGER);
 var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
 
 var T4_NUM_ANALOG_CHANNELS = 12;
 var T5_NUM_ANALOG_CHANNELS = 8;
 var T7_NUM_ANALOG_CHANNELS = 14;
+var T8_NUM_ANALOG_CHANNELS = 8;
 
-var t4Channels = {
-	"0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
-	// "1": {"ioNum": 1, "type": "AO", "name": "DAC1"},
-
-	"2": {"ioNum": 0, "type": "AIN", "name": "AIN0"},
-	// "3": {"ioNum": 1, "type": "AIN", "name": "AIN1"},
-	// "4": {"ioNum": 2, "type": "AIN", "name": "AIN2"},
-	// "5": {"ioNum": 3, "type": "AIN", "name": "AIN3"},
-
-	"6": {"ioNum": 4, "type": "FLEX", "name": "FIO4"},
-	// "7": {"ioNum": 5, "type": "FLEX", "name": "FIO5"},
-	// "8": {"ioNum": 6, "type": "FLEX", "name": "FIO6"},
-	// "9": {"ioNum": 7, "type": "FLEX", "name": "FIO7"},
-	"14": {"ioNum": 12, "type": "DIO", "name": "EIO4"},
-	// "15": {"ioNum": 13, "type": "DIO", "name": "EIO5"},
-	// "16": {"ioNum": 14, "type": "DIO", "name": "EIO6"},
-	// "17": {"ioNum": 15, "type": "DIO", "name": "EIO7"},
-};
-t4Channels = dashboard_channel_parser.channels.T4;
-
-var t5Channels = {
-	"0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
-	"2": {"ioNum": 5, "type": "AIN", "name": "AIN5"},
-	"6": {"ioNum": 5, "type": "DIO", "name": "FIO5"},
-	"14": {"ioNum": 14, "type": "DIO", "name": "EIO5"},
-};
-t5Channels = dashboard_channel_parser.channels.T5;
-var t7Channels = {
-	"0": {"ioNum": 0, "type": "AO", "name": "DAC0"},
-	"2": {"ioNum": 7, "type": "AIN", "name": "AIN7"},
-	"6": {"ioNum": 0, "type": "DIO", "name": "FIO0"},
-	"14": {"ioNum": 15, "type": "DIO", "name": "EIO7"},
-};
-t7Channels = dashboard_channel_parser.channels.T7;
+var t4Channels = dashboard_channel_parser.channels.T4;
+var t5Channels = dashboard_channel_parser.channels.T5;
+var t7Channels = dashboard_channel_parser.channels.T7;
+var t8Channels = dashboard_channel_parser.channels.T8;
 
 function t4CollectGeneralData(bundle) {
 	var defered = q.defer();
@@ -368,6 +344,8 @@ function getGeneralDataCollector(numAnalogChannels) {
 				debugT5DC('Collected T5 Data', results);
 			} else if(dt === 7) {
 				debugT7DC('Collected T7 Data', results);
+			}  else if(dt === 8) {
+				debugT8DC('Collected T8 Data', results);
 			} else {
 				errorLog('Unknown dt Results:', dt, results);
 			}
@@ -447,11 +425,38 @@ function t7DataCollector(device) {
 
 	return defered.promise;
 }
+function t8DataCollector(device) {
+	var defered = q.defer();
+
+	var data = {
+		'device': device,
+		'channelData': {},
+		'rawData': {},
+		'ainChannelsData': {},
+		'dioChannelsData': {},
+	};
+
+	getGeneralDataCollector(T8_NUM_ANALOG_CHANNELS)(data)
+	.then(genericOrganizeDIOData)
+	.then(getDataOrganizer(t8Channels))
+	.then(function(bundle) {
+		debugT8CD('T8 Channel Data', bundle.channelData);
+		defered.resolve(bundle.channelData);
+	})
+	.catch(function(err) {
+		errorLog('t8DataCollector ERROR', err);
+		defered.resolve(err);
+	})
+	.done();
+
+	return defered.promise;
+}
 
 var dataCollectors = {
 	'T4': t4DataCollector,
 	'T5': t5DataCollector,
 	'T7': t7DataCollector,
+	'T8': t8DataCollector,
 };
 
 function createDashboardDataCollector(deviceType) {
