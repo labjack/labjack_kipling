@@ -2505,6 +2505,32 @@ function device(useMockDevice) {
 				self.restartConnectionManager();
 				defered.reject(err);
 			});
+		} else if (dt === 8) {
+			var progressListener = new UpgradeProgressListener(
+				percentListenerObj,
+				stepListenerObj
+			);
+			self.prepareForUpgrade();
+			tseries_device_upgrader.updateFirmware(
+				self,
+				ljmDevice,
+				firmwareFileLocation,
+				self.savedAttributes.connectionTypeString,
+				progressListener
+			).then(function(results){
+				var resultDevice = results.getDevice();
+				ljmDevice.handle = resultDevice.handle;
+				self.savedAttributes.handle = resultDevice.handle;
+				ljmDevice.deviceType = resultDevice.deviceType;
+				ljmDevice.isHandleValid = resultDevice.isHandleValid;
+				// console.info('Updated savedAttributes');
+				// defered.resolve(results);
+				self.finishFirmwareUpdate(results)
+				.then(defered.resolve);
+			}, function(err) {
+				self.restartConnectionManager();
+				defered.reject(err);
+			});
 		} else {
 			defered.reject(getDeviceTypeMessage(dt));
 		}
@@ -2518,6 +2544,10 @@ function device(useMockDevice) {
 		if(dt === driver_const.LJM_DT_T7) {
 			return lj_t7_flash_operations.readFlash(ljmDevice, startAddress, length);
 		} else if(dt === driver_const.LJM_DT_T4) {
+			return lj_t7_flash_operations.readFlash(ljmDevice, startAddress, length);
+		} else if(dt === driver_const.LJM_DT_T5) {
+			return lj_t7_flash_operations.readFlash(ljmDevice, startAddress, length);
+		} else if(dt === driver_const.LJM_DT_T8) {
 			return lj_t7_flash_operations.readFlash(ljmDevice, startAddress, length);
 		} else if(dt === driver_const.LJM_DT_DIGIT) {
 			var digitDefered = q.defer();
@@ -2538,6 +2568,10 @@ function device(useMockDevice) {
 			return lj_t7_flash_operations.writeFlash(ljmDevice, startAddress, length, size, key, data);
 		} else if(dt === driver_const.LJM_DT_T4) {
 			return lj_t7_flash_operations.writeFlash(ljmDevice, startAddress, length, size, key, data);
+		} else if(dt === driver_const.LJM_DT_T5) {
+			return lj_t7_flash_operations.writeFlash(ljmDevice, startAddress, length, size, key, data);
+		} else if(dt === driver_const.LJM_DT_T8) {
+			return lj_t7_flash_operations.writeFlash(ljmDevice, startAddress, length, size, key, data);
 		} else if(dt === driver_const.LJM_DT_DIGIT) {
 			var digitDefered = q.defer();
 			digitDefered.resolve();
@@ -2556,6 +2590,10 @@ function device(useMockDevice) {
 		if(dt === driver_const.LJM_DT_T7) {
 			return lj_t7_flash_operations.eraseFlash(ljmDevice, startAddress, numPages, key);
 		} else if(dt === driver_const.LJM_DT_T4) {
+			return lj_t7_flash_operations.eraseFlash(ljmDevice, startAddress, numPages, key);
+		} else if(dt === driver_const.LJM_DT_T5) {
+			return lj_t7_flash_operations.eraseFlash(ljmDevice, startAddress, numPages, key);
+		} else if(dt === driver_const.LJM_DT_T8) {
 			return lj_t7_flash_operations.eraseFlash(ljmDevice, startAddress, numPages, key);
 		} else if(dt === driver_const.LJM_DT_DIGIT) {
 			var digitDefered = q.defer();

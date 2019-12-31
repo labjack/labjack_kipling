@@ -16,8 +16,8 @@ var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');
 
 var driver_const = labjack_nodejs.driver_const;
 
-var DEBUG_CHECK_ERASE = true;
-var DEBUG_CHECK_WRITE = true;
+var DEBUG_CHECK_ERASE = false;
+var DEBUG_CHECK_WRITE = false;
 var DEBUG_FIRMWARE_UPGRADE_PROCESS = false;
 var DEBUG_RECONNECT_TO_DEVICE_STEP = false;
 
@@ -28,6 +28,8 @@ var ALLOWED_IMAGE_INFO_DEVICE_TYPES = [
     driver_const.T7_TARGET_OLD,
     driver_const.T7_TARGET,
     driver_const.T7_RECOVERY_TARGET,
+    driver_const.T8_TARGET,
+    driver_const.T8_RECOVERY_TARGET,
 ];
 
 // Define a variety of information required by each device type.
@@ -76,6 +78,15 @@ UPGRADE_TARGET_FLASH_INFO[driver_const.T4_RECOVERY_TARGET.toString()] = {
     'imagePageSize': driver_const.T7_RECOVERY_IMG_FLASH_PAGE_ERASE,
     'verifyFirmwareVersion': false,
     'isRecoveryFW': true,
+};
+UPGRADE_TARGET_FLASH_INFO[driver_const.T8_TARGET.toString()] = {
+    'imageKey': driver_const.T7_EFkey_ExtFirmwareImage,
+    'imageAddress': driver_const.MZ_EFAdd_ExtFirmwareImage,
+    'imageInfoKey': driver_const.T7_EFkey_ExtFirmwareImgInfo,
+    'imageInfoAddress': driver_const.MZ_EFAdd_ExtFirmwareImgInfo,
+    'imagePageSize': driver_const.MZ_IMG_FLASH_PAGE_ERASE,
+    'verifyFirmwareVersion': true,
+    'isRecoveryFW': false,
 };
 
 var DEFAULT_UPGRADE_TARGET_FLASH_INFO = {
@@ -614,8 +625,7 @@ this.readFirmwareFile = function(fileSrc, bundle)
                 'Could not read image: '
             );
             return;
-        }        
-
+        }
         var versionStr = fileName.split('_');
         versionStr = versionStr[1];
         try {
@@ -629,6 +639,7 @@ this.readFirmwareFile = function(fileSrc, bundle)
             return;
         }
         deferred.resolve(bundle);
+        
     };
 
     if ((fileSrc.indexOf('http') === 0) || (fileSrc.indexOf('https') === 0)) {
@@ -697,16 +708,25 @@ this.checkCompatibility = function(bundle)
     }
 
     if (headerCodeCorrect && intendedDeviceCorrect && versionCorrect) {
+        if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+            console.log('Checked:', headerCodeCorrect, intendedDeviceCorrect, versionCorrect);
+        }
         deferred.resolve(bundle);
     } else {
-        if (!headerCodeCorrect)
+        if (!headerCodeCorrect) {
+            if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+                console.log('Checked:', imageInformation.headerCode, expectedHeaderCode);
+            }
             deferred.reject(new Error('Invalid header code.'));
-        else if(!intendedDeviceCorrect)
+        } else if(!intendedDeviceCorrect) {
+            if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+                console.log('Checked:', intendedDeviceCorrect, curDevIsReqDev);
+            }
             deferred.reject(new Error('Incorrect device type.'));
-        else
+        } else {
             deferred.reject(new Error('Incorrect version.'));
+        }
     }
-    
     return deferred.promise;
 };
 
@@ -715,12 +735,22 @@ this.checkCompatibility = function(bundle)
  * flash.
 **/
 this.getLoadedPrimaryFW = function(bundle) {
+    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+        console.log('in getLoadedPrimaryFW');
+    }
     var defered = q.defer();
     function succFunc(res) {
+        if(isNaN(res)) {res = 0;}
+        if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+            console.log('in getLoadedPrimaryFW succFunc', res);
+        }
         bundle.addTempDataStore('primaryFW', res);
         defered.resolve(bundle);
     }
     function errFunc(err) {
+        if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+            console.log('in getLoadedPrimaryFW errFunc', err);
+        }
         bundle.addTempDataStore('primaryFW', 0.000);
         defered.resolve(bundle);
     }
@@ -733,12 +763,22 @@ this.getLoadedPrimaryFW = function(bundle) {
 };
 
 this.getLoadedEmergencyFW = function(bundle) {
+    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+        console.log('in getLoadedEmergencyFW');
+    }
     var defered = q.defer();
     function succFunc(res) {
+        if(isNaN(res)) {res = 0;}
+        if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+            console.log('in getLoadedEmergencyFW succFunc', res);
+        }
         bundle.addTempDataStore('recoveryFW', res);
         defered.resolve(bundle);
     }
     function errFunc(err) {
+        if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+            console.log('in getLoadedEmergencyFW errFunc');
+        }
         bundle.addTempDataStore('recoveryFW', 0.000);
         defered.resolve(bundle);
     }
@@ -749,16 +789,25 @@ this.getLoadedEmergencyFW = function(bundle) {
     return defered.promise;
 };
 this.getLoadedActiveFW = function(bundle) {
+    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+        console.log('in getLoadedActiveFW');
+    }
     var defered = q.defer();
     function succFunc(res) {
+        if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+            console.log('in getLoadedActiveFW succFunc', res);
+        }
         bundle.addTempDataStore('activeFW', res.val);
         defered.resolve(bundle);
     }
     function errFunc(err) {
+        if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+            console.log('in getLoadedActiveFW errFunc', err);
+        }
         bundle.addTempDataStore('activeFW', 0.000);
         defered.resolve(bundle);
     }
-    
+
     var curatedDevice = bundle.getCuratedDevice();
     curatedDevice.iRead('FIRMWARE_VERSION')
     .then(succFunc, errFunc).catch(errFunc);
@@ -767,10 +816,14 @@ this.getLoadedActiveFW = function(bundle) {
 this.getInitialDeviceFWState = function(bundle) {
     var deferred = q.defer();
     bundle.clearTempDataStore();
+    if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+        console.log('in getInitialDeviceFWState');
+    }
     tSeriesUpgrader.getLoadedActiveFW(bundle)
     .then(tSeriesUpgrader.getLoadedEmergencyFW)
     .then(tSeriesUpgrader.getLoadedPrimaryFW)
     .then(function(retBundle) {
+
         var fwData = retBundle.getTempDataStore();
         if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
             console.log('fwData', fwData, bundle.getDeviceType());
@@ -1694,7 +1747,13 @@ this.checkNewFirmware = function(bundle)
     var verifyFWVersion = bundle.verifyLoadedFirmwareVersion();
     if(verifyFWVersion) {
         device.read('FIRMWARE_VERSION',
-            createSafeReject(deferred),
+            // createSafeReject(deferred),
+            function(err) {
+                if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+                    console.log('tseries_upgrade.js - Error reading firmware version', err);
+                }
+                createSafeReject(deferred)(err);
+            },
             function (firmwareVersion) {
                 if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
                     console.log('tseries_upgrade.js - Reported Firmware Version', firmwareVersion.toFixed(4));
@@ -1737,7 +1796,8 @@ this.checkNewFirmware = function(bundle)
 var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocation,
     connectionType, progressListener)
 {
-    var deferred = q.defer();
+    var iufDefered = q.defer();
+
     var initialWiFiStatus = 0;
     var initialStartupConfigs = 0;
     var errorEncountered = false;
@@ -1752,7 +1812,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
         }
         bundle.setCuratedDevice(curatedDevice);
         bundle.setDevice(device);
-        innerDeferred.resolve(bundle);
+        innerDeferred.resolve(bundle); 
         return innerDeferred.promise;
     };
     var cleanErrorMessageString = function(LJMError) {
@@ -1873,6 +1933,9 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
     };
     var disableStartupConfigsFWCheck = function() {
         return function (bundle) {
+            if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+                console.log('tseries_upgrade.js - disableStartupConfigsFWCheck');
+            }
             var innerDeferred = q.defer();
             var param = 'LJM_OLD_FIRMWARE_CHECK';
             ljmDriver.writeLibrary(param, 0, function(err) {
@@ -1905,7 +1968,7 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
                 var fwVer = curatedDevice.savedAttributes.FIRMWARE_VERSION;
 
                 device.read('POWER_WIFI', function(err) {
-                        console.log('Failed to Read WiFi Status', err);
+                        console.error('Failed to Read WiFi Status', err);
                         innerDeferred.reject(err);
                     }, function(res) {
                         initialWiFiStatus = res;
@@ -1971,6 +2034,9 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
         };
     };
     var finishedUpgrade = function(res) {
+        if(DEBUG_FIRMWARE_UPGRADE_PROCESS) {
+            console.log('firmware update process completed');
+        }
         var finishedDefered = q.defer();
         setImmediate(function() {
             finishedDefered.resolve(res);
@@ -2029,9 +2095,9 @@ var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocatio
     .then(updateProgress(CHECKPOINT_FIVE_PERCENT), reportError('toggleWiFi'))
     .then(disableStartupConfigsFWCheck(), reportError('updateStatusText'))
     .then(finishedUpgrade, reportError('disableStartupConfigsFWCheck'))
-    .then(deferred.resolve, deferred.reject);
+    .then(iufDefered.resolve, iufDefered.reject);
 
-    return deferred.promise;
+    return iufDefered.promise;
 };
 
 

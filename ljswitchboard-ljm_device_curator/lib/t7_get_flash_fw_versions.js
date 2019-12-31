@@ -55,20 +55,54 @@ function parseData(flashData) {
 	return imageInformation;
 }
 
+function getFlashSizeAndLocation(device, type) {
+    var ret = {
+        size: 0,
+        flashOffset: 0,
+    };
+    if(device.savedAttributes.dt == driver_const.LJM_DT_T8) {
+        if(type === 'recovery') {
+            // Recovery firmware
+            ret.size = driver_const.T7_IMG_HEADER_LENGTH;
+            ret.flashOffset = driver_const.MZ_EFAdd_EmerFirmwareImgInfo;
+        } else if(type === 'primary') {
+            // Info for FW saved to flash.
+            ret.size = driver_const.T7_IMG_HEADER_LENGTH;
+            ret.flashOffset = driver_const.MZ_EFAdd_ExtFirmwareImgInfo;
+        } else if(type === 'internal') {
+            // Info for currently-loaded Firmware
+            ret.size = driver_const.T7_IMG_HEADER_LENGTH;
+            ret.flashOffset = driver_const.MZ_EFAdd_IntFirmwareImgInfo;
+        }
+    } else {
+        if(type === 'recovery') {
+            // Recovery firmware
+            ret.size = driver_const.T7_IMG_HEADER_LENGTH;
+            ret.flashOffset = driver_const.T7_EFAdd_EmerFirmwareImgInfo;
+        } else if(type === 'primary') {
+            // Info for FW saved to flash.
+            ret.size = driver_const.T7_IMG_HEADER_LENGTH;
+            ret.flashOffset = driver_const.T7_EFAdd_ExtFirmwareImgInfo;
+        } else if(type === 'internal') {
+            // Info for currently-loaded Firmware
+            ret.size = driver_const.T7_IMG_HEADER_LENGTH;
+            ret.flashOffset = driver_const.T7_EFAdd_IntFirmwareImgInfo;
+        }
+    }
+    return ret;
+}
 function getRecoveryFWVersion(device) {
 	var defered = q.defer();
-    var imgHeaderSize = driver_const.T7_IMG_HEADER_LENGTH;
-
+    var fwInfo = getFlashSizeAndLocation(device, 'recovery');
+    var imgHeaderSize = fwInfo.size;
+    var flashLocationOffset = fwInfo.flashOffset;
+    
     device.readFlash(
-        driver_const.T7_EFAdd_EmerFirmwareImgInfo,
-        // driver_const.T7_EFAdd_IntFirmwareImgInfo,
-        // driver_const.T7_EFAdd_ExtFirmwareImgInfo,
+        flashLocationOffset,
         imgHeaderSize/4
     ).then(function(data) {
-        // console.log('T4 Testing: We Are HERE!', data);
-    	// Parse the data.
+        // Parse the data.
     	var info = parseData(data.results);
-    	// console.log('In t7_get_flash_fw_versions.getRecoveryFWVersion', info);
     	//Resolve to the firmware version
     	defered.resolve(parseFloat(info.containedVersion));
     }, function(err) {
@@ -84,8 +118,11 @@ function getRecoveryFWVersion(device) {
 
 function getPrimaryFWVersion(device) {
 	var defered = q.defer();
-    var imgHeaderSize = driver_const.T7_IMG_HEADER_LENGTH;
 
+    var fwInfo = getFlashSizeAndLocation(device, 'recovery');
+    var imgHeaderSize = fwInfo.size;
+    var flashLocationOffset = fwInfo.flashOffset;
+    
     device.readFlash(
         // driver_const.T7_EFAdd_EmerFirmwareImgInfo,
         // driver_const.T7_EFAdd_IntFirmwareImgInfo,
