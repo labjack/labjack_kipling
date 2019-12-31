@@ -3,6 +3,8 @@
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 var q = require('q');
 
+var DEBUG_FIRMWARE_CHECK = false;
+
 var parseFirmwareFile = function(parsedData, fileData) {
     var imageFile = new Buffer(fileData);
 
@@ -60,6 +62,8 @@ var ALLOWED_IMAGE_INFO_DEVICE_TYPES = [
     driver_const.T7_TARGET_OLD,
     driver_const.T7_TARGET,
     driver_const.T7_RECOVERY_TARGET,
+    driver_const.T8_TARGET,
+    driver_const.T8_RECOVERY_TARGET,
 ];
 
 var validateParsedData = function(parsedData, fileData, options) {
@@ -83,12 +87,21 @@ var validateParsedData = function(parsedData, fileData, options) {
         intendedDeviceCorrect = intendedDeviceCorrect && curDevIsReqDev;
 
         if (headerCodeCorrect && intendedDeviceCorrect && versionCorrect) {
+            if(DEBUG_FIRMWARE_CHECK) {
+                console.log('Checked:', headerCodeCorrect, intendedDeviceCorrect, versionCorrect);
+            }
             parsedData.isValid = true;
         } else {
             if (!headerCodeCorrect) {
+                if(DEBUG_FIRMWARE_CHECK) {
+                    console.log('Failed Check 1:', imageInformation.headerCode, expectedHeaderCode);
+                }
                 parsedData.isValid = false;
                 parsedData.message = 'Invalid header code.';
             } else if (!intendedDeviceCorrect) {
+                if(DEBUG_FIRMWARE_CHECK) {
+                    console.log('Failed Check 2:', dt, parsedData.requiredDT, intendedDeviceCorrect, curDevIsReqDev);
+                }
                 parsedData.isValid = false;
                 parsedData.message = 'Incorrect device type.';
             } else {

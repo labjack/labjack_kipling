@@ -21,6 +21,10 @@ var testFiles = [{
 		'deviceType': 'Digit',
 		'fileName': 'DigitFW_012200_04222015.bin',
 		'test': true,
+	}, {
+		'deviceType': 'T8',
+		'fileName': 'T8firmware_009009_2019-12-26.bin',
+		'test': true,
 	}];
 testFiles.forEach(function(testFile) {
 	testFile.path = path.join(process.cwd(), 'test', testFile.fileName);
@@ -63,6 +67,19 @@ exports.tests = {
 		firmware_verifier.validateFirmwareFile(fileData, {
 			'version': '10.1401',
 			'deviceType': 'T4', // This flag isn't currently enabled but should be...
+		})
+		.then(function(parsedData) {
+			// console.log('Parsed Data', parsedData);
+			test.ok(parsedData.isValid, parsedData.message);
+			test.done();
+		});
+	},
+	'test T8 fw file': function(test) {
+		var fileData = fs.readFileSync(testFiles[4].path);
+
+		firmware_verifier.validateFirmwareFile(fileData, {
+			'version': '0.9009',
+			'deviceType': 'T8', // This flag isn't currently enabled but should be...
 		})
 		.then(function(parsedData) {
 			// console.log('Parsed Data', parsedData);

@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-firmware_verifier",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A tool to verify and extract information saved in LabJack's firmware .bin files.",
   "author": {
     "name": "Chris Johnson",
@@ -26,7 +26,7 @@
     "url": "https://github.com/chrisJohn404/ljswitchboard-firmware_verifier/issues"
   },
   "dependencies": {
-    "ljswitchboard-ljm_driver_constants": "^1.0.0",
+    "ljswitchboard-ljm_driver_constants": "^1.0.3",
     "q": "1.5.1"
   },
   "devDependencies": {
