@@ -85,6 +85,7 @@ exports.T7_DEVICE_CONFIGURATION_CODE		= 0x26B57AF3;
 exports.T7_RESTART_CODE						= 0x4C4A;
 exports.T7_SET_STARTUP_TO_FACTORY			= 0xE4EC3DC6;
 //==============================================
+
 //==============================================
 // Keys
 exports.T7_EFkey_ExtFirmwareImage			= 0x6A0902B5;
@@ -115,6 +116,20 @@ exports.T7_EFAdd_CalValues					= 0x3C4000;
 exports.T7_EFAdd_SWDTSettings				= 0x3C5000;
 exports.T7_EFAdd_EmerFirmwareImage			= 0x3E0000;
 
+// Mz Addresses
+exports.MZ_EFAdd_ExtFirmwareImage			= 0x400000;
+exports.MZ_EFAdd_ExtFirmwareImgInfo			= 0x620000;
+exports.MZ_EFAdd_EmerFirmwareImage			= 0x600000;
+exports.MZ_EFAdd_EmerFirmwareImgInfo		= 0x622000;
+exports.MZ_EFAdd_IntFirmwareImgInfo			= 0x621000; // Not true. This address hasn't been defined yet.
+
+// Mz address block lengths.
+exports.MZ_EFLen_ExtFirmwareImage			= 0x200000;
+exports.MZ_EFLen_ExtFirmwareImgInfo			= 0x1000;
+exports.MZ_EFLen_EmerFirmwareImage			= 0x20000;
+exports.MZ_EFLen_EmerFirmwareImgInfo		= 0x1000;
+exports.MZ_EFAdd_IntFirmwareImgInfo			= 0x1000;
+
 exports.T7_HEAD_FIRST_FOUR_BYTES			= 0x4C4A4658;
 exports.T7_TARGET_OLD						= 100017001;
 exports.T7_TARGET							= 100007001;
@@ -124,6 +139,10 @@ exports.T7_RECOVERY_TARGET					= 100007021;
 exports.T4_TARGET							= 100004001;
 exports.T4_RECOVERY_TARGET					= 100004021;
 
+// T8 targets
+exports.T8_TARGET 							= 100008001;
+exports.T8_RECOVERY_TARGET					= 100008021;
+
 // Firmware Targets to required device types
 exports.TARGET_TO_REQ_DT = {};
 exports.TARGET_TO_REQ_DT[exports.T7_TARGET_OLD] = exports.LJM_DT_T7;
@@ -131,10 +150,13 @@ exports.TARGET_TO_REQ_DT[exports.T7_TARGET] = exports.LJM_DT_T7;
 exports.TARGET_TO_REQ_DT[exports.T7_RECOVERY_TARGET] = exports.LJM_DT_T7;
 exports.TARGET_TO_REQ_DT[exports.T4_TARGET] = exports.LJM_DT_T4;
 exports.TARGET_TO_REQ_DT[exports.T4_RECOVERY_TARGET] = exports.LJM_DT_T4;
+exports.TARGET_TO_REQ_DT[exports.T8_TARGET] = exports.LJM_DT_T8;
+exports.TARGET_TO_REQ_DT[exports.T8_RECOVERY_TARGET] = exports.LJM_DT_T8;
 
 // Device Specific constants
 exports.T7_HDR_FLASH_PAGE_ERASE				= 1;
 exports.T7_IMG_FLASH_PAGE_ERASE				= 120;
+exports.MZ_IMG_FLASH_PAGE_ERASE				= 512;
 exports.T7_RECOVERY_IMG_FLASH_PAGE_ERASE	= 32;
 exports.T7_IMG_HEADER_LENGTH				= 128;
 exports.T7_FLASH_BLOCK_WRITE_SIZE			= 8; 
@@ -537,6 +559,8 @@ exports.serialNumberOffsets = {
 // Error codes for the device_curator:
 exports.LJN_DEVICE_NOT_CONNECTED = 99999;
 exports.LJN_UNEXPECTED_ASYNC_CALL_ERROR = 99998;
+exports.LJN_UNEXPECTED_SYNC_CALL_ERROR = 999997;
+exports.LJN_INVALID_ARGUMENTS = 99991;
 exports.LJN_INVALID_IO_ATTEMPT = 99990;
 
 exports.device_curator_constants = {
