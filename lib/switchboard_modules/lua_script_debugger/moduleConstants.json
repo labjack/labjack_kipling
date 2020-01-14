@@ -178,6 +178,9 @@
 	}, {
 		"name": "Advanced Scripts",
 		"subScripts": [{
+			"name": "Read Saved Script",
+			"location": "lua_script_debugger/premade_scripts/advanced_scripts/read_saved_script.lua"
+		}, {
 			"name": "PID Example",
 			"location": "lua_script_debugger/premade_scripts/advanced_scripts/13_pid_example.lua"
 		}, {
