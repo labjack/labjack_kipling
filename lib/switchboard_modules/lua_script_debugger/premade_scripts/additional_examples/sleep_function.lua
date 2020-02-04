@@ -22,12 +22,14 @@ local numiterations = 5
 MB.writeName("POWER_LED", 4)
 
 -- Turn off LEDs
+print("Turning LEDs off")
 MB.writeName("LED_COMM", 0)
 MB.writeName("LED_STATUS", 0)
 
 sleep(1000)
 
 -- Turn on LEDs
+print("Turning LEDs on")
 MB.writeName("LED_COMM", 1)
 MB.writeName("LED_STATUS", 1)
 

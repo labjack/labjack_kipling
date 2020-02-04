@@ -20,7 +20,7 @@
 	},
 	"min_names_fw_versions": {
 		"T4": 1.0023,
-		"T7": 1.0282
+		"T7": 1.0287
 	},
 	"preBuiltScripts": [{
 		"name": "Helpful Information",
@@ -249,6 +249,12 @@
 		}, {
 			"name": "Num Sec Since Epoch",
 			"location": "lua_script_debugger/premade_scripts/rtc_and_device_time/num_seconds_since_epoch.lua"
+		}]
+	}, {
+		"name": "Additional Examples",
+		"subScripts": [{
+			"name": "Sleep Function",
+			"location": "lua_script_debugger/premade_scripts/additional_examples/sleep_function.lua"
 		}]
 	}, {
 		"name": "1. Blink LEDs",
