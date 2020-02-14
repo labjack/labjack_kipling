@@ -157,6 +157,9 @@
 			"name": "Speed Test - AIN",
 			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/speed_test-ain.lua"
 		}, {
+			"name": "Speed Test - AIN_EF",
+			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/speed_test-ain_ef.lua"
+		}, {
 			"name": "Speed Test - AIN & PWM",
 			"location": "lua_script_debugger/premade_scripts/benchmarking_tests/speed_test-ain_and_pwm.lua"
 		}, {
