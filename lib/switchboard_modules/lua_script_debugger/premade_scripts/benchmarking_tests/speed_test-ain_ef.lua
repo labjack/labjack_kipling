@@ -5,15 +5,20 @@
           functions: "LJ.IntervalConfig(0, 1000)", and "if LJ.CheckInterval(0)"
 
           On a T7 (FW 1.0282) this example runs at around 16kHz
-          On a T4 (FW 1.0023) this example runs at around 12kHz
 
-          This example requires firmware 1.0282 (T7) or 1.0023 (T4)
+          This example requires firmware 1.0282 (T7)
 --]]
 
 -- For sections of code that require precise timing assign global functions
 -- locally (local definitions of globals are marginally faster)
 local modbus_read = MB.R
 local check_interval = LJ.CheckInterval
+
+-- Read product ID, stop script if T4 is detected.
+local pid = MB.readName('PRODUCT_ID')
+if pid == 4 then
+    MB.writeName('LUA_RUN',0)
+end
 
 print("Benchmarking Test: Read a thermocouple connected to AIN0 as fast as possible.")
 MB.writeName("IO_CONFIG_SET_CURRENT_TO_FACTORY", 1)
