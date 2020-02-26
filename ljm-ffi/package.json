@@ -24,11 +24,12 @@
     ],
     "dependencies": {
         "async": "1.5.2",
-        "ffi": "2.3.0",
+        "ffi-napi": "2.4.6",
         "ljswitchboard-ljm_driver_constants": "^1.0.0",
         "ljswitchboard-modbus_map": "^1.0.1",
         "q": "1.5.1",
-        "ref": "1.3.5"
+        "ref-napi": "^1.4.3",
+        "semver": "^7.1.1"
     },
     "devDependencies": {
         "colors": "1.4.0",
@@ -40,5 +41,8 @@
     "scripts": {
         "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
         "start": "node ./examples/hello_world.js"
+    },
+    "engines": {
+        "node": ">=6.0.0"
     }
 }

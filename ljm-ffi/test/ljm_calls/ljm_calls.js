@@ -37,7 +37,7 @@ var enabled_tests = {
 		'ffi_liblabjack': false,
 	},
 	'async': {
-		'ljm': true,
+		'ljm': false,
 		'liblabjack': false,
 		'ffi_liblabjack': false,
 	}

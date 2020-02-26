@@ -3,9 +3,16 @@
 */
 var child_process = require('child_process');
 var ffi;
-ffi = require('ffi');
+var ref;
+try {
+    ffi = require('ffi');
+    ref = require('ref');       //Load variable type module
+} catch(err) {
+    ffi = require('ffi-napi');
+    ref = require('ref-napi');       //Load variable type module
+}
 var util = require('util');
-var ref = require('ref');       //Load variable type module
+
 var fs = require('fs');         //Load File System module
 var jsonConstants = require('ljswitchboard-modbus_map');
 var modbus_map = jsonConstants.getConstants();

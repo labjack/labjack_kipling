@@ -1,6 +1,14 @@
 
-var ref = require('ref');       //Load variable type module
+var ref;
+try {
+    ref = require('ref');       //Load variable type module
+} catch(err) {
+    ref = require('ref-napi');       //Load variable type module
+}
 var driver_const = require('ljswitchboard-ljm_driver_constants');
+
+var semver = require('semver');
+var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');
 
 var ljTypeMap = {
     // These argument types are basic data types and are the easiest to parse.
@@ -117,12 +125,21 @@ ljTypeOps.double = {
     }
 };
 
+function allocBuffer(length) {
+    var buff;
+    if(USE_MODERN_BUFFER_ALLOC) {
+        buff = Buffer.alloc(length);
+    } else {
+        buff = new Buffer(length);
+    }
+    buff.fill(0);
+    return buff;
+}
 // Handling data type pointer variants is the same way as the standard
 // data types.
 ljTypeOps['char*'] = {
     'allocate': function(userData) {
-        var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
-        strBuffer.fill(0);
+        var strBuffer = allocBuffer(driver_const.LJM_MAX_STRING_SIZE);
         return strBuffer;
     },
     'fill': function(buffer, userData) {
@@ -159,8 +176,7 @@ ljTypeOps['char*'] = {
 // data types.
 ljTypeOps['ex-char*'] = {
     'allocate': function(userData) {
-        var strBuffer = new Buffer(driver_const.LJM_MAX_NAME_SIZE);
-        strBuffer.fill(0);
+        var strBuffer = allocBuffer(driver_const.LJM_MAX_STRING_SIZE);
         return strBuffer;
     },
     'fill': function(buffer, userData) {
@@ -240,8 +256,7 @@ ljTypeOps['double*'] = {
 // Handling the array based data types is very different...
 ljTypeOps['a-char*'] =  {
     'allocate': function(userData) {
-        var charArray = new Buffer(ARCH_CHAR_NUM_BYTES * userData.length);
-        charArray.fill(0);
+        var charArray = allocBuffer(ARCH_CHAR_NUM_BYTES * userData.length);
         return charArray;
     },
     'fill': function(buffer, userData) {
@@ -267,8 +282,7 @@ ljTypeOps['a-char*'] =  {
 };
 ljTypeOps['a-uint*'] =  {
     'allocate': function(userData) {
-        var uintArray = new Buffer(ARCH_INT_NUM_BYTES * userData.length);
-        uintArray.fill(0);
+        var uintArray = allocBuffer(ARCH_INT_NUM_BYTES * userData.length);
         return uintArray;
     },
     'fill': function(buffer, userData) {
@@ -294,8 +308,7 @@ ljTypeOps['a-uint*'] =  {
 };
 ljTypeOps['a-int*'] =  {
     'allocate': function(userData) {
-        var intArray = new Buffer(ARCH_INT_NUM_BYTES * userData.length);
-        intArray.fill(0);
+        var intArray = allocBuffer(ARCH_INT_NUM_BYTES * userData.length);
         return intArray;
     },
     'fill': function(buffer, userData) {
@@ -321,8 +334,7 @@ ljTypeOps['a-int*'] =  {
 };
 ljTypeOps['a-double*'] =  {
     'allocate': function(userData) {
-        var doubleArray = new Buffer(ARCH_DOUBLE_NUM_BYTES * userData.length);
-        doubleArray.fill(0);
+        var doubleArray = allocBuffer(ARCH_DOUBLE_NUM_BYTES * userData.length);
         return doubleArray;
     },
     'fill': function(buffer, userData) {
@@ -350,13 +362,11 @@ ljTypeOps['a-double*'] =  {
 ljTypeOps['char**'] =  {
     'allocate': function(userData) {
         //ref: http://tootallnate.github.io/ref/
-        var pointerArray = new Buffer(ARCH_POINTER_SIZE);
-        pointerArray.fill(0);
+        var pointerArray = allocBuffer(ARCH_POINTER_SIZE);
         return pointerArray;
     },
     'fill':function(buffer, userData) {
-        var buf = new Buffer(userData.length + 1);
-        buf.fill(0);
+        var buf = allocBuffer(userData.length + 1);
         ref.writeCString(buf, 0, userData);
         ref.writePointer(buffer, 0, buf);
         return buffer;
@@ -375,8 +385,7 @@ ljTypeOps['a-char**'] = {
         var offset = 0;
 
         //ref: http://tootallnate.github.io/ref/
-        var pointerArray = new Buffer(ARCH_POINTER_SIZE*length);
-        pointerArray.fill(0);
+        var pointerArray = allocBuffer(ARCH_POINTER_SIZE*length);
         return pointerArray;
     },
     'fill':function(buffer, userData) {
@@ -385,8 +394,7 @@ ljTypeOps['a-char**'] = {
         var offset = 0;
 
         for ( i = 0; i < length; i++ ) {
-            var buf = new Buffer(userData[i].length + 1);
-            buf.fill(0);
+            var buf = allocBuffer(userData[i].length + 1);
             ref.writeCString(buf, 0, userData[i]);
             ref.writePointer(buffer, offset, buf);
             offset += ARCH_POINTER_SIZE;

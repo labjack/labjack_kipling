@@ -1,4 +1,9 @@
-var ref = require('ref');
+var ref;
+try {
+    ref = require('ref');       //Load variable type module
+} catch(err) {
+    ref = require('ref-napi');       //Load variable type module
+}
 
 var ENABLE_DEBUG = false;
 function debug() {

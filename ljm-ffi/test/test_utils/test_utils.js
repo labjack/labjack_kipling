@@ -1,6 +1,11 @@
 
 var async = require('async');
-var ref = require('ref');
+var ref;
+try {
+    ref = require('ref');       //Load variable type module
+} catch(err) {
+    ref = require('ref-napi');       //Load variable type module
+}
 var q = require('q');
 var ljm_ffi = require('../../lib/ljm-ffi');
 var ljm = ljm_ffi.load();
