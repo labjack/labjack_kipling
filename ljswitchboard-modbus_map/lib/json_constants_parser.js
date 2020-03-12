@@ -337,7 +337,7 @@ var parseConstants = function(LJMJSONFileLocation) {
 	constantsData.errors.push({
 		'error': driver_const.LJN_DEVICE_NOT_CONNECTED,
 		'string': 'LJN_DEVICE_NOT_CONNECTED',
-		'description': 'The device is no longer connected, trying to reconnect'
+		'description': 'The device is no longer connected, trying to reconnect.'
 	});
 	// Append custom "forcing error b/c device not connected" error
 	constantsData.errors.push({
@@ -349,8 +349,14 @@ var parseConstants = function(LJMJSONFileLocation) {
 	constantsData.errors.push({
 		'error': driver_const.LJN_INVALID_IO_ATTEMPT,
 		'string': 'LJN_INVALID_IO_ATTEMPT',
-		'description': 'The device is no longer connected, trying to reconnect'
+		'description': 'The device is no longer connected, trying to reconnect.'
 	});
+	constantsData.errors.push({
+		'error': driver_const.LJN_INVALID_ARGUMENTS,
+		'string': 'LJN_INVALID_ARGUMENTS',
+		'description': 'Invalid arguments were used to call a function.'
+	});
+	
 	
 	var numErrors = constantsData.errors.length;
 	for(i = 0; i < numErrors; i ++) {
