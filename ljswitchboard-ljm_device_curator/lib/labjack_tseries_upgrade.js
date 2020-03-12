@@ -658,6 +658,7 @@ this.readFirmwareFile = function(fileSrc, bundle)
             }
             var options = {
                 url: fileSrc,
+                reqContentType: 'application/octet-stream',
                 port: 443
             }
             ipHttpsGet(options, function(err, res) {
