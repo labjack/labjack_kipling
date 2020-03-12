@@ -9,9 +9,12 @@ var async = require('async');
 var labjack_nodejs = require('labjack-nodejs');
 var ljmDriver = new labjack_nodejs.driver();
 var q = require('q');
-var request = require('request');
+var ipHttpsGet = require('dns-chk-https-get').get;
+var url = require('url');
+var dns = require('dns');
 var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 var semver = require('semver');
+
 var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');
 
 var driver_const = labjack_nodejs.driver_const;
@@ -645,19 +648,29 @@ this.readFirmwareFile = function(fileSrc, bundle)
     if ((fileSrc.indexOf('http') === 0) || (fileSrc.indexOf('https') === 0)) {
         urlComponents = fileSrc.split('/');
         fileName = urlComponents[urlComponents.length-1];
-        request(
-            {url: fileSrc, encoding: null},
-            function (error, response, body) {
-                // Catch statusCode's that aren't 200 (http: OK)
-                if(response.statusCode == 200) {
-                    parseFile(error, body);
-                } else {
-                    deferred.reject(
+        var urlInfo = url.parse(fileSrc);
+        dns.lookup(urlInfo.hostname, '6', function(err, ip, fam) {
+            if(err) {
+                defered.reject(
+                    'Failed to query URL IP: ' + err.toString()
+                );
+                return;
+            }
+            var options = {
+                url: fileSrc,
+                port: 443
+            }
+            ipHttpsGet(options, function(err, res) {
+                if(err) {
+                    defered.reject(
                         'Failed to query URL, status code: ' + response.statusCode.toString()
                     );
+                    return;
+                } else {
+                    parseFile(error, body);
                 }
-            }
-        );
+            });
+        });
     } else {
         fileName = fileSrc;
         fs.readFile(fileSrc, parseFile);

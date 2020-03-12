@@ -140,7 +140,7 @@ var testGroups = {
 		't7_check_calibration_test': false,
 		't7_read_recovery_fw_version_test': false,
 		't7_upgrade_recovery_image_test': false,
-		't7_upgrade_test': false,
+		't7_upgrade_test': true,
 		
 		// These two tests should be enabled and disabled together.  The first
 		// test loads and runs a lua script that creates a file.  The second
