@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_device_curator",
-  "version": "1.0.6",
+  "version": "2.0.0",
   "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
   "main": "./lib/device_curator.js",
   "scripts": {
@@ -40,7 +40,7 @@
     "compute-gcd": "1.2.0",
     "dict": "1.4.0",
     "dns-chk-https-get": "^1.0.0",
-    "labjack-nodejs": "git+https://github.com/chrisJohn404/labjack-nodejs.git#testability-refactor",
+    "labjack-nodejs": "^2.0.0",
     "lj-apps-win-registry-info": "git+https://github.com/chrisJohn404/lj-apps-win-registry-info.git#master",
     "ljm-ffi": "^2.0.0",
     "ljmmm-parse": "^0.2.2",
