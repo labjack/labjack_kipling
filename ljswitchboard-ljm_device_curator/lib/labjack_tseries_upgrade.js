@@ -668,7 +668,7 @@ this.readFirmwareFile = function(fileSrc, bundle)
                     );
                     return;
                 } else {
-                    parseFile(error, body);
+                    parseFile(err, res);
                 }
             });
         });

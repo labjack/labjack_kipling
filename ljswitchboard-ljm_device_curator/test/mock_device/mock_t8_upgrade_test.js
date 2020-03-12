@@ -64,7 +64,7 @@ exports.tests = {
 	},
 	'createDevice': function(test) {
 		console.log('');
-		console.log('**** mock_device_upgrade_test ****');
+		console.log('**** mock_T8_upgrade_test ****');
 		try {
 			device = new device_curator.device(true);
 		} catch(err) {
