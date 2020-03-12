@@ -29,10 +29,9 @@ var ljm_mm = ljs_mm.getConstants();
 var LJME_NO_ERROR = 0;
 var LJME_INVALID_ADDRESS = ljm_mm.errorsByName.LJME_INVALID_ADDRESS.error;
 var LJME_INVALID_DIRECTION = ljm_mm.errorsByName.LJME_INVALID_DIRECTION.error;
-
 var LJN_INVALID_ARGUMENTS = ljm_mm.errorsByName.LJN_INVALID_ARGUMENTS.error;
-
 var LJN_INVALID_IO_ATTEMPT = ljm_mm.errorsByName.LJN_INVALID_IO_ATTEMPT.error;
+
 
 // Handle for device that gets opened.
 var dev;
@@ -117,7 +116,7 @@ testCase('Device Reading', function() {
 					var errorCode = 0;
 					try {
 						// Execute function
-						var res = dev[test.func](test.args[0]);
+						var res = dev[test.func].apply(this, test.args);
 
 						// Test result.
 						deepEqual(res, test.res);

@@ -4,21 +4,22 @@
  * @author Chris Johnson (chrisjohn404, LabJack Corp.)
 **/
 
-var ref = require('ref');//http://tootallnate.github.io/ref/#types-double
-var util = require('util');//
-var driverLib = require('./driver_wrapper');
+const ref = require('ref-napi');
+const util = require('util');//
+const driverLib = require('./driver_wrapper');
 
-var jsonConstants = require('ljswitchboard-modbus_map');
-var ljm_mm = jsonConstants.getConstants();
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+const jsonConstants = require('ljswitchboard-modbus_map');
+const ljm_mm = jsonConstants.getConstants();
+const driver_const = require('ljswitchboard-ljm_driver_constants');
+
+const allocBuffer = require('allocate_buffer').allocBuffer;
 
 
-var LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = driver_const.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
-
-var ARCH_INT_NUM_BYTES = driver_const.ARCH_INT_NUM_BYTES;
-var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
-var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
-var LJM_LIST_ALL_SIZE = driver_const.LJM_LIST_ALL_SIZE;
+const LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = driver_const.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
+const ARCH_INT_NUM_BYTES = driver_const.ARCH_INT_NUM_BYTES;
+const ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
+const ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
+const LJM_LIST_ALL_SIZE = driver_const.LJM_LIST_ALL_SIZE;
 
 
 /**
@@ -39,7 +40,7 @@ var LJM_LIST_ALL_SIZE = driver_const.LJM_LIST_ALL_SIZE;
 function DriverOperationError(code, message, errFrame, results)
 {
     this.code = code;
-    var errorInfo = ljm_mm.getErrorInfo(code);
+    let errorInfo = ljm_mm.getErrorInfo(code);
     this.string = errorInfo.string;
     this.description = errorInfo.description;
     if(typeof(message) !== 'undefined') {
@@ -108,11 +109,11 @@ exports.ljmDriver = function(ljmOverride) {
      *      available device.
      */
     this.buildListAllArray = function(numFound, aDevT, aConT, aSN, aIP) {
-        var deviceInfoArray = [];
-        var offset = 0;
-        var numDevices = numFound.deref();
-        for(var i = 0; i < numDevices; i++) {
-            var ipStr = "";
+        let deviceInfoArray = [];
+        let offset = 0;
+        let numDevices = numFound.deref();
+        for(let i = 0; i < numDevices; i++) {
+            let ipStr = "";
             ipStr += aIP.readUInt8(offset+3).toString();
             ipStr += ".";
             ipStr += aIP.readUInt8(offset+2).toString();
@@ -157,19 +158,15 @@ exports.ljmDriver = function(ljmOverride) {
      8      avilable devices as an array of object.
      */
     this.listAll = function(deviceType, connectionType, onError, onSuccess) {
-        var errorResult;
-        var devT;
-        var conT;
+        let errorResult;
+        let devT;
+        let conT;
 
-        var numFound =  new ref.alloc('int',1);
-        var aDeviceTypes = new Buffer(4*128);
-        aDeviceTypes.fill(0);
-        var aConnectionTypes = new Buffer(4*128);
-        aConnectionTypes.fill(0);
-        var aSerialNumbers = new Buffer(4*128);
-        aSerialNumbers.fill(0);
-        var aIPAddresses = new Buffer(4*128);
-        aIPAddresses.fill(0);
+        let numFound =  new ref.alloc('int',1);
+        let aDeviceTypes = allocBuffer(4*128);
+        let aConnectionTypes = allocBuffer(4*128);
+        let aSerialNumbers = allocBuffer(4*128);
+        let aIPAddresses = allocBuffer(4*128);
 
         //Figure out if we need to augment the input variables
         if(arguments.length < 4) {
@@ -196,7 +193,7 @@ exports.ljmDriver = function(ljmOverride) {
                     // if (err) throw err;
                     if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAll', err.toString()));
                     if (res === 0) {                        
-                        var devArray = self.buildListAllArray(
+                        let devArray = self.buildListAllArray(
                             numFound,
                             aDeviceTypes,
                             aConnectionTypes,
@@ -223,7 +220,7 @@ exports.ljmDriver = function(ljmOverride) {
                     // if(err) throw err;
                     if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAll', err.toString()));
                     if(res === 0) {
-                        var devArray = self.buildListAllArray(
+                        let devArray = self.buildListAllArray(
                             numFound,
                             aDeviceTypes,
                             aConnectionTypes,
@@ -256,19 +253,15 @@ exports.ljmDriver = function(ljmOverride) {
      * @throws {DriverOperationError} If the input args aren't correct or an error occurs.
     **/
     this.listAllSync = function(deviceType, connectionType) {
-        var errorResult;
-        var devT;
-        var conT;
+        let errorResult;
+        let devT;
+        let conT;
 
-        var numFound =  new ref.alloc('int',1);
-        var aDeviceTypes = new Buffer(4*128);
-        aDeviceTypes.fill(0);
-        var aConnectionTypes = new Buffer(4*128);
-        aConnectionTypes.fill(0);
-        var aSerialNumbers = new Buffer(4*128);
-        aSerialNumbers.fill(0);
-        var aIPAddresses = new Buffer(4*128);
-        aIPAddresses.fill(0);
+        let numFound =  new ref.alloc('int',1);
+        let aDeviceTypes = allocBuffer(4*128);
+        let aConnectionTypes = allocBuffer(4*128);
+        let aSerialNumbers = allocBuffer(4*128);
+        let aIPAddresses = allocBuffer(4*128);
 
         //Figure out if we need to augment the input variables
         if(arguments.length < 2) {
@@ -304,7 +297,7 @@ exports.ljmDriver = function(ljmOverride) {
             throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error);
         }
         if (errorResult === 0) {
-            var devArray = self.buildListAllArray(
+            let devArray = self.buildListAllArray(
                 numFound,
                 aDeviceTypes,
                 aConnectionTypes,
@@ -318,10 +311,10 @@ exports.ljmDriver = function(ljmOverride) {
 
     };
     this.interpretResult = function(buffer,type,index) {
-        var retVar;
-        var strInterpret = function(input) {
-            var output = '';
-            for(var i = 0; i < input.length; i++) {
+        let retVar;
+        function strInterpret(input) {
+            let output = '';
+            for(let i = 0; i < input.length; i++) {
                 if(input.charCodeAt(i) === 0) {
                     break;
                 } else {
@@ -330,8 +323,8 @@ exports.ljmDriver = function(ljmOverride) {
             }
             return output;
         };
-        var numInterpret = function(input) {return input;};
-        var bufFuncs = {
+        function numInterpret(input) {return input;};
+        let bufFuncs = {
             'STRING': {func:'toString',argA:'utf8',argB:index,argC:index+50,intFunc:strInterpret},
             // 'UINT64': {func:'readFloatLE',argA:index,argB:undefined,argC:undefined},
             'FLOAT32': {func:'readFloatBE',argA:index,argB:undefined,argC:undefined,intFunc:numInterpret},
@@ -340,25 +333,25 @@ exports.ljmDriver = function(ljmOverride) {
             'UINT16': {func:'readUInt16BE',argA:index,argB:undefined,argC:undefined,intFunc:numInterpret},
             'BYTE': {func:'readUInt8',argA:index,argB:undefined,argC:undefined,intFunc:numInterpret},
         };
-        var funcStr = bufFuncs[type].func;
-        var argA = bufFuncs[type].argA;
-        var argB = bufFuncs[type].argB;
-        var argC = bufFuncs[type].argC;
-        var intFunc = bufFuncs[type].intFunc;
+        let funcStr = bufFuncs[type].func;
+        let argA = bufFuncs[type].argA;
+        let argB = bufFuncs[type].argB;
+        let argC = bufFuncs[type].argC;
+        let intFunc = bufFuncs[type].intFunc;
         retVar = intFunc(buffer[funcStr](argA,argB,argC));
         return retVar;
     };
     this.buildListAllExtendedArray = function(context,deviceData,registers,addresses,names,types,numBytes,buffer) {
-        var retData = {};
-        var bufferOffset = 0;
+        let retData = {};
+        let bufferOffset = 0;
         // console.log('Raw Data',C_aBytes);
         deviceData.forEach(function(devObj,devObjIndex){
-            var dataArray = [];
-            var readDataArray = [];
+            let dataArray = [];
+            let readDataArray = [];
             registers.forEach(function(reg,index) {
-                var readData = context.interpretResult(buffer,types[index],bufferOffset);
+                let readData = context.interpretResult(buffer,types[index],bufferOffset);
                 // console.log('Result',types[index],bufferOffset,typeof(readData),readData);
-                var data = {
+                let data = {
                     register: reg,
                     name: names[index],
                     address: addresses[index],
@@ -399,14 +392,13 @@ exports.ljmDriver = function(ljmOverride) {
      */
     this.listAllExtended = function(deviceType, connectionType, registers, onError, onSuccess) {
         // Compensate for Auto-
-        var devT;
-        var conT;
-        var regs;
-        var onErr;
-        var onSuc;
-
-        var message;
-        var errorCode;
+        let devT;
+        let conT;
+        let regs;
+        let onErr;
+        let onSuc;
+        let message;
+        let errorCode;
 
         // Intelligently parse the input arguments
         if (arguments.length == 2) {
@@ -460,52 +452,48 @@ exports.ljmDriver = function(ljmOverride) {
         }
 
         // Save the maximum number of devices to be found
-        var maxNumDevices = LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
+        let maxNumDevices = LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
 
         // Values to be interpreted by function
-        var aAddresses = [];
-        var addressNames = [];
-        var numBytes = [];
-        var aNumRegs = [];
-        var types = [];
-        var numRecvRegs = 0;
+        let aAddresses = [];
+        let addressNames = [];
+        let numBytes = [];
+        let aNumRegs = [];
+        let types = [];
+        let numRecvRegs = 0;
         
         // Values to be sent to C call
-        var C_DeviceType = devT;            // Device type to search for
-        var C_ConnectionType = conT;        // Connection type to search for
-        var C_NumAddresses = regs.length;   // Number of registers to read
-        var C_aAddresses;                   // integer array of addresses;
-        var C_aNumRegs;                     // integer array of sizes
-        var C_MaxNumFound = maxNumDevices;  // integer
-        var C_NumFound;                     // integer pointer to be populated with num found
-        var C_aDeviceTypes;                 // integer array to be populated with deviceTypes
-        var C_aConnectionTypes;             // integer array to be populated with connectionTypes
-        var C_aSerialNumbers;               // integer array to be populated with serialNumbers
-        var C_aIPAddresses;                 // integer array to be populated with ipAddresses
-        var C_aBytes;                       // byte (char) buffer filled with read-data
-        var errorResult=0;
+        let C_DeviceType = devT;            // Device type to search for
+        let C_ConnectionType = conT;        // Connection type to search for
+        let C_NumAddresses = regs.length;   // Number of registers to read
+        let C_aAddresses;                   // integer array of addresses;
+        let C_aNumRegs;                     // integer array of sizes
+        let C_MaxNumFound = maxNumDevices;  // integer
+        let C_NumFound;                     // integer pointer to be populated with num found
+        let C_aDeviceTypes;                 // integer array to be populated with deviceTypes
+        let C_aConnectionTypes;             // integer array to be populated with connectionTypes
+        let C_aSerialNumbers;               // integer array to be populated with serialNumbers
+        let C_aIPAddresses;                 // integer array to be populated with ipAddresses
+        let C_aBytes;                       // byte (char) buffer filled with read-data
+        let errorResult=0;
 
         // Calculate buffer sizes
-        var addrBuffSize = 4*C_NumAddresses;
-        var searchBuffSize = 4*maxNumDevices;
+        let addrBuffSize = 4*C_NumAddresses;
+        let searchBuffSize = 4*maxNumDevices;
         // Allocate buffers for variables that are already known
-        C_aAddresses = new Buffer(addrBuffSize);
-        C_aNumRegs = new Buffer(addrBuffSize);
+        C_aAddresses = allocBuffer(addrBuffSize);
+        C_aNumRegs = allocBuffer(addrBuffSize);
 
         C_NumFound =  new ref.alloc('int',1);
-        C_aDeviceTypes = new Buffer(searchBuffSize);
-        C_aDeviceTypes.fill(0);
-        C_aConnectionTypes = new Buffer(searchBuffSize);
-        C_aConnectionTypes.fill(0);
-        C_aSerialNumbers = new Buffer(searchBuffSize);
-        C_aSerialNumbers.fill(0);
-        C_aIPAddresses = new Buffer(searchBuffSize);
-        C_aIPAddresses.fill(0);
+        C_aDeviceTypes = allocBuffer(searchBuffSize);
+        C_aConnectionTypes = allocBuffer(searchBuffSize);
+        C_aSerialNumbers = allocBuffer(searchBuffSize);
+        C_aIPAddresses = allocBuffer(searchBuffSize);
 
-        var bytesPerRegister = driver_const.LJM_BYTES_PER_REGISTER;
+        let bytesPerRegister = driver_const.LJM_BYTES_PER_REGISTER;
         regs.forEach(function(reg,index){
-            var info = self.constants.getAddressInfo(reg, 'R');
-            var numRegs = Math.ceil(info.size/bytesPerRegister);
+            let info = self.constants.getAddressInfo(reg, 'R');
+            let numRegs = Math.ceil(info.size/bytesPerRegister);
             aAddresses.push(info.address);
             aNumRegs.push(numRegs);
             numBytes.push(numRegs+numRegs);
@@ -516,13 +504,12 @@ exports.ljmDriver = function(ljmOverride) {
         });
 
         // Allocate the receive buffer LJM will use to save extra read data
-        var aBytesSize = maxNumDevices * numRecvRegs * bytesPerRegister;
-        C_aBytes = new Buffer(aBytesSize);
-        C_aBytes.fill(0);
+        let aBytesSize = maxNumDevices * numRecvRegs * bytesPerRegister;
+        C_aBytes = allocBuffer(aBytesSize);
 
         // Save register data to buffers (filling C_aAddresses and C_aNumRegs)
-        var i;
-        var bufIndex = 0;
+        let i;
+        let bufIndex = 0;
         for (i=0; i < aAddresses.length; i++) {
             C_aAddresses.writeInt32LE(aAddresses[i],bufIndex);
             C_aNumRegs.writeInt32LE(aNumRegs[i],bufIndex);
@@ -546,14 +533,14 @@ exports.ljmDriver = function(ljmOverride) {
             function (err, res){
                 if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'listAllExtended', err.toString()));
                 if (res === 0) {
-                    var devArray = self.buildListAllArray(
+                    let devArray = self.buildListAllArray(
                         C_NumFound,
                         C_aDeviceTypes,
                         C_aConnectionTypes,
                         C_aSerialNumbers,
                         C_aIPAddresses
                     );
-                    var retArray = self.buildListAllExtendedArray(
+                    let retArray = self.buildListAllExtendedArray(
                         self,devArray,regs,aAddresses,addressNames,types,
                         numBytes,C_aBytes);
                     
@@ -567,14 +554,12 @@ exports.ljmDriver = function(ljmOverride) {
         );
     };
     this.listAllExtendedSync = function(deviceType, connectionType, registers) {
-        var listAllData;
-        // Compensate for Auto-
-        var devT;
-        var conT;
-        var regs;
-
-        var message;
-        var errorCode;
+        let listAllData;
+        let devT;
+        let conT;
+        let regs;
+        let message;
+        let errorCode;
         // Intelligently parse the input arguments
         if (arguments.length === 0) {
             devT = "LJM_dtANY";
@@ -618,52 +603,48 @@ exports.ljmDriver = function(ljmOverride) {
         }
 
         // Save the maximum number of devices to be found
-        var maxNumDevices = LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
+        let maxNumDevices = LIST_ALL_EXTENDED_MAX_NUM_TO_FIND;
 
         // Values to be interpreted by function
-        var aAddresses = [];
-        var addressNames = [];
-        var numBytes = [];
-        var aNumRegs = [];
-        var types = [];
-        var numRecvRegs = 0;
+        let aAddresses = [];
+        let addressNames = [];
+        let numBytes = [];
+        let aNumRegs = [];
+        let types = [];
+        let numRecvRegs = 0;
         
         // Values to be sent to C call
-        var C_DeviceType = devT;            // Device type to search for
-        var C_ConnectionType = conT;        // Connection type to search for
-        var C_NumAddresses = regs.length;   // Number of registers to read
-        var C_aAddresses;                   // integer array of addresses;
-        var C_aNumRegs;                     // integer array of sizes
-        var C_MaxNumFound = maxNumDevices;  // integer
-        var C_NumFound;                     // integer pointer to be populated with num found
-        var C_aDeviceTypes;                 // integer array to be populated with deviceTypes
-        var C_aConnectionTypes;             // integer array to be populated with connectionTypes
-        var C_aSerialNumbers;               // integer array to be populated with serialNumbers
-        var C_aIPAddresses;                 // integer array to be populated with ipAddresses
-        var C_aBytes;                       // byte (char) buffer filled with read-data
-        var errorResult=0;
+        let C_DeviceType = devT;            // Device type to search for
+        let C_ConnectionType = conT;        // Connection type to search for
+        let C_NumAddresses = regs.length;   // Number of registers to read
+        let C_aAddresses;                   // integer array of addresses;
+        let C_aNumRegs;                     // integer array of sizes
+        let C_MaxNumFound = maxNumDevices;  // integer
+        let C_NumFound;                     // integer pointer to be populated with num found
+        let C_aDeviceTypes;                 // integer array to be populated with deviceTypes
+        let C_aConnectionTypes;             // integer array to be populated with connectionTypes
+        let C_aSerialNumbers;               // integer array to be populated with serialNumbers
+        let C_aIPAddresses;                 // integer array to be populated with ipAddresses
+        let C_aBytes;                       // byte (char) buffer filled with read-data
+        let errorResult=0;
 
         // Calculate buffer sizes
-        var addrBuffSize = 4*C_NumAddresses;
-        var searchBuffSize = 4*maxNumDevices;
+        let addrBuffSize = 4*C_NumAddresses;
+        let searchBuffSize = 4*maxNumDevices;
         // Allocate buffers for variables that are already known
-        C_aAddresses = new Buffer(addrBuffSize);
-        C_aNumRegs = new Buffer(addrBuffSize);
+        C_aAddresses = allocBuffer(addrBuffSize);
+        C_aNumRegs = allocBuffer(addrBuffSize);
 
         C_NumFound =  new ref.alloc('int',1);
-        C_aDeviceTypes = new Buffer(searchBuffSize);
-        C_aDeviceTypes.fill(0);
-        C_aConnectionTypes = new Buffer(searchBuffSize);
-        C_aConnectionTypes.fill(0);
-        C_aSerialNumbers = new Buffer(searchBuffSize);
-        C_aSerialNumbers.fill(0);
-        C_aIPAddresses = new Buffer(searchBuffSize);
-        C_aIPAddresses.fill(0);
+        C_aDeviceTypes = allocBuffer(searchBuffSize);
+        C_aConnectionTypes = allocBuffer(searchBuffSize);
+        C_aSerialNumbers = allocBuffer(searchBuffSize);
+        C_aIPAddresses = allocBuffer(searchBuffSize);
 
-        var bytesPerRegister = driver_const.LJM_BYTES_PER_REGISTER;
+        let bytesPerRegister = driver_const.LJM_BYTES_PER_REGISTER;
         regs.forEach(function(reg,index){
-            var info = self.constants.getAddressInfo(reg, 'R');
-            var numRegs = Math.ceil(info.size/bytesPerRegister);
+            let info = self.constants.getAddressInfo(reg, 'R');
+            let numRegs = Math.ceil(info.size/bytesPerRegister);
             aAddresses.push(info.address);
             aNumRegs.push(numRegs);
             numBytes.push(numRegs+numRegs);
@@ -674,13 +655,12 @@ exports.ljmDriver = function(ljmOverride) {
         });
 
         // Allocate the receive buffer LJM will use to save extra read data
-        var aBytesSize = maxNumDevices * numRecvRegs * bytesPerRegister;
-        C_aBytes = new Buffer(aBytesSize);
-        C_aBytes.fill(0);
+        let aBytesSize = maxNumDevices * numRecvRegs * bytesPerRegister;
+        C_aBytes = allocBuffer(aBytesSize);
 
         // Save register data to buffers (filling C_aAddresses and C_aNumRegs)
-        var i;
-        var bufIndex = 0;
+        let i;
+        let bufIndex = 0;
         for (i=0; i < aAddresses.length; i++) {
             C_aAddresses.writeInt32LE(aAddresses[i],bufIndex);
             C_aNumRegs.writeInt32LE(aNumRegs[i],bufIndex);
@@ -702,14 +682,14 @@ exports.ljmDriver = function(ljmOverride) {
             C_aBytes
         );
         if (errorResult === 0) {
-            var devArray = self.buildListAllArray(
+            let devArray = self.buildListAllArray(
                 C_NumFound,
                 C_aDeviceTypes,
                 C_aConnectionTypes,
                 C_aSerialNumbers,
                 C_aIPAddresses
             );
-            var retArray = self.buildListAllExtendedArray(
+            let retArray = self.buildListAllExtendedArray(
                 self,devArray,regs,aAddresses,addressNames,types,
                 numBytes,C_aBytes);
             return retArray;
@@ -724,7 +704,7 @@ exports.ljmDriver = function(ljmOverride) {
      * @throws {DriverInterfaceError} Thrown if the function can't be called.
      * @throws {DriverOperationError} If the input args aren't correct or an error occurs.
      */
-    var prepareOpenAll = function(me, deviceType, connectionType) {
+    function prepareOpenAll(me, deviceType, connectionType) {
         if (!self.hasOpenAll) {
             throw new DriverInterfaceError(
                 'openAll is not loaded. Use ListAll and Open functions instead.'
@@ -739,12 +719,10 @@ exports.ljmDriver = function(ljmOverride) {
         }
 
         me.numOpened = new ref.alloc('int', 0);
-        me.aHandles = new Buffer(ARCH_INT_NUM_BYTES * LJM_LIST_ALL_SIZE);
-        me.aHandles.fill(0);
+        me.aHandles = allocBuffer(ARCH_INT_NUM_BYTES * LJM_LIST_ALL_SIZE);
         me.numErrors = new ref.alloc('int', 0);
         me.errorHandle = new ref.alloc('int', 0);
-        me.errors = new Buffer(ARCH_POINTER_SIZE);
-        me.errors.fill(0);
+        me.errors = allocBuffer(ARCH_POINTER_SIZE);
 
         me.devType = driver_const.deviceTypes[deviceType];
         me.deviceType = deviceType;
@@ -755,8 +733,8 @@ exports.ljmDriver = function(ljmOverride) {
     /**
      * Desc: Internal helper function to extract return data from an OpenAll call.
      */
-    var extractOpenAllResults = function(me) {
-        var results = {
+    function extractOpenAllResults(me) {
+        let results = {
             'deviceType': me.deviceType,
             'deviceTypeNum': me.devType,
             'connectionType': me.connectionType,
@@ -764,29 +742,29 @@ exports.ljmDriver = function(ljmOverride) {
         };
 
         // Parse the successfully opened devices.
-        var numOpened = me.numOpened.deref();
-        var handles = [];
-        for(var i = 0; i < numOpened; i++) {
-            var handle = me.aHandles.readInt32LE(i * ARCH_INT_NUM_BYTES);
+        let numOpened = me.numOpened.deref();
+        let handles = [];
+        for(let i = 0; i < numOpened; i++) {
+            let handle = me.aHandles.readInt32LE(i * ARCH_INT_NUM_BYTES);
             handles.push(handle);
         }
         results.numOpened = numOpened;
         results.handles = handles;
 
         // Parse the errors...
-        var numErrors = me.numErrors.deref();
-        var failedOpens = [];
+        let numErrors = me.numErrors.deref();
+        let failedOpens = [];
         results.numErrors = numErrors;
         results.failedOpens = failedOpens;
 
         // Parse the errorHandle
-        var errorHandle = me.errorHandle.readInt32LE(0);
+        let errorHandle = me.errorHandle.readInt32LE(0);
 
         // Read the errors string
-        var pointerToCharStar = ref.readPointer(me.errors, 0, ARCH_POINTER_SIZE);
-        var parsedCharStar = ref.readCString(pointerToCharStar, 0);
-        var errorsString = parsedCharStar;
-        var errorsObj = {};
+        let pointerToCharStar = ref.readPointer(me.errors, 0, ARCH_POINTER_SIZE);
+        let parsedCharStar = ref.readCString(pointerToCharStar, 0);
+        let errorsString = parsedCharStar;
+        let errorsObj = {};
         try {
             errorsObj = JSON.parse(errorsString);
         } catch(err) {
@@ -822,7 +800,7 @@ exports.ljmDriver = function(ljmOverride) {
     //     return;
     // }
     this.cleanInfo = function(handle, onError, onSuccess) {
-        var bHandle = new ref.alloc('int', handle);
+        let bHandle = new ref.alloc('int', handle);
         self.ljm.LJM_CleanInfo.async(
             bHandle,
             function (err, res) {
@@ -832,8 +810,8 @@ exports.ljmDriver = function(ljmOverride) {
             });
     }
     this.cleanInfoSync = function(handle) {
-        var bHandle = new ref.alloc('int', handle);
-        var errorResult = self.ljm.LJM_CleanInfo(bHandle);
+        let bHandle = new ref.alloc('int', handle);
+        let errorResult = self.ljm.LJM_CleanInfo(bHandle);
         if (errorResult !== 0) {
             throw new DriverOperationError(errorResult);
         }
@@ -853,7 +831,7 @@ exports.ljmDriver = function(ljmOverride) {
      *      the devices opened as an array of objects.
      */
     this.openAll = function(deviceType, connectionType, onError, onSuccess) {
-        var me = {};
+        let me = {};
         prepareOpenAll(me, deviceType, connectionType);
 
         self.ljm.Internal_LJM_OpenAll.async(
@@ -880,10 +858,10 @@ exports.ljmDriver = function(ljmOverride) {
         );
     };
     this.openAllSync = function(deviceType, connectionType) {
-        var me = {};
+        let me = {};
         prepareOpenAll(me, deviceType, connectionType);
 
-        var errorResult = self.ljm.Internal_LJM_OpenAll(
+        let errorResult = self.ljm.Internal_LJM_OpenAll(
             me.devType,
             me.connType,
             me.numOpened,
@@ -895,7 +873,7 @@ exports.ljmDriver = function(ljmOverride) {
         if (errorResult !== 0) {
             throw new DriverOperationError(errorResult);
         }
-        var results = extractOpenAllResults(me);
+        let results = extractOpenAllResults(me);
         self.cleanInfoSync(results.errorHandle);
         return results;
     };
@@ -913,13 +891,12 @@ exports.ljmDriver = function(ljmOverride) {
         }
 
         info.infoHandle = new ref.alloc('int', 0);
-        info.info = new Buffer(ARCH_POINTER_SIZE);
-        info.info.fill(0);
+        info.info = allocBuffer(ARCH_POINTER_SIZE);
         
         return info;
     };
     function extractGetHandlesResults(info) {
-        var results = {
+        let results = {
             infoHandle: infoHandle,
             info: info,
             infoString: '',
@@ -927,10 +904,10 @@ exports.ljmDriver = function(ljmOverride) {
         };
 
         // Parse the infoHandle
-        var infoHandle = info.infoHandle.readInt32LE(0);
+        let infoHandle = info.infoHandle.readInt32LE(0);
         // Read the errors string
-        var pointerToCharStar = ref.readPointer(info.info, 0, ARCH_POINTER_SIZE);
-        var parsedCharStar = ref.readCString(pointerToCharStar, 0);
+        let pointerToCharStar = ref.readPointer(info.info, 0, ARCH_POINTER_SIZE);
+        let parsedCharStar = ref.readCString(pointerToCharStar, 0);
         
         results.infoString = parsedCharStar;
         
@@ -948,7 +925,7 @@ exports.ljmDriver = function(ljmOverride) {
         return results;
     }
     this.getHandles = function(onError, onSuccess) {
-        var info = {};
+        let info = {};
         prepareGetHandles(info);
         
         self.ljm.Internal_LJM_GetHandles.async(
@@ -957,7 +934,7 @@ exports.ljmDriver = function(ljmOverride) {
             function (err, res) {
                 if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'getHandles', err.toString()));
                 if (res !== 0) return onError(new DriverOperationError(res));
-                var results = extractGetHandlesResults(info);
+                let results = extractGetHandlesResults(info);
                 
                 self.cleanInfo(
                     results.infoHandle,
@@ -967,14 +944,12 @@ exports.ljmDriver = function(ljmOverride) {
             }
         );
 
-        // var results = extractGetHandlesResults(info);
-
     }
 
     this.getHandlesSync = function() {
-        var info = {};
+        let info = {};
         prepareGetHandles(info);
-        var errorResult = self.ljm.Internal_LJM_GetHandles(
+        let errorResult = self.ljm.Internal_LJM_GetHandles(
             info.infoHandle,
             info.info
         );
@@ -983,7 +958,7 @@ exports.ljmDriver = function(ljmOverride) {
             throw new DriverOperationError(errorResult);
         }
 
-        var results = extractGetHandlesResults(info);
+        let results = extractGetHandlesResults(info);
         self.cleanInfoSync(results.infoHandle);
         return results.infoObj;
 
@@ -999,9 +974,8 @@ exports.ljmDriver = function(ljmOverride) {
      *      resulting string description.
      */
     this.errToStr = function(errNum, onError, onSuccess) {
-        var errorResult=0;
-        var strRes = new Buffer(50);
-        strRes.fill(0);
+        let errorResult=0;
+        let strRes = allocBuffer(50);
         errorResult = self.ljm.LJM_ErrorToString.async(
             errNum, 
             strRes, 
@@ -1026,10 +1000,9 @@ exports.ljmDriver = function(ljmOverride) {
      *      provided error numebr.
      */
     this.errToStrSync = function(errNum) {
-        var errorResult=0;
+        let errorResult=0;
 
-        var strRes = new Buffer(50);
-        strRes.fill(0);
+        let strRes = allocBuffer(50);
 
         errorResult = self.ljm.LJM_ErrorToString(errNum, strRes);
         if (errorResult !== 0) {
@@ -1049,7 +1022,7 @@ exports.ljmDriver = function(ljmOverride) {
      *      loaded. Should take no arguments.
      */
     this.loadConstants = function(onError, onSuccess) {
-        var errorResult;
+        let errorResult;
         errorResult = self.ljm.LJM_LoadConstants.async(
             function (err, res){
                 if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'loadConstants', err.toString()));
@@ -1070,7 +1043,7 @@ exports.ljmDriver = function(ljmOverride) {
      *      constants, likely because of file system issues.
      */
     this.loadConstantsSync = function() {
-        var errorResult;
+        let errorResult;
         errorResult = self.ljm.LJM_LoadConstants();
         if (errorResult !== 0) {
             throw new DriverOperationError(errorResult);
@@ -1090,7 +1063,7 @@ exports.ljmDriver = function(ljmOverride) {
      *      been closed. Should take no arguments.
      */
     this.closeAll = function(onError, onSuccess) {
-        var errorResult;
+        let errorResult;
         errorResult = self.ljm.LJM_CloseAll.async(
             function (err, res){
                 if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'closeAll', err.toString()));
@@ -1108,7 +1081,7 @@ exports.ljmDriver = function(ljmOverride) {
      * Synchronous version of closeAll.
      */
     this.closeAllSync = function() {
-        var errorResult;
+        let errorResult;
         errorResult = self.ljm.LJM_CloseAll();
         if (errorResult !== 0) {
             return errorResult;
@@ -1132,8 +1105,8 @@ exports.ljmDriver = function(ljmOverride) {
      */
     this.readLibrary = function(parameter, onError, onSuccess) {
         if (isNaN(parameter)) {
-            var errorResult;
-            var returnVar = new ref.alloc('double',1);
+            let errorResult;
+            let returnVar = new ref.alloc('double',1);
 
             errorResult = self.ljm.LJM_ReadLibraryConfigS.async(
                 parameter, 
@@ -1163,9 +1136,9 @@ exports.ljmDriver = function(ljmOverride) {
      */
     this.readLibrarySync = function(parameter) {
         if(isNaN(parameter)) {
-            var errorResult;
+            let errorResult;
             //Allocate a buffer for the result
-            var returnVar = new ref.alloc('double',1);
+            let returnVar = new ref.alloc('double',1);
 
             //Clear the buffer
             returnVar.fill(0);
@@ -1184,12 +1157,10 @@ exports.ljmDriver = function(ljmOverride) {
     };
     this.readLibraryS = function (parameter, onError, onSuccess) {
         if (isNaN(parameter)) {
-            var errorResult;
+            let errorResult;
 
             //Allocate a buffer for the result
-            var strBuffer = new Buffer(driver_const.LJM_MAX_NAME_SIZE);
-            //Clear the buffer
-            strBuffer.fill(0);
+            let strBuffer = allocBuffer(driver_const.LJM_MAX_NAME_SIZE);
 
             errorResult = self.ljm.LJM_ReadLibraryConfigStringS.async(
                 parameter,
@@ -1216,11 +1187,9 @@ exports.ljmDriver = function(ljmOverride) {
     };
     this.readLibrarySSync = function (parameter) {
         if(isNaN(parameter)) {
-            var errorResult;
+            let errorResult;
             //Allocate a buffer for the result
-            var strBuffer = new Buffer(driver_const.LJM_MAX_NAME_SIZE);
-            //Clear the buffer
-            strBuffer.fill(0);
+            let strBuffer = allocBuffer(driver_const.LJM_MAX_NAME_SIZE);
 
             errorResult = self.ljm.LJM_ReadLibraryConfigStringS(
                 parameter,
@@ -1251,10 +1220,10 @@ exports.ljmDriver = function(ljmOverride) {
      * @param  {function} onSuccess Function called on success.
      */
     this.writeLibrary = function (parameter, value, onError, onSuccess) {
-        var errorResult;
+        let errorResult;
         if((isNaN(parameter))&&(isNaN(value))) {
-            var enums = driver_const.LJM_LIBRARY_CONSTANTS;
-            var isValid = typeof(enums[parameter]); 
+            let enums = driver_const.LJM_LIBRARY_CONSTANTS;
+            let isValid = typeof(enums[parameter]); 
             if ( isValid !== 'undefined') {
                 isValid = typeof(enums[parameter][value]);
                 if ( isValid !== 'undefined') {
@@ -1304,7 +1273,7 @@ exports.ljmDriver = function(ljmOverride) {
      * @param  {number} value     The value to write.
      */
     this.writeLibrarySync = function (parameter, value) {
-        var errorResult;
+        let errorResult;
         if ((isNaN(parameter))&&(!isNaN(value))) {
             errorResult = self.ljm.LJM_WriteLibraryConfigS(
                 parameter, 
@@ -1344,7 +1313,7 @@ exports.ljmDriver = function(ljmOverride) {
         if ((isNaN(level))||(!isNaN(str))) {
             return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, 'wrong types'));
         }
-        var errorResult;
+        let errorResult;
         if(str.length >= driver_const.LJM_MAX_STRING_SIZE) {
             return onError(new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, 'string to long'));
         }
@@ -1381,7 +1350,7 @@ exports.ljmDriver = function(ljmOverride) {
                 'wrong types'
             );
         }
-        var errorResult;
+        let errorResult;
         if(str.length >= driver_const.LJM_MAX_STRING_SIZE) {
             throw new DriverOperationError(
                 self.errors.LJN_INVALID_ARGUMENTS.error,
@@ -1406,7 +1375,7 @@ exports.ljmDriver = function(ljmOverride) {
      *      any arguments.
      */
     this.resetLog = function(onError, onSuccess) {
-        var errorResult;
+        let errorResult;
         errorResult = self.ljm.LJM_ResetLog.async(
             function (err, res) {
                 if (err) onError(new DriverOperationError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR.error, 'resetLog', err.toString()));
@@ -1423,7 +1392,7 @@ exports.ljmDriver = function(ljmOverride) {
      * Synchronously calls resetLog.
      */
     this.resetLogSync = function() {
-        var errorResult;
+        let errorResult;
         errorResult = self.ljm.LJM_ResetLog();
         if (errorResult !== 0) {
             return errorResult;
@@ -1459,9 +1428,9 @@ exports.ljmDriver = function(ljmOverride) {
         });
     };
     this.controlLogSync = function(mode, level) {
-        var err = 0;
-        var errA = self.writeLibrarySync('LJM_DEBUG_LOG_MODE', mode);
-        var errB = self.writeLibrarySync('LJM_DEBUG_LOG_LEVEL', level);
+        let err = 0;
+        let errA = self.writeLibrarySync('LJM_DEBUG_LOG_MODE', mode);
+        let errB = self.writeLibrarySync('LJM_DEBUG_LOG_LEVEL', level);
         if(errA !== 0) {
             err = errA;
         }
@@ -1498,7 +1467,7 @@ exports.ljmDriver = function(ljmOverride) {
         return self.controlLogSync(1, 10);
     };
 
-    var self = this;
+    let self = this;
 
     //Read the Driver Version number
     this.installedDriverVersion = this.readLibrarySync('LJM_LIBRARY_VERSION');
@@ -1559,14 +1528,14 @@ exports.ljmDriver = function(ljmOverride) {
      * @return {Object} DeviceInfo
     **/
     this.LJM_GetHandleInfo = function(handle, onError, onSuccess) {
-        var errorResult;
+        let errorResult;
 
-        var deviceType = ref.alloc('int', 1);
-        var connectionType = ref.alloc('int', 1);
-        var serialNumber = ref.alloc('int', 1);
-        var ipAddr = ref.alloc('int', 1);
-        var port = ref.alloc('int', 1);
-        var maxBytesPerMessage = ref.alloc('int', 1);
+        let deviceType = ref.alloc('int', 1);
+        let connectionType = ref.alloc('int', 1);
+        let serialNumber = ref.alloc('int', 1);
+        let ipAddr = ref.alloc('int', 1);
+        let port = ref.alloc('int', 1);
+        let maxBytesPerMessage = ref.alloc('int', 1);
 
         errorResult = self.ljm.LJM_GetHandleInfo.async(
             handle,
@@ -1634,14 +1603,14 @@ exports.ljmDriver = function(ljmOverride) {
      * @throws {Error} Thrown if any errors are discovered.
     **/
     this.LJM_GetHandleInfoSync = function(handle) {
-        var errorResult;
+        let errorResult;
 
-        var devT = ref.alloc('int', 1);
-        var conT = ref.alloc('int', 1);
-        var sN = ref.alloc('int', 1);
-        var ipAddr = ref.alloc('int', 1);
-        var port = ref.alloc('int', 1);
-        var maxB = ref.alloc('int', 1);
+        let devT = ref.alloc('int', 1);
+        let conT = ref.alloc('int', 1);
+        let sN = ref.alloc('int', 1);
+        let ipAddr = ref.alloc('int', 1);
+        let port = ref.alloc('int', 1);
+        let maxB = ref.alloc('int', 1);
 
         //Perform device I/O Operation
         errorResult = self.ljm.LJM_GetHandleInfo(
@@ -1659,7 +1628,7 @@ exports.ljmDriver = function(ljmOverride) {
             throw new DriverOperationError(errorResult);
         }
 
-        var returnVariable = {
+        let returnVariable = {
             deviceType: devT.deref(),
             connectionType: conT.deref(),
             serialNumber: sN.deref(),
@@ -1689,8 +1658,7 @@ exports.ljmDriver = function(ljmOverride) {
         }
 
         //Create a blank array for data to be saved to & returned
-        var aData = new Buffer(data.length);
-        aData.fill(0);
+        let aData = allocBuffer(data.length);
 
         errorResult = self.ljm.LJM_ReadRaw.async(
             handle,
@@ -1727,8 +1695,7 @@ exports.ljmDriver = function(ljmOverride) {
         }
 
         //Create a blank array for data to be saved to & returned
-        var bufferData = new Buffer(data.length);
-        bufferData.fill(0);
+        let bufferData = allocBuffer(data.length);
 
         errorResult = self.ljm.LJM_ReadRaw(handle, bufferData,
             data.length);
@@ -1755,11 +1722,11 @@ exports.ljmDriver = function(ljmOverride) {
      */
     this.LJN_Read = function(handle, address, onError, onSuccess) {
 
-        var info = self.constants.getAddressInfo(address, 'R');
-        var expectedReturnType = info.type;
-        var isReturningString = expectedReturnType == driver_const.LJM_STRING;
-        var isDirectionValid = info.directionValid == 1;
-        var resolvedAddress = info.address;
+        let info = self.constants.getAddressInfo(address, 'R');
+        let expectedReturnType = info.type;
+        let isReturningString = expectedReturnType == driver_const.LJM_STRING;
+        let isDirectionValid = info.directionValid == 1;
+        let resolvedAddress = info.address;
 
         if (isDirectionValid && !isReturningString) {
             return self.LJM_eReadAddress(handle, resolvedAddress, info.type, onError, onSuccess);
@@ -1785,11 +1752,11 @@ exports.ljmDriver = function(ljmOverride) {
      * @throws {DriverOperationError} If the input args aren't correct or an error occurs.
      */
     this.LJN_ReadSync = function (handle, address) {
-        var info = self.constants.getAddressInfo(address, 'R');
-        var expectedReturnType = info.type;
-        var isReturningString = expectedReturnType == driver_const.LJM_STRING;
-        var isDirectionValid = info.directionValid == 1;
-        var resolvedAddress = info.address;
+        let info = self.constants.getAddressInfo(address, 'R');
+        let expectedReturnType = info.type;
+        let isReturningString = expectedReturnType == driver_const.LJM_STRING;
+        let isDirectionValid = info.directionValid == 1;
+        let resolvedAddress = info.address;
 
         if (isDirectionValid && !isReturningString) {
             return self.LJM_eReadAddressSync(handle, resolvedAddress, info.type);
@@ -1810,7 +1777,7 @@ exports.ljmDriver = function(ljmOverride) {
      * Define functions to call the LJM_eReadAddress function.
      */
     this.LJM_eReadAddress = function(handle, address, type, onError, onSuccess) {
-        var result = new ref.alloc('double', 1);
+        let result = new ref.alloc('double', 1);
         self.ljm.LJM_eReadAddress.async(
             handle,
             resolvedAddress,
@@ -1831,8 +1798,8 @@ exports.ljmDriver = function(ljmOverride) {
             });
     };
     this.LJM_eReadAddressSync = function(handle, address, type) {
-        var result = new ref.alloc('double',1);
-        var output = self.ljm.LJM_eReadAddress(
+        let result = new ref.alloc('double',1);
+        let output = self.ljm.LJM_eReadAddress(
             handle,
             resolvedAddress,
             type,
@@ -1852,8 +1819,7 @@ exports.ljmDriver = function(ljmOverride) {
      */
     this.LJM_eReadAddressString = function(handle, address, onError, onSuccess) {
         //Allocate space for the string-result
-        var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
-        strBuffer.fill(0);
+        let strBuffer = allocBuffer(driver_const.LJM_MAX_STRING_SIZE);
 
         //Perform LJM Async function call
         self.ljm.LJM_eReadAddressString.async(
@@ -1868,13 +1834,13 @@ exports.ljmDriver = function(ljmOverride) {
                 // Check the output value.
                 if ( res === 0 ) {
                     // Parse the string buffer and get the actual string.
-                    var receivedStrData = strBuffer.toString(
+                    let receivedStrData = strBuffer.toString(
                         'utf8',
                         0,
                         driver_const.LJM_MAX_STRING_SIZE
                     );
-                    var actualStr = '';
-                    for(var i = 0; i < receivedStrData.length; i++) {
+                    let actualStr = '';
+                    for(let i = 0; i < receivedStrData.length; i++) {
                         if(receivedStrData.charCodeAt(i) === 0) {
                             break;
                         } else {
@@ -1891,8 +1857,7 @@ exports.ljmDriver = function(ljmOverride) {
 
     this.LJM_eReadAddressStringSync = function(handle, address) {
         //Allocate space for the result
-        var strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
-        strBuffer.fill(0);
+        let strBuffer = allocBuffer(driver_const.LJM_MAX_STRING_SIZE);
 
         output = self.ljm.LJM_eReadAddressString(
             handle,
@@ -1903,13 +1868,13 @@ exports.ljmDriver = function(ljmOverride) {
         // Check output value.
         if (output === 0) {
             // Parse the string buffer and get the actual string.
-            var receivedStrData = strBuffer.toString(
+            let receivedStrData = strBuffer.toString(
                 'utf8',
                 0,
                 driver_const.LJM_MAX_STRING_SIZE
             );
-            var actualStr = '';
-            for(var i = 0; i < receivedStrData.length; i++) {
+            let actualStr = '';
+            for(let i = 0; i < receivedStrData.length; i++) {
                 if(receivedStrData.charCodeAt(i) === 0) {
                     break;
                 } else {
@@ -1941,15 +1906,15 @@ exports.ljmDriver = function(ljmOverride) {
      * @throws {DriverOperationError} If the input args aren't correct or an error occurs.
     **/
     this.LJN_readArray = function(handle, address, numReads, onError, onSuccess) {
-        var output;
-        var addressNumber = 0;
-        var numValues = numReads;
-        var addressType = driver_const.LJM_BYTE;
-        var info = self.constants.getAddressInfo(address, 'R');
+        let output;
+        let addressNumber = 0;
+        let numValues = numReads;
+        let addressType = driver_const.LJM_BYTE;
+        let info = self.constants.getAddressInfo(address, 'R');
         // var expectedReturnType = info.type;
         addressType = info.type;
-        var isDirectionValid = info.directionValid == 1;
-        var isBufferRegister = false;
+        let isDirectionValid = info.directionValid == 1;
+        let isBufferRegister = false;
         if(info.data) {
             if(info.data.isBuffer) {
                 isBufferRegister = true;
@@ -1960,7 +1925,7 @@ exports.ljmDriver = function(ljmOverride) {
             addressNumber = info.address;
 
             // Return Variable
-            var errorResult = undefined;
+            let errorResult = undefined;
 
             return self.LJM_eReadAddressArray(handle, addressNumber, addressType, numValues, onError, onSuccess);
             
@@ -1969,16 +1934,16 @@ exports.ljmDriver = function(ljmOverride) {
         }
     };
     this.LJN_readArraySync = function(handle, address, numReads) {
-        var output;
-        var addressNumber = 0;
-        var numValues = numReads;
-        var addressType = driver_const.LJM_BYTE;
-        var info = self.constants.getAddressInfo(address, 'R');
-        var expectedReturnType = info.type;
+        let output;
+        let addressNumber = 0;
+        let numValues = numReads;
+        let addressType = driver_const.LJM_BYTE;
+        let info = self.constants.getAddressInfo(address, 'R');
+        let expectedReturnType = info.type;
         addressType = info.type;
-        var isDirectionValid = info.directionValid == 1;
-        var isBufferRegister = false;
-        var retData = [];
+        let isDirectionValid = info.directionValid == 1;
+        let isBufferRegister = false;
+        let retData = [];
         
         if (info.type >= 0) {
             addressNumber = info.address;
@@ -1997,11 +1962,10 @@ exports.ljmDriver = function(ljmOverride) {
 
     this.LJM_eReadAddressArray = function(handle, address, type, numValues, onError, onSuccess) {
         // Perform buffer allocations
-        var aValues = new Buffer(numValues * ARCH_DOUBLE_NUM_BYTES);         //Array of doubles
-        var errorVal = new ref.alloc('int',1);
+        let aValues = allocBuffer(numValues * ARCH_DOUBLE_NUM_BYTES);         //Array of doubles
+        let errorVal = new ref.alloc('int',1);
 
         // Clear all of the arrays
-        aValues.fill(0);
         errorVal.fill(0);
 
         // Call the LJM function
@@ -2032,14 +1996,13 @@ exports.ljmDriver = function(ljmOverride) {
 
     this.LJM_eReadAddressArraySync = function(handle, address, type, numValues) {
         // Perform buffer allocations
-        var aValues = new Buffer(numValues * ARCH_DOUBLE_NUM_BYTES);         //Array of doubles
-        var errorVal = new ref.alloc('int',1);
+        let aValues = allocBuffer(numValues * ARCH_DOUBLE_NUM_BYTES);         //Array of doubles
+        let errorVal = new ref.alloc('int',1);
 
         // Clear all of the arrays
-        aValues.fill(0);
         errorVal.fill(0);
 
-        var ljmError = self.ljm.LJM_eReadAddressArray(
+        let ljmError = self.ljm.LJM_eReadAddressArray(
             handle,
             address,
             type,
@@ -2085,15 +2048,14 @@ exports.ljmDriver = function(ljmOverride) {
     **/
     this.readMany = function(handle, addresses, onError, onSuccess) {
         //Get important info & allocate argument variables
-        var length = addresses.length;
-        var returnResults = Array();
+        let length = addresses.length;
+        let returnResults = Array();
 
         //Define buffers
-        var results = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
-        var errors = new ref.alloc('int',1);
+        let results = allocBuffer(ARCH_DOUBLE_NUM_BYTES * length);
+        let errors = new ref.alloc('int',1);
         
         // Make sure buffers are empty.
-        results.fill(0);
         errors.fill(0);
 
         if(length < 1) {
@@ -2101,17 +2063,17 @@ exports.ljmDriver = function(ljmOverride) {
             return onError("Addresses array must contain data");
         }
 
-        var addrBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
-        var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
-        var inValidOperation = 0;
+        let addrBuff = allocBuffer(ARCH_INT_NUM_BYTES*length);
+        let addrTypeBuff = allocBuffer(ARCH_INT_NUM_BYTES*length);
+        let inValidOperation = 0;
 
         //Integer Returned by .dll function
-        var info;
-        var offset=0;
-        var constants = self.constants;
-        var i;
+        let info;
+        let offset=0;
+        let constants = self.constants;
+        let i;
         for ( i=0; i<length; i++ ) {
-            var address = addresses[i];
+            let address = addresses[i];
 
             info = constants.getAddressInfo(address, 'R');
             if (info.directionValid == 1) {
@@ -2139,7 +2101,7 @@ exports.ljmDriver = function(ljmOverride) {
                 if(err) {
                     return onError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, err, 'LJM_eReadAddressArray');
                 }
-                var offset = 0;
+                let offset = 0;
                 for (i = 0; i < addresses.length; i++) {
                     returnResults[i] = results.readDoubleLE(offset);
                     offset += ARCH_DOUBLE_NUM_BYTES;
@@ -2171,34 +2133,31 @@ exports.ljmDriver = function(ljmOverride) {
     **/
     this.readManySync = function(handle, addresses) {
         //Get important info & allocate argument variables
-        var length = addresses.length;
-        var returnResults = Array();
+        let length = addresses.length;
+        let returnResults = Array();
 
         //Define buffers
-        var results = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
-        var errors = new ref.alloc('int',1);
+        let results = allocBuffer(ARCH_DOUBLE_NUM_BYTES * length);
+        let errors = new ref.alloc('int',1);
 
         //Make sure buffers are empty
-        results.fill(0);
         errors.fill(0);
 
-        var i = 0;
-        var offset = 0;
+        let i = 0;
+        let offset = 0;
 
         if ( length < 1 ) {
             throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, 'Addresses array must contain data', i);
         }
 
-        var addrBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
-        var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES*length);
-        var inValidOperation = 0;
+        let addrBuff = allocBuffer(ARCH_INT_NUM_BYTES*length);
+        let addrTypeBuff = allocBuffer(ARCH_INT_NUM_BYTES*length);
+        let inValidOperation = 0;
         //Integer Returned by .dll function
-        var info;
-        var offset=0;
-        var constants = self.constants;
-        var i;
+        let info;
+        let constants = self.constants;
         for ( i=0; i<length; i++ ) {
-            var address = addresses[i];
+            let address = addresses[i];
 
             info = constants.getAddressInfo(address, 'R');
             if (info.directionValid == 1) {

@@ -4,18 +4,16 @@
  * @author Chris Johnson (chrisjohn404, LabJack Corp.)
 **/
 
-var ref = require('ref');// http://tootallnate.github.io/ref/#types-double
-var util = require('util');
-var driverLib = require('./driver_wrapper');
-// var ljm = driverLib.getDriver();
+const ref = require('ref-napi');
+const util = require('util');
+const driverLib = require('./driver_wrapper');
 
-var ljnDriverLib = require('./driver');
-// var ljn = require('./labjack_nodejs');
-// var ljnd = ljn.getDriver();
+const ljnDriverLib = require('./driver');
+const allocBuffer = require('allocate_buffer').allocBuffer;
 
 
-var jsonConstants = require('ljswitchboard-modbus_map');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+const jsonConstants = require('ljswitchboard-modbus_map');
+const driver_const = require('ljswitchboard-ljm_driver_constants');
 
 
 // var ARCH_INT_NUM_BYTES = 4;
@@ -67,8 +65,8 @@ util.inherits(DriverInterfaceError, Error);
 DriverInterfaceError.prototype.name = 'Driver Interface Error - device';
 
 function buildAsyncError(code, message, errFrame) {
-    var errorInfo = ljm_mm.getErrorInfo(code);
-    var error = {
+    let errorInfo = ljm_mm.getErrorInfo(code);
+    let error = {
         code: code,
         string: errorInfo.string,
         description: errorInfo.description,
@@ -83,7 +81,7 @@ function buildAsyncError(code, message, errFrame) {
 }
 
 // A numeric that keeps track of the number of devices that have been created;
-var numCreatedDevices = 0;
+let numCreatedDevices = 0;
 exports.getNumCreatedDevices = function() {
 	return numCreatedDevices;
 };
@@ -110,8 +108,8 @@ exports.labjack = function (ljmOverride) {
 
 	this.isHandleValid = false;
 
-	var wrapUserFunction = function(userFunction) {
-		var persistentFunction = function(a, b, c, d) {
+	function wrapUserFunction(userFunction) {
+		function persistentFunction(a, b, c, d) {
 			try {
 				if(self.isHandleValid) {
 					if(userFunction) {
@@ -129,8 +127,9 @@ exports.labjack = function (ljmOverride) {
 		};
 		return persistentFunction;
 	};
-	var wrapOpenCloseCallbacks = function(userFunction) {
-		var persistentFunction = function(a, b, c, d) {
+
+	function wrapOpenCloseCallbacks(userFunction) {
+		function persistentFunction(a, b, c, d) {
 			if(userFunction) {
 				userFunction(a, b, c, d);
 			} else {
@@ -164,14 +163,14 @@ exports.labjack = function (ljmOverride) {
 	**/
 	this.open = function() {
 		//Variables to save information to allowing for open(onError, onSuccess)
-		var deviceType, connectionType, identifier, onError, onSuccess;
+		let deviceType, connectionType, identifier, onError, onSuccess;
 
 		//Determine how open() was used
 		if(arguments.length == 2) {
 			//If there are two args, aka open(onError, onSuccess) call
 
-			var argA = typeof(arguments[0]);
-			var argB = typeof(arguments[1]);
+			let argA = typeof(arguments[0]);
+			let argB = typeof(arguments[1]);
 
 			//Make sure the first two arg's are onError and onSuccess
 			if((argA == "function") && (argB == "function")) {
@@ -202,13 +201,13 @@ exports.labjack = function (ljmOverride) {
 		//Make sure we aren't already connected to a device
 		if(self.handle === null) {
 			//Create variables for the ffi call
-			var refDeviceHandle = new ref.alloc(ref.types.int,1);
-			var output;
+			let refDeviceHandle = new ref.alloc(ref.types.int,1);
+			let output;
 
 			//Get the type's of the inputs
-			var dtType = isNaN(deviceType);
-			var ctType = isNaN(connectionType);
-			var idType = isNaN(identifier);
+			let dtType = isNaN(deviceType);
+			let ctType = isNaN(connectionType);
+			let idType = isNaN(identifier);
 
 			if(dtType) {
 				dtType = "string";
@@ -231,7 +230,7 @@ exports.labjack = function (ljmOverride) {
 			}
 
 			//Function for handling the ffi callback
-			var handleResponse = function(err, res) {
+			function handleResponse(err, res) {
 				if(err) {
 					return onError('Weird Error open', err);
 				}
@@ -638,7 +637,7 @@ exports.labjack = function (ljmOverride) {
 	this.readArraySync = function(address, numReads) {
 		//Check to make sure a device has been opened
 		self.checkStatus();
-
+		
 		return self.ljnd.LJN_readArraySync(self.handle, address, numReads);
 	};
 	/**
@@ -720,8 +719,7 @@ exports.labjack = function (ljmOverride) {
 			console.log('WriteRaw-Err, data not a number-array');
 		}
 
-		var aData = new Buffer(data.length);
-		aData.fill(0);
+		var aData = allocBuffer(data.length);
 
 		for ( var i = 0; i < data.length; i++ ) {
 			aData.writeUInt8(data[i], i);
@@ -763,9 +761,8 @@ exports.labjack = function (ljmOverride) {
 		}
 
 		//Define data buffer
-		var aData = new Buffer(data.length);
-		//Clear data buffer
-		aData.fill(0);
+		var aData = allocBuffer(data.length);
+
 		for ( var i = 0; i < data.length; i++ ) {
 			aData.writeUInt8(data[i], i);
 		}
@@ -834,8 +831,7 @@ exports.labjack = function (ljmOverride) {
 				return 0;
 			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
-				strBuffer.fill(0);
+				strBuffer = allocBuffer(driver_const.LJM_MAX_STRING_SIZE);
 
 				//Fill the write-string
 				if ( value.length <= driver_const.LJM_MAX_STRING_SIZE ) {
@@ -893,8 +889,7 @@ exports.labjack = function (ljmOverride) {
 				return 0;
 			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
-				strBuffer.fill(0);
+				strBuffer = allocBuffer(driver_const.LJM_MAX_STRING_SIZE);
 
 				//Fill the write-string
 				if(value.length <= driver_const.LJM_MAX_STRING_SIZE) {
@@ -972,8 +967,7 @@ exports.labjack = function (ljmOverride) {
 				);
 			} else if( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
-				strBuffer.fill(0);
+				strBuffer = allocBuffer(driver_const.LJM_MAX_STRING_SIZE);
 
 				//Fill the write-string
 				if ( value.length <= driver_const.LJM_MAX_STRING_SIZE ) {
@@ -1011,8 +1005,7 @@ exports.labjack = function (ljmOverride) {
 				);
 			} else if ( (info.directionValid == 1) && (info.type == 98) ) {
 				//Allocate space for the string to be written
-				strBuffer = new Buffer(driver_const.LJM_MAX_STRING_SIZE);
-				strBuffer.fill(0);
+				strBuffer = allocBuffer(driver_const.LJM_MAX_STRING_SIZE);
 
 				//Fill the write-string
 				if ( value.length <= driver_const.LJM_MAX_STRING_SIZE ) {
@@ -1097,8 +1090,7 @@ exports.labjack = function (ljmOverride) {
 				writeInfo.message = 'Buffer type is not supported';
 			} else if(Array.isArray(writeData)) {
 				writeInfo.numValues = writeData.length;
-				aValues = new Buffer(writeData.length * ARCH_DOUBLE_NUM_BYTES);
-				aValues.fill(0);
+				aValues = allocBuffer(writeData.length * ARCH_DOUBLE_NUM_BYTES);
 				offset = 0;
 				for(i = 0; i < writeData.length; i++) {
 					aValues.writeDoubleLE(writeData[i], offset);
@@ -1107,8 +1099,7 @@ exports.labjack = function (ljmOverride) {
 				writeInfo.aValues = aValues;
 			} else if((typeof(writeData) === 'string') || (writeData instanceof String)) {
 				writeInfo.numValues = writeData.length;
-				aValues = new Buffer(writeData.length * ARCH_DOUBLE_NUM_BYTES);
-				aValues.fill(0);
+				aValues = allocBuffer(writeData.length * ARCH_DOUBLE_NUM_BYTES);
 				offset = 0;
 				for(i = 0; i < writeData.length; i++) {
 					aValues.writeDoubleLE(writeData.charCodeAt(i), offset);
@@ -1277,11 +1268,10 @@ exports.labjack = function (ljmOverride) {
 
 		//Perform universal buffer allocations.
 		var length = addresses.length;
-		var aValues = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
+		var aValues = allocBuffer(ARCH_DOUBLE_NUM_BYTES * length);
 		var errors = new ref.alloc('int',1);
 
 		//Clear the buffers
-		aValues.fill(0);
 		errors.fill(0);
 
 		var errorResult;
@@ -1296,20 +1286,14 @@ exports.labjack = function (ljmOverride) {
 			dataOffset = 0;
 
 			//Declare aNames array buffer
-			var aNames = new Buffer(ARCH_POINTER_SIZE * length);
-
-			//Clear aNames buffer
-			aNames.fill(0);
+			var aNames = allocBuffer(ARCH_POINTER_SIZE * length);
 
 			for ( i = 0; i < length; i++ ) {
 				//Append the value to the aValues array
 				aValues.writeDoubleLE(values[i], dataOffset);
 
 				//Declare buffer for string-address
-				var buf = new Buffer(addresses[i].length + 1);
-
-				//Clear the buffer
-				buf.fill(0);
+				var buf = allocBuffer(addresses[i].length + 1);
 
 				//Save the string to the buffer
 				ref.writeCString(buf, 0, addresses[i]);
@@ -1343,8 +1327,8 @@ exports.labjack = function (ljmOverride) {
 			return 0;
 		} else if ( !isNaN(addresses[0]) ) {
 			//Perform necessary number buffer allocations.
-			var addrBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
-			var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
+			var addrBuff = allocBuffer(ARCH_INT_NUM_BYTES * length);
+			var addrTypeBuff = allocBuffer(ARCH_INT_NUM_BYTES * length);
 			var inValidOperation = 0;
 
 			var info;
@@ -1440,11 +1424,10 @@ exports.labjack = function (ljmOverride) {
 
 		//Perform universal buffer allocations.
 		var length = addresses.length;
-		var aValues = new Buffer(ARCH_DOUBLE_NUM_BYTES * length);
+		var aValues = allocBuffer(ARCH_DOUBLE_NUM_BYTES * length);
 		var errors = new ref.alloc('int',1);
 
 		//Clear the buffers
-		aValues.fill(0);
 		errors.fill(0);
 
 		var errorResult;
@@ -1459,20 +1442,14 @@ exports.labjack = function (ljmOverride) {
 			var dataOffset = 0;
 
 			//Declare aNames array buffer
-			var aNames = new Buffer(ARCH_POINTER_SIZE * length);
-
-			//Clear aNames buffer
-			aNames.fill(0);
+			var aNames = allocBuffer(ARCH_POINTER_SIZE * length);
 
 			for ( i = 0; i < length; i++ ) {
 				//Append the value to the aValues array
 				aValues.writeDoubleLE(values[i], dataOffset);
 
 				//Declare buffer for string-address
-				var buf = new Buffer(addresses[i].length + 1);
-
-				//Clear the buffer
-				buf.fill(0);
+				var buf = allocBuffer(addresses[i].length + 1);
 
 				//Save the string to the buffer
 				ref.writeCString(buf, 0, addresses[i]);
@@ -1496,8 +1473,8 @@ exports.labjack = function (ljmOverride) {
 
 		} else if (!isNaN(addresses[0])) {
 			//Perform necessary number buffer allocations.
-			var addrBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
-			var addrTypeBuff = new Buffer(ARCH_INT_NUM_BYTES * length);
+			var addrBuff = allocBuffer(ARCH_INT_NUM_BYTES * length);
+			var addrTypeBuff = allocBuffer(ARCH_INT_NUM_BYTES * length);
 			var inValidOperation = 0;
 
 			var info;
@@ -1629,21 +1606,14 @@ exports.labjack = function (ljmOverride) {
 
 
 		//Perform function wide buffer allocations:
-		var aDirections = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of directions
-		var aNumWrites = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of ops. per frame
-		var aValues = new Buffer(values.length * 8);//Array of doubles
-		var errorVal = new Buffer(ARCH_INT_NUM_BYTES); //Array the size of one UInt32 for err
-
-		//Clear all the arrays
-		aDirections.fill(0);
-		aNumWrites.fill(0);
-		aValues.fill(0);
-		errorVal.fill(0);
+		var aDirections = allocBuffer(numFrames * ARCH_INT_NUM_BYTES);//Array of directions
+		var aNumWrites = allocBuffer(numFrames * ARCH_INT_NUM_BYTES);//Array of ops. per frame
+		var aValues = allocBuffer(values.length * 8);//Array of doubles
+		var errorVal = allocBuffer(ARCH_INT_NUM_BYTES); //Array the size of one UInt32 for err
 
 		if (isNaN(addresses[0])) {
 			//Allocate space for the aNames array
-			var aNames = new Buffer(numFrames * ARCH_POINTER_SIZE);//Array of C-String pointers
-			aNames.fill(0);
+			var aNames = allocBuffer(numFrames * ARCH_POINTER_SIZE);//Array of C-String pointers
 
 			var offsetP = 0;
 			offsetD = 0;
@@ -1658,8 +1628,7 @@ exports.labjack = function (ljmOverride) {
 				aNumWrites.writeUInt32LE(numValues[i], offsetI);
 
 				//Fill aNames array
-				var buf = new Buffer(addresses[i].length + 1);
-				buf.fill(0);
+				var buf = allocBuffer(addresses[i].length + 1);
 
 				ref.writeCString(buf, 0, addresses[i]);
 				ref.writePointer(aNames, offsetP, buf);
@@ -1711,8 +1680,8 @@ exports.labjack = function (ljmOverride) {
 			);
 		} else if(!isNaN(addresses[0])) {
 			//Allocate space for the aNames array
-			var aAddresses = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of addresses
-			var aTypes = new Buffer(numFrames * ARCH_INT_NUM_BYTES);//Array of types
+			var aAddresses = allocBuffer(numFrames * ARCH_INT_NUM_BYTES);//Array of addresses
+			var aTypes = allocBuffer(numFrames * ARCH_INT_NUM_BYTES);//Array of types
 
 			offsetD = 0;
 			offsetI = 0;
@@ -1860,16 +1829,10 @@ exports.labjack = function (ljmOverride) {
 		var errorResult;
 
 		//Perform function wide buffer allocations:
-		var aDirections = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of directions
-		var aNumWrites = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of ops. per frame
-		var aValues = new Buffer(values.length * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
-		var errorVal = new Buffer(ARCH_INT_NUM_BYTES);							//Array the size of one UInt32 for err
-
-		//Clear all the arrays
-		aDirections.fill(0);
-		aNumWrites.fill(0);
-		aValues.fill(0);
-		errorVal.fill(0);
+		var aDirections = allocBuffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of directions
+		var aNumWrites = allocBuffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of ops. per frame
+		var aValues = allocBuffer(values.length * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
+		var errorVal = allocBuffer(ARCH_INT_NUM_BYTES);							//Array the size of one UInt32 for err
 
 		var offsetP = 0;
 		var offsetD = 0;
@@ -1880,8 +1843,7 @@ exports.labjack = function (ljmOverride) {
 
 		if ( isNaN(addresses[0]) ) {
 			//Allocate space for the aNames array
-			var aNames = new Buffer(numFrames * ARCH_POINTER_SIZE);				//Array of C-String pointers
-			aNames.fill(0);
+			var aNames = allocBuffer(numFrames * ARCH_POINTER_SIZE);				//Array of C-String pointers
 
 			offsetP = 0;
 			offsetD = 0;
@@ -1896,8 +1858,7 @@ exports.labjack = function (ljmOverride) {
 				aNumWrites.writeUInt32LE(numValues[i], offsetI);
 
 				//Fill aNames array
-				var buf = new Buffer(addresses[i].length+1);
-				buf.fill(0);
+				var buf = allocBuffer(addresses[i].length+1);
 
 				ref.writeCString(buf, 0, addresses[i]);
 				ref.writePointer(aNames, offsetP, buf);
@@ -1931,8 +1892,8 @@ exports.labjack = function (ljmOverride) {
 
 		} else if(!isNaN(addresses[0])) {
 			//Allocate space for the aNames array
-			var aAddresses = new Buffer(numFrames * ARCH_INT_NUM_BYTES);		//Array of addresses
-			var aTypes = new Buffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of types
+			var aAddresses = allocBuffer(numFrames * ARCH_INT_NUM_BYTES);		//Array of addresses
+			var aTypes = allocBuffer(numFrames * ARCH_INT_NUM_BYTES);			//Array of types
 
 			offsetD = 0;
 			offsetI = 0;
@@ -2081,20 +2042,12 @@ exports.labjack = function (ljmOverride) {
 		var errorResult;
 
 		//Perform function wide buffer allocations:
-		var aAddresses = new Buffer(1 * ARCH_INT_NUM_BYTES);
-		var aTypes = new Buffer(1 * ARCH_INT_NUM_BYTES);
-		var aWrites = new Buffer(1 * ARCH_INT_NUM_BYTES);			//Array of directions
-		var aNumValues = new Buffer(1 * ARCH_INT_NUM_BYTES);		//Array of ops. per frame
-		var aValues = new Buffer(8 * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
-		var errorVal = new Buffer(ARCH_INT_NUM_BYTES);				//Array the size of one UInt32 for err
-
-		//Clear all the arrays
-		aAddresses.fill(0);
-		aTypes.fill(0);
-		aWrites.fill(0);
-		aNumValues.fill(0);
-		aValues.fill(0);
-		errorVal.fill(0);
+		var aAddresses = allocBuffer(1 * ARCH_INT_NUM_BYTES);
+		var aTypes = allocBuffer(1 * ARCH_INT_NUM_BYTES);
+		var aWrites = allocBuffer(1 * ARCH_INT_NUM_BYTES);			//Array of directions
+		var aNumValues = allocBuffer(1 * ARCH_INT_NUM_BYTES);		//Array of ops. per frame
+		var aValues = allocBuffer(8 * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
+		var errorVal = allocBuffer(ARCH_INT_NUM_BYTES);				//Array the size of one UInt32 for err
 
 
 		var numFrames = 1;
@@ -2177,20 +2130,12 @@ exports.labjack = function (ljmOverride) {
 		var errorResult;
 
 		//Perform function wide buffer allocations:
-		var aAddresses = new Buffer(1 * ARCH_INT_NUM_BYTES);
-		var aTypes = new Buffer(1 * ARCH_INT_NUM_BYTES);
-		var aWrites = new Buffer(1 * ARCH_INT_NUM_BYTES);			//Array of directions
-		var aNumValues = new Buffer(1 * ARCH_INT_NUM_BYTES);		//Array of ops. per frame
-		var aValues = new Buffer(8 * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
-		var errorVal = new Buffer(ARCH_INT_NUM_BYTES);				//Array the size of one UInt32 for err
-
-		//Clear all the arrays
-		aAddresses.fill(0);
-		aTypes.fill(0);
-		aWrites.fill(0);
-		aNumValues.fill(0);
-		aValues.fill(0);
-		errorVal.fill(0);
+		var aAddresses = allocBuffer(1 * ARCH_INT_NUM_BYTES);
+		var aTypes = allocBuffer(1 * ARCH_INT_NUM_BYTES);
+		var aWrites = allocBuffer(1 * ARCH_INT_NUM_BYTES);			//Array of directions
+		var aNumValues = allocBuffer(1 * ARCH_INT_NUM_BYTES);		//Array of ops. per frame
+		var aValues = allocBuffer(8 * ARCH_DOUBLE_NUM_BYTES);		//Array of doubles
+		var errorVal = allocBuffer(ARCH_INT_NUM_BYTES);				//Array the size of one UInt32 for err
 
 
 		var numFrames = 1;
@@ -2300,12 +2245,8 @@ exports.labjack = function (ljmOverride) {
 		var numAddresses = scanList.length;
 
 		// Allocate buffer space:
-		var aScanList = new Buffer(numAddresses * ARCH_INT_NUM_BYTES);	//Array of integers
-		var pScanRate = new Buffer(ARCH_DOUBLE_NUM_BYTES);			//Pointer to a double
-
-		// Clear the buffers
-		aScanList.fill(0);
-		pScanRate.fill(0);
+		var aScanList = allocBuffer(numAddresses * ARCH_INT_NUM_BYTES);	//Array of integers
+		var pScanRate = allocBuffer(ARCH_DOUBLE_NUM_BYTES);			//Pointer to a double
 
 		//Write data to the buffers
 		var i = 0;
@@ -2426,14 +2367,9 @@ exports.labjack = function (ljmOverride) {
 		var readBufferSize = self.streamSettings.readBufferSize;
 
 		// Allocate buffer space:
-		var aData = new Buffer(readBufferSize);					//Array of integers
-		var deviceScanBacklog = new Buffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
-		var ljmScanBacklog = new Buffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
-
-		// Clear the buffers
-		aData.fill(0);
-		deviceScanBacklog.fill(0);
-		ljmScanBacklog.fill(0);
+		var aData = allocBuffer(readBufferSize);					//Array of integers
+		var deviceScanBacklog = allocBuffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
+		var ljmScanBacklog = allocBuffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
 
 		// Call the ljm eStreamRead function
 		self.ljm.LJM_eStreamRead.async(
@@ -2544,10 +2480,7 @@ exports.labjack = function (ljmOverride) {
 		onSuccess = wrapUserFunction(onSuccess);
 
 		// Allocate buffer space:
-		var isAuthorized = new Buffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
-
-		// Clear the buffers
-		isAuthorized.fill(0);
+		var isAuthorized = allocBuffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
 
 		// Call the ljm IsAuth function
 		self.ljm.LJM_IsAuth.async(
@@ -2576,10 +2509,7 @@ exports.labjack = function (ljmOverride) {
 		self.checkStatus();
 
 		// Allocate buffer space:
-		var isAuthorized = new Buffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
-
-		// Clear the buffers
-		isAuthorized.fill(0);
+		var isAuthorized = allocBuffer(ARCH_INT_NUM_BYTES);	//Pointer to an integer
 		
 		var isAuth = false;
 		
