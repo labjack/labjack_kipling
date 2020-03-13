@@ -1,5 +1,5 @@
 
-var ref = require('ref');
+
 var q = require('q');
 var async = require('async');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
