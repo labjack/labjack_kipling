@@ -49,6 +49,11 @@ exports.tests = {
 				'serialNumber': 4,
 			},
 			{
+				'deviceType': 'LJM_dtT8',
+				'connectionType': 'LJM_ctUSB',
+				'serialNumber': 8,
+			},
+			{
 				'deviceType': 'LJM_dtDIGIT',
 				'connectionType': 'LJM_ctUSB'
 			}
@@ -83,6 +88,21 @@ exports.tests = {
 					}]
 				}]
 			},
+			// The T4/T5/T8 don't necessairly have WiFi 
+			'T8': {
+				'devices': [{
+					'connectionTypes': [{
+						'name': 'USB',
+						'insertionMethod': 'scan',
+					}, {
+						'name': 'Ethernet',
+						'insertionMethod': 'attribute'
+					}, {
+						'name': 'WiFi',
+						'insertionMethod': 'attribute'
+					}]
+				}]
+			},
 			'T5': {
 				'devices': [{
 					'connectionTypes': [{
@@ -90,6 +110,9 @@ exports.tests = {
 						'insertionMethod': 'scan',
 					}, {
 						'name': 'Ethernet',
+						'insertionMethod': 'attribute'
+					}, {
+						'name': 'WiFi',
 						'insertionMethod': 'attribute'
 					}]
 				}]
@@ -102,6 +125,9 @@ exports.tests = {
 					}, {
 						'name': 'Ethernet',
 						'insertionMethod': 'attribute'
+					}, {
+						'name': 'WiFi',
+						'insertionMethod': 'attribute'
 					}]
 				}]
 			},
@@ -109,7 +135,14 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			// console.log('HERE', deviceTypes);
+			// console.log('Device Type information:', deviceTypes);
+			var outStr = JSON.stringify(deviceTypes, null, 4);
+			fs = require('fs');
+			path = require('path');
+			var fp = path.join(process.cwd(), 'scan_data.json');
+			fs.writeFileSync(fp, outStr);
+
+			// console.log('Manual Debug Results', deviceTypes);
 			// deviceTypes.forEach(function(deviceType) {
 			// 	var devices = deviceType.devices;
 			// 	devices.forEach(function(device) {
@@ -124,11 +157,12 @@ exports.tests = {
 			// 		});
 			// 	});
 			// });
+
 			var endTime = new Date();
 			var debug = false;
 			// printScanResultsKeys(deviceTypes);
 			verifyScanResults(deviceTypes, test);
-			testScanResults(deviceTypes, expectedData, test, {'debug': false});
+			testScanResults(deviceTypes, expectedData, test, {'debug': debug});
 			
 			if(debug) {
 				console.log('  - Duration', (endTime - startTime)/1000);

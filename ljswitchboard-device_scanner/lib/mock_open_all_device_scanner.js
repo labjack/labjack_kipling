@@ -28,7 +28,13 @@ function createMockDeviceScanner() {
 		'DEVICE_NAME_DEFAULT': function(deviceInfo, address) {
 			return 'Device: ' + deviceInfo.serialNumber.toString();
 		},
-		'HARDWARE_INSTALLED': 15, // Indicating T7-Pro with all options installed
+		'HARDWARE_INSTALLED': function(deviceInfo, address) {
+			if(deviceInfo.dt == 7) {
+				return 15; // Indicating T7-Pro with all options installed
+			} else {
+				return 0;
+			}
+		},
 		'DGT_INSTALLED_OPTIONS': 3, // Indicating TLH
 		'ETHERNET_IP': getFakeIP,		// Indicate that the devie has a valid IP.
 		'WIFI_IP': getFakeIP,		// Indicate that the devie has a valid IP.
@@ -250,6 +256,19 @@ function createMockDeviceScanner() {
 			} else if(scanDT == currentDT) {
 				// If we are scanning for a particular device type
 				addDevice = true;
+			} else if (scanDT == driver_const.LJM_DT_TSERIES) {
+				if (currentDT == driver_const.LJM_DT_T4) {
+					addDevice = true;
+				}
+				if (currentDT == driver_const.LJM_DT_T5) {
+					addDevice = true;
+				}
+				if (currentDT == driver_const.LJM_DT_T7) {
+					addDevice = true;
+				}
+				if (currentDT == driver_const.LJM_DT_T8) {
+					addDevice = true;
+				}
 			}
 
 			// If the device should be added, check its connection type.
@@ -385,6 +404,9 @@ function createMockDeviceScanner() {
 		} else if(deviceInfo.dt === 5) {
 			// return deviceInfo.HARDWARE_INSTALLED.productType;
 			return 'T5';
+		} else if(deviceInfo.dt === 8) {
+			// return deviceInfo.HARDWARE_INSTALLED.productType;
+			return 'T8';
 		} else if(deviceInfo.dt === 200) {
 			return deviceInfo.DGT_INSTALLED_OPTIONS.productType;
 		} else {
@@ -396,7 +418,8 @@ function createMockDeviceScanner() {
 		var pt = deviceInfo.deviceTypeName;
 		var sc = '';
 		if(deviceInfo.dt === 7) {
-			pt = deviceInfo.HARDWARE_INSTALLED.productType;
+			// pt = deviceInfo.HARDWARE_INSTALLED.productType;
+			pt = deviceInfo.deviceTypeName;
 			sc = deviceInfo.HARDWARE_INSTALLED.subclass;
 		} else if(deviceInfo.dt === 4) {
 			// pt = deviceInfo.HARDWARE_INSTALLED.productType;
@@ -408,8 +431,13 @@ function createMockDeviceScanner() {
 			// sc = deviceInfo.HARDWARE_INSTALLED.subclass;
 			pt = 'T5';
 			sc = '';
+		} else if(deviceInfo.dt === 8) {
+			// pt = deviceInfo.HARDWARE_INSTALLED.productType;
+			// sc = deviceInfo.HARDWARE_INSTALLED.subclass;
+			pt = 'T8';
+			sc = '';
 		} else if(deviceInfo.dt === 200) {
-			pt = deviceInfo.DGT_INSTALLED_OPTIONS.productType;
+			pt = deviceInfo.deviceTypeName;
 			sc = deviceInfo.DGT_INSTALLED_OPTIONS.subclass;
 		} else {
 			console.log('Failed to get model type');
@@ -417,7 +445,6 @@ function createMockDeviceScanner() {
 		return pt + sc;
 	}
 	this.getDeviceInfo = function(handle, requiredInfo, cb) {
-		// console.log('Getting Device Data', handle, requiredInfo);
 		var sn = 0;
 		var device;
 		var foundDevice = self.devices.some(function(mockDevice) {
@@ -479,13 +506,17 @@ function createMockDeviceScanner() {
 			// deviceInfo.serialNumber = handleInfo.SerialNumber;
 			// deviceInfo.ip = parseIPAddress(handleInfo.IPAddress);
 			data.ip = device.ip;
+			if(typeof(data.ip) === 'undefined') {
+				data.ip = device.ipAddress;
+			}
 			data.port = device.port;
+
 			// deviceInfo.port = handleInfo.Port;
 			// deviceInfo.maxBytesPerMB = handleInfo.MaxBytesPerMB;	
 
 			data.acquiredRequiredData = true;
 			data.productType = getProductType(data);
-			data.modelType = getModelType(data);	
+			data.modelType = getModelType(data);
 		} else {
 			// The mock device wasn't found.  We should try getting a real device...
 			console.log('Finding a real device...')
@@ -504,10 +535,8 @@ function createMockDeviceScanner() {
 	this.openAll = function(dt, ct, onErr, onSuccess) {
 		var foundDevices = [];
 		// console.log('dt, ct', dt, ct);
-		// console.log('Called OpenAll', dt, ct);
 		addMockDevices(foundDevices, dt, ct)
 		.then(function(devices) {
-			// console.log('OpenAll Data', devices);
 			var handles = [];
 			devices.forEach(function(device) {
 				handles.push(device.handle);

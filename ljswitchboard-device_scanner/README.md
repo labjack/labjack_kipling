@@ -48,7 +48,7 @@ Returns an array,
 
         "productType": "T7-Pro",
         // Human-readable device class / subclass name, e.g. "T7" or "T7-Pro"
-
+n
         "modelType": "T7-Pro",
         // Same as productType
 

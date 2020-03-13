@@ -88,14 +88,19 @@ var printAvailableDeviceData = function(device) {
 	];
 	var availableKeys = Object.keys(device);
 	availableKeys.forEach(function(key) {
-		if(ignoredData.indexOf(key) < 0) {
-			if(typeof(device[key].res) !== 'undefined') {
-				console.log('  - ', key, '>>', device[key].val);
+		try {
+			if(ignoredData.indexOf(key) < 0) {
+				if(typeof(device[key].res) !== 'undefined') {
+					console.log('  - ', key, '>>', device[key].val);
+				} else {
+					console.log('  - ', key, '>>', device[key]);
+				}
 			} else {
-				console.log('  - ', key, '>>', device[key]);
+				console.log('  - ', key, '...');
 			}
-		} else {
-			console.log('  - ', key, '...');
+		} catch(err) {
+			console.log ('! - Error reading', key, err, device);
+			throw new Error(err);
 		}
 	});
 };
@@ -154,6 +159,23 @@ var requiredDeviceKeys = {
 		{'name': 'isActive', verify: verifyBooleanResult},
 	],
 	'LJM_dtT5': [
+		{'name': 'deviceType', verify:verifyNumberResult},
+		{'name': 'deviceTypeString', verify:verifyStringResult},
+		{'name': 'deviceTypeName', verify:verifyStringResult},
+		{'name': 'serialNumber', verify:verifyNumberResult},
+		{'name': 'acquiredRequiredData', verify:verifyBooleanResult},
+		{'name': 'connectionTypes', verify:verifyConnectionTypesArray},
+		{'name': 'isMockDevice', verify:verifyBooleanResult},
+		{'name': 'DEVICE_NAME_DEFAULT', verify:verifyDeviceDataObject},
+		{'name': 'DEVICE_NAME_DEFAULT', verify:verifyDeviceDataObject},
+		{'name': 'HARDWARE_INSTALLED', verify: verifyDeviceDataObject},
+		{'name': 'ETHERNET_IP', verify: verifyDeviceDataObject},
+		{'name': 'FIRMWARE_VERSION', verify: verifyDeviceDataObject},
+		{'name': 'productType', verify: verifyStringResult},
+		{'name': 'modelType', verify: verifyStringResult},
+		{'name': 'isActive', verify: verifyBooleanResult},
+	],
+	'LJM_dtT8': [
 		{'name': 'deviceType', verify:verifyNumberResult},
 		{'name': 'deviceTypeString', verify:verifyStringResult},
 		{'name': 'deviceTypeName', verify:verifyStringResult},
@@ -249,7 +271,10 @@ function verifyScanResults(deviceTypes, test, options) {
 			var strAttrKeysToCheck = ['deviceTypeStr', 'deviceTypeString', 'deviceTypeName', 'productType', 'modelType'];
 			for(var i = 0; i < strAttrKeysToCheck.length; i++) {
 				var strAttrKey = strAttrKeysToCheck[i];
-				test.ok(device[strAttrKeysToCheck[i]].indexOf(dtn) >= 0, 'Device Attr: '+strAttrKey+' should have chars '+dtn);
+
+				var strToCheck = dtn.toLowerCase();
+				var strToSearch = device[strAttrKeysToCheck[i]].toLowerCase();
+				test.ok(strToSearch.indexOf(strToCheck) >= 0, 'Device Attr: '+strAttrKey+' should have chars '+dtn);
 			}
 
 			var requiredDevKeys = requiredDeviceKeys[dts];
@@ -404,7 +429,7 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 				test.strictEqual(
 					numConnectionTypes,
 					expNumConnectionTypes,
-					'Unexpected number of connection types'
+					'Unexpected number of connection types dt:' + device.deviceTypeName
 				);
 			}
 			

@@ -14,6 +14,7 @@ function createMockDeviceScanner() {
 		var sn = deviceInfo.serialNumber;
 		var ct;
 		var dt = deviceInfo.deviceType;
+
 		if(address === 'ETHERNET_IP') {
 			ct = driver_const.LJM_CT_ETHERNET;
 		} else if(address === 'WIFI_IP') {

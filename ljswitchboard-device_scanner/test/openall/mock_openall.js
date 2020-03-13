@@ -83,10 +83,11 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
+			console.log('Device Types', deviceTypes);
 			var endTime = new Date();
 			var debug = false;
 
-			testScanResults(deviceTypes, expectedData, test, {'debug': false});
+			testScanResults(deviceTypes, expectedData, test, {'debug': true});
 			
 			if(debug) {
 				console.log('  - Duration', (endTime - startTime)/1000);
