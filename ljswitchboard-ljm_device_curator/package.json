@@ -44,9 +44,9 @@
     "lj-apps-win-registry-info": "git+https://github.com/chrisJohn404/lj-apps-win-registry-info.git#master",
     "ljm-ffi": "^2.0.0",
     "ljmmm-parse": "^0.2.2",
-    "ljswitchboard-data_parser": "^1.0.0",
+    "ljswitchboard-data_parser": "^1.0.1",
     "ljswitchboard-ljm_driver_constants": "^1.0.3",
-    "ljswitchboard-modbus_map": "^1.0.1",
+    "ljswitchboard-modbus_map": "^1.0.3",
     "q": "1.5.1",
     "semver": "^7.1.1",
     "stats-lite": "2.2.0"
