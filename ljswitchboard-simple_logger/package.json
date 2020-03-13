@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-simple_logger",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A simple data logger for LabJack devices.",
   "main": "./lib/ljswitchboard-simple_logger",
   "scripts": {
@@ -33,12 +33,12 @@
     "async": "1.5.2",
     "compute-gcd": "1.2.0",
     "fs-extra": "0.18.4",
-    "labjack-nodejs": "^1.0.0",
+    "labjack-nodejs": "^2.0.0",
     "ljswitchboard-data_parser": "^1.0.1",
     "ljswitchboard-device_manager": "git://github.com/chrisJohn404/ljswitchboard-device_manager.git#master",
-    "ljswitchboard-ljm_device_curator": "^1.0.0",
-    "ljswitchboard-ljm_driver_constants": "^1.0.0",
-    "ljswitchboard-modbus_map": "^1.0.1",
+    "ljswitchboard-ljm_device_curator": "^2.0.0",
+    "ljswitchboard-ljm_driver_constants": "^1.0.3",
+    "ljswitchboard-modbus_map": "^1.0.3",
     "q": "1.5.1"
   },
   "devDependencies": {
@@ -56,5 +56,8 @@
   },
   "directories": {
     "lib": "./lib"
+  },
+  "engines": {
+      "node": ">=6.0.0"
   }
 }
