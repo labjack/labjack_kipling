@@ -10,10 +10,10 @@ outPin = 0--FIO0. Changed if T4 instead of T7
 pwmFrequency = 50 -- 50 Hz
 pwmDutyCycle = 5 -- 5%
 
--- devType = MB.R(60000, 3)
--- if devType == 4 then
--- 	outPin = 6--FIO6 on T4
--- end
+devType = MB.R(60000, 3)
+if devType == 4 then
+	outPin = 6--FIO6 on T4
+end
 -- Create PWM library.
 PWM = {}--add local variables here
 function PWM.init (self, ichan, ifreq, iduty, iclk, idivisor)--duty should be in %, not decimal
@@ -55,7 +55,7 @@ end
 
 myPWM = PWM
 
-myPWM.init(myPWM, 0, pwmFrequency, pwmDutyCycle, 0, 1)--init on outPin with 50Hz (20ms) and 50% duty cycle
+myPWM.init(myPWM, outPin, pwmFrequency, pwmDutyCycle, 0, 1)--init on outPin with 50Hz (20ms) and 50% duty cycle
 myPWM.enable(myPWM)
 
 -- Initialize the user RAM registers 46000 and 46002 registers.
