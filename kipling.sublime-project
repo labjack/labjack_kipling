@@ -1,0 +1,49 @@
+{
+	"files":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				"jshint.js"
+			],
+			"folder_exclude_patterns":
+			[
+				"node_modules/*",
+				"static/*",
+				"deploy/*",
+				"third_party_code/*"
+			],
+			"name": "Settings",
+			"path": "./kipling.sublime-project"
+		}
+	],
+	"folders":
+	[
+		{
+			"name": "Modules",
+			"path": "ljswitchboard-module_manager/lib/switchboard_modules"
+		},
+		{
+			"name": "LabJack LJM (win)",
+			"path": "C:\\ProgramData\\LabJack"
+		},
+		{
+			"name": "LabJack Install (win)",
+			"path": "C:\\Program Files (x86)\\LabJack"
+		},
+		{
+			"name": "LabJack LJM (unix)",
+			"path": "/usr/local/share/LabJack/K3"
+		},
+		{
+			"name": "root",
+			"path": "."
+		}
+	],
+	"settings":
+	[
+		{
+			"tab_size": 4
+		}
+	]
+}
