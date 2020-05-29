@@ -52,7 +52,7 @@
     "ljswitchboard-ljm_driver_constants": "^1.0.0",
     "ljswitchboard-ljm_special_addresses": "^1.0.0",
     "ljswitchboard-modbus_map": "^1.0.1",
-    "ljswitchboard-simple_logger": "git://github.com/chrisJohn404/ljswitchboard-simple_logger.git#master",
+    "ljswitchboard-simple_logger": "*",
     "ljswitchboard-version_manager": "^0.0.23",
     "lodash": "^4.17.15",
     "process_manager": "^0.0.17",
