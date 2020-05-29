@@ -1,0 +1,14 @@
+{
+    "name": "network_settings",
+    "humanName": "Network Settings",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "third_party_code":[],
+    "supportedDevices": [{"type":"T7","subclass":["Pro",""],"minFW":"0.5"}, {"type":"T4","minFW":"0.1"}],
+    "third_party_code_unload":[],
+    "htmlFiles": [
+        "ethernet_settings.html",
+        "wifi_settings.html",
+    	"current_pc_settings.html"
+    ]
+}

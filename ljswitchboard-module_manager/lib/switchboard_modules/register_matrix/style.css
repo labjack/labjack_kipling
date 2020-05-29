@@ -1,0 +1,315 @@
+#module-chrome-contents-holder {
+    overflow-x: hidden;
+}
+.toggle-info-button:hover
+{
+    color: #888888;
+    cursor: pointer;
+}
+
+.add-to-list-button:hover
+{
+    color: #888888;
+    cursor: pointer;
+}
+
+.remove-from-list-button:hover
+{
+    color: #888888;
+    cursor: pointer;
+}
+
+.edit-register-button:hover
+{
+    color: #888888;
+    cursor: pointer;
+}
+#search-button {
+    float:left;
+}
+.search-progress-status {
+    float: left;
+    height: 30px;
+    margin-top: -3px;
+}
+
+.close-value-editor-button {
+    margin-bottom: 1px;
+    width: 20px;
+}
+.register-value-obj {
+    max-width: 90px;
+}
+.value-edit-object {
+    display: inline-block;
+}
+
+.write-value-editor-button {
+    margin-top: 1px;
+}
+
+.value-editor-button {
+    color: black;
+    background-color: #CCCCCC;
+    padding: 7px 5px 8px 5px;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.value-editor-button:hover {
+    background-color: #AAAAAA;
+    margin-top: -4px;
+}
+
+.write-controls-holder
+{
+    height: 24px;
+    width: 70px;
+    font-size: 22px;
+    margin-left: -2px;
+}
+
+.write-controls-holder .write-confirm-msg
+{
+    float: right;
+    height: 33px;
+}
+
+.write-controls-holder .write-value-editor-button
+{
+}
+
+.value-edit-controls
+{
+    display: none;
+    margin-top: -5px;
+    margin-bottom: -5px;
+}
+
+.value-edit-controls .icon
+{
+    width: 10px;
+    height: 10px;
+}
+
+.write-reg-value-input
+{
+    margin-bottom: 0px !important;
+    width: 120px;
+}
+
+.write-confirm-msg
+{
+    margin-top: -4px;
+}
+
+.register-description
+{
+    display: none;
+}
+
+.register-row
+{
+    background-color: white;
+    font-size: 14px;
+}
+
+.register-row td
+{
+    word-wrap: break-word;
+}
+
+.small-table-row:nth-child(odd)
+{
+    background-color: #F9F9F9;
+}
+
+.big-table-row:nth-child(4n-1)
+{
+    background-color: #F9F9F9;
+}
+
+.description-section
+{
+    margin-bottom: 5px;
+}
+
+.description-header
+{
+    font-weight: bold;
+}
+
+.write-confirm-msg
+{
+    display:none;
+}
+
+#no-reg-msg {
+    font-weight: bold;
+    font-size: 14px;
+    margin: 15px 0;
+}
+
+#register-matrix-search
+{
+    margin-top: 10px;
+}
+
+#tablePagination {
+    background-color: #E0E0E0;
+    padding: 5px 5px;
+    height: 40px;
+}
+
+#tablePagination_paginater {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#tablePagination img {
+    padding: 0px 2px;
+    margin: 1px;
+}
+
+#tablePagination img:hover {
+    padding: 0px 2px;
+    border: 1px solid #A0A0A0;
+    margin: 0;
+}
+
+#tablePagination select {
+    width: 100px;
+}
+
+#tablePagination_perPage {
+    float: left;
+}
+
+#tablePagination_paginater {
+    float: right;
+}
+
+#watch-config-tooltip
+{
+    /*position: relative;
+    width: 45px;
+    height: 50px;
+    line-height: 12px;
+    padding: 10px;
+    font-size: 12px;
+    color: rgb(255, 255, 255);
+    background: rgb(0, 0, 0);
+    top: -14px;
+    text-transform: lowercase;
+    letter-spacing: 0;*/
+    position: relative;
+    width: 100px;
+    height: 20px;
+    margin-top: -20px;
+    line-height: 12px;
+    padding: 5px 5px 10px 8px;
+    font-size: 12px;
+    color: rgb(255, 255, 255);
+    background: rgb(0, 0, 0);
+    top: -15px;
+    right: 54%;
+    text-transform: lowercase;
+    letter-spacing: 0;
+    float: right;
+}
+
+#watch-config-tooltip:after
+{
+    content: "";
+    position: relative;
+    width: 0;
+    height: 0px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: black transparent transparent transparent;
+    top: 30px;
+    left: 0;
+}
+
+#register-matrix-body table
+{
+    table-layout: fixed;
+    min-width: 620px;
+}
+#register-matrix th {
+    padding:2px;
+}
+#register-matrix .addressTableColumn{
+    width: 70px;
+}
+#register-matrix .typeTableColumn{
+    width: 87px;
+}
+#register-matrix #ljm-register-search-box #search-box {
+    width:260px;
+}
+.tt-dropdown-menu {
+    margin-top: 12px;
+    padding: 8px 8px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    -webkit-border-radius: 8px;
+    -moz-border-radius:0;
+    border-radius: 0;
+    -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+    box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+.tt-suggestion {
+  /*padding: 3px 20px;*/
+  /*font-size: 18px;*/
+  padding: 1px 5px;
+  line-height: 24px;
+}
+.tt-suggestion.tt-cursor {
+  color: #fff;
+  background-color: #0097cf;
+}
+.tt-suggestion p {
+  margin: 0;
+}
+.twitter-typeahead {
+    width: 200%;
+}
+.typeaheadRegInfo {
+
+}
+.typeaheadRegInfo strong {
+    font-weight: 300;
+}
+#ljm-register-search-box .tt-dropdown-menu {
+  max-height: 350px;
+  max-width:65%;
+  overflow-y: auto;
+}
+
+.registerControls table {
+    margin-bottom:0px;
+}
+
+.registerControls .registerNumber {
+    width: 70px;
+}
+.registerControls .registerType {
+    width: 75px;
+}
+.registerControls .registerValue {
+    width:230px;
+}
+.registerControls .removeButton {
+    width: 60px;
+}
+.register-matrix-heading {
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-bottom-color: lightgrey;
+}
+#watch-config-tooltip {
+    display:none;
+}

@@ -1,0 +1,28 @@
+{
+    "name": "dashboard",
+    "humanName": "Dashboard",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "third_party_code":[],
+    "supportedDevices": [{"type":"T7","subclass":["Pro",""],"minFW":"0.01"}, {"type":"T4","minFW":"0.01"}],
+    "jsFiles":["deviceDashboardController.js"],
+    "htmlFiles": [
+        "resources/ain-in.html",
+        "resources/dac-out.html",
+        "resources/dio-in.html",
+        "resources/dio.html",
+        "resources/flex-io.html"
+    ],
+    "third_party_code_unload":[],
+    "buildTypes":["develop","debug","release"],
+    "internalCompOnly":false,
+    "developCompOnly":false,
+    "third_party_code": [
+            "customSpinners.js"
+    ],
+    "a-third_party_code_unload":[],
+    "framework_flags": {
+        "debug_framework_connector": false,
+        "debug_framework": false
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "name": "analog_outputs_fw",
+    "humanName": "Analog Outputs",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "third_party_code":[],
+    "supportedDevices": [{"type":"T7","subclass":["Pro",""],"minFW":"0.01"}, {"type":"T4","minFW":"10.01"}]
+}

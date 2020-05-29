@@ -1,0 +1,119 @@
+<div id="device-scanner-device-listing">
+    {{#device_types}}
+    <div class="device-pane-section device-type DEVICE_TYPE_{{deviceTypeName}}">
+        <div class="device-pane-popover">
+            <div class="arrow"></div>
+            <div class="label">{{deviceTypeName}}</div>
+        </div>
+        <div class="devices-enumeration-scroller">
+            <div class="well {{size}}">
+                {{#devices}}
+                {{#if errorCode}}
+                <table class="device ERR_SERIAL_NUMBER_{{serialNumber}}"><tr>
+                    <td id="image"><img src="{{../../staticFiles}}img/devices/{{productType}}.png"></td>
+                    <!-- <td class="connection-buttons-holder">
+                        <div class="disconnect_buttons_class {{disconnect_buttons_class}}">
+                            <div class="connection-button-holder"><button class="btn btn-danger disconnect-button" id="{{serial}}-disconnect">
+                                Disconnect
+                            </button></div>
+                            <div class="current-connection-indicator"></div>
+                        </div>
+                        <div class="connect_buttons_class {{connect_buttons_class}}">
+                            {{#connectionTypes}}
+                            <div class="connection-button-holder"><button
+                                id="{{dt}}-{{../serialNumber}}-{{ipSafe}}-{{name}}-{{ct}}-{{../deviceType}}"
+                                class="btn {{button_class}} connect-button CONNECTION_TYPE_{{name}}"
+                                title="{{button_title}}"
+                                {{button_state}}
+                                >{{name}}</button></div>
+                            {{/connectionTypes}}
+                        </div>
+                    </td> -->
+                    <td id="info-holder">
+                        <div id="info">
+                            <table>
+                                <tbody>
+                                    <tr><td class="device-attribute-label">Model</td><td id="type" class="device-attribute-value selectableText">{{modelType}}</td></tr>
+                                    <tr><td class="device-attribute-label">Connection Type</td><td id="type" class="device-attribute-value selectableText">{{ctMedium}}</td></tr>
+                                    {{#if ip}}
+                                    <tr><td class="device-attribute-label">IP</td><td id="code" class="device-attribute-value selectableText">{{ip}}: {{port}}</td></tr>
+                                    {{/if}}
+                                    <tr><td class="device-attribute-label">Error Code</td><td id="code" class="device-attribute-value selectableText">{{errorCode}}</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+                <tr><td id="error-info-holder" colspan="2">
+                    <div id="error-info">
+                        <table><tbody>
+                            <!-- <tr><td class="device-attribute-label"></td><td id="name" class="device-attribute-value selectableText">{{errorName}}</td></tr> -->
+                            <!-- <tr><td class="device-attribute-label"></td><td id="message" class="device-attribute-value selectableText">{{errorMessage}}</td></tr> -->
+                            <tr><td id="name" class="device-attribute-value selectableText">{{errorName}}</td></tr>
+                            <tr><td id="message" class="device-attribute-value selectableText">{{errorMessage}}</td></tr>
+                        </tbody></table>
+                    </div>
+                </td></tr>
+                </table>
+                {{else}}
+                <table class="device SERIAL_NUMBER_{{serialNumber}}"><tr>
+                    <td id="image"><img src="{{../../staticFiles}}img/devices/{{productType}}.png" alt="dir: {{../../../staticFiles}}"></td>
+                    <td class="connection-buttons-holder">
+                        <div class="connecting_to_device_circle" style="display:none;">
+                            <div class="progress progress-indeterminate">
+                                <div class="win-ring small"></div>
+                            </div>
+                        </div>
+                        <div class="disconnect_buttons_class {{disconnect_buttons_class}}">
+                            <div class="connection-button-holder"><button class="btn btn-danger disconnect-button" id="{{serial}}-disconnect">
+                                Disconnect
+                            </button></div>
+                            
+                            <div class="current-connection-indicator">
+                                <span>Active Connection:</span><br><span id="active_connection_type">{{#connectionTypes}}
+                            {{#if isActive}}{{connectionTypeName}}{{/if}}
+                            {{/connectionTypes}}</span>
+                            </div>
+                            
+                        </div>
+                        <div class="connect_buttons_class {{connect_buttons_class}}">
+                            {{#connectionTypes}}
+                            <div class="connection-button-holder"><button
+                                id="{{dt}}-{{../serialNumber}}-{{ipSafe}}-{{name}}-{{ct}}-{{../deviceType}}"
+                                class="btn {{button_class}} connect-button CONNECTION_TYPE_{{name}}"
+                                title="{{button_title}}"
+                                {{button_state}}
+                                >{{name}}</button></div>
+                            {{/connectionTypes}}
+                        </div>
+                    </td>
+                    <!-- Info to the right of the connection buttons -->
+                    <td id="info-holder">
+                        <div id="info">
+                            <table>
+                                <tbody>
+                                    <tr><td class="device-attribute-label">Model</td><td id="type" class="device-attribute-value selectableText">{{modelType}}</td></tr>
+                                    <tr><td class="device-attribute-label">Serial</td><td id="serial" class="device-attribute-value selectableText">{{serialNumber}}</td></tr>
+                                    <tr><td class="device-attribute-label">Name</td><td id="name" class="device-attribute-value selectableText">{{DEVICE_NAME_DEFAULT.res}}</td></tr>
+                                    
+                                    {{#if ETHERNET_IP}}
+                                    <tr><td class="device-attribute-label">Eth. IP</td><td id="ethernet-ip-address" class="device-attribute-value selectableText">{{#if ETHERNET_IP.isReal}}{{ETHERNET_IP.str}}{{else}}Not Connected{{/if}}</td></tr>
+                                    {{/if}}
+
+                                    {{#if WIFI_IP}}{{#if HARDWARE_INSTALLED.wifi}}
+                                    <tr><td class="device-attribute-label">WiFi IP</td><td id="wifi-ip-address" class="device-attribute-value"><span class="wifiIPAddressText selectableText">{{#if WIFI_STATUS.isConnected}}{{WIFI_IP.str}}{{else}}{{WIFI_STATUS.str}}{{/if}}</span>
+                                        {{{../../wifiImage}}}</td></tr>
+                                    {{/if}}{{/if}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr></table>
+                {{/if}}
+                {{/devices}}
+            </div>
+        </div>
+    </div>
+    {{/device_types}}
+    {{!--<pre>{{printContext}}</pre>--}}
+</div>

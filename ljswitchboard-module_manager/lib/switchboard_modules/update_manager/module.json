@@ -1,0 +1,8 @@
+{
+    "name": "update_manager",
+    "humanName": "Update Manager",
+    "version": "0.0.1",
+    "jsFiles": ["update_manager.js"],
+    "startTime": "auto",
+    "description": "Periodically check for current Kipling, LJM, and device version numbers."
+}

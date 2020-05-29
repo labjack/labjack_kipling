@@ -1,0 +1,6 @@
+{
+    "DACRegisters": [
+        {"register":"DAC0","name":"DAC0","title":"DAC0","heading":"","id":"","type":"FLOAT32","isConfig":true,"isPeriodic":true},
+        {"register":"DAC1","name":"DAC1","title":"DAC1","heading":"","id":"","type":"FLOAT32","isConfig":true,"isPeriodic":true}
+    ]
+}

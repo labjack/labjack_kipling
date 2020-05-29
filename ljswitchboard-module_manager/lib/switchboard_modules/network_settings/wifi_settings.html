@@ -1,0 +1,138 @@
+<div id="wifi_settings_div" class="network-settings-div">
+	{{#if showWifiWarning}}<span class="text-warning icon-warning" title="{{../ethernetPowerButtonWarning }}"></span>Currently connected to device over WiFi, changing current WiFi settings may break your connection.{{/if}}
+	<div id="wifi_settings">
+		<div class="settingsTopDiv">
+			<div class="currentStatusInfo">
+				<span>Connection Status: </span><b><span id="WIFI_STATUS">Connected</span></b>
+				<div class="powerButtonDiv">
+					<div class="btn-group">
+						<button id="wifiPowerButton" class="btn" title="{{ wifiPowerButtonString }}">
+							<span class="buttonText">{{#if showWifiWarning}}<span class="text-warning icon-warning" title="{{../ethernetPowerButtonWarning }}"></span>{{/if}}{{ wifiPowerButtonString }}<!-- {{#if showWifiWarning}}<span class="text-warning icon-warning" title="{{../ethernetPowerButtonWarning }}"></span>{{/if}} --></span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="connectionStatusMessage">
+				<span id="wifiStatusMessage" class="selectableText">{{ wifiStatusMessage }}<span>
+			</div>
+		</div>
+		<br>
+		<hr>
+		<br>
+		<h3>Configure</h3>
+		<div class="configSettingsDiv">
+			<table class="table table-non-striped configSettingsTable">
+				<thead>
+					<th class="attribute"/>
+					<th class="input"/>
+					<th class="userFeedback"/>
+				</thead>
+				<tbody style="background-color:transparent">
+					<tr id="WIFI_SSID_DEFAULT_VAL" class="networkSetting">
+						<td>Network Name:</td>
+						<td>
+							<input class="WIFI_SSID_DEFAULT_AUTO_VAL" type="text" name="Network Name" value="{{ wifiNetworkName }}" placeholder="ex: MyNetwork">
+						</td>
+						<td class="alertCol">
+							<div class="alert alert-success">
+								<span class="messageIcon icon-checkmark-3"></span>
+							</div>
+						</td>
+					</tr>
+					<tr id="WIFI_PASSWORD_DEFAULT_VAL" class="networkSetting">
+						<td>Password:</td>
+						<td>
+							<input class="WIFI_PASSWORD_DEFAULT_AUTO_VAL" type="password" name="{{humanName}}" value="" placeholder ="ex: password">
+						</td>
+						<td class="alertCol">
+							<div class="alert alert-success">
+								<span class="messageIcon icon-checkmark-3"></span>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<div id="wifiDHCPSelect" class="dhcpSelectRow">
+				<div id="wifi-DHCP-Select-Toggle" class="btn-group dhcpSelectSpan">
+					<a class="btn dropdown-toggle dhcpSelectionButton" data-toggle="dropdown">
+						<span class="btnText">{{wifiDHCPStatusString}}</span>
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a id="WiFi_DHCP_Auto">{{dhcpEnabledText}}</a></li>
+						<li><a id="WiFi_DHCP_Manual">{{dhcpDisabledText}}</a></li>
+					</ul>
+				</div>
+				<div class="dhcpAlert span1">
+					<div class="alert alert-success">
+						<span class="messageIcon icon-checkmark-3"></span>
+					</div>
+				</div>
+			</div>
+			<table class="table table-non-striped configSettingsTable wifiConfigSettingsTable">
+				<thead>
+					<th class="attribute"/>
+					<th class="input"/>
+					<th class="userFeedback"/>
+				</thead>
+				<tbody style="background-color:transparent">
+					{{#each wifiIPRegisters}}
+						<tr id="{{name}}_VAL" class="networkSetting">
+							<td>{{humanName}}:</td>
+							<td>
+								<span class="Auto_Value {{name}}_AUTO_VAL selectableText" style="{{#unless isDHCPAuto}}display:none;{{/unless}}">{{ initVal }}</span>
+								<div class="Manual_Value" style="{{#if isDHCPAuto}}display:none;{{/if}}">
+									<input class="ipAddress {{name}}_MAN_VAL" type="text" name="{{humanName}}" value="{{ initVal }}" placeholder="ex: 127.0.0.1">
+								</div>
+							</td>
+							<td class="alertCol">
+								<div class="alert alert-success">
+									<span class="messageIcon icon-checkmark-3"></span>
+								</div>
+							</td>
+						</tr>
+					{{/each}}
+				</tbody>
+			</table>
+			<div class="applyAndCancelButtons">
+				<div class="btn-group">
+					<button id="wifiApplyButton" class="btn" title="Apply Changes">
+						<span class="buttonText">{{#if showWifiWarning}}<span class="text-warning icon-warning" title="{{../wifiWarningMessage }}"></span>{{/if}}Apply<!-- {{#if showWifiWarning}}<span class="text-warning icon-warning" title="{{../wifiWarningMessage }}"></span>{{/if}} --></span>
+					</button>
+					<button id="wifiCancelButton" class="btn" title="Cancel Changes">
+						<span class="buttonText">Cancel</span>
+					</button>
+					<div class="networkConfigHelpButtonDiv">
+						<button id="wifiHelpButton" class="networkConfigHelpButton win-command win-command-small" rel="tootlip" title="WiFi Configuration Help, Opens Link in Default Browser">
+							<span class="win-commandicon win-commandring icon-question-2"></span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<br>
+			<hr>
+			<br>
+			<h3>Detailed Status</h3>
+			<table class="table table-sm table-hover currentStateTable">
+				<thead>
+					<th class="attribute"/>
+					<th class="currentStateRegisters">Current</th>
+					<th class="defaultValueRegisters">Defaults</th>
+				</thead>
+				<tbody style="background-color:transparent">
+					{{#each wifiStatusRegisters}}
+						<tr id="{{name}}_VALS" class="currentNetworkSettings">
+							<td>{{humanName}}: </td>
+							<td>
+								<span id="CURRENT_VAL_{{current.reg}}" class="current_{{name}}_val selectableText">{{ current.val }}</span>
+							</td>
+							<td>
+								<span id="DEFAULT_VAL_{{current.reg}}" class="default_{{name}}_val selectableText">{{ default.val }}</span>
+							</td>
+						</tr>
+					{{/each}}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

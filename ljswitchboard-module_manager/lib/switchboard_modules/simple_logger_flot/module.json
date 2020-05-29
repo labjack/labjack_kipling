@@ -1,0 +1,11 @@
+{
+    "name": "simple_logger_flot",
+    "humanName": "Simple Logger Flot",
+    "version": "0.0.1",
+    "framework":"multipleDevices",
+    "supportedDevices": [{"type":"T7"}],
+    "jsFiles": [
+    ],
+    "htmlFiles": [
+    ]
+}

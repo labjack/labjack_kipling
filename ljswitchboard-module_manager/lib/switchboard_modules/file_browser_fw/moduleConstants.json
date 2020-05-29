@@ -1,0 +1,11 @@
+{
+    "//T7": [],
+    "//Digit": [],
+    "registerList": [{
+		"register": "LUA_RUN",
+		"name": "LUA_RUN",
+		"id": "lua-run-status",
+		"isPeriodic": true,
+		"dataKey": "val"
+	}]
+}

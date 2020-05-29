@@ -1,0 +1,194 @@
+.ain-config-options {
+    display:none;
+}
+.uninitialized .analog-input-graph {
+	height: 0;
+}
+.channelNamesList {
+	list-style-type: none;
+}
+.channelNamesList li {
+	line-height: 11px;
+}
+.primary-ef-readings {
+	height: 35px;
+}
+.optionsConfigTable {
+	background-color: transparent;
+	margin-top: 0px;
+	margin-bottom: 5px;
+	width:100%;
+}
+.optionsConfigTable thead {
+	border-bottom: none;
+	background-color: transparent;
+}
+.optionsConfigTable td {
+	background-color: transparent;
+}
+.ainEFExtendedInfo {
+	width: 86%;
+	margin-left: 14%;
+	display: block;
+}
+@media (max-width: 767px) {
+	.ainEFExtendedInfo {
+		margin-left: 0px;
+	}
+}
+.efExtendedInfo {
+	min-height: 0;
+	margin:0;
+	/*width:49%;*/
+	float:left;
+	display:block;
+	list-style-type: none;
+}
+.efExtendedInfo.ainEFSecondaryReadRegisters {
+  margin-left: 20px;
+  margin-right: -20px;
+  width:43%;
+}
+.efExtendedInfo.ainEFConfigs {
+  width:55%;
+}
+
+.efExtendedInfo li {
+	margin-bottom:5px;
+}
+.efExtendedInfoHelperText {
+  line-height: 20px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+.ainEFConfigA-LINK {
+	width: 70px;
+}
+.ainEFConfigB-LINK {
+  width: 255px;
+}
+.efConfig-FORM {
+	margin:0;
+}
+.efConfig-INPUT-APPEND {
+	margin:0;
+}
+.efConfig-INPUT {
+	width: 225px;
+}
+.efConfig-INPUT-BTN {
+	width: 25px;
+	border: 0;
+	padding: 0;
+}
+.displayed-icon {
+	font-size: large;
+}
+.input-bar
+{
+    background-color: grey;
+    margin-top:8px;
+    height:5px;
+}
+#output-data-table {
+	background-color: transparent;
+}
+#output-data-table .result-text p {
+	margin-bottom: -11px;
+	margin-left: 10px;
+	/*text-align: center;*/
+}
+#output-data-table .result-text .result-value {
+	width:100px;
+}
+#output-data-table td {
+	background-color: transparent;
+}
+.ain-range-text-left {
+	font-size: xx-small;
+	float:right;
+}
+.ain-range-text-right {
+	font-size: xx-small;
+	float:left;
+}
+#output-data-table .graphRange {
+	width: 5%;
+}
+#output-data-table .graphSlider {
+	width:90%;
+}
+.optionsConfigTable tr {
+	background-color: transparent;
+}
+.optionsConfigTable td {
+	background-color: transparent;
+}
+.ain-config-options hr {
+	margin:0px;
+}
+.ainConfigTable {
+	margin-left: 14%;
+	width: 86%;
+}
+@media (max-width: 767px) {
+	.ainConfigTable {
+		margin-left: 0px;
+	}
+}
+.range-header {
+	width: 110px;
+}
+.range-LINK {
+	width: 110px;
+}
+.resolution-header {
+	width: 62px;
+}
+.resolution-LINK {
+	width: 62px;
+}
+.settling-header {
+	width: 68px;
+}
+.settling-LINK {
+	width: 68px;
+}
+.negativeChannel-header {
+	/*width: 85px;*/
+	width: 13%;
+	min-width: 67px;
+	max-width: 150px;
+}
+.negativeChannel-LINK {
+	width: 62px;
+}
+.efSystem-LINK {
+	width: 183px;
+}
+.btn-group .currentValue {
+	float:left;
+}
+.btn-group .caret {
+	float:right;
+}
+.dropdown-menu {
+	min-width:0px;
+}
+.dropdown-menu li a {
+	padding: 3px 13px;
+}
+#advanced-ain-readout .dropdown-toggle {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.positiveResult {
+	margin-left:50%;
+}
+.negativeResult {
+	margin-left:0%;
+}
+.table-dataHeader th {
+	line-height: 12px;
+}
+

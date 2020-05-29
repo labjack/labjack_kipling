@@ -1,0 +1,30 @@
+<div>
+{{#if path}}
+<!-- <dl class="file-info dl-horizontal">
+	<dt>File Path</dt>
+	<dd>{{path}}</dd>
+	<dt>File Name</dt>
+	<dd>{{fileName}}</dd>
+	<dt>Version</dt>
+	<dd>{{version}}</dd>
+	<dt>Is Valid</dt>
+	<dd>{{#if isValidBinary}}Yes{{else}}No{{/if}}</dd>
+	{{#unless isValidBinary}}
+	<dt>Error Message</dt>
+	<dd>{{message}}</dd>
+	{{/unless}}
+</dl> -->
+<dl class="file-info">
+	<dt>File Info</dt>
+	<dd><strong>File Path:</strong> {{path}}</dd>
+	<dd><strong>File Name:</strong> {{fileName}}</dd>
+	<dd><strong>Version:</strong> {{version}}</dd>
+	<dd><strong>Is Valid:</strong> {{#if isValidBinary}}Yes{{else}}No{{/if}}</dd>
+	{{#unless isValidBinary}}
+	<dd><strong>Error Message:</strong> {{message}}</dd>
+	{{/unless}}
+</dl>
+{{else}}
+<p>Please select a file</p>
+{{/if}}
+</div>

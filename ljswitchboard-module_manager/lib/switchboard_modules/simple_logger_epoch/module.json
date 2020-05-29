@@ -1,0 +1,11 @@
+{
+    "name": "simple_logger_epoch",
+    "humanName": "Simple Logger Epoch",
+    "version": "0.0.1",
+    "framework":"multipleDevices",
+    "supportedDevices": [{"type":"T7"}],
+    "jsFiles": [
+    ],
+    "htmlFiles": [
+    ]
+}

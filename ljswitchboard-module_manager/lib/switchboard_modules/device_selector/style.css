@@ -1,0 +1,291 @@
+
+.device_scan_status_box {
+	display:none;
+}
+
+.center-text {
+	text-align: center;
+}
+div.link a {
+    cursor:pointer;
+}
+
+.advanced-scan-options-toggle {
+    cursor:pointer;
+    color:#333;
+    font-size: 15px;
+}
+.advanced-scan-options-toggle:hover {
+    color:grey;
+}
+
+.direct-connect-options-toggle {
+    cursor:pointer;
+    color:#333;
+    font-size: 15px;
+}
+
+.direct-connect-options-toggle:hover {
+    color:grey;
+}
+td.direct-connect-table-desc {
+    font-size:12px;
+    min-width:110px;
+    text-align: right;
+}
+td.direct-connect-table-desc span {
+    line-height: 28px;
+    padding-right: 5px;
+}
+/* Scan Options */
+.scan-options-and-info {
+    height:160px;
+    display:table;
+    width:100%;
+}
+.scan-options-and-info-tr {
+    display:table-row;
+    width:100%;
+}
+.directConnectOptionsDiv .description {
+    width:40px;
+}
+.scanOptionsTableDiv {
+    /*float:left;*/
+    display:table-cell;
+    width:180px;
+    /*width:33%;*/
+}
+.directConnectOptionsDiv {
+    /*float:left;*/
+    display:table-cell;
+    width:33%;
+    padding-right: 10px;
+    /*position: absolute;*/
+    /*left: 163px;*/
+}
+.connectButtonColorsLegendDiv {
+    /*float:right;*/
+    display:table-cell;
+    /*margin-right:20px;*/
+    width:365px;
+}
+
+.direct-connect-options input {
+    margin: 0px 0px 5px 0px;
+}
+.direct-connect-options a {
+    margin: 0px 0px 0px 0px;
+}
+.directConnectOptionsDiv table {
+    max-width: 320px;
+    min-width:320px;
+}
+
+#attempt_direct_connect_btn {
+    width:113px;
+    /*margin:0px 0px 0px 150px*/
+    margin:0px 0px 0px 0px;
+}
+.drop-down-select {
+    width:30px;
+}
+/* max-width: 695... before DC options */
+@media screen and (max-width: 950px) {
+    .scan-options-and-info {
+        height:290px;
+    }
+    .scanOptionsTableDiv {
+        float:none;
+        display:inline-table;
+    }
+    .directConnectOptionsDiv {
+        float:none;
+        display:inline-table;
+        position: inherit;
+    }
+    .connectButtonColorsLegendDiv {
+        float:none;
+        display:inline-table;
+    }
+}
+
+/* Check boxes */
+.scanOptionsTable {
+    width:150px;
+}
+.scanOptionsTable input {
+    margin-top:-2px;
+}
+.checkbox-inline+.checkbox-inline, .radio-inline+.radio-inline {
+  margin-top: 10px;
+}
+
+.scan-medium {
+
+}
+.lj-link-holder {
+    cursor: pointer;
+}
+.time-estimate {
+    font-size:12px;
+}
+
+/* Legend */
+
+.connectButtonColorsLegend  {
+    width:345px;
+}
+.connectButtonColorsLegend td div {
+    width:15px;
+    height:15px;
+    margin: 3px 5px 0px 0px;
+}
+.green-button-color {
+    background-color: #51a351;
+    border-color: #51a351;
+}
+.yellow-button-color {
+    background-color: #f89406;
+    border-color: #f89406;
+}
+.grey-button-color {
+    background-color: #e6e6e6;
+    border-color: #e6e6e6;
+}
+.red-button-color {
+    background-color: #bd362f;
+    border-color: #bd362f;
+}
+
+/*.device-selector-holder .selector-header {
+    height:30px;
+}
+.device-selector-holder .selector-header .refresh-button {
+    float:right;
+    margin-right:20px;
+}
+@media screen and (max-width: 725px) {
+    .device-selector-holder .selector-header .refresh-button {
+    float:left;
+}
+}*/
+
+/* Device Selection Styles */
+.connection-buttons-holder {
+    vertical-align: top;
+    padding: 0 10px;
+    width: 130px;
+}
+.current-connection-indicator {
+    width: 110px;
+}
+.device-attribute-label {
+    padding: 0 6px;
+    vertical-align: top;
+    text-align: right;
+    font-weight: bold;
+    min-width: 55px;
+}
+.device-selector-header {
+    margin-top: 10px;
+}
+.device-selector-holder {
+    margin-left: 50px;
+    z-index:1;
+}
+.devices-enumeration-scroller {
+    width: 100%;
+    height: 100%;
+}
+.devices-enumeration-scroller .well {
+    border: none;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+.device-pane-popover {
+    text-align: right;
+    width: 100px;
+    height: 10px;
+    z-index: 1000;
+    position: relative;
+    /*top: 50px;*/
+    top:12px;
+    left: -107px;
+}
+.device-pane-popover .arrow {
+    width: 0;
+    margin-top: 4px;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid #999999;
+    float: right;
+}
+.device-pane-popover .label {
+    float: right;
+    position: relative;
+    z-index: 1001;
+}
+.device #image {
+    vertical-align: top;
+    padding: 0 2px;
+}
+.device {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    display: inline-block;
+    width: 475px;
+    padding-right: 10px;
+    vertical-align: top;
+    border: 1px solid #ddd;
+    padding: 3px;
+}
+.black-border {
+    border: 1px solid #000;
+}
+.device #image img {
+    width: 100px;
+}
+.device #name {
+    max-width:185px;
+    word-break:break-all;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.device #info-holder {
+    display: inline-block;
+    font-size: 12px;
+}
+.device #error-info-holder {
+    font-size: 12px;
+}
+.device .current-connection-indicator {
+    font-size:12px;
+}
+.wifiIPAddressText {
+    width: 115px;
+    display: inline-block;
+}
+.wifiRSSIImage {
+    position: relative;
+    width: 30px;
+    margin-left: -30px;
+    padding-right: 6px;
+    margin-top: -10px;
+    margin-bottom: -10px;
+    left: 50px;
+    top: -3px;
+}
+.connection-button-holder {
+    margin-bottom: 2px;
+}
+.connection-button-holder button {
+    width:110px;
+}
+
+
+.hidden-button {
+    display:none;
+}

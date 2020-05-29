@@ -1,0 +1,34 @@
+{
+    "name": "kipling-module-framework",
+    "version": "0.0.1",
+    "description": "Library for making LabJack Kipling modules.",
+    "dependencies": {
+        "async": "~0.2",
+        "dict": "~1",
+        "handlebars": "~1",
+        "labjack-nodejs": "~0",
+        "ljmmm-parse": "~0.1",
+        "node.extend": "~1",
+        "q": "~1",
+        "rewire": "~2",
+        "sprintf": "~0"
+    },
+    "author": {
+        "name": "Sam Pottinger",
+        "url": "http://gleap.org"
+    },
+    "main": "./lib/ljmmm",
+    "license": "MIT",
+    "keywords": [
+        "LabJack",
+        "LJMMM",
+        "MODBUS",
+        "Kipling"
+    ],
+    "chromium-args": "--enable-threaded-compositing",
+    "homepage": "https://github.com/samnsparky/kipling-module-framework",
+    "repository": {
+        "type" : "git",
+        "url" : "http://github.com/samnsparky/kipling-module-framework.git"
+    }
+}

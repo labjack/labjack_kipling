@@ -1,0 +1,156 @@
+<div class="device-info-div">
+	<div class="info-section" id="general-section">
+		<div class="pane-popover">
+			General
+		</div>
+		<div class="important-info">
+			<div class="device-detail">
+				Serial Number:
+				<span id="serial-number-display" class="selectableText">{{serialNumber}}</span>
+			</div>
+			<div class="device-detail">
+				Model:
+				<span id="type-display" class="selectableText">{{productType}}</span>
+			</div>
+			<div id="name-display-holder" class="device-detail">
+				Name:
+				<span id="name-display">
+					<span id="current-name-display" class="selectableText">{{DEVICE_NAME_DEFAULT}}</span>
+					<button id="change-name-link" class="icon-pencil btn btn-link" title="Edit Device Name"></button>
+					{{!--<div><button id="change-name-link" class="btn">Change Name</button></div>--}}
+					<div id="change-name-controls">
+						<div><input type="text" id="new-name-input" placeholder="new name"></div>
+						<div>
+							<button id="change-name-button" class="btn">Change Name</button>
+							<button id="cancel-change-name-button" class="btn">Cancel</button>
+						</div>
+					</div>
+				</span>
+			</div>
+		</div>
+		<div class="device-detail">
+			Ethernet Mac Address: 
+			<span class="selectableText">
+				{{ETHERNET_MAC.val}}
+			</span>
+		</div>
+		{{#if HARDWARE_INSTALLED.wifi }}
+		<div class="device-detail">
+			WiFi Mac Address: 
+			<span class="selectableText">
+				{{WIFI_MAC.val}}
+			</span>
+		</div>
+		{{/if}}
+		<div class="device-detail">
+			200 uA Current Source Cal: 
+			<span class="selectableText">
+				{{CURRENT_SOURCE_200UA_CAL_VALUE.val}} uA
+			</span>
+		</div>
+		<div class="device-detail">
+			10 uA Current Source Cal: 
+			<span class="selectableText">
+				{{CURRENT_SOURCE_10UA_CAL_VALUE.val}} uA
+			</span>
+		</div>
+		{{#if calibrationStatus}}
+		<div class="device-detail">
+			Calibration Status: 
+			<span id="calibration-status-display" class="calibration-message selectableText {{#if calibrationStatus.overall}}isa_success{{else}}isa_error{{/if}}" title="{{calibrationStatus.message}}">
+				{{calibrationStatus.shortMessage}}&nbsp;&nbsp;<span class="{{#if calibrationStatus.overall}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
+			</span>
+		</div>
+		{{/if}}
+		<div class="block-separator"/>
+		<div class="pane-popover">
+			Versions
+		</div>
+		<div id="firmware-display-holder" class="device-detail">
+			Firmware Version: 
+			<span id="firmware-display" class="selectableText">
+					{{FIRMWARE_VERSION}}
+			</span>
+		</div>
+		<div id="bootloader-display-holder" class="device-detail">
+			Bootloader Version: 
+			<span id="bootloader-display" class="selectableText">
+					{{BOOTLOADER_VERSION}}
+			</span>
+		</div>
+		{{#if HARDWARE_INSTALLED.wifi }}
+		<div id="wifi-firmware-display-holder" class="device-detail">
+			WiFi Firmware Version: 
+			<span id="bootloader-display" class="selectableText">
+				{{WIFI_VERSION}}
+			</span>
+		</div>
+		{{/if}}
+		<div class="block-separator"/>
+		<div class="pane-popover">
+			Current Status
+		</div>
+
+		<div class="device-detail">
+			Ethernet IP Address: 
+			<span id="ethernet-ip-address" class="selectableText">
+				{{#if ETHERNET_IP.isReal}}{{ETHERNET_IP.val}}{{else}}Not Connected{{/if}}
+			</span>
+		</div>
+		{{#if isPro }}
+		<div class="device-detail">
+			WiFi IP Address: 
+			<span id="wifi-ip-address" class="selectableText">
+				{{WIFI_IP.val}}
+			</span>
+		</div>
+		{{/if}}
+		<div class="device-detail">
+			Device Temperature:
+			<span id="internal-device-temperature" class="selectableText">
+				{{TEMPERATURE_DEVICE_K.val}}
+			</span> K
+		</div>
+		<div id="power-overview">
+			<div><span class="power-indicator {{#if POWER_ETHERNET.val }}powered{{/if}}"></span> Ethernet {{#if POWER_ETHERNET.val }}Powered{{/if}} {{#unless POWER_ETHERNET.val}}Not Powered{{/unless}}</div>
+			<div><span class="power-indicator {{#if POWER_WIFI.val }}powered{{/if}}"></span> WiFi {{#if POWER_WIFI.val }}Powered{{/if}} {{#unless POWER_WIFI.val}}Not Powered{{/unless}}</div>
+			<div><span class="power-indicator {{#if POWER_AIN.val }}powered{{/if}}"></span> Analog Input Module {{#if POWER_AIN.val }}Powered{{/if}} {{#unless POWER_AIN.val}}Not Powered{{/unless}}</div>
+			<div><span class="power-indicator {{#if WATCHDOG_ENABLE_DEFAULT.val }}powered{{/if}}"></span> Watchdog {{#if WATCHDOG_ENABLE_DEFAULT.val }}Enabled{{/if}} {{#unless WATCHDOG_ENABLE_DEFAULT.val}}Disabled{{/unless}}</div>
+			<div><span class="power-indicator {{#if POWER_LED.val }}powered{{/if}}"></span> Device LED {{#if POWER_LED.val }}Powered{{/if}} {{#unless POWER_LED.val}}Not Powered{{/unless}}</div>
+		</div>
+	</div>
+</div>
+<div class="device-links-div">
+	<img id="device-image" class="product-image" src="{{staticFiles}}/img/devices/{{productType}}.png">
+	<p/>
+	<h3>Important Device Links</h3>
+	<ul>
+		<li><div title="Open the {{deviceTypeName}} product page in your default browser"><a id="lj-link-holder-productPage" class="lj-link-holder">Product Page</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} datasheet in your default browser"><a id="lj-link-holder-datasheet" class="lj-link-holder">Datasheet</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} Support Homepage in your default browser"><a id="lj-link-holder-supportPage" class="lj-link-holder">Support Homepage</a></div></li>
+	</ul>
+	<script>
+		$('#lj-link-holder-productPage').unbind();
+		$('#lj-link-holder-productPage').bind('click',function(){
+			if(typeof(gui) === 'undefined') {
+				gui = require('nw.gui');
+			}
+			gui.Shell.openExternal("https://labjack.com/{{deviceTypeName}}");
+		});
+		$('#lj-link-holder-datasheet').unbind();
+		$('#lj-link-holder-datasheet').bind('click',function(){
+			if(typeof(gui) === 'undefined') {
+				gui = require('nw.gui');
+			}
+			gui.Shell.openExternal("https://labjack.com/support/datasheets/{{deviceTypeName}}");
+		});
+		$('#lj-link-holder-supportPage').unbind();
+		$('#lj-link-holder-supportPage').bind('click',function(){
+			if(typeof(gui) === 'undefined') {
+				gui = require('nw.gui');
+			}
+			gui.Shell.openExternal("https://labjack.com/support/{{deviceTypeName}}");
+		});
+	</script>
+</div>
+{{!--<pre>{{printContext}}</pre>--}}

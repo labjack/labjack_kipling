@@ -1,0 +1,27 @@
+#device-selector
+{
+    max-height: 150px;
+    overflow: auto;
+    font-size: 16px;
+    padding: 20px;
+}
+
+.subsection
+{
+    margin: 50px 0 50px 0;
+}
+
+#analog-output-config .row-fluid
+{
+    margin: 30px 0 30px 0;
+}
+
+#write-defaults-button-holder
+{
+    padding-left: 15px;
+}
+
+.slider
+{
+    width: 95% !important;
+}

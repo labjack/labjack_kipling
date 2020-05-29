@@ -1,0 +1,6 @@
+{
+    "name": "reset",
+    "humanName": "Global Configuration",
+    "version": "0.0.1",
+    "supportedDevices": [{"type":"T7"}]
+}

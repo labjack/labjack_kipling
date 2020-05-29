@@ -1,0 +1,97 @@
+[
+    {
+        "name": "AIN0",
+        "value_register": 0,
+        "range_register": 40000,
+        "negative_channel": 41000
+    },
+    {
+        "name": "AIN1",
+        "value_register": 2,
+        "range_register": 40002,
+        "negative_channel": 41001
+    },
+    {
+        "name": "AIN2",
+        "value_register": 4,
+        "range_register": 40004,
+        "negative_channel": 41002
+    },
+    {
+        "name": "AIN3",
+        "value_register": 6,
+        "range_register": 40006,
+        "negative_channel": 41003
+    },
+    {
+        "name": "AIN4",
+        "value_register": 8,
+        "range_register": 40008,
+        "negative_channel": 41004
+    },
+    {
+        "name": "AIN5",
+        "value_register": 10,
+        "range_register": 40010,
+        "negative_channel": 41005
+    },
+    {
+        "name": "AIN6",
+        "value_register": 12,
+        "range_register": 40012,
+        "negative_channel": 41006
+    },
+    {
+        "name": "AIN7",
+        "value_register": 14,
+        "range_register": 40014,
+        "negative_channel": 41007
+    },
+    {
+        "name": "AIN8",
+        "value_register": 16,
+        "range_register": 40016,
+        "negative_channel": 41008
+    },
+    {
+        "name": "AIN9",
+        "value_register": 18,
+        "range_register": 40018,
+        "negative_channel": 41009
+    },
+    {
+        "name": "AIN10",
+        "value_register": 20,
+        "range_register": 40020,
+        "negative_channel": 41010
+    },
+    {
+        "name": "AIN11",
+        "value_register": 22,
+        "range_register": 40022,
+        "negative_channel": 41011
+    },
+    {
+        "name": "AIN12",
+        "value_register": 24,
+        "range_register": 40024,
+        "negative_channel": 41012
+    },
+    {
+        "name": "AIN13",
+        "value_register": 26,
+        "range_register": 40026,
+        "negative_channel": 41013
+    },
+    {
+        "name": "GND",
+        "value_register": 30,
+        "range_register": 40030
+    },
+    {
+        "name": "Temperature",
+        "value_register": 28,
+        "range_register": 40028,
+        "disabled_range_display": "Intern. (deg K)"
+    }
+]

@@ -1,0 +1,17 @@
+{
+	"scanOptions": {
+		"scanUSB": true,
+		"scanEthernet": true,
+		"scanWiFi": false,
+		"scanEthernetTCP": false,
+		"scanWiFiTCP": false
+	},
+	"advancedScanOptions": false,
+	"directConnectParams": {
+		"dt": "ANY",
+		"ct": "ANY",
+		"id": "ANY",
+		"isMockDevice": false
+	},
+	"showDirectConnectOptions": false
+}

@@ -1,0 +1,89 @@
+<div id="single-device-framework-obj">
+    <div id="device-selector" class="unselectable">
+        <!-- <span class="device-selector-table-header"><h4>Connected Devices:</h4></span> -->
+        <table class="table table-striped table-hover table-condensed" id="device-selector-table">
+            {{!--<thead>
+                <tr>
+                    <th><p style="width:46px">select</p></th>
+                    <th><p>device type</p></th>
+                    <th><p>serial number</p></th>
+                    <th><p>connection type</p></th>
+                    <th><p>firmware version</p></th>
+                    <th><p>name</p></th>
+                <tr>
+            </thead>--}}
+            <tbody>
+                {{#devices}}
+                <tr class="SERIAL_NUMBER_{{serialNumber}} {{#unless isConnected}}text-error{{/unless}}">
+                    <td class="device-selector-table-device-selector">
+                        {{#if ../framework_options.device_selection}}
+                            {{#if ../frameworkType.singleDevice}}
+                            <label class="radio" style="display:none">
+                                <input name="selected-device" class="device-selection-radio" id="{{serialNumber}}-selector" type="radio" value="{{serialNumber}}">
+                                <span class="metro-radio" title="Select {{productType}}, {{serialNumber}}"></span>
+                            </label>
+                            {{/if}}
+                            {{#if ../frameworkType.multipleDevices}}
+                            <label class="checkbox" style="display:none">
+                                <input name="selected-device" class="device-selection-checkbox" id="{{serialNumber}}-selector" type="checkbox" value="{{serialNumber}}">
+                                <span class="metro-checkbox" title="Select {{productType}}, {{serialNumber}}"></span>
+                            </label>
+                            {{/if}}
+                        {{/if}}
+                    </td>
+                    <td class="device-selector-table-device-type">
+                        <div class="hide-overflow-text" title="Product Type">{{productType}}</div>
+                    </td>
+                    <td class="device-selector-table-serial-number">
+                        <div class="hide-overflow-text" title="Serial Number (SERIAL_NUMBER)">{{serialNumber}}</div>
+                    </td>
+                    <td class="device-selector-table-connection-type">
+                        <div class="hide-overflow-text" title="Connection Type">{{connectionTypeName}}</div>
+                    </td>
+                    <td class="device-selector-table-firmware-version">
+                        <div class="hide-overflow-text device-firmware-version-holder" title="Firmware Version (FIRMWARE_VERSION)">{{FIRMWARE_VERSION}}</div>
+                    </td>
+                    <td class="device-selector-table-device-name">
+                        <div class="hide-overflow-text device-name-holder" title="Device Name (DEVICE_NAME_DEFAULT)">{{DEVICE_NAME_DEFAULT}}</div>
+                    </td>
+                    <td class="device-selector-table-status">
+                        <div class="btn-group expand-right">
+                            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <div class="module-chrome-tab-badge">
+                                    <span class="badge">{{deviceErrors.length}}</span>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-data" role="menu">
+                                <li><ul class="dropdown-menu-errors">
+                                    {{#if deviceErrors.length}}
+                                        {{#each deviceErrorMessages}}
+                                        <li class="error-message">{{{this}}}</li>
+                                        {{/each}}
+                                    {{else}}
+                                        <li class="error-message">No Errors</li>
+                                    {{/if}}
+                                </ul></li>
+                                <li class="divider"></li>
+                                <li><a class="clear-error-messages">Clear Errors</a></li>
+                                <li><a class="copy-to-clipboard">Copy Errors</a></li>
+                            </ul>
+                        </div>
+                        <div class="connection-status-div">
+                            <span class="icon-warning-2 text-warning connection-status-icon" style="{{#if isConnected}}display:none;{{/if}}"></span>
+                        </div>
+                    </td>
+                </tr>
+                {{/devices}}
+            </tbody>
+        </table>
+    </div>
+    <div id="sd-ramework-configuring-device-display" class="progress progress-indeterminate">
+        <div><p id="single-device-framework-loading-message">configuring device</p></div>
+        <div class="progress progress-indeterminate">
+            <div class="win-ring"></div>
+        </div>
+    </div>
+    <div id="device-view" style="display:none" class="unselectable"></div>
+    {{!--<pre style="width:100%">{{printContext}}</pre>--}}
+    {{!--<pre>{{stats.numLoaded}}</pre>--}}
+</div>

@@ -1,0 +1,6 @@
+{
+    "name": "analog_inputs",
+    "humanName": "Analog Inputs",
+    "supportedDevices": [{"type":"T7","minFW":"0.5"}],
+    "version": "0.0.1"
+}

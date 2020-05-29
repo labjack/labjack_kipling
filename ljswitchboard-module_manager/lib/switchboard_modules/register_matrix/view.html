@@ -1,0 +1,46 @@
+<div id="register-matrix-holder">
+    {{#hasMultipleDevices}}
+    <table class="table table-striped" id="device-selector">
+        <thead>
+            <tr>
+                <th>select</th>
+                <th>device type</th>
+                <th>serial number</th>
+                <th>name</th>
+            <tr>
+        </thead>
+        <tbody>
+            {{#devices}}
+            <tr>
+                <td>
+                    <label class="radio">
+                        <input name="deviceSelectionRadios" class="device-selection-radio" id="{{getSerial}}-selector" type="radio" value="{{getSerial}}">
+                        <span class="metro-radio"></span>
+                    </label>
+                </td>
+                <td>
+                    {{getDeviceType}} {{getSubclass}}
+                </td>
+                <td>
+                    {{getSerial}}
+                </td>
+                <td>
+                    {{getName}}
+                </td>
+            </tr>
+            {{/devices}}
+        </tbody>
+    </table>
+    {{/hasMultipleDevices}}
+    <h3 class="register-matrix-heading">Active Registers</h3>
+    <div id="register-watchlist">
+    </div>
+    <div id="register-matrix-empty-holder">
+        <p>Active Registers list is empty, please select registers from the Modbus Map using  WATCH/CONFIG.
+    </div>
+    <h3 class="register-matrix-heading">Modbus Map</h3>
+    <div id="register-matrix">
+        <div>loading registers list</div>
+        <div><img src="static/img/progress-indeterminate.gif" alt="Loading"></div>
+    </div>
+</div>

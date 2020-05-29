@@ -1,0 +1,51 @@
+<table class="registerControls table">
+    <thead>
+        <tr>
+            <th class="registerNumber">Address</th>
+            <th class="registerName">Name</th>
+            <th class="registerType">Type</th>
+            <th class="registerValue">Value</th>
+            <th class="removeButton">Remove</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#registers}}
+        <tr id="{{address}}-watch-row" class="register-row small-table-row register-overview-row">
+            <td class="selectableText">{{address}}</td>
+            <td class="selectableText">{{name}}</td>
+            <td id="{{address}}-type-display">{{type}}</td>
+            <td class="register-value-obj">
+                <div class="value-display">
+                    <span id="{{address}}-cur-val-display" class="selectableText">1.0000</span>
+                    {{#writeAccess}}
+                    <span id="edit-reg-{{address}}" title="enter write mode" class="icon-pencil edit-register-button"></span>
+                    {{/writeAccess}}
+                </div>
+                <div class="value-edit-controls">
+                    <div class="value-edit-object close-value-editor-button">
+                        <span id="close-edit-reg-{{address}}" class="value-editor-button">
+                            <span id="close-edit-reg-icon-{{address}}" class="icon icon-close close-value-editor-button-icon" title="exit write mode"></span>
+                        </span>
+                    </div>
+                    <div class="value-edit-object">
+                        <input id="write-reg-{{address}}-input" class="input-small write-reg-value-input" type="text">
+                    </div>
+                    <div class="value-edit-object write-controls-holder">
+                        <span id="write-reg-{{address}}" class="write-value-editor-button value-editor-button">
+                            <span id="write-reg-icon-{{address}}" class="icon icon-arrow-right-12" title="write"></span>
+                        </span>
+                        <span class="write-confirm-msg" id="write-confirm-msg-{{address}}">
+                            <div class="progress progress-indeterminate">
+                                <div class="win-ring small"></div>
+                            </div>
+                        </span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div id="{{address}}-remove-from-list-button" class="remove-from-list-button icon-trash"></div>
+            </td>
+        </tr>
+        {{/registers}}
+    </tbody>
+</table>

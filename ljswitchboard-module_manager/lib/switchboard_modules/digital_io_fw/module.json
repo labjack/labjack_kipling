@@ -1,0 +1,6 @@
+{
+    "name": "digital_io_fw",
+    "humanName": "Digital Inputs/Outputs",
+    "version": "0.0.1",
+    "framework":"singleDevice"
+}

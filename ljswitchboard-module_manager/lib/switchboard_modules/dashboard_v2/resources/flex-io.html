@@ -1,0 +1,31 @@
+<div id="{{register}}-display" class="flexIOControlObject">
+	<div id="{{register}}-MODE-SELECT" class="btn-group direction-select digitalSelectButton">
+	    <a class="btn dropdown-toggle" data-toggle="dropdown" title="Set {{register}} Direction"><span class="currentValue">{{#if ainEnabled}}Analog{{else}}{{directionStr}}{{/if}}</span><span class="caret"></span>
+	    </a>
+	    <ul class="dropdown-menu">
+	        <li>
+	        	<a class="menuOption" value="0"title="Configure {{register}} to be an Analog Input">Analog</a>
+	            <a class="menuOption" value="1"title="Configure {{register}} to be a Digital Input">Input</a>
+	            <a class="menuOption" value="2"title="Configure {{register}} to be a Digital Output">Output</a>
+	        </li>
+	    </ul>
+	</div>
+	<div class="btn-group digitalStateSelectButton outputObject" id="{{register}}-STATE-SELECT" style="{{#if ainEnabled}}display:none;{{else}}{{#unless direction}}display:none;{{/unless}}{{/if}}">
+		<button class="btn currentValue toggleButton" title="Toggle {{register}} State">{{#if state}}High{{else}}Low{{/if}}</button>
+		<button class="btn dropdown-toggle" data-toggle="dropdown" title="Set {{register}} State">
+			<span class="caret"></span>
+		</button>
+		<ul class="dropdown-menu">
+			<li>
+	            <a class="menuOption" value="1" title="Set {{register}} State to High">High</a>
+	            <a class="menuOption" value="0" title="Set {{register}} State to Low">Low</a>
+	        </li>
+		</ul>
+	</div>
+	<div id="{{register}}-DIGITAL-INDICATOR" class="digitalDisplayIndicator inputObject" style="{{#if ainEnabled}}display:none;{{else}}{{#if direction}}display:none;{{/if}}{{/if}}">
+	    <span class="state-indicator state-indicator-2000 {{#if state}}active{{else}}inactive{{/if}}">{{#if state}}High{{else}}Low{{/if}}</span>
+	</div>
+	<div id="{{register}}-ANALOG-INDICATOR" class="analogDisplayIndicator"style="{{#unless ainEnabled}}display:none;{{/unless}}">
+	    <span class="ainValue">{{value}}</span><span class="unit"> V</span>
+	</div>
+</div>

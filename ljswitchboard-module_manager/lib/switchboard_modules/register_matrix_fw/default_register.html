@@ -1,0 +1,41 @@
+<tr id="register_{{name}}_controls" class="active-register-info">
+    <td class="details-control" title="Show Details">
+        <span class="show-details-button icon-info-4"></span>
+        <span class="hide-details-button icon-info-5"></span>
+    </td>
+    <td class="remove-register" title="Remove Register"><span class=" icon-remove-2"></span>
+    <td class="register-name selectableText">{{name}}</td>
+    <td class="register-value-obj {{disableControls}} {{registerMode}}">
+        <div class="value-display">
+            <span title="enter write mode" class="icon-pencil edit-register-button"></span>
+            <span class="register-value selectableText">{{result.str}}</span>
+        </div>
+        <div class="value-edit-controls">
+            <div class="value-edit-object close-value-editor-button">
+                <span class="value-editor-button">
+                    <span class="icon icon-close close-value-editor-button-icon" title="exit write mode"></span>
+                </span>
+            </div>
+            <div class="value-edit-object">
+                <input class="input-small write-reg-value-input" type="text">
+            </div>
+            <div class="value-edit-object write-controls-holder">
+                <span class="write-value-editor-button value-editor-button">
+                    <span class="icon icon-arrow-right-12" title="write"></span>
+                </span>
+                <div class="write-confirm-msg">
+                    <div class="progress progress-indeterminate">
+                        <div class="win-ring small"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </td>
+</tr>
+<tr id="register_{{name}}_details" class="active-register-details">
+    <td colspan="4">
+        <div>
+            {{{register_details}}}
+        </div>
+    </td>
+</tr>

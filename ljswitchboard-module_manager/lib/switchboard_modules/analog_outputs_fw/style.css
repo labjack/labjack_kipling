@@ -1,0 +1,20 @@
+.dacRow {
+	margin-top: 30px;
+}
+.subsection {
+    margin: 50px 0 50px 0;
+}
+
+#analog-output-config .row-fluid {
+    margin: 30px 0 30px 0;
+}
+.slider {
+    width: 90% !important;
+}
+.inputBar {
+	margin-top: 15px;
+	padding-left:20px;
+}
+.channelDescription {
+	margin-right:10px;
+}

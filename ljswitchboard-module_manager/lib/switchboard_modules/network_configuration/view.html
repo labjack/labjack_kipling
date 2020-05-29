@@ -1,0 +1,87 @@
+<div id="network-configuration">
+    <div class="flash-notice" id="flash-read-notice">
+        <div><img src="static/img/progress-indeterminate-ring-light.gif"></div>
+        <div>
+            Whoops! This will just take a minute. Device flash memory is not ready (code 2358). This likely means that the WiFi / Ethernet module is initializing. Please wait...
+        </div>
+    </div>
+    <div id="device-overview"></div>
+    <div id="device-configuration-pane">
+        <form>
+            <fieldset>
+                <div class="section">
+                    <label>Power Ethernet</label>
+                    <div class="ethernet-switch-holder switch" data-on-label="on" data-off-label="off">
+                        <input id="ethernet-switch" type="checkbox">
+                    </div>
+                </div>
+                <div class="section" id="wifi-controls">
+                    <label>Power WiFi</label>
+                    <div class="wifi-switch-holder switch" data-on-label="on" data-off-label="off">
+                        <input id="wifi-switch" type="checkbox">
+                    </div>
+                    <label>WiFi Network Name</label>
+                    <input id="wifi-network-name-input" type="text" placeholder="WiFi SSID">
+                    <label>WiFi Network Password</label>
+                    <input id="wifi-network-password-input" type="password" placeholder="WiFi Password">
+                </div>
+                <div class="section">
+                    <div id="advanced-settings-collapsed">
+                        <a id="show-advanced-settings-link" href="#">Show Advanced Settings</a>
+                    </div>
+                    <div id="advanced-settings">
+                        <label>Default DNS Server</label>
+                        <input id="default-dns-input" type="text">
+                        <label>Alt DNS Server</label>
+                        <input id="alt-dns-input" type="text">
+                        <label>Ethernet DHCP (on for dynamic IP, off for static IP)</label>
+                        <div class="ethernet-dhcp-switch-holder switch" data-on-label="on" data-off-label="off">
+                            <input id="ethernet-dhcp-switch" type="checkbox">
+                        </div>
+                        <div id="ethernet-static-ip-settings">
+                            <label>Ethernet IP Address</label>
+                            <input id="ethernet-ip-input" type="text">
+                            <label>Ethernet Subnet</label>
+                            <input id="ethernet-subnet-input" type="text">
+                            <label>Ethernet Gateway</label>
+                            <input id="ethernet-gateway-input" type="text">
+                        </div>
+                        <div id="wifi-advanced-controls">
+                            <label>WiFi DHCP (on for dynamic IP, off for static IP)</label>
+                            <div class="wifi-dhcp-switch-holder switch" data-on-label="on" data-off-label="off">
+                                <input id="wifi-dhcp-switch" type="checkbox">
+                            </div>
+                            <div id="wifi-static-ip-settings">
+                                <label>WiFi IP Address</label>
+                                <input id="wifi-ip-input" type="text">
+                                <label>WiFi Subnet</label>
+                                <input id="wifi-subnet-input" type="text">
+                                <label>WiFi Gateway</label>
+                                <input id="wifi-gateway-input" type="text">
+                            </div>
+                        </div>
+                        <div class="note" id="multiple-device-note">
+                            The first selected device will be given this IP address and each subsequent selected device will be given the next IP address up until X.X.X.255.
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <button id="update-button" class="btn">Update Configuration</button>
+            <div class="flash-notice" id="flash-write-notice">
+                <div><img src="static/img/progress-indeterminate-ring-light.gif"></div>
+                <div>
+                    Whoops! This will just take a minute. Device flash memory is not ready (code 2358). This likely means that the WiFi / Ethernet module is initializing. Please wait...
+                </div>
+                <div>
+                    <a href="#" id="cancel-flash-button" class="btn btn-danger">Cancel</a>
+                </div>
+            </div>
+            <div id="save-indicator">Saving...</div>
+            <div id="saved-indicator">Saved...</div>
+
+            <div class="note" id="wifi-note">
+                Note: WiFi configuration settings are not shown because your device does not support connectivity by wireless network.
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+.device-canvas-container {
+	display: inline-block;
+}
+
+.edit-label {
+    padding: 7px;
+}
+
+.val-input-holder {
+    text-align: center;
+}
+
+.write-button {
+    margin-right: 5px;
+}

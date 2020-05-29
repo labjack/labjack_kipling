@@ -1,0 +1,14 @@
+{
+    "autoConnectToDevices": false,
+    "_Comment": "connectionType choices are: 'USB', 'Wifi', or 'Ethernet'",
+    "ljmDeviceParameters":
+    [
+        {
+            "serialNumber":"470010610",
+            "connectionType":"USB"
+        }
+    ],
+    "displayDevTools": false,
+    "overrideAutoModuleLoad": false,
+    "moduleName": "dashboard"
+}

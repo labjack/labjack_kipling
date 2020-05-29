@@ -1,0 +1,16 @@
+{
+    "name": "device_selector",
+    "humanName": "Device Selector",
+    "version": "0.0.1",
+    "jsFiles": [
+    	"view_generator.js"
+    ],
+    "htmlFiles": [
+    	"no_devices_found.html",
+    	"found_devices.html",
+    	"wifi_image.html",
+        "scanning_for_devices.html",
+        "direct_opening_device.html",
+        "device_connection_error.html"
+    ]
+}

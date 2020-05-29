@@ -1,0 +1,7 @@
+{
+    "name": "task_data_output_buffer",
+    "humanName": "Data Output Buffer",
+    "version": "0.0.1",
+    "primary_file_name": "data_buffer.js",
+    "startTime": "auto"
+}

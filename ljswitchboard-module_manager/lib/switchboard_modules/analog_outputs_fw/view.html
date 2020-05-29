@@ -1,0 +1,17 @@
+<div id="analog_outputs_fw">
+	<div id="analog_outputs_fw_hider"  style="position: relative;top: -1000px;height:0px">
+		<h3>Analog Outputs</h3>
+		<!--<p>Read and control the devices analog output (DAC) channels.</p>-->
+		{{#each custom.outputs}}
+		<div class="dacRow row-fluid">
+			<div class="centered-left span1">{{name}}</div>
+			<div id="{{register}}_input_slider_holder" class="span6 inputBar" >
+			    <input id="{{register}}_input_slider" type="range" class="slider" data-slider-min="-0.05" data-slider-max="5.05" data-slider-step="0.01" data-slider-orientation="horizontal" max="5" min="0">
+			</div>
+			<div class="span4 centered-left" id="{{register}}-confirmation-display">
+				<input class="spinner" id="{{register}}_input_spinner" name="spinner" value="0" max="5.05" min="-0.05"></input>
+			</div>
+		</div>
+		{{/each}}
+	</div>
+</div>

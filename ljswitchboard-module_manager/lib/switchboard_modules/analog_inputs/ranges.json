@@ -1,0 +1,6 @@
+[
+    {"name": "-10 to 10V", "driver_val": 10},
+    {"name": "-1 to 1V", "driver_val": 1},
+    {"name": "-0.1 to 0.1V", "driver_val": 0.1},
+    {"name": "-0.01 to 0.01V", "driver_val": 0.01}
+]

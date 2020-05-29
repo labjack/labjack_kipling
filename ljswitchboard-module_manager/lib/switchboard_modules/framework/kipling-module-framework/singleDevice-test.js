@@ -1,0 +1,1 @@
+console.log('singleDevice-test.js-here');

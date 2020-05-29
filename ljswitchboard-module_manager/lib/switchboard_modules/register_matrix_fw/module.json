@@ -1,0 +1,24 @@
+{
+    "name": "register_matrix_fw",
+    "humanName": "Register Matrix",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "supportedDevices": [{"type":"T7"},{"type":"T4"},{"type":"Digit"}],
+    "jsFiles": [
+        "data_formatter.js",
+        "data_table_helper.js"
+    ],
+    "htmlFiles": [
+        "active_registers.html",
+        "default_register.html",
+        "active_register_details.html",
+        "register_details.html",
+    	"group_row.html",
+        "child_table.html",
+        "search_input_box.html",
+        "ljm_filter_box.html"
+    ],
+    "cssFiles": [
+        "active_registers.css"
+    ]
+}

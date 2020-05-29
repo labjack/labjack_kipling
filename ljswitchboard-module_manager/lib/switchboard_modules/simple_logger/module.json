@@ -1,0 +1,14 @@
+{
+    "name": "simple_logger",
+    "humanName": "Simple Logger",
+    "version": "0.0.1",
+    "framework":"multipleDevices",
+    "framework_options": {
+    	"device_selection": false
+    },
+    "supportedDevices": [{"type":"T7"},{"type":"T4"}],
+    "jsFiles": [
+    ],
+    "htmlFiles": [
+    ]
+}

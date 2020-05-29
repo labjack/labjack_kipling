@@ -1,0 +1,15 @@
+{
+    "name": "device_updater_fw",
+    "humanName": "Device Updater",
+    "version": "0.0.1",
+    "framework":"multipleDevices",
+    "supportedDevices": [{"type":"T7"},{"type":"T4"}],
+    "jsFiles": [
+    ],
+    "htmlFiles": [
+        "device_upgrade_status.html",
+        "firmware_file_info.html",
+    	"selected_firmware.html",
+        "upgrade_results.html"
+    ]
+}

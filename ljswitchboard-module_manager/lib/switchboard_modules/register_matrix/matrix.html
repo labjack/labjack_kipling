@@ -1,0 +1,106 @@
+<div class="row-fluid" id="register-matrix-search">
+    <div class="span7" id="search-holder">
+        <div id="ljm-register-search-box">
+            <input id="search-box" class="escapableInput typeahead" type="text" value="{{currentSearchTerm}}" placeholder="search term" title="Search by register name or description">
+        </div>
+        <div>
+            <button id="search-button" class="btn">search</button>
+            <div id="searching-status" class="search-progress-status" style="display:none;">
+                <div class="progress progress-indeterminate">
+                    <div class="win-ring small"></div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <div class="span5" id="tag-dropdown-holder">
+        Tag: <div class="btn-toolbar">
+        <div class="btn-group" id="device-selection-controls">
+            <a class="btn dropdown-toggle" data-toggle="dropdown">
+                <span id="selected-device-display">{{currentTag}}</span>
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                {{# tags }}
+                <li><a class="tag-selection-link" id="{{.}}-tag-selector">{{.}}</a></li>
+                {{/ tags }}
+                <li><a class="tag-selection-link" id="all-tag-selector">ALL</a></li>
+            </ul>
+        </div>
+        </div>
+    </div>
+</div>
+<div id="register-matrix-body">
+    <table id="register-matrix" class="table">
+        <thead>
+            <tr>
+                <th class="addressTableColumn">address</th>
+                <th class="nameTableColumn">name</th>
+                <th class="typeTableColumn">type</th>
+                <th>fwmin</th>
+                <th>access</th>
+                <th>details</th>
+                <th>
+                    <div id="watch-config-tooltip">
+                        select a register to read or write
+                    </div>
+                    watch/ config
+                </th>
+            </tr>
+        </thead>
+        <tbody id="page-content">
+            {{!--
+            {{#registers}}
+            <tr class="register-row big-table-row register-overview-row">
+                <td class="selectableText">{{address}}</td>
+                <td class="selectableText">{{name}}</td>
+                <td>{{type}}</td>
+                <td>{{relevantFwmin}}</td>
+                <td>{{readwrite}}</td>
+                <td id="{{address}}-toggle-button" class="icon-plus toggle-info-button expand"></td>
+                <td>
+                    <div id="{{address}}-add-to-list-button" class="add-to-list-button icon-add-to-list"></div>
+                </td>
+            </tr>
+            <tr id="{{address}}-description-display" class="register-row big-table-row register-description">
+                <td colspan="7">
+                    <div class="description-section">
+                        <span class="description-header">Tags:</span> {{flatTagStr}}
+                    </div>
+                    <div class="description-section">
+                        <span class="description-header">Description:</span>
+                        <span class="selectableText">{{description}}</span>
+                    </div>
+                </td>
+            </tr>
+            {{/registers}}
+            --}}
+        </tbody>
+    </table>
+    <!-- <div  class="well"></div> -->
+    <!-- <div class="text-center">
+        <ul id="pagination-demo" class="pagination-sm"></ul>
+    </div> -->
+    {{^hasRegisters}}
+    <div id="no-reg-msg">No registers found.</div>
+    {{/hasRegisters}}
+</div>
+<script>
+$('#register-matrix-body').ready(function () {
+    // var options = {
+    //     rowsPerPage : 10,
+    //     firstArrow : (new Image()).src="static/img/first.gif",
+    //     prevArrow : (new Image()).src="static/img/prev.gif",
+    //     lastArrow : (new Image()).src="static/img/last.gif",
+    //     nextArrow : (new Image()).src="static/img/next.gif",
+    //     ignoreRows : $('tbody tr:odd', $('#register-matrix')),
+    //     topNav : false
+    // };
+    // $('#register-matrix').tablePagination(options);
+});
+
+// $('#module-chrome-contents-footer').html('<div class="text-center">
+//         <ul id="pagination-demo" class="pagination-sm"></ul>
+//     </div>');
+// $('#module-chrome-contents-footer').show();
+</script>

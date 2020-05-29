@@ -1,0 +1,63 @@
+
+.extra-padding {
+	padding-bottom:10px;
+}
+
+.file-input-box{
+	width:350px;
+}
+
+.file-info {
+	padding-top:10px;
+}
+.file-info.dl-horizontal dt{
+	width:100px;
+}
+.file-info.dl-horizontal dd{
+	margin-left: 120px;
+}
+
+@media (max-width: 767px) {
+	.file-info.dl-horizontal dd {
+	  margin-left: 0;
+	}
+}
+
+.upgrade-status-hoder {
+	display:none;
+}
+
+.upgrade-status ul{
+	margin-bottom:0px;
+}
+
+.lj-link-holder {
+	cursor:pointer;
+}
+
+#firmware-update-results-holder {
+	/*display:none;*/
+}
+#device_updater_holder {
+	padding-top:20px;
+}
+
+.upgrade-results.well {
+	padding-bottom:0px;
+}
+.device-upgrade-results {
+	margin:0px;
+	padding:0px;
+	margin-top:10px;
+	margin-bottom: 20px;
+	padding-left: 5px;
+}
+
+.device-upgrade-results dl {
+	margin-bottom:5px;
+	margin-top: 5px;
+}
+
+#t7_firmware_controls .tab-content {
+	overflow: initial;
+}

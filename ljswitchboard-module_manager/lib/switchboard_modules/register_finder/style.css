@@ -1,0 +1,143 @@
+.ct-select-control {
+	cursor:pointer;
+}
+.select-control {
+	cursor:pointer;
+}
+.details-control {
+	cursor:pointer;
+}
+
+.register_matrix_child_row dl dt {
+	width: 100px;
+}
+.register_matrix_child_row dl dd {
+	margin-left: 120px;
+}
+@media (max-width: 767px) {
+	.register_matrix_child_row dl dd {
+	  margin-left: 0;
+	}
+}
+div.dataTables_info {
+  float: left;
+}
+
+.register-address-header {
+	width:65px;
+}
+.register-type-header {
+	width: 65px;
+}
+.ct-address-header {
+  width: 65px;
+}
+
+th.ct-select-control.sorting_disabled {
+  padding-right: 5px;
+}
+th.select-control.sorting_disabled {
+  padding-right: 5px;
+}
+th.details-control.sorting_disabled {
+  padding-right: 5px;
+}
+
+
+#modbus_map tr.primary_row.odd {
+    background-color: #f9f9f9;
+}
+#modbus_map tr.primary_row.even {}
+
+#modbus_map tr.primary_row:hover {
+  background-color:#eee;
+}
+
+#modbus_map tr.primary_row.selected {
+	background-color:#DDD;
+}
+#modbus_map tr.primary_row.selected:hover {
+	/*background-color:#f9f9f9;*/
+}
+
+
+/* Defining button states */
+#modbus_map .primary_row .select-button .state-indicator{
+	color:#999;	/* Dark grey */
+}
+
+/* Defining their hover-over effects */
+#modbus_map .primary_row:hover .select-button .state-indicator{
+	/*color: #5bb75b;  Light green */
+}
+
+/* Defining their state when row is selected */
+#modbus_map .primary_row.selected .select-button .state-indicator{
+	/* color:#468847; Dark Green */
+	color: #5bb75b; /* Light green */
+}
+
+/* Defining their hover-over effects */
+#modbus_map .primary_row.selected:hover .select-button .state-indicator{
+	/*color: #ccc;  Light grey */
+}
+
+
+/* Define details- icon states */
+#modbus_map .primary_row .details-control .show-details-button {
+	display:inline;
+}
+#modbus_map .primary_row .details-control .hide-details-button {
+	display:none;
+}
+/* Re-define them for when the primary_row has the class details-visible */
+#modbus_map .primary_row.details-visible .details-control .show-details-button {
+	display:none;
+}
+#modbus_map .primary_row.details-visible .details-control .hide-details-button {
+	display:inline;
+}
+
+
+
+#modbus_map .ct-select-control {
+	cursor:pointer;
+}
+
+/*#modbus_map .primary_row.hidden-data .register-name-header {
+	color:blue;
+}*/
+#modbus_map .primary_row.hidden-data:hover .show-details-button{
+  /*color: blue;*/
+}
+#modbus_map .primary_row:hover .select-button {
+	background-color:#ccc;
+}
+#modbus_map .primary_row.hidden-data:hover .details-control{
+	background-color:#ccc;
+}
+#modbus_map .primary_row.hidden-data:hover .select-button {
+	background-color:inherit;
+}
+
+
+/* Define styling for child-tables */
+#modbus_map tr.secondary_row.odd {
+    background-color: #f9f9f9;
+}
+#modbus_map tr.secondary_row.even {}
+#modbus_map tr.secondary_row:hover {
+  background-color:#eee;
+}
+
+#modbus_map tr.secondary_row.selected {
+	background-color:#DDD;
+}
+/* Defining button states */
+#modbus_map .secondary_row .select-button .state-indicator{
+	color:#999;	/* Dark grey */
+}
+#modbus_map .secondary_row.selected .select-button .state-indicator{
+	color: #5bb75b; /* Light green */
+	/* color:#468847; Dark Green */
+}

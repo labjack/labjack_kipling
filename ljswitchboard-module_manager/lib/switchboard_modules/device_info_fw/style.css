@@ -1,0 +1,126 @@
+#change-name-controls
+{
+    display: none;
+    margin: 20px 0 30px 0;
+}
+.device-info-module-block {
+    min-width: 660px;
+}
+.device-info-div {
+    display:block;
+    float:left;
+    max-width:410px;
+}
+.device-links-div {
+    display:block;
+    float:left;
+    margin-left:10px;
+    width: 37%;
+}
+.important-info
+{
+    font-weight: bold;
+}
+
+.info-section
+{
+    margin: 20px 0 0 85px;
+    position: relative;
+}
+.lj-link-holder {
+    cursor: pointer;
+}
+#change-name-link {
+    padding: 0px 5px;
+    margin: 0px 0px;
+    margin-top: -5px;
+}
+.block-separator {
+    height: 20px;
+}
+.pane-popover {
+    position: absolute;
+    width: 64px;
+    /*height: 18px;*/
+    line-height: 18px;
+    padding: 3px;
+    padding-right: 6px;
+    padding-left: 0px;
+    font-size: 12px;
+    color: white;
+    background-color: #999999;
+    margin-top: -3px;
+    left: -81px;
+    font-weight: bold;
+    text-align: right;
+}
+
+.pane-popover:after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-width: 7px;
+    border-style: solid;
+    border-color: transparent transparent transparent #999999;
+    top: 5px;
+    left: 66px;
+}
+
+#power-overview {
+    margin-top: 0;
+    min-height: 30px;
+}
+
+.power-indicator {
+    width: 14px;
+    height: 14px;
+    background-color: #C0C0C0;
+    display: inline-block;
+}
+
+.power-indicator.powered {
+    background-color: #00C000;
+}
+#installed-hardware-overview {
+    margin-top: 0;
+    min-height: 30px;
+}
+.installed-hardware-indicator {
+    width: 14px;
+    height: 14px;
+    background-color: initial;
+    display: inline-block;
+}
+
+.calibration-message {
+    padding: 2px 5px 2px 8px;
+}
+
+.product-image {
+    width: 100%;
+    max-width: 300px;
+}
+
+.wifi-rssi-val {
+    position: relative;
+    height: 0px;
+    margin-left: 220px;
+    top: -24px;
+}
+
+.wifi-rssi-image {
+    height:20px;
+}
+#name-display {
+    width:185px;
+}
+#current-name-display{
+    word-wrap:break-word;
+}
+ .todo-paragraph {
+     width: 300px;
+ }
+/*.device-info-div p{
+    width: 300px;
+}*/

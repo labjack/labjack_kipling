@@ -1,0 +1,111 @@
+#network_settings hr{
+	margin:0px;
+}
+.network-settings-div {
+	padding-bottom:10px;
+}
+.currentStatusInfo {
+	height:30px;
+}
+.powerButtonDiv {
+	float:right;
+}
+.dhcpSelectionButton {
+	width:286px;
+}
+.dhcpSelectRow {
+	width:364px;
+}
+.configSettingsDiv .dropdown-menu{
+	left: 114px;
+}
+.configSettingsDiv .row {
+	margin-left:0px;
+}
+.configSettingsTable {
+	width:350px;
+}
+.configSettingsTable .attribute {
+	width: 133px;
+}
+.configSettingsTable .input {
+	/*width:75%;*/
+}
+.configSettingsTable .userFeedback {
+	min-width: 30px;
+	width:30px;
+}
+
+.currentStateTable {
+	max-width: 325px;
+}
+#network_settings .table {
+	margin-bottom: 8px;
+}
+.Auto_Value {
+	/*display:none;*/
+}
+.Manual_Value {
+}
+.Manual_Value input {
+	margin-bottom: 0px;
+}
+.networkSetting {
+}
+.networkSetting td {
+	line-height: 34px;
+}
+.networkSetting .alertCol {
+	/*position: absolute;*/
+}
+.networkSetting .alert {
+	margin-bottom: -2px;
+	padding: 3px;
+	width: 21px;
+	left:-6px;
+	display:none;
+}
+.configSettingsDiv .dhcpAlert {
+	margin-bottom: -3px;
+	padding: 0px;
+	width: 17px;
+	left:15px;
+	height: 33px;
+	display:none;
+}
+.configSettingsDiv .dhcpAlert .alert{
+	padding:5px 1px 5px 1px;
+}
+#ethernet_settings {
+	/*box-shadow: 1px 1px 5px black;
+	border: solid 1px black;
+	padding: 5px;*/
+}
+.ethAutoDHCPDivs {
+
+}
+.ethManualDHCPDivs {
+	
+}
+.networkConfigHelpButtonDiv {
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 177px;
+	display:inline;
+}
+.networkConfigHelpButton {
+	margin: 0px 0px 0px 0px;
+	padding: 2px 0px 0px 0px;
+}
+.networkConfigHelpButton span {
+	margin: 0 2px;
+}
+#wifi_settings {
+	/*box-shadow: 1px 1px 5px black;
+	border: solid 1px black;
+	padding: 5px;*/
+}
+
+.win-command.win-command-small .win-commandicon {
+  width: 28px;
+  height: 28px;
+}

@@ -1,0 +1,27 @@
+<h3 class="register-matrix-heading">Active Registers</h3>
+<div id="register-watchlist">
+</div>
+<div id="register-matrix-active-registers">
+    <!-- <div>Loading the Active Registers</div>
+    <div class="progress progress-indeterminate">
+        <div class="win-ring"></div>
+    </div> -->
+    <!-- {{#each custom.registers}}
+    <p>Register: {{name}}, val: {{result.val}} {{result.unit}}</p>
+    {{/each}} -->
+    {{{custom.activeRegisters}}}
+</div>
+<!-- <button id="add_or_remove_registers">Add/Remove Registers</button> -->
+<h3 class="register-matrix-heading">Modbus Map</h3>
+<div id="register-matrix">
+    <!-- <div>Loading the Modbus Map</div>
+    <div class="progress progress-indeterminate">
+        <div class="win-ring"></div>
+    </div> -->
+    <div class="container" style="width:100%">
+    	<div id="modbus_map">
+    		<table id="modbus_map_table" class="table" cellspacing="0" width="100%">
+    		</table>
+    	</div>
+	</div>
+</div>

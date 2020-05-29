@@ -1,0 +1,170 @@
+.register-overlay {
+    font-size: 12px;
+    position: absolute;
+    /*width: 122px;
+    margin-left:-3px;*/
+    width: 128px;
+  	margin-left: 0px;
+}
+.device-register-overlay {
+	font-size: 12px;
+    position: absolute;
+    width: 122px;
+    margin-left:-3px;
+}
+.register-overlay-left {
+	text-align: right;
+}
+.register-overlay-left .dac-output-SELECT {
+	float:right;
+	position: absolute;
+	right: -9px;
+}
+.analogInputDisplay {
+	padding-right: 7px;
+}
+.digitalDisplayIndicator {
+
+}
+.status-indicator {
+	padding:5px;
+	min-width:20px;
+	font-size: 10px;
+
+}
+.state-indicator {
+	/*padding: 5px;
+	min-width: 20px;
+	font-size: 10px;
+	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, Sans-Serif;*/
+
+	padding: 3px 8px 2px 8px;
+	margin-top: -1px;
+	min-width: 20px;
+	font-size: 10px;
+	font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, Sans-Serif;
+	position: absolute;
+	width: 36px;
+}
+.state-indicator.active {
+	background-color:#5BB75B;
+	color: white;
+}
+.state-indicator.inactive {
+	background-color:#C0C0C0;
+	color: black;
+}
+#device-display-container {
+	height: 525px;
+	width: 370px;
+	display: inline-block;
+	float:left;
+	margin-left:10px;
+}
+#device-display-container-svg {
+    /*shape-rendering: crispEdges;*/
+    height: 525px;
+	width: 370px;
+	position: relative;
+}
+#device-display-container-registers {
+	position: relative;
+	width: 120px;
+	z-index: 1;
+}
+#db-display-container {
+	height: 525px;
+	/*width: 445px;*/
+	display: inline-block;
+	margin-left: 10px;
+	float:left;
+}
+#db-display-container-svg {
+	/*height: 525px;
+	width: 370px;*/
+	position: relative;
+	height: 100%;
+	width: 442px;
+}
+#db-display-container-registers {
+	position: relative;
+	width: 120px;
+	z-index: 1;
+}
+.digitalControlObject {
+
+}
+.digitalSelectButton {
+	float:left;
+	top: -1px;
+	margin-right: 2px;
+}
+.digitalDisplayIndicator {
+	float:left;
+	padding-left: 2px;
+}
+.digitalSelectButton .dropdown-toggle {
+	font-size: 12px;
+	padding: 0px 0px 0px 5px;
+	min-width: 61px;
+	/*margin-bottom: -10px;*/
+}
+.dropdown-menu {
+	width: 90px;
+	padding: 0px;
+	min-width: 90px;
+}
+.dropdown-menu a {
+	padding:2px 0px 2px 5px;
+}
+.menuOption {
+	font-size: 12px;
+}
+.dac-output-spinner {
+	padding-top: 0px;
+}
+.dac-output-spinner input {
+	margin: 0px;
+	font-size: 12px;
+	line-height: 20px;
+	width:90px;
+}
+/*--------- Digital Output Styling -------------*/
+.digitalControlObject .btn-group {
+	top: -1px;
+	margin: 0px;
+}
+.digitalControlObject .currentValue {
+	font-size: 12px;
+	padding: 0px;
+	font-weight: 300;
+}
+.digitalControlObject .button-toggle {
+	padding: 0px 0px 0px 2px;
+}
+.digitalControlObject .button-toggle .caret {
+	font-size: 12px;
+	padding: 0px 1px 0px 0px;
+}
+.digitalControlObject .digitalStateSelectButton{
+	margin-left:2px;
+}
+.digitalControlObject .digitalStateSelectButton .currentValue{
+	padding: 0px 4px 0px 4px;
+	min-width: 37px;
+	height: 25px;
+	border: none;
+}
+.digitalControlObject .digitalStateSelectButton .btn.dropdown-toggle {
+padding: 0px;
+}
+/*@media screen and (min-width: 768px) {
+    #device-display-container-registers {
+    	top:0px;
+    }
+}
+@media screen and (max-width: 767px) {
+ 	 #device-display-container-registers {
+    	top:100px;
+    }  
+}*/

@@ -1,0 +1,20 @@
+{
+    "name": "file_browser_fw",
+    "humanName": "File Browser",
+    "version": "0.0.1",
+    "framework":"singleDevice",
+    "supportedDevices": [{"type":"T7"}],
+    "jsFiles": [
+        "view_generator.js",
+        "data_formatter.js",
+        "data_table_helper.js",
+        "browser_controls_manager.js",
+        "download_controls_manager.js",
+        "file_browser_manager.js"
+    ],
+    "htmlFiles": [
+    	"browser_controls_template.html",
+        "download_controls_template.html",
+        "file_browser_template.html"
+    ]
+}

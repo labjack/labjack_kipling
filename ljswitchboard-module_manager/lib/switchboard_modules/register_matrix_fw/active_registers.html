@@ -1,0 +1,22 @@
+<div id="active-registers-holder" class="{{#unless registers.length}}no-registers{{/unless}}">
+	<div>
+		<table id="active_registers" class="table table-striped" cellspacing="0" width="100%">
+			<thead>
+				<tr>
+					<th><span class="show-details-button icon-info-4"></span></th>
+					<th>Remove</th>
+					<th>Name</th>
+					<th>Value</th>
+				</tr>
+			</thead>
+			<tbody class="active-registers-list">
+				{{#each registers}}
+				{{{this}}}
+				{{/each}}
+			</tbody>
+	    </table>
+		<div id="module_instructions">
+			<p>Active Registers list is empty, please select registers from the Modbus Map.</p>
+		</div>
+	</div>
+</div>

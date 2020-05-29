@@ -1,0 +1,223 @@
+<div id="defaults-holder">
+    {{#if devices.length}}
+    <div class="section">
+        <h3>Introduction</h3>
+        <div>
+            <p>
+                Control how the device is configured after any reboot, power-up, or reset condition.  This uses the device's I/O configuration system to configure registers including but not limited to:
+            </p>
+            <ul>
+                <li>Digital I/O directions and states</li>
+                <li>Analog input configuration options (Range, Resolution, etc.)</li>
+                <li>Analog input extended features (AINx_EF)</li>
+                <li>Analog output (DAC) channel values</li>
+            </ul>
+            <p>Refer to the <a class="lj-link-holder" id="io-config-datasheet-link">"IO Config" section of the datasheet</a> for more information.</p>
+            <script>
+                $('#io-config-datasheet-link').unbind();
+                $('#io-config-datasheet-link').bind('click',function(){
+                    if(typeof(gui) === 'undefined') {
+                        gui = require('nw.gui');
+                    }
+                    gui.Shell.openExternal("https://labjack.com/support/datasheets/t7/io-config-default");
+                });
+            </script>
+        </div>
+    </div>
+    
+    <ul class="nav nav-tabs" id="myTab">
+        <li class="active"><a href="#configure_defaults_tab">Configure Defaults</a></li>
+        <li><a href="#save_defaults_tab">Save Defaults to File</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane active" id="configure_defaults_tab">
+    <h2>Configure Device Power-Up Defaults</h2>
+    <div class="section">
+        <div class="primary-step">
+            <h3>1. Select Defaults Source</h3>
+            <div id="select-defaults-source" class="primary-step-content">
+                <div style="padding-top: 5px;">
+                    <label class="radio">
+                        <input type="radio" name="source" value="current" checked>
+                        <span class="metro-radio">Current Device Settings</span>
+                        {{#if custom.isMultipleDevices}}
+                        <p class="option-description">
+                            Instruct the selected devices to take a snapshot of their current settings and use that 
+                            snapshot to reconfigure itself after a reboot.
+                        </p>
+                        {{else}}
+                        <p class="option-description">
+                            Instruct the selected device to take a snapshot of the settings the device has right now
+                            and use that snapshot of settings after the device is
+                            rebooted.
+                        </p>
+                        {{/if}}
+                    </label>
+                </div>
+                <div>
+                    <label class="radio">
+                        <input type="radio" name="source" value="factory">
+                        <span class="metro-radio">Factory Defaults</span>
+                        {{#if custom.isMultipleDevices}}
+                        <p class="option-description">
+                            Configure the selected devices to use factory default settings after they get rebooted.
+                        </p>
+                        {{else}}
+                        <p class="option-description">
+                            Configure the device to use the factory settings after the device is rebooted.
+                        </p>
+                        {{/if}}
+                    </label>
+                </div>
+                <div>
+                    <label class="radio">
+                        <input type="radio" name="source" value="file">
+                        <span class="metro-radio">Load From File</span>
+                        <p class="option-description">
+                            Configure the selected device(s) power-up defaults from a file.  The power-up defaults 
+                            are used to configure the device after it gets rebooted.
+                        </p>
+                        <div class="selected-config-file-information shifted-element">
+                            <!--<span>File Info:</span>-->
+                            <div class="no-config-file-selected file-info-text">
+                                <div><span>No File Selected. To load settings from a file, please browse for a file.</span> 
+                                </div>
+                            </div>
+                            <div class="selected-file-details file-info-text" style="display:none">
+                                <div class="file-name file-detail">File Name: <span class="selectableText"></span></div>
+                                <div class="product-name file-detail">Intended Product Name: <span class="selectableText"></span></div>
+                                <div class="fw-version file-detail">Intended Firmware Version: <span class="user-fw-warning-text selectableText"></span></div>
+                                <div class="user-fw-warning-text file-detail">** The intended firmware version and the device firmware version must match. **</div>
+                                <!--The firmware version in the saved defaults file and on the device must match.-->
+                            </div>
+                        </div>
+                        <div class="small-section shifted-element">
+                            <a id="browse-for-config-file-button" class="btn">Browse for Config File</a>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="primary-step">
+            <h3>2. Select Devices</h3>
+            <div class="primary-step-content">
+                <table  id="configure-defaults-device-selection-table" class="primary-step-content">
+                    <thead>
+                        <tr>
+                            <th style="padding-right:5px"></th>
+                            <th style="padding-right:20px; min-width: 140px;"><p>Device</p></th>
+                            <th style="padding-right:20px"><p>FW Version</p></th>
+                            <!--<th><p>Operation to be performed</p></th>-->
+
+                        <tr>
+                    </thead>
+                    <tbody>
+                    {{#each devices}}
+                    <tr>
+                        <td>
+                            <label class="checkbox" style="display:block">
+                                <input name="selected-device" class="configure-device-defaults-device-checkbox" id="{{savedAttributes.serialNumber}}-selector" type="checkbox" value="{{savedAttributes.FIRMWARE_VERSION}}_{{savedAttributes.deviceTypeName}}_{{savedAttributes.serialNumber}}">
+                                <span class="metro-checkbox" title="Select {{savedAttributes.productType}}, {{savedAttributes.serialNumber}}"></span>
+                            </label>
+                        </td>
+                        <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
+                        <td class="device-fw-version">{{savedAttributes.FIRMWARE_VERSION}}</td>
+                        <!--<td hover="Do Nothing.  Configure Current/Factory Defaults/Settings from File as the power-up defaults for the device the next time it starts.">None</td>-->
+                    </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="primary-step">
+            <h3>3. Configure Device</h3>
+            <div class="section primary-step-content">
+                <a id="configure-button" class="btn">Configure Power-up Defaults</a>
+                <div class="saving-notice" id="saving-indicator">Saving...</div>
+            </div>
+        </div>
+        <div class="primary-step">
+            <h3>4. Reboot Device (Optional)</h3>
+            <div class="section primary-step-content">
+                <a id="perform-system-reboot-button" class="btn">Perform System Reboot</a>
+            </div>
+            <p class="option-description">WARNING: This writes 0x4C4A0004 to the 'SYSTEM_REBOOT' register which instructs your device to perform a software-triggered reboot 200ms (50ms*4) after the instruction is recieved by the device.</p>
+        </div>
+    </div>
+        </div>
+        <div class="tab-pane" id="save_defaults_tab">
+    <h2>Save Power-Up Defaults to File</h2>
+    <div class ="section">
+        <div class="primary-step">
+            <h3>1. Select Devices</h3>
+            <div class="primary-step-content">
+                <table id="save-defaults-device-selection-table">
+                    <thead>
+                        <tr>
+                            <th style="padding-right:5px"></th>
+                            <th style="padding-right:20px; min-width: 140px;"><p>Device</p></th>
+                            <th><p>File Name</p></th>
+                        <tr>
+                    </thead>
+                    <tbody>
+                    {{#each devices}}
+                    <tr>
+                        <td>
+                            <label class="checkbox" style="display:block">
+                                <input name="selected-device" class="save-defaults-to-file-device-checkbox" id="{{savedAttributes.serialNumber}}-selector" type="checkbox" value="{{savedAttributes.serialNumber}}" checked>
+                                <span class="metro-checkbox" title="Select {{savedAttributes.productType}}, {{savedAttributes.serialNumber}}"></span>
+                            </label>
+                        </td>
+                        <td>{{savedAttributes.productType}}: {{savedAttributes.serialNumber}}</td>
+                        <td>YYYY-MM-DD_{{savedAttributes.productType}}_{{savedAttributes.serialNumber}}_{{savedAttributes.DEVICE_NAME_DEFAULT}}.json<td>
+                    </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="primary-step">
+            <h3>2. Select Directory</h3>
+            <div class="primary-step-content">
+                <div id="output-directory-display-holder" class="file-info-text">
+                    <span>Selected Directory:</span>
+                    <div id="output-directory-display">
+                        <span id="current-directory-display" class="selectableText">{{#if custom.selected_output_directory}}{{custom.selected_output_directory}}{{else}}No directory selected. Please browse for an output directory.{{/if}}</span><button id="browse-for-output-directory-button" class="icon-pencil btn btn-link" title="Edit Device Name"></button>
+                    </div>
+                </div>
+                <table>
+                    <tr><td>
+                        <label class="checkbox" style="display:block">
+                            <input name="prevent-file-overwriting" class="prevent-file-overwriting-checkbox" id="prevent-file-overwriting-selector" type="checkbox" value="true">
+                            <span class="metro-checkbox" title="Overwrite Existing Files."></span>
+                        </label>
+                    </td><td>
+                        <p>Overwrite Existing Files.</p>
+                    </td></tr>
+                </table>
+                <a id="save-defaults-button" class="btn">Save Power-up Defaults</a>
+                <div class="backup-notice" id="saving-to-file-indicator">Saving...</div>
+            </div>
+        </div>
+        
+        <!--{{#if custom.isMultipleDevices}}
+        <p>Please select only 1 device.  Currently {{custom.numDevices}} devices are selected.</p>
+        {{else}}
+        <a id="save-defaults-button" class="btn">Save Power-up Defaults</a>
+        <div class="saving-to-file-notice" id="saving-to-file-indicator">Saving...</div>
+        {{/if}}-->
+    </div>
+    {{else}}
+    <h3>Please slect a device</h3>
+    <p>Currently no devices are selected so this module has been disabled. Please Select a device to continue.</p>
+    {{/if}}
+        </div>
+    </div>
+    <script>
+        $('#myTab a').click(function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        })
+  </script>
+</div>
+{{!--<pre>{{printContext}}</pre>--}}

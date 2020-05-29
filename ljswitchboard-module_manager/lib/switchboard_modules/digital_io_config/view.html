@@ -1,0 +1,38 @@
+<div id="digital-io-configuration">
+    {{#hasMultipleDevices}}
+    <table class="table table-striped" id="device-selector">
+        <thead>
+            <tr>
+                <th>select</th>
+                <th>device type</th>
+                <th>serial number</th>
+                <th>name</th>
+            <tr>
+        </thead>
+        <tbody>
+            {{#devices}}
+            <tr>
+                <td>
+                    <label class="checkbox">
+                        <input class="device-selection-checkbox" id="{{getSerial}}-selector" type="checkbox" value="{{getSerial}}">
+                        <span class="metro-checkbox"></span>
+                    </label>
+                </td>
+                <td>
+                    {{getDeviceType}} {{getSubclass}}
+                </td>
+                <td>
+                    {{getSerial}}
+                </td>
+                <td>
+                    {{getName}}
+                </td>
+            </tr>
+            {{/devices}}
+        </tbody>
+    </table>
+    {{/hasMultipleDevices}}
+    <div id="io-config-pane">
+        <img src="static/img/progress-indeterminate-ring-light.gif">
+    </div>
+</div>
