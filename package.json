@@ -1,0 +1,43 @@
+{
+  "name": "labjack_kipling",
+  "version": "3.18.1",
+  "description": "LabJack Kipling device configuration and general I/O GUI program.",
+  "scripts": {
+    "build": "node scripts/prep_build_and_run.js",
+    "clean": "lerna clean",
+    "clean_core": "node main.js --which=core do -c \"rm -r node_modules\"",
+    "clean_temp_files": "node scripts/clean_temp_files.js",
+    "lint": "grunt",
+    "lint_imports": "eslint .",
+    "list_submodules": "node main.js list",
+    "run_built_k3": "node scripts/run_built_k3.js",
+    "setup": "lerna bootstrap",
+    "start": "npm run start --prefix ljswitchboard-splash_screen",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/labjack/labjack_kipling.git"
+  },
+  "author": "LabJack Corporation (https://labjack.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/labjack/labjack_kipling/issues"
+  },
+  "homepage": "https://github.com/labjack/labjack_kipling",
+  "dependencies": {
+    "async": "^3.2.0",
+    "q": "^1.5.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-standard": "^4.0.1",
+    "grunt": "^1.0.2",
+    "grunt-contrib-jshint": "^1.1.0",
+    "lerna": "^3.20.2"
+  },
+  "keywords": [
+    "labjack"
+  ]
+}
