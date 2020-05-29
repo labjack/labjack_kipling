@@ -52,11 +52,11 @@
     "stats-lite": "2.2.0"
   },
   "custom-deps": {
-    "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master",
-    "ljmmm-parse": "git://github.com/chrisJohn404/ljmmm-parse.git#master",
-    "ljswitchboard-data_parser": "git://github.com/chrisJohn404/ljswitchboard-data_parser.git#master",
-    "ljswitchboard-modbus_map": "git://github.com/chrisJohn404/ljswitchboard-modbus_map.git#master",
-    "ljm-ffi": "git://github.com/chrisJohn404/ljm-ffi.git#master",
+    "ljswitchboard-ljm_driver_constants": "*",
+    "ljmmm-parse": "*",
+    "ljswitchboard-data_parser": "*",
+    "ljswitchboard-modbus_map": "*",
+    "ljm-ffi": "*",
     "dont delete": "do not delete"
   },
   "devDependencies": {
