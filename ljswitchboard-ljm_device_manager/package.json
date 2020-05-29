@@ -19,9 +19,9 @@
     "q": "1.5.1"
   },
   "customDeps": {
-    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#master",
-    "ljswitchboard-device_scanner": "git://github.com/chrisJohn404/ljswitchboard-device_scanner.git#master",
-    "ljswitchboard-ljm_driver_constants": "git://github.com/chrisJohn404/ljswitchboard-ljm_driver_constants.git#master"
+    "ljswitchboard-ljm_device_curator": "*",
+    "ljswitchboard-device_scanner": "*",
+    "ljswitchboard-ljm_driver_constants": "*"
   },
   "devDependencies": {
     "diff": ">=3.5.0",
