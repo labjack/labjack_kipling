@@ -6,17 +6,15 @@
     "url": "https://labjack.com"
   },
   "main": "lib/ljm_driver_checker.js",
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_driver_checker/master/LICENSE"
-  },
+  "license": "MIT",
   "keywords": [
     "LabJack"
   ],
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_driver_checker",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_driver_checker",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_driver_checker.git"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-ljm_driver_checker"
   },
   "files": [
     "lib",

@@ -6,19 +6,17 @@
     "url": "https://labjack.com"
   },
   "main": "lib/ljswitchboard-require.js",
-  "license": {
-    "type": "MIT",
-    "url": "https://raw.githubusercontent.com/chrisJohn404/ljswitchboard-require/master/LICENSE"
-  },
+  "license": "MIT",
   "keywords": [
     "LabJack",
     "Child Process Management",
     "IPC Messaging"
   ],
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-require",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-require",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-require.git"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-require"
   },
   "files": [
     "lib"

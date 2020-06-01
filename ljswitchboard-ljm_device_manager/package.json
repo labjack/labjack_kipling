@@ -29,12 +29,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chrisJohn404/ljswitchboard-ljm_device_manager.git"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-ljm_device_manager"
   },
   "author": "Chris Johnson",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_manager/issues"
-  },
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_manager#readme"
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_device_manager"
 }

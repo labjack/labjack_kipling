@@ -3,6 +3,12 @@
   "version": "1.0.0",
   "description": "Device manager for Kipling.",
   "main": "device_manager.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-device_manager"
+  },
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-device_manager",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,5 +16,5 @@
     "name": "Chris Johnson",
     "url": "https://labjack.com"
   },
-  "license": "ISC"
+  "license": "MIT or ISC"
 }

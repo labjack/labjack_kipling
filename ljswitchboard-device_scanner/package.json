@@ -11,10 +11,11 @@
     "scan_with_listall": "node ./scripts/scan_with_listall.js",
     "scan_with_openall": "node ./scripts/scan_with_openall.js"
   },
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-device_scanning",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-device_scanner",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-device_scanning"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-device_scanner"
   },
   "keywords": [
     "LabJack",
@@ -27,9 +28,7 @@
     "url": "https://labjack.com"
   },
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-device_scanning/issues"
-  },
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
   "dependencies": {
     "async": "1.5.2",
     "labjack-nodejs": "^2.0.0",

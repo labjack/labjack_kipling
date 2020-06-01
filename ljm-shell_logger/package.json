@@ -8,14 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljm-shell_logger"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljm-shell_logger"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chrisJohn404/ljm-shell_logger/issues"
+    "url": "https://github.com/labjack/labjack_kipling/issues"
   },
-  "homepage": "https://github.com/chrisJohn404/ljm-shell_logger",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljm-shell_logger",
   "dependencies": {
     "async": "1.5.2",
     "chalk": "1.1.x",

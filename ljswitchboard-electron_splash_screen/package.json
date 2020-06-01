@@ -6,10 +6,11 @@
     "name": "Chris Johnson",
     "url": "https://labjack.com"
   },
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-electron_splash_screen",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-electron_splash_screen",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-electron_splash_screen"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-electron_splash_screen"
   },
   "keywords": [
     "LabJack",
@@ -17,13 +18,8 @@
     "T7",
     "ljswitchboard"
   ],
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-electron_splash_screen/master/LICENSE"
-  },
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-electron_splash_screen/issues"
-  },
+  "license": "MIT",
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
   "main": "lib/main.js",
   "window": {
     "title": "Kipling",

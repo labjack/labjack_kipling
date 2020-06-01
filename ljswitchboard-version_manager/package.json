@@ -7,10 +7,11 @@
     "url": "https://labjack.com"
   },
   "main": "./lib/version_manager.js",
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-version_manager",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-version_manager",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-version_manager"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-version_manager"
   },
   "keywords": [
     "LabJack",
@@ -18,13 +19,8 @@
     "T7",
     "ljswitchboard"
   ],
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-version_manager/master/LICENSE"
-  },
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-version_manager/issues"
-  },
+  "license": "MIT",
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
   "dependencies": {
     "async": "1.5.2",
     "cheerio": "1.0.0-rc.3",

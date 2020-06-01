@@ -7,10 +7,11 @@
     "url": "https://labjack.com"
   },
   "main": "./lib/window_manager",
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-window_manager",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-window_manager",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-window_manager"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-window_manager"
   },
   "keywords": [
     "LabJack",
@@ -18,13 +19,8 @@
     "T7",
     "ljswitchboard"
   ],
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-window_manager/master/LICENSE"
-  },
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-window_manager/issues"
-  },
+  "license": "MIT",
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
   "dependencies": {},
   "devDependencies": {
     "diff": ">=3.5.0",

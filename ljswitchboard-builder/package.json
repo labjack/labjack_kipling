@@ -2,11 +2,13 @@
   "name": "ljswitchboard-builder",
   "description": "Building and packing for the ljswitchboard program.",
   "version": "3.0.7",
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-builder",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-builder",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-builder"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-builder"
   },
+  "license": "MIT",
   "dependencies": {
     "adm-zip": "0.4.13",
     "archiver": "3.1.1",

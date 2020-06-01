@@ -7,10 +7,11 @@
     "start": "node ./examples/hello_world.js",
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-simple_logger",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-simple_logger",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-simple_logger"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-simple_logger"
   },
   "keywords": [
     "LabJack",
@@ -22,13 +23,8 @@
     "name": "Chris Johnson",
     "url": "https://labjack.com"
   },
-  "license": {
-    "type": "MIT",
-    "url": "https://raw.githubusercontent.com/chrisJohn404/ljswitchboard-simple_logger/master/LICENSE"
-  },
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-simple_logger/issues"
-  },
+  "license": "MIT",
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
   "dependencies": {
     "async": "1.5.2",
     "compute-gcd": "1.2.0",

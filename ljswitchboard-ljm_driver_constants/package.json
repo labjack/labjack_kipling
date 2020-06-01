@@ -18,10 +18,11 @@
         "T4",
         "ljswitchboard"
     ],
-    "homepage": "https://github.com/chrisJohn404/ljswitchboard-driver_constants",
+    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_driver_constants",
     "repository": {
         "type": "git",
-        "url": "https://github.com/chrisJohn404/ljswitchboard-driver_constants.git"
+        "url": "https://github.com/labjack/labjack_kipling.git",
+        "directory": "ljswitchboard-ljm_driver_constants"
     },
     "files": [
         "lib"

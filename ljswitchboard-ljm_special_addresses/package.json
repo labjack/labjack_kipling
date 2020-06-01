@@ -15,7 +15,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chrisJohn404/ljswitchboard-ljm_special_addresses.git"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-ljm_special_addresses"
   },
   "author": {
     "name": "Chris Johnson",
@@ -26,10 +27,8 @@
     "LJM"
   ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_special_addresses/issues"
-  },
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_special_addresses#readme",
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_special_addresses",
   "dependencies": {
     "q": "1.5.1",
     "ljm-ffi": "^2.0.0",

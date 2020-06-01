@@ -9,10 +9,11 @@
   "main": "./lib/ljswitchboard-kipling.js",
   "ljswitchboard-type": "nwApp",
   "ljswitchboard-main": "lib/index.html",
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-kipling",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-kipling",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-kipling"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-kipling"
   },
   "keywords": [
     "LabJack",
@@ -20,13 +21,8 @@
     "T7",
     "ljswitchboard"
   ],
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-kipling/master/LICENSE"
-  },
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-kipling/issues"
-  },
+  "license": "MIT",
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
   "dependencies": {
     "dict": "1.4.0",
     "ljswitchboard-ljm_driver_constants": "^1.0.0",

@@ -15,10 +15,11 @@
         "T7",
         "ljswitchboard"
     ],
-    "homepage": "https://github.com/chrisJohn404/ljswitchboard-data_parser",
+    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-data_parser",
     "repository": {
         "type": "git",
-        "url": "https://github.com/chrisJohn404/ljswitchboard-data_parser.git"
+        "url": "https://github.com/labjack/labjack_kipling.git",
+        "directory": "ljswitchboard-data_parser"
     },
     "files": [
         "lib"

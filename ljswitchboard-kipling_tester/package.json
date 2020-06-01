@@ -9,10 +9,11 @@
   "main": "./lib/ljswitchboard-kipling_tester.js",
   "ljswitchboard-type": "nwApp",
   "ljswitchboard-main": "lib/index.html",
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-kipling_tester",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-kipling_tester",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-kipling_tester"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-kipling_tester"
   },
   "keywords": [
     "LabJack",
@@ -20,13 +21,8 @@
     "T7",
     "ljswitchboard"
   ],
-  "license": {
-    "type": "MIT",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-kipling_tester/master/LICENSE"
-  },
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-kipling_tester/issues"
-  },
+  "license": "MIT",
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
   "dependencies": {
     "async": "1.5.2",
     "diff": ">=3.5.0",

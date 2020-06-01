@@ -15,7 +15,8 @@
   "packagesDirectory": "/packages",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_curator"
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-ljm_device_curator"
   },
   "keywords": [
     "LabJack",
@@ -27,14 +28,9 @@
     "name": "Chris Johnson",
     "url": "https://labjack.com"
   },
-  "license": {
-    "type": "MIT",
-    "url": "https://raw.githubusercontent.com/chrisJohn404/ljswitchboard-ljm_device_curator/master/LICENSE"
-  },
-  "bugs": {
-    "url": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_curator/issues"
-  },
-  "homepage": "https://github.com/chrisJohn404/ljswitchboard-ljm_device_curator",
+  "license": "MIT",
+  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_device_curator",
   "dependencies": {
     "async": "1.5.2",
     "compute-gcd": "1.2.0",

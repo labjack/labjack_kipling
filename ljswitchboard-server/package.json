@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "This is Kipling's server process.",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/labjack/labjack_kipling.git",
+    "directory": "ljswitchboard-server"
+  },
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-server",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT OR ISC",
   "dependencies": {
     "mosca": "^0.32.1"
   }
