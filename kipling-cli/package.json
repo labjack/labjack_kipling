@@ -31,8 +31,6 @@
     "shelljs": "^0.5.3",
     "static": "^2.0.0",
     "task-runner": "0.0.8",
-    "terminal-menu": "^2.1.1",
-    "terminal-menu-program": "0.0.17",
     "terminal-task-runner": "^1.5.3"
   }
 }
