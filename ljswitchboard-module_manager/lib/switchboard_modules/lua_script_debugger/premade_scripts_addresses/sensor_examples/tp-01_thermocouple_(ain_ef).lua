@@ -1,7 +1,7 @@
 print("Grab the temperature from a TP-01 thermocouple.")
 --The voltage output from the thermocouple is automatically converted into degK
 --by the T7s AIN Extended Feature for thermocouples.
---http://labjack.com/support/datasheets/t7/ain/extended-features
+--https://labjack.com/support/datasheets/t7/ain/extended-features
 --The cold junction compensation is automatically handled by the T7s integrated
 --temperature sensor, and calculations performed by firmware.
 

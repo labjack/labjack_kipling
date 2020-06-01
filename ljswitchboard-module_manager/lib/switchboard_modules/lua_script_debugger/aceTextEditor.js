@@ -208,7 +208,7 @@ function textEditor() {
             'fw': 1.0282
         }],
         'urlPageTitle': 'LabJack Lua Library and find the section "Modbus Name Functions"',
-        'urlRef': 'http://labjack.com/support/datasheets/t-series/scripting/labjack-library#name-functions',
+        'urlRef': 'https://labjack.com/support/datasheets/t-series/scripting/labjack-library#name-functions',
     }, {
         'strs': ['I2C.config','I2C.writeRead', 'I2C.read', 'I2C.write', 'I2C.search'],
         'minVersions': [{

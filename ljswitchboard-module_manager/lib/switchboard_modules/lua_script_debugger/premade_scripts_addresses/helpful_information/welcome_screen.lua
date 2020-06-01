@@ -29,8 +29,8 @@ print("Welcome, please Load an example to get started!")
 --See "LabJack Lua functions" code example for a list of integrated functions
 --Functions are limited to those in eLua core (embedded Lua)
 
---Register Matrix(Modbus Map) http://labjack.com/support/modbus/map
---Scripting information       http://labjack.com/support/datasheets/t7/scripting
+--Register Matrix(Modbus Map) https://labjack.com/support/modbus/map
+--Scripting information       https://labjack.com/support/datasheets/t7/scripting
 --Example Scripts are built in to Kipling, under the </> tab above
 --Examples are also online: https://labjack.com/support/software/examples/lua-scripting
 

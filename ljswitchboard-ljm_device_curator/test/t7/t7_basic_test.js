@@ -235,7 +235,7 @@ var device_tests = {
 		});
 	},
 	// 'upgradeFirmware': function(test) {
-	// 	var fwURL = 'http://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin';
+	// 	var fwURL = 'https://labjack.com/sites/default/files/2014/12/T7firmware_010135_2014-11-24.bin';
 	// 	device.updateFirmware(fwURL)
 	// 	.then(
 	// 		function(res) {

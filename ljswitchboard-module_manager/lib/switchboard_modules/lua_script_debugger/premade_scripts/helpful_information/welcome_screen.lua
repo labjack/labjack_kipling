@@ -30,10 +30,10 @@ print("Welcome, please Load an example to get started!")
 -- Functions are limited to those in eLua core (embedded Lua)
 
 -- Register Matrix(Modbus Map):
---  http://labjack.com/support/modbus/map
+--  https://labjack.com/support/modbus/map
 
 -- Scripting information:
---  http://labjack.com/support/datasheets/t7/scripting
+--  https://labjack.com/support/datasheets/t7/scripting
 
 -- Example Scripts are built in to Kipling, under the </> tab above
 -- Examples are also online:

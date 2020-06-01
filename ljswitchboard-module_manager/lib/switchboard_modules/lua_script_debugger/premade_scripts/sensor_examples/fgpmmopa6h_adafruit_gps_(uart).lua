@@ -3,7 +3,7 @@
     Desc: This is an example that shows how to use an FGPMMOPA6H GPS Module
           utilizing UART
     Note: UART part of the T7 datasheet:
-            http://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
+            https://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
 
           GPS module datasheets:
             http://www.adafruit.com/datasheets/GlobalTop-FGPMMOPA6H-Datasheet-V0A.pdf

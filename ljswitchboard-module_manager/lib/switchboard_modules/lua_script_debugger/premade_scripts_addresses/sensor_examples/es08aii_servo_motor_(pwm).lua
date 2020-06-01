@@ -3,7 +3,7 @@ print("Example for servo motor using PWM output.")
 --Users must first configure a digital I/O for PWM out
 --NOTE: Servos draw a significant amount of current. Capacitors may be needed to prevent brownout conditions. 
 --After PWM output is enabled, the duty cycle can be updated easily by changing DIO0_EF_CONFIG_A
---http://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
+--https://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
 --default for most servo motors is 50 Hz or one cycle every 20ms
 
 local mbWrite=MB.W		--local functions for faster processing

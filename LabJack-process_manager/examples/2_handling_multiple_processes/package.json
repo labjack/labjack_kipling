@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"author": {
 		"name": "Chris Johnson",
-		"url": "http://labjack.com"
+		"url": "https://labjack.com"
 	},
     "main": "main.js",
 	"dependencies": {

@@ -13,7 +13,7 @@
           of FIFO1
 
           See the datasheet for more on USER RAM FIFO buffers:
-            http://labjack.com/support/datasheets/t7/scripting
+            https://labjack.com/support/datasheets/t7/scripting
 
           This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]

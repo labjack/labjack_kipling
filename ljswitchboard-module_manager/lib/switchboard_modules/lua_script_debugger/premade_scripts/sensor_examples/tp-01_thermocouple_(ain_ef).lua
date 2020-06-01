@@ -10,7 +10,7 @@
           integrated temperature sensor, and calculations performed by firmware
 
           For more information see the T7 AIN_EF datasheet page:
-            http://labjack.com/support/datasheets/t7/ain/extended-features
+            https://labjack.com/support/datasheets/t7/ain/extended-features
 
           The TP-01 is a type K thermocouple, which is very affordable on Amazon:
             http://www.amazon.com/Type-Thermocouple-Thermometer-Sensor-TP01/dp/B0087ZR81O

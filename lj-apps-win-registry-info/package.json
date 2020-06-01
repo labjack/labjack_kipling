@@ -4,7 +4,7 @@
   "description": "This is a node.js library utilizing the winreg library to query for windows registry keys which are used by the LabJack logging applications to determine their current working directories.",
   "author": {
     "name": "Chris Johnson",
-    "url": "http://labjack.com"
+    "url": "https://labjack.com"
   },
   "main": "./lib/get_registry_info.js",
   "homepage": "https://github.com/chrisJohn404/lj-apps-win-registry-info",

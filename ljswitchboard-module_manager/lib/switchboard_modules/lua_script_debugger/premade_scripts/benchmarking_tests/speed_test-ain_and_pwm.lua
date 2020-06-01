@@ -7,7 +7,7 @@
           Users must first configure a digital I/O for PWM out, and save those
           settings as defaults. After PWM output is enabled, the duty cycle can
           be updated easily by changing DIO0_EF_CONFIG_A:
-            http://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
+            https://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
 
           On a T7 (FW 1.0282) this example runs at around 13kHz
           On a T4 (FW 1.0023) this example runs at around 10kHz

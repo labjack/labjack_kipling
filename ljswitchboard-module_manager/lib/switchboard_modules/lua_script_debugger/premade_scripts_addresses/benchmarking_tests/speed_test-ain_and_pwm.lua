@@ -1,7 +1,7 @@
 print("Benchmarking Test: Read AIN0 as fast as possible, and configure Duty Cycle.")
 --Users must first configure a digital I/O for PWM out, and save those settings as defaults
 --After PWM output is enabled, the duty cycle can be updated easily by changing DIO0_EF_CONFIG_A
---http://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
+--https://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
 --Script runs at about 9.5kHz
 --The throttle setting can correspond roughly with the length of the Lua script.
 --A rule of thumb for deciding a throttle setting is Throttle = (3*NumLinesCode) + 20

@@ -1,13 +1,13 @@
 LabJack-nodejs
 ==============
-'LabJack-nodejs' makes LabJack's [LJM library](http://labjack.com/ljm) available for node.js.  The library uses [ffi](https://www.npmjs.com/package/ffi) to link to the appropriate library file (LabJackM.dll, LabJackM.dylib, or LabJackM.so) which must be installed with one of [LabJack's installers](https://labjack.com/support/software/installers/ljm).  Currently, installers are available for Windows, Mac OS X, Linux 32-bit & 64-bit, and a few builds for ARMv6 and ARMV7 architectures.
+'LabJack-nodejs' makes LabJack's [LJM library](https://labjack.com/ljm) available for node.js.  The library uses [ffi](https://www.npmjs.com/package/ffi) to link to the appropriate library file (LabJackM.dll, LabJackM.dylib, or LabJackM.so) which must be installed with one of [LabJack's installers](https://labjack.com/support/software/installers/ljm).  Currently, installers are available for Windows, Mac OS X, Linux 32-bit & 64-bit, and a few builds for ARMv6 and ARMV7 architectures.
 
 This library exposes the LJM driver slightly different than our standard [LJM Library](https://labjack.com/support/software/examples/ljm) wrappers because it was created primarily for use in [Kipling](https://labjack.com/support/software/applications/kipling).  If this library were to be re-written it would be split into two modules, one that directly exposes the LJM Library functions, and another that performs some of the abstractions.  A brief summary of how this library exposes the LJM Library:
  * Created two different objects, device.js and driver.js, that can be imported individually.
- * Was created to function much like the [LabJack Python driver](http://labjack.com/support/labjackpython) for LabJack UD devices.
- * For more information about what each function does, please look at the LabJackM.h file that can be downloaded & installed from LabJacks [Software & Driver](http://labjack.com/support/software) page.
+ * Was created to function much like the [LabJack Python driver](https://labjack.com/support/labjackpython) for LabJack UD devices.
+ * For more information about what each function does, please look at the LabJackM.h file that can be downloaded & installed from LabJacks [Software & Driver](https://labjack.com/support/software) page.
 
-Currently this wrapper only supports the [T4](http://labjack.com/products/t4), [T7](http://labjack.com/products/t7), [T7-Pro](http://labjack.com/products/t7), [Digit-TL](http://labjack.com/products/digit), and [Digit-TLH](http://labjack.com/products/digit) LabJack devices. (Which are low cost, high-quality, multifunction USB / Ethernet / 802.11b/g WiFi DAQ devices.)  Devices using the UD library (Windows only) aka U3, U6, and UE9 are not supported.  Additionally, the U12 is not supported.
+Currently this wrapper only supports the [T4](https://labjack.com/products/t4), [T7](https://labjack.com/products/t7), [T7-Pro](https://labjack.com/products/t7), [Digit-TL](https://labjack.com/products/digit), and [Digit-TLH](https://labjack.com/products/digit) LabJack devices. (Which are low cost, high-quality, multifunction USB / Ethernet / 802.11b/g WiFi DAQ devices.)  Devices using the UD library (Windows only) aka U3, U6, and UE9 are not supported.  Additionally, the U12 is not supported.
 
 Notes:
 ------

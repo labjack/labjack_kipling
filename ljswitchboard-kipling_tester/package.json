@@ -4,7 +4,7 @@
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
     "name": "Chris Johnson",
-    "url": "http://labjack.com"
+    "url": "https://labjack.com"
   },
   "main": "./lib/ljswitchboard-kipling_tester.js",
   "ljswitchboard-type": "nwApp",

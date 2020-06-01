@@ -4,7 +4,7 @@
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
-        "url": "http://labjack.com"
+        "url": "https://labjack.com"
     },
     "contributors": {
         "name": "Sam Pottinger",

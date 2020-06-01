@@ -1,5 +1,5 @@
 print("Get the GPS latitude & longitude from a FGPMMOPA6H Adafruit GPS Module.")
---UART part of the T7 datasheet http://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
+--UART part of the T7 datasheet https://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
 --http://www.adafruit.com/datasheets/GlobalTop-FGPMMOPA6H-Datasheet-V0A.pdf
 --http://www.adafruit.com/datasheets/PMTK_A11.pdf
 --other helpful resources

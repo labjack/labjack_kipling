@@ -9,7 +9,7 @@
           eionum. Discover the ROM ID using the "1-Wire Read ROM ID" example
 
           T7 1-Wire documentation:
-            http://labjack.com/support/datasheets/t7/digital-io/1-wire
+            https://labjack.com/support/datasheets/t7/digital-io/1-wire
 
           DS18B20 datasheet:
             http://datasheets.maximintegrated.com/en/ds/DS18B20.pdf

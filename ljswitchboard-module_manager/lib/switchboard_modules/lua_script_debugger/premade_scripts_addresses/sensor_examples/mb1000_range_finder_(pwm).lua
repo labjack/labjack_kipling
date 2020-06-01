@@ -4,7 +4,7 @@ print("Communicate with a MaxBotix MB1000 ultrasonic range sensor using PWM.")
 --more accurate, and the script is simple when using the PWM feature.
 --The distance can be calculated using the scale factor of 147uS per inch
 --http://www.maxbotix.com/documents/MB1000_Datasheet.pdf
---http://labjack.com/support/datasheets/t7/digital-io/extended-features/pulse-width
+--https://labjack.com/support/datasheets/t7/digital-io/extended-features/pulse-width
 
 local mbRead=MB.R			--local functions for faster processing
 local mbWrite=MB.W

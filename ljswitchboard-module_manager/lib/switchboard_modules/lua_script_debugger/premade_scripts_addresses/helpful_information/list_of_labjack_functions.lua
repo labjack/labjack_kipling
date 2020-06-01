@@ -2,9 +2,9 @@
 --This is the list of LabJack-specific functions.  There are many more native Lua functions
 --http://www.lua.org/manual/5.2/manual.html#3
 --All LabJack addresses can be found in the Register Matrix(Modbus Map)
---http://labjack.com/support/modbus/map
+--https://labjack.com/support/modbus/map
 --For more information, see the scripting section in the T7 datasheet
---http://labjack.com/support/datasheets/t7/scripting
+--https://labjack.com/support/datasheets/t7/scripting
 
 --dataTypes
 

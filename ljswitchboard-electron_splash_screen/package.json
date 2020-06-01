@@ -4,7 +4,7 @@
   "description": "The splash screen & primary loading file for LabJack's Kipling program.",
   "author": {
     "name": "Chris Johnson",
-    "url": "http://labjack.com"
+    "url": "https://labjack.com"
   },
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-electron_splash_screen",
   "repository": {

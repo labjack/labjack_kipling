@@ -13,7 +13,7 @@
           Default for most servo motors is 50 Hz or one cycle every 20ms
 
           See our datasheet page on the pwm-out feature:
-            http://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
+            https://labjack.com/support/datasheets/t7/digital-io/extended-features/pwm-out
 --]]
 
 print("Example for servo motor using PWM output.")

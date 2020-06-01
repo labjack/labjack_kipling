@@ -11,9 +11,9 @@
 
           The T7 has SBUS functionality integrated which handles sensibus comm
           For more T7 information see:
-            http://labjack.com/support/datasheets/t7/digital-io/sbus
+            https://labjack.com/support/datasheets/t7/digital-io/sbus
           For more on the EI-1050 see:
-            http://labjack.com/support/ei-1050/datasheet
+            https://labjack.com/support/ei-1050/datasheet
 --]]
 
 --WIRES

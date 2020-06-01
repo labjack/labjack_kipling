@@ -4,7 +4,7 @@
     Note: There are several kinds of 1-wire sensors from Maxim. Some variants:
           DS1820, DS1821, DS1822, DS18S20, and DS18B20.
           T7 1-Wire documentation
-            http://labjack.com/support/datasheets/t7/digital-io/1-wire
+            https://labjack.com/support/datasheets/t7/digital-io/1-wire
           DS18B20 datasheet:
             http://datasheets.maximintegrated.com/en/ds/DS18B20.pdf
 

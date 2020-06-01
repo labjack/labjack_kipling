@@ -4,7 +4,7 @@
   "description": "A tool to verify and extract information saved in LabJack's firmware .bin files.",
   "author": {
     "name": "Chris Johnson",
-    "url": "http://labjack.com"
+    "url": "https://labjack.com"
   },
   "main": "./lib/firmware_verifier.js",
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-firmware_verifier",

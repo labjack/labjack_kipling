@@ -962,7 +962,7 @@ function module() {
     };
     this.ethernetHelpButton = function(data, onSuccess) {
         console.log('in wifiHelpButton listener');
-        // gui.Shell.openExternal("http://labjack.com/support/app-notes/basic-networking-troubleshooting");
+        // gui.Shell.openExternal("https://labjack.com/support/app-notes/basic-networking-troubleshooting");
         gui.Shell.openExternal("https://labjack.com/support/app-notes/wifi-and-ethernet-t7-t4-t7-pro");
         onSuccess();
     };
@@ -1511,7 +1511,7 @@ function module() {
     };
     this.wifiHelpButton = function(data, onSuccess) {
         console.log('in wifiHelpButton listener');
-        // gui.Shell.openExternal("http://labjack.com/support/app-notes/basic-networking-troubleshooting");
+        // gui.Shell.openExternal("https://labjack.com/support/app-notes/basic-networking-troubleshooting");
         gui.Shell.openExternal("https://labjack.com/support/app-notes/wifi-and-ethernet-t7-t4-t7-pro");
         onSuccess();
     };

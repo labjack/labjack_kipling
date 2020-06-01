@@ -12,7 +12,7 @@
 
           See the mb1000 datasheet and our T7 datasheet page on PWM:
             http://www.maxbotix.com/documents/MB1000_Datasheet.pdf
-            http://labjack.com/support/datasheets/t7/digital-io/extended-features/pulse-width
+            https://labjack.com/support/datasheets/t7/digital-io/extended-features/pulse-width
 --]]
 
 print("Communicate with a MaxBotix MB1000 ultrasonic range sensor using PWM.")

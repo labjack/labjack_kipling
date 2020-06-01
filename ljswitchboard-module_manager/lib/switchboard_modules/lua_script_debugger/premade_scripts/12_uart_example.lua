@@ -4,7 +4,7 @@
     Note: This example requires you to connect a jumper between the RX and TX pins
 
           See the UART section of the T7 datasheet:
-            http://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
+            https://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
 
           This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]

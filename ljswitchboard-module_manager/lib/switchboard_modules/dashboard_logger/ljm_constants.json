@@ -4,8 +4,8 @@
    "filename":"ljm_constants.json",
    "version":"2013.06.19.A",
    "checksum":"-1",
-   "support_url":"http://labjack.com/support/modbus",
-   "tags_base_url":"http://labjack.com/support/modbus/tags"
+   "support_url":"https://labjack.com/support/modbus",
+   "tags_base_url":"https://labjack.com/support/modbus/tags"
  },
 
  "registers":

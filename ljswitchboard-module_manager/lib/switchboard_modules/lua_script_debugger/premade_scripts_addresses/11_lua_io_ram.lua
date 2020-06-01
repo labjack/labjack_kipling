@@ -8,7 +8,7 @@ print("Save some data to RAM for subsequent access by an external computer.")
 --and then saves the resultant values to RAM.  Then, the external software
 --simply reads the result out of the RAM registers.
 --See the datasheet for more on USER RAM
---http://labjack.com/support/datasheets/t7/scripting
+--https://labjack.com/support/datasheets/t7/scripting
 
 
 --To get started, simply run the script.

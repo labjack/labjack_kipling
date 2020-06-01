@@ -1,6 +1,6 @@
 #ljswitchboard-require
 
-A special "require" extension developed for the [ljswitchboard](https://github.com/chrisJohn404/LabJack-nodejs) project aka ([Kipling](http://labjack.com/support/kipling)).  This project has a unique requirement where a single node-js process was split among multiple root directories.  The program needs to be stored in several "chunks" to run optimally therefore requiring the use of multiple "node_module" directories.  This project allows users to declare "root" directories that require would normally operate properly in and require the node_modules available in those directories.  
+A special "require" extension developed for the [ljswitchboard](https://github.com/chrisJohn404/LabJack-nodejs) project aka ([Kipling](https://labjack.com/support/kipling)).  This project has a unique requirement where a single node-js process was split among multiple root directories.  The program needs to be stored in several "chunks" to run optimally therefore requiring the use of multiple "node_module" directories.  This project allows users to declare "root" directories that require would normally operate properly in and require the node_modules available in those directories.  
 
 Essentially, this module calls the nodejs require function with a stored "n" number of additional paths that gets automatically appended to the require call once it is appropriately initialized.
 

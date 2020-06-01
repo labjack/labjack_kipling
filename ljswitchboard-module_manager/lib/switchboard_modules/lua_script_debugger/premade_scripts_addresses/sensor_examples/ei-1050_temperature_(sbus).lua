@@ -2,8 +2,8 @@ print("Communicate with an EI-1050 digital temperature and humidity probe")
 --The EI-1050 includes a SHT-11 temperature/humidity sensor by Sensiron (SBUS).
 --Sensibus (SBUS) is a proprietary communication protocol used by the SHT11, SHT15, SHT71, and SHT75
 --The T7 has SBUS functionality integrated which handles sensibus comm, so the script is easy.
---For more T7 information, see http://labjack.com/support/datasheets/t7/digital-io/sbus
---For more on the EI-1050, see http://labjack.com/support/ei-1050/datasheet
+--For more T7 information, see https://labjack.com/support/datasheets/t7/digital-io/sbus
+--For more on the EI-1050, see https://labjack.com/support/ei-1050/datasheet
 
 --WIRES
 --Red Wire (Power) FIO2 (FIO6 on T4) set to output high

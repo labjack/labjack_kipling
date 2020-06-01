@@ -4,7 +4,7 @@
   "description": "A simple module to collect and cache important device firmware and software version numbers available for users to download.",
   "author": {
     "name": "Chris Johnson",
-    "url": "http://labjack.com"
+    "url": "https://labjack.com"
   },
   "main": "./lib/version_manager.js",
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-version_manager",

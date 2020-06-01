@@ -4,7 +4,7 @@
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
     "name": "Chris Johnson",
-    "url": "http://labjack.com"
+    "url": "https://labjack.com"
   },
   "main": "./lib/ljswitchboard-static_files.js",
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-static_files",

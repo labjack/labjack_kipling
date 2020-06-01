@@ -439,7 +439,7 @@ function labjackVersionManager() {
         /**
          * Example T7 fw file name: T7firmware_010100_2014-05-12.bin
          * Example T7 fw file download link:
-         * http://labjack.com/sites/default/files/2014/05/T7firmware_010100_2014-05-12.bin
+         * https://labjack.com/sites/default/files/2014/05/T7firmware_010100_2014-05-12.bin
         **/
         t7FirmwarePage: function(listingArray, pageData, urlInfo, name) {
             if(urlInfo.type === 'organizer-current') {
@@ -509,7 +509,7 @@ function labjackVersionManager() {
         /**T7firmware_010100_2014-05-12.bin
          * Example digit fw file name: DigitFW_007416_01232013.bin
          * Example digit fw file download link:
-         * http://labjack.com/sites/default/files/2013/01/DigitFW_007416_01232013.bin
+         * https://labjack.com/sites/default/files/2013/01/DigitFW_007416_01232013.bin
         **/
         digitFirmwarePage: function(listingArray, pageData, urlInfo, name) {
             // var FIRMWARE_LINK_REGEX = /href=\".*DigitFW\_([\d\_]+).bin\"(?=\s)/g;

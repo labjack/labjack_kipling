@@ -1,7 +1,7 @@
 print("Basic UART example.")
 print("Please connect a jumper wire between FIO0 and FIO1 (FIO4 and FIO5 on T4)")
 print("")
---UART part of the T7 datasheet http://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
+--UART part of the T7 datasheet https://labjack.com/support/datasheets/t7/digital-io/asynchronous-serial
 
 local mbRead=MB.R			--local functions for faster processing
 local mbWrite=MB.W

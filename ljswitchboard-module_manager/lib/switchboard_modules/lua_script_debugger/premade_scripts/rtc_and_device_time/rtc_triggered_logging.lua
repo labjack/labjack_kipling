@@ -4,13 +4,13 @@
     Note: Requires a micro SD Card installed inside the T7 or T7-Pro
 
           T7 uSD card:
-             http://labjack.com/support/datasheets/t7/sd-card
+             https://labjack.com/support/datasheets/t7/sd-card
 
           Timestamp (real-time-clock) is only available on the T7-Pro
 
           As of Firmware v1.0150, some SD cards do not work.
           Check for the latest firwmare updates at:
-            http://labjack.com/support/firmware/t7/beta
+            https://labjack.com/support/firmware/t7/beta
 
           This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]

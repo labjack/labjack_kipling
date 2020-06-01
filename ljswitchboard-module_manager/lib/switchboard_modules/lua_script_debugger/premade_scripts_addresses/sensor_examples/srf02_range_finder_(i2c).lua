@@ -3,7 +3,7 @@ print("Communicate with an SRF02 I2C ultrasonic range sensor")
 --When using I2C remember to wire SDA and SCL to VS through a resistor (pull-up).
 --Usually something in the range of 1.8kΩ to 4.7kΩ will work, but SRF02 documentation
 --indicates that 1.8kΩ pull-up resistors are optimal.
---For more T7 information, see http://labjack.com/support/datasheets/t7/digital-io/i2c
+--For more T7 information, see https://labjack.com/support/datasheets/t7/digital-io/i2c
 --For more on the SRF02, see http://www.robot-electronics.co.uk/htm/srf02techI2C.htm
 
 local mbReadArray=MB.RA			--local functions for faster processing

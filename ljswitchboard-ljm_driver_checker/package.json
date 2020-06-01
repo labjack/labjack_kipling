@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "author": {
     "name": "Chris Johnson",
-    "url": "http://labjack.com"
+    "url": "https://labjack.com"
   },
   "main": "lib/ljm_driver_checker.js",
   "license": {

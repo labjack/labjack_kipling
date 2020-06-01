@@ -3,7 +3,7 @@ print("Communicate with a HMC6352 via I2C")
 --When using I2C remember to wire SDA and SCL to VS through a resistor (pull-up).
 --Usually something in the range of 1.8kΩ to 20kΩ will work, but HMC6352 documentation
 --indicates that 10kΩ pull-up resistors are optimal.
---For more T7 information, see http://labjack.com/support/datasheets/t7/digital-io/i2c
+--For more T7 information, see https://labjack.com/support/datasheets/t7/digital-io/i2c
 --HMC6352 datasheet, see https://www.sparkfun.com/datasheets/Components/HMC6352.pdf
 
 local mbReadArray=MB.RA			--local functions for faster processing

@@ -653,7 +653,7 @@ function device(useMockDevice) {
 			var numAddresses = numBytes * registerSizeMultiple;
 
 			// Defined here:
-			// http://labjack.com/support/modbus/protocol-details
+			// https://labjack.com/support/modbus/protocol-details
 			// Max "Modbus Feedback" frame size.
 			var maxRegistersPerFrame = 255;
 

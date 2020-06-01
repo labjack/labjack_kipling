@@ -7,7 +7,7 @@ print("Transfer an array of ordered information to/from an external computer usi
 --it responds by writing data into FIFO1, and then the host may read the data out of FIFO1.
 
 --See the datasheet for more on USER RAM FIFOs
---http://labjack.com/support/datasheets/t7/scripting
+--https://labjack.com/support/datasheets/t7/scripting
 
 --To get started, simply run the script.
 --Once the script is running, open up the Register Matrix, and search USER_RAM_FIFO1_DATA_F32

@@ -4,7 +4,7 @@
   "description": "A small node/node-webkit project loader for ljswitchboard that loads files into the global.ljswitchboard namespace",
   "author": {
     "name": "Chris Johnson",
-    "url": "http://labjack.com"
+    "url": "https://labjack.com"
   },
   "main": "./lib/ljswitchboard-package_loader",
   "homepage": "https://github.com/chrisJohn404/ljswitchboard-package_loader",

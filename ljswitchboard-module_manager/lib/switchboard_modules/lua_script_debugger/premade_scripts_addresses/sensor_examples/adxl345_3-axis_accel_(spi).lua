@@ -1,7 +1,7 @@
 print("Communicate with an ADXL345 SPI accelerometer")
 --An I2C version of this script is available under the I2C Lua script folder
 --For more information about SPI on the T7, see the T7 datasheet
---http://labjack.com/support/datasheets/t7/digital-io/spi
+--https://labjack.com/support/datasheets/t7/digital-io/spi
 --For more information on the ADXL345, see the datasheet
 --http://www.analog.com/static/imported-files/data_sheets/ADXL345.pdf
 --Supply voltage is 3.3V.  In this example it is being powered by DAC0, but users
