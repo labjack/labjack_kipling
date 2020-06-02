@@ -53,8 +53,11 @@ ljswitchboard-modbus_map/potential_json_additions
 ljswitchboard-module_manager/lib/switchboard_modules/framework/kipling-module-framework/framework_connector_old.js
 
 
-# Ignore node_modules everywhere. Not sure why the default node_modules ignore isn't working.
+# Project-specific files to ignore
+temp_project_files/
 
+
+# Ignore node_modules everywhere. Not sure why the default node_modules ignore isn't working.
 kipling-cli/node_modules/**
 labjack-nodejs/node_modules/**
 LabJack-process_manager/node_modules/**
