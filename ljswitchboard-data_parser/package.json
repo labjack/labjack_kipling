@@ -25,9 +25,9 @@
         "lib"
     ],
     "dependencies": {
-        "ljmmm-parse": "^0.2.2",
-        "ljswitchboard-modbus_map": "^1.0.0",
-        "ljswitchboard-ljm_driver_constants": "^1.0.0"
+        "ljmmm-parse": "*",
+        "ljswitchboard-modbus_map": "*",
+        "ljswitchboard-ljm_driver_constants": "*"
     },
     "custDependencies": {
         "ljmmm-parse": "*",

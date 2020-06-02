@@ -12,9 +12,9 @@
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "dependencies": {
-    "ljswitchboard-ljm_device_curator": "^1.0.0",
-    "ljswitchboard-device_scanner": "^1.0.0",
-    "ljswitchboard-ljm_driver_constants": "^1.0.0",
+    "ljswitchboard-ljm_device_curator": "*",
+    "ljswitchboard-device_scanner": "*",
+    "ljswitchboard-ljm_driver_constants": "*",
     "async": "1.5.2",
     "q": "1.5.1"
   },

@@ -42,7 +42,7 @@
   "un-managed-dependencies": {
     "semver": "4.2.0",
     "unzip": "0.1.11",
-    "ljswitchboard-core": "0.0.x"
+    "ljswitchboard-core": "*"
   },
   "kipling_dependencies": [
     "ljswitchboard-splash_screen",
