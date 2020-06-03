@@ -425,7 +425,7 @@ function createWindowManager() {
 					}
 
 					// Build the windowInfo object to be passed to the self.addWindow function
-					windowInfo = {
+					var windowInfo = {
 						'name': packageInfo.name,
 						'win': win,
 						'initialVisibility': initialVisibilityState,
@@ -457,7 +457,7 @@ function createWindowManager() {
 			}
 
 			// Build the windowInfo object to be passed to the self.addWindow function
-			windowInfo = {
+			var windowInfo = {
 				'name': packageInfo.name,
 				'win': newWindow,
 				'initialVisibility': initialVisibilityState,
@@ -520,31 +520,6 @@ function createWindowManager() {
 		});
 
 		return defered.promise;
-		keys.forEach(function(key) {
-			try {
-				// Open the found nwApp libraries
-				// console.log('checking App (window_manager)', packages[key].packageData);
-				if(packages[key].packageData) {
-					var loadedAppData = packages[key].packageData;
-					if(loadedAppData['ljswitchboard-main']) {
-						var appFile = loadedAppData['ljswitchboard-main'];
-						var appType = path.extname(appFile);
-						if(appType === '.html') {
-							var requiredInfo = {
-								'main': appFile
-							};
-							var openedWindow = self.openWindow(
-								packages[key].packageInfo,
-								requiredInfo,
-								packages[key].packageData
-							);
-						} 
-					}
-				}
-			} catch (err) {
-				console.error('Error Opening App', key, err);
-			}
-		});
 	};
 	var self = this;
 }
