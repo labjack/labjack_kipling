@@ -62,10 +62,10 @@
     "nodeunit": "0.11.3"
   },
   "custom-deps": {
-    "ljswitchboard-device_scanner": "git://github.com/chrisJohn404/ljswitchboard-device_scanner.git#fix-osx-signing",
+    "ljswitchboard-device_scanner": "*",
     "ljswitchboard-simple_logger": "*",
-    "ljswitchboard-ljm_device_curator": "git://github.com/chrisJohn404/ljswitchboard-ljm_device_curator.git#fix-osx-signing",
-    "labjack-nodejs": "git://github.com/chrisJohn404/labjack-nodejs.git#fix-osx-signing",
+    "ljswitchboard-ljm_device_curator": "*",
+    "labjack-nodejs": "*",
     "ljmmm-parse": "*",
     "ljswitchboard-data_parser": "*",
     "ljswitchboard-firmware_verifier": "*",
