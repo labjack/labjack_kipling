@@ -45,7 +45,7 @@
     "ljswitchboard-ljm_driver_checker": "*",
     "ljswitchboard-package_loader": "*",
     "ljswitchboard-require": "*",
-    "ljswitchboard-window_manager": "git://github.com/chrisJohn404/ljswitchboard-window_manager.git#new-nw-support",
+    "ljswitchboard-window_manager": "*",
     "q": "1.5.1",
     "rimraf": "2.2.8",
     "walk": "^2.3.14",
