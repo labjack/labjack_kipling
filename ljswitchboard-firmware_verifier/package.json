@@ -22,7 +22,7 @@
   "license": "MIT",
   "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
   "dependencies": {
-    "ljswitchboard-ljm_driver_constants": "^1.0.3",
+    "ljswitchboard-ljm_driver_constants": "*",
     "q": "1.5.1"
   },
   "devDependencies": {
@@ -30,7 +30,7 @@
     "nodeunit": "0.11.3"
   },
   "old-dependencies": {
-    "ljswitchboard-ljm_driver_constants": "0.0.x"
+    "ljswitchboard-ljm_driver_constants": "*"
   },
   "directories": {
     "lib": "./lib"

@@ -31,7 +31,7 @@
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_special_addresses",
   "dependencies": {
     "q": "1.5.1",
-    "ljm-ffi": "^2.0.0",
+    "ljm-ffi": "*",
     "javascript-natural-sort": "0.x.x",
     "fs-extra": "0.18.4"
   },
@@ -40,7 +40,7 @@
     "nodeunit": "0.11.3"
   },
   "old-dependencies": {
-    "ljm-ffi": "1.x.x",
+    "ljm-ffi": "*",
     "dontDelete": "dontDelete"
   },
   "engines": {
