@@ -1,7 +1,8 @@
 
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-
+var q = require('q');
+var async = require('async');
 
 var path = require('path');
 
@@ -16,7 +17,7 @@ var eventList = {
 };
 
 var DEBUG_WINDOW_EVENT_LISTENERS = false;
-var DEBUG_WINDOW_MANAGER = false;
+var DEBUG_WINDOW_MANAGER = true;
 var DEBUG_WINDOW_EVENT_LIST = false;
 var DEBUG_PRINT_WINDOW_EVENT_DATA = false;
 
@@ -357,6 +358,7 @@ function createWindowManager() {
 	ljswitchboard-package_loader project.
 	*/
 	this.openWindow = function(packageInfo, info, appData) {
+		var defered = q.defer();
 		// Make sure that the gui object is defined
 		if(typeof(self.options.gui) === 'undefined') {
 			throw new Error('Must configure the module_manager, gui is not defined');
@@ -386,38 +388,138 @@ function createWindowManager() {
 		if(DEBUG_WINDOW_MANAGER) {
 			console.log('Reference to gui.Window', Object.keys(gui.Window));
 		}
-		// Open a new window and save its reference
-		var newWindow = gui.Window.open(
-			windowPath,
-			newWindowData
-		);
 
-		var initialVisibilityState = true;
-		var windowTitle = '';
-
-		if(newWindowData.title) {
-			windowTitle = newWindowData.title;
+		var asyncOpen = false;
+		if(typeof(process.versions.nw) !== 'undefined') {
+			// crude NW version check
+			if(process.versions.nw > "0.12.3") {
+				asyncOpen = true;
+				if(typeof(newWindowData.toolbar) !== 'undefined') {
+					delete newWindowData.toolbar;
+					// TODO: This fails on NW 0.13++:
+					// https://github.com/nwjs/nw.js/issues/4418
+					// https://github.com/nwjs/nw.js/issues/6149
+					// Can't open new windows & share objects between them.
+					// Potentially worth adding (in the future, 10/21/2019, not working):
+					// -- "chromium-args": "--enable-features=nw2"
+					newWindowData.new_instance = true;
+				}
+			}
 		}
-		if(typeof(newWindowData.show) !== 'undefined') {
-			initialVisibilityState = newWindowData.show;
+		
+
+		if(asyncOpen) {
+			// Open a new window and save its reference, nw0.13++ uses an async "open" call.
+			gui.Window.open(
+				windowPath,
+				newWindowData,
+				function(win) {
+					var initialVisibilityState = true;
+					var windowTitle = '';
+
+					if(newWindowData.title) {
+						windowTitle = newWindowData.title;
+					}
+					if(typeof(newWindowData.show) !== 'undefined') {
+						initialVisibilityState = newWindowData.show;
+					}
+
+					// Build the windowInfo object to be passed to the self.addWindow function
+					windowInfo = {
+						'name': packageInfo.name,
+						'win': win,
+						'initialVisibility': initialVisibilityState,
+						'title': windowTitle
+					};
+					self.addWindow(windowInfo);
+
+					// Emit an event indicating that a new window has been opened.
+					self.emit(eventList.OPENED_WINDOW, packageInfo.name);
+
+					defered.resolve(win);
+				}
+			);
+		} else {
+			// Open a new window and save its reference
+			var newWindow = gui.Window.open(
+				windowPath,
+				newWindowData
+			);
+
+			var initialVisibilityState = true;
+			var windowTitle = '';
+
+			if(newWindowData.title) {
+				windowTitle = newWindowData.title;
+			}
+			if(typeof(newWindowData.show) !== 'undefined') {
+				initialVisibilityState = newWindowData.show;
+			}
+
+			// Build the windowInfo object to be passed to the self.addWindow function
+			windowInfo = {
+				'name': packageInfo.name,
+				'win': newWindow,
+				'initialVisibility': initialVisibilityState,
+				'title': windowTitle
+			};
+			self.addWindow(windowInfo);
+
+			// Emit an event indicating that a new window has been opened.
+			self.emit(eventList.OPENED_WINDOW, packageInfo.name);
+
+			defered.resolve(newWindow);
 		}
+		
 
-		// Build the windowInfo object to be passed to the self.addWindow function
-		windowInfo = {
-			'name': packageInfo.name,
-			'win': newWindow,
-			'initialVisibility': initialVisibilityState,
-			'title': windowTitle
-		};
-		self.addWindow(windowInfo);
-
-		// Emit an event indicating that a new window has been opened.
-		self.emit(eventList.OPENED_WINDOW, packageInfo.name);
-
-		return newWindow;
+		// return newWindow;
+		return defered.promise;
 	};
 	this.openManagedApps = function(packages) {
+		var defered = q.defer();
 		var keys = Object.keys(packages);
+
+		async.eachSeries(keys, function(key, cb) {
+			try {
+				// Open the found nwApp libraries
+				var reqOpenWindow = false;
+				if(packages[key].packageData) {
+					var loadedAppData = packages[key].packageData;
+					if(loadedAppData['ljswitchboard-main']) {
+						var appFile = loadedAppData['ljswitchboard-main'];
+						var appType = path.extname(appFile);
+						if(appType === '.html') {
+							var requiredInfo = {
+								'main': appFile
+							};
+							reqOpenWindow = true;
+							self.openWindow(
+								packages[key].packageInfo,
+								requiredInfo,
+								packages[key].packageData
+							).then(function(res) {
+								cb();
+							}, function(err) {
+								cb(err);
+							});
+						} 
+					}
+				}
+				if(!reqOpenWindow) {
+					cb();
+				}
+			} catch (err) {
+				console.error('Error Opening App', key, err);
+			}
+		}, function(err) {
+			if(err) {
+				defered.reject(err);
+			} else {
+				defered.resolve();
+			}
+		});
+
+		return defered.promise;
 		keys.forEach(function(key) {
 			try {
 				// Open the found nwApp libraries
@@ -465,7 +567,9 @@ if(DEBUG_WINDOW_EVENT_LIST) {
 		});
 	});
 }
-
+exports.linkOutput = function(console) {
+	global.console = console;
+}
 exports.windowManager = WINDOW_MANAGER;
 exports.open = WINDOW_MANAGER.openWindow;
 exports.openManagedApps = WINDOW_MANAGER.openManagedApps;
