@@ -20,6 +20,8 @@ if(typeof(buildOS) === 'undefined') {
 }
 
 var mac_notarize = false;
+// The LabJack macOS installer builder signs Kipling files, so we actually don't
+// want to sign here.
 if(process.argv.some((arg)=>{return process.argv.indexOf('mac_sign') > 0;})) {
 	mac_notarize = true;
 	console.log('**************************\n ****Signing ****\n**************************');
