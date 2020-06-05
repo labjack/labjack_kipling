@@ -10,6 +10,7 @@ First, install the [LJM library](https://labjack.com/support/software/installers
 ```bash
 git clone https://github.com/labjack/labjack_kipling
 cd labjack_kipling
+npm install
 npm run setup # Installs npm modules using `lerna bootstrap`
 npm start # Launches a development version of Kipling
 ```
