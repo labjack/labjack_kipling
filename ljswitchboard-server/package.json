@@ -9,9 +9,7 @@
     "directory": "ljswitchboard-server"
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-server",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "author": "",
   "license": "MIT OR ISC",
   "dependencies": {

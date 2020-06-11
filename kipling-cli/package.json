@@ -4,8 +4,7 @@
   "description": "This is a cmd-line based program that gives you access to LabJack devices.",
   "main": "lib/kipling-cli.js",
   "scripts": {
-    "start": "node ./kipling-cli.js",
-    "test": "nodeunit ./test/test.js"
+    "start": "node ./kipling-cli.js"
   },
   "repository": {
     "type": "git",
@@ -33,5 +32,6 @@
     "static": "^2.0.0",
     "task-runner": "0.0.8",
     "terminal-task-runner": "^1.5.3"
-  }
+  },
+  "devDependencies": {}
 }

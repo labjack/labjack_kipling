@@ -17,7 +17,7 @@ var eventList = {
 };
 
 var DEBUG_WINDOW_EVENT_LISTENERS = false;
-var DEBUG_WINDOW_MANAGER = true;
+var DEBUG_WINDOW_MANAGER = false;
 var DEBUG_WINDOW_EVENT_LIST = false;
 var DEBUG_PRINT_WINDOW_EVENT_DATA = false;
 

@@ -13,7 +13,7 @@
     "run_built_k3": "node scripts/run_built_k3.js",
     "setup": "lerna bootstrap",
     "start": "npm run start --prefix ljswitchboard-splash_screen",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "lerna exec --ignore ljswitchboard-ljm_special_addresses -- npm test --if-present"
   },
   "repository": {
     "type": "git",

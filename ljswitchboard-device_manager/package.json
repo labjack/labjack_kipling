@@ -9,9 +9,7 @@
     "directory": "ljswitchboard-device_manager"
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-device_manager",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "author": {
     "name": "Chris Johnson",
     "url": "https://labjack.com"

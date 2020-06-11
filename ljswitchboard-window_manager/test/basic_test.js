@@ -124,15 +124,16 @@ var tests = {
 			'main': '',
 		};
 		var appData = {};
-		var openedWindow = window_manager.open(
+		window_manager.open(
 			packageInfo,
 			requiredInfo,
 			appData
-		);
-		// Wait for the on LOADED event to finish the test indicating that a 
-		// new window has opened.
-		openedWindow.on(eventList.LOADED, function() {
-			test.done();
+		).then(function(openedWindow) {
+			// Wait for the on LOADED event to finish the test indicating that a 
+			// new window has opened.
+			openedWindow.on(eventList.LOADED, function() {
+				test.done();
+			});
 		});
 	},
 	'check the number of visible and open windows': function(test) {

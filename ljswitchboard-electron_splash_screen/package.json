@@ -70,8 +70,7 @@
   },
   "script_notes": "to run a script w/o using npm test, use npm run [script name]",
   "scripts": {
-    "start": "./node_modules/.bin/electron .",
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+    "start": "./node_modules/.bin/electron ."
   },
   "enableStartupConfig": false,
   "buildType": "release",

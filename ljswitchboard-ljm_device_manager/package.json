@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "diff": ">=3.5.0",
+    "ljm-ffi": "*",
     "nodeunit": "0.11.3"
   },
   "repository": {
