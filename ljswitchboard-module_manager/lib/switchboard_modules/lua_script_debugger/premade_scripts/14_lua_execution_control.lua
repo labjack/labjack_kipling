@@ -1,7 +1,7 @@
 --[[
   Name: 14_lua_execution_control.lua
-  Desc: This example shows how to control LUA execution blocks using an LJM
-        host app and the USER_RAM registers.
+  Desc: This example shows how to control LUA execution blocks using a host
+        app and the USER_RAM registers.
   Note: Information on the USER_RAM registers and LJM host applications that
         work in conjunction with this example can be found here:
           https://labjack.com/support/datasheets/t-series/lua-scripting#user-ram
