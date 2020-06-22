@@ -8,6 +8,10 @@ To build the project:
 
 `npm run build_project`
 
+## Not meant to be a dependency of any published labjack_kipling packages
+
+Because ljswitchboard-builder contains large build files, it does not make itself available for the final Kipling app. For more, see [publish_locally](#publish_locally).
+
 ## test
 
 ### npm test
@@ -46,9 +50,20 @@ Ensures that `ljswitchboard-splash_screen/package.json` is ready for release.
 
 For the keys and values in `ljswitchboard-builder/package.json['splash_screen_build_keys']`, sets the corresponding keys and values in `ljswitchboard-splash_screen/package.json`. E.g. if ljswitchboard-builder/package.json['splash_screen_build_keys']['test'] is false, sets `ljswitchboard-splash_screen/package.json['test']` to false.
 
+### publish_locally
+
+Publishes all labjack_kipling packages besides ljswitchboard-builder as tar files to:
+`labjack_kipling/ljswitchboard-builder/temp_publish/`
+ 
+All contents of `temp_publish` will be deleted first. 
+
 ### install_production_dependencies
 
-Recursively installs production `package.json['dependencies']` of each module defined in `ljswitchboard-builder/package.json['kipling_dependencies']`.
+Does two passes of installation.
+
+For each package in `temp_project_files`, installs their internal (labjack_kipling) dependencies from the tar packages in `temp_publish`.
+
+Then recursively installs production `package.json['dependencies']` of each module defined in `ljswitchboard-builder/package.json['kipling_dependencies']`.
 
 ### rebuild_native_modules
 

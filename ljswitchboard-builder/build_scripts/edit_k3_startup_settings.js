@@ -8,6 +8,8 @@ var async = require('async');
 var child_process = require('child_process');
 var handlebars = require('handlebars');
 
+const editPackageKeys = require('./edit_package_keys.js').editPackageKeys;
+
 var startingDir = process.cwd();
 
 var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
@@ -42,72 +44,6 @@ function debugLog() {
 	}
 }
 
-function editPackageKeys(bundle) {
-	var defered = q.defer();
-
-	var packageName = bundle.project_part;
-	var projectPackagePath = path.normalize(path.join(
-		TEMP_PROJECT_FILES_PATH,
-		packageName,
-		'package.json'
-	));
-	debugLog('Editing file', projectPackagePath);
-
-	function editFileContents(data) {
-		var str = data.toString();
-		var obj = JSON.parse(str);
-		var reqKeys = bundle.required_keys;
-		debugLog('Project Info', obj);
-		debugLog('Required keys',reqKeys);
-
-		// Replace info with required info.
-		var keys = Object.keys(reqKeys);
-		keys.forEach(function(key) {
-			obj[key] = reqKeys[key];
-		});
-
-		var newStr = JSON.stringify(obj, null, 2);
-		debugLog('new str', newStr);
-		
-
-		// var template = handlebars.compile(data);
-		// var compiledData = template({k3Version:k3VersionStr});
-		// console.log('We have opened a file!', data);
-		// console.log('it is now',compiledData);
-		return newStr;
-	}
-	function editAndSaveFile(data) {
-		var newData = editFileContents(data);
-		fse.outputFile(projectPackagePath, newData, function(err) {
-			if(err) {
-				fse.outputFile(projectPackagePath, newData, function(err) {
-					if(err) {
-						defered.reject();
-					} else {
-						defered.resolve();
-					}
-				});
-			} else {
-				defered.resolve();
-			}
-		});
-	}
-	fse.readFile(projectPackagePath, function(err, data) {
-		if(err) {
-			fse.readFile(projectPackagePath, function(err, data) {
-				if(err) {
-					defered.reject(err);
-				} else {
-					editAndSaveFile(data);
-				}
-			});
-		} else {
-			editAndSaveFile(data);
-		}
-	});
-	return defered.promise;
-}
-
 
 var brandingOperationsMap = {
 	'editPackageKeys': editPackageKeys,
@@ -115,7 +51,7 @@ var brandingOperationsMap = {
 
 var genericBrandingOps = [{
 	'operation': 'editPackageKeys',
-	'project_part': 'ljswitchboard-splash_screen',
+	'project_path': path.join(TEMP_PROJECT_FILES_PATH, 'ljswitchboard-splash_screen'),
 	'required_keys': requiredSplashScreenKeys,
 }];
 
@@ -136,14 +72,7 @@ function executeBrandingOperations(brandingOps) {
 				var func = brandingOperationsMap[item.operation];
 				if(typeof(func) === 'function') {
 					debugLog('Starting execution op', item.operation);
-					func(item)
-					.then(function brandingOpSucc() {
-						debugLog('Finished executing op', item.operation);
-						callback();
-					}, function brandingOpErr(err) {
-						console.error('Error Executing Operation', err);
-						callback(err);
-					});
+					func(item);
 				} else {
 					console.error('Operation Not defined', item.operation);
 					callback('Operation Not defined: "' + item.operation.toString() + '"');
