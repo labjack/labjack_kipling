@@ -4,7 +4,7 @@
 
  - Install the [LJM library](https://labjack.com/support/software/installers/ljm).
  - Install Node 8.9.4.
-     - See notes below about ways to install multiple versions of node.
+     - This version is likely to change. Use `nave` or `nvm` to manage node versions.
  - Install git
 
 
@@ -65,9 +65,6 @@ npm start
 
 See [distribution.md](distribution.md) to build a Kipling executable.
 
-
-## Required Node Versions
-As of 2020-05-22, Windows/Mac/Linux users should be using node.js 8.9.4. This version is likely to change to newer versions over time. Use `nave` or `nvm` to manage node versions.
 
 
 ## macOS Notes:
