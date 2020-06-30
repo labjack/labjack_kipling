@@ -28,7 +28,9 @@
     "url": "https://labjack.com"
   },
   "license": "MIT",
-  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "bugs": {
+    "url": "https://github.com/labjack/labjack_kipling/issues"
+  },
   "dependencies": {
     "async": "1.5.2",
     "labjack-nodejs": "*",
