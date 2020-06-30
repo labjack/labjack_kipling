@@ -4,6 +4,8 @@
 var path = require('path');
 var child_process = require('child_process');
 
+var fse = require('fs-extra');
+
 var buildOS = {
 	'darwin': 'darwin',
 	'win32': 'win32'
@@ -18,5 +20,4 @@ var localK3FilesPath = {
 	linux:  '/usr/local/share/LabJack/K3',
 }[buildOS];
 
-var toDelete = path.join(localK3FilesPath, '*');
-var installOutput = child_process.execSync(`rm -rf ${toDelete}`);
+fse.emptyDirSync(localK3FilesPath);

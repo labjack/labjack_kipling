@@ -27,6 +27,7 @@
   "homepage": "https://github.com/labjack/labjack_kipling",
   "dependencies": {
     "async": "^3.2.0",
+    "fs-extra": "^0.18.4",
     "q": "^1.5.1"
   },
   "devDependencies": {
