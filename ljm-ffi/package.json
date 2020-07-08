@@ -1,5 +1,5 @@
 {
-    "name": "ljm-ffi",
+    "name": "@labjack/ljm-ffi",
     "version": "2.0.0",
     "description": "nodejs library for using the LabJackM library",
     "author": {
@@ -26,8 +26,8 @@
     "dependencies": {
         "async": "1.5.2",
         "ffi-napi": "2.4.6",
-        "ljswitchboard-ljm_driver_constants": "*",
-        "ljswitchboard-modbus_map": "*",
+        "@labjack/ljswitchboard-ljm_driver_constants": "*",
+        "@labjack/ljswitchboard-modbus_map": "*",
         "q": "1.5.1",
         "ref-napi": "^1.4.3",
         "semver": "^7.1.1"

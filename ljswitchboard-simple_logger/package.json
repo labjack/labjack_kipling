@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-simple_logger",
+  "name": "@labjack/ljswitchboard-simple_logger",
   "version": "1.0.0",
   "description": "A simple data logger for LabJack devices.",
   "main": "./lib/ljswitchboard-simple_logger",
@@ -29,12 +29,12 @@
     "async": "1.5.2",
     "compute-gcd": "1.2.0",
     "fs-extra": "^0.18",
-    "labjack-nodejs": "*",
-    "ljswitchboard-data_parser": "*",
-    "ljswitchboard-device_manager": "*",
-    "ljswitchboard-ljm_device_curator": "*",
-    "ljswitchboard-ljm_driver_constants": "*",
-    "ljswitchboard-modbus_map": "*",
+    "@labjack/labjack-nodejs": "*",
+    "@labjack/ljswitchboard-data_parser": "*",
+    "@labjack/ljswitchboard-device_manager": "*",
+    "@labjack/ljswitchboard-ljm_device_curator": "*",
+    "@labjack/ljswitchboard-ljm_driver_constants": "*",
+    "@labjack/ljswitchboard-modbus_map": "*",
     "q": "1.5.1"
   },
   "devDependencies": {
@@ -42,12 +42,12 @@
     "nodeunit": "0.11.3"
   },
   "old-dependencies": {
-    "labjack-nodejs": "*",
-    "ljswitchboard-data_parser": "*",
-    "ljswitchboard-device_manager": "*",
-    "ljswitchboard-ljm_device_curator": "*",
-    "ljswitchboard-ljm_driver_constants": "*",
-    "ljswitchboard-modbus_map": "*",
+    "@labjack/labjack-nodejs": "*",
+    "@labjack/ljswitchboard-data_parser": "*",
+    "@labjack/ljswitchboard-device_manager": "*",
+    "@labjack/ljswitchboard-ljm_device_curator": "*",
+    "@labjack/ljswitchboard-ljm_driver_constants": "*",
+    "@labjack/ljswitchboard-modbus_map": "*",
     "dontDelete": "dontDelete"
   },
   "directories": {

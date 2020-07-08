@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-server",
+  "name": "@labjack/ljswitchboard-server",
   "version": "1.0.0",
   "description": "This is Kipling's server process.",
   "main": "index.js",

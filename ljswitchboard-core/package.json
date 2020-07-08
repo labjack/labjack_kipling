@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-core",
+  "name": "@labjack/ljswitchboard-core",
   "version": "0.0.5",
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
@@ -38,7 +38,7 @@
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "window": {
-    "title": "ljswitchboard-core",
+    "title": "@labjack/ljswitchboard-core",
     "icon": "lib/Kipling_128x128.png",
     "toolbar": true,
     "width": 1120,

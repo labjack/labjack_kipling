@@ -1,5 +1,5 @@
 {
-  "name": "ljmmm-parse",
+  "name": "@labjack/ljmmm-parse",
   "version": "0.2.4",
   "description": "Library for parsing LabJack Modbus Map Markup documents.",
   "scripts": {

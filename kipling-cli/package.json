@@ -1,5 +1,5 @@
 {
-  "name": "kipling-cli",
+  "name": "@labjack/kipling-cli",
   "version": "1.0.0",
   "description": "This is a cmd-line based program that gives you access to LabJack devices.",
   "main": "lib/kipling-cli.js",
@@ -19,7 +19,7 @@
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/kipling-cli",
   "preferGlobal": true,
   "bin": {
-    "kipling-cli": "./lib/kipling-cli.js",
+    "@labjack/kipling-cli": "./lib/kipling-cli.js",
     "kipling-cli-test": "./lib/kipling-cli-test.js"
   },
   "dependencies": {
