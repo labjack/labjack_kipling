@@ -1,5 +1,5 @@
 {
-    "name": "process_manager",
+    "name": "@labjack/process_manager",
     "version": "0.0.17",
     "author": {
         "name": "Chris Johnson",

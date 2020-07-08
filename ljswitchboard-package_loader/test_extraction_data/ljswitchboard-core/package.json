@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-core",
+  "name": "@labjack/ljswitchboard-core",
   "version": "0.0.2",
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
@@ -30,7 +30,7 @@
     "static": "./static"
   },
   "ljswitchboardDependencies": {
-    "ljswitchboard-package_loader": "x.x.x",
-    "ljswitchboard-static_files": "x.x.x"
+    "@labjack/ljswitchboard-package_loader": "x.x.x",
+    "@labjack/ljswitchboard-static_files": "x.x.x"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-package_loader",
+  "name": "@labjack/ljswitchboard-package_loader",
   "version": "1.0.3",
   "description": "A small node/node-webkit project loader for ljswitchboard that loads files into the global.ljswitchboard namespace",
   "author": {

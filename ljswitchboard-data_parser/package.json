@@ -1,5 +1,5 @@
 {
-    "name": "ljswitchboard-data_parser",
+    "name": "@labjack/ljswitchboard-data_parser",
     "version": "1.0.1",
     "description": "A library that contains a variety of formatters for data coming and going to LabJack devices.",
     "author": {
@@ -25,14 +25,14 @@
         "lib"
     ],
     "dependencies": {
-        "ljmmm-parse": "*",
-        "ljswitchboard-modbus_map": "*",
-        "ljswitchboard-ljm_driver_constants": "*"
+        "@labjack/ljmmm-parse": "*",
+        "@labjack/ljswitchboard-modbus_map": "*",
+        "@labjack/ljswitchboard-ljm_driver_constants": "*"
     },
     "custDependencies": {
-        "ljmmm-parse": "*",
-        "ljswitchboard-modbus_map": "*",
-        "ljswitchboard-ljm_driver_constants": "*"
+        "@labjack/ljmmm-parse": "*",
+        "@labjack/ljswitchboard-modbus_map": "*",
+        "@labjack/ljswitchboard-ljm_driver_constants": "*"
     },
     "devDependencies": {
         "nodeunit": "0.11.3",

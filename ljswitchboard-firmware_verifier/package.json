@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-firmware_verifier",
+  "name": "@labjack/ljswitchboard-firmware_verifier",
   "version": "1.0.0",
   "description": "A tool to verify and extract information saved in LabJack's firmware .bin files.",
   "author": {
@@ -22,7 +22,7 @@
   "license": "MIT",
   "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
   "dependencies": {
-    "ljswitchboard-ljm_driver_constants": "*",
+    "@labjack/ljswitchboard-ljm_driver_constants": "*",
     "q": "1.5.1"
   },
   "devDependencies": {
@@ -30,7 +30,7 @@
     "nodeunit": "0.11.3"
   },
   "old-dependencies": {
-    "ljswitchboard-ljm_driver_constants": "*"
+    "@labjack/ljswitchboard-ljm_driver_constants": "*"
   },
   "directories": {
     "lib": "./lib"

@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-electron_splash_screen",
+  "name": "@labjack/ljswitchboard-electron_splash_screen",
   "version": "0.0.1",
   "description": "The splash screen & primary loading file for LabJack's Kipling program.",
   "author": {
@@ -44,10 +44,10 @@
     "concat-stream": "1.5.2",
     "fs-extra": "0.18.4",
     "fs.extra": "1.3.2",
-    "ljswitchboard-ljm_driver_checker": "*",
-    "ljswitchboard-package_loader": "*",
-    "ljswitchboard-require": "*",
-    "ljswitchboard-window_manager": "git://github.com/chrisJohn404/ljswitchboard-window_manager.git#new-nw-support",
+    "@labjack/ljswitchboard-ljm_driver_checker": "*",
+    "@labjack/ljswitchboard-package_loader": "*",
+    "@labjack/ljswitchboard-require": "*",
+    "@labjack/ljswitchboard-window_manager": "git://github.com/chrisJohn404/ljswitchboard-window_manager.git#new-nw-support",
     "q": "1.5.1",
     "rimraf": "2.2.8",
     "yauzl": "2.10.0"
@@ -55,7 +55,7 @@
   "un-managed-dependencies": {
     "semver": "4.2.0",
     "unzip": "0.1.11",
-    "ljswitchboard-core": "*"
+    "@labjack/ljswitchboard-core": "*"
   },
   "old-dependencies": {
     "async": "~0",

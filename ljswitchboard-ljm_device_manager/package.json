@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-ljm_device_manager",
+  "name": "@labjack/ljswitchboard-ljm_device_manager",
   "version": "1.0.2",
   "description": "",
   "main": "./lib/ljm_device_manager.js",
@@ -12,20 +12,20 @@
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "dependencies": {
-    "ljswitchboard-ljm_device_curator": "*",
-    "ljswitchboard-device_scanner": "*",
-    "ljswitchboard-ljm_driver_constants": "*",
+    "@labjack/ljswitchboard-ljm_device_curator": "*",
+    "@labjack/ljswitchboard-device_scanner": "*",
+    "@labjack/ljswitchboard-ljm_driver_constants": "*",
     "async": "1.5.2",
     "q": "1.5.1"
   },
   "customDeps": {
-    "ljswitchboard-ljm_device_curator": "*",
-    "ljswitchboard-device_scanner": "*",
-    "ljswitchboard-ljm_driver_constants": "*"
+    "@labjack/ljswitchboard-ljm_device_curator": "*",
+    "@labjack/ljswitchboard-device_scanner": "*",
+    "@labjack/ljswitchboard-ljm_driver_constants": "*"
   },
   "devDependencies": {
     "diff": ">=3.5.0",
-    "ljm-ffi": "*",
+    "@labjack/ljm-ffi": "*",
     "nodeunit": "0.11.3"
   },
   "repository": {
