@@ -1,5 +1,5 @@
 {
-  "name": "ljswitchboard-static_files",
+  "name": "@labjack/ljswitchboard-static_files",
   "version": "0.0.13",
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
