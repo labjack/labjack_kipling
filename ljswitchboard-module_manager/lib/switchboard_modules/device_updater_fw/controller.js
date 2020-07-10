@@ -13,7 +13,7 @@
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
-var firmware_verifier = global.require('ljswitchboard-firmware_verifier');
+var firmware_verifier = global.require('@labjack/ljswitchboard-firmware_verifier');
 var fs = require('fs');
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.

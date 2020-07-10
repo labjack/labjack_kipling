@@ -14,9 +14,9 @@ try {
 var util = require('util');
 
 var fs = require('fs');         //Load File System module
-var jsonConstants = require('ljswitchboard-modbus_map');
+var jsonConstants = require('@labjack/ljswitchboard-modbus_map');
 var modbus_map = jsonConstants.getConstants();
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 var ljm_functions = require('./ljm_functions');
 var LJM_FUNCTIONS = ljm_functions.LJM_FUNCTIONS;

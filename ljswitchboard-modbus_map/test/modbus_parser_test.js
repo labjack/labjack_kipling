@@ -12,10 +12,10 @@
 var jsonConstants = require('../lib/json_constants_parser');
 var constants = jsonConstants.getConstants();
 
-var ljmmm_parse = require('ljmmm-parse');
+var ljmmm_parse = require('@labjack/ljmmm-parse');
 var bufferRegisters = require('../lib/buffer_registers').bufferRegisters;
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 var expandedBufferRegisters = [];
 bufferRegisters.forEach(function(bufferRegister) {

@@ -2,14 +2,14 @@
 var rewire = require('rewire');
 var device_scanner = rewire('../../lib/ljswitchboard-device_scanner');
 var open_all_device_scanner = rewire('../../lib/open_all_device_scanner');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var REQUIRED_INFO_BY_DEVICE = require('../../lib/required_device_info').requiredInfo;
 var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
 var printScanResultsKeys = test_util.printScanResultsKeys;
 var testScanResults = test_util.testScanResults;
-var device_curator = require('ljswitchboard-ljm_device_curator');
+var device_curator = require('@labjack/ljswitchboard-ljm_device_curator');
 
 var deviceScanner;
 var driver;
@@ -22,7 +22,7 @@ exports.tests = {
 	},
 	'create device scanner': function(test) {
 		device_scanner.disableSafeLoad();
-		driver = require('LabJack-nodejs').driver();
+		driver = require('@labjack/labjack-nodejs').driver();
 		deviceScanner = open_all_device_scanner.createDeviceScanner(driver);
 		test.done();
 	},

@@ -88,7 +88,7 @@ var createDataTable = function() {
 };
 
 try {
-	global.require('ljmmm-parse');
+	global.require('@labjack/ljmmm-parse');
 	console.log('Required ljmmm-parse');
 } catch(err) {
 	console.log('Error requiring ljmmm-parse');

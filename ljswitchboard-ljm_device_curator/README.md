@@ -7,7 +7,7 @@ This library sits on top of the 'labjack-nodejs' library allowing it abstract se
 ### Basic Usage:
 ```javascript
 //Include the device curator
-var device_curator = require('ljswitchboard-ljm_device_curator');
+var device_curator = require('@labjack/ljswitchboard-ljm_device_curator');
 
 // Creating a new device object
 var device = new device_curator.device();
@@ -147,7 +147,7 @@ Beta/Un-stable functions:
 For testing purposes, it is possible to open "mock" devices that try to behave like standard devices and return dummy values.  Mock devices are declared when initializing the device object:
 ```javascript
 //Include the device curator
-var device_curator = require('ljswitchboard-ljm_device_curator');
+var device_curator = require('@labjack/ljswitchboard-ljm_device_curator');
 
 // Creating a new device object
 var device = new device_curator.device(true);

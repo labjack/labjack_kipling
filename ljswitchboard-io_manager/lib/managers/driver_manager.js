@@ -1,5 +1,5 @@
 
-var labjack_nodejs = require('labjack-nodejs');
+var labjack_nodejs = require('@labjack/labjack-nodejs');
 var constants = require('../common/constants');
 var q = require('q');
 var io_endpoint_key = constants.driver_endpoint_key;
@@ -8,7 +8,7 @@ var ljm_special_addresses_loaded = false;
 var ljm_special_addresses;
 function loadLJMSpecialAddresses() {
 	if(!ljm_special_addresses_loaded) {
-		ljm_special_addresses = require('ljswitchboard-ljm_special_addresses');
+		ljm_special_addresses = require('@labjack/ljswitchboard-ljm_special_addresses');
 	}
 }
 

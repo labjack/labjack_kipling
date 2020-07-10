@@ -1,5 +1,5 @@
 
-var process_manager = require('process_manager');
+var process_manager = require('@labjack/process_manager');
 var q = require('q');
 
 // Include the single_device_controller

@@ -44,10 +44,10 @@ mockDevices.forEach(function(mockDevice) {
 
 this.test_device_info = {
 	'initialize test': function(test) {
-		package_loader = global.require('ljswitchboard-package_loader');
+		package_loader = global.require('@labjack/ljswitchboard-package_loader');
 		gns = package_loader.getNameSpace();
 		gui = global[gns].gui;
-		window_manager = global.require('ljswitchboard-window_manager');
+		window_manager = global.require('@labjack/ljswitchboard-window_manager');
 
 		var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;
 		testerWin = managedTesterWindow.win;
@@ -61,7 +61,7 @@ this.test_device_info = {
 		MODULE_CHROME = kiplingWindow.MODULE_CHROME;
 		
 
-		io_manager = global.require('ljswitchboard-io_manager');
+		io_manager = global.require('@labjack/ljswitchboard-io_manager');
 		io_interface = io_manager.io_interface();
 		deviceController = io_interface.getDeviceController();
 		test.done();

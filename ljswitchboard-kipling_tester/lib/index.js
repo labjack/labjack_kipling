@@ -56,9 +56,9 @@ for(var i = 0; i < testFiles.length; i++) {
 }
 
 
-var package_loader = require('ljswitchboard-package_loader');
+var package_loader = require('@labjack/ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
-var window_manager = require('ljswitchboard-window_manager');
+var window_manager = require('@labjack/ljswitchboard-window_manager');
 var startDir = global[gns].info.startDir;
 var handlebars = require('handlebars');
 /*

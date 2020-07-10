@@ -9,15 +9,15 @@ var q;
 var gns;
 var static_files;
 try {
-	package_loader = global.require.main.require('ljswitchboard-package_loader');
+	package_loader = global.require.main.require('@labjack/ljswitchboard-package_loader');
 	q = global.require.main.require('q');
 	gns = package_loader.getNameSpace();
-	static_files = global.require('ljswitchboard-static_files');
+	static_files = global.require('@labjack/ljswitchboard-static_files');
 } catch(err) {
-	package_loader = require.main.require('ljswitchboard-package_loader');
+	package_loader = require.main.require('@labjack/ljswitchboard-package_loader');
 	q = require.main.require('q');
 	gns = package_loader.getNameSpace();
-	static_files = require('ljswitchboard-static_files');
+	static_files = require('@labjack/ljswitchboard-static_files');
 }
 
 var EventEmitter = require('events').EventEmitter;

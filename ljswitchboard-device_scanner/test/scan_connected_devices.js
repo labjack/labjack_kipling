@@ -5,8 +5,8 @@
 var rewire = require('rewire');
 var device_scanner = rewire('../lib/device_scanner');
 
-var device_curator = require('ljswitchboard-ljm_device_curator');
-var ljm = require('labjack-nodejs');
+var device_curator = require('@labjack/ljswitchboard-ljm_device_curator');
+var ljm = require('@labjack/labjack-nodejs');
 var driver = ljm.driver();
 
 var test_util = require('./test_util');

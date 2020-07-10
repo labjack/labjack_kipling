@@ -12,7 +12,7 @@
  */
 
 var rewire = require('rewire');
-var jsonConstants = require('ljswitchboard-modbus_map');
+var jsonConstants = require('@labjack/ljswitchboard-modbus_map');
 var constants = jsonConstants.getConstants();
 
 module.exports = {

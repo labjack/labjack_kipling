@@ -1,5 +1,5 @@
 
-var ljmmm_parse = require('ljmmm-parse');
+var ljmmm_parse = require('@labjack/ljmmm-parse');
 
 
 var list = {

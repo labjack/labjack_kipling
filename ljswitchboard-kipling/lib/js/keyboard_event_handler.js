@@ -14,7 +14,7 @@ var async = require('async');
 // Require nodejs libraries
 var os = require('os');
 var path = require('path');
-var window_manager = require('ljswitchboard-window_manager');
+var window_manager = require('@labjack/ljswitchboard-window_manager');
 
 // (function () {
 //   "use strict";

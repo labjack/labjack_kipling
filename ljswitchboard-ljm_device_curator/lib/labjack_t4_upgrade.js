@@ -7,11 +7,11 @@
 
 var fs = require('fs');
 var async = require('async');
-var labjack_nodejs = require('labjack-nodejs');
+var labjack_nodejs = require('@labjack/labjack-nodejs');
 var ljmDriver = new labjack_nodejs.driver();
 var q = require('q');
 var request = require('request');
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+var modbus_map = require('@labjack/ljswitchboard-modbus_map').getConstants();
 var semver = require('semver');
 var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');
 

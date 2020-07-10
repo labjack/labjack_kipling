@@ -2,9 +2,9 @@
 
 var data_formatters = require('./data_formatters');
 
-var modbus_map = require('ljswitchboard-modbus_map');
+var modbus_map = require('@labjack/ljswitchboard-modbus_map');
 var constants = modbus_map.getConstants();
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 var formatters = data_formatters.list;
 var formatterKeys = Object.keys(formatters);

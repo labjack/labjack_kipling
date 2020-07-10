@@ -3,8 +3,8 @@
 var async = require('async');
 
 
-var device_curator = require('ljswitchboard-ljm_device_curator');
-var ljm_ffi = require('ljm-ffi');
+var device_curator = require('@labjack/ljswitchboard-ljm_device_curator');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
 process.on('uncaughtException', (err) => {
   console.log(`Caught exception: ${err}`);

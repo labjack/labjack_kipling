@@ -17,7 +17,7 @@ driverManager.__set__('driverLib',mockDriver);
 var deviceManager = rewire('../lib/device');
 deviceManager.__set__('driverLib',mockDriver);
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 
 // Handle for device that gets opened.

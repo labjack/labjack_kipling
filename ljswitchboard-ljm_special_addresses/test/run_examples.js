@@ -1,6 +1,6 @@
 
 var q = require('q');
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
 var fs = require('fs');
 var path = require('path');

@@ -11,7 +11,7 @@ var qExec = utils.qExec;
 var pResults = utils.pResults;
 var q = require('q');
 
-var labjack_nodejs = require('labjack-nodejs');
+var labjack_nodejs = require('@labjack/labjack-nodejs');
 var constants = labjack_nodejs.driver_const;
 
 var io_manager;

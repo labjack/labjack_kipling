@@ -1,11 +1,11 @@
 
 // This is a mock device to use when no actual devices are present.
 var q = require('q');
-var ljm = require('labjack-nodejs');
-var constants = require('ljswitchboard-ljm_driver_constants');
-var modbus_map = require('ljswitchboard-modbus_map');
+var ljm = require('@labjack/labjack-nodejs');
+var constants = require('@labjack/ljswitchboard-ljm_driver_constants');
+var modbus_map = require('@labjack/ljswitchboard-modbus_map');
 var modbusMap = modbus_map.getConstants();
-var data_parser = require('ljswitchboard-data_parser');
+var data_parser = require('@labjack/ljswitchboard-data_parser');
 var semver = require('semver');
 
 var NUM_OPEN_DEVICES = 0;

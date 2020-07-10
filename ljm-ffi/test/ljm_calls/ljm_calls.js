@@ -6,7 +6,7 @@ var ljTypeMap = type_helpers.ljTypeMap;
 var ljTypeOps = type_helpers.ljTypeOps;
 var convertToFFIType = type_helpers.convertToFFIType;
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var ARCH_CHAR_NUM_BYTES = 1;
 var ARCH_INT_NUM_BYTES = driver_const.ARCH_INT_NUM_BYTES;
 var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;

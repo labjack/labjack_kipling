@@ -2,7 +2,7 @@
 var q = require('q');
 var fs = require('fs');
 var path = require('path');
-var modbusMap = require('ljswitchboard-modbus_map').getConstants();
+var modbusMap = require('@labjack/ljswitchboard-modbus_map').getConstants();
 
 var DEBUG_MANUFACTURING_INFO_OPS = false;
 var DEBUG_READ_MANUFACTURING_INFO_OPS = false;

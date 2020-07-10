@@ -1,6 +1,6 @@
 
 
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 
 
 var approxPlatform = {

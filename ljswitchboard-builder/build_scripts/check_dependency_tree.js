@@ -6,7 +6,7 @@ var path = require('path');
 var q = require('q');
 var cwd = process.cwd();
 var rimraf = require('rimraf');
-var async = require('lj_async_0_to_x_shim');
+var async = require('@labjack/lj_async_0_to_x_shim');
 var colors = require('colors');
 
 var projectBaseDir = path.join(__dirname, '..', '..');

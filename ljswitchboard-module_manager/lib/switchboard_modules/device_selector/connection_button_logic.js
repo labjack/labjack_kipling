@@ -1,6 +1,6 @@
 
 var q = global.require('q');
-var static_files = global.require('ljswitchboard-static_files');
+var static_files = global.require('@labjack/ljswitchboard-static_files');
 
 exports.appendPageLogicToScanResults = function(scanResults, wifiImageTemplate) {
 	// console.log('Appending page logic');

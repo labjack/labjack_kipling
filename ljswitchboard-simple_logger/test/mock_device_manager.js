@@ -1,6 +1,6 @@
 var q = require('q');
 var async = require('async');
-var device_curator = require('ljswitchboard-ljm_device_curator');
+var device_curator = require('@labjack/ljswitchboard-ljm_device_curator');
 
 function CREATE_DEVICE_MANAGER() {
 	this.devices = [];

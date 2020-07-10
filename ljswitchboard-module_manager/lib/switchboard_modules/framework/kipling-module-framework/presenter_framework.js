@@ -26,7 +26,7 @@ var sprintf = require('sprintf-js').sprintf;
 
 var ljmmm_parse = null;
 try {
-    ljmmm_parse = require('ljmmm-parse');
+    ljmmm_parse = require('@labjack/ljmmm-parse');
     ljmmm_parse.expandLJMMMNameSync = function (name) {
         return ljmmm_parse.expandLJMMMEntrySync(
             {name: name, address: 0, type: 'FLOAT32'}
@@ -49,15 +49,15 @@ var modbus_map;
 var gui;
 try {
     gns = package_loader.getNameSpace();
-    io_manager = global.require.main.require('ljswitchboard-io_manager');
-    driver_const = global.require('ljswitchboard-ljm_driver_constants');
-    modbus_map = global.require('ljswitchboard-modbus_map').getConstants();
+    io_manager = global.require.main.require('@labjack/ljswitchboard-io_manager');
+    driver_const = global.require('@labjack/ljswitchboard-ljm_driver_constants');
+    modbus_map = global.require('@labjack/ljswitchboard-modbus_map').getConstants();
     gui = require('nw.gui');
 } catch(err) {
     gns = package_loader.getNameSpace();
-    io_manager = require.main.require('ljswitchboard-io_manager');
-    driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
-    modbus_map = require('ljswitchboard-modbus_map').getConstants();
+    io_manager = require.main.require('@labjack/ljswitchboard-io_manager');
+    driver_const = require.main.require('@labjack/ljswitchboard-ljm_driver_constants');
+    modbus_map = require('@labjack/ljswitchboard-modbus_map').getConstants();
     gui = global.require('gui');
 }
 

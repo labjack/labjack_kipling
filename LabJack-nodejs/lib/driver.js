@@ -8,9 +8,9 @@ const ref = require('ref-napi');
 const util = require('util');//
 const driverLib = require('./driver_wrapper');
 
-const jsonConstants = require('ljswitchboard-modbus_map');
+const jsonConstants = require('@labjack/ljswitchboard-modbus_map');
 const ljm_mm = jsonConstants.getConstants();
-const driver_const = require('ljswitchboard-ljm_driver_constants');
+const driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 const allocBuffer = require('allocate_buffer').allocBuffer;
 

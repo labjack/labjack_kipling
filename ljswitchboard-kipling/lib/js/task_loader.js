@@ -12,11 +12,11 @@ try {
 } catch(err) {
 	console.log('HErE', err);
 }
-var module_manager = require('ljswitchboard-module_manager');
+var module_manager = require('@labjack/ljswitchboard-module_manager');
 var fs = require('fs');
-var package_loader = require('ljswitchboard-package_loader');
+var package_loader = require('@labjack/ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
-var static_files = require('ljswitchboard-static_files');
+var static_files = require('@labjack/ljswitchboard-static_files');
 
 // Configure the module_manager persistent data path.
 var kiplingExtractionPath = package_loader.getExtractionPath();

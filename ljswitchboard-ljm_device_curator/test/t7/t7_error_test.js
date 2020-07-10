@@ -4,7 +4,7 @@ var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');
 var qExec = utils.qExec;
 
-var ljm = require('labjack-nodejs');
+var ljm = require('@labjack/labjack-nodejs');
 var modbusMap = ljm.modbusMap.getConstants();
 var driver_const = ljm.driver_const;
 var driver_errors = driver_const.device_curator_constants;

@@ -6,9 +6,9 @@ var q = require('q');
 var win = gui.Window.get();
 
 
-var package_loader = require('ljswitchboard-package_loader');
+var package_loader = require('@labjack/ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
-var window_manager = require('ljswitchboard-window_manager');
+var window_manager = require('@labjack/ljswitchboard-window_manager');
 var GLOBAL_SUBPROCESS_REFERENCE;
 var GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
 var UPDATE_K3_WINDOW_VERSION_NUMBER_STR = function(str) {

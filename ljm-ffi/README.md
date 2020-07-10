@@ -18,7 +18,7 @@ npm install ljm-ffi
 The most straight forward example that demonstrates that this library is communicating with the LJM library properly is to request the version of LJM installed on the system.  This can be done with the following code (Synchronously):
 ```javascript
 // Load the LJM Library.
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
 
 // Call the LJM_ReadLibraryConfigS function:
@@ -31,7 +31,7 @@ console.log('LJM Version:', ljmLibraryVersion.Value);
 This can be done with the following code (Asynchronously):
 ```javascript
 // Load the LJM Library.
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
 
 // Execute LJM Function
@@ -46,7 +46,7 @@ This is also illustrated in the ./test/get_ljm_version.js file.
 The LJM library can be interacted with in three different ways.  They are exposed by the following code:
 ```javascript
 // Include and load the ljm-ffi library:
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 
 // Type 1
 var ljm = ljm_ffi.load();
@@ -63,7 +63,7 @@ The first, easiest, and recommended way to interact with the LJM library.  This 
 
 ```javascript
 // Include and load the ljm-ffi library:
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
 
 // Call the LJM_NameToAddress function:
@@ -78,7 +78,7 @@ console.log(data);
 As of ffi version 2.0.0 there is a bug in the FFI library where functions that don't exist in the driver behave differently on Windows vs Mac/Linux computers.  This layer makes sure that all of the defined LJM functions exist and will throw the same error across each platform.  The inputs and outputs to these functions are exactly the same as the raw FFI functions.  Look at the ./test/basic_ljm_calls.js file in the "Execute LJM_NameToAddress (Sync) - Safe" and "Execute LJM_NameToAddress (Async) - Safe" tests for more details.  Look at the ./lib/type_helpers.js file to determine how to use the ref and buffer libraries to encode and decode the variety of data types required by LJM.  The basic outline for code using this interface is as follows (Note: This code will not work, look at the mentioned tests):
 ```javascript
 // Include and load the ljm-ffi library:
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var liblabjackm = ljm_ffi.loadSafe();
 
 // Function arguments
@@ -102,7 +102,7 @@ var type = pType.readInt32LE(0);
 These are the raw ffi functions.  If the FFI library threw an error when binding to the function it will not exist.  Look at the ./test/basic_ljm_calls.js file in the "Execute LJM_NameToAddress (Sync) - Raw" and "Execute LJM_NameToAddress (Async) - Raw" tests for more details.  Look at the ./lib/type_helpers.js file to determine how to use the ref and buffer libraries to encode and decode the variety of data types required by LJM.  The basic outline for code using this interface is as follows (Note: This code will not work, look at the mentioned tests):
 ```javascript
 // Include and load the ljm-ffi library:
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ffi_liblabjackm = ljm_ffi.loadRaw();
 
 // Function arguments

@@ -10,7 +10,7 @@ var DEVICE_CONTROLLER_DEVICE_CLOSED = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
 
 var q = require('q');
 
-var labjack_nodejs = require('labjack-nodejs');
+var labjack_nodejs = require('@labjack/labjack-nodejs');
 var driver_constants = labjack_nodejs.driver_const;
 var ljmConstants = labjack_nodejs.modbusMap.getConstants();
 

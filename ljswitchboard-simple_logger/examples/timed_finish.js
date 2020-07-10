@@ -13,7 +13,7 @@ console.log('');
  */
 
 /*
- * Normally you would require the project as "require('ljswitchboard-simple_logger');"
+ * Normally you would require the project as "require('@labjack/ljswitchboard-simple_logger');"
 */
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');

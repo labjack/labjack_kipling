@@ -13,14 +13,14 @@ try {
 	ref = require('ref-napi');
 }
 var fs = require('fs');         //Load File System module
-var jsonConstants = require('ljswitchboard-modbus_map');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var jsonConstants = require('@labjack/ljswitchboard-modbus_map');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 var ljm;
 var ffi_liblabjack;
 
 // Require the ljm-ffi library.
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 
 // Link to the ljm shared library (.so, .dylib, .dll)
 ljm = ljm_ffi.load();

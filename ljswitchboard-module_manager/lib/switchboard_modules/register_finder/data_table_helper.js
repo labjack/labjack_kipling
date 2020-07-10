@@ -9,7 +9,7 @@
 /* exported dataTableCreator */
 
 function dataTableCreator() {
-    var ljmmm_parse = global.require('ljmmm-parse');
+    var ljmmm_parse = global.require('@labjack/ljmmm-parse');
     
     this.activeDevice = undefined;
     var dataTableFormatter = new dataTableDataFormatter();

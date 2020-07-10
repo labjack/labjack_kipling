@@ -7,7 +7,7 @@ sure that it works with all of the test_config_files.
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
 var simpleLogger;
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var mock_device_manager = require('./mock_device_manager');
 var mockDeviceManager = mock_device_manager.createDeviceManager();
 var log_display = require('./utils/log_display');

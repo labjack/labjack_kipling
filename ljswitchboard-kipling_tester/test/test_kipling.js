@@ -25,7 +25,7 @@ this.test_kipling = {
 		test.ok(true, 'Started ljswitchboard');
 		try {
 			
-			package_loader = global.require('ljswitchboard-package_loader');
+			package_loader = global.require('@labjack/ljswitchboard-package_loader');
 			gns = package_loader.getNameSpace();
 			gui = global[gns].gui;
 			screens = gui.Screen.Init();
@@ -36,7 +36,7 @@ this.test_kipling = {
 			var testWinPos = 0;
 			var kiplingWinPos = winWidth;
 
-			window_manager = global.require('ljswitchboard-window_manager');
+			window_manager = global.require('@labjack/ljswitchboard-window_manager');
 			var loadedEvent = window_manager.eventList.LOADED_WINDOW;
 			// window_manager.on(loadedEvent, function(data) {
 			// 	console.log('Test Detected Load Event', data);

@@ -26,7 +26,7 @@ deviceManager.__set__('driverLib',fakeDriver);
 driverManager.__set__('driverLib',fakeDriver);
 
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 var asyncRun = require('./UtilityCode/asyncUtility');
 var syncRun = require('./UtilityCode/syncUtility');

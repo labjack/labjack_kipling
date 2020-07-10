@@ -4,7 +4,7 @@
 /* exported dataTableDataFormatter */
 
 function dataTableDataFormatter() {
-    var ljmmm_parse = global.require('ljmmm-parse');
+    var ljmmm_parse = global.require('@labjack/ljmmm-parse');
     
 	this.dataTableData = {
         'columns': [],

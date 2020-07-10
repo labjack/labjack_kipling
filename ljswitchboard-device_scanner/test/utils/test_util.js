@@ -1,4 +1,4 @@
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 function printScanResultsData(deviceTypes) {
 	console.log('Scan Summary:', deviceTypes);

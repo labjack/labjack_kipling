@@ -8,12 +8,12 @@ var q = require('q');
 var async = require('async');
 
 /* LJ requirements, not sure if these are used. */
-// var ljm = require('labjack-nodejs');
-// var driver_const = require('ljswitchboard-ljm_driver_constants');
+// var ljm = require('@labjack/labjack-nodejs');
+// var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 // var driver = ljm.driver();
-// var data_parser = require('ljswitchboard-data_parser');
-// var curatedDevice = require('ljswitchboard-ljm_device_curator');
-// var modbus_map = require('ljswitchboard-modbus_map');
+// var data_parser = require('@labjack/ljswitchboard-data_parser');
+// var curatedDevice = require('@labjack/ljswitchboard-ljm_device_curator');
+// var modbus_map = require('@labjack/ljswitchboard-modbus_map');
 // var constants = modbus_map.getConstants();
 
 

@@ -273,7 +273,7 @@ global.my_app = my_app;
 var repl = require('repl');
 
 /* Stuff for the device manager */
-// var ljm_device_manager = require('ljswitchboard-ljm_device_manager');
+// var ljm_device_manager = require('@labjack/ljswitchboard-ljm_device_manager');
 // var deviceManager = ljm_device_manager.load();
 
 // var otherCLIConsoles = [];
@@ -296,11 +296,11 @@ var repl = require('repl');
 // global.deviceManager = deviceManager;
 /* End Stuff for the device manager */
 
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
-var Device = require('ljswitchboard-ljm_device_curator').device;
+var Device = require('@labjack/ljswitchboard-ljm_device_curator').device;
 
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+var modbus_map = require('@labjack/ljswitchboard-modbus_map').getConstants();
 
 global.ljm = ljm;
 // global.Device = Device;

@@ -6,7 +6,7 @@ var q = require('q');
 var constants = require('../common/constants');
 var io_endpoint_key = constants.io_manager_endpoint_key;
 
-var process_manager = require('process_manager');
+var process_manager = require('@labjack/process_manager');
 var slave_process = process_manager.slave_process();
 
 var single_device_manager = require('../managers/single_device_manager');

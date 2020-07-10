@@ -1,5 +1,5 @@
 var handlebars = require('handlebars');
-var labjack = require('labjack-nodejs');
+var labjack = require('@labjack/labjack-nodejs');
 var q = require('q');
 
 var framework_standalone_ui = require('./framework_standalone_ui');

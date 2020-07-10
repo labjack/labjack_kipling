@@ -15,7 +15,7 @@ var fs = require('fs');
 var path = require('path');
 var natural_sort = require('javascript-natural-sort');
 var fse = require('fs-extra');
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
 
 var DEBUG_LJM_SPECIAL_ADDRESS_INTEGRATION = false;

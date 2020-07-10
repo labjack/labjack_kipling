@@ -20,7 +20,7 @@ var eventList = {
 function versionManager() {
 	// var tab_notification_manager = TASK_LOADER.tasks.tab_notification_manager;
 
-	this.version_manager = global.require('ljswitchboard-version_manager');
+	this.version_manager = global.require('@labjack/ljswitchboard-version_manager');
 	
 	// Cached Data
 	this.cachedData = {};

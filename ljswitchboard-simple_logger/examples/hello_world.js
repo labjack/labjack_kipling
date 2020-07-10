@@ -14,11 +14,11 @@ console.log('');
  */
 
 /*
- * Normally you would require the project as "require('ljswitchboard-simple_logger');"
+ * Normally you would require the project as "require('@labjack/ljswitchboard-simple_logger');"
 */
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
-var device_manager = require('ljswitchboard-device_manager');
+var device_manager = require('@labjack/ljswitchboard-device_manager');
 var async = require('async');
 var q = require('q');
 var path = require('path');

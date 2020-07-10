@@ -9,8 +9,8 @@
 // var driver_const = require('./driver_const');
 var device;
 var driver;
-var modbusMap = require('ljswitchboard-modbus_map');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var modbusMap = require('@labjack/ljswitchboard-modbus_map');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 
 exports.device = function() {

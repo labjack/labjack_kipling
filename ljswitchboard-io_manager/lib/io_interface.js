@@ -4,7 +4,7 @@
  */
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var process_manager = require('process_manager');
+var process_manager = require('@labjack/process_manager');
 var q = require('q');
 var fs = require('fs');
 var path = require('path');
@@ -17,7 +17,7 @@ var device_controller = require('./controllers/device_controller');
 var file_io_controller = require('./controllers/file_io_controller');
 
 // Include the LJM installation verification function
-var ljmCheck = require('ljswitchboard-ljm_driver_checker');
+var ljmCheck = require('@labjack/ljswitchboard-ljm_driver_checker');
 
 // Include the checkRequirements function
 var npm_build_check = require('./common/npm_build_check');

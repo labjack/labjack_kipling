@@ -23,7 +23,7 @@ var basic_config = undefined;
 var mock_device_manager = require('../mock_device_manager');
 var mockDeviceManager = mock_device_manager.createDeviceManager();
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 /* Configure what devices to open/create */
 mockDeviceManager.configure([{

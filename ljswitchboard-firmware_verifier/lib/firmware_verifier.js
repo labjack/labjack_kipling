@@ -1,6 +1,6 @@
 
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var q = require('q');
 
 var DEBUG_FIRMWARE_CHECK = false;

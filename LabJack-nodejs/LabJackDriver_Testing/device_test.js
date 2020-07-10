@@ -35,14 +35,14 @@ deviceManager.__set__('driverLib',fakeDriver);
 
 
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 var asyncRun = require('./UtilityCode/asyncUtility');
 var syncRun = require('./UtilityCode/syncUtility');
 
 var callSequenceChecker = require('./call_sequence_checker');
 
-var ljs_mm = require('ljswitchboard-modbus_map');
+var ljs_mm = require('@labjack/ljswitchboard-modbus_map');
 var ljm_modbus_map = ljs_mm.getConstants();
 
 var dev;

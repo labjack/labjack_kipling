@@ -1,7 +1,7 @@
 
 var q = require('q');
 var async = require('async');
-var data_parser = require('ljswitchboard-data_parser');
+var data_parser = require('@labjack/ljswitchboard-data_parser');
 
 var digit_light_calibration = require('./digit_light_calibration');
 

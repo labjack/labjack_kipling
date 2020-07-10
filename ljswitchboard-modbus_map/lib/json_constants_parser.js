@@ -13,9 +13,9 @@ var fs = require('fs');				//Load File System module
 var os = require('os');				//Load OS module
 var path = require('path');
 
-var ljmmm_parse = require('ljmmm-parse');
+var ljmmm_parse = require('@labjack/ljmmm-parse');
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 var array_registers = require('./array_registers').arrayRegisters;
 var buffer_registers = require('./buffer_registers').bufferRegisters;

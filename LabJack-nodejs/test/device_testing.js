@@ -21,8 +21,8 @@ driverManager.__set__('driverLib',mockDriver);
 var deviceManager = rewire('../lib/device');
 deviceManager.__set__('driverLib',mockDriver);
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
-var ljs_mm = require('ljswitchboard-modbus_map');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
+var ljs_mm = require('@labjack/ljswitchboard-modbus_map');
 var ljm_mm = ljs_mm.getConstants();
 
 // Locally define some LJN error codes.

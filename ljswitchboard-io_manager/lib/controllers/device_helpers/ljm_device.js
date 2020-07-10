@@ -3,7 +3,7 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var device_events = driver_const.device_curator_constants;
 
 function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDeviceFunc) {

@@ -3,7 +3,7 @@
 var async = require('async');
 var dict = require('dict');
 var q = require('q');
-var driver_const = require('labjack-nodejs').driver_const;
+var driver_const = require('@labjack/labjack-nodejs').driver_const;
 var stats = require('stats-lite');
 var semver = require('semver');
 var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');

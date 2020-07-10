@@ -5,13 +5,13 @@ var util = require('util');
 var path = require('path');
 var q = global.require('q');
 var handlebars = global.require('handlebars');
-var module_manager = require('ljswitchboard-module_manager');
+var module_manager = require('@labjack/ljswitchboard-module_manager');
 var fs = require('fs');
-var package_loader = require('ljswitchboard-package_loader');
+var package_loader = require('@labjack/ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
-var static_files = require('ljswitchboard-static_files');
-var io_manager = require('ljswitchboard-io_manager');
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+var static_files = require('@labjack/ljswitchboard-static_files');
+var io_manager = require('@labjack/ljswitchboard-io_manager');
+var modbus_map = require('@labjack/ljswitchboard-modbus_map').getConstants();
 
 // Configure the module_manager persistent data path.
 var kiplingExtractionPath = package_loader.getExtractionPath();

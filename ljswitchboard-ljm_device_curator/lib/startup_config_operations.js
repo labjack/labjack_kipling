@@ -3,8 +3,8 @@ var q = require('q');
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
-var modbusMap = require('ljswitchboard-modbus_map').getConstants();
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var modbusMap = require('@labjack/ljswitchboard-modbus_map').getConstants();
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 var DEBUG_STARTUP_CONFIG_OPS = false;
 var DEBUG_READ_CONFIG_OP = false;

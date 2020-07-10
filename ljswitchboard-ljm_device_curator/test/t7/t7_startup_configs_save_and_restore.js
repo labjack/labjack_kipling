@@ -3,8 +3,8 @@ var q = require('q');
 var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');
 var qExec = utils.qExec;
-var ljm = require('labjack-nodejs').driver();
-var ljmModbusMap = require('ljswitchboard-modbus_map');
+var ljm = require('@labjack/labjack-nodejs').driver();
+var ljmModbusMap = require('@labjack/ljswitchboard-modbus_map');
 var modbus_map = ljmModbusMap.getConstants();
 
 var device;

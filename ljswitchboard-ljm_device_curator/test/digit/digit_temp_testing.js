@@ -7,14 +7,14 @@
 var q = require('q');
 var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
-var ljn = require('labjack-nodejs');
+var ljn = require('@labjack/labjack-nodejs');
 var driver = ljn.driver();
 
 var qExec = utils.qExec;
 var async = require('async');
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+var modbus_map = require('@labjack/ljswitchboard-modbus_map').getConstants();
 
 // Digit format functions
 var digit_format_functions = require('../../lib/digit_format_functions');

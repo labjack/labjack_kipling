@@ -5,7 +5,7 @@ try {
 } catch(err) {
     ref = require('ref-napi');       //Load variable type module
 }
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 var semver = require('semver');
 var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');

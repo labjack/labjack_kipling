@@ -76,7 +76,7 @@ exampleFunction(
 
 ```javascript
 //Require LabJack-nodejs
-var ljn = require('labjack-nodejs');
+var ljn = require('@labjack/labjack-nodejs');
 
 //Device object (to control a LabJack device)c
 var createDeviceObject = ljn.getDevice();
@@ -97,7 +97,7 @@ device.closeSync();
 ### Available functions in the labjack-nodejs library:
 After creating a labjack-nodejs library reference:
 ```javascript
-var ljn = require('labjack-nodejs');
+var ljn = require('@labjack/labjack-nodejs');
 ```
 you get access to several attributes, the two most important ones are:
 * ljn.device()
@@ -298,7 +298,7 @@ JavaScript wrapper for the rest of the LJM_Driver functions.
 
 ```javascript
 //Require LabJack-nodejs
-var ljn = require('labjack-nodejs');
+var ljn = require('@labjack/labjack-nodejs');
 
 //Driver Object (to gain access to more general driver-related features)
 var driver = ljn.driver();

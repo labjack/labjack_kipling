@@ -1,4 +1,4 @@
-var ljs_modbus_map = require('ljswitchboard-modbus_map');
+var ljs_modbus_map = require('@labjack/ljswitchboard-modbus_map');
 var modbus_map = ljs_modbus_map.getConstants();
 
 var globalDeviceConstantsSwitch = {

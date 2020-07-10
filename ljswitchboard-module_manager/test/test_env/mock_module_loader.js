@@ -2,7 +2,7 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
-var package_loader = require.main.require('ljswitchboard-package_loader');
+var package_loader = require.main.require('@labjack/ljswitchboard-package_loader');
 
 var createFakeModuleLoader = function(moduleData) {
 	this.eventList = {

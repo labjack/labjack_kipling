@@ -42,7 +42,7 @@ deviceFound = false;
 var firmware_links = require('../firmware_links');
 var fws = firmware_links.firmwareLinks.T7;
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var device_events = driver_const.device_curator_constants;
 var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
 var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;

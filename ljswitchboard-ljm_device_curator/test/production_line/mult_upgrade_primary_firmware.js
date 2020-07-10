@@ -4,12 +4,12 @@ var async = require('async');
 var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');
 var qExec = utils.qExec;
-var ljn = require('labjack-nodejs');
+var ljn = require('@labjack/labjack-nodejs');
 var ljDevice = ljn.getDeviceRef();
 var driver = ljn.driver();
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+var modbus_map = require('@labjack/ljswitchboard-modbus_map').getConstants();
 
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
 
 
@@ -27,7 +27,7 @@ var performTests = true;
 
 var firmware_links = require('../firmware_links');
 var fws = firmware_links.firmwareLinks.T7;
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var device_events = driver_const.device_curator_constants;
 var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
 var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;

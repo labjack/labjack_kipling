@@ -1,6 +1,6 @@
 
 
-var labjack_nodejs = require('labjack-nodejs');
+var labjack_nodejs = require('@labjack/labjack-nodejs');
 var q = require('q');
 var constants = require('../common/constants');
 var io_endpoint_key = constants.single_device_endpoint_key;

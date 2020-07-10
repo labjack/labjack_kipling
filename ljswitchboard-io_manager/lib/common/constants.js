@@ -18,7 +18,7 @@ var basicDeviceControllerEvents = {
 	DEVICE_CONTROLLER_DEVICE_OPENED: 'OPENED_DEVICE',
 	DEVICE_CONTROLLER_DEVICE_CLOSED: 'CLOSED_DEVICE',
 };
-var simpleLoggerEvents = require('ljswitchboard-simple_logger').eventList;
+var simpleLoggerEvents = require('@labjack/ljswitchboard-simple_logger').eventList;
 var loggerEventKeys = Object.keys(simpleLoggerEvents);
 loggerEventKeys.forEach(function(key) {
 	basicDeviceControllerEvents[key] = simpleLoggerEvents[key];
@@ -33,7 +33,7 @@ exports.deviceControllerEvents = basicDeviceControllerEvents;
 
 
 /* Device Scanner Events */
-var deviceScannerEvents = require('ljswitchboard-device_scanner').eventList;
+var deviceScannerEvents = require('@labjack/ljswitchboard-device_scanner').eventList;
 var deviceScannerEventKeys = Object.keys(deviceScannerEvents);
 deviceScannerEventKeys.forEach(function(key) {
 	exports.deviceControllerEvents[key] = deviceScannerEvents[key];
@@ -41,5 +41,5 @@ deviceScannerEventKeys.forEach(function(key) {
 
 
 // Define device errors
-var ljm_driver_constants = require('ljswitchboard-ljm_driver_constants');
+var ljm_driver_constants = require('@labjack/ljswitchboard-ljm_driver_constants');
 exports.deviceEvents = ljm_driver_constants.device_curator_constants;

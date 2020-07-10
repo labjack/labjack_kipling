@@ -2,13 +2,13 @@
 
 var q = require('q');
 var async = require('async');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
-var data_parser = require('ljswitchboard-data_parser');
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
+var data_parser = require('@labjack/ljswitchboard-data_parser');
+var modbus_map = require('@labjack/ljswitchboard-modbus_map').getConstants();
 var REQUIRED_INFO_BY_DEVICE = require('../required_device_info').requiredInfo;
 
 // var modbus_map = data_parser.getConstants();
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var ljm = ljm_ffi.load();
 
 var DEBUG_CURATED_DEVICE_READS = false;

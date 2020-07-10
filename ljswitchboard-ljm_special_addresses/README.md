@@ -12,7 +12,7 @@ npm install ljswitchboard-ljm_special_addresses
 
 ## Including
 ```javascript
-var ljm_special_addresses = require('ljswitchboard-ljm_special_addresses');
+var ljm_special_addresses = require('@labjack/ljswitchboard-ljm_special_addresses');
 ```
 
 ## Examples

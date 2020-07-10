@@ -11,7 +11,7 @@ var testScanResults = test_util.testScanResults;
 
 var expDeviceTypes = require('./utils/expected_devices').expectedDevices;
 
-var device_curator = require('ljswitchboard-ljm_device_curator');
+var device_curator = require('@labjack/ljswitchboard-ljm_device_curator');
 
 var devices = [];
 

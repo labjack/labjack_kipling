@@ -13,8 +13,8 @@ try {
 
 var ref = require('ref');       //Load variable type module
 var fs = require('fs');         //Load File System module
-var jsonConstants = require('ljswitchboard-modbus_map');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var jsonConstants = require('@labjack/ljswitchboard-modbus_map');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 /**
  * Global Variables:

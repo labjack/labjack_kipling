@@ -12,8 +12,8 @@ const ljnDriverLib = require('./driver');
 const allocBuffer = require('allocate_buffer').allocBuffer;
 
 
-const jsonConstants = require('ljswitchboard-modbus_map');
-const driver_const = require('ljswitchboard-ljm_driver_constants');
+const jsonConstants = require('@labjack/ljswitchboard-modbus_map');
+const driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 
 // var ARCH_INT_NUM_BYTES = 4;

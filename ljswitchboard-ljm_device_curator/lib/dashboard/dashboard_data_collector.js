@@ -4,7 +4,7 @@ var util = require('util');
 var q = require('q');
 var fs = require('fs');
 var path = require('path');
-var modbusMap = require('ljswitchboard-modbus_map').getConstants();
+var modbusMap = require('@labjack/ljswitchboard-modbus_map').getConstants();
 var dashboard_channels = require('./dashboard_channels.json');
 var dashboard_channel_parser = require('./dashboard_channel_parser');
 

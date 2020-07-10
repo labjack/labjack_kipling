@@ -56,7 +56,7 @@ function initIOManager() {
 // console.log('Loading Dev version of the package_loader');
 // var package_loader = require('../../ljswitchboard-package_loader');
 // Load the library from the node_module dirctory:
-var package_loader = require('ljswitchboard-package_loader');
+var package_loader = require('@labjack/ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
 
 
@@ -66,7 +66,7 @@ var persistent_data_manager = require('./persistent_data_manager');
 var persistentDataManager;
 
 // Require and initialize the window_manager
-var window_manager = require('ljswitchboard-window_manager');
+var window_manager = require('@labjack/ljswitchboard-window_manager');
 // Pass the window_manager a reference to the gui object
 window_manager.configure({
 	'gui': require('nw.gui')
@@ -146,11 +146,11 @@ var startInfo = require('./get_cwd').startInfo;
 var rootPackages = [{
 		'name': 'req',
 		'loadMethod': 'set',
-		'ref': require('ljswitchboard-require')
+		'ref': require('@labjack/ljswitchboard-require')
 	}, {
 		'name': 'ljm_driver_checker',
 		'loadMethod': 'set',
-		'ref': require('ljswitchboard-ljm_driver_checker')
+		'ref': require('@labjack/ljswitchboard-ljm_driver_checker')
 	}, {
 		'name': 'win',
 		'loadMethod': 'set',

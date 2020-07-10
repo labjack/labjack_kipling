@@ -3,7 +3,7 @@ var q = require('q');
 var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');
 var qExec = utils.qExec;
-var data_parser = require('ljswitchboard-data_parser');
+var data_parser = require('@labjack/ljswitchboard-data_parser');
 
 var device;
 

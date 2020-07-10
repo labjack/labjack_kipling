@@ -3,7 +3,7 @@ var q = require('q');
 var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');
 var qExec = utils.qExec;
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 
 
 var ljm = ljm_ffi.load();

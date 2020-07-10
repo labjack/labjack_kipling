@@ -10,14 +10,14 @@ var vm = require('vm');
 var fs = require('fs');
 
 
-var data_parser = require('ljswitchboard-data_parser');
+var data_parser = require('@labjack/ljswitchboard-data_parser');
 
 // Requires & definitions involving the labjack-nodejs library
-var ljm = require('labjack-nodejs');
+var ljm = require('@labjack/labjack-nodejs');
 var ljmDeviceReference = ljm.getDevice();
 var modbusMap = ljm.modbusMap.getConstants();
-var driver_const = require('ljswitchboard-ljm_driver_constants');
-var ljm_ffi_req = require('ljm-ffi');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
+var ljm_ffi_req = require('@labjack/ljm-ffi');
 var ljm_ffi = ljm_ffi_req.load();
 
 

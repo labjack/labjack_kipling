@@ -12,7 +12,7 @@ var testScanResults = test_util.testScanResults;
 var expDeviceTypes = require('../utils/expected_devices').expectedDevices;
 var reqDeviceTypes = require('../utils/required_devices').requiredDeviceTypes;
 
-var device_curator = require('ljswitchboard-ljm_device_curator');
+var device_curator = require('@labjack/ljswitchboard-ljm_device_curator');
 
 function getLogger(bool) {
     return function logger() {

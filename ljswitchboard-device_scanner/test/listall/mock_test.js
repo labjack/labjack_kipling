@@ -1,7 +1,7 @@
 
 var rewire = require('rewire');
 var device_scanner = rewire('../../lib/device_scanner');
-var driver = require('LabJack-nodejs').driver();
+var driver = require('@labjack/labjack-nodejs').driver();
 
 var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;

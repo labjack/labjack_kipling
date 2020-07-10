@@ -1,6 +1,6 @@
 
 var data_parser = require('../lib/data_parser');
-var modbus_map = require('ljswitchboard-modbus_map');
+var modbus_map = require('@labjack/ljswitchboard-modbus_map');
 var constants = modbus_map.getConstants();
 
 

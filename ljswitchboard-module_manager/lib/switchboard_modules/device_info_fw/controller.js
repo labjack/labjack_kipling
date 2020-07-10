@@ -101,7 +101,7 @@ function module() {
             }
         }
         try {
-            var regInfo = require('lj-apps-win-registry-info');
+            var regInfo = require('@labjack/lj-apps-win-registry-info');
             regInfo.getLJAppsRegistryInfo(regInfo.ljAppNames,openApp);
         } catch(err) {
             console.log('error getting app registry info', err);

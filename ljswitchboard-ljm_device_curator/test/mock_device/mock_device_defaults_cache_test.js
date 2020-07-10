@@ -3,7 +3,7 @@ var q = require('q');
 var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');
 var qExec = utils.qExec;
-var ljm = require('labjack-nodejs').driver_const;
+var ljm = require('@labjack/labjack-nodejs').driver_const;
 
 
 var device;

@@ -1,13 +1,13 @@
 var q = require('q');
 var fs = require('fs');
 var path = require('path');
-var modbusMap = require('ljswitchboard-modbus_map').getConstants();
+var modbusMap = require('@labjack/ljswitchboard-modbus_map').getConstants();
 var async = require('async');
-var lj_apps_win_registry_info = require('lj-apps-win-registry-info');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var lj_apps_win_registry_info = require('@labjack/lj-apps-win-registry-info');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var getLJAppsRegistryInfo = lj_apps_win_registry_info.getLJAppsRegistryInfo;
 var ljAppNames = lj_apps_win_registry_info.ljAppNames;
-var ljm_ffi_req = require('ljm-ffi');
+var ljm_ffi_req = require('@labjack/ljm-ffi');
 var ljm_ffi = ljm_ffi_req.load();
 var net = require('net');
 

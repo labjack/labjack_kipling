@@ -1,5 +1,5 @@
 
-var process_manager = require('process_manager');
+var process_manager = require('@labjack/process_manager');
 var q = require('q');
 var async = require('async');
 
@@ -13,17 +13,17 @@ var DEVICE_CONTROLLER_DEVICE_CLOSED = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
 // var device_interface = require('../../single_device_interface');
 // var device_delegator_path = './lib/delegators/single_device_delegator.js';
 
-var labjack_nodejs = require('labjack-nodejs');
+var labjack_nodejs = require('@labjack/labjack-nodejs');
 var driver_const = labjack_nodejs.driver_const;
 var device_generator = require('./device_generator');
-var device_scanner_obj = require('ljswitchboard-device_scanner');
+var device_scanner_obj = require('@labjack/ljswitchboard-device_scanner');
 var device_scanner = device_scanner_obj.getDeviceScanner();
 var device_scanner_events = device_scanner_obj.eventList;
-var data_parser = require('ljswitchboard-data_parser');
-var modbus_map = require('ljswitchboard-modbus_map');
+var data_parser = require('@labjack/ljswitchboard-data_parser');
+var modbus_map = require('@labjack/ljswitchboard-modbus_map');
 var ljmConstants = modbus_map.getConstants();
 
-var simple_logger = require('ljswitchboard-simple_logger');
+var simple_logger = require('@labjack/ljswitchboard-simple_logger');
 
 
 var ENABLE_PRINTING = false;

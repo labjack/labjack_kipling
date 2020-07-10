@@ -1,8 +1,8 @@
 
 var q = require('q');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
-var data_parser = require('ljswitchboard-data_parser');
-var modbus_map = require('ljswitchboard-modbus_map');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
+var data_parser = require('@labjack/ljswitchboard-data_parser');
+var modbus_map = require('@labjack/ljswitchboard-modbus_map');
 var constants = modbus_map.getConstants();
 
 function createMockDeviceScanner() {

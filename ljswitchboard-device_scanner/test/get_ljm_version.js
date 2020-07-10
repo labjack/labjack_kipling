@@ -13,7 +13,7 @@ var ffi_liblabjack;
 /* Define Test Cases */
 var test_cases = {
 	'include ljm': function(test) {
-		var ljm_ffi = require('ljm-ffi');
+		var ljm_ffi = require('@labjack/ljm-ffi');
 
 		ljm = ljm_ffi.load();
 		liblabjack = ljm_ffi.loadSafe();

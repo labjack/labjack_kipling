@@ -3,10 +3,10 @@ var q = require('q');
 var device_curator = require('../../lib/device_curator');
 var utils = require('../utils/utils');
 var qExec = utils.qExec;
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('@labjack/ljm-ffi');
 var async = require('async');
 var ljm = ljm_ffi.load();
-var ljmb = require('ljswitchboard-modbus_map');
+var ljmb = require('@labjack/ljswitchboard-modbus_map');
 var modbus_map = ljmb.getConstants();
 var path = require('path');
 var fs = require('fs');
@@ -41,7 +41,7 @@ try {
 	criticalError = true;
 }
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var device_events = driver_const.device_curator_constants;
 var DEVICE_DISCONNECTED = device_events.DEVICE_DISCONNECTED;
 var DEVICE_RECONNECTED = device_events.DEVICE_RECONNECTED;

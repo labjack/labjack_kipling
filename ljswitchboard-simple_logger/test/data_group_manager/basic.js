@@ -20,7 +20,7 @@ var cwd = process.cwd();
 var logger_config_files_dir = path.join(cwd, 'test', 'logger_config_files');
 var basic_config = undefined;
 
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 
 
 /* What devices should be logged from */

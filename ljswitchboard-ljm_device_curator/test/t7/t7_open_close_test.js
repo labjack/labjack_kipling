@@ -1,7 +1,7 @@
 
 var q = require('q');
 var async = require('async');
-var labjack_nodejs = require('labjack-nodejs');
+var labjack_nodejs = require('@labjack/labjack-nodejs');
 var ljm = new labjack_nodejs.driver();
 var device_curator = require('../lib/device_curator');
 var utils = require('./utils/utils');

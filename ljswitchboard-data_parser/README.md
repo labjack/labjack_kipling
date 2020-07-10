@@ -9,7 +9,7 @@ Installation
 `npm install ljswitchboard-data_parser`
 
 Init
-`const ljdp = require('ljswitchboard-data_parser');`
+`const ljdp = require('@labjack/ljswitchboard-data_parser');`
 
 Calling
  `// Parse Result

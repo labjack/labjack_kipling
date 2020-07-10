@@ -10,17 +10,17 @@ var gns;
 var static_files;
 var driver_const;
 try {
-	package_loader = global.require.main.require('ljswitchboard-package_loader');
+	package_loader = global.require.main.require('@labjack/ljswitchboard-package_loader');
 	q = global.require.main.require('q');
 	gns = package_loader.getNameSpace();
-	static_files = global.require('ljswitchboard-static_files');
-	driver_const = global.require('ljswitchboard-ljm_driver_constants');
+	static_files = global.require('@labjack/ljswitchboard-static_files');
+	driver_const = global.require('@labjack/ljswitchboard-ljm_driver_constants');
 } catch(err) {
-	package_loader = require.main.require('ljswitchboard-package_loader');
+	package_loader = require.main.require('@labjack/ljswitchboard-package_loader');
 	q = require.main.require('q');
 	gns = package_loader.getNameSpace();
-	static_files = require('ljswitchboard-static_files');
-	driver_const = require('ljswitchboard-ljm_driver_constants');
+	static_files = require('@labjack/ljswitchboard-static_files');
+	driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 }
 
 var EventEmitter = require('events').EventEmitter;

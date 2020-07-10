@@ -3,8 +3,8 @@
 var path = require('path');
 var q = global.require('q');
 var handlebars = global.require('handlebars');
-var module_manager = require('ljswitchboard-module_manager');
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+var module_manager = require('@labjack/ljswitchboard-module_manager');
+var modbus_map = require('@labjack/ljswitchboard-modbus_map').getConstants();
 var fs = require('fs');
 
 
@@ -618,7 +618,7 @@ function createModuleChrome() {
 	};
 	var attachToDeviceControllerEvents = function(bundle) {
 		var defered = q.defer();
-		self.io_manager = global.require('ljswitchboard-io_manager');
+		self.io_manager = global.require('@labjack/ljswitchboard-io_manager');
 		self.io_interface = self.io_manager.io_interface();
 		self.device_controller = self.io_interface.getDeviceController();
 		self.device_controller_events = self.device_controller.eventList;

@@ -137,7 +137,7 @@ $('#single-device-framework-obj').ready(function(){
         $('#module-chrome-contents').fadeIn();
     }
 
-    var io_manager = require('ljswitchboard-io_manager');
+    var io_manager = require('@labjack/ljswitchboard-io_manager');
     var io_interface = io_manager.io_interface();
 
     //gives access to device

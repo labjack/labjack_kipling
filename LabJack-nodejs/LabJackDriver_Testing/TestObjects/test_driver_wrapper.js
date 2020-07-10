@@ -8,8 +8,8 @@
  * 		"./LabJackDriver/json_constants_parser"
  */
 
-var ljmJsonManager = require('ljswitchboard-modbus_map');
-var driver_const = require('ljswitchboard-ljm_driver_constants');
+var ljmJsonManager = require('@labjack/ljswitchboard-modbus_map');
+var driver_const = require('@labjack/ljswitchboard-ljm_driver_constants');
 var ref;
 try {
     ref = require('ref');       //Load variable type module
