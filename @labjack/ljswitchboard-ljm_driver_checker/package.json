@@ -10,11 +10,11 @@
   "keywords": [
     "LabJack"
   ],
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_driver_checker",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-ljm_driver_checker",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-ljm_driver_checker"
+    "directory": "@labjack/ljswitchboard-ljm_driver_checker"
   },
   "files": [
     "lib",

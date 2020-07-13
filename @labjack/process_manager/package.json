@@ -12,11 +12,11 @@
         "Child Process Management",
         "IPC Messaging"
     ],
-    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/LabJack-process_manager",
+    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/process_manager",
     "repository": {
         "type": "git",
         "url": "https://github.com/labjack/labjack_kipling.git",
-        "directory": "LabJack-process_manager"
+        "directory": "@labjack/process_manager"
     },
     "files": [
         "lib",

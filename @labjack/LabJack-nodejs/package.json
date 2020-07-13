@@ -18,11 +18,11 @@
         "MODBUS",
         "T7"
     ],
-    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/LabJack-nodejs",
+    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/LabJack-nodejs",
     "repository": {
         "type": "git",
         "url": "https://github.com/labjack/labjack_kipling.git",
-        "directory": "labjack-nodejs"
+        "directory": "@labjack/labjack-nodejs"
     },
     "files": [
         "lib"

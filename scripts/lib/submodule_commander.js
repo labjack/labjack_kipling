@@ -136,7 +136,7 @@ function getAllSubmodules() {
 
 exports.getCoreSubmodules = getCoreSubmodules;
 function getCoreSubmodules() {
-    var ljswitchboardBuilderPackageInfo = require('../../ljswitchboard-builder/package.json');
+    var ljswitchboardBuilderPackageInfo = require('../../@labjack/ljswitchboard-builder/package.json');
     var currentFiles = ljswitchboardBuilderPackageInfo.kipling_dependencies;
     var ignoredFolders = ['.git'];
     var currentFolders = currentFiles.filter(function(fileName) {

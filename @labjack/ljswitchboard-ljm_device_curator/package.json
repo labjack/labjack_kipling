@@ -16,7 +16,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-ljm_device_curator"
+    "directory": "@labjack/ljswitchboard-ljm_device_curator"
   },
   "keywords": [
     "LabJack",
@@ -30,7 +30,7 @@
   },
   "license": "MIT",
   "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_device_curator",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-ljm_device_curator",
   "dependencies": {
     "async": "1.5.2",
     "compute-gcd": "1.2.0",

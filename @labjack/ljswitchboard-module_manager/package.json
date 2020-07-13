@@ -8,11 +8,11 @@
     "url": "https://labjack.com"
   },
   "main": "./lib/ljswitchboard-module_manager.js",
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-module_manager",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-module_manager",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-module_manager"
+    "directory": "@labjack/ljswitchboard-module_manager"
   },
   "keywords": [
     "LabJack",

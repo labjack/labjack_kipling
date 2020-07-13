@@ -6,11 +6,11 @@
     "name": "Chris Johnson",
     "url": "https://labjack.com"
   },
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-electron_splash_screen",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-electron_splash_screen",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-electron_splash_screen"
+    "directory": "@labjack/ljswitchboard-electron_splash_screen"
   },
   "keywords": [
     "LabJack",
@@ -47,7 +47,7 @@
     "@labjack/ljswitchboard-ljm_driver_checker": "*",
     "@labjack/ljswitchboard-package_loader": "*",
     "@labjack/ljswitchboard-require": "*",
-    "@labjack/ljswitchboard-window_manager": "git://github.com/chrisJohn404/ljswitchboard-window_manager.git#new-nw-support",
+    "@labjack/ljswitchboard-window_manager": "*",
     "q": "1.5.1",
     "rimraf": "2.2.8",
     "yauzl": "2.10.0"

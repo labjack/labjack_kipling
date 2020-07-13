@@ -7,11 +7,11 @@
     "url": "https://labjack.com"
   },
   "main": "./lib/firmware_verifier.js",
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-firmware_verifier",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-firmware_verifier",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-firmware_verifier"
+    "directory": "@labjack/ljswitchboard-firmware_verifier"
   },
   "keywords": [
     "LabJack",

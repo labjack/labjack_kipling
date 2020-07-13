@@ -7,11 +7,11 @@
     "url": "https://labjack.com"
   },
   "main": "./lib/ljswitchboard-package_loader",
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-package_loader",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-package_loader",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-package_loader"
+    "directory": "@labjack/ljswitchboard-package_loader"
   },
   "keywords": [
     "LabJack",

@@ -244,11 +244,12 @@ var checkRequirements = function(passedResult, passedResults) {
 		'overallResult': true
 	};
 
-    // var baseDirectory = rootDir + '/node_modules/labjack-nodejs';
+    // var baseDirectory = rootDir + '/node_modules/@labjack/labjack-nodejs';
+    console.log('rootDir asdfasdfasdf', rootDir)
     var baseDirectory = rootDir + '';
 	var reqs = {
 		'labjack-nodejs': [
-			path.normalize(baseDirectory + '')
+			path.normalize(baseDirectory + '@labjack/')
 		],
 		'ffi': [
 			path.normalize(baseDirectory + '/node_modules/ffi')

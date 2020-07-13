@@ -2,7 +2,7 @@ var dict = require('dict');
 var q = require('q');
 var async = require('async');
 
-var process_manager = require('LabJack-process_manager');
+var process_manager = require('@labjack/process_manager');
 var managedProcess;
 
 

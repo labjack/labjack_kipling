@@ -6,9 +6,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-device_manager"
+    "directory": "@labjack/ljswitchboard-device_manager"
   },
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-device_manager",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-device_manager",
   "scripts": {},
   "author": {
     "name": "Chris Johnson",

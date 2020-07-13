@@ -33,11 +33,11 @@
     "LJMMM",
     "MODBUS"
   ],
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljmmm-parse",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljmmm-parse",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljmmm-parse"
+    "directory": "@labjack/ljmmm-parse"
   },
   "files": [
     "lib"

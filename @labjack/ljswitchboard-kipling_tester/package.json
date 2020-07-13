@@ -9,11 +9,11 @@
   "main": "./lib/ljswitchboard-kipling_tester.js",
   "ljswitchboard-type": "nwApp",
   "ljswitchboard-main": "lib/index.html",
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-kipling_tester",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-kipling_tester",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-kipling_tester"
+    "directory": "@labjack/ljswitchboard-kipling_tester"
   },
   "keywords": [
     "LabJack",

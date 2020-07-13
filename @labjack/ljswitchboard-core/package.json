@@ -9,11 +9,11 @@
   "main": "./lib/ljswitchboard-core.js",
   "ljswitchboard-type": "nwApp",
   "ljswitchboard-main": "lib/index.html",
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-core",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-core",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-core"
+    "directory": "@labjack/ljswitchboard-core"
   },
   "keywords": [
     "LabJack",

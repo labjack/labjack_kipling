@@ -7,11 +7,11 @@
     "url": "https://labjack.com"
   },
   "main": "./lib/window_manager",
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-window_manager",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-window_manager",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-window_manager"
+    "directory": "@labjack/ljswitchboard-window_manager"
   },
   "keywords": [
     "LabJack",

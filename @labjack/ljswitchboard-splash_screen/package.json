@@ -6,11 +6,11 @@
     "name": "Chris Johnson",
     "url": "https://labjack.com"
   },
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-splash_screen",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-splash_screen",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-splash_screen"
+    "directory": "@labjack/ljswitchboard-splash_screen"
   },
   "keywords": [
     "LabJack",

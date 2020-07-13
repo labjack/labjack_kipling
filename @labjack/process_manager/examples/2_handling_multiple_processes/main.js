@@ -7,7 +7,7 @@
 var q = require('q');
 
 // Create a new process manager object
-var process_manager = require('LabJack-process_manager');
+var process_manager = require('@labjack/process_manager');
 
 // Create the first master_process object
 var mpA = new process_manager.master_process();

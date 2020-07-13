@@ -9,14 +9,14 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "kipling-cli"
+    "directory": "@labjack/kipling-cli"
   },
   "author": "Chris Johnson",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/kipling-cli",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/kipling-cli",
   "preferGlobal": true,
   "bin": {
     "@labjack/kipling-cli": "./lib/kipling-cli.js",

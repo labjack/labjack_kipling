@@ -6,9 +6,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-server"
+    "directory": "@labjack/ljswitchboard-server"
   },
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-server",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-server",
   "scripts": {},
   "author": "",
   "license": "MIT OR ISC",

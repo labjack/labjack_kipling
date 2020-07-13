@@ -12,11 +12,11 @@
     "Child Process Management",
     "IPC Messaging"
   ],
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-require",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-require",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-require"
+    "directory": "@labjack/ljswitchboard-require"
   },
   "files": [
     "lib"

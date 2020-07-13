@@ -14,11 +14,11 @@
         "MODBUS",
         "T7"
     ],
-    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljm-ffi",
+    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljm-ffi",
     "repository": {
         "type": "git",
         "url": "https://github.com/labjack/labjack_kipling.git",
-        "directory": "ljm-ffi"
+        "directory": "@labjack/ljm-ffi"
     },
     "files": [
         "lib"

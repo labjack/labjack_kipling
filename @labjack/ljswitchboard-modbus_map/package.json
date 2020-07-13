@@ -15,11 +15,11 @@
         "T7",
         "ljswitchboard"
     ],
-    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-modbus_map",
+    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-modbus_map",
     "repository": {
         "type": "git",
         "url": "https://github.com/labjack/labjack_kipling.git",
-        "directory": "ljswitchboard-modbus_map"
+        "directory": "@labjack/ljswitchboard-modbus_map"
     },
     "files": [
         "lib"

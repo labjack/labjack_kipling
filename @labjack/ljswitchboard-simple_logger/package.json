@@ -7,11 +7,11 @@
     "start": "node ./examples/hello_world.js",
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-simple_logger",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-simple_logger",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-simple_logger"
+    "directory": "@labjack/ljswitchboard-simple_logger"
   },
   "keywords": [
     "LabJack",

@@ -1,4 +1,4 @@
-LabJack-process_manager handling multiple processes example
+@labjack/process_manager handling multiple processes example
 =======================
 
 To get started, execute "npm install"

@@ -6,11 +6,11 @@
   "scripts": {
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/lj_async_0_to_x_shim",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/lj_async_0_to_x_shim",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "lj_async_0_to_x_shim"
+    "directory": "@labjack/lj_async_0_to_x_shim"
   },
   "author": "Chris Johnson",
   "license": "MIT",

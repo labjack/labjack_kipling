@@ -1,4 +1,4 @@
-LabJack-process_manager, just process_manager on npm.
+@labjack/process_manager
 =======================
 
 A child process manager and IPC message passing tool for nodejs applications.  Specifically created for the ljswitchboard project but can be used in any project that wants to send and receive messages between processes via process.send(yourData) and process.on('message', yourFunc).  The more common way to pass these messages is via TCP sockets through localhost, however, ljswitchboard is a desktop application and will not need to scale between multiple servers at any point but needs to be optimized to handle multiple core computers.  Doing so is out of the project's scope.

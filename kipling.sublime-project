@@ -21,7 +21,7 @@
 	[
 		{
 			"name": "Modules",
-			"path": "ljswitchboard-module_manager/lib/switchboard_modules"
+			"path": "@labjack/ljswitchboard-module_manager/lib/switchboard_modules"
 		},
 		{
 			"name": "LabJack LJM (win)",

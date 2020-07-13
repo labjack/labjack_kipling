@@ -7,11 +7,11 @@
     "url": "https://labjack.com"
   },
   "main": "./lib/ljswitchboard-static_files.js",
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-static_files",
+  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-static_files",
   "repository": {
     "type": "git",
     "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-static_files"
+    "directory": "@labjack/ljswitchboard-static_files"
   },
   "keywords": [
     "LabJack",

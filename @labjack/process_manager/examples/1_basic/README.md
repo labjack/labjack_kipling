@@ -1,4 +1,4 @@
-LabJack-process_manager basic example
+@labjack/process_manager basic example
 =======================
 
 To get started, execute "npm install"
