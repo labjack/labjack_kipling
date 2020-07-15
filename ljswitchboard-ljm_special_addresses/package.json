@@ -27,7 +27,9 @@
     "LJM"
   ],
   "license": "MIT",
-  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "bugs": {
+    "url": "https://github.com/labjack/labjack_kipling/issues"
+  },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_special_addresses",
   "dependencies": {
     "q": "1.5.1",
