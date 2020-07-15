@@ -249,8 +249,6 @@ function createPackageLoader() {
 	};
 	var setPackage = function(packageInfo) {
 		var name = packageInfo.name;
-		var location;
-		var requireStr;
 
 		if(packageInfo.ref) {
 			global[gns][name] = packageInfo.ref;
@@ -260,10 +258,7 @@ function createPackageLoader() {
 	};
 	var managePackage = function(packageInfo) {
 		var name = packageInfo.name;
-		var location;
-		var requireStr;
 
-		
 		if(self.managedPackages[name]) {
 			self.emit(EVENTS.OVERWRITING_MANAGED_PACKAGE, packageInfo);
 		} else {
