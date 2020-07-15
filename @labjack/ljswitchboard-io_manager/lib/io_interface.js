@@ -596,7 +596,7 @@ function createIOInterface() {
 		}
 
 		var errFunc = function(err) {
-			console.log('io_interface error', err);
+			console.log('io_interface error', util.inspect(err));
 			defered.reject(err);
 		};
 
