@@ -248,7 +248,7 @@ var checkRequirements = function(passedResult, passedResults) {
     var baseDirectory = rootDir + '';
 	var reqs = {
 		'labjack-nodejs': [
-			path.normalize(baseDirectory + '@labjack/')
+			path.normalize(baseDirectory + '')
 		],
 		'ffi': [
 			path.normalize(baseDirectory + '/node_modules/ffi')
