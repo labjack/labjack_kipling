@@ -245,7 +245,6 @@ var checkRequirements = function(passedResult, passedResults) {
 	};
 
     // var baseDirectory = rootDir + '/node_modules/@labjack/labjack-nodejs';
-    console.log('rootDir asdfasdfasdf', rootDir)
     var baseDirectory = rootDir + '';
 	var reqs = {
 		'labjack-nodejs': [
