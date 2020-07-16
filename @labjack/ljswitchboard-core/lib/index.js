@@ -44,7 +44,7 @@ var corePackages = [
 
 			// If those files aren't found, check the node_modules directory of
 			// the current application for upgrades.
-			path.join(startDir, 'node_modules', 'ljswitchboard-io_manager'),
+			path.join(startDir, 'node_modules', '@labjack', 'ljswitchboard-io_manager'),
 
 			// For non-development use, check the LabJack folder/K3/downloads
 			// file for upgrades.
@@ -68,7 +68,7 @@ var corePackages = [
 
 			// If those files aren't found, check the node_modules directory of
 			// the current application for upgrades.
-			path.join(startDir, 'node_modules', 'ljswitchboard-module_manager'),
+			path.join(startDir, 'node_modules', '@labjack', 'ljswitchboard-module_manager'),
 
 			// For non-development use, check the LabJack folder/K3/downloads
 			// file for upgrades.
@@ -93,7 +93,7 @@ var corePackages = [
 
 			// If those files aren't found, check the node_modules directory of
 			// the current application for upgrades.
-			path.join(startDir, 'node_modules', 'ljswitchboard-kipling'),
+			path.join(startDir, 'node_modules', '@labjack', 'ljswitchboard-kipling'),
 
 			// For non-development use, check the LabJack folder/K3/downloads
 			// file for upgrades.

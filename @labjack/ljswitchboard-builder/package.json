@@ -46,12 +46,12 @@
     "@labjack/ljswitchboard-core": "*"
   },
   "kipling_dependencies": [
-    "@labjack/ljswitchboard-splash_screen",
-    "@labjack/ljswitchboard-core",
-    "@labjack/ljswitchboard-io_manager",
-    "@labjack/ljswitchboard-kipling",
-    "@labjack/ljswitchboard-module_manager",
-    "@labjack/ljswitchboard-static_files"
+    "ljswitchboard-splash_screen",
+    "ljswitchboard-core",
+    "ljswitchboard-io_manager",
+    "ljswitchboard-kipling",
+    "ljswitchboard-module_manager",
+    "ljswitchboard-static_files"
   ],
   "splash_screen_build_keys": {
     "window": {

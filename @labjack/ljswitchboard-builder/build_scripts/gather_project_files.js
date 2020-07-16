@@ -316,7 +316,7 @@ var copyRequiredFiles = function() {
 			TEMP_PROJECT_FILES_PATH,
 			required_file
 		));
-		fs.mkdirSync(destination_path);
+		fse.mkdirsSync(destination_path);
 
 		// var projectInfo = require(path.normalize(path.join(
 		// 	PROJECT_FILES_SEARCH_PATH,

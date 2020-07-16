@@ -213,7 +213,7 @@ var secondaryPackages = [
 
 			// If those files aren't found, check the node_modules directory of
 			// the current application for upgrades.
-			path.join(startDir, 'node_modules', 'ljswitchboard-static_files'),
+			path.join(startDir, 'node_modules', '@labjack', 'ljswitchboard-static_files'),
 
 			// For non-development use, check the LabJack folder/K3/downloads
 			// file for upgrades.
@@ -239,7 +239,7 @@ var secondaryPackages = [
 
 			// If those files aren't found, check the node_modules directory of
 			// the current application for upgrades.
-			path.join(startDir, 'node_modules', 'ljswitchboard-core'),
+			path.join(startDir, 'node_modules', '@labjack', 'ljswitchboard-core'),
 
 			// For non-development use, check the LabJack folder/K3/downloads
 			// file for upgrades.
