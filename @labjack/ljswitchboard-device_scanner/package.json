@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-device_scanner",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "A node project dedicated to finding ALL LabJack devices that are able to be connected to.",
   "main": "./lib/ljswitchboard-device_scanner",
   "scripts": {
@@ -32,12 +32,12 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "@labjack/labjack-nodejs": "^2.1.0",
-    "@labjack/ljm-ffi": "^2.1.0",
-    "@labjack/ljswitchboard-data_parser": "^1.1.0",
-    "@labjack/ljswitchboard-ljm_device_curator": "^2.1.0",
-    "@labjack/ljswitchboard-ljm_driver_constants": "^1.1.0",
-    "@labjack/ljswitchboard-modbus_map": "^1.1.0",
+    "@labjack/labjack-nodejs": "^2.2.0",
+    "@labjack/ljm-ffi": "^2.2.0",
+    "@labjack/ljswitchboard-data_parser": "^1.2.0",
+    "@labjack/ljswitchboard-ljm_device_curator": "^2.2.0",
+    "@labjack/ljswitchboard-ljm_driver_constants": "^1.2.0",
+    "@labjack/ljswitchboard-modbus_map": "^1.2.0",
     "async": "1.5.2",
     "q": "1.5.1",
     "ref": "^1.3.5"

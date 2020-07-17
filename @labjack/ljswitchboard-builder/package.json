@@ -1,7 +1,7 @@
 {
   "name": "@labjack/ljswitchboard-builder",
   "description": "Building and packing for the ljswitchboard program.",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "private": true,
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-builder",
   "repository": {
@@ -11,11 +11,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@labjack/lj_async_0_to_x_shim": "^0.1.0",
-    "@labjack/ljswitchboard-ljm_driver_checker": "^1.1.0",
-    "@labjack/ljswitchboard-package_loader": "^1.1.0",
-    "@labjack/ljswitchboard-require": "^0.1.0",
-    "@labjack/ljswitchboard-window_manager": "^0.1.0",
+    "@labjack/lj_async_0_to_x_shim": "^0.2.0",
+    "@labjack/ljswitchboard-ljm_driver_checker": "^1.2.0",
+    "@labjack/ljswitchboard-package_loader": "^1.2.0",
+    "@labjack/ljswitchboard-require": "^0.2.0",
+    "@labjack/ljswitchboard-window_manager": "^0.2.0",
     "adm-zip": "0.4.13",
     "archiver": "3.1.1",
     "async": "3.1.0",

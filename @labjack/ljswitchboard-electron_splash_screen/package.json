@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-electron_splash_screen",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "The splash screen & primary loading file for LabJack's Kipling program.",
   "author": {
@@ -43,10 +43,10 @@
   },
   "nodejs": true,
   "dependencies": {
-    "@labjack/ljswitchboard-ljm_driver_checker": "^1.1.0",
-    "@labjack/ljswitchboard-package_loader": "^1.1.0",
-    "@labjack/ljswitchboard-require": "^0.1.0",
-    "@labjack/ljswitchboard-window_manager": "^0.1.0",
+    "@labjack/ljswitchboard-ljm_driver_checker": "^1.2.0",
+    "@labjack/ljswitchboard-package_loader": "^1.2.0",
+    "@labjack/ljswitchboard-require": "^0.2.0",
+    "@labjack/ljswitchboard-window_manager": "^0.2.0",
     "async": "1.5.2",
     "concat-stream": "1.5.2",
     "fs-extra": "0.18.4",

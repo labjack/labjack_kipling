@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-module_manager",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "startupDataVersion": "0.0.1",
   "description": "A project that is dedicated to rendering, loading, and managing modules for the ljswitchboard project",

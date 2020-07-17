@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-window_manager",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A library that assists the ljswitchboard in managing multiple windows and exiting when they are all closed.",
   "author": {
     "name": "Chris Johnson",

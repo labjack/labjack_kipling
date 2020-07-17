@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-kipling",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "private": true,
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
@@ -27,11 +27,11 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "@labjack/ljswitchboard-io_manager": "^0.2.0",
-    "@labjack/ljswitchboard-ljm_driver_constants": "^1.1.0",
-    "@labjack/ljswitchboard-modbus_map": "^1.1.0",
-    "@labjack/ljswitchboard-module_manager": "^1.1.0",
-    "@labjack/ljswitchboard-static_files": "^0.1.0",
+    "@labjack/ljswitchboard-io_manager": "^0.3.0",
+    "@labjack/ljswitchboard-ljm_driver_constants": "^1.2.0",
+    "@labjack/ljswitchboard-modbus_map": "^1.2.0",
+    "@labjack/ljswitchboard-module_manager": "^1.2.0",
+    "@labjack/ljswitchboard-static_files": "^0.2.0",
     "dict": "1.4.0",
     "q": "1.5.1"
   },
