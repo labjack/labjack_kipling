@@ -2,6 +2,7 @@
   "name": "@labjack/ljswitchboard-builder",
   "description": "Building and packing for the ljswitchboard program.",
   "version": "3.0.7",
+  "private": true,
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-builder",
   "repository": {
     "type": "git",

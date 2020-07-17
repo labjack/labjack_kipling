@@ -1,6 +1,7 @@
 {
   "name": "@labjack/ljm-shell_logger",
   "version": "0.0.1",
+  "private": true,
   "description": "A logger program with a cmd shell interface to assist in the creation of the logger module in Kipling.",
   "main": "./lib/shell_logger.js",
   "scripts": {
