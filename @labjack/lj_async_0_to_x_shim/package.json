@@ -1,6 +1,7 @@
 {
   "name": "@labjack/lj_async_0_to_x_shim",
   "version": "0.0.1",
+  "private": true,
   "description": "A repository to make it easier to switch from async 0 to async 2,3 ++",
   "main": "lj_async_shim.js",
   "scripts": {
