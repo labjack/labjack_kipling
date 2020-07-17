@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-ljm_device_manager",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "",
   "main": "./lib/ljm_device_manager.js",
   "directories": {
@@ -12,9 +12,9 @@
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },
   "dependencies": {
-    "@labjack/ljswitchboard-ljm_device_curator": "*",
-    "@labjack/ljswitchboard-device_scanner": "*",
-    "@labjack/ljswitchboard-ljm_driver_constants": "*",
+    "@labjack/ljswitchboard-device_scanner": "^2.1.0",
+    "@labjack/ljswitchboard-ljm_device_curator": "^2.1.0",
+    "@labjack/ljswitchboard-ljm_driver_constants": "^1.1.0",
     "async": "1.5.2",
     "q": "1.5.1"
   },
@@ -24,8 +24,8 @@
     "@labjack/ljswitchboard-ljm_driver_constants": "*"
   },
   "devDependencies": {
+    "@labjack/ljm-ffi": "^2.1.0",
     "diff": ">=3.5.0",
-    "@labjack/ljm-ffi": "*",
     "nodeunit": "0.11.3"
   },
   "repository": {
@@ -35,6 +35,8 @@
   },
   "author": "Chris Johnson",
   "license": "MIT",
-  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "bugs": {
+    "url": "https://github.com/labjack/labjack_kipling/issues"
+  },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-ljm_device_manager"
 }

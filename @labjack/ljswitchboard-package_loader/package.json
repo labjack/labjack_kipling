@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-package_loader",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "A small node/node-webkit project loader for ljswitchboard that loads files into the global.ljswitchboard namespace",
   "author": {
     "name": "Chris Johnson",
@@ -20,7 +20,9 @@
     "ljswitchboard"
   ],
   "license": "MIT",
-  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "bugs": {
+    "url": "https://github.com/labjack/labjack_kipling/issues"
+  },
   "dependencies": {
     "async": "1.5.2",
     "concat-stream": "1.5.2",

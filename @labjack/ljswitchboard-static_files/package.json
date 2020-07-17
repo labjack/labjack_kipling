@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-static_files",
-  "version": "0.0.13",
+  "version": "0.1.0",
   "private": true,
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
@@ -21,7 +21,9 @@
     "ljswitchboard"
   ],
   "license": "MIT",
-  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "bugs": {
+    "url": "https://github.com/labjack/labjack_kipling/issues"
+  },
   "directories": {
     "lib": "./lib",
     "static": "./static"

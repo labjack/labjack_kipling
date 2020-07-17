@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-version_manager",
-  "version": "0.0.23",
+  "version": "0.1.0",
   "description": "A simple module to collect and cache important device firmware and software version numbers available for users to download.",
   "author": {
     "name": "Chris Johnson",
@@ -20,7 +20,9 @@
     "ljswitchboard"
   ],
   "license": "MIT",
-  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "bugs": {
+    "url": "https://github.com/labjack/labjack_kipling/issues"
+  },
   "dependencies": {
     "async": "1.5.2",
     "cheerio": "1.0.0-rc.3",
@@ -29,9 +31,9 @@
     "request": "2.88.0"
   },
   "devDependencies": {
-    "nodeunit": "0.11.3",
+    "colors": "1.4.0",
     "diff": ">=3.5.0",
-    "colors": "1.4.0"
+    "nodeunit": "0.11.3"
   },
   "directories": {
     "lib": "./lib"

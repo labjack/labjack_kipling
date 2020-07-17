@@ -1,6 +1,6 @@
 {
     "name": "@labjack/labjack-nodejs",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "nodejs library for using the LabJackM library",
     "author": {
         "name": "Chris Johnson",
@@ -28,23 +28,23 @@
         "lib"
     ],
     "dependencies": {
+        "@labjack/ljm-ffi": "^2.1.0",
+        "@labjack/ljswitchboard-ljm_driver_constants": "^1.1.0",
+        "@labjack/ljswitchboard-modbus_map": "^1.1.0",
         "allocate_buffer": "^1.0.0",
         "async": "1.5.2",
         "diff": "^4.0.1",
         "ffi-napi": "^2.4.7",
-        "@labjack/ljm-ffi": "*",
-        "@labjack/ljswitchboard-ljm_driver_constants": "*",
-        "@labjack/ljswitchboard-modbus_map": "*",
         "q": "1.5.1",
         "ref-napi": "^1.4.3"
     },
     "devDependencies": {
         "chai": "^4.2.0",
         "deep-eql": "^4.0.0",
-        "mocha": "^6.2.2",
-        "rewire": "4.0.1",
         "diff": ">=3.5.0",
-        "nodeunit": "0.11.3"
+        "mocha": "^6.2.2",
+        "nodeunit": "0.11.3",
+        "rewire": "4.0.1"
     },
     "oldDevDependencies": {
         "diff": ">=3.5.0",

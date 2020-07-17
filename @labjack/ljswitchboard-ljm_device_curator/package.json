@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-ljm_device_curator",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
   "main": "./lib/device_curator.js",
   "scripts": {
@@ -29,20 +29,22 @@
     "url": "https://labjack.com"
   },
   "license": "MIT",
-  "bugs": {"url": "https://github.com/labjack/labjack_kipling/issues"},
+  "bugs": {
+    "url": "https://github.com/labjack/labjack_kipling/issues"
+  },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-ljm_device_curator",
   "dependencies": {
+    "@labjack/labjack-nodejs": "^2.1.0",
+    "@labjack/lj-apps-win-registry-info": "^1.1.0",
+    "@labjack/ljm-ffi": "^2.1.0",
+    "@labjack/ljmmm-parse": "^0.3.0",
+    "@labjack/ljswitchboard-data_parser": "^1.1.0",
+    "@labjack/ljswitchboard-ljm_driver_constants": "^1.1.0",
+    "@labjack/ljswitchboard-modbus_map": "^1.1.0",
     "async": "1.5.2",
     "compute-gcd": "1.2.0",
     "dict": "1.4.0",
     "dns-chk-https-get": "^1.0.0",
-    "@labjack/labjack-nodejs": "*",
-    "@labjack/lj-apps-win-registry-info": "*",
-    "@labjack/ljm-ffi": "*",
-    "@labjack/ljmmm-parse": "*",
-    "@labjack/ljswitchboard-data_parser": "*",
-    "@labjack/ljswitchboard-ljm_driver_constants": "*",
-    "@labjack/ljswitchboard-modbus_map": "*",
     "q": "1.5.1",
     "semver": "^7.1.1",
     "stats-lite": "2.2.0"
@@ -57,8 +59,8 @@
   },
   "devDependencies": {
     "colors": "1.4.0",
-    "nodeunit": "0.11.3",
-    "diff": ">=3.5.0"
+    "diff": ">=3.5.0",
+    "nodeunit": "0.11.3"
   },
   "directories": {
     "lib": "./lib"

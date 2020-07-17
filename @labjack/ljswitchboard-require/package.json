@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-require",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "author": {
     "name": "Chris Johnson",
     "url": "https://labjack.com"
@@ -21,7 +21,6 @@
   "files": [
     "lib"
   ],
-  "dependencies": {},
   "scripts": {
     "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
   },

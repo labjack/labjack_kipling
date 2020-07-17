@@ -1,6 +1,6 @@
 {
     "name": "@labjack/ljswitchboard-data_parser",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "A library that contains a variety of formatters for data coming and going to LabJack devices.",
     "author": {
         "name": "Chris Johnson",
@@ -25,9 +25,9 @@
         "lib"
     ],
     "dependencies": {
-        "@labjack/ljmmm-parse": "*",
-        "@labjack/ljswitchboard-modbus_map": "*",
-        "@labjack/ljswitchboard-ljm_driver_constants": "*"
+        "@labjack/ljmmm-parse": "^0.3.0",
+        "@labjack/ljswitchboard-ljm_driver_constants": "^1.1.0",
+        "@labjack/ljswitchboard-modbus_map": "^1.1.0"
     },
     "custDependencies": {
         "@labjack/ljmmm-parse": "*",
@@ -35,8 +35,8 @@
         "@labjack/ljswitchboard-ljm_driver_constants": "*"
     },
     "devDependencies": {
-        "nodeunit": "0.11.3",
-        "diff": ">=3.5.0"
+        "diff": ">=3.5.0",
+        "nodeunit": "0.11.3"
     },
     "scripts": {
         "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"

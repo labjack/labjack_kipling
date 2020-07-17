@@ -1,7 +1,7 @@
 {
   "name": "@labjack/ljswitchboard-builder",
   "description": "Building and packing for the ljswitchboard program.",
-  "version": "3.0.7",
+  "version": "3.1.0",
   "private": true,
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/@labjack/ljswitchboard-builder",
   "repository": {
@@ -11,6 +11,11 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@labjack/lj_async_0_to_x_shim": "^0.1.0",
+    "@labjack/ljswitchboard-ljm_driver_checker": "^1.1.0",
+    "@labjack/ljswitchboard-package_loader": "^1.1.0",
+    "@labjack/ljswitchboard-require": "^0.1.0",
+    "@labjack/ljswitchboard-window_manager": "^0.1.0",
     "adm-zip": "0.4.13",
     "archiver": "3.1.1",
     "async": "3.1.0",
@@ -24,11 +29,6 @@
     "fs.extra": "1.3.2",
     "handlebars": "^4.5.1",
     "jszip": "2.5.0",
-    "@labjack/lj_async_0_to_x_shim": "*",
-    "@labjack/ljswitchboard-ljm_driver_checker": "*",
-    "@labjack/ljswitchboard-package_loader": "*",
-    "@labjack/ljswitchboard-require": "*",
-    "@labjack/ljswitchboard-window_manager": "*",
     "node-zip": "1.1.1",
     "q": "1.5.1",
     "request": "2.88.0",
@@ -80,8 +80,8 @@
     "handlebars": "4.0.0"
   },
   "devDependencies": {
-    "nodeunit": "0.11.3",
-    "diff": ">=3.5.0"
+    "diff": ">=3.5.0",
+    "nodeunit": "0.11.3"
   },
   "script_notes": "to run a script w/o using npm test, use npm run [script name]",
   "scripts": {
