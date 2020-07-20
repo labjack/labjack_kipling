@@ -30,7 +30,6 @@
   "dependencies": {
     "@labjack/labjack-nodejs": "^2.2.0",
     "@labjack/ljswitchboard-data_parser": "^1.2.0",
-    "@labjack/ljswitchboard-device_manager": "^1.2.0",
     "@labjack/ljswitchboard-ljm_device_curator": "^2.2.0",
     "@labjack/ljswitchboard-ljm_driver_constants": "^1.2.0",
     "@labjack/ljswitchboard-modbus_map": "^1.2.0",
@@ -40,6 +39,7 @@
     "q": "1.5.1"
   },
   "devDependencies": {
+    "@labjack/ljswitchboard-device_manager": "^1.2.0",
     "diff": ">=3.5.0",
     "nodeunit": "0.11.3"
   },
