@@ -18,7 +18,7 @@ if(typeof(buildOS) === 'undefined') {
 }
 
 var cwd = process.cwd();
-var BUILDER_PATH = path.join(cwd, 'ljswitchboard-builder');
+var BUILDER_PATH = path.join(cwd, '@labjack', 'ljswitchboard-builder');
 // var currentFiles = fs.readdirSync(BUILDER_PATH);
 
 
