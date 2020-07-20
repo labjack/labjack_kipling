@@ -1,6 +1,6 @@
 {
   "name": "@labjack/ljswitchboard-simple_logger",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A simple data logger for LabJack devices.",
   "main": "./lib/ljswitchboard-simple_logger",
   "scripts": {
