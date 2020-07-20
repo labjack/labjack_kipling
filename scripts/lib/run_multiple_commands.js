@@ -12,7 +12,7 @@ var child_process = require('child_process');
 exports.run_multiple_commands = function(npmCommands) {
     function getCWD(cmd) {
         if(cmd.indexOf('/build_scripts/') >= 0) {
-            return path.join(process.cwd(), 'ljswitchboard-builder');
+            return path.join(process.cwd(), '@labjack', 'ljswitchboard-builder');
         } else {
             return process.cwd();
         }
