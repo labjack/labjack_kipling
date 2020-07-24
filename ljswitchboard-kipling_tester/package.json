@@ -1,6 +1,7 @@
 {
   "name": "ljswitchboard-kipling_tester",
   "version": "0.0.1",
+  "private": true,
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
     "name": "Chris Johnson",
