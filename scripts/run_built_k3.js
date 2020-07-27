@@ -77,9 +77,9 @@ var outputFileName = k3StrPartial + dateStrPartial + osStrPartial;
 console.log('running app', outputFileName);
 
 var k3Path = {
-	'darwin': path.join(cwd, 'ljswitchboard-builder',outputFileName,'Kipling.app'),
-	'win32': path.join(cwd, 'ljswitchboard-builder',outputFileName,'Kipling.exe'),
-	'linux': path.join(cwd, 'ljswitchboard-builder',outputFileName,'Kipling'),
+	'darwin': path.join(BUILDER_PATH,outputFileName,'Kipling.app'),
+	'win32': path.join(BUILDER_PATH,outputFileName,'Kipling.exe'),
+	'linux': path.join(BUILDER_PATH,outputFileName,'Kipling'),
 }[buildOS];
 
 var osExecFunc = {
