@@ -122,7 +122,7 @@ var testSinglePackageUpdate = function(test, updatedPackages, step, upgradeType,
 
 	var requiredLibKeys = [];
 	if(!testConditions.shouldHaveFailed) {
-		requiredLibKeys.push('ljswitchboard-static_files');
+		requiredLibKeys.push('@labjack/ljswitchboard-static_files');
 	}
 	requiredLibKeys.forEach(function(requiredLibKey) {
 		if(loadedLibKeys.indexOf(requiredLibKey) >= 0) {

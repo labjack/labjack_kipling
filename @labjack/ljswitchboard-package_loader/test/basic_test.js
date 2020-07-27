@@ -44,16 +44,16 @@ exports.tests = {
 		// add the staticFiles package to the packageManager
 		package_loader.loadPackage(testPackages.staticFiles);
 		package_loader.on(package_loader.eventList.OVERWRITING_MANAGED_PACKAGE, function(info) {
-			test.strictEqual(info.name, 'ljswitchboard-static_files');
+			test.strictEqual(info.name, '@labjack/ljswitchboard-static_files');
 			test.deepEqual(package_loader.getManagedPackages(), [
-				'ljswitchboard-static_files',
-				'ljswitchboard-core'
+				'@labjack/ljswitchboard-static_files',
+				'@labjack/ljswitchboard-core'
 				]);
 			test.done();
 		});
 
-		test.deepEqual(package_loader.getDependencyList(), ['ljswitchboard-package_loader']);
-		test.deepEqual(package_loader.getManagedPackages(), ['ljswitchboard-static_files']);
+		test.deepEqual(package_loader.getDependencyList(), ['@labjack/ljswitchboard-package_loader']);
+		test.deepEqual(package_loader.getManagedPackages(), ['@labjack/ljswitchboard-static_files']);
 		test.deepEqual(Object.keys(global[gns]), ['nodeunit']);
 
 		package_loader.loadPackage(testPackages.core);
@@ -83,21 +83,21 @@ exports.tests = {
 		// Check global name space
 		test.deepEqual(Object.keys(global[gns]), [
 			'nodeunit',
-			'ljswitchboard-static_files',
-			'ljswitchboard-core'
+			'@labjack/ljswitchboard-static_files',
+			'@labjack/ljswitchboard-core'
 		]);
 
 		// Check dependencies
 		test.deepEqual(package_loader.getDependencyList(), [
-			'ljswitchboard-package_loader',
-			'ljswitchboard-static_files',
-			'ljswitchboard-core'
+			'@labjack/ljswitchboard-package_loader',
+			'@labjack/ljswitchboard-static_files',
+			'@labjack/ljswitchboard-core'
 		]);
 
 		// Check managed packages
 		test.deepEqual(package_loader.getManagedPackages(), [
-			'ljswitchboard-static_files',
-			'ljswitchboard-core'
+			'@labjack/ljswitchboard-static_files',
+			'@labjack/ljswitchboard-core'
 		]);
 		test.done();
 	},
@@ -105,28 +105,28 @@ exports.tests = {
 		// This shouldn't change anything
 		package_loader.deleteManagedPackage('aa');
 		test.deepEqual(package_loader.getManagedPackages(), [
-			'ljswitchboard-static_files',
-			'ljswitchboard-core'
+			'@labjack/ljswitchboard-static_files',
+			'@labjack/ljswitchboard-core'
 		]);
 
 		// This is normally a REALLY bad idea.... but for testing putposes.
-		package_loader.deleteManagedPackage('ljswitchboard-static_files');
+		package_loader.deleteManagedPackage('@labjack/ljswitchboard-static_files');
 	
 		// Check global name space
 		test.deepEqual(Object.keys(global[gns]), [
 			'nodeunit',
-			'ljswitchboard-core'
+			'@labjack/ljswitchboard-core'
 		]);
 
 		// Check dependencies
 		test.deepEqual(package_loader.getDependencyList(), [
-			'ljswitchboard-package_loader',
-			'ljswitchboard-core'
+			'@labjack/ljswitchboard-package_loader',
+			'@labjack/ljswitchboard-core'
 		]);
 
 		// Check managed packages
 		test.deepEqual(package_loader.getManagedPackages(), [
-			'ljswitchboard-core'
+			'@labjack/ljswitchboard-core'
 		]);
 
 		// This method is just as frowned upon.
@@ -138,7 +138,7 @@ exports.tests = {
 
 		// Check dependencies
 		test.deepEqual(package_loader.getDependencyList(), [
-			'ljswitchboard-package_loader',
+			'@labjack/ljswitchboard-package_loader',
 		]);
 
 		// Check managed packages
@@ -167,7 +167,7 @@ exports.tests = {
 			// Check global name space
 			test.deepEqual(Object.keys(global[gns]), [
 				'nodeunit',
-				'ljswitchboard-static_files'
+				'@labjack/ljswitchboard-static_files'
 			]);
 
 			// Run a second time to make sure no packages get managed
@@ -179,8 +179,8 @@ exports.tests = {
 				// Check global name space
 				test.deepEqual(Object.keys(global[gns]), [
 					'nodeunit',
-					'ljswitchboard-static_files',
-					'ljswitchboard-core'
+					'@labjack/ljswitchboard-static_files',
+					'@labjack/ljswitchboard-core'
 				]);
 				// Run a second time to make sure no packages get managed
 				package_loader.runPackageManager()
@@ -191,8 +191,8 @@ exports.tests = {
 					// Check global name space
 					test.deepEqual(Object.keys(global[gns]), [
 						'nodeunit',
-						'ljswitchboard-static_files',
-						'ljswitchboard-core'
+						'@labjack/ljswitchboard-static_files',
+						'@labjack/ljswitchboard-core'
 					]);
 					test.done();
 				});
