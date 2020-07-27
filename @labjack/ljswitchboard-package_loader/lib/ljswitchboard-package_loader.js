@@ -280,8 +280,6 @@ function createPackageLoader() {
 		var defered = q.defer();
 		try {
 			var name = packageInfo.name;
-			var location;
-			var requireStr;
 			var method = 'require';
 			if(packageInfo.loadMethod) {
 				method = packageInfo.loadMethod;
