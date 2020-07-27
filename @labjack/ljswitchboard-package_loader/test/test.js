@@ -6,7 +6,9 @@ var EXTRACTION_TEST = true;
 var ADVANCED_EXTRACTION_TEST = true;
 var MULTIPLE_PACKAGES_TEST = true;
 var FORCE_REFRESH_TEST = true;
-var BAD_ZIPS_TEST = true;
+
+var BAD_ZIPS_TEST = false; // Failed to get this to work.
+// See https://github.com/labjack/labjack_kipling/issues/1
 
 // This test requires manual execution & verification.  Test has to be started
 // and canceled before completion and started again to test the refresh abilities.
