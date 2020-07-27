@@ -55,15 +55,15 @@ var tests = {
 		package_loader.deleteAllManagedPackages();
 		callback();
 	},
-	'configure the extraction path (2)': function(test) {
+	'configure the extraction path (first time)': function(test) {
 		directory = path.join(process.cwd(), localFolder);
-		
+
 		cleanExtractionPath(test, directory);
 
 		package_loader.setExtractionPath(directory);
 		test.done();
 	},
-	'start extraction (corrupted .zip)': function(test){
+	'start extraction (corrupted .zip, first time)': function(test){
 		// Clear the fired-events list
 		capturedEvents = [];
 
@@ -104,7 +104,7 @@ var tests = {
 			test.done();
 		});
 	},
-	'configure the extraction path (2)': function(test) {
+	'configure the extraction path (second time)': function(test) {
 		directory = path.join(process.cwd(), localFolder);
 		
 		cleanExtractionPath(test, directory);
@@ -112,7 +112,7 @@ var tests = {
 		package_loader.setExtractionPath(directory);
 		test.done();
 	},
-	'start extraction (corrupted .zip)': function(test){
+	'start extraction (corrupted .zip, second time)': function(test){
 		// Clear the fired-events list
 		capturedEvents = [];
 
