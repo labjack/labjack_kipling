@@ -29,6 +29,6 @@
     "static": "./static"
   },
   "ljswitchboardDependencies": {
-    "ljswitchboard-package_loader": "*"
+    "@labjack/ljswitchboard-package_loader": "*"
   }
 }
