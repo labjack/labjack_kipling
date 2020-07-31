@@ -50,23 +50,9 @@ var q = require('q');
 
 global.ljswitchboard = {};
 
-function initIOManager() {
-	var io_manager = require('../../ljswitchboard-io_manager');
-	var io_interface = io_manager.io_interface();
-
-	console.log(Object.keys(io_manager));
-	console.log('initializing interface');
-	io_interface.initialize()
-	.then(function(res) {
-		console.log('Initialized', res);
-	}, function(err) {
-		console.log('failed', err);
-	});
-}
-
 if(ENABLE_BREAKS_TO_DEV_NW_31) {
 	// 9/19/2018, this is just before where the app breaks w/ NW 31.
-	console.log('Defined initIOManager()');
+	console.log('ENABLE_BREAKS_TO_DEV_NW_31 pre ljswitchboard-package_loader');
 	// TODO: Delete Me.
 	// throw new Error();
 }
