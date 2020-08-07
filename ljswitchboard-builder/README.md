@@ -36,9 +36,30 @@ TODO: Document.
 
 Empties `output` build directory & copies NW files.
 
+### publish_locally
+
+To avoid hitting the npm registry, we can publish locally. Doing so allows us know reliably know that all labjack_kipling internal packages in the final build object are the most recent.
+
+Primarily, the build is guaranteed to have only one version of each labjack_kipling internal package. This ensures everything in the final build is up-to-date.
+
+Some related benefits:
+
+ - No waiting for the npm registry to update
+ - No worrying about the local npm cache being stale
+ - Less network traffic is required, both outbound and inbound
+ - We don't need the npm registry anymore.
+ - The final build is comparatively smaller.
+
+publish_locally.js copies staging versions of the labjack_kipling internal packages to `labjack_kipling/ljswitchboard-builder/temp_staging/`. Once there, it sets their labjack_kipling internal dependencies to be absolute paths in `labjack_kipling/ljswitchboard-builder/temp_staging/`.
+
+From there it `npm pack`s labjack_kipling internal packages from `temp_staging` as tar files to:
+`labjack_kipling/ljswitchboard-builder/temp_tar/`.
+
+All contents of `temp_tar` and `temp_staging` will be deleted beforehand.
+
 ### gather_project_files
 
-Deletes any previous files in `temp_project_files`, then recursively copies dirs defined in `ljswitchboard-builder/package.json['kipling_dependencies']` to `temp_project_files`, while omitting certain files and directories.
+Deletes any previous files in `temp_project_files`, then recursively copies dirs defined in `ljswitchboard-builder/package.json['kipling_dependencies']` from `temp_staging` to `temp_project_files`, while omitting certain files and directories.
 
 ### gather_test_project_files
 
@@ -50,18 +71,11 @@ Ensures that `ljswitchboard-splash_screen/package.json` is ready for release.
 
 For the keys and values in `ljswitchboard-builder/package.json['splash_screen_build_keys']`, sets the corresponding keys and values in `ljswitchboard-splash_screen/package.json`. E.g. if ljswitchboard-builder/package.json['splash_screen_build_keys']['test'] is false, sets `ljswitchboard-splash_screen/package.json['test']` to false.
 
-### publish_locally
-
-Publishes all labjack_kipling packages besides ljswitchboard-builder as tar files to:
-`labjack_kipling/ljswitchboard-builder/temp_publish/`
- 
-All contents of `temp_publish` will be deleted first. 
-
 ### install_production_dependencies
 
 Does two passes of installation.
 
-For each package in `temp_project_files`, installs their internal (labjack_kipling) dependencies from the tar packages in `temp_publish`.
+For each package in `temp_project_files` (which come from `temp_staging`), installs their labjack_kipling internal dependencies from the tar packages in `temp_tar`.
 
 Then recursively installs production `package.json['dependencies']` of each module defined in `ljswitchboard-builder/package.json['kipling_dependencies']`.
 

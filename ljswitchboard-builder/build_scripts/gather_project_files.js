@@ -13,6 +13,9 @@ var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
 var startingDir = process.cwd();
 var TEMP_PROJECT_FILES_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY);
 
+const TEMP_STAGING_DIRECTORY = 'temp_staging';
+const TEMP_STAGING_PATH = path.join(startingDir, TEMP_STAGING_DIRECTORY);
+
 var DEBUG_FILE_COPYING = false;
 var PROJECT_FILES_SEARCH_PATH = path.normalize(path.join(startingDir, '..'));
 
@@ -309,7 +312,7 @@ var copyRequiredFiles = function() {
 		try {
 		// console.log('Copying:', required_file);
 		var source_path = path.normalize(path.join(
-			PROJECT_FILES_SEARCH_PATH,
+			TEMP_STAGING_PATH,
 			required_file
 		));
 		var destination_path = path.normalize(path.join(

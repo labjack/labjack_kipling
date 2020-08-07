@@ -2,7 +2,7 @@
  * get_labjack_kipling_packages.js
  *
  * See the functions below for details.
- * 
+ *
  * Package name may not match the path: labjack_kipling/LabJack-process_manager
  * contains a package.json with the name process_manager
  *
@@ -17,12 +17,12 @@ const lernaBin = path.join(startingDir,'..','node_modules','.bin','lerna');
 
 /**
  * Returns a list of objects describing the labjack_kipling packages. Resembles:
- * 
+ *
  * [ { name: 'labjack-nodejs',
  *     version: '2.0.0',
  *     private: false,
  *     location: '/Users/me/src/labjack_kipling/LabJack-nodejs'
- *   },  
+ *   },
  *   {
  *     name: 'process_manager',
  *     version: '0.0.17',
@@ -42,7 +42,7 @@ function getPackages() {
  * Returns a object of lists of the dependencies of each labjack_kipling
  * package. Resembles:
  *
- * { 'labjack-nodejs': 
+ * { 'labjack-nodejs':
  *    [ 'allocate_buffer',
  *      'async',
  *      'diff',

@@ -6,17 +6,9 @@ var fsex = require('fs.extra');
 var path = require('path');
 var q = require('q');
 
-var execSync = require('child_process').execSync;
-
-const labjackKiplingPackages = require('./get_labjack_kipling_packages.js');
-const editPackageKeys = require('./edit_package_keys.js').editPackageKeys;
-
 var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
 var startingDir = process.cwd();
 var TEMP_PROJECT_FILES_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY);
-
-const graph = labjackKiplingPackages.getAdjacencyGraph();
-const packages = labjackKiplingPackages.getPackages();
 
 var DEBUG_INSTALLATION = true;
 
@@ -99,60 +91,6 @@ var printStatus = function() {
 	}
 };
 
-function installLocalProductionDependencies(name, directory) {
-	var defered = q.defer();
-	if(DEBUG_INSTALLATION) {
-		console.log('installLocalProductionDependencies', name);
-	}
-
-	const pkgPath = path.join(directory, 'package.json');
-	const pkgName = require(pkgPath).name;
-
-	const packageDependencies = graph[pkgName];
-	if (!packageDependencies) {
-		throw new Error(`Could not find packageDependencies`);
-	}
-
-	packageDependencies.forEach(function(dependency) {
-		if (dependency in graph) {
-			const depInfo = Array.prototype.find.call(packages, function(package) {
-				return (package.name == dependency)
-			});
-			const depPackageName = depInfo.name;
-			const version = depInfo.version;
-			const dependencyTar = path.join(
-				'..','..','temp_publish',`${depPackageName}-${version}.tgz`
-			);
-			var bundle = {
-				'project_path': directory,
-				'required_keys': {
-					'dependencies': {
-					},
-				},
-			};
-			bundle.required_keys.dependencies[depPackageName] = dependencyTar;
-			editPackageKeys(bundle, true);
-
-			if(DEBUG_INSTALLATION) {
-				console.log(`${pkgPath} now dependent on ${dependencyTar}`);
-			}
-			// execSync(`npm install --production ${dependencyTar}`, {
-			// 	'cwd': directory,
-			// });
-
-		}
-	})
-
-	if (name == 'ljswitchboard-io_manager') {
-		console.log(execSync(`npm install ../../temp_publish/ljswitchboard-device_manager-1.0.0.tgz --production --loglevel silent`, {
-			'cwd': directory
-		}).toString('utf-8'));
-	}
-
-	defered.resolve();
-	return defered.promise;
-}
-
 function innerInstallProductionDependency(name, directory) {
 	var defered = q.defer();
 	if(DEBUG_INSTALLATION) {
@@ -196,10 +134,7 @@ function installProductionDependency(dependency) {
 	var directory = dependency.directory;
 	var finishedFunc = getFinishedInstallFunc(key);
 
-	installLocalProductionDependencies(name, directory)
-	.then(function() {
-		innerInstallProductionDependency(name, directory)
-	})
+	innerInstallProductionDependency(name, directory)
 	.then(function() {
 		finishedFunc();
 		defered.resolve();
