@@ -129,10 +129,6 @@ var filesToDelete = {
 					}
 				}
 			},
-			'mathjs': {
-				'filesToDelete': ['CONTRIBUTING.md', 'HISTORY.md', 'NOTICE', 'README.md', 'ROADMAP.md'],
-				'foldersToDelete': ['test', 'examples', 'docs', 'bin', 'dist']
-			},
 			'javascript-natural-sort': {
 				'filesToDelete': ['index.html', 'speed-tests.html', 'unit-tests.html', '.gitattributes'],
 				'foldersToDelete': ['.idea']
@@ -148,30 +144,6 @@ var filesToDelete = {
 				// 	}
 				// }
 			},
-			'request': {
-				'filesToSave': ['LICENSE', 'package.json', 'request.js', 'index.js'],
-				'foldersToSave': ['lib', 'node_modules'],
-				// 'node_modules': createStdCleanModules([
-				// 	'aws-sign2',
-				// 	'bl',
-				// 	'caseless',
-				// 	'combined-stream',
-				// 	'forever-agent',
-				// 	'form-data',
-				// 	'har-validator',
-				// 	'hawk',
-				// 	'http-signature',
-				// 	'isstream',
-				// 	'json-stringify-safe',
-				// 	'mime-types',
-				// 	'node-uuid',
-				// 	'oauth-sign',
-				// 	'qs',
-				// 	'stringstream',
-				// 	'tough-cookie',
-				// 	'tunnel-agent',
-				// ]),
-			},
 			// 'lodash': {
 			// 	'filesToSave': ['package.json', 'lodash.js', 'index.js'],
 			// 	'foldersToSave': ['lib', 'node_modules'],
@@ -179,14 +151,6 @@ var filesToDelete = {
 			'cheerio': {
 				'filesToDelete': [],
 				'foldersToDelete': [],
-				'node_modules': {
-					'filesToDelete': [],
-					'foldersToDelete': [],
-					// 'lodash': {
-					// 	'filesToSave': ['package.json', 'index.js', 'lodash.js'],
-					// 	'foldersToSave': ['lib', 'node_modules'],
-					// }
-				}
 			},
 			'json-schema': {
 				'filesToDelete': ['draft-zyp-json-schema-03.xml', 'draft-zyp-json-schema-04.xml'],
