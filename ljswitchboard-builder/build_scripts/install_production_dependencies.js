@@ -100,8 +100,9 @@ function innerInstallProductionDependency(name, directory) {
 	var exec = require('child_process').exec;
 	exec('npm install --production', {
 		'cwd': directory,
+		'maxBuffer': 1024 * 1024,
 	}, function(error, stdout, stderr) {
-		if(DEBUG_INSTALLATION) {
+		if(DEBUG_INSTALLATION || error) {
 			console.log('Finished installing', name);
 			console.log({
 				'error': error,
