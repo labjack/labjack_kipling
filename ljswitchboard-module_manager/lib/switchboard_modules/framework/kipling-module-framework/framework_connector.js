@@ -3,7 +3,7 @@ var sdModule = null;
 var sdFramework = null;
 
 var createModuleInstance = function() {
-    this.DEBUG_FRAMEWORK_CONNECTOR = false;
+    this.DEBUG_FRAMEWORK_CONNECTOR = true;
     var io_interface = io_manager.io_interface();
     var device_controller = io_interface.getDeviceController();
 

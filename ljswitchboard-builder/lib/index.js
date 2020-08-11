@@ -38,19 +38,6 @@ var q = require('q');
 
 global.ljswitchboard = {};
 
-function initIOManager() {
-	var io_manager = require('../../ljswitchboard-io_manager');
-	var io_interface = io_manager.io_interface();
-
-	console.log(Object.keys(io_manager));
-	console.log('initializing interface');
-	io_interface.initialize()
-	.then(function(res) {
-		console.log('Initialized', res);
-	}, function(err) {
-		console.log('failed', err);
-	});
-}
 // Require the package loader
 // Load the local repository for development purposes
 // console.log('Loading Dev version of the package_loader');

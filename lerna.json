@@ -3,5 +3,13 @@
   "packages": [
     "./*"
   ],
-  "version": "independent"
+  "version": "independent",
+  "ignoreChanges": [
+    "test*/**",
+    "**/*.md",
+    "deploy/**",
+    "third_party_code/**",
+    "temp*/**",
+    "jshint*"
+  ]
 }
