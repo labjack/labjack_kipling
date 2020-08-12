@@ -7,6 +7,7 @@
 const child_process = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 
 const labjackKiplingPackages = require('./get_labjack_kipling_packages.js');
 
@@ -15,8 +16,8 @@ const startingDir = process.cwd();
 /**
  * Replacement for console.log that prepends the path of this file.
  */
-function logWithPath() {
-	console.log(`${path.basename(__filename)}, cwd: ${startingDir} - `, ...arguments);
+function logWithInfo() {
+	console.log(`${path.basename(__filename)}: `, ...arguments);
 }
 
 /**
@@ -42,6 +43,8 @@ function getBaseName(versionedName) {
  *   dependencies (as reported by `npm ls`) are ignored.
  */
 function validateInternalDependencies(projectDir) {
+	logWithInfo(`validateInternalDependencies, cwd: ${startingDir}. Parsing: ${projectDir}`)
+
 	var localCounts = {};
 	// This will eventually look like:
 	// {
@@ -64,7 +67,7 @@ function validateInternalDependencies(projectDir) {
 		};
 		if (isInternalDepencency(contents[item])) {
 			const depPath = path.join(projectDir, contents[item]);
-			logWithPath(`Checking ${depPath}`);
+			logWithInfo(`Checking ${depPath}`);
 			var npmLs;
 			try {
 				npmLs = child_process.execSync('npm ls --json', {
@@ -89,8 +92,13 @@ function validateInternalDependencies(projectDir) {
 							localCounts[depKey] = [];
 						}
 						var vers = depObj.version;
-						if (!localCounts[depKey].includes(vers)) {
-							localCounts[depKey].push(vers);
+						if (!localCounts[depKey].find(function(obj) {
+							if (obj.version == vers) {
+								return true;
+							}
+							return false;
+						})) {
+							localCounts[depKey].push(depObj);
 						}
 
 						if (depObj['dependencies']) {
@@ -106,17 +114,33 @@ function validateInternalDependencies(projectDir) {
 		}
 	}
 
-	logWithPath(`${Object.keys(localCounts).length} labjack_kipling internal dependencies found while parsing ${projectDir}`);
+	logWithInfo(`${Object.keys(localCounts).length} labjack_kipling internal dependencies found while parsing ${projectDir}`);
 
-	var duplicates = [];
+	var duplicatesMsgs = [];
+	var duplicatesObjs = [];
 	for (var pkg in localCounts) {
 		if (localCounts[pkg].length > 1) {
-			duplicates.push(`${pkg}: ${localCounts[pkg].join(', ')}`);
+			var versions = localCounts[pkg].map(function(pkgInst) {
+				return pkgInst.version;
+			});
+			duplicatesMsgs.push(`${pkg}: ${versions.join(', ')}`);
+			var toPush = {};
+			toPush[pkg] = localCounts[pkg];
+			duplicatesObjs.push(toPush);
 		}
 	}
-	if (duplicates.length > 0) {
-		var errMsg = `Duplicate packages found: ${duplicates.join('; ')}`;
-		logWithPath(`  ${errMsg}`);
+	if (duplicatesMsgs.length > 0) {
+		for (var obj in duplicatesObjs) {
+			var lines = util.inspect(duplicatesObjs[obj]).split('\n');
+			// The default of depth=2 avoids recursing into ['dependencies'],
+			// which would be too much info to output. To see the ['problems']
+			// or other additional info, use `npm ls`.
+
+			for (var i in lines) {
+				logWithInfo(lines[i]);
+			}
+		}
+		var errMsg = `Duplicate packages found: ${duplicatesMsgs.join('; ')}. See stdout or stderr for more details.`;
 		throw new Error(errMsg);
 	}
 }
@@ -143,6 +167,5 @@ if (require.main === module) {
 		throw new Error(`Unexpected number of arguments. Expected 1 but got ${args.length}`);
 	}
 
-	logWithPath(`validateInternalDependencies: ${projectDir}`)
 	validateInternalDependencies(projectDir);
 }
