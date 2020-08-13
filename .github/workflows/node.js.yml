@@ -1,0 +1,58 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ publish-locally-ci ]
+  pull_request:
+    branches: [ publish-locally-ci ]
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        node-version: [8.9.4]
+        platform: [ubuntu-16.04, macos-latest, windows-latest]
+    #        platform: [windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y_%m_%d')"
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      #      - run: npm ci # doesn't work with node8
+      - run: npm install --global node-gyp@latest
+      - run: npm install --global --production windows-build-tools --vs2015
+        if: ${{ matrix.platform == 'windows-latest' }}
+      - run: npm install
+      - run: npm config set msvs_version 2015 && npm run setup
+      - name: Fix lerna mess
+        run: node ./scripts/fix_lerna_backup.js
+      - run: npm run build
+
+      - run: ls ./ljswitchboard-builder
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kipling.3.1.18.${{ steps.date.outputs.date }}_linux64.tar.gz
+          path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.date }}_linux64.tar.gz
+        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kipling.3.1.18.${{ steps.date.outputs.date }}_windows.zip
+          path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.date }}_win64.zip
+        if: ${{ matrix.platform == 'windows-latest' }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kipling.3.1.18.${{ steps.date.outputs.date }}_macos.zip
+          path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.date }}_mac64.zip
+        if: ${{ matrix.platform == 'macos-latest' }}
