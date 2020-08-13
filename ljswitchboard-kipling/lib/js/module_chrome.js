@@ -514,8 +514,8 @@ function createModuleChrome() {
 			if(typeof(gui.App.manifest.clearCachesOnModuleLoad) !== "undefined") {
 				clearCaches = clearCaches || gui.App.manifest.clearCachesOnModuleLoad;
 			}
-			if(typeof(gui.App.manifest.test) !== "undefined") {
-				clearCaches = clearCaches || gui.App.manifest.test;
+			if(!!process.env.TEST_MODE || typeof(gui.App.manifest.test) !== "undefined") {
+				clearCaches = clearCaches || !!process.env.TEST_MODE || gui.App.manifest.test;
 			}
 			if(clearCaches) {
 				if(CLEAR_CACHES) {
@@ -523,10 +523,10 @@ function createModuleChrome() {
 					CLEAR_CACHES();
 				}
 			} else {
-				console.log('not clearing caches', 
+				console.log('not clearing caches',
 					clearCaches,
 					gui.App.manifest.clearCachesOnModuleLoad,
-					gui.App.manifest.test
+					!!process.env.TEST_MODE || gui.App.manifest.test
 				);
 			}
 		} catch(err) {
@@ -709,7 +709,7 @@ function createModuleChrome() {
 		return internalLoadModuleChrome();
 	};
 	this.loadModuleChrome = function() {
-		if(gui.App.manifest.test) {
+		if(!!process.env.TEST_MODE || gui.App.manifest.test) {
 			return loadTestModuleChrome();
 		} else {
 			return internalLoadModuleChrome();

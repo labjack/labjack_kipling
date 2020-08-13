@@ -1,6 +1,6 @@
 /**
- * keyboard_event_handler.js for LabJack Switchboard.  Provides Kipling 
- * and all modules with a unified & error-safe way to respond to user keyboard 
+ * keyboard_event_handler.js for LabJack Switchboard.  Provides Kipling
+ * and all modules with a unified & error-safe way to respond to user keyboard
  * events.
  *
  * @author Chris Johnson (LabJack, 2014)
@@ -18,11 +18,11 @@ var window_manager = require('ljswitchboard-window_manager');
 
 // (function () {
 //   "use strict";
- 
+
 var walk = require('walk');
 
 /**
- * keyboardEventHandler is an object that allows easy window-wide keypress 
+ * keyboardEventHandler is an object that allows easy window-wide keypress
  * handling.  Initialize object at the start of the program.
  * @return {[type]} [description]
 **/
@@ -120,7 +120,7 @@ function keyboardEventHandler() {
     this.reloading = false;
     this.performUpgrade = false;
     this.devUpdateAndReLoadIOManager = function(info) {
-        if(gui.App.manifest.clearCachesOnModuleLoad || gui.App.manifest.test) {
+        if(gui.App.manifest.clearCachesOnModuleLoad || !!process.env.TEST_MODE || gui.App.manifest.test) {
             self.performUpgrade = true;
             self.devReLoadIOManager(info);
         }
@@ -141,7 +141,7 @@ function keyboardEventHandler() {
                     // defered.resolve();
                     // var options = {
                     //     followLinks: false
-                    //     // directories with these keys will be skipped 
+                    //     // directories with these keys will be skipped
                     //   , filters: ["Temp", "_Temp"]
                     //   };
                     // walker = walk.walk("C:\\ProgramData\\LabJack\\K3\\ljswitchboard-io_manager", options);
@@ -151,12 +151,12 @@ function keyboardEventHandler() {
                     //     // console.log('Found FIle', fileStats.name);
                     //     next();
                     // // fs.readFile(fileStats.name, function () {
-                    // //   // doStuff 
+                    // //   // doStuff
                     // //   next();
                     // // });
                     // });
                     // walker.on("end", function () {
-                        
+
                     // });
                     path = require('path');
                     var cwd = process.cwd();
@@ -179,7 +179,7 @@ function keyboardEventHandler() {
                         //     console.log('stdout: ',stdout);
                         //     console.log('stderr: ',stderr);
                         //     // console.log("all done found files: ", foundFiles.length);
-                        //  } 
+                        //  }
                         );
                     proc.stdout.on('data', function (data) {
                         console.log('data from stdout', data.toString());
@@ -208,7 +208,7 @@ function keyboardEventHandler() {
                     },
                     3000);
                 }
-                
+
             },10);
             return defered.promise;
         }
@@ -234,7 +234,7 @@ function keyboardEventHandler() {
         });
     }
     this.devReLoadIOManager = function(info) {
-        if(gui.App.manifest.clearCachesOnModuleLoad || gui.App.manifest.test) {
+        if(gui.App.manifest.clearCachesOnModuleLoad || !!process.env.TEST_MODE || gui.App.manifest.test) {
             if(!self.reloading) {
                 performDevReload(info);
             }
@@ -351,7 +351,7 @@ function keyboardEventHandler() {
             'platforms':['mac','win','linux'],
             'func': this.devUpdateAndReLoadIOManager,
             'listeners': dict()
-        },{ // windows keypress to save 
+        },{ // windows keypress to save
             'name':'save',
             'key':'ctrl+s',
             'platforms':['win','linux'],
@@ -446,7 +446,7 @@ function keyboardEventHandler() {
     var r_KEY       = 82;
     var s_KEY       = 83;
     var w_KEY       = 87;
-    this.primaryKeysList = [esc_KEY, minus_KEY, equ_KEY, c_KEY, f_KEY, 
+    this.primaryKeysList = [esc_KEY, minus_KEY, equ_KEY, c_KEY, f_KEY,
         q_KEY, r_KEY, s_KEY, w_KEY];
 
     this.convertKeyCode = function(code) {
