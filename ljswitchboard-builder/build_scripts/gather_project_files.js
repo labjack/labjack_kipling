@@ -312,7 +312,7 @@ var copyRequiredFiles = function() {
 		try {
 		// console.log('Copying:', required_file);
 		var source_path = path.normalize(path.join(
-			TEMP_STAGING_PATH,
+			PROJECT_FILES_SEARCH_PATH,
 			required_file
 		));
 		var destination_path = path.normalize(path.join(
