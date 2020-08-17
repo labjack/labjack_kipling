@@ -37,6 +37,7 @@ jobs:
       - run: npm config set msvs_version 2015 && npm run setup
       - name: Fix lerna mess
         run: node ./scripts/fix_lerna_backup.js
+      - run: npm run test
       - run: npm run build
 
       - run: ls ./ljswitchboard-builder
