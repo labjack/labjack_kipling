@@ -62,7 +62,7 @@ var T7_LIST = {
 				'str': ''
 			};
 			var strVal = '';
-			
+
 			var convertSigFigs = false;
 			// Decide whether or not to convert units for sigfig reasons.
 			if((-0.1 < val) && (val < 0.1) && convertSigFigs) {
@@ -222,7 +222,7 @@ var T7_LIST = {
 				wifi = wifi == 1;
 				rtc = rtc == 1;
 				sdCard = sdCard == 1;
-				
+
 				var subclass = '';
 				var isPro = false;
 				var productType = 'T7';
@@ -307,8 +307,9 @@ var T7_LIST = {
 			var pcTime = new Date();
 			var t7Time = new Date(res*1000);
 			// nodejs changed the behavior in ~ node v 8.x.x to revert back to 24hr/UTC time formatting.
-			var t7TimeStr = t7Time.toLocaleString('en-us',{hour12:true});
-			var pcTimeStr = pcTime.toLocaleString('en-us',{hour12:true});
+			var t7TimeStr = t7Time.toLocaleString('en-us',{timeZone: 'UTC', hour12:true});
+			var pcTimeStr = pcTime.toLocaleString('en-us',{timeZone: 'UTC', hour12:true});
+			// process.exit(1);
 			var timeDifference = pcTime - t7Time;
 			var timeDiffSec = Number((timeDifference/1000).toFixed(2));
 			return {
