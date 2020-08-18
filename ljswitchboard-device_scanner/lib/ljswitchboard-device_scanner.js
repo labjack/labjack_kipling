@@ -6,10 +6,18 @@ var device_scanner;
 var driver;
 
 var getListAllScanner = function(scanner) {
-    device_scanner = require('./device_scanner').createDeviceScanner(driver);
+    if (!!process.env.TEST_MODE) {
+        device_scanner = require('./mock_device_scanner').createMockDeviceScanner();
+    } else {
+        device_scanner = require('./device_scanner').createDeviceScanner(driver);
+    }
 };
 var getOpenAllScanner = function() {
-    device_scanner = require('./open_all_device_scanner').createDeviceScanner(driver);
+    if (!!process.env.TEST_MODE) {
+        device_scanner = require('./mock_open_all_device_scanner').create();
+    } else {
+        device_scanner = require('./open_all_device_scanner').createDeviceScanner(driver);
+    }
 };
 
 var listAllNames = [
@@ -57,7 +65,7 @@ function innerGetDeviceScanner(whichScanner) {
     } else {
         // Load the LJM driver functions
         driver = require('labjack-nodejs').driver();
-        
+
         // Determine which version of the device_scanner to return.
         if(whichScanner) {
             if (listAllNames.indexOf(whichScanner) >= 0) {

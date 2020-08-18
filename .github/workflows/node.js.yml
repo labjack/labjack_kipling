@@ -16,7 +16,6 @@ jobs:
       matrix:
         node-version: [8.9.4]
         platform: [ubuntu-16.04, macos-latest, windows-latest]
-    #        platform: [windows-latest]
 
     runs-on: ${{ matrix.platform }}
 
@@ -47,7 +46,7 @@ jobs:
       - name: Fix lerna mess
         run: node ./scripts/fix_lerna_backup.js
       - run: npm run build
-      - run: npm run test
+      - run: SKIP_HARDWARE_TEST=true npm run test
         if: ${{ matrix.platform == 'ubuntu-16.04' }}
 
       - run: ls ./ljswitchboard-builder

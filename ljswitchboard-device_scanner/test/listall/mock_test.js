@@ -1,7 +1,7 @@
 
 var rewire = require('rewire');
 var device_scanner = rewire('../../lib/device_scanner');
-var driver = require('LabJack-nodejs').driver();
+var driver = require('labjack-nodejs').driver();
 
 var test_util = require('../utils/test_util');
 var printAvailableDeviceData = test_util.printAvailableDeviceData;
@@ -50,7 +50,7 @@ exports.tests = {
 	},
 	'mock test': function(test) {
 		var startTime = new Date();
-		
+
 		var expectedData = {
 			'T7': {
 				'devices': [{
