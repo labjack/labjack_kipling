@@ -57,7 +57,7 @@ function convertLJFunctionInfoToFFI(functionInfo) {
 
     // Add the built argumentTypes array.
     ffiInfo.push(argumentTypes);
-    
+
     // Return the built ffiInfo array.
     return ffiInfo;
 }
@@ -174,7 +174,7 @@ if(typeof(approxPlatform) === 'undefined') {
 }
 
 
-/* 
+/*
  * In these functions we will look at a given ljm library path and determine
  * what version of LJM will be loaded.  We will primarily rely on node's
  * path.parse(filePath) function.  An example output of that function is:
@@ -188,7 +188,7 @@ if(typeof(approxPlatform) === 'undefined') {
  *  "1.11.1"
  */
 
-/* 
+/*
  * Define a helper function to check linux libry file path "base" attributes
  * to see if they contain the correct version number string.
  */
@@ -221,7 +221,7 @@ function linuxHelperCheckLJMVersion(libLocation, libPathInfo, ljmVersion) {
         isCorrectVersion = true;
     } else {
         // We have not found the required version of LJM.
-    
+
         // Debugging info...
         if(DEBUG_LJM_LIBRARY_LOCATION_SELECTION) {
             console.log('Library:', libLocation);
@@ -234,7 +234,7 @@ function linuxHelperCheckLJMVersion(libLocation, libPathInfo, ljmVersion) {
     return isCorrectVersion;
 }
 
-/* 
+/*
  * Define a helper function to check and rewport that a windows .dll file is
  * the correct version of LJM.
  */
@@ -253,7 +253,7 @@ function windowsHelperCheckLJMVersion(libLocation, libraryVersion, ljmVersion) {
         isCorrectVersion = true;
     } else {
         // We have not found the required version of LJM.
-    
+
         // Debugging info...
         if(DEBUG_LJM_LIBRARY_LOCATION_SELECTION) {
             console.log('Library:', libLocation);
@@ -282,11 +282,11 @@ var checkLJMLibForVersion = {
         // ~/linux/ia32/libLabJackM.so.1.8.5
         // ~/linux/x64/libLabJackM.so.1.8.5
 
-        
+
 
         // This needs to not be applied to the default linux library directory:
         // "/usr/local/lib" aka the variable : DEFAULT_LIBRARY_LOC
-        // as it will contain only 64bit libraries.  Libraries in this 
+        // as it will contain only 64bit libraries.  Libraries in this
         // directory should always be allowed.
         var foundLJMVersion = false;
         var pathInfo = path.parse(libLocation);
@@ -314,7 +314,7 @@ var checkLJMLibForVersion = {
             // We can now check the libraries targeted architecture as well
             // as checking the libraries version.
             if(arch === libArch) {
-                // Call the helper function to perform logic to check the lib 
+                // Call the helper function to perform logic to check the lib
                 // file's version.
                 foundLJMVersion = linuxHelperCheckLJMVersion(
                     libLocation,
@@ -332,7 +332,7 @@ var checkLJMLibForVersion = {
                 foundLJMVersion = false;
             }
         }
-        
+
         return foundLJMVersion;
     },
     'darwin': function checkDarwinLibraryPath(libLocation, ljmVersion) {
@@ -343,10 +343,10 @@ var checkLJMLibForVersion = {
         var foundLJMVersion = false;
         var pathInfo = path.parse(libLocation);
 
-        // Check to make sure the ljmVersion number exists at the end of the 
+        // Check to make sure the ljmVersion number exists at the end of the
         // parsed file path "name" attribute.
         var expectedIndex = pathInfo.name.length - ljmVersion.length;
-        var index = pathInfo.name.indexOf(ljmVersion); 
+        var index = pathInfo.name.indexOf(ljmVersion);
         if(index == expectedIndex) {
             // Congrats, we have found the required version of the LJM library!
 
@@ -354,12 +354,12 @@ var checkLJMLibForVersion = {
             if(DEBUG_LJM_LIBRARY_LOCATION_SELECTION) {
                 console.log('Found Library!', libLocation);
             }
-            
+
             // Indicate that we found the required version of the LJM library.
             foundLJMVersion = true;
         } else {
             // We have not found the required version of the LJM library.
-            
+
             // Debugging info...
             if(DEBUG_LJM_LIBRARY_LOCATION_SELECTION) {
                 console.log('Library:', libLocation);
@@ -379,9 +379,9 @@ var checkLJMLibForVersion = {
         //     ~/win32/ia32/1_9_0/LabJackM.dll
         //     ~/win32/x64/1_9_0/LabJackM.dll
 
-        // This needs to not be applied to the relevant default windows .dll 
-        // directory: "/Windows/System32" or "/Windows/SysWOW64" aka the  
-        // variable: DEFAULT_LIBRARY_LOC as it will contain only 64bit   
+        // This needs to not be applied to the relevant default windows .dll
+        // directory: "/Windows/System32" or "/Windows/SysWOW64" aka the
+        // variable: DEFAULT_LIBRARY_LOC as it will contain only 64bit
         // libraries.  Libraries in this directory should always be allowed.
 
         var foundLJMVersion = false;
@@ -417,7 +417,7 @@ var checkLJMLibForVersion = {
 
         // Check if we are in the platforms default library path.
         if(pathInfo.dir === DEFAULT_LIBRARY_LOC) {
-              
+
             // We don't need to have any logic to determine 32/64 bit versions.
 
             // Call the helper function to perform logic to check the lib file's
@@ -432,7 +432,7 @@ var checkLJMLibForVersion = {
             var arch = process.arch;
 
             // We can determine the libraries targeted architecture by parsing
-            // one directory up from the pathInfo's "dir" attribute and looking 
+            // one directory up from the pathInfo's "dir" attribute and looking
             // at the "base" attribute.
             var dirInfo = path.parse(path.resolve(pathInfo.dir,'..'));
             var libArch = dirInfo.base;
@@ -440,7 +440,7 @@ var checkLJMLibForVersion = {
             // We can now check the libraries targeted architecture as well
             // as checking the libraries version.
             if(arch === libArch) {
-                // Call the helper function to perform logic to check the lib 
+                // Call the helper function to perform logic to check the lib
                 // file's version.
                 foundLJMVersion = windowsHelperCheckLJMVersion(
                     libLocation,
@@ -471,14 +471,14 @@ function chooseLJMLibFile(libLocations, ljmVersion, requireExactVersion) {
         }
         return isVersion;
     });
-    
+
     if(foundLJMLib) {
         // If we found the proper ljmLib then lets return its path.
         return libPath;
     } else {
         // If not we need to decide what to do....
         if(requireExactVersion) {
-            // We need to throw an error because we didn't find the 
+            // We need to throw an error because we didn't find the
             // requested version of LJM.
             console.error();
             console.error('ERROR: (lib-ffi)');
@@ -565,7 +565,7 @@ function performLJMLibLocationsSearch(foundLJMLibLocations, currentDir) {
                     if(fpInfo.base.indexOf(LJM_LIBRARY_FILE_TYPE) < 0) {
                         isValidFile = false;
                     }
-                    
+
                     if(isValidFile) {
                         // console.log('Found File', fullThingPath);
                         foundLJMLibLocations.push(fullThingPath);
@@ -633,7 +633,7 @@ function getLibraryLocation(options) {
         }
 
         // If the requested ljmVersion is a string.
-        // It needs to be in one of the following formats: 
+        // It needs to be in one of the following formats:
         // ['x.x.x', 'x-x-x', 'x_x_x']
         if(typeof(options.ljmVersion) === 'string') {
             var ljmVersionStr = options.ljmVersion;
@@ -677,14 +677,14 @@ function getLibraryLocation(options) {
             librarySearchRoot = options.root;
         }
     }
-    
-    
+
+
     if(customLoad) {
         var localDependencies = '';
         var modulePathInfo = path.parse(module.filename);
         var moduleDir = modulePathInfo.dir;
         localDependencies = path.resolve(moduleDir, '..', 'deps');
-        
+
         if(DEBUG_LOAD_CUSTOM_LJM) {
             console.log('Default Library Location:', DEFAULT_LIBRARY_LOC);
             console.log('Local ljm-ffi dependencies:', localDependencies);
@@ -708,7 +708,7 @@ function getLibraryLocation(options) {
         // For now we should assume the user wants to use a version
         // globally installed on their computer
     } else {
-        // Do nothing cool for now... Potentially we can check to 
+        // Do nothing cool for now... Potentially we can check to
         // see if the .dll/.dylib/.so exists and if it doesn't use
         // a local version instead of the global one.
     }
@@ -804,7 +804,7 @@ function createSafeSyncFunction(functionName, functionInfo) {
         } else {
             // Get a reference to the LJM function being called.
             var ljmFunction = ffi_liblabjack[functionName];
-            
+
             // Check to make sure that the function being called has been
             // defined.
             if(typeof(ljmFunction) === 'function') {
@@ -837,13 +837,17 @@ function createSafeSyncFunction(functionName, functionInfo) {
 
 // Define a function that creates functions that can call LJM asynchronously.
 function createAsyncFunction(functionName, functionInfo) {
+    if (!functionInfo || !functionInfo.args) {
+        throw new Error('functionInfo for "' + functionName + '" without args');
+    }
+
     return function asyncLJMFunction() {
         var userCB;
         function cb(err, res) {
             if(err) {
                 console.error('Error Reported by Async Function', functionName);
             }
-            
+
             // Create an object to be returned.
             var ljmError = res;
             var retObj = {
@@ -925,7 +929,7 @@ function createSafeAsyncFunction(functionName, functionInfo) {
 
             // Get a reference to the LJM function being called.
             var ljmFunction = ffi_liblabjack[functionName].async;
-            
+
             // Check to make sure that the function being called has been
             // defined.
             if(typeof(ljmFunction) === 'function') {
@@ -970,7 +974,7 @@ function loadLJMMultiple(ljmVersion) {
                 console.log('I am alive');
                 // console.log(functionName + ' is not implemented by the installed version of LJM.');
             }
-            
+
             var fn = functionName;
             var fi = dummyFunction;
             try {
@@ -1006,7 +1010,7 @@ function loadLJMMultiple(ljmVersion) {
                         console.log('Warning: Failed to link function', functionName);
                     }
                 }
-                
+
                 // Create functions that go in the liblabjack object.
                 liblabjack[fn] = createSafeSyncFunction(fn, fi);
                 liblabjack[fn].async = createSafeAsyncFunction(fn, fi);
@@ -1044,7 +1048,7 @@ function loadLJMSingle(ljmVersion) {
                 }
             }
         });
-        
+
         ffi_liblabjack = custLoadFFILib(ljmLibraryLocation, ffiFuncInfo);
 
         var ljmFunctionNames = Object.keys(ffi_liblabjack);
