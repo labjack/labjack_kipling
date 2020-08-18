@@ -31,6 +31,7 @@ jobs:
         with:
           args: https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_02_14_i386_release.tar.gz
       - name: Install ljm
+        if: ${{ matrix.platform == 'ubuntu-16.04' }}
         run: tar xfz https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_02_14_i386_release.tar.gz && cd ./labjack_ljm_software_2019_02_14 && ./labjack_ljm_installer.run
 
       - uses: actions/checkout@v2
