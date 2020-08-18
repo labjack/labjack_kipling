@@ -24,6 +24,15 @@ jobs:
       - name: Get current date
         id: date
         run: echo "::set-output name=date::$(date +'%Y_%m_%d')"
+
+      - name: Download ljm
+        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        uses: wei/curl@master
+        with:
+          args: https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_02_14_i386_release.tar.gz
+      - name: Install ljm
+        run: tar xfz https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_02_14_i386_release.tar.gz && cd ./labjack_ljm_software_2019_02_14 && ./labjack_ljm_installer.run
+
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -39,6 +48,7 @@ jobs:
         run: node ./scripts/fix_lerna_backup.js
       - run: npm run build
       - run: npm run test
+        if: ${{ matrix.platform == 'ubuntu-16.04' }}
 
       - run: ls ./ljswitchboard-builder
 
