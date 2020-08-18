@@ -32,10 +32,18 @@ var exeName = {
 	'win32': 'node.exe',
 	'darwin': 'node'
 }[platform];
+
 var arch = process.arch;
 var rootDir = process.cwd();
 
 var pathOfVersionFolders = path.join(rootDir, binariesDir, platform, arch);
+
+if (!fs.existsSync(pathOfVersionFolders)) {
+	exports.tests = {
+	};
+	return;
+}
+
 var nodejsVersions = fs.readdirSync(pathOfVersionFolders);
 var nodeExecutables = {};
 nodejsVersions.forEach(function(version) {
@@ -104,7 +112,7 @@ exports.tests = {
 		var arch = process.arch;
 		var rootDir = process.cwd();
 
-		
+
 		nodejsVersions.forEach(function(version) {
 			var fullPath = path.join(rootDir, binariesDir, platform, arch, version, exeName);
 			binaryPaths.push({'path':fullPath,'exists': false});
