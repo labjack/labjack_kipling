@@ -6,18 +6,10 @@ var device_scanner;
 var driver;
 
 var getListAllScanner = function(scanner) {
-    if (!!process.env.TEST_MODE) {
-        device_scanner = require('./mock_device_scanner').createMockDeviceScanner();
-    } else {
-        device_scanner = require('./device_scanner').createDeviceScanner(driver);
-    }
+    device_scanner = require('./device_scanner').createDeviceScanner(driver);
 };
 var getOpenAllScanner = function() {
-    if (!!process.env.TEST_MODE) {
-        device_scanner = require('./mock_open_all_device_scanner').create();
-    } else {
-        device_scanner = require('./open_all_device_scanner').createDeviceScanner(driver);
-    }
+    device_scanner = require('./open_all_device_scanner').createDeviceScanner(driver);
 };
 
 var listAllNames = [
