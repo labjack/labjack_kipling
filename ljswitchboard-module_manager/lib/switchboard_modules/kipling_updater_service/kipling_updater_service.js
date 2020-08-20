@@ -11,7 +11,7 @@ var q = global.require('q');
 var io_manager = global[gns].io_manager;
 var io_interface = io_manager.io_interface();
 var driver = io_interface.getDriverController();
-var semver = require('semver_min');
+var semver = global.require('semver_min');
 
 function createKiplingUpdaterService() {
 	console.log('Available tasks', Object.keys(TASK_LOADER.tasks));
@@ -163,7 +163,7 @@ function createKiplingUpdaterService() {
 			if(self.checkKiplingIsOld() || self.checkLJMIsOld()) {
 				msg += ' (Updates Available)';
 			}
-			
+
 			UPDATE_K3_WINDOW_VERSION_NUMBER_STR(msg)
 		} catch(err) {
 
@@ -434,7 +434,7 @@ this.getProgramInfo = function() {
 	} else if(updates.length === 2) {
 		updateText = updates[0] + ' and ' + updates[1];
 	}
-	
+
 	var pannelType = 'panel-success';
 	if(availableUpdates) {
 		pannelType = 'panel-danger';
