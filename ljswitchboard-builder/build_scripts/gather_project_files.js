@@ -42,7 +42,7 @@ var filteredFilesAndFolders = [
 	'.git',
 	'.gitignore',
 	'.npmignore',
-	'test',
+	// 'test', // kipling_tester
 	'test_binaries',
 	// 'node_binaries/linux',
 	// 'node_binaries/win32',

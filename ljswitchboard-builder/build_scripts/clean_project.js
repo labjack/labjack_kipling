@@ -79,11 +79,20 @@ var createStdCleanModules = function(names) {
 
 var filesToDelete = {
     'ljswitchboard-core': {
+		'foldersToDelete': ['test'],
 		'node_modules': {
 			'foldersToDelete': ['.bin'],
 		},
 	},
-    'ljswitchboard-kipling': {
+	'ljswitchboard-kipling': {
+		'foldersToDelete': ['test'],
+		'node_modules': {
+			'foldersToDelete': ['.bin'],
+		},
+	},
+	'ljswitchboard-kipling_tester': {
+		'foldersToSave': ['test', 'node_modules', 'lib'],
+		'filesToSave': ['README.md', 'LICENSE', 'package.json'],
 		'node_modules': {
 			'foldersToDelete': ['.bin'],
 		},
@@ -99,12 +108,13 @@ var filesToDelete = {
 		},
 	},
 	'ljswitchboard-module_manager': {
+		'foldersToDelete': ['test'],
 		'node_modules': {
 			'foldersToDelete': ['.bin'],
 		},
 	},
 	'ljswitchboard-io_manager': {
-		'foldersToDelete': ['.bin'],
+		'foldersToDelete': ['test', '.bin'],
 		'node_modules': {
 			'foldersToDelete': ['.bin'],
 			'ffi': {
@@ -214,13 +224,16 @@ kipling_parts.forEach(function(kipling_part) {
 	var kiplingPartNMPath = normalizeAndJoin(kiplingPartPath, 'node_modules');
 
 
-	var kiplingPartDeps;
-	try {
-		kiplingPartDeps = fs.readdirSync(kiplingPartNMPath);
-	} catch(err) {
-		console.error('Error reading current directory', kiplingPartNMPath);
-		console.error(err);
-		kiplingPartDeps = [];
+	var kiplingPartDeps = [];
+
+	if (fs.existsSync(kiplingPartNMPath)) { // static_files.zip doesn't contain node_modules
+		try {
+			kiplingPartDeps = fs.readdirSync(kiplingPartNMPath);
+		} catch(err) {
+			console.error('Error reading current directory', kiplingPartNMPath);
+			console.error(err);
+			kiplingPartDeps = [];
+		}
 	}
 	// console.log('Kipling Part:', kipling_part);
 	// console.log('Kipling Part Deps:', kiplingPartDeps);
@@ -274,13 +287,15 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 	// Debugging cleaning a flattened node_module's tree...
 	// console.log('Called...', numTimesCalled);
 	var keys = Object.keys(map);
-	var availableThings;
-	try {
-		availableThings = fs.readdirSync(directoryOffset);
-	} catch(err) {
-		console.error('Error reading current directory', directoryOffset);
-		console.error(err);
-		availableThings = [];
+	var availableThings = [];
+	if (fs.existsSync(directoryOffset)) {
+		try {
+			availableThings = fs.readdirSync(directoryOffset);
+		} catch(err) {
+			console.error('Error reading current directory', directoryOffset);
+			console.error(err);
+			availableThings = [];
+		}
 	}
 
 	if(DEBUG_DIRECTORY_SEARCHING) {
