@@ -15,9 +15,9 @@ jobs:
     strategy:
       matrix:
         node-version: [8.9.4]
-        platform: [ubuntu-16.04, macos-latest, windows-latest, self-hosted]
+        platform: [ubuntu-16.04, macos-latest, windows-latest]
 
-    runs-on: ${{ matrix.platform }}
+    runs-on: [${{ matrix.platform }}, self-hosted]
 
     steps:
       - name: Get current date
