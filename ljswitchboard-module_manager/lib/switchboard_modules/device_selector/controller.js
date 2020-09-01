@@ -292,6 +292,7 @@ var createModuleInstance = function() {
 			updateAndSaveScanSelections();
 
 			// In parallel, scan for devices.
+			console.log('Calling listAllDevices', self.scanOptions);
 			listAllDevices(self.scanOptions)
 			.then(function(res) {
 				scanResults = res;
@@ -554,6 +555,7 @@ var createModuleInstance = function() {
 		'scanWiFi': false,
 		'scanEthernetTCP': false,
 		'scanWiFiTCP': false,
+		'enableDemoMode': false,
 	};
 	this.advancedScanOptions = false;
 	this.directConnectParams = {
@@ -571,6 +573,7 @@ var createModuleInstance = function() {
 		self.scanOptions.scanWiFi = $("#wifi_scan_enabled").is(':checked');
 		self.scanOptions.scanEthernetTCP = $("#ethernet_tcp_scan_enabled").is(':checked');
 		self.scanOptions.scanWiFiTCP = $("#wifi_tcp_scan_enabled").is(':checked');
+		self.scanOptions.enableDemoMode = $("#demo_scan_enabled").is(':checked');
 		// After updating these variables, update the persistent data
 		return innerSaveStartupData();
 		// .then(function(res) {
@@ -628,6 +631,7 @@ var createModuleInstance = function() {
 				'scanWiFi': false,
 				'scanEthernetTCP': false,
 				'scanWiFiTCP': false,
+				'enableDemoMode': false,
 			},
 			'advancedScanOptions': false,
 			'directConnectParams': {
@@ -656,7 +660,7 @@ var createModuleInstance = function() {
 
 				if(requiredPrimaryKey === requiredPrimaryKeys[0]) {
 					var secondaryKeys = Object.keys(startupData[requiredPrimaryKey]);
-					var reqSecondaryKeys = ['scanUSB', 'scanEthernet', 'scanWiFi','scanEthernetTCP', 'scanWiFiTCP'];
+					var reqSecondaryKeys = ['scanUSB', 'scanEthernet', 'scanWiFi','scanEthernetTCP', 'scanWiFiTCP', 'enableDemoMode'];
 					reqSecondaryKeys.forEach(function(reqSecondaryKey) {
 						if(secondaryKeys.indexOf(reqSecondaryKey) < 0) {
 							isValid = false;

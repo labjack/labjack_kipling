@@ -4,8 +4,14 @@
     "version": "0.0.1",
     "framework":"singleDevice",
     "third_party_code":[],
-    "supportedDevices": [{"type":"T7"},{"type":"Digit"},{"type":"T4"}],
+    "supportedDevices": [
+        {"type":"Digit"},
+        {"type":"T8","minFW":"1.5"},
+        {"type":"T7","minFW":"0.1"},
+        {"type":"T4","minFW":"0.1"}
+    ],
     "htmlFiles": [
+        "t8_template.html",
     	"t7_template.html",
     	"digit_template.html",
         "t4_template.html",

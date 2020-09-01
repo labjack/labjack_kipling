@@ -1873,8 +1873,10 @@ function module() {
         // Add Ethernet readRegisters
         self.ethernetRegisters.forEach(addSmartBinding);
 
-        // Add Wifi readRegisters
-        self.wifiRegisters.forEach(addSmartBinding);
+        if(self.activeDevice.savedAttributes.HARDWARE_INSTALLED.wifi) {
+            // Add Wifi readRegisters
+            self.wifiRegisters.forEach(addSmartBinding);
+        }
 
         var customSmartBindings = [
             {
@@ -1940,7 +1942,7 @@ function module() {
         // device doesn't have WiFi.
         var filteredCustomSmartBindings = customSmartBindings;
 
-        if(self.activeDevice.savedAttributes.deviceTypeName === 'T4') {
+        if(!self.activeDevice.savedAttributes.HARDWARE_INSTALLED.wifi) {
             filteredCustomSmartBindings = customSmartBindings.filter(function(binding) {
                 if(binding.bindingName.indexOf('wifi') >= 0) {
                     // console.log('Using a T4, filtering out wifi customSmartBinding', binding);
@@ -1995,8 +1997,8 @@ function module() {
         self.moduleContext.wifiWarningMessage = wifiWarningMessage;
         self.moduleContext.wifiPowerButtonWarning = wifiPowerButtonWarning;
 
-        var hasWiFi = false;
-        self.moduleContext.hasWiFi = null;
+        var hasWiFi = self.activeDevice.savedAttributes.HARDWARE_INSTALLED.wifi;
+        self.moduleContext.hasWiFi = hasWiFi;
         if(self.activeDevice.savedAttributes.deviceTypeName === 'T7') {
             if (self.activeDevice.savedAttributes.isPro) {
                 hasWiFi = true;

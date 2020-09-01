@@ -525,7 +525,117 @@ function module() {
                 // 'RTC_TIME_S', // Not available in T4 FW 0.202
                 // 'SNTP_UPDATE_INTERVAL', // Not available in T4 FW 0.202
             ];
-            
+
+            // Not available in T4 FW 0.202
+            var secondaryExtraRegisters = [
+                'TEMPERATURE_DEVICE_K',
+            ];
+            // var secondaryExtraRegisters = [];
+            promises.push(getExtraOperation(device,'sReadMany', extraRegisters));
+            promises.push(getExtraOperation(device,'sReadMany', secondaryExtraRegisters));
+            promises.push(getExtraOperation(device,'sRead', 'ETHERNET_MAC'));
+            promises.push(function getDeviceRecoveryFirmwareVersion() {
+                var defered = q.defer();
+                device.getRecoveryFirmwareVersion()
+                .then(function(res) {
+                    console.log('Get Device Recovery Firmware Version Result', res);
+                    defered.resolve({
+                        'val': res,
+                        'name': 'recoveryFirmwareVersion'
+                    });
+                }, function(err) {
+                    defered.reject(err);
+                });
+                return defered.promise;
+            }());
+            promises.push(function performCheckForHardwareIssues() {
+                var defered = q.defer();
+                device.checkForHardwareIssues()
+                .then(function(res) {
+                    console.log('HW Issues Results', res);
+                    var retData = JSON.parse(JSON.stringify(res));
+                    retData.name = 'hwIssues';
+                    retData.testResults = [];
+                    var tests = Object.keys(res.testResults);
+                    tests.forEach(function(key) {
+                        retData.testResults.push(res.testResults[key]);
+                    });
+                    defered.resolve(retData);
+                }, function(err) {
+                    defered.reject(err);
+                });
+                return defered.promise;
+            }());
+            promises.push(function getDeviceAuthStatus() {
+                var defered = q.defer();
+                device.isAuthorized()
+                .then(function(res) {
+                    console.log('Device Auth Status', res);
+                    var message = "Device is Authorized";
+                    var shortMessage = "Authorized";
+                    if(!res) {
+                        message = "Not authorized, please email support@labjack.com";
+                        shortMessage = "Not Authorized";
+                    }
+                    defered.resolve({
+                        'val': res,
+                        'name': 'isAuthorized',
+                        'message': message,
+                        'shortMessage': shortMessage,
+                    });
+                }, function(err) {
+                    defered.reject(err);
+                });
+                return defered.promise;
+            }());
+            promises.push(function getAvailableConnectionTypes() {
+                var defered = q.defer();
+                device.getAvailableConnectionTypes()
+                .then(function(result) {
+                    console.log('Available connection types');
+                    var connections = result.connections;
+                    var isUSB = false;
+                    var isEth = false;
+                    var isWiFi = false;
+                    connections.forEach(function(connection) {
+                        if(connection.type === 'USB') {
+                            isUSB = connection.isAvailable;
+                        }
+                        if(connection.type === 'Ethernet') {
+                            isEth = connection.isAvailable;
+                        }
+                        if(connection.type === 'WiFi') {
+                            isWiFi = connection.isAvailable;
+                        }
+                    });
+                    defered.resolve({
+                        'val': result,
+                        'name': 'availableConnections',
+                        'isUSB': isUSB,
+                        'isEth': isEth,
+                        'isWiFi': isWiFi,
+                    });
+                }, function(err) {
+                    defered.reject(err);
+                });
+                return defered.promise;
+            }());
+            promises.push(getExtraOperation(device,'getLatestDeviceErrors'));
+        } else if(device.savedAttributes.deviceTypeName === 'T8') {
+            deviceTemplate = handlebars.compile(
+                framework.moduleData.htmlFiles.t8_template
+            );
+
+            // Extra required data for T4s
+            extraRegisters = [
+                'ETHERNET_IP',
+                'POWER_LED',
+                'WATCHDOG_ENABLE_DEFAULT',
+                'HARDWARE_VERSION',
+                // 'RTC_TIME_S', // Not available in T4 FW 0.202
+                // 'SNTP_UPDATE_INTERVAL', // Not available in T4 FW 0.202
+            ];
+
             // Not available in T4 FW 0.202
             var secondaryExtraRegisters = [
                 'TEMPERATURE_DEVICE_K',

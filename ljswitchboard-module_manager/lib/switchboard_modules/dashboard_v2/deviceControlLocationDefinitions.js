@@ -9,28 +9,38 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
     this.LABJACK_OVERVIEW_IMG_SRC = STATIC_FILES_DIR + this.LABJACK_OVERVIEW_IMG_SRC;
 
     this.DEVICE_IMAGE_ALLOCATED_WIDTH = {
+        'T8': 560,
         'T7': 370,
         'T5': 505,
         'T4': 505,
     }[deviceTypeName];
     this.DEVICE_IMAGE_X_OFFSET = 150;
     this.DEVICE_IMAGE_Y_OFFSET = 10;//10
-    this.DEVICE_IMG_WIDTH = 225;
+    this.DEVICE_IMG_WIDTH = {
+        'T8': 290,
+        'T7': 225,
+        'T5': 225,
+        'T4': 225,
+    }[deviceTypeName];
 
+    var T8_DEVICE_HEIGHT = 525;
     var T7_DEVICE_HEIGHT = 525;
     var T5_DEVICE_HEIGHT = 425;
     var T4_DEVICE_HEIGHT = 325;
     this.DEVICE_IMG_HEIGHT = {
+        'T8': T8_DEVICE_HEIGHT,
         'T7': T7_DEVICE_HEIGHT,
         'T5': T5_DEVICE_HEIGHT,
         'T4': T4_DEVICE_HEIGHT,
     }[deviceTypeName];
     this.DEVICE_IMG_SPLINES_HEIGHT_MULTIPLIER = {
+        'T8': 1,
         'T7': 1,
         'T5': T7_DEVICE_HEIGHT/T5_DEVICE_HEIGHT,
         'T4': T7_DEVICE_HEIGHT/T4_DEVICE_HEIGHT,
     }[deviceTypeName];
     this.DEVICE_IMAGE_Y_SPLINES_OFFSET = {
+        'T8': 0,
         'T7': 0,
         'T5': 20,
         'T4': 40,
@@ -42,7 +52,12 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
     this.CONNECTOR_SIZE_X = this.DEVICE_IMAGE_X_OFFSET + this.DEVICE_IMAGE_X_OVERLAP;
 
     // this.DEVICE_IMAGE_X_OVERLAP = 55;
-    this.DEVICE_RIGHT_SIDE_OFFSET = 215;
+    this.DEVICE_RIGHT_SIDE_OFFSET = {
+        'T8': 300,
+        'T7': 215,
+        'T5': 215,
+        'T4': 215,
+    }[deviceTypeName];
     this.DEVICE_CONNECTOR_SIZE_X = this.DEVICE_IMAGE_X_OFFSET + this.DEVICE_IMAGE_X_OVERLAP;
     this.DEVICE_BUTTON_LEFT_PADDING = 5;
 
@@ -53,6 +68,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
     // DB Image Info
     // this.LABJACK_DB_IMG_SRC = 'img/'+deviceTypeName+'-DB-cartoon.png';
     this.LABJACK_DB_IMG_SRC = {
+        'T8': 'img/'+deviceTypeName+'-DB-cartoon.png',
         'T7': 'img/'+deviceTypeName+'-DB-cartoon.png',
         'T4': 'img/'+deviceTypeName+'-DB15-cartoon.png',
         'T5': 'img/'+deviceTypeName+'-DB15-cartoon.png',
@@ -62,27 +78,32 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
     this.DB_IMG_WIDTH = 225;
 
     this.DB_ALLOCATED_HEIGHT = {
+        'T8': 230,
         'T7': 525,
         'T5': 260,
         'T4': 230,
     }[deviceTypeName];
 
+    var T8_DB_HEIGHT = 180;
     var T7_DB_HEIGHT = 525;
     var T5_DB_HEIGHT = 180;
     var T4_DB_HEIGHT = 180;
     this.DB_IMG_HEIGHT = {
+        'T8': T8_DB_HEIGHT,
         'T7': T7_DB_HEIGHT,
         'T5': T5_DB_HEIGHT,
         'T4': T4_DB_HEIGHT,
     }[deviceTypeName];
 
     this.DB_IMG_SPLINES_HEIGHT_MULTIPLIER = {
+        'T8': T7_DB_HEIGHT/T8_DB_HEIGHT,
         'T7': 1,
         'T5': T7_DB_HEIGHT/T5_DB_HEIGHT,
         'T4': T7_DB_HEIGHT/T4_DB_HEIGHT,
     }[deviceTypeName];
 
     this.DB_IMAGE_Y_SPLINES_OFFSET = {
+        'T8': 20,
         'T7': 0,
         'T5': 20,
         'T4': 20,
@@ -90,6 +111,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
 
     this.DB_IMAGE_X_OFFSET = 110;
     this.DB_IMAGE_Y_OFFSET = {
+        'T8': 50,
         'T7': 0,
         'T5': 80,
         'T4': 50,
@@ -214,6 +236,42 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             
 
             // Right Side, Device
+            {register: 'AIN1', yLocation: 0.667-DEV_OFF,    yShift: -5,         yOffset: 6,         yOverlayOffset: 8,       type: null, board: 'device', side: 'right'},
+            {register: 'AIN0', yLocation: 0.642-DEV_OFF,    yShift: -4,         yOffset: -6,         yOverlayOffset: 8,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN3', yLocation: 0.558-DEV_OFF,    yShift: -2,         yOffset: 6,         yOverlayOffset: 10,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN2', yLocation: 0.532-DEV_OFF,    yShift: -1,         yOffset: -6,        yOverlayOffset: 10,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN5', yLocation: 0.453-DEV_OFF,    yShift: 0,          yOffset: 6,         yOverlayOffset: 12,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN4', yLocation: 0.425-DEV_OFF,    yShift: 1,          yOffset: -6,        yOverlayOffset: 12,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN7', yLocation: 0.342-DEV_OFF,    yShift: 3.5,        yOffset: 6,         yOverlayOffset: 15,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN6', yLocation: 0.315-DEV_OFF,    yShift: 4,          yOffset: -6,        yOverlayOffset: 15,      type: null, board: 'device', side: 'right'},
+
+            // Left Side, DB15
+            {register: 'EIO6', yLocation: 0.275+0.020,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'left'},
+            {register: 'EIO4', yLocation: 0.250+0.020,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'left'},
+            {register: 'EIO2', yLocation: 0.225+0.020,      yOffset:  0*bNum,   type: 'dio', board: 'connector', side: 'left'},
+            {register: 'EIO0', yLocation: 0.197+0.020,      yOffset: -1*bNum,   type: 'dio', board: 'connector', side: 'left'},
+            {register: 'CIO3', yLocation: 0.170+0.020,      yOffset: -2*bNum,   type: 'dio', board: 'connector', side: 'left'},
+            {register: 'CIO1', yLocation: 0.140+0.020,      yOffset: -3*bNum,   type: 'dio', board: 'connector', side: 'left'},
+
+            // Right Side, DB15
+            {register: 'EIO7', yLocation: 0.300+0.010,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'right'},
+            {register: 'EIO5', yLocation: 0.275+0.010,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'right'},
+            {register: 'EIO3', yLocation: 0.248+0.010,      yOffset:  0*bNum,   type: 'dio', board: 'connector', side: 'right'},
+            {register: 'EIO1', yLocation: 0.222+0.010,      yOffset: -1*bNum,   type: 'dio', board: 'connector', side: 'right'},
+            {register: 'CIO2', yLocation: 0.165+0.010,      yOffset: -0.5*bNum, type: 'dio', board: 'connector', side: 'right'},
+            {register: 'CIO0', yLocation: 0.135+0.010,      yOffset: -1.5*bNum, type: 'dio', board: 'connector', side: 'right'}
+        ];
+    } else if(deviceTypeName === 'T8') {
+        this.AIN_NUM_DIGITS_PRECISION = 6;
+        this.REGISTER_OVERLAY_SPEC = [
+            // Left Side, Device
+            {register: 'DAC0', yLocation: 0.622-DEV_OFF,    yShift: -5,         yOffset: 6,         yOverlayOffset: 8,       type: 'dac', board: 'device', side: 'left'},
+            {register: 'DAC1', yLocation: 0.597-DEV_OFF,    yShift: -4,         yOffset: -6,         yOverlayOffset: 8,      type: 'dac', board: 'device', side: 'left'},
+            {register: 'FIO0', yLocation: 0.512-DEV_OFF,    yShift: -2,         yOffset: 6,         yOverlayOffset:  10,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO1', yLocation: 0.486-DEV_OFF,    yShift: -1,         yOffset: -6,        yOverlayOffset:  10,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO2', yLocation: 0.405-DEV_OFF,    yShift: 0,          yOffset: 6,         yOverlayOffset:  12,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO3', yLocation: 0.382-DEV_OFF,    yShift: 1,          yOffset: -6,        yOverlayOffset:  12,     type: 'dio', board: 'device', side: 'left'},
+
             {register: 'AIN1', yLocation: 0.667-DEV_OFF,    yShift: -5,         yOffset: 6,         yOverlayOffset: 8,       type: null, board: 'device', side: 'right'},
             {register: 'AIN0', yLocation: 0.642-DEV_OFF,    yShift: -4,         yOffset: -6,         yOverlayOffset: 8,      type: null, board: 'device', side: 'right'},
             {register: 'AIN3', yLocation: 0.558-DEV_OFF,    yShift: -2,         yOffset: 6,         yOverlayOffset: 10,      type: null, board: 'device', side: 'right'},

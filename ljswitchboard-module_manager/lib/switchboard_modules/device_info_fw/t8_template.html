@@ -58,7 +58,7 @@
 		</div>
 		{{/if}}
 		{{/unless}}--}}
-		
+
 		{{#if hwIssues}}
 		<div class="selectableText">
 		{{#unless hwIssues.overallResult}}
@@ -82,7 +82,7 @@
 		{{/unless}}
 		</div>
 		{{/if}}
-		
+
 		<div class="block-separator"/>
 		<div class="pane-popover">
 			Versions
@@ -130,7 +130,7 @@
 				{{TEMPERATURE_DEVICE_K.val}}
 			</span> K
 		</div>
-		
+
 
 		<div class="block-separator"/>
 		<div class="block-separator"/>
@@ -166,7 +166,7 @@
 			</span>
 		</div>
 		-->
-		
+
 		<!-- <div class="device-detail selectableText">
 			Time Difference (s): 
 			<span id="rtc-time-difference" class="">
@@ -299,11 +299,11 @@
 	</ul>
 	{{/if}}
 	{{/if}}
-	
+
 	<p style="display:none">TODO: Add button/config-tool that lets user configure LJLogM/LJStreamM to open the currently connected device.  Consider just opening the file in a user's default text editor and telling them what the file path is.  The tool can automatically search the user's Let the user configure Kipling to remember where each application's default directory is.  You can do this by running a bash command: http://stackoverflow.com/questions/8066679/how-to-do-a-simple-file-search-in-cmd, On Windows: "dir /b/s LJLogM.cfg".	Add a quick-disconnect/re-connect button to the module-header section.  Add an Open-Application button for LJLogM/LJStreamM/T7uSDCardUtility.</p>
 	<script>
 
-		
+
 		var linksToBindTo = [{
 			'id': '#lj-link-holder-productPage',
 			'url': "https://labjack.com/{{deviceTypeName}}"
