@@ -635,10 +635,55 @@ function createDeviceKeeper(io_delegator, link) {
 		});
 
 		// Start device scan
-		deviceScanner.findAllDevices(currentDevices, options)
-		.then(function(data) {
-			defered.resolve(data);
-		}, defered.reject);
+		if(options.enableDemoMode) {
+			var mockDevices = [{
+					'deviceType': 'LJM_dtT7',
+					'connectionType': 'LJM_ctETHERNET',
+					'serialNumber': 1,
+				}, {
+					'deviceType': 'LJM_dtT7',
+					'connectionType': 'LJM_ctUSB',
+					'serialNumber': 1,
+				}, {
+					'deviceType': 'LJM_dtT4',
+					'connectionType': 'LJM_ctUSB',
+					'serialNumber': 4,
+				}, // {
+				// 	'deviceType': 'LJM_dtT8',
+				// 	'connectionType': 'LJM_ctUSB',
+				// 	'serialNumber': 8,
+				// }
+			];
+			deviceScanner.addMockDevices(mockDevices)
+			.then(function(res) {
+				deviceScanner.disableDeviceScanning()
+				.then(function(res) {
+					deviceScanner.findAllDevices(currentDevices, options)
+					.then(function(data) {
+						defered.resolve(data);
+					}, defered.reject);
+				}, function(err) {
+					deviceScanner.findAllDevices(currentDevices, options)
+					.then(function(data) {
+						defered.resolve(data);
+					}, defered.reject);
+				});
+			});
+		} else {
+			deviceScanner.enableDeviceScanning()
+			.then(function(res) {
+				deviceScanner.findAllDevices(currentDevices, options)
+				.then(function(data) {
+					defered.resolve(data);
+				}, defered.reject);
+			}, function(err) {
+				deviceScanner.findAllDevices(currentDevices, options)
+				.then(function(data) {
+					defered.resolve(data);
+				}, defered.reject);
+			});
+		}
+
 		return defered.promise;
 	};
 
@@ -686,6 +731,12 @@ function createDeviceKeeper(io_delegator, link) {
 	this.addMockDevice = function(deviceInfo) {
 		var defered = q.defer();
 		deviceScanner.addMockDevice(deviceInfo)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	this.removeAllMockDevices = function() {
+		var defered = q.defer();
+		deviceScanner.removeAllMockDevices()
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
