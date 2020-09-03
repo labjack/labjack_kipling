@@ -276,7 +276,7 @@ var initializeProgram = function() {
 
 			// Save to the global scope
 			global.ljswitchboard.labjackFolderPath = lj_folder_path;
-			if(gui.App.manifest.test) {
+			if(!!process.env.TEST_MODE || gui.App.manifest.test) {
 				persistentDataManager = new persistent_data_manager.create(
 					lj_folder_path,
 					gui.App.manifest.testPersistentDataFolderName,
@@ -383,7 +383,7 @@ win.on('loaded', function() {
 
 if(false) {
 // Perform a switch based on if this is a test or not.
-if(gui.App.manifest.test) {
+if(!!process.env.TEST_MODE || gui.App.manifest.test) {
 	// If set to 'test', perform testing code
 
 	// Load the testing window

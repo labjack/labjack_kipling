@@ -31,11 +31,11 @@ exports.tests = {
 		console.log('');
 		console.log('**** Two Device Live Test ****');
 		console.log('**** Please connect 2x T7 via USB ****');
-		
+
 		// Require the io_manager library
 		io_manager = require('../../lib/io_manager');
 
-		// Require the io_interface that gives access to the ljm driver, 
+		// Require the io_interface that gives access to the ljm driver,
 		// device controller, logger, and file_io_controller objects.
 		io_interface = io_manager.io_interface();
 
@@ -56,6 +56,11 @@ exports.tests = {
 		});
 	},
 	'open device': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		var params = {
 			'deviceType': 'LJM_dtANY',
 			'connectionType': 'LJM_ctANY',
@@ -85,6 +90,11 @@ exports.tests = {
 		});
 	},
 	'open deviceB': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		var params = {
 			'deviceType': 'LJM_dtANY',
 			'connectionType': 'LJM_ctANY',
@@ -118,6 +128,11 @@ exports.tests = {
 		});
 	},
 	'check num open devices': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device_controller.getNumDevices()
 		.then(function(res) {
 			test.strictEqual(res, 1, 'wrong number of devices are open');
@@ -125,6 +140,11 @@ exports.tests = {
 		});
 	},
 	'close all devices': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device_controller.closeAllDevices()
 		.then(function(res) {
 			// console.log('Num Devices Closed', res);
@@ -137,6 +157,11 @@ exports.tests = {
 		});
 	},
 	'open devices parallel': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		var td = {
 			'dt': 'LJM_dtANY',
 			'ct': 'LJM_ctANY',
@@ -180,11 +205,16 @@ exports.tests = {
 		}
 		device_controller.openDevice(td)
 		.then(onSuccess, onError);
-		
+
 		device_controller.openDevice(td)
 		.then(onSuccess, onError);
 	},
 	'check num open devices 2': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device_controller.getNumDevices()
 		.then(function(res) {
 			test.strictEqual(res, 1, 'wrong number of devices are open');
@@ -192,6 +222,11 @@ exports.tests = {
 		});
 	},
 	'close all devices 2': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device_controller.closeAllDevices()
 		.then(function(res) {
 			// console.log('Num Devices Closed', res);

@@ -5,6 +5,8 @@ kipling.exe
 output/*
 temp_project_files/*
 temp_extract_test_dir/*
+temp_staging/*
+temp_tar/*
 temp_zip_test_dir/*
 output.zip
 output.tar.gz

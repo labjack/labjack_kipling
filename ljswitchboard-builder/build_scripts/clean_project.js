@@ -79,11 +79,20 @@ var createStdCleanModules = function(names) {
 
 var filesToDelete = {
     'ljswitchboard-core': {
+		'foldersToDelete': ['test'],
 		'node_modules': {
 			'foldersToDelete': ['.bin'],
 		},
 	},
-    'ljswitchboard-kipling': {
+	'ljswitchboard-kipling': {
+		'foldersToDelete': ['test'],
+		'node_modules': {
+			'foldersToDelete': ['.bin'],
+		},
+	},
+	'ljswitchboard-kipling_tester': {
+		'foldersToSave': ['test', 'node_modules', 'lib'],
+		'filesToSave': ['README.md', 'LICENSE', 'package.json'],
 		'node_modules': {
 			'foldersToDelete': ['.bin'],
 		},
@@ -99,12 +108,13 @@ var filesToDelete = {
 		},
 	},
 	'ljswitchboard-module_manager': {
+		'foldersToDelete': ['test'],
 		'node_modules': {
 			'foldersToDelete': ['.bin'],
 		},
 	},
 	'ljswitchboard-io_manager': {
-		'foldersToDelete': ['.bin'],
+		'foldersToDelete': ['test', '.bin'],
 		'node_modules': {
 			'foldersToDelete': ['.bin'],
 			'ffi': {
@@ -129,10 +139,6 @@ var filesToDelete = {
 					}
 				}
 			},
-			'mathjs': {
-				'filesToDelete': ['CONTRIBUTING.md', 'HISTORY.md', 'NOTICE', 'README.md', 'ROADMAP.md'],
-				'foldersToDelete': ['test', 'examples', 'docs', 'bin', 'dist']
-			},
 			'javascript-natural-sort': {
 				'filesToDelete': ['index.html', 'speed-tests.html', 'unit-tests.html', '.gitattributes'],
 				'foldersToDelete': ['.idea']
@@ -148,30 +154,6 @@ var filesToDelete = {
 				// 	}
 				// }
 			},
-			'request': {
-				'filesToSave': ['LICENSE', 'package.json', 'request.js', 'index.js'],
-				'foldersToSave': ['lib', 'node_modules'],
-				// 'node_modules': createStdCleanModules([
-				// 	'aws-sign2',
-				// 	'bl',
-				// 	'caseless',
-				// 	'combined-stream',
-				// 	'forever-agent',
-				// 	'form-data',
-				// 	'har-validator',
-				// 	'hawk',
-				// 	'http-signature',
-				// 	'isstream',
-				// 	'json-stringify-safe',
-				// 	'mime-types',
-				// 	'node-uuid',
-				// 	'oauth-sign',
-				// 	'qs',
-				// 	'stringstream',
-				// 	'tough-cookie',
-				// 	'tunnel-agent',
-				// ]),
-			},
 			// 'lodash': {
 			// 	'filesToSave': ['package.json', 'lodash.js', 'index.js'],
 			// 	'foldersToSave': ['lib', 'node_modules'],
@@ -179,14 +161,6 @@ var filesToDelete = {
 			'cheerio': {
 				'filesToDelete': [],
 				'foldersToDelete': [],
-				'node_modules': {
-					'filesToDelete': [],
-					'foldersToDelete': [],
-					// 'lodash': {
-					// 	'filesToSave': ['package.json', 'index.js', 'lodash.js'],
-					// 	'foldersToSave': ['lib', 'node_modules'],
-					// }
-				}
 			},
 			'json-schema': {
 				'filesToDelete': ['draft-zyp-json-schema-03.xml', 'draft-zyp-json-schema-04.xml'],
@@ -250,13 +224,16 @@ kipling_parts.forEach(function(kipling_part) {
 	var kiplingPartNMPath = normalizeAndJoin(kiplingPartPath, 'node_modules');
 
 
-	var kiplingPartDeps;
-	try {
-		kiplingPartDeps = fs.readdirSync(kiplingPartNMPath);
-	} catch(err) {
-		console.error('Error reading current directory', kiplingPartNMPath);
-		console.error(err);
-		kiplingPartDeps = [];
+	var kiplingPartDeps = [];
+
+	if (fs.existsSync(kiplingPartNMPath)) { // static_files.zip doesn't contain node_modules
+		try {
+			kiplingPartDeps = fs.readdirSync(kiplingPartNMPath);
+		} catch(err) {
+			console.error('Error reading current directory', kiplingPartNMPath);
+			console.error(err);
+			kiplingPartDeps = [];
+		}
 	}
 	// console.log('Kipling Part:', kipling_part);
 	// console.log('Kipling Part Deps:', kiplingPartDeps);
@@ -310,13 +287,15 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 	// Debugging cleaning a flattened node_module's tree...
 	// console.log('Called...', numTimesCalled);
 	var keys = Object.keys(map);
-	var availableThings;
-	try {
-		availableThings = fs.readdirSync(directoryOffset);
-	} catch(err) {
-		console.error('Error reading current directory', directoryOffset);
-		console.error(err);
-		availableThings = [];
+	var availableThings = [];
+	if (fs.existsSync(directoryOffset)) {
+		try {
+			availableThings = fs.readdirSync(directoryOffset);
+		} catch(err) {
+			console.error('Error reading current directory', directoryOffset);
+			console.error(err);
+			availableThings = [];
+		}
 	}
 
 	if(DEBUG_DIRECTORY_SEARCHING) {

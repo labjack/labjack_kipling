@@ -65,6 +65,11 @@ var device_tests = {
 		test.done();
 	},
 	'openDevice (UDP)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		var td = {
 			'dt': 'LJM_dtT7',
 			'ct': 'LJM_ctTCP',
@@ -85,6 +90,11 @@ var device_tests = {
 		});
 	},
 	'create curated device (UDP)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		try {
 			var td = {
 				'dt': 'LJM_dtT7',
@@ -118,6 +128,11 @@ var device_tests = {
 		}
 	},
 	'checkDeviceInfo (UDP)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
@@ -128,6 +143,11 @@ var device_tests = {
 		});
 	},
 	'perform test reads (UDP)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device.iReadMultiple(dataToRead)
 		.then(function(results) {
 			device.iRead('DEVICE_NAME_DEFAULT')
@@ -158,6 +178,11 @@ var device_tests = {
 		});
 	},
 	'closeDevice (UDP)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device.close()
 		.then(function() {
 			test.done();
@@ -165,6 +190,11 @@ var device_tests = {
 	},
 
 	'openDevice (USB)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		var td = {
 			'dt': 'LJM_dtT7',
 			'ct': 'LJM_ctUSB',
@@ -185,6 +215,11 @@ var device_tests = {
 		});
 	},
 	'create curated device (USB)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		try {
 			var td = {
 				'dt': 'LJM_dtT7',
@@ -218,6 +253,11 @@ var device_tests = {
 		}
 	},
 	'checkDeviceInfo (USB)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
@@ -228,6 +268,11 @@ var device_tests = {
 		});
 	},
 	'perform test reads (USB)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device.iReadMultiple(dataToRead)
 		.then(function(results) {
 			device.iRead('DEVICE_NAME_DEFAULT')
@@ -258,6 +303,11 @@ var device_tests = {
 		});
 	},
 	'closeDevice (USB)': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device.close()
 		.then(function() {
 			test.done();

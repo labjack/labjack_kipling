@@ -35,9 +35,11 @@ var BUILD_SCRIPTS_DIR = 'build_scripts';
 var commands = {};
 var buildScripts = [
 	{'script': 'prepare_build', 'text': 'Preparing Build'},
+	{'script': 'publish_locally', 'text': 'Publish Locally'},
 	{'script': 'gather_project_files', 'text': 'Gathering Project Files'},
 	{'script': 'edit_k3_startup_settings', 'text': 'Edit K3 Startup Settings'},
 	{'script': 'install_production_dependencies', 'text': 'Installing production dependencies'},
+	{'script': 'validate_internal_dependencies', 'text': 'Validating there are no duplicate internal dependencies'},
 	{'script': 'rebuild_native_modules', 'text': 'Rebuilding Native Modules (ffi & ref)'},
 	{'script': 'clean_project', 'text': 'Cleaning Project'},
 ]

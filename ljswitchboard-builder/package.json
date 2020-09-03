@@ -51,7 +51,8 @@
     "ljswitchboard-io_manager",
     "ljswitchboard-kipling",
     "ljswitchboard-module_manager",
-    "ljswitchboard-static_files"
+    "ljswitchboard-static_files",
+    "ljswitchboard-kipling_tester"
   ],
   "splash_screen_build_keys": {
     "window": {

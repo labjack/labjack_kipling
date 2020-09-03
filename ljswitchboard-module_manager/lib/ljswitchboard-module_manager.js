@@ -61,7 +61,7 @@ function printTestStartupInfo(name) {
 	} catch(err) {
 		console.log('Error reading startupData', name, filePath);
 	}
-	
+
 }
 exports.printTestStartupInfo = printTestStartupInfo;
 
@@ -160,7 +160,7 @@ var doesFileExist = function(filePath) {
 	});
 	return defered.promise;
 };
-var extraCachedReadFile = function(fileName) { 
+var extraCachedReadFile = function(fileName) {
 	var defered = q.defer();
 	var finishFunc = function(data) {
 		moduleManagerFileCache[fileName] = data;
@@ -238,10 +238,17 @@ var innerCachedReadFile = function(filePath) {
 		// 		console.log(lintData.lintResult);
 		// 	}
 		// }
+
+		var fileData = lintData.fileData;
+
+		if (filePath.endsWith('.js')) {
+			fileData += "\n//# sourceURL=" + filePath;
+		}
+
 		defered.resolve({
 			'fileName': path.basename(filePath),
 			'filePath': filePath,
-			'fileData': lintData.fileData,
+			'fileData': fileData,
 			'lintResult': lintData.lintResult
 		});
 	});
@@ -443,7 +450,7 @@ var getTaskList = function() {
 exports.getTaskList = getTaskList;
 
 var getEnabledModulesList = function() {
-	
+
 };
 
 var resolveToHeaderModules = function(moduleList) {
@@ -734,7 +741,7 @@ var initializeManagedModuleData = function(dataManager) {
 	} else {
 		defered.resolve(dataManager);
 	}
-	
+
 	return defered.promise;
 };
 var writeAndValidateModuleDataFile = function(dataManager) {
@@ -748,7 +755,7 @@ var writeAndValidateModuleDataFile = function(dataManager) {
 		moduleDataDir,
 		MODULE_PERSISTENT_DATA_FILE_NAME
 	);
-	
+
 	// Invalidate the cache for this file.
 	invalidateCacheFile(moduleDataFilePath);
 
@@ -948,7 +955,7 @@ var resetModuleStartupData = function(key) {
 		console.warn('!!! Prevented Deletion of all kipling modules !!!');
 		defered.resolve();
 	}
-	
+
 	return defered.promise;
 };
 exports.resetModuleStartupData = resetModuleStartupData;
@@ -1069,7 +1076,7 @@ var loadModuleCSS = function(data) {
 		cssFiles = ['style.css'];
 	}
 	cssFiles = resolveModuleFilePaths(data.path, cssFiles);
-	
+
 	// Perform logic for modules loading a framework
 	if(data.data.framework) {
 		cssFiles = applyFrameworkAdditions(
@@ -1103,7 +1110,7 @@ var loadModuleCSS = function(data) {
 
 var loadModuleJS = function(data) {
 	var defered = q.defer();
-	
+
 	var requiredJSFiles;
 	if(data.baseData.isTask) {
 		requiredJSFiles = [];
@@ -1134,7 +1141,7 @@ var loadModuleJS = function(data) {
 			jsLibFiles = resolveModuleFilePaths(data.path, jsLibFiles);
 		}
 	}
-	
+
 	// Perform logic for modules loading a framework
 	if(data.data.framework) {
 		requiredJSFiles = applyFrameworkAdditions(
@@ -1143,7 +1150,7 @@ var loadModuleJS = function(data) {
 			requiredJSFiles
 		);
 	}
-			
+
 	var jsFiles = [];
 
 	var i;
@@ -1202,10 +1209,10 @@ var loadModuleHTML = function(data) {
 	cachedReadFiles(htmlFiles)
 	.then(function(loadedFiles) {
 		data.html = loadedFiles;
-		
+
 		var i;
 		for(i = 0; i < loadedFiles.length; i++) {
-			
+
 			var fullFileName = loadedFiles[i].fileName;
 			var fileEnding = path.extname(fullFileName);
 			var fileName = fullFileName.split(fileEnding).join('');
@@ -1231,7 +1238,7 @@ var loadModuleJSON = function(data) {
 			extJSONFiles = resolveModuleFilePaths(data.path, extJSONFiles);
 		}
 	}
-	
+
 	var i;
 	for(i = 0; i < extJSONFiles.length; i++) {
 		jsonFiles.push(extJSONFiles[i]);

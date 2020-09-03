@@ -109,6 +109,11 @@ exports.tests = {
 	 * a "connected" device by the cached scan in the next test.
 	 */
 	'open device': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		var device = new device_curator.device();
 		devices.push(device);
 		console.log('  - Opening Device...');
@@ -126,6 +131,11 @@ exports.tests = {
 		});
 	},
 	'perform cached scan': function(test) {
+		if(!devices[0]) {
+			test.done();
+			return;
+		}
+
 		var device = devices[0];
 		var startTime = new Date();
 		console.log('  - Performing secondary cached scan...');
@@ -140,19 +150,18 @@ exports.tests = {
 			var endTime = new Date();
 			debugScanTime('  - Duration'.cyan, (endTime - startTime)/1000);
 
-
 			function checkConnectionType(foundDevCT) {
 				// console.log('FoundDevCT', foundDevCT);
 				var ctn = device.savedAttributes.connectionTypeName;
 				var fCTN = foundDevCT.connectionTypeName;
 
-				
+
 				if(ctn === fCTN){
 					foundDeviceConnectionType = true;
 					if(foundDevCT.insertionMethod === 'connected') {
 						correctlyReportedDeviceAsOpen = true;
 					}
-				} 
+				}
 			}
 			function checkFoundDevice(foundDevice) {
 				// console.log('in checkFoundDevice', foundDevice.serialNumber, device.savedAttributes.serialNumber);
@@ -178,7 +187,6 @@ exports.tests = {
 			var foundOpenDevice = false;
 			var foundDeviceConnectionType = false;
 			var correctlyReportedDeviceAsOpen = false;
-
 
 			deviceTypes.forEach(checkForDeviceType);
 
@@ -230,7 +238,10 @@ exports.tests = {
 		// 	test.ok(false, 'Scan should have worked properly');
 		// 	test.done();
 		// });
-
+		if(!devices[0]) {
+			test.done();
+			return;
+		}
 
 		var device = devices[0];
 		var startTime = new Date();
@@ -252,13 +263,13 @@ exports.tests = {
 				var ctn = device.savedAttributes.connectionTypeName;
 				var fCTN = foundDevCT.connectionTypeName;
 
-				
+
 				if(ctn === fCTN){
 					foundDeviceConnectionType = true;
 					if(foundDevCT.insertionMethod === 'connected') {
 						correctlyReportedDeviceAsOpen = true;
 					}
-				} 
+				}
 			}
 			function checkFoundDevice(foundDevice) {
 				// console.log('in checkFoundDevice', foundDevice.serialNumber, device.savedAttributes.serialNumber);

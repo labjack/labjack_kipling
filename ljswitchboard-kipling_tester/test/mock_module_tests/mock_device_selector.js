@@ -64,7 +64,7 @@ this.test_device_selector = {
 		$ = kiplingWindow.$;
 		MODULE_LOADER = kiplingWindow.MODULE_LOADER;
 		MODULE_CHROME = kiplingWindow.MODULE_CHROME;
-		
+
 
 		io_manager = global.require('ljswitchboard-io_manager');
 		io_interface = io_manager.io_interface();
@@ -105,10 +105,10 @@ this.test_device_selector = {
 	'check page elements': function(test) {
 		var labjackLogo = $('#labjack-logo-image');
 		var isLogoValid = true;
-		if(labjackLogo.height() != 43) {
+		if(labjackLogo.height() != 49) {
 			isLogoValid = false;
 		}
-		if(labjackLogo.width() != 224) {
+		if(labjackLogo.width() != 290) {
 			isLogoValid = false;
 		}
 		test.ok(isLogoValid, 'LabJack logo not displayed');
@@ -201,7 +201,7 @@ this.test_device_selector = {
 				});
 			var viewGen = activeModule.viewGen;
 			var refreshButton = viewGen.pageElements.refresh_devices_button.ref;
-			
+
 			// Trigger the click event for the refresh button and make sure the scan
 			// happens.
 			refreshButton.trigger('click');

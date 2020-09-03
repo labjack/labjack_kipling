@@ -358,7 +358,7 @@ exports.tests = {
 				{'reg': 'AIN_ALL_RANGE', 'res': 1.123456789, 'val': 1.123457, 'rounded': 1.123457, 'unit': 'V'},
 				{'reg': 'AIN_ALL_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 				{'reg': 'AIN_ALL_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
-			
+
 				{'reg': 'AIN_ALL_SETTLING_US', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 				{'reg': 'AIN0_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
 				{'reg': 'AIN254_RANGE', 'res': 0.0123456789012, 'val': 0.012346, 'rounded': 0.012346, 'unit': 'V'},
@@ -656,7 +656,7 @@ exports.tests = {
 	},
 	'check RTC_TIME_S register (T7)': function(test) {
 		var vals = [
-			{'val': 1473967452, 'str': '9/15/2016, 1:24:12 PM', 't7Time': 1473967452000},
+			{'val': 1473967452, 'str': '9/15/2016, 7:24:12 PM', 't7Time': 1473967452000},
 		];
 
 		var results = [];
@@ -688,7 +688,7 @@ exports.tests = {
 	},
 	'check RTC_TIME_S register (T8)': function(test) {
 		var vals = [
-			{'val': 1473967452, 'str': '9/15/2016, 1:24:12 PM', 't8Time': 1473967452000},
+			{'val': 1473967452, 'str': '9/15/2016, 7:24:12 PM', 't8Time': 1473967452000},
 		];
 
 		var results = [];
@@ -805,7 +805,7 @@ exports.tests = {
 		results.forEach(function(result, i) {
 			test.deepEqual(
 				result,
-				reqResults[i], 
+				reqResults[i],
 				'dgt log items failed ' + result.name + ' i: ' + i
 			);
 		});
@@ -839,7 +839,7 @@ exports.tests = {
 		results.forEach(function(result, i) {
 			test.deepEqual(
 				result,
-				reqResults[i], 
+				reqResults[i],
 				'dgt log intervals failed ' + result.name + ' i: ' + i
 			);
 		});
@@ -876,7 +876,7 @@ exports.tests = {
 		results.forEach(function(result, i) {
 			test.deepEqual(
 				result,
-				reqResults[i], 
+				reqResults[i],
 				'dgt log intervals failed ' + result.name + ' i: ' + i
 			);
 		});

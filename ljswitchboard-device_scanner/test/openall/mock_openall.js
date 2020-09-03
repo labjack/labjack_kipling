@@ -10,9 +10,9 @@ var printScanResultsData = test_util.printScanResultsData;
 var printScanResultsKeys = test_util.printScanResultsKeys;
 var testScanResults = test_util.testScanResults;
 var device_curator = require('ljswitchboard-ljm_device_curator');
+var driver = require('labjack-nodejs').driver();
 
 var deviceScanner;
-var driver;
 var devices = [];
 exports.tests = {
 	'Starting Mock Test': function(test) {
@@ -22,7 +22,6 @@ exports.tests = {
 	},
 	'create device scanner': function(test) {
 		device_scanner.disableSafeLoad();
-		driver = require('LabJack-nodejs').driver();
 		deviceScanner = open_all_device_scanner.createDeviceScanner(driver);
 		test.done();
 	},
@@ -55,7 +54,7 @@ exports.tests = {
 	},
 	'mock test': function(test) {
 		var startTime = new Date();
-		
+
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -88,7 +87,7 @@ exports.tests = {
 			var debug = false;
 
 			testScanResults(deviceTypes, expectedData, test, {'debug': true});
-			
+
 			if(debug) {
 				console.log('  - Duration', (endTime - startTime)/1000);
 			}
@@ -150,7 +149,7 @@ exports.tests = {
 			test.done();
 		});
 	},
-	
+
 	're-configure - USB Only': function(test) {
 		var OPEN_ALL_SCAN_REQUEST_LIST = [
 		    {

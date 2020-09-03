@@ -8,6 +8,10 @@ To build the project:
 
 `npm run build_project`
 
+## Not meant to be a dependency of any published labjack_kipling packages
+
+Because ljswitchboard-builder contains large build files, it does not make itself available for the final Kipling app. For more, see [publish_locally](#publish_locally).
+
 ## test
 
 ### npm test
@@ -32,9 +36,30 @@ TODO: Document.
 
 Empties `output` build directory & copies NW files.
 
+### publish_locally
+
+To avoid hitting the npm registry, we can publish locally. Doing so allows us know reliably know that all labjack_kipling internal packages in the final build object are the most recent.
+
+Primarily, the build is guaranteed to have only one version of each labjack_kipling internal package. This ensures everything in the final build is up-to-date.
+
+Some related benefits:
+
+ - No waiting for the npm registry to update
+ - No worrying about the local npm cache being stale
+ - Less network traffic is required, both outbound and inbound
+ - We don't need the npm registry anymore.
+ - The final build is comparatively smaller.
+
+publish_locally.js copies staging versions of the labjack_kipling internal packages to `labjack_kipling/ljswitchboard-builder/temp_staging/`. Once there, it sets their labjack_kipling internal dependencies to be absolute paths in `labjack_kipling/ljswitchboard-builder/temp_staging/`.
+
+From there it `npm pack`s labjack_kipling internal packages from `temp_staging` as tar files to:
+`labjack_kipling/ljswitchboard-builder/temp_tar/`.
+
+All contents of `temp_tar` and `temp_staging` will be deleted beforehand.
+
 ### gather_project_files
 
-Deletes any previous files in `temp_project_files`, then recursively copies dirs defined in `ljswitchboard-builder/package.json['kipling_dependencies']` to `temp_project_files`, while omitting certain files and directories.
+Deletes any previous files in `temp_project_files`, then recursively copies dirs defined in `ljswitchboard-builder/package.json['kipling_dependencies']` from `temp_staging` to `temp_project_files`, while omitting certain files and directories.
 
 ### gather_test_project_files
 
@@ -48,7 +73,11 @@ For the keys and values in `ljswitchboard-builder/package.json['splash_screen_bu
 
 ### install_production_dependencies
 
-Recursively installs production `package.json['dependencies']` of each module defined in `ljswitchboard-builder/package.json['kipling_dependencies']`.
+Does two passes of installation.
+
+For each package in `temp_project_files` (which come from `temp_staging`), installs their labjack_kipling internal dependencies from the tar packages in `temp_tar`.
+
+Then recursively installs production `package.json['dependencies']` of each module defined in `ljswitchboard-builder/package.json['kipling_dependencies']`.
 
 ### rebuild_native_modules
 

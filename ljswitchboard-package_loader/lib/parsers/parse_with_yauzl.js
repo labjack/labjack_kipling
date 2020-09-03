@@ -31,7 +31,7 @@ function parseWithYauzl (packageInfo) {
 
     var zipFileDone = false;
     var parseFileDone = false;
-    // Define a function that saves the streamed package.json data to a 
+    // Define a function that saves the streamed package.json data to a
     // string.
     var savePackageData = function(chunk) {
         packageString += chunk.toString('ascii');
@@ -83,7 +83,7 @@ function parseWithYauzl (packageInfo) {
                     defered.resolve(packageInfo);
                 } else {
                     logError('package.json file not found');
-                    // The file wasn't found and no errors occured
+                    // The file wasn't found and no errors occurred
                     defered.resolve(packageInfo);
                 }
             }
@@ -126,10 +126,13 @@ function parseWithYauzl (packageInfo) {
                     }
                 }
             });
-            
+
             zipfile.on('close', function() {
                 zipFileDone = true;
                 finishedParsing('zipfile.on(close)');
+                if(!foundPackageJsonFile) {
+                    defered.resolve(packageInfo);
+                }
             });
             zipfile.on('error', function(err) {
                 logError('zipfile error', err);

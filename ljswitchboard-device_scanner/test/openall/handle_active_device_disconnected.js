@@ -115,6 +115,11 @@ exports.tests = {
 	 * a "connected" device by the cached scan in the next test.
 	 */
 	'open device': function(test) {
+		if (process.env.SKIP_HARDWARE_TEST) {
+			test.done();
+			return;
+		}
+
 		device = new device_curator.device();
 		device.on('DEVICE_DISCONNECTED', deviceDisconnectedHandler);
 		device.on('DEVICE_RECONNECTED', deviceReconnectedHandler);
@@ -190,13 +195,13 @@ exports.tests = {
 	// 			var ctn = device.savedAttributes.connectionTypeName;
 	// 			var fCTN = foundDevCT.connectionTypeName;
 
-				
+
 	// 			if(ctn === fCTN){
 	// 				foundDeviceConnectionType = true;
 	// 				if(foundDevCT.insertionMethod === 'connected') {
 	// 					correctlyReportedDeviceAsOpen = true;
 	// 				}
-	// 			} 
+	// 			}
 	// 		}
 	// 		function checkFoundDevice(foundDevice) {
 	// 			// console.log('in checkFoundDevice', foundDevice.serialNumber, device.savedAttributes.serialNumber);
@@ -254,7 +259,7 @@ exports.tests = {
 		}
 		var intervalHandler = setInterval(deviceChecker, 1000);
 	},
-	
+
 	'close device': function(test) {
 		if(devices[0]) {
 			devices[0].close()

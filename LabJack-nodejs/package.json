@@ -31,7 +31,6 @@
         "allocate_buffer": "^1.0.0",
         "async": "1.5.2",
         "diff": "^4.0.1",
-        "ffi-napi": "^2.4.7",
         "ljm-ffi": "*",
         "ljswitchboard-ljm_driver_constants": "*",
         "ljswitchboard-modbus_map": "*",

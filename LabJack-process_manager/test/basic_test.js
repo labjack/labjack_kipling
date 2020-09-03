@@ -4,6 +4,7 @@
 
 // Require npm modules
 var q = require('q');
+var fs = require('fs');
 
 function createBasicTest(imports) {
 	var process_manager;
@@ -17,6 +18,12 @@ function createBasicTest(imports) {
 	getExecution = utils.getExecution;
 	node_binary = imports.node_binary;
 	constants = process_manager.constants;
+
+	if (!fs.existsSync(imports.node_binary)) { // skip for linux
+		this.tests = {
+		};
+		return;
+	}
 
 	// master_process object
 	var mp;
@@ -126,7 +133,7 @@ function createBasicTest(imports) {
 				'getProcessInfo',
 				'getEventEmitter'
 			];
-			
+
 			createMasterProcess()
 			.then(function(retData) {
 				// Verify function list
@@ -142,8 +149,8 @@ function createBasicTest(imports) {
 			});
 		},
 		/**
-		 * Initialize the master_process instance, this test makes sure that 
-		 * initializing the master process returns an event listener.  this process 
+		 * Initialize the master_process instance, this test makes sure that
+		 * initializing the master process returns an event listener.  this process
 		 * can be done synchronously but is wrapped by a promise to make it async.
 		 */
 		'initialize_master_process': function(test) {
@@ -201,8 +208,8 @@ function createBasicTest(imports) {
 		},
 		/**
 		 * This test starts a new process and performs some IO to the process and
-		 * checks the results of the sendReceive message as well as the send & 
-		 * sendMessage functions.  The one way messages get handled by the 
+		 * checks the results of the sendReceive message as well as the send &
+		 * sendMessage functions.  The one way messages get handled by the
 		 * previously established event listeners.
 		 */
 		'basic_execution': function(test) {
@@ -250,7 +257,7 @@ function createBasicTest(imports) {
 				// Check to make sure that the testEvents were fired
 				test.deepEqual(receivedTestEvents, expectedTestEvents, 'Issue with event messaging');
 
-				// Check to make sure that the the sendReceive/master_process 
+				// Check to make sure that the the sendReceive/master_process
 				// functions were called properly
 				// console.log('retData', returnedData[5].retData);
 				// var buff = new Buffer(1);

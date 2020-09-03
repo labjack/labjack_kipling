@@ -253,7 +253,7 @@ var initializeProgram = function() {
 
 			// Save to the global scope
 			global.ljswitchboard.labjackFolderPath = lj_folder_path;
-			if(gui.App.manifest.test) {
+			if(!!process.env.TEST_MODE || gui.App.manifest.test) {
 				persistentDataManager = new persistent_data_manager.create(
 					lj_folder_path,
 					gui.App.manifest.testPersistentDataFolderName,
@@ -266,7 +266,7 @@ var initializeProgram = function() {
 					gui.App.manifest.persistentDataVersion
 				);
 			}
-			
+
 
 			// Save the path to the global scope
 			global.ljswitchboard.appDataPath = persistentDataManager.getPath();
@@ -320,8 +320,8 @@ var loadSecondaryPackages = function() {
 
 		// Instruct the window_manager to open any managed nwApps
 		// window_manager.openManagedApps(packages);
-		
-		
+
+
 		// Execute test function to proove that io_manager can be used.
 		// global.require('../../test.js').runProgram();
 
@@ -352,7 +352,7 @@ win.on('loaded', function() {
 
 if(false) {
 // Perform a switch based on if this is a test or not.
-if(gui.App.manifest.test) {
+if(!!process.env.TEST_MODE || gui.App.manifest.test) {
 	// If set to 'test', perform testing code
 
 	// Load the testing window
