@@ -635,54 +635,10 @@ function createDeviceKeeper(io_delegator, link) {
 		});
 
 		// Start device scan
-		if(options.enableDemoMode) {
-			var mockDevices = [{
-					'deviceType': 'LJM_dtT7',
-					'connectionType': 'LJM_ctETHERNET',
-					'serialNumber': 1,
-				}, {
-					'deviceType': 'LJM_dtT7',
-					'connectionType': 'LJM_ctUSB',
-					'serialNumber': 1,
-				}, {
-					'deviceType': 'LJM_dtT4',
-					'connectionType': 'LJM_ctUSB',
-					'serialNumber': 4,
-				}, // {
-				// 	'deviceType': 'LJM_dtT8',
-				// 	'connectionType': 'LJM_ctUSB',
-				// 	'serialNumber': 8,
-				// }
-			];
-			deviceScanner.addMockDevices(mockDevices)
-			.then(function(res) {
-				deviceScanner.disableDeviceScanning()
-				.then(function(res) {
-					deviceScanner.findAllDevices(currentDevices, options)
-					.then(function(data) {
-						defered.resolve(data);
-					}, defered.reject);
-				}, function(err) {
-					deviceScanner.findAllDevices(currentDevices, options)
-					.then(function(data) {
-						defered.resolve(data);
-					}, defered.reject);
-				});
-			});
-		} else {
-			deviceScanner.enableDeviceScanning()
-			.then(function(res) {
-				deviceScanner.findAllDevices(currentDevices, options)
-				.then(function(data) {
-					defered.resolve(data);
-				}, defered.reject);
-			}, function(err) {
-				deviceScanner.findAllDevices(currentDevices, options)
-				.then(function(data) {
-					defered.resolve(data);
-				}, defered.reject);
-			});
-		}
+		deviceScanner.findAllDevices(currentDevices, options)
+		.then(function(data) {
+			defered.resolve(data);
+		}, defered.reject);
 
 		return defered.promise;
 	};

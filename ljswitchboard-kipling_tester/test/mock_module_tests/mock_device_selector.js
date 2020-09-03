@@ -169,8 +169,8 @@ this.test_device_selector = {
 		var t4s = $('.DEVICE_TYPE_T4 .device');
 		test.strictEqual(t4s.length, 1, 'Unexpected number of T4s found');
 
-		var t5s = $('.DEVICE_TYPE_T5 .device');
-		test.strictEqual(t5s.length, 1, 'Unexpected number of T5s found');
+		var t8s = $('.DEVICE_TYPE_T8 .device');
+		test.strictEqual(t8s.length, 1, 'Unexpected number of T8s found');
 
 		test.done();
 	},

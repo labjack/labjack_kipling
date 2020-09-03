@@ -40,15 +40,23 @@ var mockDevices = [{
 		'POWER_LED': 1,
 	},
 }, {
+	'deviceType': 'LJM_dtT8',
+	'connectionType': 'LJM_ctUSB',
+	'serialNumber': 8,
+	'WIFI_RSSI': -65,
+	'deviceConfig': {
+		'TEMPERATURE_DEVICE_K': 210.69,
+		'CURRENT_SOURCE_200UA_CAL_VALUE': 0.000123123,
+		'CURRENT_SOURCE_10UA_CAL_VALUE': 0.000123123,
+		'POWER_ETHERNET': 1,
+		'POWER_WIFI': 1,
+		'POWER_AIN': 1,
+		'POWER_LED': 1,
+	},
+}, {
 	'deviceType': 'LJM_dtT4',
 	'connectionType': 'LJM_ctUSB',
 	'serialNumber': 44001000,
-	'deviceConfig': {
-	},
-}, {
-	'deviceType': 'LJM_dtT5',
-	'connectionType': 'LJM_ctUSB',
-	'serialNumber': 45001000,
 	'deviceConfig': {
 	},
 }, {
