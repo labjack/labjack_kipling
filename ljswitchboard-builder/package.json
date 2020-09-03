@@ -16,7 +16,7 @@
     "async": "3.1.0",
     "colors": "1.4.0",
     "concat-stream": "1.5.2",
-    "decompress": "2.3.0",
+    "decompress": "4.2.1",
     "decompress-unzip": "3.2.2",
     "decompress-zip": "0.2.0",
     "extract-zip": "1.0.3",
