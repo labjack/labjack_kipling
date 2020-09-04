@@ -5,17 +5,15 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ publish-locally-ci ]
-  pull_request:
-    branches: [ publish-locally-ci ]
+    branches: [ master ]
 
 jobs:
   build:
-
+    if: ${{ github.event.repository.full_name == 'labjack/labjack_kipling_private' }}
     strategy:
       matrix:
         node-version: [8.9.4]
-        platform: [ubuntu-16.04, macos-latest, windows-latest]
+        platform: [self-hosted]
 
     runs-on: ${{ matrix.platform }}
 
@@ -42,30 +40,18 @@ jobs:
       #      - run: npm ci # doesn't work with node8
       - run: npm install --global node-gyp@latest
       - run: npm install --global --production windows-build-tools --vs2015
-        if: ${{ matrix.platform == 'windows-latest' }}
+        if: ${{ matrix.platform == 'self-hosted' }}
       - run: npm install
       - run: npm config set msvs_version 2015
       - run: npm run setup
       - name: Fix lerna mess
         run: node ./scripts/fix_lerna_backup.js
       - run: npm run build
-      - run: SKIP_HARDWARE_TEST=true npm run test
-        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+      - run: npm run test
+        if: ${{ matrix.platform == 'self-hosted' }}
 
-      - run: ls ./ljswitchboard-builder
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: kipling.3.1.18.${{ steps.date.outputs.date }}_linux64.tar.gz
-          path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_linux64.tar.gz
-        if: ${{ matrix.platform == 'ubuntu-16.04' }}
       - uses: actions/upload-artifact@v2
         with:
           name: kipling.3.1.18.${{ steps.date.outputs.date }}_windows.zip
           path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_win64.zip
-        if: ${{ matrix.platform == 'windows-latest' }}
-      - uses: actions/upload-artifact@v2
-        with:
-          name: kipling.3.1.18.${{ steps.date.outputs.date }}_macos.zip
-          path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_mac64.zip
-        if: ${{ matrix.platform == 'macos-latest' }}
+        if: ${{ matrix.platform == 'self-hosted' }}
