@@ -1,5 +1,5 @@
 
-var ZIPPING_TEST = true;
+var ZIPPING_TEST = false; // TODO somehow test prior to building
 
 if(ZIPPING_TEST) {
 	var zipping_test = require('./zipping_test');
