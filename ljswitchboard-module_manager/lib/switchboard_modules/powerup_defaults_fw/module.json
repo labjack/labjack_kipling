@@ -4,7 +4,7 @@
     "version": "0.0.1",
     "framework":"multipleDevices",
     "supportedDevices": [
-        {"type":"T8","minFW":"1.5"},
+        {"type":"T8","minFW":"0.1"},
         {"type":"T7","minFW":"0.1"},
         {"type":"T4","minFW":"0.1"}
     ],
