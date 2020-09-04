@@ -52,6 +52,10 @@ if(dayStr.length < 2) {
 }
 var dateStrPartial = [yearStr,monthStr,dayStr].join('_') + '_';
 
+if (process.env.OVERRIDE_BUILD_DATE) {
+	dateStrPartial =process.env.OVERRIDE_BUILD_DATE + '_';
+}
+
 var osForOutputFileName = {
 	'darwin': 'mac',
 	'win32': 'win',
