@@ -22,7 +22,7 @@ jobs:
 
       - name: get-npm-version
         id: package-version
-        uses: action-get-npm-version@master
+        uses: pchynoweth/action-get-npm-version@master
 
       - name: Validate version
         run: echo "Wrong tag"
