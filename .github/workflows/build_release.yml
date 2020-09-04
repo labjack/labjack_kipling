@@ -1,0 +1,94 @@
+name: Build release binaries
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        node-version: [8.9.4]
+        platform: [ubuntu-16.04, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - run: echo "${{ github.event.release.tag_name }}"
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+
+      - name: Validate version
+        run: echo "Wrong tag"
+        if: ${{ github.event.release.tag_name != format('{0}{1}', 'v', steps.package-version.outputs.current-version) }}
+
+      - name: Get current date
+        uses: 1466587594/get-current-time@v2
+        id: date
+        with:
+          format: YYYY_MM_DD
+          utcOffset: "+08:00"
+      - name: Download ljm
+        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        uses: wei/wget@v1
+        with:
+          args: -O labjack_ljm_software.tar.gz https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_07_16_x86_64.tar.gz
+      - name: Install ljm
+        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        run: tar xfz labjack_ljm_software.tar.gz && cd ./labjack_ljm_software_2019_07_16_x86_64 && sudo ./labjack_ljm_installer.run
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      #      - run: npm ci # doesn't work with node8
+      - run: npm install --global node-gyp@latest
+      - run: npm install --global --production windows-build-tools --vs2015
+        if: ${{ matrix.platform == 'windows-latest' }}
+      - run: npm install
+      - run: npm config set msvs_version 2015
+      - run: npm run setup
+      - name: Fix lerna mess
+        run: node ./scripts/fix_lerna_backup.js
+      - run: OVERRIDE_BUILD_DATE=${{ steps.date.outputs.formattedTime }} npm run build
+      - run: SKIP_HARDWARE_TEST=true npm run test
+        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_linux64.tar.gz
+          asset_name: kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_linux64.tar.gz
+          asset_content_type: application/zip
+        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_win64.tar.gz
+          asset_name: kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_win64.tar.gz
+          asset_content_type: application/zip
+        if: ${{ matrix.platform == 'windows-latest' }}
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_mac64.tar.gz
+          asset_name: kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_mac64.tar.gz
+          asset_content_type: application/zip
+        if: ${{ matrix.platform == 'macos-latest' }}
