@@ -56,7 +56,11 @@ jobs:
       - run: npm run setup
       - name: Fix lerna mess
         run: node ./scripts/fix_lerna_backup.js
-      - run: OVERRIDE_BUILD_DATE=${{ steps.date.outputs.formattedTime }} npm run build
+
+      - run: npm run build
+        with:
+          OVERRIDE_BUILD_DATE: '${{ steps.date.outputs.formattedTime }}'
+
       - run: SKIP_HARDWARE_TEST=true npm run test
         if: ${{ matrix.platform == 'ubuntu-16.04' }}
 
