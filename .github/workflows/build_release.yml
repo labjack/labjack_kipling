@@ -22,12 +22,11 @@ jobs:
 
       - name: get-npm-version
         id: package-version
-        uses: martinbeentjes/npm-get-version-action@master
-        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        uses: action-get-npm-version@master
 
       - name: Validate version
         run: echo "Wrong tag"
-        if: ${{ matrix.platform == 'ubuntu-16.04' && github.event.release.tag_name != format('{0}{1}', 'v', steps.package-version.outputs.current-version) }}
+        if: ${{ github.event.release.tag_name != format('{0}{1}', 'v', steps.package-version.outputs.version) }}
 
       - name: Get current date
         uses: 1466587594/get-current-time@v2
