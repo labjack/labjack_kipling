@@ -58,7 +58,7 @@ jobs:
         run: node ./scripts/fix_lerna_backup.js
 
       - run: npm run build
-        with:
+        env:
           OVERRIDE_BUILD_DATE: '${{ steps.date.outputs.formattedTime }}'
 
       - run: SKIP_HARDWARE_TEST=true npm run test
