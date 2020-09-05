@@ -25,3 +25,7 @@ If steps of the above build process fail:
 
 - Old: navigate into the ljswitchboard-builder directory and run "npm run build_project" to build the project.  The output files will exist in the /output folder.
 
+
+## Incrementing the main version
+
+See `git show 217f70851d8aa00a098af70592d5e54aabb7fd0a` for an example.
