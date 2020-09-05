@@ -52,6 +52,6 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: kipling.3.1.18.${{ steps.date.outputs.date }}_windows.zip
-          path: ljswitchboard-builder/kipling.3.1.18.${{ steps.date.outputs.formattedTime }}_win64.zip
+          name: kipling.3.2.0.${{ steps.date.outputs.date }}_windows.zip
+          path: ljswitchboard-builder/kipling.3.2.0.${{ steps.date.outputs.formattedTime }}_win64.zip
         if: ${{ matrix.platform == 'self-hosted' }}
