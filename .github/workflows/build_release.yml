@@ -15,7 +15,6 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - run: echo "${{ github.event.release.tag_name }}"
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.release.tag_name }}
@@ -25,7 +24,7 @@ jobs:
         uses: pchynoweth/action-get-npm-version@master
 
       - name: Validate version
-        run: echo "Wrong tag"
+        run: exit
         if: ${{ github.event.release.tag_name != format('{0}{1}', 'v', steps.package-version.outputs.version) }}
 
       - name: Get current date
@@ -58,7 +57,7 @@ jobs:
         run: node ./scripts/fix_lerna_backup.js
       - run: npm run build
         env:
-          OVERRIDE_BUILD_DATE: ${{ steps.date.outputs.formattedTime }}
+          OVERRIDE_BUILD_DATE: '${{ steps.date.outputs.formattedTime }}'
       - run: SKIP_HARDWARE_TEST=true npm run test
         if: ${{ matrix.platform == 'ubuntu-16.04' }}
 
@@ -68,8 +67,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ljswitchboard-builder/kipling.3.2.0.${{ steps.date.outputs.formattedTime }}_linux64.tar.gz
-          asset_name: kipling.3.2.0.${{ steps.date.outputs.formattedTime }}_linux64.tar.gz
+          asset_path: ljswitchboard-builder/kipling.${{ steps.package-version.outputs.version }}.${{ steps.date.outputs.formattedTime }}_linux64.tar.gz
+          asset_name: kipling.${{ steps.package-version.outputs.version }}.${{ steps.date.outputs.formattedTime }}_linux64.tar.gz
           asset_content_type: application/zip
         if: ${{ matrix.platform == 'ubuntu-16.04' }}
 
@@ -79,8 +78,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ljswitchboard-builder/kipling.3.2.0.${{ steps.date.outputs.formattedTime }}_win64.zip
-          asset_name: kipling.3.2.0.${{ steps.date.outputs.formattedTime }}_win64.tar.gz
+          asset_path: ljswitchboard-builder/kipling.${{ steps.package-version.outputs.version }}.${{ steps.date.outputs.formattedTime }}_win64.zip
+          asset_name: kipling.${{ steps.package-version.outputs.version }}.${{ steps.date.outputs.formattedTime }}_win64.tar.gz
           asset_content_type: application/zip
         if: ${{ matrix.platform == 'windows-latest' }}
 
@@ -90,7 +89,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ljswitchboard-builder/kipling.3.2.0.${{ steps.date.outputs.formattedTime }}_mac64.zip
-          asset_name: kipling.3.2.0.${{ steps.date.outputs.formattedTime }}_mac64.tar.gz
+          asset_path: ljswitchboard-builder/kipling.${{ steps.package-version.outputs.version }}.${{ steps.date.outputs.formattedTime }}_mac64.zip
+          asset_name: kipling.${{ steps.package-version.outputs.version }}.${{ steps.date.outputs.formattedTime }}_mac64.tar.gz
           asset_content_type: application/zip
         if: ${{ matrix.platform == 'macos-latest' }}
