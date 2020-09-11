@@ -68,7 +68,12 @@ function module() {
         console.error('Error getting cached T4 versions');
     }
 
-    
+    var defaultVersionData = {
+        'current': [],
+        'beta': [],
+        'old': [],
+        'isValid': false
+    };
 
     this.moduleContext.t7VersionData = this.t7VersionData;
     this.moduleContext.t4VersionData = this.t4VersionData;
@@ -76,6 +81,7 @@ function module() {
     this.availableVersionData = {
         'T4': this.t4VersionData,
         'T7': this.t7VersionData,
+        'T8': defaultVersionData,
     };
     this.currentDTVersionData = {};
     this.selectedDT = '';
@@ -186,7 +192,10 @@ function module() {
         },
         'T7': {
             'changeLogLink': 'https://labjack.com/support/firmware/t7',
-        }
+        },
+        'T8': {
+            'changeLogLink': 'https://labjack.com/support/firmware',
+        },
     }
     this.onDeviceConfigured = function(framework, devices, setupBindings, onError, onSuccess) {
 

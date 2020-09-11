@@ -18,6 +18,7 @@ var io_endpoint_key = constants.device_endpoint_key;
 
 // device creators:
 var ljm_device_creator = require('./device_helpers/ljm_device');
+var t8_device_creator = require('./device_helpers/t8_device');
 var t7_device_creator = require('./device_helpers/t7_device');
 var t4_device_creator = require('./device_helpers/t4_device');
 var t5_device_creator = require('./device_helpers/t5_device');
@@ -150,6 +151,9 @@ function createDeviceController(io_interface) {
 	this.addMockDevice = function(deviceInfo) {
 		return callFunc('addMockDevice', [deviceInfo]);
 	};
+	this.removeAllMockDevices = function() {
+		return callFunc('removeAllMockDevices');
+	}
 	this.initializeLogger = function() {
 		return callFunc('initializeLogger');
 	};
@@ -440,8 +444,10 @@ function createDeviceController(io_interface) {
 			deviceCreator = t5_device_creator;
 		} else if (deviceInfo.deviceType == driver_constants.deviceTypes.digit) {
 			deviceCreator = digit_device_creator;
+		} else if (deviceInfo.deviceType == driver_constants.deviceTypes.t8) {
+			deviceCreator = t8_device_creator;
 		} else {
-			console.warn('Creating a non-standard ljm device object', deviceInfo);
+			console.warn('Creating a default ljm device object', deviceInfo);
 			deviceCreator = ljm_device_creator;
 		}
 
