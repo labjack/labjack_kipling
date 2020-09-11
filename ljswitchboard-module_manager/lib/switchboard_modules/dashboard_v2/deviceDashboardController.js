@@ -224,7 +224,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         .attr('stroke-width', 1)
         .style('shape-rendering', determineAntialiasing);
 
-        // Create a DIV for each of the registers for the main device
+        // Create a DIV for each of the registers
         var overlays = d3.select(DB_REGISTERS_CONTAINER)
         .selectAll('.register-overlay')                                         // Try to replace any existing elements w/ this class
         .data(function () {                                                     // fill all of the elements with data.
@@ -337,7 +337,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
             (-1 * marginTopVal).toString() + 'px'
         );
 
-        // Apply width & height fixes to allow for T4 to have register controls
+        // Apply width & height fixes to allow for register controls
         // on the right side.
         $(DEVICE_D3_CONTAINER).css(
             'width',

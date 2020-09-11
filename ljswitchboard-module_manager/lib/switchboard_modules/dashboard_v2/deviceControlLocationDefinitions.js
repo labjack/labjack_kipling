@@ -68,7 +68,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
     // DB Image Info
     // this.LABJACK_DB_IMG_SRC = 'img/'+deviceTypeName+'-DB-cartoon.png';
     this.LABJACK_DB_IMG_SRC = {
-        'T8': 'img/'+deviceTypeName+'-DB-cartoon.png',
+        'T8': 'img/'+deviceTypeName+'-DB15-cartoon.png',
         'T7': 'img/'+deviceTypeName+'-DB-cartoon.png',
         'T4': 'img/'+deviceTypeName+'-DB15-cartoon.png',
         'T5': 'img/'+deviceTypeName+'-DB15-cartoon.png',
@@ -265,21 +265,25 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
         this.AIN_NUM_DIGITS_PRECISION = 6;
         this.REGISTER_OVERLAY_SPEC = [
             // Left Side, Device
-            {register: 'DAC0', yLocation: 0.622-DEV_OFF,    yShift: -5,         yOffset: 6,         yOverlayOffset: 8,       type: 'dac', board: 'device', side: 'left'},
-            {register: 'DAC1', yLocation: 0.597-DEV_OFF,    yShift: -4,         yOffset: -6,         yOverlayOffset: 8,      type: 'dac', board: 'device', side: 'left'},
-            {register: 'FIO0', yLocation: 0.512-DEV_OFF,    yShift: -2,         yOffset: 6,         yOverlayOffset:  10,     type: 'dio', board: 'device', side: 'left'},
-            {register: 'FIO1', yLocation: 0.486-DEV_OFF,    yShift: -1,         yOffset: -6,        yOverlayOffset:  10,     type: 'dio', board: 'device', side: 'left'},
-            {register: 'FIO2', yLocation: 0.405-DEV_OFF,    yShift: 0,          yOffset: 6,         yOverlayOffset:  12,     type: 'dio', board: 'device', side: 'left'},
-            {register: 'FIO3', yLocation: 0.382-DEV_OFF,    yShift: 1,          yOffset: -6,        yOverlayOffset:  12,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'DAC1', yLocation:  0.297-DEV_OFF,          yShift: 1,          yOffset: -6,        yOverlayOffset:  12,     type: 'dac', board: 'device', side: 'left'},
+            {register: 'DAC0', yLocation: (0.297+0.025)-DEV_OFF,   yShift: 0,          yOffset: 6,         yOverlayOffset:  12,     type: 'dac', board: 'device', side: 'left'},
+            {register: 'FIO7', yLocation:  0.382-DEV_OFF,          yShift: -1,         yOffset: -6,        yOverlayOffset:  10,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO6', yLocation: (0.382+0.025)-DEV_OFF,   yShift: -2,         yOffset: 6,         yOverlayOffset:  10,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO5', yLocation:  0.486-DEV_OFF,          yShift: 1,          yOffset: -6,        yOverlayOffset:  12,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO4', yLocation: (0.486+0.025)-DEV_OFF,   yShift: 0,          yOffset: 6,         yOverlayOffset:  12,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO3', yLocation:  0.597-DEV_OFF,          yShift: -1,         yOffset: -6,        yOverlayOffset:  10,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO2', yLocation: (0.597+0.025)-DEV_OFF,   yShift: -2,         yOffset: 6,         yOverlayOffset:  10,     type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO1', yLocation:  0.690-DEV_OFF,          yShift: -4,         yOffset: -6,        yOverlayOffset: 8,       type: 'dio', board: 'device', side: 'left'},
+            {register: 'FIO0', yLocation: (0.690+0.025)-DEV_OFF,   yShift: -5,         yOffset: 6,         yOverlayOffset: 8,       type: 'dio', board: 'device', side: 'left'},
 
-            {register: 'AIN1', yLocation: 0.667-DEV_OFF,    yShift: -5,         yOffset: 6,         yOverlayOffset: 8,       type: null, board: 'device', side: 'right'},
-            {register: 'AIN0', yLocation: 0.642-DEV_OFF,    yShift: -4,         yOffset: -6,         yOverlayOffset: 8,      type: null, board: 'device', side: 'right'},
-            {register: 'AIN3', yLocation: 0.558-DEV_OFF,    yShift: -2,         yOffset: 6,         yOverlayOffset: 10,      type: null, board: 'device', side: 'right'},
-            {register: 'AIN2', yLocation: 0.532-DEV_OFF,    yShift: -1,         yOffset: -6,        yOverlayOffset: 10,      type: null, board: 'device', side: 'right'},
-            {register: 'AIN5', yLocation: 0.453-DEV_OFF,    yShift: 0,          yOffset: 6,         yOverlayOffset: 12,      type: null, board: 'device', side: 'right'},
-            {register: 'AIN4', yLocation: 0.425-DEV_OFF,    yShift: 1,          yOffset: -6,        yOverlayOffset: 12,      type: null, board: 'device', side: 'right'},
-            {register: 'AIN7', yLocation: 0.342-DEV_OFF,    yShift: 3.5,        yOffset: 6,         yOverlayOffset: 15,      type: null, board: 'device', side: 'right'},
-            {register: 'AIN6', yLocation: 0.315-DEV_OFF,    yShift: 4,          yOffset: -6,        yOverlayOffset: 15,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN0', yLocation: 0.200-DEV_OFF,    yShift: 0,          yOffset: 0,        yOverlayOffset: 15,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN1', yLocation: (0.200+1*.07)-DEV_OFF,    yShift: 0,         yOffset: 0,         yOverlayOffset: 15,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN2', yLocation: (0.200+2*.07)-DEV_OFF,    yShift: 0,          yOffset: 0,        yOverlayOffset: 12,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN3', yLocation: (0.200+3*.07)-DEV_OFF,    yShift: 0,          yOffset: 0,         yOverlayOffset: 12,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN4', yLocation: (0.200+4*.07)-DEV_OFF,    yShift: 0,         yOffset: 0,        yOverlayOffset: 10,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN5', yLocation: (0.200+5*.07)-DEV_OFF,    yShift: 0,         yOffset: 0,         yOverlayOffset: 10,      type: null, board: 'device', side: 'right'},
+            {register: 'AIN6', yLocation: (0.200+6*.07)-DEV_OFF,    yShift: 0,         yOffset: 0,        yOverlayOffset: 8,       type: null, board: 'device', side: 'right'},
+            {register: 'AIN7', yLocation: (0.200+7*.07)-DEV_OFF,    yShift: 0,         yOffset: 0,         yOverlayOffset: 8,       type: null, board: 'device', side: 'right'},
             
             // Left Side, DB15
             {register: 'EIO6', yLocation: 0.275+0.020,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'left'},
