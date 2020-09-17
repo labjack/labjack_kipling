@@ -19,10 +19,10 @@ function debugLog() {
 	}
 }
 
-/** 
+/**
  * Adds or replaces keys in a package.json
  *
- * Param bundle must be an object with the keys:
+ * @param {object} bundle - An object with the keys:
  *   project_path - String path of the package directory.
  *   required_keys - object describing what package.json keys to add/overwrite
  *
@@ -30,16 +30,16 @@ function debugLog() {
  *
  * {
  *   project_path: '/Users/me/src/labjack_kipling/ljswitchboard-splash_screen',
- *   required_keys: 
- *    { topLevelKey: 
+ *   required_keys:
+ *    { topLevelKey:
  *       { recursiveKey: 1,
  *         otherRecursiveKey: 'Hello',
  *         ... },
  *      otherTopLevelKey: true,
  *    }
  *  }
- * 
- * Param recursive is boolean describing if bundle.required_keys should be added
+ *
+ * @param {boolean} recursive - Sets whether bundle.required_keys will be added
  * recursively or not.
  * Example: If bundle.required_keys is:
  *   "dependencies": {
@@ -63,8 +63,6 @@ function debugLog() {
  *   }
  */
 function editPackageKeys(bundle, recursive=false) {
-	// var defered = q.defer();
-
 	var projectPackagePath = path.normalize(path.join(
 		bundle.project_path,
 		'package.json'
@@ -97,80 +95,19 @@ function editPackageKeys(bundle, recursive=false) {
 
 		// Replace info with required info.
 		var keys = Object.keys(reqKeys);
-		keys.forEach(function(key) {	
+		keys.forEach(function(key) {
 			if (recursive) {
-				// console.log('recursiveSetKeys pre', obj, reqKeys)
 				recursiveSetKeys(key, obj, reqKeys);
-				// console.log('recursiveSetKeys pos', obj, reqKeys)
 			} else {
 				obj[key] = reqKeys[key];
 			}
 		});
 		return obj;
-
-		// var newStr = JSON.stringify(obj, null, 2);
-		// debugLog('new str', newStr);
-
-		// return newStr;
 	}
-	// function editAndSaveFile(data) {
-	// 	var newData = editFileContents(data);
-	// 	fse.outputFile(projectPackagePath, newData, function(err) {
-	// 		if(err) {
-	// 			defered.reject(err);
-	// 		} else {
-	// 			console.log('editAndSaveFile saved')
-	// 			defered.resolve();
-	// 		}
-	// 	});
-	// }
+
 	const data = fse.readFileSync(projectPackagePath);
 	const newData = editFileContents(data);
 	fse.outputJSONSync(projectPackagePath, newData);
 }
 
-// function installLocalProductionDependencies(name, directory) {
-// 	const pkgPath = path.join(directory, 'package.json');
-// 	const pkgName = require(pkgPath).name;
-
-// 	const graph = labjackKiplingPackages.getAdjacencyGraph();
-// 	const packages = labjackKiplingPackages.getPackages();
-
-// 	const packageDependencies = graph[pkgName];
-// 	if (!packageDependencies) {
-// 		throw new Error(`Could not find packageDependencies`);
-// 	}
-
-// 	packageDependencies.forEach(function(dependency) {
-// 		if (dependency in graph) {
-// 			const depInfo = Array.prototype.find.call(packages, function(package) {
-// 				return (package.name == dependency)
-// 			});
-// 			const depPackageName = depInfo.name;
-// 			const version = depInfo.version;
-// 			const dependencyTar = path.join(
-// 				'..','..','temp_pre_publish',`${depPackageName}-${version}.tgz`
-// 			);
-// 			var bundle = {
-// 				'project_path': directory,
-// 				'required_keys': {
-// 					'dependencies': {
-// 					},
-// 				},
-// 			};
-// 			bundle.required_keys.dependencies[depPackageName] = dependencyTar;
-// 			editPackageKeys(bundle, true);
-
-// 			if(DEBUG_INSTALLATION) {
-// 				console.log(`${pkgPath} now dependent on ${dependencyTar}`);
-// 			}
-// 			// execSync(`npm install --production ${dependencyTar}`, {
-// 			// 	'cwd': directory,
-// 			// });
-
-// 		}
-// 	})
-// }
-
 exports.editPackageKeys = editPackageKeys;
-// exports.installLocalProductionDependencies = installLocalProductionDependencies;
