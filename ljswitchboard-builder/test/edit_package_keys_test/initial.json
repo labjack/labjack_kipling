@@ -1,0 +1,8 @@
+{
+  "name": "edit_package_keys_test",
+  "version": "1.0.0",
+  "dependencies": {
+    "thing": "1.2.3",
+    "other": "4.5.6"
+  }
+}
