@@ -39,7 +39,6 @@
     "ljswitchboard-ljm_device_curator": "*",
     "ljswitchboard-ljm_driver_constants": "*",
     "ljswitchboard-modbus_map": "*",
-    "labjack-nodejs": "*",
     "q": "1.5.1",
     "ref": "^1.3.5"
   },
