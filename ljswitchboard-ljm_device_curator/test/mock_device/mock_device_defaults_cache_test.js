@@ -10,9 +10,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 deviceFound = false;
@@ -36,7 +36,7 @@ exports.tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -48,9 +48,9 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -58,19 +58,19 @@ exports.tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			assert.strictEqual(res.connectionType, 1);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			done();
 		});
 	},
 	'check defaults cache': function(test) {
 		device.getUnsavedDefaults()
 		.then(function(res) {
 			var expectedRes = {};
-			test.deepEqual(res, expectedRes);
-			test.done();
+			assert.deepEqual(res, expectedRes);
+			done();
 		});
 	},
 	'write defaults': function(test) {
@@ -81,11 +81,11 @@ exports.tests = {
 				var expectedRes = {
 					'POWER_WIFI_DEFAULT': 0
 				};
-				test.deepEqual(res, expectedRes);
-				test.done();
+				assert.deepEqual(res, expectedRes);
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
 	},
 	'write many defaults': function(test) {
@@ -97,11 +97,11 @@ exports.tests = {
 					'POWER_WIFI_DEFAULT': 1,
 					'POWER_ETHERNET_DEFAULT': 0
 				};
-				test.deepEqual(res, expectedRes);
-				test.done();
+				assert.deepEqual(res, expectedRes);
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
 	},
 	'write many defaults (qrwMany)': function(test) {
@@ -117,11 +117,11 @@ exports.tests = {
 					'POWER_WIFI_DEFAULT': 0,
 					'POWER_ETHERNET_DEFAULT': 0
 				};
-				test.deepEqual(res, expectedRes);
-				test.done();
+				assert.deepEqual(res, expectedRes);
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
 	},
 	'clear defaults cache': function(test) {
@@ -130,17 +130,17 @@ exports.tests = {
 			.then(device.getUnsavedDefaults)
 			.then(function(res) {
 				var expectedRes = {};
-				test.deepEqual(res, expectedRes);
-				test.done();
+				assert.deepEqual(res, expectedRes);
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	}
 };

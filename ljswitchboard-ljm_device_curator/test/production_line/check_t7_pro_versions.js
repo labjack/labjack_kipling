@@ -13,9 +13,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -51,7 +51,7 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -72,21 +72,21 @@ var device_tests = {
 				parseFloat(res.FIRMWARE_VERSION.toFixed(4))
 			);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log("  - Failed to open device", ljm.errToStrSync(err));
 			performTests = false;
-			test.ok(false, 'Failed to open device');
-			test.done();
+			assert.isOk(false, 'Failed to open device');
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'check wifi version': function(test) {
@@ -94,13 +94,13 @@ var device_tests = {
 		.then(function(version) {
 			console.log('  - WiFi FW Version:'.green, version.val);
 			if(version.val == 3.12) {
-				test.ok(true);
+				assert.isOk(true);
 			} else {
-				test.ok(false, 'WiFi version should be 3.12, it is: ' + version.toString());
+				assert.isOk(false, 'WiFi version should be 3.12, it is: ' + version.toString());
 			}
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 
 	},
@@ -110,14 +110,14 @@ var device_tests = {
 		.then(function(fwVersion) {
 			console.log('  - Primary FW:'.green, fwVersion.val);
 			if(fwVersion.val == fwVersionNum) {
-				test.ok(true);
+				assert.isOk(true);
 			} else {
-				test.ok(false, 'T7 Firmware version should be '+fwVersionStr+', it is: ' + fwVersion.str);
+				assert.isOk(false, 'T7 Firmware version should be '+fwVersionStr+', it is: ' + fwVersion.str);
 			}
-			test.done();
+			done();
 		}, function(err) {
-			test.ok(false, 'Failed to read FW version: ' + err.toString());
-			test.done();
+			assert.isOk(false, 'Failed to read FW version: ' + err.toString());
+			done();
 		});
 	},
 	'check recovery firmware version': function(test) {
@@ -125,17 +125,17 @@ var device_tests = {
 		.then(function(res) {
 			console.log('  - Recovery FW:'.green, res);
 			if(res == 0.6604) {
-				test.ok(true);
+				assert.isOk(true);
 			} else if(res == 0.6606) {
-				test.ok(true);
+				assert.isOk(true);
 			}else {
-				test.ok(false, 'T7 Recovery FW should be 0.6604 or 0.6606, it is: ' + res.toString());
+				assert.isOk(false, 'T7 Recovery FW should be 0.6604 or 0.6606, it is: ' + res.toString());
 			}
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Error', err);
-			test.ok(false, 'Failed to read the recovery FW version: ' + err.toString());
-			test.done();
+			assert.isOk(false, 'Failed to read the recovery FW version: ' + err.toString());
+			done();
 		});
 	},
 	'check t7 calibration': function(test) {
@@ -144,13 +144,13 @@ var device_tests = {
 			console.log('  - Cal Status:'.green, calStatus);
 			var keys = Object.keys(calStatus);
 			keys.forEach(function(key) {
-				test.ok(calStatus[key], 'T7 Cal Check Failed: ' + key.toString());
+				assert.isOk(calStatus[key], 'T7 Cal Check Failed: ' + key.toString());
 			});
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Error', err);
-			test.ok(false, 'Failed to get the devices calibration status: ' + err.toString());
-			test.done();
+			assert.isOk(false, 'Failed to get the devices calibration status: ' + err.toString());
+			done();
 		});
 	},
 	'check for installed uSD card': function(test) {
@@ -164,26 +164,26 @@ var device_tests = {
 		});
 		if(device.savedAttributes.productType === 'T7-Pro') {
 			if(uSDCardInstalled) {
-				test.ok(true);
+				assert.isOk(true);
 			} else {
-				test.ok(false, 'There should be a uSD card installed in a T7-Pro');
+				assert.isOk(false, 'There should be a uSD card installed in a T7-Pro');
 				console.log('HW Installed'.red, device.savedAttributes.HARDWARE_INSTALLED);
 			}
 		}
-		test.done();
+		done();
 	},
 	'closeDevice': function(test) {
 		// setTimeout(function() {
 			device.close()
 			.then(function() {
-				test.done();
+				done();
 			}, function(err) {
 				console.log("Failure");
-				test.ok(false);
-				test.done();
+				assert.isOk(false);
+				done();
 			});
 		// }, 5000);
-		
+
 	},
 };
 
@@ -197,7 +197,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

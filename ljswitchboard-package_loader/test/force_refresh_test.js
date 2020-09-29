@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 var package_loader = require('../lib/ljswitchboard-package_loader');
 
@@ -19,11 +19,13 @@ eventListKeys.forEach(function(eventKey) {
 	});
 });
 
-
-var fs = require('fs.extra');
 var path = require('path');
+var fs = require('fs');
+var os = require('os');
 var localFolder = 'test_extraction_folder';
-var directory = '';
+
+var tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'labjack-test-'));
+var directory = null;
 // Switch to using a local minified version of semver
 // var semver = require('semver');
 var semver = require('../lib/semver_min');
@@ -38,12 +40,13 @@ var testSinglePackageUpdate = testUtils.testSinglePackageUpdate;
 
 var testDurationTimes = [];
 var currentTestStartTime;
-var tests = {
-	'setUp': function(callback) {
+
+describe('force refresh', function() {
+	beforeEach(function (done) {
 		currentTestStartTime = new Date();
-		callback();
-	},
-	'tearDown': function(callback) {
+		done();
+	});
+	afterEach(function (done) {
 		var startTime = currentTestStartTime;
 		var endTime = new Date();
 		var duration = new Date(endTime - startTime);
@@ -53,17 +56,17 @@ var tests = {
 			'duration': duration
 		});
 		package_loader.deleteAllManagedPackages();
-		callback();
-	},
-	'configure the extraction path': function(test) {
-		directory = path.join(process.cwd(), localFolder);
-		
-		cleanExtractionPath(test, directory);
+		done();
+	});
+	it('configure the extraction path', function (done) {
+		directory = path.join(tmpDir, localFolder);
+
+		cleanExtractionPath(directory);
 
 		package_loader.setExtractionPath(directory);
-		test.done();
-	}, 
-	'start extraction': function(test){
+		done();
+	});
+	it('start extraction', function (done) {
 		// Clear the fired-events list
 		capturedEvents = [];
 
@@ -73,54 +76,54 @@ var tests = {
 		package_loader.loadPackage(testPackages.core);
 
 		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UNINITIALIZED_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UNINITIALIZED_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-			];
+			.then(function (updatedPackages) {
+				// Define the required event list
+				var requiredEvents = [
+					eventList.PACKAGE_MANAGEMENT_STARTED,
+					eventList.VALID_UPGRADE_DETECTED,
+					eventList.DETECTED_UNINITIALIZED_PACKAGE,
+					eventList.STARTING_EXTRACTION,
+					eventList.STARTING_DIRECTORY_EXTRACTION,
+					eventList.FINISHED_EXTRACTION,
+					eventList.FINISHED_DIRECTORY_EXTRACTION,
+					eventList.LOADED_PACKAGE,
+					eventList.PACKAGE_MANAGEMENT_STARTED,
+					eventList.VALID_UPGRADE_DETECTED,
+					eventList.DETECTED_UNINITIALIZED_PACKAGE,
+					eventList.STARTING_EXTRACTION,
+					eventList.STARTING_DIRECTORY_EXTRACTION,
+					eventList.FINISHED_EXTRACTION,
+					eventList.FINISHED_DIRECTORY_EXTRACTION,
+					eventList.LOADED_PACKAGE,
+				];
 
-			// Test to make sure the staticFiles were loaded
-			testSinglePackageUpdate(
-				test,
-				updatedPackages,
-				'initialize',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
+				// Test to make sure the staticFiles were loaded
+				testSinglePackageUpdate(
+					assert,
+					updatedPackages,
+					'initialize',
+					'directory',
+					requiredEvents,
+					capturedEvents
+				);
 
-			// Test to make sure the core library was loaded
-			testSinglePackageUpdate(
-				test,
-				updatedPackages,
-				'initialize',
-				'directory',
-				requiredEvents,
-				capturedEvents,
-				1
-			);
-			test.done();
-		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
-		});
-	},
-	'Force upgrade if greater than/equal to current': function(test) {
+				// Test to make sure the core library was loaded
+				testSinglePackageUpdate(
+					assert,
+					updatedPackages,
+					'initialize',
+					'directory',
+					requiredEvents,
+					capturedEvents,
+					1
+				);
+				done();
+			}, function (err) {
+				assert.isOk(false, 'failed to run the packageManager');
+				done();
+			});
+	});
+	it('Force upgrade if greater than/equal to current extraction', function (done) {
 		// Clear the fired-events list
 		capturedEvents = [];
 
@@ -130,68 +133,66 @@ var tests = {
 		package_loader.loadPackage(testPackages.forceRefreshCore);
 
 		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UP_TO_DATE_PACKAGE,
-				eventList.SKIPPING_PACKAGE_RESET,
-				eventList.SKIPPING_PACKAGE_UPGRADE,
-				eventList.LOADED_PACKAGE,
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.RESETTING_PACKAGE,
-				eventList.FINISHED_RESETTING_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-			];
-			try {
-			testSinglePackageUpdate(
-				test,
-				updatedPackages,
-				'existingSkipUpgrade',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
-			testSinglePackageUpdate(
-				test,
-				updatedPackages,
-				'existingPerformUpgrade',
-				'directory',
-				requiredEvents,
-				capturedEvents,
-				1
-			);
-		} catch(err) {
-			console.log('error', err);
-		}
+			.then(function (updatedPackages) {
+				// Define the required event list
+				var requiredEvents = [
+					eventList.PACKAGE_MANAGEMENT_STARTED,
+					eventList.VALID_UPGRADE_DETECTED,
+					eventList.DETECTED_UP_TO_DATE_PACKAGE,
+					eventList.SKIPPING_PACKAGE_RESET,
+					eventList.SKIPPING_PACKAGE_UPGRADE,
+					eventList.LOADED_PACKAGE,
+					eventList.PACKAGE_MANAGEMENT_STARTED,
+					eventList.VALID_UPGRADE_DETECTED,
+					eventList.RESETTING_PACKAGE,
+					eventList.FINISHED_RESETTING_PACKAGE,
+					eventList.STARTING_EXTRACTION,
+					eventList.STARTING_DIRECTORY_EXTRACTION,
+					eventList.FINISHED_EXTRACTION,
+					eventList.FINISHED_DIRECTORY_EXTRACTION,
+					eventList.LOADED_PACKAGE,
+				];
+				try {
+					testSinglePackageUpdate(
+						assert,
+						updatedPackages,
+						'existingSkipUpgrade',
+						'directory',
+						requiredEvents,
+						capturedEvents
+					);
+					testSinglePackageUpdate(
+						assert,
+						updatedPackages,
+						'existingPerformUpgrade',
+						'directory',
+						requiredEvents,
+						capturedEvents,
+						1
+					);
+				} catch (err) {
+					console.log('error', err);
+				}
 
-			test.done();
-		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
-		});
-	},
+				done();
+			}, function (err) {
+				assert.isOk(false, 'failed to run the packageManager');
+				done();
+			});
+	});
 	// 'check test durations': function(test) {
 	// 	// console.log('Durations:', testDurationTimes);
 	// 	var testSteps = Object.keys(tests);
-	// 	test.strictEqual(testSteps.length - 1, testDurationTimes.length, 'not all times were logged');
+	// 	assert.strictEqual(testSteps.length - 1, testDurationTimes.length, 'not all times were logged');
 	// 	var i;
 	// 	for(i = 0; i < testDurationTimes.length; i++) {
 	// 		// console.log(testDurationTimes[i].endTime - testDurationTimes[i].startTime, testSteps[i]);
 	// 	}
-	// 	test.done();
+	// 	done();
 	// }
 	// Check to make sure that the NEWEST valid upgrade option is selected, not just 'the first found'
 	// Clear the saved files and do the same for .zip files
 	// Make tests where files have dependencies
 	// Make tests where multiple packages are managed and one depends on a version
 	//     of another that is currently being upgraded.  (de-async package-loading front-end).
-};
-
-exports.tests = tests;
+});

@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 var get_registry_info;
 
@@ -6,20 +7,21 @@ var requiredKeys = {
     'LJStreamUD': ['workdir'],
     'LJLogM': ['workdir'],
     'LJStreamM': ['workdir'],
-}
-exports.tests = {
-	'require lib': function(test) {
+};
+
+describe('basic_test', function() {
+    it('require lib', function(done) {
 		get_registry_info = require('../lib/get_registry_info');
-		test.done();
-	},
-	'get application info': function(test) {
+		done();
+    });
+    it('get application info', function(done) {
 		var ljAppNames = get_registry_info.ljAppNames;
         get_registry_info.getLJAppsRegistryInfo(ljAppNames, function(err, info) {
             if(err) {
                 console.error(err);
-                test.ok(false, 'should not have recieved an error');
+                assert.isOk(false, 'should not have recieved an error');
             } else {
-                test.ok(true);
+                assert.isOk(true);
                 console.log('Registry Info:', info);
 
                 var appNames = Object.keys(info);
@@ -28,12 +30,13 @@ exports.tests = {
                     if(requiredKeys[appName]) {
                         var reqAppKeys = requiredKeys[appName];
                         reqAppKeys.forEach(function(reqAppKey) {
-                            test.ok(appKeys.indexOf(reqAppKey) >= 0, 'Missing required registry key for app: '+appName+', key: '+reqAppKey);
+                            assert.isOk(appKeys.indexOf(reqAppKey) >= 0, 'Missing required registry key for app: '+appName+', key: '+reqAppKey);
                         });
                     }
                 });
-                test.done();
+                done();
             }
         });
-	},
-};
+    });
+
+});

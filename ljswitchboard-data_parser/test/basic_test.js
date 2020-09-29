@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 var data_parser = require('../lib/data_parser');
 var modbus_map = require('ljswitchboard-modbus_map');
@@ -5,8 +6,8 @@ var constants = modbus_map.getConstants();
 
 var deviceTypes = ['T4','T5','T7','T8'];
 
-exports.tests = {
-	'check IP registers - encode': function(test) {
+describe('basic_test', function() {
+	it('check IP registers - encode', function (done) {
 		var testVals = [
 			// Test IP strings
 			{'val': '0.0.0.0', 'res': 0},
@@ -42,10 +43,10 @@ exports.tests = {
 			reqResults.push(testVal.res);
 		});
 
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-	'check IP registers (fail) - encode': function(test) {
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+	it('check IP registers (fail) - encode', function (done) {
 		var testVals = [
 			{'val': 'aa', 'res': 0},
 		];
@@ -56,10 +57,10 @@ exports.tests = {
 			results.push(data_parser.encodeValue('WIFI_IP', testVal.val));
 			reqResults.push(testVal.res);
 		});
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-	'check IP registers - decode': function(test) {
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+	it('check IP registers - decode', function (done) {
 		var testVals = [
 			{'val': 0, 'ip': '0.0.0.0'},
 			{'val': 0, 'ip': '0.0.0.0'},
@@ -116,17 +117,17 @@ exports.tests = {
 				});
 			});
 		});
-		test.deepEqual(results, reqResults);
+		assert.deepEqual(results, reqResults);
 		var resultsLength = results.length;
 		var reqResultsLength = reqResults.length;
-		test.strictEqual(resultsLength, reqResultsLength, 'Lengths must be equal');
+		assert.strictEqual(resultsLength, reqResultsLength, 'Lengths must be equal');
 		var i;
 		for(i = 0; i < results.length; i++) {
-			test.deepEqual(results[i], reqResults[i], 'result: ' + i.toString() + 'failed');
+			assert.deepEqual(results[i], reqResults[i], 'result: ' + i.toString() + 'failed');
 		}
-		test.done();
-	},
-	'check HARDWARE_INSTALLED -decode': function(test) {
+		done();
+	});
+	it('check HARDWARE_INSTALLED - decode', function (done) {
 		// Origional values & results w/ proper bit-masks (If there wasn't a wifi issue);
 		var vals = [
 			{'val': 1, 'sdCard': false, 'rtc': false, 'wifi': false, 'adc': true, 'isPro': true},
@@ -183,11 +184,11 @@ exports.tests = {
 				console.log('HERE', i, resKeys[i], reqKeys[i]);
 			}
 		}
-		test.deepEqual(resKeys, reqKeys);
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-	'check DGT_INSTALLED_OPTIONS -decode': function(test) {
+		assert.deepEqual(resKeys, reqKeys);
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+	it('check DGT_INSTALLED_OPTIONS - decode', function (done) {
 		var vals = [
 			{'val': 2, 'temperature': true, 'light': true, 'humidity': false, 'subclass': '-TL'},
 			{'val': 3, 'temperature': true, 'light': true, 'humidity': true, 'subclass': '-TLH'},
@@ -222,11 +223,11 @@ exports.tests = {
 				console.log('HERE', i, resKeys[i], reqKeys[i]);
 			}
 		}
-		test.deepEqual(resKeys, reqKeys, 'Keys are not equal');
-		test.deepEqual(results, reqResults, 'results are not equal');
-		test.done();
-	},
-	'check WIFI_STATUS - decode': function(test) {
+		assert.deepEqual(resKeys, reqKeys, 'Keys are not equal');
+		assert.deepEqual(results, reqResults, 'results are not equal');
+		done();
+	});
+	it('check WIFI_STATUS - decode', function (done) {
 		var wifiData = {
 			2900: 'Associated',
 			2901: 'Associating',
@@ -260,11 +261,11 @@ exports.tests = {
 				'isConnected': isConnected
 			};
 		});
-		test.deepEqual(results, reqResults);
+		assert.deepEqual(results, reqResults);
 
-		test.done();
-	},
-	'check WIFI_RSSI': function(test) {
+		done();
+	});
+	it('check WIFI_RSSI', function (done) {
 		var imgs = [
 			'wifiRSSI-0',
 			'wifiRSSI-1',
@@ -300,13 +301,13 @@ exports.tests = {
 			});
 		});
 
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-	'check FLOAT32 registers for rounding': function(test) {
-		test.done();
-	},
-	'check AINx registers for high-precision rounding': function(test) {
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+	it('check FLOAT32 registers for rounding', function (done) {
+		done();
+	});
+	it('check AINx registers for high-precision rounding', function (done) {
 		deviceTypes.forEach(function(deviceType) {
 			var intDeviceType = 'all';
 			var precision = 6;
@@ -346,11 +347,11 @@ exports.tests = {
 				};
 			});
 			// console.log('Results', results);
-			test.deepEqual(results, reqResults, 'AINx Values are bad: '+deviceType);
+			assert.deepEqual(results, reqResults, 'AINx Values are bad: '+deviceType);
 		});
-		test.done();
-	},
-	'check other AINx related registers for rounding': function(test) {
+		done();
+	});
+	it('check other AINx related registers for rounding', function (done) {
 		deviceTypes.forEach(function(deviceType) {
 
 			var ainValues = [
@@ -399,12 +400,12 @@ exports.tests = {
 				};
 			});
 			// console.log('Results', results);
-			test.deepEqual(results, reqResults, 'AINx Values are bad');
+			assert.deepEqual(results, reqResults, 'AINx Values are bad');
 
-		})
-		test.done();
-	},
-	'check DACx registers for rounding': function(test) {
+		});
+		done();
+	});
+	it('check DACx registers for rounding', function (done) {
 		// DAC registers to test:
 		var registers = ['DAC0', 'DAC1', 1000, 1002];
 
@@ -429,11 +430,11 @@ exports.tests = {
 					'str': dacValue.val.toFixed(3),
 				};
 			});
-			test.deepEqual(results, reqResults, 'DACx Values are bad');
+			assert.deepEqual(results, reqResults, 'DACx Values are bad');
 		});
-		test.done();
-	},
-	'check _VERSION Parsers': function(test) {
+		done();
+	});
+	it('check _VERSION Parsers', function (done) {
 		var vals = [
 			{'reg': 'FIRMWARE_VERSION', 'val': 1.01234567, 'res': 1.0123, 'str': '1.0123'},
 			{'reg': 'BOOTLOADER_VERSION', 'val': 1.01234567, 'res': 1.0123, 'str': '1.0123'},
@@ -457,10 +458,10 @@ exports.tests = {
 		});
 
 		// console.log('Results', results);
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-	'check TEMPERATURE_DEVICE_K': function(test) {
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+	it('check TEMPERATURE_DEVICE_K', function (done) {
 		var vals = [
 			{'reg': 'TEMPERATURE_DEVICE_K', 'val': 303.123456, 'res': 303.1235}
 		];
@@ -481,10 +482,10 @@ exports.tests = {
 		});
 
 		// console.log('Results', results);
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-	'check CURRENT_SOURCE_x_CAL_VALUE': function(test) {
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+	it('check CURRENT_SOURCE_x_CAL_VALUE', function (done) {
 		var vals = [
 			{'reg': 'CURRENT_SOURCE_10UA_CAL_VALUE', 'val': 0.0001981853274, 'res': 198.185},
 			{'reg': 'CURRENT_SOURCE_200UA_CAL_VALUE', 'val': 0.0001002213502, 'res': 100.221}
@@ -506,10 +507,10 @@ exports.tests = {
 		});
 
 		// console.log('Results', results);
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-	'check POWER_ & other systemEnabled/Disabled registers': function(test) {
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+	it('check POWER_ & other systemEnabled/Disabled registers', function (done) {
 		var vals = [
 			{'reg': 'POWER_WIFI', 'val': 0, 'txt': 'WiFi Not Powered'},
 			{'reg': 'POWER_WIFI', 'val': 1, 'txt': 'WiFi Powered'},
@@ -542,10 +543,10 @@ exports.tests = {
 			});
 		});
 
-		test.deepEqual(results, reqResults, 'systemEnabled/Disabled registers failed');
-		test.done();
-	},
-	'check byte size registers': function(test) {
+		assert.deepEqual(results, reqResults, 'systemEnabled/Disabled registers failed');
+		done();
+	});
+	it('check byte size registers', function (done) {
 		var vals = [
 			{'reg': 'FILE_IO_SIZE', 'val': 0, 'str': '0 B'},
 			{'reg': 'FILE_IO_SIZE_BYTES', 'val': 0, 'str': '0 B'},
@@ -579,10 +580,10 @@ exports.tests = {
 				'str': val.str,
 			});
 		});
-		test.deepEqual(results, reqResults, 'byte size registers failed');
-		test.done();
-	},
-	'check File I/O registers: FILE_IO_ATTRIBUTES': function(test) {
+		assert.deepEqual(results, reqResults, 'byte size registers failed');
+		done();
+	});
+	it('check File I/O registers: FILE_IO_ATTRIBUTES', function (done) {
 		var vals = [
 			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b000000, 'isDir': false, 'isFile': false},
 			// {'reg': 'FILE_IO_ATTRIBUTES', 'val': 0b000001, 'isDir': false, 'isFile': false},
@@ -618,10 +619,10 @@ exports.tests = {
 				'isFile': val.isFile,
 			});
 		});
-		test.deepEqual(results, reqResults, 'File I/O registers: FILE_IO_ATTRIBUTES failed');
-		test.done();
-	},
-	'check File I/O registers: FILE_IO_DISK_FORMAT_INDEX': function(test) {
+		assert.deepEqual(results, reqResults, 'File I/O registers: FILE_IO_ATTRIBUTES failed');
+		done();
+	});
+	it('check File I/O registers: FILE_IO_DISK_FORMAT_INDEX', function (done) {
 		var vals = [
 			{'reg': 'FILE_IO_DISK_FORMAT_INDEX', 'val': 0, 'fsType': 'Unknown: 0'},
 			{'reg': 'FILE_IO_DISK_FORMAT_INDEX', 'val': 1, 'fsType': 'FAT12'},
@@ -651,10 +652,10 @@ exports.tests = {
 				'fileSystem': val.fsType,
 			});
 		});
-		test.deepEqual(results, reqResults, 'File I/O registers: FILE_IO_DISK_FORMAT_INDEX failed');
-		test.done();
-	},
-	'check RTC_TIME_S register (T7)': function(test) {
+		assert.deepEqual(results, reqResults, 'File I/O registers: FILE_IO_DISK_FORMAT_INDEX failed');
+		done();
+	});
+	it('check RTC_TIME_S register (T7)', function (done) {
 		var vals = [
 			{'val': 1473967452, 'str': '9/15/2016, 7:24:12 PM', 't7Time': 1473967452000},
 		];
@@ -683,10 +684,10 @@ exports.tests = {
 		});
 		// console.log('results', results);
 		// console.log('reqResults', reqResults);
-		test.deepEqual(results, reqResults, 'RTC Registers failed.');
-		test.done();
-	},
-	'check RTC_TIME_S register (T8)': function(test) {
+		assert.deepEqual(results, reqResults, 'RTC Registers failed.');
+		done();
+	});
+	it('check RTC_TIME_S register (T8)', function (done) {
 		var vals = [
 			{'val': 1473967452, 'str': '9/15/2016, 7:24:12 PM', 't8Time': 1473967452000},
 		];
@@ -715,10 +716,10 @@ exports.tests = {
 		});
 		// console.log('results', results);
 		// console.log('reqResults', reqResults);
-		test.deepEqual(results, reqResults, 'RTC Registers failed.');
-		test.done();
-	},
-	'check SNTP_UPDATE_INTERVAL register': function(test) {
+		assert.deepEqual(results, reqResults, 'RTC Registers failed.');
+		done();
+	});
+	it('check SNTP_UPDATE_INTERVAL register', function (done) {
 		var vals = [
 			{'val': 0, 'str': 'Disabled'},
 			{'val': 10, 'str': '10 sec.'},
@@ -741,10 +742,10 @@ exports.tests = {
 				'str': val.str,
 			});
 		});
-		test.deepEqual(results, reqResults, 'SNTP Register failed.');
-		test.done();
-	},
-	'check shared bitmaskRegister parser': function(test) {
+		assert.deepEqual(results, reqResults, 'SNTP Register failed.');
+		done();
+	});
+	it('check shared bitmaskRegister parser', function (done) {
 		var vals = [
 			{'val': 0, 'reg': 'DIO_STATE'},
 			{'val': 0, 'reg': 'DIO_DIRECTION'},
@@ -772,10 +773,10 @@ exports.tests = {
 				'hexStr': '0x' + val.val.toString(16),
 			});
 		});
-		test.deepEqual(results, reqResults, 'bitmaskRegisters failed.');
-		test.done();
-	},
-	'check DGT_LOG_ITEMS_DATASET register': function(test) {
+		assert.deepEqual(results, reqResults, 'bitmaskRegisters failed.');
+		done();
+	});
+	it('check DGT_LOG_ITEMS_DATASET register', function (done) {
 		var vals = [
 			{'val': 0, 'temperature': false, 'light': false, 'humidity': false, 'isValid': false},
 			{'val': 1, 'temperature': true, 'light': false, 'humidity': false, 'isValid': true},
@@ -803,15 +804,15 @@ exports.tests = {
 			});
 		});
 		results.forEach(function(result, i) {
-			test.deepEqual(
+			assert.deepEqual(
 				result,
 				reqResults[i],
 				'dgt log items failed ' + result.name + ' i: ' + i
 			);
 		});
-		test.done();
-	},
-	'check DGT_STORED_BYTES register': function(test) {
+		done();
+	});
+	it('check DGT_STORED_BYTES register', function (done) {
 		var vals = [
 			{'val': 0},
 			{'val': 1},
@@ -837,15 +838,15 @@ exports.tests = {
 			});
 		});
 		results.forEach(function(result, i) {
-			test.deepEqual(
+			assert.deepEqual(
 				result,
 				reqResults[i],
 				'dgt log intervals failed ' + result.name + ' i: ' + i
 			);
 		});
-		test.done();
-	},
-	'check DGT_LOG_INTERVAL_INDEX_DATASET register': function(test) {
+		done();
+	});
+	it('check DGT_LOG_INTERVAL_INDEX_DATASET register', function (done) {
 		var vals = [
 			{'val': 0, 'time': 10, 'isValid': true},
 			{'val': 1, 'time': 30, 'isValid': true},
@@ -874,15 +875,15 @@ exports.tests = {
 			});
 		});
 		results.forEach(function(result, i) {
-			test.deepEqual(
+			assert.deepEqual(
 				result,
 				reqResults[i],
 				'dgt log intervals failed ' + result.name + ' i: ' + i
 			);
 		});
-		test.done();
-	},
-	'check undefined register - parse': function(test) {
+		done();
+	});
+	it('check undefined register - parse', function (done) {
 		// Make sure that no parsers get run but some basic information is added
 		var cmds = [
 			{'reg': 9000, 'val': 0},
@@ -905,10 +906,10 @@ exports.tests = {
 		});
 
 		// console.log('Results', results);
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-	'check undefined register - encode': function(test) {
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+	it('check undefined register - encode', function (done) {
 		var cmds = [
 			{'reg': 'HARDWARE_INSTALLED', 'val': 15, 'res': 15},
 			{'reg': 'HARDWARE_INSTALLED', 'val': '15', 'res': 15},
@@ -923,13 +924,13 @@ exports.tests = {
 		var reqResults = cmds.map(function(cmd) {
 			return cmd.res;
 		});
-		test.deepEqual(results, reqResults);
+		assert.deepEqual(results, reqResults);
 		results.forEach(function(result, i) {
-			test.strictEqual(result, reqResults[i], cmds[i].reg + ' has an invalid value');
+			assert.strictEqual(result, reqResults[i], cmds[i].reg + ' has an invalid value');
 		});
-		test.done();
-	},
-	'check undefined register (b) - encode': function(test) {
+		done();
+	});
+	it('check undefined register (b) - encode', function (done) {
 		var cmds = [
 			{'reg': 'HARDWARE_INSTALLED', 'val': 15},
 			{'reg': 'DEVICE_NAME_DEFAULT', 'val': '1'},
@@ -940,7 +941,7 @@ exports.tests = {
 		var reqResults = cmds.map(function(cmd) {
 			return cmd.val;
 		});
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-};
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+});

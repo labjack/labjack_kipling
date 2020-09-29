@@ -35,12 +35,13 @@
     "devDependencies": {
         "colors": "1.4.0",
         "diff": ">=3.5.0",
-        "nodeunit": "0.11.3",
+        "mocha": "7.2.0",
+        "chai": "^4.2.0",
         "rewire": "4.0.1"
     },
     "script_notes": "to run a script w/o using npm test, use npm run [script name]",
     "scripts": {
-        "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+        "test": "mocha",
         "start": "node ./examples/hello_world.js"
     },
     "engines": {

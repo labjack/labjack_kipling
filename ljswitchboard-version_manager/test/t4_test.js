@@ -1,8 +1,9 @@
+var assert = require('chai').assert;
 
 var version_manager;
 var versionData;
 
-function validateVersionData(test, data, debug) {
+function validateVersionData(assert, data, debug) {
 	if(debug) {
 		console.log('Validating Data', JSON.stringify(Object.keys(data), null, 2));
 	}
@@ -49,44 +50,46 @@ function printVersions(versionData) {
 					'K:', firmware.key,
 					'F:', finalPartial
 				);
-			})
+			});
 		}
 	});
 }
-exports.tests = {
-	'require version_manager': function(test) {
+describe('t4_test', function() {
+	return;
+	this.skip();
+	it('require version_manager', function (done) {
 		version_manager = require('../lib/version_manager');
-		test.done();
-	},
+		done();
+	});
 	// 'get initial T4 Versions': function(test) {
 	// 	var data = version_manager.lvm.getCachedT4Versions();
-	// 	test.ok(!data.isValid, 'T4 Firmware data should not be valid yet');
-	// 	test.done();
+	// 	assert.isOk(!data.isValid, 'T4 Firmware data should not be valid yet');
+	// 	done();
 	// },
-	'initialize version_manager': function(test) {
+	it('initialize version_manager', function (done) {
 		var startTime = new Date();
 		version_manager.getAllVersions()
 		.then(function(data) {
 			var endTime = new Date();
 			addExecutionTime('Initialization', startTime, endTime);
-			test.ok(true);
+			assert.isOk(true);
 			versionData = data;
-			validateVersionData(test, data, false);
-			test.done();
+			validateVersionData(assert, data, false);
+			done();
 		}, function(err) {
-			test.ok(false, 'Error initializing version_manager');
-			test.done();
+			assert.isOk(false, 'Error initializing version_manager');
+			done();
 		});
-	},
-	'get T4 Versions': function(test) {
+	});
+	it('get T4 Versions', function (done) {
 		var data = version_manager.lvm.getCachedT4Versions();
-		test.ok(data.isValid, 'T4 Firmware data should be valid');
+		assert.isOk(data.isValid, 'T4 Firmware data should be valid');
 		var requiredKeys = [
 			'current',
 			// 'old',
 			// 'beta'
 		];
-		
+
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
 		// printVersions(data);
@@ -96,9 +99,9 @@ exports.tests = {
 			if(givenKeys.indexOf(reqKey) >= 0) {
 				isOk = true;
 			}
-			test.ok(isOk, '(T4 Firmware) Missing a required key: ' + reqKey);
+			assert.isOk(isOk, '(T4 Firmware) Missing a required key: ' + reqKey);
 		});
 		// console.log('T4 FW Versions', data);
-		test.done();
-	},
-};
+		done();
+	});
+});

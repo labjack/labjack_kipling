@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 /*
  * This test makes sure that a simple LJM function call can be performed with
@@ -5,7 +6,7 @@
  * types.
  * Type 1: Automatically handles converting/parsing of data into and out of
  * 		buffer data structures.
- * Type 2: Adds a try-catch around the function call that makes the 
+ * Type 2: Adds a try-catch around the function call that makes the
  * 		Linux/Mac/Windows ffi implementations more similar.
  * Type 3: The raw FFI function calls.
  */
@@ -44,17 +45,18 @@ var ffi_liblabjack;
 
 
 /* Define Test Cases */
-var test_cases = {
-	'include ljm': function(test) {
+
+describe('get_ljm_version', function() {
+	it('include ljm', function (done) {
 		var ljm_ffi = require('../lib/ljm-ffi');
 
 		ljm = ljm_ffi.load();
 		liblabjack = ljm_ffi.loadSafe();
 		ffi_liblabjack = ljm_ffi.loadRaw();
 
-		test.done();
-	},
-	'Execute LJM_NameToAddress (Sync)': function(test) {
+		done();
+	});
+	it('Execute LJM_NameToAddress (Sync)', function (done) {
 		var ljmLibraryVersion = ljm.LJM_ReadLibraryConfigS('LJM_LIBRARY_VERSION', 0);
 		var expectedData = {
 			'ljmError': 0,
@@ -62,24 +64,21 @@ var test_cases = {
 			'Value': ljmLibraryVersion.Value,
 		};
 		console.log('  - LJM Library Version:'.green, ljmLibraryVersion.Value);
-		test.deepEqual(ljmLibraryVersion, expectedData);
-		test.done();
-	},
-	'Execute LJM_NameToAddress (Async)': function(test) {
+		assert.deepEqual(ljmLibraryVersion, expectedData);
+		done();
+	});
+	it('Execute LJM_NameToAddress (Async)', function (done) {
 		function testData(ljmLibraryVersion) {
 			var expectedData = {
 				'ljmError': 0,
 				'Parameter': 'LJM_LIBRARY_VERSION',
 				'Value': ljmLibraryVersion.Value,
 			};
-			test.deepEqual(ljmLibraryVersion, expectedData);
-			test.done();
+			assert.deepEqual(ljmLibraryVersion, expectedData);
+			done();
 		}
 
 		// Execute LJM Function
 		ljm.LJM_ReadLibraryConfigS.async('LJM_LIBRARY_VERSION', 0, testData);
-	},
-};
-
-
-exports.tests = test_cases;
+	});
+});

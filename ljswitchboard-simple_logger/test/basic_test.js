@@ -1,7 +1,8 @@
+var assert = require('chai').assert;
 
 /*
 The basic_test tests the logger with a single logging configuration for basic
-debugging & development purposes.  The adv_test.js executes the logger and makes
+debugging & development purposes.  The adv_assert.js executes the logger and makes
 sure that it works with all of the test_config_files.
 */
 
@@ -47,7 +48,7 @@ var ENABLE_DEBUG_LOG = false;
 function debugLog() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];
-		dataToPrint.push('(basic_test.js)');
+		dataToPrint.push('(basic_assert.js)');
 		for(var i = 0; i < arguments.length; i++) {
 			dataToPrint.push(arguments[i]);
 		}
@@ -70,71 +71,79 @@ function attachListeners(loggerObject) {
 
 
 /* Define Test Cases */
-exports.tests = {
-	'Starting Basic Test': function(test) {
+describe('basic_test', function() {
+	return;
+	this.skip();
+	it('Starting Basic Test', function (done) {
 		console.log('');
 		console.log('*** Starting Basic Test ***');
-		test.done();
-	},
-	'Create simpleLogger': function(test) {
+		done();
+	});
+	it('Create simpleLogger', function (done) {
 		simpleLogger = simple_logger.create();
 		attachListeners(simpleLogger);
-		test.done();
-	},
-	'Open Devices': mockDeviceManager.openDevices,
-	'Initialize Logger': function(test) {
+		done();
+	});
+	it('Open Devices', function (done) {
+		mockDeviceManager.openDevices();
+		done();
+	});
+	it('Initialize Logger', function (done) {
 		simpleLogger.initialize()
 		.then(function() {
-			test.done();
+			done();
 		}, function() {
-			test.ok(false, 'Should not have failed to initialize logger');
-			test.done();
+			assert.isOk(false, 'Should not have failed to initialize logger');
+			done();
 		});
-	},
-	'Update Loggers Device Listing': function(test) {
+	});
+	it('Update Loggers Device Listing', function (done) {
 		simpleLogger.updateDeviceListing(mockDeviceManager.getDevices())
 		.then(function() {
-			test.done();
+			done();
 		}, function() {
-			test.ok(false, 'Should not have failed to updateDeviceListing');
+			assert.isOk(false, 'Should not have failed to updateDeviceListing');
 			// process.exit();
-			test.done();
+			done();
 		});
-	},
-	'Load Config File': function(test) {
+	});
+	it('Load Config File', function (done) {
 		simpleLogger.configureLogger({
 			'configType': 'filePath',
 			'filePath': logger_config_file_path
 		})
 		.then(function() {
-			test.done();
+			done();
 		}, function() {
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
-	},
-	'Attach Display to Logger': function(test) {
+	});
+	it('Attach Display to Logger', function (done) {
 		// log_display.initialize();
 		// log_tester.initialize();
-		test.done();
+		done();
 
-	},
-	'Run Logger': function(test) {
+	});
+	it('Run Logger', function (done) {
 		simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
 			debugLog('Logger Stopped');
-			test.done();
+			done();
 		});
 		simpleLogger.startLogger()
 		.then(function succ() {
-			test.ok(true);
+			assert.isOk(true);
 			debugLog('Logger Started');
 		}, function err() {
-			test.ok(false, 'Logger should have started');
+			assert.isOk(false, 'Logger should have started');
 			debugLog('Logger Started');
 		});
-	},
-	'Verify Configuration': function(test) {
-		test.done();
-	},
-	'Close Devices': mockDeviceManager.closeDevices,
-};
+	});
+	it('Verify Configuration', function (done) {
+		done();
+	});
+	it('Close Devices', function (done) {
+		mockDeviceManager.closeDevices();
+		done();
+	});
+});

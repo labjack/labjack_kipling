@@ -1,4 +1,3 @@
-
 var mockDevices = [{
 	'deviceType': 'LJM_dtT7',
 	'connectionType': 'LJM_ctUSB',

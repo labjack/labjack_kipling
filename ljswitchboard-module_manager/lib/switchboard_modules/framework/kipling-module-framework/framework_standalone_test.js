@@ -28,9 +28,9 @@ module.exports = {
         var testPromise = testDeferred.promise;
 
         testPromise.then(function () {
-            test.deepEqual(eventFired, testEvent);
-            test.deepEqual(frameworkProvidedToEvent, testFramework);
-            test.done();
+            assert.deepEqual(eventFired, testEvent);
+            assert.deepEqual(frameworkProvidedToEvent, testFramework);
+            done();
         });
 
         framework_standalone.fireAndResolve(
@@ -46,7 +46,7 @@ module.exports = {
         .then(function (environment) {
             test.notDeepEqual(environment.framework, null);
             test.notDeepEqual(environment.framework, undefined);
-            test.done();
+            done();
         });
     },
 
@@ -64,8 +64,8 @@ module.exports = {
 
         framework_standalone.loadModuleInfo(testEnvironment)
         .then(function (environment) {
-            test.deepEqual(environment.moduleInfo, testModuleInfo);
-            test.done();
+            assert.deepEqual(environment.moduleInfo, testModuleInfo);
+            done();
         });
     },
 
@@ -85,30 +85,30 @@ module.exports = {
 
         framework_standalone.loadModuleLogic(environment)
         .then(function (environment) {
-            test.deepEqual(environment.module.name, 'kipling-module-framework');
-            test.deepEqual(providedLocalLoc, '/test-name/controller');
-            test.done();
+            assert.deepEqual(environment.module.name, 'kipling-module-framework');
+            assert.deepEqual(providedLocalLoc, '/test-name/controller');
+            done();
         });
     },
 
     testLoadModuleCallbacks: function (test) {
-        test.done();
+        done();
     },
 
     testLoadDevice: function (test) {
-        test.done();
+        done();
     },
 
     testCreateInterface: function (test) {
-        test.done();
+        done();
     },
 
     testStartFrameworkLoop: function (test) {
-        test.done();
+        done();
     },
 
     testOnUserExit: function (test) {
-        test.done();
+        done();
     }
 
 };

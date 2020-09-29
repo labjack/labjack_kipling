@@ -15,9 +15,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -45,11 +45,11 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -70,7 +70,7 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -79,7 +79,7 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -103,15 +103,15 @@ var device_tests = {
 			var givenAttributes = Object.keys(res);
 			requiredAttributes.forEach(function(requiredAttribute) {
 				var msg = 'Required key does not exist: ' + requiredAttribute;
-				test.ok((givenAttributes.indexOf(requiredAttribute) >= 0), msg);
+				assert.isOk((givenAttributes.indexOf(requiredAttribute) >= 0), msg);
 			});
 
-			test.strictEqual(res.deviceType, 8);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT8');
-			test.done();
+			assert.strictEqual(res.deviceType, 8);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT8');
+			done();
 		}, function(err) {
-			test.ok(false, 'Error calling getDeviceAttributes', err);
-			test.done();
+			assert.isOk(false, 'Error calling getDeviceAttributes', err);
+			done();
 		});
 	},
 	// 'performTestRead': function(test) {
@@ -125,7 +125,7 @@ var device_tests = {
 	// 			{'functionCall': 'read', 'type': 'range', 'min': -11, 'max': 11}
 	// 		];
 	// 		utils.testResults(test, expectedResult, res);
-	// 		test.done();
+	// 		done();
 	// 	});
 	// },
 	'readFirmwareVersion': function(test) {
@@ -147,24 +147,24 @@ var device_tests = {
 				cb();
 			});
 		}, function(err) {
-			test.ok(passes, errorMessage);
-			test.done();
+			assert.isOk(passes, errorMessage);
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
 		setTimeout(function() {
-			test.done();
+			done();
 		}, 100);
 	}
 };
@@ -179,7 +179,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

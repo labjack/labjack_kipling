@@ -78,12 +78,13 @@
   ],
   "kipling_primary_dependency": "ljswitchboard-splash_screen",
   "devDependencies": {
-    "nodeunit": "0.11.3",
-    "diff": ">=3.5.0"
+    "diff": ">=3.5.0",
+    "mocha": "7.2.0",
+    "chai": "^4.2.0"
   },
   "script_notes": "to run a script w/o using npm test, use npm run [script name]",
   "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+    "test": "mocha test/**/*test.js",
     "prepare_build": "node build_scripts/prepare_build.js",
     "gather_project_files": "node build_scripts/gather_project_files.js",
     "edit_k3_startup_settings": "node build_scripts/edit_k3_startup_settings.js",

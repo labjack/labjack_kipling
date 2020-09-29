@@ -29,10 +29,11 @@
         "ljswitchboard-ljm_driver_constants": "*"
     },
     "devDependencies": {
-        "nodeunit": "0.11.3",
-        "diff": ">=3.5.0"
+        "diff": ">=3.5.0",
+        "mocha": "7.2.0",
+        "chai": "^4.2.0"
     },
     "scripts": {
-        "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+        "test": "mocha"
     }
 }

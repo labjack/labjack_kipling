@@ -14,9 +14,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -44,7 +44,7 @@ function createDeviceUpdater(test) {
 			upgradeIsReady();
 		}, function(err) {
 			console.log('Error getting flash chip version', err);
-			
+
 			device.read('BOOTLOADER_VERSION')
 			.then(function(res) {
 				blVersion = parseFloat(res.toFixed(4));
@@ -107,7 +107,7 @@ function createDeviceUpdater(test) {
 					// The result is a new device object
 					// console.log('Upgrade Success', res);
 					// console.log('Number of created devices', ljDevice.getNumCreatedDevices());
-					test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
+					assert.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
 					var ljmDevice = device.getDevice();
 					// console.log(
 					// 	'Reading device FW version',
@@ -120,7 +120,7 @@ function createDeviceUpdater(test) {
 					.then(function(res) {
 						try {
 							pInfo('  - Currently Loaded Recovery FW', res);
-							test.strictEqual(
+							assert.strictEqual(
 								parseFloat(res).toFixed(4),
 								parseFloat(self.fwVersionNum).toFixed(4),
 								'Firmware Not Upgraded');
@@ -137,7 +137,7 @@ function createDeviceUpdater(test) {
 					pInfo("Failed to upgrade (upgrade test)", err);
 					pInfo('');
 					pInfo('');
-					test.ok(true, 'Failed to upgrade device: ' + JSON.stringify(err));
+					assert.isOk(true, 'Failed to upgrade device: ' + JSON.stringify(err));
 					device.read('FIRMWARE_VERSION')
 					.then(function(res) {
 						pInfo('Device is still responding to messages', res);
@@ -155,7 +155,7 @@ function createDeviceUpdater(test) {
 				performUpdate();
 			} else {
 				console.log('  - Skipping Recovery FW Update T7:', device.savedAttributes.serialNumber,'already has fw:', res.val);
-				test.ok(true);
+				assert.isOk(true);
 				upgradeIsFinished();
 			}
 		});
@@ -182,7 +182,7 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -203,29 +203,29 @@ var device_tests = {
 				parseFloat(res.FIRMWARE_VERSION.toFixed(4))
 			);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log("  - Failed to open device", ljm.errToStrSync(err));
 			performTests = false;
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'get wifi version': function(test) {
 		device.iRead('WIFI_VERSION')
 		.then(function(version) {
 			console.log('  - WiFi FW Version:', version.val);
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'upgradeFirmware': function(test) {
@@ -238,7 +238,7 @@ var device_tests = {
 				deviceUpdater[step](device, innerCB);
 			},
 			function(err) {
-				test.done();
+				done();
 			}
 		);
 	},
@@ -253,32 +253,32 @@ var device_tests = {
 				.then(function(res) {
 					deviceInfo['Recovery Version'] = res;
 					console.log('  - FW Version Info:',deviceInfo);
-					test.done();
+					done();
 				}, function(err) {
 					console.log('Error', err);
-					test.done();
+					done();
 				});
 			}, function(err) {
 				console.log('Error', err);
-				test.done();
+				done();
 			});
-			
+
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		// setTimeout(function() {
 			device.close()
 			.then(function() {
-				test.done();
+				done();
 			}, function(err) {
 				console.log("Failure");
-				test.ok(false);
-				test.done();
+				assert.isOk(false);
+				done();
 			});
 		// }, 5000);
-		
+
 	},
 };
 
@@ -292,7 +292,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

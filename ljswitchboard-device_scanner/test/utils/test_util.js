@@ -22,7 +22,7 @@ function printScanResultsData(deviceTypes) {
 					return name.slice(0,4);
 				});
 			} catch(err) {
- 
+
 			}
 			// console.log('Keys:', Object.keys(device));
 			console.log(' - Device', {
@@ -41,7 +41,7 @@ function printScanResultsData(deviceTypes) {
 			cts.forEach(function(ct) {
 				console.log('  - ct:', {
 					'N': ct.name,
-					'M': ct.insertionMethod, 
+					'M': ct.insertionMethod,
 					'A': ct.isActive,
 					'V':ct.verified,
 				});
@@ -237,7 +237,7 @@ function verifyScanDataObject(msg, data, requiredKeys) {
 	};
 }
 
-function verifyScanResults(deviceTypes, test, options) {
+function verifyScanResults(deviceTypes, options) {
 	var debug = false;
 	if(options) {
 		if(options.debug) {
@@ -274,15 +274,16 @@ function verifyScanResults(deviceTypes, test, options) {
 
 				var strToCheck = dtn.toLowerCase();
 				var strToSearch = device[strAttrKeysToCheck[i]].toLowerCase();
-				test.ok(strToSearch.indexOf(strToCheck) >= 0, 'Device Attr: '+strAttrKey+' should have chars '+dtn);
+				assert.isOk(strToSearch.indexOf(strToCheck) >= 0, 'Device Attr: '+strAttrKey+' should have chars '+dtn);
 			}
 
 			var requiredDevKeys = requiredDeviceKeys[dts];
 			if(debug) {
 				console.log('Checking Device', device.serialNumber, Object.keys(device), dts, device.isMockDevice, device.isActive);
 			}
+			var devTest;
 			try {
-				var devTest = verifyScanDataObject(dts, device, requiredDevKeys);
+				devTest = verifyScanDataObject(dts, device, requiredDevKeys);
 			} catch(err) {
 				console.log('ERR', err);
 				throw new Error(err);
@@ -302,12 +303,12 @@ function verifyScanResults(deviceTypes, test, options) {
 			}
 		});
 	}
-	test.ok(passes, 'Failed to verify scan results');
+	assert.isOk(passes, 'Failed to verify scan results');
 }
 exports.verifyScanResults = verifyScanResults;
 
 var suppressTestingErrors = false;
-var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) {
+var innerTestScanResults = function(deviceTypes, expDeviceTypes, options) {
 	var debug;
 	var performTests = true;
 	if(options) {
@@ -322,12 +323,12 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 		console.log('Finished Scanning');
 		console.log('Number of Device Types', deviceTypes.length);
 	}
-	
+
 	// Test to make sure the proper number of device types were found.
 	var numDeviceTypes = deviceTypes.length;
 	var numExpDeviceTypes = Object.keys(expDeviceTypes).length;
 	if(performTests) {
-		test.strictEqual(
+		assert.strictEqual(
 			numDeviceTypes,
 			numExpDeviceTypes,
 			'Unexpected number of device types found'
@@ -363,7 +364,7 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 		// Test to make sure the proper number of devices were found per device
 		// type.
 		if(performTests) {
-			test.strictEqual(
+			assert.strictEqual(
 				numDevices,
 				expNumDevices,
 				'Unexpected number of found devices'
@@ -397,7 +398,7 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 				// Check each expected key.
 				expectedKeys.forEach(function(key) {
 					if(performTests) {
-						test.strictEqual(
+						assert.strictEqual(
 							connectionType[key],
 							expConnectionType[key],
 							'Unexpected connectionType Data'
@@ -426,13 +427,13 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 			// Test to make sure the proper number of connection types were
 			// found.
 			if(performTests) {
-				test.strictEqual(
+				assert.strictEqual(
 					numConnectionTypes,
 					expNumConnectionTypes,
 					'Unexpected number of connection types dt:' + device.deviceTypeName
 				);
 			}
-			
+
 			if(performTests) {
 				if (expConnectionTypes.length == connectionTypes.length) {
 					// For each connection type verify expected results.
@@ -450,20 +451,20 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 						expConnectionTypes.length,
 						', got: ', connectionTypes.length
 					);
-					test.ok(false, 'unexpected number of connection types, see console.log');
+					assert.isOk(false, 'unexpected number of connection types, see console.log');
 				}
 			}
 			if(debug) {
 				printAvailableDeviceData(device);
 			}
-			
+
 		});
 	});
 };
-var testScanResults = function(deviceTypes, expDeviceTypes, test, debug) {
+var testScanResults = function(deviceTypes, expDeviceTypes, debug) {
 	try {
 		suppressTestingErrors = false;
-		innerTestScanResults(deviceTypes, expDeviceTypes, test, debug);
+		innerTestScanResults(deviceTypes, expDeviceTypes, debug);
 		return true;
 	} catch(err) {
 		if(suppressTestingErrors) {
@@ -477,7 +478,7 @@ var testScanResults = function(deviceTypes, expDeviceTypes, test, debug) {
 };
 exports.testScanResults = testScanResults;
 
-function testRequiredDevices(deviceTypes, requiredDeviceTypes, test, debug) {
+function testRequiredDevices(deviceTypes, requiredDeviceTypes) {
 	try {
 		// Verify that each required device type and its connection type are
 		// found in the device types.
@@ -495,12 +496,12 @@ function testRequiredDevices(deviceTypes, requiredDeviceTypes, test, debug) {
 				if(deviceType.deviceTypeName != reqDevType.deviceTypeName) {
 					isFound = false;
 				}
-				
+
 				if(isFound) {
 					isReqDevTypeFound = true;
 				}
 			});
-			test.ok(isReqDevTypeFound, 'We should have found the device type: ' + reqDevType.deviceTypeName);
+			assert.isOk(isReqDevTypeFound, 'We should have found the device type: ' + reqDevType.deviceTypeName);
 
 
 			var reqDevices = reqDevType.devices;
@@ -517,7 +518,7 @@ function testRequiredDevices(deviceTypes, requiredDeviceTypes, test, debug) {
 		return true;
 	} catch(err) {
 		console.log('Error testing for required device types', err);
-		test.ok(false, 'Should not have encountered an error');
+		assert.isOk(false, 'Should not have encountered an error');
 		return false;
 	}
 }

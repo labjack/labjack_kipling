@@ -41,10 +41,10 @@ AVAILABLE_FUNCTIONS = {
 
 VERIFICATION_STRATEGIES = {
 	'notUndefined': function(test, expected, actual) { test.notStrictEqual(typeof(actual), 'undefined'); },
-	'number': function(test, expected, actual) { test.equal(actual, expected); },
+	'number': function(test, expected, actual) { assert.equal(actual, expected); },
 	'uint': function(test, expected, actual) { bufferEqualsArray(test, expected, actual, actual.readUInt32LE, 4); },
 	'double': function(test, expected, actual) { bufferEqualsArray(test, expected, actual, actual.readDoubleLE, 8); },
-	'length': function(test, expected, actual) { test.equal(expected, actual.length); },
+	'length': function(test, expected, actual) { assert.equal(expected, actual.length); },
 	'stringArray': function(test, expected, actual) { cPointerEqualsArray(test, expected, actual); },
 	'type': function(test, expected, actual) { test.notStrictEqual(typeof(actual), expected); }
 };
@@ -53,7 +53,7 @@ function bufferEqualsArray(test, expected, actual, bufFunc, valueSizeInBytes) {
 	//Expected = buffer imput from argList
 	//actual = normal number-array defined by test code
 	for(var i = 0; i< expected.length; i++) {
-		test.equal(bufFunc.call(actual, i*valueSizeInBytes),expected[i]);
+		assert.equal(bufFunc.call(actual, i*valueSizeInBytes),expected[i]);
 	}
 }
 var POINTER_LENGTH = {
@@ -68,7 +68,7 @@ if(process.arch === 'arm') {
 function cPointerEqualsArray(test, expected, actual) {
 	for(var i = 0; i < expected.length; i++) {
 		var namePtr = ref.readPointer(actual, i*POINTER_LENGTH, 50);
-		test.strictEqual(ref.readCString(namePtr,0),expected[i], 'Failed to check argument string');
+		assert.strictEqual(ref.readCString(namePtr,0),expected[i], 'Failed to check argument string');
 	}
 }
 
@@ -90,7 +90,7 @@ exports.createCallSequenceChecker = function (expectedFunctionNames, expectedPar
 
 			nextFunctionName = expectedFunctionNames.shift();
 			if(nextFunctionName !== null)
-				test.equal(nextFunctionName, calledFunctionName);
+				assert.equal(nextFunctionName, calledFunctionName);
 
 			numFunctionParams = functionParams.length;
 			for (var i=0; i<numFunctionParams; i++) {
@@ -108,7 +108,7 @@ exports.createCallSequenceChecker = function (expectedFunctionNames, expectedPar
 	return function (test, calledFunctionNames, passedArgsVector) {
 		try {
 			var numCallCheckers = callCheckers.length;
-			
+
 			for (var i=0; i<numCallCheckers; i++) {
 				callCheckers[i](test, calledFunctionNames[i], passedArgsVector[i]);
 			}

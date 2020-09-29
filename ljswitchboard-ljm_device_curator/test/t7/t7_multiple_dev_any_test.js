@@ -40,16 +40,16 @@ var device_tests = {
 				'1': deviceB
 			}
 		} catch(err) {
-			test.ok(false, err);
+			assert.isOk(false, err);
 			criticalError = true;
-			test.done();
+			done();
 			return;
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -67,7 +67,7 @@ var device_tests = {
 				res.serialNumber
 			);
 			// console.log('in t7_basic_test.js, openDevice', res);
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -76,7 +76,7 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			criticalError = true;
 			deviceA.destroy();
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -84,9 +84,9 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 
@@ -106,12 +106,12 @@ var device_tests = {
 			// 	res.serialNumber
 			// );
 			// console.log('in t7_basic_test.js, openDevice', res);
-			test.ok(false, 'Should have received an error opening 2nd "ANY","A","A" device');
-			test.done();
+			assert.isOk(false, 'Should have received an error opening 2nd "ANY","A","A" device');
+			done();
 		}, function(err) {
 			var keys = Object.keys(err);
 			if(keys.length > 0) {
-				test.ok(true);
+				assert.isOk(true);
 				var dt = err.deviceInfo.deviceTypeName;
 				var ct = err.deviceInfo.connectionTypeName;
 				var sn = err.deviceInfo.serialNumber;
@@ -120,7 +120,7 @@ var device_tests = {
 				str += ct + ' ' + sn.toString();
 				console.log(str)
 			} else {
-				test.ok(false, 'Error should contain several keys...');
+				assert.isOk(false, 'Error should contain several keys...');
 				console.log('Failed to open device', err);
 				var info = modbus_map.getErrorInfo(err);
 				console.log('Error Code', err);
@@ -129,26 +129,26 @@ var device_tests = {
 				criticalError = true;
 				deviceB.destroy();
 			}
-			test.done();
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		deviceA.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 
 	'closeDeviceB': function(test) {
 		deviceB.close()
 		.then(function() {
-			test.ok(false, 'Device should never have been opened.');
-			test.done();
+			assert.isOk(false, 'Device should never have been opened.');
+			done();
 		}, function(err) {
 			// This close command should fail b/c the device was never opened.
-			test.equal(err, 'Device Never Opened', 'Wrong error message');
-			test.ok(true);
-			test.done();
+			assert.equal(err, 'Device Never Opened', 'Wrong error message');
+			assert.isOk(true);
+			done();
 		});
 	},
 	'parallelOpen2x': function(test) {
@@ -163,9 +163,9 @@ var device_tests = {
 		function finalizeTest() {
 			if(openSuccesses.length + openErrors.length == 2) {
 				// console.log('Finished opening...', openSuccesses, openErrors);
-				test.equal(openSuccesses.length, 1, 'We received the wrong number of successful opens');
-				test.equal(openErrors.length, 1, 'We received the wrong number of error-ful opens');
-				test.done();
+				assert.equal(openSuccesses.length, 1, 'We received the wrong number of successful opens');
+				assert.equal(openErrors.length, 1, 'We received the wrong number of error-ful opens');
+				done();
 			}
 		}
 		function onSuccess(res) {
@@ -178,19 +178,19 @@ var device_tests = {
 		}
 		deviceA.open(td.dt, td.ct, td.id, devices)
 		.then(onSuccess, onError);
-		
+
 		deviceB.open(td.dt, td.ct, td.id, devices)
 		.then(onSuccess, onError);
 	},
 
 	'close all devicesA': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
 		setTimeout(function() {
-			test.done();
+			done();
 		}, 100);
 	}
 };

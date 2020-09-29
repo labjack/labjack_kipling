@@ -21,7 +21,7 @@ var minLJMVersion = 1.09;
 var tests = {
 	'include ljm_special_addresses': function(test) {
 		ljm_special_addresses = require('../lib/ljm_special_addresses');
-		test.done();
+		done();
 	},
 	'Check LJM Version for Special Address implementation': function(test) {
 		var ljmLibraryVersion = ljm.LJM_ReadLibraryConfigS('LJM_LIBRARY_VERSION', 0);
@@ -33,8 +33,8 @@ var tests = {
 		if(ljmLibraryVersion.Value >= minLJMVersion) {
 			has_special_addresses = true;
 		}
-		test.deepEqual(ljmLibraryVersion, expectedData);
-		test.done();
+		assert.deepEqual(ljmLibraryVersion, expectedData);
+		done();
 	},
 };
 
@@ -44,12 +44,12 @@ function generateFileParseTest(fileName, filePath, expFileData) {
 		ljm_special_addresses.parse({'filePath': filePath})
 		.then(function(res) {
 			// console.log('File Parsed', res.fileData);
-			test.deepEqual(res.fileData, expFileData);
-			test.done();
+			assert.deepEqual(res.fileData, expFileData);
+			done();
 		}, function(err) {
 			console.log('Error parsing', err);
-			test.ok(false, 'Should have parsed file...');
-			test.done();
+			assert.isOk(false, 'Should have parsed file...');
+			done();
 		});
 	};
 }
@@ -73,12 +73,12 @@ function generateFileSaveTest(fileName, outputFilePath, expectedFileContentsPath
 			if((numCreatedLines.length != numExpectedCreatedLines.length) && (numExpectedCreatedLines.length == 1)) {
 				expectedFileData = expectedFileData.split('\n').join('\r\n');
 			}
-			test.strictEqual(createdFileData, expectedFileData);
-			test.done();
+			assert.strictEqual(createdFileData, expectedFileData);
+			done();
 		}, function(err) {
 			console.log('Saved File Err', err);
-			test.ok(false, 'Failed to create the output test file.');
-			test.done();
+			assert.isOk(false, 'Failed to create the output test file.');
+			done();
 		});
 	};
 }
@@ -135,14 +135,14 @@ function generateVerifyLoadWithLJMTest(fileName, filePath) {
 
 		function finalize(data) {
 			// console.log('Verify Load W/ LJM Success', data);
-			test.strictEqual(data.specAddrFile, filePath, 
+			assert.strictEqual(data.specAddrFile, filePath,
 				'LJM did not load the correct file');
-			test.done();
+			done();
 		}
 		function handleError(data) {
 			console.log('Verify Load W/ LJM Error', data);
-			test.ok(false, 'There was an error verifying S.A. loading w/ LJM');
-			test.done();
+			assert.isOk(false, 'There was an error verifying S.A. loading w/ LJM');
+			done();
 		}
 
 		checkLJMSpecialAddressesStatus(data)
@@ -171,16 +171,16 @@ function generateLJMLoadSpecialAddressesFile(fileName, filePath, expFileDataObj)
 			});
 
 			if(missingIPs.length === 0) {
-				test.ok(true);
+				assert.isOk(true);
 			} else {
-				test.ok(false, 'Missing IPs: ' + JSON.stringify(missingIPs));
+				assert.isOk(false, 'Missing IPs: ' + JSON.stringify(missingIPs));
 			}
 
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Error parsing', err);
-			test.ok(false, 'Should have parsed file...');
-			test.done();
+			assert.isOk(false, 'Should have parsed file...');
+			done();
 		});
 	};
 }
@@ -199,8 +199,8 @@ filesToTest.forEach(function(fileName, i) {
 		var expectedOutputTestFilePath = path.join(expected_output_test_files_dir, fileName);
 
 		testFiles.push(testFilePath);
-		
-		
+
+
 		var testFileExpData = require(testInfoFilePath).data;
 
 		var outputData = testFileExpData.map(function(a) { return a; });
@@ -226,7 +226,7 @@ filesToTest.forEach(function(fileName, i) {
 			expectedOutputTestFilePath,
 			outputData
 		);
-		
+
 		tests['Verify Load With LJM Test - ' + fileName] = generateVerifyLoadWithLJMTest(
 			fileName,
 			outputTestFilePath
@@ -238,7 +238,7 @@ filesToTest.forEach(function(fileName, i) {
 			outputData
 		);
 
-		
+
 	}
 });
 

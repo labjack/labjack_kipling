@@ -1,3 +1,5 @@
+var assert = require('chai').assert;
+
 /**
  * Unit tests for the ljmmm-parse LJMMM markup parsing micro-library
  *
@@ -15,6 +17,7 @@ var ljmmm = rewire('../lib/ljmmm');
 ljmmm.__set__('DATA_TYPE_SIZES', {TEST_TYPE: 4, ANOTHER_TYPE: 2});
 ljmmm.__set__('LUA_INTEGER_TYPES', {TEST_TYPE: 4, ANOTHER_TYPE: 2});
 
+describe('ljmmm_test', function() {
 
 /**
  * Test getting the size of a known data type.
@@ -22,13 +25,11 @@ ljmmm.__set__('LUA_INTEGER_TYPES', {TEST_TYPE: 4, ANOTHER_TYPE: 2});
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testGetTypeRegSize = function(test)
-{
+it('testGetTypeRegSize', function (done) {
     var getTypeRegSize = ljmmm.__get__('getTypeRegSize');
-    test.equal(getTypeRegSize('TEST_TYPE'), 4);
-    test.done();
-};
-
+    assert.equal(getTypeRegSize('TEST_TYPE'), 4);
+    done();
+});
 
 /**
  * Test getting the size of an unknown data type.
@@ -36,12 +37,11 @@ exports.testGetTypeRegSize = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testGetTypeRegSizeNotFound = function(test)
-{
+it('testGetTypeRegSizeNotFound', function (done) {
     var getTypeRegSize = ljmmm.__get__('getTypeRegSize');
-    test.equal(getTypeRegSize('SOMETHING_ELSE'), -1);
-    test.done();
-};
+    assert.equal(getTypeRegSize('SOMETHING_ELSE'), -1);
+    done();
+});
 
 /**
  * Test getting the lua type of a known data type.
@@ -49,13 +49,11 @@ exports.testGetTypeRegSizeNotFound = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testGetTypeLuaType = function(test)
-{
+it('testGetTypeLuaType', function (done) {
     var getLuaTypeInt = ljmmm.__get__('getLuaTypeInt');
-    test.equal(getLuaTypeInt('TEST_TYPE'), 4);
-    test.done();
-};
-
+    assert.equal(getLuaTypeInt('TEST_TYPE'), 4);
+    done();
+});
 
 /**
  * Test getting the lua type of an unknown data type.
@@ -63,13 +61,11 @@ exports.testGetTypeLuaType = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testGetTypeLuaTypeNotFound = function(test)
-{
+it('testGetTypeLuaTypeNotFound', function (done) {
     var getLuaTypeInt = ljmmm.__get__('getLuaTypeInt');
-    test.equal(getLuaTypeInt('SOMETHING_ELSE'), -1);
-    test.done();
-};
-
+    assert.equal(getLuaTypeInt('SOMETHING_ELSE'), -1);
+    done();
+});
 
 /**
  * Test an entry that doesn't expand in a synchronous call.
@@ -77,14 +73,12 @@ exports.testGetTypeLuaTypeNotFound = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandLJMMMNameNoExpand = function(test)
-{
+it('testExpandLJMMMNameNoExpand', function (done) {
     var expectedResult = ['TestAfter'];
     var result = ljmmm.expandLJMMMName('TestAfter');
-    test.deepEqual(expectedResult, result);
-    test.done();
-};
-
+    assert.deepEqual(expectedResult, result);
+    done();
+});
 
 /**
  * Test expanding the name of a register with the default range increment.
@@ -92,8 +86,7 @@ exports.testExpandLJMMMNameNoExpand = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandLJMMMNameNoIncrement = function(test)
-{
+it('testExpandLJMMMNameNoIncrement', function (done) {
     var expectedResult = [
         'Test0After',
         'Test1After',
@@ -102,14 +95,13 @@ exports.testExpandLJMMMNameNoIncrement = function(test)
 
     ljmmm.expandLJMMMName(
         'Test#(0:2)After',
-        function (error) { test.ok(false, error); test.done(); },
+        function (error) { assert.isOk(false, error); done(); },
         function (result) {
-            test.deepEqual(result, expectedResult);
-            test.done();
+            assert.deepEqual(result, expectedResult);
+            done();
         }
     );
-};
-
+});
 
 /**
  * Test expanding the name of a register with a non-standard range increment.
@@ -117,8 +109,7 @@ exports.testExpandLJMMMNameNoIncrement = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandLJMMMNameIncrement = function(test)
-{
+it('testExpandLJMMMNameIncrement', function (done) {
     var expectedResult = [
         'Test0After',
         'Test2After',
@@ -128,15 +119,14 @@ exports.testExpandLJMMMNameIncrement = function(test)
     ljmmm.expandLJMMMName(
         'Test#(0:4:2)After',
         function (error) {
-            test.ok(false, error);
+            assert.ok(false, error);
         },
         function (result) {
-            test.deepEqual(result, expectedResult);
-            test.done();
+            assert.deepEqual(result, expectedResult);
+            done();
         }
     );
-};
-
+});
 
 /**
  * Test expanding a register entry, testing both expanded names and addresses.
@@ -144,8 +134,7 @@ exports.testExpandLJMMMNameIncrement = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandLJMMMEntry = function(test)
-{
+it('testExpandLJMMMEntry', function (done) {
     var testInput = {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'};
     var expectedResult = [
         {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
@@ -154,14 +143,13 @@ exports.testExpandLJMMMEntry = function(test)
 
     ljmmm.expandLJMMMEntry(
         testInput,
-        function (error) { test.ok(false, error); test.done(); },
+        function (error) { assert.isOk(false, error); done(); },
         function (result) {
-            test.deepEqual(result, expectedResult);
-            test.done();
+            assert.deepEqual(result, expectedResult);
+            done();
         }
     );
-};
-
+});
 
 /**
  * Test expanding a register entry, testing both expanded names and addresses.
@@ -169,8 +157,7 @@ exports.testExpandLJMMMEntry = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandLJMMMEntryAltNames = function(test)
-{
+it('testExpandLJMMMEntryAltNames', function (done) {
     var testInput = {
         name: 'Test#(0:1)',
         address: 0,
@@ -187,14 +174,13 @@ exports.testExpandLJMMMEntryAltNames = function(test)
 
     ljmmm.expandLJMMMEntry(
         testInput,
-        function (error) { test.ok(false, error); test.done(); },
+        function (error) { assert.isOk(false, error); done(); },
         function (result) {
-            test.deepEqual(result, expectedResult);
-            test.done();
+            assert.deepEqual(result, expectedResult);
+            done();
         }
     );
-};
-
+});
 
 /**
  * Test expanding a register entry synchronously.
@@ -202,8 +188,7 @@ exports.testExpandLJMMMEntryAltNames = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandLJMMMEntrySync = function(test)
-{
+it('testExpandLJMMMEntrySync', function (done) {
     var testInput = {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'};
     var expectedResult = [
         {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
@@ -211,10 +196,9 @@ exports.testExpandLJMMMEntrySync = function(test)
     ];
 
     var result = ljmmm.expandLJMMMEntrySync(testInput);
-    test.deepEqual(result, expectedResult);
-    test.done();
-};
-
+    assert.deepEqual(result, expectedResult);
+    done();
+});
 
 /**
  * Test expanding a register entry, testing both expanded names and addresses.
@@ -222,8 +206,7 @@ exports.testExpandLJMMMEntrySync = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandLJMMMEntryAltNamesSync = function(test)
-{
+it('testExpandLJMMMEntryAltNamesSync', function (done) {
     var testInput = {
         name: 'Test#(0:1)',
         address: 0,
@@ -239,18 +222,17 @@ exports.testExpandLJMMMEntryAltNamesSync = function(test)
     ];
 
     var result = ljmmm.expandLJMMMEntrySync(testInput);
-    test.deepEqual(result, expectedResult);
-    test.done();
-};
+    assert.deepEqual(result, expectedResult);
+    done();
+});
 
 /**
  * Test expanding a register entry synchronously.
- * 
+ *
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.expandPrimaryLJMMMEntrySync = function(test)
-{
+it('expandPrimaryLJMMMEntrySync', function (done) {
     var testInput = {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'};
     var expectedResult = [
         {name: 'Test0', address: 0, type: 'TEST_TYPE', group: testInput.name, luaTypeInt: 4},
@@ -258,9 +240,9 @@ exports.expandPrimaryLJMMMEntrySync = function(test)
     ];
 
     var result = ljmmm.expandPrimaryLJMMMEntrySync(testInput);
-    test.deepEqual(result, expectedResult);
-    test.done();
-};
+    assert.deepEqual(result, expectedResult);
+    done();
+});
 
 /**
  * Test expanding a register entry, testing both expanded names and addresses.
@@ -268,8 +250,7 @@ exports.expandPrimaryLJMMMEntrySync = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandPrimaryLJMMMEntryAltNamesSync = function(test)
-{
+it('testExpandPrimaryLJMMMEntryAltNamesSync', function (done) {
     var testInput = {
         name: 'Test#(0:1)',
         address: 0,
@@ -283,9 +264,9 @@ exports.testExpandPrimaryLJMMMEntryAltNamesSync = function(test)
     ];
 
     var result = ljmmm.expandPrimaryLJMMMEntrySync(testInput);
-    test.deepEqual(result, expectedResult);
-    test.done();
-};
+    assert.deepEqual(result, expectedResult);
+    done();
+});
 
 /**
  * Test expanding a many register entries.
@@ -293,8 +274,7 @@ exports.testExpandPrimaryLJMMMEntryAltNamesSync = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandLJMMMEntries = function(test)
-{
+it('testExpandLJMMMEntries', function (done) {
     var testInput = [
         {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'},
         {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE'}
@@ -308,14 +288,13 @@ exports.testExpandLJMMMEntries = function(test)
 
     ljmmm.expandLJMMMEntries(
         testInput,
-        function (error) { test.ok(false, error); test.done(); },
+        function (error) { assert.isOk(false, error); done(); },
         function (result) {
-            test.deepEqual(result, expectedResult);
-            test.done();
+            assert.deepEqual(result, expectedResult);
+            done();
         }
     );
-};
-
+});
 
 /**
  * Test expanding many register entries synchronously.
@@ -323,8 +302,7 @@ exports.testExpandLJMMMEntries = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandLJMMMEntriesSync = function(test)
-{
+it('testExpandLJMMMEntriesSync', function (done) {
     var testInput = [
         {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'},
         {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE', altnames:['Again#(0:1)']}
@@ -339,9 +317,9 @@ exports.testExpandLJMMMEntriesSync = function(test)
     ];
 
     var result = ljmmm.expandLJMMMEntriesSync(testInput);
-    test.deepEqual(result, expectedResult);
-    test.done();
-};
+    assert.deepEqual(result, expectedResult);
+    done();
+});
 
 /**
  * Test expanding many register entries synchronously.
@@ -349,8 +327,7 @@ exports.testExpandLJMMMEntriesSync = function(test)
  * @param {nodeunit.test} test The nodeunit-standard test that this function's
  *      assertions should run against and this test should report to when done.
 **/
-exports.testExpandPrimaryLJMMMEntriesSync = function(test)
-{
+it('testExpandPrimaryLJMMMEntriesSync', function (done) {
     var testInput = [
         {name: 'Test#(0:1)', address: 0, type: 'TEST_TYPE'},
         {name: 'Another#(0:1)', address: 0, type: 'ANOTHER_TYPE', altnames:['Again#(0:1)']}
@@ -363,6 +340,8 @@ exports.testExpandPrimaryLJMMMEntriesSync = function(test)
     ];
 
     var result = ljmmm.expandPrimaryLJMMMEntriesSync(testInput);
-    test.deepEqual(result, expectedResult);
-    test.done();
-};
+    assert.deepEqual(result, expectedResult);
+    done();
+});
+
+});

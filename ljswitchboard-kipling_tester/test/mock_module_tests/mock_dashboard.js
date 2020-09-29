@@ -1,5 +1,3 @@
-
-
 // Generic Application Objects
 var package_loader;
 var gns;
@@ -7,7 +5,7 @@ var gui;
 var window_manager;
 
 // Window Objects
-var testWin;
+var testerWin;
 var kiplingWin;
 
 // Kipling Application Objects
@@ -18,10 +16,6 @@ var MODULE_CHROME;
 var io_manager;
 var io_interface;
 var deviceController;
-var activeModule;
-var viewGen;
-var eventList;
-
 
 var mockDevices;
 try {
@@ -42,8 +36,8 @@ mockDevices.forEach(function(mockDevice) {
 	deviceScannerConfigData.push(deviceData);
 });
 
-this.test_device_info = {
-	'initialize test': function(test) {
+describe('mock_dashboard', function() {
+	it('initialize test', function (done) {
 		package_loader = global.require('ljswitchboard-package_loader');
 		gns = package_loader.getNameSpace();
 		gui = global[gns].gui;
@@ -59,17 +53,16 @@ this.test_device_info = {
 		$ = kiplingWindow.$;
 		MODULE_LOADER = kiplingWindow.MODULE_LOADER;
 		MODULE_CHROME = kiplingWindow.MODULE_CHROME;
-		
+
 
 		io_manager = global.require('ljswitchboard-io_manager');
 		io_interface = io_manager.io_interface();
 		deviceController = io_interface.getDeviceController();
-		test.done();
-	},
-	'load device info': function(test) {
-
+		done();
+	});
+	it('load device info', function (done) {
 		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
+			done();
 		});
 		var deviceInfoTab = $('#dashboard-tab');
 		deviceInfoTab.trigger('click');
@@ -78,37 +71,34 @@ this.test_device_info = {
 		// 	// Device selector isn't quite loaded yet.  Just ready for
 		// 	// other async tasks.  Must wait for the "MODULE_READY" event.
 		// });
-	},
-	'load analog inputs': function(test) {
-
+	});
+	it('load analog inputs', function (done) {
 		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
+			done();
 		});
 		var deviceInfoTab = $('#analog_inputs_fw-tab');
 		deviceInfoTab.trigger('click');
-	},
-	'load lua script debugger': function(test) {
-
+	});
+	it('load lua script debugger', function (done) {
 		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
+			done();
 		});
 		var deviceInfoTab = $('#lua_script_debugger-tab');
 		deviceInfoTab.trigger('click');
-	},
-	'load network settings': function(test) {
-
+	});
+	it('load network settings', function (done) {
 		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
+			done();
 		});
 		var deviceInfoTab = $('#network_settings-tab');
 		deviceInfoTab.trigger('click');
-	},
+	});
 	// 'disconnect from T7': function(test) {
 	// 	MODULE_CHROME.once(
 	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_CLOSED,
 	// 		function(updatedModules) {
 	// 			console.log('Tabs updated (test)', updatedModules);
-	// 			test.done();
+	// 			done();
 	// 		});
 
 	// 	// Connect to the first found USB-T7
@@ -116,4 +106,4 @@ this.test_device_info = {
 	// 	var t7 = t7s.first();
 	// 	t7.trigger('click');
 	// },
-};
+});

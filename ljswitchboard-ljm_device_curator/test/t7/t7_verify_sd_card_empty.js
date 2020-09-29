@@ -15,9 +15,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -72,11 +72,11 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -97,7 +97,7 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -106,7 +106,7 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -114,9 +114,9 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'get cwd': function(test) {
@@ -125,11 +125,11 @@ var device_tests = {
 		.then(function(res) {
 			debugCWD('  - Got CWD', res);
 			testLog('  - Got CWD:', res);
-			test.done();
+			done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
+			assert.isOk(false,'Should not have received an error...');
+			done();
 		});
 	},
 	'get file listing': function(test) {
@@ -137,33 +137,33 @@ var device_tests = {
 		device.readdir()
 		.then(function(res) {
 			if(res.fileNames.length === 0) {
-				test.ok(true, 'SD Card should have 0 files/folders on it.');
+				assert.isOk(true, 'SD Card should have 0 files/folders on it.');
 			} else {
 				if(res.fileNames.length == 1) {
-					test.deepEqual(res.fileNames, ['System Volume Information'], 'SD Card should only have the "System Volume Information" folder.');
+					assert.deepEqual(res.fileNames, ['System Volume Information'], 'SD Card should only have the "System Volume Information" folder.');
 				} else {
-					test.ok(false, 'SD Card should have at most 1 folder on it.  There are: ' + res.fileNames.length.toString() + ' files/folders on the card.');
+					assert.isOk(false, 'SD Card should have at most 1 folder on it.  There are: ' + res.fileNames.length.toString() + ' files/folders on the card.');
 				}
 			}
-			// test.equal(res.fileNames.length, 0, 'SD Card should not have any files on it');
+			// assert.equal(res.fileNames.length, 0, 'SD Card should not have any files on it');
 			debugLS('  - Got ls:', res.fileNames);
 			testLog('  - Got ls:'.green, res.fileNames);
-			test.done();
+			done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
+			assert.isOk(false,'Should not have received an error...');
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 };
 
@@ -177,7 +177,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

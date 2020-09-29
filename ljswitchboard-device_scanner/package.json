@@ -4,7 +4,7 @@
   "description": "A node project dedicated to finding ALL LabJack devices that are able to be connected to.",
   "main": "./lib/ljswitchboard-device_scanner",
   "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+    "test": "mocha",
     "test_openall": "node ./node_modules/nodeunit/bin/nodeunit ./test/test_openall.js",
     "test_listall": "node ./node_modules/nodeunit/bin/nodeunit ./test/test_listall.js",
     "scan": "node ./scripts/scan_for_devices.js",
@@ -43,10 +43,11 @@
     "ref": "^1.3.5"
   },
   "devDependencies": {
-    "nodeunit": "0.11.3",
     "colors": "1.4.0",
     "diff": ">=3.5.0",
-    "rewire": "^4.0.1"
+    "rewire": "^4.0.1",
+    "mocha": "7.2.0",
+    "chai": "^4.2.0"
   },
   "directories": {
     "lib": "./lib"

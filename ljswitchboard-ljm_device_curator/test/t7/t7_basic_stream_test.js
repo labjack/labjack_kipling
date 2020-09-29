@@ -13,9 +13,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -43,7 +43,7 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -63,19 +63,19 @@ var device_tests = {
 				);
 			}
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			performTests = false;
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'startBasicStream': function(test) {
@@ -91,60 +91,60 @@ var device_tests = {
 			settings.scanRate
 			)
 		.then(function(res) {
-				test.done();
+				done();
 			}, function(err) {
 				// End the test & report that an error has occured.
 				console.log('Stream not started', err, modbus_map.getErrorInfo(err));
 
 				performTests = false;
-				test.ok(false, 'Stream failed to start');
-				test.done();
+				assert.isOk(false, 'Stream failed to start');
+				done();
 			});
 	},
 	'basicStreamRead': function(test) {
 		device.streamRead()
 		.then(function(res) {
 			var msg = 'bad stream read results';
-			test.strictEqual(res.numAddresses, settings.scanList.length, msg);
-			test.deepEqual(res.scanList, settings.scanList, msg);
-			test.strictEqual(res.scansPerRead, settings.scansPerRead, msg);
-			test.strictEqual(res.data.length, settings.scansPerRead, msg);
+			assert.strictEqual(res.numAddresses, settings.scanList.length, msg);
+			assert.deepEqual(res.scanList, settings.scanList, msg);
+			assert.strictEqual(res.scansPerRead, settings.scansPerRead, msg);
+			assert.strictEqual(res.data.length, settings.scansPerRead, msg);
 
 			if(DEBUG_TEST) {
 				console.log('Stream Data:', res);
 			}
 			res.data.forEach(function(dataPoint, i) {
-				test.strictEqual(dataPoint.length, settings.scanList.length + 1, msg);
+				assert.strictEqual(dataPoint.length, settings.scanList.length + 1, msg);
 				if(DEBUG_TEST) {
 					console.log('  ' + i.toString() + ': ' + JSON.stringify(dataPoint));
 				}
 			});
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Stream Read failed', err, modbus_map.getErrorInfo(err));
-			test.ok(false, 'Stream Read failed');
-			test.done();
+			assert.isOk(false, 'Stream Read failed');
+			done();
 		});
 	},
 	'stopBasicStream': function(test) {
 		device.streamStop()
 		.then(function(res) {
-			test.done();
+			done();
 		}, function(err) {
 			// Report that the stream failed to stop
 			console.log('Stream failed to stop', err);
-			test.ok(false, 'Stream failed to stop');
-			test.done();
+			assert.isOk(false, 'Stream failed to stop');
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failure');
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 };
@@ -162,7 +162,7 @@ var getTest = function(testFunc, key) {
 			} else {
 				console.log("  * Not Executing!!", key);
 				try {
-					test.done();
+					done();
 				} catch(err) {
 					console.log("HERE", err);
 				}

@@ -15,9 +15,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -45,11 +45,11 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -70,7 +70,7 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -79,112 +79,112 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'read FW': function(test) {
 		device.iRead('FIRMWARE_VERSION')
 		.then(function(res) {
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		})
 	},
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 
-			test.strictEqual(res.deviceType, 8);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT8');
-			test.done();
+			assert.strictEqual(res.deviceType, 8);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT8');
+			done();
 		}, function(err) {
-			test.ok(false, 'Error calling getDeviceAttributes', err);
-			test.done();
+			assert.isOk(false, 'Error calling getDeviceAttributes', err);
+			done();
 		});
 	},
 	'test getRecoveryFirmwareVersion': function(test) {
 		device.getRecoveryFirmwareVersion()
 		.then(function(res) {
 			console.log('getRecoveryFirmwareVersion res:', res);
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'error received: ' + err.toString());
-			test.done();
+			assert.isOk(false, 'error received: ' + err.toString());
+			done();
 		})
 	},
 	// 'test getPrimaryFirmwareVersion': function(test) {
 	// 	device.getPrimaryFirmwareVersion()
 	// 	.then(function(res) {
 	// 		console.log('getPrimaryFirmwareVersion res:', res);
-	// 		test.ok(true);
-	// 		test.done();
+	// 		assert.isOk(true);
+	// 		done();
 	// 	}, function(err) {
-	// 		test.ok(false, 'error received: ' + err.toString());
-	// 		test.done();
+	// 		assert.isOk(false, 'error received: ' + err.toString());
+	// 		done();
 	// 	})
 	// },
 	// 'test getInternalFWVersion': function(test) {
 	// 	device.getInternalFWVersion()
 	// 	.then(function(res) {
 	// 		console.log('getInternalFWVersion res:', res);
-	// 		test.ok(true);
-	// 		test.done();
+	// 		assert.isOk(true);
+	// 		done();
 	// 	}, function(err) {
-	// 		test.ok(false, 'error received: ' + err.toString());
-	// 		test.done();
+	// 		assert.isOk(false, 'error received: ' + err.toString());
+	// 		done();
 	// 	})
 	// },
 	// 'test getRecoveryFirmwareVersion2': function(test) {
 	// 	device.getRecoveryFirmwareVersion()
 	// 	.then(function(res) {
 	// 		console.log('getRecoveryFirmwareVersion res:', res);
-	// 		test.ok(true);
-	// 		test.done();
+	// 		assert.isOk(true);
+	// 		done();
 	// 	}, function(err) {
-	// 		test.ok(false, 'error received: ' + err.toString());
-	// 		test.done();
+	// 		assert.isOk(false, 'error received: ' + err.toString());
+	// 		done();
 	// 	})
 	// },
 	// 'test getPrimaryFirmwareVersion2': function(test) {
 	// 	device.getPrimaryFirmwareVersion()
 	// 	.then(function(res) {
 	// 		console.log('getPrimaryFirmwareVersion res:', res);
-	// 		test.ok(true);
-	// 		test.done();
+	// 		assert.isOk(true);
+	// 		done();
 	// 	}, function(err) {
-	// 		test.ok(false, 'error received: ' + err.toString());
-	// 		test.done();
+	// 		assert.isOk(false, 'error received: ' + err.toString());
+	// 		done();
 	// 	})
 	// },
 	// 'test getInternalFWVersion2': function(test) {
 	// 	device.getInternalFWVersion()
 	// 	.then(function(res) {
 	// 		console.log('getInternalFWVersion res:', res);
-	// 		test.ok(true);
-	// 		test.done();
+	// 		assert.isOk(true);
+	// 		done();
 	// 	}, function(err) {
-	// 		test.ok(false, 'error received: ' + err.toString());
-	// 		test.done();
+	// 		assert.isOk(false, 'error received: ' + err.toString());
+	// 		done();
 	// 	})
 	// },
 
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
 		setTimeout(function() {
-			test.done();
+			done();
 		}, 100);
 	}
 };
@@ -199,7 +199,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

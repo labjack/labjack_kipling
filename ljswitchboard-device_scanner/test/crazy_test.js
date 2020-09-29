@@ -1,14 +1,14 @@
+var assert = require('chai').assert;
 
 var fs = require('fs');
 var path = require('path');
 var rewire = require('rewire');
 var device_scanner = rewire('../lib/device_scanner');
 
-var test_util = require('./test_util');
-var printAvailableDeviceData = test_util.printAvailableDeviceData;
+var test_util = require('./utils/test_util');
 var testScanResults = test_util.testScanResults;
 
-var performScan = function(test) {
+var performScan = function(done) {
 	var expectedData = {
 		'T7': {
 			'devices': [{
@@ -71,12 +71,12 @@ var performScan = function(test) {
 	deviceScanner.findAllDevices()
 	.then(function(deviceTypes) {
 		var stopTime = new Date();
-		testScanResults(deviceTypes, expectedData, test, {'test': false});
+		testScanResults(deviceTypes, expectedData, {'test': false});
 		console.log('Duration', (stopTime - startTime)/1000);
-		test.done();
+		done();
 	}, function(err) {
 		console.log('Scanning Error');
-		test.done();
+		done();
 	});
 };
 
@@ -103,13 +103,14 @@ var saveDataToFile = function(data) {
 };
 var deviceScanner;
 var fileFD;
-var tests = {
-	'Starting Mock Test': function(test) {
+
+describe('crazy', function() {
+	it('Starting Mock Test', function (done) {
 		console.log('');
 		console.log('*** Starting Crazy Test ***');
-		test.done();
-	},
-	'Open debug file': function(test) {
+		done();
+	});
+	it('Open debug file', function (done) {
 		var cwd = process.cwd();
 		var debugFileName = 'crazy_test_dump.txt';
 		var filePath = path.join(cwd, debugFileName);
@@ -119,11 +120,11 @@ var tests = {
 				console.log('!!! error opening file');
 			} else {
 				fileFD = fd;
-				test.done();
+				done();
 			}
 		});
-	},
-	'create device scanner': function(test) {
+	});
+	it('create device scanner', function (done) {
 		deviceScanner = require('../lib/ljswitchboard-device_scanner').getDeviceScanner();
 
 		var eventsToHandle = [
@@ -138,9 +139,9 @@ var tests = {
 		eventsToHandle.forEach(function(eventKey) {
 			deviceScanner.on(eventKey, getEventHandler(eventKey));
 		});
-		test.done();
-	},
-	'configure crazy test': function(test) {
+		done();
+	});
+	it('configure crazy test', function (done) {
 		// var SCAN_REQUEST_LIST = [{
 		// 	'deviceType': 'LJM_dtDIGIT',
 		// 	'connectionType': 'LJM_ctUSB',
@@ -172,27 +173,27 @@ var tests = {
 		];
 		device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
 		device_scanner.__set__('scanStrategies', scanStrategies);
-		test.done();
-	},
-};
+		done();
+	});
 
-var numScans = 0;
-var i;
-for(i = 0; i < numScans; i++) {
-	var testName = 'Performing scan number:' + i.toString();
-	tests[testName] = performScan;
-}
-tests.closeDebugFile = function(test) {
-	if(fileFD) {
-		fs.close(fileFD, function(err) {
-			if(err) {
-				console.log('!!! Error closing debug file');
-				test.done();
-			} else {
-				test.done();
-			}
-		});
+	var numScans = 0;
+	var i;
+	for(i = 0; i < numScans; i++) {
+		var testName = 'Performing scan number:' + i.toString();
+		it(testName, performScan);
 	}
-};
 
-exports.tests = tests;
+	it('closeDebugFile', function (done) {
+		if(fileFD) {
+			fs.close(fileFD, function(err) {
+				if(err) {
+					console.log('!!! Error closing debug file');
+					done();
+				} else {
+					done();
+				}
+			});
+		}
+	});
+
+});

@@ -1,11 +1,10 @@
+var assert = require('chai').assert;
 
 var fs = require('fs');
 var fse = require('fs-extra');
 var path = require('path');
-var archiver = require('archiver');
 var cwd = process.cwd();
 // var ndd = require('node-dir-diff');
-var util = require('util');
 
 var fileOps = require('../build_scripts/file_operations');
 
@@ -26,8 +25,11 @@ var testFolders = [];
 var createTestZipFiles = true;
 var parseTestZipFiles = true;
 var extractTestZipFiles = true;
-exports.tests = {
-    'create temporary .zip output directory': function(test) {
+
+describe('zipping', function() {
+    return;
+    this.skip();
+    it('create temporary .zip output directory', function (done) {
         try {
             if(createTestZipFiles) {
                 fse.ensureDirSync(TEMP_ZIP_TEST_PATH);
@@ -39,17 +41,17 @@ exports.tests = {
                 fse.emptyDirSync(TEMP_EXTRACT_TEST_PATH);
             }
         } catch(err) {
-            test.ok(false, 'failed to ensureDirSync');
+            assert.isOk(false, 'failed to ensureDirSync');
             console.error(err);
         }
-        test.done();
-    },
-    'verify that there is data to test on': function(test) {
+        done();
+    });
+	it('verify that there is data to test on', function (done) {
         var folders = fs.readdirSync(PATH_OF_FILES_TO_ZIP);
 
         var testFolderInFolders = function(expectedFolder) {
             var str = 'Expected ' + expectedFolder + ' in ' + PATH_OF_FILES_TO_ZIP;
-            test.ok(folders.indexOf(expectedFolder) != -1, str);
+            assert.isOk(folders.indexOf(expectedFolder) != -1, str);
         };
         testFolderInFolders('ljswitchboard-core');
         testFolderInFolders('ljswitchboard-io_manager');
@@ -70,9 +72,9 @@ exports.tests = {
             });
         });
 
-        test.done();
-    },
-    'create test .zip files': function(test) {
+        done();
+    });
+	it('create test .zip files', function (done) {
         if(createTestZipFiles) {
             var folders = testFolders.map(function(testFolder) {
                 return {'from': testFolder.origin, 'to': testFolder.zipPath};
@@ -80,14 +82,14 @@ exports.tests = {
             fileOps.compressFolders(folders)
             .then(function() {
                 // console.log('Finished Compressing (test)');
-                test.done();
+                done();
             });
         } else {
             console.log('Skipping...');
-            test.done();
+            done();
         }
-    },
-    'parse .zip files': function(test) {
+    });
+	it('parse .zip files', function (done) {
         if(parseTestZipFiles) {
             var files = testFolders.map(function(testFolder) {
                 return {'path': testFolder.zipPath};
@@ -95,14 +97,14 @@ exports.tests = {
             fileOps.parseZipFiles(files)
             .then(function() {
                 // console.log('Finished Parsing');
-                test.done();
+                done();
             });
         } else {
             console.log('Skipping...');
-            test.done();
+            done();
         }
-    },
-    'extract test .zip files': function(test) {
+    });
+	it('extract test .zip files', function (done) {
         if(extractTestZipFiles) {
             var files = testFolders.map(function(testFolder) {
                 return {'from': testFolder.zipPath, 'to': testFolder.extractPath};
@@ -110,14 +112,14 @@ exports.tests = {
             fileOps.extractFiles(files)
             .then(function() {
                 // console.log('Finished Extracting (test)');
-                test.done();
+                done();
             });
         } else {
             console.log('Skipping...');
-            test.done();
+            done();
         }
-    },
-    // 'verify output directories': function(test) {
+    });
+    // it('verify output directories', function (done) {
     //     var dd = new ndd.Dir_Diff(
     //         [
     //             // TEMP_EXTRACT_TEST_PATH,
@@ -138,8 +140,7 @@ exports.tests = {
     //             console.log(util.inspect(result.deviation));
     //             // console.log(JSON.stringify(result, null, 2));
     //         }
-    //         test.done();
+    //         done();
     //     });
     // },
-};
-
+});

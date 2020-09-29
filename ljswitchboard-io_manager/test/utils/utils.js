@@ -1,8 +1,9 @@
+var assert = require('chai').assert;
 
 var q = require('q');
 var util = require('util');
 
-var qRunner = function(test, func) {
+var qRunner = function(done, func) {
 	var defered = q.defer();
 	try {
 		func()
@@ -10,23 +11,23 @@ var qRunner = function(test, func) {
 			defered.resolve(res);
 		}, function(err) {
 			console.log('qRunner defered error err', err);
-			test.ok(false, err);
-			test.done();
+			assert.isOk(false, err);
+			done();
 		}, function(err) {
 			console.log('qRunner syntax error err', err);
-			test.ok(false, err);
-			test.done();
+			assert.isOk(false, err);
+			done();
 		});
 	} catch(err) {
 			console.log('qRunner critical error err', err);
-			test.ok(false, err);
-			test.done();
+			assert.isOk(false, err);
+			done();
 		}
 	return defered.promise;
 };
 exports.qRunner = qRunner;
 
-// define a q function that calls an object's function and saves data into an 
+// define a q function that calls an object's function and saves data into an
 // array
 var qExec = function(obj, func, argA, argB, argC) {
 	return function(bundle) {
@@ -69,7 +70,7 @@ var pResults = function(results, pIndividual, expectedErrorsList) {
 				data = result.errData;
 				numSuccess += 1;
 			}
-			
+
 		}
 		message += result.functionCall;
 		if(pIndividual) {
@@ -82,29 +83,29 @@ var pResults = function(results, pIndividual, expectedErrorsList) {
 		var ratio = (numSuccess/num*100).toFixed(3);
 		console.log(' - Num Results %d, %d% successful', num, ratio);
 	}
-	
+
 	defered.resolve(results);
 	return defered.promise;
 };
 exports.pResults = pResults;
 
-var testResults = function(test, expectedResults, results) {
+var testResults = function(expectedResults, results) {
 	if(results.length !== expectedResults.length) {
-		test.ok(false, 'num results does not match');
+		assert.isOk(false, 'num results does not match');
 	}
 	var i = 0;
 	for(i = 0; i < results.length; i++) {
 		var expectedResult = expectedResults[i];
 		var result = results[i];
 		var fCall = 'proper function not called';
-		test.strictEqual(expectedResult.functionCall, result.functionCall, fCall);
+		assert.strictEqual(expectedResult.functionCall, result.functionCall, fCall);
 		var type = 'value';
 		if(expectedResult.type) {
 			type = expectedResult.type;
 		}
 		if(type === 'value') {
 			var datamsg = 'bad value detected';
-			test.strictEqual(expectedResult.retData, result.retData, datamsg);
+			assert.strictEqual(expectedResult.retData, result.retData, datamsg);
 		} else if (type === 'range') {
 			var rangemsg = 'value out of range';
 			var valueInRange = true;
@@ -118,15 +119,15 @@ var testResults = function(test, expectedResults, results) {
 				rangemsg += ': value to high, val: ' + result.retData.toString();
 				rangemsg += ', maxVal: ' + expectedResult.max.toString();
 			}
-			test.ok(valueInRange, rangemsg);
+			assert.isOk(valueInRange, rangemsg);
 		}
 	}
 };
 exports.testResults = testResults;
 
-var testResultsArray = function(test, expectedResults, results) {
+var testResultsArray = function(expectedResults, results) {
 	if(results.length !== expectedResults.length) {
-		test.ok(false, 'num results does not match');
+		assert.isOk(false, 'num results does not match');
 	}
 	var i = 0;
 	var j = 0;
@@ -134,18 +135,18 @@ var testResultsArray = function(test, expectedResults, results) {
 		var expectedResult = expectedResults[i];
 		var result = results[i];
 		var fCall = 'proper function not called';
-		test.strictEqual(expectedResult.functionCall, result.functionCall, fCall);
-		
+		assert.strictEqual(expectedResult.functionCall, result.functionCall, fCall);
+
 		if(result.retData.length !== expectedResult.retData.length) {
-			test.ok(false, 'length of retData does not match');
+			assert.isOk(false, 'length of retData does not match');
 		}
 		for(j = 0; j < result.retData.length; j++) {
 			var res = result.retData[j];
 			var expectedRes = expectedResult.retData[j];
 			var addrmsg = 'Wrong address read';
-			test.strictEqual(expectedRes.address, res.address, addrmsg);
+			assert.strictEqual(expectedRes.address, res.address, addrmsg);
 			var errmsg = 'wrong error boolean result';
-			test.strictEqual(expectedRes.isErr, res.isErr, errmsg);
+			assert.strictEqual(expectedRes.isErr, res.isErr, errmsg);
 
 			var type = 'value';
 			if(expectedRes.type) {
@@ -153,7 +154,7 @@ var testResultsArray = function(test, expectedResults, results) {
 			}
 			if(type === 'value') {
 				var datamsg = 'bad value detected';
-				test.strictEqual(expectedRes.data, res.data, datamsg);
+				assert.strictEqual(expectedRes.data, res.data, datamsg);
 			} else if (type === 'range') {
 				var rangemsg = 'value out of range';
 				var valueInRange = true;
@@ -167,14 +168,14 @@ var testResultsArray = function(test, expectedResults, results) {
 					rangemsg += ': value to high, val: ' + res.data.toString();
 					rangemsg += ', maxVal: ' + expectedRes.max.toString();
 				}
-				test.ok(valueInRange, rangemsg);
+				assert.isOk(valueInRange, rangemsg);
 			}
 		}
 	}
 };
 exports.testResultsArray = testResultsArray;
 
-var testDeviceObject = function(test, device, expDevice) {
+var testDeviceObject = function(device, expDevice) {
 	var savedAttributes = device.savedAttributes;
 	var expSavedAttributes = expDevice.mockDeviceConfig;
 
@@ -194,7 +195,7 @@ var testDeviceObject = function(test, device, expDevice) {
 		var res = savedAttributes[resKey];
 		if(res) {
 			if(res.val) {
-				test.strictEqual(res.val, expRes, 'Key: '+resKey+', wrong val');
+				assert.strictEqual(res.val, expRes, 'Key: '+resKey+', wrong val');
 			} else {
 				if(res !== expRes) {
 					console.log('Looking for', resKey);
@@ -206,31 +207,30 @@ var testDeviceObject = function(test, device, expDevice) {
 					// 	savedAttributes
 					// );
 				}
-				test.strictEqual(res, expRes, 'Key: '+expKey+', wrong val');
+				assert.strictEqual(res, expRes, 'Key: '+expKey+', wrong val');
 			}
 		} else {
 			console.log('(no-res) Looking for', expKey);
 			console.log('Expected Val', expRes);
 			console.log('Available Data', Object.keys(savedAttributes));
-			test.ok(false, 'Expected key: '+expKey+', not found.');
+			assert.isOk(false, 'Expected key: '+expKey+', not found.');
 		}
 	});
 };
 exports.testDeviceObject = testDeviceObject;
 
-var testDeviceObjects = function(test, devices, expDevices) {
+var testDeviceObjects = function(devices, expDevices) {
 	try {
-		test.strictEqual(devices.length, expDevices.length, 'Num Devices not correct');
+		assert.strictEqual(devices.length, expDevices.length, 'Num Devices not correct');
 		expDevices.forEach(function(expDevice, i) {
 			var device = devices[i];
 			testDeviceObject(
-				test,
 				device,
 				expDevice
 			);
 		});
 	} catch(err) {
-		test.ok(false, 'Error Running Test' + err.toString());
+		assert.isOk(false, 'Error Running Test' + err.toString());
 	}
 };
 exports.testDeviceObjects = testDeviceObjects;

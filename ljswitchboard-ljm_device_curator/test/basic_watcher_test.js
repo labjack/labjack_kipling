@@ -7,7 +7,7 @@ function createMockDevice() {
 	this.iReadMany = function(addresses) {
 		var defered = q.defer();
 		// console.log('in mock iReadMany', addresses);
-		
+
 		var results = addresses.map(function(address) {
 			return {'name': address, 'res': 1};
 		});
@@ -30,19 +30,19 @@ var watcherReceiver = function(results) {
 exports.tests = {
 	'create watcher object': function(test) {
 		registerWatcher = new register_watcher.createRegisterWatcher(mockDevice);
-		test.done();
+		done();
 	},
 	'create new watcher': function(test) {
 		registerWatcher.createWatcher(
 			testWatcherName,
 			watcherReceiver
 		).then(function(name) {
-			test.strictEqual(
+			assert.strictEqual(
 				name,
 				testWatcherName,
 				'invalid created watcher name'
 			);
-			test.done();
+			done();
 		});
 	},
 	'configure watcher': function(test) {
@@ -51,17 +51,17 @@ exports.tests = {
 			[{'registers': ['AIN0'],'ms': 100},
 			{'registers': ['AIN2'],'ms': 200},]
 		).then(function(name) {
-			test.strictEqual(
+			assert.strictEqual(
 				name,
 				testWatcherName,
 				'invalid watcher results'
 			);
-			test.done();
+			done();
 		});
 	},
 	'wait for data': function(test) {
 		var finishWaiting = function() {
-			test.done();
+			done();
 		};
 		var timer = setTimeout(finishWaiting, 500);
 	},
@@ -78,29 +78,29 @@ exports.tests = {
 					numUpdates: 1
 				}
 			};
-			test.deepEqual(
+			assert.deepEqual(
 				result,
 				expectedResult,
 				'invalid watcher name'
 			);
-			test.done();
+			done();
 		});
 	},
 	'increase delay': function(test) {
 		mockDevice.delay = 210;
-		test.done();
+		done();
 	},
 	'create new watcher (2)': function(test) {
 		registerWatcher.createWatcher(
 			testWatcherName,
 			watcherReceiver
 		).then(function(name) {
-			test.strictEqual(
+			assert.strictEqual(
 				name,
 				testWatcherName,
 				'invalid created watcher name'
 			);
-			test.done();
+			done();
 		});
 	},
 	'configure watcher (2)': function(test) {
@@ -109,17 +109,17 @@ exports.tests = {
 			[{'registers': ['AIN0'],'ms': 100},
 			{'registers': ['AIN2'],'ms': 200},]
 		).then(function(name) {
-			test.strictEqual(
+			assert.strictEqual(
 				name,
 				testWatcherName,
 				'invalid watcher name'
 			);
-			test.done();
+			done();
 		});
 	},
 	'wait for data (2)': function(test) {
 		var finishWaiting = function() {
-			test.done();
+			done();
 		};
 		var timer = setTimeout(finishWaiting, 500);
 	},
@@ -136,23 +136,23 @@ exports.tests = {
 					numUpdates: 1
 				}
 			};
-			test.deepEqual(
+			assert.deepEqual(
 				result,
 				expectedResult,
 				'invalid watcher name'
 			);
-			test.done();
+			done();
 		});
 	},
 	'stop remaining watchers': function(test) {
 		registerWatcher.stopAllWatchers()
 		.then(function(names) {
-			test.deepEqual(
+			assert.deepEqual(
 				names,
 				[],
 				'invalid watcher names'
 			);
-			test.done();
+			done();
 		})
 	},
 };

@@ -1,10 +1,8 @@
-
+var assert = require('chai').assert;
 
 var utils = require('../utils/utils');
 var qRunner = utils.qRunner;
 var qExec = utils.qExec;
-var pResults = utils.pResults;
-var q = require('q');
 
 var io_manager;
 var io_interface;
@@ -17,25 +15,22 @@ var device;
 var deviceB;
 
 var criticalError = false;
-var stopTest = function(test, err) {
-	test.ok(false, err);
+var stopTest = function(done, err) {
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
-exports.tests = {
-	'setUp': function(callback) {
+describe('two mock devs', function() {
+	beforeEach(function(done) {
 		if(criticalError) {
 			process.exit(1);
-			callback();
+			done();
 		} else {
-			callback();
+			done();
 		}
-	},
-	'tearDown': function(callback) {
-		callback();
-	},
-	'require io_manager': function(test) {
+	});
+	it('require io_manager', function (done) {
 		console.log('');
 		console.log('**** open_close_mock_dev_test ****');
 		console.log('**** No Device Required ****');
@@ -44,24 +39,24 @@ exports.tests = {
 		try {
 			io_manager = require('../../lib/io_manager');
 		} catch(err) {
-			stopTest(test, err);
+			stopTest(done, err);
 		}
-		test.done();
-	},
-	'create new io_interface': function(test) {
+		done();
+	});
+	it('create new io_interface', function (done) {
 		try {
 			io_interface = io_manager.io_interface();
 		} catch(err) {
-			stopTest(test, err);
+			stopTest(done, err);
 		}
-		test.done();
-	},
-	'initialize io_interface': function(test) {
+		done();
+	});
+	it('initialize io_interface', function (done) {
 		// io_interface.initialize('testCWD')
 		io_interface.initialize(process.cwd())
 		.then(function(res) {
-			test.ok(true, res);
-			test.done();
+			assert.isOk(true, res);
+			done();
 		}, function(err) {
 			console.log('******');
 			console.log('io_interface failed to initialize:');
@@ -72,10 +67,10 @@ exports.tests = {
 			// infoKeys.forEach(function(key) {
 			// 	console.log('    - ' + key + ': ' + JSON.stringify(err[key]));
 			// });
-			stopTest(test, 'io_interface failed to initialize');
-		});	
-	},
-	'check device_controller': function(test) {
+			stopTest(done, 'io_interface failed to initialize');
+		});
+	});
+	it('check device_controller', function (done) {
 		device_controller = io_interface.getDeviceController();
 
 		var bundle = [];
@@ -94,16 +89,16 @@ exports.tests = {
 				'retData': ['io_manager', 'driver_manager', 'device_manager']
 			};
 			var endpointsMsg = 'The resulting endpoints were not expected';
-			test.deepEqual(results[0], expectedEndpointsResults, endpointsMsg);
+			assert.deepEqual(results[0], expectedEndpointsResults, endpointsMsg);
 			setTimeout(function() {
-				test.done();
+				done();
 			}, 1000);
 		}, function(err) {
 			console.log('ERROR!', err);
-			test.done();
+			done();
 		});
-	},
-	'open mock device': function(test) {
+	});
+	it('open mock device', function (done) {
 		var params = {
 			'deviceType': 'LJM_dtT5',
 			'connectionType': 'LJM_ctUSB',
@@ -117,16 +112,16 @@ exports.tests = {
 			device = newDevice;
 			device_controller.getNumDevices()
 			.then(function(res) {
-				test.strictEqual(res, 1, 'wrong number of devices are open');
-				test.done();
+				assert.strictEqual(res, 1, 'wrong number of devices are open');
+				done();
 			});
 		}, function(err) {
 			console.log("Error opening device", err);
-			test.ok(false, 'failed to create new device object');
-			test.done();
+			assert.isOk(false, 'failed to create new device object');
+			done();
 		});
-	},
-	'open mock deviceB': function(test) {
+	});
+	it('open mock deviceB', function (done) {
 		var params = {
 			'deviceType': 'LJM_dtT5',
 			'connectionType': 'LJM_ctUSB',
@@ -140,64 +135,64 @@ exports.tests = {
 			deviceB = newDevice;
 			device_controller.getNumDevices()
 			.then(function(res) {
-				test.strictEqual(res, 2, 'wrong number of devices are open');
-				test.done();
+				assert.strictEqual(res, 2, 'wrong number of devices are open');
+				done();
 			});
 		}, function(err) {
 			console.log("Error opening device", err);
-			test.ok(false, 'failed to create new device object');
-			test.done();
+			assert.isOk(false, 'failed to create new device object');
+			done();
 		});
-	},
-	'get device attributes': function(test) {
-		// Perform the first query with no filters enabled.  By default, no 
+	});
+	it('get device attributes', function (done) {
+		// Perform the first query with no filters enabled.  By default, no
 		// mock devices are enabled.
 		device_controller.getDeviceListing()
 		.then(function(res) {
-			test.strictEqual(res.length,2,'Device listing should not be empty');
-			test.strictEqual(res[0].serialNumber, 470010549, 'Wrong Serial Number');
-			test.strictEqual(res[1].serialNumber, 470010548, 'Wrong Serial Number');
-			test.done();
+			assert.strictEqual(res.length,2,'Device listing should not be empty');
+			assert.strictEqual(res[0].serialNumber, 470010549, 'Wrong Serial Number');
+			assert.strictEqual(res[1].serialNumber, 470010548, 'Wrong Serial Number');
+			done();
 		});
-	},
-	'get device attributes (2)': function(test) {
+	});
+	it('get device attributes (2)', function (done) {
 		// Perform the first query with
 		device_controller.getDeviceListing([{'enableMockDevices': true}])
 		.then(function(res) {
 			// console.log('Data', res);
-			test.strictEqual(res.length,2,'Device listing should not be empty');
-			test.strictEqual(res[0].serialNumber, 470010549, 'Wrong Serial Number');
-			test.strictEqual(res[1].serialNumber, 470010548, 'Wrong Serial Number');
-			test.done();
+			assert.strictEqual(res.length,2,'Device listing should not be empty');
+			assert.strictEqual(res[0].serialNumber, 470010549, 'Wrong Serial Number');
+			assert.strictEqual(res[1].serialNumber, 470010548, 'Wrong Serial Number');
+			done();
 		});
-	},
-	'close mock device': function(test) {
+	});
+	it('close mock device', function (done) {
 		device.close()
 		.then(function(res) {
-			test.strictEqual(res.comKey, 0, 'expected to receive a different comKey');
-			test.done();
+			assert.strictEqual(res.comKey, 0, 'expected to receive a different comKey');
+			done();
 		}, function(err) {
 			console.log('Failed to close mock device', err);
-			test.ok(false, 'Failed to close mock device');
-			test.done();
+			assert.isOk(false, 'Failed to close mock device');
+			done();
 		});
-	},
-	'close mock device(2)': function(test) {
+	});
+	it('close mock device(2)', function (done) {
 		deviceB.close()
 		.then(function(res) {
-			test.strictEqual(res.comKey, 1, 'expected to receive a different comKey');
-			test.done();
+			assert.strictEqual(res.comKey, 1, 'expected to receive a different comKey');
+			done();
 		}, function(err) {
 			console.log('Failed to close mock device', err);
-			test.ok(false, 'Failed to close mock device');
-			test.done();
+			assert.isOk(false, 'Failed to close mock device');
+			done();
 		});
-	},
-	'destroy io_interface': function(test) {
-		qRunner(test, io_interface.destroy)
+	});
+	it('destroy io_interface', function (done) {
+		qRunner(done, io_interface.destroy)
 		.then(function(res) {
-			test.ok(true, res);
-			test.done();
+			assert.isOk(true, res);
+			done();
 		});
-	},
-};
+	});
+});

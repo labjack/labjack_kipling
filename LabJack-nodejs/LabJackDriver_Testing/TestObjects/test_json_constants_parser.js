@@ -1,6 +1,6 @@
 /**
- * This file contains unit tests for testing functions in the 
- * LabJackDriver/json_constants_parser.js file.  Using "rewire" it replaces the 
+ * This file contains unit tests for testing functions in the
+ * LabJackDriver/json_constants_parser.js file.  Using "rewire" it replaces the
  * some of the constants for appropriate unit-testing.
  *
  * @author Chris Johnson (chrisjohn404)
@@ -23,22 +23,22 @@ module.exports = {
 
 	/**
 	 * Tests to make sure register information can be found by name.
-	 * 
+	 *
 	 * @param  {[type]} test
 	 * @return {[type]}
 	 */
 	testParseName: function(test) {
 		console.log("hello world");
-		test.done();
+		done();
 	},
 
 	/**
 	 * Tests to make sure register information can be found by address number.
-	 * 
+	 *
 	 * @param  {[type]} test
 	 * @return {[type]}
 	 */
 	testParseAddress: function(test) {
-		test.done();
+		done();
 	},
 }

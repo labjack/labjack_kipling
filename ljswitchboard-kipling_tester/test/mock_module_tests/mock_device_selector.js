@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 var testOptions = {
 	'refreshDevices': false,
@@ -12,7 +12,7 @@ var gui;
 var window_manager;
 
 // Window Objects
-var testWin;
+var testerWin;
 var kiplingWin;
 
 // Kipling Application Objects
@@ -46,8 +46,8 @@ mockDevices.forEach(function(mockDevice) {
 	deviceScannerConfigData.push(deviceData);
 });
 
-this.test_device_selector = {
-	'initialize test': function(test) {
+describe('mock_device_selector', function() {
+	it('initialize test', function (done) {
 		package_loader = global.require('ljswitchboard-package_loader');
 		gns = package_loader.getNameSpace();
 		gui = global[gns].gui;
@@ -69,40 +69,40 @@ this.test_device_selector = {
 		io_manager = global.require('ljswitchboard-io_manager');
 		io_interface = io_manager.io_interface();
 		deviceController = io_interface.getDeviceController();
-		test.done();
-	},
-	'disable device scanning': function(test) {
+		done();
+	});
+	it('disable device scanning', function (done) {
 		deviceController.enableMockDeviceScanning()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'Add mock devices': function(test) {
+	});
+	it('Add mock devices', function (done) {
 		deviceController.addMockDevices(deviceScannerConfigData)
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'load the device_selector module': function(test) {
+	});
+	it('load the device_selector module', function (done) {
 		MODULE_LOADER.loadModuleByName('device_selector')
 		.then(function(res) {
-			test.done();
+			done();
 		});
-	},
-	'save save device_selector information': function(test) {
+	});
+	it('save save device_selector information', function (done) {
 		activeModule = kiplingWindow.activeModule;
 		viewGen = activeModule.viewGen;
 		eventList = activeModule.eventList;
-		test.done();
-	},
-	'wait for device selector module to start': function(test) {
+		done();
+	});
+	it('wait for device selector module to start', function (done) {
 		activeModule.once(eventList.MODULE_STARTED, function(scanResults) {
 			var numResults = scanResults.length = 0;
-			test.strictEqual(numResults, 0, 'No results should currently be cached');
-			test.done();
+			assert.strictEqual(numResults, 0, 'No results should currently be cached');
+			done();
 		});
-	},
-	'check page elements': function(test) {
+	});
+	it('check page elements', function (done) {
 		var labjackLogo = $('#labjack-logo-image');
 		var isLogoValid = true;
 		if(labjackLogo.height() != 49) {
@@ -111,13 +111,13 @@ this.test_device_selector = {
 		if(labjackLogo.width() != 290) {
 			isLogoValid = false;
 		}
-		test.ok(isLogoValid, 'LabJack logo not displayed');
+		assert.isOk(isLogoValid, 'LabJack logo not displayed');
 		var labjackLink = $('#lj-link-text');
 		// labjackLink.trigger('click');
 
-		test.done();
-	},
-	'refresh device list': function(test) {
+		done();
+	});
+	it('refresh device list', function (done) {
 		function ensureChecked(elName) {
 			var checkbox = $(elName);
 			checkbox.prop('checked', true);
@@ -136,9 +136,9 @@ this.test_device_selector = {
 			activeModule.once(
 				eventList.DEVICE_SCAN_COMPLETED,
 				function(scanResults) {
-					test.ok(startedScanEventCaught, 'should triggered scan started event');
+					assert.isOk(startedScanEventCaught, 'should triggered scan started event');
 					console.log('scanResults', scanResults);
-					test.done();
+					done();
 				});
 			var viewGen = activeModule.viewGen;
 			var refreshButton = viewGen.pageElements.refresh_devices_button.ref;
@@ -146,45 +146,45 @@ this.test_device_selector = {
 			// Trigger the click event for the refresh button and make sure the scan
 			// happens.
 			refreshButton.trigger('click');
-			// test.done();
+			// done();
 		} else {
-			test.done();
+			done();
 		}
-	},
+	});
 
-	'check displayed scan results': function(test) {
+	it('check displayed scan results', function (done) {
 		// Verify there being some number of found device types
 		var deviceTypes = $('.device-type');
-		test.strictEqual(deviceTypes.length, 4, 'Unexpected number of device types');
+		assert.strictEqual(deviceTypes.length, 4, 'Unexpected number of device types');
 
 		var devices = $('.device');
-		test.strictEqual(devices.length, 5, 'Unexpected number of devices');
+		assert.strictEqual(devices.length, 5, 'Unexpected number of devices');
 
 		var digits = $('.DEVICE_TYPE_Digit .device');
-		test.strictEqual(digits.length, 1, 'Unexpected number of digits found');
+		assert.strictEqual(digits.length, 1, 'Unexpected number of digits found');
 
 		var t7s = $('.DEVICE_TYPE_T7 .device');
-		test.strictEqual(t7s.length, 2, 'Unexpected number of T7s found');
+		assert.strictEqual(t7s.length, 2, 'Unexpected number of T7s found');
 
 		var t4s = $('.DEVICE_TYPE_T4 .device');
-		test.strictEqual(t4s.length, 1, 'Unexpected number of T4s found');
+		assert.strictEqual(t4s.length, 1, 'Unexpected number of T4s found');
 
 		var t5s = $('.DEVICE_TYPE_T5 .device');
-		test.strictEqual(t5s.length, 1, 'Unexpected number of T5s found');
+		assert.strictEqual(t5s.length, 1, 'Unexpected number of T5s found');
 
-		test.done();
-	},
-	'Enable device scanning': function(test) {
+		done();
+	});
+	it('Enable device scanning', function (done) {
 		if(testOptions.realRefresh) {
 			deviceController.disableMockDeviceScanning()
 			.then(function() {
-				test.done();
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'refresh device list - live': function(test) {
+	});
+	it('refresh device list - live', function (done) {
 		if(gui.App.manifest.performLiveTests || testOptions.realRefresh) {
 			var startedScanEventCaught = false;
 			activeModule.once(
@@ -195,9 +195,9 @@ this.test_device_selector = {
 			activeModule.once(
 				eventList.DEVICE_SCAN_COMPLETED,
 				function(scanResults) {
-					test.ok(startedScanEventCaught, 'should triggered scan started event');
+					assert.isOk(startedScanEventCaught, 'should triggered scan started event');
 					console.log('scanResults', scanResults);
-					test.done();
+					done();
 				});
 			var viewGen = activeModule.viewGen;
 			var refreshButton = viewGen.pageElements.refresh_devices_button.ref;
@@ -206,15 +206,15 @@ this.test_device_selector = {
 			// happens.
 			refreshButton.trigger('click');
 		} else {
-			test.done();
+			done();
 		}
-	},
+	});
 	// 'connect to T7': function(test) {
 	// 	MODULE_CHROME.once(
 	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
 	// 		function(updatedModules) {
 	// 			console.log('Tabs updated (test)', updatedModules);
-	// 			test.done();
+	// 			done();
 	// 		});
 
 	// 	// Connect to the first found USB-T7
@@ -227,7 +227,7 @@ this.test_device_selector = {
 	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_CLOSED,
 	// 		function(updatedModules) {
 	// 			console.log('Tabs updated (test)', updatedModules);
-	// 			test.done();
+	// 			done();
 	// 		});
 
 	// 	// Connect to the first found USB-T7
@@ -235,4 +235,4 @@ this.test_device_selector = {
 	// 	var t7 = t7s.first();
 	// 	t7.trigger('click');
 	// },
-};
+});

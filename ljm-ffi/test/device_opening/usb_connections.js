@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 /*
  * This test makes sure that a simple LJM function call can be performed with
@@ -5,7 +6,7 @@
  * types.
  * Type 1: Automatically handles converting/parsing of data into and out of
  * 		buffer data structures.
- * Type 2: Adds a try-catch around the function call that makes the 
+ * Type 2: Adds a try-catch around the function call that makes the
  * 		Linux/Mac/Windows ffi implementations more similar.
  * Type 3: The raw FFI function calls.
  */
@@ -46,19 +47,17 @@ var ffi_liblabjack;
 var device;
 
 /* Define Test Cases */
-var test_cases = {
-	'include ljm': function(test) {
+describe('usb_connections', function() {
+	it('include ljm', function (done) {
 		var ljm_ffi = require('../../lib/ljm-ffi');
 
 		ljm = ljm_ffi.load();
 		liblabjack = ljm_ffi.loadSafe();
 		ffi_liblabjack = ljm_ffi.loadRaw();
 
-		test.done();
-	},
-	'Execute Opening (Sync)': function(test) {
-
-
+		done();
+	});
+	it('Execute Opening (Sync)', function (done) {
 		// Execute LJM Function
 		var dt = 'LJM_dtT7';
 		var ct = 'LJM_ctUSB';
@@ -70,14 +69,14 @@ var test_cases = {
 			console.log('Opening USB Device, iteration:', i);
 			var openInfo = ljm.LJM_OpenS(dt, ct, id, 0);
 			console.log('Open Info', openInfo);
-			
+
 			var closeInfo = ljm.LJM_Close(openInfo.handle);
 			console.log('Close Info', closeInfo);
 		}
-		
-		test.ok(true);
-		test.done();
-	},
+
+		assert.isOk(true);
+		done();
+	});
 	// 'Execute Opening (Async)': function(test) {
 
 
@@ -103,13 +102,10 @@ var test_cases = {
 	// 			currentIteration += 1;
 	// 			ljm.LJM_OpenS.async(dt, ct, id, 0, handleOpen);
 	// 		} else {
-	// 			test.done();
+	// 			done();
 	// 		}
 	// 	}
-		
+
 	// 	runTest();
 	// },
-};
-
-
-exports.tests = test_cases;
+});

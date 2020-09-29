@@ -1,6 +1,6 @@
+var assert = require('chai').assert;
 
 var path = require('path');
-
 
 var config_checker;
 var cwd = process.cwd();
@@ -32,45 +32,45 @@ var testFiles = [{
 	'pass': true,
 }];
 
-exports.tests = {
-	'Require config_checker': function(test) {
+describe('basic_test', function() {
+	it('Require config_checker', function (done) {
 		try {
 			config_checker = require('../../lib/config_checker');
-			test.ok(true);
+			assert.isOk(true);
 		} catch(err) {
-			test.ok(false, 'error loading config_checker');
+			assert.isOk(false, 'error loading config_checker');
 		}
-		test.done();
-	},
-};
+		done();
+	});
 
-function createConfigCheckerTest (options) {
-	exports.tests[options.name] = function(test) {
-		var filePath = path.join(logger_config_files_dir, options.file_name);
-		config_checker.verifyConfigFile(filePath)
-		.then(function(results) {
-			if(options.pass) {
-				test.ok(true, 'Test is supposed to pass');
-			} else {
-				test.ok(false, 'Test should have failed: ' + options.name);
-			}
-			test.done();
-		}, function(error) {
-
-			test.equals(error.isValid, false, 'isValid should be false: ' + options.name);
-			if(options.pass) {
-				test.ok(false, 'Test is supposed to fail: ' + options.name);
-			} else {
-				test.ok(true, 'Test is supposed to fail');
-				var searchRes = error.message.indexOf(options.partial_err_str);
-				if(searchRes >= 0) {
-					test.ok(true, 'Partial error string was found');
+	function createConfigCheckerTest (options) {
+		it(options.name, function (done) {
+			var filePath = path.join(logger_config_files_dir, options.file_name);
+			config_checker.verifyConfigFile(filePath)
+			.then(function(results) {
+				if(options.pass) {
+					assert.isOk(true, 'Test is supposed to pass');
 				} else {
-					test.ok(false, 'Partial error string was not found: ' + JSON.stringify(error.message, null, 2));
+					assert.isOk(false, 'Test should have failed: ' + options.name);
 				}
-			}
-			test.done();
+				done();
+			}, function(error) {
+
+				assert.equals(error.isValid, false, 'isValid should be false: ' + options.name);
+				if(options.pass) {
+					assert.isOk(false, 'Test is supposed to fail: ' + options.name);
+				} else {
+					assert.isOk(true, 'Test is supposed to fail');
+					var searchRes = error.message.indexOf(options.partial_err_str);
+					if(searchRes >= 0) {
+						assert.isOk(true, 'Partial error string was found');
+					} else {
+						assert.isOk(false, 'Partial error string was not found: ' + JSON.stringify(error.message, null, 2));
+					}
+				}
+				done();
+			});
 		});
-	};
-}
-testFiles.forEach(createConfigCheckerTest);
+	}
+	testFiles.forEach(createConfigCheckerTest);
+});

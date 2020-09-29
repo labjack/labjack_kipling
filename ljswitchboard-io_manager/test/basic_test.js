@@ -1,61 +1,49 @@
-
+var assert = require('chai').assert;
 
 var utils = require('./utils/utils');
 var qRunner = utils.qRunner;
-var qExec = utils.qExec;
-var pResults = utils.pResults;
-var q = require('q');
 
 var io_manager;
 var io_interface;
 
-// Managers
-var driver_controller;
-var device_controller;
-var file_io_controller;
-var logger_controller;
-
 var criticalError = false;
-var stopTest = function(test, err) {
-	test.ok(false, err);
+var stopTest = function(done, err) {
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
-var TEST_DRIVER_MANAGER = false;
-
-
-exports.basic_test = {
-	'setUp': function(callback) {
+describe('basic', function() {
+	beforeEach(function(done) {
 		if(criticalError) {
 			process.exit(1);
 		} else {
-			callback();
+			done();
 		}
-	},
-	'tearDown': function(callback) {
-		callback();
-	},
-	'require io_manager': function(test) {
+	});
+	afterEach(function(done) {
+		done();
+	});
+	it('require io_manager', function (done) {
 		// Require the io_manager
 		try {
 			io_manager = require('../lib/io_manager');
 		} catch(err) {
-			stopTest(test, err);
+			stopTest(done, err);
 		}
 
 
 		var keys = Object.keys(io_manager);
-		test.deepEqual(keys, ['io_interface', 'info'], 'io_manager not required properly');
-		test.done();
-	},
-	'create new io_interface': function(test) {
+		assert.deepEqual(keys, ['io_interface', 'info'], 'io_manager not required properly');
+		done();
+	});
+	it('create new io_interface', function (done) {
 		io_interface = io_manager.io_interface();
 		var keys = Object.keys(io_interface);
 		var requiredKeys = [
 			'driver_controller',
 			'device_controller',
-			'logger_controller',
+			// 'logger_controller', // TODO uncomment?
 			'file_io_controller'
 		];
 		var foundRequiredKeys = true;
@@ -63,32 +51,31 @@ exports.basic_test = {
 			if (keys.indexOf(requiredKey) < 0) {
 				foundRequiredKeys = false;
 				var mesg = 'io_interface missing required key: ' + requiredKey;
-				test.ok(false, mesg);
+				assert.isOk(false, mesg);
 				process.exit(1);
 			} else {
-				test.ok(true);
+				assert.isOk(true);
 			}
 		});
 		// var msg = 'io_interface not created properly';
-		// test.deepEqual(keys, expectedKeys, msg);
-		test.done();
-	},
-	'initialize io_interface': function(test) {
-		console.log('TEST: Initializing io_interface');
-		qRunner(test, io_interface.initialize)
+		// assert.deepEqual(keys, expectedKeys, msg);
+		done();
+	});
+	it('initialize io_interface', function (done) {
+		qRunner(done, io_interface.initialize)
 		.then(function(res) {
-			test.ok(true, res);
-			test.done();
+			assert.isOk(true, res);
+			done();
 		}, function(err) {
-			test.ok(false, err);
-			test.done();
+			assert.isOk(false, err);
+			done();
 		});
-	},
-	'destroy io_interface': function(test) {
-		qRunner(test, io_interface.destroy)
+	});
+	it('destroy io_interface', function (done) {
+		qRunner(done, io_interface.destroy)
 		.then(function(res) {
-			test.ok(true, res);
-			test.done();
+			assert.isOk(true, res);
+			done();
 		});
-	},
-};
+	});
+});

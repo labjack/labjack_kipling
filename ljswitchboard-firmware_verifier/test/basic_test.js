@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 var firmware_verifier;
 var fileData;
@@ -29,13 +29,14 @@ var testFiles = [{
 testFiles.forEach(function(testFile) {
 	testFile.path = path.join(process.cwd(), 'test', testFile.fileName);
 });
-exports.tests = {
-	'load firmware_verifier': function(test) {
+
+describe('basic', function() {
+	it('load firmware_verifier', function (done) {
 		firmware_verifier = require('../lib/firmware_verifier');
-		test.ok(true);
-		test.done();
-	},
-	'test valid file': function(test) {
+		assert.isOk(true);
+		done();
+	});
+	it('test valid file', function (done) {
 		var fileData = fs.readFileSync(testFiles[0].path);
 
 		firmware_verifier.validateFirmwareFile(fileData, {
@@ -44,11 +45,11 @@ exports.tests = {
 		})
 		.then(function(parsedData) {
 			// console.log('Parsed Data', parsedData);
-			test.ok(parsedData.isValid, parsedData.message);
-			test.done();
+			assert.isOk(parsedData.isValid, parsedData.message);
+			done();
 		});
-	},
-	'test T7 recovery fw': function(test) {
+	});
+	it('test T7 recovery fw', function (done) {
 		var fileData = fs.readFileSync(testFiles[1].path);
 
 		firmware_verifier.validateFirmwareFile(fileData, {
@@ -57,11 +58,11 @@ exports.tests = {
 		})
 		.then(function(parsedData) {
 			// console.log('Parsed Data', parsedData);
-			test.ok(parsedData.isValid, parsedData.message);
-			test.done();
+			assert.isOk(parsedData.isValid, parsedData.message);
+			done();
 		});
-	},
-	'test T4 fw file': function(test) {
+	});
+	it('test T4 fw file', function (done) {
 		var fileData = fs.readFileSync(testFiles[2].path);
 
 		firmware_verifier.validateFirmwareFile(fileData, {
@@ -70,11 +71,11 @@ exports.tests = {
 		})
 		.then(function(parsedData) {
 			// console.log('Parsed Data', parsedData);
-			test.ok(parsedData.isValid, parsedData.message);
-			test.done();
+			assert.isOk(parsedData.isValid, parsedData.message);
+			done();
 		});
-	},
-	'test T8 fw file': function(test) {
+	});
+	it('test T8 fw file', function (done) {
 		var fileData = fs.readFileSync(testFiles[4].path);
 
 		firmware_verifier.validateFirmwareFile(fileData, {
@@ -83,11 +84,11 @@ exports.tests = {
 		})
 		.then(function(parsedData) {
 			// console.log('Parsed Data', parsedData);
-			test.ok(parsedData.isValid, parsedData.message);
-			test.done();
+			assert.isOk(parsedData.isValid, parsedData.message);
+			done();
 		});
-	},
-	'test invalid file': function(test) {
+	});
+	it('test invalid file', function (done) {
 		// Try to load a Digit's firmware file as a T7.
 		var fileData = fs.readFileSync(testFiles[3].path);
 
@@ -96,11 +97,11 @@ exports.tests = {
 			'deviceType': 'T7', // This flag isn't currently enabled but should be...
 		})
 		.then(function(parsedData) {
-			test.strictEqual(parsedData.isValid, false, 'Should have failed');
+			assert.strictEqual(parsedData.isValid, false, 'Should have failed');
 			var reqMessage = 'Incorrect device type.';
 			// console.log('Data', parsedData);
-			test.deepEqual(parsedData.message, reqMessage, 'Wrong error message');
-			test.done();
+			assert.deepEqual(parsedData.message, reqMessage, 'Wrong error message');
+			done();
 		});
-	},
-};
+	});
+});

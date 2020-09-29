@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 var q = require('q');
 var path = require('path');
@@ -40,7 +41,7 @@ try {
 var data_collector;
 var dataCollector;
 var dcEvents;
-	
+
 var DEBUG_COLLECTED_EVENTS = false;
 var logEvent = function() {
 	if(DEBUG_COLLECTED_EVENTS) {
@@ -130,7 +131,7 @@ function DATA_COLLECTOR_TESTER () {
 	};
 	this.initializeTester = function(config) {
 		var defered = q.defer();
-		
+
 		// Clear the captured event log
 		self.config = config;
 		self.eventLog = [];
@@ -189,7 +190,7 @@ function DATA_COLLECTOR_TESTER () {
 					userValuesArray = Object.keys(groupData[groupKey]);
 				}
 			});
-			
+
 			// Save the user values object if necessary.
 			if(userValuesArray.length > 0) {
 				aggregatedGroupData.userValues = userValuesArray;
@@ -318,47 +319,48 @@ function DATA_COLLECTOR_TESTER () {
 			});
 			// console.log('requestedDeviceData:', requestedDeviceData);
 			// console.log('expRequestedDeviceData:', expRequestedDeviceData);
-			test.deepEqual(
+			assert.deepEqual(
 				requestedDeviceData,
 				expRequestedDeviceData,
 				'Unexpected requestedDeviceData received'
 			);
 			// console.log('reportedDataGroups:', reportedDataGroups);
 			// console.log('expReportedDataGroups:', expReportedDataGroups);
-			test.deepEqual(
+			assert.deepEqual(
 				reportedDataGroups,
 				expReportedDataGroups,
 				'Unexpected reportedDataGroups received'
 			);
 			// console.log('collectedGroupData:', collectedGroupData);
 			// console.log('expCollectedGroupData:', expCollectedGroupData);
-			test.deepEqual(
+			assert.deepEqual(
 				collectedGroupData,
 				expCollectedGroupData,
 				'Unexpected collectedGroupData received'
 			);
 		}
-		test.ok(true);
+		assert.isOk(true);
 	};
 	var self = this;
 }
 var dataCollectorTester = new DATA_COLLECTOR_TESTER();
 
-
-exports.tests = {
-	'Require data_collector': function(test) {
+describe('data_collector', function() {
+	return;
+	this.skip();
+	it('Require data_collector', function (done) {
 		try {
 			data_collector = require('../../lib/data_collector');
 			dcEvents = data_collector.eventList;
 			dataCollector = data_collector.create();
-			test.ok(true);
+			assert.isOk(true);
 		} catch(err) {
-			test.ok(false, 'error loading data_collector');
+			assert.isOk(false, 'error loading data_collector');
 			console.log('Error...', err);
 		}
-		test.done();
-	},
-	'Load Test Files': function(test) {
+		done();
+	});
+	it('Load Test Files', function (done) {
 		var promises = configurations.map(function(config) {
 			config.filePath = path.join(
 				logger_config_files_dir,
@@ -404,8 +406,8 @@ exports.tests = {
 			}, function(err) {
 				var defered = q.defer();
 				console.log('Failed to load file...', err);
-				test.ok(false, 'Failed to load file... ' + config.fileName + '. ' + err.errorMessage);
-				
+				assert.isOk(false, 'Failed to load file... ' + config.fileName + '. ' + err.errorMessage);
+
 				defered.reject(err);
 				return defered.promise;
 			});
@@ -413,36 +415,42 @@ exports.tests = {
 
 		q.allSettled(promises)
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'Open Devices': mockDeviceManager.openDevices,
-	'Verify Device Info': mockDeviceManager.getDevicesInfo,
-	'link tester to data collector': function(test) {
+	});
+	it('Open Devices', function (done) {
+		mockDeviceManager.openDevices();
+		done();
+	});
+	it('Verify Device Info', function (done) {
+		mockDeviceManager.getDevicesInfo();
+		done();
+	});
+	it('link tester to data collector', function (done) {
 		dataCollectorTester.linkToDataCollector()
 		.then(function() {
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		})
 		.catch(function(error) {
-			test.ok(false, 'Failed to link tester to data collector');
-			test.done();
+			assert.isOk(false, 'Failed to link tester to data collector');
+			done();
 		})
 		.done();
-	},
-	'configure data collector': function(test) {
+	});
+	it('configure data collector', function (done) {
 		// Configure the dataCollector with the available device objects.
 		var devices = mockDeviceManager.getDevices();
 		dataCollector.updateDeviceObjects(devices)
 		.then(function() {
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function() {
-			test.ok(false, 'Should have successfully configured the devices');
-			test.done();
+			assert.isOk(false, 'Should have successfully configured the devices');
+			done();
 		});
-	},
-	'configure and test data collector': function(test) {
+	});
+	it('configure and test data collector', function (done) {
 		// console.log('Configurations', configurations);
 
 		// q.longStackSupport = true;
@@ -466,20 +474,23 @@ exports.tests = {
 					}, 1000);
 				})
 				.catch(function(error) {
-					test.ok(false,'Caught an error running the data collector');
+					assert.isOk(false,'Caught an error running the data collector');
 					console.log('write.... q.longStackSupport = true;');
 					console.log('Error...', error);
 					console.log('Error Keys', Object.keys(error));
 					console.log('Error Stack', error.stack);
-					test.done();
+					done();
 				})
 				.done();
 			}, function(err) {
-				test.done();
+				done();
 			});
-	},
-	'execute and test data collector': function(test) {
-		test.done();
-	},
-	'Close Devices':mockDeviceManager.closeDevices,
-};
+	});
+	it('execute and test data collector', function (done) {
+		done();
+	});
+	it('Close Devices', function (done) {
+		mockDeviceManager.closeDevices();
+		done();
+	});
+});

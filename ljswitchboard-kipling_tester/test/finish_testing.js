@@ -1,6 +1,7 @@
+var assert = require('chai').assert;
 
-this.finish_testing = {
-	'display test results': function(test) {
-		test.done();
-	},
-};
+describe('finish_testing', function() {
+	it('Adjust Window Positions', function (done) {
+		done();
+	});
+});

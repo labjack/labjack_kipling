@@ -1,9 +1,8 @@
 // edit_package_keys_test.js
 // Expects to be called with cwd: labjack_kipling/ljswitchboard-builder
-
+var assert = require('chai').assert;
 
 var fse = require('fs-extra');
-var path = require('path');
 
 var editPackageKeys = require('../build_scripts/edit_package_keys.js').editPackageKeys;
 
@@ -33,27 +32,24 @@ const EXPECTED_RECURSIVE = {
 	}
 };
 
-exports.tests = {
-	setUp: function(callback) {
+describe('edit package keys', function() {
+	beforeEach(function (done) {
 		fse.copySync(
 			'./test/edit_package_keys_test/initial.json',
 			'./test/edit_package_keys_test/package.json'
 		);
-		callback();
-	},
-
-	'not_recursive': function(test) {
+		done();
+	});
+	it('not_recursive', function (done) {
 		editPackageKeys(TEST_BUNDLE, false);
 		var result = fse.readJsonSync('./test/edit_package_keys_test/package.json');
-		test.deepEqual(result, EXPECTED_NOT_RECURSIVE);
-		test.done();
-	},
-
-	'recursive': function(test) {
+		assert.deepEqual(result, EXPECTED_NOT_RECURSIVE);
+		done();
+	});
+	it('recursive', function (done) {
 		editPackageKeys(TEST_BUNDLE, true);
 		var result = fse.readJsonSync('./test/edit_package_keys_test/package.json');
-		test.deepEqual(result, EXPECTED_RECURSIVE);
-		test.done();
-	},
-};
-
+		assert.deepEqual(result, EXPECTED_RECURSIVE);
+		done();
+	});
+});

@@ -14,9 +14,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -44,11 +44,11 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -69,7 +69,7 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -78,7 +78,7 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -86,9 +86,9 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 4);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT4');
-			test.done();
+			assert.strictEqual(res.deviceType, 4);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT4');
+			done();
 		});
 	},
 	'Is Device Authorized?': function(test) {
@@ -99,27 +99,27 @@ var device_tests = {
 			} else {
 				console.log('  - Device is not authorized'.red);
 			}
-			test.done();
+			done();
 		});
 	},
 	// 'call iWriteMultiple': function(test) {
 	// 	device.iWriteMultiple(['DAC0', 'DAC1'], [1.0, 1.0])
 	// 	.then(function(res) {
 	// 		// console.log('iWriteMultiple res', res);
-	// 		test.done();
+	// 		done();
 	// 	});
 	// },
 	// 'call iWriteMany': function(test) {
 	// 	device.iWriteMany(['DAC0', 'DAC1'], [1.0, 1.0])
 	// 	.then(function(res) {
 	// 		// console.log('iWriteMany res', res);
-	// 		test.done();
+	// 		done();
 	// 	});
 	// },
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 };
@@ -134,7 +134,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

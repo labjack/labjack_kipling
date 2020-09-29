@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 var package_loader = require('../lib/ljswitchboard-package_loader');
 
@@ -19,31 +19,29 @@ eventListKeys.forEach(function(eventKey) {
 	});
 });
 
-
 var fs = require('fs.extra');
 var path = require('path');
+var os = require('os');
 var localFolder = 'test_extraction_folder';
-var directory = '';
-// Switch to using a local minified version of semver
-// var semver = require('semver');
-var semver = require('../lib/semver_min');
+
+var tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'labjack-test-'));
+var directory = null;
 
 var testPackages = require('./test_packages').testPackages;
 var testUtils = require('./test_utils');
 var cleanExtractionPath = testUtils.cleanExtractionPath;
 var testSinglePackageUpdate = testUtils.testSinglePackageUpdate;
 
-
-
-
 var testDurationTimes = [];
 var currentTestStartTime;
-var tests = {
-	'setUp': function(callback) {
+
+describe('bad zips', function() {
+	this.timeout(5000);
+	beforeEach(function (done) {
 		currentTestStartTime = new Date();
-		callback();
-	},
-	'tearDown': function(callback) {
+		done();
+	});
+	afterEach(function (done) {
 		var startTime = currentTestStartTime;
 		var endTime = new Date();
 		var duration = new Date(endTime - startTime);
@@ -53,17 +51,17 @@ var tests = {
 			'duration': duration
 		});
 		package_loader.deleteAllManagedPackages();
-		callback();
-	},
-	'configure the extraction path (first time)': function(test) {
-		directory = path.join(process.cwd(), localFolder);
+		done();
+	});
+	it('configure the extraction path (first time)', function (done) {
+		directory = path.join(tmpDir, localFolder);
 
-		cleanExtractionPath(test, directory);
+		cleanExtractionPath(directory);
 
 		package_loader.setExtractionPath(directory);
-		test.done();
-	},
-	'start extraction (corrupted .zip, first time)': function(test){
+		done();
+	});
+	it('start extraction (corrupted .zip, first time)', function (done) {
 		// Clear the fired-events list
 		capturedEvents = [];
 
@@ -71,7 +69,7 @@ var tests = {
 		package_loader.loadPackage(testPackages.staticFilesBadZip);
 
 		// Verify that the package was added to the managed packages list
-		test.deepEqual(
+		assert.deepEqual(
 			package_loader.getManagedPackages(),
 			[testPackages.staticFilesBadZip.name]
 		);
@@ -91,28 +89,28 @@ var tests = {
 			];
 
 			testSinglePackageUpdate(
-				test,
+				assert,
 				updatedPackages,
 				'initialize',
 				'.zip',
 				requiredEvents,
 				capturedEvents
 			);
-			test.done();
+			done();
 		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
+			assert.isOk(false, 'failed to run the packageManager');
+			done();
 		});
-	},
-	'configure the extraction path (second time)': function(test) {
-		directory = path.join(process.cwd(), localFolder);
-		
-		cleanExtractionPath(test, directory);
+	});
+	it('configure the extraction path (second time)', function (done) {
+		directory = path.join(tmpDir, localFolder);
+
+		cleanExtractionPath(directory);
 
 		package_loader.setExtractionPath(directory);
-		test.done();
-	},
-	'start extraction (corrupted .zip, second time)': function(test){
+		done();
+	});
+	it('start extraction (corrupted .zip, second time)', function (done) {
 		// Clear the fired-events list
 		capturedEvents = [];
 
@@ -120,7 +118,7 @@ var tests = {
 		package_loader.loadPackage(testPackages.staticFilesBadZip);
 
 		// Verify that the package was added to the managed packages list
-		test.deepEqual(
+		assert.deepEqual(
 			package_loader.getManagedPackages(),
 			[testPackages.staticFilesBadZip.name]
 		);
@@ -140,34 +138,22 @@ var tests = {
 			];
 
 			testSinglePackageUpdate(
-				test,
+				assert,
 				updatedPackages,
 				'initialize',
 				'.zip',
 				requiredEvents,
 				capturedEvents
 			);
-			test.done();
+			done();
 		}, function(err) {
-			test.ok(false, 'failed to run the packageManager');
-			test.done();
+			assert.isOk(false, 'failed to run the packageManager');
+			done();
 		});
-	},
-	'check test durations': function(test) {
-		// console.log('Durations:', testDurationTimes);
-		var testSteps = Object.keys(tests);
-		test.strictEqual(testSteps.length - 1, testDurationTimes.length, 'not all times were logged');
-		var i;
-		for(i = 0; i < testDurationTimes.length; i++) {
-			// console.log(testDurationTimes[i].endTime - testDurationTimes[i].startTime, testSteps[i]);
-		}
-		test.done();
-	}
+	});
 	// Check to make sure that the NEWEST valid upgrade option is selected, not just 'the first found'
 	// Clear the saved files and do the same for .zip files
 	// Make tests where files have dependencies
 	// Make tests where multiple packages are managed and one depends on a version
 	//     of another that is currently being upgraded.  (de-async package-loading front-end).
-};
-
-exports.tests = tests;
+});

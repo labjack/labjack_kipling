@@ -9,9 +9,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 deviceFound = false;
@@ -143,7 +143,7 @@ var getReadArrayTest = function(options) {
 				}
 
 				var msgA = 'mock device not working (readArray)';
-				test.deepEqual(res, expectedResults, msgA);
+				assert.deepEqual(res, expectedResults, msgA);
 
 				// Check to make sure there were the right number of calls
 				var calledFuncs = dev.getCalledFunctions();
@@ -154,13 +154,13 @@ var getReadArrayTest = function(options) {
 				msgB += ' != ';
 				msgB += totalNumExpectedCalls.toString();
 
-				test.equal(calledFuncs.length, totalNumExpectedCalls, msgB);
+				assert.equal(calledFuncs.length, totalNumExpectedCalls, msgB);
 
-				test.done();
+				done();
 			});
 		} else {
 			console.log('* Skipping Test');
-			test.done();
+			done();
 		}
 	};
 	return readArrayTest;
@@ -235,7 +235,7 @@ var getWriteArrayTest = function(options) {
 				testArrays.push({'data': testData});
 			});
 
-			
+
 			var totalNumExpectedCalls = 0;
 
 			var testVals = testArrays.map(function(testArray) {
@@ -305,7 +305,7 @@ var getWriteArrayTest = function(options) {
 				}
 
 				var msgA = 'mock device not working (writeArray)';
-				test.deepEqual(res, expectedResults, msgA);
+				assert.deepEqual(res, expectedResults, msgA);
 
 				// Check to make sure there were the right number of calls
 				var calledFuncs = dev.getCalledFunctions();
@@ -315,13 +315,13 @@ var getWriteArrayTest = function(options) {
 				msgB += ' != ';
 				msgB += totalNumExpectedCalls.toString();
 
-				test.equal(calledFuncs.length, totalNumExpectedCalls, msgB);
+				assert.equal(calledFuncs.length, totalNumExpectedCalls, msgB);
 
-				test.done();
+				done();
 			});
 		} else {
 			console.log('* Skipping Test');
-			test.done();
+			done();
 		}
 	};
 	return writeArrayTest;
@@ -345,7 +345,7 @@ exports.tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -357,9 +357,9 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -367,24 +367,24 @@ exports.tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			assert.strictEqual(res.connectionType, 1);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			done();
 		});
 	},
 	'perform test write': function(test) {
 		var testVal = 1;
 		device.read('DAC0')
 		.then(function(initialRes) {
-			test.strictEqual(initialRes, 0, 'Invalid initial DAC0 value');
+			assert.strictEqual(initialRes, 0, 'Invalid initial DAC0 value');
 			device.write('DAC0', testVal)
 			.then(function(res) {
 				device.read('DAC0')
 				.then(function(res) {
-					test.strictEqual(res, testVal, 'Invalid DAC0 value after write');
-					test.done();
+					assert.strictEqual(res, testVal, 'Invalid DAC0 value after write');
+					done();
 				});
 			});
 		});
@@ -408,11 +408,11 @@ exports.tests = {
 					{'functionCall': 'read', 'retData': 0}
 				];
 				var msg = 'mock device not working (read)';
-				test.deepEqual(expectedResult, res, msg);
-				test.done();
+				assert.deepEqual(expectedResult, res, msg);
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
 	},
 	'performTest AnalogRead': function(test) {
@@ -426,7 +426,7 @@ exports.tests = {
 				{'functionCall': 'read', 'type': 'range', 'min': -11, 'max': 11}
 			];
 			utils.testResults(test, expectedResult, res);
-			test.done();
+			done();
 		});
 	},
 	'performTest qRead': function(test) {
@@ -452,16 +452,16 @@ exports.tests = {
 					{'functionCall': 'read', 'retData': 0}
 				];
 				var msg = 'mock device not working (read)';
-				test.deepEqual(res, expectedResult, msg);
+				assert.deepEqual(res, expectedResult, msg);
 
 				msg = 'message re-try scheme failed';
 				var functionList = dev.getCalledFunctions();
-				test.strictEqual(functionList.length, 3, msg);
-				test.done();
+				assert.strictEqual(functionList.length, 3, msg);
+				done();
 			});
 		} else {
 			console.log("* Skipping Test");
-			test.done();
+			done();
 		}
 	},
 	'performTest readArray': getReadArrayTest(),
@@ -492,24 +492,24 @@ exports.tests = {
 					}
 				];
 				var msg = 'mock readMultiple failed';
-				test.deepEqual(res, expectedRes, msg);
+				assert.deepEqual(res, expectedRes, msg);
 				// console.log("readMultiple res", res[0].retData);
 				// console.log("readMultiple funcs", dev.getCalledFunctions());
-				
+
 				var functionList = dev.getCalledFunctions();
 				msg = 'did not call proper functions';
-				test.strictEqual(functionList.length, 3, msg);
-				test.done();
+				assert.strictEqual(functionList.length, 3, msg);
+				done();
 			});
 		} else {
 			console.log("* Skipping Test");
-			test.done();
+			done();
 		}
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'openDevice (assigned serial number)': function(test) {
@@ -522,27 +522,27 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo (assigned serial number)': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.strictEqual(res.serialNumber, 470010548);
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			assert.strictEqual(res.connectionType, 1);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			assert.strictEqual(res.serialNumber, 470010548);
+			done();
 		});
 	},
 	'closeDevice (assigned serial number)': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'open T7 via Ethernet': function(test) {
@@ -555,9 +555,9 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'performTest readArray Ethernet': getReadArrayTest({
@@ -578,7 +578,7 @@ exports.tests = {
 	'close T7 via Ethernet': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'open T7 via WiFi': function(test) {
@@ -591,9 +591,9 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'performTest readArray WiFi': getReadArrayTest({
@@ -614,7 +614,7 @@ exports.tests = {
 	'close T7 via WiFi': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'createDigitDevice': function(test) {
@@ -623,7 +623,7 @@ exports.tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDigit': function(test) {
 		var td = {
@@ -635,19 +635,19 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDigitDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
-			test.strictEqual(res.deviceType, 200);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtDIGIT');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.done();
+			assert.strictEqual(res.deviceType, 200);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtDIGIT');
+			assert.strictEqual(res.connectionType, 1);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			done();
 		});
 	},
 	'readTemp': function(test) {
@@ -668,14 +668,14 @@ exports.tests = {
 				},
 			];
 			var msg = 'mock device not working (digitRead)';
-			test.deepEqual(res, expectedResult, msg);
-			test.done();
+			assert.deepEqual(res, expectedResult, msg);
+			done();
 		});
 	},
 	'closeDigit': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 };

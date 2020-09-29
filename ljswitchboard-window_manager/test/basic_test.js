@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 var window_manager = require('../lib/window_manager');
 var mock_window = require('../lib/mock_window');
@@ -7,8 +7,9 @@ var eventList = mock_window.eventList;
 
 var windows = {};
 var guiAppQuitDetected = false;
-var tests = {
-	'verify lack of configuration': function(test) {
+
+describe('basic_test', function() {
+	it('verify lack of configuration', function (done) {
 		var packageInfo = {
 			'location': '',
 		};
@@ -22,12 +23,12 @@ var tests = {
 				requiredInfo,
 				appData
 			);
-			test.ok(false, 'An error should have been thrown');
+			assert.isOk(false, 'An error should have been thrown');
 		} catch(err) {
-			test.done();
+			done();
 		}
-	},
-	'configure window_manager': function(test) {
+	});
+	it('configure window_manager', function (done) {
 		window_manager.configure({
 			'gui': {
 				'Window': mock_window,
@@ -38,20 +39,20 @@ var tests = {
 				}
 			}
 		});
-		test.done();
-	},
-	'create new window': function(test) {
+		done();
+	});
+	it('create new window', function (done) {
 		var newWindow = mock_window.open();
 		newWindow.on(eventList.LOADED, function() {
 			// console.log('Window Loaded', Object.keys(this));
-			test.done();
+			done();
 		});
-	},
+	});
 	// 'inspect window_manager': function(test) {
 	// 	console.log(Object.keys(window_manager));
-	// 	test.done();
+	// 	done();
 	// },
-	'insert window into window_manager': function(test) {
+	it('insert window into window_manager', function (done) {
 		var primaryWindow = mock_window.open();
 		windows.primary = primaryWindow;
 		window_manager.addWindow({
@@ -73,16 +74,16 @@ var tests = {
 		var finishFunc = function() {
 			numLoaded += 1;
 			if(numLoaded == 2) {
-				test.done();
+				done();
 			}
 		};
 		primaryWindow.on(eventList.LOADED, finishFunc);
 		newWindow.on(eventList.LOADED, finishFunc);
 		// setTimeout(function() {
-		// 	test.done();
+		// 	done();
 		// }, 2000);
-	},
-	'close first window': function(test) {
+	});
+	it('close first window', function (done) {
 		var events = [];
 		windows.first.on(eventList.HIDDEN, function() {
 			events.push(eventList.HIDDEN);
@@ -94,28 +95,28 @@ var tests = {
 			events.push(eventList.CLOSED);
 
 			// make sure the "firstWindow" title is passed back.
-			test.strictEqual(this.title, 'firstWindowTitle', 'wrong window title');
+			assert.strictEqual(this.title, 'firstWindowTitle', 'wrong window title');
 
-			// Make sure that the window has been hidden, issued a close req. 
+			// Make sure that the window has been hidden, issued a close req.
 			// and ultimately closed via the events list.
-			test.deepEqual(
+			assert.deepEqual(
 				events,
 				['hidden', 'close', 'closed']
 			);
-			
-			test.deepEqual(
+
+			assert.deepEqual(
 				events,
 				['hidden', 'close', 'closed'],
 				'required events were not fired'
 				);
-			test.done();
+			done();
 		});
 
-		// Close the first window and let  the event listener detect & finish 
-		// the test.
+		// Close the first window and let  the event listener detect & finish
+		// the assert.
 		window_manager.closeWindow('firstWindow');
-	},
-	'open window test': function(test) {
+	});
+	it('open window test', function (done) {
 		var packageInfo = {
 			'name': 'MyWindow',
 			'location': '',
@@ -129,29 +130,29 @@ var tests = {
 			requiredInfo,
 			appData
 		).then(function(openedWindow) {
-			// Wait for the on LOADED event to finish the test indicating that a 
+			// Wait for the on LOADED event to finish the test indicating that a
 			// new window has opened.
 			openedWindow.on(eventList.LOADED, function() {
-				test.done();
+				done();
 			});
 		});
-	},
-	'check the number of visible and open windows': function(test) {
+	});
+	it('check the number of visible and open windows', function (done) {
 		// make sure the main window can be shown and have the results indicate
 		// it.
 		window_manager.hideWindow('main');
-		test.strictEqual(window_manager.numVisibleWindows(), 1);
-		test.strictEqual(window_manager.numOpenWindows(), 2);
+		assert.strictEqual(window_manager.numVisibleWindows(), 1);
+		assert.strictEqual(window_manager.numOpenWindows(), 2);
 		window_manager.showWindow('main');
-		test.strictEqual(window_manager.numVisibleWindows(), 2);
-		test.strictEqual(window_manager.numOpenWindows(), 2);
-		
+		assert.strictEqual(window_manager.numVisibleWindows(), 2);
+		assert.strictEqual(window_manager.numOpenWindows(), 2);
+
 		// Establish a quitting_application event listener to save results.
 		var receivedQuitEvent = false;
 		var quitListener = function() {
 			receivedQuitEvent = true;
 		};
-		
+
 		// Register the QUIT_APPLICATION event listener
 		window_manager.on(eventList.QUITTING_APPLICATION, quitListener);
 
@@ -162,29 +163,27 @@ var tests = {
 		// Right after these functions are called, the window should be hidden
 		// but it takes a few loops in the event loop for the window to be
 		// closed.
-		test.strictEqual(window_manager.numVisibleWindows(), 1, 'visible');
-		test.strictEqual(window_manager.numOpenWindows(), 2, 'open');
-		
+		assert.strictEqual(window_manager.numVisibleWindows(), 1, 'visible');
+		assert.strictEqual(window_manager.numOpenWindows(), 2, 'open');
+
 		// Wait for app to exit:
 		var waitForQuit = function() {
 			if(guiAppQuitDetected) {
-				test.ok(receivedQuitEvent, 'did not receive the QUITTING_APPLICATION event');
-				test.strictEqual(window_manager.numVisibleWindows(), 0, 'visible');
-				test.strictEqual(window_manager.numOpenWindows(), 0, 'numOpenWindows');
-				test.deepEqual(window_manager.getOpenWindows(), []);
-				test.done();
+				assert.isOk(receivedQuitEvent, 'did not receive the QUITTING_APPLICATION event');
+				assert.strictEqual(window_manager.numVisibleWindows(), 0, 'visible');
+				assert.strictEqual(window_manager.numOpenWindows(), 0, 'numOpenWindows');
+				assert.deepEqual(window_manager.getOpenWindows(), []);
+				done();
 			} else {
 				setTimeout(waitForQuit, 100);
 			}
 		};
 		setTimeout(waitForQuit, 100);
-	},
-	'delay for output': function(test) {
+	});
+	it('delay for output', function (done) {
 		// setTimeout(function() {
-		// 	test.done();
+		// 	done();
 		// }, 2000);
-		test.done();
-	}
-};
-
-exports.tests = tests;
+		done();
+	});
+});

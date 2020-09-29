@@ -1,5 +1,5 @@
-
-// Just to make sure that the package.json is created properly, navigate to one 
+var assert = require('chai').assert;
+// Just to make sure that the package.json is created properly, navigate to one
 // folder above this packages directory.
 var ljs_req = require('../../ljswitchboard-require');
 var req = ljs_req.require;
@@ -11,18 +11,19 @@ var expectedDirectories = ['', '.', testDirectory];
 
 var expectedTestObjKeys = ['testVar', 'tFunc', 'req'];
 
-exports.basic_test = {
-	'add a directory': function(test) {
+describe('basic_test', function () {
+
+	it('add a directory', function (done) {
 		expectedDirectories.push(rootDirectory);
 		ljs_req.addDirectory(rootDirectory);
 
 		// Test the directory addition
 		var msg = 'ljs-req search directories var is invalid';
-		test.deepEqual(ljs_req.getDirectories(), expectedDirectories, msg);
-		test.done();
-	},
-	'add multiple directories': function(test) {
-		
+		assert.deepEqual(ljs_req.getDirectories(), expectedDirectories, msg);
+		done();
+	});
+
+	it('add multiple directories', function (done) {
 		var directories = ['dir_a','dir_b'];
 		for(var i = 0; i < directories.length; i++) {
 			directories[i] = testDirectory + '/' + directories[i];
@@ -33,10 +34,11 @@ exports.basic_test = {
 
 		// Test the addition of directories
 		var msg = 'ljs-req search directories var is invalid';
-		test.deepEqual(ljs_req.getDirectories(), expectedDirectories, msg);
-		test.done();
-	},
-	'require "test-module"': function(test) {
+		assert.deepEqual(ljs_req.getDirectories(), expectedDirectories, msg);
+		done();
+	});
+
+	it('require "test-module"', function (done) {
 		try {
 			var test_module = req('test-module');
 
@@ -45,17 +47,18 @@ exports.basic_test = {
 				'Required object returned an invalid result'
 			];
 			var foundKeys = Object.keys(test_module);
-			test.deepEqual(foundKeys, expectedTestObjKeys, msgs[0]);
+			assert.deepEqual(foundKeys, expectedTestObjKeys, msgs[0]);
 			var expectedTestVar = 'test-module: index.js';
-			test.strictEqual(test_module.testVar, expectedTestVar, msgs[1]);
-			test.ok(true);
+			assert.strictEqual(test_module.testVar, expectedTestVar, msgs[1]);
+			assert.isOk(true);
 		} catch (err) {
 			console.log('ERROR',err);
-			test.ok(false);
+			assert.isOk(false);
 		}
-		test.done();
-	},
-	'require "sub_test.js"': function(test) {
+		done();
+	});
+
+	it('require "sub_test.js"', function (done) {
 		try {
 			var test_module = req('sub_test.js');
 
@@ -64,40 +67,41 @@ exports.basic_test = {
 				'Required object returned an invalid result'
 			];
 			var foundKeys = Object.keys(test_module);
-			test.deepEqual(foundKeys, expectedTestObjKeys, msgs[0]);
+			assert.deepEqual(foundKeys, expectedTestObjKeys, msgs[0]);
 			var expectedTestVar = 'sub_test.js';
-			test.strictEqual(test_module.testVar, expectedTestVar, msgs[1]);
-			test.ok(true);
+			assert.strictEqual(test_module.testVar, expectedTestVar, msgs[1]);
+			assert.isOk(true);
 		} catch (err) {
 			console.log('ERROR',err);
-			test.ok(false);
+			assert.isOk(false);
 		}
-		test.done();
-	},
-	'require "test_file.js"': function(test) {
+		done();
+	});
+
+	it('require "test_file.js"', function (done) {
 		try {
 			var test_module = req('test_file.js');
-
 			var msgs = [
 				'Required object has invalid keys',
 				'Required object returned an invalid result'
 			];
 			var foundKeys = Object.keys(test_module);
-			test.deepEqual(foundKeys, expectedTestObjKeys, msgs[0]);
+			assert.deepEqual(foundKeys, expectedTestObjKeys, msgs[0]);
 			var expectedTestVar = 'test-file.js';
-			test.strictEqual(test_module.testVar, expectedTestVar, msgs[1]);
-			test.ok(true);
+			assert.strictEqual(test_module.testVar, expectedTestVar, msgs[1]);
+			assert.isOk(true);
 		} catch (err) {
 			console.log('ERROR',err);
-			test.ok(false);
+			assert.isOk(false);
 		}
-		test.done();
-	},
-	'require an invalid module': function(test) {
+		done();
+	});
+
+	it('require an invalid module', function (done) {
 		try {
 			var test_module = req('test-modulea');
 			console.log('Module some how found', test_module);
-			test.ok(false);
+			assert.isOk(false);
 		} catch (err) {
 			var expectedMessage = "Can not find module 'test-modulea'";
 			var msgs = [
@@ -105,10 +109,11 @@ exports.basic_test = {
 				'Invalid err.code returned'
 			];
 
-			test.strictEqual(err.message, expectedMessage, msgs[0]);
-			test.strictEqual(err.code, 'MODULE_NOT_FOUND', msgs[1]);
-			test.ok(true);
+			assert.strictEqual(err.message, expectedMessage, msgs[0]);
+			assert.strictEqual(err.code, 'MODULE_NOT_FOUND', msgs[1]);
+			assert.isOk(true);
 		}
-		test.done();
-	},
-};
+		done();
+	});
+
+});

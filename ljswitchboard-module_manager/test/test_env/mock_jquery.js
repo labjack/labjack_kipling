@@ -1,7 +1,3 @@
-
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-
 var resources = {};
 var jqueryElements = {};
 var createJQuery = function(itemName) {
@@ -13,7 +9,7 @@ var createJQuery = function(itemName) {
 	} else {
 		// Deal with creating data...
 		if(itemName[0] === '<') {
-			// For simplicity, if the first character looks like it will be 
+			// For simplicity, if the first character looks like it will be
 			// trying to create data then create it.
 			this.internalData = [itemName];
 		} else {

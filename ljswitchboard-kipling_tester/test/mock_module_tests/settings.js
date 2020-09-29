@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 // Generic Application Objects
 var package_loader;
@@ -7,7 +7,7 @@ var gui;
 var window_manager;
 
 // Window Objects
-var testWin;
+var testerWin;
 var kiplingWin;
 
 // Kipling Application Objects
@@ -18,9 +18,6 @@ var MODULE_CHROME;
 var io_manager;
 var io_interface;
 var deviceController;
-var activeModule;
-var viewGen;
-var eventList;
 
 
 var mockDevices;
@@ -64,8 +61,8 @@ var configureMockDevice = function(deviceIndex) {
 	return defered.promise;
 };
 
-this.test_device_info = {
-	'initialize test': function(test) {
+describe('test_device_info', function() {
+	it('initialize test', function (done) {
 		package_loader = global.require('ljswitchboard-package_loader');
 		gns = package_loader.getNameSpace();
 		gui = global[gns].gui;
@@ -81,16 +78,16 @@ this.test_device_info = {
 		$ = kiplingWindow.$;
 		MODULE_LOADER = kiplingWindow.MODULE_LOADER;
 		MODULE_CHROME = kiplingWindow.MODULE_CHROME;
-		
+
 
 		io_manager = global.require('ljswitchboard-io_manager');
 		io_interface = io_manager.io_interface();
 		deviceController = io_interface.getDeviceController();
-		test.done();
-	},
-	'reload device selector': function(test) {
+		done();
+	});
+	it('reload device selector', function (done) {
 		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
+			done();
 		});
 
 		var settingsTab = $('#settings-tab');
@@ -100,13 +97,13 @@ this.test_device_info = {
 		// 	// Device selector isn't quite loaded yet.  Just ready for
 		// 	// other async tasks.  Must wait for the "MODULE_READY" event.
 		// });
-	},
+	});
 	// 'connect to T7 (USB)': function(test) {
 	// 	MODULE_CHROME.once(
 	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
 	// 		function(updatedModules) {
 	// 			console.log('Tabs updated (test)', updatedModules);
-	// 			test.done();
+	// 			done();
 	// 		});
 
 	// 	// Connect to the first found USB-T7
@@ -119,7 +116,7 @@ this.test_device_info = {
 	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
 	// 		function(updatedModules) {
 	// 			console.log('Tabs updated (test)', updatedModules);
-	// 			test.done();
+	// 			done();
 	// 		});
 
 	// 	// Connect to the second found Ethernet-T7
@@ -132,7 +129,7 @@ this.test_device_info = {
 	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
 	// 		function(updatedModules) {
 	// 			console.log('Tabs updated (test)', updatedModules);
-	// 			test.done();
+	// 			done();
 	// 		});
 
 	// 	// Connect to the first found USB-Digit
@@ -144,7 +141,7 @@ this.test_device_info = {
 	// 	kiplingWin.showDevTools();
 
 	// 	MODULE_LOADER.once('MODULE_READY', function(res) {
-	// 		test.done();
+	// 		done();
 	// 	});
 	// 	var deviceInfoTab = $('#device_info_fw-tab');
 	// 	deviceInfoTab.trigger('click');
@@ -159,7 +156,7 @@ this.test_device_info = {
 	// 		MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_CLOSED,
 	// 		function(updatedModules) {
 	// 			console.log('Tabs updated (test)', updatedModules);
-	// 			test.done();
+	// 			done();
 	// 		});
 
 	// 	// Connect to the first found USB-T7
@@ -167,4 +164,4 @@ this.test_device_info = {
 	// 	var t7 = t7s.first();
 	// 	t7.trigger('click');
 	// },
-};
+});

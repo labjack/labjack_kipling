@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 var rewire = require('rewire');
 var device_scanner = rewire('../../lib/ljswitchboard-device_scanner');
@@ -5,33 +6,31 @@ var open_all_device_scanner = rewire('../../lib/open_all_device_scanner');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 var REQUIRED_INFO_BY_DEVICE = require('../../lib/required_device_info').requiredInfo;
 var test_util = require('../utils/test_util');
-var printAvailableDeviceData = test_util.printAvailableDeviceData;
-var printScanResultsData = test_util.printScanResultsData;
-var printScanResultsKeys = test_util.printScanResultsKeys;
 var testScanResults = test_util.testScanResults;
 var device_curator = require('ljswitchboard-ljm_device_curator');
 var driver = require('labjack-nodejs').driver();
 
 var deviceScanner;
 var devices = [];
-exports.tests = {
-	'Starting Mock Test': function(test) {
+
+describe('mock openall', function() {
+	it('Starting Mock Test', function (done) {
 		console.log('');
 		console.log('*** Starting Mock OpenAll Test ***');
-		test.done();
-	},
-	'create device scanner': function(test) {
+		done();
+	});
+	it('create device scanner', function (done) {
 		device_scanner.disableSafeLoad();
 		deviceScanner = open_all_device_scanner.createDeviceScanner(driver);
-		test.done();
-	},
-	'disable device scanning': function(test) {
+		done();
+	});
+	it('disable device scanning', function (done) {
 		deviceScanner.disableDeviceScanning()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'Add mock devices': function(test) {
+	});
+	it('Add mock devices', function (done) {
 		deviceScanner.addMockDevices([
 			{
 				'deviceType': 'LJM_dtT7',
@@ -49,10 +48,10 @@ exports.tests = {
 			}
 		])
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'mock test': function(test) {
+	});
+	it('mock test', function (done) {
 		var startTime = new Date();
 
 		var expectedData = {
@@ -86,18 +85,18 @@ exports.tests = {
 			var endTime = new Date();
 			var debug = false;
 
-			testScanResults(deviceTypes, expectedData, test, {'debug': true});
+			testScanResults(deviceTypes, expectedData, {'debug': true});
 
 			if(debug) {
 				console.log('  - Duration', (endTime - startTime)/1000);
 			}
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	're-configure - UDP Only': function(test) {
+	});
+	it('re-configure - UDP Only', function (done) {
 		var OPEN_ALL_SCAN_REQUEST_LIST = [
 		    {
 		        'deviceType': driver_const.LJM_DT_T7,
@@ -108,9 +107,9 @@ exports.tests = {
 		    },
 		];
 		open_all_device_scanner.__set__('OPEN_ALL_SCAN_REQUEST_LIST', OPEN_ALL_SCAN_REQUEST_LIST);
-		test.done();
-	},
-	'mock test - UDP Only': function(test) {
+		done();
+	});
+	it('mock test - UDP Only', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -142,15 +141,15 @@ exports.tests = {
 			// 		});
 			// 	});
 			// });
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
+	});
 
-	're-configure - USB Only': function(test) {
+	it('re-configure - USB Only', function (done) {
 		var OPEN_ALL_SCAN_REQUEST_LIST = [
 		    {
 		        'deviceType': driver_const.LJM_DT_DIGIT,
@@ -175,9 +174,9 @@ exports.tests = {
 		    // },
 		];
 		open_all_device_scanner.__set__('OPEN_ALL_SCAN_REQUEST_LIST', OPEN_ALL_SCAN_REQUEST_LIST);
-		test.done();
-	},
-	'mock test - USB Only': function(test) {
+		done();
+	});
+	it('mock test - USB Only', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -205,14 +204,14 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	're-configure - Out of order': function(test) {
+	});
+	it('re-configure - Out of order', function (done) {
 		var OPEN_ALL_SCAN_REQUEST_LIST = [
 		    {
 		        'deviceType': driver_const.LJM_DT_T7,
@@ -237,9 +236,9 @@ exports.tests = {
 		    },
 		];
 		open_all_device_scanner.__set__('OPEN_ALL_SCAN_REQUEST_LIST', OPEN_ALL_SCAN_REQUEST_LIST);
-		test.done();
-	},
-	'mock test - Out of order': function(test) {
+		done();
+	});
+	it('mock test - Out of order', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -282,26 +281,26 @@ exports.tests = {
 			// 		});
 			// 	});
 			// });
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	'open mock device': function(test) {
+	});
+	it('open mock device', function (done) {
 		var device = new device_curator.device(true);
 		devices.push(device);
 		device.open('LJM_dtT7', 'LJM_ctUSB', 'LJM_idANY')
 		.then(function() {
-			test.done();
+			done();
 		}, function() {
 			devices[0].destroy();
 			devices = [];
-			test.done();
+			done();
 		});
-	},
-	'basic test': function(test) {
+	});
+	it('basic test', function (done) {
 		var currentDeviceList = [];
 		var startTime = new Date();
 		deviceScanner.findAllDevices(devices)
@@ -309,42 +308,42 @@ exports.tests = {
 			// printScanResultsData(deviceTypes);
 			var endTime = new Date();
 			// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
-			// test.ok(testStatus, 'Unexpected test result');
+			// assert.isOk(testStatus, 'Unexpected test result');
 			console.log('  - Duration'.cyan, (endTime - startTime)/1000);
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error');
-			test.done();
+			done();
 		});
-	},
-	'read device AIN': function(test) {
+	});
+	it('read device AIN', function (done) {
 		if(devices[0]) {
 			devices[0].iRead('AIN0')
 			.then(function(res) {
 				console.log('  - AIN Res:'.green, res.val);
-				test.done();
+				done();
 			}, function(err) {
-				test.ok(false, 'Failed to read AIN0: ' + err.toString());
-				test.done();
+				assert.isOk(false, 'Failed to read AIN0: ' + err.toString());
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'close device': function(test) {
+	});
+	it('close device', function (done) {
 		if(devices[0]) {
 			devices[0].close()
 			.then(function() {
-				test.done();
+				done();
 			}, function() {
-				test.done();
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'unload': function(test) {
+	});
+	it('unload', function (done) {
 		device_scanner.unload();
-		test.done();
-	},
-};
+		done();
+	});
+});

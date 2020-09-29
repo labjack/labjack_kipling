@@ -1,5 +1,5 @@
+var assert = require('chai').assert;
 
-var q = require('q');
 var path = require('path');
 var fs = require('fs.extra');
 var module_manager = require('../../lib/ljswitchboard-module_manager');
@@ -9,11 +9,7 @@ var mock_jquery = require('../test_env/mock_jquery');
 var $ = mock_jquery.jquery;
 
 var test_utils = require('../test_utils');
-var addFrameworkFiles = test_utils.addFrameworkFiles;
 var checkLoadedModuleData = test_utils.checkLoadedModuleData;
-var printLintError = test_utils.printLintError;
-var checkLoadedFiles = test_utils.checkLoadedFiles;
-var getLoadedFiles = test_utils.getLoadedFiles;
 
 var cwd = process.cwd();
 var testDir = 'test_persistent_data_dir';
@@ -25,16 +21,17 @@ var testModuleName = 'device_selector';
 var MODULE_LOADER;
 var device_selector_active_module;
 var device_selector_module_data;
-var tests = {
-	'enable module linting': function(test) {
+
+describe('device selector', function() {
+	it('enable module linting', function (done) {
 		// enable module linting.
 		// module_manager.disableLinting();
 
 		// Configure the persistent data directory
 		module_manager.configurePersistentDataPath(testPersistentDataFilePath);
-		test.done();
-	},
-	'getModuleNames': function(test) {
+		done();
+	});
+	it('getModuleNames', function (done) {
 		module_manager.getModulesList()
 		.then(function(categories) {
 			var categoryKeys = Object.keys(categories);
@@ -47,15 +44,17 @@ var tests = {
 							hasModule = true;
 						}
 					}
-					
+
 				});
 			});
-			test.ok(hasModule, 'Test Module: ' + testModuleName + ', was not found');
-			test.done();
+			assert.isOk(hasModule, 'Test Module: ' + testModuleName + ', was not found');
+			done();
 		});
-	},
-	'Initialize Test Environment': test_env.initialize,
-	'loadModuleDataByName': function(test) {
+	});
+	it('Initialize Test Environment', function (done) {
+		test_env.initialize(done);
+	});
+	it('loadModuleDataByName', function (done) {
 		test_utils.clearLoadedFiles();
 		var startTime = new Date();
 		module_manager.loadModuleDataByName(testModuleName)
@@ -63,24 +62,26 @@ var tests = {
 			var endTime = new Date();
 			console.log('  - loadModule duration', endTime - startTime);
 			if(moduleData.json.data_init) {
-				test.deepEqual(
+				assert.deepEqual(
 					moduleData.startupData,
 					moduleData.json.data_init,
 					'startup data data did not load'
 				);
 			}
 			device_selector_module_data = moduleData;
-			checkLoadedModuleData(test, moduleData);
-			test.done();
+			checkLoadedModuleData(moduleData);
+			done();
 		});
-	},
-	'check for lint errors': test_utils.getCheckForLintErrors(true),
-	'initialize device_selector module': function(test) {
+	});
+	it('check for lint errors', function (done) {
+		test_utils.getCheckForLintErrors(true)(done);
+	});
+	it('initialize device_selector module', function (done) {
 		// Setup a fake test environment
 		MODULE_LOADER = new module_loader.createFakeModuleLoader(
 			device_selector_module_data
 		);
-		
+
 		// Execute the module
 		var jsFiles = device_selector_module_data.js;
 		// console.log('  - Num JS files', jsFiles.length);
@@ -92,7 +93,7 @@ var tests = {
 			// jsFile.fileName,
 			// Object.keys(jsFile)
 			// );
-			
+
 			// Execute module .js file
 			try {
 				eval(jsFile.fileData); // jshint ignore:line
@@ -105,19 +106,19 @@ var tests = {
 			}
 		}
 		device_selector_active_module = activeModule;
-		test.done();
-	},
-	'trigger module to start': function(test) {
+		done();
+	});
+	it('trigger module to start', function (done) {
 		device_selector_active_module.on(
 			device_selector_active_module.eventList.MODULE_STARTED,
 			function() {
-				test.done();
+				done();
 			});
 		MODULE_LOADER.triggerLoadEvent()
 		.then(function(res) {
 		});
-	},
-	'trigger module to start new scan': function(test) {
+	});
+	it('trigger module to start new scan', function (done) {
 		var startedScanEventCaught = false;
 		device_selector_active_module.on(
 			device_selector_active_module.eventList.DEVICE_SCAN_STARTED,
@@ -127,35 +128,35 @@ var tests = {
 		device_selector_active_module.on(
 			device_selector_active_module.eventList.DEVICE_SCAN_COMPLETED,
 			function() {
-				test.ok(startedScanEventCaught, 'should triggered scan started event');
-				test.done();
+				assert.isOk(startedScanEventCaught, 'should triggered scan started event');
+				done();
 			});
 		var viewGen = device_selector_active_module.viewGen;
 		var refreshButton = viewGen.pageElements.refresh_devices_button.ref;
-		
+
 		// Trigger the click event for the refresh button and make sure the scan
 		// happens.
 		refreshButton.trigger('click');
-	},
-	'get displayed device data': function(test) {
+	});
+	it('get displayed device data', function (done) {
 		var viewGen = device_selector_active_module.viewGen;
 		var jqueryScanResults = $('#device_scan_results');
 		console.log('Jquerys data', jqueryScanResults.html());
 		var renderedResults = viewGen.pageElements.device_scan_results.ref;
 		console.log('Stored data', renderedResults.html());
-		test.done();
-	},
-	'trigger module to stop': function(test) {
+		done();
+	});
+	it('trigger module to stop', function (done) {
 		device_selector_active_module.on(
 			device_selector_active_module.eventList.MODULE_STOPPED,
 			function() {
-				test.done();
+				done();
 			});
 		MODULE_LOADER.triggerStopEvent()
 		.then(function(res) {
 		});
-	},
-	'Destruct Test Environment': test_env.destruct,
-};
-
-exports.tests = tests;
+	});
+	it('Destruct Test Environment', function (done) {
+		test_env.destruct(done);
+	});
+});

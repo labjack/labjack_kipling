@@ -14,9 +14,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -62,11 +62,11 @@ var device_tests = {
 		console.log('');
 		console.log('**** Starting external_handle_test ****');
 		console.log('Please connect 1x T7 via Ethernet and 1x T7 via USB');
-		test.done();
+		done();
 	},
 	'openDevice (UDP)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -80,18 +80,18 @@ var device_tests = {
 				// The device was not opened properly.
 				console.log('Failed to open T7 device via UDP.  Please connect a T7 via Ethernet or WiFi');
 				performTests = false;
-				test.done();
+				done();
 			} else {
 				// The device was opened properly.
 				deviceFound = true;
 				deviceHandle = data.handle;
-				test.done();
+				done();
 			}
 		});
 	},
 	'create curated device (UDP)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -114,13 +114,13 @@ var device_tests = {
 				}
 				// console.log('in t7_basic_test.js, openDevice', res);
 				deviceFound = true;
-				test.done();
+				done();
 			}, function(err) {
 				console.log('Failed to link to open device', err);
 				var mbInfo = modbus_map.getErrorInfo(err);
 				console.log('MB Info', mbInfo);
 				performTests = false;
-				test.done();
+				done();
 			})
 		} catch(err) {
 			console.log('Encountered an error....', err);
@@ -129,7 +129,7 @@ var device_tests = {
 	},
 	'checkDeviceInfo (UDP)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -137,14 +137,14 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'perform test reads (UDP)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -167,31 +167,31 @@ var device_tests = {
 				nameData[deviceName.name] = deviceName.val;
 				vals.push(nameData);
 				console.log('Test Results', vals);
-				test.done();
+				done();
 			}, function(err) {
 				console.log('Failed to read name', err);
-				test.done();
+				done();
 			});
 		}, function(err) {
 			console.log('Failed to collect data');
-			test.done();
+			done();
 		});
 	},
 	'closeDevice (UDP)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 
 	'openDevice (USB)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -205,18 +205,18 @@ var device_tests = {
 				// The device was not opened properly.
 				console.log('Failed to open device.  Please connect a T7 via USB');
 				performTests = false;
-				test.done();
+				done();
 			} else {
 				// The device was opened properly.
 				deviceFound = true;
 				deviceHandle = data.handle;
-				test.done();
+				done();
 			}
 		});
 	},
 	'create curated device (USB)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -239,13 +239,13 @@ var device_tests = {
 				}
 				// console.log('in t7_basic_test.js, openDevice', res);
 				deviceFound = true;
-				test.done();
+				done();
 			}, function(err) {
 				console.log('Failed to link to open device', err);
 				var mbInfo = modbus_map.getErrorInfo(err);
 				console.log('MB Info', mbInfo);
 				performTests = false;
-				test.done();
+				done();
 			})
 		} catch(err) {
 			console.log('Encountered an error....', err);
@@ -254,7 +254,7 @@ var device_tests = {
 	},
 	'checkDeviceInfo (USB)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -262,14 +262,14 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'perform test reads (USB)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -292,25 +292,25 @@ var device_tests = {
 				nameData[deviceName.name] = deviceName.val;
 				vals.push(nameData);
 				console.log('Test Results', vals);
-				test.done();
+				done();
 			}, function(err) {
 				console.log('Failed to read name', err);
-				test.done();
+				done();
 			});
 		}, function(err) {
 			console.log('Failed to collect data');
-			test.done();
+			done();
 		});
 	},
 	'closeDevice (USB)': function(test) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 };
@@ -325,7 +325,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

@@ -11,23 +11,23 @@ var qRunner = function(test, func) {
 			defered.resolve(res);
 		}, function(err) {
 			console.log('qRunner defered error err', err);
-			test.ok(false, err);
-			test.done();
+			assert.isOk(false, err);
+			done();
 		}, function(err) {
 			console.log('qRunner syntax error err', err);
-			test.ok(false, err);
-			test.done();
+			assert.isOk(false, err);
+			done();
 		});
 	} catch(err) {
 			console.log('qRunner critical error err', err);
-			test.ok(false, err);
-			test.done();
+			assert.isOk(false, err);
+			done();
 		}
 	return defered.promise;
 };
 exports.qRunner = qRunner;
 
-// define a q function that calls an object's function and saves data into an 
+// define a q function that calls an object's function and saves data into an
 // array
 var qExec = function(obj, func, argA, argB, argC) {
 	return function(bundle) {
@@ -75,7 +75,7 @@ var pResults = function(results, pIndividual, expectedErrorsList) {
 				data = result.errData;
 				numSuccess += 1;
 			}
-			
+
 		}
 		message += result.functionCall;
 		if(pIndividual) {
@@ -88,7 +88,7 @@ var pResults = function(results, pIndividual, expectedErrorsList) {
 		var ratio = (numSuccess/num*100).toFixed(3);
 		console.log(' - Num Results %d, %d% successful', num, ratio);
 	}
-	
+
 	defered.resolve(results);
 	return defered.promise;
 };
@@ -96,14 +96,14 @@ exports.pResults = pResults;
 
 var testResults = function(test, expectedResults, results, resultKey) {
 	if(results.length !== expectedResults.length) {
-		test.ok(false, 'num results does not match');
+		assert.isOk(false, 'num results does not match');
 	}
 	var i = 0;
 	for(i = 0; i < results.length; i++) {
 		var expectedResult = expectedResults[i];
 		var result = results[i];
 		var fCall = 'proper function not called';
-		test.strictEqual(expectedResult.functionCall, result.functionCall, fCall);
+		assert.strictEqual(expectedResult.functionCall, result.functionCall, fCall);
 		var type = 'value';
 		if(expectedResult.type) {
 			type = expectedResult.type;
@@ -111,9 +111,9 @@ var testResults = function(test, expectedResults, results, resultKey) {
 		if(type === 'value') {
 			var datamsg = 'bad value detected';
 			if(resultKey) {
-				test.strictEqual(expectedResult.retData, result.retData[resultKey], datamsg);
+				assert.strictEqual(expectedResult.retData, result.retData[resultKey], datamsg);
 			} else {
-				test.strictEqual(expectedResult.retData, result.retData, datamsg);
+				assert.strictEqual(expectedResult.retData, result.retData, datamsg);
 			}
 		} else if (type === 'range') {
 			var rangemsg = 'value out of range';
@@ -129,7 +129,7 @@ var testResults = function(test, expectedResults, results, resultKey) {
 					rangemsg += ': value to high, val: ' + result.retData[resultKey].toString();
 					rangemsg += ', maxVal: ' + expectedResult.max.toString();
 				}
-				test.ok(valueInRange, rangemsg);
+				assert.isOk(valueInRange, rangemsg);
 			} else {
 				if(result.retData < expectedResult.min) {
 					valueInRange = false;
@@ -141,7 +141,7 @@ var testResults = function(test, expectedResults, results, resultKey) {
 					rangemsg += ': value to high, val: ' + result.retData.toString();
 					rangemsg += ', maxVal: ' + expectedResult.max.toString();
 				}
-				test.ok(valueInRange, rangemsg);
+				assert.isOk(valueInRange, rangemsg);
 			}
 		}
 	}
@@ -150,7 +150,7 @@ exports.testResults = testResults;
 
 var testResultsArray = function(test, expectedResults, results, resultKey) {
 	if(results.length !== expectedResults.length) {
-		test.ok(false, 'num results does not match');
+		assert.isOk(false, 'num results does not match');
 	}
 	var i = 0;
 	var j = 0;
@@ -158,10 +158,10 @@ var testResultsArray = function(test, expectedResults, results, resultKey) {
 		var expectedResult = expectedResults[i];
 		var result = results[i];
 		var fCall = 'proper function not called';
-		test.strictEqual(expectedResult.functionCall, result.functionCall, fCall);
-		
+		assert.strictEqual(expectedResult.functionCall, result.functionCall, fCall);
+
 		if(result.retData.length !== expectedResult.retData.length) {
-			test.ok(false, 'length of retData does not match');
+			assert.isOk(false, 'length of retData does not match');
 		}
 		for(j = 0; j < result.retData.length; j++) {
 			var res = result.retData[j];
@@ -169,16 +169,16 @@ var testResultsArray = function(test, expectedResults, results, resultKey) {
 			var addrmsg = 'Wrong address read';
 			// Perform switch to compensate for iRead commands
 			if(isNaN(res.address)) {
-				test.strictEqual(expectedRes.address, res.address, addrmsg);
+				assert.strictEqual(expectedRes.address, res.address, addrmsg);
 			} else {
-				test.strictEqual(expectedRes.address, res.name, addrmsg);
+				assert.strictEqual(expectedRes.address, res.name, addrmsg);
 			}
-			
+
 			if(res.isErr) {
 				var errmsg = 'wrong error boolean result';
-				test.strictEqual(expectedRes.isErr, res.isErr, errmsg);
+				assert.strictEqual(expectedRes.isErr, res.isErr, errmsg);
 			}
-			
+
 
 			var type = 'value';
 			if(expectedRes.type) {
@@ -187,9 +187,9 @@ var testResultsArray = function(test, expectedResults, results, resultKey) {
 			if(type === 'value') {
 				var datamsg = 'bad value detected';
 				if(resultKey) {
-					test.strictEqual(expectedRes.data, res.data[resultKey], datamsg);
+					assert.strictEqual(expectedRes.data, res.data[resultKey], datamsg);
 				} else {
-					test.strictEqual(expectedRes.data, res.data, datamsg);
+					assert.strictEqual(expectedRes.data, res.data, datamsg);
 				}
 			} else if (type === 'range') {
 				var rangemsg = 'value out of range';
@@ -221,7 +221,7 @@ var testResultsArray = function(test, expectedResults, results, resultKey) {
 						rangemsg += ', maxVal: ' + expectedRes.max.toString();
 					}
 				}
-				test.ok(valueInRange, rangemsg);
+				assert.isOk(valueInRange, rangemsg);
 			}
 		}
 	}

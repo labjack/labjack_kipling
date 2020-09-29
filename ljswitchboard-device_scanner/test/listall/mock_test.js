@@ -1,33 +1,32 @@
+var assert = require('chai').assert;
 
 var rewire = require('rewire');
 var device_scanner = rewire('../../lib/device_scanner');
 var driver = require('labjack-nodejs').driver();
 
 var test_util = require('../utils/test_util');
-var printAvailableDeviceData = test_util.printAvailableDeviceData;
-var printScanResultsData = test_util.printScanResultsData;
-var printScanResultsKeys = test_util.printScanResultsKeys;
 var testScanResults = test_util.testScanResults;
 var verifyScanResults = test_util.verifyScanResults;
 
 var deviceScanner;
-exports.tests = {
-	'Starting Mock Test': function(test) {
+
+describe('mock', function() {
+	it('Starting Mock Test', function (done) {
 		console.log('');
 		console.log('*** Starting Mock Test ***');
-		test.done();
-	},
-	'create device scanner': function(test) {
+		done();
+	});
+	it('create device scanner', function (done) {
 		deviceScanner = new device_scanner.createDeviceScanner(driver);
-		test.done();
-	},
-	'disable device scanning': function(test) {
+		done();
+	});
+	it('disable device scanning', function (done) {
 		deviceScanner.disableDeviceScanning()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'Add mock devices': function(test) {
+	});
+	it('Add mock devices', function (done) {
 		deviceScanner.addMockDevices([
 			{
 				'deviceType': 'LJM_dtT7',
@@ -45,10 +44,10 @@ exports.tests = {
 			}
 		])
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'mock test': function(test) {
+	});
+	it('mock test', function (done) {
 		var startTime = new Date();
 
 		var expectedData = {
@@ -82,18 +81,18 @@ exports.tests = {
 			var endTime = new Date();
 			var debug = false;
 
-			testScanResults(deviceTypes, expectedData, test, {'debug': false});
+			testScanResults(deviceTypes, expectedData, {'debug': false});
 			// printScanResultsKeys(deviceTypes);
 			if(debug) {
 				console.log('  - Duration', (endTime - startTime)/1000);
 			}
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	're-configure - TCP all & extended': function(test) {
+	});
+	it('re-configure - TCP all & extended', function (done) {
 		var SCAN_REQUEST_LIST = [{
 				'deviceType': 'LJM_dtT7',
 				'connectionType': 'LJM_ctTCP',
@@ -105,9 +104,9 @@ exports.tests = {
 		];
 		device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
 		device_scanner.__set__('scanStrategies', scanStrategies);
-		test.done();
-	},
-	'mock test - TCP all & extended': function(test) {
+		done();
+	});
+	it('mock test - TCP all & extended', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -124,14 +123,14 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	're-configure - TCP extended': function(test) {
+	});
+	it('re-configure - TCP extended', function (done) {
 		var SCAN_REQUEST_LIST = [{
 				'deviceType': 'LJM_dtT7',
 				'connectionType': 'LJM_ctTCP',
@@ -142,9 +141,9 @@ exports.tests = {
 		];
 		device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
 		device_scanner.__set__('scanStrategies', scanStrategies);
-		test.done();
-	},
-	'mock test - TCP extended': function(test) {
+		done();
+	});
+	it('mock test - TCP extended', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -161,14 +160,14 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	're-configure - TCP all': function(test) {
+	});
+	it('re-configure - TCP all', function (done) {
 		var SCAN_REQUEST_LIST = [{
 				'deviceType': 'LJM_dtT7',
 				'connectionType': 'LJM_ctTCP',
@@ -179,9 +178,9 @@ exports.tests = {
 		];
 		device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
 		device_scanner.__set__('scanStrategies', scanStrategies);
-		test.done();
-	},
-	'mock test - TCP all': function(test) {
+		done();
+	});
+	it('mock test - TCP all', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -198,14 +197,14 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	're-configure - USB all & extended': function(test) {
+	});
+	it('re-configure - USB all & extended', function (done) {
 		var SCAN_REQUEST_LIST = [{
 				'deviceType': 'LJM_dtDIGIT',
 				'connectionType': 'LJM_ctUSB',
@@ -222,9 +221,9 @@ exports.tests = {
 
 		device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
 		device_scanner.__set__('scanStrategies', scanStrategies);
-		test.done();
-	},
-	'mock test - USB all & extended': function(test) {
+		done();
+	});
+	it('mock test - USB all & extended', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -252,14 +251,14 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	're-configure - USB extended': function(test) {
+	});
+	it('re-configure - USB extended', function (done) {
 		var SCAN_REQUEST_LIST = [{
 				'deviceType': 'LJM_dtDIGIT',
 				'connectionType': 'LJM_ctUSB',
@@ -275,9 +274,9 @@ exports.tests = {
 
 		device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
 		device_scanner.__set__('scanStrategies', scanStrategies);
-		test.done();
-	},
-	'mock test - USB extended': function(test) {
+		done();
+	});
+	it('mock test - USB extended', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -305,14 +304,14 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	're-configure - USB all': function(test) {
+	});
+	it('re-configure - USB all', function (done) {
 		var SCAN_REQUEST_LIST = [{
 				'deviceType': 'LJM_dtDIGIT',
 				'connectionType': 'LJM_ctUSB',
@@ -328,9 +327,9 @@ exports.tests = {
 
 		device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
 		device_scanner.__set__('scanStrategies', scanStrategies);
-		test.done();
-	},
-	'mock test - USB all': function(test) {
+		done();
+	});
+	it('mock test - USB all', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -358,14 +357,14 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	're-configure - Out of order': function(test) {
+	});
+	it('re-configure - Out of order', function (done) {
 		var SCAN_REQUEST_LIST = [{
 				'deviceType': 'LJM_dtT7',
 				'connectionType': 'LJM_ctTCP',
@@ -386,9 +385,9 @@ exports.tests = {
 
 		device_scanner.__set__('SCAN_REQUEST_LIST', SCAN_REQUEST_LIST);
 		device_scanner.__set__('scanStrategies', scanStrategies);
-		test.done();
-	},
-	'mock test - Out of order': function(test) {
+		done();
+	});
+	it('mock test - Out of order', function (done) {
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -416,11 +415,11 @@ exports.tests = {
 
 		deviceScanner.findAllDevices()
 		.then(function(deviceTypes) {
-			testScanResults(deviceTypes, expectedData, test, false);
-			test.done();
+			testScanResults(deviceTypes, expectedData, false);
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-};
+	});
+});

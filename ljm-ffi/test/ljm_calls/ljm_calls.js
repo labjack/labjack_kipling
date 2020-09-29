@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 var extend = require('extend');
 // Define functions to assist with handling various C data types.
@@ -69,7 +70,7 @@ extend(false, function_tests, open_all_testing);
 
 
 function create_ljm_sync_test(functionName, testInfo, nameAppend) {
-	return function test_ljm_sync_call(test) {
+	return function test_ljm_sync_call(done) {
 		var minVersion = 0;
 		if(testInfo.min_ljm_version) {
 			minVersion = testInfo.min_ljm_version;
@@ -81,7 +82,7 @@ function create_ljm_sync_test(functionName, testInfo, nameAppend) {
 				'Requires LJM Version:',
 				minVersion
 			);
-			test.done();
+			done();
 			return;
 		}
 
@@ -105,7 +106,7 @@ function create_ljm_sync_test(functionName, testInfo, nameAppend) {
 			results = ljm[functionName].apply(this, args);
 			log(' - Finished Calling Sync Function', functionName);
 			if(testInfo.expected_results) {
-				test.deepEqual(
+				assert.deepEqual(
 					testInfo.expected_results,
 					results,
 					'Results are not correct for: ' + functionName  + nameAppend
@@ -113,15 +114,15 @@ function create_ljm_sync_test(functionName, testInfo, nameAppend) {
 			}
 			if(testInfo.custom_verify) {
 				testInfo.custom_verify(test, results, function() {
-					test.done();
+					done();
 				});
 			} else {
-				test.done();
+				done();
 			}
 		} else {
 			console.error('Does not have function', functionName);
 			console.error('Available Functions', Object.keys(functionName));
-			test.done();
+			done();
 		}
 		// ljm_err = ljm[functionName].apply(this, args);
 		// console.log('Err', ljm_err);
@@ -152,12 +153,12 @@ function create_ljm_async_test(functionName, testInfo, nameAppend) {
 				'Requres LJM Version:',
 				minVersion
 			);
-			test.done();
+			done();
 			return;
 		}
 		function finished_ljm_call (results) {
 			if(testInfo.expected_results) {
-				test.deepEqual(
+				assert.deepEqual(
 					testInfo.expected_results,
 					results,
 					'Results are not correct for: ' + functionName  + nameAppend
@@ -165,10 +166,10 @@ function create_ljm_async_test(functionName, testInfo, nameAppend) {
 			}
 			if(testInfo.custom_verify) {
 				testInfo.custom_verify(test, results, function() {
-					test.done();
+					done();
 				});
 			} else {
-				test.done();
+				done();
 			}
 		}
 
@@ -195,12 +196,12 @@ function create_ljm_async_test(functionName, testInfo, nameAppend) {
 		} else {
 			console.error('Does not have function', functionName);
 			console.error('Available Functions', Object.keys(functionName));
-			test.ok(false,'Failed to call function...');
-			test.done();
+			assert.isOk(false,'Failed to call function...');
+			done();
 		}
 		// ljm_err = ljm[functionName].apply(this, args);
 		// console.log('Err', ljm_err);
-		
+
 	};
 }
 
@@ -257,12 +258,14 @@ function addTests() {
 			console.log('Error adding function', testName);
 		}
 	});
-	
+
 }
 
+addTests();
+
 /* Define Test Cases */
-var test_cases = {
-	'include ljm': function(test) {
+describe('ljm_calls', function() {
+	it('include ljm', function (done) {
 		var ljm_ffi = require('../../lib/ljm-ffi');
 
 		ljm = ljm_ffi.load();
@@ -273,12 +276,9 @@ var test_cases = {
 			'LJM_LIBRARY_VERSION', 0);
 		ljmVersion = ljmLibraryVersion.Value;
 
-		test.done();
-	},
-	
-};
+		done();
+	});
+
+});
 
 /* Add tests defined in the function_tests objects to the test_cases object. */
-addTests();
-
-exports.tests = test_cases;

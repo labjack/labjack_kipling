@@ -32,16 +32,16 @@ var device_tests = {
 		try {
 			device = new device_curator.device();
 		} catch(err) {
-			test.ok(false, err);
+			assert.isOk(false, err);
 			criticalError = true;
-			test.done();
+			done();
 			return;
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -59,7 +59,7 @@ var device_tests = {
 			// 	res.serialNumber
 			// );
 			// console.log('in t7_basic_test.js, openDevice', res);
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -68,7 +68,7 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			criticalError = true;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -76,9 +76,9 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'performTestRead': function(test) {
@@ -92,7 +92,7 @@ var device_tests = {
 				{'functionCall': 'read', 'type': 'range', 'min': -11, 'max': 11}
 			];
 			utils.testResults(test, expectedResult, res);
-			test.done();
+			done();
 		});
 	},
 	'performTestqRead': function(test) {
@@ -116,15 +116,15 @@ var device_tests = {
 					{'functionCall': 'read', 'retData': 0}
 				];
 				var msg = 'mock device not working (read)';
-				test.deepEqual(res, expectedResult, msg);
+				assert.deepEqual(res, expectedResult, msg);
 
 				msg = 'message re-try scheme failed';
 				var functionList = dev.getCalledFunctions();
-				test.strictEqual(functionList.length, 3, msg);
-				test.done();
+				assert.strictEqual(functionList.length, 3, msg);
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
 	},
 	'performTestReadMultiple': function(test) {
@@ -141,7 +141,7 @@ var device_tests = {
 				}
 			];
 			utils.testResultsArray(test, expectedResults, res);
-			test.done();
+			done();
 		});
 	},
 	'performTest iRead': function(test) {
@@ -157,7 +157,7 @@ var device_tests = {
 				}
 			];
 			utils.testResults(test, expectedResults, res, 'res');
-			test.done();
+			done();
 		});
 	},
 	'performTest iReadMany': function(test) {
@@ -186,7 +186,7 @@ var device_tests = {
 				});
 			}
 			utils.testResultsArray(test, expectedResults, res, 'res');
-			test.done();
+			done();
 		});
 	},
 	'performTest iReadMultiple': function(test) {
@@ -203,35 +203,35 @@ var device_tests = {
 				}
 			];
 			utils.testResultsArray(test, expectedResults, res, 'res');
-			test.done();
+			done();
 		});
 	},
 	'call iReadMultiple': function(test) {
 		device.iReadMultiple(['AIN0', 'ETHERNET_IP'])
 		.then(function(res) {
 			// console.log('iReadMultiple res', res);
-			test.done();
+			done();
 		});
 	},
 	'call iWrite': function(test) {
 		device.iWrite('DAC0', 1.0)
 		.then(function(res) {
 			// console.log('iWrite res', res);
-			test.done();
+			done();
 		});
 	},
 	'call iWriteMultiple': function(test) {
 		device.iWriteMultiple(['DAC0', 'DAC1'], [1.0, 1.0])
 		.then(function(res) {
 			// console.log('iWriteMultiple res', res);
-			test.done();
+			done();
 		});
 	},
 	'call iWriteMany': function(test) {
 		device.iWriteMany(['DAC0', 'DAC1'], [1.0, 1.0])
 		.then(function(res) {
 			// console.log('iWriteMany res', res);
-			test.done();
+			done();
 		});
 	},
 	// 'upgradeFirmware': function(test) {
@@ -241,27 +241,27 @@ var device_tests = {
 	// 		function(res) {
 	// 			// The result is a new device object
 	// 			console.log("Finished Upgrading!");
-	// 			test.done();
+	// 			done();
 	// 		}, function(err) {
 	// 			console.log("Failed to upgrade", err);
-	// 			test.done();
+	// 			done();
 	// 		}
 	// 	);
 	// },
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
 		setTimeout(function() {
-			test.done();
+			done();
 		}, 100);
 	}
 };

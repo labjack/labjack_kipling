@@ -1,18 +1,6 @@
+var assert = require('chai').assert;
 
-
-var utils = require('../utils/utils');
-var testDeviceObject = utils.testDeviceObject;
-var testDeviceObjects = utils.testDeviceObjects;
-
-var qRunner = utils.qRunner;
-var qExec = utils.qExec;
-var pResults = utils.pResults;
-var q = require('q');
 var constants = require('../../lib/common/constants');
-
-var test_util = require('../utils/scanner_test_util');
-var printAvailableDeviceData = test_util.printAvailableDeviceData;
-var testScanResults = test_util.testScanResults;
 
 var io_manager;
 var io_interface;
@@ -20,8 +8,6 @@ var io_interface;
 // Managers
 var driver_controller;
 var device_controller;
-var file_io_controller;
-var logger_controller;
 
 var device;
 
@@ -56,12 +42,16 @@ var nameOptions = [
 ];
 var cachedDeviceName = '';
 var chosenTempName = '';
-exports.tests = {
-	'initialization': function(test) {
+
+
+describe('device errors', function() {
+	return;
+	this.skip();
+	it('initialization', function (done) {
 		// Require the io_manager library
 		io_manager = require('../../lib/io_manager');
 
-		// Require the io_interface that gives access to the ljm driver, 
+		// Require the io_interface that gives access to the ljm driver,
 		// device controller, logger, and file_io_controller objects.
 		io_interface = io_manager.io_interface();
 
@@ -84,14 +74,14 @@ exports.tests = {
 				);
 			});
 
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'error initializing io_interface' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'error initializing io_interface' + JSON.stringify(err));
+			done();
 		});
-	},
-	'open device': function(test) {
+	});
+	it('open device', function (done) {
 		var reportedToCmd = false;
 		var connectToDevice = function() {
 			var params = deviceParameters[0];
@@ -107,11 +97,11 @@ exports.tests = {
 
 				setTimeout(function() {
 					if(capturedEvents.length != 1) {
-						test.ok(false, 'unexpected number of events triggered.');
+						assert.isOk(false, 'unexpected number of events triggered.');
 					} else {
-						test.ok(true);
+						assert.isOk(true);
 					}
-					test.done();
+					done();
 				},50);
 			}, function(err) {
 				if(!reportedToCmd) {
@@ -122,10 +112,10 @@ exports.tests = {
 			});
 		};
 		connectToDevice();
-	},
-	'cause device error': function(test) {
+	});
+	it('cause device error', function (done) {
 		// Check to make sure that the device object is an event emitter.
-		test.strictEqual(
+		assert.strictEqual(
 			typeof(device.on),
 			'function',
 			'device is not an event emitter'
@@ -136,13 +126,13 @@ exports.tests = {
 		});
 		device.read('AINA')
 		.then(function(res) {
-			test.ok(false, 'Should have run into an error');
+			assert.isOk(false, 'Should have run into an error');
 		}, function(err) {
-			test.ok(errorDetected, 'device should have thrown a "DEVICE_ERROR"');
-			test.done();
+			assert.isOk(errorDetected, 'device should have thrown a "DEVICE_ERROR"');
+			done();
 		});
-	},
-	'change device name': function(test) {
+	});
+	it('change device name', function (done) {
 		device.qRead('DEVICE_NAME_DEFAULT')
 		.then(function(res) {
 			cachedDeviceName = res;
@@ -153,109 +143,109 @@ exports.tests = {
 			}
 			device.qWrite('DEVICE_NAME_DEFAULT', chosenTempName)
 			.then(function() {
-				test.done();
+				done();
 			});
 		});
-	},
-	'disconnect device': function(test) {
+	});
+	it('disconnect device', function (done) {
 		console.log('  - Please Disconnect Device');
 		device.once('DEVICE_DISCONNECTED', function() {
 			console.log('  - Device Disconnected');
-			test.done();
+			done();
 		});
-	},
-	'wait for reconnecting error': function(test) {
+	});
+	it('wait for reconnecting error', function (done) {
 		device.once('DEVICE_ERROR', function(data) {
-			test.done();
+			done();
 		});
-	},
-	'wait for device to emit DEVICE_RECONNECTING': function(test) {
+	});
+	it('wait for device to emit DEVICE_RECONNECTING', function (done) {
 		device.once('DEVICE_RECONNECTING', function(data) {
-			test.done();
+			done();
 		});
-	},
-	'get latest errors': function(test) {
+	});
+	it('get latest errors', function (done) {
 		device.getLatestDeviceErrors()
 		.then(function(latestErrors) {
 			// console.log('Latest Errors', latestErrors);
-			test.strictEqual(latestErrors.numErrors, 3);
-			test.strictEqual(latestErrors.errors.length, 3);
-			test.done();
+			assert.strictEqual(latestErrors.numErrors, 3);
+			assert.strictEqual(latestErrors.errors.length, 3);
+			done();
 		});
-	},
-	'test reconnectToDevice': function(test) {
+	});
+	it('test reconnectToDevice', function (done) {
 		console.log('  - Please Reconnect Device');
 		device.once('DEVICE_RECONNECTED', function() {
 			console.log('  - Device Reconnected');
-			test.done();
+			done();
 		});
-	},
-	'test device attributes updated': function(test) {
+	});
+	it('test device attributes updated', function (done) {
 		device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
 			// console.log('  - Device Attributes Updated');
-			test.done();
+			done();
 		});
-	},
-	'write original device name': function(test) {
-		test.strictEqual(
+	});
+	it('write original device name', function (done) {
+		assert.strictEqual(
 			device.savedAttributes.DEVICE_NAME_DEFAULT,
 			chosenTempName,
 			'device name not written properly'
 		);
 		device.qWrite('DEVICE_NAME_DEFAULT', cachedDeviceName)
 		.then(function() {
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Error writing name', err);
 
 		});
-	},
-	'disconnect device (2)': function(test) {
+	});
+	it('disconnect device (2)', function (done) {
 		console.log('  - Please Disconnect Device');
 		device.once('DEVICE_DISCONNECTED', function() {
 			console.log('  - Device Disconnected');
-			test.done();
+			done();
 		});
-	},
-	'test reconnectToDevice (2)': function(test) {
+	});
+	it('test reconnectToDevice (2)', function (done) {
 		console.log('  - Please Reconnect Device');
 		device.once('DEVICE_RECONNECTED', function() {
 			console.log('  - Device Reconnected');
-			test.done();
+			done();
 		});
-	},
-	'test device attributes updated (2)': function(test) {
+	});
+	it('test device attributes updated (2)', function (done) {
 		device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
 			// console.log('  - Device Attributes Updated');
-			test.done();
+			done();
 		});
-	},
-	'verify name restoration': function(test) {
-		test.strictEqual(
+	});
+	it('verify name restoration', function (done) {
+		assert.strictEqual(
 			device.savedAttributes.DEVICE_NAME_DEFAULT,
 			cachedDeviceName,
 			'device name not restored properly'
 		);
-		test.done();
-	},
-	'close device': function(test) {
+		done();
+	});
+	it('close device', function (done) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'destruction': function(test) {
+	});
+	it('destruction', function (done) {
 		setImmediate(function() {
 			io_interface.destroy()
 			.then(function(res) {
 				// io_interface process has been shut down
-				test.ok(true);
-				test.done();
+				assert.isOk(true);
+				done();
 			}, function(err) {
-				test.ok(false, 'io_interface failed to shut down' + JSON.stringify(err));
-				test.done();
+				assert.isOk(false, 'io_interface failed to shut down' + JSON.stringify(err));
+				done();
 			});
 		});
-		
-	}
-};
+
+	});
+});
