@@ -1,8 +1,8 @@
-		
+
 var fs = require('fs');
 var path = require('path');
 var q = require('q');
-var unzip = require('unzip');
+var unzip = require('unzipper');
 var semver = require('../semver_min');
 var fse = require('fs-extra');
 
@@ -12,14 +12,14 @@ function parseWithUnzip(packageInfo) {
 	// Create a readable stream for the .zip file
 	var readZipStream = fs.createReadStream(packageInfo.location);
 
-	// Create an unzip parsing stream that will get piped the readable 
+	// Create an unzip parsing stream that will get piped the readable
 	// stream data.
 	var parseZipStream = unzip.Parse();
 
 	var foundPackageJsonFile = false;
 	var packageString = '';
 
-	// Define a function that saves the streamed package.json data to a 
+	// Define a function that saves the streamed package.json data to a
 	// string.
 	var savePackageData = function(chunk) {
 		packageString += chunk.toString('ascii');

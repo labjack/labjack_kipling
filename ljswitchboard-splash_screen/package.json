@@ -59,7 +59,7 @@
   },
   "un-managed-dependencies": {
     "semver": "4.2.0",
-    "unzip": "0.1.11",
+    "unzipper": "0.10.11",
     "nw": "^0.31.5",
     "nodewebkit": "0.11.6",
     "ljswitchboard-core": "*"

@@ -66,7 +66,7 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 	this.clearDeviceErrors = function() {
 		return self.callFunc('clearDeviceErrors');
 	};
-	
+
 	this.getHandleInfo = function() {
 		return self.callFunc('getHandleInfo');
 	};
@@ -187,7 +187,6 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 	 */
 	this.updateFirmware = function(firmwareFileLocation, percentListener, stepListener) {
 		var defered = q.defer();
-
 		self.addInternalListener('updateFirmware', function(m) {
 			if(m.type === 'percent') {
 				percentListener(m.data);
@@ -206,15 +205,15 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 
 		return defered.promise;
 	};
-	
+
 	this.getFunctions = function() {
 		return self.callFunc('getFunctions');
 	};
 
 	/**
 	 *	The close function calls the previously passed in close function of the
-	 *	device_controller object to instruct the sub-process to delete the 
-	 *	close & delete the device and remove it from the device_controller's 
+	 *	device_controller object to instruct the sub-process to delete the
+	 *	close & delete the device and remove it from the device_controller's
 	 *	local listing of devices.
 	 */
 	this.close = function() {
@@ -225,7 +224,7 @@ function createDevice(savedAttributes, deviceCallFunc, deviceSendFunc, closeDevi
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
-	
+
 	var self = this;
 }
 util.inherits(createDevice, EventEmitter);

@@ -29,13 +29,13 @@
 		"rimraf": "2.2.8",
 		"targz": "1.0.1",
 		"underscore": "1.9.1",
-		"unzip": "0.1.11",
+		"unzipper": "0.10.11",
 		"yauzl": "2.10.0",
 		"yazl": "2.5.1"
 	},
 	"un-managed-dependencies": {
 		"semver": "4.2.0",
-		"unzip": "0.1.11",
+		"unzipper": "0.10.11",
 		"ljswitchboard-core": "*"
 	},
 	"kipling_dependencies": [

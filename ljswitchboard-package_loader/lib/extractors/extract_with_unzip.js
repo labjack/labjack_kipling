@@ -2,7 +2,7 @@
 var fs = require('fs');
 var path = require('path');
 var q = require('q');
-var unzip = require('unzip');
+var unzip = require('unzipper');
 
 var extractWithUnzip = function(bundle, self, EVENTS) {
 	var defered = q.defer();
@@ -15,11 +15,11 @@ var extractWithUnzip = function(bundle, self, EVENTS) {
 	// Emit events indicating that a zip file extraction has started
 	self.emit(EVENTS.STARTING_EXTRACTION, bundle);
 	self.emit(EVENTS.STARTING_ZIP_FILE_EXTRACTION, bundle);
-	
+
 	unzipExtractor.on('error', function(err) {
 		console.error('  - Error performZipFileUpgrade', err, bundle.name);
 		var msg = 'Error performing a .zip file upgrade.  Verify ' +
-		'the user-permissions for the directory and .zip file: ' + 
+		'the user-permissions for the directory and .zip file: ' +
 		upgradeZipFilePath + ', and ' + destinationPath;
 		bundle.resultMessages.push({
 			'step': 'performDirectoryUpgrade-copyRecursive',
