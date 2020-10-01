@@ -29,7 +29,7 @@
   "dependencies": {
     "async": "1.5.2",
     "diff": ">=3.5.0",
-    "mocha": "7.2.0",
+    "mocha": "5.2.0",
     "chai": "^4.2.0"
   },
   "devDependencies": {
