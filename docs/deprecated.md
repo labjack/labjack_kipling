@@ -16,6 +16,13 @@ Updated:
 
 * nodeunit no longer maintained (https://www.npmjs.com/package/nodeunit) generates tons of `retire` warnings. It was replaced with mocha/chai
 
+NOT UPDATED (to be updated after nwjs upgrade or switch to electron):
+
+* cheerio - waiting for 1.0.0.rc-4 - https://github.com/cheeriojs/cheerio/issues/1476
+* node-fetch - more recent version not working with nw.js
+* mocha@7.2.0 - more recent version not working with nw.js
+* ffi-napi@2.4.6 - more recent version not working with nw.js
+ 
 TODO:
 
 Check LabJack-nodejs test scripts in package.json

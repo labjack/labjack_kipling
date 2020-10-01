@@ -1,99 +1,79 @@
 {
-  "name": "ljswitchboard-builder",
-  "description": "Building and packing for the ljswitchboard program.",
-  "version": "3.0.7",
-  "private": true,
-  "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-builder",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/labjack/labjack_kipling.git",
-    "directory": "ljswitchboard-builder"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "adm-zip": "0.4.13",
-    "archiver": "3.1.1",
-    "async": "3.1.0",
-    "colors": "1.4.0",
-    "concat-stream": "1.5.2",
-    "decompress": "2.3.0",
-    "decompress-unzip": "3.2.2",
-    "decompress-zip": "0.2.0",
-    "extract-zip": "1.0.3",
-    "fs-extra": "0.18.4",
-    "fs.extra": "1.3.2",
-    "handlebars": "4.7.6",
-    "jszip": "2.5.0",
-    "lj_async_0_to_x_shim": "*",
-    "ljswitchboard-ljm_driver_checker": "*",
-    "ljswitchboard-package_loader": "*",
-    "ljswitchboard-require": "*",
-    "ljswitchboard-window_manager": "*",
-    "node-zip": "1.1.1",
-    "q": "1.5.1",
-    "rimraf": "2.2.8",
-    "targz": "1.0.1",
-    "underscore": "1.9.1",
-    "unzip": "0.1.11",
-    "yauzl": "2.10.0",
-    "yazl": "2.5.1"
-  },
-  "un-managed-dependencies": {
-    "semver": "4.2.0",
-    "unzip": "0.1.11",
-    "ljswitchboard-core": "*"
-  },
-  "kipling_dependencies": [
-    "ljswitchboard-splash_screen",
-    "ljswitchboard-core",
-    "ljswitchboard-io_manager",
-    "ljswitchboard-kipling",
-    "ljswitchboard-module_manager",
-    "ljswitchboard-static_files",
-    "ljswitchboard-kipling_tester"
-  ],
-  "splash_screen_build_keys": {
-    "window": {
-      "title": "Kipling",
-      "icon": "lib/Kipling_128x128.png",
-      "toolbar": false,
-      "frame": false,
-      "width": 480,
-      "height": 300,
-      "min_width": 480,
-      "min_height": 300,
-      "show": true,
-      "resizable": false
-    },
-    "enableStartupConfig": false,
-    "buildType": "release",
-    "test": false,
-    "clearCachesOnModuleLoad": false,
-    "enableBetaOptions": false
-  },
-  "kipling_test_dependencies": [
-    "ljswitchboard-kipling_tester"
-  ],
-  "kipling_primary_dependency": "ljswitchboard-splash_screen",
-  "devDependencies": {
-    "diff": ">=3.5.0",
-    "mocha": "7.2.0",
-    "chai": "^4.2.0"
-  },
-  "script_notes": "to run a script w/o using npm test, use npm run [script name]",
-  "scripts": {
-    "test": "mocha test/**/*test.js",
-    "prepare_build": "node build_scripts/prepare_build.js",
-    "gather_project_files": "node build_scripts/gather_project_files.js",
-    "edit_k3_startup_settings": "node build_scripts/edit_k3_startup_settings.js",
-    "gather_test_project_files": "node build_scripts/gather_project_files.js test",
-    "install_production_dependencies": "node build_scripts/install_production_dependencies.js",
-    "rebuild_native_modules": "node build_scripts/rebuild_native_modules",
-    "clean_project": "node build_scripts/clean_project.js",
-    "organize_project_files": "node build_scripts/organize_project_files.js",
-    "brand_project": "node build_scripts/brand_project.js",
-    "compress_output": "node build_scripts/compress_output.js",
-    "build_project": "node build_scripts/build_project.js",
-    "quick_build_project": "node build_scripts/quick_build_project.js"
-  }
+	"name": "ljswitchboard-builder",
+	"description": "Building and packing for the ljswitchboard program.",
+	"version": "3.0.7",
+	"private": true,
+	"homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-builder",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/labjack/labjack_kipling.git",
+		"directory": "ljswitchboard-builder"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"adm-zip": "0.4.13",
+		"archiver": "3.1.1",
+		"async": "3.1.0",
+		"colors": "1.4.0",
+		"concat-stream": "1.5.2",
+		"decompress": "4.2.1",
+		"decompress-unzip": "3.2.2",
+		"decompress-zip": "0.2.2",
+		"extract-zip": "2.0.1",
+		"fs-extra": "0.18.4",
+		"fs.extra": "1.3.2",
+		"handlebars": "4.7.6",
+		"jszip": "2.5.0",
+		"node-zip": "1.1.1",
+		"q": "1.5.1",
+		"rimraf": "2.2.8",
+		"targz": "1.0.1",
+		"underscore": "1.9.1",
+		"unzip": "0.1.11",
+		"yauzl": "2.10.0",
+		"yazl": "2.5.1"
+	},
+	"un-managed-dependencies": {
+		"semver": "4.2.0",
+		"unzip": "0.1.11",
+		"ljswitchboard-core": "*"
+	},
+	"kipling_dependencies": [
+		"ljswitchboard-splash_screen",
+		"ljswitchboard-core",
+		"ljswitchboard-io_manager",
+		"ljswitchboard-kipling",
+		"ljswitchboard-module_manager",
+		"ljswitchboard-static_files",
+		"ljswitchboard-kipling_tester"
+	],
+	"splash_screen_build_keys": {
+		"window": {
+			"title": "Kipling",
+			"icon": "lib/Kipling_128x128.png",
+			"toolbar": false,
+			"frame": false,
+			"width": 480,
+			"height": 300,
+			"min_width": 480,
+			"min_height": 300,
+			"show": true,
+			"resizable": false
+		},
+		"enableStartupConfig": false,
+		"buildType": "release",
+		"test": false,
+		"clearCachesOnModuleLoad": false,
+		"enableBetaOptions": false
+	},
+	"kipling_test_dependencies": [
+		"ljswitchboard-kipling_tester"
+	],
+	"kipling_primary_dependency": "ljswitchboard-splash_screen",
+	"devDependencies": {
+		"chai": "^4.2.0",
+		"diff": ">=3.5.0",
+		"mocha": "7.2.0"
+	},
+	"script_notes": "to run a script w/o using npm test, use npm run [script name]"
 }
