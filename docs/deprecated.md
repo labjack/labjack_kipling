@@ -22,6 +22,7 @@ NOT UPDATED (to be updated after nwjs upgrade or switch to electron):
 * node-fetch - more recent version not working with nw.js
 * mocha@7.2.0 - more recent version not working with nw.js
 * ffi-napi@2.4.6 - more recent version not working with nw.js
+* extract-zip@1.7.0 - more recent version not working with nw.js
  
 TODO:
 
