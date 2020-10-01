@@ -1,6 +1,6 @@
 /**
  * version_manager.js for LabJack Switchboard.  Provides Kipling with the ability
- * to query for various versions of LabJack software versions, firmeware 
+ * to query for various versions of LabJack software versions, firmeware
  * versions, and drivers
  *
  * @author Chris Johnson (LabJack, 2014)
@@ -13,13 +13,14 @@ var util = require('util');
 
 // 3rd party npm library requires:
 var q = require('q');
-var request = require('request');
+var fetch = require('node-fetch');
 var async = require('async');
 var dict = require('dict');
 var path = require('path');
 
 var cheerio = require('cheerio');
 var semver = require('./semver_min');
+
 
 var eventList = {
     'ERROR_PARSING_PAGE_DATA': 'ERROR_PARSING_PAGE_DATA',
@@ -179,7 +180,7 @@ function labjackVersionManager() {
         if(pageType === 'software') {
             currentNode = $('.node-software-platform');
             isValid = (currentNode.length >= 0);
-            
+
             if(isValid) {
                 var platformSelector = {
                     'win': '.platform-windows',
@@ -377,7 +378,7 @@ function labjackVersionManager() {
                     'pageType': 'firmware',
                     'releaseType': 'stable',
                 });
-                
+
                 if(parsedData.isValid) {
                     listingArray.push({
                         'upgradeLink': parsedData.upgradeLink,
@@ -449,7 +450,7 @@ function labjackVersionManager() {
                     'pageType': 'firmware',
                     'releaseType': 'stable',
                 });
-                
+
                 if(parsedData.isValid) {
                     listingArray.push({
                         'upgradeLink': parsedData.upgradeLink,
@@ -548,7 +549,7 @@ function labjackVersionManager() {
     this.isDataComplete = false;
     this.isError = false;
     this.errorInfo = null;
-    
+
 
     /**
      * Function that prints out all urls to console.log
@@ -562,17 +563,18 @@ function labjackVersionManager() {
     this.buildQuery = function(savedData, strategy, urlInfo, name) {
         var dataQuery = function(callback) {
             var url = urlInfo.url;
-            // Check to see if the page has been cached, if it is don't query 
+            // Check to see if the page has been cached, if it is don't query
             // for it
             if(!self.pageCache.has(url)) {
                 // Perform request to get pageData/body
-                var options = {
-                    'url': url,
-                    'timeout': 20000,
-                };
-                request(
-                    options,
-                    function (error, response, body) {
+                fetch(url, {
+                    timeout: 20000
+                })
+                    .then(function (res) {
+                        if (res.ok) {
+                            return res.text();
+                        }
+
                         var message = '';
                         var err = null;
                         if (error) {
@@ -595,10 +597,10 @@ function labjackVersionManager() {
                             };
                             self.reportError(err);
                             callback(err);
-                        } else if (response.statusCode != 200) {
+                        } else if (error.status != 200) {
                             // Report a http error, likely is 404, page not found.
                             message = "Got Code: ";
-                            message += response.statusCode.toString();
+                            message += error.status.toString();
                             message += "; loading: " + url;
                             message += "; name: " + name;
                             message += "; type: " + urlInfo.type;
@@ -609,18 +611,23 @@ function labjackVersionManager() {
                                 "url": url
                             };
                             self.reportWarning(err);
-                            callback(err);
-                        } else {
-                            self.pageCache.set(url,body);
-                            try {
-                                strategy(savedData, body, urlInfo, name);
-                            } catch(innerErr) {
-                                console.error('Error calling strategy...', innerErr, name);
-                            }
                             callback();
                         }
-                    }
-                );
+                    })
+                    .then(function (body) {
+                        self.pageCache.set(url, body);
+                        try {
+                            strategy(savedData, body, urlInfo, name);
+                        } catch(innerErr) {
+                            console.error('Error calling strategy...', innerErr, name);
+                        }
+                        callback();
+
+                    })
+                    .catch(function (error) {
+                        console.error('fetch error', error.message);
+                        callback();
+                    });
             } else {
                 // get pageData/body from cache
                 var pageData = self.pageCache.get(url);
@@ -633,7 +640,7 @@ function labjackVersionManager() {
     this.saveTempData = function(name, rawInfos) {
         var systemType = self.getLabjackSystemType();
         var platformDependent = self.urlDict[name].platformDependent;
-        
+
         var organizer = null;
         var infos = [];
         var numCurrent = 0;
@@ -867,7 +874,7 @@ function labjackVersionManager() {
     /**
      * Function that querys & parses labjack.com/support/firmware/t7, /beta, and
      *  /old for different versions of T7 firmware & appropriate links.
-     *  
+     *
      * @return {[type]} [description]
     **/
     this.getT7FirmwareVersions = function() {
@@ -955,6 +962,7 @@ function labjackVersionManager() {
             'type': 'error',
             'data': data
         });
+        console.warn(JSON.stringify(data, null, 2));
     };
     this.getIssue = function() {
         var issue;
@@ -1001,7 +1009,7 @@ function labjackVersionManager() {
             }
         };
 
-        // if the data isn't complete then 
+        // if the data isn't complete then
         if(isComplete()) {
             setTimeout(waitFunc,checkInterval);
         } else {
@@ -1131,7 +1139,7 @@ function labjackVersionManager() {
             return false;
         }
     };
-    
+
     var self = this;
 }
 util.inherits(labjackVersionManager, EventEmitter);

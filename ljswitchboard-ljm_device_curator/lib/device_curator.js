@@ -22,16 +22,10 @@ var ljm_ffi = ljm_ffi_req.load();
 
 
 // Special T7 additional functions/operations
-// - Not Needed, see tseries:
-//     var lj_t7_upgrader = require('./labjack_t7_upgrade');
 var lj_t7_flash_operations = require('./t7_flash_operations');
 lj_t7_flash_operations.setDriverConst(ljm.driver_const);
 var lj_t7_get_flash_fw_versions = require('./t7_get_flash_fw_versions');
 var lj_t7_cal_operations = require('./t7_calibration_operations');
-
-// Special T4 additional functions/operations
-// - Not Needed, see tseries:
-//     var lj_t4_upgrader = require('./labjack_t4_upgrade');
 
 // Special TSeries additional functions/operations
 var lj_tseries_upgrader = require('./labjack_tseries_upgrade');
@@ -118,7 +112,7 @@ function device(useMockDevice) {
 				errors.push(self.deviceErrors[i]);
 			}
 		}
-		
+
 		var data = {
 			'numErrors': numErrors,
 			'errors': errors,
@@ -506,7 +500,7 @@ function device(useMockDevice) {
 				self.savedAttributes.subclass = '';
 				if(res === 2) {
 					self.savedAttributes.subclass = '-TL';
-					
+
 				} else if (res === 3) {
 					self.savedAttributes.subclass = '-TLH';
 				}
@@ -557,7 +551,7 @@ function device(useMockDevice) {
 							self.savedAttributes[res.address] = res.data;
 						}
 					}
-					
+
 					// Save values to cache:
 					if(!res.isErr) {
 						updateDeviceValueCacheSingle(res.address, res.data);
@@ -642,10 +636,10 @@ function device(useMockDevice) {
 		var keys = Object.keys(self.bufferDataSplitSizes);
 		keys.forEach(function(key) {
 			var numBytes = parseInt(key, 10);
-			
+
 			var standardValue = Math.floor((maxBytesPerMB - 12)/numBytes);
 
-			
+
 
 			// Ratio to convert bytes to numRegisters, each register is 16bits
 			// of data vs 8bits.
@@ -809,7 +803,7 @@ function device(useMockDevice) {
 		} else {
 			setTimeout(refreshResults, refreshRate);
 		}
-		
+
 		return defered.promise;
 	};
 	var factoryFirmwareVersions = [
@@ -900,7 +894,7 @@ function device(useMockDevice) {
 		function onSuccess(res) {
 			var curHandle = ljmDevice.handle;
 			var numSameHandles = 0;
-			
+
 			if(typeof(knownDevices) !== 'undefined') {
 				var devKeys = Object.keys(knownDevices);
 				devKeys.forEach(function(devKey) {
@@ -916,7 +910,7 @@ function device(useMockDevice) {
 					var devInfo = ljmDevice.getHandleInfoSync();
 					devInfo.deviceTypeName = driver_const.DEVICE_TYPE_NAMES[devInfo.deviceType];
 					devInfo.connectionTypeName = driver_const.CONNECTION_TYPE_NAMES[devInfo.connectionType];
-					
+
 					var openParams = {
 						'dt': ljmDevice.deviceType,
 						'ct': ljmDevice.connectionType,
@@ -1033,7 +1027,7 @@ function device(useMockDevice) {
 		return defered.promise;
 	}
 
-	/* 
+	/*
 	 * This function allows users to generate a LJM device handle and then create a curated device object with it.
 	*/
 	this.linkToHandle = function(deviceHandle, deviceType, connectionType, identifier) {
@@ -1072,7 +1066,7 @@ function device(useMockDevice) {
 				defered.reject(driver_const.LJN_DEVICE_NOT_CONNECTED);
 			});
 		}
-		
+
 		return defered.promise;
 	};
 	this.getDeviceAttributes = function() {
@@ -1161,7 +1155,7 @@ function device(useMockDevice) {
 				}
 			}
 		}
-		
+
 		// Prepare reads
 		var info = modbusMap.getAddressInfo(address);
 		var splitSize = self.getBufferDataSplitSize(info.typeString);
@@ -1198,7 +1192,7 @@ function device(useMockDevice) {
 			} else {
 				lastUpdateValue = percent;
 			}
-			
+
 		}
 		// Perform reads
 		async.eachSeries(reads, function(singleRead, callback) {
@@ -1222,7 +1216,7 @@ function device(useMockDevice) {
 				defered.resolve(readData);
 			}
 		});
-		
+
 		return defered.promise;
 	};
 	/**
@@ -1570,7 +1564,7 @@ function device(useMockDevice) {
 				scanRate,
 				function(err) {
 					captureDeviceError('streamStart', err, {
-						'scansPerRead': scansPerRead, 
+						'scansPerRead': scansPerRead,
 						'scanList': scanList,
 						'scanRate': scanRate,
 					});
@@ -1586,7 +1580,7 @@ function device(useMockDevice) {
 		return defered.promise;
 	};
 	/**
-	 * The goal of this function is to transpose & pull out information, and 
+	 * The goal of this function is to transpose & pull out information, and
 	 * calculate a timestamp for each stream data point given that the buffer
 	 * object that gets populated by the streamRead function as "rawData"
 	 * in the format:
@@ -1594,15 +1588,15 @@ function device(useMockDevice) {
 	 * to:
 	 *     [[timeStamp, x1, y1], [timeStamp, x2, y2], ... ]
 	 * and save that new javascript object to the data object as "data".
-	 * 
-	 * This format was chosen because the created "data_buffer.js" file in 
+	 *
+	 * This format was chosen because the created "data_buffer.js" file in
 	 * Kipling and the "flot" graphing program prefer data to be organized in
 	 * similar ways to this.  It also cut down on the number of loops required
 	 * to parse the data into one full pass-through of the data.
 	**/
 	var parseStreamData = function(data) {
 		var defered = q.defer();
-		
+
 		var numValues = data.numVals;
 		var numAddresses = data.numAddresses;
 		var numResults = data.scansPerRead;
@@ -1716,7 +1710,7 @@ function device(useMockDevice) {
 		}
 		return defered.promise;
 	};
-	
+
 
 	function removeProcessListeners() {
 		// Remove the connected process listeners.
@@ -1729,7 +1723,7 @@ function device(useMockDevice) {
 		// Clear cached device values
 		self.cachedValues = undefined;
 		self.cachedValues = {};
-		
+
 		// Disable various background operations.
 		self.haltBackgroundOperations();
 
@@ -1749,9 +1743,9 @@ function device(useMockDevice) {
 
 	this.close = function() {
 		var defered = q.defer();
-		
+
 		prepareToCloseDevice();
-		
+
 		// Close the LJM device.
 		ljmDevice.close(
 			function(err) {
@@ -1763,7 +1757,7 @@ function device(useMockDevice) {
 		return defered.promise;
 	};
 
-	
+
 
 	function handleProcessExitInterrupt(code) {
 		console.log('Exiting... event not removed.. Call device\'s ".destroy()" function.', self.curatedDeviceInt);
@@ -1772,7 +1766,7 @@ function device(useMockDevice) {
 	}
 	function handleSIGINTInterrupt(code) {
 		console.log('Got SIGINT. Exiting...', self.curatedDeviceInt);
-		
+
 		prepareToCloseDevice();
 		process.exit();
 	}
@@ -1794,7 +1788,7 @@ function device(useMockDevice) {
 		defered.resolve(unsavedDefaults);
 		return defered.promise;
 	};
-	
+
 	this.clearUnsavedDefaults = function() {
 		var defered = q.defer();
 		unsavedDefaults = {};
@@ -1859,7 +1853,7 @@ function device(useMockDevice) {
 
 	/*
 	Intelligent Read/Write Functions.  These functions have automatic parsing/
-	encoding/caching additions and all use the q functions for stability & 
+	encoding/caching additions and all use the q functions for stability &
 	reliability.
 	*/
 	var updateDeviceValueCacheSingle = function(address, value) {
@@ -1918,10 +1912,10 @@ function device(useMockDevice) {
 		return defered.promise;
 	};
 
-	/* 
-	 * This function intelligently re-tries the iReadMany function call to build 
+	/*
+	 * This function intelligently re-tries the iReadMany function call to build
 	 * a "best possible" result object organized by register name.  This function
-	 * uses the iReadMany function call for efficiency and will collect errors 
+	 * uses the iReadMany function call for efficiency and will collect errors
 	 * for each individual register.
 	*/
 	this.irReadMany = function(addresses) {
@@ -2018,9 +2012,9 @@ function device(useMockDevice) {
 		return defered.promise;
 	};
 
-	/* 
-	 * The "s" functions always resolve successfully.  
-	 * They either resolve with the latest value or an 
+	/*
+	 * The "s" functions always resolve successfully.
+	 * They either resolve with the latest value or an
 	 * old cached value.
 	 */
 	this.sRead = function(address) {
@@ -2348,7 +2342,7 @@ function device(useMockDevice) {
 	this.resumeDeviceConnection = function() {
 		var defered = q.defer();
 
-		
+
 
 		 var dt = self.savedAttributes.openParameters.deviceType;
 		 var ct = self.savedAttributes.openParameters.connectionType;
@@ -2766,7 +2760,7 @@ function device(useMockDevice) {
     for(i = 0; i < deviceValueCheckerKeys.length; i++) {
 		this[deviceValueCheckerKeys[i]] = deviceValueChecker[deviceValueCheckerKeys[i]];
 	}
-	
+
 	/**
 	 * Lua Script functions:
 	**/
@@ -2927,7 +2921,7 @@ function device(useMockDevice) {
 			return {};
 		}
 	}
-	
+
 	/**
 	 * Digit Specific functions:
 	**/
@@ -2977,7 +2971,7 @@ function device(useMockDevice) {
 				'DGT_TEMPERATURE_LATEST_RAW',
 				'DGT_HUMIDITY_RAW',
 				'DGT_LIGHT_RAW',
-				
+
 			])
 			.then(applyDigitFormatterFunctions, defered.reject)
 			.then(finishedSuccessfully, defered.reject);
@@ -3018,7 +3012,7 @@ function device(useMockDevice) {
 	this.getLogParams = function() {
 		var dt = self.savedAttributes.deviceType;
 		var digitDeviceNum = driver_const.deviceTypes.digit;
-		
+
 		if(dt === digitDeviceNum) {
 			return digit_io_helper.getLogParams(self);
 		} else {
@@ -3030,7 +3024,7 @@ function device(useMockDevice) {
 	this.readDigitLoggedData = function(options) {
 		var dt = self.savedAttributes.deviceType;
 		var digitDeviceNum = driver_const.deviceTypes.digit;
-		
+
 		if(dt === digitDeviceNum) {
 			return digit_io_helper.readDigitLoggedData(self, options);
 		} else {
