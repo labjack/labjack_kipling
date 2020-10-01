@@ -106,10 +106,11 @@ var loadResources = function(doc, resources, isLocal, location) {
 		});
 
 		if (loadingOps.length > 0) {
-			var results = {};
-			loadingOps.reduce(function (soFar, f) {
-				return soFar.then(f);
-			}, q(results))
+			var result = Promise.resolve({});
+			loadingOps.forEach(function (f) {
+				result = result.then(f);
+			});
+			result
 				.then(function (res) {
 					// console.log('Finished loading resources', res);
 					resolve(res);
