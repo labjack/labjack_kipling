@@ -12,9 +12,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -99,44 +99,44 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openAndCloseMultipleTimes': function(test) {
 		openAndCloseMultipleTimes(test, 50)
 		.then(function(res) {
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'Failed to open/close a device' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'Failed to open/close a device' + JSON.stringify(err));
+			done();
 		});
 	},
 	'closeAllDevices': function(test) {
 		ljm.closeAll(function(err){
-			test.ok(false, 'Close All failed');
-			test.done();
+			assert.isOk(false, 'Close All failed');
+			done();
 		}, function(res) {
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		});
 	},
 	'openAndCloseMultipleTimesAgain': function(test) {
 		openAndCloseMultipleTimes(test, 260)
 		.then(function(res) {
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'Failed to open/close a device' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'Failed to open/close a device' + JSON.stringify(err));
+			done();
 		});
 	},
 	'closeAllDevices': function(test) {
 		ljm.closeAll(function(err){
-			test.ok(false, 'Close All failed');
-			test.done();
+			assert.isOk(false, 'Close All failed');
+			done();
 		}, function(res) {
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		});
 	},
 };
@@ -151,7 +151,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

@@ -27,7 +27,7 @@ function verifyResultKeys(test, results, functionName) {
 		expectedKeys.push(argName);
 	});
 	debug(Object.keys(results), expectedKeys);
-	test.deepEqual(
+	assert.deepEqual(
 		Object.keys(results),
 		expectedKeys,
 		'Found unexpected return argument'
@@ -36,7 +36,7 @@ function verifyResultKeys(test, results, functionName) {
 
 function verifyNoLJMError(test, results, functionName) {
 	var ljmError = results.ljmError;
-	test.equal(
+	assert.equal(
 		ljmError,
 		0,
 		'There should not have been an LJM Error calling' + functionName
@@ -46,7 +46,7 @@ function verifyNoLJMError(test, results, functionName) {
 function parseIPAddress(ipInt) {
 	var ipAddr = ref.alloc('int', 1);
 	ipAddr.writeInt32LE(ipInt, 0);
-	
+
 	var ipStr = "";
 	ipStr += ipAddr.readUInt8(3).toString();
 	ipStr += ".";
@@ -83,7 +83,7 @@ module.exports.LJM_ListAll = {
 
 		if(results.NumFound > 0) {
 			var deviceData = [];
-			
+
 			for(var i = 0; i < results.NumFound; i++) {
 				var ipStr = parseIPAddress(results.aIPAddresses[i]);
 				deviceData.push({
@@ -118,7 +118,7 @@ module.exports.LJM_ListAllS = {
 		verifyResultKeys(test, results, 'LJM_ListAllS');
 		if(results.NumFound > 0) {
 			var deviceData = [];
-			
+
 			for(var i = 0; i < results.NumFound; i++) {
 				var ipStr = parseIPAddress(results.aIPAddresses[i]);
 				deviceData.push({
@@ -164,7 +164,7 @@ module.exports.LJM_ListAllExtended = {
 		Object.keys(results);
 		if(results.NumFound > 0) {
 			var deviceData = [];
-			
+
 			for(var i = 0; i < results.NumFound; i++) {
 				var ipStr = parseIPAddress(results.aIPAddresses[i]);
 				deviceData.push({

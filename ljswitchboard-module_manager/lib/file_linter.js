@@ -8,7 +8,7 @@ try {
 } catch(err) {
 	q = require('q');
 }
-var handlebars = require('./handlebars');
+var handlebars = require('handlebars');
 
 var LINTERS_ENABLED = true;
 exports.configure = function(val) {
@@ -49,7 +49,7 @@ try {
 	LINTERS.css.run = function(fileData) {
 		var defered = q.defer();
 
-		
+
 		var isError = false;
 		var isWarning = false;
 		var overallResult = true;
@@ -192,11 +192,11 @@ try {
 		'<!DOCTYPE html>',
 		'Expected \u201C<!DOCTYPE html>\u201D',
 
-		// To get rid of error message saying that the <head> element was 
+		// To get rid of error message saying that the <head> element was
 		// missing from templates
 		'Element \u201Chead\u201D is missing a required instance of child element',
 
-		// To get rid of error message thrown when a table is populated by a 
+		// To get rid of error message thrown when a table is populated by a
 		// template.
 		'Row 2 of a row group established by a',
 
@@ -222,7 +222,7 @@ try {
 				var isWarning = false;
 				var overallResult = true;
 				var messages = [];
-				
+
 				if(err) {
 					// Don't check the results
 					isError = true;
@@ -237,7 +237,7 @@ try {
 						'evidence': ''
 					});
 				} else {
-					
+
 					results.messages.forEach(function(message) {
 						var isIgnored = false;
 
@@ -291,7 +291,7 @@ try {
 			};
 			defered.resolve(result);
 		}
-		
+
 		return defered.promise;
 	};
 } catch (err) {
@@ -301,7 +301,7 @@ try {
 var getLinter = function(filePath) {
 	var fileType = path.extname(filePath).replace('.','');
 	var linter = LINTERS.defaultLinter;
-	
+
 	if(LINTERS_ENABLED) {
 		if(LINTERS[fileType]) {
 			if(LINTERS[fileType].enabled) {

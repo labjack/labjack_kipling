@@ -12,9 +12,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -36,7 +36,7 @@ var settings = {
 	'scanList': ['AIN0','AIN1','AIN2','AIN3'],
 	'testRate': 82500,		// The samples/sec instead of scans/sec
 	'scanRate': null,		// Will get calculated: testRate/scanList.length
-	'duration': 40,			// Num seconds to stream for 
+	'duration': 40,			// Num seconds to stream for
 };
 
 // Over write settings to make the test pass
@@ -84,10 +84,10 @@ function createReadLoop(numReads) {
 							result[key] = res[key];
 						}
 						// console.log('  - ' + key + ': ' + JSON.stringify(res[key]));
-						
+
 					}
 				});
-				
+
 				results.push(result);
 				innerDefered.resolve(results);
 			}, function(err) {
@@ -175,7 +175,7 @@ var streamTest = function(settings) {
 		defered.reject(err);
 	})
 	.then(function(res) {
-		
+
 		if(DEBUG_TEST) {
 			console.log("stream stopped");
 		}
@@ -231,15 +231,15 @@ var executeStreamTest = function(test) {
 					'Auto Recovery events detected, number of occurances:',
 					numAutoRecovery
 				);
-				test.ok(false, 'Auto Recovery detected');
+				assert.isOk(false, 'Auto Recovery detected');
 			}
-			// test.ok(testOk, 'stream error detected');
+			// assert.isOk(testOk, 'stream error detected');
 			// console.log('');
 			checkTestDuration(test);
 		}, function(err) {
 			// End the test & report that an error has occured.
 			console.log('Stream Test Failed', err, ljm.errToStrSync(err));
-			test.ok(false, 'Stream failed to start');
+			assert.isOk(false, 'Stream failed to start');
 			checkTestDuration(test);
 		});
 };
@@ -249,14 +249,14 @@ var checkTestDuration = function(test) {
 	console.log('  - Test Duration', testDuration);
 	if (streamTestPassed) {
 		if(testDuration < settings.duration) {
-			test.ok(
+			assert.isOk(
 				false,
 				'Test finished to quickly: ' + parseFloat(testDuration) + 's' +
 				'. Should be longer than: ' + parseFloat(settings.duration) + 's.'
 			);
 		}
 	}
-	test.done();
+	done();
 };
 
 var device_tests = {
@@ -280,13 +280,13 @@ var device_tests = {
 		}
 		if(ENABLE_LJM_LOG) {
 			ljm.enableLog(function(err) {
-				test.ok(false, 'failed to enable the log', err);
-				test.done();
+				assert.isOk(false, 'failed to enable the log', err);
+				done();
 			}, function(res) {
-				test.done();
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
 	},
 	'openDevice': function(test) {
@@ -301,19 +301,19 @@ var device_tests = {
 				);
 			}
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			performTests = false;
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'1. startBasicStream': executeStreamTest,
@@ -327,11 +327,11 @@ var device_tests = {
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failure');
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 };
@@ -349,7 +349,7 @@ var getTest = function(testFunc, key) {
 			} else {
 				console.log("  * No Device Connected, Not Executing!!", key);
 				try {
-					test.done();
+					done();
 				} catch(err) {
 					console.log("HERE", err);
 				}

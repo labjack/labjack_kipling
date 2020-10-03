@@ -1,4 +1,3 @@
-var q = require('q');
 var async = require('async');
 var device_curator = require('ljswitchboard-ljm_device_curator');
 
@@ -31,7 +30,7 @@ function CREATE_DEVICE_MANAGER() {
 		self.devicesToOpen,
 		function(deviceToOpen, cb) {
 			var device = new device_curator.device(true);
-			
+
 			// Save device reference
 			self.devices.push(device);
 
@@ -39,7 +38,7 @@ function CREATE_DEVICE_MANAGER() {
 				getConfigurableDeviceAttributes(deviceToOpen)
 			)
 			.then(function(res) {
-				test.ok(true, 'Opened Device');
+				assert.isOk(true, 'Opened Device');
 				device.open(
 					deviceToOpen.deviceType,
 					deviceToOpen.serialNumber,
@@ -49,14 +48,14 @@ function CREATE_DEVICE_MANAGER() {
 				}, function(err) {
 					console.log('Failed to open device', device);
 					console.log('Error', err);
-					test.ok(false, 'Failed to open device');
+					assert.isOk(false, 'Failed to open device');
 					cb();
 				});
 			});
 		},
 		function(err) {
 			//Need to verify opened devices...
-			test.done();
+			done();
 		});
 	};
 	this.getDevicesInfo = function(test) {
@@ -77,7 +76,7 @@ function CREATE_DEVICE_MANAGER() {
 			});
 			// console.log('Device Info', devData);
 		});
-		test.done();
+		done();
 	};
 	this.getDevices = function() {
 		return self.devices;
@@ -89,17 +88,17 @@ function CREATE_DEVICE_MANAGER() {
 		function(device, cb) {
 			device.close()
 			.then(function(res) {
-				test.ok(true, 'Closed Device');
+				assert.isOk(true, 'Closed Device');
 				cb();
 			}, function(err) {
 				console.log('Failed to Closed Device');
 				console.log('Error', err);
-				test.ok(false, 'Failed to close device');
+				assert.isOk(false, 'Failed to close device');
 				cb();
 			});
 		},
 		function(err) {
-			test.done();
+			done();
 		});
 	};
 	var self = this;

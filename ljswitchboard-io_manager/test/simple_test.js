@@ -1,15 +1,11 @@
-
 /**
 	This test aims to show how the io_manager library should be used.  It
 	shows the initialization, some basic usage steps, and destruction of the
 	library.
 **/
 
-var utils = require('./utils/utils');
-var qRunner = utils.qRunner;
-var qExec = utils.qExec;
-var pResults = utils.pResults;
-var q = require('q');
+var assert = require('chai').assert;
+
 var constants = require('../lib/common/constants');
 
 var io_manager;
@@ -18,19 +14,17 @@ var io_interface;
 // Managers
 var driver_controller;
 var device_controller;
-var file_io_controller;
-var logger_controller;
 
 var device;
 
 var capturedEvents = [];
 
-exports.tests = {
-	'initialization': function(test) {
+describe('simple test', function() {
+	it('initialization', function (done) {
 		// Require the io_manager library
 		io_manager = require('../lib/io_manager');
 
-		// Require the io_interface that gives access to the ljm driver, 
+		// Require the io_interface that gives access to the ljm driver,
 		// device controller, logger, and file_io_controller objects.
 		io_interface = io_manager.io_interface();
 
@@ -57,13 +51,13 @@ exports.tests = {
 				// console.log('Device Closed event:', data);
 			});
 
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'error initializing io_interface' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'error initializing io_interface' + JSON.stringify(err));
+			done();
 		});
-	},
+	});
 	/**
 		At its core, the driver_controller doesn't do much, it simply calls
 		ljm functions from within a sub-process and returns the result.
@@ -71,19 +65,18 @@ exports.tests = {
 		never changes and not a complex function like listAll whose function
 		should be tested else where.
 	**/
-	'use_driver_controller': function(test) {
-
+	it('use_driver_controller', function (done) {
 		driver_controller.errToStr(1236)
 		.then(function(res) {
-			test.strictEqual(
+			assert.strictEqual(
 				res,
 				'Num: 1236, LJME_CANNOT_OPEN_DEVICE',
 				'invalid error string detected'
 			);
-			test.done();
+			done();
 		});
-	},
-	'open mock device': function(test) {
+	});
+	it('open mock device', function (done) {
 		var params = {
 			'deviceType': 'LJM_dtT7',
 			'connectionType': 'LJM_ctEthernet',
@@ -96,47 +89,47 @@ exports.tests = {
 			device = newDevice;
 			setTimeout(function() {
 				if(capturedEvents.length != 1) {
-					test.ok(false, 'unexpected number of events triggered.');
+					assert.isOk(false, 'unexpected number of events triggered.');
 				} else {
-					test.ok(true);
+					assert.isOk(true);
 				}
-				test.done();
+				done();
 			},50);
 		}, function(err) {
 			console.log("Error opening device", err);
-			test.ok(false, 'failed to create new device object');
-			test.done();
+			assert.isOk(false, 'failed to create new device object');
+			done();
 		});
-	},
-	'close mock device': function(test) {
+	});
+	it('close mock device', function (done) {
 		device.close()
 		.then(function(res) {
 			setTimeout(function() {
 				if(capturedEvents.length != 2) {
-					test.ok(false, 'unexpected number of events triggered.');
+					assert.isOk(false, 'unexpected number of events triggered.');
 				} else {
-					test.ok(true);
+					assert.isOk(true);
 				}
-				test.done();
+				done();
 			},50);
 		}, function(err) {
 			console.log('Failed to close', err);
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
-	},
-	'destruction': function(test) {
+	});
+	it('destruction', function (done) {
 		setImmediate(function() {
 			io_interface.destroy()
 			.then(function(res) {
 				// io_interface process has been shut down
-				test.ok(true);
-				test.done();
+				assert.isOk(true);
+				done();
 			}, function(err) {
-				test.ok(false, 'io_interface failed to shut down' + JSON.stringify(err));
-				test.done();
+				assert.isOk(false, 'io_interface failed to shut down' + JSON.stringify(err));
+				done();
 			});
 		});
-		
-	}
-};
+
+	});
+});

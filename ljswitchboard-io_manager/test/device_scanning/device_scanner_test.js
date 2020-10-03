@@ -1,15 +1,11 @@
-
 /**
 	This test aims to show how the io_manager library should be used.  It
 	shows the initialization, some basic usage steps, and destruction of the
 	library.
 **/
 
-var utils = require('../utils/utils');
-var qRunner = utils.qRunner;
-var qExec = utils.qExec;
-var pResults = utils.pResults;
-var q = require('q');
+var assert = require('chai').assert;
+
 var constants = require('../../lib/common/constants');
 
 var io_manager;
@@ -18,8 +14,6 @@ var io_interface;
 // Managers
 var driver_controller;
 var device_controller;
-var file_io_controller;
-var logger_controller;
 
 var device;
 
@@ -39,12 +33,14 @@ var getDeviceControllerEventListener = function(eventKey) {
 	return deviceControllerEventListener;
 };
 
-exports.tests = {
-	'initialization': function(test) {
+describe('device scanner', function() {
+	return;
+	this.skip();
+	it('initialization', function (done) {
 		// Require the io_manager library
 		io_manager = require('../../lib/io_manager');
 
-		// Require the io_interface that gives access to the ljm driver, 
+		// Require the io_interface that gives access to the ljm driver,
 		// device controller, logger, and file_io_controller objects.
 		io_interface = io_manager.io_interface();
 
@@ -67,14 +63,14 @@ exports.tests = {
 				);
 			});
 
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'error initializing io_interface' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'error initializing io_interface' + JSON.stringify(err));
+			done();
 		});
-	},
-	'open mock device': function(test) {
+	});
+	it('open mock device', function (done) {
 		var params = {
 			'deviceType': 'LJM_dtT7',
 			'connectionType': 'LJM_ctUSB',
@@ -87,39 +83,39 @@ exports.tests = {
 			device = newDevice;
 			setTimeout(function() {
 				if(capturedEvents.length != 1) {
-					test.ok(false, 'unexpected number of events triggered.');
+					assert.isOk(false, 'unexpected number of events triggered.');
 				} else {
-					test.ok(true);
+					assert.isOk(true);
 				}
-				test.done();
+				done();
 			},50);
 		}, function(err) {
 			console.log("Error opening device", err);
-			test.ok(false, 'failed to create new device object');
-			test.done();
+			assert.isOk(false, 'failed to create new device object');
+			done();
 		});
-	},
-	'get device listing': function(test) {
+	});
+	it('get device listing', function (done) {
 		device_controller.getDeviceListing()
 		.then(function(foundDevices) {
-			test.strictEqual(foundDevices.length, 1);
-			test.done();
+			assert.strictEqual(foundDevices.length, 1);
+			done();
 		});
-	},
-	'cached listAllDevices - empty': function(test) {
+	});
+	it('cached listAllDevices - empty', function (done) {
 		device_controller.getCachedListAllDevices()
 		.then(function(res) {
 			// This result should be an empty array because the listAllDevices
 			// function hasn't been called yet.
 			console.log('Result', res);
-			test.deepEqual(res, [], 'array should be empty');
+			assert.deepEqual(res, [], 'array should be empty');
 
-			test.done();
+			done();
 		});
-	},
-	'list all devices': function(test) {
+	});
+	it('list all devices', function (done) {
 		// Mocking out the listAllDevices function call sounds like a night mare
-		// Therefore, the solution to verifying its functionality will be to 
+		// Therefore, the solution to verifying its functionality will be to
 		// check for a properly formatted & discovered mock-device.
 		device_controller.listAllDevices()
 		.then(function(res) {
@@ -147,53 +143,52 @@ exports.tests = {
 					console.log('isActive', device.isActive);
 				});
 			});
-			test.done();
+			done();
 		});
-	},
-	'cached listAllDevices - populated': function(test) {
+	});
+	it('cached listAllDevices - populated', function (done) {
 		device_controller.getCachedListAllDevices()
 		.then(function(res) {
-			// This result should not be an empty array because the 
+			// This result should not be an empty array because the
 			// listAllDevices function has been called.
 			var len = res.length;
 			if(len > 0) {
-				test.ok(true);
+				assert.isOk(true);
 			} else {
-				test.ok(false, 'array should not be empty');
+				assert.isOk(false, 'array should not be empty');
 			}
-			test.done();
+			done();
 		});
-	},
-	'close mock device': function(test) {
+	});
+	it('close mock device', function (done) {
 		capturedEvents = [];
 		device.close()
 		.then(function(res) {
 			setTimeout(function() {
 				if(capturedEvents.length != 1) {
-					test.ok(false, 'unexpected number of events triggered.');
+					assert.isOk(false, 'unexpected number of events triggered.');
 				} else {
-					test.ok(true);
+					assert.isOk(true);
 				}
-				test.done();
+				done();
 			},50);
 		}, function(err) {
 			console.log('Failed to close', err);
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
-	},
-	'destruction': function(test) {
+	});
+	it('destruction', function (done) {
 		setImmediate(function() {
 			io_interface.destroy()
 			.then(function(res) {
 				// io_interface process has been shut down
-				test.ok(true);
-				test.done();
+				assert.isOk(true);
+				done();
 			}, function(err) {
-				test.ok(false, 'io_interface failed to shut down' + JSON.stringify(err));
-				test.done();
+				assert.isOk(false, 'io_interface failed to shut down' + JSON.stringify(err));
+				done();
 			});
 		});
-		
-	}
-};
+	});
+});

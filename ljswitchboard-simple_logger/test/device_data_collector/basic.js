@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 /*
 This file is the basic test for the device_data_collector object.
@@ -7,19 +7,12 @@ It tests for syntax errors (ability to properly require & use) as well as some
 basic functionality.
 
 */
-var path = require('path');
 var q = require('q');
-var async = require('async');
 
 var device_data_collector;
 var deviceDataCollectors = [];
 
 /* Code that is required to load a logger-configuration */
-var config_loader = require('../../lib/config_loader');
-var cwd = process.cwd();
-var logger_config_files_dir = path.join(cwd, 'test', 'logger_config_files');
-var basic_config = undefined;
-
 var mock_device_manager = require('../mock_device_manager');
 var mockDeviceManager = mock_device_manager.createDeviceManager();
 
@@ -75,24 +68,28 @@ var loggerTestGenerator = require('./loggerTestGenerator');
 var getTriggerLoggerTest = loggerTestGenerator.getTriggerLoggerTest;
 var triggerLoggerTest = getTriggerLoggerTest(numReads, daqInterval, dataToRead);
 
-
-
 /*
 Begin defining test cases.
 */
-exports.basic_tests = {
-	'Require device_data_collector': function(test) {
+describe('device_data_collector', function() {
+	it('Require device_data_collector', function (done) {
 		try {
 			device_data_collector = require('../../lib/device_data_collector');
-			test.ok(true);
+			assert.isOk(true);
 		} catch(err) {
-			test.ok(false, 'error loading device_data_collector');
+			assert.isOk(false, 'error loading device_data_collector');
 		}
-		test.done();
-	},
-	'Open Devices': mockDeviceManager.openDevices,
-	'Verify Device Info': mockDeviceManager.getDevicesInfo,
-	'create deviceDataCollector objects': function(test) {
+		done();
+	});
+	it('Open Devices', function (done) {
+		mockDeviceManager.openDevices();
+		done();
+	});
+	it('Verify Device Info', function (done) {
+		mockDeviceManager.getDevicesInfo();
+		done();
+	});
+	it('create deviceDataCollector objects', function (done) {
 		var devices = mockDeviceManager.getDevices();
 
 		deviceDataCollectors = required_data_collectors.map(function() {
@@ -101,9 +98,9 @@ exports.basic_tests = {
 
 		// Save data collectors to the test generator.
 		loggerTestGenerator.setDataCollectors(deviceDataCollectors);
-		test.done();
-	},
-	'update device listings': function(test) {
+		done();
+	});
+	it('update device listings', function (done) {
 		var promises = deviceDataCollectors.map(function(deviceDataCollector) {
 			var keys = Object.keys(deviceDataCollector);
 			// Update each deviceDataCollector with the available devices
@@ -114,10 +111,10 @@ exports.basic_tests = {
 
 		q.allSettled(promises)
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'link deviceDataCollectors to devices': function(test) {
+	});
+	it('link deviceDataCollectors to devices', function (done) {
 		var promises = deviceDataCollectors.map(function(deviceDataCollector, i) {
 			// Configure the deviceDataCollector with the desired serial number.
 			return deviceDataCollector.linkToDevice(
@@ -130,31 +127,34 @@ exports.basic_tests = {
 			deviceDataCollectors.forEach(function(deviceDataCollector, i) {
 				var expectedIsFound = required_data_collectors[i].isFound;
 				var isFound = deviceDataCollector.isValidDevice;
-				
-				test.equal(
+
+				assert.equal(
 					isFound,
 					expectedIsFound,
 					'Device is not properly found'
 				);
 			});
-			test.done();
+			done();
 		});
-	},
-	'attach data collectors': function(test) {
+	});
+	it('attach data collectors', function (done) {
 		deviceDataCollectors.forEach(function(deviceDataCollector, i) {
 			// Attach to the new data event of each of the deviceDataCollectors.
 			var newDataEvent = device_data_collector.EVENT_LIST.DATA;
 			deviceDataCollector.on(newDataEvent, dataCollector);
 		});
-		test.done();
-	},
-	'trigger read for dummy data': triggerLoggerTest,
-	'time delay...': function(test) {
+		done();
+	});
+	it('trigger read for dummy data', function (done) {
+		triggerLoggerTest();
+		done();
+	});
+	it('time delay...', function (done) {
 		setTimeout(function() {
-			test.done();
+			done();
 		}, 100);
-	},
-	'test results': function(test) {
+	});
+	it('test results', function (done) {
 		var expectedResults = {};
 
 		var keys = Object.keys(required_data_collectors);
@@ -163,7 +163,7 @@ exports.basic_tests = {
 
 			var sn = requiredDataCollector.serialNumber;
 			expectedResults[sn] = [];
-			
+
 			var isFound = requiredDataCollector.isFound;
 			var reqErrorCode = 0;
 			if(!isFound) {
@@ -191,13 +191,13 @@ exports.basic_tests = {
 					var expData = expectedData[i];
 
 					// Check error codes
-					test.equals(resData.errorCode, expData.errorCode, 'Error Code does not match');
+					assert.equals(resData.errorCode, expData.errorCode, 'Error Code does not match');
 
 					// Check registers read
-					test.deepEqual(resData.registers, expData.registers, 'Registers list does not match');
+					assert.deepEqual(resData.registers, expData.registers, 'Registers list does not match');
 				}
 			} else {
-				test.ok(false, 'result data lengths dont align');
+				assert.isOk(false, 'result data lengths dont align');
 			}
 		});
 		// console.log('Results...');
@@ -208,7 +208,10 @@ exports.basic_tests = {
 		// console.log(JSON.stringify(collectedData['1'], null, 2));
 		// console.log('Expected Results');
 		// console.log(JSON.stringify(expectedResults['1'], null, 2));
-		test.done();
-	},
-	'Close Devices':mockDeviceManager.closeDevices,
-};
+		done();
+	});
+	it('Close Devices', function (done) {
+		mockDeviceManager.closeDevices();
+		done();
+	});
+});

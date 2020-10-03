@@ -1,6 +1,6 @@
 /**
- * This file contains unit tests for testing functions in the 
- * LabJackDriver/device.js file.  Using "rewire" it replaces the 
+ * This file contains unit tests for testing functions in the
+ * LabJackDriver/device.js file.  Using "rewire" it replaces the
  * driver_wrapper.js library with a virtual device for testing purposes.
  *
  * @author Chris Johnson (chrisjohn404)
@@ -8,7 +8,7 @@
  * Module Dependencies:
  * rewire, can be installed using "npm install rewire"
  * device, should be located relatively "../labJackDriver/device.js"
- * test_driver_wrapper, should be located relatively 
+ * test_driver_wrapper, should be located relatively
  * 		"./TestObjects/test_driver_wrapper"
  */
 
@@ -101,7 +101,7 @@ module.exports = {
 	 * 		3. The device information saved.
 	 * 		4. Function should succede at opening a device.
 	 * 		5. Close a Device
-	 * 
+	 *
 	 * @param  {[type]} test
 	 * @return {[type]}
 	 */
@@ -120,29 +120,29 @@ module.exports = {
 			test.notEqual(device.handle, 0);
 
 			//Make sure that LJM_OpenSAsync was called
-			test.equal(fakeDriver.getLastFunctionCall().length,1);
-			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
+			assert.equal(fakeDriver.getLastFunctionCall().length,1);
+			assert.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
 
 			//Make sure that dtAny, ctAny, and idAny were used as variables
-			test.equal(device.deviceType,driver_const.LJM_DT_ANY);
-			test.equal(device.connectionType,driver_const.LJM_CT_ANY);
-			test.equal(device.identifier,"LJM_idANY");
-			
+			assert.equal(device.deviceType,driver_const.LJM_DT_ANY);
+			assert.equal(device.connectionType,driver_const.LJM_CT_ANY);
+			assert.equal(device.identifier,"LJM_idANY");
+
 			//Close the Device
 			device.close(
 				function(res) {
 					console.log("Closing Error");
 				},
 				function(res) {
-					test.strictEqual(device.handle, null);
-					test.strictEqual(device.deviceType,null);
-					test.strictEqual(device.connectionType,null);
-					test.strictEqual(device.identifier,null);
-					test.equal(
+					assert.strictEqual(device.handle, null);
+					assert.strictEqual(device.deviceType,null);
+					assert.strictEqual(device.connectionType,null);
+					assert.strictEqual(device.identifier,null);
+					assert.equal(
 						fakeDriver.getLastFunctionCall()[1],
 						"LJM_CloseAsync"
 					);
-					test.done();
+					done();
 				});
 		});
 	},
@@ -161,36 +161,36 @@ module.exports = {
 			test.notEqual(device.handle, 0);
 
 			//Make sure that LJM_OpenSAsync was called
-			test.equal(fakeDriver.getLastFunctionCall().length,1);
-			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
+			assert.equal(fakeDriver.getLastFunctionCall().length,1);
+			assert.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
 
 			//Make sure that dtAny, ctAny, and idAny were used as variables
-			test.equal(device.deviceType,driver_const.LJM_DT_ANY);
-			test.equal(device.connectionType,driver_const.LJM_CT_ANY);
-			test.equal(device.identifier,"LJM_idANY");
-			
+			assert.equal(device.deviceType,driver_const.LJM_DT_ANY);
+			assert.equal(device.connectionType,driver_const.LJM_CT_ANY);
+			assert.equal(device.identifier,"LJM_idANY");
+
 			//Close the Device
 			device.close(
 				function(res) {
 					console.log("Closing Error");
 				},
 				function(res) {
-					test.strictEqual(device.handle, null);
-					test.strictEqual(device.deviceType,null);
-					test.strictEqual(device.connectionType,null);
-					test.strictEqual(device.identifier,null);
-					test.equal(
+					assert.strictEqual(device.handle, null);
+					assert.strictEqual(device.deviceType,null);
+					assert.strictEqual(device.connectionType,null);
+					assert.strictEqual(device.identifier,null);
+					assert.equal(
 						fakeDriver.getLastFunctionCall()[1],
 						"LJM_CloseAsync"
 					);
-					test.done();
+					done();
 				});
 		});
 	},
 	testOpenWeirdB: function(test) {
 		var device = new deviceManager.labjack(fakeLJM);
 		device.open(
-			driver_const.LJM_DT_ANY,	
+			driver_const.LJM_DT_ANY,
 			"LJM_ctANY",	//Will be converted to an integer
 			"LJM_idANY",
 		function(res) {
@@ -202,29 +202,29 @@ module.exports = {
 			test.notEqual(device.handle, 0);
 
 			//Make sure that LJM_OpenSAsync was called
-			test.equal(fakeDriver.getLastFunctionCall().length,1);
-			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
+			assert.equal(fakeDriver.getLastFunctionCall().length,1);
+			assert.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
 
 			//Make sure that dtAny, ctAny, and idAny were used as variables
-			test.equal(device.deviceType,driver_const.LJM_DT_ANY);
-			test.equal(device.connectionType,driver_const.LJM_CT_ANY);
-			test.equal(device.identifier,"LJM_idANY");
-			
+			assert.equal(device.deviceType,driver_const.LJM_DT_ANY);
+			assert.equal(device.connectionType,driver_const.LJM_CT_ANY);
+			assert.equal(device.identifier,"LJM_idANY");
+
 			//Close the Device
 			device.close(
 				function(res) {
 					console.log("Closing Error");
 				},
 				function(res) {
-					test.strictEqual(device.handle, null);
-					test.strictEqual(device.deviceType,null);
-					test.strictEqual(device.connectionType,null);
-					test.strictEqual(device.identifier,null);
-					test.equal(
+					assert.strictEqual(device.handle, null);
+					assert.strictEqual(device.deviceType,null);
+					assert.strictEqual(device.connectionType,null);
+					assert.strictEqual(device.identifier,null);
+					assert.equal(
 						fakeDriver.getLastFunctionCall()[1],
 						"LJM_CloseAsync"
 					);
-					test.done();
+					done();
 				});
 		});
 	},
@@ -245,29 +245,29 @@ module.exports = {
 			test.notEqual(device.handle, 0);
 
 			//Make sure that LJM_OpenSAsync was called
-			test.equal(fakeDriver.getLastFunctionCall().length,1);
-			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
+			assert.equal(fakeDriver.getLastFunctionCall().length,1);
+			assert.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
 
 			//Make sure that dtAny, ctAny, and idAny were used as variables
-			test.equal(device.deviceType,driver_const.LJM_DT_ANY);
-			test.equal(device.connectionType,driver_const.LJM_CT_ANY);
-			test.equal(device.identifier,"LJM_idANY");
-			
+			assert.equal(device.deviceType,driver_const.LJM_DT_ANY);
+			assert.equal(device.connectionType,driver_const.LJM_CT_ANY);
+			assert.equal(device.identifier,"LJM_idANY");
+
 			//Close the Device
 			device.close(
 				function(res) {
 					console.log("Closing Error");
 				},
 				function(res) {
-					test.strictEqual(device.handle, null);
-					test.strictEqual(device.deviceType,null);
-					test.strictEqual(device.connectionType,null);
-					test.strictEqual(device.identifier,null);
-					test.equal(
+					assert.strictEqual(device.handle, null);
+					assert.strictEqual(device.deviceType,null);
+					assert.strictEqual(device.connectionType,null);
+					assert.strictEqual(device.identifier,null);
+					assert.equal(
 						fakeDriver.getLastFunctionCall()[1],
 						"LJM_CloseAsync"
 					);
-					test.done();
+					done();
 				});
 		});
 	},
@@ -275,7 +275,7 @@ module.exports = {
 		var device = new deviceManager.labjack(fakeLJM);
 		var param = "0";
 		device.open(
-			driver_const.LJM_DT_ANY,	
+			driver_const.LJM_DT_ANY,
 			param,	//Will be converted to an integer
 			"LJM_idANY",
 		function(res) {
@@ -287,40 +287,40 @@ module.exports = {
 			test.notEqual(device.handle, 0);
 
 			//Make sure that LJM_OpenSAsync was called
-			test.equal(fakeDriver.getLastFunctionCall().length,1);
-			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
+			assert.equal(fakeDriver.getLastFunctionCall().length,1);
+			assert.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenAsync");
 
 			//Make sure that dtAny, ctAny, and idAny were used as variables
-			test.equal(device.deviceType,driver_const.LJM_DT_ANY);
-			test.equal(device.connectionType,driver_const.LJM_CT_ANY);
-			test.equal(device.identifier,"LJM_idANY");
-			
+			assert.equal(device.deviceType,driver_const.LJM_DT_ANY);
+			assert.equal(device.connectionType,driver_const.LJM_CT_ANY);
+			assert.equal(device.identifier,"LJM_idANY");
+
 			//Close the Device
 			device.close(
 				function(res) {
 					console.log("Closing Error");
 				},
 				function(res) {
-					test.strictEqual(device.handle, null);
-					test.strictEqual(device.deviceType,null);
-					test.strictEqual(device.connectionType,null);
-					test.strictEqual(device.identifier,null);
-					test.equal(
+					assert.strictEqual(device.handle, null);
+					assert.strictEqual(device.deviceType,null);
+					assert.strictEqual(device.connectionType,null);
+					assert.strictEqual(device.identifier,null);
+					assert.equal(
 						fakeDriver.getLastFunctionCall()[1],
 						"LJM_CloseAsync"
 					);
-					test.done();
+					done();
 				});
 		});
 	},
 
 	/**
-	 * Tests the string-open feature of the device class. 
+	 * Tests the string-open feature of the device class.
 	 * 		1. The LJM function "OpenS" should be called.
 	 * 		2. A handle acquired.
 	 * 		3. The device information saved.
 	 * 		4. Function should succede at opening a device.
-	 * 
+	 *
 	 * @param  {[type]} test
 	 * @return {[type]}
 	 */
@@ -336,37 +336,37 @@ module.exports = {
 			test.notEqual(device.handle, 0);
 
 			//Make sure that LJM_OpenSAsync was called
-			test.equal(fakeDriver.getLastFunctionCall().length,1);
-			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenSAsync");
+			assert.equal(fakeDriver.getLastFunctionCall().length,1);
+			assert.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenSAsync");
 
 			//Make sure that dtAny, ctAny, and idAny were used as variables
-			test.equal(device.deviceType,"LJM_dtT7");
-			test.equal(device.connectionType,"LJM_ctUSB");
-			test.equal(device.identifier,"LJM_idANY");
-			
+			assert.equal(device.deviceType,"LJM_dtT7");
+			assert.equal(device.connectionType,"LJM_ctUSB");
+			assert.equal(device.identifier,"LJM_idANY");
+
 			//Close the Device
 			device.close(
 				function(res) {
 					console.log("Closing Error");
 				},
 				function(res) {
-					test.strictEqual(device.handle, null);
-					test.strictEqual(device.deviceType,null);
-					test.strictEqual(device.connectionType,null);
-					test.strictEqual(device.identifier,null);
-					test.equal(
+					assert.strictEqual(device.handle, null);
+					assert.strictEqual(device.deviceType,null);
+					assert.strictEqual(device.connectionType,null);
+					assert.strictEqual(device.identifier,null);
+					assert.equal(
 						fakeDriver.getLastFunctionCall()[1],
 						"LJM_CloseAsync"
 						);
-					test.done();
+					done();
 				});
 		});
 	},
 	/**
 	 * Tests the open feature when no information is passed to the driver. A
-	 * device should be opened using the Open LJM function with commands: 
-	 * 		1. DeviceType any 
-	 * 		2. ConnectionTypeπ any 
+	 * device should be opened using the Open LJM function with commands:
+	 * 		1. DeviceType any
+	 * 		2. ConnectionTypeπ any
 	 * 		3. Identifier any
 	 * @param  {[type]} test
 	 * @return {[type]}
@@ -383,38 +383,38 @@ module.exports = {
 			test.notEqual(device.handle, 0);
 
 			//Make sure that LJM_OpenSAsync was called
-			test.equal(fakeDriver.getLastFunctionCall().length,1);
-			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenSAsync");
+			assert.equal(fakeDriver.getLastFunctionCall().length,1);
+			assert.equal(fakeDriver.getLastFunctionCall()[0],"LJM_OpenSAsync");
 
 			//Make sure that dtAny, ctAny, and idAny were used as variables
-			test.equal(device.deviceType,"LJM_dtANY");
-			test.equal(device.connectionType,"LJM_ctANY");
-			test.equal(device.identifier,"LJM_idANY");
-			
+			assert.equal(device.deviceType,"LJM_dtANY");
+			assert.equal(device.connectionType,"LJM_ctANY");
+			assert.equal(device.identifier,"LJM_idANY");
+
 			//Close the Device
 			device.close(
 				function(res) {
 					console.log("Closing Error");
 				},
 				function(res) {
-					test.strictEqual(device.handle, null);
-					test.strictEqual(device.deviceType,null);
-					test.strictEqual(device.connectionType,null);
-					test.strictEqual(device.identifier,null);
-					test.equal(
+					assert.strictEqual(device.handle, null);
+					assert.strictEqual(device.deviceType,null);
+					assert.strictEqual(device.connectionType,null);
+					assert.strictEqual(device.identifier,null);
+					assert.equal(
 						fakeDriver.getLastFunctionCall()[1],
 						"LJM_CloseAsync"
 					);
-					test.done();
+					done();
 				});
 		});
 	},
 	/**
-	 * Tests the error-reporting features of the open command in Async-mode.  
+	 * Tests the error-reporting features of the open command in Async-mode.
 	 * 		1. An error should be reported via the onError function.
 	 * 		2. No device information should be saved.
 	 * 		3. There should be no device handle saved.
-	 * 
+	 *
 	 * @param  {[type]} test
 	 */
 	testOpenNoDeviceFail: function(test) {
@@ -425,17 +425,17 @@ module.exports = {
 		var device = new deviceManager.labjack(fakeLJM);
 		device.open("LJM_dtANY","LJM_ctANY","LJM_idANY",
 		function(res) {
-			test.equal(res,erCode);
-			test.strictEqual(device.handle, null);
-			test.strictEqual(device.deviceType,null);
-			test.strictEqual(device.connectionType,null);
-			test.strictEqual(device.identifier,null);
+			assert.equal(res,erCode);
+			assert.strictEqual(device.handle, null);
+			assert.strictEqual(device.deviceType,null);
+			assert.strictEqual(device.connectionType,null);
+			assert.strictEqual(device.identifier,null);
 			//Try closing a device even though one has never been opened
 			device.close(
 				function(res) {
-					test.equal(res,"Device Never Opened");
+					assert.equal(res,"Device Never Opened");
 					autoOpen = true; //Request that the test enviro. auto-open
-					test.done();
+					done();
 				},
 				function(res) {
 					console.log("CloseSuccess, ERROR!! NOT SUPPOSED TO HAPPEN");
@@ -458,14 +458,14 @@ module.exports = {
 		},
 		function(res) {
 			//Test the return values
-			test.equal(res.deviceType,driver_const.LJM_DT_T7);
-			test.equal(res.connectionType,driver_const.LJM_CT_USB);
-			test.equal(res.serialNumber,12345678);
-			test.equal(res.ipAddress,"1.2.3.4");
-			test.equal(res.port,2468);
-			test.equal(res.maxBytesPerMB,testVal);
-			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_GetHandleInfoAsync");
-			test.done();
+			assert.equal(res.deviceType,driver_const.LJM_DT_T7);
+			assert.equal(res.connectionType,driver_const.LJM_CT_USB);
+			assert.equal(res.serialNumber,12345678);
+			assert.equal(res.ipAddress,"1.2.3.4");
+			assert.equal(res.port,2468);
+			assert.equal(res.maxBytesPerMB,testVal);
+			assert.equal(fakeDriver.getLastFunctionCall()[0],"LJM_GetHandleInfoAsync");
+			done();
 		});
 	},
 
@@ -486,10 +486,10 @@ module.exports = {
 			//Success
 			var i;
 			for(i = 0; i < res.length; i++) {
-				test.equal(testBuf.readUInt8(i),res.readUInt8(i));
+				assert.equal(testBuf.readUInt8(i),res.readUInt8(i));
 			}
-			test.equal(fakeDriver.getLastFunctionCall()[0],"LJM_ReadRawAsync");
-			test.done();
+			assert.equal(fakeDriver.getLastFunctionCall()[0],"LJM_ReadRawAsync");
+			done();
 		});
 	},
 
@@ -508,7 +508,7 @@ module.exports = {
 			'read(60500)',
 			'read("DEVICE_NAME_DEFAULT")'
 		];
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_eReadAddress',
 			'LJM_eReadAddress',
 			'LJM_eReadAddressString',
@@ -516,7 +516,7 @@ module.exports = {
 			'LJM_eReadAddressAsync',
 			'LJM_eReadAddressAsync',
 			'LJM_eReadAddressStringAsync',
-			'LJM_eReadAddressStringAsync' 
+			'LJM_eReadAddressStringAsync'
 		];
 		var expectedResultList = [
 			testVal,
@@ -533,29 +533,29 @@ module.exports = {
 			function(res) {
 				//Error, should never be called.... isn't ever used... woops....
 			}, function(res) {
-				//Success				
+				//Success
 				var funcs = fakeDriver.getLastFunctionCall();
 				var results = asyncRun.getResults();
 				var args = fakeDriver.getArgumentsList();
 				var i;
 				for(i = 0; i < testList.length*2; i++) {
-					test.equal(funcs[i], expectedFunctionList[i]);
-					test.equal(results[i], expectedResultList[i]);
+					assert.equal(funcs[i], expectedFunctionList[i]);
+					assert.equal(results[i], expectedResultList[i]);
 				}
 				//Test to make sure the address-to-type conversion worked (sync)
-				test.equal(args[1][2],driver_const.LJM_FLOAT32);
+				assert.equal(args[1][2],driver_const.LJM_FLOAT32);
 
 				//Test to make sure the address-to-type conversion worked(async)
-				test.equal(args[5][2],driver_const.LJM_FLOAT32);
+				assert.equal(args[5][2],driver_const.LJM_FLOAT32);
 
 
-				test.done();
-			});		
+				done();
+			});
 	},
 
 	/**
 	 * This test tests the LJM_eReadName, LJM_eReadAddress, LJM_eReadNameString,
-	 * and LJM_eReadAddressString asynchronous function calls of LJM. 
+	 * and LJM_eReadAddressString asynchronous function calls of LJM.
 	 * & makes sure that they properly return error codes.
 	 * @param  {[type]} test The test object.
 	 */
@@ -578,7 +578,7 @@ module.exports = {
 			'read(0)',
 			'read("AIN0")',
 		];
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_eReadAddress',
 			'LJM_eReadName',
 			'LJM_eReadAddressAsync',
@@ -603,7 +603,7 @@ module.exports = {
 			function(res) {
 				//Error, should never be called.... isn't ever used... woops....
 			}, function(res) {
-				//Success				
+				//Success
 				var funcs = fakeDriver.getLastFunctionCall();
 				var results = asyncRun.getResults();
 				var args = fakeDriver.getArgumentsList();
@@ -615,20 +615,20 @@ module.exports = {
 				// console.log("Results",results);
 				//Test to make sure that the proper number of commands have been
 				//executed & results returned:
-				test.equal(funcs.length, expectedFunctionList.length);
-				test.equal(results.length, expectedResultList.length);
+				assert.equal(funcs.length, expectedFunctionList.length);
+				assert.equal(results.length, expectedResultList.length);
 
 				//Make sure that the proper LJM functions were called
 				for(i = 0; i < testList.length*2; i++) {
-					test.equal(results[i], expectedResultList[i]);
+					assert.equal(results[i], expectedResultList[i]);
 				}
 
-				test.done();
-			});		
+				done();
+			});
 	},
 
 	/**
-	 * This test tests the LJM_eReadNames, and LJM_eReadAddresses asynchronous 
+	 * This test tests the LJM_eReadNames, and LJM_eReadAddresses asynchronous
 	 * function calls of LJM.
 	 * @param  {[type]} test The test object.
 	 */
@@ -643,7 +643,7 @@ module.exports = {
 			'readMany(["AIN0","AIN1"])',
 		];
 		//Expected info combines both sync & async
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_eReadAddresses',
 			'LJM_eReadNames',
 			'LJM_eReadAddressesAsync',
@@ -670,63 +670,63 @@ module.exports = {
 
 				console.log("Functions Called",funcs);
 				console.log("Results",results);
-				
+
 				//Figure out how many function calls should have been made:
 				var numDriverCalls = testList.length * 2;
 
 				//Test to make sure that the proper number of commands have been
 				//executed & results returned:
-				test.equal(funcs.length, expectedFunctionList.length);
-				test.equal(results.length, expectedResultList.length);
+				assert.equal(funcs.length, expectedFunctionList.length);
+				assert.equal(results.length, expectedResultList.length);
 
 				//Test to make sure that the expected driver calls is actually
 				//what happened:
 				for(i = 0; i < numDriverCalls; i++) {
-					test.equal(funcs[i],expectedFunctionList[i]);
+					assert.equal(funcs[i],expectedFunctionList[i]);
 				}
 
-				//Test to make sure that the proper results came back for each 
+				//Test to make sure that the proper results came back for each
 				//call starting with sync then async
 				for(i = 0; i < numDriverCalls; i++) {
 					for(j = 0; j < resArray.length; j++) {
-						test.equal(results[i][j],expectedResultList[i][j]);
+						assert.equal(results[i][j],expectedResultList[i][j]);
 					}
 				}
 
-				//Test to make sure that each function got passed the proper 
+				//Test to make sure that each function got passed the proper
 				//arguments
 				// console.log(funcs)
 				// console.log('argList length:',argList.length);
 				// console.log('argList:',argList);
 				for(i = 0; i < numDriverCalls; i++) {
 					if(expectedFunctionList[i] == 'LJM_eReadAddressesAsync') {
-						test.equal(argList[i+offsetSync][1], numArgs);
-						test.equal(argList[i+offsetSync][2].length, numArgs*4);
-						test.equal(argList[i+offsetSync][3].length, numArgs*4);
-						test.equal(argList[i+offsetSync][4].length, numArgs*8);
-						test.equal(argList[i+offsetSync][5].length, 4);
+						assert.equal(argList[i+offsetSync][1], numArgs);
+						assert.equal(argList[i+offsetSync][2].length, numArgs*4);
+						assert.equal(argList[i+offsetSync][3].length, numArgs*4);
+						assert.equal(argList[i+offsetSync][4].length, numArgs*8);
+						assert.equal(argList[i+offsetSync][5].length, 4);
 					} else if(expectedFunctionList[i] == 'LJM_eReadNamesAsync'){
-						test.equal(argList[i+offsetSync][1], numArgs);
-						test.equal(argList[i+offsetSync][3].length, numArgs*8);
-						test.equal(argList[i+offsetSync][4].length, 4);
+						assert.equal(argList[i+offsetSync][1], numArgs);
+						assert.equal(argList[i+offsetSync][3].length, numArgs*8);
+						assert.equal(argList[i+offsetSync][4].length, 4);
 					} else if(expectedFunctionList[i] == 'LJM_eReadAddresses') {
-						test.equal(argList[i+offsetSync][1], numArgs);
-						test.equal(argList[i+offsetSync][2].length, numArgs*4);
-						test.equal(argList[i+offsetSync][3].length, numArgs*4);
-						test.equal(argList[i+offsetSync][4].length, numArgs*8);
-						test.equal(argList[i+offsetSync][5].length, 4);
+						assert.equal(argList[i+offsetSync][1], numArgs);
+						assert.equal(argList[i+offsetSync][2].length, numArgs*4);
+						assert.equal(argList[i+offsetSync][3].length, numArgs*4);
+						assert.equal(argList[i+offsetSync][4].length, numArgs*8);
+						assert.equal(argList[i+offsetSync][5].length, 4);
 					} else if (expectedFunctionList[i] == 'LJM_eReadNames'){
-						test.equal(argList[i+offsetSync][1], numArgs);
-						test.equal(argList[i+offsetSync][3].length, numArgs*8);
-						test.equal(argList[i+offsetSync][4].length, 4);
+						assert.equal(argList[i+offsetSync][1], numArgs);
+						assert.equal(argList[i+offsetSync][3].length, numArgs*8);
+						assert.equal(argList[i+offsetSync][4].length, 4);
 					} else {
 					}
 				}
-				test.done();
-			});	
+				done();
+			});
 	},
 	/**
-	 * This test tests the LJM_eReadNames, and LJM_eReadAddresses asynchronous 
+	 * This test tests the LJM_eReadNames, and LJM_eReadAddresses asynchronous
 	 * function calls of LJM and their methidologies for reporting errors.
 	 * @param  {[type]} test The test object.
 	 */
@@ -738,7 +738,7 @@ module.exports = {
 		//Force the driver to produce an error code
 		var erCode = 1;
 		fakeDriver.setExpectedResult(erCode);
-		
+
 		//Configure running-engines
 		asyncRun.config(dev, null);
 		syncRun.config(dev, null);
@@ -753,7 +753,7 @@ module.exports = {
 			'readMany(["AIN0","AIN1"])',
 		];
 		//Expected info combines both sync & async
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_eReadNames',
 			'LJM_eReadNames',
 			'LJM_eReadAddresses',
@@ -800,29 +800,29 @@ module.exports = {
 
 				//Test to make sure that the proper number of commands have been
 				//executed & results returned:
-				test.equal(results.length, expectedResultList.length);
+				assert.equal(results.length, expectedResultList.length);
 
 				//Test to make sure that the expected driver calls is actually
 				//what happened:
-				
-				test.deepEqual(expectedFunctionList,funcs);
+
+				assert.deepEqual(expectedFunctionList,funcs);
 
 				//Make sure that the errors are being returned properly & stored
 				//in the results array
 				for(i = 0; i < numDriverCalls; i++) {
-					test.equal(results[i] instanceof Object,true);
-					test.equal(
+					assert.equal(results[i] instanceof Object,true);
+					assert.equal(
 						results[i].retError,
 						expectedResultList[i].retError
 					);
-					test.equal(
+					assert.equal(
 						results[i].errFrame,
 						expectedResultList[i].errFrame
 					);
-				}				
+				}
 
-				test.done();
-			});	
+				done();
+			});
 	},
 
 	/**
@@ -832,7 +832,7 @@ module.exports = {
 	testWriteRaw: function(test) {
 		var resArray = [9,8,7,6,5,4,3,2,1];
 		fakeDriver.setResultArg(resArray);
-		
+
 		//Configure running-engines
 		asyncRun.config(dev, null);
 		syncRun.config(dev, null);
@@ -842,7 +842,7 @@ module.exports = {
 			'writeRaw([1,2,3,4,5,6,7,8,9])',
 		];
 		//Expected info combines both sync & async
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_WriteRaw',
 			'LJM_WriteRawAsync',
 		];
@@ -863,32 +863,32 @@ module.exports = {
 				var results = asyncRun.getResults();
 				var argList = fakeDriver.getArgumentsList();
 				var i,j;
-				var offsetSync = 1;		
+				var offsetSync = 1;
 
 				// console.log("Function Calls", funcs);
 				// console.log("Results",results);
 				// console.log("Arguments",argList);
 
 				//Make sure we called the proper test-driver functions
-				test.deepEqual(expectedFunctionList,funcs);
+				assert.deepEqual(expectedFunctionList,funcs);
 
 				//Make sure the results array's are what we expected
 				for(i = 0; i < expectedResultList.length; i++) {
 					for(j = 0; j < expectedResultList[i].length; j++) {
-						test.equal(expectedResultList[i][j],results[i][j]);
+						assert.equal(expectedResultList[i][j],results[i][j]);
 					}
 				}
-				test.done();
-			});	
+				done();
+			});
 	},
 
 	/**
-	 * This test tests the LJM_eWriteName, LJM_eWriteAddress, 
-	 * LJM_eWriteNameString, and LJM_eWriteAddressString asynchronous function 
+	 * This test tests the LJM_eWriteName, LJM_eWriteAddress,
+	 * LJM_eWriteNameString, and LJM_eWriteAddressString asynchronous function
 	 * calls of LJM.
 	 * @param  {[type]} test The test object.
 	 */
-	testWrite: function(test) {		
+	testWrite: function(test) {
 		//Configure running-engines
 		asyncRun.config(dev, null);
 		syncRun.config(dev, null);
@@ -901,7 +901,7 @@ module.exports = {
 			'write("DEVICE_NAME_DEFAULT","Mine")'
 		];
 		//Expected info combines both sync & async
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_eWriteAddress',
 			'LJM_eWriteName',
 			'LJM_eWriteAddressString',
@@ -929,33 +929,33 @@ module.exports = {
 				var results = asyncRun.getResults();
 				var argList = fakeDriver.getArgumentsList();
 				var i,j;
-				var offsetSync = 1;		
+				var offsetSync = 1;
 
 				// console.log("Function Calls", funcs);
 				// console.log("Results",results);
 				//console.log("Arguments",argList);
 
 				//Make sure we called the proper test-driver functions
-				test.deepEqual(expectedFunctionList,funcs);
+				assert.deepEqual(expectedFunctionList,funcs);
 
 				//Make sure we get the proper results back
-				test.deepEqual(expectedResultList,results);
-				
-				test.done();
-			});	
+				assert.deepEqual(expectedResultList,results);
+
+				done();
+			});
 	},
 
 	/**
-	 * This test tests the device's capability to fail gracefully on write 
+	 * This test tests the device's capability to fail gracefully on write
 	 * function calls.
-	 * 
+	 *
 	 * @param  {[type]} test The test object.
 	 */
 	testWriteFail: function(test) {
 		//Force the driver to produce an error code
 		var erCode = 1;
 		fakeDriver.setExpectedResult(erCode);
-		
+
 		//Configure running-engines
 		asyncRun.config(dev, null);
 		syncRun.config(dev, null);
@@ -972,7 +972,7 @@ module.exports = {
 			'write("DEVICE_NAME_DEFAULT","Mine")',//again...
 		];
 		//Expected info combines both sync & async
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_eWriteAddress',
 			'LJM_eWriteName',
 			'LJM_eWriteAddressString',
@@ -1014,20 +1014,20 @@ module.exports = {
 				var results = asyncRun.getResults();
 				var argList = fakeDriver.getArgumentsList();
 				var i,j;
-				var offsetSync = 1;		
+				var offsetSync = 1;
 
 				// console.log("Function Calls", funcs);
 				// console.log("Results",results);
 				//console.log("Arguments",argList);
 
 				//Make sure we called the proper test-driver functions
-				test.deepEqual(expectedFunctionList,funcs);
+				assert.deepEqual(expectedFunctionList,funcs);
 
 				//Make sure we get the proper results back
-				test.deepEqual(expectedResultList,results);
-				
-				test.done();
-			});	
+				assert.deepEqual(expectedResultList,results);
+
+				done();
+			});
 	},
 
 
@@ -1054,7 +1054,7 @@ module.exports = {
 		];
 
 		//Expected info combines both sync & async
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_eWriteAddresses',
 			'LJM_eWriteNames',
 			'LJM_eWriteAddressesAsync',
@@ -1077,17 +1077,17 @@ module.exports = {
 				var results = asyncRun.getResults();
 				var argList = fakeDriver.getArgumentsList();
 				var i,j;
-				var offsetSync = 1;		
+				var offsetSync = 1;
 
 				// console.log("Function Calls", funcs);
 				// console.log("Results",results);
 				// console.log("Arguments",argList);
-				
+
 				//Test to make sure the proper functions were called
-				test.deepEqual(expectedFunctionList,funcs);
+				assert.deepEqual(expectedFunctionList,funcs);
 
 				//test to make sure the proper results were acquired
-				test.deepEqual(expectedResultList,results);
+				assert.deepEqual(expectedResultList,results);
 
 				var paramsDict = {
 					'handle': [null, null, null, null],
@@ -1106,9 +1106,9 @@ module.exports = {
 				);
 
 				checker(test, funcs, argList.slice(1,argList.length));
-				
-				test.done();
-			});	
+
+				done();
+			});
 	},
 
 	testWriteManyFail: function(test) {
@@ -1130,7 +1130,7 @@ module.exports = {
 		];
 
 		//Expected info combines both sync & async
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_eWriteNames',
 			'LJM_eWriteNames',
 			'LJM_eWriteNamesAsync',
@@ -1159,24 +1159,24 @@ module.exports = {
 				var results = asyncRun.getResults();
 				var argList = fakeDriver.getArgumentsList();
 				var i,j;
-				var offsetSync = 1;		
+				var offsetSync = 1;
 
 				// console.log("Function Calls", funcs);
 				// console.log("Results",results);
 				// console.log("Arguments",argList);
-				
+
 				//Test to make sure the proper functions were called
-				test.deepEqual(expectedFunctionList,funcs);
+				assert.deepEqual(expectedFunctionList,funcs);
 
 				//test to make sure the proper results were acquired
-				test.deepEqual(expectedResultList,results);
+				assert.deepEqual(expectedResultList,results);
 
-				test.done();
-			});	
+				done();
+			});
 	},
 
 	/**
-	 * This test tests the LJM_eAddresses, and LJM_eNames asynchronous function 
+	 * This test tests the LJM_eAddresses, and LJM_eNames asynchronous function
 	 * calls of LJM.
 	 * @param  {[type]} test [description]
 	 */
@@ -1205,7 +1205,7 @@ module.exports = {
 		];
 
 		//Expected info combines both sync & async
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 		//Synchronous Results:
 			'LJM_eAddresses',													// #1
 			'LJM_eNames',														// #2
@@ -1217,7 +1217,7 @@ module.exports = {
 			'LJM_eNames',														// #8
 			'LJM_eAddresses',													// #9
 			'LJM_eNames',														// #10
-			
+
 		//Asynchronous Results:
 			'LJM_eAddressesAsync',												// #1
 			'LJM_eNamesAsync',													// #2
@@ -1272,7 +1272,7 @@ module.exports = {
 				var results = asyncRun.getResults();
 				var argList = fakeDriver.getArgumentsList();
 				var i,j;
-				var offsetSync = 1;		
+				var offsetSync = 1;
 
 				// console.log("Function Calls", funcs);
 				// console.log("Results",results);
@@ -1283,40 +1283,40 @@ module.exports = {
 				// console.log('lenNew',argList.slice(1,argList.length).length)
 				// ljmArgs = argList.slice(1+testList.length,2+testList.length);
 				//console.log('LJM-Args',argList)
-				
+
 				//Test to make sure the proper functions were called
 				expectedFunctionList.forEach(function(element, index, array) {
 					// console.log(element,funcs[index]);
-					test.deepEqual(element,funcs[index]);
+					assert.deepEqual(element,funcs[index]);
 				});
-				test.deepEqual(expectedFunctionList,funcs);
-				
+				assert.deepEqual(expectedFunctionList,funcs);
+
 
 				//test to make sure the proper results were acquired
 				expectedResultList.forEach(function(element, index, array) {
 					// console.log(element,results[index]);
-					test.deepEqual(element,results[index]);
+					assert.deepEqual(element,results[index]);
 				});
-				test.deepEqual(expectedResultList,results);
+				assert.deepEqual(expectedResultList,results);
 
-				test.done();
-			});	
+				done();
+			});
 	},
     readUINT64: function(test){
         // asyncRun.config(dev, driver,driver_const);
         // syncRun.config(dev, driver,driver_const);
-        
+
         //Configure running-engines
 		asyncRun.config(dev, null);
 		syncRun.config(dev, null);
-        
+
         //Create test-variables
         var testList = [
             'readUINT64("WIFI_MAC")',
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'readUINT64',
             'readUINT64',
         ];
@@ -1327,7 +1327,7 @@ module.exports = {
                 console.log('Error',res);
             }, function(res) {
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -1370,7 +1370,7 @@ module.exports = {
     		}, function(res) {
     			// Test to make sure the appropriate LJM functions were called
     			var funcs = fakeDriver.getLastFunctionCall();
-    			test.deepEqual(funcs, expectedFunctionList);
+    			assert.deepEqual(funcs, expectedFunctionList);
 
     			// Test to make sure that the functions were called with the
     			// appropriate arguments
@@ -1378,25 +1378,25 @@ module.exports = {
     			var msg = 'argument descrepency, console.log(argList) for details.';
     			argList.forEach(function(argI, i) {
     				// Test for callback function locations
-    				test.strictEqual(typeof(argI[callbackIndex[i]]), 'function', msg);
-    			
+    				assert.strictEqual(typeof(argI[callbackIndex[i]]), 'function', msg);
+
     				// Test for buffer indicies
     				if(bufferIndicies[i]) {
     					bufferIndicies[i].forEach(function(bufferIndicy, j) {
 
     						var type = Buffer.isBuffer(argI[bufferIndicy]);
-    						test.strictEqual(type, true, msg);
+    						assert.strictEqual(type, true, msg);
 
     						var size = argI[bufferIndicy].length;
     						var expectedSize = bufferSizes[i][j];
-    						test.strictEqual(size, expectedSize, msg);
+    						assert.strictEqual(size, expectedSize, msg);
     					});
     				}
     			});
 
 				var results = asyncRun.getResults();
 				msg = 'results descrepency';
-				test.strictEqual(results.length, 3, msg);
+				assert.strictEqual(results.length, 3, msg);
 				var tRes = results[1];
 				var tResKeys = [
 					'rawData',
@@ -1410,23 +1410,23 @@ module.exports = {
 					'numAddresses',
 					'scanList'
 				];
-				test.deepEqual(Object.keys(tRes), tResKeys, msg);
-				test.strictEqual(tRes.rawData.length, resultBufferLength, msg);
+				assert.deepEqual(Object.keys(tRes), tResKeys, msg);
+				assert.strictEqual(tRes.rawData.length, resultBufferLength, msg);
 
     // 			console.log("HERE!");
 				// console.log(results);
 				// console.log(argList);
-    			test.done();
+    			done();
     		}, false, false);
     },
     readArray: function(test){
         // asyncRun.config(dev, driver,driver_const);
         // syncRun.config(dev, driver,driver_const);
-        
+
         //Configure running-engines
 		asyncRun.config(dev, null);
 		syncRun.config(dev, null);
-        
+
         //Create test-variables
         var testList = [
             'readArray("LUA_DEBUG_DATA", 10)',
@@ -1451,7 +1451,7 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_eReadAddressArray',
             'LJM_eReadAddressArrayAsync',
         ];
@@ -1466,18 +1466,18 @@ module.exports = {
 
                 // Test to make sure the appropriate LJM functions were called
     			var funcs = fakeDriver.getLastFunctionCall();
-    			test.deepEqual(funcs, expectedFunctionList);
+    			assert.deepEqual(funcs, expectedFunctionList);
 
     			// Test to make sure the proper results were acquired
     			var results = asyncRun.getResults();
-    			test.deepEqual(results, expectedData);
+    			assert.deepEqual(results, expectedData);
     			// console.log('Results', results);
 
     			var argList = fakeDriver.getArgumentsList();
     			var actualArgs = argList.splice(1, argList.length);
     			// console.log('Args', actualArgs[0]);
-    			
-                test.done();
+
+                done();
             },false,false
         );
     },
@@ -1486,7 +1486,7 @@ module.exports = {
     	//Configure running-engines
 		asyncRun.config(dev, null);
 		syncRun.config(dev, null);
-        
+
         //Create test-variables
         var testList = [
             'writeArray("LUA_SOURCE_WRITE", "DEADBEEF\\r\\n")',
@@ -1510,7 +1510,7 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_eWriteAddressArray',
             'LJM_eWriteAddressArray',
             'LJM_eWriteAddressArray',
@@ -1537,7 +1537,7 @@ module.exports = {
 			});
 			var retData = interpretWriteArrayData.apply(this, argArray);
 			var expectedRetData = expectedData[index];
-			test.deepEqual(retData, expectedRetData, 'written data was not encoded properly');
+			assert.deepEqual(retData, expectedRetData, 'written data was not encoded properly');
 		};
 
         //Run the desired commands
@@ -1552,7 +1552,7 @@ module.exports = {
                 // Test to make sure the appropriate LJM functions were called
     			var funcs = fakeDriver.getLastFunctionCall();
     			// console.log('funcs:', funcs);
-    			test.deepEqual(funcs, expectedFunctionList);
+    			assert.deepEqual(funcs, expectedFunctionList);
 
     			var argList = fakeDriver.getArgumentsList();
     			var actualArgs = argList.splice(1, argList.length);
@@ -1562,18 +1562,18 @@ module.exports = {
     			// Test to make sure the proper results were acquired
     			var results = asyncRun.getResults();
     			// console.log('results:', results);
-    			// test.deepEqual(results, expectedData);
+    			// assert.deepEqual(results, expectedData);
 
-                test.done();
+                done();
             },false,false
         );
     },
     /**
-	 * This test tests the LJM_IsAuth synchronous and 
+	 * This test tests the LJM_IsAuth synchronous and
 	 * LJM_IsAuth asynchronous function calls of LJM.
 	 * @param  {[type]} test The test object.
 	 */
-	IsAuthorized: function(test) {		
+	IsAuthorized: function(test) {
 		//Configure running-engines
 		asyncRun.config(dev, null);
 		syncRun.config(dev, null);
@@ -1583,7 +1583,7 @@ module.exports = {
 			'isAuthorized()',
 		];
 		//Expected info combines both sync & async
-		var expectedFunctionList = [ 
+		var expectedFunctionList = [
 			'LJM_IsAuth',
 			'LJM_IsAuthAsync',
 		];
@@ -1599,20 +1599,20 @@ module.exports = {
 				var results = asyncRun.getResults();
 				var argList = fakeDriver.getArgumentsList();
 				var i,j;
-				var offsetSync = 1;		
+				var offsetSync = 1;
 
 				// console.log("Function Calls", funcs);
 				// console.log("Results",results);
 				// console.log("Arguments",argList);
 
 				//Make sure we called the proper test-driver functions
-				test.deepEqual(expectedFunctionList,funcs);
+				assert.deepEqual(expectedFunctionList,funcs);
 
 				//Make sure we get the proper results back
-				// test.deepEqual(expectedResultList,results);
-				
-				test.done();
-			});	
+				// assert.deepEqual(expectedResultList,results);
+
+				done();
+			});
 	},
 
 	/**
@@ -1622,7 +1622,7 @@ module.exports = {
 	 * DEPRECIATED IN LJM 2.46????????? skipping for now
 	 */
 	// testResetConnection: function(test) {
-	// 	test.done();
+	// 	done();
 	// }
 };
 

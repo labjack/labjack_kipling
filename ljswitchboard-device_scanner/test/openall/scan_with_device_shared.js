@@ -1,47 +1,43 @@
 // Legacy test for the old ListAll scan method. Expects to open real devices.
+var assert = require('chai').assert;
 
 var deviceScanner;
 var device_scanner = require('../../lib/ljswitchboard-device_scanner');
 var test_util = require('../utils/test_util');
-var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
-var printScanResultsKeys = test_util.printScanResultsKeys;
 var verifyScanResults = test_util.verifyScanResults;
-var testScanResults = test_util.testScanResults;
-
-var expDeviceTypes = require('../utils/expected_devices').expectedDevices;
 
 var device_curator = require('ljswitchboard-ljm_device_curator');
 
 var device = null;
 var devices = [];
 
-exports.tests = {
-	'Starting Basic Test': function(test) {
+describe('scan with device shared', function() {
+	it('Starting Basic Test', function (done) {
 		console.log('');
 		console.log('*** Starting Basic Ethernet (OpenAll) Test ***');
 
 		deviceScanner = device_scanner.getDeviceScanner('open_all');
 
-		test.done();
-	},
-	'open device': function(test) {
+		done();
+	});
+	it('open device', function (done) {
 		device = new device_curator.device();
 		devices.push(device);
 		// device.open('LJM_dtT7', 'LJM_ctEthernet', 'LJM_idANY')
 		device.open('LJM_dtT4', 'LJM_ctUSB', 'LJM_idANY')
 		.then(function() {
-			test.done();
+			done();
 		}, function() {
 			devices[0].destroy();
 			devices = [];
-			test.done();
+			done();
 		});
-	},
-	'open device in ljlogm': function(test) {
+	});
+	it('open device in ljlogm', function (done) {
 		if (process.platform !== 'win32') {
 			console.warn('Test \'open device in ljlogm\' not supported except on Windows');
-			test.done();
+			done();
 			return;
 		}
 		var scanFinished = false;
@@ -49,7 +45,7 @@ exports.tests = {
 		function finishTest() {
 			if(scanFinished && ljlogmFinished) {
 				console.log('  - Scan & LJLogM Finished'.green);
-				test.done();
+				done();
 			} else {
 				console.log(
 					'  - Trying to finish step...'.yellow,
@@ -69,39 +65,39 @@ exports.tests = {
 				verifyScanResults(deviceTypes, test, {debug: false});
 				var endTime = new Date();
 				// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
-				// test.ok(testStatus, 'Unexpected test result');
+				// assert.isOk(testStatus, 'Unexpected test result');
 				console.log('  - Duration'.cyan, (endTime - startTime)/1000);
-				test.ok(true, 'Scan Finished');
+				assert.isOk(true, 'Scan Finished');
 				scanFinished = true;
 				finishTest();
 			}, function(err) {
 				console.log('Scanning Error', err);
-				test.ok(false, 'Reported a scan error');
+				assert.isOk(false, 'Reported a scan error');
 				scanFinished = true;
 				finishTest();
-				// test.done();
+				// done();
 			});
         },
         3000);
 		device.openDeviceInLJLogM()
 		.then(function() {
-			test.ok(true, 'LJLogM Finished');
+			assert.isOk(true, 'LJLogM Finished');
 			ljlogmFinished = true;
 			finishTest();
 		}, function(err) {
-			test.ok(false, 'Should not fail to open in LJLogM');
+			assert.isOk(false, 'Should not fail to open in LJLogM');
 			console.log('ERROR', err);
 			ljlogmFinished = true;
 			finishTest();
 		});
-	},
-	'enable device scanning': function(test) {
+	});
+	it('enable device scanning', function (done) {
 		deviceScanner.enableDeviceScanning()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'basic test': function(test) {
+	});
+	it('basic test', function (done) {
 		var currentDeviceList = [];
 		var startTime = new Date();
 		deviceScanner.findAllDevices(devices)
@@ -110,43 +106,43 @@ exports.tests = {
 			verifyScanResults(deviceTypes, test, {debug: false});
 			var endTime = new Date();
 			// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
-			// test.ok(testStatus, 'Unexpected test result');
+			// assert.isOk(testStatus, 'Unexpected test result');
 			console.log('  - Duration'.cyan, (endTime - startTime)/1000);
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error');
-			test.done();
+			done();
 		});
-	},
-	'read device SERIAL_NUMBER': function(test) {
+	});
+	it('read device SERIAL_NUMBER', function (done) {
 		if(devices[0]) {
 			devices[0].iRead('SERIAL_NUMBER')
 			.then(function(res) {
 				console.log('  - SN Res:'.green, res.val);
-				test.done();
+				done();
 			}, function(err) {
 				console.log('Failed to read SN:', err, devices[0].savedAttributes.serialNumber);
-				test.ok(false, 'Failed to read SN: ' + JSON.stringify(err));
-				test.done();
+				assert.isOk(false, 'Failed to read SN: ' + JSON.stringify(err));
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'close device': function(test) {
+	});
+	it('close device', function (done) {
 		if(devices[0]) {
 			devices[0].close()
 			.then(function() {
-				test.done();
+				done();
 			}, function() {
-				test.done();
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'unload': function(test) {
+	});
+	it('unload', function (done) {
 		device_scanner.unload();
-		test.done();
-	},
-};
+		done();
+	});
+});

@@ -23,11 +23,12 @@
   ],
   "dependencies": {},
   "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+    "test": "mocha"
   },
   "devDependencies": {
     "diff": ">=3.5.0",
-    "nodeunit": "0.11.3",
+    "mocha": "7.2.0",
+    "chai": "^4.2.0",
     "rekuire": "0.1.9"
   }
 }

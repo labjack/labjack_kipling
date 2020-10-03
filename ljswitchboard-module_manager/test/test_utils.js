@@ -1,8 +1,6 @@
+var assert = require('chai').assert;
 
-var q = require('q');
 var path = require('path');
-var fs = require('fs.extra');
-var module_manager = require('../lib/ljswitchboard-module_manager');
 
 var FRAMEWORK_ADDITIONS = {
 	'singleDevice': {
@@ -32,11 +30,11 @@ exports.clearLoadedFiles = function() {
 	loadedFiles = {};
 };
 
-var checkLoadedFiles = function(test, fileObj) {
+var checkLoadedFiles = function(fileObj) {
 	var fileObjkeys = Object.keys(fileObj);
 	var expectedKeys = ['fileName', 'filePath', 'fileData', 'lintResult'];
 	loadedFiles[fileObj.filePath] = fileObj;
-	test.deepEqual(fileObjkeys, expectedKeys, 'invalid cssFile keys');
+	assert.deepEqual(fileObjkeys, expectedKeys, 'invalid cssFile keys');
 };
 exports.checkLoadedFiles = checkLoadedFiles;
 
@@ -65,7 +63,7 @@ var addFrameworkFiles = function(fileType, frameworkType, origFiles) {
 };
 exports.addFrameworkFiles = addFrameworkFiles;
 
-var checkLoadedModuleData = function(test, moduleData) {
+var checkLoadedModuleData = function(moduleData) {
 	var moduleDataKeys = Object.keys(moduleData);
 	var requiredKeys = [
 		'name',
@@ -82,15 +80,15 @@ var checkLoadedModuleData = function(test, moduleData) {
 			if(given) {
 				isValid = true;
 			}
-			test.ok(isValid, 'module name invalid');
+			assert.isOk(isValid, 'module name invalid');
 		},
 		'css': function(cssFiles) {
 			var isValid = Array.isArray(cssFiles);
-			test.ok(isValid,'cssFiles should be an array');
+			assert.isOk(isValid,'cssFiles should be an array');
 			var loadedCSSFiles = [];
 			var loadedEmptyFile = false;
 			cssFiles.forEach(function(cssFile) {
-				checkLoadedFiles(test, cssFile);
+				checkLoadedFiles(cssFile);
 				loadedCSSFiles.push(cssFile.fileName);
 				if(cssFile.fileData.length === 0) {
 					loadedEmptyFile = true;
@@ -109,9 +107,9 @@ var checkLoadedModuleData = function(test, moduleData) {
 			}
 
 			if(unfinishedModules.indexOf(moduleData.name) < 0) {
-				test.ok(!loadedEmptyFile, 'a loaded file was empty: ' + moduleData.name);
+				assert.isOk(!loadedEmptyFile, 'a loaded file was empty: ' + moduleData.name);
 			}
-			test.deepEqual(
+			assert.deepEqual(
 				loadedCSSFiles,
 				requiredCSSFiles,
 				'all js files not loaded: ' + moduleData.name
@@ -119,11 +117,11 @@ var checkLoadedModuleData = function(test, moduleData) {
 		},
 		'js': function(jsFiles) {
 			var isValid = Array.isArray(jsFiles);
-			test.ok(isValid,'jsFiles should be an array');
+			assert.isOk(isValid,'jsFiles should be an array');
 			var loadedJSFiles = [];
 			var loadedEmptyFile = false;
 			jsFiles.forEach(function(jsFile) {
-				checkLoadedFiles(test, jsFile);
+				checkLoadedFiles(jsFile);
 				loadedJSFiles.push(jsFile.fileName);
 				if(jsFile.fileData.length === 0) {
 					loadedEmptyFile = true;
@@ -159,9 +157,9 @@ var checkLoadedModuleData = function(test, moduleData) {
 			requiredJSFiles = requiredJSFiles.concat(jsLibFiles);
 			requiredJSFiles = requiredJSFiles.concat(requiredFiles);
 			if(unfinishedModules.indexOf(moduleData.name) < 0) {
-				test.ok(!loadedEmptyFile, 'a loaded file was empty: ' + moduleData.name);
+				assert.isOk(!loadedEmptyFile, 'a loaded file was empty: ' + moduleData.name);
 			}
-			test.deepEqual(
+			assert.deepEqual(
 				loadedJSFiles,
 				requiredJSFiles,
 				'all js files not loaded: ' + moduleData.name
@@ -169,11 +167,11 @@ var checkLoadedModuleData = function(test, moduleData) {
 		},
 		'html': function(htmlFiles) {
 			var isValid = Array.isArray(htmlFiles);
-			test.ok(isValid,'htmlFiles should be an array');
+			assert.isOk(isValid,'htmlFiles should be an array');
 			var foundCoreHTMLFile = false;
 			var htmlFilePaths = [];
 			htmlFiles.forEach(function(htmlFile) {
-				checkLoadedFiles(test, htmlFile);
+				checkLoadedFiles(htmlFile);
 				if(htmlFile.fileName === 'view.html') {
 					foundCoreHTMLFile = true;
 
@@ -187,21 +185,20 @@ var checkLoadedModuleData = function(test, moduleData) {
 							var splitPath = htmlFile.filePath.split(path.sep);
 							var index = splitPath.indexOf('framework');
 							if(index < 0) {
-								test.ok(false, 'File not properly loaded');
+								assert.isOk(false, 'File not properly loaded');
 							} else {
-								test.ok(true, 'File properly loaded');
+								assert.isOk(true, 'File properly loaded');
 							}
 						} else {
-							test.ok(false, 'Unsupported framework type');
+							assert.isOk(false, 'Unsupported framework type');
 						}
 					}
 				}
 				htmlFilePaths.push(htmlFile.filePath);
 			});
-			test.ok(foundCoreHTMLFile, 'did not find view.html file');
+			assert.isOk(foundCoreHTMLFile, 'did not find view.html file');
 		}
 	};
-
 	requiredKeys.forEach(function(requiredKey) {
 		var exists = false;
 		if(moduleDataKeys.indexOf(requiredKey) >= 0) {
@@ -210,7 +207,7 @@ var checkLoadedModuleData = function(test, moduleData) {
 				attributeStrategies[requiredKey](moduleData[requiredKey]);
 			}
 		}
-		test.ok(exists, 'Required Key not found: ' + requiredKey);
+		assert.isOk(exists, 'Required Key not found: ' + requiredKey);
 	});
 	// console.log('loaded data keys', moduleDataKeys);
 };
@@ -257,7 +254,7 @@ var printLintError = function(lintResult) {
 exports.printLintError = printLintError;
 
 var getCheckForLintErrors = function(printWarnings) {
-	var checkForLintErrors = function(test) {
+	var checkForLintErrors = function(done) {
 		var loadedFileKeys = Object.keys(loadedFiles);
 		delayPrint('aa', 'ab');
 		delayPrint('');
@@ -315,8 +312,8 @@ var getCheckForLintErrors = function(printWarnings) {
 		if(printLintResults) {
 			flushPrintQueue();
 		}
-		
-		test.done();
+
+		done();
 	};
 	return checkForLintErrors;
 };

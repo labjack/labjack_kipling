@@ -2,10 +2,10 @@
 
 // Unit tests for the unitTestExports object (as exported from
 // ljswitchboard-device_scanner/lib/open_all_device_scanner.js).
+var assert = require('chai').assert;
 
 var unitTestExports;
 var open_all_device_scanner = require('../../lib/open_all_device_scanner');
-var test_util = require('../utils/test_util');
 
 const TEST_ERROR_DISCOVERED = {
     "errorCode": 1298,
@@ -103,51 +103,51 @@ function wrapOpenAllInfo(openAllInfo) {
     };
 }
 
-exports.tests = {
-    'Starting unitTestExports Test': function(test) {
+describe('open all device scanner', function() {
+    it('Starting unitTestExports Test', function (done) {
         console.log('');
         console.log('*** Starting open_all_device_scanner.unitTestExports Test ***');
 
         unitTestExports = open_all_device_scanner.unitTestExports;
 
-        test.done();
-    },
-    'parseOutErroniusDevices sanity check': function(test) {
-        test.ok(
+        done();
+    });
+	it('parseOutErroniusDevices sanity check', function (done) {
+        assert.isOk(
             unitTestExports.hasOwnProperty('parseOutErroniusDevices'),
             'unitTestExports does not have property: parseOutErroniusDevices'
         );
-        test.equals(typeof unitTestExports.parseOutErroniusDevices, 'function');
-        test.done();
-    },
-    'parseOutErroniusDevices gets discovered error device': function(test) {
+        assert.equals(typeof unitTestExports.parseOutErroniusDevices, 'function');
+        done();
+    });
+	it('parseOutErroniusDevices gets discovered error device', function (done) {
         var openAllInfo = createTestOpenAllInfoJson();
         openAllInfo.exceptions.push(TEST_ERROR_DISCOVERED);
         var errDevs = unitTestExports.parseOutErroniusDevices(
             wrapOpenAllInfo(openAllInfo)
         );
-        test.equals(errDevs.length, 1);
-        test.done();
-    },
-    'parseOutErroniusDevices gets 1230 error device': function(test) {
+        assert.equals(errDevs.length, 1);
+        done();
+    });
+	it('parseOutErroniusDevices gets 1230 error device', function (done) {
         var openAllInfo = createTestOpenAllInfoJson();
         openAllInfo.exceptions.push(TEST_ERROR_1230);
         var errDevs = unitTestExports.parseOutErroniusDevices(
             wrapOpenAllInfo(openAllInfo)
         );
-        test.equals(errDevs.length, 1);
-        test.done();
-    },
-    'parseOutErroniusDevices ignores not discovered error device': function(test) {
+        assert.equals(errDevs.length, 1);
+        done();
+    });
+	it('parseOutErroniusDevices ignores not discovered error device', function (done) {
         var openAllInfo = createTestOpenAllInfoJson();
         openAllInfo.exceptions.push(TEST_ERROR_NOT_DISCOVERED);
         var errDevs = unitTestExports.parseOutErroniusDevices(
             wrapOpenAllInfo(openAllInfo)
         );
-        test.equals(errDevs.length, 0);
-        test.done();
-    },
-    'parseOutErroniusDevices combined': function(test) {
+        assert.equals(errDevs.length, 0);
+        done();
+    });
+	it('parseOutErroniusDevices combined', function (done) {
         var openAllInfo = createTestOpenAllInfoJson();
         openAllInfo.exceptions.push(TEST_ERROR_1230);
         openAllInfo.exceptions.push(TEST_ERROR_DISCOVERED);
@@ -155,10 +155,10 @@ exports.tests = {
         var errDevs = unitTestExports.parseOutErroniusDevices(
             wrapOpenAllInfo(openAllInfo)
         );
-        test.equals(errDevs.length, 2);
-        test.done();
-    },
-    'parseOutErroniusDevices combined paranoid ordering': function(test) {
+        assert.equals(errDevs.length, 2);
+        done();
+    });
+	it('parseOutErroniusDevices combined paranoid ordering', function (done) {
         var openAllInfo = createTestOpenAllInfoJson();
         openAllInfo.exceptions.push(TEST_ERROR_DISCOVERED);
         openAllInfo.exceptions.push(TEST_ERROR_NOT_DISCOVERED);
@@ -166,7 +166,7 @@ exports.tests = {
         var errDevs = unitTestExports.parseOutErroniusDevices(
             wrapOpenAllInfo(openAllInfo)
         );
-        test.equals(errDevs.length, 2);
-        test.done();
-    },
-};
+        assert.equals(errDevs.length, 2);
+        done();
+    });
+});

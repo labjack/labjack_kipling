@@ -5,7 +5,7 @@ var userIP = {'ip': '192.168.1.12', 'comments': ['My First Single New IP']};
 
 /*
  * The addIP function parses the specified .config file, adds the new userIP,
- * removes duplicate IP addresses, formats, saves, and instructs LJM to load the 
+ * removes duplicate IP addresses, formats, saves, and instructs LJM to load the
  * specified .config file.  There is an optional
  * options argument where file path can be specified:
  * ljm_special_addresses.addIP(userIPs, {'filePath': '[customFilePath]'})

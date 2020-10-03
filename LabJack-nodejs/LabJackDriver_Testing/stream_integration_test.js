@@ -64,12 +64,12 @@ var tFunc = function(test, obj, func, options) {
 			);
 		} else {
 			console.log('in tFunc, function Not Supported, to many args');
-			test.ok(false);
+			assert.isOk(false);
 		}
 	} catch(err) {
 		console.log('Caught an error in tFunc:', func, err);
-		test.ok(false, 'Error caught calling function: ' + func);
-		test.done();
+		assert.isOk(false, 'Error caught calling function: ' + func);
+		done();
 	}
 };
 var tErr = function(test, message) {
@@ -80,8 +80,8 @@ var tErr = function(test, message) {
 		if(test.onErr) {
 			test.onErr(err, test);
 		} else {
-			test.ok(false, 'Error reported in tErr: ' + err.toString());
-			test.done();
+			assert.isOk(false, 'Error reported in tErr: ' + err.toString());
+			done();
 		}
 	};
 	return errFunc;
@@ -91,11 +91,11 @@ var tSucc = function(test, message, callback) {
 		if(test.debugStep) {
 			console.log('* in tSucc |', message, '| result:', res);
 		}
-		test.ok(true);
+		assert.isOk(true);
 		if(test.onSucc) {
 			test.onSucc(res, test);
 		} else {
-			test.done();
+			done();
 		}
 	};
 	return sucFunc;
@@ -117,7 +117,7 @@ var parseStreamData = function(res, test) {
 		'dataOffset': res.dataOffset,
 	};
 	// console.log('streamRead result', pResults);
-	test.done();
+	done();
 };
 var getParseStreamData = function(options) {
 	var parseStreamData = function(res, test) {
@@ -141,7 +141,7 @@ var getParseStreamData = function(options) {
 				options.callback(test, pResults);
 			}
 		} else {
-			test.done();
+			done();
 		}
 	};
 	return parseStreamData;
@@ -170,7 +170,7 @@ exports.basic_test = {
 		tFunc(test, device, 'getHandleInfo', {
 			'pRes': false,
 			'onSucc': function(res, test) {
-				test.done();
+				done();
 			}
 		});
 	},
@@ -192,14 +192,14 @@ exports.basic_test = {
 			'pErr': false,
 			'args': [streamScansPerRead, ['AIN0'], streamScanRate],
 			'onErr': function(err, test) {
-				test.ok(true);
+				assert.isOk(true);
 				var expectedMsg = 'streamStart: stream already running';
-				test.strictEqual(err, expectedMsg, 'bad error message');
-				test.done();
+				assert.strictEqual(err, expectedMsg, 'bad error message');
+				done();
 			},
 			'onSucc': function(res, test) {
-				test.ok(false,'secondary streamStart should have failed');
-				test.done();
+				assert.isOk(false,'secondary streamStart should have failed');
+				done();
 			}
 		});
 	},
@@ -237,7 +237,7 @@ exports.basic_test = {
 					var isBacklogExpected = false;
 
 					// TODO: Changing to "2 * " will sometimes break test b/c ljmBacklog doesn't get filled enough during the delay period
-					if(res.ljmBacklog > (2 * streamScansPerRead)) {				
+					if(res.ljmBacklog > (2 * streamScansPerRead)) {
 						isBacklogExpected = true;
 					} else {
 						console.log("ljmBacklog is to low");
@@ -246,27 +246,27 @@ exports.basic_test = {
 						console.log("ljmBacklog is to high");
 						isBacklogExpected = false;
 					}
-					test.ok(
-						isBacklogExpected, 
+					assert.isOk(
+						isBacklogExpected,
 						'ljmBacklog did not get affected properly: ' +
 						res.ljmBacklog.toString()
 					);
 					startHRTime = process.hrtime();
-					test.done();
+					done();
 				}})
 			});
 		}, delay);
-		
+
 	},
 	/**
 	 * In combination with streamReadx3 test, here we make sure that if LJM
 	 * has buffered data it returns +- instantly after calling streamRead with
 	 * more data.
-	 * 
+	 *
 	 * Results show that it takes roughly 1.5ms to read 1k samples.
 	 * Note: There is a larve variance between results.
 	 * Time for 1k: 4.00ms
-	 * Time for 2k: 5.50ms | 5.39ms | 5.55ms | 5.61ms 
+	 * Time for 2k: 5.50ms | 5.39ms | 5.55ms | 5.61ms
 	 * Time for 3k: 7.00ms
 	 * Time for 4k: 8.44ms | 8.45ms | 8.42ms | 9.62ms
 	 * Time for 5k: 10.00ms
@@ -288,12 +288,12 @@ exports.basic_test = {
 				if(diff < (refreshDelay * 1000 / 2)) {
 					isTimeDiffValid = true;
 				}
-				test.ok(
+				assert.isOk(
 					isTimeDiffValid,
 					'timeDiff between streamReads is invalid: ' +
 					diff.toString()
 				);
-				test.done();
+				done();
 			}})
 		});
 	},

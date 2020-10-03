@@ -24,9 +24,9 @@ var deviceSerials = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -56,7 +56,7 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'list all digits...': function(test) {
 		var foundDevices = driver.listAllSync('LJM_dtDIGIT', 'LJM_ctUSB');
@@ -64,7 +64,7 @@ var device_tests = {
 		deviceSerials = foundDevices.map(function(foundDevice) {
 			return foundDevice.serialNumber;
 		});
-		test.done();
+		done();
 	},
 	'open all digits': function(test) {
 		console.log('Opening Devices', deviceSerials);
@@ -90,7 +90,7 @@ var device_tests = {
 					cb();
 				});
 			}, function(err) {
-				test.done();
+				done();
 			});
 	},
 	'print out device serial numbers': function(test) {
@@ -100,14 +100,14 @@ var device_tests = {
 				console.log('Opened...', device.savedAttributes.serialNumber);
 				cb();
 			}, function(err) {
-				test.done();
+				done();
 			});
 	},
 };
 
 function collectDigitData(test) {
 	var collectedData = [];
-	
+
 	async.each(
 		devices,
 		function(device, iterationCB) {
@@ -133,7 +133,7 @@ function collectDigitData(test) {
 			console.log('Finished Collecting Data:');
 			console.log(deviceDataBySN);
 			setTimeout(function() {
-				test.done();
+				done();
 			}, 500);
 		});
 }
@@ -154,7 +154,7 @@ device_tests['closeDigit'] = function(test) {
 				cb();
 			});
 		}, function(err) {
-			test.done();
+			done();
 		});
 };
 
@@ -215,7 +215,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

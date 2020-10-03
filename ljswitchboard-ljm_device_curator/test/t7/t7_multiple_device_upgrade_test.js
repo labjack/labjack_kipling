@@ -12,9 +12,9 @@ var device_B_Attributes;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceAInfo = {
@@ -87,11 +87,11 @@ function createDeviceUpgrader(device, firmwareInfo, test) {
 			// console.log('  - Upgrade result', res);
 			// Make sure that the device disconnect & reconnect events get
 			// fired.
-			test.ok(
+			assert.isOk(
 				self.deviceDisconnectEventReceived,
 				'Disconnect event should have been detected'
 			);
-			test.ok(
+			assert.isOk(
 				self.deviceReconnectEventReceived,
 				'Reconnect event should have been detected'
 			);
@@ -140,7 +140,7 @@ exports.tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevice - ctUSB deviceA': function(test) {
 		var td = {
@@ -154,14 +154,14 @@ exports.tests = {
 		.then(function(resA) {
 			console.log('Opened DeviceA', resA.serialNumber);
 			device_A_Attributes = resA;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'delay opening of second device': function(test) {
 		setTimeout(function() {
-			test.done();
+			done();
 		}, 2000);
 	},
 	'openDevice - ctUSB deviceB': function(test) {
@@ -180,15 +180,15 @@ exports.tests = {
 				console.log('Opened the same device...');
 				stopTest(test, 'Failed to open two devices');
 			} else {
-				test.done();
+				done();
 			}
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	// 'delay upgrade': function(test) {
 	// 	setTimeout(function() {
-	// 		test.done();
+	// 		done();
 	// 	}, 5000);
 	// },
 	'upgrade devices': function(test) {
@@ -202,11 +202,11 @@ exports.tests = {
 		upgradeDevices(devices, firmwareInfo, test)
 		.then(function() {
 			console.log('  - Devices Upgraded');
-			test.done();
+			done();
 		}, function() {
 			console.log('  ! Devices failed to upgrade');
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 	// 'upgradeFirmware': function(test) {
@@ -232,7 +232,7 @@ exports.tests = {
 	// 			// The result is a new device object
 	// 			// console.log('Upgrade Success', res);
 	// 			// console.log('Number of created devices', ljDevice.getNumCreatedDevices());
-	// 			test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
+	// 			assert.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
 	// 			var ljmDevice = device.getDevice();
 	// 			// console.log(
 	// 			// 	'Reading device FW version',
@@ -242,30 +242,30 @@ exports.tests = {
 	// 			// );
 	// 			device.read('FIRMWARE_VERSION')
 	// 			.then(function(res) {
-	// 				test.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
-	// 				test.done();
+	// 				assert.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
+	// 				done();
 	// 			});
 	// 		}, function(err) {
 	// 			console.log("Failed to upgrade (upgrade test)", err);
-	// 			test.ok(false, 'Failed to upgrade device: ' + JSON.stringify(err));
+	// 			assert.isOk(false, 'Failed to upgrade device: ' + JSON.stringify(err));
 	// 			device.read('DEVICE_NAME_DEFAULT')
 	// 			.then(function(res) {
 	// 				console.log('Device is still responding to messages', res);
-	// 				test.done();
+	// 				done();
 	// 			}, function(err) {
 	// 				console.log('Device is not responding anymore', err);
-	// 				test.done();
+	// 				done();
 	// 			});
 	// 		}
 	// 	);
 	// },
-	
+
 	'closeDevice (assigned serial number)': function(test) {
 		deviceA.close()
 		.then(function() {
 			deviceB.close()
 			.then(function() {
-				test.done();
+				done();
 			});
 		});
 	},

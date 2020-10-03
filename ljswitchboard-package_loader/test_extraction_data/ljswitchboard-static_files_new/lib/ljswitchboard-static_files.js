@@ -1,3 +1,0 @@
-exports.info = {
-	'type': 'staticFiles'
-};

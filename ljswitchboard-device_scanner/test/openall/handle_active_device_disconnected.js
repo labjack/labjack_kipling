@@ -1,26 +1,20 @@
 // Legacy test for the old ListAll scan method. Expects to open real devices.
+var assert = require('chai').assert;
 
 var deviceScanner;
 var device_scanner = require('../../lib/ljswitchboard-device_scanner');
 var test_util = require('../utils/test_util');
-var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
-var printScanResultsKeys = test_util.printScanResultsKeys;
 var verifyScanResults = test_util.verifyScanResults;
-var testScanResults = test_util.testScanResults;
-
-var expDeviceTypes = require('../utils/expected_devices').expectedDevices;
-var reqDeviceTypes = require('../utils/required_devices').requiredDeviceTypes;
 
 var device_curator = require('ljswitchboard-ljm_device_curator');
-
 
 var ljn = require('labjack-nodejs');
 var driver = ljn.driver();
 
 
 var isDeviceConnected = false;
-var innerReporter = undefined;
+var innerReporter;
 function deviceDisconnectedHandler(info) {
 	isDeviceConnected = false;
 }
@@ -41,33 +35,33 @@ var debugScanData = getLogger(DEBUG_SCAN_DATA);
 var debugDeviceCon = getLogger(DEBUG_DEVICE_CONNECTION);
 
 var devices = [];
-var device = undefined;
-var expectedDeviceTypes = undefined;
+var device;
+var expectedDeviceTypes;
 
-exports.tests = {
-	'Starting Basic Test': function(test) {
+describe('handle active device disconnected', function() {
+	it('Starting Basic Test', function (done) {
 		console.log('');
 		console.log('*** Starting Handle Active Device Disconnected test ***');
 		console.log('*** 1x T7 needs to be connected via USB ***');
 
 		deviceScanner = device_scanner.getDeviceScanner('open_all');
 
-		test.done();
-	},
-	'enable device scanning': function(test) {
+		done();
+	});
+	it('enable device scanning', function (done) {
 
 		deviceScanner.enableDeviceScanning()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'clear cached scan results': function(test) {
+	});
+	it('clear cached scan results', function (done) {
 		deviceScanner.clearCachedScanResults()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'find USB device': function(test) {
+	});
+	it('find USB device', function (done) {
 		var numRetries = 10;
 		function deviceChecker() {
 			var foundDevices = driver.listAllSync('LJM_dtT7', 'LJM_ctUSB');
@@ -80,22 +74,22 @@ exports.tests = {
 
 			if(foundUSBDevice) {
 				clearInterval(intervalHandler);
-				test.done();
+				done();
 			} else {
 				numRetries = numRetries - 1;
 				console.log('  - Connect a T7 via USB ('+numRetries.toString()+')');
 				if(numRetries < 0) {
-					test.ok(false, 'no T7 connected');
-					test.done();
+					assert.isOk(false, 'no T7 connected');
+					done();
 				}
 			}
 		}
 		var intervalHandler = setInterval(deviceChecker, 1000);
-	},
+	});
 	/*
 	 * This test determines what devices are currently available for other tests to compare results with.
 	 */
-	'perform initial scan': function(test) {
+	it('perform initial scan', function (done) {
 		deviceScanner.findAllDevices(devices, {scanUSB: true, scanEthernet:false, scanWiFi:false})
 		.then(function(deviceTypes) {
 			expectedDeviceTypes = deviceTypes;
@@ -103,20 +97,20 @@ exports.tests = {
 			printScanResultsData(deviceTypes);
 
 			verifyScanResults(deviceTypes, test, {debug: false});
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error');
-			test.ok(false, 'Scan should have worked properly');
-			test.done();
+			assert.isOk(false, 'Scan should have worked properly');
+			done();
 		});
-	},
+	});
 	/*
 	 * Now we need to open a device.  This device will need to be properly detected as
 	 * a "connected" device by the cached scan in the next test.
 	 */
-	'open device': function(test) {
+	it('open device', function (done) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -130,36 +124,36 @@ exports.tests = {
 		.then(function() {
 			isDeviceConnected = true;
 			debugDeviceCon('Opened Device', device.savedAttributes.serialNumber);
-			test.done();
+			done();
 		}, function() {
 			debugDeviceCon('**** T7 Not detected ****');
 			devices[0].destroy();
 			devices = [];
-			test.ok(false, 'Please connect a T7 via USB');
-			test.done();
+			assert.isOk(false, 'Please connect a T7 via USB');
+			done();
 		});
-	},
-	'disconnect USB device': function(test) {
+	});
+	it('disconnect USB device', function (done) {
 		var numRetries = 10;
 		function deviceChecker() {
 			if(!isDeviceConnected) {
 				clearInterval(intervalHandler);
-				test.done();
+				done();
 			} else {
 				numRetries = numRetries - 1;
 				console.log(' - Disconnect USB Device', device.savedAttributes.serialNumber, numRetries);
 				if(numRetries < 0) {
-					test.ok(false, 'device should have been disconnected, exiting.');
-					test.done();
+					assert.isOk(false, 'device should have been disconnected, exiting.');
+					done();
 				}
 			}
 		}
 		var intervalHandler = setInterval(deviceChecker, 1000);
-	},
+	});
 	/*
 	 * This test determines what devices are currently available for other tests to compare results with.
 	 */
-	'perform secondary': function(test) {
+	it('perform secondary', function (done) {
 		deviceScanner.findAllDevices(devices, {scanUSB: true, scanEthernet:false, scanWiFi:false})
 		.then(function(deviceTypes) {
 			// expectedDeviceTypes = deviceTypes;
@@ -167,14 +161,14 @@ exports.tests = {
 			console.log('! scan results:');
 			printScanResultsData(deviceTypes);
 			verifyScanResults(deviceTypes, test, {debug: false});
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error');
-			test.ok(false, 'Scan should have worked properly');
-			test.done();
+			assert.isOk(false, 'Scan should have worked properly');
+			done();
 		});
-	},
-	// 'perform cached scan': function(test) {
+	});
+	// it('perform cached scan', function (done) {
 	// 	var device = devices[0];
 	// 	var startTime = new Date();
 	// 	console.log('  - Performing secondary cached scan...');
@@ -231,49 +225,49 @@ exports.tests = {
 
 	// 		deviceTypes.forEach(checkForDeviceType);
 
-	// 		test.ok(appropriateDeviceTypeFound, 'appropriateDeviceTypeFound was not true.'),
-	// 		test.ok(foundOpenDevice, 'foundOpenDevice was not true.'),
-	// 		test.ok(foundDeviceConnectionType, 'foundDeviceConnectionType was not true.'),
-	// 		test.ok(correctlyReportedDeviceAsOpen, 'correctlyReportedDeviceAsOpen was not true.'),
-	// 		test.done();
+	// 		assert.isOk(appropriateDeviceTypeFound, 'appropriateDeviceTypeFound was not true.'),
+	// 		assert.isOk(foundOpenDevice, 'foundOpenDevice was not true.'),
+	// 		assert.isOk(foundDeviceConnectionType, 'foundDeviceConnectionType was not true.'),
+	// 		assert.isOk(correctlyReportedDeviceAsOpen, 'correctlyReportedDeviceAsOpen was not true.'),
+	// 		done();
 	// 	}, function(err) {
 	// 		console.log('Scanning Error');
-	// 		test.ok(false, 'Scan should have worked properly');
-	// 		test.done();
+	// 		assert.isOk(false, 'Scan should have worked properly');
+	// 		done();
 	// 	});
-	// },
-	're-connect USB device': function(test) {
+	// });
+	it('re-connect USB device', function (done) {
 		var numRetries = 10;
 		function deviceChecker() {
 			if(isDeviceConnected) {
 				clearInterval(intervalHandler);
-				test.done();
+				done();
 			} else {
 				numRetries = numRetries - 1;
 				console.log(' - Connect USB Device', device.savedAttributes.serialNumber, numRetries);
 				if(numRetries < 0) {
-					test.ok(false, 'device should have been re-connected, exiting.');
-					test.done();
+					assert.isOk(false, 'device should have been re-connected, exiting.');
+					done();
 				}
 			}
 		}
 		var intervalHandler = setInterval(deviceChecker, 1000);
-	},
+	});
 
-	'close device': function(test) {
+	it('close device', function (done) {
 		if(devices[0]) {
 			devices[0].close()
 			.then(function() {
-				test.done();
+				done();
 			}, function() {
-				test.done();
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'unload': function(test) {
+	});
+	it('unload', function (done) {
 		device_scanner.unload();
-		test.done();
-	},
-};
+		done();
+	});
+});

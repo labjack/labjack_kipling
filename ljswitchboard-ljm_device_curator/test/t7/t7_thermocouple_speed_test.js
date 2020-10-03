@@ -10,9 +10,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -39,7 +39,7 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -60,11 +60,11 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			performTests = false;
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -72,9 +72,9 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'configure thermocouples': function(test) {
@@ -97,7 +97,7 @@ var device_tests = {
 		qExec(device, 'writeMultiple', regs, vals)(results)
 		.then(function(res) {
 			console.log('  - Configured Device');
-			test.done();
+			done();
 		});
 	},
 	'read configuration': function(test) {
@@ -110,7 +110,7 @@ var device_tests = {
 		.then(function(res) {
 			var results = res[0].retData;
 			// console.log('Config', results);
-			test.done();
+			done();
 		});
 	}
 };
@@ -134,7 +134,7 @@ var getTCTest = function(name, resolution, numSamples) {
 		// Setup and call functions
 		qExec(device, 'writeMultiple', regs, vals)(results)
 		.then(function(res) {
-			test.done();
+			done();
 		});
 	};
 	var establishBaseline = function(test) {
@@ -163,7 +163,7 @@ var getTCTest = function(name, resolution, numSamples) {
 			// console.log('Num', results.length);
 			// console.log('Duration', duration);
 			console.log('  - Rate', rate, 'ms');
-			test.done();
+			done();
 		});
 	};
 	var performAcquisition = function(test) {
@@ -192,7 +192,7 @@ var getTCTest = function(name, resolution, numSamples) {
 			// console.log('Duration', duration);
 			console.log('  - Rate', rate, 'ms');
 			console.log('  - Thermocouple Overhead', parseFloat((rate - baselineRate).toFixed(4)), 'ms');
-			test.done();
+			done();
 		});
 	};
 	var configuredTest = {};
@@ -224,7 +224,7 @@ for(var i = 0; i < tcTests.length; i++) {
 device_tests.closeDevice = function(test) {
 	device.close()
 	.then(function() {
-		test.done();
+		done();
 	});
 };
 var tests = {};
@@ -237,7 +237,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

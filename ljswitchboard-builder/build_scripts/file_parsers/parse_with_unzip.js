@@ -4,7 +4,7 @@ var fse = require('fs-extra');
 var path = require('path');
 var q = require('q');
 
-var unzip = require('unzip');
+var unzip = require('unzipper');
 
 
 function parseWithUnzip(file) {
@@ -12,14 +12,14 @@ function parseWithUnzip(file) {
     // Create a readable stream for the .zip file
     var readZipStream = fs.createReadStream(file);
 
-    // Create an unzip parsing stream that will get piped the readable 
+    // Create an unzip parsing stream that will get piped the readable
     // stream data.
     var parseZipStream = unzip.Parse();
 
     var foundPackageJsonFile = false;
     var packageString = '';
 
-    // Define a function that saves the streamed package.json data to a 
+    // Define a function that saves the streamed package.json data to a
     // string.
     var savePackageData = function(chunk) {
         packageString += chunk.toString('ascii');

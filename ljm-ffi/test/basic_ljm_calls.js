@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 /*
  * This test makes sure that a simple LJM function call can be performed with
@@ -5,7 +6,7 @@
  * types.
  * Type 1: Automatically handles converting/parsing of data into and out of
  * 		buffer data structures.
- * Type 2: Adds a try-catch around the function call that makes the 
+ * Type 2: Adds a try-catch around the function call that makes the
  * 		Linux/Mac/Windows ffi implementations more similar.
  * Type 3: The raw FFI function calls.
  */
@@ -44,17 +45,18 @@ var ffi_liblabjack;
 
 
 /* Define Test Cases */
-var test_cases = {
-	'include ljm': function(test) {
+
+describe('basic_ljm_calls', function() {
+	it('include ljm', function (done) {
 		var ljm_ffi = require('../lib/ljm-ffi');
 
 		ljm = ljm_ffi.load();
 		liblabjack = ljm_ffi.loadSafe();
 		ffi_liblabjack = ljm_ffi.loadRaw();
 
-		test.done();
-	},
-	'Execute LJM_NameToAddress (Sync)': function(test) {
+		done();
+	});
+	it('Execute LJM_NameToAddress (Sync)', function (done) {
 		var addressInfo = ljm.LJM_NameToAddress('AIN0', 0, 0);
 		var expectedData = {
 			'ljmError': 0,
@@ -62,10 +64,10 @@ var test_cases = {
 			'Address': 0,
 			'Type': 3,
 		};
-		test.deepEqual(addressInfo, expectedData);
-		test.done();
-	},
-	'Execute LJM_NameToAddress (Async)': function(test) {
+		assert.deepEqual(addressInfo, expectedData);
+		done();
+	});
+	it('Execute LJM_NameToAddress (Async)', function (done) {
 		function testData(addressInfo) {
 			var expectedData = {
 				'ljmError': 0,
@@ -73,15 +75,15 @@ var test_cases = {
 				'Address': 0,
 				'Type': 3,
 			};
-			test.deepEqual(addressInfo, expectedData);
-			test.done();
+			assert.deepEqual(addressInfo, expectedData);
+			done();
 		}
 
 		// Execute LJM Function
 		ljm.LJM_NameToAddress.async('AIN0', 0, 0, testData);
-	},
+	});
 
-	'Execute LJM_NameToAddress (Sync) - Safe': function(test) {
+	it('Execute LJM_NameToAddress (Sync) - Safe', function (done) {
 		// Allocate and fill buffers required to execute LJM calls with ffi.
 		var addrName = 'AIN0';
 		var Name = ljTypeOps.string.allocate(addrName);
@@ -111,10 +113,10 @@ var test_cases = {
 		};
 
 		// Check Results
-		test.deepEqual(addressInfo, expectedData);
-		test.done();
-	},
-	'Execute LJM_NameToAddress (Async) - Safe': function(test) {
+		assert.deepEqual(addressInfo, expectedData);
+		done();
+	});
+	it('Execute LJM_NameToAddress (Async) - Safe', function (done) {
 		function testData(err, ljmError) {
 			// Parse returned data
 			var addressInfo = {
@@ -131,8 +133,8 @@ var test_cases = {
 			};
 
 			// Check Results
-			test.deepEqual(addressInfo, expectedData);
-			test.done();
+			assert.deepEqual(addressInfo, expectedData);
+			done();
 		}
 
 		// Allocate and fill buffers required to execute LJM calls with ffi.
@@ -148,9 +150,9 @@ var test_cases = {
 
 		// Execute LJM Function
 		liblabjack.LJM_NameToAddress.async(Name, Address, Type, testData);
-	},
+	});
 
-	'Execute LJM_NameToAddress (Sync) - Raw': function(test) {
+	it('Execute LJM_NameToAddress (Sync) - Raw', function (done) {
 		// Allocate and fill buffers required to execute LJM calls with ffi.
 		var addrName = 'AIN0';
 		var Name = ljTypeOps.string.allocate(addrName);
@@ -180,10 +182,10 @@ var test_cases = {
 		};
 
 		// Check Results
-		test.deepEqual(addressInfo, expectedData);
-		test.done();
-	},
-	'Execute LJM_NameToAddress (Async) - Raw': function(test) {
+		assert.deepEqual(addressInfo, expectedData);
+		done();
+	});
+	it('Execute LJM_NameToAddress (Async) - Raw', function (done) {
 		function testData(err, ljmError) {
 			// Parse returned data
 			var addressInfo = {
@@ -200,8 +202,8 @@ var test_cases = {
 			};
 
 			// Check Results
-			test.deepEqual(addressInfo, expectedData);
-			test.done();
+			assert.deepEqual(addressInfo, expectedData);
+			done();
 		}
 
 		// Allocate and fill buffers required to execute LJM calls with ffi.
@@ -217,8 +219,5 @@ var test_cases = {
 
 		// Execute LJM Function
 		ffi_liblabjack.LJM_NameToAddress.async(Name, Address, Type, testData);
-	},
-};
-
-
-exports.tests = test_cases;
+	});
+});

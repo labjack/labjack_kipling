@@ -9,9 +9,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -39,7 +39,7 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -59,11 +59,11 @@ var device_tests = {
 				);
 			}
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			performTests = false;
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -71,12 +71,12 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 4);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT4');
-			// test.ok(res.calibrationStatus.overall, 'Device Not Calibrated');
-			// test.strictEqual(res.calibrationStatus.message, 'Device Calibration is Good');
-			// test.strictEqual(res.calibrationStatus.shortMessage, 'Good');
-			test.done();
+			assert.strictEqual(res.deviceType, 4);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT4');
+			// assert.isOk(res.calibrationStatus.overall, 'Device Not Calibrated');
+			// assert.strictEqual(res.calibrationStatus.message, 'Device Calibration is Good');
+			// assert.strictEqual(res.calibrationStatus.shortMessage, 'Good');
+			done();
 		});
 	},
 	'check t4 calibration': function(test) {
@@ -85,13 +85,13 @@ var device_tests = {
 			console.log('  - Cal Status:'.green, calStatus);
 			var keys = Object.keys(calStatus);
 			keys.forEach(function(key) {
-				test.ok(calStatus[key], 'T4 Cal Check Failed: ' + key.toString());
+				assert.isOk(calStatus[key], 'T4 Cal Check Failed: ' + key.toString());
 			});
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Error', err);
-			test.ok(false, 'Failed to get the devices calibration status: ' + err.toString());
-			test.done();
+			assert.isOk(false, 'Failed to get the devices calibration status: ' + err.toString());
+			done();
 		});
 	},
 	'open device in ljlogm': function(test) {
@@ -100,7 +100,7 @@ var device_tests = {
 		function finishTest() {
 			if(finishedCheckForHWIssues && ljlogmFinished) {
 				console.log('  - Scan & LJLogM Finished'.green);
-				test.done();
+				done();
 			} else {
 				console.log(
 					'  - Trying to finish step...'.yellow,
@@ -115,12 +115,12 @@ var device_tests = {
             console.log('  - Exit LJLogM to continue test'.yellow);
 			device.checkForHardwareIssues()
 			.then(function(result) {
-				test.ok(!result.overallResult, 'Disconnected & un-cached test should fail');
+				assert.isOk(!result.overallResult, 'Disconnected & un-cached test should fail');
 				finishedCheckForHWIssues = true;
 				finishTest();
 			}, function(err) {
 				console.log('Scanning Error', err);
-				test.ok(false, 'Reported a scan error');
+				assert.isOk(false, 'Reported a scan error');
 				finishedCheckForHWIssues = true;
 				finishTest();
 			});
@@ -128,11 +128,11 @@ var device_tests = {
         3000);
 		device.openDeviceInLJLogM()
 		.then(function() {
-			test.ok(true, 'LJLogM Finished');
+			assert.isOk(true, 'LJLogM Finished');
 			ljlogmFinished = true;
 			finishTest();
 		}, function(err) {
-			test.ok(false, 'Should not fail to open in LJLogM');
+			assert.isOk(false, 'Should not fail to open in LJLogM');
 			console.log('ERROR', err);
 			ljlogmFinished = true;
 			finishTest();
@@ -144,19 +144,19 @@ var device_tests = {
 	// 		if(!result.overallResult) {
 	// 			console.log('  - HW Issues Results'.red, result);
 	// 		}
-	// 		test.ok(result.overallResult, 'Device should pass');
-			
-	// 		test.done();
+	// 		assert.isOk(result.overallResult, 'Device should pass');
+
+	// 		done();
 	// 	}, function(err) {
 	// 		console.log('Error', err);
-	// 		test.ok(false, 'Failed to get the devices calibration status: ' + err.toString());
-	// 		test.done();
+	// 		assert.isOk(false, 'Failed to get the devices calibration status: ' + err.toString());
+	// 		done();
 	// 	});
 	// },
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 };
@@ -171,7 +171,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

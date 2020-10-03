@@ -21,8 +21,7 @@ if(!path.isAbsolute(cwd)) {
 	cwd = path.resolve(path.sep, cwd);
 }
 
-var nodeunit = require(path.normalize(path.join(cwd, '../node_modules/nodeunit')));
-var nodeunit_recorder = require(path.normalize(path.join(cwd, 'nodeunit_recorder')));
+var testunit_recorder = require(path.normalize(path.join(cwd, 'nodeunit_recorder')));
 
 var testFiles = [
 	'test_kipling.js',
@@ -34,11 +33,11 @@ var testFiles = [
 	// 'mock_module_tests/mock_simple_logger.js',
 
 	/* T4 Mock Tests */
-	
+
 
 	// Execute Mock-Settings test.
 	// 'mock_module_tests/settings.js',
-	
+
 	// Execute stand-alone mock tests
 	// 'mock_module_tests/mock_file_browser.js',
 
@@ -78,7 +77,7 @@ var loadCoreResources = function(resources) {
 
 /*
 	Function called to load the application's local resources.
-	The resources are loaded starting from the directory of the 
+	The resources are loaded starting from the directory of the
 	index.html/index.js file aka the cwd of the window.
 */
 var localResourcesLoaded = false;
@@ -109,7 +108,7 @@ var getUpdateTestResults = function(divID) {
 	cachedTestDiv = undefined;
 	var updateTestResults = function() {
 
-		var savedText = nodeunit_recorder.getSavedText();
+		var savedText = testunit_recorder.getSavedText();
 		if(cachedTestDiv) {
 			cachedTestDiv.html(savedText);
 		} else {
@@ -148,7 +147,7 @@ var getRunTest = function(testFile, testDiv) {
 		});
 		testDiv.append($(newTxt));
 		try {
-			var outputHTML = nodeunit_recorder.run(
+			var outputHTML = testunit_recorder.run(
 				[testFile],
 				{},
 				getUpdateTestResults('#' + divID),
@@ -167,7 +166,7 @@ var getRunTest = function(testFile, testDiv) {
 						testResults.slideUp();
 						// console.log('Finished running test', testFile);
 					}
-					
+
 					var btn = $('#' + divID + '_button');
 					btn.on('click', function() {
 						testResults.slideToggle();

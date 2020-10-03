@@ -14,9 +14,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -45,12 +45,12 @@ var device_tests = {
 			stopTest(test, err);
 		}
 		setTimeout(function() {
-			test.done();
+			done();
 		}, 1000);
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -71,7 +71,7 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device:');
 			var info = modbus_map.getErrorInfo(err);
@@ -80,7 +80,7 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -88,38 +88,38 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'enable lua-debugging': function(test) {
 		device.write('LUA_DEBUG_ENABLE', 1)
 		.then(function(res) {
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 	'performTest readArray': function(test) {
 		device.readArray('LUA_DEBUG_DATA', 100)
 		.then(function(res) {
 			// console.log('readArray res', res);
-			test.equal(res.length, 100, 'Length is not valid');
-			test.ok(true);
-			test.done();
+			assert.equal(res.length, 100, 'Length is not valid');
+			assert.isOk(true);
+			done();
 		},function(err) {
 			// console.log('readArray error', err);
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'openDevice Ethernet': function(test) {
@@ -141,45 +141,45 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			performTests = false;
-			test.done();
+			done();
 		});
 	},
 	'enable lua-debugging Ethernet': function(test) {
 		device.write('LUA_DEBUG_ENABLE', 1)
 		.then(function(res) {
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 	'performTest readArray Ethernet': function(test) {
 		device.readArray('LUA_DEBUG_DATA', 1000)
 		.then(function(res) {
 			// console.log('readArray res', res);
-			test.equal(res.length, 1000, 'Length is not valid');
-			test.ok(true);
-			test.done();
+			assert.equal(res.length, 1000, 'Length is not valid');
+			assert.isOk(true);
+			done();
 		},function(err) {
 			// console.log('readArray error', err);
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 	'closeDevice Ethernet': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	}
 };
 
@@ -193,7 +193,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

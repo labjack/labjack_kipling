@@ -1,16 +1,11 @@
 // Legacy test for the old ListAll scan method. Expects to open real devices.
+var assert = require('chai').assert;
 
 var deviceScanner;
 var device_scanner = require('../../lib/ljswitchboard-device_scanner');
 var test_util = require('../utils/test_util');
-var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
-var printScanResultsKeys = test_util.printScanResultsKeys;
 var verifyScanResults = test_util.verifyScanResults;
-var testScanResults = test_util.testScanResults;
-
-var expDeviceTypes = require('../utils/expected_devices').expectedDevices;
-var reqDeviceTypes = require('../utils/required_devices').requiredDeviceTypes;
 
 var device_curator = require('ljswitchboard-ljm_device_curator');
 
@@ -28,31 +23,31 @@ var debugScanData = getLogger(DEBUG_SCAN_DATA);
 var debugScanTime = getLogger(DEBUG_SCAN_TIME);
 
 var devices = [];
-var expectedDeviceTypes = undefined;
+var expectedDeviceTypes;
 
-exports.tests = {
-	'Starting Basic Test': function(test) {
+describe('cached scan', function() {
+	it('Starting Basic Test', function (done) {
 		console.log('');
 		console.log('*** Starting Basic (OpenAll) Test ***');
 
 		deviceScanner = device_scanner.getDeviceScanner('open_all');
 
-		test.done();
-	},
-	'enable device scanning': function(test) {
+		done();
+	});
+	it('enable device scanning', function (done) {
 
 		deviceScanner.enableDeviceScanning()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'clear cached scan results': function(test) {
+	});
+	it('clear cached scan results', function (done) {
 		deviceScanner.clearCachedScanResults()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'perform initial cached read': function(test) {
+	});
+	it('perform initial cached read', function (done) {
 		var startTime = new Date();
 		console.log('  - Performing initial cached scan...');
 		deviceScanner.getLastFoundDevices(devices)
@@ -66,19 +61,19 @@ exports.tests = {
 			debugScanTime('  - Duration'.cyan, (endTime - startTime)/1000);
 
 			// Cerify that no devices were found.
-			test.deepEqual(deviceTypes, [], 'Initial Cached Device Types should be an empty array');
+			assert.deepEqual(deviceTypes, [], 'Initial Cached Device Types should be an empty array');
 
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error');
-			test.ok(false, 'Scan should have worked properly');
-			test.done();
+			assert.isOk(false, 'Scan should have worked properly');
+			done();
 		});
-	},
+	});
 	/*
 	 * This test determines what devices are currently available for other tests to compare results with.
 	 */
-	'perform initial scan': function(test) {
+	it('perform initial scan', function (done) {
 		var currentDeviceList = [];
 		var startTime = new Date();
 		console.log('  - Performing Initial scan...');
@@ -88,29 +83,29 @@ exports.tests = {
 			debugScanData('Finished initial scan, scan data', deviceTypes);
 			printScanResultsData(deviceTypes);
 
-			verifyScanResults(deviceTypes, test, {debug: false});
+			verifyScanResults(deviceTypes, {debug: false});
 			var endTime = new Date();
-			// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
-			// test.ok(testStatus, 'Unexpected test result');
+			// var testStatus = testScanResults(deviceTypes, expDeviceTypes, {'test': false, 'debug': false});
+			// assert.isOk(testStatus, 'Unexpected test result');
 
 			// var testStatus = testRequiredDevices(deviceTypes, reqDeviceTypes, test);
-			// test.ok(testStatus, 'Unexpected test result');
+			// assert.isOk(testStatus, 'Unexpected test result');
 
 			console.log('  - Duration'.cyan, (endTime - startTime)/1000);
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error');
-			test.ok(false, 'Scan should have worked properly');
-			test.done();
+			assert.isOk(false, 'Scan should have worked properly');
+			done();
 		});
-	},
+	});
 	/*
 	 * Now we need to open a device.  This device will need to be properly detected as
 	 * a "connected" device by the cached scan in the next test.
 	 */
-	'open device': function(test) {
+	it('open device', function (done) {
 		if (process.env.SKIP_HARDWARE_TEST) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -121,18 +116,18 @@ exports.tests = {
 		device.open('LJM_dtT7', 'LJM_ctUSB', 'LJM_idANY')
 		.then(function() {
 			console.log('Opened Device', device.savedAttributes.serialNumber);
-			test.done();
+			done();
 		}, function() {
 			console.log('**** Please connect a T7 via USB ****');
 			devices[0].destroy();
 			devices = [];
-			test.ok(false, 'Please connect a T7 via USB');
-			test.done();
+			assert.isOk(false, 'Please connect a T7 via USB');
+			done();
 		});
-	},
-	'perform cached scan': function(test) {
+	});
+	it('perform cached scan', function (done) {
 		if(!devices[0]) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -190,19 +185,19 @@ exports.tests = {
 
 			deviceTypes.forEach(checkForDeviceType);
 
-			test.ok(appropriateDeviceTypeFound, 'appropriateDeviceTypeFound was not true.'),
-			test.ok(foundOpenDevice, 'foundOpenDevice was not true.'),
-			test.ok(foundDeviceConnectionType, 'foundDeviceConnectionType was not true.'),
-			test.ok(correctlyReportedDeviceAsOpen, 'correctlyReportedDeviceAsOpen was not true.'),
-			test.done();
+			assert.isOk(appropriateDeviceTypeFound, 'appropriateDeviceTypeFound was not true.'),
+			assert.isOk(foundOpenDevice, 'foundOpenDevice was not true.'),
+			assert.isOk(foundDeviceConnectionType, 'foundDeviceConnectionType was not true.'),
+			assert.isOk(correctlyReportedDeviceAsOpen, 'correctlyReportedDeviceAsOpen was not true.'),
+			done();
 		}, function(err) {
 			console.log('Scanning Error');
-			test.ok(false, 'Scan should have worked properly');
-			test.done();
+			assert.isOk(false, 'Scan should have worked properly');
+			done();
 		});
-	},
+	});
 
-	// 'perform secondary cached read': function(test) {
+	// it('perform secondary cached read', function (done) {
 	// 	var startTime = new Date();
 	// 	deviceScanner.getLastFoundDevices(devices)
 	// 	.then(function(deviceTypes) {
@@ -212,14 +207,14 @@ exports.tests = {
 	// 		var endTime = new Date();
 	// 		console.log('  - Duration'.cyan, (endTime - startTime)/1000);
 
-	// 		test.done();
+	// 		done();
 	// 	}, function(err) {
 	// 		console.log('Scanning Error');
-	// 		test.ok(false, 'Scan should have worked properly');
-	// 		test.done();
+	// 		assert.isOk(false, 'Scan should have worked properly');
+	// 		done();
 	// 	});
-	// },
-	'perform secondary scan': function(test) {
+	// });
+	it('perform secondary scan', function (done) {
 		// var currentDeviceList = [];
 		// var startTime = new Date();
 		// deviceScanner.findAllDevices(devices)
@@ -227,19 +222,19 @@ exports.tests = {
 		// 	console.log('finished scanning, scan data', deviceTypes);
 		// 	printScanResultsData(deviceTypes);
 		// 	console.log('Finished printing scan results');
-		// 	verifyScanResults(deviceTypes, test, {debug: false});
+		// 	verifyScanResults(deviceTypes, {debug: false});
 		// 	var endTime = new Date();
-		// 	// var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
-		// 	// test.ok(testStatus, 'Unexpected test result');
+		// 	// var testStatus = testScanResults(deviceTypes, expDeviceTypes, {'test': false, 'debug': false});
+		// 	// assert.isOk(testStatus, 'Unexpected test result');
 		// 	console.log('  - Duration'.cyan, (endTime - startTime)/1000);
-		// 	test.done();
+		// 	done();
 		// }, function(err) {
 		// 	console.log('Scanning Error');
-		// 	test.ok(false, 'Scan should have worked properly');
-		// 	test.done();
+		// 	assert.isOk(false, 'Scan should have worked properly');
+		// 	done();
 		// });
 		if(!devices[0]) {
-			test.done();
+			done();
 			return;
 		}
 
@@ -299,46 +294,46 @@ exports.tests = {
 
 			deviceTypes.forEach(checkForDeviceType);
 
-			test.ok(appropriateDeviceTypeFound, 'appropriateDeviceTypeFound was not true.'),
-			test.ok(foundOpenDevice, 'foundOpenDevice was not true.'),
-			test.ok(foundDeviceConnectionType, 'foundDeviceConnectionType was not true.'),
-			test.ok(correctlyReportedDeviceAsOpen, 'correctlyReportedDeviceAsOpen was not true.'),
-			test.done();
+			assert.isOk(appropriateDeviceTypeFound, 'appropriateDeviceTypeFound was not true.'),
+			assert.isOk(foundOpenDevice, 'foundOpenDevice was not true.'),
+			assert.isOk(foundDeviceConnectionType, 'foundDeviceConnectionType was not true.'),
+			assert.isOk(correctlyReportedDeviceAsOpen, 'correctlyReportedDeviceAsOpen was not true.'),
+			done();
 		}, function(err) {
 			console.log('Scanning Error');
-			test.ok(false, 'Scan should have worked properly');
-			test.done();
+			assert.isOk(false, 'Scan should have worked properly');
+			done();
 		});
-	},
-	// 'read device SERIAL_NUMBER': function(test) {
+	});
+	// it('read device SERIAL_NUMBER', function (done) {
 	// 	if(devices[0]) {
 	// 		devices[0].iRead('SERIAL_NUMBER')
 	// 		.then(function(res) {
 	// 			console.log('  - SN Res:'.green, res.val);
-	// 			test.done();
+	// 			done();
 	// 		}, function(err) {
 	// 			console.log('Failed to read SN:', err, devices[0].savedAttributes);
-	// 			test.ok(false, 'Failed to read SN: ' + JSON.stringify(err));
-	// 			test.done();
+	// 			assert.isOk(false, 'Failed to read SN: ' + JSON.stringify(err));
+	// 			done();
 	// 		});
 	// 	} else {
-	// 		test.done();
+	// 		done();
 	// 	}
-	// },
-	'close device': function(test) {
+	// });
+	it('close device', function (done) {
 		if(devices[0]) {
 			devices[0].close()
 			.then(function() {
-				test.done();
+				done();
 			}, function() {
-				test.done();
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'unload': function(test) {
+	});
+	it('unload', function (done) {
 		device_scanner.unload();
-		test.done();
-	},
-};
+		done();
+	});
+});

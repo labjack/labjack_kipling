@@ -1,5 +1,0 @@
-#!/usr/bin/env node
-'use strict';
-
-console.log('in bin/kipling-cli');
-var kipling_cli = require('../lib/kipling-cli.js');

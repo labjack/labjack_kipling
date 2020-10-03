@@ -93,9 +93,6 @@
         "name": "simple_logger_epoch",
         "active": false
     }, {
-        "name": "device_updater",
-        "active": false
-    }, {
         "name": "device_updater_fw",
         "active": true
     }, {

@@ -9,9 +9,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceInfo = {
@@ -49,12 +49,12 @@ exports.tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'configure mock device': function(test) {
 		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
-			test.done();
+			done();
 		});
 	},
 	'openDevice - ctANY device': function(test) {
@@ -67,24 +67,24 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 5);
-			test.strictEqual(res.deviceTypeName, 'T5');
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT5');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
-			test.strictEqual(res.ip, '0.0.0.0');
-			test.strictEqual(res.ipAddress, '0.0.0.0');
-			test.done();
+			assert.strictEqual(res.deviceType, 5);
+			assert.strictEqual(res.deviceTypeName, 'T5');
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT5');
+			assert.strictEqual(res.connectionType, 1);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			assert.strictEqual(res.serialNumber, deviceInfo.serialNumber);
+			assert.strictEqual(res.ip, '0.0.0.0');
+			assert.strictEqual(res.ipAddress, '0.0.0.0');
+			done();
 		});
 	},
 	'Read Device Attributes': function(test) {
@@ -105,19 +105,19 @@ exports.tests = {
 				}
 
 				if(deviceInfo[name]) {
-					test.strictEqual(resData, deviceInfo[name]);
+					assert.strictEqual(resData, deviceInfo[name]);
 				} else if(infoMapping[name]) {
-					test.strictEqual(resData, deviceInfo[infoMapping[name]]);
+					assert.strictEqual(resData, deviceInfo[infoMapping[name]]);
 				}
 				// console.log(name, resData);
 			});
-			test.done();
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 };

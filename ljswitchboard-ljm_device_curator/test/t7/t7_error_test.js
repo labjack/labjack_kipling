@@ -25,9 +25,9 @@ var getDeviceEventListener = function(eventKey) {
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -54,14 +54,14 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'attach listeners': function(test) {
 		var events = Object.keys(driver_errors);
 		events.forEach(function(eventKey) {
 			device.on(eventKey, getDeviceEventListener(eventKey));
 		});
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var reportedToCmd = false;
@@ -87,7 +87,7 @@ var device_tests = {
 					);
 				}
 				deviceFound = true;
-				test.done();
+				done();
 			}, function(err) {
 				if(!reportedToCmd) {
 					// console.log(
@@ -107,7 +107,7 @@ var device_tests = {
 		var results = [];
 		qExec(device, 'iRead', 'AIN0')(results)
 		.then(function(res) {
-			test.done();
+			done();
 		});
 	},
 	'test successful writing & caching of WIFI_PASSWORD_DEFAULT': function(test) {
@@ -116,8 +116,8 @@ var device_tests = {
 		.then(function(res) {
 			device.sRead('WIFI_PASSWORD_DEFAULT')
 			.then(function(res) {
-				test.strictEqual(netPass, res.val, 'Password does not match');
-				test.done();
+				assert.strictEqual(netPass, res.val, 'Password does not match');
+				done();
 			});
 		});
 	},
@@ -128,14 +128,14 @@ var device_tests = {
 		.then(function(res) {
 			res.forEach(function(r) {
 				r.retData.forEach(function(ret) {
-					test.deepEqual(
+					assert.deepEqual(
 						ret,
 						{'address': 'DAC0A', 'isErr': true, 'data': 'Invalid Address'}
 					);
 				});
 			});
-			test.strictEqual(capturedEvents.length, 1);
-			test.done();
+			assert.strictEqual(capturedEvents.length, 1);
+			done();
 		});
 	},
 	'disconnect device': function(test) {
@@ -152,7 +152,7 @@ var device_tests = {
 			}, function(err) {
 				if(err === 1239) {
 					console.log('  - Device Disconnected');
-					test.strictEqual(capturedEvents.length, 2);
+					assert.strictEqual(capturedEvents.length, 2);
 				} else {
 					console.log('Encountered Error', err);
 					setTimeout(disconnectDevice, 100);
@@ -167,11 +167,11 @@ var device_tests = {
 				} else if(capturedEvents.length == 4) {
 					ok = true;
 				}
-				test.ok(ok, 'Unexpected number of captured events during disconnect phase');
-				
+				assert.isOk(ok, 'Unexpected number of captured events during disconnect phase');
+
 				try {
 					device.removeListener('DEVICE_ERROR', errorListener);
-					test.done();
+					done();
 				}catch(err) {
 					console.log('err', err);
 				}
@@ -185,9 +185,9 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'performTestRead (1)': function(test) {
@@ -198,16 +198,16 @@ var device_tests = {
 		.then(qExec(device, 'read', 'AIN0'))
 		.then(function(res) {
 			res.forEach(function(r) {
-				test.strictEqual(r.errData, driver_const.LJN_DEVICE_NOT_CONNECTED);
+				assert.strictEqual(r.errData, driver_const.LJN_DEVICE_NOT_CONNECTED);
 				// console.log(
 				// 	'Error Info',
 				// 	modbusMap.getErrorInfo(r.errData)
 				// );
 			});
-			// The first read after a device disconnects should fail but report 
+			// The first read after a device disconnects should fail but report
 			// a "reconnecting" error.
-			// test.strictEqual(capturedEvents.length, 1, JSON.stringify(capturedEvents, null, 2));
-			test.done();
+			// assert.strictEqual(capturedEvents.length, 1, JSON.stringify(capturedEvents, null, 2));
+			done();
 		});
 	},
 	'performTestRead (2)': function(test) {
@@ -217,13 +217,13 @@ var device_tests = {
 		.then(qExec(device, 'read', 'AIN0'))
 		.then(function(res) {
 			res.forEach(function(r) {
-				test.strictEqual(r.errData, driver_const.LJN_DEVICE_NOT_CONNECTED);
+				assert.strictEqual(r.errData, driver_const.LJN_DEVICE_NOT_CONNECTED);
 				// console.log(
 				// 	'Error Info',
 				// 	modbusMap.getErrorInfo(r.errData)
 				// );
 			});
-			test.done();
+			done();
 		});
 	},
 	'performTestqRead': function(test) {
@@ -233,9 +233,9 @@ var device_tests = {
 		.then(qExec(device, 'read', 'AIN0'))
 		.then(function(res) {
 			res.forEach(function(r) {
-				test.strictEqual(r.errData, driver_const.LJN_DEVICE_NOT_CONNECTED);
+				assert.strictEqual(r.errData, driver_const.LJN_DEVICE_NOT_CONNECTED);
 			});
-			test.done();
+			done();
 		});
 	},
 	'performTestReadMultiple': function(test) {
@@ -244,13 +244,13 @@ var device_tests = {
 		.then(function(res) {
 			res.forEach(function(r) {
 				r.retData.forEach(function(ret) {
-					test.deepEqual(
-						ret, 
+					assert.deepEqual(
+						ret,
 						{'address': 'AIN0', 'isErr': true, 'data': driver_const.LJN_DEVICE_NOT_CONNECTED}
 					);
 				});
 			});
-			test.done();
+			done();
 		});
 	},
 	'test readMany': function(test) {
@@ -258,9 +258,9 @@ var device_tests = {
 		qExec(device, 'readMany', ['AIN0','AIN0'])(results)
 		.then(function(res) {
 			res.forEach(function(r) {
-				test.deepEqual(r.errData, {'retError': driver_const.LJN_DEVICE_NOT_CONNECTED, 'errFrame': 0});
+				assert.deepEqual(r.errData, {'retError': driver_const.LJN_DEVICE_NOT_CONNECTED, 'errFrame': 0});
 			});
-			test.done();
+			done();
 		});
 	},
 	'test write': function(test) {
@@ -270,9 +270,9 @@ var device_tests = {
 		.then(qExec(device, 'write', 'DAC0', 1.0))
 		.then(function(res) {
 			res.forEach(function(r) {
-				test.strictEqual(r.errData, driver_const.LJN_DEVICE_NOT_CONNECTED);
+				assert.strictEqual(r.errData, driver_const.LJN_DEVICE_NOT_CONNECTED);
 			});
-			test.done();
+			done();
 		});
 	},
 	'test writeMultiple': function(test) {
@@ -281,13 +281,13 @@ var device_tests = {
 		.then(function(res) {
 			res.forEach(function(r) {
 				r.retData.forEach(function(ret) {
-					test.deepEqual(
+					assert.deepEqual(
 						ret,
 						{'address': 'DAC0', 'isErr': true, 'data': driver_const.LJN_DEVICE_NOT_CONNECTED}
 					);
 				});
 			});
-			test.done();
+			done();
 		});
 	},
 	'test writeMany': function(test) {
@@ -295,9 +295,9 @@ var device_tests = {
 		qExec(device, 'writeMany', ['DAC0','DAC0'], [1.0, 1.0])(results)
 		.then(function(res) {
 			res.forEach(function(r) {
-				test.deepEqual(r.errData, {'retError': driver_const.LJN_DEVICE_NOT_CONNECTED, 'errFrame': 0});
+				assert.deepEqual(r.errData, {'retError': driver_const.LJN_DEVICE_NOT_CONNECTED, 'errFrame': 0});
 			});
-			test.done();
+			done();
 		});
 	},
 	'test iRead': function(test) {
@@ -306,12 +306,12 @@ var device_tests = {
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
 				// console.log('execResult', execResult);
-				test.strictEqual(
+				assert.strictEqual(
 					execResult.errData.errorCode,
 					driver_const.LJN_DEVICE_NOT_CONNECTED
 				);
 			});
-			test.done();
+			done();
 		});
 	},
 	'test iReadMany': function(test) {
@@ -319,12 +319,12 @@ var device_tests = {
 		qExec(device, 'iReadMany', ['AIN0','AIN1'])(results)
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
-				test.strictEqual(
+				assert.strictEqual(
 					execResult.errData.errorCode,
 					driver_const.LJN_DEVICE_NOT_CONNECTED
 				);
 			});
-			test.done();
+			done();
 		});
 	},
 	'test iReadMultiple': function(test) {
@@ -333,14 +333,14 @@ var device_tests = {
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
 				execResult.retData.forEach(function(result) {
-					test.ok(result.isErr, 'An error should have occured');
-					test.strictEqual(
+					assert.isOk(result.isErr, 'An error should have occured');
+					assert.strictEqual(
 						result.data.errorCode,
 						driver_const.LJN_DEVICE_NOT_CONNECTED
 					);
 				});
 			});
-			test.done();
+			done();
 		});
 	},
 	'test sRead': function(test) {
@@ -348,12 +348,12 @@ var device_tests = {
 		qExec(device, 'sRead', 'AIN0')(results)
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
-				test.ok(
+				assert.isOk(
 					typeof(execResult.retData) !== 'undefined',
 					'Result should be returned'
 				);
 			});
-			test.done();
+			done();
 		});
 	},
 	'test sReadMany': function(test) {
@@ -361,12 +361,12 @@ var device_tests = {
 		qExec(device, 'sReadMany', ['AIN0','AIN1'])(results)
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
-				test.ok(
+				assert.isOk(
 					typeof(execResult.retData) !== 'undefined',
 					'Result should be returned'
 				);
 			});
-			test.done();
+			done();
 		});
 	},
 	'test sReadMultiple': function(test) {
@@ -375,14 +375,14 @@ var device_tests = {
 		.then(function(execResults) {
 			execResults.forEach(function(execResult) {
 				execResult.retData.forEach(function(result) {
-					test.ok(!result.isErr, 'An error should not have occured');
-					test.ok(
+					assert.isOk(!result.isErr, 'An error should not have occured');
+					assert.isOk(
 						typeof(result.data) !== 'undefined',
 						'Result should be returned'
 					);
 				});
 			});
-			test.done();
+			done();
 		});
 	},
 	'test reconnectToDevice': function(test) {
@@ -391,7 +391,7 @@ var device_tests = {
 		var numSuccesses = 0;
 		var finishTest = function() {
 			if(numSuccesses > 1) {
-				test.done();
+				done();
 			} else {
 				console.log('  * Verifying new device attributes');
 			}
@@ -400,7 +400,7 @@ var device_tests = {
 			device.read('AIN0')
 			.then(function(res) {
 				console.log('  - Device Reconnected');
-				// test.strictEqual(capturedEvents.length, 1, JSON.stringify(capturedEvents, null, 2));
+				// assert.strictEqual(capturedEvents.length, 1, JSON.stringify(capturedEvents, null, 2));
 				numSuccesses += 1;
 				finishTest();
 			}, function(err) {
@@ -427,9 +427,9 @@ var device_tests = {
 			// });
 			var expNumErrors = 4;
 			var expLengthErrors = 4;
-			test.strictEqual(data.numErrors, expNumErrors, 'Unexpected number of errors');
-			test.strictEqual(data.errors.length, expLengthErrors, 'Unexpected number of errors');
-			test.done();
+			assert.strictEqual(data.numErrors, expNumErrors, 'Unexpected number of errors');
+			assert.strictEqual(data.errors.length, expLengthErrors, 'Unexpected number of errors');
+			done();
 		});
 	},
 	'clear device errors': function(test) {
@@ -439,16 +439,16 @@ var device_tests = {
 			// console.log('Error Data', data);
 			var expNumErrors = 0;
 			var expLengthErrors = 0;
-			test.strictEqual(data.numErrors, expNumErrors, 'Unexpected number of errors');
-			test.strictEqual(data.errors.length, expLengthErrors, 'Unexpected number of errors');
-			test.done();
+			assert.strictEqual(data.numErrors, expNumErrors, 'Unexpected number of errors');
+			assert.strictEqual(data.errors.length, expLengthErrors, 'Unexpected number of errors');
+			done();
 		});
 	},
 	'disconnect device again': function(test) {
 		console.log('  - Please Disconnect Device');
 		device.once('DEVICE_DISCONNECTED', function() {
 			console.log('  - Device Disconnected');
-			test.done();
+			done();
 		});
 	},
 	'reconnect device again': function(test) {
@@ -457,18 +457,18 @@ var device_tests = {
 		device.once('DEVICE_RECONNECTED', function() {
 			console.log('  - Device Reconnected');
 			receivedReconnectEvent = true;
-			// test.done();
+			// done();
 		});
 		device.once('DEVICE_ATTRIBUTES_CHANGED', function() {
 			console.log('  - Device Attributes Updated');
-			test.ok(receivedReconnectEvent, 'Did not receive reconnect event');
-			test.done();
+			assert.isOk(receivedReconnectEvent, 'Did not receive reconnect event');
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	}
 };
@@ -483,7 +483,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

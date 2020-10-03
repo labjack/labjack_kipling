@@ -17,9 +17,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -41,7 +41,7 @@ var fwVersionStr = shipping_fw.fwVersionStr;
 
 function createDeviceUpdater(test) {
 	var fwVersionNum = t7fwVersionNum;
-	
+
 	this.performDeviceUpdate = function(device, upgradeIsFinished) {
 		function pInfo() {
 			var dataToPrint = [
@@ -87,7 +87,7 @@ function createDeviceUpdater(test) {
 					// The result is a new device object
 					// console.log('Upgrade Success', res);
 					// console.log('Number of created devices', ljDevice.getNumCreatedDevices());
-					test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
+					assert.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
 					var ljmDevice = device.getDevice();
 					// console.log(
 					// 	'Reading device FW version',
@@ -98,18 +98,18 @@ function createDeviceUpdater(test) {
 
 					// Make sure that the device disconnect & reconnect events get
 					// fired.
-					test.ok(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
-					test.ok(deviceReconnectEventReceived, 'Reconnect event should have been detected');
+					assert.isOk(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
+					assert.isOk(deviceReconnectEventReceived, 'Reconnect event should have been detected');
 					device.read('FIRMWARE_VERSION')
 					.then(function(res) {
-						test.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
+						assert.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
 						upgradeIsFinished();
 					});
 				}, function(err) {
 					pInfo("Failed to upgrade (upgrade test)", err);
 					pInfo('');
 					pInfo('');
-					test.ok(true, 'Failed to upgrade device: ' + JSON.stringify(err));
+					assert.isOk(true, 'Failed to upgrade device: ' + JSON.stringify(err));
 					device.read('FIRMWARE_VERSION')
 					.then(function(res) {
 						pInfo('Device is still responding to messages', device.savedAttributes.serialNumber, res);
@@ -132,7 +132,7 @@ function createDeviceUpdater(test) {
 				}
 			} else {
 				console.log('  - Skipping Primary FW Update T7:', device.savedAttributes.serialNumber,'already has fw:', res.val);
-				test.ok(true);
+				assert.isOk(true);
 				upgradeIsFinished();
 			}
 		});
@@ -153,7 +153,7 @@ var device_tests = {
 	'initialization': function(test) {
 		console.log('');
 		console.log('**** mult_upgrade_primary_firmware ****');
-		test.done();
+		done();
 	},
 	'list all devices...': function(test) {
 		var foundDevices = driver.listAllSync('LJM_dtT7', 'LJM_ctUSB');
@@ -161,7 +161,7 @@ var device_tests = {
 		deviceSerials = foundDevices.map(function(foundDevice) {
 			return foundDevice.serialNumber;
 		});
-		test.done();
+		done();
 	},
 	'open all T7s': function(test) {
 		console.log('Opening Devices', deviceSerials);
@@ -186,12 +186,12 @@ var device_tests = {
 					cb();
 				});
 			}, function(err) {
-				test.done();
+				done();
 			});
 	},
 	'check for connected devices': function(test) {
 		if(devices.length > 0) {
-			test.done();
+			done();
 		} else {
 			stopTest(test, new Error('Connect T7s via USB'));
 		}
@@ -207,11 +207,11 @@ var device_tests = {
 				);
 				cb();
 			}, function(err) {
-				test.done();
+				done();
 			});
 	},
 	'upgradeFirmware': function(test) {
-		
+
 
 
 		async.each(
@@ -222,7 +222,7 @@ var device_tests = {
 				deviceUpdater.performDeviceUpdate(device, cb);
 			},
 			function(err) {
-				test.done();
+				done();
 			});
 	},
 	'Get FW Related Info': function(test) {
@@ -247,7 +247,7 @@ var device_tests = {
 			devices,
 			getDeviceInformation,
 			function(err) {
-				test.done();
+				done();
 			});
 	},
 	'close T7s': function(test) {
@@ -262,21 +262,21 @@ var device_tests = {
 					cb();
 				});
 			}, function(err) {
-				test.done();
+				done();
 			});
 	},
 	// 'closeDevice': function(test) {
 	// 	// setTimeout(function() {
 	// 		device.close()
 	// 		.then(function() {
-	// 			test.done();
+	// 			done();
 	// 		}, function(err) {
 	// 			console.log("Failure");
-	// 			test.ok(false);
-	// 			test.done();
+	// 			assert.isOk(false);
+	// 			done();
 	// 		});
 	// 	// }, 5000);
-		
+
 	// },
 };
 
@@ -290,7 +290,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

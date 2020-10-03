@@ -8,7 +8,7 @@
     "start": "node ./demo-app/console-app.js",
     "winNode32": ".\\test_binaries\\win32\\ia32\\0_11_13\\node_32.exe ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
     "winNode64": ".\\test_binaries\\win32\\x64\\0_11_13\\node_64.exe ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
-    "basicTest": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js",
+    "basicTest": "mocha",
     "test": "npm run basicTest",
     "package": "echo \"Error: no package command specified\" && exit 1"
   },
@@ -38,7 +38,7 @@
     "comment-json": "2.x.x",
     "dict": "1.4.0",
     "ffi": "2.3.0",
-    "handlebars": "^4.4.3",
+    "handlebars": "4.7.6",
     "json-parser": "^3.1.2",
     "labjack-nodejs": "*",
     "ljm-ffi": "*",
@@ -62,7 +62,8 @@
     "colors": "1.4.0",
     "diff": ">=3.5.0",
     "fs-extra": "0.18.4",
-    "nodeunit": "0.11.3"
+    "mocha": "7.2.0",
+    "chai": "^4.2.0"
   },
   "custom-deps": {
     "ljswitchboard-device_scanner": "*",

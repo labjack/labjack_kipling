@@ -1,21 +1,20 @@
-
 /**
 	This test aims to show how the io_manager library should be used.  It
 	shows the initialization, some basic usage steps, and destruction of the
 	library.
 **/
 
+var assert = require('chai').assert;
+
 var fse = require('fs-extra');
 var path = require('path');
 
-var LOG_CWD = path.join(process.cwd(),'test','simple_logger','output');
+var LOG_CWD = path.join(process.cwd(), 'test', 'simple_logger', 'output');
 var TEST_NAME = 'io_man-simp_log_basic_test';
 
 var utils = require('../utils/utils');
-var testDeviceObject = utils.testDeviceObject;
 var testDeviceObjects = utils.testDeviceObjects;
 
-var q = require('q');
 var constants = require('../../lib/common/constants');
 
 
@@ -28,7 +27,7 @@ function getPrinter(ENABLED) {
 		if(ENABLED) {
 			console.log.apply(console, arguments);
 		}
-	}
+	};
 }
 var debug = getPrinter(ENABLE_DEBUG);
 
@@ -101,8 +100,11 @@ var printDeviceInfo = function(device) {
 		}
 	});
 };
-exports.tests = {
-	'initialization': function(test) {
+
+describe('simple logger basic', function() {
+	return;
+	this.skip();
+	it('initialization', function (done) {
 		console.log('');
 		console.log('**** simple_logger_basic_test ****');
 		console.log('**** No Devices Required ****');
@@ -110,7 +112,7 @@ exports.tests = {
 		// Require the io_manager library
 		io_manager = require('../../lib/io_manager');
 
-		// Require the io_interface that gives access to the ljm driver, 
+		// Require the io_interface that gives access to the ljm driver,
 		// device controller, logger, and file_io_controller objects.
 		io_interface = io_manager.io_interface();
 
@@ -125,7 +127,7 @@ exports.tests = {
 			device_controller = io_interface.getDeviceController();
 
 			var eventKeys = Object.keys(constants.deviceControllerEvents);
-			
+
 			eventKeys.forEach(function(eventKey) {
 				var eventName = constants.deviceControllerEvents[eventKey];
 				device_controller.on(
@@ -134,185 +136,184 @@ exports.tests = {
 				);
 			});
 
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'error initializing io_interface' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'error initializing io_interface' + JSON.stringify(err));
+			done();
 		});
-	},
-	'open mock device': function(test) {
+	});
+	it('open mock device', function (done) {
 		var params = mockDevices[0];
 
 		device_controller.openDevice(params)
 		.then(function(newDevice) {
 			device = newDevice;
-			test.ok(true, 'Device has been opened.');
-			test.done();
+			assert.isOk(true, 'Device has been opened.');
+			done();
 		}, function(err) {
 			console.log("Error opening device", err);
-			test.ok(false, 'failed to create new device object');
-			test.done();
+			assert.isOk(false, 'failed to create new device object');
+			done();
 		});
-	},
-	'open second device': function(test) {
+	});
+	it('open second device', function (done) {
 		capturedEvents = [];
 		// Configure the device so that its serial number is one of the mock
 		// devices that gets found.
 		var params = mockDevices[1];
-		
+
 
 		device_controller.openDevice(params)
 		.then(function(newDevice) {
 			deviceB = newDevice;
-			test.ok(true, 'Device has been opened.');
-			test.done();
+			assert.isOk(true, 'Device has been opened.');
+			done();
 		}, function(err) {
 			console.log("Error opening device", err);
-			test.ok(false, 'failed to create new device object');
-			test.done();
+			assert.isOk(false, 'failed to create new device object');
+			done();
 		});
-	},
-	'get number of devices': function(test) {
+	});
+	it('get number of devices', function (done) {
 		device_controller.getNumDevices()
 		.then(function(numDevices) {
-			test.strictEqual(numDevices, 2, 'Unexpected number of already open devices');
-			test.done();
+			assert.strictEqual(numDevices, 2, 'Unexpected number of already open devices');
+			done();
 		});
-	},
-	'get device listing': function(test) {
+	});
+	it('get device listing', function (done) {
 		device_controller.getDeviceListing()
 		.then(function(foundDevices) {
-			test.strictEqual(foundDevices.length, 2, 'Unexpected number of already open devices');
+			assert.strictEqual(foundDevices.length, 2, 'Unexpected number of already open devices');
 			// console.log('Listing', foundDevices);
-			test.done();
+			done();
 		});
-	},
-	'get devices': function(test) {
+	});
+	it('get devices', function (done) {
 		device_controller.getDevices()
 		.then(function(devices) {
 			try {
-				test.strictEqual(devices.length, 2, 'Unexpected number of already open devices');
+				assert.strictEqual(devices.length, 2, 'Unexpected number of already open devices');
 				devices.forEach(function(device, i) {
 					var expDevice = mockDevices[i];
 				});
-				testDeviceObjects(test, devices, mockDevices);
+				testDeviceObjects(devices, mockDevices);
 				// console.log('Device Objects', devices);
-				test.done();
+				done();
 			} catch(err) {
 				console.log('err', err, err.stack);
 			}
 		});
-	},
-	'initialize logger': function(test) {
+	});
+	it('initialize logger', function (done) {
 		device_controller.initializeLogger()
 		.then(function(res) {
 			// debug('Initialized Logger');
-			test.ok(true, 'Initialized logger');
-			test.done();
+			assert.isOk(true, 'Initialized logger');
+			done();
 		}, function(err) {
 			console.error('Failed to initialize logger', err);
-			test.ok(false, 'Failed to init logger.');
-			test.done();
+			assert.isOk(false, 'Failed to init logger.');
+			done();
 		});
-	},
-	'update logger device listing': function(test) {
+	});
+	it('update logger device listing', function (done) {
 		device_controller.updateLoggerDeviceListing()
 		.then(function(res) {
 			// debug('Updated Loggers device listing');
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
 			console.error('Failed to update dev listing', err);
-			test.ok(false, 'Failed to update dev listing.');
-			test.done();
+			assert.isOk(false, 'Failed to update dev listing.');
+			done();
 		});
-	},
-	'create output directory': function(test) {
+	});
+	it('create output directory', function (done) {
 		fse.ensureDir(LOG_CWD, function(err) {
 			if(err) {
 				console.log('Error ensuring directory', err);
-				test.ok(false, 'Failed to create output directory');
+				assert.isOk(false, 'Failed to create output directory');
 			} else {
-				test.ok(true);
+				assert.isOk(true);
 			}
-			test.done();
+			done();
 		});
-	},
-	'configure logger with basic configs.': function(test) {
+	});
+	it('configure logger with basic configs.', function (done) {
 		device_controller.configLoggerWithBasicConfigs(LOG_CWD, TEST_NAME)
 		.then(function(res) {
 			debug('Updated logger config');
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
 			console.error('Failed to update  logger config', err);
-			test.ok(false, 'Failed to update  logger config.');
-			test.done();
+			assert.isOk(false, 'Failed to update  logger config.');
+			done();
 		});
-	},
-	'start logger': function(test) {
+	});
+	it('start logger', function (done) {
 		device_controller.startLogger()
 		.then(function(res) {
 			debug('Started logger');
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
 			console.error('Failed to start logger', err);
-			test.ok(false, 'Failed to start logger.');
-			test.done();
+			assert.isOk(false, 'Failed to start logger.');
+			done();
 		});
-	},
-	'wait for logger to run': function(test) {
+	});
+	it('wait for logger to run', function (done) {
 		// device_controller.once()
 
 		setTimeout(function() {
 			device_controller.stopLogger()
 			.then(function succ() {
 				debug('Logger Stopped-succ');
-				test.ok(true);
-				test.done();
+				assert.isOk(true);
+				done();
 			}, function err() {
 				debug('Logger Stopped-err');
-				test.ok(false, 'logger should have stopped');
-				test.done();
+				assert.isOk(false, 'logger should have stopped');
+				done();
 			});
-		}, 5000)
-	},
-	'close mock device': function(test) {
+		}, 5000);
+	});
+	it('close mock device', function (done) {
 		device.close()
 		.then(function(res) {
-			test.ok(true, 'device has been closed');
-			test.done();
+			assert.isOk(true, 'device has been closed');
+			done();
 		}, function(err) {
 			console.log('Failed to close', err);
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
-	},
-	
-	'close mock device (2)': function(test) {
+	});
+	it('close mock device (2)', function (done) {
 		deviceB.close()
 		.then(function(res) {
-			test.ok(true, 'device has been closed');
-			test.done();
+			assert.isOk(true, 'device has been closed');
+			done();
 		}, function(err) {
 			console.log('Failed to close', err);
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
-	},
-	'destruction': function(test) {
+	});
+	it('destruction', function (done) {
 		setImmediate(function() {
 			io_interface.destroy()
 			.then(function(res) {
 				// io_interface process has been shut down
-				test.ok(true);
-				test.done();
+				assert.isOk(true);
+				done();
 			}, function(err) {
-				test.ok(false, 'io_interface failed to shut down' + JSON.stringify(err));
-				test.done();
+				assert.isOk(false, 'io_interface failed to shut down' + JSON.stringify(err));
+				done();
 			});
 		});
-	}
-};
+	});
+});

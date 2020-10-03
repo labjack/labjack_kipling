@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 var version_manager;
 var versionData;
@@ -53,54 +54,58 @@ function printVersions(versionData) {
 		}
 	});
 }
-exports.tests = {
-	'require version_manager': function(test) {
+
+describe('basic_test', function() {
+	return;
+	this.skip();
+	this.timeout(2000);
+	it('require version_manager', function (done) {
 		version_manager = require('../lib/version_manager');
-		test.done();
-	},
-	'get initial T7 Versions': function(test) {
+		done();
+	});
+	it('get initial T7 Versions', function (done) {
 		var data = version_manager.lvm.getCachedT7Versions();
-		test.ok(!data.isValid, 'T7 Firmware data should not be valid yet');
-		test.done();
-	},
-	'initialize version_manager': function(test) {
+		assert.isOk(!data.isValid, 'T7 Firmware data should not be valid yet');
+		done();
+	});
+	it('initialize version_manager', function (done) {
 		var startTime = new Date();
 		version_manager.getAllVersions()
 		.then(function(data) {
 			var endTime = new Date();
 			addExecutionTime('Initialization', startTime, endTime);
-			test.ok(true);
+			assert.isOk(true);
 			versionData = data;
 			validateVersionData(test, data, false);
-			test.done();
+			done();
 		}, function(err) {
-			test.ok(false, 'Error initializing version_manager');
-			test.done();
+			assert.isOk(false, 'Error initializing version_manager');
+			done();
 		});
-	},
-	'perform cached query': function(test) {
+	});
+	it('perform cached query', function (done) {
 		var startTime = new Date();
 		version_manager.getAllVersions()
 		.then(function(data) {
 			var endTime = new Date();
 			addExecutionTime('Get Cached Versions', startTime, endTime);
-			test.ok(true);
+			assert.isOk(true);
 			validateVersionData(test, data);
-			test.done();
+			done();
 		}, function(err) {
-			test.ok(false, 'Error getting version numbers');
-			test.done();
+			assert.isOk(false, 'Error getting version numbers');
+			done();
 		});
-	},
-	'get T7 Versions': function(test) {
+	});
+	it('get T7 Versions', function (done) {
 		var data = version_manager.lvm.getCachedT7Versions();
-		test.ok(data.isValid, 'T7 Firmware data should be valid');
+		assert.isOk(data.isValid, 'T7 Firmware data should be valid');
 		var requiredKeys = [
 			'current',
 			'old',
 			'beta'
 		];
-		
+
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
 		// printVersions(data);
@@ -110,20 +115,20 @@ exports.tests = {
 			if(givenKeys.indexOf(reqKey) >= 0) {
 				isOk = true;
 			}
-			test.ok(isOk, '(T7 Firmware) Missing a required key: ' + reqKey);
+			assert.isOk(isOk, '(T7 Firmware) Missing a required key: ' + reqKey);
 		});
 		// console.log('T7 FW Versions', data);
-		test.done();
-	},
-	'get T4 Versions': function(test) {
+		done();
+	});
+	it('get T4 Versions', function (done) {
 		var data = version_manager.lvm.getCachedT4Versions();
-		test.ok(data.isValid, 'T4 Firmware data should be valid');
+		assert.isOk(data.isValid, 'T4 Firmware data should be valid');
 		var requiredKeys = [
 			'current',
 			// 'old',
 			// 'beta'
 		];
-		
+
 		// Print out data
 		// console.log(' - T4 Test Output:', JSON.stringify(data, null, 2));
 		// printVersions(data);
@@ -133,19 +138,19 @@ exports.tests = {
 			if(givenKeys.indexOf(reqKey) >= 0) {
 				isOk = true;
 			}
-			test.ok(isOk, '(T4 Firmware) Missing a required key: ' + reqKey);
+			assert.isOk(isOk, '(T4 Firmware) Missing a required key: ' + reqKey);
 		});
 		// console.log('T4 FW Versions', data);
-		test.done();
-	},
-	'get Digit Versions': function(test) {
+		done();
+	});
+	it('get Digit Versions', function (done) {
 		var data = version_manager.lvm.getCachedDigitVersions();
-		test.ok(data.isValid, 'Digit Firmware data should be valid');
+		assert.isOk(data.isValid, 'Digit Firmware data should be valid');
 		var requiredKeys = [
 			'current',
 			'old',
 		];
-		
+
 		// Print out data
 		// console.log(' - Digit Test Output:', JSON.stringify(data, null, 2));
 		// printVersions(data);
@@ -155,18 +160,18 @@ exports.tests = {
 			if(givenKeys.indexOf(reqKey) >= 0) {
 				isOk = true;
 			}
-			test.ok(isOk, '(Digit Firmware) Missing a required key: ' + reqKey);
+			assert.isOk(isOk, '(Digit Firmware) Missing a required key: ' + reqKey);
 		});
 		// console.log('Digit FW Versions', data);
-		test.done();
-	},
-	'get LJM Versions': function(test) {
+		done();
+	});
+	it('get LJM Versions', function (done) {
 		var data = version_manager.lvm.getCachedLJMVersions();
-		
+
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
 		// printVersions(data);
-		test.ok(data.isValid, 'LJM Versions data should be valid');
+		assert.isOk(data.isValid, 'LJM Versions data should be valid');
 		var requiredKeys = ['current_win', 'current_mac', 'current_linux32', 'current_linux64'];
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey, i) {
@@ -174,17 +179,17 @@ exports.tests = {
 			if(givenKeys.indexOf(reqKey) >= 0) {
 				isOk = true;
 			}
-			test.ok(isOk, '(LJM Check) Missing a required key: ' + reqKey);
+			assert.isOk(isOk, '(LJM Check) Missing a required key: ' + reqKey);
 		});
-		test.done();
-	},
-	'get Kipling Versions': function(test) {
+		done();
+	});
+	it('get Kipling Versions', function (done) {
 		var data = version_manager.lvm.getCachedKiplingVersions();
 
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
 		// printVersions(data);
-		test.ok(data.isValid, 'Kipling Versions data should be valid');
+		assert.isOk(data.isValid, 'Kipling Versions data should be valid');
 		var requiredKeys = ['current_win', 'current_mac', 'current_linux32', 'current_linux64'];
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey, i) {
@@ -192,41 +197,41 @@ exports.tests = {
 			if(givenKeys.indexOf(reqKey) >= 0) {
 				isOk = true;
 			}
-			test.ok(isOk, '(Kipling Check) Missing a required key: ' + reqKey);
+			assert.isOk(isOk, '(Kipling Check) Missing a required key: ' + reqKey);
 		});
-		test.done();
-	},
-	'clear versions cache': function(test) {
+		done();
+	});
+	it('clear versions cache', function (done) {
 		// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
 		version_manager.lvm.clearPageCache();
 		// console.log('T7 FW Versions', version_manager.lvm.getCachedT7Versions());
-		test.done();
-	},
-	'secondary query': function(test) {
+		done();
+	});
+	it('secondary query', function (done) {
 		var startTime = new Date();
 		version_manager.getAllVersions()
 		.then(function(data) {
 			var endTime = new Date();
 			addExecutionTime('Secondary query', startTime, endTime);
-			test.ok(true);
+			assert.isOk(true);
 			validateVersionData(test, data);
-			test.done();
+			done();
 		}, function(err) {
-			test.ok(false, 'Error getting version numbers');
-			test.done();
+			assert.isOk(false, 'Error getting version numbers');
+			done();
 		});
-	},
-	'check T7 versions': function(test) {
+	});
+	it('check T7 versions', function (done) {
 		version_manager.lvm.getT7FirmwareVersions()
 		.then(function(data) {
 			// console.log('T7 FW Versions', data);
-			test.done();
+			done();
 		}, function(err) {
-			test.ok(false,'Failed to get T7 firmware versions');
-			test.done();
+			assert.isOk(false,'Failed to get T7 firmware versions');
+			done();
 		});
-	},
-	'Check load times': function(test) {
+	});
+	it('Check load times', function (done) {
 		var output = [];
 		console.log('Execution Times:');
 		executionTimes.forEach(function(executionTime) {
@@ -234,6 +239,6 @@ exports.tests = {
 			output.push(str);
 			console.log(str);
 		});
-		test.done();
-	},
-};
+		done();
+	});
+});

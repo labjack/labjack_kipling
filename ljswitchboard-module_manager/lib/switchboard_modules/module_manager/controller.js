@@ -63,7 +63,7 @@ function decorateLoadedModules(allModules)
             decoratedEntry.loaded = activeNames.indexOf(module.name) != -1;
             return decoratedEntry;
         });
-        
+
         deferred.resolve(decoratedModules);
     }
 
@@ -112,11 +112,6 @@ function getModuleList()
         {
             "name": "analog_outputs",
             "humanName": "Analog Outputs",
-            "version": "0.0.1"
-        },
-        {
-            "name": "device_updater",
-            "humanName": "Device Updater",
             "version": "0.0.1"
         },
         {

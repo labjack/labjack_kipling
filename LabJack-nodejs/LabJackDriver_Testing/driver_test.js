@@ -1,6 +1,6 @@
 /**
- * This file contains unit tests for testing functions in the 
- * LabJackDriver/device.js file.  Using "rewire" it replaces the 
+ * This file contains unit tests for testing functions in the
+ * LabJackDriver/device.js file.  Using "rewire" it replaces the
  * driver_wrapper.js library with a virtual device for testing purposes.
  *
  * @author Chris Johnson (chrisjohn404)
@@ -8,7 +8,7 @@
  * Module Dependencies:
  * rewire, can be installed using "npm install rewire"
  * device, should be located relatively "../labJackDriver/device.js"
- * test_driver_wrapper, should be located relatively 
+ * test_driver_wrapper, should be located relatively
  *    "./TestObjects/test_driver_wrapper"
  */
 
@@ -68,7 +68,7 @@ module.exports = {
             'listAll(7,1)',
         ];
         //Expected info combines both sync & async
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_ListAllS',
             'LJM_ListAllS',
             'LJM_ListAllS',
@@ -80,69 +80,69 @@ module.exports = {
         ];
         //Expected info combines both sync & async
         var expectedResultList = [
-            [   
-                { 
+            [
+                {
                     deviceType: 0,
                     connectionType: 0,
                     serialNumber: 0,
-                    ipAddress: '0.0.0.0' 
-                } 
+                    ipAddress: '0.0.0.0'
+                }
             ],
-            [ 
-                { 
+            [
+                {
                     deviceType: 0,
                     connectionType: 0,
                     serialNumber: 0,
-                    ipAddress: '0.0.0.0' 
-                } 
+                    ipAddress: '0.0.0.0'
+                }
             ],
-            [ 
-                { 
+            [
+                {
                     deviceType: 0,
                     connectionType: 0,
                     serialNumber: 0,
-                    ipAddress: '0.0.0.0' 
-                } 
+                    ipAddress: '0.0.0.0'
+                }
             ],
-            [ 
-                { 
+            [
+                {
                     deviceType: 0,
                     connectionType: 0,
                     serialNumber: 0,
-                    ipAddress: '0.0.0.0' 
-                } 
+                    ipAddress: '0.0.0.0'
+                }
             ],
-            [ 
-                { 
+            [
+                {
                     deviceType: 0,
                     connectionType: 0,
                     serialNumber: 0,
-                    ipAddress: '0.0.0.0' 
-                } 
+                    ipAddress: '0.0.0.0'
+                }
             ],
-            [ 
-                { 
+            [
+                {
                     deviceType: 0,
                     connectionType: 0,
                     serialNumber: 0,
-                    ipAddress: '0.0.0.0' 
-                } 
+                    ipAddress: '0.0.0.0'
+                }
             ],
-            [ 
-                { 
+            [
+                {
                     deviceType: 0,
                     connectionType: 0,
                     serialNumber: 0,
-                    ipAddress: '0.0.0.0' 
-                } 
+                    ipAddress: '0.0.0.0'
+                }
             ],
-            [ 
-                { 
+            [
+                {
                     deviceType: 0,
                     connectionType: 0,
                     serialNumber: 0,
-                    ipAddress: '0.0.0.0' 
-                } 
+                    ipAddress: '0.0.0.0'
+                }
             ]
         ];
 
@@ -157,21 +157,21 @@ module.exports = {
                 var results = asyncRun.getResults();
                 var argList = fakeDriver.getArgumentsList();
                 var i,j;
-                var offsetSync = 1;   
+                var offsetSync = 1;
 
                 // console.log("Function Calls", funcs);
                 // console.log("Results",results);
                 // console.log("Arguments",argList);
 
                 //Make sure we called the proper test-driver functions
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Make sure we get the proper results back
-                test.deepEqual(expectedResultList,results);
+                assert.deepEqual(expectedResultList,results);
 
-                test.done();
+                done();
             }
-        ); 
+        );
     },
     testInternalOpenAll: function(test) {
         // Manually set OpenAll to true so that this test doesn't depend on the
@@ -215,7 +215,7 @@ module.exports = {
         testOptions.forEach(generateFuncListAsync);
 
         var expectedFunctionList = syncFuncList.concat(asyncFuncList);
-        
+
 
         function createExpectedData(args) {
             var dt = args.dt;
@@ -255,12 +255,12 @@ module.exports = {
                 var results = asyncRun.getResults();
 
                 //Make sure we called the proper test-driver functions
-                test.deepEqual(expectedFunctionList, funcs);
+                assert.deepEqual(expectedFunctionList, funcs);
 
                 //Make sure we get the proper results back
-                test.deepEqual(expectedResultList, results);
+                assert.deepEqual(expectedResultList, results);
 
-                test.done();
+                done();
             }
         );
     },
@@ -274,9 +274,9 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_ErrorToString',
-            'LJM_ErrorToStringAsync' 
+            'LJM_ErrorToStringAsync'
         ];
 
         //Run the desired commands
@@ -291,10 +291,10 @@ module.exports = {
                 var argList = fakeDriver.getArgumentsList();
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -308,9 +308,9 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_LoadConstants',
-            'LJM_LoadConstantsAsync' 
+            'LJM_LoadConstantsAsync'
         ];
 
         //Run the desired commands
@@ -325,10 +325,10 @@ module.exports = {
                 var argList = fakeDriver.getArgumentsList();
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -342,9 +342,9 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_CloseAll',
-            'LJM_CloseAllAsync' 
+            'LJM_CloseAllAsync'
         ];
 
         //Run the desired commands
@@ -359,10 +359,10 @@ module.exports = {
                 var argList = fakeDriver.getArgumentsList();
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -376,9 +376,9 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_ReadLibraryConfigS',
-            'LJM_ReadLibraryConfigSAsync' 
+            'LJM_ReadLibraryConfigSAsync'
         ];
 
         //Run the desired commands
@@ -393,10 +393,10 @@ module.exports = {
                 var argList = fakeDriver.getArgumentsList();
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -427,16 +427,16 @@ module.exports = {
                 var argList = fakeDriver.getArgumentsList();
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
     'configure ethernet timeout': function(test) {
         driver.writeLibrarySync('LJM_LISTALL_TIMEOUT_MS_ETHERNET', 10000);
-        test.done();
+        done();
     },
     testReadLibraryScallSpeed: function(test) {
         console.log(' - in testReadLibraryScallSpeed');
@@ -449,14 +449,14 @@ module.exports = {
         for(var i = 0; i < numIterations; i++) {//LJM_ReadLibraryConfigS
             results.push(driver.readLibrarySync(testArg));
         }
-        
+
         // Get the final time
         var endTime = new Date();
 
         console.log(' - Duration:', endTime - startTime);
         console.log(' - Results', results);
         // console.log('Available Functions:', Object.keys(driver));
-        test.done();
+        done();
     },
     testWriteLibrary: function(test) {
         asyncRun.config(dev, driver,driver_const);
@@ -469,7 +469,7 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_WriteLibraryConfigS',
             'LJM_WriteLibraryConfigStringS',
             'LJM_WriteLibraryConfigSAsync',
@@ -488,10 +488,10 @@ module.exports = {
                 var argList = fakeDriver.getArgumentsList();
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -505,7 +505,7 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_Log',
             'LJM_LogAsync',
         ];
@@ -522,10 +522,10 @@ module.exports = {
                 var argList = fakeDriver.getArgumentsList();
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -539,7 +539,7 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_ResetLog',
             'LJM_ResetLogAsync',
         ];
@@ -556,10 +556,10 @@ module.exports = {
                 var argList = fakeDriver.getArgumentsList();
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -574,7 +574,7 @@ module.exports = {
         ];
 
         //Expected function list:
-        var expectedFunctionList = [ 
+        var expectedFunctionList = [
             'LJM_WriteLibraryConfigS',
             'LJM_WriteLibraryConfigS',
             'LJM_WriteLibraryConfigS',
@@ -597,10 +597,10 @@ module.exports = {
                 var argList = fakeDriver.getArgumentsList();
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -612,7 +612,7 @@ module.exports = {
             'getHandleInfo()',
         ];
 
-        test.done();
+        done();
     },
     getHandles: function(test) {
         asyncRun.config(dev, driver,driver_const);
@@ -621,7 +621,7 @@ module.exports = {
         var testList = [
             'getHandles()',
         ];
-        
+
         var expectedResults = [
             {handles: []}, // No handles are expected as per mock function.
             'SUCCESS' // Added at the end of the test.
@@ -645,16 +645,16 @@ module.exports = {
                 var funcs = fakeDriver.getLastFunctionCall();
                 var results = asyncRun.getResults();
                 var argList = fakeDriver.getArgumentsList();
-                
+
                 //Test to make sure expected results were returned.
-                test.deepEqual(expectedResults, asyncRun.getResults());
-                test.deepEqual(expectedResults, syncRun.getResults());
+                assert.deepEqual(expectedResults, asyncRun.getResults());
+                assert.deepEqual(expectedResults, syncRun.getResults());
 
                 //Test to see appropriate functions were called:
-                test.deepEqual(expectedFunctionList,funcs);
+                assert.deepEqual(expectedFunctionList,funcs);
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     },
@@ -733,8 +733,8 @@ module.exports = {
                     // console.log('argList',argList)
                     // console.log('addressList',addressList)
                     // console.log('funcArgs',funcArgs)
-                    
-                    
+
+
                     addressList.forEach(function(address){
                         addrA = address.split('"');
                         if (addrA.length == 1) {
@@ -816,23 +816,23 @@ module.exports = {
                         var type = typeof(arg[argName]);
                         var argument = arg[argName];
                         var expectedSize, info;
-                        test.deepEqual(expectedType,type);
+                        assert.deepEqual(expectedType,type);
                         if(expectedType === 'object') {
                             if(ljmArgName === 'aAddresses') {
                                 expectedSize = expectedInfo[execNum].addresses.length;
                                 expectedSize *= driver_const.ARCH_INT_NUM_BYTES;
                                 // console.log(argument.length,expectedSize,expectedInfo);
-                                test.strictEqual(argument.length,expectedSize,'badArg: '+ljmArgName);
+                                assert.strictEqual(argument.length,expectedSize,'badArg: '+ljmArgName);
                             } else if (ljmArgName === 'aNumRegs') {
                                 expectedSize = expectedInfo[execNum].addresses.length;
                                 expectedSize *= driver_const.ARCH_INT_NUM_BYTES;
                                 // console.log(argument.length,expectedSize);
-                                test.strictEqual(argument.length,expectedSize,'badArg: '+ljmArgName);
+                                assert.strictEqual(argument.length,expectedSize,'badArg: '+ljmArgName);
                             } else if (ljmArgName === 'aBytes') {
                                 info = expectedInfo[execNum];
                                 expectedSize *= driver_const.ARCH_INT_NUM_BYTES;
-                                test.strictEqual(argument.length,info.aBufSize,'badArg: '+ljmArgName);
-                            } 
+                                assert.strictEqual(argument.length,info.aBufSize,'badArg: '+ljmArgName);
+                            }
                             // console.log(ljmArgName,argument.length,expectedSize);
                         }
                     });
@@ -856,16 +856,16 @@ module.exports = {
                             execNum = numAsync;
                             numAsync += 1;
                         }
-                        test.strictEqual(expectedInfo[execNum].addresses.length,foundDevice.data.length,'unexpected number of results');
+                        assert.strictEqual(expectedInfo[execNum].addresses.length,foundDevice.data.length,'unexpected number of results');
                         foundDevice.data.forEach(function(devData,devDataIndex){
                             var expectedName = expectedInfo[execNum].namesList[devDataIndex];
-                            test.strictEqual(devData.name,expectedName,'bad Returned name');
+                            assert.strictEqual(devData.name,expectedName,'bad Returned name');
                         });
                     });
                 });
 
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
     }

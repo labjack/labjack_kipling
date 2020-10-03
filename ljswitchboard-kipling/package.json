@@ -34,14 +34,15 @@
   },
   "devDependencies": {
     "diff": ">=3.5.0",
-    "nodeunit": "0.11.3",
-    "csslint": "1.0.5"
+    "csslint": "1.0.5",
+    "mocha": "7.2.0",
+    "chai": "^4.2.0"
   },
   "directories": {
     "lib": "./lib"
   },
   "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+    "test": "mocha"
   },
   "window": {
     "title": "Kipling",

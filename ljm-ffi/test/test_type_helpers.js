@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 // Define functions to assist with handling various C data types.
 var type_helpers = require('../lib/type_helpers');
@@ -13,14 +13,14 @@ var ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
 var ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 
 
-function testValues(test, userVal, expVal, type, size, expErr) {
+function testValues(assert, userVal, expVal, type, size, expErr) {
 	var throwsError = false;
 	try {
 		var buf;
 		var finalVal;
 		if(Array.isArray(userVal)) {
 			buf = ljTypeOps[type].allocate(userVal);
-			test.equal(
+			assert.equal(
 				buf.length,
 				size * userVal.length,
 				'Array size should be size * array.length'
@@ -28,14 +28,14 @@ function testValues(test, userVal, expVal, type, size, expErr) {
 
 			buf = ljTypeOps[type].fill(buf, userVal);
 			finalVal = ljTypeOps[type].parse(buf);
-			test.deepEqual(expVal, finalVal, 'type: '+type+' should be equal');
+			assert.deepEqual(expVal, finalVal, 'type: '+type+' should be equal');
 		} else if ( type.indexOf('*') >= 0 ) {
 			buf = ljTypeOps[type].allocate(userVal);
-			test.equal(buf.length, size, 'type: '+type+' buffer should be 1 byte long');
+			assert.equal(buf.length, size, 'type: '+type+' buffer should be 1 byte long');
 
 			buf = ljTypeOps[type].fill(buf, userVal);
 			finalVal = ljTypeOps[type].parse(buf);
-			test.equal(expVal, finalVal, 'type: '+type+' should be equal');
+			assert.equal(expVal, finalVal, 'type: '+type+' should be equal');
 		}
 	} catch(err) {
 		throwsError = true;
@@ -43,13 +43,13 @@ function testValues(test, userVal, expVal, type, size, expErr) {
 			console.log('Error', err, err.stack);
 		}
 	}
-	test.equal(throwsError, expErr, 'Un-Expected error/non-error');
+	assert.equal(throwsError, expErr, 'Un-Expected error/non-error');
 }
-function performTestType(test, type) {
+function performTestType(assert, type) {
 	var testData = type_tests[type];
 	testData.test_vals.forEach(function(testVal) {
 		testValues(
-			test,
+			assert,
 			testVal.start,
 			testVal.end,
 			testData.type,
@@ -167,15 +167,17 @@ type_tests['a-char**'] = {
 };
 
 /* Define Test Cases */
-exports.tests = {
-	'hello world': function(test) {
-		test.done();
-	},
-	'verify defined types': function(test) {
+
+
+describe('test_type_helpers', function() {
+	it('hello world', function (done) {
+		done();
+	});
+	it('verify defined types', function (done) {
 		var mapKeys = Object.keys(ljTypeMap);
 		var opsKeys = Object.keys(ljTypeOps);
 
-		test.equal(
+		assert.equal(
 			mapKeys.length,
 			opsKeys.length,
 			'ljType Lengths do not match.'
@@ -183,52 +185,52 @@ exports.tests = {
 
 		for(var i = 0; i < mapKeys.length; i++) {
 		    // console.log(mapKeys[i], opsKeys[i]);
-		    test.strictEqual(
+			assert.strictEqual(
 		    	mapKeys[i],
 		    	opsKeys[i],
 		    	'ljType Indices do not match'
 		    );
 		}
-		test.done();
-	},
-	'verify string type': function(test) {
+		done();
+	});
+	it('verify string type', function (done) {
 		var userStr = 'abcdef';
 		var strBuff = ljTypeOps.string.allocate(userStr);
-		test.equal(
+		assert.equal(
 			strBuff.length,
 			userStr.length,
 			'String length & buffer length should be correlated'
 		);
-		
+
 		strBuff = ljTypeOps.string.fill(strBuff, userStr);
-		// test.strictEqual(strBuff, userStr, 'String should be full');
-		
+		// assert.strictEqual(strBuff, userStr, 'String should be full');
+
 		var finalStr = ljTypeOps.string.parse(strBuff);
-		test.strictEqual(finalStr, userStr, 'String should be the userStr');
-		test.equal(
+		assert.strictEqual(finalStr, userStr, 'String should be the userStr');
+		assert.equal(
 			finalStr.length,
 			userStr.length,
 			'String lengths should be the same'
 		);
-		test.done();
-	},
-	'verify char type': function(test) {
-		performTestType(test, 'char');
-		test.done();
-	},
-	'verify uint type': function(test) {
-		performTestType(test, 'uint');
-		test.done();
-	},
-	'verify int type': function(test) {
-		performTestType(test, 'int');
-		test.done();
-	},
-	'verify double type': function(test) {
-		performTestType(test, 'double');
-		test.done();
-	},
-	'verify char* type': function(test) {
+		done();
+	});
+	it('verify char type', function (done) {
+		performTestType(assert, 'char');
+		done();
+	});
+	it('verify uint type', function (done) {
+		performTestType(assert, 'uint');
+		done();
+	});
+	it('verify int type', function (done) {
+		performTestType(assert, 'int');
+		done();
+	});
+	it('verify double type', function (done) {
+		performTestType(assert, 'double');
+		done();
+	});
+	it('verify char* type', function (done) {
 		/**
 		 * This data type indicates a string that LJM fills.  It is used
 		 * in the functions:
@@ -238,45 +240,44 @@ exports.tests = {
 		 * LJM_eWriteAddressString
 		 * LJM_ReadLibraryConfigStringS
 		**/
-		performTestType(test, 'char*');
-		test.done();
-	},
-	'verify uint* type': function(test) {
-		performTestType(test, 'uint*');
-		test.done();
-	},
-	'verify int* type': function(test) {
-		performTestType(test, 'int*');
-		test.done();
-	},
-	'verify double* type': function(test) {
-		performTestType(test, 'double*');
-		test.done();
-	},
-	'verify a-char* type': function(test) {
-		performTestType(test, 'a-char*');
-		test.done();
-	},
-	'verify a-uint* type': function(test) {
-		performTestType(test, 'a-uint*');
-		test.done();
-	},
-	'verify a-int* type': function(test) {
-		performTestType(test, 'a-int*');
-		test.done();
-	},
-	'verify a-double* type': function(test) {
-		performTestType(test, 'a-double*');
-		test.done();
-	},
-	'verify char** type': function(test) {
-		performTestType(test, 'char**');
-		test.done();
-	},
-	'verify a-char** type': function(test) {
-		performTestType(test, 'a-char**');
-		test.done();
-	},
-};
+		performTestType(assert, 'char*');
+		done();
+	});
+	it('verify uint* type', function (done) {
+		performTestType(assert, 'uint*');
+		done();
+	});
+	it('verify int* type', function (done) {
+		performTestType(assert, 'int*');
+		done();
+	});
+	it('verify double* type', function (done) {
+		performTestType(assert, 'double*');
+		done();
+	});
+	it('verify a-char* type', function (done) {
+		performTestType(assert, 'a-char*');
+		done();
+	});
+	it('verify a-uint* type', function (done) {
+		performTestType(assert, 'a-uint*');
+		done();
+	});
+	it('verify a-int* type', function (done) {
+		performTestType(assert, 'a-int*');
+		done();
+	});
+	it('verify a-double* type', function (done) {
+		performTestType(assert, 'a-double*');
+		done();
+	});
+	it('verify char** type', function (done) {
+		performTestType(assert, 'char**');
+		done();
+	});
+	it('verify a-char** type', function (done) {
+		performTestType(assert, 'a-char**');
+		done();
+	});
 
-
+});

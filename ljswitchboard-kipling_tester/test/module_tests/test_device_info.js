@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 var testOptions = {
 	'forceLiveTest': true
@@ -32,8 +32,8 @@ try {
 	q = global.require('q');
 }
 
-this.test_device_selector = {
-	'initialize test': function(test) {
+describe('test_device_selector', function() {
+	it('initialize test', function (done) {
 		package_loader = global.require('ljswitchboard-package_loader');
 		gns = package_loader.getNameSpace();
 		gui = global[gns].gui;
@@ -50,26 +50,26 @@ this.test_device_selector = {
 		$ = kiplingWindow.$;
 		MODULE_LOADER = kiplingWindow.MODULE_LOADER;
 		MODULE_CHROME = kiplingWindow.MODULE_CHROME;
-		
+
 
 		io_manager = global.require('ljswitchboard-io_manager');
 		io_interface = io_manager.io_interface();
 		deviceController = io_interface.getDeviceController();
-		test.done();
-	},
-	'load the device_selector module': function(test) {
+		done();
+	});
+	it('load the device_selector module', function (done) {
 		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
+			done();
 		});
 		var deviceSelectorTab = $('#device_selector-tab');
 		deviceSelectorTab.trigger('click');
-	},
-	'save save device_selector information': function(test) {
+	});
+	it('save save device_selector information', function (done) {
 		activeModule = kiplingWindow.activeModule;
 		eventList = activeModule.eventList;
-		test.done();
-	},
-	'disconnect from mock devices': function(test) {
+		done();
+	});
+	it('disconnect from mock devices', function (done) {
 		var buttonClasses = $('.disconnect_buttons_class');
 		var num = buttonClasses.length;
 		var i;
@@ -98,22 +98,22 @@ this.test_device_selector = {
 		q.allSettled(promises)
 		.then(function() {
 			console.log('Closed All Devices!');
-			test.done();
+			done();
 		}, function(err) {
 			console.log('ERror...', err);
 		});
-	},
-	'Enable device scanning': function(test) {
+	});
+	it('Enable device scanning', function (done) {
 		if(gui.App.manifest.performLiveTests || testOptions.forceLiveTest) {
 			deviceController.disableMockDeviceScanning()
 			.then(function() {
-				test.done();
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'refresh device list - live': function(test) {
+	});
+	it('refresh device list - live', function (done) {
 		if(gui.App.manifest.performLiveTests || testOptions.forceLiveTest) {
 			var startedScanEventCaught = false;
 			activeModule.once(
@@ -124,26 +124,26 @@ this.test_device_selector = {
 			activeModule.once(
 				eventList.DEVICE_SCAN_COMPLETED,
 				function(scanResults) {
-					test.ok(startedScanEventCaught, 'should triggered scan started event');
+					assert.isOk(startedScanEventCaught, 'should triggered scan started event');
 					console.log('scanResults', scanResults);
-					test.done();
+					done();
 				});
 			var viewGen = activeModule.viewGen;
 			var refreshButton = viewGen.pageElements.refresh_devices_button.ref;
-			
+
 			// Trigger the click event for the refresh button and make sure the scan
 			// happens.
 			refreshButton.trigger('click');
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'connect to T7 (USB)': function(test) {
+	});
+	it('connect to T7 (USB)', function (done) {
 		MODULE_CHROME.once(
 			MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_OPENED,
 			function(updatedModules) {
 				console.log('Tabs updated (test)', updatedModules);
-				test.done();
+				done();
 			});
 
 		// Connect to the first found USB-T7
@@ -152,17 +152,17 @@ this.test_device_selector = {
 			var t7 = t7s.first();
 			t7.trigger('click');
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'load device info': function(test) {
+	});
+	it('load device info', function (done) {
 		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
+			done();
 		});
 		var deviceInfoTab = $('#device_info_fw-tab');
 		deviceInfoTab.trigger('click');
-	},
-	'please disconnect T7': function(test) {
-		test.done();
-	}
-};
+	});
+	it('please disconnect T7', function (done) {
+		done();
+	});
+});

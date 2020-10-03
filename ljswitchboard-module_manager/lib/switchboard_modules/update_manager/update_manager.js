@@ -21,7 +21,7 @@ function versionManager() {
 	// var tab_notification_manager = TASK_LOADER.tasks.tab_notification_manager;
 
 	this.version_manager = global.require('ljswitchboard-version_manager');
-	
+
 	// Cached Data
 	this.cachedData = {};
 	this.cachedT7Data = {};
@@ -38,7 +38,7 @@ function versionManager() {
 
 	this.queryStartTime = undefined;
 	this.queryEndTime = undefined;
-	
+
 	this.getCachedT7Versions = function() {
 		return self.version_manager.lvm.getCachedT7Versions();
 	};
@@ -72,7 +72,7 @@ function versionManager() {
 	};
 	var handleInitializeError = function(err) {
 		var defered = q.defer();
-		console.error('Error initializing update_manager', err);
+		console.error('Error initializing update_manager' + JSON.stringify(err));
 		defered.resolve();
 		return defered.promise;
 	};
@@ -119,13 +119,13 @@ function versionManager() {
 	this.forceUpdateVersionManager = function() {
 		var initialAllowState = self.allowQueryLoopToRun;
 
-		// Stop the query loop so that we don't get duplicate timeout events 
+		// Stop the query loop so that we don't get duplicate timeout events
 		// firing.
 		self.stopVersionManager();
 
 		// Check to see if a query is in progress
 		if(self.isQueryActive) {
-			// If a query is in progress then restore the allowQueryLoopToRun 
+			// If a query is in progress then restore the allowQueryLoopToRun
 			// flag to its original state.
 			self.allowQueryLoopToRun = initialAllowState;
 		} else {
@@ -149,7 +149,7 @@ try {
 this.startTask = function(bundle) {
 	console.log('Starting version_manager task');
 	var defered = q.defer();
-	
+
 	vm.startVersionManager();
 	defered.resolve(bundle);
 	return defered.promise;

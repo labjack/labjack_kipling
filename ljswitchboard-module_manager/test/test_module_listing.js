@@ -1,14 +1,10 @@
+var assert = require('chai').assert;
 
-
-var q = require('q');
 var module_manager = require('../lib/ljswitchboard-module_manager');
 
-var testModuleResult = function(test, modules) {
-
-};
-var testModuleCategoryResult = function(test, modules) {
+var testModuleCategoryResult = function(assert, modules) {
 	try {
-	test.ok(
+	assert.isOk(
 		Array.isArray(modules),
 		'Category should be an array'
 	);
@@ -25,15 +21,16 @@ var testModuleCategoryResult = function(test, modules) {
 			if(keys.indexOf(requiredKey) >= 0) {
 				exists = true;
 			}
-			test.ok(exists, 'Required Key not found: ' + requiredKey);
+			assert.isOk(exists, 'Required Key not found: ' + requiredKey);
 		});
 	});
 } catch(err) {
 	console.log('Error in testModuleCategoryResult', err, err.stack);
 }
 };
-var tests = {
-	'getModulesList': function(test) {
+
+describe('module listing', function() {
+	it('getModulesList', function (done) {
 		module_manager.getModulesList()
 		.then(function(moduleGroups) {
 			// console.log('Data', moduleGroups);
@@ -44,44 +41,42 @@ var tests = {
 			];
 			var foundCategories = Object.keys(moduleGroups);
 			var msg = 'Required module categories not found';
-			test.deepEqual(foundCategories, requiredCategories, msg);
+			assert.deepEqual(foundCategories, requiredCategories, msg);
 			foundCategories.forEach(function(categoryKey) {
-				testModuleCategoryResult(test, moduleGroups[categoryKey]);
+				testModuleCategoryResult(assert, moduleGroups[categoryKey]);
 			});
-			test.done();
+			done();
 		});
-	},
-	'getHeaderModules': function(test) {
+	});
+	it('getHeaderModules', function (done) {
 		module_manager.getHeaderModules()
 		.then(function(headerModules) {
-			testModuleCategoryResult(test, headerModules);
-			test.done();
+			testModuleCategoryResult(assert, headerModules);
+			done();
 		});
-	},
-	'getBodyModules': function(test) {
+	});
+	it('getBodyModules', function (done) {
 		module_manager.getBodyModules()
 		.then(function(bodyModules) {
-			testModuleCategoryResult(test, bodyModules);
-			test.done();
+			testModuleCategoryResult(assert, bodyModules);
+			done();
 		});
-	},
-	'getFooterModules': function(test) {
+	});
+	it('getFooterModules', function (done) {
 		module_manager.getFooterModules()
 		.then(function(footerModules) {
-			testModuleCategoryResult(test, footerModules);
-			test.done();
+			testModuleCategoryResult(assert, footerModules);
+			done();
 		});
-	},
-	'getTaskModules': function(test) {
+	});
+	it('getTaskModules', function (done) {
 		module_manager.getTaskList()
 		.then(function(tasks) {
-			testModuleCategoryResult(test, tasks);
-			test.done();
+			testModuleCategoryResult(assert, tasks);
+			done();
 		});
-	},
-	'filterBodyModules': function(test) {
-		test.done();
-	},
-};
-
-exports.tests = tests;
+	});
+	it('filterBodyModules', function (done) {
+		done();
+	});
+});

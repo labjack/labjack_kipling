@@ -16,9 +16,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -77,11 +77,11 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -102,7 +102,7 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -111,7 +111,7 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -119,9 +119,9 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'change directory to root': function(test) {
@@ -130,11 +130,11 @@ var device_tests = {
 		.then(function(res) {
 			debugCD('  - performed cd:', res);
 			testLog('  - performed cd:'.green, res);
-			test.done();
+			done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
+			assert.isOk(false,'Should not have received an error...');
+			done();
 		});
 	},
 	'get cwd': function(test) {
@@ -143,11 +143,11 @@ var device_tests = {
 		.then(function(res) {
 			debugCWD('  - Got CWD', res);
 			testLog('  - Got CWD:'.green, res);
-			test.done();
+			done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
+			assert.isOk(false,'Should not have received an error...');
+			done();
 		});
 	},
 	'get file listing - root': function(test) {
@@ -160,11 +160,11 @@ var device_tests = {
 			testLog('  - File Names:'.green, res.fileNames);
 			testLog('  - File Array:'.green, res.files.length);
 			// console.log('!!- ls:', res);
-			test.done();
+			done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
+			assert.isOk(false,'Should not have received an error...');
+			done();
 		});
 	},
 	'get file listing - cwd': function(test) {
@@ -178,11 +178,11 @@ var device_tests = {
 			testLog('  - File Array:'.green, res.files.length);
 			// console.log('!!- ls:', res);
 			foundFiles = res.files;
-			test.done();
+			done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
+			assert.isOk(false,'Should not have received an error...');
+			done();
 		});
 	},
 	'read first found file': function(test) {
@@ -194,19 +194,19 @@ var device_tests = {
 				.then(function(res) {
 					debugRF('  - File Contents:', res.data);
 					testLog('  - File Contents:'.green, res.data.substring(0,10) + '... (' + res.data.length + ')');
-					test.done();
+					done();
 				}, function(err) {
 					errorLog('ERROR!!', err);
-					test.ok(false,'Should not have received an error...');
-					test.done();
+					assert.isOk(false,'Should not have received an error...');
+					done();
 				});
 			} else {
 				testLog('No files were found');
-				test.done();
+				done();
 			}
 		} else {
 			testLog('No files were found');
-			test.done();
+			done();
 		}
 	},
 	'get disk information': function(test) {
@@ -219,22 +219,22 @@ var device_tests = {
 			infoToReport.fileSystem = res.fileSystem;
 			debugDiskInfo('  - Disk Info'.green, infoToReport);
 			testLog('  - Disk Info:'.green, infoToReport);
-			test.done();
+			done();
 		}, function(err) {
 			errorLog('ERROR!!', err);
-			test.ok(false,'Should not have received an error...');
-			test.done();
+			assert.isOk(false,'Should not have received an error...');
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 };
 
@@ -248,7 +248,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

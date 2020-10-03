@@ -52,9 +52,9 @@ module.exports = {
                 //Success
                 var results = asyncRun.getResults();
 
-                test.deepEqual(results, expectedResults);
+                assert.deepEqual(results, expectedResults);
                 //Report that test finished
-                test.done();
+                done();
             },false,false
         );
 	}

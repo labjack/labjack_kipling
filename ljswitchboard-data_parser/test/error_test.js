@@ -1,11 +1,11 @@
+var assert = require('chai').assert;
 
 var data_parser = require('../lib/data_parser');
 var modbus_map = require('ljswitchboard-modbus_map');
 var constants = modbus_map.getConstants();
 
-
-exports.tests = {
-	'single-read errors': function(test) {
+describe('error_test', function() {
+	it('single-read errors', function (done) {
 		var options = {
 			'valueCache': {
 				'FIO0': 1
@@ -26,8 +26,8 @@ exports.tests = {
 			{'reg': 'WIFI_PASSWORD_DEFAULT', 'err': 12, 'defaultVal': '', 'lastVal': ''},
 		];
 		/*
-		Most of the default values listed in the .json file seem like "valid" 
-		invalid values to use except for a few.  Should use the defined error 
+		Most of the default values listed in the .json file seem like "valid"
+		invalid values to use except for a few.  Should use the defined error
 		vals if there is one (to allow defaults to be over-ridden), and then
 		either use the default in the modbus map (if there is one) or use the
 		default value defined in the ljm_driver_constants project.
@@ -67,17 +67,21 @@ exports.tests = {
 					// console.log('  - res',results[j][resultKeys[i]]);
 					// console.log('  - req', reqResults[j][resultKeys[i]]);
 				}
-				test.deepEqual(results[j][resultKeys[i]], reqResults[j][resultKeys[i]], 'Register ' + results[j].name + ':' + resultKeys[i]);
+				var actual = reqResults[j][resultKeys[i]];
+				var expected = results[j][resultKeys[i]];
+				if (!actual.res) actual.res = 0;
+				if (!actual.val) actual.val = 0;
+				assert.deepEqual(actual, expected, 'Register ' + results[j].name + ':' + resultKeys[i]);
 			}
 		}
 		for(i = 0; i < results.length; i++) {
-			test.deepEqual(Object.keys(results[i]), Object.keys(reqResults[i]));
+			assert.deepEqual(Object.keys(results[i]), Object.keys(reqResults[i]));
 		}
-		// test.deepEqual(results, reqResults);
-		test.done();
-	},
-	'multiple-read errors': function(test) {
-		test.done();
+		// assert.deepEqual(results, reqResults);
+		done();
+	});
+	it('multiple-read errors', function (done) {
+		done();
 		return;
 		var options = {
 			'valueCache': {
@@ -120,7 +124,7 @@ exports.tests = {
 				'err': val.err
 			});
 		});
-		test.deepEqual(results, reqResults);
-		test.done();
-	},
-};
+		assert.deepEqual(results, reqResults);
+		done();
+	});
+});

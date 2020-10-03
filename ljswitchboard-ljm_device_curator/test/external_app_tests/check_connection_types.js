@@ -20,9 +20,9 @@ var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var device = undefined;
@@ -80,7 +80,7 @@ exports.tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevices': function(test) {
         var td = {
@@ -95,12 +95,12 @@ exports.tests = {
         // Open the device.
         device.open(td.dt, td.ct, td.id)
         .then(function(res) {
-            test.done();
+            done();
         }, function(err) {
             console.log('Error Opening', td);
-            test.ok(false);
+            assert.isOk(false);
             stopTest(test, err);
-            test.done();
+            done();
         });
 
         device.on(events.DEVICE_RELEASED, deviceReleasedCB);
@@ -117,67 +117,67 @@ exports.tests = {
             keys.forEach(function(key) {
                 info[key] = res[key];
             });
-            test.done();
+            done();
         }, function(err) {
-            test.ok(false, 'there was an error getting attributes: ' + JSON.stringify(err));
-            test.done();
+            assert.isOk(false, 'there was an error getting attributes: ' + JSON.stringify(err));
+            done();
         });
 	},
     'check device connection types': function(test) {
         device.cGetAvailableConnectionTypes()
         .then(function(res) {
             console.log('Available CTs'.green, res);
-            test.done();
+            done();
         }, function(err) {
-            test.done();
+            done();
         });
     },
     // 'open device in LJLogM': function(test) {
     //     device.openDeviceInExternalApplication('LJLogM','USB')
     //     .then(function(res) {
-    //         test.ok(got_DEVICE_RELEASED, 'should have gotten DEVICE_RELEASED cb');
-    //         test.ok(got_DEVICE_ACQUIRED, 'should have gotten DEVICE_ACQUIRED cb');
+    //         assert.isOk(got_DEVICE_RELEASED, 'should have gotten DEVICE_RELEASED cb');
+    //         assert.isOk(got_DEVICE_ACQUIRED, 'should have gotten DEVICE_ACQUIRED cb');
     //         console.log('Num Times Attrs Changed'.green, numAttrsChanged);
     //         // console.log('Open in App (external_app_tests/basic_test.js)', res);
-    //         test.done();
+    //         done();
     //     }, function(err) {
-    //         test.done();
+    //         done();
     //     });
     // },
     // 'open device in LJLogM(2)': function(test) {
     //     device.openDeviceInLJLogM()
     //     .then(function(res) {
-    //         test.done();
+    //         done();
     //     }, function(err) {
-    //         test.done();
+    //         done();
     //     });
     // },
     // 'open device in LJStreamM': function(test) {
     //     device.openDeviceInLJStreamM()
     //     .then(function(res) {
-    //         test.done();
+    //         done();
     //     }, function(err) {
-    //         test.done();
+    //         done();
     //     });
     // },
     'perform test read': function(test) {
         device.read('AIN0')
         .then(function(res) {
-            test.ok(true, 'device is still connected');
-            test.done();
+            assert.isOk(true, 'device is still connected');
+            done();
         }, function(err) {
             console.error('LJM Error:', err);
-            test.ok(false, 'device should still be connected');
-            test.done();
+            assert.isOk(false, 'device should still be connected');
+            done();
         });
     },
 	'closeDevices': function(test) {
         device.close()
         .then(function(res) {
-            test.done();
+            done();
         }, function(err) {
-            test.ok(false, 'there was an error closing: ' + JSON.stringify(err));
-				test.done();
+            assert.isOk(false, 'there was an error closing: ' + JSON.stringify(err));
+				done();
         });
 	},
 };

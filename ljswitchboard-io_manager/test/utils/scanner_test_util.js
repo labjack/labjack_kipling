@@ -1,3 +1,5 @@
+var assert = require('chai').assert;
+
 var printAvailableDeviceData = function(device) {
 	if(device.connectionTypes) {
 		console.log(
@@ -38,7 +40,7 @@ var printAvailableDeviceData = function(device) {
 exports.printAvailableDeviceData = printAvailableDeviceData;
 
 var suppressTestingErrors = false;
-var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) {
+var innerTestScanResults = function(deviceTypes, expDeviceTypes, options) {
 	var debug;
 	var performTests = true;
 	if(options) {
@@ -53,12 +55,12 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 		console.log('Finished Scanning');
 		console.log('Number of Device Types', deviceTypes.length);
 	}
-	
+
 	// Test to make sure the proper number of device types were found.
 	var numDeviceTypes = deviceTypes.length;
 	var numExpDeviceTypes = Object.keys(expDeviceTypes).length;
 	if(performTests) {
-		test.strictEqual(
+		assert.strictEqual(
 			numDeviceTypes,
 			numExpDeviceTypes,
 			'Unexpected number of device types found'
@@ -96,7 +98,7 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 		// Test to make sure the proper number of devices were found per device
 		// type.
 		if(performTests) {
-			test.strictEqual(
+			assert.strictEqual(
 				numDevices,
 				expNumDevices,
 				'Unexpected number of found devices'
@@ -120,7 +122,7 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 				// Check each expected key.
 				expectedKeys.forEach(function(key) {
 					if(performTests) {
-						test.strictEqual(
+						assert.strictEqual(
 							connectionType[key],
 							expConnectionType[key],
 							'Unexpected connectionType Data'
@@ -149,13 +151,13 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 			// Test to make sure the proper number of connection types were
 			// found.
 			if(performTests) {
-				test.strictEqual(
+				assert.strictEqual(
 					numConnectionTypes,
 					expNumConnectionTypes,
 					'Unexpected number of connection types'
 				);
 			}
-			
+
 			// For each connection type verify expected results.
 			connectionTypes.forEach(function(connectionType, j) {
 				// Organize device connection type results.
@@ -166,16 +168,16 @@ var innerTestScanResults = function(deviceTypes, expDeviceTypes, test, options) 
 			if(debug) {
 				printAvailableDeviceData(device);
 			}
-			
+
 		});
 	});
 	return true;
 };
-var testScanResults = function(deviceTypes, expDeviceTypes, test, debug) {
+var testScanResults = function(deviceTypes, expDeviceTypes, debug) {
 	var testStatus = false;
 	try {
 		suppressTestingErrors = false;
-		testStatus = innerTestScanResults(deviceTypes, expDeviceTypes, test, debug);
+		testStatus = innerTestScanResults(deviceTypes, expDeviceTypes, debug);
 	} catch(err) {
 		if(suppressTestingErrors) {
 			console.log('Error being suppressed');

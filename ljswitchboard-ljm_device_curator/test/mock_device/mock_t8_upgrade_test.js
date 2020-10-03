@@ -10,9 +10,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var fwBasePath;
@@ -70,12 +70,12 @@ exports.tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'configure mock device': function(test) {
 		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
-			test.done();
+			done();
 		});
 	},
 	'openDevice - ctANY device': function(test) {
@@ -88,24 +88,24 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo (assigned serial number)': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 8);
-			test.strictEqual(res.deviceTypeName, 'T8');
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT8');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
-			test.strictEqual(res.ip, '0.0.0.0');
-			test.strictEqual(res.ipAddress, '0.0.0.0');
-			test.done();
+			assert.strictEqual(res.deviceType, 8);
+			assert.strictEqual(res.deviceTypeName, 'T8');
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT8');
+			assert.strictEqual(res.connectionType, 1);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			assert.strictEqual(res.serialNumber, deviceInfo.serialNumber);
+			assert.strictEqual(res.ip, '0.0.0.0');
+			assert.strictEqual(res.ipAddress, '0.0.0.0');
+			done();
 		});
 	},
 	'upgradeFirmware': function(test) {
@@ -144,7 +144,7 @@ exports.tests = {
 				// The result is a new device object
 				// console.log('Upgrade Success', res);
 				// console.log('Number of created devices', ljDevice.getNumCreatedDevices());
-				test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
+				assert.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
 				var ljmDevice = device.getDevice();
 				// console.log(
 				// 	'Reading device FW version',
@@ -155,35 +155,35 @@ exports.tests = {
 
 				// Make sure that the device disconnect & reconnect events get
 				// fired.
-				test.ok(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
-				test.ok(deviceReconnectEventReceived, 'Reconnect event should have been detected');
+				assert.isOk(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
+				assert.isOk(deviceReconnectEventReceived, 'Reconnect event should have been detected');
 
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
-					test.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
-					test.done();
+					assert.strictEqual(res.toFixed(4), fwVersionNum.toFixed(4), 'Firmware Not Upgraded');
+					done();
 				});
 			}, function(err) {
 				console.log("Failed to upgrade (upgrade test)", err);
-				test.ok(false, 'Failed to upgrade device: ' + JSON.stringify(err));
+				assert.isOk(false, 'Failed to upgrade device: ' + JSON.stringify(err));
 				device.read('DEVICE_NAME_DEFAULT')
 				.then(function(res) {
 					console.log('Device is still responding to messages', res);
-					test.done();
+					done();
 				}, function(err) {
 					console.log('Device is not responding anymore', err);
-					test.done();
+					done();
 				});
 			}
 		);
 	},
 	'perform upgrade': function(test) {
-		test.done();
+		done();
 	},
 	'closeDevice (assigned serial number)': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 };

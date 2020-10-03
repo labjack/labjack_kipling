@@ -17,9 +17,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -66,11 +66,11 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -91,7 +91,7 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -100,22 +100,22 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
-			test.strictEqual(res.deviceType, 8);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT8');
-			test.done();
+			assert.strictEqual(res.deviceType, 8);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT8');
+			done();
 		}, function(err) {
-			test.ok(false, 'Error calling getDeviceAttributes', err);
-			test.done();
+			assert.isOk(false, 'Error calling getDeviceAttributes', err);
+			done();
 		});
 	},
 	'upgradeFirmware': function(test) {
-		
+
 
 		console.log('  - FW path:', fwFileA);
 
@@ -150,7 +150,7 @@ var device_tests = {
 				// The result is a new device object
 				// console.log('Upgrade Success', res);
 				// console.log('Number of created devices', ljDevice.getNumCreatedDevices());
-				test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
+				assert.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
 				var ljmDevice = device.getDevice();
 				// console.log(
 				// 	'Reading device FW version',
@@ -161,36 +161,36 @@ var device_tests = {
 
 				// Make sure that the device disconnect & reconnect events get
 				// fired.
-				test.ok(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
-				test.ok(deviceReconnectEventReceived, 'Reconnect event should have been detected');
+				assert.isOk(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
+				assert.isOk(deviceReconnectEventReceived, 'Reconnect event should have been detected');
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
-					test.strictEqual(res.toFixed(4), (0.9008).toFixed(4), 'Firmware Not Upgraded');
-					test.done();
+					assert.strictEqual(res.toFixed(4), (0.9008).toFixed(4), 'Firmware Not Upgraded');
+					done();
 				}, function(err) {
-					test.ok(false);
-					test.done();
+					assert.isOk(false);
+					done();
 				});
 			}, function(err) {
 				console.log("Failed to upgrade (upgrade test)", err);
 				console.log('');
 				console.log('');
-				test.ok(true, 'Failed to upgrade device: ' + JSON.stringify(err));
+				assert.isOk(true, 'Failed to upgrade device: ' + JSON.stringify(err));
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
 					console.log('Device is still responding to messages', res);
-					test.ok(false, 'Failed to Upgrade Device');
-					test.done();
+					assert.isOk(false, 'Failed to Upgrade Device');
+					done();
 				}, function(err) {
 					console.log('Device is not responding anymore', err);
-					test.ok(false, 'Failed to Upgrade Device');
-					test.done();
+					assert.isOk(false, 'Failed to Upgrade Device');
+					done();
 				});
 			}
 		);
 	},
 	'upgradeFirmware2': function(test) {
-		
+
 
 		console.log('  - FW path:', fwFileB);
 
@@ -225,7 +225,7 @@ var device_tests = {
 				// The result is a new device object
 				// console.log('Upgrade Success', res);
 				// console.log('Number of created devices', ljDevice.getNumCreatedDevices());
-				test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
+				assert.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
 				var ljmDevice = device.getDevice();
 				// console.log(
 				// 	'Reading device FW version',
@@ -236,36 +236,36 @@ var device_tests = {
 
 				// Make sure that the device disconnect & reconnect events get
 				// fired.
-				test.ok(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
-				test.ok(deviceReconnectEventReceived, 'Reconnect event should have been detected');
+				assert.isOk(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
+				assert.isOk(deviceReconnectEventReceived, 'Reconnect event should have been detected');
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
-					test.strictEqual(res.toFixed(4), (0.9009).toFixed(4), 'Firmware Not Upgraded');
-					test.done();
+					assert.strictEqual(res.toFixed(4), (0.9009).toFixed(4), 'Firmware Not Upgraded');
+					done();
 				}, function(err) {
-					test.ok(false);
-					test.done();
+					assert.isOk(false);
+					done();
 				});
 			}, function(err) {
 				console.log("Failed to upgrade (upgrade test)", err);
 				console.log('');
 				console.log('');
-				test.ok(true, 'Failed to upgrade device: ' + JSON.stringify(err));
+				assert.isOk(true, 'Failed to upgrade device: ' + JSON.stringify(err));
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
 					console.log('Device is still responding to messages', res);
-					test.ok(false, 'Failed to Upgrade Device');
-					test.done();
+					assert.isOk(false, 'Failed to Upgrade Device');
+					done();
 				}, function(err) {
 					console.log('Device is not responding anymore', err);
-					test.ok(false, 'Failed to Upgrade Device');
-					test.done();
+					assert.isOk(false, 'Failed to Upgrade Device');
+					done();
 				});
 			}
 		);
 	},
 	'upgradeFirmware3': function(test) {
-		
+
 
 		console.log('  - FW path:', fwFileA);
 
@@ -300,7 +300,7 @@ var device_tests = {
 				// The result is a new device object
 				// console.log('Upgrade Success', res);
 				// console.log('Number of created devices', ljDevice.getNumCreatedDevices());
-				test.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
+				assert.strictEqual(lastPercent, 100, 'Highest Percentage isnt 100%');
 				var ljmDevice = device.getDevice();
 				// console.log(
 				// 	'Reading device FW version',
@@ -311,30 +311,30 @@ var device_tests = {
 
 				// Make sure that the device disconnect & reconnect events get
 				// fired.
-				test.ok(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
-				test.ok(deviceReconnectEventReceived, 'Reconnect event should have been detected');
+				assert.isOk(deviceDisconnectEventReceived, 'Disconnect event should have been detected');
+				assert.isOk(deviceReconnectEventReceived, 'Reconnect event should have been detected');
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
-					test.strictEqual(res.toFixed(4), (0.9008).toFixed(4), 'Firmware Not Upgraded');
-					test.done();
+					assert.strictEqual(res.toFixed(4), (0.9008).toFixed(4), 'Firmware Not Upgraded');
+					done();
 				}, function(err) {
-					test.ok(false);
-					test.done();
+					assert.isOk(false);
+					done();
 				});
 			}, function(err) {
 				console.log("Failed to upgrade (upgrade test)", err);
 				console.log('');
 				console.log('');
-				test.ok(true, 'Failed to upgrade device: ' + JSON.stringify(err));
+				assert.isOk(true, 'Failed to upgrade device: ' + JSON.stringify(err));
 				device.read('FIRMWARE_VERSION')
 				.then(function(res) {
 					console.log('Device is still responding to messages', res);
-					test.ok(false, 'Failed to Upgrade Device');
-					test.done();
+					assert.isOk(false, 'Failed to Upgrade Device');
+					done();
 				}, function(err) {
 					console.log('Device is not responding anymore', err);
-					test.ok(false, 'Failed to Upgrade Device');
-					test.done();
+					assert.isOk(false, 'Failed to Upgrade Device');
+					done();
 				});
 			}
 		);
@@ -358,24 +358,24 @@ var device_tests = {
 				cb();
 			});
 		}, function(err) {
-			test.ok(passes, errorMessage);
-			test.done();
+			assert.isOk(passes, errorMessage);
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
 		setTimeout(function() {
-			test.done();
+			done();
 		}, 100);
 	}
 };
@@ -390,7 +390,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

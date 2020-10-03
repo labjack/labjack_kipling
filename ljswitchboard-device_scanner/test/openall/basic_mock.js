@@ -1,32 +1,32 @@
+var assert = require('chai').assert;
 
 var rewire = require('rewire');
 var device_scanner = rewire('../../lib/ljswitchboard-device_scanner');
 
 var test_util = require('../utils/test_util');
-var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var testScanResults = test_util.testScanResults;
-var printScanResultsKeys = test_util.printScanResultsKeys;
 var verifyScanResults = test_util.verifyScanResults;
 
 var deviceScanner;
-exports.tests = {
-	'Starting Mock Test': function(test) {
+
+describe('basic mock', function() {
+	it('Starting Mock Test', function (done) {
 		console.log('');
 		console.log('*** Starting Basic Openall Mock Test ***');
-		test.done();
-	},
-	'create device scanner': function(test) {
+		done();
+	});
+	it('create device scanner', function (done) {
 		device_scanner.disableSafeLoad();
 		deviceScanner = device_scanner.deviceScanner();
-		test.done();
-	},
-	'disable device scanning': function(test) {
+		done();
+	});
+	it('disable device scanning', function (done) {
 		deviceScanner.disableDeviceScanning()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'Add mock devices': function(test) {
+	});
+	it('Add mock devices', function (done) {
 		deviceScanner.addMockDevices([
 			{
 				'deviceType': 'LJM_dtT7',
@@ -59,12 +59,12 @@ exports.tests = {
 			}
 		])
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'mock test': function(test) {
+	});
+	it('mock test', function (done) {
 		var startTime = new Date();
-		
+
 		var expectedData = {
 			'T7': {
 				'devices': [{
@@ -88,7 +88,7 @@ exports.tests = {
 					}]
 				}]
 			},
-			// The T4/T5/T8 don't necessairly have WiFi 
+			// The T4/T5/T8 don't necessairly have WiFi
 			'T8': {
 				'devices': [{
 					'connectionTypes': [{
@@ -162,19 +162,19 @@ exports.tests = {
 			var debug = false;
 			// printScanResultsKeys(deviceTypes);
 			verifyScanResults(deviceTypes, test);
-			testScanResults(deviceTypes, expectedData, test, {'debug': debug});
-			
+			testScanResults(deviceTypes, expectedData, {'debug': debug});
+
 			if(debug) {
 				console.log('  - Duration', (endTime - startTime)/1000);
 			}
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error', err);
-			test.done();
+			done();
 		});
-	},
-	'unload': function(test) {
+	});
+	it('unload', function (done) {
 		device_scanner.unload();
-		test.done();
-	},
-};
+		done();
+	});
+});

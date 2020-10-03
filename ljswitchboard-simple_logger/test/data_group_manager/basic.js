@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 /*
 This file is the basic test for the data_group_manager object.
@@ -86,17 +86,17 @@ function debugLog() {
 /*
 Begin defining test cases.
 */
-exports.basic_tests = {
-	'Require data_group_manager': function(test) {
+describe('data_group_manager', function() {
+	it('Require data_group_manager', function (done) {
 		try {
 			data_group_manager = require('../../lib/data_group_manager');
-			test.ok(true);
+			assert.isOk(true);
 		} catch(err) {
-			test.ok(false, 'error loading data_group_manager');
+			assert.isOk(false, 'error loading data_group_manager');
 		}
-		test.done();
-	},
-	'Load Test Files': function(test) {
+		done();
+	});
+	it('Load Test Files', function (done) {
 		var promises = configurations.map(function(config) {
 			config.filePath = path.join(
 				logger_config_files_dir,
@@ -142,8 +142,8 @@ exports.basic_tests = {
 			}, function(err) {
 				var defered = q.defer();
 				console.log('Failed to load file...', err);
-				test.ok(false, 'Failed to load file... ' + config.fileName + '. ' + err.errorMessage);
-				
+				assert.isOk(false, 'Failed to load file... ' + config.fileName + '. ' + err.errorMessage);
+
 				defered.reject(err);
 				return defered.promise;
 			});
@@ -151,18 +151,18 @@ exports.basic_tests = {
 
 		q.allSettled(promises)
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'create data_group_managers': function(test) {
+	});
+	it('create data_group_managers', function (done) {
 		configurations.forEach(function(config) {
 			config.managers = config.dataGroups.map(function(dataGroup) {
 				return data_group_manager.create(dataGroup, config.data);
 			});
 		});
-		test.done();
-	},
-	'execute and test operation ticks': function(test) {
+		done();
+	});
+	it('execute and test operation ticks', function (done) {
 		var numIterations = 8;
 		var iterations = [];
 		for(var i = 0; i < numIterations; i++) {
@@ -203,8 +203,8 @@ exports.basic_tests = {
 			// console.log('Results', config.fileName);
 			// console.log(JSON.stringify(config.results, null, 2));
 			// console.log(JSON.stringify(expectedResults, null, 2));
-			test.deepEqual(config.results, expectedResults, 'Results do not match pattern');
+			assert.deepEqual(config.results, expectedResults, 'Results do not match pattern');
 		});
-		test.done();
-	},
-};
+		done();
+	});
+});

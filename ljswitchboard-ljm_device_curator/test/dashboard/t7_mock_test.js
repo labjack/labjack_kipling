@@ -38,9 +38,9 @@ var t7Device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceInfo = {
@@ -103,7 +103,7 @@ function createDashboardTester(device) {
 			action = self.actions[self.numDataCollected];
 			isValidAction = true;
 		}
-		
+
 		if(isValidAction) {
 			device.dashboard_configIO(
 				action.channelName,
@@ -135,7 +135,7 @@ function createDashboardTester(device) {
 					// Resolve the "waitForStop" promise;
 					self.stopDefered({'numIterations': self.numDataCollected});
 				});
-				
+
 			}
 		}
 	}
@@ -177,7 +177,7 @@ exports.tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'configure mock devices': function(test) {
 		var promises = [];
@@ -187,7 +187,7 @@ exports.tests = {
 
 		q.allSettled(promises)
 		.then(function(res) {
-			test.done();
+			done();
 		});
 	},
 	'openDevices': function(test) {
@@ -219,10 +219,10 @@ exports.tests = {
 		q.allSettled(promises)
 		.then(function(res) {
 			if(errors.length === 0) {
-				test.done();
+				done();
 			} else {
-				test.ok(false, 'there was an error opening: ' + JSON.stringify(errors));
-				test.done();
+				assert.isOk(false, 'there was an error opening: ' + JSON.stringify(errors));
+				done();
 			}
 		});
 	},
@@ -254,10 +254,10 @@ exports.tests = {
 		q.allSettled(promises)
 		.then(function(res) {
 			if(errors.length === 0) {
-				test.done();
+				done();
 			} else {
-				test.ok(false, 'there was an error getting attributes: ' + JSON.stringify(errors));
-				test.done();
+				assert.isOk(false, 'there was an error getting attributes: ' + JSON.stringify(errors));
+				done();
 			}
 		});
 	},
@@ -284,10 +284,10 @@ exports.tests = {
 		q.allSettled(promises)
 		.then(function(res) {
 			if(errors.length === 0) {
-				test.done();
+				done();
 			} else {
-				test.ok(false, 'there was an error executing testFunc: ' + JSON.stringify(errors));
-				test.done();
+				assert.isOk(false, 'there was an error executing testFunc: ' + JSON.stringify(errors));
+				done();
 			}
 		});
 	},
@@ -319,10 +319,10 @@ exports.tests = {
 		q.allSettled(promises)
 		.then(function(res) {
 			if(errors.length === 0) {
-				test.done();
+				done();
 			} else {
-				test.ok(false, 'there was an error starting: ' + JSON.stringify(errors));
-				test.done();
+				assert.isOk(false, 'there was an error starting: ' + JSON.stringify(errors));
+				done();
 			}
 		});
 	},
@@ -413,10 +413,10 @@ exports.tests = {
 		q.allSettled(promises)
 		.then(function(res) {
 			if(errors.length === 0) {
-				test.done();
+				done();
 			} else {
-				test.ok(false, 'there was an error stopping: ' + JSON.stringify(errors));
-				test.done();
+				assert.isOk(false, 'there was an error stopping: ' + JSON.stringify(errors));
+				done();
 			}
 		});
 	},
@@ -438,13 +438,13 @@ exports.tests = {
 	// 			}
 
 	// 			if(deviceInfo[name]) {
-	// 				test.strictEqual(resData, deviceInfo[name]);
+	// 				assert.strictEqual(resData, deviceInfo[name]);
 	// 			} else if(infoMapping[name]) {
-	// 				test.strictEqual(resData, deviceInfo[infoMapping[name]]);
+	// 				assert.strictEqual(resData, deviceInfo[infoMapping[name]]);
 	// 			}
 	// 			// console.log(name, resData);
 	// 		});
-	// 		test.done();
+	// 		done();
 	// 	});
 	// },
 	'closeDevices': function(test) {
@@ -469,10 +469,10 @@ exports.tests = {
 		q.allSettled(promises)
 		.then(function(res) {
 			if(errors.length === 0) {
-				test.done();
+				done();
 			} else {
-				test.ok(false, 'there was an error closing: ' + JSON.stringify(errors));
-				test.done();
+				assert.isOk(false, 'there was an error closing: ' + JSON.stringify(errors));
+				done();
 			}
 		});
 	},

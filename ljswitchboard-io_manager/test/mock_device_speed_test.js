@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 /**
 	This test aims to show how the io_manager library should be used.  It
@@ -5,10 +6,6 @@
 	library.
 **/
 
-var utils = require('./utils/utils');
-var qRunner = utils.qRunner;
-var qExec = utils.qExec;
-var pResults = utils.pResults;
 var q = require('q');
 
 var io_manager;
@@ -17,8 +14,6 @@ var io_interface;
 // Managers
 var driver_controller;
 var device_controller;
-var file_io_controller;
-var logger_controller;
 
 var device;
 
@@ -26,7 +21,7 @@ var getPerformTest = function(functionName, testArguments, numReads) {
 	// var numReads = numReads;
 	// var functionName = functionName;
 	// var testArguments = testArguments;
-	var testingFunc = function(test) {
+	var testingFunc = function(done) {
 		var promises = [];
 		var i;
 		var startTime = new Date();
@@ -52,13 +47,16 @@ var getPerformTest = function(functionName, testArguments, numReads) {
 			};
 			console.log('Finished Reading, Stats:');
 			console.log(JSON.stringify(stats, null, 2));
-			test.done();
+			done();
 		});
 	};
 	return testingFunc;
 };
-exports.tests = {
-	'initialization': function(test) {
+
+describe('mock device speed', function() {
+	return;
+	this.skip();
+	it('initialization', function (done) {
 		// Require the io_manager library
 		io_manager = require('../lib/io_manager');
 
@@ -70,19 +68,18 @@ exports.tests = {
 		io_interface.initialize()
 		.then(function(res) {
 			// io_interface has initialized and is ready for use
-
 			// Save local pointers to the created objects
 			driver_controller = io_interface.getDriverCotroller();
 			device_controller = io_interface.getDeviceController();
 
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'error initializing io_interface' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'error initializing io_interface' + JSON.stringify(err));
+			done();
 		});
-	},
-	'open mock device': function(test) {
+	});
+	it('open mock device', function (done) {
 		var params = {
 			'deviceType': 'LJM_dtT7',
 			'connectionType': 'LJM_ctUSB',
@@ -97,33 +94,39 @@ exports.tests = {
 			device = newDevice;
 			device_controller.getNumDevices()
 			.then(function(res) {
-				test.strictEqual(res, 1, 'wrong number of devices are open');
-				test.done();
+				assert.strictEqual(res, 1, 'wrong number of devices are open');
+				done();
 			});
 		}, function(err) {
 			console.log("Error opening device", err);
-			test.ok(false, 'failed to create new device object');
-			test.done();
+			assert.isOk(false, 'failed to create new device object');
+			done();
 		});
-	},
-	'read single AIN0': function(test) {
+	});
+	it('read single AIN0', function (done) {
 		device.read('AIN0')
 		.then(function(res) {
 			var isOk = true;
 			if((res > 11) || (res < -11)) {
 				isOk = false;
 			}
-			test.ok(isOk, 'AIN0 read result is out of range');
-			test.done();
+			assert.isOk(isOk, 'AIN0 read result is out of range');
+			done();
 		}, function(err) {
-			test.ok(false, 'AIN0 read result returned an error');
-			test.done();
+			assert.isOk(false, 'AIN0 read result returned an error');
+			done();
 		});
-	},
-	'read x2000, AIN0': getPerformTest('read', 'AIN0', 2000),
-	'iRead x2000, AIN0': getPerformTest('iRead', 'AIN0', 2000),
-	'sRead x2000, AIN0': getPerformTest('sRead', 'AIN0', 2000),
-	// 'update firmware': function(test) {
+	});
+	it('read x2000, AIN0', function (done) {
+		getPerformTest('read', 'AIN0', 2000)(done);
+	});
+	it('iRead x2000, AIN0', function (done) {
+		getPerformTest('iRead', 'AIN0', 2000)(done);
+	});
+	it('sRead x2000, AIN0', function (done) {
+		getPerformTest('sRead', 'AIN0', 2000)(done);
+	});
+	// it('update firmware', function (done) {
 	// 	var fwLocation = '';
 	// 	var numPercentUpdates = 0;
 	// 	var percentListener = function(percent) {
@@ -139,44 +142,44 @@ exports.tests = {
 	// 		stepListener
 	// 	)
 	// 	.then(function(res) {
-	// 		test.ok(true);
+	// 		assert.isOk(true);
 	// 		if(numPercentUpdates > 0) {
-	// 			test.ok(true);
+	// 			assert.isOk(true);
 	// 		} else {
-	// 			test.ok(false, 'did not receive any percent updates');
+	// 			assert.isOk(false, 'did not receive any percent updates');
 	// 		}
 	// 		if(numPercentUpdates > 0) {
-	// 			test.ok(true);
+	// 			assert.isOk(true);
 	// 		} else {
-	// 			test.ok(false, 'did not receive any step updates');
+	// 			assert.isOk(false, 'did not receive any step updates');
 	// 		}
-	// 		test.done();
+	// 		done();
 	// 	}, function(err) {
 	// 		console.log('Update Failed', err);
-	// 		test.ok(false, 'Update failed to complete');
-	// 		test.done();
+	// 		assert.isOk(false, 'Update failed to complete');
+	// 		done();
 	// 	});
 	// },
-	'close mock device': function(test) {
+	it('close mock device', function (done) {
 		device.close()
 		.then(function(res) {
-			test.strictEqual(res.comKey, 0, 'expected to receive a different comKey');
-			test.done();
+			assert.strictEqual(res.comKey, 0, 'expected to receive a different comKey');
+			done();
 		}, function(err) {
 			console.log('Failed to close mock device', err);
-			test.ok(false, 'Failed to close mock device');
-			test.done();
+			assert.isOk(false, 'Failed to close mock device');
+			done();
 		});
-	},
-	'destruction': function(test) {
+	});
+	it('destruction', function (done) {
 		io_interface.destroy()
 		.then(function(res) {
 			// io_interface process has been shut down
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'io_interface failed to shut down' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'io_interface failed to shut down' + JSON.stringify(err));
+			done();
 		});
-	}
-};
+	});
+});

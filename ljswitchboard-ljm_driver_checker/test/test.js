@@ -1,3 +1,5 @@
+var assert = require('chai').assert;
+
 /**
  * This example shows the basic usage of the process_manager library.
 **/
@@ -8,16 +10,17 @@ var q = require('q');
 
 var driver_checker;
 
-exports.ljm_installation = {
-	'include checker': function(test) {
+
+describe('ljm_installation', function() {
+	it('include checker', function (done) {
 		try {
 			driver_checker = require('../lib/ljm_driver_checker');
 		} catch (err) {
-			test.ok(false, 'failed to require library');
+			assert.isOk(false, 'failed to require library');
 		}
-		test.done();
-	},
-	'check installation': function(test) {
+		done();
+	});
+	it('check installation', function (done) {
 		driver_checker.verifyLJMInstallation()
 		.then(function(res) {
 			var requiredKeys = [
@@ -36,12 +39,12 @@ exports.ljm_installation = {
 
 			var resKeys = Object.keys(res);
 			var msg = 'Required Keys does not match result keys';
-			test.strictEqual(resKeys.length, requiredKeys.length, msg);
+			assert.strictEqual(resKeys.length, requiredKeys.length, msg);
 			requiredKeys.forEach(function(key) {
 				if(resKeys.indexOf(key) >= 0) {
-					test.ok(true);
+					assert.isOk(true);
 				} else {
-					test.ok(false, msg + ', missing key: ' + key);
+					assert.isOk(false, msg + ', missing key: ' + key);
 				}
 
 				// As an extra sanity check, the following tests should pass on
@@ -50,23 +53,23 @@ exports.ljm_installation = {
 				// test for the ljm_startup_configs.json which isn't a valid .json file.
 				if(key !== 'LJM startup configs file') {
 					if(res[key].exists) {
-						test.ok(res[key].exists, 'ljm is likely not installed properly or test is broken');
+						assert.isOk(res[key].exists, 'ljm is likely not installed properly or test is broken');
 					}
 					if(res[key].isValid) {
-						test.ok(res[key].isValid, 'ljm is likely not installed properly or test is broken');
+						assert.isOk(res[key].isValid, 'ljm is likely not installed properly or test is broken');
 					}
 				}
 			});
-			test.ok(res.overallResult, 'ljm not installed properly');
-			test.done();
+			assert.isOk(res.overallResult, 'ljm not installed properly');
+			done();
 		}, function(err) {
 			console.log('LJM not installed properly');
 			console.log(err);
-			test.ok(false, 'LJM not installed properly');
-			test.done();
+			assert.isOk(false, 'LJM not installed properly');
+			done();
 		});
-	},
-	'check core requirements': function(test) {
+	});
+	it('check core requirements', function (done) {
 		driver_checker.verifyCoreInstall()
 		.then(function(res) {
 			var requiredKeys = [
@@ -76,22 +79,21 @@ exports.ljm_installation = {
 
 			var resKeys = Object.keys(res);
 			var msg = 'Required Keys does not match result keys';
-			test.strictEqual(resKeys.length, requiredKeys.length, msg);
+			assert.strictEqual(resKeys.length, requiredKeys.length, msg);
 			requiredKeys.forEach(function(key) {
 				if(resKeys.indexOf(key) >= 0) {
-					test.ok(true);
+					assert.isOk(true);
 				} else {
-					test.ok(false, msg + ', missing key: ' + key);
+					assert.isOk(false, msg + ', missing key: ' + key);
 				}
 			});
-			test.ok(res.overallResult, 'core requirements not met');
-			test.done();
+			assert.isOk(res.overallResult, 'core requirements not met');
+			done();
 		}, function(err) {
 			console.log('LJM not installed properly');
 			console.log(err);
-			test.ok(false, 'LJM not installed properly');
-			test.done();
+			assert.isOk(false, 'LJM not installed properly');
+			done();
 		});
-	}
-};
-
+	});
+});

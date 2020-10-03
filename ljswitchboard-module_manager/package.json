@@ -23,7 +23,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "sprintf-js": "1.1.2"
+    "sprintf-js": "1.1.2",
+    "handlebars": "4.7.6"
   },
   "bugs": {
     "url": "https://github.com/labjack/labjack_kipling/issues"
@@ -35,14 +36,15 @@
     "diff": ">=3.5.0",
     "jshint": "2.10.2",
     "html5-lint": "0.3.0",
-    "nodeunit": "0.11.3",
     "rewire": "4.0.1",
-    "handlebars": ">=4.0.0"
+    "handlebars": "4.7.6",
+    "mocha": "7.2.0",
+    "chai": "^4.2.0"
   },
   "directories": {
     "lib": "./lib"
   },
   "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+    "test": "mocha"
   }
 }

@@ -37,9 +37,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -63,7 +63,7 @@ var device_tests = {
 		console.log('');
 		console.log('**** load_specific_ljm_version ****');
 		console.log(' - Installed LJM Library Version:', ljmLibraryVersion.Value);
-		test.done();
+		done();
 	},
 };
 
@@ -77,7 +77,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

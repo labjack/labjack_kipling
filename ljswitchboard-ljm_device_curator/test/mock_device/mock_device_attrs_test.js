@@ -9,9 +9,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceInfo = {
@@ -50,12 +50,12 @@ exports.tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'configure mock device': function(test) {
 		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
-			test.done();
+			done();
 		});
 	},
 	'openDevice - ctANY device': function(test) {
@@ -68,36 +68,36 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo (assigned serial number)': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeName, 'T7');
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
-			test.strictEqual(res.ip, '0.0.0.0');
-			test.strictEqual(res.ipAddress, '0.0.0.0');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeName, 'T7');
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			assert.strictEqual(res.connectionType, 1);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			assert.strictEqual(res.serialNumber, deviceInfo.serialNumber);
+			assert.strictEqual(res.ip, '0.0.0.0');
+			assert.strictEqual(res.ipAddress, '0.0.0.0');
+			done();
 		});
 	},
 	'closeDevice (assigned serial number)': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'configure mock device - USB': function(test) {
 		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
-			test.done();
+			done();
 		});
 	},
 	'openDevice - USB': function(test) {
@@ -110,35 +110,35 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo - USB': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
-			test.strictEqual(res.ip, '0.0.0.0');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			assert.strictEqual(res.connectionType, 1);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			assert.strictEqual(res.serialNumber, deviceInfo.serialNumber);
+			assert.strictEqual(res.ip, '0.0.0.0');
+			done();
 		});
 	},
 	'closeDevice - USB': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'configure mock device - Ethernet': function(test) {
 		// THIS HAS TO HAPPEN BEFORE OPENING A DEVICE!!!
 		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
-			test.done();
+			done();
 		});
 	},
 	'openDevice - Ethernet': function(test) {
@@ -151,34 +151,34 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo - Ethernet': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.strictEqual(res.connectionType, 3);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctETHERNET');
-			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
-			test.strictEqual(res.ip, deviceInfo.ipAddress);
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			assert.strictEqual(res.connectionType, 3);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctETHERNET');
+			assert.strictEqual(res.serialNumber, deviceInfo.serialNumber);
+			assert.strictEqual(res.ip, deviceInfo.ipAddress);
+			done();
 		});
 	},
 	'closeDevice - Ethernet': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'configure mock device - WiFi': function(test) {
 		device.configureMockDevice(deviceInfo)
 		.then(function(res) {
-			test.done();
+			done();
 		});
 	},
 	'openDevice - WiFi': function(test) {
@@ -191,23 +191,23 @@ exports.tests = {
 		device.open(td.dt, td.ct, td.id)
 		.then(function(res) {
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo - WiFi': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.strictEqual(res.connectionType, 4);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctWIFI');
-			test.strictEqual(res.serialNumber, deviceInfo.serialNumber);
-			test.strictEqual(res.ip, deviceInfo.ipAddress);
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			assert.strictEqual(res.connectionType, 4);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctWIFI');
+			assert.strictEqual(res.serialNumber, deviceInfo.serialNumber);
+			assert.strictEqual(res.ip, deviceInfo.ipAddress);
 			// console.log('device attributes', res);
-			test.done();
+			done();
 		});
 	},
 	'Read Device Attributes': function(test) {
@@ -230,19 +230,19 @@ exports.tests = {
 				}
 
 				if(deviceInfo[name]) {
-					test.strictEqual(resData, deviceInfo[name]);
+					assert.strictEqual(resData, deviceInfo[name]);
 				} else if(infoMapping[name]) {
-					test.strictEqual(resData, deviceInfo[infoMapping[name]]);
+					assert.strictEqual(resData, deviceInfo[infoMapping[name]]);
 				}
 				// console.log(name, resData);
 			});
-			test.done();
+			done();
 		});
 	},
 	'closeDevice - WiFi': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 };

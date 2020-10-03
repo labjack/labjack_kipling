@@ -1,7 +1,6 @@
-
+var assert = require('chai').assert;
 
 var path = require('path');
-var fs = require('fs');
 
 // Generic Application Objects
 var package_loader;
@@ -11,7 +10,7 @@ var screens;
 var window_manager;
 
 // Window Objects
-var testWin;
+var testerWin;
 var kiplingWin;
 
 // Kipling Application Objects
@@ -20,11 +19,11 @@ var $;
 var MODULE_LOADER;
 var MODULE_CHROME;
 
-this.test_kipling = {
-	'Adjust Window Positions': function(test) {
-		test.ok(true, 'Started ljswitchboard');
+describe('test_kipling', function() {
+	it('Adjust Window Positions', function (done) {
+		assert.isOk(true, 'Started ljswitchboard');
 		try {
-			
+
 			package_loader = global.require('ljswitchboard-package_loader');
 			gns = package_loader.getNameSpace();
 			gui = global[gns].gui;
@@ -62,23 +61,23 @@ this.test_kipling = {
 		} catch(err) {
 			console.error('Error in test', err);
 		}
-		test.done();
-	},
-	'Check Extraction Path': function(test) {
+		done();
+	});
+	it('Check Extraction Path', function (done) {
 		var extractionPath = package_loader.getExtractionPath();
 		var basename = path.basename(extractionPath);
 		var msg = 'Extraction Path should not be the default extraction path';
-		test.notStrictEqual(basename, 'K3', msg);
+		assert.notStrictEqual(basename, 'K3', msg);
 		// testerWin.showDevTools();
 		// console.log('Dev Tools shown');
-		test.done();
-	},
-	'Wait for module chrome to start': function(test) {
+		done();
+	});
+	it('Wait for module chrome to start', function (done) {
 		var numLoadDelay = 0;
 		var waitForStart = function() {
 			if(MODULE_CHROME.moduleChromeStarted) {
-				test.ok(MODULE_CHROME.moduleChromeStarted, 'module chrome has not started');
-				test.done();
+				assert.isOk(MODULE_CHROME.moduleChromeStarted, 'module chrome has not started');
+				done();
 			} else {
 				numLoadDelay += 1;
 				if(numLoadDelay > 5) {
@@ -90,5 +89,5 @@ this.test_kipling = {
 			}
 		};
 		setTimeout(waitForStart, 1);
-	}
-};
+	});
+});

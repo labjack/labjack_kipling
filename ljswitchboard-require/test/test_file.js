@@ -6,7 +6,7 @@ exports.testVar = 'test-file.js';
 exports.tFunc = function() {
 	var isFound = false;
 	try {
-		require('nodeunit');
+		require('mocha');
 		isFound = true;
 	} catch (err) {
 

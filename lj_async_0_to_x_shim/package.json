@@ -5,7 +5,7 @@
   "description": "A repository to make it easier to switch from async 0 to async 2,3 ++",
   "main": "lj_async_shim.js",
   "scripts": {
-    "test": "node ./node_modules/nodeunit/bin/nodeunit ./test/test.js"
+    "test": "mocha"
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/lj_async_0_to_x_shim",
   "repository": {
@@ -17,7 +17,8 @@
   "license": "MIT",
   "devDependencies": {
     "diff": ">=3.5.0",
-    "nodeunit": "0.11.3"
+    "mocha": "7.2.0",
+    "chai": "^4.2.0"
   },
   "dependencies": {
     "async": "3.1.0"

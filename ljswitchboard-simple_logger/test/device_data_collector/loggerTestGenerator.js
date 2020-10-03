@@ -25,7 +25,7 @@ function getTriggerLoggerTest(numReads, interval, dataToRead) {
 		// 		numIterations += 1;
 		// 		if(numIterations > numReads) {
 		// 			clearInterval(intervalHandler);
-		// 			test.done();
+		// 			done();
 		// 		}
 		// 	})
 		// }, interval);
@@ -53,7 +53,7 @@ function getTriggerLoggerTest(numReads, interval, dataToRead) {
 				});
 			},
 			function(err) {
-				test.done();
+				done();
 			});
 	};
 }

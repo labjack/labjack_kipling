@@ -16,9 +16,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -58,11 +58,11 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -83,7 +83,7 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -92,7 +92,7 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -100,9 +100,9 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'stopping lua script': function(test) {
@@ -110,9 +110,9 @@ var device_tests = {
 		device.stopLuaScript()
 		.then(function(res) {
 			console.log('  - Lua Script Stopped.');
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'load lua script': function(test) {
@@ -121,12 +121,12 @@ var device_tests = {
 		})
 		.then(function(res) {
 			console.log('Finished Loading Script', res);
-			test.ok(true, 'Finished loading script');
-			test.done();
+			assert.isOk(true, 'Finished loading script');
+			done();
 		}, function(err) {
 			console.log('Error loading script', err);
-			test.ok(false, 'Error loading script');
-			test.done();
+			assert.isOk(false, 'Error loading script');
+			done();
 		});
 	},
 	'starting lua script': function(test) {
@@ -134,9 +134,9 @@ var device_tests = {
 		device.startLuaScript()
 		.then(function(res) {
 			console.log('  - Lua Script Started.');
-			test.done();
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
 	},
 	'wait for script to stop': function(test) {
@@ -156,13 +156,13 @@ var device_tests = {
 		.then(function(res) {
 			// console.log('  - Lua Script Finished?', res);
 			console.log('  - Lua Script Finished Running.');
-			test.ok(true, 'Lua script finished running.');
+			assert.isOk(true, 'Lua script finished running.');
 			luaScriptExecuted = true;
-			test.done();
+			done();
 		}, function(err) {
-			test.ok(false, 'Lua script failed to execute and finish.');
+			assert.isOk(false, 'Lua script failed to execute and finish.');
 			luaScriptExecuted = false;
-			test.done();
+			done();
 		});
 	},
 	'stopping lua script(2)': function(test) {
@@ -170,21 +170,21 @@ var device_tests = {
 		device.stopLuaScript()
 		.then(function(res) {
 			console.log('  - Lua Script Stopped.');
-			test.done();
+			done();
 		}, function(err) {
-			test.ok(false, 'Lua script should have stopped.');
-			test.done();
+			assert.isOk(false, 'Lua script should have stopped.');
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 };
 
@@ -198,7 +198,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

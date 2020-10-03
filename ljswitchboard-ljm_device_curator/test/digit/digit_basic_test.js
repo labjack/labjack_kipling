@@ -17,9 +17,9 @@ var device;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -46,7 +46,7 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDigit': function(test) {
 		var td = {
@@ -66,25 +66,25 @@ var device_tests = {
 				);
 			}
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			performTests = false;
-			test.done();
+			done();
 		});
 	},
 	'checkDigitDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
-			test.strictEqual(res.deviceType, 200);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtDIGIT');
-			test.strictEqual(res.connectionType, 1);
-			test.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
-			test.done();
+			assert.strictEqual(res.deviceType, 200);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtDIGIT');
+			assert.strictEqual(res.connectionType, 1);
+			assert.strictEqual(res.connectionTypeString, 'LJM_ctUSB');
+			done();
 		});
 	},
 	'check constants': function(test) {
 		// console.log(device.savedAttributes);
-		test.done();
+		done();
 	},
 	'readTemp': function(test) {
 		var results = [];
@@ -99,7 +99,7 @@ var device_tests = {
 				{'functionCall': 'read', 'type': 'range', 'min': 0, 'max': 99999}
 			];
 			utils.testResults(test, expectedResult, res);
-			test.done();
+			done();
 		});
 	},
 	'verify temperature format function': function(test) {
@@ -134,8 +134,8 @@ var device_tests = {
 		results.forEach(function(result, i) {
 			// console.log('Result:', result, 'ReqResult', reqResults[i]);
 		});
-		test.deepEqual(results, reqResults, 'There are some wrong temperature-conversions');
-		test.done();
+		assert.deepEqual(results, reqResults, 'There are some wrong temperature-conversions');
+		done();
 	},
 	'verify humidity format function': function(test) {
 		var testPoints = [
@@ -168,13 +168,13 @@ var device_tests = {
 
 		results.forEach(function(result, i) {
 			if(result != reqResults[i]) {
-				console.log('!!!', 'Result:', result, 'ReqResult', reqResults[i]);	
+				console.log('!!!', 'Result:', result, 'ReqResult', reqResults[i]);
 			}
-			
+
 
 		});
-		test.deepEqual(results, reqResults, 'There are some wrong humidity-conversions');
-		test.done();
+		assert.deepEqual(results, reqResults, 'There are some wrong humidity-conversions');
+		done();
 	},
 	'verify light format function': function(test) {
 		var testPoints = [
@@ -203,8 +203,8 @@ var device_tests = {
 		results.forEach(function(result, i) {
 			// console.log('Result:', result, 'ReqResult', reqResults[i]);
 		});
-		test.deepEqual(results, reqResults, 'There are some wrong light-conversions');
-		test.done();
+		assert.deepEqual(results, reqResults, 'There are some wrong light-conversions');
+		done();
 	},
 	'read log parameters': function(test) {
 		device.getLogParams()
@@ -218,13 +218,13 @@ var device_tests = {
 				'startTime',
 			];
 			var acquiredKeys = Object.keys(logParams);
-			test.deepEqual(acquiredKeys, requiredKeys, 'getLogParams data is invalid');
-			test.ok(true);
-			test.done();
+			assert.deepEqual(acquiredKeys, requiredKeys, 'getLogParams data is invalid');
+			assert.isOk(true);
+			done();
 		}, function(err) {
 			console.log('Error!!', err);
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 	'read log data': function(test) {
@@ -246,7 +246,7 @@ var device_tests = {
 		.then(function(loggedData) {
 			var stopTime = new Date();
 			var duration = stopTime - startTime;
-			
+
 
 			var requiredKeys = [
 				'logParams',
@@ -256,8 +256,8 @@ var device_tests = {
 				'error',
 			];
 			var acquiredKeys = Object.keys(loggedData);
-			test.deepEqual(acquiredKeys, requiredKeys, 'readDigitLoggedData data is invalid');
-			
+			assert.deepEqual(acquiredKeys, requiredKeys, 'readDigitLoggedData data is invalid');
+
 			if(false) {
 				console.log(
 					'Logged Data',
@@ -287,12 +287,12 @@ var device_tests = {
 					'light': loggedData.logParams.itemsLogged.light
 				});
 			}
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
 			console.log('Error test!!', Object.keys(err));
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 	'readTempLightHumidity': function(test) {
@@ -301,7 +301,7 @@ var device_tests = {
 		qExec(device, 'readTempLightHumidity')(results)
 		.then(function(readResults) {
 			console.log(JSON.stringify(results, null, 2));
-			test.done();
+			done();
 		});
 	},
 	'averageTLH Readings': function(test) {
@@ -311,7 +311,7 @@ var device_tests = {
 		executeMany(operation, numReads)
 		.then(function(averagedData) {
 			console.log('Averaged Data', averagedData);
-			test.done();
+			done();
 		});
 	},
 	'averageTHL Readings': function(test) {
@@ -322,13 +322,13 @@ var device_tests = {
 		.then(function(averagedData) {
 			console.log('SN:', device.savedAttributes.serialNumber);
 			console.log('Averaged Data', averagedData);
-			test.done();
+			done();
 		});
 	},
 	'closeDigit': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 };
@@ -390,7 +390,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

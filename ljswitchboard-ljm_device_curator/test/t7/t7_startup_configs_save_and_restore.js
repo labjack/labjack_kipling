@@ -12,9 +12,9 @@ var deviceB;
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -49,7 +49,7 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -70,11 +70,11 @@ var device_tests = {
 			);
 			console.log('  - Current Fw Version:', res.FIRMWARE_VERSION);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log("  - Failed to open device", ljm.errToStrSync(err));
 			performTests = false;
-			test.done();
+			done();
 		});
 	},
 	'openDeviceB': function(test) {
@@ -96,28 +96,28 @@ var device_tests = {
 			);
 			console.log('  - Current Fw Version:', res.FIRMWARE_VERSION);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log("  - Failed to open device", ljm.errToStrSync(err));
 			performTests = false;
-			test.done();
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
 		device.getDeviceAttributes()
 		.then(function(res) {
 			var keys = Object.keys(res);
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
 	'read device configs': function(test) {
 		device.readConfigs([
-			'StartupPowerSettings', 
-			'StartupSettings', 
-			'CommSettings', 
-			// 'SWDTSettings', 
+			'StartupPowerSettings',
+			'StartupSettings',
+			'CommSettings',
+			// 'SWDTSettings',
 			'AIN_EF_Settings'
 		])
 		.then(function(results) {
@@ -131,46 +131,46 @@ var device_tests = {
 			// 		console.log('    - Flash Data', result.group, result.type, result.data.length);
 			// 	}
 			// });
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
 			console.log('Error', err);
-			test.ok(false, 'Failed to read device configs');
-			test.done();
+			assert.isOk(false, 'Failed to read device configs');
+			done();
 		});
 	},
 	'write device configs': function(test) {
 		deviceB.writeConfigs(deviceConfigs)
 		.then(function(result) {
 			console.log('  - Finished writing device configs');
-			test.done();
+			done();
 		}, function(err) {
 			console.log('  - Finished writing device config.  It FAILED!!!', err);
 			var code = err.error;
 			var errorInfo = modbus_map.getErrorInfo(code);
 			console.log('Error Code Info', code, errorInfo);
-			test.ok(false, 'Failed to write device configs');
-			test.done();
+			assert.isOk(false, 'Failed to write device configs');
+			done();
 		});
 	},
 	'closeDevice': function(test) {
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		}, function(err) {
 			console.log("Failure");
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 	'closeDeviceB': function(test) {
 		deviceB.close()
 		.then(function() {
-			test.done();
+			done();
 		}, function(err) {
 			console.log("Failure");
-			test.ok(false);
-			test.done();
+			assert.isOk(false);
+			done();
 		});
 	},
 };
@@ -185,7 +185,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

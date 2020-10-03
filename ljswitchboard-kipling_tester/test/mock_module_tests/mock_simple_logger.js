@@ -1,4 +1,4 @@
-
+var assert = require('chai').assert;
 
 // Generic Application Objects
 var package_loader;
@@ -7,7 +7,7 @@ var gui;
 var window_manager;
 
 // Window Objects
-var testWin;
+var testerWin;
 var kiplingWin;
 
 // Kipling Application Objects
@@ -18,9 +18,6 @@ var MODULE_CHROME;
 var io_manager;
 var io_interface;
 var deviceController;
-var activeModule;
-var viewGen;
-var eventList;
 
 
 var mockDevices;
@@ -42,8 +39,8 @@ mockDevices.forEach(function(mockDevice) {
 	deviceScannerConfigData.push(deviceData);
 });
 
-this.test_device_info = {
-	'initialize test': function(test) {
+describe('simple logger', function() {
+	it('initialize test', function (done) {
 		package_loader = global.require('ljswitchboard-package_loader');
 		gns = package_loader.getNameSpace();
 		gui = global[gns].gui;
@@ -59,19 +56,18 @@ this.test_device_info = {
 		$ = kiplingWindow.$;
 		MODULE_LOADER = kiplingWindow.MODULE_LOADER;
 		MODULE_CHROME = kiplingWindow.MODULE_CHROME;
-		
+
 
 		io_manager = global.require('ljswitchboard-io_manager');
 		io_interface = io_manager.io_interface();
 		deviceController = io_interface.getDeviceController();
-		test.done();
-	},
-	'load register_matrix_fw': function(test) {
-
+		done();
+	});
+	it('load register_matrix_fw', function (done) {
 		MODULE_LOADER.once('MODULE_READY', function(res) {
-			test.done();
+			done();
 		});
 		var deviceInfoTab = $('#simple_logger-tab');
 		deviceInfoTab.trigger('click');
-	},
-};
+	});
+});

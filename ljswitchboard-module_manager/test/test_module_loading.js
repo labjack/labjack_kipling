@@ -1,20 +1,13 @@
-var q = require('q');
+var assert = require('chai').assert;
+
 var path = require('path');
-var fs = require('fs.extra');
 var module_manager = require('../lib/ljswitchboard-module_manager');
 
 var test_utils = require('./test_utils');
-var addFrameworkFiles = test_utils.addFrameworkFiles;
 var checkLoadedModuleData = test_utils.checkLoadedModuleData;
-var printLintError = test_utils.printLintError;
-var checkLoadedFiles = test_utils.checkLoadedFiles;
-
 
 var moduleNames = [];
 var savedModules = {};
-var loadTimes = {};
-
-
 
 var cwd = process.cwd();
 var testDir = 'test_persistent_data_dir';
@@ -25,14 +18,14 @@ var testPersistentDataFilePath = testPath;
 
 // Configure the persistent data directory
 module_manager.configurePersistentDataPath(testPersistentDataFilePath);
-var clearPersistentTestData = function(test) {
+var clearPersistentTestData = function(done) {
 	module_manager.resetModuleStartupData(
 		'I am self aware and will be deleting a LOT of things'
 	)
 	.then(function(res) {
-		test.done();
+		done();
 	}, function(err) {
-		test.ok(false, 'failed to reset the persistent data dir');
+		assert.ok(false, 'failed to reset the persistent data dir');
 	});
 };
 
@@ -40,8 +33,8 @@ var clearPersistentTestData = function(test) {
 
 var testModuleName = 'device_selector';
 
-var tests = {
-	'getModuleNames': function(test) {
+describe('module loading', function() {
+	it('getModuleNames', function (done) {
 		module_manager.getModulesList()
 		.then(function(categories) {
 			var categoryKeys = Object.keys(categories);
@@ -52,7 +45,7 @@ var tests = {
 					if(module.name) {
 						hasAttr = true;
 					}
-					test.ok(hasAttr, 'Module does not define name attribute');
+					assert.isOk(hasAttr, 'Module does not define name attribute');
 					moduleNames.push(module.name);
 					savedModules[module.name] = module;
 				});
@@ -61,12 +54,14 @@ var tests = {
 			// Make sure there aren't any naming conflicts
 			var numNames = moduleNames.length;
 			var numObjs = Object.keys(savedModules).length;
-			test.ok((numNames == numObjs), 'Naming conflicts...');
-			test.done();
+			assert.isOk((numNames == numObjs), 'Naming conflicts...');
+			done();
 		});
-	},
-	'clearPersistentTestData - initial': clearPersistentTestData,
-	'loadModuleDataByName': function(test) {
+	});
+	it('clearPersistentTestData', function (done) {
+		clearPersistentTestData(done);
+	});
+	it('loadModuleDataByName', function (done) {
 		// console.log('Modules...', moduleNames);
 		var startTime = new Date();
 
@@ -75,17 +70,17 @@ var tests = {
 			var endTime = new Date();
 			console.log('  - loadModule duration', endTime - startTime);
 			if(moduleData.json.data_init) {
-				test.deepEqual(
+				assert.deepEqual(
 					moduleData.startupData,
 					moduleData.json.data_init,
 					'startup data data did not load'
 				);
 			}
-			checkLoadedModuleData(test, moduleData);
-			test.done();
+			checkLoadedModuleData(moduleData);
+			done();
 		});
-	},
-	'readWriteReadModuleStartupData': function(test) {
+	});
+	it('readWriteReadModuleStartupData', function (done) {
 		var originalStartupData = {};
 		module_manager.getModuleStartupData(testModuleName)
 		.then(function(startupData) {
@@ -99,7 +94,7 @@ var tests = {
 			.then(module_manager.getModuleStartupData)
 			.then(function(newStartupData) {
 				// Make sure the file has changed appropriately
-				test.deepEqual(
+				assert.deepEqual(
 					startupData,
 					newStartupData,
 					'startup data did not change'
@@ -110,18 +105,18 @@ var tests = {
 				module_manager.revertModuleStartupData(testModuleName)
 				.then(module_manager.getModuleStartupData)
 				.then(function(finalStartupData) {
-					// Make sure that the file has changed back to its original 
+					// Make sure that the file has changed back to its original
 					// state.
-					test.deepEqual(
+					assert.deepEqual(
 						finalStartupData,
 						originalStartupData,
 						'startup data did not revert');
-					test.done();
+					done();
 				});
 			});
 		});
-	},
-	'readWrite startupData AndLoadModule': function(test) {
+	});
+	it('readWrite startupData AndLoadModule', function (done) {
 		var originalStartupData = {};
 		module_manager.getModuleStartupData(testModuleName)
 		.then(function(startupData) {
@@ -137,7 +132,7 @@ var tests = {
 			.then(function(newStartupData) {
 				// console.log('currentData', newStartupData);
 				// Make sure the file has changed appropriately
-				test.deepEqual(
+				assert.deepEqual(
 					startupData,
 					newStartupData,
 					'startup data did not change'
@@ -146,9 +141,9 @@ var tests = {
 				module_manager.loadModuleDataByName(testModuleName)
 				.then(function(moduleData) {
 					// console.log('currentData', moduleData.startupData);
-					// Make sure that the module's startupData is what was 
+					// Make sure that the module's startupData is what was
 					// written
-					test.deepEqual(
+					assert.deepEqual(
 						moduleData.startupData,
 						startupData,
 						'startup data was re-set'
@@ -157,9 +152,9 @@ var tests = {
 					.then(module_manager.getModuleStartupData)
 					.then(function(finalStartupData) {
 						// console.log('currentData', finalStartupData);
-						// Make sure that the file has changed back to its 
+						// Make sure that the file has changed back to its
 						// original state.
-						test.deepEqual(
+						assert.deepEqual(
 							finalStartupData,
 							originalStartupData,
 							'startup data did not revert'
@@ -169,18 +164,18 @@ var tests = {
 							// console.log('finalData', moduleDataB.startupData);
 							// Make sure the module's startupData was reverted
 							// back to its original state.
-							test.deepEqual(
+							assert.deepEqual(
 								moduleDataB.startupData,
 								originalStartupData,
 								'startup data did not revert B'
 							);
-							test.done();
+							done();
 						});
 					});
 				});
 			});
 		});
-	},
+	});
 	// 'loadAllModulesByName': function(test) {
 	// 	loadTimes.byName = {
 	// 		'start': new Date(),
@@ -203,13 +198,13 @@ var tests = {
 
 	// 	q.allSettled(promises)
 	// 	.then(function(collectedData) {
-	// 		test.ok(true, 'test finished');
+	// 		assert.isOk(true, 'test finished');
 	// 		loadTimes.byName.end = new Date();
 	// 		loadTimes.byName.duration = loadTimes.byName.end - loadTimes.byName.start;
-	// 		test.done();
+	// 		done();
 	// 	}, function(err) {
-	// 		test.ok(false, 'test failed');
-	// 		test.done();
+	// 		assert.isOk(false, 'test failed');
+	// 		done();
 	// 	});
 	// },
 	// 'loadAllModulesByObject': function(test) {
@@ -235,13 +230,13 @@ var tests = {
 
 	// 	q.allSettled(promises)
 	// 	.then(function(collectedData) {
-	// 		test.ok(true, 'test finished');
+	// 		assert.isOk(true, 'test finished');
 	// 		loadTimes.byObject.end = new Date();
 	// 		loadTimes.byObject.duration = loadTimes.byObject.end - loadTimes.byObject.start;
-	// 		test.done();
+	// 		done();
 	// 	}, function(err) {
-	// 		test.ok(false, 'test failed');
-	// 		test.done();
+	// 		assert.isOk(false, 'test failed');
+	// 		done();
 	// 	});
 	// },
 	// 'check cached files': function(test) {
@@ -249,10 +244,8 @@ var tests = {
 	// 	var cachedFileKeys = Object.keys(cachedFiles);
 	// 	console.log('Number of cached files', cachedFileKeys.length);
 	// 	console.log(JSON.stringify(loadTimes, null, 2));
-	// 	test.done();
+	// 	done();
 	// },
 	// 'check for lint errors': test_utils.getCheckForLintErrors(false),
 	// 'clearPersistentTestData - final': clearPersistentTestData,
-};
-
-exports.tests = tests;
+});

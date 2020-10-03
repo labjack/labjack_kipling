@@ -4,7 +4,7 @@ var fse = require('fs-extra');
 var path = require('path');
 var q = require('q');
 
-var unzip = require('unzip');
+var unzip = require('unzipper');
 
 
 function extractWithUnzip (from, to) {
@@ -34,7 +34,7 @@ function extractWithUnzip (from, to) {
             console.error('  - Error performZipFileUpgrade', err);
             console.error('   - Failed From:', from);
             console.error('   - Failed to:', to);
-            
+
             var msg = 'Error performing a .zip file upgrade.  Verify ' +
             'the user-permissions for the directory and .zip file: ' +
             upgradeZipFilePath + ', and ' + destinationPath;

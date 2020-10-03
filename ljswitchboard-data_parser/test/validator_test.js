@@ -1,10 +1,11 @@
+var assert = require('chai').assert;
 
 var data_parser = require('../lib/data_parser');
 var modbus_map = require('ljswitchboard-modbus_map');
 var constants = modbus_map.getConstants();
 
 
-var testResults = function(test, results, reqResults) {
+var testResults = function(assert, results, reqResults) {
 	var i, j;
 	for(j = 0; j < results.length; j++) {
 		var resultKeys = Object.keys(results[j]);
@@ -18,17 +19,17 @@ var testResults = function(test, results, reqResults) {
 				console.log('  - res',results[j][resultKeys[i]]);
 				console.log('  - req', reqResults[j][resultKeys[i]]);
 			}
-			test.deepEqual(results[j][resultKeys[i]], reqResults[j][resultKeys[i]], 'Attribute: ' + resultKeys[i]);
+			assert.deepEqual(results[j][resultKeys[i]], reqResults[j][resultKeys[i]], 'Attribute: ' + resultKeys[i]);
 		}
 	}
 	for(i = 0; i < results.length; i++) {
-		test.deepEqual(Object.keys(results[i]), Object.keys(reqResults[i]));
+		assert.deepEqual(Object.keys(results[i]), Object.keys(reqResults[i]));
 	}
-	test.deepEqual(results, reqResults);
+	assert.deepEqual(results, reqResults);
 };
-exports.tests = {
-	'ip validation': function(test) {
-		
+
+describe('validator_test', function() {
+	it('ip validation', function (done) {
 		var vals = [
 			{'reg': 'ETHERNET_IP', 'val': '0.0.0', 'res': false, 'reason': 'IP address validation failed, invalid IP string.'},
 			{'reg': 'ETHERNET_IP', 'val': '0', 'res': false, 'reason': 'IP address validation failed, invalid IP string.'},
@@ -56,10 +57,10 @@ exports.tests = {
 		});
 		// console.log('Results', results);
 		// console.log('reqResults', reqResults);
-		testResults(test, results, reqResults);
-		test.done();
-	},
-	'undefined validator': function(test) {
+		testResults(assert, results, reqResults);
+		done();
+	});
+	it('undefined validator', function (done) {
 		var vals = [
 			{'reg': 'DAC0', 'val': 1.0},
 		];
@@ -79,7 +80,7 @@ exports.tests = {
 				'reason': '',
 			});
 		});
-		testResults(test, results, reqResults);
-		test.done();
-	},
-};
+		testResults(assert, results, reqResults);
+		done();
+	});
+});

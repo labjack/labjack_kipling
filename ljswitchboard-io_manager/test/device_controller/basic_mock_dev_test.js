@@ -1,15 +1,10 @@
-
 /**
 	This test aims to show how the io_manager library should be used.  It
 	shows the initialization, some basic usage steps, and destruction of the
 	library.
 **/
 
-var utils = require('../utils/utils');
-var qRunner = utils.qRunner;
-var qExec = utils.qExec;
-var pResults = utils.pResults;
-var q = require('q');
+var assert = require('chai').assert;
 
 var io_manager;
 var io_interface;
@@ -17,13 +12,11 @@ var io_interface;
 // Managers
 var driver_controller;
 var device_controller;
-var file_io_controller;
-var logger_controller;
 
 var device;
 
-exports.tests = {
-	'initialization': function(test) {
+describe('basic live', function() {
+	it('initialization', function (done) {
 		console.log('');
 		console.log('**** open_close_mock_dev_test ****');
 		console.log('**** No Device Required ****');
@@ -31,7 +24,7 @@ exports.tests = {
 		// Require the io_manager library
 		io_manager = require('../../lib/io_manager');
 
-		// Require the io_interface that gives access to the ljm driver, 
+		// Require the io_interface that gives access to the ljm driver,
 		// device controller, logger, and file_io_controller objects.
 		io_interface = io_manager.io_interface();
 
@@ -44,14 +37,14 @@ exports.tests = {
 			driver_controller = io_interface.getDriverController();
 			device_controller = io_interface.getDeviceController();
 
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'error initializing io_interface' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'error initializing io_interface' + JSON.stringify(err));
+			done();
 		});
-	},
-	'open mock device': function(test) {
+	});
+	it('open mock device', function (done) {
 		var params = {
 			'deviceType': 'LJM_dtT7',
 			'connectionType': 'LJM_ctUSB',
@@ -65,71 +58,71 @@ exports.tests = {
 			device = newDevice;
 			device_controller.getNumDevices()
 			.then(function(res) {
-				test.strictEqual(res, 1, 'wrong number of devices are open');
-				test.done();
+				assert.strictEqual(res, 1, 'wrong number of devices are open');
+				done();
 			});
 		}, function(err) {
 			console.log("Error opening device", err);
-			test.ok(false, 'failed to create new device object');
-			test.done();
+			assert.isOk(false, 'failed to create new device object');
+			done();
 		});
-	},
-	'read AIN0': function(test) {
+	});
+	it('read AIN0', function (done) {
 		device.read('AIN0')
 		.then(function(res) {
 			var isOk = true;
 			if((res > 11) || (res < -11)) {
 				isOk = false;
 			}
-			test.ok(isOk, 'AIN0 read result is out of range');
-			test.done();
+			assert.isOk(isOk, 'AIN0 read result is out of range');
+			done();
 		}, function(err) {
-			test.ok(false, 'AIN0 read result returned an error');
-			test.done();
+			assert.isOk(false, 'AIN0 read result returned an error');
+			done();
 		});
-	},
-	'close mock device': function(test) {
+	});
+	it('close mock device', function (done) {
 		device.close()
 		.then(function(res) {
-			test.strictEqual(res.comKey, 0, 'expected to receive a different comKey');
-			test.done();
+			assert.strictEqual(res.comKey, 0, 'expected to receive a different comKey');
+			done();
 		}, function(err) {
 			console.log('Failed to close mock device', err);
-			test.ok(false, 'Failed to close mock device');
-			test.done();
+			assert.isOk(false, 'Failed to close mock device');
+			done();
 		});
-	},
-	'verify device closure': function(test) {
+	});
+	it('verify device closure', function (done) {
 		device.read('AIN0')
 		.then(function(res) {
 			console.log('read returned', res);
-			test.ok(false, 'should have caused an error');
-			test.done();
+			assert.isOk(false, 'should have caused an error');
+			done();
 		}, function(err) {
-			test.done();
+			done();
 		});
-	},
-	'close all devices': function(test) {
+	});
+	it('close all devices', function (done) {
 		device_controller.closeAllDevices()
 		.then(function(res) {
 			// console.log('Num Devices Closed', res);
-			test.strictEqual(res.numClosed, 0, 'wrong number of devices closed');
-			test.done();
+			assert.strictEqual(res.numClosed, 0, 'wrong number of devices closed');
+			done();
 		}, function(err) {
 			console.log('Error closing all devices', err);
-			test.ok(false, 'failed to close all devices');
-			test.done();
+			assert.isOk(false, 'failed to close all devices');
+			done();
 		});
-	},
-	'destruction': function(test) {
+	});
+	it('destruction', function (done) {
 		io_interface.destroy()
 		.then(function(res) {
 			// io_interface process has been shut down
-			test.ok(true);
-			test.done();
+			assert.isOk(true);
+			done();
 		}, function(err) {
-			test.ok(false, 'io_interface failed to shut down' + JSON.stringify(err));
-			test.done();
+			assert.isOk(false, 'io_interface failed to shut down' + JSON.stringify(err));
+			done();
 		});
-	}
-};
+	});
+});

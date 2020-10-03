@@ -1,3 +1,4 @@
+var assert = require('chai').assert;
 
 // Define functions to assist with handling various C data types.
 var type_helpers = require('../../lib/type_helpers');
@@ -36,8 +37,8 @@ var getHandleInfos;
 var getDeviceInfos;
 
 /* Define Test Cases */
-var test_cases = {
-	'include ljm': function(test) {
+describe('open_all', function() {
+	it('include ljm', function (done) {
 		var ljm_ffi = require('../../lib/ljm-ffi');
 
 		ljm = ljm_ffi.load();
@@ -50,9 +51,9 @@ var test_cases = {
 		getHandleInfos = test_utils.getHandleInfos;
 		getDeviceInfos = test_utils.getDeviceInfos;
 
-		test.done();
-	},
-	'Executing OpenAll function': function(test) {
+		done();
+	});
+	it('Executing OpenAll function', function (done) {
 		var cachedOpenAllData = {};
 
 		function handleGetHandleInfos(data) {
@@ -60,7 +61,7 @@ var test_cases = {
 
 			// Release the open all data info handle
 			ljm.LJM_CleanInfo(cachedOpenAllData.InfoHandle);
-			test.done();
+			done();
 		}
 
 		function handleOpenAll(openAllData) {
@@ -99,7 +100,7 @@ var test_cases = {
 			getDeviceInfos(deviceHandles, handleGetHandleInfos);
 		}
 
-		var dts = 'LJM_dtT7'; 
+		var dts = 'LJM_dtT7';
 		var dt = driver_const.deviceTypes[dts];
 		var cts = 'LJM_ctANY';
 		var ct = driver_const.connectionTypes[cts];
@@ -122,14 +123,11 @@ var test_cases = {
 			info,
 			handleOpenAll
 		);
-	},
-	'Execute close-all function': function(test) {
+	});
+	it('Execute close-all function', function (done) {
 		function handleCloseAll(info) {
-			test.done();
+			done();
 		}
 		ljm.LJM_CloseAll.async(handleCloseAll);
-	},
-};
-
-
-exports.tests = test_cases;
+	});
+});

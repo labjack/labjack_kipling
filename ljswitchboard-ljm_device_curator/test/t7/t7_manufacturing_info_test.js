@@ -16,9 +16,9 @@ var capturedEvents = [];
 
 var criticalError = false;
 var stopTest = function(test, err) {
-	test.ok(false, err);
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
 var deviceFound = false;
@@ -73,11 +73,11 @@ var device_tests = {
 		} catch(err) {
 			stopTest(test, err);
 		}
-		test.done();
+		done();
 	},
 	'close all open devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 	'openDevice': function(test) {
 		var td = {
@@ -98,7 +98,7 @@ var device_tests = {
 			}
 			// console.log('in t7_basic_test.js, openDevice', res);
 			deviceFound = true;
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed to open device', err);
 			var info = modbus_map.getErrorInfo(err);
@@ -107,7 +107,7 @@ var device_tests = {
 			console.log('Error Description', info.description);
 			performTests = false;
 			device.destroy();
-			test.done();
+			done();
 		});
 	},
 	'get manufacturing info': function(test) {
@@ -127,22 +127,22 @@ var device_tests = {
 		.then(function(res) {
 			console.log('Manufacturing Info:'.green, res.data);
 			var keys = Object.keys(res);
-			test.strictEqual(requiredResKeys.length, keys.length, 'num keys should be equal');
+			assert.strictEqual(requiredResKeys.length, keys.length, 'num keys should be equal');
 			keys.forEach(function(key) {
-				test.ok(requiredResKeys.indexOf(key) >= 0, 'Key was not found: ' + key);
+				assert.isOk(requiredResKeys.indexOf(key) >= 0, 'Key was not found: ' + key);
 			});
 
 			var dataKeys = Object.keys(res.data);
-			test.strictEqual(requiredDataKeys.length, dataKeys.length, 'num keys should be equal');
+			assert.strictEqual(requiredDataKeys.length, dataKeys.length, 'num keys should be equal');
 			dataKeys.forEach(function(dataKey) {
-				test.ok(requiredDataKeys.indexOf(dataKey) >= 0, 'Key was not found: ' + dataKey);
+				assert.isOk(requiredDataKeys.indexOf(dataKey) >= 0, 'Key was not found: ' + dataKey);
 			});
-			// test.strictEqual(res.deviceType, 7);
-			// test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			// assert.strictEqual(res.deviceType, 7);
+			// assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		}, function(err) {
-			test.ok(false, 'should not have gotten an error reading manufacturing info');
-			test.done();
+			assert.isOk(false, 'should not have gotten an error reading manufacturing info');
+			done();
 		});
 	},
 	'checkDeviceInfo': function(test) {
@@ -150,22 +150,22 @@ var device_tests = {
 		.then(function(res) {
 			var keys = Object.keys(res);
 
-			test.strictEqual(res.deviceType, 7);
-			test.strictEqual(res.deviceTypeString, 'LJM_dtT7');
-			test.done();
+			assert.strictEqual(res.deviceType, 7);
+			assert.strictEqual(res.deviceTypeString, 'LJM_dtT7');
+			done();
 		});
 	},
-	
+
 	'closeDevice': function(test) {
 		// console.log('Closing...');
 		device.close()
 		.then(function() {
-			test.done();
+			done();
 		});
 	},
 	'close all devices': function(test) {
 		ljm.LJM_CloseAll();
-		test.done();
+		done();
 	},
 };
 
@@ -179,7 +179,7 @@ var getTest = function(testFunc, key) {
 		} else {
 			console.log("  * Not Executing!!");
 			try {
-				test.done();
+				done();
 			} catch(err) {
 				console.log("HERE", err);
 			}

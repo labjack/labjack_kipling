@@ -1,64 +1,55 @@
-
+var assert = require('chai').assert;
 
 var utils = require('./utils/utils');
 var qRunner = utils.qRunner;
-var qExec = utils.qExec;
-var pResults = utils.pResults;
-var q = require('q');
 
 var single_device_interface;
 var singleDeviceInterface;
-var single_device_controller;
-
-var deviceObject;
 
 var criticalError = false;
-var stopTest = function(test, err) {
-	test.ok(false, err);
+var stopTest = function(done, err) {
+	assert.isOk(false, err);
 	criticalError = true;
-	test.done();
+	done();
 };
 
-exports.tests = {
-	'setUp': function(callback) {
+describe('single device controller', function() {
+	beforeEach(function(done) {
 		if(criticalError) {
 			process.exit(1);
 		} else {
-			callback();
+			done();
 		}
-	},
-	'tearDown': function(callback) {
-		callback();
-	},
-	'require single_device_interface': function(test) {
+	});
+	it('require single_device_interface', function (done) {
 		try {
 			single_device_interface = require('../lib/single_device_interface');
 		} catch(err) {
-			stopTest(test, err);
+			stopTest(done, err);
 		}
-		test.done();
-	},
-	'create singleDeviceInterface': function(test) {
+		done();
+	});
+	it('create singleDeviceInterface', function (done) {
 		try {
 			singleDeviceInterface = single_device_interface.createSingleDeviceInterface();
 		} catch(err) {
-			stopTest(test, err);
+			stopTest(done, err);
 		}
-		test.done();
-	},
-	'initialize singleDeviceInterface': function(test) {
-		qRunner(test, singleDeviceInterface.initialize)
+		done();
+	});
+	it('initialize singleDeviceInterface', function (done) {
+		qRunner(done, singleDeviceInterface.initialize)
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'destroy singleDeviceInterface': function(test) {
-		qRunner(test, singleDeviceInterface.destroy)
+	});
+	it('destroy singleDeviceInterface', function (done) {
+		qRunner(done, singleDeviceInterface.destroy)
 		.then(function(res) {
-			test.done();
+			done();
 		});
-	},
-	// 'create createDeviceObject': function(test) {
+	});
+	// it('create createDeviceObject', function (done) {
 	// 	qRunner(singleDeviceInterface.createDeviceObject)
 	// 	.then(function(device) {
 
@@ -69,11 +60,11 @@ exports.tests = {
 	// 		var keys = Object.keys(device);
 
 	// 		deviceObject = device;
-	// 		test.ok(true, device);
-	// 		test.done();
+	// 		assert.isOk(true, device);
+	// 		done();
 	// 	});
 	// },
-	// 'open device': function(test) {
+	// it('open device', function (done) {
 	// 	var testDeviceAttributes = {
 	// 		'deviceType': 'LJM_dtANY',
 	// 		'connectionType': 'LJM_ctANY',
@@ -82,19 +73,19 @@ exports.tests = {
 
 	// 	deviceObject.open(testDeviceAttributes)
 	// 	.then(function(device) {
-	// 		test.done();
+	// 		done();
 	// 	});
 	// },
-	// 'close device': function(test) {
+	// it('close device', function (done) {
 	// 	deviceObject.close()
 	// 	.then(function(deviceReferenceKey) {
-	// 		test.done();
+	// 		done();
 	// 	});
 	// },
-	// 'destroyInactiveDeviceObjects': function(test) {
+	// it('destroyInactiveDeviceObjects', function (done) {
 	// 	qRunner(singleDeviceInterface.destroyInactiveDeviceObjects)
 	// 	.then(function() {
-	// 		test.done();
+	// 		done();
 	// 	});
 	// }
-};
+});

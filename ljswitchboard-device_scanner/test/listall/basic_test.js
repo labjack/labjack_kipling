@@ -1,9 +1,9 @@
 // Legacy test for the old ListAll scan method. Expects to open real devices.
+var assert = require('chai').assert;
 
 var deviceScanner;
 
 var test_util = require('../utils/test_util');
-var printAvailableDeviceData = test_util.printAvailableDeviceData;
 var printScanResultsData = test_util.printScanResultsData;
 var testScanResults = test_util.testScanResults;
 var device_curator = require('ljswitchboard-ljm_device_curator');
@@ -11,36 +11,37 @@ var device_scanner = require('../../lib/ljswitchboard-device_scanner');
 var expDeviceTypes = require('../utils/expected_devices').expectedDevices;
 var devices = [];
 var device;
-exports.tests = {
-	'Starting Basic Test': function(test) {
+
+describe('basic', function() {
+	it('Starting Basic Test', function (done) {
 		console.log('');
 		console.log('*** Starting Basic (ListAll) Test ***');
 
 		deviceScanner = device_scanner.getDeviceScanner('device_scanner');
 
-		test.done();
-	},
-	'open device': function(test) {
+		done();
+	});
+	it('open device', function (done) {
 		device = new device_curator.device();
 		devices.push(device);
 		device.open('LJM_dtT7', 'LJM_ctUSB', 'LJM_idANY')
 		.then(function() {
 			console.log('Opened Device');
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Failed....', err)
 			devices[0].destroy();
 			devices = [];
-			test.done();
+			done();
 		});
-	},
-	'enable device scanning': function(test) {
+	});
+	it('enable device scanning', function (done) {
 		deviceScanner.enableDeviceScanning()
 		.then(function() {
-			test.done();
+			done();
 		});
-	},
-	'basic test': function(test) {
+	});
+	it('basic test', function (done) {
 		var startTime = new Date();
 		console.log('Starting Scan');
 		deviceScanner.findAllDevices(devices)
@@ -49,45 +50,45 @@ exports.tests = {
 			printScanResultsData(deviceTypes);
 			var endTime = new Date();
 			var testStatus = testScanResults(deviceTypes, expDeviceTypes, test, {'test': false, 'debug': false});
-			test.ok(testStatus, 'Unexpected test result');
+			assert.isOk(testStatus, 'Unexpected test result');
 			console.log('  - Duration'.cyan, (endTime - startTime)/1000);
-			test.done();
+			done();
 		}, function(err) {
 			console.log('Scanning Error');
-			test.done();
+			done();
 		});
-	},
-	'read device SN': function(test) {
+	});
+	it('read device SN', function (done) {
 		if(device) {
 			device.iRead('SERIAL_NUMBER')
 			.then(function(res) {
 				console.log('  - SN Res:'.green, res.val);
-				test.done();
+				done();
 			}, function(err) {
 				console.log('Failed to read SN:', err, device.savedAttributes);
 				console.log('Connect a T7 via USB!!!!!!!!!');
-				test.ok(false, 'Failed to read SN: ' + JSON.stringify(err));
-				test.done();
+				assert.isOk(false, 'Failed to read SN: ' + JSON.stringify(err));
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'close device': function(test) {
+	});
+	it('close device', function (done) {
 		if(device) {
 			console.log('Closing Device');
 			device.close()
 			.then(function() {
-				test.done();
+				done();
 			}, function() {
-				test.done();
+				done();
 			});
 		} else {
-			test.done();
+			done();
 		}
-	},
-	'unload': function(test) {
+	});
+	it('unload', function (done) {
 		device_scanner.unload();
-		test.done();
-	},
-};
+		done();
+	});
+});
