@@ -28,7 +28,7 @@
     "cheerio": "1.0.0-rc.3",
     "dict": "1.4.0",
     "q": "1.5.1",
-    "node-fetch": "1.7.3"
+    "node-fetch": "2.6.1"
   },
   "devDependencies": {
     "diff": ">=3.5.0",
