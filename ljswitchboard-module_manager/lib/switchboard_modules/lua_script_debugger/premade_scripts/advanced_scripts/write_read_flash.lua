@@ -45,7 +45,7 @@ if err ~= 0 then
   MB.writeNameArray("LUA_RUN", 2, {0,0}, 0)
 else
   print(" ... Successfully wrote flash section\n")
-en
+end
 
 print("Reading flash now...")
 for i=0,3 do
@@ -53,7 +53,16 @@ for i=0,3 do
   -- Values are accessed by 32-bit values, addressed by byte; 4 bytes=32 bits
   local relativeaddress = i*4
   -- Convert the 32-bit address to two 16-bit values
-  local addressarr = {startaddress[1], bit.band(0x0000FFFF, relativeaddress)+startaddress[2]}
+  local addressMSW = startaddress[1]
+  local addressLSW = relativeaddress + startaddress[2]
+  -- If the variable holding the LSW data is bigger than 16-bits adjust
+  -- so that it only holds the LSW (Move the "overflow" to the MSW)
+  if addressLSW > 0xFFFF then
+    local LSWoverflow = bit.band(0xFFFF0000, addressLSW)
+    addressLSW = addressLSW - LSWoverflow
+    addressMSW = addressMSW + LSWoverflow
+  end
+  local addressarr = {addressMSW, addressLSW}
   LJ.ResetOpCount()
   -- Move the read pointer to the starting address of a 32-bit value in flash
   MB.writeNameArray("INTERNAL_FLASH_READ_POINTER", 2, addressarr, 0)

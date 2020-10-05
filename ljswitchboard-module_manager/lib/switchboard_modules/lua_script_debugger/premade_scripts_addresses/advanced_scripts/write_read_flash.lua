@@ -18,11 +18,11 @@ local err
 print("Erasing flash now...")
 LJ.ResetOpCount()
 -- Set the flash key to look at the user section of flash
-MB.WA(61800, 0, 2, usersectionkey) -- INTERNAL_FLASH_KEY
+MB.WA(61800, 0, 2, usersectionkey)
 -- Erase a (4KB) section of flash before writing to it
-err = MB.WA(61820, 0, 2, startaddress) -- INTERNAL_FLASH_ERASE
+err = MB.WA(61820, 0, 2, startaddress)
 -- Clear the flash key
-MB.WA(61800, 0, 2, clearkey) -- INTERNAL_FLASH_KEY
+MB.WA(61800, 0, 2, clearkey)
 if err ~= 0 then
   print("  ... Failed to erase flash section.")
   MB.W(6000, 1, 0)
@@ -33,13 +33,13 @@ end
 print("Writing flash now...")
 LJ.ResetOpCount()
 -- Move the write pointer to the starting address of interest
-MB.WA(61830, 0, 2, startaddress) -- INTERNAL_FLASH_WRITE_POINTER
+MB.WA(61830, 0, 2, startaddress)
 -- Set the flash key to look at the user section of flash
-MB.WA(61800, 0, 2, usersectionkey) -- INTERNAL_FLASH_KEY
+MB.WA(61800, 0, 2, usersectionkey)
 -- Write 32-bit values to the user section
-err = MB.WA(61832, 0, 8, writevals) -- INTERNAL_FLASH_WRITE
+err = MB.WA(61832, 0, 8, writevals)
 -- Clear the flash key
-MB.WA(61800, 0, 2, clearkey) -- INTERNAL_FLASH_KEY
+MB.WA(61800, 0, 2, clearkey)
 if err ~= 0 then
   print("  ... Failed to write flash section.")
   MB.W(6000, 1, 0)
@@ -53,13 +53,22 @@ for i=0,3 do
   -- Values are accessed by 32-bit values, addressed by byte; 4 bytes=32 bits
   local relativeaddress = i*4
   -- Convert the 32-bit address to two 16-bit values
-  local addressarr = {startaddress[1], bit.band(0x0000FFFF, relativeaddress)+startaddress[2]}
+  local addressMSW = startaddress[1]
+  local addressLSW = relativeaddress + startaddress[2]
+  -- If the variable holding the LSW data is bigger than 16-bits adjust
+  -- so that it only holds the LSW (Move the "overflow" to the MSW)
+  if addressLSW > 0xFFFF then
+    local LSWoverflow = bit.band(0xFFFF0000, addressLSW)
+    addressLSW = addressLSW - LSWoverflow
+    addressMSW = addressMSW + LSWoverflow
+  end
+  local addressarr = {addressMSW, addressLSW}
 
   LJ.ResetOpCount()
   -- Move the read pointer to the starting address of a 32-bit value in flash
-  MB.WA(61810, 0, 2, addressarr) -- INTERNAL_FLASH_READ_POINTER
+  MB.WA(61810, 0, 2, addressarr)
   -- Read a 32-bit value from flash
-  readvals,err = MB.RA(61812, 0, 2) -- INTERNAL_FLASH_READ
+  readvals,err = MB.RA(61812, 0, 2)
   if err ~= 0 then
     print("  ... Failed to read flash section.")
     MB.W(6000, 1, 0)
