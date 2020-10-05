@@ -45,7 +45,7 @@ if err ~= 0 then
   MB.writeNameArray("LUA_RUN", 2, {0,0}, 0)
 else
   print(" ... Successfully wrote flash section\n")
-end
+en
 
 print("Reading flash now...")
 for i=0,3 do

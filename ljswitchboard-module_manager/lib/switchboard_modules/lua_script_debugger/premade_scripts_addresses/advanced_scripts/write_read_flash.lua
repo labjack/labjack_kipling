@@ -31,7 +31,7 @@ else
 end
 
 print("Writing flash now...")
-LJ.ResetOpCount() 
+LJ.ResetOpCount()
 -- Move the write pointer to the starting address of interest
 MB.WA(61830, 0, 2, startaddress) -- INTERNAL_FLASH_WRITE_POINTER
 -- Set the flash key to look at the user section of flash
