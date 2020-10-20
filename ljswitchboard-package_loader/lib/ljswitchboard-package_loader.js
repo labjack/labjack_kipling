@@ -1,34 +1,19 @@
-
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var path = require('path');
-var q = require('q');
+const EventEmitter = require('events').EventEmitter;
+const path = require('path');
 
 // Switch to using a minified local version of semver
-// var semver = require('semver');
-var semver = require('./semver_min');
+// const semver = require('semver');
+const semver = require('./semver_min');
 
-var fs = require('fs.extra');
-var fse = require('fs-extra');
+const fs = require('fs');
+const fse = require('fs-extra');
+const {checkForValidPackage} = require('./utils');
+const {debugSteps} = require('./utils');
 
-var gns = 'ljswitchboard';
-global[gns] = {};
+const extract_with_yauzl = require('./extractors/extract_with_yauzl');
+const extractWithYauzl = extract_with_yauzl.extractWithYauzl;
 
-var useYauzl = true;
-
-var DEBUG_PACKAGE_EXTRACTION_STEPS = false;
-function debugSteps () {
-    if(DEBUG_PACKAGE_EXTRACTION_STEPS) {
-        console.log.apply(console, arguments);
-    }
-}
-function debugPackageChecking () {
-    if(DEBUG_PACKAGE_EXTRACTION_STEPS) {
-        console.log.apply(console, arguments);
-    }
-}
-
-var EVENTS = {
+const EVENTS = {
 	// Events emitted during the loadPackage function, they all return the
 	// name of the package being handled.
 	OPENED_WINDOW: 'opened_window',
@@ -74,62 +59,52 @@ var EVENTS = {
 };
 exports.eventList = EVENTS;
 
+const packageInfoFileName = 'package_loader_data.json';
 
+class PackageLoader extends EventEmitter {
 
-exports.setNameSpace = function(namespace) {
-	global[namespace] = {};
-	var curKeys = Object.keys(global[gns]);
-	curKeys.forEach(function(curKey) {
-		global[namespace][curKey] = global[gns][curKey];
-		global[gns][curKey] = null;
-		delete global[gns][curKey];
-	});
-	global[gns] = null;
-	delete global[gns];
+	constructor(injector) {
+		super();
 
-	gns = namespace;
-};
-exports.getNameSpace = function() {
-	return gns;
-};
+		this.injector = injector;
 
-function createPackageLoader() {
-	this.extractionPath = '';
-	this.managedPackages = {};
-	this.managedPackagesList = [];
-	this.dependencyData = {};
+		this._loadedPackages = [];
 
-	// Load the package.json of the current module (ljswitchboard-package_loader)
-	// to save its information in the dependencyData object incase other modules
-	// require it as a dependency.
-	var packageLoaderPackageInfo = require('../package.json');
-	var selfName = packageLoaderPackageInfo.name;
-	var selfVersion = packageLoaderPackageInfo.version;
-	this.dependencyData[selfName] = {
-		'name': selfName,
-		'version': selfVersion
-	};
+		this.extractionPath = '';
+		this.managedPackages = {};
+		this.managedPackagesList = [];
+		this.dependencyData = {};
 
-	var packageInfoFileName = 'package_loader_data.json';
+		// Load the package.json of the current module (ljswitchboard-package_loader)
+		// to save its information in the dependencyData object incase other modules
+		// require it as a dependency.
+		const packageLoaderPackageInfo = require('../package.json');
+		const selfName = packageLoaderPackageInfo.name;
+		const selfVersion = packageLoaderPackageInfo.version;
+		this.dependencyData[selfName] = {
+			'name': selfName,
+			'version': selfVersion
+		};
+	}
 
+	_startNWApp(packageInfo, info) {
+		console.log('nwApp detected', packageInfo, info);
+		const gui = this.injector.get('gui');
 
-	var startNWApp = function(packageInfo, info) {
-		// console.log('nwApp detected', packageInfo, info);
-		if(global[gns].gui) {
+		if (gui) {
 			// Local reference to nw.gui
-			var gui = global[gns].gui;
-			var curApp = global[gns][packageInfo.name];
+			const curApp = this._loadedPackages[packageInfo.name];
 
 			// Get the module's data that should be used when opening the new window
-			var newWindowData;
-			if(curApp.data) {
-				if(curApp.data.window) {
+			let newWindowData;
+			if (curApp.data) {
+				if (curApp.data.window) {
 					newWindowData = curApp.data.window;
 				}
 			}
 
 			// Build the url and moduleData path
-			var windowPath = 'file:///' + path.join(packageInfo.location, info.main);
+			const windowPath = 'file:///' + path.join(packageInfo.location, info.main);
 
 			// Open a new window and save its reference
 			curApp.win = gui.Window.open(
@@ -138,49 +113,50 @@ function createPackageLoader() {
 			);
 
 			// If desired, open the window's devTools
-			if(packageInfo.showDevTools) {
+			if (packageInfo.showDevTools) {
 				curApp.win.showDevTools();
 			}
 
 			// Emit an event indicating that a new window has been opened.
-			self.emit(EVENTS.OPENED_WINDOW, packageInfo.name);
+			this.emit(EVENTS.OPENED_WINDOW, packageInfo.name);
 		}
-	};
+	}
 
-	var startPackage = function(packageInfo, name) {
+	_startPackage(packageInfo, name) {
+		const loadedPackage = this._loadedPackages[name];
+
 		try {
-			if(global[gns][name].info) {
+			if (loadedPackage.info) {
 				// Load the moduleData (its package.json file) & save it to info.data;
-				var moduleData = getRequiredPackageData(packageInfo.location);
+				const moduleData = this._getRequiredPackageData(packageInfo.location);
 
 				// Add module path to the global.module.paths index
-				var extraPaths = [
+				const extraPaths = [
 					'node_modules',
 					path.join('lib', 'node_modules')
 				];
-				if(global[gns][name].info.type) {
-					if(global[gns][name].info.type === 'library') {
+				if (loadedPackage.info.type) {
+					if (loadedPackage.info.type === 'library') {
 						extraPaths.push('..');
 					}
 				}
-				extraPaths.forEach(function(extraPath) {
-					var dirToAdd = packageInfo.location;
-					var modulesDirToAdd = path.join(dirToAdd, extraPath);
-					modulesDirToAdd = path.normalize(modulesDirToAdd);
-					if(global.module) {
-						if(global.module.paths) {
-							global.module.paths.splice(2,0,modulesDirToAdd);
+				extraPaths.forEach((extraPath) => {
+					const dirToAdd = packageInfo.location;
+					const modulesDirToAdd = path.normalize(path.join(dirToAdd, extraPath));
+					if (global.module) {
+						if (global.module.paths) {
+							global.module.paths.splice(2, 0, modulesDirToAdd);
 						}
 					}
 				});
 
-				global[gns][name].data = moduleData;
-				if(global[gns][name].info.type) {
-					if(global[gns][name].info.type === 'nwApp') {
+				loadedPackage.data = moduleData;
+				if (loadedPackage.info.type) {
+					if (loadedPackage.info.type === 'nwApp') {
 						// Determine if the app should be started.
-						var startApp = false;
-						if(typeof(packageInfo.startApp) !== 'undefined') {
-							if(packageInfo.startApp) {
+						let startApp = false;
+						if (typeof (packageInfo.startApp) !== 'undefined') {
+							if (packageInfo.startApp) {
 								startApp = true;
 							}
 						} else {
@@ -188,12 +164,12 @@ function createPackageLoader() {
 						}
 
 						// If desired, start the application.
-						if(startApp) {
-							startNWApp(packageInfo, global[gns][name].info);
+						if (startApp) {
+							this._startNWApp(packageInfo, loadedPackage.info);
 						} else {
 							// Emit an event indicating that we aren't
 							// starting the detected nwApp
-							self.emit(EVENTS.NOT_STARTING_NW_APP, packageInfo.name);
+							this.emit(EVENTS.NOT_STARTING_NW_APP, packageInfo.name);
 						}
 					}
 				}
@@ -201,984 +177,802 @@ function createPackageLoader() {
 				console.warn('Info Object does not exist, not doing anything special', packageInfo, name);
 			}
 		} catch (err) {
-			console.error('  - package_loader: startPackage Error', err, name);
+			console.error('  - package_loader: _startPackage Error', err, name);
 		}
-	};
-	var getRequiredPackageData = function(moduleLocation) {
-		var moduleData = {};
+	}
+
+	_getRequiredPackageData(moduleLocation) {
 		try {
 			// Build package.json path
-			var moduleDataPath = path.join(moduleLocation, 'package.json');
+			const moduleDataPath = path.join(moduleLocation, 'package.json');
 
 			// Load the moduleData (its package.json file) & save it to info.data;
-			moduleData = require(moduleDataPath);
-		} catch(err) {
+			return require(moduleDataPath);
+		} catch (err) {
 			console.error('  - Failed to load package data', err, name);
 		}
-		return moduleData;
-	};
-	var requirePackage = function(packageInfo) {
-		var name = packageInfo.name;
-		var location;
-		var requireStr;
-		var loadedPackages = Object.keys(global[gns]);
+		return {};
+	}
+
+	_requirePackage(packageInfo) {
+		const name = packageInfo.name;
+		const loadedPackages = Object.keys(this._loadedPackages);
 		// Make sure that we aren't over-writing a global variable by requiring
 		// the new lib.
-		if(loadedPackages.indexOf(name) < 0) {
-			if(packageInfo.location) {
-				location = packageInfo.location;
-				if(packageInfo.requireStr) {
+		if (loadedPackages.indexOf(name) < 0) {
+			if (packageInfo.location) {
+				let requireStr;
+				const location = packageInfo.location;
+
+				if (packageInfo.requireStr) {
 					requireStr = packageInfo.requireStr;
 				} else {
 					requireStr = location;
 				}
-				if(global.require) {
-					global[gns][name] = global.require(requireStr);
-					startPackage(packageInfo, name);
-				} else {
 
-					global[gns][name] = require(requireStr);
-					startPackage(packageInfo, name);
+				if (global.require) {
+					this._loadedPackages[name] = global.require(requireStr);
+					this._startPackage(packageInfo, name);
+				} else {
+					this._loadedPackages[name] = require(requireStr);
+					this._startPackage(packageInfo, name);
 				}
-				global[gns][name].packageInfo = packageInfo;
-				self.emit(EVENTS.LOADED_PACKAGE, packageInfo);
+				this._loadedPackages[name].packageInfo = packageInfo;
+				this.emit(EVENTS.LOADED_PACKAGE, packageInfo);
 			}
 		} else {
-			self.emit(EVENTS.NOT_LOADING_PACKAGE, packageInfo);
+			this.emit(EVENTS.NOT_LOADING_PACKAGE, packageInfo);
 		}
-	};
-	var setPackage = function(packageInfo) {
-		var name = packageInfo.name;
+	}
 
-		if(packageInfo.ref) {
-			global[gns][name] = packageInfo.ref;
-			self.emit(EVENTS.SET_PACKAGE, name);
-			self.emit(EVENTS.LOADED_PACKAGE, packageInfo);
+	getPackage(name) {
+		if (!this._loadedPackages[name]) {
+			throw 'Package ' + name + ' not found';
 		}
-	};
-	var managePackage = function(packageInfo) {
-		var name = packageInfo.name;
 
-		if(self.managedPackages[name]) {
-			self.emit(EVENTS.OVERWRITING_MANAGED_PACKAGE, packageInfo);
+		return this._loadedPackages[name];
+	}
+
+	_setPackage(packageInfo) {
+		const name = packageInfo.name;
+
+		if (packageInfo.ref) {
+			this._loadedPackages[name] = packageInfo.ref;
+			this.emit(EVENTS.SET_PACKAGE, name);
+			this.emit(EVENTS.LOADED_PACKAGE, packageInfo);
+		}
+	}
+
+	_managePackage(packageInfo) {
+		const name = packageInfo.name;
+
+		if (this.managedPackages[name]) {
+			this.emit(EVENTS.OVERWRITING_MANAGED_PACKAGE, packageInfo);
 		} else {
-			self.managedPackagesList.push(name);
+			this.managedPackagesList.push(name);
 			// console.log('Adding a managed package', name);
 		}
-		self.managedPackages[name] = packageInfo;
-		self.managedPackages[name].version = '';
-		self.managedPackages[name].location = '';
-	};
-
+		this.managedPackages[name] = packageInfo;
+		this.managedPackages[name].version = '';
+		this.managedPackages[name].location = '';
+	}
 
 	/**
 	 * Loads packages and saves them to the global scope.  It also prepares a
 	 * list of managedPackages that have to get started separately due to their
 	 * async loading requirements.
 	 */
-	this.loadPackage = function(packageInfo) {
-		var defered = q.defer();
-		try {
-			var name = packageInfo.name;
-			var method = 'require';
-			if(packageInfo.loadMethod) {
-				method = packageInfo.loadMethod;
-			}
-
-			if(method === 'require') {
-				try {
-					requirePackage(packageInfo);
-				} catch (err) {
-					console.error('  - package_loader: Failed to require package', err);
+	loadPackage(packageInfo) {
+		return new Promise((resolve, reject) => {
+			try {
+				let method = 'require';
+				if (packageInfo.loadMethod) {
+					method = packageInfo.loadMethod;
 				}
-			} else if (method === 'set') {
-				setPackage(packageInfo);
-			} else if (method === 'managed') {
-				managePackage(packageInfo);
+
+				if (method === 'require') {
+					try {
+						this._requirePackage(packageInfo);
+					} catch (err) {
+						console.error('  - package_loader: Failed to require package', err);
+					}
+				} else if (method === 'set') {
+					this._setPackage(packageInfo);
+				} else if (method === 'managed') {
+					this._managePackage(packageInfo);
+				}
+				resolve();
+			} catch (err) {
+				console.error('  - package_loader: loadPackage Error', err);
+				reject();
 			}
-		} catch (err) {
-			console.error('  - package_loader: loadPackage Error', err);
-		}
-	};
+		});
+	}
 
 	/**
 	 * Returns a list of the packages managed by the package_loader
 	 */
-	this.getManagedPackages = function() {
-		return self.managedPackagesList;
-	};
-	this.getDependencyList = function() {
-		return Object.keys(self.dependencyData);
-	};
-	this.getDependencyData = function() {
-		var retData = {};
+	getManagedPackages() {
+		return this.managedPackagesList;
+	}
+
+	getDependencyList() {
+		return Object.keys(this.dependencyData);
+	}
+
+	getDependencyData() {
 		try {
-			retData = JSON.parse(JSON.stringify(self.dependencyData));
-		} catch(err) {
-			retData = {};
+			return JSON.parse(JSON.stringify(this.dependencyData));
+		} catch (err) {
+			return {};
 		}
-		return retData;
-	};
-	this.deleteManagedPackage = function(name) {
-		var isValid = false;
-		if(self.managedPackages[name]) {
+	}
+
+	deleteManagedPackage(name) {
+		let isValid = false;
+		if (this.managedPackages[name]) {
 			// Delete the item from the managedPackagesList
-			var newList = [];
-			self.managedPackagesList.forEach(function(item) {
-				if(item !== name) {
+			const newList = [];
+			this.managedPackagesList.forEach((item) => {
+				if (item !== name) {
 					newList.push(item);
 				}
 			});
-			self.managedPackagesList = newList;
+			this.managedPackagesList = newList;
 
-			self.managedPackages[name] = null;
-			self.managedPackages[name] = undefined;
-			delete self.managedPackages[name];
+			this.managedPackages[name] = null;
+			this.managedPackages[name] = undefined;
+			delete this.managedPackages[name];
 
 			isValid = true;
 		}
 		// Only delete managedObjects from the global scope & dependency obj.
-		if(isValid) {
-			if(self.dependencyData[name]) {
-				self.dependencyData[name] = null;
-				self.dependencyData[name] = undefined;
-				delete self.dependencyData[name];
+		if (isValid) {
+			if (this.dependencyData[name]) {
+				this.dependencyData[name] = null;
+				this.dependencyData[name] = undefined;
+				delete this.dependencyData[name];
 			}
-			if(global[gns][name]) {
-				global[gns][name] = null;
-				global[gns][name] = undefined;
-				delete global[gns][name];
+			if (this._loadedPackages[name]) {
+				this._loadedPackages[name] = null;
+				this._loadedPackages[name] = undefined;
+				delete this._loadedPackages[name];
 			}
 		}
-	};
-	this.deleteAllManagedPackages = function() {
-		var packagesToDelete = [];
-		self.managedPackagesList.forEach(function(packageToDelete) {
+	}
+
+	deleteAllManagedPackages() {
+		const packagesToDelete = [];
+		this.managedPackagesList.forEach((packageToDelete) => {
 			packagesToDelete.push(packageToDelete);
 		});
+		packagesToDelete.forEach(this.deleteManagedPackage);
+	}
 
-		packagesToDelete.forEach(self.deleteManagedPackage);
-	};
-
-	var initializeInfoFile = function(bundle) {
-		var defered = q.defer();
-		var filePath = path.normalize(path.join(
-			self.extractionPath,
-			packageInfoFileName
-		));
-		fs.writeFile(filePath, JSON.stringify({}), function(err) {
-			if(err) {
-				if(err.code === 'ENOENT') {
-					var errPath = err.path;
-					console.error('Error Initializing package_loader info file b/c of permissions', err);
-					var message = '';
-					message += 'Write-access required for: ' + path.dirname(errPath);
-					console.error('Message:', message);
-					self.emit(EVENTS.FAILED_TO_INITIALIZE_PACKAGE_MANAGER, message);
-
+	_initializeInfoFile(bundle) {
+		return new Promise((resolve) => {
+			const filePath = path.normalize(path.join(
+				this.extractionPath,
+				packageInfoFileName
+			));
+			fs.writeFile(filePath, JSON.stringify({}), (err) => {
+				if (err) {
+					if (err.code === 'ENOENT') {
+						const errPath = err.path;
+						console.error('Error Initializing package_loader info file b/c of permissions', err);
+						const message = 'Write-access required for: ' + path.dirname(errPath);
+						console.error(message);
+						this.emit(EVENTS.FAILED_TO_INITIALIZE_PACKAGE_MANAGER, message);
+					} else {
+						console.error('Error Initializing package_loader info file', err);
+					}
+					resolve(bundle);
 				} else {
-					console.error('Error Initializing package_loader info file', err);
+					resolve(bundle);
 				}
-				defered.resolve(bundle);
-			} else {
-				defered.resolve(bundle);
-			}
+			});
 		});
-		return defered.promise;
-	};
-	var readInfoFile = function(defaultData) {
-		var defered = q.defer();
-		var filePath = path.normalize(path.join(
-			self.extractionPath,
-			packageInfoFileName
-		));
-		var finishFunc = function(fileData) {
-			var parsedFileData = {};
+	}
+
+	_readInfoFile(defaultData) {
+		return new Promise((resolve) => {
+			const filePath = path.normalize(path.join(
+				this.extractionPath,
+				packageInfoFileName
+			));
+			const finishFunc = (fileData) => {
+				try {
+					const parsedFileData = JSON.parse(fileData.toString('ascii'));
+					// If the file is only "{}" the obj will be 'null'.
+					// force it to be an object.
+					if (parsedFileData === null) {
+						resolve({});
+						return;
+					}
+					resolve(parsedFileData);
+				} catch (jsonParseError) {
+					// Error parsing the JSON file so it should be
+					// re-initialized and assume data is invalid/what was
+					// passed into the function.
+					this._initializeInfoFile(defaultData)
+						.then(resolve);
+				}
+			};
+			if (!fs.existsSync(filePath)) {
+				// Error finding the file so try to re-initialize it and assume
+				// data is invalid/what was passed into the function.
+				this._initializeInfoFile(defaultData)
+					.then(resolve);
+				return;
+			}
+
 			try {
-				parsedFileData = JSON.parse(
-					fileData.toString('ascii'));
-				// If the file is only "{}" the obj will be 'null'.
-				// force it to be an object.
-				if(parsedFileData === null) {
-					parsedFileData = {};
+				const fileData = fs.readFileSync(filePath);
+				finishFunc(fileData);
+			} catch (err) {
+				this._initializeInfoFile(defaultData)
+					.then(resolve);
+			}
+		});
+	}
+
+	_writeInfoFile(dataToWrite) {
+		return new Promise((resolve) => {
+			const filePath = path.normalize(path.join(
+				this.extractionPath,
+				packageInfoFileName
+			));
+			// Create a string that is readable.
+			dataToWrite = JSON.stringify(dataToWrite, null, 2);
+			fs.exists(filePath, (exists) => {
+				if (exists) {
+					fs.writeFile(filePath, dataToWrite, (err) => {
+						if (err) {
+							this._initializeInfoFile({})
+								.then(resolve);
+						} else {
+							resolve({});
+						}
+					});
+				} else {
+					// Error finding the file so try to re-initialize it and assume
+					// data is invalid/what was passed into the function.
+					this._initializeInfoFile({})
+						.then(resolve);
 				}
-				defered.resolve(parsedFileData);
-			} catch(jsonParseError) {
-				// Error parsing the JSON file so it should be
-				// re-initialized and assume data is invalid/what was
-				// passed into the function.
-				initializeInfoFile(defaultData)
-				.then(defered.resolve);
-			}
-		};
-		fs.exists(filePath, function(exists) {
-			if(exists) {
-				fs.readFile(filePath, function(err, fileData) {
-					if(err) {
-						fs.readFile(filePath, function(errB, fileData) {
-							if(errB) {
-								fs.readFile(filePath, function(errB, fileData) {
-									if(errB) {
-										initializeInfoFile(defaultData)
-										.then(defered.resolve);
-									} else {
-										finishFunc(fileData);
-									}
-								});
-							} else {
-								finishFunc(fileData);
-							}
+			});
+		});
+	}
+
+	_declarePackageInvalid(bundle) {
+		return new Promise((resolve) => {
+			const defaultData = {};
+
+			// Store information about packages by their folderName
+			const packageName = bundle.packageInfo.folderName;
+
+			// Read the existing file contents
+			this._readInfoFile(defaultData)
+				.then((data) => {
+					// If the packageInfo.name object dats is already there, declare the
+					// validity attribute to be false.
+
+					if (data[packageName]) {
+						data[packageName].isValid = false;
+						data[packageName].version = bundle.currentPackage.version;
+					} else {
+						// Otherwise, initialize it to be false.
+						data[packageName] = {
+							'isValid': false,
+							'name': packageName,
+							'location': bundle.currentPackage.location,
+							'version': bundle.currentPackage.version
+						};
+					}
+
+					// Write the data back to the file.
+					this._writeInfoFile(data)
+						.then(() => {
+							resolve(bundle);
 						});
-					} else {
-						finishFunc(fileData);
-					}
 				});
-			} else {
-				// Error finding the file so try to re-initialize it and assume
-				// data is invalid/what was passed into the function.
-				initializeInfoFile(defaultData)
-				.then(defered.resolve);
-			}
 		});
-		return defered.promise;
-	};
-	var writeInfoFile = function(dataToWrite) {
-		var defered = q.defer();
-		var filePath = path.normalize(path.join(
-			self.extractionPath,
-			packageInfoFileName
-		));
-		// Create a string that is readable.
-		dataToWrite = JSON.stringify(dataToWrite, null, 2);
-		fs.exists(filePath, function(exists) {
-			if(exists) {
-				fs.writeFile(filePath, dataToWrite, function(err) {
-					if(err) {
-						initializeInfoFile({})
-						.then(defered.resolve);
+	}
+
+	_declarePackageValid(bundle) {
+		return new Promise((resolve) => {
+			const defaultData = {};
+
+			// Store information about packages by their folderName
+			const packageName = bundle.packageInfo.folderName;
+
+			// Read the existing file contents
+			this._readInfoFile(defaultData)
+				.then((data) => {
+					// If the packageInfo.name object dats is already there, declare the
+					// validity attribute to be false.
+					if (data[packageName]) {
+						data[packageName].isValid = true;
+						data[packageName].version = bundle.managedPackage.version;
 					} else {
-						defered.resolve({});
+						// Otherwise, initialize it to be true.
+						data[packageName] = {
+							'isValid': true,
+							'name': packageName,
+							'location': bundle.currentPackage.location,
+							'version': bundle.managedPackage.version
+						};
 					}
+					// Write the data back to the file.
+					this._writeInfoFile(data)
+						.then(() => {
+							resolve(bundle);
+						});
 				});
-			} else {
-				// Error finding the file so try to re-initialize it and assume
-				// data is invalid/what was passed into the function.
-				initializeInfoFile({})
-				.then(defered.resolve);
-			}
 		});
-		return defered.promise;
-	};
+	}
 
-	var declarePackageInvalid = function(bundle) {
-		var defered = q.defer();
-		var defaultData = {};
-
-		// Store information about packages by their folderName
-		var packageName = bundle.packageInfo.folderName;
-
-		// Read the existing file contents
-		readInfoFile(defaultData)
-		.then(function(data) {
-			// If the packageInfo.name object dats is already there, declare the
-			// validity attribute to be false.
-
-			if(data[packageName]) {
-				data[packageName].isValid = false;
-				data[packageName].version = bundle.currentPackage.version;
-			} else {
-				// Otherwise, initialize it to be false.
-				var initData = {
-					'isValid': false,
-					'name': packageName,
-					'location': bundle.currentPackage.location,
-					'version': bundle.currentPackage.version
-				};
-				data[packageName] = initData;
-			}
-
-			// Write the data back to the file.
-			writeInfoFile(data)
-			.then(function(res) {
-				defered.resolve(bundle);
-			});
-		});
-		return defered.promise;
-	};
-	var declarePackageValid = function(bundle) {
-		var defered = q.defer();
-		var defaultData = {};
-
-		// Store information about packages by their folderName
-		var packageName = bundle.packageInfo.folderName;
-
-		// Read the existing file contents
-		readInfoFile(defaultData)
-		.then(function(data) {
-			// If the packageInfo.name object dats is already there, declare the
-			// validity attribute to be false.
-			if(data[packageName]) {
-				data[packageName].isValid = true;
-				data[packageName].version = bundle.managedPackage.version;
-			} else {
-				// Otherwise, initialize it to be true.
-				var initData = {
-					'isValid': true,
-					'name': packageName,
-					'location': bundle.currentPackage.location,
-					'version': bundle.managedPackage.version
-				};
-				data[packageName] = initData;
-			}
-			// Write the data back to the file.
-			writeInfoFile(data)
-			.then(function(res) {
-				defered.resolve(bundle);
-			});
-		});
-		return defered.promise;
-	};
-
-	var checkForExtractionErrors = function(bundle) {
+	checkForExtractionErrors(bundle) {
 		debugSteps('in checkForExtractionErrors');
-		var defered = q.defer();
-		var defaultData = {};
+		return new Promise((resolve) => {
+			const defaultData = {};
 
-		// Information about packages is stored by their folderName.
-		var packageName = bundle.packageInfo.folderName;
+			// Information about packages is stored by their folderName.
+			const packageName = bundle.packageInfo.folderName;
 
-		// console.log('currentPackage', bundle.currentPackage)
-		// Read the existing file contents
-		readInfoFile(defaultData)
-		.then(function(data) {
-			// console.log('Read Data', data);
-			// If the packageInfo.name object data is there then read the
-			// isValid attribute, otherwise say that there are extraction errors.
-			if(data) {
-				if(data[packageName]) {
-					if(data[packageName].isValid) {
-						// Current Package is valid (should already be true).
+			// console.log('currentPackage', bundle.currentPackage)
+			// Read the existing file contents
+			this._readInfoFile(defaultData)
+				.then((data) => {
+					// console.log('Read Data', data);
+					// If the packageInfo.name object data is there then read the
+					// isValid attribute, otherwise say that there are extraction errors.
+					if (data) {
+						if (data[packageName]) {
+							if (data[packageName].isValid) {
+								// Current Package is valid (should already be true).
+							} else {
+								// Current package isn't valid.
+								bundle.currentPackage.isValid = false;
+							}
+						} else {
+							// Current package isn't valid.
+							bundle.currentPackage.isValid = false;
+						}
 					} else {
-						// Current package isn't valid.
 						bundle.currentPackage.isValid = false;
 					}
-				} else {
-					// Current package isn't valid.
-					bundle.currentPackage.isValid = false;
-				}
-			} else {
-				bundle.currentPackage.isValid = false;
-			}
-			defered.resolve(bundle);
+					resolve(bundle);
+				});
 		});
-		return defered.promise;
-	};
-	var checkForManagedPackageExtractionErrors = function(bundle) {
-		var defered = q.defer();
-		var defaultData = {};
+	}
 
-		// Information about packages is stored by their folderName.
-		var packageName = bundle.packageInfo.folderName;
+	_checkForManagedPackageExtractionErrors(bundle) {
+		return new Promise((resolve) => {
+			const defaultData = {};
 
-		// console.log('currentPackage', bundle.currentPackage)
-		// Read the existing file contents
-		readInfoFile(defaultData)
-		.then(function(data) {
-			// console.log('Read Data', data);
-			// If the packageInfo.name object data is there then read the
-			// isValid attribute, otherwise say that there are extraction errors.
-			if(data) {
-				if(data[packageName]) {
-					if(data[packageName].isValid) {
-						// Current Package is valid (should already be true).
+			// Information about packages is stored by their folderName.
+			const packageName = bundle.packageInfo.folderName;
+
+			// console.log('currentPackage', bundle.currentPackage)
+			// Read the existing file contents
+			this._readInfoFile(defaultData)
+				.then((data) => {
+					// console.log('Read Data', data);
+					// If the packageInfo.name object data is there then read the
+					// isValid attribute, otherwise say that there are extraction errors.
+					if (data) {
+						if (data[packageName]) {
+							if (data[packageName].isValid) {
+								// Current Package is valid (should already be true).
+							} else {
+								// Current package isn't valid.
+								bundle.managedPackage.isValid = false;
+							}
+						} else {
+							// Current package isn't valid.
+							bundle.managedPackage.isValid = false;
+						}
 					} else {
-						// Current package isn't valid.
 						bundle.managedPackage.isValid = false;
 					}
-				} else {
-					// Current package isn't valid.
-					bundle.managedPackage.isValid = false;
-				}
-			} else {
-				bundle.managedPackage.isValid = false;
-			}
-			defered.resolve(bundle);
-		});
-		return defered.promise;
-	};
-	var checkforExistingDirectory = function(packageInfo) {
-		var defered = q.defer();
-		fs.exists(packageInfo.location, function(exists) {
-			packageInfo.exists = exists;
-			defered.resolve(packageInfo);
-		});
-		return defered.promise;
-	};
-	var checkPackageType = function(packageInfo) {
-		var defered = q.defer();
-		if(packageInfo.exists) {
-			fs.stat(packageInfo.location, function(err, stats) {
-				if(err) {
-					packageInfo.type = '';
-					defered.resolve(packageInfo);
-				} else {
-					var isFile = stats.isFile();
-					var isDirectory = stats.isDirectory();
-
-					packageInfo.type = '';
-					if(isFile) {
-						packageInfo.type = path.extname(packageInfo.location);
-					}
-					if(isDirectory) {
-						packageInfo.type = 'directory';
-					}
-					defered.resolve(packageInfo);
-				}
-			});
-		} else {
-			packageInfo.type = '';
-			defered.resolve(packageInfo);
-		}
-		return defered.promise;
-	};
-
-	var getPackageVersionOfDirectory = function(packageInfo) {
-		var defered = q.defer();
-
-		var packageDataDir = path.join(packageInfo.location, 'package.json');
-		var finishFunc = function(data) {
-			try {
-				var packageData = JSON.parse(data);
-				if(packageData.version) {
-					if(semver.valid(packageData.version)) {
-						packageInfo.version = packageData.version;
-					}
-				}
-				if(packageData.ljswitchboardDependencies) {
-					packageInfo.dependencies = packageData.ljswitchboardDependencies;
-				}
-				defered.resolve(packageInfo);
-			} catch(jsonParseError) {
-				defered.resolve(packageInfo);
-			}
-		};
-		fs.exists(packageDataDir, function(exists) {
-			if(exists) {
-				fs.readFile(packageDataDir, function(err, data) {
-					if(err) {
-						fs.readFile(packageDataDir, function(err, data) {
-							if(err) {
-								fs.readFile(packageDataDir, function(err, data) {
-									if(err) {
-										defered.resolve(packageInfo);
-									} else {
-										finishFunc(data);
-									}
-								});
-							} else {
-								finishFunc(data);
-							}
-						});
-					} else {
-						finishFunc(data);
-					}
+					resolve(bundle);
 				});
-			} else {
-				defered.resolve(packageInfo);
-			}
 		});
-		return defered.promise;
-	};
-
-	try {
-		// var parse_with_unzip = require('./parsers/parse_with_unzip');
-		// var parseWithUnzip = parse_with_unzip.parseWithUnzip;
-		var parse_with_yauzl = require('./parsers/parse_with_yauzl');
-		var parseWithYauzl = parse_with_yauzl.parseWithYauzl;
-	} catch(err) {
-		console.log('ERROR requiring parsers', err);
 	}
-	var getPackageVersionOfZip = function(packageInfo) {
-		// return parseWithUnzip(packageInfo);
-		debugPackageChecking('in getPackageVersionOfZip', packageInfo);
-		return parseWithYauzl(packageInfo);
-	};
-	var checkPackageVersion = function(packageInfo) {
-		var defered = q.defer();
-		packageInfo.version = '';
-		if(packageInfo.exists) {
-			if(packageInfo.type === 'directory') {
-				getPackageVersionOfDirectory(packageInfo)
-				.then(defered.resolve);
-			} else if(packageInfo.type === '.zip') {
-				getPackageVersionOfZip(packageInfo)
-				.then(defered.resolve);
-			} else {
-				defered.resolve(packageInfo);
-			}
-		} else {
-			defered.resolve(packageInfo);
-		}
-		return defered.promise;
-	};
-	var checkPackageValidity = function(packageInfo) {
-		debugPackageChecking('in checkPackageValidity');
-		var defered = q.defer();
 
-		if(packageInfo.exists) {
-			if(packageInfo.type) {
-				if(packageInfo.version) {
-					packageInfo.isValid = true;
-				}
-			}
-		}
-		defered.resolve(packageInfo);
-		return defered.promise;
-	};
-
-	var checkForValidPackage = function(location) {
-		debugPackageChecking('in checkForValidPackage', location);
-		var defered = q.defer();
-
-		var packageInfo = {
-			'location': location,
-			'exists': null,
-			'version': null,
-			'type': null,
-			'isValid': false,
-			'dependencies': {}
-		};
-
-		checkforExistingDirectory(packageInfo)
-		.then(checkPackageType)
-		.then(checkPackageVersion)
-		.then(checkPackageValidity)
-		.then(function(info) {
-			defered.resolve(info);
-		});
-		return defered.promise;
-	};
-
-	var checkForUpgradeOptions = function(bundle) {
+	checkForUpgradeOptions(bundle) {
 		debugSteps('in checkForUpgradeOptions');
 
-		var defered = q.defer();
-		var dirsToCheck = bundle.packageInfo.locations;
+		return new Promise((resolve, reject) => {
+			const dirsToCheck = bundle.packageInfo.locations;
 
-		var checkDirOps = [];
-		dirsToCheck.forEach(function(dir) {
-			checkDirOps.push(checkForValidPackage(dir));
-		});
-
-		// Wait for all of the operations to complete
-		q.allSettled(checkDirOps)
-		.then(function(opgradeOptions) {
-			var validUpgrades = [];
-
-			// Loop through and pick out the valid upgrades
-			opgradeOptions.forEach(function(opgradeOption) {
-				if(opgradeOption.value) {
-					if(opgradeOption.value.isValid) {
-						validUpgrades.push(opgradeOption.value);
-					}
-				}
+			const checkDirOps = [];
+			dirsToCheck.forEach((dir) => {
+				checkDirOps.push(checkForValidPackage(dir));
 			});
 
-			// Save the information about the currently available upgrades
-			bundle.availableUpgrades = validUpgrades;
-			defered.resolve(bundle);
+			// Wait for all of the operations to complete
+			Promise.allSettled(checkDirOps)
+				.then((upgradeOptions) => {
+					const validUpgrades = [];
 
-		}, function(err) {
-			console.error('  - Finished Managing err', err, bundle.name);
-			defered.reject(err);
+					// Loop through and pick out the valid upgrades
+					upgradeOptions.forEach((upgradeOption) => {
+						if (upgradeOption.value) {
+							if (upgradeOption.value.isValid) {
+								validUpgrades.push(upgradeOption.value);
+							}
+						}
+					});
+
+					// Save the information about the currently available upgrades
+					bundle.availableUpgrades = validUpgrades;
+
+					resolve(bundle);
+
+				}, (err) => {
+					console.error('  - Finished Managing err', err, bundle.name);
+					reject(err);
+				});
 		});
-		return defered.promise;
-	};
+	}
 
-
-	var checkForExistingPackage = function(bundle) {
-		return new Promise(function (resolve, reject) {
-			var dirToCheck = path.join(self.extractionPath, bundle.packageInfo.folderName);
+	checkForExistingPackage(bundle) {
+		return new Promise((resolve) => {
+			const dirToCheck = path.join(this.extractionPath, bundle.packageInfo.folderName);
 
 			checkForValidPackage(dirToCheck)
-			.then(function(currentPackage) {
-				// Save the information about the currently installed package
-				bundle.currentPackage = currentPackage;
+				.then((currentPackage) => {
+					// Save the information about the currently installed package
+					bundle.currentPackage = currentPackage;
 
-				// Also save the found version number to the managed packages
-				// object and the dependencyData object.  (create it if it doesn't
-				// exist).
-				self.managedPackages[bundle.name].version = currentPackage.version;
+					// Also save the found version number to the managed packages
+					// object and the dependencyData object.  (create it if it doesn't
+					// exist).
+					this.managedPackages[bundle.name].version = currentPackage.version;
 
-				if(self.dependencyData[bundle.name]) {
-					self.dependencyData[bundle.name].version = currentPackage.version;
-					self.dependencyData[bundle.name].name = bundle.name;
-				} else {
-					self.dependencyData[bundle.name] = {};
-					self.dependencyData[bundle.name].version = currentPackage.version;
-					self.dependencyData[bundle.name].name = bundle.name;
-				}
+					if (this.dependencyData[bundle.name]) {
+						this.dependencyData[bundle.name].version = currentPackage.version;
+						this.dependencyData[bundle.name].name = bundle.name;
+					} else {
+						this.dependencyData[bundle.name] = {};
+						this.dependencyData[bundle.name].version = currentPackage.version;
+						this.dependencyData[bundle.name].name = bundle.name;
+					}
 
-				resolve(bundle);
-			});
+					resolve(bundle);
+				});
 		});
-	};
+	}
 
-	var chooseValidUpgrade = function(bundle) {
+	chooseValidUpgrade(bundle) {
 		debugSteps('in chooseValidUpgrade');
 
-		var defered = q.defer();
+		return new Promise((resolve) => {
+			let chosenUpgrade;
+			// Pick the first-found package whose dependencies are met
+			bundle.availableUpgrades.forEach((upgrade) => {
+				let isValid = true;
 
-		var chosenUpgrade;
-		// Pick the first-found package whose dependencies are met
-		var foundValidUpgrade = bundle.availableUpgrades.forEach(function(upgrade) {
-			var isValid = true;
-
-			// Check to see if its dependencies are met by the objects currently
-			// managed by the package_loader, aka is the data in
-			// the self.dependencyData object and are the versions compatable.
-			var requirementKeys = Object.keys(upgrade.dependencies);
-			requirementKeys.every(function(key) {
-				// Check to see if the dependency is found
-				if(typeof(self.dependencyData[key]) !== 'undefined') {
-					// Make sure that the dependency has a valid version number
-					if(self.dependencyData[key].version) {
-						var satisfies = semver.satisfies(
-							self.dependencyData[key].version,
-							upgrade.dependencies[key]
+				// Check to see if its dependencies are met by the objects currently
+				// managed by the package_loader, aka is the data in
+				// the this.dependencyData object and are the versions compatible.
+				const requirementKeys = Object.keys(upgrade.dependencies);
+				requirementKeys.every((key) => {
+					// Check to see if the dependency is found
+					if (typeof (this.dependencyData[key]) !== 'undefined') {
+						// Make sure that the dependency has a valid version number
+						if (this.dependencyData[key].version) {
+							isValid = semver.satisfies(
+								this.dependencyData[key].version,
+								upgrade.dependencies[key]
 							);
-						if(satisfies) {
-							isValid = true;
 						} else {
 							isValid = false;
 						}
 					} else {
 						isValid = false;
 					}
-				} else {
+					return isValid;
+				});
+				// Check to make sure that the available upgrade has a valid type
+				if (isValid) {
 					isValid = false;
-				}
-				return isValid;
-			});
-			// Check to make sure that the available upgrade has a valid type
-			if(isValid) {
-				if(upgrade.type) {
-					if(upgrade.type === 'directory') {
-						isValid = true;
-					} else if (upgrade.type === '.zip') {
-						isValid = true;
-					} else {
-						isValid = false;
+					if (upgrade.type) {
+						if (upgrade.type === 'directory' || upgrade.type === '.zip') {
+							isValid = true;
+						}
 					}
-				} else {
-					isValid = false;
 				}
-			}
-			if(isValid) {
-				if(typeof(chosenUpgrade) === 'undefined') {
-					// Save the selected upgrade option
-					chosenUpgrade = upgrade;
-				} else {
-					// Only replace the chosenUpgrade obj if the newer one has a
-					// newer verion number
-
-					var isNewer = semver.lt(
-						chosenUpgrade.version,
-						upgrade.version
-					);
-					// console.log(isNewer, chosenUpgrade.version, upgrade.version, upgrade.type);
-					if(isNewer) {
+				if (isValid) {
+					if (typeof (chosenUpgrade) === 'undefined') {
+						// Save the selected upgrade option
 						chosenUpgrade = upgrade;
+					} else {
+						// Only replace the chosenUpgrade obj if the newer one has a
+						// newer verion number
+
+						const isNewer = semver.lt(
+							chosenUpgrade.version,
+							upgrade.version
+						);
+						// console.log(isNewer, chosenUpgrade.version, upgrade.version, upgrade.type);
+						if (isNewer) {
+							chosenUpgrade = upgrade;
+						}
 					}
 				}
+			});
+
+			if (typeof (chosenUpgrade) === 'undefined') {
+				// Emit an event indicating that a valid upgrade has been
+				// detected.
+				this.emit(EVENTS.NO_VALID_UPGRADE_DETECTED, bundle);
+			} else {
+				// Emit an event indicating that a valid upgrade has been
+				// detected.
+				this.emit(EVENTS.VALID_UPGRADE_DETECTED, bundle);
 			}
+
+			bundle.chosenUpgrade = chosenUpgrade;
+			resolve(bundle);
 		});
-		if(typeof(chosenUpgrade) === 'undefined') {
-			// Emit an event indicating that a valid upgrade has been
-			// detected.
-			self.emit(EVENTS.NO_VALID_UPGRADE_DETECTED, bundle);
-		} else {
-			// Emit an event indicating that a valid upgrade has been
-			// detected.
-			self.emit(EVENTS.VALID_UPGRADE_DETECTED, bundle);
-		}
-		bundle.chosenUpgrade = chosenUpgrade;
-		defered.resolve(bundle);
-		return defered.promise;
-	};
-	var determineRequiredOperations = function(bundle) {
-		var defered = q.defer();
-		var isCurrentValid = bundle.currentPackage.isValid;
-		var isUpgradeValid = false;
-		var isUpgradeAvailable = false;
-		if(bundle.chosenUpgrade) {
-			if(bundle.chosenUpgrade.isValid) {
-				isUpgradeAvailable = true;
-			}
-		}
+	}
 
+	determineRequiredOperations(bundle) {
+		return new Promise((resolve) => {
+			const isCurrentValid = bundle.currentPackage.isValid;
+			const isUpgradeAvailable = !!(bundle.chosenUpgrade && bundle.chosenUpgrade.isValid);
 
-		// If there is a valid current installation then see if it needs to be
-		// upgraded.
-		if(isCurrentValid) {
-			// Check to see if the upgrade version is newer than what is
-			// installed.
-			if(isUpgradeAvailable) {
-				var performUpgrade = semver.lt(
-					bundle.currentPackage.version,
-					bundle.chosenUpgrade.version
-				);
-				// If the package indicates that it should be forced to refresh
-				// then handle that flag here.
-				if(bundle.packageInfo.forceRefresh) {
-					performUpgrade = true;
+			// If there is a valid current installation then see if it needs to be
+			// upgraded.
+			if (isCurrentValid) {
+				// Check to see if the upgrade version is newer than what is
+				// installed.
+				if (isUpgradeAvailable) {
+					let performUpgrade = semver.lt(
+						bundle.currentPackage.version,
+						bundle.chosenUpgrade.version
+					);
+					// If the package indicates that it should be forced to refresh
+					// then handle that flag here.
+					if (bundle.packageInfo.forceRefresh) {
+						performUpgrade = true;
+					}
+					if (performUpgrade) {
+						bundle.resetPackage = true;
+						bundle.performUpgrade = true;
+					} else {
+						this.emit(EVENTS.DETECTED_UP_TO_DATE_PACKAGE, bundle);
+					}
+				} else {
+					this.emit(EVENTS.DETECTED_UP_TO_DATE_PACKAGE, bundle);
 				}
-				if(performUpgrade) {
+			} else {
+				// If the current installation isn't valid then force it to be
+				// upgraded. unless there are no valid upgrades.
+				if (isUpgradeAvailable) {
 					bundle.resetPackage = true;
 					bundle.performUpgrade = true;
-				} else {
-					self.emit(EVENTS.DETECTED_UP_TO_DATE_PACKAGE, bundle);
-				}
-			} else {
-				self.emit(EVENTS.DETECTED_UP_TO_DATE_PACKAGE, bundle);
-			}
-		} else {
-			// If the current installation isn't valid then force it to be
-			// upgraded. unless there are no valid upgrades.
-			if(isUpgradeAvailable) {
-				bundle.resetPackage = true;
-				bundle.performUpgrade = true;
 
-				// Emit an event indicating that an unitialized package has been
-				// detected
-				self.emit(EVENTS.DETECTED_UNINITIALIZED_PACKAGE, bundle);
-			} else {
-				console.error('  - Detected uninitialized package w/ no upgrade options', bundle.name);
-				var msg = 'Detected an uninitialized package with no upgrade ' +
-				'options';
-				bundle.resultMessages.push({
-					'step': 'resetPackageDirectory',
-					'message': msg,
-					'isError': true,
-				});
-				bundle.overallResult = false;
-				bundle.isError = true;
-			}
-		}
-		defered.resolve(bundle);
-		return defered.promise;
-	};
-	var performPackageReset = function(bundle) {
-		var defered = q.defer();
-		fs.exists(bundle.currentPackage.location, function(exists) {
-		if(exists) {
-			// Emit an event indicating that the package is being reset.
-			self.emit(EVENTS.RESETTING_PACKAGE, bundle);
-			fs.rmrf(bundle.currentPackage.location, function(err) {
-				if(err) {
-					console.error('  - Error resetPackageDirectory', err, bundle.name);
-					var msg = 'Error resetting the package-cache, try' +
-						'manually deleting the folder:' +
-						bundle.currentPackage.location;
+					// Emit an event indicating that an unitialized package has been
+					// detected
+					this.emit(EVENTS.DETECTED_UNINITIALIZED_PACKAGE, bundle);
+				} else {
+					console.error('  - Detected uninitialized package w/ no upgrade options', bundle.name);
+					const msg = 'Detected an uninitialized package with no upgrade ' +
+						'options';
 					bundle.resultMessages.push({
 						'step': 'resetPackageDirectory',
+						'message': msg,
+						'isError': true,
+					});
+					bundle.overallResult = false;
+					bundle.isError = true;
+				}
+			}
+
+			resolve(bundle);
+		});
+	}
+
+	_performPackageReset(bundle) {
+		return new Promise((resolve) => {
+			fs.exists(bundle.currentPackage.location, (exists) => {
+				if (exists) {
+					// Emit an event indicating that the package is being reset.
+					this.emit(EVENTS.RESETTING_PACKAGE, bundle);
+					fs.rmrf(bundle.currentPackage.location, (err) => {
+						if (err) {
+							console.error('  - Error resetPackageDirectory', err, bundle.name);
+							const msg = 'Error resetting the package-cache, try' +
+								'manually deleting the folder:' +
+								bundle.currentPackage.location;
+							bundle.resultMessages.push({
+								'step': 'resetPackageDirectory',
+								'message': msg,
+								'isError': true,
+								'error': JSON.stringify(err)
+							});
+							bundle.overallResult = false;
+							bundle.isError = true;
+
+							// Emit an event indicating that the package is
+							// finished being reset with an error.
+							this.emit(EVENTS.FINISHED_RESETTING_PACKAGE_ERROR, bundle);
+
+							resolve(bundle);
+						} else {
+							// Emit an event indicating that the package is
+							// finished being reset.
+							this.emit(EVENTS.FINISHED_RESETTING_PACKAGE, bundle);
+							resolve(bundle);
+						}
+					});
+
+				} else {
+					bundle.resultMessages.push({
+						'step': 'resetPackageDirectory',
+						'message': 'Package directory not deleted b/c it does not exist'
+					});
+					// The folder doesn't exist so don't remove it
+					resolve(bundle);
+				}
+			});
+		});
+	}
+
+	resetPackageDirectory(bundle) {
+		return new Promise((resolve, reject) => {
+			if (bundle.resetPackage) {
+				this._declarePackageInvalid(bundle)
+					.then(res => this._performPackageReset(res))
+					.then(resolve, reject);
+			} else {
+				this.emit(EVENTS.SKIPPING_PACKAGE_RESET, bundle);
+				resolve(bundle);
+			}
+		});
+	}
+
+	_performDirectoryUpgrade(bundle) {
+		return new Promise((resolve) => {
+			// Save info to shorter variables
+			const destinationPath = bundle.currentPackage.location;
+			const upgradeFilesPath = bundle.chosenUpgrade.location;
+
+			// Emit events indicating that a directory extraction has started
+			this.emit(EVENTS.STARTING_EXTRACTION, bundle);
+			this.emit(EVENTS.STARTING_DIRECTORY_EXTRACTION, bundle);
+
+			// fs.copyRecursive(upgradeFilesPath, destinationPath, function(err) {
+			fse.copy(upgradeFilesPath, destinationPath, (err) => {
+				if (err) {
+					console.error('  - Error performDirectoryUpgrade', err, bundle.name);
+					const msg = 'Error performing a directory upgrade.  Verify' +
+						'the user-permissions for the two directories: ' +
+						upgradeFilesPath + ', and ' + destinationPath;
+					bundle.resultMessages.push({
+						'step': 'performDirectoryUpgrade-copyRecursive',
 						'message': msg,
 						'isError': true,
 						'error': JSON.stringify(err)
 					});
 					bundle.overallResult = false;
 					bundle.isError = true;
-
-					// Emit an event indicating that the package is
-					// finished being reset with an error.
-					self.emit(EVENTS.FINISHED_RESETTING_PACKAGE_ERROR, bundle);
-
-					defered.resolve(bundle);
+					// Emit events indicating that a zip file extraction has
+					// finished w/ an error
+					this.emit(EVENTS.FINISHED_EXTRACTION_ERROR, bundle);
+					this.emit(EVENTS.FINISHED_DIRECTORY_EXTRACTION_ERROR, bundle);
+					resolve(bundle);
 				} else {
-					// Emit an event indicating that the package is
-					// finished being reset.
-					self.emit(EVENTS.FINISHED_RESETTING_PACKAGE, bundle);
-					defered.resolve(bundle);
+					// Emit events indicating that a directory extraction has finished
+					this.emit(EVENTS.FINISHED_EXTRACTION, bundle);
+					this.emit(EVENTS.FINISHED_DIRECTORY_EXTRACTION, bundle);
+
+					resolve(bundle);
 				}
 			});
-
-		} else {
-			bundle.resultMessages.push({
-				'step': 'resetPackageDirectory',
-				'message': 'Package directory not deleted b/c it does not exist'
-			});
-			// The folder doesn't exist so don't remove it
-			defered.resolve(bundle);
-		}
-	});
-		return defered.promise;
-	};
-
-	var resetPackageDirectory = function(bundle) {
-		var defered = q.defer();
-		if(bundle.resetPackage) {
-			declarePackageInvalid(bundle)
-			.then(performPackageReset)
-			.then(defered.resolve, defered.reject);
-		} else {
-			self.emit(EVENTS.SKIPPING_PACKAGE_RESET, bundle);
-			defered.resolve(bundle);
-		}
-		return defered.promise;
-	};
-
-	var performDirectoryUpgrade = function(bundle) {
-		var defered = q.defer();
-		// Save info to shorter variables
-		var destinationPath = bundle.currentPackage.location;
-		var upgradeFilesPath = bundle.chosenUpgrade.location;
-
-		// Emit events indicating that a directory extraction has started
-		self.emit(EVENTS.STARTING_EXTRACTION, bundle);
-		self.emit(EVENTS.STARTING_DIRECTORY_EXTRACTION, bundle);
-
-		// fs.copyRecursive(upgradeFilesPath, destinationPath, function(err) {
-			fse.copy(upgradeFilesPath, destinationPath, function(err) {
-			if(err) {
-				console.error('  - Error performDirectoryUpgrade', err, bundle.name);
-				var msg = 'Error performing a directory upgrade.  Verify' +
-				'the user-permissions for the two directories: ' +
-				upgradeFilesPath + ', and ' + destinationPath;
-				bundle.resultMessages.push({
-					'step': 'performDirectoryUpgrade-copyRecursive',
-					'message': msg,
-					'isError': true,
-					'error': JSON.stringify(err)
-				});
-				bundle.overallResult = false;
-				bundle.isError = true;
-				// Emit events indicating that a zip file extraction has
-				// finished w/ an error
-				self.emit(EVENTS.FINISHED_EXTRACTION_ERROR, bundle);
-				self.emit(EVENTS.FINISHED_DIRECTORY_EXTRACTION_ERROR, bundle);
-				defered.resolve(bundle);
-			} else {
-				// Emit events indicating that a directory extraction has finished
-				self.emit(EVENTS.FINISHED_EXTRACTION, bundle);
-				self.emit(EVENTS.FINISHED_DIRECTORY_EXTRACTION, bundle);
-
-				defered.resolve(bundle);
-			}
 		});
-		return defered.promise;
-	};
-
-	try {
-		// var extract_with_unzip = require('./extractors/extract_with_unzip');
-		// var extractWithUnzip = extract_with_unzip.extractWithUnzip;
-		var extract_with_yauzl = require('./extractors/extract_with_yauzl');
-		var extractWithYauzl = extract_with_yauzl.extractWithYauzl;
-	} catch(err) {
-		console.log('Error including extractors', err);
 	}
-	var performZipFileUpgrade = function(bundle) {
-		// return extractWithUnzip(bundle, self, EVENTS);
-		return extractWithYauzl(bundle, self, EVENTS);
-	};
 
-	var performUpgrade = function(bundle) {
-		var defered = q.defer();
+	_performZipFileUpgrade(bundle) {
+		// return extractWithUnzip(bundle, this, EVENTS);
+		return extractWithYauzl(bundle, this, EVENTS);
+	}
 
-		if(bundle.performUpgrade) {
-			// Save info to shorter variables
-			var destination = bundle.currentPackage.location;
-			var upgradePath = '';
-			var upgradeType = '';
-			if(bundle.chosenUpgrade) {
-				upgradePath = bundle.chosenUpgrade.location;
-				upgradeType = bundle.chosenUpgrade.type;
+	performUpgrade(bundle) {
+		return new Promise((resolve, reject) => {
+			if (bundle.performUpgrade) {
+				// Save info to shorter variables
+				const upgradeType = bundle.chosenUpgrade ? bundle.chosenUpgrade.type : '';
+
+				// Determine what kind of upgrade process we need to perform
+				if (upgradeType === 'directory') {
+					this._declarePackageInvalid(bundle)
+						.then(res => this._performDirectoryUpgrade(res))
+						.then(resolve, reject);
+				} else if (upgradeType === '.zip') {
+					this._declarePackageInvalid(bundle)
+						.then(res => this._performZipFileUpgrade(res))
+						.then(resolve, reject);
+				} else {
+					console.error('  - in performUpgrade, invalid upgradeType detected', bundle.name, upgradeType);
+					const msg = 'Failed to perform upgrade, invalid upgradeType ' +
+						'detected: ' + upgradeType;
+					bundle.resultMessages.push({
+						'step': 'performUpgrade',
+						'message': msg
+					});
+
+					// If the current installation isn't valid and we reset the
+					// package directory, we have issues because we can't
+					// load/upgrade/install this library...
+					const isCurrentValid = bundle.currentPackage.isValid;
+					if ((!isCurrentValid) && (bundle.resetPackage)) {
+						bundle.overallResult = false;
+						bundle.isError = true;
+					}
+					resolve(bundle);
+				}
+			} else {
+				this.emit(EVENTS.SKIPPING_PACKAGE_UPGRADE, bundle);
+				resolve(bundle);
 			}
 
+		});
+	}
 
+	verifyPackageUpgrade(bundle) {
+		return new Promise((resolve, reject) => {
+			const dirToCheck = path.join(this.extractionPath, bundle.packageInfo.folderName);
+			checkForValidPackage(dirToCheck)
+				.then((managedPackage) => {
+					// Save the information about the currently installed package
+					bundle.managedPackage = managedPackage;
 
-			// Determine what kind of upgrade process we need to perform
-			if(upgradeType === 'directory') {
-				declarePackageInvalid(bundle)
-				.then(performDirectoryUpgrade)
-				.then(defered.resolve, defered.reject);
-			} else if(upgradeType === '.zip') {
-				declarePackageInvalid(bundle)
-				.then(performZipFileUpgrade)
-				.then(defered.resolve, defered.reject);
-			} else {
-				console.error('  - in performUpgrade, invalid upgradeType detected', bundle.name);
-				var msg = 'Failed to perform upgrade, invalid upgradeType ' +
-				'detected: ' + upgradeType;
-				bundle.resultMessages.push({
-					'step': 'performUpgrade',
-					'message': msg
+					// Also save the found version number to the managed packages
+					// object and the dependencyData object.  (create it if it doesn't
+					// exist).
+					this.managedPackages[bundle.name].version = managedPackage.version;
+					this.managedPackages[bundle.name].location = managedPackage.location;
+
+					// Also save that information to the local packageInfo object
+					bundle.packageInfo.version = managedPackage.version;
+					bundle.packageInfo.location = managedPackage.location;
+
+					if (this.dependencyData[bundle.name]) {
+						this.dependencyData[bundle.name].version = managedPackage.version;
+						this.dependencyData[bundle.name].name = bundle.name;
+					} else {
+						this.dependencyData[bundle.name] = {};
+						this.dependencyData[bundle.name].version = managedPackage.version;
+						this.dependencyData[bundle.name].name = bundle.name;
+					}
+
+					this._declarePackageValid(bundle)
+						.then(res => this._checkForManagedPackageExtractionErrors(res))
+						.then(resolve, reject);
 				});
 
-				// If the current installation isn't valid and we reset the
-				// package directory, we have issues because we can't
-				// load/upgrade/install this library...
-				var isCurrentValid = bundle.currentPackage.isValid;
-				if((!isCurrentValid) && (bundle.resetPackage)) {
-					bundle.overallResult = false;
-					bundle.isError = true;
-				}
-				defered.resolve(bundle);
-			}
-		} else {
-			self.emit(EVENTS.SKIPPING_PACKAGE_UPGRADE, bundle);
-			defered.resolve(bundle);
-		}
-
-		return defered.promise;
-	};
-
-	var verifyPackageUpgrade = function(bundle) {
-		var defered = q.defer();
-		var dirToCheck = path.join(self.extractionPath, bundle.packageInfo.folderName);
-		checkForValidPackage(dirToCheck)
-		.then(function(managedPackage) {
-			// Save the information about the currently installed package
-			bundle.managedPackage = managedPackage;
-
-			// Also save the found version number to the managed packages
-			// object and the dependencyData object.  (create it if it doesn't
-			// exist).
-			self.managedPackages[bundle.name].version = managedPackage.version;
-			self.managedPackages[bundle.name].location = managedPackage.location;
-
-			// Also save that information to the local packageInfo object
-			bundle.packageInfo.version = managedPackage.version;
-			bundle.packageInfo.location = managedPackage.location;
-
-			if(self.dependencyData[bundle.name]) {
-				self.dependencyData[bundle.name].version = managedPackage.version;
-				self.dependencyData[bundle.name].name = bundle.name;
-			} else {
-				self.dependencyData[bundle.name] = {};
-				self.dependencyData[bundle.name].version = managedPackage.version;
-				self.dependencyData[bundle.name].name = bundle.name;
-			}
-
-			declarePackageValid(bundle)
-			.then(checkForManagedPackageExtractionErrors)
-			.then(defered.resolve, defered.reject);
 		});
+	}
 
-		return defered.promise;
-	};
-	var extendedLoadManagedPackage = function(bundle) {
-		requirePackage(bundle.packageInfo);
-		bundle.packageData = getRequiredPackageData(
+	extendedLoadManagedPackage(bundle) {
+		this._requirePackage(bundle.packageInfo);
+		bundle.packageData = this._getRequiredPackageData(
 			bundle.packageInfo.location
 		);
 		bundle.packageLoaded = true;
 		bundle.overallResult = true;
 		return bundle;
-	};
-	var loadManagedPackage = function(bundle) {
-		return new Promise(function (resolve, reject) {
+	}
+
+	loadManagedPackage(bundle) {
+		return new Promise((resolve) => {
 			// Verify that the packageManagement process went smoothly
-			if(!bundle.isError) {
+			if (!bundle.isError) {
 				if(bundle.managedPackage.isValid) {
 					// If process succeeded load the package
 					try {
@@ -1193,12 +987,12 @@ function createPackageLoader() {
 								}
 							}
 						}
-						bundle = extendedLoadManagedPackage(bundle);
+						bundle = this.extendedLoadManagedPackage(bundle);
 
 					} catch(err) {
 						console.error('  - Error in loadManagedPackage', err, bundle.name, err.stack);
-						var errMsg = 'Error requiring managedPackage during the ' +
-						'loadManagedPackage step.';
+						const errMsg = 'Error requiring managedPackage during the ' +
+							'loadManagedPackage step.';
 						bundle.resultMessages.push({
 							'step': 'loadManagedPackage',
 							'message': errMsg,
@@ -1207,12 +1001,12 @@ function createPackageLoader() {
 						});
 						bundle.overallResult = false;
 						bundle.isError = true;
-						self.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
+						this.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
 					}
 				} else {
 					console.error('  - Error requiring package, detected an error via isValid', bundle.name);
-					var isValidMsg = 'Error requiring managedPackage during the ' +
-					'loadManagedPackage step. managedPackage is not valid';
+					const isValidMsg = 'Error requiring managedPackage during the ' +
+						'loadManagedPackage step. managedPackage is not valid';
 					bundle.resultMessages.push({
 						'step': 'loadManagedPackage',
 						'message': isValidMsg,
@@ -1221,12 +1015,12 @@ function createPackageLoader() {
 					});
 					bundle.overallResult = false;
 					bundle.isError = true;
-					self.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
+					this.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
 				}
 			} else {
 				console.error('  - Error requiring package, detected an error via isError', bundle.name);
-				var isErrorMsg = 'Error requiring managedPackage during the ' +
-				'loadManagedPackage step. Previous error detected';
+				const isErrorMsg = 'Error requiring managedPackage during the ' +
+					'loadManagedPackage step. Previous error detected';
 				bundle.resultMessages.push({
 					'step': 'loadManagedPackage',
 					'message': isErrorMsg,
@@ -1235,42 +1029,40 @@ function createPackageLoader() {
 				});
 				bundle.overallResult = false;
 				bundle.isError = true;
-				self.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
+				this.emit(EVENTS.FAILED_TO_LOAD_MANAGED_PACKAGE, bundle);
 			}
 			resolve(bundle);
 		});
-	};
-	var getManageSinglePackage = function(bundle) {
-		var manageSinglePackage = function(results) {
-			return new Promise(function (resolve, reject) {
-				var getOnErr = function(msg) {
-					return function(err) {
-						console.error('manageSinglePackage err', msg, err, bundle);
-						return Promise.reject(err);
-					};
+	}
+
+	getManageSinglePackage(bundle) {
+		console.log('getManageSinglePackage', bundle.name);
+		return new Promise((resolve, reject) => {
+			const getOnErr = (msg) => {
+				return (err) => {
+					console.error('manageSinglePackage err', msg, err, bundle);
+					return Promise.reject(err);
 				};
+			};
 
-				// Event a message indicating that we are starting to manage a
-				// package.
-				self.emit(EVENTS.PACKAGE_MANAGEMENT_STARTED, bundle);
+			// Event a message indicating that we are starting to manage a
+			// package.
+			this.emit(EVENTS.PACKAGE_MANAGEMENT_STARTED, bundle);
 
-				checkForExistingPackage(bundle)
-				.then(checkForUpgradeOptions, getOnErr('checkingForExistingPackage'))
-				.then(chooseValidUpgrade, getOnErr('checkForUpgradeOptions'))
-				.then(checkForExtractionErrors, getOnErr('chooseValidUpgrade'))
-				.then(determineRequiredOperations, getOnErr('checkForExtractionErrors'))
-				.then(resetPackageDirectory, getOnErr('determineRequiredOperations'))
-				.then(performUpgrade, getOnErr('resetPackageDirectory'))
-				.then(verifyPackageUpgrade, getOnErr('performUpgrade'))
-				.then(loadManagedPackage, getOnErr('verifyPackageUpgrade'))
-				.then(function(res) {
-					results[res.name] = res;
-					resolve(results);
+			this.checkForExistingPackage(bundle)
+				.then(res => this.checkForUpgradeOptions(res), getOnErr('checkingForExistingPackage'))
+				.then(res => this.chooseValidUpgrade(res), getOnErr('checkForUpgradeOptions'))
+				.then(res => this.checkForExtractionErrors(res), getOnErr('chooseValidUpgrade'))
+				.then(res => this.determineRequiredOperations(res), getOnErr('checkForExtractionErrors'))
+				.then(res => this.resetPackageDirectory(res), getOnErr('determineRequiredOperations'))
+				.then(res => this.performUpgrade(res), getOnErr('resetPackageDirectory'))
+				.then(res => this.verifyPackageUpgrade(res), getOnErr('performUpgrade'))
+				.then(res => this.loadManagedPackage(res), getOnErr('verifyPackageUpgrade'))
+				.then((res) => {
+					resolve(res);
 				}, reject);
-			});
-		};
-		return manageSinglePackage;
-	};
+		});
+	}
 
 	/**
 	 * runPackageManager instructs the package manager to start its async
@@ -1279,91 +1071,71 @@ function createPackageLoader() {
 	 *     it isn't given the manager performs its operations on all managed
 	 *     packages.
 	 */
-	this.runPackageManager = function(packageNamesToLoad) {
-		var defered = q.defer();
-		var packageNames;
-		if(packageNamesToLoad) {
-			packageNames = packageNamesToLoad;
-		} else {
-			packageNames = self.getManagedPackages();
-		}
+	runPackageManager(packageNamesToLoad) {
+		return new Promise(async (resolve, reject) => {
+			const packageNames = packageNamesToLoad ? packageNamesToLoad : this.getManagedPackages();
 
-		var manageOps = [];
-		packageNames.forEach(function(packageName) {
-			// Only add packages that aren't in the global name space;
-			var gnsObjs = Object.keys(global[gns]);
-			if(gnsObjs.indexOf(packageName) < 0) {
-				var bundle = {
-					'name': packageName,
-					'packageInfo': self.managedPackages[packageName],
-					'packageData': null,
-					'currentPackage': null,
-					'availableUpgrades': null,
-					'managedPackage': null,
-					'resetPackage': false,
-					'performUpgrade': false,
-					'chosenUpgrade': null,
-					'overallResult': false,
-					'resultMessages': [],
-					'isError': false,
-					'packageLoaded': false
-				};
-				// Commented out async operation
-				// manageOps.push(manageSinglePackage(bundle));
-				manageOps.push(getManageSinglePackage(bundle));
+			const bundles = [];
+
+			packageNames.forEach((packageName) => {
+				// Only add packages that aren't in the global name space;
+				const gnsObjs = Object.keys(this._loadedPackages);
+				if(gnsObjs.indexOf(packageName) < 0) {
+					const bundle = {
+						'name': packageName,
+						'packageInfo': this.managedPackages[packageName],
+						'packageData': null,
+						'currentPackage': null,
+						'availableUpgrades': null,
+						'managedPackage': null,
+						'resetPackage': false,
+						'performUpgrade': false,
+						'chosenUpgrade': null,
+						'overallResult': false,
+						'resultMessages': [],
+						'isError': false,
+						'packageLoaded': false
+					};
+					// Commented out async operation
+					bundles.push(bundle);
+				}
+			});
+
+			if (bundles.length > 0) {
+				try {
+					const result = {};
+					for (const bundle of bundles) {
+						result[bundle.name] = await this.getManageSinglePackage(bundle);
+					}
+					resolve(result);
+				} catch (err) {
+					console.error('Finished managing err', err);
+					reject(err);
+				}
+			} else {
+				resolve({});
 			}
 		});
-
-		// Wait for all of the operations to complete
-		// q.allSettled(manageOps)
-		// .then(function(res) {
-		//     var results = {};
-		//     res.forEach(function(re) {
-		//     	results[re.value.name] = re.value;
-		//     });
-		//     defered.resolve(results);
-		// }, function(err) {
-		//     console.log('Finished Managing err', err);
-		//     defered.reject(err);
-		// });
-		// Execute each operation one at a time
-		if(manageOps.length > 0) {
-			var results = {};
-			manageOps.reduce(function(soFar, f) {
-				 return soFar.then(f);
-			}, q(results))
-			.then(function(res) {
-				// console.log('Finished Managing success!', res);
-				defered.resolve(res);
-			}, function(err) {
-				console.log('Finished managing err', err);
-				defered.reject(err);
-			});
-		} else {
-			defered.resolve({});
-		}
-		return defered.promise;
-	};
+	}
 
 	/**
 	 * Configures the extraction path of the package_loader.  If this hasn't
 	 * been done before running the package manager it will fail as the default
 	 * path is invalid.
 	 */
-	this.setExtractionPath = function(path) {
-		self.extractionPath = path;
-	};
-	this.getExtractionPath = function() {
-		return self.extractionPath;
-	};
+	setExtractionPath(path) {
+		this.extractionPath = path;
+	}
+	getExtractionPath() {
+		return this.extractionPath;
+	}
 
-	var self = this;
 }
 
-util.inherits(createPackageLoader, EventEmitter);
+// const PACKAGE_LOADER = new PackageLoader();
 
-var PACKAGE_LOADER = new createPackageLoader();
-
+exports.PackageLoader = PackageLoader;
+/*
 
 // Define the functions to be exported
 exports.on = function(eventName, callback) {
@@ -1380,3 +1152,4 @@ exports.getDependencyData = PACKAGE_LOADER.getDependencyData;
 exports.deleteManagedPackage = PACKAGE_LOADER.deleteManagedPackage;
 exports.deleteAllManagedPackages = PACKAGE_LOADER.deleteAllManagedPackages;
 exports.runPackageManager = PACKAGE_LOADER.runPackageManager;
+*/

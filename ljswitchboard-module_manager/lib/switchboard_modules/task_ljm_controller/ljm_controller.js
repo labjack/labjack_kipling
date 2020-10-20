@@ -13,23 +13,17 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = global.require('q');
 
-var package_loader;
 var q;
-var gns;
 var io_manager;
 var driver_const;
 var async;
 try {
-	package_loader = global.require.main.require('ljswitchboard-package_loader');
 	q = global.require.main.require('q');
-	gns = package_loader.getNameSpace();
 	io_manager = global.require.main.require('ljswitchboard-io_manager');
 	driver_const = global.require('ljswitchboard-ljm_driver_constants');
 	async = global.require('async');
 } catch(err) {
-	package_loader = require.main.require('ljswitchboard-package_loader');
 	q = require.main.require('q');
-	gns = package_loader.getNameSpace();
 	io_manager = require.main.require('ljswitchboard-io_manager');
 	driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
 	async = require.main.require('async');
@@ -53,7 +47,7 @@ function ljmController() {
 	function addUnresolvedDefered(defered) {
 		unresolvedDefereds.push(defered);
 	}
-	
+
 	function resolveUnresolvedDefereds() {
 		unresolvedDefereds.forEach(function(defered) {
 			defered.resolve();
@@ -74,7 +68,7 @@ function ljmController() {
 			specialAddresses.load()
 			.then(function(data) {
 				console.log('finished refreshing specialAddresses:', data);
-				
+
 				self.cachedSpecialAddressesData = data;
 				self.cachedFileData = data.fileData;
 
@@ -96,7 +90,7 @@ function ljmController() {
 		specialAddresses.save(fileData)
 		.then(function(data) {
 			console.log('finished saving specialAddresses:', data);
-			
+
 			self.cachedSpecialAddressesData = data;
 			self.cachedFileData = data.fileData;
 
@@ -115,7 +109,7 @@ function ljmController() {
 		specialAddresses.load()
 		.then(function(data) {
 			console.log('finished loading specialAddresses:', data);
-			
+
 			self.cachedSpecialAddressesData = data;
 			self.cachedFileData = data.fileData;
 
@@ -127,7 +121,7 @@ function ljmController() {
 		});
 		return defered.promise;
 	};
-	
+
 	var self = this;
 }
 util.inherits(ljmController, EventEmitter);
@@ -141,7 +135,7 @@ try {
 this.startTask = function(bundle) {
 	console.log('Starting ljm_controller task', bundle);
 	var defered = q.defer();
-	
+
 	ljc.startLJMController();
 	defered.resolve(bundle);
 	return defered.promise;

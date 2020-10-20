@@ -22,23 +22,6 @@ function createWindowManager() {
 		});
 	};
 
-	// this.mainWindow = mainWindow;
-	// this.mainWindowInitialState = 
-
-	// mainWindow.on('close', function() {
-	// 	var hideWindow = false;
-	// 	if(global.ljswitchboard) {
-	// 		if(global.ljswitchboard.tray) {
-	// 			hideWindow = true;
-	// 		}
-	// 	}
-
-	// 	if(hideWindow) {
-	// 		mainWindow.hide();
-	// 	} else {
-	// 		this.close(true);
-	// 	}
-	// });
 	this.managedWindows = {};
 
 	this.areAnyWindowsVisible = function() {
@@ -89,7 +72,7 @@ function createWindowManager() {
 			// Set the window's title from the window's package.json reference.
 			var win = self.managedWindows[windowName].win;
 			var initialVisibility = self.managedWindowKeys[windowName].initialVisibility;
-			
+
 			// Configure the window's title
 			win.title = self.managedWindows[windowName].title;
 
@@ -111,7 +94,7 @@ function createWindowManager() {
 
 			// Manage the other window attributes
 			self.managedWindows[windowName].isVisible = false;
-			
+
 
 			if(self.managedWindows[windowName].isPrimary) {
 				if(self.numOpenWindows() === 1) {

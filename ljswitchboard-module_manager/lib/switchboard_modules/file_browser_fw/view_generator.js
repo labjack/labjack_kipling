@@ -4,20 +4,11 @@
 
 // console.log('in device_selector view_generator.js');
 
-var package_loader;
 var q;
-var gns;
-var static_files;
 try {
-	package_loader = global.require.main.require('ljswitchboard-package_loader');
 	q = global.require.main.require('q');
-	gns = package_loader.getNameSpace();
-	static_files = global.require('ljswitchboard-static_files');
 } catch(err) {
-	package_loader = require.main.require('ljswitchboard-package_loader');
 	q = require.main.require('q');
-	gns = package_loader.getNameSpace();
-	static_files = require('ljswitchboard-static_files');
 }
 
 var EventEmitter = require('events').EventEmitter;
@@ -133,7 +124,7 @@ var createFileBrowserViewGenerator = function() {
 		},
 		// Text bar that displays the devices cwd.
 		{'id': '#device_cwd', 'name': 'device_cwd'},
-		
+
 		// Button that initiates the downloading of the selected files.
 		{
 			'id': '#download_selected_files_button',
@@ -225,7 +216,7 @@ var createFileBrowserViewGenerator = function() {
 	this.cachePageControlElements = function(moduleData) {
 		self.moduleData = moduleData;
 		var modulePath = moduleData.path;
-		
+
 		// Initialize various properties and compile templates.
 		self.fileImageTemplate = handlebars.compile(
 			moduleData.htmlFiles.file_image
@@ -325,12 +316,12 @@ var createFileBrowserViewGenerator = function() {
 		promises.push(elements.file_listing_table.slideDown());
 		return q.allSettled(promises);
 	}
-	
+
 	// An example snippit of data to be rendered and displayed.
 	var testFileListingData = {
 		cwd: '/',
 		fileNames: [ 'log1.csv', 'JP2 period 2.txt' ],
-		files:[{ 
+		files:[{
 				name: 'log1.csv', ext: '.csv', img: 'csv',
 			path: '/log1.csv', pathInfo: {}, isDirectory: false,
 			isFile: true, size: 299, sizeStr: '299 B'
@@ -403,7 +394,7 @@ var createFileBrowserViewGenerator = function() {
 	this.displayDownloadFileToDir = function(renderedData) {
 		return elements.download_to_dir.fill(renderedData);
 	};
-	
+
 	// TODO: Stubbed out function for getting the list of selected files.
 	this.getSelectedFiles = function() {
 		return [];
@@ -411,7 +402,7 @@ var createFileBrowserViewGenerator = function() {
 
 	// var enableModuleSwitching = function() {
 	// 	var defered = q.defer();
-		
+
 	// 	// Enable module-switching
 	// 	MODULE_CHROME.enableModuleLoading();
 
@@ -577,7 +568,7 @@ var createFileBrowserViewGenerator = function() {
 	// 					'ele': ele
 	// 				};
 	// 			});
-				
+
 	// 			if(!device.isActive) {
 	// 				// Attach connect button listeners
 	// 				attachConnectListeners(device);
@@ -591,7 +582,7 @@ var createFileBrowserViewGenerator = function() {
 	// 	return defered.promise;
 	// };
 
-	
+
 	// var innerDisplayScanResults = function(scanResults) {
 
 	// 	var defered = q.defer();

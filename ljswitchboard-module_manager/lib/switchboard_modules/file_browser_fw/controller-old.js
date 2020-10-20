@@ -9,21 +9,18 @@
 
 var package_loader;
 var q;
-var gns;
 var io_manager;
 var driver_const;
 var async;
 try {
 	package_loader = global.require.main.require('ljswitchboard-package_loader');
 	q = global.require.main.require('q');
-	gns = package_loader.getNameSpace();
 	io_manager = global.require.main.require('ljswitchboard-io_manager');
 	driver_const = global.require('ljswitchboard-ljm_driver_constants');
 	async = global.require('async');
 } catch(err) {
 	package_loader = require.main.require('ljswitchboard-package_loader');
 	q = require.main.require('q');
-	gns = package_loader.getNameSpace();
 	io_manager = require.main.require('ljswitchboard-io_manager');
 	driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
 	async = require.main.require('async');

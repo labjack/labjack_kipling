@@ -13,10 +13,7 @@ try {
 	console.log('HErE', err);
 }
 var module_manager = require('ljswitchboard-module_manager');
-var fs = require('fs');
 var package_loader = require('ljswitchboard-package_loader');
-var gns = package_loader.getNameSpace();
-var static_files = require('ljswitchboard-static_files');
 
 // Configure the module_manager persistent data path.
 var kiplingExtractionPath = package_loader.getExtractionPath();
@@ -76,7 +73,7 @@ function createTaskLoader() {
 			task.taskData = taskData;
 			defered.resolve(task);
 		});
-		
+
 		return defered.promise;
 	};
 	var checkForViewData = function(task) {
@@ -155,7 +152,7 @@ function createTaskLoader() {
 			// Insert newly created element into the DOM
 			var taskViewHolder = $('#' + TASK_VIEW_DESTINATION_ID);
 			taskViewHolder.append(newElement);
-			
+
 			// Wait for the task's view to be ready & resolve.
 			var taskID = '#' + task.task.name + '_task_view';
 			$(taskID).ready(function() {
@@ -191,7 +188,7 @@ function createTaskLoader() {
 		try {
 			var newElement = document.createElement('script');
 			newElement.setAttribute('type', 'text/javascript');
-			
+
 			// Save the file's data
 			task.element = newElement;
 			newElement.appendChild(document.createTextNode(task.compiledData));
@@ -205,7 +202,7 @@ function createTaskLoader() {
 		}
 		// console.log('Loading task into page....');
 		// defered.resolve(task);
-		
+
 		return defered.promise;
 	};
 	var executeLoadedTask = function(task) {
@@ -274,7 +271,7 @@ function createTaskLoader() {
 	};
 	var internalStartTask = function(taskName) {
 		var defered = q.defer();
-		
+
 		var task;
 		if(self.tasks[taskName]) {
 			task = self.tasks[taskName];
@@ -298,7 +295,7 @@ function createTaskLoader() {
 	};
 	this.startTask = function(taskName) {
 		var defered = q.defer();
-		
+
 		internalStartTask(taskName)
 		.then(function() {
 			self.emit(eventList.STARTED_TASK, taskName);
@@ -320,7 +317,7 @@ function createTaskLoader() {
 	};
 	var internalStopTask = function(taskName) {
 		var defered = q.defer();
-		
+
 		var task;
 		if(self.tasks[taskName]) {
 			task = self.tasks[taskName];
@@ -345,7 +342,7 @@ function createTaskLoader() {
 
 	this.stopTask = function(taskName) {
 		var defered = q.defer();
-		
+
 		internalStopTask(taskName)
 		.then(function() {
 			self.tasks[taskName] = null;

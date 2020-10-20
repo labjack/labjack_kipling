@@ -10,19 +10,16 @@ var util = require('util');
 
 var package_loader;
 var q;
-var gns;
 var io_manager;
 var driver_const;
 try {
 	package_loader = global.require.main.require('ljswitchboard-package_loader');
 	q = global.require.main.require('q');
-	gns = package_loader.getNameSpace();
 	io_manager = global.require.main.require('ljswitchboard-io_manager');
 	driver_const = global.require('ljswitchboard-ljm_driver_constants');
 } catch(err) {
 	package_loader = require.main.require('ljswitchboard-package_loader');
 	q = require.main.require('q');
-	gns = package_loader.getNameSpace();
 	io_manager = require.main.require('ljswitchboard-io_manager');
 	driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
 }
@@ -33,7 +30,6 @@ var createModuleInstance = function() {
 		var h = document.body.offsetHeight; // no need to store this anywhere, the reference is enough
 		document.body.style.display='block';
 	};
-	// var io_manager = global[gns].io_manager;
 	var io_interface = io_manager.io_interface();
 	var driver_controller = io_interface.getDriverController();
 	var device_controller = io_interface.getDeviceController();
@@ -183,7 +179,7 @@ var createModuleInstance = function() {
 			self.directConnectParams.id = data.openParams.id;
 		}
 
-		
+
 
 		if(missingValues.length > 0) {
 			var errStr = 'The following connection parameter';
@@ -236,14 +232,14 @@ var createModuleInstance = function() {
 					getCachedListAllDevices()
 					.then(self.viewGen.displayScanResults, self.viewGen.displayScanResults)
 					.then(onDisplayed, onDisplayed);
-					
-					
+
+
 					// showAlert('Failed to open the desired device');
 				});
 			}
 		}
 
-		
+
 		return defered.promise;
 	};
 	this.getDeviceElement = function(sn) {
@@ -287,7 +283,7 @@ var createModuleInstance = function() {
 		var scanResults = [];
 		function getListAllDevices() {
 			var innerDefered = q.defer();
-			
+
 			// Update and save the scan selections
 			updateAndSaveScanSelections();
 
@@ -640,7 +636,7 @@ var createModuleInstance = function() {
 		};
 		return defaultStartupData;
 	}
-	
+
 	function verifyStartupData(startupData) {
 		var defered = q.defer();
 		var isValid = true;
@@ -713,7 +709,7 @@ var createModuleInstance = function() {
 	var startModule = function(newModule) {
 		// console.log('device_selector starting', newModule.name, newModule.id);
 		self.moduleData = newModule.data;
-		
+
 		// Cache the page elements
 		self.viewGen.cachePageControlElements(newModule.data);
 
@@ -767,7 +763,7 @@ var createModuleInstance = function() {
 			// console.log('Finished preLoadStep', newModule.context);
 			defered.resolve(newModule);
 		});
-		
+
 		return defered.promise;
 	}
 	MODULE_LOADER.addPreloadStep(preLoadStep);

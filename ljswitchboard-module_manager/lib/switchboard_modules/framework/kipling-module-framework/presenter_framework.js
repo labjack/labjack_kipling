@@ -42,19 +42,16 @@ try {
     console.error('error loading fs_facade presenter_framework', err, err.stack);
 }
 
-var gns;
 var io_manager;
 var driver_const;
 var modbus_map;
 var gui;
 try {
-    gns = package_loader.getNameSpace();
     io_manager = global.require.main.require('ljswitchboard-io_manager');
     driver_const = global.require('ljswitchboard-ljm_driver_constants');
     modbus_map = global.require('ljswitchboard-modbus_map').getConstants();
     gui = require('nw.gui');
 } catch(err) {
-    gns = package_loader.getNameSpace();
     io_manager = require.main.require('ljswitchboard-io_manager');
     driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
     modbus_map = require('ljswitchboard-modbus_map').getConstants();
@@ -76,7 +73,7 @@ var CALLBACK_STRING_CONST = '-callback';
  * a LabJack device. This will copy the "metadata" from an existing binding
  * into a new one. Namely, it will re-use original's class, direction, and
  * event attributes but add in new binding and template values.
- * 
+ *
  * @param {Object} orginal The object with the original binding information.
  * @param {String} binding The register name to bind the GUI element(s) to.
  *      If given an LJMMM string, will be exapnded and all registers named after
@@ -121,7 +118,7 @@ function cloneBindingInfo (original, bindingClass, binding, template) {
  * Each binding info object has a binding attribute with the name of the
  * register on the device to bind from as well as a template attribute that
  * specifies the ID of the HTML element to bind to. So, binding AIN0 and
- * template analog-input-0 would bind the device register for AIN0 to 
+ * template analog-input-0 would bind the device register for AIN0 to
  * the HTML element with the id analog-input-0. This function will exapnd
  * LJMMM names found in either the template or binding attributes. Binding
  * AIN#(0:1) will exapnd to [AIN0, AIN1] and analog-input-#(0:1) will expand
@@ -215,7 +212,7 @@ function qRunRedraw() {
     return innerDeferred.promise;
 }
 
-/** 
+/**
  * Function to render device error data
 */
 function extrapolateDeviceErrorData(data) {
@@ -443,7 +440,7 @@ function Framework() {
             } else {
                 console.log(errName,self.moduleName);
             }
-            
+
         }
     };
     this.printDAQLoopInfo = function(functionName,info) {
@@ -488,7 +485,7 @@ function Framework() {
         self.selectedDevices = selectedDevices;
     };
     var _SetSelectedDevices = this._SetSelectedDevices;
-    
+
     var getConnectedDeviceInfoJquerySelector = function(serialNumber, extra) {
         var selector = [
             '.SERIAL_NUMBER_' + serialNumber.toString(),
@@ -782,7 +779,7 @@ function Framework() {
             }
         }
     };
-    
+
     var deviceErrorEventListener = function(data) {
         // console.warn('Device Error', data);
         try {
@@ -899,7 +896,7 @@ function Framework() {
         self.deviceErrorLog = {};
         newActiveDevices.forEach(function(device) {
             var sn = device.savedAttributes.serialNumber;
-            
+
             var controls = buildDeviceErrorControls(sn);
             // Initialize the error log
             var messages = [];
@@ -934,7 +931,7 @@ function Framework() {
     var getActiveDevice = this.getActiveDevice;
 
 
-    
+
     var updateDisplayedDeviceErrors = function() {
         var serialNumbers = Object.keys(self.deviceErrorLog);
         serialNumbers.forEach(function(serialNumber) {
@@ -1096,7 +1093,7 @@ function Framework() {
     var fire = this.fire;
 
     /**
-     * Function deletes various 'window.' objects that need to be removed in 
+     * Function deletes various 'window.' objects that need to be removed in
      * order for module to behave properly when switching tabs.
      * @param  {Array} moduleLibraries Array of string "window.xxx" calls that
      *      need to be deleted, (delete window.xxx) when a module gets unloaded.
@@ -1193,7 +1190,7 @@ function Framework() {
     this.resetModuleStartupData = function() {
         var defered = q.defer();
         var moduleName = self.currentModuleName;
-        
+
         if(self.DEBUG_STARTUP_DATA) {
             console.info('presenter_framework: resetModuleStartupData');
         }
@@ -1281,7 +1278,7 @@ function Framework() {
                 defered.resolve();
                 return defered.promise;
             };
-            
+
             self.qExecVerifyStartupData('saveStartupData')
             .then(innerSaveStartupData)
             .then(reportSavedStartupData)
@@ -1442,7 +1439,7 @@ function Framework() {
         return innerDeferred.promise;
     };
     var qExecOnTemplateDisplayed = this.qExecOnTemplateDisplayed;
-    
+
     this.qExecOnTemplateLoaded = function() {
         var innerDeferred = q.defer();
 
@@ -1484,7 +1481,7 @@ function Framework() {
             var continueExec = function() {
                 innerDeferred.resolve(data);
             };
-            
+
             self.saveModuleStartupData('qExecOnCloseDevice-suc')
             .then(continueExec, continueExec);
         };
@@ -1672,7 +1669,7 @@ function Framework() {
         // for(var i = 0; i < devs.length; i++) {
         //     console.log('sn',devs.eq(i).prop('value'),devs.eq(i).prop('checked'));
         // }
-        
+
         var foundActiveDevice = false;
         var activeDevices = self.getSelectedDevices();
         activeDevices.forEach(function(activeDev) {
@@ -1732,12 +1729,12 @@ function Framework() {
                 // device_controller.selectDevice(activeDevSN);
                 getSmartSaveSelectedDevices(activeDevSN)().then(repeatCallOnSuccess,onError);
             }
-            
+
         } else {
             onSuccess();
         }
 
-        
+
         return defered.promise;
     };
     this.qUpdateActiveDevice = function() {
@@ -1777,7 +1774,7 @@ function Framework() {
      *
      * @param {Array} newConfigControls An array of Object where each element
      *      has an event attribute with the name of the event to listen for
-     *      on the HTML element and a selector attribute which should be a 
+     *      on the HTML element and a selector attribute which should be a
      *      jQuery selector for the HTML elements to bind the event listener
      *      to.
     **/
@@ -1914,13 +1911,13 @@ function Framework() {
         } else {
             newBinding.currentDelay = newBinding.initialDelay;
         }
-        
+
         // if an output format isn't defined define the default
         if (newBinding.format === undefined) {
             newBinding.format = '%.4f';
         }
 
-        // if a customFormatFunc isn't defined define a dummy function 
+        // if a customFormatFunc isn't defined define a dummy function
         // just incase
         if (newBinding.customFormatFunc === undefined) {
             newBinding.customFormatFunc = function(rawReading){
@@ -1960,7 +1957,7 @@ function Framework() {
         }
         // Finished checking for potential binding object related errors
         // ------------------------------------
-        
+
         // BEGIN:
         // Code for recursively adding configBindings:
         var expandedBindings = expandBindingInfo(newBinding);
@@ -1971,8 +1968,8 @@ function Framework() {
             return;
         }
         // END:
- 
-        // Code for adding individual bindings to the moduleTemplateBindings, 
+
+        // Code for adding individual bindings to the moduleTemplateBindings,
         // readBindings, writeBindings, and bindings objects
         try{
             if(self.moduleTemplateBindings[newBinding.bindingClass] === undefined) {
@@ -1983,7 +1980,7 @@ function Framework() {
             console.error('Error in presenter_framework.js, putConfigBinding',err);
         }
         bindings.set(newBinding.template, newBinding);
-        
+
 
         var jquerySelector = '#' + newBinding.template;
         if (newBinding.direction === 'read') {
@@ -2037,7 +2034,7 @@ function Framework() {
         if(newSmartBinding.dataKey === undefined) {
             newSmartBinding.dataKey = 'res';
         }
-        
+
         var bindingName = newSmartBinding.bindingName;
         var smartName = newSmartBinding.smartName;
         var binding = {};
@@ -2085,7 +2082,7 @@ function Framework() {
             setupBinding.format = newSmartBinding.format;
             setupBinding.formatFunc = newSmartBinding.customFormatFunc;
             setupBinding.dataKey = newSmartBinding.dataKey;
-            
+
             if(typeof(newSmartBinding.configCallback) === 'function') {
                 setupBinding.execCallback = true;
             }
@@ -2103,7 +2100,7 @@ function Framework() {
             setupBinding.format = newSmartBinding.format;
             setupBinding.formatFunc = newSmartBinding.customFormatFunc;
             setupBinding.dataKey = newSmartBinding.dataKey;
-            
+
             if(typeof(newSmartBinding.configCallback) === 'function') {
                 setupBinding.execCallback = true;
             }
@@ -2189,7 +2186,7 @@ function Framework() {
         self.setupBindings = dict({});
     }
     /**
-     * Function to add a single binding that gets read once upon device 
+     * Function to add a single binding that gets read once upon device
      * selection.
      * @param  {[type]} binding [description]
      * @return {[type]}         [description]
@@ -2199,7 +2196,7 @@ function Framework() {
             self.runLoop = shouldContinue;
         };
 
-        // Check for various required binding attributes & report onLoadErrors 
+        // Check for various required binding attributes & report onLoadErrors
         // if they dont exist
         if (newBinding.bindingClass === undefined) {
             self.fire(
@@ -2232,7 +2229,7 @@ function Framework() {
             newBinding.format = '%.4f';
         }
 
-        // if a customFormatFunc isn't defined define a dummy function 
+        // if a customFormatFunc isn't defined define a dummy function
         if (newBinding.formatFunc === undefined) {
             newBinding.formatFunc = function(rawReading){
                 console.info('Here, val:',rawReading);
@@ -2264,7 +2261,7 @@ function Framework() {
                 onSuccess();
             };
         }
-        
+
 
         var expandedBindings = expandSetupBindingInfo(newBinding);
         var numBindings = expandedBindings.length;
@@ -2283,7 +2280,7 @@ function Framework() {
             console.error('Error in presenter_framework.js, putSetupBinding', err);
         }
         self.setupBindings.set(newBinding.bindingClass, newBinding);
-        
+
         if (newBinding.direction === 'read') {
             self.readSetupBindings.set(newBinding.bindingClass, newBinding);
         } else if (newBinding.direction === 'write') {
@@ -2299,7 +2296,7 @@ function Framework() {
     var putSetupBinding = this.putSetupBinding;
 
     /**
-     * Function to add multiple bindings that get read once upon device 
+     * Function to add multiple bindings that get read once upon device
      * selection.
      * @param  {[type]} binding [description]
      * @return {[type]}         [description]
@@ -2408,7 +2405,7 @@ function Framework() {
             };
         }
 
-        // Function for saving failed write i/o attempts 
+        // Function for saving failed write i/o attempts
         function createFailedWriteFunc (ioDeferred, binding, results) {
             return function (error) {
                 var result = {
@@ -2465,7 +2462,7 @@ function Framework() {
                 // ioDeferred.resolve();
             };
         }
-        
+
         // Function for saving failed read i/o attempts
         function createFailedReadFunc (ioDeferred, binding, results) {
             return function (error) {
@@ -2591,7 +2588,7 @@ function Framework() {
             directions = setupInfo.directions;
             numValues = setupInfo.numValues;
             values = setupInfo.values;
-            
+
             try{
                 device.rwMany(
                     addresses,
@@ -2630,9 +2627,9 @@ function Framework() {
             }
             return innerDeferred.promise;
         };
-        
+
         // Save the setup information
-        
+
     // Code for executing requests in a single rwMany request:
         // saveSetupBindings(rwManyData)
         // .then(performDeviceWrites,self.qExecOnLoadError)
@@ -2971,7 +2968,7 @@ function Framework() {
             var innerDefered = q.defer();
             // var moduleDiv = $(DEVICE_VIEW_TARGET);
             // moduleDiv.html(htmlContents);
-            
+
             htmlContents = '<div class="framework-template">' + htmlContents + '</div>';
             self.jquery.html(DEVICE_VIEW_TARGET, htmlContents);
             $('.framework-template').ready(runRedraw);
@@ -2992,7 +2989,7 @@ function Framework() {
                 self.deviceSelectionListenersAttached = true;
                 deviceSelectionListenersAttached = true;
             }
-            
+
             innerDefered.resolve();
             return innerDefered.promise;
         };
@@ -3026,7 +3023,7 @@ function Framework() {
         };
         return saveSelectedDevices;
     };
-    
+
     var getSmartSaveSelectedDevices = function(serialNumberData) {
         // If the data is an array, call and return the saveDevices function
         if(Array.isArray(serialNumberData)) {
@@ -3117,7 +3114,7 @@ function Framework() {
 
             // Report that the module's template has been displayed
             .then(self.qExecOnTemplateDisplayed, self.qExecOnLoadError)
-            
+
             // Re-draw the window to prevent window-disapearing issues
             .then(qRunRedraw, self.qExecOnLoadError)
             .done();
@@ -3253,7 +3250,7 @@ function Framework() {
                 self.ljmDriver.logSSync(2,'initDebug: Slow DAQ Loop: '+elapsedTime.toString());
                 self.ljmDriver.logSSync(2,self.moduleName);
                 self.ljmDriver.logSSync(2,'TCP_SEND_RECEIVE_TIMEOUT: '+confTimeout.toString());
-                
+
                 self.ljmDriverLogEnabled = true;
                 self.numContinuousRegLoopIterations = 0;
             } else {
@@ -3352,7 +3349,7 @@ function Framework() {
         if(executeFinishedFunc) {
             finishedFunc();
         }
-        
+
         return defered.promise;
     };
     var getNeededAddresses = function () {
@@ -3366,17 +3363,17 @@ function Framework() {
         // Loop through all registered bindings and determine what should be
         // done.
         self.readBindings.forEach(function (value, key) {
-            // For each binding check to see if it should be executed by 
-            // checking its currentDelay.  If it equals zero than it needs 
-            // to be executed.  
+            // For each binding check to see if it should be executed by
+            // checking its currentDelay.  If it equals zero than it needs
+            // to be executed.
             if(value.currentDelay <= 0) {
                 // Search bindings for custom bindings
                 var callbackString = CALLBACK_STRING_CONST;
                 var baseStr = value.binding;
                 var searchIndex = baseStr.search(callbackString);
                 if( searchIndex < 0) {
-                    // if the CALLBACK_STRING_CONST tag wasn't found then 
-                    // add the binding to the list of registers that needs 
+                    // if the CALLBACK_STRING_CONST tag wasn't found then
+                    // add the binding to the list of registers that needs
                     // to be queried from the device.
                     addresses.push(value.binding);
                     formats.push(value.format);
@@ -3426,12 +3423,12 @@ function Framework() {
         var innerDeferred = q.defer();
         self.daqLoopStatus = 'requestDeviceValues';
         var device = self.getSelectedDevice();
-        
+
         var addresses = bindingsInfo.addresses;
         var formats = bindingsInfo.formats;
         var customFormatFuncs = bindingsInfo.customFormatFuncs;
         var bindings = bindingsInfo.bindings;
-        
+
         if (addresses.length === 0) {
             innerDeferred.resolve({
                 values: [],
@@ -3457,7 +3454,7 @@ function Framework() {
 
         return innerDeferred.promise;
     };
-    
+
 
     var processDeviceValues = function (valuesInfo) {
         var innerDeferred = q.defer();
@@ -3469,12 +3466,12 @@ function Framework() {
         var numAddresses = addresses.length;
         var bindings = valuesInfo.bindings;
         var retDict = dict({});
-        
+
         // Iterate through the bindings executed using the async library
         var curDeviceIOIndex = 0;
 
         var innerProcessSingleDeviceValue = function(binding, nextStep) {
-            
+
             //Executed for each binding
             // Search binding string for callback bindings tag
             var callbackString = CALLBACK_STRING_CONST;
@@ -3487,7 +3484,7 @@ function Framework() {
             var stringVal;
             var curValue;
             var curVal;
-            
+
             // Periodic bindings (ones that don't perform any device IO
             // will have a "undefined" curResult value.
             if(curResult) {
@@ -3507,7 +3504,7 @@ function Framework() {
                 //If the tag was not found then perform auto-formatting
                 var curFormat = formats[index];
                 var curCustomFormatFunc = customFormatFuncs[index];
-                
+
                 if(curFormat !== 'customFormat') {
                     if(isNaN(curVal)){
                         stringVal = curVal;
@@ -3545,7 +3542,7 @@ function Framework() {
                     console.warn('Warning, PeriodicFunction Found but not executing',binding);
                 }
             }
-            // If the current binding has a defined binding that 
+            // If the current binding has a defined binding that
             // needs to be executed execute it now
             if(binding.execCallback) {
                 // Execute read-binding function callback
@@ -3621,7 +3618,7 @@ function Framework() {
             return defered.promise;
         }
 
-        // Make sure that the loop should be executing.                                   
+        // Make sure that the loop should be executing.
         if (!self.runLoop) {
             self.isDAQLoopActive = false;
             defered.reject('stoppingLoop');
@@ -3711,7 +3708,7 @@ function Framework() {
         var defered = q.defer();
         innerRunDAQLoop(self.activeDevice.savedAttributes)
         .then(defered.resolve, defered.reject);
-        
+
         return defered.promise;
     };
     this.runDAQLoop = function(onSuccess) {
@@ -3755,7 +3752,7 @@ function Framework() {
             // return defered.promise;
         }
 
-        // Make sure that the loop should be executing.                                   
+        // Make sure that the loop should be executing.
         if (!self.runLoop) {
             self.isDAQLoopActive = false;
             // defered.reject('Loop not running.');
@@ -3774,7 +3771,7 @@ function Framework() {
                 var promises = [];
                 promises.push(self.qRunDAQLoop());
                 // promises.push(self.runDAQMonitor());
-                
+
                 q.allSettled(promises)
                 .then(function(){
                     verifyFrameworkIsActive()
@@ -3902,7 +3899,7 @@ function Framework() {
         }
 
         // var setTimeout = function () {
-            
+
         // };
         //checkModuleStatus()
         pauseLoop()
@@ -4094,7 +4091,7 @@ function Framework() {
             innerDeferred.resolve();
             return innerDeferred.promise;
         };
-        
+
         // Add exit listener.
         addProgramExitListener();
 
@@ -4190,11 +4187,11 @@ function Framework() {
         moduleConstants = constantsObj;
         self.module = moduleObj;  // A reference to the created module
         module = moduleObj;
-        
+
 
         self.startupData = undefined;
         self.isStartupDataValid = false;
-        
+
 
         self.frameworkType = infoObj.framework;
         frameworkType = infoObj.framework;

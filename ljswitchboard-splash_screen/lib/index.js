@@ -63,7 +63,6 @@ if(ENABLE_BREAKS_TO_DEV_NW_31) {
 // var package_loader = require('../../ljswitchboard-package_loader');
 // Load the library from the node_module dirctory:
 var package_loader = require('ljswitchboard-package_loader');
-var gns = package_loader.getNameSpace();
 
 if(ENABLE_BREAKS_TO_DEV_NW_31) {
 	// 9/19/2018, this is currently where the app breaks w/ NW 31.
@@ -181,7 +180,6 @@ package_loader.on('failed_to_load_managed_package', function(message) {
 });
 
 var startDir = require('./get_cwd').startDir;
-var startInfo = require('./get_cwd').startInfo;
 
 var rootPackages = [{
 		'name': 'req',

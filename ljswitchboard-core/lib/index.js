@@ -1,35 +1,29 @@
 console.log("ljswitchboard-core index.js");
 
-var gui = require('nw.gui');
 var path = require('path');
 var q = require('q');
-var win = gui.Window.get();
 
+const electron = require('electron');
+const getInjector = require('lj-di').getInjector;
+const injector = getInjector({ electron });
 
+const window_manager = injector.get('window_manager');
+const gui = injector.get('gui');
+var package_loader = injector.get('package_loader');
+
+const splash_screen = injector.get('splash_screen');
 // Show the window's dev tools
 // win.showDevTools();
-
-var package_loader = require('ljswitchboard-package_loader');
-var gns = package_loader.getNameSpace();
-var window_manager = require('ljswitchboard-window_manager');
 
 var coreResourcesLoaded = false;
 
 // Use the req require tool to load files to prevent from cluttering up the
 // require namespace & adding everything there.
 console.log('Requiring message_formatter');
-var req = global[gns].req.require;
-var message_formatter = req('message_formatter');
+var message_formatter = require('./message_formatter');
 
-var loadResources = function(resources) {
-	global[gns].static_files.loadResources(document, resources)
-	.then(function(res) {
-		coreResourcesLoaded = true;
-	}, function(err) {
-		console.error('Error Loading resources', err);
-	});
-};
-var startDir = global[gns].info.startDir;
+const startDir = injector.get('startDir');
+
 var corePackages = [
 	{
 		// 'name': 'ljswitchboard-static_files',
@@ -127,7 +121,7 @@ if(!!process.env.TEST_MODE || gui.App.manifest.test) {
 
 var checkRequirements = function() {
 	var defered = q.defer();
-	global[gns].splash_screen.update('Verifing LJM Installation');
+	splash_screen.update('Verifing LJM Installation');
 	global[gns].ljm_driver_checker.verifyLJMInstallation()
 	.then(function(res) {
 		global[gns].splash_screen.update('Finished Verifying LJM Installation');
@@ -232,11 +226,3 @@ var startCoreApp = function() {
 window.onload = function(e) {
 	setTimeout(startCoreApp, 10);
 };
-
-
-
-
-// win.shared.tFunc()
-// .then(function(d) {
-// 	console.log('ljswitchboard-core:', d);
-// });

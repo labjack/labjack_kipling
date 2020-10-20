@@ -39,7 +39,7 @@ if(os === 'win32') {
 } else if(os === 'darwin') {
 	// Check to see if the current working directory is w/in a *.app file
 	if(cwd.indexOf('.app/Contents/Resources/') >= 0) { // (packaged & un-zipped)
-		// In this case the startDir should be its cwd as any files needing to 
+		// In this case the startDir should be its cwd as any files needing to
 		// be un-packed will be in the /Contents/Resources/ directory next to
 		// the app.nw file.
 		var newDir = path.resolve(path.join(cwd, '..'));
@@ -72,7 +72,7 @@ if(os === 'win32') {
 		startDir = cwd;
 	}
 	/*
-	 * Notes for MAC OS X: (packaged & Un-zipped) 
+	 * Notes for MAC OS X: (packaged & Un-zipped)
 	 *   - cwd: "/Users/chrisjohn/git/ljswitchboard-project_manager/
 	 *   ljswitchboard-builder/output/nwjs.app/Contents/Resources/app.nw"
 	 *   - execDir: "/Users/chrisjohn/git/ljswitchboard-project_manager/
@@ -97,7 +97,7 @@ if(os === 'win32') {
 	 *   ljswitchboard-splash_screen/node_modules/nw/nwjs/nwjs.app/Contents/Frameworks"
 	 */
 	console.log('Mac OS Not Supported (Yet)', os, process.platform, process.arch);
-	
+
 } else if(os === 'linux') {
 	console.log('Linux OS Not Supported (YET)', os, process.platform, process.arch);
 	console.error('Project was started via an un-known location (On Linux)');
@@ -112,18 +112,9 @@ if(os === 'win32') {
 }
 
 console.log('Started project via: ' + startMethod);
-var startInfo = {
-	'isCompressed': isCompressed,
-	'startDir': startDir,
-	'execDir': execDir,
-	'derivedCWD': derivedCWD,
-	'cwd': cwd
-};
-console.log('Start info', startInfo);
 
 // startDir is the important directory that indicates where files that need to be extracted exist
 exports.startDir = startDir;
-exports.startInfo = startInfo;
 exports.getPaths = function() {
 	return global.module.paths;
 };

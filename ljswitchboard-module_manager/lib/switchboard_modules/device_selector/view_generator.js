@@ -6,19 +6,16 @@
 
 var package_loader;
 var q;
-var gns;
 var static_files;
 var driver_const;
 try {
 	package_loader = global.require.main.require('ljswitchboard-package_loader');
 	q = global.require.main.require('q');
-	gns = package_loader.getNameSpace();
 	static_files = global.require('ljswitchboard-static_files');
 	driver_const = global.require('ljswitchboard-ljm_driver_constants');
 } catch(err) {
 	package_loader = require.main.require('ljswitchboard-package_loader');
 	q = require.main.require('q');
-	gns = package_loader.getNameSpace();
 	static_files = require('ljswitchboard-static_files');
 	driver_const = require('ljswitchboard-ljm_driver_constants');
 }
@@ -195,9 +192,9 @@ var createDeviceSelectorViewGenerator = function() {
 			}
 		}
 
-		
-		
-		
+
+
+
 	];
 	var elements = {};
 	this.pageElements = elements;
@@ -367,7 +364,7 @@ var createDeviceSelectorViewGenerator = function() {
 			elements = self.deviceControlElements[key];
 
 			// Slide up the scroller
-			
+
 
 			// Re-attach connect button listeners
 			attachConnectListeners(data.device);
@@ -404,7 +401,7 @@ var createDeviceSelectorViewGenerator = function() {
 
 	var enableModuleSwitching = function() {
 		var defered = q.defer();
-		
+
 		// Enable module-switching
 		MODULE_CHROME.enableModuleLoading();
 
@@ -444,7 +441,7 @@ var createDeviceSelectorViewGenerator = function() {
 		promises.push(
 			self.deviceControlElements[key].connectingToDeviceHolder.slideDown()
 		);
-		
+
 		// Wait for both tasks to finish
 		q.allSettled(promises)
 		.then(handleOnConnectResult)
@@ -504,7 +501,7 @@ var createDeviceSelectorViewGenerator = function() {
 		promises.push(
 			self.deviceControlElements[key].disconnectButtonHolder.slideUp()
 		);
-		
+
 		// Wait for both tasks to finish
 		q.allSettled(promises)
 		.then(handleOnDisconnectResult);
@@ -702,7 +699,7 @@ var createDeviceSelectorViewGenerator = function() {
 					},
 				};
 
-				
+
 				// Establish connection type listeners
 				device.connectionTypes.forEach(function(connectionType) {
 					var selector = createConnectButtonSelector(
@@ -716,7 +713,7 @@ var createDeviceSelectorViewGenerator = function() {
 						'ele': ele
 					};
 				});
-				
+
 				if(!device.isActive) {
 					// Attach connect button listeners
 					attachConnectListeners(device);

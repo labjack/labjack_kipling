@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "async": "1.5.2",
+    "lj-di": "*",
     "q": "1.5.1"
   },
   "devDependencies": {

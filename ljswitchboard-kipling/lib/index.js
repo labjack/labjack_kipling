@@ -42,19 +42,9 @@ function restartIOInterface() {
 	if(MODULE_LOADER) {
 		MODULE_LOADER.loadModuleByName('crash_module');
 	}
-	// global[gns].ljm.io_interface.destroy()
-	// .then(global[gns].ljm.io_interface.initialize)
-	// .then(saveGlobalSubprocessReference)
-	// .then(MODULE_CHROME.reloadModuleChrome);
-	// // .then(startCoreApp)
 	if(MODULE_LOADER) {
 		MODULE_LOADER.loadModuleByName('crash_module');
 	}
-	// K3_ON_APPLICATION_EXIT_WINDOW_LISTENER(true)
-	// .then(global[gns].ljm.io_interface.destroy)
-	// .then(function() {
-	// 	return ;
-	// })
 	global[gns].ljm.io_interface.destroy()
 	.then(function() {
 		window_manager.windowManager.managedWindows.kipling.win.reload();
@@ -128,7 +118,7 @@ function K3_ON_APPLICATION_EXIT_WINDOW_LISTENER(enablePromise) {
 					} else {
 						defered.resolve();
 					}
-					
+
 				} catch(err) {
 					console.error('Error exiting things...', err);
 				}
@@ -145,7 +135,6 @@ window_manager.on(
 	window_manager.eventList.PREVENTING_WINDOW_FROM_CLOSING,
 	K3_ON_APPLICATION_EXIT_WINDOW_LISTENER
 );
-var startDir = global[gns].info.startDir;
 
 /*
 	Function called to load the application's core resources.
@@ -279,7 +268,7 @@ var performRemainingInitializationRoutines = function() {
 	function finalize() {
 		defered.resolve();
 	}
-	
+
 	KEYBOARD_EVENT_HANDLER.init(managers)
 	.then(WINDOW_ZOOM_MANAGER.init)
 	.then(MOUSE_EVENT_HANDLER.init)
