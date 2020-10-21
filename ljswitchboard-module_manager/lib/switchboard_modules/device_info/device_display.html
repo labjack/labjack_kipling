@@ -31,33 +31,33 @@
                 </div>
             </div>
             <div class="device-detail">
-                Ethernet Mac Address: 
+                Ethernet Mac Address:
                 <span id="wifi-version-display" class="selectableText">
                     {{../ethernetMac}}
                 </span>
             </div>
             {{#if ../isPro }}
             <div class="device-detail">
-                WiFi Mac Address: 
+                WiFi Mac Address:
                 <span id="wifi-version-display" class="selectableText">
                     {{../../wifiMac}}
                 </span>
             </div>
             {{/if}}
             <div class="device-detail">
-                200 uA Current Source Cal: 
+                200 uA Current Source Cal:
                 <span id="wifi-version-display" class="selectableText">
                     {{../currentSourceA}} uA
                 </span>
             </div>
             <div class="device-detail">
-                10 uA Current Source Cal: 
+                10 uA Current Source Cal:
                 <span id="wifi-version-display" class="selectableText">
                     {{../currentSourceB}} uA
                 </span>
             </div>
             <div class="device-detail">
-                Calibration Status: 
+                Calibration Status:
                 <span id="calibration-status-display" class="calibration-message selectableText {{#if ../isCalibrationValid}}isa_success{{else}}isa_error{{/if}}" title="{{../deviceCalibrationLongMessage}}">
                     {{../deviceCalibrationMessage}}&nbsp;&nbsp;<span class="{{#if ../isCalibrationValid}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
                 </span>
@@ -67,20 +67,20 @@
                 Versions
             </div>
             <div id="firmware-display-holder" class="device-detail">
-                Firmware Version: 
+                Firmware Version:
                 <span id="firmware-display" class="selectableText">
                     {{../firmware}}
                 </span>
             </div>
             <div id="bootloader-display-holder" class="device-detail">
-                Bootloader Version: 
+                Bootloader Version:
                 <span id="bootloader-display" class="selectableText">
                     {{../bootloader}}
                 </span>
             </div>
             {{#if ../isPro }}
             <div id="wifi-firmware-display-holder" class="device-detail">
-                WiFi Firmware Version: 
+                WiFi Firmware Version:
                 <span id="bootloader-display" class="selectableText">
                     {{../../wifiFirmware}}
                 </span>
@@ -91,14 +91,14 @@
                 Current Status
             </div>
             <div class="device-detail">
-                Ethernet IP Address: 
+                Ethernet IP Address:
                 <span id="wifi-version-display" class="selectableText">
                     {{../ethernetIP}}
                 </span>
             </div>
             {{#if ../isPro }}
             <div class="device-detail">
-                WiFi IP Address: 
+                WiFi IP Address:
                 <span id="wifi-version-display" class="selectableText">
                     {{../../wifiIP}}
                 </span>
@@ -131,23 +131,17 @@
         <script>
             $('#lj-link-holder-productPage').unbind();
             $('#lj-link-holder-productPage').bind('click',function(){
-                if(typeof(gui) === 'undefined') {
-                    gui = require('nw.gui');
-                }
+                const gui = global.lj_di_injector.get('gui');
                 gui.Shell.openExternal("https://labjack.com/{{getDeviceType}}");
             });
             $('#lj-link-holder-datasheet').unbind();
             $('#lj-link-holder-datasheet').bind('click',function(){
-                if(typeof(gui) === 'undefined') {
-                    gui = require('nw.gui');
-                }
+                const gui = global.lj_di_injector.get('gui');
                 gui.Shell.openExternal("https://labjack.com/support/datasheets/{{getDeviceType}}");
             });
             $('#lj-link-holder-supportPage').unbind();
             $('#lj-link-holder-supportPage').bind('click',function(){
-                if(typeof(gui) === 'undefined') {
-                    gui = require('nw.gui');
-                }
+                const gui = global.lj_di_injector.get('gui');
                 gui.Shell.openExternal("https://labjack.com/support/{{getDeviceType}}");
             });
         </script>

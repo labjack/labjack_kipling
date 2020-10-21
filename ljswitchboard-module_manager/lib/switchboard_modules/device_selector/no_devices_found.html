@@ -60,9 +60,7 @@
     linksToBindTo.forEach(function(linkToBindTo) {
         $(linkToBindTo.id).unbind();
         $(linkToBindTo.id).bind('click',function(){
-            if(typeof(gui) === 'undefined') {
-                gui = require('nw.gui');
-            }
+            const gui = global.lj_di_injector.get('gui');
             gui.Shell.openExternal(linkToBindTo.url);
         });
     });

@@ -92,9 +92,7 @@ function module() {
                 var workingDirPath = 'file:///' + posixPath;
                 var filePath = workingDirPath + path.posix.sep + cfgFileName;
                 console.log('HERE', data, progPath, posixPath, filePath);
-                if(typeof(gui) === 'undefined') {
-                    gui = require('nw.gui');
-                }
+                const gui = global.lj_di_injector.get('gui');
                 gui.Shell.openExternal(filePath);
             } catch(errA) {
                 console.log('error opening application', errA);
@@ -128,9 +126,7 @@ function module() {
             'LJLogM': "file:///C:/Program Files (x86)/LabJack/Applications/LJLogM.exe",
             'LJStreamM': "file:///C:/Program Files (x86)/LabJack/Applications/LJStreamM.exe"
         }[appName];
-        if(typeof(gui) === 'undefined') {
-            gui = require('nw.gui');
-        }
+        const gui = global.lj_di_injector.get('gui');
         gui.Shell.openExternal(appPath);
     }
     function configAndOpenApp(appName) {
@@ -163,7 +159,7 @@ function module() {
     function getConfigAndOpenInApplication(appName, ct) {
         return function configAndOpenInApplication(data, onSuccess) {
             console.log('Opening Application:', appName, ct);
-            
+
             var msgStr = 'Opening device in '+appName +' ';
             var preventCloseOpen = false;
             var ctToOpen;
@@ -174,7 +170,7 @@ function module() {
                 msgStr += 'over' + ct;
                 ctToOpen = driver_const.connectionTypes[ct.toUpperCase()];
             }
-            
+
             if(ctToOpen == driver_const.connectionTypes.USB) {
                 preventCloseOpen = false;
             } else if(ctToOpen == driver_const.connectionTypes.Ethernet) {
@@ -288,9 +284,9 @@ function module() {
         framework.putSmartBindings(customSmartBindings);
         onSuccess();
     };
-    
+
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -385,7 +381,7 @@ function module() {
             });
             onSuccess();
         };
-        
+
         if(device.savedAttributes.deviceTypeName === 'T7') {
             deviceTemplate = handlebars.compile(
                 framework.moduleData.htmlFiles.t7_template
@@ -416,7 +412,7 @@ function module() {
             promises.push(getExtraOperation(device,'sRead', 'WIFI_MAC'));
             // promises.push(getExtraOperation(device, 'getRecoveryFirmwareVersion'))
             promises.push(function getDeviceRecoveryFirmwareVersion() {
-                var defered = q.defer();   
+                var defered = q.defer();
                 device.getRecoveryFirmwareVersion()
                 .then(function(res) {
                     console.log('Get Device Recovery Firmware Version Result', res);
@@ -470,7 +466,7 @@ function module() {
                 return defered.promise;
             }());
             promises.push(function getAvailableConnectionTypes() {
-                var defered = q.defer();   
+                var defered = q.defer();
                 device.getAvailableConnectionTypes()
                 .then(function(result) {
                     console.log('Available connection types');
@@ -525,7 +521,7 @@ function module() {
                 // 'RTC_TIME_S', // Not available in T4 FW 0.202
                 // 'SNTP_UPDATE_INTERVAL', // Not available in T4 FW 0.202
             ];
-            
+
             // Not available in T4 FW 0.202
             var secondaryExtraRegisters = [
                 'TEMPERATURE_DEVICE_K',
@@ -535,7 +531,7 @@ function module() {
             promises.push(getExtraOperation(device,'sReadMany', secondaryExtraRegisters));
             promises.push(getExtraOperation(device,'sRead', 'ETHERNET_MAC'));
             promises.push(function getDeviceRecoveryFirmwareVersion() {
-                var defered = q.defer();   
+                var defered = q.defer();
                 device.getRecoveryFirmwareVersion()
                 .then(function(res) {
                     console.log('Get Device Recovery Firmware Version Result', res);
@@ -567,7 +563,7 @@ function module() {
                 return defered.promise;
             }());
             promises.push(function getDeviceAuthStatus() {
-                var defered = q.defer();   
+                var defered = q.defer();
                 device.isAuthorized()
                 .then(function(res) {
                     console.log('Device Auth Status', res);
@@ -589,7 +585,7 @@ function module() {
                 return defered.promise;
             }());
             promises.push(function getAvailableConnectionTypes() {
-                var defered = q.defer();   
+                var defered = q.defer();
                 device.getAvailableConnectionTypes()
                 .then(function(result) {
                     console.log('Available connection types');
@@ -650,7 +646,7 @@ function module() {
             continueFramework(deviceTemplate, data);
         });
     };
-    
+
 
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
         if(self.MODULE_LOADING_STATE_DEBUGGING) {

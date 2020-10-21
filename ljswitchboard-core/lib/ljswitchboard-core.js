@@ -46,8 +46,6 @@ exports.initializePackage = function (injector) {
 	const package_loader = injector.get('package_loader');
 	const static_files = package_loader.getPackage('static_files');
 
-	let coreResourcesLoaded = false;
-
 	window_manager.on(window_manager.eventList.OPENED_WINDOW, async (name) => {
 		if (name !== 'core') return;
 
@@ -222,7 +220,7 @@ exports.initializePackage = function (injector) {
 				});
 				package_loader.runPackageManager()
 					.then(async (managedPackages) => {
-						console.log('Managed Packages', managedPackages);
+						console.log('Managed Packages', Object.keys(managedPackages));
 						const keys = Object.keys(managedPackages);
 						if (!!process.env.TEST_MODE || gui.App.manifest.test) {
 							const isKiplingTesterManaged = keys.indexOf('kipling_tester');
@@ -256,22 +254,7 @@ exports.initializePackage = function (injector) {
 			});
 		}
 
-		function startCoreApp() {
-			console.log('startCoreApp');
-			if (coreResourcesLoaded) {
-
-				// Start the application
-
-				checkRequirements()
-					.then(loadCorePackages);
-			} else {
-				// setTimeout(startCoreApp, 10);
-			}
-		}
-
-		checkRequirements()
-			.then(loadCorePackages);
-		// startCoreApp();
+		checkRequirements().then(loadCorePackages);
 	});
 };
 

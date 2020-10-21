@@ -1,7 +1,5 @@
 'use strict';
 
-console.log('1WindowManager');
-
 const EventEmitter = require('events').EventEmitter;
 const async = require('async');
 

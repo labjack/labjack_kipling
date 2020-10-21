@@ -6,20 +6,9 @@
  * @author Chris Johnson (LabJack, 2014)
 **/
 
-// Require npm libraries
 var dict = require('dict');
-var q = require('q');
-var async = require('async');
-
-// Require nodejs libraries
-var os = require('os');
 var path = require('path');
 var window_manager = require('ljswitchboard-window_manager');
-
-// (function () {
-//   "use strict";
-
-var walk = require('walk');
 
 /**
  * keyboardEventHandler is an object that allows easy window-wide keypress
@@ -27,7 +16,6 @@ var walk = require('walk');
  * @return {[type]} [description]
 **/
 function keyboardEventHandler() {
-    var escBinding = 'escape-input-listener-keyboard_event_handler';
     this.handleGenericKeypress = function(info) {
         if(typeof(info.listeners) !== 'undefined') {
             info.listeners.forEach(function(listenerFunc, listenerName){
@@ -49,16 +37,12 @@ function keyboardEventHandler() {
     };
     this.handleOpenConsole = function(info) {
         // console.log('in handleOpenConsole', info.name);
-        if(typeof(gui) === 'undefined') {
-            gui = require('nw.gui');
-        }
+        const gui = global.lj_di_injector.get('gui');
         gui.Window.get().showDevTools();
     };
     this.rebootKipling = function(info) {
         console.log('in rebootKipling', info.name);
-        if(typeof(gui) === 'undefined') {
-            gui = require('nw.gui');
-        }
+        const gui = global.lj_di_injector.get('gui');
         var child_process = require('child_process');
         var execStr = 'bash helper_scripts/reboot_scripts/mac_reboot.sh';
         var currentExecutable = process.execPath.split(' ')[0].split(/\.*\/Contents/g)[0];
@@ -73,9 +57,7 @@ function keyboardEventHandler() {
     };
     this.rebuildKipling = function(info) {
         console.log('in rebuildKipling', info.name);
-        if(typeof(gui) === 'undefined') {
-            gui = require('nw.gui');
-        }
+        const gui = global.lj_di_injector.get('gui');
         var child_process = require('child_process');
         var execStr = 'bash helper_scripts/reboot_scripts/mac_reboot.sh';
         var currentExecutable = process.execPath.split(' ')[0].split(/\.*\/Contents/g)[0];
@@ -88,20 +70,7 @@ function keyboardEventHandler() {
         console.log('Executed Script');
         gui.App.quit();
     };
-    // function restartSubProcess() {
-    //     console.log('Trying to restart subprocess');
-    //     global[gns].ljm.io_interface.destroy()
-    //     .then(function() {
-    //         window_manager.windowManager.managedWindows.kipling.win.reload();
-    //     });
-    // }
-    // this.reloadSubProcess = function(info) {
-    //     console.log('Trying to restart subprocess');
-    //     global[gns].ljm.io_interface.destroy()
-    //     .then(function() {
-    //         window_manager.windowManager.managedWindows.kipling.win.reload();
-    //     });
-    // };
+
     this.reloadCurrentModule = function(info) {
         // Using jquery, search for selected tab & trigger the click event.
         var selectedTab = $('.module-chrome-tab.selected');
@@ -125,106 +94,73 @@ function keyboardEventHandler() {
             self.devReLoadIOManager(info);
         }
     };
-    function performDevReload(info) {
+    function performDevReload(info, io_interface) {
         showCriticalAlert('Restarting subprocess and re-loading Kipling.');
         self.reloading = true;
         console.log('Trying to restart subprocess');
         function startReload() {
-            var defered = q.defer();
-            console.log('Reloading...');
-            setTimeout(function() {
+            return new Promise((resolve, reject) => {
+                console.log('Reloading...');
+                setTimeout(function () {
 
-                console.log('Restarting!');
-                if(self.performUpgrade) {
-                    showCriticalAlert('DEV ONLY: Restarting/Updating Subprocess (IO_Manager).  Then re-loading Kipling.');
-                    self.performUpgrade = false;
-                    // defered.resolve();
-                    // var options = {
-                    //     followLinks: false
-                    //     // directories with these keys will be skipped
-                    //   , filters: ["Temp", "_Temp"]
-                    //   };
-                    // walker = walk.walk("C:\\ProgramData\\LabJack\\K3\\ljswitchboard-io_manager", options);
-                    // foundFiles = [];
-                    // walker.on("file", function (root, fileStats, next) {
-                    //     foundFiles.push(fileStats.name);
-                    //     // console.log('Found FIle', fileStats.name);
-                    //     next();
-                    // // fs.readFile(fileStats.name, function () {
-                    // //   // doStuff
-                    // //   next();
-                    // // });
-                    // });
-                    // walker.on("end", function () {
+                    console.log('Restarting!');
+                    if (self.performUpgrade) {
+                        showCriticalAlert('DEV ONLY: Restarting/Updating Subprocess (IO_Manager).  Then re-loading Kipling.');
+                        self.performUpgrade = false;
 
-                    // });
-                    path = require('path');
-                    var cwd = process.cwd();
-                    cwd = path.join(process.cwd(), '..', 'ljswitchboard-io_manager');
-                    console.log('CWD', cwd);
-                    console.log('Updating io_manager node_modules');
-                    var child_process = require('child_process');
-                    var proc = child_process.exec(
-                        'npm update', {
-                            // cwd: 'C:\\ProgramData\\LabJack\\K3\\ljswitchboard-io_manager',
-                            cwd: cwd,
-                        }
-                        // },
-                        // function (error, stdout, stderr) {
-                        //     console.log('finished executing');
-                        //     if (error) {
-                        //         console.error('exec error: ',error);
-                        //         return;
-                        //     }
-                        //     console.log('stdout: ',stdout);
-                        //     console.log('stderr: ',stderr);
-                        //     // console.log("all done found files: ", foundFiles.length);
-                        //  }
+                        var cwd = process.cwd();
+                        cwd = path.join(process.cwd(), '..', 'ljswitchboard-io_manager');
+                        console.log('CWD', cwd);
+                        console.log('Updating io_manager node_modules');
+                        var child_process = require('child_process');
+                        var proc = child_process.exec(
+                            'npm update', {
+                                // cwd: 'C:\\ProgramData\\LabJack\\K3\\ljswitchboard-io_manager',
+                                cwd: cwd,
+                            }
                         );
-                    proc.stdout.on('data', function (data) {
-                        console.log('data from stdout', data.toString());
-                    });
+                        proc.stdout.on('data', function (data) {
+                            console.log('data from stdout', data.toString());
+                        });
 
-                    proc.stderr.on('data', function (data) {
-                        console.log('data from stderr', data.toString());
-                    });
+                        proc.stderr.on('data', function (data) {
+                            console.log('data from stderr', data.toString());
+                        });
 
-                    proc.on('exit', function (code) {
-                        console.log('Child exited with code ${code}',code);
-                        console.log('DELAYING.....');
-                        setTimeout(function() {
-                            console.log('HERE!');
-                            defered.resolve();
-                        },
-                        10);
-                    });
+                        proc.on('exit', function (code) {
+                            console.log('Child exited with code ${code}', code);
+                            console.log('DELAYING.....');
+                            setTimeout(function () {
+                                    console.log('HERE!');
+                                    resolve();
+                                },
+                                10);
+                        });
 
-                } // IF
-                else {
-                    console.log('Skipping Upgrade');
-                    setTimeout(function() {
-                        console.log('HERE!');
-                        defered.resolve();
-                    },
-                    3000);
-                }
+                    } // IF
+                    else {
+                        console.log('Skipping Upgrade');
+                        setTimeout(function () {
+                                console.log('HERE!');
+                                resolve();
+                            },
+                            3000);
+                    }
 
-            },10);
-            return defered.promise;
+                }, 10);
+            });
         }
 
-
-        // .then(getFile)
         startReload()
         .then(function() {
-            var defered = q.defer();
-            setTimeout(function() {
-                console.log('LAST CALL!');
-                defered.resolve();
-            },10);
-            return defered.promise;
+            return new Promise((resolve, reject) => {
+                setTimeout(function () {
+                    console.log('LAST CALL!');
+                    resolve();
+                }, 10);
+            });
         })
-        .then(global[gns].ljm.io_interface.destroy)
+        .then(io_interface.destroy)
         .then(function() {
             // Destroy io_manager cache
             var decache = require('decache');
@@ -578,16 +514,14 @@ function keyboardEventHandler() {
      * Function to be called that sets up the document wide keypress listener.
     **/
     this.init = function(bundle) {
-        var defered = q.defer();
-
         self.managers = bundle;
         // Initialize the key listener list
-        self.keysList.forEach(function(keysListItem) {
-            keysListItem.platforms.forEach(function(platform) {
+        self.keysList.forEach(function (keysListItem) {
+            keysListItem.platforms.forEach(function (platform) {
                 // if the defined key has a matching platform, add it to the
                 // list.
-                if(platform === self.curPlatform) {
-                    self.keyFunctions.set(keysListItem.key,keysListItem);
+                if (platform === self.curPlatform) {
+                    self.keyFunctions.set(keysListItem.key, keysListItem);
                 }
             });
         });
@@ -596,8 +530,7 @@ function keyboardEventHandler() {
         $(document).keydown(self.keydownListener);
         $(document).keyup(self.keyupListener);
 
-        defered.resolve(bundle);
-        return defered.promise;
+        return Promise.resolve(bundle);
     };
 
     var self = this;
@@ -605,4 +538,3 @@ function keyboardEventHandler() {
 
 // Initialize object and make object available in k3's namespace.
 var KEYBOARD_EVENT_HANDLER = new keyboardEventHandler();
-

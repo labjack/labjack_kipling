@@ -1,8 +1,3 @@
-
-
-var q = require('q');
-var async = require('async');
-
 // Define the Mouse event Handler.
 function createMouseEventHandler() {
     this.lastMouseEventData = undefined;
@@ -21,7 +16,7 @@ function createMouseEventHandler() {
             // Therefore we need to ignore the situation when Y delta is zero.
             // or make the decision to allow both ctrl and ctrl + shift to allow
             // scrolling.... which is what is going to happen...
-            
+
             // Enable only Y axis scroll deltas.
             // if(wheelDeltaY > 0) {
             //     self.windowZoomManager.zoomIn();
@@ -37,13 +32,11 @@ function createMouseEventHandler() {
             }
         }
     }
-    
-    // The mouse event handler is initialized by the index.js file in the 
+
+    // The mouse event handler is initialized by the index.js file in the
     // Kipling application.
     this.init = function(bundle) {
         // console.log('Initializing mouse event handler', bundle);
-        var defered = q.defer();
-
         self.keyboardEventHandler = bundle.keyboard;
         self.windowZoomManager = bundle.zoom;
 
@@ -54,10 +47,9 @@ function createMouseEventHandler() {
 
         //for IE/OPERA etc
         document.onmousewheel = handleMouseScroll;
-        
 
-        defered.resolve(bundle);
-        return defered.promise;
+
+        return Promise.resolve(bundle);
     };
 
     var self = this;

@@ -29,34 +29,34 @@
 			</div>
 		</div>
 		<div class="device-detail">
-			Ethernet Mac Address: 
+			Ethernet Mac Address:
 			<span class="selectableText">
 				{{ETHERNET_MAC.val}}
 			</span>
 		</div>
 		{{#if HARDWARE_INSTALLED.wifi }}
 		<div class="device-detail">
-			WiFi Mac Address: 
+			WiFi Mac Address:
 			<span class="selectableText">
 				{{WIFI_MAC.val}}
 			</span>
 		</div>
 		{{/if}}
 		<div class="device-detail">
-			200 uA Current Source Cal: 
+			200 uA Current Source Cal:
 			<span class="selectableText">
 				{{CURRENT_SOURCE_200UA_CAL_VALUE.val}} uA
 			</span>
 		</div>
 		<div class="device-detail">
-			10 uA Current Source Cal: 
+			10 uA Current Source Cal:
 			<span class="selectableText">
 				{{CURRENT_SOURCE_10UA_CAL_VALUE.val}} uA
 			</span>
 		</div>
 		{{#if calibrationStatus}}
 		<div class="device-detail">
-			Calibration Status: 
+			Calibration Status:
 			<span id="calibration-status-display" class="calibration-message selectableText {{#if calibrationStatus.overall}}isa_success{{else}}isa_error{{/if}}" title="{{calibrationStatus.message}}">
 				{{calibrationStatus.shortMessage}}&nbsp;&nbsp;<span class="{{#if calibrationStatus.overall}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
 			</span>
@@ -67,20 +67,20 @@
 			Versions
 		</div>
 		<div id="firmware-display-holder" class="device-detail">
-			Firmware Version: 
+			Firmware Version:
 			<span id="firmware-display" class="selectableText">
 					{{FIRMWARE_VERSION}}
 			</span>
 		</div>
 		<div id="bootloader-display-holder" class="device-detail">
-			Bootloader Version: 
+			Bootloader Version:
 			<span id="bootloader-display" class="selectableText">
 					{{BOOTLOADER_VERSION}}
 			</span>
 		</div>
 		{{#if HARDWARE_INSTALLED.wifi }}
 		<div id="wifi-firmware-display-holder" class="device-detail">
-			WiFi Firmware Version: 
+			WiFi Firmware Version:
 			<span id="bootloader-display" class="selectableText">
 				{{WIFI_VERSION}}
 			</span>
@@ -92,14 +92,14 @@
 		</div>
 
 		<div class="device-detail">
-			Ethernet IP Address: 
+			Ethernet IP Address:
 			<span id="ethernet-ip-address" class="selectableText">
 				{{#if ETHERNET_IP.isReal}}{{ETHERNET_IP.val}}{{else}}Not Connected{{/if}}
 			</span>
 		</div>
 		{{#if isPro }}
 		<div class="device-detail">
-			WiFi IP Address: 
+			WiFi IP Address:
 			<span id="wifi-ip-address" class="selectableText">
 				{{WIFI_IP.val}}
 			</span>
@@ -132,23 +132,17 @@
 	<script>
 		$('#lj-link-holder-productPage').unbind();
 		$('#lj-link-holder-productPage').bind('click',function(){
-			if(typeof(gui) === 'undefined') {
-				gui = require('nw.gui');
-			}
+			const gui = global.lj_di_injector.get('gui');
 			gui.Shell.openExternal("https://labjack.com/{{deviceTypeName}}");
 		});
 		$('#lj-link-holder-datasheet').unbind();
 		$('#lj-link-holder-datasheet').bind('click',function(){
-			if(typeof(gui) === 'undefined') {
-				gui = require('nw.gui');
-			}
+			const gui = global.lj_di_injector.get('gui');
 			gui.Shell.openExternal("https://labjack.com/support/datasheets/{{deviceTypeName}}");
 		});
 		$('#lj-link-holder-supportPage').unbind();
 		$('#lj-link-holder-supportPage').bind('click',function(){
-			if(typeof(gui) === 'undefined') {
-				gui = require('nw.gui');
-			}
+			const gui = global.lj_di_injector.get('gui');
 			gui.Shell.openExternal("https://labjack.com/support/{{deviceTypeName}}");
 		});
 	</script>

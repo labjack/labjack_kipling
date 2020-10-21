@@ -1,4 +1,4 @@
-/* 
+/*
  * This file is in charge of saving collected data to files.
  */
 
@@ -204,7 +204,7 @@ function CREATE_DATA_LOGGER() {
 		// Initialize the logData object.
 		self.logData = undefined;
 		self.logData = {};
-		
+
 		// Parse the config file for various data.
 		var data_groups = self.config.data_groups;
 		data_groups.forEach(function(data_group) {
@@ -226,7 +226,7 @@ function CREATE_DATA_LOGGER() {
 				logStatus[serial_number] = {};
 				var serialNumber = dataGroup[serial_number];
 				var addedSerialNumber = false;
-				
+
 				// Add the device serial number to the data category array
 				dataCategories.push('SN: ' + serial_number.toString());
 
@@ -550,7 +550,7 @@ function CREATE_DATA_LOGGER() {
 		return defered.promise;
 	}
 
-	
+
 	function initializeDataGroupDirectory(data_group) {
 		var defered = q.defer();
 
@@ -640,7 +640,7 @@ function CREATE_DATA_LOGGER() {
 
 		var logFileName = logName + '-' + groupName + logFileAppendText + fileExtensionType;
 		var filePath = path.join(groupDir, logFileName);
-		
+
 		function onSuccess() {
 			debugLogFiles('Successfully initialized log file', groupName);
 			defered.resolve(data_group);
@@ -691,7 +691,7 @@ function CREATE_DATA_LOGGER() {
 			});
 			fileData += line_ending;
 		});
-		
+
 		function onSuccess() {
 			debugLogFiles('Successfully initialized log file header', groupName);
 
@@ -745,7 +745,7 @@ function CREATE_DATA_LOGGER() {
 		return defered.promise;
 	}
 	function finalizeLogFiles(bundle) {
-		
+
 		var defered = q.defer();
 
 		debugLogFiles('Finalizing log files');
@@ -803,7 +803,7 @@ function CREATE_DATA_LOGGER() {
 		var groupData = self.logData[data.groupKey];
 		var line_ending = groupData.line_ending;
 		var value_separator = groupData.value_separator;
-		
+
 		var dataToWrite = '';
 		var dataGroups = data.data;
 		var serialNumbers = [];
@@ -818,7 +818,7 @@ function CREATE_DATA_LOGGER() {
 		});
 		serialNumbers.forEach(function(serialNumber) {
 			var deviceData = dataGroups[serialNumber];
-			
+
 			// Get and format the time stamp
 			var time = formatTimeStamp(deviceData.time);
 			dataToWrite += time + value_separator;
@@ -868,7 +868,7 @@ function CREATE_DATA_LOGGER() {
 		} catch(err) {
 			console.error('(data_logger.js) Error executing saveNewDataToBuffer', err);
 		}
-		
+
 		var groupKey = data.groupKey;
 		var groupData = self.logData[data.groupKey];
 		var file_stream_buffer = groupData.file_stream_buffer;

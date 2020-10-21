@@ -8,7 +8,6 @@
  *      handlebars = require('handlebars');
  *      q = require('q');
  *      device_controller = require('./device_controller');
- *      gui = require('nw.gui');
 **/
 var handlebars = require('handlebars');
 var q = require('q');
@@ -18,12 +17,7 @@ try {
 } catch(err) {
     console.log('in device_selector.js, error requiring device_controller', err);
 }
-var gui;
-try {
-    gui = require('nw.gui');
-} catch(err) {
-    console.log('in device_selector.js, error requiring nw.gui');
-}
+const gui = global.lj_di_injector.get('gui');
 
 var OPEN_FAIL_MESSAGE = handlebars.compile(
     'Sorry. Failed to the open device. Please check the ' +
@@ -470,7 +464,7 @@ function attachUpgradeLinkListeners() {
             console.log('Error :(',error);
         });
     });
-    
+
 
 }
 

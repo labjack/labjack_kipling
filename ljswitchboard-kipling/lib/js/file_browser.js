@@ -1,12 +1,3 @@
-
-var path = require('path');
-var q = global.require('q');
-var handlebars = global.require('handlebars');
-var module_manager = require('ljswitchboard-module_manager');
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
-var fs = require('fs');
-
-
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
@@ -31,14 +22,11 @@ function createFileBrowser() {
         FILE_NOT_SELECTED: 'FILE_NOT_SELECTED'
     };
     this.initialize = function(bundle) {
-        var defered = q.defer();
-
         self.fileBrowserDialog = $('#file-dialog-hidden');
         self.fileSaveDialog = $('#file-save-dialog-hidden');
         self.folderSelectDialog = $('#folder-select-dialog-hidden');
 
-        defered.resolve(bundle);
-        return defered.promise;
+        return Promise.resolve(bundle);
     };
 
     function innerBrowseForFile() {

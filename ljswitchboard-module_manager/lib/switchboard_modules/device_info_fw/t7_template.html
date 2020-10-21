@@ -34,27 +34,27 @@
 			</div>
 		</div>
 		<div class="device-detail">
-			Ethernet Mac Address: 
+			Ethernet Mac Address:
 			<span class="selectableText">
 				{{ETHERNET_MAC.val}}
 			</span>
 		</div>
 		{{#if HARDWARE_INSTALLED.wifi }}
 		<div class="device-detail">
-			WiFi Mac Address: 
+			WiFi Mac Address:
 			<span class="selectableText">
 				{{WIFI_MAC.val}}
 			</span>
 		</div>
 		{{/if}}
 		<div class="device-detail">
-			200 uA Current Source Cal: 
+			200 uA Current Source Cal:
 			<span class="selectableText">
 				{{CURRENT_SOURCE_200UA_CAL_VALUE.val}} uA
 			</span>
 		</div>
 		<div class="device-detail">
-			10 uA Current Source Cal: 
+			10 uA Current Source Cal:
 			<span class="selectableText">
 				{{CURRENT_SOURCE_10UA_CAL_VALUE.val}} uA
 			</span>
@@ -62,7 +62,7 @@
 		{{!-- {{#unless calibrationStatus.overall}}
 		{{#if calibrationStatus}}
 		<div class="device-detail">
-			Calibration Status: 
+			Calibration Status:
 			<span id="calibration-status-display" class="calibration-message selectableText {{#if calibrationStatus.overall}}isa_success{{else}}isa_error{{/if}}" title="{{calibrationStatus.message}}">
 				{{calibrationStatus.shortMessage}}&nbsp;&nbsp;<span class="{{#if calibrationStatus.overall}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
 			</span>
@@ -97,33 +97,33 @@
 			Versions
 		</div>
 		<div id="firmware-display-holder" class="device-detail selectableText">
-			Hardware Version: 
+			Hardware Version:
 			<span id="firmware-display" class="">
 					{{HARDWARE_VERSION.str}}
 			</span>
 		</div>
 		<div id="firmware-display-holder" class="device-detail selectableText">
-			Firmware Version: 
+			Firmware Version:
 			<span id="firmware-display" class="">
 					{{FIRMWARE_VERSION}}
 			</span>
 		</div>
 		<div id="bootloader-display-holder" class="device-detail selectableText">
-			Bootloader Version: 
+			Bootloader Version:
 			<span id="bootloader-display" class="">
 					{{BOOTLOADER_VERSION}}
 			</span>
 		</div>
 		{{#if HARDWARE_INSTALLED.wifi }}
 		<div id="wifi-firmware-display-holder" class="device-detail selectableText">
-			WiFi Firmware Version: 
+			WiFi Firmware Version:
 			<span id="bootloader-display" class="">
 				{{WIFI_VERSION}}
 			</span>
 		</div>
 		{{/if}}
 		<div id="recovery-firmware-display-holder" class="device-detail selectableText">
-			Recovery Firmware Version: 
+			Recovery Firmware Version:
 			<span id="bootloader-display" class="">
 					{{recoveryFirmwareVersion.val}}
 			</span>
@@ -134,14 +134,14 @@
 		</div>
 
 		<div class="device-detail selectableText">
-			Ethernet IP Address: 
+			Ethernet IP Address:
 			<span id="ethernet-ip-address" class="">
 				{{#if ETHERNET_IP.isReal}}{{ETHERNET_IP.val}}{{else}}Not Connected{{/if}}
 			</span>
 		</div>
 		{{#if HARDWARE_INSTALLED.wifi }}
 		<div class="device-detail selectableText">
-			WiFi IP Address: 
+			WiFi IP Address:
 			<span id="wifi-ip-address" class="">
 				{{#if WIFI_IP.isReal}}{{WIFI_IP.val}}{{else}}Not Connected{{/if}}
 			</span>
@@ -156,7 +156,7 @@
 				{{TEMPERATURE_DEVICE_K.val}}
 			</span> K
 		</div>
-		
+
 		<div class="block-separator"/>
 		<div class="pane-popover">
 			Hardware Installed
@@ -201,20 +201,20 @@
 			SD Card Info
 		</div>
 		<div class="device-detail selectableText">
-			Free Space: 
+			Free Space:
 			<span id="sd-card-free-space" class="">
 
 				{{diskInfo.freeSpace.str}}
 			</span>
 		</div>
 		<div class="device-detail selectableText">
-			Total Size: 
+			Total Size:
 			<span id="sd-card-total-size" class="">
 				{{diskInfo.totalSize.str}}
 			</span>
 		</div>
 		<div class="device-detail selectableText">
-			File System: 
+			File System:
 			<span id="sd-card-file-system" class="">
 				{{diskInfo.fileSystem}}
 			</span>
@@ -227,26 +227,26 @@
 			Current Time
 		</div>
 		<div class="device-detail selectableText">
-			Device Time: 
+			Device Time:
 			<span id="rtc-device-time" class="">
 				{{RTC_TIME_S.t7TimeStr}}
 			</span>
 		</div>
 		<div class="device-detail selectableText">
-			System Time: 
+			System Time:
 			<span id="rtc-system-time" class="">
 				{{RTC_TIME_S.pcTimeStr}}
 			</span>
 		</div>
 		<div class="device-detail selectableText">
-			SNTP Update Interval: 
+			SNTP Update Interval:
 			<span id="rtc-system-time" class="">
 				{{SNTP_UPDATE_INTERVAL.str}}
 			</span>
 		</div>
-		
+
 		<!-- <div class="device-detail selectableText">
-			Time Difference (s): 
+			Time Difference (s):
 			<span id="rtc-time-difference" class="">
 				{{RTC_TIME_S.timeDifferenceSec}}
 			</span>
@@ -319,7 +319,7 @@
 	<!-- <p style="padding: 0px;margin: 0px;}">(Windows Only)</p> -->
 	<br>
 	{{/if}}
-	
+
 	<h2>{{deviceTypeName}} Support Resources</h2><br>
 	<h3>Important {{deviceTypeName}} Website Links</h3>
 	<ul>
@@ -379,12 +379,12 @@
 	</ul>
 	{{/if}}
 	{{/if}}
-	
+
 	<p style="display:none">TODO: Add button/config-tool that lets user configure LJLogM/LJStreamM to open the currently connected device.  Consider just opening the file in a user's default text editor and telling them what the file path is.  The tool can automatically search the user's Let the user configure Kipling to remember where each application's default directory is.  You can do this by running a bash command: http://stackoverflow.com/questions/8066679/how-to-do-a-simple-file-search-in-cmd, On Windows: "dir /b/s LJLogM.cfg".	Add a quick-disconnect/re-connect button to the module-header section.  Add an Open-Application button for LJLogM/LJStreamM/T7uSDCardUtility.</p>
-	
+
 	<script>
 
-		
+
 		var linksToBindTo = [{
 			'id': '#lj-link-holder-productPage',
 			'url': "https://labjack.com/{{deviceTypeName}}"
@@ -468,14 +468,12 @@
 		// 	'url': "file:///C:/Users/chris/Documents/LabVIEW Data/LJStreamM_open.cfg"
 		// }
 		];
-		
+
 
 		linksToBindTo.forEach(function(linkToBindTo) {
 			$(linkToBindTo.id).unbind();
 			$(linkToBindTo.id).bind('click',function(){
-				if(typeof(gui) === 'undefined') {
-					gui = require('nw.gui');
-				}
+				const gui = global.lj_di_injector.get('gui');
 				gui.Shell.openExternal(linkToBindTo.url);
 			});
 		});

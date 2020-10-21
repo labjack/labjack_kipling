@@ -115,9 +115,7 @@
             <script>
               $('#lj-link-holder-changeLog').unbind();
               $('#lj-link-holder-changeLog').bind('click',function(){
-                if(typeof(gui) === 'undefined') {
-                  gui = require('nw.gui');
-                }
+                const gui = global.lj_di_injector.get('gui');
                 gui.Shell.openExternal("{{custom.dtInfo.changeLogLink}}");
               });
             </script>
@@ -131,8 +129,8 @@
        })
       </script>
     </div>
-    
-    
+
+
     <div id="upgrade_status_holder" class="upgrade-status-holder"></div>
     {{/if}} {{!-- End if statement for multiple device types--}}
   {{else}} {{!-- End if statement for no devices--}}

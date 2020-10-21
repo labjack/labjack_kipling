@@ -16,15 +16,13 @@
             <script>
                 $('#io-config-datasheet-link').unbind();
                 $('#io-config-datasheet-link').bind('click',function(){
-                    if(typeof(gui) === 'undefined') {
-                        gui = require('nw.gui');
-                    }
+                    const gui = global.lj_di_injector.get('gui');
                     gui.Shell.openExternal("https://labjack.com/support/datasheets/t7/io-config-default");
                 });
             </script>
         </div>
     </div>
-    
+
     <ul class="nav nav-tabs" id="myTab">
         <li class="active"><a href="#configure_defaults_tab">Configure Defaults</a></li>
         <li><a href="#save_defaults_tab">Save Defaults to File</a></li>
@@ -42,7 +40,7 @@
                         <span class="metro-radio">Current Device Settings</span>
                         {{#if custom.isMultipleDevices}}
                         <p class="option-description">
-                            Instruct the selected devices to take a snapshot of their current settings and use that 
+                            Instruct the selected devices to take a snapshot of their current settings and use that
                             snapshot to reconfigure itself after a reboot.
                         </p>
                         {{else}}
@@ -74,13 +72,13 @@
                         <input type="radio" name="source" value="file">
                         <span class="metro-radio">Load From File</span>
                         <p class="option-description">
-                            Configure the selected device(s) power-up defaults from a file.  The power-up defaults 
+                            Configure the selected device(s) power-up defaults from a file.  The power-up defaults
                             are used to configure the device after it gets rebooted.
                         </p>
                         <div class="selected-config-file-information shifted-element">
                             <!--<span>File Info:</span>-->
                             <div class="no-config-file-selected file-info-text">
-                                <div><span>No File Selected. To load settings from a file, please browse for a file.</span> 
+                                <div><span>No File Selected. To load settings from a file, please browse for a file.</span>
                                 </div>
                             </div>
                             <div class="selected-file-details file-info-text" style="display:none">
@@ -199,7 +197,7 @@
                 <div class="backup-notice" id="saving-to-file-indicator">Saving...</div>
             </div>
         </div>
-        
+
         <!--{{#if custom.isMultipleDevices}}
         <p>Please select only 1 device.  Currently {{custom.numDevices}} devices are selected.</p>
         {{else}}

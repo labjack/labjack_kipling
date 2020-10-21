@@ -2,7 +2,6 @@ exports.info = {
 	'type': 'library'
 };
 
-
 var path = require('path');
 // var fs = require('fs');
 var fs;
@@ -10,13 +9,6 @@ try {
 	fs = global.require('fs.extra');
 } catch(err) {
 	fs = require('fs.extra');
-}
-
-var q;
-try {
-	q = global.require('q');
-} catch(err) {
-	q = require('q');
 }
 
 var file_linter = require('./file_linter');
@@ -91,9 +83,6 @@ exports.configurePersistentDataPath = function(newPath) {
 	}
 };
 
-
-
-
 var FRAMEWORK_PATHS = {
 	'singleDevice': path.join(
 		MODULES_DIR,
@@ -154,21 +143,21 @@ var invalidateCacheFile = function(fileName) {
 };
 
 var doesFileExist = function(filePath) {
-	var defered = q.defer();
-	fs.exists(filePath, function(exists) {
-		defered.resolve(exists);
+	return new Promise((resolve, reject) => {
+		fs.exists(filePath, function(exists) {
+			resolve(exists);
+		});
 	});
-	return defered.promise;
 };
 var extraCachedReadFile = function(fileName) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var finishFunc = function(data) {
 		moduleManagerFileCache[fileName] = data;
-		defered.resolve(moduleManagerFileCache[fileName].toString());
+		resolve(moduleManagerFileCache[fileName].toString());
 	};
 	console.log('in extraCachedReadFile');
 	if(moduleManagerFileCache[fileName]) {
-		defered.resolve(moduleManagerFileCache[fileName].toString());
+		resolve(moduleManagerFileCache[fileName].toString());
 	} else {
 		fs.readFile(fileName, function(err, data) {
 			if(err) {
@@ -177,7 +166,7 @@ var extraCachedReadFile = function(fileName) {
 						fs.readFile(fileName, function(err, data) {
 							if(err) {
 								console.error('Error Reading File', err, fileName);
-								defered.resolve('');
+								resolve('');
 							} else {
 								finishFunc(data);
 							}
@@ -191,12 +180,12 @@ var extraCachedReadFile = function(fileName) {
 			}
 		});
 	}
-	return defered.promise;
+	});
 };
 var cachedReadFile = function(fileName) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	if(moduleManagerFileCache[fileName]) {
-		defered.resolve(moduleManagerFileCache[fileName].toString());
+		resolve(moduleManagerFileCache[fileName].toString());
 	} else {
 		fs.readFile(fileName, function(err, data) {
 			if(err) {
@@ -209,22 +198,22 @@ var cachedReadFile = function(fileName) {
 				}
 				if(retry) {
 					extraCachedReadFile(fileName)
-					.then(defered.resolve);
+					.then(resolve);
 				} else {
-					defered.resolve('');
+					resolve('');
 				}
 			} else {
 				moduleManagerFileCache[fileName] = data;
-				defered.resolve(moduleManagerFileCache[fileName].toString());
+				resolve(moduleManagerFileCache[fileName].toString());
 			}
 		});
 	}
-	return defered.promise;
+	});
 };
 
 
 var innerCachedReadFile = function(filePath) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	cachedReadFile(filePath)
 	.then(file_linter.getLinter(filePath))
 	.then(function(lintData) {
@@ -245,35 +234,35 @@ var innerCachedReadFile = function(filePath) {
 			fileData += "\n//# sourceURL=" + filePath;
 		}
 
-		defered.resolve({
+		resolve({
 			'fileName': path.basename(filePath),
 			'filePath': filePath,
 			'fileData': fileData,
 			'lintResult': lintData.lintResult
 		});
 	});
-	return defered.promise;
+	});
 };
 var cachedReadFiles = function(fileNames) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var promises = [];
 	fileNames.forEach(function(fileName) {
 		promises.push(innerCachedReadFile(fileName));
 	});
 
 	// Wait for all of the operations to complete
-	q.allSettled(promises)
+	Promise.allSettled(promises)
 	.then(function(results) {
 		var readFiles = [];
 		results.forEach(function(result) {
 			readFiles.push(result.value);
 		});
-		defered.resolve(readFiles);
-	}, defered.reject);
-	return defered.promise;
+		resolve(readFiles);
+	}, reject);
+	});
 };
 var parseJSONFile = function(fileData) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var parsedData;
 	try {
 		if(fileData !== '') {
@@ -285,39 +274,39 @@ var parseJSONFile = function(fileData) {
 		console.error('Error parsing .json', err);
 		parsedData = {};
 	}
-	defered.resolve(parsedData);
-	return defered.promise;
+	resolve(parsedData);
+	});
 };
 var internalParseJSONFile = function(cachedFile) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	parseJSONFile(cachedFile.fileData)
 	.then(function(parsedData) {
 		cachedFile.fileData = parsedData;
-		defered.resolve(cachedFile);
+		resolve(cachedFile);
 	});
-	return defered.promise;
+	});
 };
 var parseCachedJSONFiles = function(files) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var promises = [];
 	files.forEach(function(file) {
 		promises.push(internalParseJSONFile(file));
 	});
 
 	// Wait for all of the operations to complete
-	q.allSettled(promises)
+	Promise.allSettled(promises)
 	.then(function(results) {
 		var parsedData = [];
 		results.forEach(function(result) {
 			parsedData.push(result.value);
 		});
-		defered.resolve(parsedData);
-	}, defered.reject);
-	return defered.promise;
+		resolve(parsedData);
+	}, reject);
+	});
 };
 
 var filterOutInactiveModules = function(modules) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var moduleTypes = Object.keys(modules);
 	var activeModules = {};
 	moduleTypes.forEach(function(moduleType) {
@@ -329,11 +318,11 @@ var filterOutInactiveModules = function(modules) {
 		});
 		activeModules[moduleType] = activeModulesByType;
 	});
-	defered.resolve(activeModules);
-	return defered.promise;
+	resolve(activeModules);
+	});
 };
 var filterOutTaskModules = function(modules) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var moduleTypes = Object.keys(modules);
 	var nonTaskModules = {};
 	moduleTypes.forEach(function(moduleType) {
@@ -347,11 +336,11 @@ var filterOutTaskModules = function(modules) {
 		});
 		nonTaskModules[moduleType] = nonTaskModulesByType;
 	});
-	defered.resolve(nonTaskModules);
-	return defered.promise;
+	resolve(nonTaskModules);
+	});
 };
 var filterOutStandardModules = function(modules) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var moduleTypes = Object.keys(modules);
 	var taskModules = {};
 	moduleTypes.forEach(function(moduleType) {
@@ -366,11 +355,11 @@ var filterOutStandardModules = function(modules) {
 		});
 		taskModules[moduleType] = taskModulesByType;
 	});
-	defered.resolve(taskModules);
-	return defered.promise;
+	resolve(taskModules);
+	});
 };
 var loadModuleAttributes = function(module, category) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var filePath = path.join(MODULES_DIR, module.name, MODULE_DATA_FILE_NAME);
 	cachedReadFile(filePath)
 	.then(parseJSONFile)
@@ -381,13 +370,13 @@ var loadModuleAttributes = function(module, category) {
 		});
 		module.data = moduleData;
 		module.category = category;
-		defered.resolve(module);
-	}, defered.reject);
-	return defered.promise;
+		resolve(module);
+	}, reject);
+	});
 };
 
 var loadFoundModuleAttributes = function(modules) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var promises = [];
 	var i,j;
 	var moduleKeys = Object.keys(modules);
@@ -399,15 +388,15 @@ var loadFoundModuleAttributes = function(modules) {
 	});
 
 	// Wait for all of the operations to complete
-	q.allSettled(promises)
+	Promise.allSettled(promises)
 	.then(function(collectedData) {
-		defered.resolve(modules);
-	}, defered.reject);
-	return defered.promise;
+		resolve(modules);
+	}, reject);
+	});
 };
 
 var flattenModuleList = function(modules) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var moduleList = [];
 	var moduleKeys = Object.keys(modules);
 	moduleKeys.forEach(function(moduleKey) {
@@ -416,26 +405,26 @@ var flattenModuleList = function(modules) {
 			moduleList.push(module);
 		});
 	});
-	defered.resolve(moduleList);
-	return defered.promise;
+	resolve(moduleList);
+	});
 };
 
 var getModulesList = function() {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 
 	cachedReadFile(MODULES_LIST_FILE)
 	.then(parseJSONFile)
 	.then(filterOutInactiveModules)
 	.then(filterOutTaskModules)
 	.then(loadFoundModuleAttributes)
-	.then(defered.resolve, defered.reject);
-	return defered.promise;
+	.then(resolve, reject);
+	});
 };
 exports.getModulesList = getModulesList;
 
 
 var getTaskList = function() {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 
 	cachedReadFile(MODULES_LIST_FILE)
 	.then(parseJSONFile)
@@ -443,9 +432,9 @@ var getTaskList = function() {
 	.then(filterOutStandardModules)
 	.then(loadFoundModuleAttributes)
 	.then(flattenModuleList)
-	.then(defered.resolve, defered.reject);
+	.then(resolve, reject);
 
-	return defered.promise;
+	});
 };
 exports.getTaskList = getTaskList;
 
@@ -454,19 +443,19 @@ var getEnabledModulesList = function() {
 };
 
 var resolveToHeaderModules = function(moduleList) {
-	var defered = q.defer();
-	defered.resolve(moduleList.header);
-	return defered.promise;
+	return new Promise((resolve, reject) => {
+	resolve(moduleList.header);
+	});
 };
 var resolveToBodyModules = function(moduleList) {
-	var defered = q.defer();
-	defered.resolve(moduleList.body);
-	return defered.promise;
+	return new Promise((resolve, reject) => {
+	resolve(moduleList.body);
+	});
 };
 var resolveToFooterModules = function(moduleList) {
-	var defered = q.defer();
-	defered.resolve(moduleList.footer);
-	return defered.promise;
+	return new Promise((resolve, reject) => {
+	resolve(moduleList.footer);
+	});
 };
 
 var getHeaderModules = function() {
@@ -504,15 +493,15 @@ exports.getFooterModules = getFooterModules;
 
 
 var getModuleInfo = function(data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var filePath = path.join(data.path, MODULE_DATA_FILE_NAME);
 	cachedReadFile(filePath)
 	.then(parseJSONFile)
 	.then(function(moduleData) {
 		data.data = moduleData;
-		defered.resolve(data);
+		resolve(data);
 	});
-	return defered.promise;
+	});
 };
 var resolveModuleFilePath = function(modulePath, file) {
 	return path.normalize(path.join(modulePath, file));
@@ -585,7 +574,7 @@ var applyFrameworkAdditions = function(fileType, frameworkType, standardData) {
 };
 
 var checkDataManagerStatus = function(dataManager) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	cachedReadFile(MODULES_PERSISTENT_DATA_FILE)
 	.then(parseJSONFile)
 	.then(function(globalData) {
@@ -599,13 +588,13 @@ var checkDataManagerStatus = function(dataManager) {
 		if(globalData[dataManager.moduleName]) {
 			dataManager.isDataManagerValid = true;
 		}
-		defered.resolve(dataManager);
+		resolve(dataManager);
 	});
-	return defered.promise;
+	});
 };
 
 var writeAndValidateDataManagerFile = function(dataManager) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	// Invalidate the cache for this file.
 	invalidateCacheFile(MODULES_PERSISTENT_DATA_FILE);
 
@@ -617,25 +606,25 @@ var writeAndValidateDataManagerFile = function(dataManager) {
 		if(err) {
 			fs.outputFile(MODULES_PERSISTENT_DATA_FILE, data, function(errB) {
 				if(errB) {
-					defered.reject(errB);
+					reject(errB);
 				} else {
 					dataManager.isDataManagerInitialized = true;
 					dataManager.isDataManagerValid = true;
-					defered.resolve(dataManager);
+					resolve(dataManager);
 				}
 			});
 		} else {
 			dataManager.isDataManagerInitialized = true;
 			dataManager.isDataManagerValid = true;
-			defered.resolve(dataManager);
+			resolve(dataManager);
 		}
 	});
-	return defered.promise;
+	});
 };
 
 
 var initializeDataManager = function(dataManager) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	if(!dataManager.isDataManagerInitialized) {
 		var currentVersion = require('../package.json').startupDataVersion;
 		var writeDataObj = {
@@ -649,14 +638,14 @@ var initializeDataManager = function(dataManager) {
 		dataManager.dataManagerData = writeDataObj;
 
 		writeAndValidateDataManagerFile(dataManager)
-		.then(defered.resolve, defered.reject);
+		.then(resolve, reject);
 	} else {
-		defered.resolve(dataManager);
+		resolve(dataManager);
 	}
-	return defered.promise;
+	});
 };
 var validateDataManager = function(dataManager) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	if(!dataManager.isDataManagerValid) {
 		// If the data in the file needs to be updated to include the current
 		// module then initialize the data & save it to the file.
@@ -664,14 +653,14 @@ var validateDataManager = function(dataManager) {
 			'isValid': false
 		};
 		writeAndValidateDataManagerFile(dataManager)
-		.then(defered.resolve, defered.reject);
+		.then(resolve, reject);
 	} else {
-		defered.resolve(dataManager);
+		resolve(dataManager);
 	}
-	return defered.promise;
+	});
 };
 var checkManagedModuleDataStatus = function(dataManager) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var moduleDataDir = path.normalize(path.join(
 		MODULES_PERSISTENT_DATA_PATH,
 		dataManager.moduleName
@@ -701,23 +690,23 @@ var checkManagedModuleDataStatus = function(dataManager) {
 								// the file needs to get re-initialized.
 								dataManager.isModuleDataValid = false;
 							}
-							defered.resolve(dataManager);
+							resolve(dataManager);
 						});
 					} else {
-						defered.resolve(dataManager);
+						resolve(dataManager);
 					}
 				});
 			} else {
-				defered.resolve(dataManager);
+				resolve(dataManager);
 			}
 		} else {
-			defered.resolve(dataManager);
+			resolve(dataManager);
 		}
 	});
-	return defered.promise;
+	});
 };
 var initializeManagedModuleData = function(dataManager) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var moduleDataDir = path.normalize(path.join(
 		MODULES_PERSISTENT_DATA_PATH,
 		dataManager.moduleName
@@ -727,25 +716,25 @@ var initializeManagedModuleData = function(dataManager) {
 			if(err) {
 				fs.mkdir(moduleDataDir, function(err) {
 					if(err) {
-						defered.reject(err);
+						reject(err);
 					} else {
 						dataManager.isModuleDataInitialized = true;
-						defered.resolve(dataManager);
+						resolve(dataManager);
 					}
 				});
 			} else {
 				dataManager.isModuleDataInitialized = true;
-				defered.resolve(dataManager);
+				resolve(dataManager);
 			}
 		});
 	} else {
-		defered.resolve(dataManager);
+		resolve(dataManager);
 	}
 
-	return defered.promise;
+	});
 };
 var writeAndValidateModuleDataFile = function(dataManager) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 
 	var moduleDataDir = path.normalize(path.join(
 		MODULES_PERSISTENT_DATA_PATH,
@@ -771,24 +760,24 @@ var writeAndValidateModuleDataFile = function(dataManager) {
 					console.log('in errB');
 					// because the file will just get re-initialized next time
 					// just resolve & don't show any errors.
-					defered.resolve(dataManager);
+					resolve(dataManager);
 				} else {
 					dataManager.isModuleDataInitialized = true;
 					dataManager.isModuleDataValid = true;
-					defered.resolve(dataManager);
+					resolve(dataManager);
 				}
 			});
 		} else {
 			dataManager.isModuleDataInitialized = true;
 			dataManager.isModuleDataValid = true;
-			defered.resolve(dataManager);
+			resolve(dataManager);
 		}
 	});
-	return defered.promise;
+	});
 };
 
 var internalSaveModuleDataFile = function(dataManager) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	// declare the current module's data to be invalid in the primary module_data file
 	dataManager.dataManagerData[dataManager.moduleName].isValid = false;
 	writeAndValidateDataManagerFile(dataManager)
@@ -796,12 +785,12 @@ var internalSaveModuleDataFile = function(dataManager) {
 	.then(function(dataManager) {
 		dataManager.dataManagerData[dataManager.moduleName].isValid = true;
 		writeAndValidateDataManagerFile(dataManager)
-		.then(defered.resolve, defered.resolve);
+		.then(resolve, resolve);
 	});
-	return defered.promise;
+	});
 };
 var validateManagedModuleData = function(dataManager) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	if(!dataManager.isModuleDataValid) {
 		var moduleDataInitFilePath = resolveModuleFilePath(
 			dataManager.modulePath,
@@ -815,21 +804,21 @@ var validateManagedModuleData = function(dataManager) {
 		.then(function(initialModuleData) {
 			dataManager.moduleData = initialModuleData;
 			internalSaveModuleDataFile(dataManager)
-			.then(defered.resolve);
+			.then(resolve);
 		});
 	} else {
-		defered.resolve(dataManager);
+		resolve(dataManager);
 	}
-	return defered.promise;
+	});
 };
 var returnModuleData = function(dataManager) {
-	var defered = q.defer();
-	defered.resolve(dataManager.moduleData);
-	return defered.promise;
+	return new Promise((resolve, reject) => {
+	resolve(dataManager.moduleData);
+	});
 };
 
 var loadBaseData = function(data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	cachedReadFile(MODULES_LIST_FILE)
 	.then(parseJSONFile)
 	.then(flattenModuleList)
@@ -844,13 +833,13 @@ var loadBaseData = function(data) {
 			return isFound;
 		});
 		data.baseData = newBaseData;
-		defered.resolve(data);
+		resolve(data);
 	});
-	return defered.promise;
+	});
 };
 
 var innerLoadModuleStartupData = function(data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var moduleDataPath = path.join(MODULES_PERSISTENT_DATA_PATH, data.name);
 	var dataManager = {
 		'isDataManagerInitialized': false,
@@ -867,7 +856,7 @@ var innerLoadModuleStartupData = function(data) {
 	var getHandleError = function(step) {
 		var handleError = function(err) {
 			console.error('Error in innerLoadModuleStartupData', err, step);
-			defered.resolve({});
+			resolve({});
 		};
 		return handleError;
 	};
@@ -879,12 +868,12 @@ var innerLoadModuleStartupData = function(data) {
 	.then(initializeManagedModuleData, getHandleError('checkManagedModuleDataStatus'))
 	.then(validateManagedModuleData, getHandleError('initializeManagedModuleData'))
 	.then(returnModuleData, getHandleError('validateManagedModuleData'))
-	.then(defered.resolve, getHandleError('returnModuleData'));
-	return defered.promise;
+	.then(resolve, getHandleError('returnModuleData'));
+	});
 };
 
 var loadModuleStartupData = function(data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 
 	var startupDataFilePath = resolveModuleFilePath(
 		data.path,
@@ -903,7 +892,7 @@ var loadModuleStartupData = function(data) {
 				})
 				.then(function(loadedData) {
 					data.startupData = loadedData;
-					defered.resolve(data);
+					resolve(data);
 				});
 			} else {
 				console.warn('persistent data manager not configured');
@@ -911,21 +900,21 @@ var loadModuleStartupData = function(data) {
 				.then(parseJSONFile)
 				.then(function(initialModuleData) {
 					data.startupData = initialModuleData;
-					defered.resolve(data);
+					resolve(data);
 				});
 			}
 		} else {
-			defered.resolve(data);
+			resolve(data);
 		}
 	});
 
 	// cachedReadFiles(jsonFiles)
 	// .then(parseCachedJSONFiles)
-	return defered.promise;
+	});
 };
 
 var resetModuleStartupData = function(key) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	// console.log('data to delete', MODULES_PERSISTENT_DATA_PATH);
 	if(MODULES_PERSISTENT_DATA_PATH !== MODULES_DIR) {
 		if(key === 'I am self aware and will be deleting a LOT of things') {
@@ -936,32 +925,32 @@ var resetModuleStartupData = function(key) {
 						if(err) {
 							fs.rmrf(MODULES_PERSISTENT_DATA_PATH, function(errB) {
 								if(errB) {
-									defered.reject(errB);
+									reject(errB);
 								}
-								defered.resolve();
+								resolve();
 							});
 						}
-						defered.resolve();
+						resolve();
 					});
 				} else {
-					defered.resolve();
+					resolve();
 				}
 			});
 		} else {
 			console.log('!!! Persistent data key is invalid !!!');
-			defered.resolve();
+			resolve();
 		}
 	} else {
 		console.warn('!!! Prevented Deletion of all kipling modules !!!');
-		defered.resolve();
+		resolve();
 	}
 
-	return defered.promise;
+	});
 };
 exports.resetModuleStartupData = resetModuleStartupData;
 
 var revertModuleStartupData = function(moduleName) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var moduleDataInitFilePath = path.normalize(path.join(
 		MODULES_DIR,
 		moduleName,
@@ -972,9 +961,9 @@ var revertModuleStartupData = function(moduleName) {
 	.then(parseJSONFile)
 	.then(function(initialData) {
 		saveModuleStartupData(moduleName, initialData)
-		.then(defered.resolve);
+		.then(resolve);
 	});
-	return defered.promise;
+	});
 };
 exports.revertModuleStartupData = revertModuleStartupData;
 
@@ -992,7 +981,7 @@ var clearCachedModuleStartupData = function(moduleName) {
 exports.clearCachedModuleStartupData = clearCachedModuleStartupData;
 
 var getModuleStartupData = function(moduleName) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var moduleDataDir = path.normalize(path.join(
 		MODULES_PERSISTENT_DATA_PATH,
 		moduleName
@@ -1005,14 +994,14 @@ var getModuleStartupData = function(moduleName) {
 	// Perform a cachedRead request for the file & parse it.
 	cachedReadFile(moduleDataFilePath)
 	.then(parseJSONFile)
-	.then(defered.resolve);
+	.then(resolve);
 
-	return defered.promise;
+	});
 };
 exports.getModuleStartupData = getModuleStartupData;
 
 var saveModuleStartupData = function(moduleName, data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 
 	var dataManager = {
 		'dataManagerData': {},
@@ -1030,22 +1019,16 @@ var saveModuleStartupData = function(moduleName, data) {
 		MODULE_PERSISTENT_DATA_FILE_NAME
 	);
 	var invalidateDesiredModule = function(readGlobalData) {
-		var innerDefered = q.defer();
 		readGlobalData[moduleName].isValid = false;
 		dataManager.dataManagerData = readGlobalData;
-		innerDefered.resolve(dataManager);
-		return innerDefered.promise;
+		return Promise.resolve(dataManager);
 	};
 	var validateDesiredModule = function(resDataManager) {
-		var innerDefered = q.defer();
 		resDataManager.dataManagerData[moduleName].isValid = true;
-		innerDefered.resolve(resDataManager);
-		return innerDefered.promise;
+		return Promise.resolve(resDataManager);
 	};
 	var returnModuleName = function(resDataManager) {
-		var innerDefered = q.defer();
-		innerDefered.resolve(resDataManager.moduleName);
-		return innerDefered.promise;
+		return Promise.resolve(resDataManager.moduleName);
 	};
 
 	var executeCachedReadFile = function() {
@@ -1060,14 +1043,14 @@ var saveModuleStartupData = function(moduleName, data) {
 	.then(validateDesiredModule)
 	.then(writeAndValidateDataManagerFile)
 	.then(returnModuleName, returnModuleName)
-	.then(defered.resolve);
+	.then(resolve);
 
-	return defered.promise;
+	});
 };
 exports.saveModuleStartupData = saveModuleStartupData;
 
 var loadModuleCSS = function(data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 
 	var cssFiles;
 	if(data.baseData.isTask) {
@@ -1102,14 +1085,14 @@ var loadModuleCSS = function(data) {
 	cachedReadFiles(cssFiles)
 	.then(function(loadedFiles) {
 		data.css = loadedFiles;
-		defered.resolve(data);
+		resolve(data);
 	});
-	return defered.promise;
+	});
 };
 
 
 var loadModuleJS = function(data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 
 	var requiredJSFiles;
 	if(data.baseData.isTask) {
@@ -1167,12 +1150,12 @@ var loadModuleJS = function(data) {
 	cachedReadFiles(jsFiles)
 	.then(function(loadedFiles) {
 		data.js = loadedFiles;
-		defered.resolve(data);
+		resolve(data);
 	});
-	return defered.promise;
+	});
 };
 var loadModuleHTML = function(data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 
 	var htmlFiles;
 	if(data.baseData.isTask) {
@@ -1218,12 +1201,12 @@ var loadModuleHTML = function(data) {
 			var fileName = fullFileName.split(fileEnding).join('');
 			data.htmlFiles[fileName] = loadedFiles[i].fileData;
 		}
-		defered.resolve(data);
+		resolve(data);
 	});
-	return defered.promise;
+	});
 };
 var loadModuleJSON = function(data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var jsonFiles = [
 		'moduleData.json',
 		'moduleConstants.json',
@@ -1259,13 +1242,13 @@ var loadModuleJSON = function(data) {
 				'filePath': loadedFile.filePath
 			});
 		});
-		defered.resolve(data);
+		resolve(data);
 	});
-	return defered.promise;
+	});
 };
 
 var innerLoadModuleData = function(data) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var promises = [
 		loadModuleStartupData(data),
 		loadModuleCSS(data),
@@ -1274,11 +1257,11 @@ var innerLoadModuleData = function(data) {
 		loadModuleJSON(data)
 	];
 	// Wait for all of the operations to complete
-	q.allSettled(promises)
+	Promise.allSettled(promises)
 	.then(function(collectedData) {
-		defered.resolve(data);
-	}, defered.reject);
-	return defered.promise;
+		resolve(data);
+	}, reject);
+	});
 };
 
 
@@ -1290,7 +1273,7 @@ obtained (like in the tab-click handlers) then the loadModuleData function
 can be used.
 */
 var loadModuleDataByName = function(moduleName) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var collectedModuleData = {
 		'name': moduleName,
 		'path': path.join(MODULES_DIR, moduleName),
@@ -1307,8 +1290,8 @@ var loadModuleDataByName = function(moduleName) {
 	getModuleInfo(collectedModuleData)
 	.then(loadBaseData)
 	.then(innerLoadModuleData)
-	.then(defered.resolve, defered.reject);
-	return defered.promise;
+	.then(resolve, reject);
+	});
 };
 exports.loadModuleDataByName = loadModuleDataByName;
 
@@ -1319,7 +1302,7 @@ further along than the loadModuleDataByName function requiring that a module's
 .json file has already been loaded.
 */
 var loadModuleData = function(moduleData) {
-	var defered = q.defer();
+	return new Promise((resolve, reject) => {
 	var collectedModuleData = {
 		'name': moduleData.name,
 		'path': path.join(MODULES_DIR, moduleData.name),
@@ -1335,8 +1318,7 @@ var loadModuleData = function(moduleData) {
 	};
 	loadBaseData(collectedModuleData)
 	.then(innerLoadModuleData)
-	.then(defered.resolve, defered.reject);
-	return defered.promise;
+	.then(resolve, reject);
+	});
 };
 exports.loadModuleData = loadModuleData;
-

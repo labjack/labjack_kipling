@@ -1,4 +1,3 @@
-
 var p = function(promiseFunc) {
 	if(promiseFunc) {
 		if(promiseFunc.then) {
@@ -24,7 +23,7 @@ var le = function(err) {
 	console.log('Error:', err);
 };
 
-var CLEAR_CACHES = function() {
+global.CLEAR_CACHES = function() {
 	var debugClearing = false;
 	try {
 		if(MODULE_CHROME) {
@@ -125,8 +124,8 @@ var TAKE_SCREENSHOT = function(name_prefix, name_append, callback) {
 			"c:/Users/chris/kipling_screen_shots/" + name.toString() + ".png",
 			base64Data,
 			'base64',
-			function(err) { 
-				if(err) { 
+			function(err) {
+				if(err) {
 					alert(err);
 				}
 				if(typeof(callback) === 'function') {
@@ -171,18 +170,18 @@ var TAKE_SCREENSHOTS = function() {
 			var duration = ((stopTime - startTime)/1000).toFixed(3);
 			console.log('Finished Taking Screen Shots', duration);
 		});
-	
+
 };
 
 function CLIPBOARD_FUNCTION_WRAPPER() {
-	var nw = require('nw.gui');
+	const gui = global.lj_di_injector.get('gui');
 	var clipboard = nw.Clipboard.get();
 	function get() {
 		return clipboard.get('text');
-	};
+	}
 	function set(txt) {
 		clipboard.set(txt,'text');
-	};
+	}
 	function clear(){
 		clipboard.clear();
 	}

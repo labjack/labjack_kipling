@@ -5,9 +5,7 @@
   <script>
     $('#lj-link-text').unbind();
     $('#lj-link-text').bind('click',function(){
-      if(typeof(gui) === 'undefined') {
-        gui = require('nw.gui');
-      }
+      const gui = global.lj_di_injector.get('gui');
       gui.Shell.openExternal("https://labjack.com");
     });
   </script>
@@ -160,9 +158,7 @@
               <script>
                 $('#ljm-update-link').unbind();
                 $('#ljm-update-link').bind('click',function(){
-                  if(typeof(gui) === 'undefined') {
-                    gui = require('nw.gui');
-                  }
+                  const gui = global.lj_di_injector.get('gui');
                   gui.Shell.openExternal("{{availableLJMVersion.upgradeLink}}");
                 });
               </script>
@@ -173,9 +169,7 @@
               <script>
                 $('#kipling-update-link').unbind();
                 $('#kipling-update-link').bind('click',function(){
-                  if(typeof(gui) === 'undefined') {
-                    gui = require('nw.gui');
-                  }
+                  const gui = global.lj_di_injector.get('gui');
                   gui.Shell.openExternal("{{availableKiplingVersion.upgradeLink}}");
                 });
               </script>

@@ -45,17 +45,15 @@ try {
 var io_manager;
 var driver_const;
 var modbus_map;
-var gui;
+const gui = global.lj_di_injector.get('gui');
 try {
     io_manager = global.require.main.require('ljswitchboard-io_manager');
     driver_const = global.require('ljswitchboard-ljm_driver_constants');
     modbus_map = global.require('ljswitchboard-modbus_map').getConstants();
-    gui = require('nw.gui');
 } catch(err) {
     io_manager = require.main.require('ljswitchboard-io_manager');
     driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
     modbus_map = require('ljswitchboard-modbus_map').getConstants();
-    gui = global.require('gui');
 }
 
 var FADE_DURATION = 400;

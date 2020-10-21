@@ -1,15 +1,11 @@
-
-
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var path = require('path');
-var q = global.require('q');
 var handlebars = global.require('handlebars');
 var module_manager = require('ljswitchboard-module_manager');
 var package_loader = require('ljswitchboard-package_loader');
 var static_files = require('ljswitchboard-static_files');
 var io_manager = require('ljswitchboard-io_manager');
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 // Configure the module_manager persistent data path.
 var kiplingExtractionPath = package_loader.getExtractionPath();
@@ -52,27 +48,25 @@ function createModuleLoader() {
 
 
 	var clearCurrentModule = function(newModule) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
+			// Remove any current listeners from the VIEW_READY and UNLOAD_MODULE
+			// events.  They should only be listened to by the currently loaded
+			// module.
+			self.removeAllListeners(eventList.VIEW_READY);
+			self.removeAllListeners(eventList.UNLOAD_MODULE);
 
-		// Remove any current listeners from the VIEW_READY and UNLOAD_MODULE
-		// events.  They should only be listened to by the currently loaded
-		// module.
-		self.removeAllListeners(eventList.VIEW_READY);
-		self.removeAllListeners(eventList.UNLOAD_MODULE);
-
-		// Clear the DOM elements
-		var locationKeys = Object.keys(newModule.outputLocation);
-		locationKeys.forEach(function(locationKey) {
-			newModule.outputLocation[locationKey].empty();
+			// Clear the DOM elements
+			var locationKeys = Object.keys(newModule.outputLocation);
+			locationKeys.forEach(function(locationKey) {
+				newModule.outputLocation[locationKey].empty();
+			});
+			resolve(newModule);
 		});
-		defered.resolve(newModule);
-		return defered.promise;
-		// location.append($(compiledData));
 	};
 
 	var getCreatePageElement = function(newModule) {
 		var createPageElement = function(newFile) {
-			var defered = q.defer();
+			return new Promise((resolve, reject) => {
 			var results = {
 				'name': newFile.fileName,
 			};
@@ -85,7 +79,7 @@ function createModuleLoader() {
 
 					newElement.onload = function() {
 						// console.info('!!! '+fileType+' file loaded', newFile.fileName);
-						defered.resolve(results);
+						resolve(results);
 					};
 					newElement.onerror = function() {
 						console.error('Error in file' + fileType);
@@ -103,7 +97,7 @@ function createModuleLoader() {
 					// Isn't working for .js files :( idk why, it worked before.
 					// newElement.onload = function() {
 					// console.info('!!! '+fileType+' file loaded', newFile.fileName);
-					// defered.resolve(results);
+					// resolve(results);
 					// };
 					// newElement.setAttribute('src', newFile.filePath);
 
@@ -111,48 +105,48 @@ function createModuleLoader() {
 					results.element = newElement;
 					newElement.appendChild(document.createTextNode(newFile.fileData));
 					newModule.outputLocation.js.append(newElement);
-					defered.resolve(results);
+					resolve(results);
 				} else {
 					console.error('Trying to load invalid fileType', fileType);
-					defered.resolve(results);
+					resolve(results);
 				}
 			} catch(err) {
 				console.error('Error Loading Element', err);
 				console.error(newFile.fileName);
 				results.element = undefined;
-				defered.resolve(results);
+				resolve(results);
 			}
 
-			return defered.promise;
+			});
 		};
 		return createPageElement;
 	};
 
 	var loadCSSFiles = function(newModule) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		var promises = newModule.css.map(getCreatePageElement(newModule));
 
-		q.allSettled(promises)
+		Promise.allSettled(promises)
 		.then(function(results) {
-			defered.resolve(newModule);
+			resolve(newModule);
 		}, function(err) {
 			console.error('Finished Loading Err', err);
-			defered.reject(newModule);
+			reject(newModule);
 		});
-		return defered.promise;
+		});
 	};
 	var loadJSFiles = function(newModule) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		var promises = newModule.js.map(getCreatePageElement(newModule));
 
-		q.allSettled(promises)
+		Promise.allSettled(promises)
 		.then(function(results) {
-			defered.resolve(newModule);
+			resolve(newModule);
 		}, function(err) {
 			console.error('Finished Loading Err', err);
-			defered.reject(newModule);
+			reject(newModule);
 		});
-		return defered.promise;
+		});
 	};
 	var precompileFunctions = [];
 	this.addPreloadStep = function(func) {
@@ -160,31 +154,31 @@ function createModuleLoader() {
 	};
 
 	var getModuleContext = function(newModule) {
-		var defered = q.defer();
-		var promises = [];
-		var i;
-		for(i = 0; i < precompileFunctions.length; i++) {
-			// console.info(
-			// 	'Executing precompile function',
-			// 	i,
-			// 	precompileFunctions.length
-			// );
-			promises.push(precompileFunctions[i](newModule));
-		}
-		q.allSettled(promises)
-		.then(function(results) {
-			// remove precompile functions
-			precompileFunctions = [];
-			defered.resolve(newModule);
-		}, function(err) {
-			console.error('Finished pre-compilation steps', err);
-			defered.reject(newModule);
+		return new Promise((resolve, reject) => {
+			var promises = [];
+			var i;
+			for(i = 0; i < precompileFunctions.length; i++) {
+				// console.info(
+				// 	'Executing precompile function',
+				// 	i,
+				// 	precompileFunctions.length
+				// );
+				promises.push(precompileFunctions[i](newModule));
+			}
+			Promise.allSettled(promises)
+				.then(function(results) {
+					// remove precompile functions
+					precompileFunctions = [];
+					resolve(newModule);
+				}, function(err) {
+					console.error('Finished pre-compilation steps', err);
+					reject(newModule);
+				});
 		});
-		return defered.promise;
 	};
 
 	var getUpdatedDeviceListing = function(newModule) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		var io_interface = io_manager.io_interface();
 		var device_controller = io_interface.getDeviceController();
 
@@ -196,12 +190,12 @@ function createModuleLoader() {
 		device_controller.getDeviceListing(filters)
 		.then(function(deviceListing) {
 			newModule.context.devices = deviceListing;
-			defered.resolve(newModule);
+			resolve(newModule);
 		});
-		return defered.promise;
+		});
 	};
 	var loadHTMLFiles = function(newModule) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		// console.log('loaded html files', newModule.htmlFiles);
 		var htmlFile = '<p>No view.html file loaded.</p>';
 		// Check to see if a framework is being loaded:
@@ -240,7 +234,7 @@ function createModuleLoader() {
 		// Element must already be added because we use jquery to search for
 		// the element's ID to attach to the "ready" event.
 		$(elementID).ready(function() {
-			defered.resolve(newModule);
+			resolve(newModule);
 			var loadedData = {
 				'name': newModule.name,
 				'id': elementID,
@@ -252,16 +246,15 @@ function createModuleLoader() {
 			self.current_module_data = undefined;
 			self.current_module_data = loadedData;
 		});
-		return defered.promise;
+		});
 	};
 	var updateStatistics = function(newModule) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		self.stats.numLoaded += 1;
-		defered.resolve(newModule);
-		return defered.promise;
+		resolve(newModule);
+		});
 	};
-	var runGC = function(data) {
-		var defered = q.defer();
+	function runGC(data) {
 		var gcExecuted = false;
 		if(gc) {
 			if(gc.call) {
@@ -277,9 +270,8 @@ function createModuleLoader() {
 			// console.log('gc.call not executed');
 		}
 
-		defered.resolve(data);
-		return defered.promise;
-	};
+		return Promise.resolve(data);
+	}
 
 	var unloadModuleFunctions = [];
 	this.addUnloadStep = function(func) {
@@ -287,7 +279,7 @@ function createModuleLoader() {
 	};
 
 	var executeUnloadModuleFunctions = function(moduleData) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
 		if(unloadModuleFunctions.length > 0) {
 			var promises = [];
@@ -295,22 +287,22 @@ function createModuleLoader() {
 			for(i = 0; i < unloadModuleFunctions.length; i++) {
 				promises.push(unloadModuleFunctions[i]());
 			}
-			q.allSettled(promises)
-			.then(function(results) {
-				unloadModuleFunctions = [];
-				defered.resolve(moduleData);
-			}, function(err) {
-				console.error('Finished unload-module steps', err);
-				defered.resolve(moduleData);
-			});
+			Promise.allSettled(promises)
+				.then(function(results) {
+					unloadModuleFunctions = [];
+					resolve(moduleData);
+				}, function(err) {
+					console.error('Finished unload-module steps', err);
+					resolve(moduleData);
+				});
 		} else {
-			defered.resolve(moduleData);
+			resolve(moduleData);
 		}
 
-		return defered.promise;
+		});
 	};
 	var renderModule = function(moduleData) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		// Trigger any loaded module to halt its execution
 		self.emit(eventList.UNLOAD_MODULE, {
 			'data': 'testData...'
@@ -342,27 +334,27 @@ function createModuleLoader() {
 		.then(getModuleContext)
 		.then(loadHTMLFiles)
 		.then(updateStatistics)
-		.then(runGC)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+		.then(() => runGC())
+		.then(resolve, reject);
+		});
 	};
 
 	this.loadModule = function(moduleObject) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		module_manager.loadModuleData(moduleObject)
 		.then(executeUnloadModuleFunctions)
 		.then(renderModule)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+		.then(resolve, reject);
+		});
 	};
 
 	this.loadModuleByName = function(moduleName) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		module_manager.loadModuleDataByName(moduleName)
 		.then(executeUnloadModuleFunctions)
 		.then(renderModule)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+		.then(resolve, reject);
+		});
 	};
 	var self = this;
 }

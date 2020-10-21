@@ -30,7 +30,7 @@
   "dependencies": {
     "async": "1.5.2",
     "compute-gcd": "1.2.0",
-    "fs-extra": "^0.18",
+    "fs-extra": "^9.0.1",
     "labjack-nodejs": "*",
     "ljswitchboard-data_parser": "*",
     "ljswitchboard-device_manager": "*",

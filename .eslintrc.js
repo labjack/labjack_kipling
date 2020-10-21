@@ -15,7 +15,7 @@ module.exports = {
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly",
-        "nw.gui": true,
+        "lj_di_injector": true
     },
     "parserOptions": {
         "ecmaVersion": 2018,
@@ -24,8 +24,7 @@ module.exports = {
         "import/no-unresolved": [
             "error",
             {
-                commonjs: true,
-                ignore: ['nw.gui'],
+                commonjs: true
             },
         ],
     },

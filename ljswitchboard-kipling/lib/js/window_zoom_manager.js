@@ -1,8 +1,3 @@
-
-
-var q = require('q');
-var async = require('async');
-
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
@@ -22,26 +17,23 @@ function createWindowZoomManager() {
         self.emit('zoomIn', self.zoomLevel);
         self.emit('zoom', self.zoomLevel);
     }
-    
+
     function zoomOut() {
         self.zoomLevel = self.zoomLevel - self.zoomIncrement;
         window.document.body.style.zoom = self.zoomLevel;
         self.emit('zoomOut', self.zoomLevel);
         self.emit('zoom', self.zoomLevel);
     }
-    
+
 
     this.zoomIn = zoomIn;
     this.zoomOut = zoomOut;
 
-    // The window zoom manager is initialized by the index.js file in the 
+    // The window zoom manager is initialized by the index.js file in the
     // Kipling application.
     this.init = function(bundle) {
         // console.log('Initializing window zoom manager', bundle);
-        var defered = q.defer();
-
-        defered.resolve(bundle);
-        return defered.promise;
+        return Promise.resolve(bundle);
     };
     var self = this;
 }

@@ -1,10 +1,7 @@
-
-
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var path = require('path');
-var q = global.require('q');
-var handlebars = global.require('handlebars');
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const path = require('path');
+const handlebars = global.require('handlebars');
 try {
 	handlebars.registerHelper('printContext', function() {
 		return new handlebars.SafeString(JSON.stringify({'context': this}, null, 2));
@@ -49,10 +46,10 @@ function createTaskLoader() {
 
 	var compileTemplate = MODULE_CHROME.compileTemplate;
 	var renderTaskTemplate = function(name, context) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
-		defered.resolve();
-		return defered.promise;
+		resolve();
+		});
 	};
 
 	this.getTaskLoaderDestination = function() {
@@ -67,17 +64,16 @@ function createTaskLoader() {
 	};
 
 	var loadTaskData = function(task) {
-		var defered = q.defer();
-		module_manager.loadModuleData(task.task)
-		.then(function(taskData) {
-			task.taskData = taskData;
-			defered.resolve(task);
+		return new Promise((resolve, reject) => {
+			module_manager.loadModuleData(task.task)
+			.then(function(taskData) {
+				task.taskData = taskData;
+				resolve(task);
+			});
 		});
-
-		return defered.promise;
 	};
 	var checkForViewData = function(task) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		// console.log('in checkForViewData', task, task.task.name);
 		var hasViewData = false;
 
@@ -112,11 +108,11 @@ function createTaskLoader() {
 			};
 		}
 
-		defered.resolve(task);
-		return defered.promise;
+		resolve(task);
+		});
 	};
 	var renderViewData = function(task) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		if(task.hasViewData) {
 			var taskViewData = task.taskData.htmlFiles.view;
 			var viewTemplate = handlebars.compile(taskViewData);
@@ -126,25 +122,25 @@ function createTaskLoader() {
 				console.error('Error Compiling Task view.html', err);
 			}
 		}
-		defered.resolve(task);
-		return defered.promise;
+		resolve(task);
+		});
 	};
 	var constructTaskView = function(task) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		if(task.hasViewData) {
 			compileTemplate(TASK_VIEW_TEMPLATE_FILE_NAME, task)
 			.then(function(compiledTask) {
 				// Save the compiled data
 				task.constructedTaskHTMLData = compiledTask;
-				defered.resolve(task);
+				resolve(task);
 			});
 		} else {
-			defered.resolve(task);
+			resolve(task);
 		}
-		return defered.promise;
+		});
 	};
 	var createAndLoadHTMLElement = function(task) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		try {
 			// Create the new element
 			var newElement = $(task.constructedTaskHTMLData);
@@ -156,35 +152,35 @@ function createTaskLoader() {
 			// Wait for the task's view to be ready & resolve.
 			var taskID = '#' + task.task.name + '_task_view';
 			$(taskID).ready(function() {
-				defered.resolve(task);
+				resolve(task);
 			});
 		} catch(err) {
 			console.error('Error in createAndLoadHTMLElement, task_loader.js', err);
 		}
-		return defered.promise;
+		});
 	};
 	var loadViewData = function(task) {
 		if(task.hasViewData) {
 			return createAndLoadHTMLElement(task);
 		} else {
-			var defered = q.defer();
-			defered.resolve(task);
-			return defered.promise;
+			return new Promise((resolve, reject) => {
+			resolve(task);
+			});
 		}
 	};
 	var constructTaskData = function(task) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
 		compileTemplate(TASK_LOADER_TEMPLATE_FILE_NAME, task.taskData)
 		.then(function(compiledTask) {
 			task.compiledData = compiledTask;
 			task.taskCreatorName = TASK_CREATOR_TEMPLATE(task.taskData);
-			defered.resolve(task);
+			resolve(task);
 		});
-		return defered.promise;
+		});
 	};
 	var loadTaskIntoPage = function(task) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		try {
 			var newElement = document.createElement('script');
 			newElement.setAttribute('type', 'text/javascript');
@@ -193,26 +189,26 @@ function createTaskLoader() {
 			task.element = newElement;
 			newElement.appendChild(document.createTextNode(task.compiledData));
 			task.destination.append(newElement);
-			defered.resolve(task);
+			resolve(task);
 		} catch(err) {
 			console.error('Error Loading Element', err);
 			console.error(task.task.name);
 			task.element = undefined;
-			defered.resolve(task);
+			resolve(task);
 		}
 		// console.log('Loading task into page....');
-		// defered.resolve(task);
+		// resolve(task);
 
-		return defered.promise;
+		});
 	};
 	var executeLoadedTask = function(task) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		try {
 			var taskName = task.task.name;
 			var creatorName = task.taskCreatorName;
 			console.log('Saving Task Reference', taskName);
 			self.tasks[taskName] = new window[creatorName](task.taskData);
-			defered.resolve(task);
+			resolve(task);
 		} catch(err) {
 			console.error(
 				'Error Executing Task',
@@ -220,17 +216,17 @@ function createTaskLoader() {
 				err,
 				err.stack
 			);
-			defered.resolve(task);
+			resolve(task);
 		}
-		return defered.promise;
+		});
 	};
 	var updateStatistics = function(task) {
-		var defered = q.defer();
-		defered.resolve(task);
-		return defered.promise;
+		return new Promise((resolve, reject) => {
+		resolve(task);
+		});
 	};
 	var loadTask = function(task) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
 		self.emit(eventList.LOADING_TASK, task);
 
@@ -256,21 +252,21 @@ function createTaskLoader() {
 		.then(loadTaskIntoPage)
 		.then(executeLoadedTask)
 		.then(updateStatistics)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+		.then(resolve, reject);
+		});
 	};
 	var internalLoadTasks = function(tasks) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		var promises = tasks.map(loadTask);
 
-		q.allSettled(promises)
-		.then(function(res) {
-			defered.resolve(tasks);
+		Promise.allSettled(promises)
+			.then(function(res) {
+				resolve(tasks);
+			});
 		});
-		return defered.promise;
 	};
 	var internalStartTask = function(taskName) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
 		var task;
 		if(self.tasks[taskName]) {
@@ -279,44 +275,44 @@ function createTaskLoader() {
 				console.log('Starting Task');
 				try {
 					task.startTask()
-					.then(defered.resolve, defered.reject);
+					.then(resolve, reject);
 				} catch(err) {
 					console.error('Error Starting task', err);
-					defered.resolve();
+					resolve();
 				}
 			} else {
 				console.log('task does not have a startTask property', taskName);
-				defered.resolve();
+				resolve();
 			}
 		} else {
-			defered.resolve();
+			resolve();
 		}
-		return defered.promise;
+		});
 	};
 	this.startTask = function(taskName) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
 		internalStartTask(taskName)
 		.then(function() {
 			self.emit(eventList.STARTED_TASK, taskName);
-			defered.resolve();
+			resolve();
 		});
-		return defered.promise;
+		});
 	};
 	this.startTasks = function(tasks) {
-		var defered = q.defer();
-		var keys = Object.keys(self.tasks);
-		var promises = keys.map(self.startTask);
+		return new Promise((resolve, reject) => {
+			var keys = Object.keys(self.tasks);
+			var promises = keys.map(self.startTask);
 
-		q.allSettled(promises)
-		.then(function() {
-			self.emit(eventList.STARTED_TASKS);
-			defered.resolve(tasks);
+			Promise.allSettled(promises)
+				.then(function() {
+					self.emit(eventList.STARTED_TASKS);
+					resolve(tasks);
+				});
 		});
-		return defered.promise;
 	};
 	var internalStopTask = function(taskName) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
 		var task;
 		if(self.tasks[taskName]) {
@@ -325,23 +321,23 @@ function createTaskLoader() {
 				console.log('Stopping Task');
 				try {
 					task.stopTask()
-					.then(defered.resolve, defered.reject);
+					.then(resolve, reject);
 				} catch(err) {
 					console.error('Error Stopping task', err);
-					defered.resolve();
+					resolve();
 				}
 			} else {
 				console.log('task does not have a stopTask property', taskName);
-				defered.resolve();
+				resolve();
 			}
 		} else {
-			defered.resolve();
+			resolve();
 		}
-		return defered.promise;
+		});
 	};
 
 	this.stopTask = function(taskName) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
 		internalStopTask(taskName)
 		.then(function() {
@@ -350,43 +346,43 @@ function createTaskLoader() {
 			delete self.tasks[taskName];
 
 			self.emit(eventList.STOPPED_TASK, taskName);
-			defered.resolve();
+			resolve();
 		});
-		return defered.promise;
+		});
 	};
 	this.stopTasks = function() {
-		var defered = q.defer();
-		var keys = Object.keys(self.tasks);
-		var promises = keys.map(self.stopTask);
+		return new Promise((resolve, reject) => {
+			var keys = Object.keys(self.tasks);
+			var promises = keys.map(self.stopTask);
 
-		q.allSettled(promises)
-		.then(function() {
-			self.emit(eventList.STOPPED_TASKS);
-			defered.resolve();
+			Promise.allSettled(promises)
+				.then(function() {
+					self.emit(eventList.STOPPED_TASKS);
+					resolve();
+				});
 		});
-		return defered.promise;
 	};
 	var clearTasksFromDOM = function() {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		try {
 			self.getTaskLoaderDestination().empty();
 		} catch(err) {
 			console.error('Failed to clearTasksFromDOM', err, err.stack);
 		}
-		defered.resolve();
-		return defered.promise;
+		resolve();
+		});
 	};
 
 	this.loadTasks = function() {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
 		self.stopTasks()
 		.then(clearTasksFromDOM)
 		.then(module_manager.getTaskList)
 		.then(internalLoadTasks)
 		.then(self.startTasks)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+		.then(resolve, reject);
+		});
 	};
 	var self = this;
 }

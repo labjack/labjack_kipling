@@ -1,59 +1,60 @@
+const ALERT_MESSAGE_SLIDE_TIME = 100;
 
-var ALERT_MESSAGE_SLIDE_TIME = 100;
-function hideAlert() {
+global.hideAlert = function() {
 	var alertMessageObj = $('#alert-message');
 	var alertMessageHolder = $('#alert-message .error-display');
 	alertMessageHolder.html('');
 	alertMessageObj.slideUp(ALERT_MESSAGE_SLIDE_TIME);
-}
+};
 
-function showAlert(message) {
+global.showAlert = function (message) {
 	var alertMessageObj = $('#alert-message');
 	var alertMessageHolder = $('#alert-message .error-display');
-	
+
 	alertMessageHolder.html(message);
 	if(alertMessageObj.css('display') === 'none') {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
-		$('#alert-message .close').one('click', hideAlert);
+		$('#alert-message .close').one('click', global.hideAlert);
 	}
-	setTimeout(hideAlert, 10000);
-}
-function showAlertNoTimeout(message) {
+	setTimeout(global.hideAlert, 10000);
+};
+
+global.showAlertNoTimeout = function (message) {
 	var alertMessageObj = $('#alert-message');
 	var alertMessageHolder = $('#alert-message .error-display');
-	
+
 	alertMessageHolder.html(message);
 	if(alertMessageObj.css('display') === 'none') {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
-		$('#alert-message .close').one('click', hideAlert);
+		$('#alert-message .close').one('click', global.hideAlert);
 	}
-}
+};
 
-function hideInfoMessage() {
+global.hideInfoMessage = function () {
 	var alertMessageObj = $('#info-message');
 	var alertMessageHolder = $('#info-message .error-display');
 	alertMessageHolder.html('');
 	alertMessageObj.slideUp(ALERT_MESSAGE_SLIDE_TIME);
-}
-function showInfoMessage(message) {
+};
+global.showInfoMessage = function (message) {
 	var alertMessageObj = $('#info-message');
 	var alertMessageHolder = $('#info-message .error-display');
-	
+
 	alertMessageHolder.html(message);
 	if(alertMessageObj.css('display') === 'none') {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
-		$('#info-message .close').one('click', hideInfoMessage);
+		$('#info-message .close').one('click', global.hideInfoMessage);
 	}
-	setTimeout(hideInfoMessage, 5000);
+	setTimeout(global.hideInfoMessage, 5000);
 }
 function showInfoMessageNoTimeout(message) {
 	var alertMessageObj = $('#info-message');
 	var alertMessageHolder = $('#info-message .error-display');
-	
+
 	alertMessageHolder.html(message);
 	if(alertMessageObj.css('display') === 'none') {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
-		$('#info-message .close').one('click', hideInfoMessage);
+		$('#info-message .close').one('click', global.hideInfoMessage);
 	}
 }
 
@@ -66,7 +67,7 @@ function hideCriticalAlert() {
 function showCriticalAlert(message) {
 	var alertMessageObj = $('#alert-error-message');
 	var alertMessageHolder = $('#alert-error-message .error-display');
-	
+
 	alertMessageHolder.html(message);
 	if(alertMessageObj.css('display') === 'none') {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
