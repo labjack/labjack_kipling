@@ -14,7 +14,6 @@
     "run_built_k3": "node scripts/run_built_k3.js",
     "setup": "lerna bootstrap",
     "start": "npm run start --prefix ljswitchboard-electron_main",
-    "start:nw": "npm run start --prefix ljswitchboard-splash_screen",
     "test": "lerna exec --ignore ljswitchboard-ljm_special_addresses -- npm test --if-present"
   },
   "repository": {
