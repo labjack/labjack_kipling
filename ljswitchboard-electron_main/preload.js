@@ -1,4 +1,7 @@
 const electron = require('electron');
+const getInjector = require('lj-di').getInjector;
+const injector = getInjector({ electron });
+
 console.log('preload');
 
 window.addEventListener('message', (event) => {
@@ -10,3 +13,5 @@ electron.ipcRenderer.on('postMessage', (event, data) => {
     window.dispatchEvent(event2);
     // window.postMessage({type: data.channel, payload: data.payload}, '*');
 });
+
+global.lj_di_injector = injector;

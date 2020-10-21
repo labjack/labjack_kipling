@@ -214,8 +214,8 @@ function loadProgramPackages(injector, splashScreenUpdater) {
 
                 package_loader.runPackageManager()
                     .then(function(packages) {
-                        console.log('Managed Packages', packages);
                         const managedPackageKeys = Object.keys(packages);
+                        console.log('Managed Packages', managedPackageKeys);
                         managedPackageKeys.forEach((managedPackageKey) => {
                             // Add the managed packages root locations to the req library.
                             const baseDir = packages[managedPackageKey].packageInfo.location;

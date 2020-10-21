@@ -1,10 +1,8 @@
 console.log("ljswitchboard-kipling index.js");
 
 var gui = require('nw.gui');
-var path = require('path');
 var q = require('q');
 var win = gui.Window.get();
-
 
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
@@ -38,18 +36,6 @@ window_manager.on(
 // aka close app manually.
 window_manager.windowManager.managedWindows.kipling.runInBackground = true;
 
-function restartIOInterface() {
-	if(MODULE_LOADER) {
-		MODULE_LOADER.loadModuleByName('crash_module');
-	}
-	if(MODULE_LOADER) {
-		MODULE_LOADER.loadModuleByName('crash_module');
-	}
-	global[gns].ljm.io_interface.destroy()
-	.then(function() {
-		window_manager.windowManager.managedWindows.kipling.win.reload();
-	});
-}
 /*
 SCRATCH PAD:
 // Prevent app from closing

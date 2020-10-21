@@ -28,12 +28,6 @@ class NwFakeWindow {
         });
         window.webContents.openDevTools();
 
-        /*
-                new BrowserWindow({
-
-            });
-        */
-
         window.loadURL(url);
 
         /*

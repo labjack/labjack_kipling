@@ -16,7 +16,6 @@ injector.bindSingleton('startDir', startDir);
 // Module to control application life.
 const app = electron.app;
 // Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow;
 
 const packageData = require('./package.json');
 const {SplashScreenUpdater} = require('./splash');
@@ -25,13 +24,16 @@ injector.bind('package.json', packageData);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-var splashWindow = null;
+let splashWindow = null;
 
 const fakeWindow = new NwFakeWindow();
 
 const gui = {
   App: {
-    manifest: packageData
+    manifest: packageData,
+    quit() {
+      console.log('@TODO: quit');
+    }
   },
   Window: fakeWindow
 };
@@ -47,11 +49,9 @@ const win = {
 };
 */
 
-console.log('PackageLoader', PackageLoader);
 const package_loader = new PackageLoader(injector);
 injector.bindSingleton('package_loader', package_loader);
 
-console.log('WindowManager', WindowManager);
 const window_manager = new WindowManager();
 window_manager.configure({
   'gui': gui
@@ -59,7 +59,7 @@ window_manager.configure({
 injector.bindSingleton('window_manager', window_manager);
 
 // Add the -builder window to the window_manager to have it be managed.
-var initialAppVisibility = false;
+let initialAppVisibility = false;
 if(packageData.window.show) {
   initialAppVisibility = true;
 }
@@ -75,7 +75,7 @@ window_manager.on(window_manager.eventList.QUITTING_APPLICATION, function() {
 app.on('window-all-closed', function() {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform != 'darwin') {
+  if (process.platform !== 'darwin') {
     app.quit();
   }
 });
@@ -114,6 +114,7 @@ app.on('ready', function() {
   splashWindow.webContents.once('dom-ready', () => {
     console.log('splashWindow::loaded');
     const splashScreenUpdater = new SplashScreenUpdater(splashWindow);
+    injector.bindSingleton('splashScreenUpdater', splashScreenUpdater);
     loadProgramPackages(injector, splashScreenUpdater);
   });
 

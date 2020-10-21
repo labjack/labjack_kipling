@@ -297,6 +297,15 @@ class WindowManager extends EventEmitter {
 		return Object.keys(this.managedWindows);
 	}
 
+
+	getWindow(name) {
+		if (!this.managedWindows[name]) {
+			throw 'Window not found: ' + name;
+		}
+
+		return this.managedWindows[name];
+	}
+
 	isManagedWindow(windowName) {
 		let isManaged = false;
 		const windowKeys = this.getWindows();
@@ -388,6 +397,7 @@ class WindowManager extends EventEmitter {
 
 			if (asyncOpen) {
 				// Open a new window and save its reference, nw0.13++ uses an async "open" call.
+
 				gui.Window.open(
 					windowPath,
 					newWindowData,
@@ -412,6 +422,7 @@ class WindowManager extends EventEmitter {
 				);
 			} else {
 				// Open a new window and save its reference
+
 				const newWindow = gui.Window.open(
 					windowPath,
 					newWindowData

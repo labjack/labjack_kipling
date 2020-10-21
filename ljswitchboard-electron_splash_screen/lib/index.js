@@ -32,9 +32,6 @@ window.addEventListener('splash_update', (event) => {
 
 const manifest = require('../package.json');
 
-// // Load native UI library
-// var gui = require('nw.gui');
-
 // // Add copy & paste support on mac
 // if (process.platform === "darwin") {
 //   var mb = new gui.Menu({type: 'menubar'});

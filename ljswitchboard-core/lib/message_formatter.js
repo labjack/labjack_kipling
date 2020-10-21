@@ -1,75 +1,73 @@
+'use strict';
 
-var path = require('path');
-var q = global.require('q');
-var handlebars = global.require('handlebars');
-var fs = require('fs');
+const path = require('path');
+const handlebars = require('handlebars');
+const fs = require('fs');
 
-var cwd = path.dirname(module.filename);
-var pageTemplateName = 'message_template.html';
-var pageTemplatePath = path.join(cwd, pageTemplateName);
+const cwd = path.dirname(module.filename);
+const pageTemplateName = 'message_template.html';
+const pageTemplatePath = path.join(cwd, pageTemplateName);
 
-var pageTemplate;
+class MessageFormatter {
 
-var pageReference;
-var $;
-
-var configure = function(jquery, bodyElement) {
-	$ = jquery;
-	pageReference = bodyElement;
-};
-exports.configure = configure;
-
-var loadTemplateFile = function() {
-	var defered = q.defer();
-	fs.readFile(pageTemplatePath, function(err, data) {
-		var pageStr = '';
-		if(err) {
-			defered.resolve(pageStr);
-		} else {
-			defered.resolve(data.toString());
-		}
-	});
-	return defered.promise;
-};
-var renderTemplate = function(context) {
-	var defered = q.defer();
-	var compiledData;
-	var textStyling = {
-		'passed': 'bs-callout-success',
-		'failed': 'bs-callout-danger'
-	}[context.result];
-	var stepAppend = {
-		'passed': '',
-		'failed': 'Error '
-	}[context.result];
-
-	if(context.result === 'failed') {
-		global.ljswitchboard.window_manager.showWindow('core');
+	constructor(injector) {
+		this.injector = injector;
 	}
-	var builtContext = {
-		'styling': textStyling,
-		'step': stepAppend + context.step,
-		'title': context.step.split(' ').join('_'),
-		'message': context.message,
-		'messages': context.messages,
-		'code': context.code
-	};
 
-	if(pageTemplate) {
-		compiledData = pageTemplate(builtContext);
-		pageReference.append($(compiledData));
-		defered.resolve(compiledData);
-	} else {
-		loadTemplateFile()
-		.then(function(pageData) {
-			pageTemplate = handlebars.compile(pageData);
-			compiledData = pageTemplate(builtContext);
-			pageReference.append($(compiledData));
-			defered.resolve(compiledData);
+	_loadTemplateFile() {
+		return new Promise((resolve) => {
+			fs.readFile(pageTemplatePath, function (err, data) {
+				if (err) {
+					resolve('');
+				} else {
+					resolve(data.toString());
+				}
+			});
 		});
 	}
-	return defered.promise;
-};
+
+	renderTemplate(context) {
+		return new Promise(async (resolve) => {
+
+			const textStyling = {
+				'passed': 'bs-callout-success',
+				'failed': 'bs-callout-danger'
+			}[context.result];
+			const stepAppend = {
+				'passed': '',
+				'failed': 'Error '
+			}[context.result];
+
+			if (context.result === 'failed') {
+				const window_manager = this.injector.get('window_manager');
+				window_manager.showWindow('core');
+			}
+			const builtContext = {
+				'styling': textStyling,
+				'step': stepAppend + context.step,
+				'title': context.step.split(' ').join('_'),
+				'message': context.message,
+				'messages': context.messages,
+				'code': context.code
+			};
+
+			if (this.pageTemplate) {
+				const compiledData = this.pageTemplate(builtContext);
+				resolve(compiledData);
+			} else {
+				const pageData = await this._loadTemplateFile();
+				this.pageTemplate = handlebars.compile(pageData);
+				const compiledData = this.pageTemplate(builtContext);
+				resolve(compiledData);
+			}
+		});
+	}
+
+}
+
+/*
+exports.configure = configure;
+
 exports.renderTemplate = renderTemplate;
 
 exports.testRender = function(data) {
@@ -85,3 +83,6 @@ exports.testRender = function(data) {
 exports.testFunc = function() {
 	return cwd;
 };
+*/
+
+exports.MessageFormatter = MessageFormatter;

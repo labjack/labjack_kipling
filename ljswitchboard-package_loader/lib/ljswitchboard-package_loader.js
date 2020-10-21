@@ -91,35 +91,33 @@ class PackageLoader extends EventEmitter {
 		console.log('nwApp detected', packageInfo, info);
 		const gui = this.injector.get('gui');
 
-		if (gui) {
-			// Local reference to nw.gui
-			const curApp = this._loadedPackages[packageInfo.name];
+		// Local reference to nw.gui
+		const curApp = this._loadedPackages[packageInfo.name];
 
-			// Get the module's data that should be used when opening the new window
-			let newWindowData;
-			if (curApp.data) {
-				if (curApp.data.window) {
-					newWindowData = curApp.data.window;
-				}
+		// Get the module's data that should be used when opening the new window
+		let newWindowData;
+		if (curApp.data) {
+			if (curApp.data.window) {
+				newWindowData = curApp.data.window;
 			}
-
-			// Build the url and moduleData path
-			const windowPath = 'file:///' + path.join(packageInfo.location, info.main);
-
-			// Open a new window and save its reference
-			curApp.win = gui.Window.open(
-				windowPath,
-				newWindowData
-			);
-
-			// If desired, open the window's devTools
-			if (packageInfo.showDevTools) {
-				curApp.win.showDevTools();
-			}
-
-			// Emit an event indicating that a new window has been opened.
-			this.emit(EVENTS.OPENED_WINDOW, packageInfo.name);
 		}
+
+		// Build the url and moduleData path
+		const windowPath = 'file:///' + path.join(packageInfo.location, info.main);
+
+		// Open a new window and save its reference
+		curApp.win = gui.Window.open(
+			windowPath,
+			newWindowData
+		);
+
+		// If desired, open the window's devTools
+		if (packageInfo.showDevTools) {
+			curApp.win.showDevTools();
+		}
+
+		// Emit an event indicating that a new window has been opened.
+		this.emit(EVENTS.OPENED_WINDOW, packageInfo.name);
 	}
 
 	_startPackage(packageInfo, name) {
@@ -176,6 +174,10 @@ class PackageLoader extends EventEmitter {
 			} else {
 				console.warn('Info Object does not exist, not doing anything special', packageInfo, name);
 			}
+
+			if (loadedPackage.initializePackage) {
+				loadedPackage.initializePackage(this.injector);
+			}
 		} catch (err) {
 			console.error('  - package_loader: _startPackage Error', err, name);
 		}
@@ -212,11 +214,11 @@ class PackageLoader extends EventEmitter {
 
 				if (global.require) {
 					this._loadedPackages[name] = global.require(requireStr);
-					this._startPackage(packageInfo, name);
 				} else {
 					this._loadedPackages[name] = require(requireStr);
-					this._startPackage(packageInfo, name);
 				}
+				this._startPackage(packageInfo, name);
+
 				this._loadedPackages[name].packageInfo = packageInfo;
 				this.emit(EVENTS.LOADED_PACKAGE, packageInfo);
 			}

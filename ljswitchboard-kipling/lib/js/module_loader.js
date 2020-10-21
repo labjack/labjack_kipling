@@ -6,9 +6,7 @@ var path = require('path');
 var q = global.require('q');
 var handlebars = global.require('handlebars');
 var module_manager = require('ljswitchboard-module_manager');
-var fs = require('fs');
 var package_loader = require('ljswitchboard-package_loader');
-var gns = package_loader.getNameSpace();
 var static_files = require('ljswitchboard-static_files');
 var io_manager = require('ljswitchboard-io_manager');
 var modbus_map = require('ljswitchboard-modbus_map').getConstants();
@@ -51,7 +49,7 @@ function createModuleLoader() {
 		'#module-chrome-current-module-{{numLoaded}}'
 	].join(''));
 
-	
+
 
 	var clearCurrentModule = function(newModule) {
 		var defered = q.defer();
@@ -100,7 +98,7 @@ function createModuleLoader() {
 				} else if(fileType === '.js') {
 					newElement = document.createElement('script');
 					newElement.setAttribute('type', 'text/javascript');
-					// 
+					//
 
 					// Isn't working for .js files :( idk why, it worked before.
 					// newElement.onload = function() {
@@ -124,7 +122,7 @@ function createModuleLoader() {
 				results.element = undefined;
 				defered.resolve(results);
 			}
-			
+
 			return defered.promise;
 		};
 		return createPageElement;
@@ -278,7 +276,7 @@ function createModuleLoader() {
 		} else {
 			// console.log('gc.call not executed');
 		}
-		
+
 		defered.resolve(data);
 		return defered.promise;
 	};

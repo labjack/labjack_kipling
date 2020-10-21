@@ -95,7 +95,7 @@ function createModuleChrome() {
 		fs.readFile(templatePath, function(err, data) {
 			var pageStr = '';
 			if(err) {
-				console.error('Error in loadTemplateFile', err);
+				console.error('Error in _loadTemplateFile', err);
 				console.error('Data', {
 					'path': templatePath,
 					'name': name,
