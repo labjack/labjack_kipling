@@ -18,7 +18,7 @@ local CORE_FREQ = 80000000
 -- 				two value U16 array
 -------------------------------------------------
 local function u32_to_u16_array(myU16)
-	local MSB = myU16/256
+	local MSB = math.floor(myU16/256)
 	local LSB = myU16 - MSB*256
 	return {MSB, LSB}
 end
@@ -82,5 +82,6 @@ end
 
 
 print("\nScript finished")
+MB.WA(44000, U16_TYPE_CONSTANT, NUM_U16_PER_U32, u32_to_u16_array(0))
 -- Stop the script
 MB.W(6000, 1, 0)
