@@ -72,7 +72,7 @@ while running do
 		-- Halve the PWM frequency
 		rollval = rollval*2
 		MB.WA(44904, U16_TYPE_CONSTANT, NUM_U16_PER_U32, u32_to_u16_array(rollval))
-		-- update the configa value according to the new rollval
+		-- Update the configa value according to the new rollval
 		-- Below will maintain the same initial duty cycle
 		configa = rollval*dutycycle/100
 		MB.WA(44300, U16_TYPE_CONSTANT, NUM_U16_PER_U32, u32_to_u16_array(configa))
