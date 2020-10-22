@@ -73,7 +73,7 @@ while running do
 		-- Halve the PWM frequency
 		rollval = rollval*2
 		MB.writeNameArray("DIO_EF_CLOCK0_ROLL_VALUE", NUM_U16_PER_U32, u32_to_u16_array(rollval), U16_TYPE_CONSTANT)
-		-- update the configa value according to the new rollval
+		-- Update the configa value according to the new rollval
 		-- Below will maintain the same initial duty cycle
 		configa = rollval*dutycycle/100
 		MB.writeNameArray("DIO0_EF_CONFIG_A", NUM_U16_PER_U32, u32_to_u16_array(configa), U16_TYPE_CONSTANT)
