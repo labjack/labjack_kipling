@@ -13,7 +13,8 @@ async function loadJsCssFile(filename, filetype, documentLocation) {
     return new Promise(function (resolve) {
         if (filetype === '.js') {
             const fileRef = document.createElement('script');
-            fileRef.setAttribute('type','text/javascript');
+            // fileRef.setAttribute('type','text/javascript');
+            fileRef.setAttribute('type','module');
             fileRef.setAttribute('src', filename);
 
             fileRef.onload = function () {
@@ -56,11 +57,15 @@ async function loadResources(win, resources, isLocal, location) {
 
 global.loadJsCssFile = loadJsCssFile;
 
-window.addEventListener('load_resources', async (event) => {
-    const {resources, isLocal, location} = event.payload;
-    if (typeof module === 'object') {window.module = module; module = undefined;}
-    for (const resource of resources) {
-        await loadJsCssFile(resource.link, resource.filetype, location);
-    }
-    if (window.module) module = window.module;
-});
+if (!global.hasResourcesEventListener) {
+    global.hasResourcesEventListener = true;
+    window.addEventListener('load_resources', async (event) => {
+        const {resources, isLocal, location} = event.payload;
+        console.log('load_resources', resources);
+        if (typeof module === 'object') {window.module = module; module = undefined;}
+        for (const resource of resources) {
+            await loadJsCssFile(resource.link, resource.filetype, location);
+        }
+        if (window.module) module = window.module;
+    });
+}

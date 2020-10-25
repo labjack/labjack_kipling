@@ -1,12 +1,9 @@
-var handlebars = require('handlebars');
 var labjack = require('labjack-nodejs');
 var q = require('q');
 
 var framework_standalone_ui = require('./framework_standalone_ui');
 var fs_facade = require('./fs_facade');
 var presenter_framework = require('./presenter_framework');
-
-var JS_LOC_TEMPLATE = handlebars.compile('/{{ . }}/controller');
 
 
 /**
@@ -76,9 +73,9 @@ function loadModuleInfo (environment) {
 function loadModuleLogic (environment) {
     var deferred = q.defer();
 
-    var moduleName = environment.moduleInfo['name'];
-    var controllerLocalLoc = JS_LOC_TEMPLATE(moduleName);
-    var controllerGlobalLoc = fs_facade.getExternalURI(controllerLocalLoc)
+    var moduleName = environment.moduleInfo.name;
+    var controllerLocalLoc = '/' + moduleName + '/controller';
+    var controllerGlobalLoc = fs_facade.getExternalURI(controllerLocalLoc);
     var controller = require(controllerGlobalLoc);
 
     environment.module = controller;
@@ -183,7 +180,7 @@ function loadModuleCallbacks (environment) {
 **/
 function loadDevice (environment) {
     var deferred = q.defer();
-    
+
     var newDevice = labjack.device();
     newDevice.open(
         deferred.reject,
@@ -209,7 +206,7 @@ function createInterface (environment) {
     var deferred = q.defer();
     var newInterface = new framework_standalone_ui.CLInterface(environment);
     environment.cli = newInterface;
-    
+
     var interfaceCreatePromise = newInterface.create();
     interfaceCreatePromise.then(
         deferred.reject,
@@ -247,10 +244,10 @@ function startFrameworkLoop (environment) {
 **/
 function onUserExit (environment) {
     var deferred = q.defer;
-    
+
     var alertDeviceClosing = function () {
         var innerDeferred = q.defer();
-        
+
         environment.framework.fire(
             'onCloseDevice',
             environment.framework,

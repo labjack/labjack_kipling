@@ -10,7 +10,6 @@ var fs = require('fs');
 var path = require('path');
 
 var handlebars = require('handlebars');
-var os = require('os');
 
 var MODULES_DIR = 'switchboard_modules';
 var MODULE_DESC_FILENAME = 'module.json';
@@ -143,7 +142,7 @@ exports.getExternalURI = function(fullResourceName) {
 **/
 exports.getParentDir = function() {
     var pathPieces = path.dirname(process.execPath).split(path.sep);
-    
+
     var cutIndex;
     var numPieces = pathPieces.length;
     for (cutIndex=0; cutIndex<numPieces; cutIndex++) {
@@ -312,8 +311,8 @@ exports.getLoadedModulesInfo = function(onError, onSuccess) {
 exports.saveDataToFile = function(location, data, onError, onSuccess) {
     fs.exists(location, function(exists) {
         fs.writeFile(
-            location, 
-            data, 
+            location,
+            data,
             function (err) {
                 if (err) {
                     onError(err);

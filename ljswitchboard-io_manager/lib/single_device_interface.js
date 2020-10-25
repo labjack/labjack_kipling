@@ -1,123 +1,58 @@
+'use strict';
 
-var process_manager = require('process_manager');
-var q = require('q');
+const process_manager = require('process_manager');
 
 // Include the single_device_controller
-var single_device_controller = require('./controllers/single_device_controller');
-// var constants = require('./common/constants');
+const single_device_controller = require('./controllers/single_device_controller');
+// const constants = require('./common/constants');
 
-// Define the delegator to be used when starting the device sub-process
-var device_delegator_path = './lib/delegators/single_device_delegator.js';
+class SingleDeviceInterface {
 
+	constructor() {
+		this.mp = null;
+		this.mp_event_emitter = null;
 
-function createSingleDeviceInterface() {
-	this.mp = null;
-	this.mp_event_emitter = null;
+		// Define a single device controller object reference
+		this.single_device_controller = null;
+	}
 
-	// Define a single device controller object reference
-	this.single_device_controller = null;
 
 	// Function to initialize the single_device_controller object
-	var createSingleDeviceController = function() {
+	createSingleDeviceController() {
 		console.log("Creating createSingleDeviceController");
-		self.single_device_controller = new single_device_controller.createSingleDeviceController(self);
-	};
+		this.single_device_controller = new single_device_controller.createSingleDeviceController(this);
+	}
 
 	/**
-	 * Initialize the single_device-interface will initialize a new 
-	 * master_process instance (aka this/self.mp) and save it.  Will also save
+	 * Initialize the single_device-interface will initialize a new
+	 * master_process instance (aka this/this.mp) and save it.  Will also save
 	 * a reference to the created event_emitter and start a new child process.
 	 * Once this is done, a single_device_controller object will be properly
 	 * linked with the messaging system thus providing a "device" object.
 	**/
-	this.initialize = function() {
-		var defered = q.defer();
-
+	async initialize() {
 		try {
-			self.mp = null;
-			self.mp_event_emitter = null;
-
-			delete self.mp;
-			delete self.mp_event_emitter;
-
-			self.mp = new process_manager.master_process();
-			self.mp_event_emitter = self.mp.init();
+			this.mp = new process_manager.master_process();
+			this.mp_event_emitter = this.mp.init();
 
 			// create the single_device_controller object:
-			createSingleDeviceController();
+			this.createSingleDeviceController();
 
-			// Start a new child process
-			self.mp.qStart(device_delegator_path)
-			.then(function(res) {
-				// Initialize the controller
-				self.single_device_controller.init()
-				.then(defered.resolve, defered.reject);
-			}, function(err) {
-				console.log("error starting process", err);
-				defered.reject(err);
-			});
+			await this.mp.qStart('./lib/delegators/single_device_delegator.js');
+			await this.single_device_controller.init();
 		} catch(err) {
 			console.log("try-catch error", err);
-			defered.reject(err);
+			throw err;
 		}
-		return defered.promise;
-	};
+	}
 
-	this.establishLink = function(name, listener) {
+	establishLink(endpoint, listener) {
 		console.log("sdi.js establishLink");
-		var endpoint = name;
-		var createMessage = function(m) {
-			var defered = q.defer();
-			var message = {
-				'endpoint': endpoint,
-				'data': m
-			};
-			defered.resolve(message);
-			return defered.promise;
-		};
-		var executeSendReceive = function(m) {
-			return self.mp.sendReceive(m);
-		};
-		var executeSendMessage = function(m) {
-			return self.mp.sendMessage(m);
-		};
-		var cleanMessage = function(m) {
-			var defered = q.defer();
-			defered.resolve(m);
-			return defered.promise;
-		};
-		var cleanError = function(err) {
-			var defered = q.defer();
-			defered.reject(err);
-			return defered.promise;
-		};
-		var sendReceive = function(m) {
-			var defered = q.defer();
-
-			// Execute sendReceive message
-			createMessage(m)
-			.then(executeSendReceive)
-			.then(cleanMessage, cleanError)
-			.then(defered.resolve, defered.reject);
-
-			return defered.promise;
-		};
-		var sendMessage = function(m) {
-			return createMessage(m)
-			.then(executeSendMessage);
-		};
-		var send = function(m) {
-			return self.mp.send(endpoint, m);
-		};
-		var callFunc = function(name, argList, options) {
-			var funcName = '';
-			var funcArgs = [];
-			if(name) {
-				funcName = name;
-			}
-			if(argList) {
-				funcArgs = argList;
-			}
+		const sendReceive = (data) => this.mp.sendReceive({ endpoint, data });
+		const send = (data) => this.mp.send(endpoint, data);
+		const callFunc = (name, argList, options) => {
+			const funcName = name ? name : '';
+			const funcArgs = argList ? argList : [];
 			return sendReceive({
 				'func': funcName,
 				'args': funcArgs,
@@ -125,33 +60,24 @@ function createSingleDeviceInterface() {
 			});
 		};
 
-		self.mp_event_emitter.on(name, listener);
-		var defered = q.defer();
+		this.mp_event_emitter.on(endpoint, listener);
 
-		var link = {
+		const link = {
 			'callFunc': callFunc,
 			'sendReceive': sendReceive,
-			'sendMessage': sendMessage,
+			'sendMessage': (data) => this.mp.sendMessage({ endpoint, data }),
 			'send': send
 		};
 
 		console.log('sdi.js end of establishLink');
-		defered.resolve(link);
-		return defered.promise;
-	};
+		return Promise.resolve(link);
+	}
 
-	this.destroy = function() {
-		var defered = q.defer();
-
-		self.mp.qStop()
-		.then(defered.resolve);
-
-		return defered.promise;
-	};
-
-	var self = this;
+	destroy() {
+		return this.mp.qStop();
+	}
 }
 
-exports.createSingleDeviceInterface = function() {
-	return new createSingleDeviceInterface();
+exports.createSingleDeviceInterface = () => {
+	return new SingleDeviceInterface();
 };

@@ -6,9 +6,11 @@
  * @author Chris Johnson (LabJack, 2014)
 **/
 
+const package_loader = global.lj_di_injector.get('package_loader');
+
 var dict = require('dict');
 var path = require('path');
-var window_manager = require('ljswitchboard-window_manager');
+var window_manager = package_loader.getPackage('window_manager');
 
 /**
  * keyboardEventHandler is an object that allows easy window-wide keypress

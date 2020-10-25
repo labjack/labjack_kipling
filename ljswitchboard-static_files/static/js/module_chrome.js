@@ -9,41 +9,28 @@
  *
  * Requires (from global_requires.js):
  *     device_controller = require('./device_controller');
- *     handlebars = require('handlebars');
  *     fs_facade = require('./fs_facade');
 **/
 
-// Include module_manager that handles searching through switchboard_modules 
+// Include module_manager that handles searching through switchboard_modules
 // file for code.
 var module_manager = require('./module_manager');
 
-var MODULE_CONTENTS_PLACEHOLDER_ELEMENT = '#module-chrome-contents';
 var MODULE_TAB_CONTAINER = '#module-list';
 var MODULE_TAB_CLASS = 'module-tab';
 var MODULE_TAB_ID_POSTFIX = '-module-tab';
-var MODULE_LOADING_IMAGE_NAME = 'progress-indeterminate-ring-light.gif';
-var MODULE_LOADING_IMAGE_DIR = 'static/img/';
-var MODULE_LOADING_IMAGE_SRC = MODULE_LOADING_IMAGE_DIR +
-    MODULE_LOADING_IMAGE_NAME;
 var CURRENT_DEVICE_INDEX = 0; // Device to start off as being selected
 var resizeTimeout;
 
 //Framework constants
 var FRAMEWORK_DIR = 'framework';
 var SINGLE_DEVICE_FRAMEWORK_DIR = FRAMEWORK_DIR + '/kipling-module-framework';
-var SINGLE_DEVICE_FRAMEWORK_PRESENTER = SINGLE_DEVICE_FRAMEWORK_DIR + 
+var SINGLE_DEVICE_FRAMEWORK_PRESENTER = SINGLE_DEVICE_FRAMEWORK_DIR +
     '/presenter_framework.js';
 var SINGLE_DEVICE_FRAMEWORK_VIEW = SINGLE_DEVICE_FRAMEWORK_DIR + '/view.html';
 var SINGLE_DEVICE_FRAMEWORK_CONNECTOR = SINGLE_DEVICE_FRAMEWORK_DIR + '/framework_connector.js';
 var SINGLE_DEVICE_FRAMEWORK_CSS = SINGLE_DEVICE_FRAMEWORK_DIR + '/style.css';
 var SINGLE_DEVICE_FRAMEWORK_DEVICE_CONSTANTS = SINGLE_DEVICE_FRAMEWORK_DIR + '/device_constants.js';
-
-// var OPERATION_FAIL_MESSAGE = handlebars.compile(
-//     'Sorry, Kipling encountered an error. Please try again or contact ' + 
-//     'support@labjack.com. Error: {{.}}');
-var OPERATION_FAIL_MESSAGE = handlebars.compile(
-    'Sorry, Kipling encountered an error. ' +
-    'Error: {{.}}');
 
 var LOADED_MODULE_INFO_OBJECT;
 var LOADED_MODULE_CONSTANTS_OBJECT;
@@ -59,15 +46,14 @@ var MODULE_WINDOW_RESIZE_LISTNERS = [];
 **/
 function innerSelectModule(name)
 {
+/*
     if (LOADING_NEW_MODULE) {
         return;
     }
     LOADING_NEW_MODULE = true;
+*/
     $('.' + MODULE_TAB_CLASS).removeClass('selected');
     $('#' + name + MODULE_TAB_ID_POSTFIX).addClass('selected');
-    // $(MODULE_CONTENTS_ELEMENT).empty().append(
-    //     $('<img>').attr('src', MODULE_LOADING_IMAGE_SRC)
-    // );
     $(MODULE_CONTENTS_ELEMENT).empty();
     $(MODULE_CONTENTS_FOOTER).hide();
     $(MODULE_CONTENTS_FOOTER).empty();
@@ -83,7 +69,7 @@ function innerSelectModule(name)
         },
         function(moduleInfo) {
             $('#cur-module-display').html(moduleInfo.humanName);
-            
+
         });
     // $('#cur-module-display').html(name.replace(/_/g, ' '));
     var src = name + '/view.html';
@@ -115,9 +101,9 @@ function innerSelectModule(name)
 
     //Function that loads a module with the singleDevice framework
     var renderSingleDeviceFrameworkModule = function (moduleInfo) {
-        //Get the file path for the presenter_framework that runs the 
+        //Get the file path for the presenter_framework that runs the
         //  singleDevice framework.
-        //File is found in the non-compiled switchboard_modules/frameworks 
+        //File is found in the non-compiled switchboard_modules/frameworks
         //  directory.
         var thirdPartyJSList;
         if(typeof(moduleInfo.third_party_code) !== 'undefined') {
@@ -131,7 +117,7 @@ function innerSelectModule(name)
         } else {
             jsLibFiles = [];
         }
-        
+
         var device_constants = SINGLE_DEVICE_FRAMEWORK_DEVICE_CONSTANTS;
         var framework_location = SINGLE_DEVICE_FRAMEWORK_PRESENTER;
         var framework_connector = SINGLE_DEVICE_FRAMEWORK_CONNECTOR;
@@ -207,7 +193,7 @@ function innerSelectModule(name)
                         //load the 'singleDevice' framework
                         renderSingleDeviceFrameworkModule(moduleInfo);
                     } else {
-                        //if no appropriate framework was found, load as if there 
+                        //if no appropriate framework was found, load as if there
                         //  was no framework requested
                         renderNoFrameworkModule(moduleInfo.third_party_code);
                     }
@@ -311,12 +297,12 @@ function displayActiveModulesWithEvents(activeModules, matchFunc, onError,onSucc
 
 /**
  * Global function that can be called by any module if it needs to listen to the
- * window resize listener.  Created because a timer is used to prevent the 
- * spamming of the window.resize listener to decrease CPU load & increase 
+ * window resize listener.  Created because a timer is used to prevent the
+ * spamming of the window.resize listener to decrease CPU load & increase
  * performance.
- * @param {string} keyStr       A unique string to be used as a 'key' to 
+ * @param {string} keyStr       A unique string to be used as a 'key' to
  *                              identify the listener.
- * @param {function} callbackFunc The function that gets called by the resize 
+ * @param {function} callbackFunc The function that gets called by the resize
  *                                listener.
  */
 function addModuleWindowResizeListner(keyStr, callbackFunc) {
@@ -354,7 +340,7 @@ function addModuleWindowResizeListner(keyStr, callbackFunc) {
 /**
  * Function to be called by the object who registered the listener when its no
  * longer required.
- * @param  {string} keyStr The unique string to identify the listener to be 
+ * @param  {string} keyStr The unique string to identify the listener to be
  *                         removed.
 **/
 function removeModuleWindowResizeListner(keyStr) {
@@ -416,7 +402,7 @@ function onResized()
         $('#device-nav-dock').slideDown();
         $('#module-list').slideUp(reCallFUnc);
     }
-    
+
     var headerHeight = $('#system-navigation');
     var moduleChromeContentsEl = $('#module-chrome-contents');
     var moduleChromeContentsHolderEl = $('#module-chrome-contents-holder');
@@ -480,7 +466,7 @@ function onResized()
         );
         moduleChromeContentsHolderEl.css({'top':'0px'});
 
-        
+
         // setModuleChromeContentsHolderBottom();
     }
     if(typeof(MODULE_WINDOW_RESIZE_LISTNERS) !== 'undefined') {
@@ -492,13 +478,13 @@ function onResized()
 
                 moduleHeight += parseInt(topPadding.slice(0,topPadding.search('px')));
                 moduleHeight += parseInt(bottomPadding.slice(0,bottomPadding.search('px')));
-                
+
                 try {
                     listener.callback(moduleHeight);
                 } catch(err) {
                     console.error('Error Calling Window Resize Listner module_chrome.js',err);
                 }
-                
+
             } else {
                 console.log('Bad Window Resize Listener Found! (module_chrome.js)',listener);
             }
@@ -523,7 +509,7 @@ function showAlert(errorMessage)
     if(!isNaN(errorMessage)) {
         errorMessage = 'LJM Error ' + device_controller.ljm_driver.errToStrSync(errorMessage);
     }
-    var message = OPERATION_FAIL_MESSAGE(errorMessage);
+    var message = 'Sorry, Kipling encountered an error. ' + 'Error: ' + errorMessage;
 
     $('#error-display').html(message);
     $('.device-selector-holder').css('margin-top', '0px');
@@ -585,7 +571,7 @@ $('#module-chrome').ready(function(){
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(onResized, 16);
     });
-    
+
     // var topPos = $('#module-chrome-contents').position().top;
     // var contents_height = $(window).height() - MODULE_CONTENT_BOTTOM_BORDER_HEIGHT;
 
@@ -604,7 +590,7 @@ $('#module-chrome').ready(function(){
     }
 
     var devices = device_controller.getDeviceKeeper().getDevices();
-    
+
     module_manager.getActiveModules(
         getCustomGenericErrorHandler('module_chrome-ready.getActiveModules'),
         function (modules) {

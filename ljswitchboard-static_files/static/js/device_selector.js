@@ -9,7 +9,6 @@
  *      q = require('q');
  *      device_controller = require('./device_controller');
 **/
-var handlebars = require('handlebars');
 var q = require('q');
 var device_controller;
 try {
@@ -18,14 +17,6 @@ try {
     console.log('in device_selector.js, error requiring device_controller', err);
 }
 const gui = global.lj_di_injector.get('gui');
-
-var OPEN_FAIL_MESSAGE = handlebars.compile(
-    'Sorry. Failed to the open device. Please check the ' +
-    'physical connection and try again. ' +
-    'Driver error number: {{.}}');
-
-var CONNECTED_OVER_TEMPLATE = handlebars.compile('Connected over {{ . }}');
-
 
 var resizeTimeout;
 
@@ -83,9 +74,8 @@ function connectNewDevice(event)
         device_controller.getDeviceKeeper().addDevice(device);
         showFinishButton();
         $('.connect-button').slideDown();
-        container.find('.current-connection-indicator').html(
-            CONNECTED_OVER_TEMPLATE(typeStr)
-        );
+
+        container.find('.current-connection-indicator').html('Connected over ' + typeStr);
         container.children('#disconnect-button-holder').slideDown();
     };
 
@@ -188,7 +178,9 @@ function moveToModules() {
  * @param {String} errorMessage The message to display.
 **/
 function showAlert(errorMessage) {
-    var message = OPEN_FAIL_MESSAGE(errorMessage);
+    var message = 'Sorry. Failed to the open device. Please check the ' +
+        'physical connection and try again. ' +
+        'Driver error number: ' + errorMessage;
     $('#error-display').html(message);
     $('.device-selector-holder').css('margin-top', '0px');
     $('#alert-message').fadeIn();

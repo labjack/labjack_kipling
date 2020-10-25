@@ -5,22 +5,12 @@
 **/
 
 var dict = require('dict');
-var handlebars = require('handlebars');
 var q = require('q');
 var sprintf = require('sprintf-js');
 
 var CONFIG_PANE_SELECTOR = '#configuration-pane';
 var OUTPUTS_TEMPLATE_SRC = 'analog_outputs/output_controls.html';
 var OUTPUTS_DATA_SRC = 'analog_outputs/outputs.json';
-
-var CONFIRMATION_DISPLAY_TEMPLATE_STR = '#{{register}}-confirmation-display';
-var DEVICE_SELECT_ID_TEMPLATE_STR = '#{{serial}}-selector';
-
-var CONFIRMATION_DISPLAY_TEMPLATE = handlebars.compile(
-    CONFIRMATION_DISPLAY_TEMPLATE_STR);
-
-var DEVICE_SELECT_ID_TEMPLATE = handlebars.compile(
-    DEVICE_SELECT_ID_TEMPLATE_STR);
 
 var devices;
 
@@ -69,8 +59,8 @@ function AnalogOutputDeviceController () {
             writeValueClosures.push(writeValueClosure(connectedDevices[i]));
 
         var numClosures = writeValueClosures.length;
-        if (numClosures == 0) { 
-            deferred.resolve(); 
+        if (numClosures == 0) {
+            deferred.resolve();
             return deferred.promise;
         }
 
@@ -167,13 +157,11 @@ function formatVoltageTooltip(value)
 function onVoltageSelected(event)
 {
     var register = Number(event.target.id.replace('-control', ''));
-    
-    var confirmationSelector = CONFIRMATION_DISPLAY_TEMPLATE(
-        {register: register}
-    );
+
+    var confirmationSelector = '# ' + register + '-confirmation-display';
 
     var selectedVoltage = Number($('#'+event.target.id).val());
-    
+
     console.log($('#'+event.target.id).slider('getValue'));
     $(confirmationSelector).html(
         formatVoltageTooltip(selectedVoltage)
@@ -221,7 +209,7 @@ function changeActiveDevices()
     analogOutputDeviceController.setConnectedDevices(checkedDevices).fail(
         function (err) {showAlert(err.retError);});
     $('#configuration-pane-holder').hide();
-    
+
     if(checkedDevices.length != 0)
         $('#configuration-pane-holder').fadeIn();
 }
@@ -235,12 +223,10 @@ function loadCurrentDACSettings ()
     $('.slider').each(function () {
         var register = Number(this.id.replace('-control', ''));
         var selectedVoltage = analogOutputDeviceController.loadDAC(register);
-        
+
         $('#' + this.id).slider('setValue', selectedVoltage);
 
-        var confirmationSelector = CONFIRMATION_DISPLAY_TEMPLATE(
-            {register: register}
-        );
+        var confirmationSelector = '#' + register + '-confirmation-display';
         $(confirmationSelector).html(formatVoltageTooltip(selectedVoltage));
     });
 }
@@ -256,10 +242,8 @@ $('#analog-output-config').ready(function(){
     var keeper = device_controller.getDeviceKeeper();
     devices = keeper.getDevices();
 
-    var currentDeviceSelector = DEVICE_SELECT_ID_TEMPLATE(
-        {'serial': devices[0].getSerial()}
-    );
-    
+    var currentDeviceSelector = '#' + devices[0].getSerial() + '-selector';
+
     $(currentDeviceSelector).attr('checked', true);
     analogOutputDeviceController.setConnectedDevices([devices[0]]);
 

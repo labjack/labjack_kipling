@@ -1,42 +1,41 @@
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
+'use strict';
 
-// Define the window zoom manager
-function createWindowZoomManager() {
-    this.zoomLevel = 1;
-    this.zoomIncrement = 0.05;
+const {EventEmitter} = require('events');
 
-    this.keyboardEventHandler = undefined;
+class WindowZoomManager extends EventEmitter {
 
-    // Set the initial body zoom.
-    window.document.body.style.zoom = this.initialZoom;
+    constructor() {
+        super();
 
-    function zoomIn() {
-        self.zoomLevel = self.zoomLevel + self.zoomIncrement;
-        window.document.body.style.zoom = self.zoomLevel;
-        self.emit('zoomIn', self.zoomLevel);
-        self.emit('zoom', self.zoomLevel);
+        this.zoomLevel = 1;
+        this.zoomIncrement = 0.05;
+
+        this.keyboardEventHandler = undefined;
+
+        // Set the initial body zoom.
+        window.document.body.style.zoom = this.initialZoom;
     }
 
-    function zoomOut() {
-        self.zoomLevel = self.zoomLevel - self.zoomIncrement;
-        window.document.body.style.zoom = self.zoomLevel;
-        self.emit('zoomOut', self.zoomLevel);
-        self.emit('zoom', self.zoomLevel);
+    zoomIn() {
+        this.zoomLevel = this.zoomLevel + this.zoomIncrement;
+        window.document.body.style.zoom = this.zoomLevel;
+        this.emit('zoomIn', this.zoomLevel);
+        this.emit('zoom', this.zoomLevel);
     }
 
-
-    this.zoomIn = zoomIn;
-    this.zoomOut = zoomOut;
+    zoomOut() {
+        this.zoomLevel = this.zoomLevel - this.zoomIncrement;
+        window.document.body.style.zoom = this.zoomLevel;
+        this.emit('zoomOut', this.zoomLevel);
+        this.emit('zoom', this.zoomLevel);
+    }
 
     // The window zoom manager is initialized by the index.js file in the
     // Kipling application.
-    this.init = function(bundle) {
+    init(bundle) {
         // console.log('Initializing window zoom manager', bundle);
         return Promise.resolve(bundle);
-    };
-    var self = this;
+    }
 }
-util.inherits(createWindowZoomManager, EventEmitter);
 
-var WINDOW_ZOOM_MANAGER = new createWindowZoomManager();
+var WINDOW_ZOOM_MANAGER = new WindowZoomManager();

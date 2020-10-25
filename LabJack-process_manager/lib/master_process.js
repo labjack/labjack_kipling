@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * The master_process is in charge of creating and destructing child
  * process and initiating any sendReceive type communication.
@@ -5,28 +7,24 @@
  * @author Chris Johnson (LabJack Corp.)
 **/
 
-var child_process = require('child_process');
-var dict = require('dict');
-var q = require('q');
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var stream = require('stream');
-var fs = require('fs');
+const child_process = require('child_process');
+const dict = require('dict');
+const {EventEmitter} = require('events');
 
 // include various constants from the constants file
-var pm_constants = require('./process_manager_constants');
-var PM_MESSAGE = pm_constants.message;
-var PM_STOP_CHILD_PROCESS = pm_constants.stopChildProcess;
-var PM_GET_PROCESS_INFO = pm_constants.getProcessInfo;
-var PM_CHILD_PROCESS_STARTED = pm_constants.childProcessStarted;
-var PM_EMIT_MESSAGE = pm_constants.emitMessage;
+const pm_constants = require('./process_manager_constants');
+const PM_MESSAGE = pm_constants.message;
+const PM_STOP_CHILD_PROCESS = pm_constants.stopChildProcess;
+const PM_GET_PROCESS_INFO = pm_constants.getProcessInfo;
+const PM_CHILD_PROCESS_STARTED = pm_constants.childProcessStarted;
+const PM_EMIT_MESSAGE = pm_constants.emitMessage;
 
-var createStreamInterface = false;
+const createStreamInterface = false;
 
-var IS_DEBUG = false;
-var print = function(argA, argB) {
+const IS_DEBUG = false;
+const print2 = (argA, argB) => {
     if(IS_DEBUG) {
-        var msg = 'PM:';
+        const msg = 'PM:';
         if(argA) {
             if(argB) {
                 console.log(msg, argA, argB);
@@ -43,134 +41,134 @@ var print = function(argA, argB) {
 /**
  * Possible events that the process manager can emit:
 **/
-var PM_MESSAGE_BUFFER_FULL = 'messageBufferFull';
-var PM_RECEIVED_MESSAGE_INVALID = 'ReceivedInvalidMessage';
-var PM_CRITICAL_ERROR = 'criticalError';
+const PM_MESSAGE_BUFFER_FULL = 'messageBufferFull';
+const PM_RECEIVED_MESSAGE_INVALID = 'ReceivedInvalidMessage';
+const PM_CRITICAL_ERROR = 'criticalError';
 
 // Some debugging constants
-var NUM_PROCESSES_MANAGERS_CREATED = 0;
-var NUM_MASTER_PROCESSES_CREATED = 0;
+let NUM_PROCESSES_MANAGERS_CREATED = 0;
+let NUM_MASTER_PROCESSES_CREATED = 0;
 
-function createNewProcessManager() {
-    NUM_PROCESSES_MANAGERS_CREATED += 1;
-    // This is the object where the child process will get saved
-    var subProcess;
-    var receivedDisconnectMessage = false;
-    var receivedExitMessage = false;
-    var internalMessages = [
-        PM_STOP_CHILD_PROCESS,
-        PM_CHILD_PROCESS_STARTED,
-        PM_GET_PROCESS_INFO
-    ];
+class NewProcessManager extends EventEmitter {
 
-    this.getSubprocess = function() {
-        return subProcess;
-    };
-    var isInternalMessage = function(messageType) {
-        var isInternalMessage = false;
-        if(internalMessages.indexOf(messageType) >= 0) {
+    constructor() {
+        super();
+
+        NUM_PROCESSES_MANAGERS_CREATED += 1;
+        // This is the object where the child process will get saved
+        this.receivedDisconnectMessage = false;
+        this.receivedExitMessage = false;
+        this.internalMessages = [
+            PM_STOP_CHILD_PROCESS,
+            PM_CHILD_PROCESS_STARTED,
+            PM_GET_PROCESS_INFO
+        ];
+
+        //  These variables will be used to create, manage, and execute async messages.
+        this.messageBufferMaxSize = 50000;
+    }
+
+    getSubprocess() {
+        return this.subProcess;
+    }
+
+    isInternalMessage(messageType) {
+        let isInternalMessage = false;
+        if(this.internalMessages.indexOf(messageType) >= 0) {
             isInternalMessage = true;
         }
         return isInternalMessage;
-    };
+    }
 
-    //  These variables will be used to create, manage, and execute async messages.
-    var messageCounter;
-    var messageBuffer;
-    var messageBufferMaxSize = 50000;
+    initializeMessageManagement() {
+        this.messageCounter = 0;
+        this.messageBuffer = dict();
+    }
 
-    var initializeMessageManaggement = function() {
-        messageCounter = 0;
-        messageBuffer = dict();
-    };
-    var addStartupListenerKey = function() {
-        var startupListener = q.defer();
-        
-        var messageInfo = {};
-        messageInfo.id = PM_CHILD_PROCESS_STARTED;
-        messageInfo.type = PM_CHILD_PROCESS_STARTED;
-        messageInfo.reject = startupListener.reject;
-        messageInfo.resolve = startupListener.resolve;
+    addStartupListenerKey() {
+        return new Promise((resolve, reject) => {
+            const messageInfo = {};
+            messageInfo.id = PM_CHILD_PROCESS_STARTED;
+            messageInfo.type = PM_CHILD_PROCESS_STARTED;
+            messageInfo.reject = reject;
+            messageInfo.resolve = resolve;
 
-        // save the message object to the buffer
-        messageBuffer.set(PM_CHILD_PROCESS_STARTED, messageInfo);
+            // save the message object to the buffer
+            this.messageBuffer.set(PM_CHILD_PROCESS_STARTED, messageInfo);
+        });
+    }
 
-        return startupListener.promise;
-    };
     // Get the next available messageId and increment the message counter
-    var getNewMessageId = function() {
-        var newMessageId = messageCounter.toString();
-        if (messageCounter < messageBufferMaxSize) {
-            messageCounter += 1;
+    getNewMessageId() {
+        const newMessageId = this.messageCounter.toString();
+        if (this.messageCounter < this.messageBufferMaxSize) {
+            this.messageCounter += 1;
         } else {
-            messageCounter = 0;
+            this.messageCounter = 0;
         }
-        return newMessageId;  
-    };
-    // Check to see if the messageId is already in use, if it is then the 
+        return newMessageId;
+    }
+
+    // Check to see if the messageId is already in use, if it is then the
     // child process has to many outstanding messages and we need to perform
     // some sort of recovery option.
-    var checkMessageId = function(messageId) {
-        if (messageBuffer.has(messageId)) {
+    checkMessageId(messageId) {
+        if (this.messageBuffer.has(messageId)) {
             console.error('in checkMessageId', PM_MESSAGE_BUFFER_FULL);
-            var emitResult = self.emit(PM_MESSAGE_BUFFER_FULL, messageId);
+            const emitResult = this.emit(PM_MESSAGE_BUFFER_FULL, messageId);
             if(!emitResult) {
-                throw new error(PM_MESSAGE_BUFFER_FULL);
+                throw new Error(PM_MESSAGE_BUFFER_FULL);
             }
         }
-    };
-    var getMessageId = function(message) {
-        return message.id;
-    };
-    var getMessageType = function(message) {
-        return message.type;
-    };
+    }
 
-    var handleReceivedMessageError = function(bundle) {
-        var errDefered = q.defer();
-        errDefered.reject(bundle);
-        return errDefered.promise;
-    };
-    var checkReceivedMessage = function(bundle) {
-        var defered = q.defer();
-        var messageId = getMessageId(bundle);
-        if(messageId === PM_EMIT_MESSAGE) {
-            var eventType = bundle.message.data.eventType;
-            var eventData = bundle.message.data.data;
-            var listeners = self.listeners(eventType);
-            print('received:', PM_EMIT_MESSAGE);
-            print(bundle.message.data, listeners);
-            self.emit(eventType, eventData);
-            defered.reject(bundle);
-        } else {
-            if(messageBuffer.has(messageId)) {
-                bundle.isMessageValid = true;
-                defered.resolve(bundle);
+    getMessageId(message) {
+        return message.id;
+    }
+
+    getMessageType(message) {
+        return message.type;
+    }
+
+    checkReceivedMessage(bundle) {
+        return new Promise((resolve, reject) => {
+            const messageId = this.getMessageId(bundle);
+            if(messageId === PM_EMIT_MESSAGE) {
+                const eventType = bundle.message.data.eventType;
+                const eventData = bundle.message.data.data;
+                const listeners = this.listeners(eventType);
+                print2('received:', PM_EMIT_MESSAGE);
+                print2(bundle.message.data, listeners);
+                this.emit(eventType, eventData);
+                reject(bundle);
             } else {
-                console.error('in checkReceivedMessage', PM_RECEIVED_MESSAGE_INVALID);
-                var emitResult = self.emit(PM_RECEIVED_MESSAGE_INVALID);
-                if(!emitResult) {
-                    throw new error(PM_RECEIVED_MESSAGE_INVALID);
+                if (this.messageBuffer.has(messageId)) {
+                    bundle.isMessageValid = true;
+                    resolve(bundle);
+                } else {
+                    console.error('in checkReceivedMessage', PM_RECEIVED_MESSAGE_INVALID);
+                    const emitResult = this.emit(PM_RECEIVED_MESSAGE_INVALID);
+                    if(!emitResult) {
+                        throw new Error(PM_RECEIVED_MESSAGE_INVALID);
+                    }
+                    bundle.qRejectMessage = 'Invalid message received: ' + messageId.toString();
+                    reject(bundle);
                 }
-                bundle.qRejectMessage = 'Invalid message received: ' + messageId.toString();
-                defered.reject(bundle);
             }
-        }
-        return defered.promise;
-    };
-    var markMessageHandler = function(bundle) {
-        var defered = q.defer();
-        var messageType = getMessageType(bundle.message);
-        if(isInternalMessage(messageType)) {
+        });
+    }
+
+    markMessageHandler(bundle) {
+        const messageType = this.getMessageType(bundle.message);
+        if (this.isInternalMessage(messageType)) {
             bundle.isInternalMessage = true;
         } else {
             bundle.executeMessageCallback = true;
         }
-        defered.resolve(bundle);
-        return defered.promise;
-    };
-    var handleInternalMessage = function(bundle) {
-        var defered = q.defer();
+        return Promise.resolve(bundle);
+    }
+
+    async handleInternalMessage(bundle) {
         if(bundle.isInternalMessage) {
             // handle internal message
             if(bundle.id === PM_CHILD_PROCESS_STARTED) {
@@ -188,86 +186,86 @@ function createNewProcessManager() {
                 console.log('internal message type encountered and not handled', bundle.message);
                 bundle.isHandled = true;
             }
-            defered.resolve(bundle);
+            return bundle;
         } else {
-            defered.resolve(bundle);
+            return bundle;
         }
-        return defered.promise;
-    };
-    var executeMessageCallback = function(bundle) {
-        var defered = q.defer();
-        
+    }
+
+    async executeMessageCallback(bundle) {
         if(!bundle.isHandled) {
-            var savedCallback = messageBuffer.get(getMessageId(bundle));
-            print('Executing Message Callback', bundle);
+            const savedCallback = this.messageBuffer.get(this.getMessageId(bundle));
+            print2('Executing Message Callback', bundle);
             if(bundle.message.isError) {
                 if(bundle.message.errorType === 'userError') {
                     savedCallback.reject(bundle.data);
-                    defered.resolve(bundle);
-                    
+                    return bundle;
                 }
             } else {
                 savedCallback.resolve(bundle.data);
-                defered.resolve(bundle);
+                return bundle;
             }
         } else {
-            defered.resolve(bundle);
+            return bundle;
         }
-        return defered.promise;
-    };
-    var cleanupMessage = function(bundle) {
-        print('cleanupMessage', bundle);
-        if(bundle.isMessageValid) {
-            messageBuffer.delete(getMessageId(bundle));
-        }
-        var defered = q.defer();
-        var keys = Object.keys(bundle);
-        keys.forEach(function(key) {
-            bundle[key] = undefined;
-            delete bundle[key];
-        });
-        bundle = undefined;
-        defered.resolve();
-        return defered.promise;
-    };
+    }
 
+    cleanupMessage(bundle) {
+        print2('cleanupMessage', bundle);
+        if(bundle.isMessageValid) {
+            this.messageBuffer.delete(this.getMessageId(bundle));
+        }
+        return new Promise((resolve) => {
+            const keys = Object.keys(bundle);
+            keys.forEach((key) => {
+                bundle[key] = undefined;
+                delete bundle[key];
+            });
+            bundle = undefined;
+            resolve();
+        });
+    }
 
     // ----------------- define any private functions: -------------------------
     //
-    var errorListener = function(err) {
-        print('errorListener', err);
-        self.emit('error', err);
-    };
+    errorListener(err) {
+        print2('errorListener', err);
+        this.emit('error', err);
+    }
+
     // exitListener takes one argument, it is the exit code of the child process.
-    var exitListener = function(code) {
-        print('exitListener', code);
-        receivedExitMessage = true;
-        self.emit('exit', code);
-    };
-    var closeListener = function(data) {
-        print('closeListener', data);
+    exitListener(code) {
+        print2('exitListener', code);
+        this.receivedExitMessage = true;
+        this.emit('exit', code);
+    }
+
+    closeListener(data) {
+        print2('closeListener', data);
 
         // If this event was thrown while the process hasn't been confirmed as
         // started then return an error.
-        if(messageBuffer.has(PM_CHILD_PROCESS_STARTED)) {
-            var startMessage = messageBuffer.get(PM_CHILD_PROCESS_STARTED);
-            var info = {
+        if (this.messageBuffer.has(PM_CHILD_PROCESS_STARTED)) {
+            const startMessage = this.messageBuffer.get(PM_CHILD_PROCESS_STARTED);
+            const info = {
                 'message': 'Child process failed to start',
                 'error': data
             };
             startMessage.reject(info);
         }
 
-        self.emit('close', data);
-    };
-    var disconnectListener = function(data) {
-        print('disconnectListener', data);
-        receivedDisconnectMessage = true;
-        self.emit('disconnect', data);
-    };
-    var messageListener = function(data) {
-        print('messageListener', data);
-        var receivedMessageBundle = {
+        this.emit('close', data);
+    }
+
+    disconnectListener(data) {
+        print2('disconnectListener', data);
+        this.receivedDisconnectMessage = true;
+        this.emit('disconnect', data);
+    }
+
+    messageListener(data) {
+        print2('messageListener', data);
+        const receivedMessageBundle = {
             'qRejectMessage': '',
             'isMessageValid': false,
             'isInternalMessage': false,
@@ -277,62 +275,62 @@ function createNewProcessManager() {
             'data': data.data,
             'id': data.id
         };
-        checkReceivedMessage(receivedMessageBundle)
-        .then(markMessageHandler,handleReceivedMessageError)
-        .then(handleInternalMessage,handleReceivedMessageError)
-        .then(executeMessageCallback,handleReceivedMessageError)
-        .then(cleanupMessage, cleanupMessage);
-    };
-    var stdinListener = function(data) {
-        console.log('in mp-stdinListener:', data.toString());
-        print('stdinListener', data);
-    };
-    var stderrListener = function(data) {
-        console.log('in mp-stderrListener:', data.toString());
-        print('stderrListener', data);
-    };
+        this.checkReceivedMessage(receivedMessageBundle)
+            .then(bundle => this.markMessageHandler(bundle))
+            .then(bundle => this.handleInternalMessage(bundle))
+            .then(bundle => this.executeMessageCallback(bundle))
+            .then(bundle => this.cleanupMessage(bundle), bundle => this.cleanupMessage(bundle));
+    }
 
-    
+    stdinListener(data) {
+        console.log('in mp-stdinListener:', data.toString());
+        print2('stdinListener', data);
+    }
+
+    stderrListener(data) {
+        console.log('in mp-stderrListener:', data.toString());
+        print2('stderrListener', data);
+    }
+
     // define any external interfaces
-    this.startChildProcess = function(childProcessFilePath, options) {
-        var startChildProcessDefered = q.defer();
-        var deviceManagerSlaveLocation = childProcessFilePath;
-        var deviceManagerSlaveArgs = [];
-        var isSilent = false;
-        
-        var deviceManagerSlaveOptions = {};
-        var validExecPath = false;
-        if(options) {
-            if(options.silent) {
+    startChildProcess(childProcessFilePath, options) {
+        const deviceManagerSlaveLocation = childProcessFilePath;
+        const deviceManagerSlaveArgs = [];
+        let isSilent = false;
+
+        const deviceManagerSlaveOptions = {};
+        let validExecPath = false;
+        if (options) {
+            if (options.silent) {
                 deviceManagerSlaveOptions.silent = options.silent;
                 isSilent = options.silent;
             }
-            if(options.cwd) {
+            if (options.cwd) {
                 deviceManagerSlaveOptions.cwd = options.cwd;
             }
-            if(options.execPath) {
-                if(options.execPath !== '') {
+            if (options.execPath) {
+                if (options.execPath !== '') {
                     validExecPath = true;
                     deviceManagerSlaveOptions.execPath = options.execPath;
                 }
             }
-            if(options.execArgv) {
-                if(Array.isArray(options.execArgv)) {
+            if (options.execArgv) {
+                if (Array.isArray(options.execArgv)) {
                     deviceManagerSlaveOptions.execArgv = options.execArgv;
                 }
             }
-            if(options.spawnChildProcess) {
+            if (options.spawnChildProcess) {
                 deviceManagerSlaveOptions.spawnChildProcess = options.spawnChildProcess;
             }
-            var envVars = process.env;
+            const envVars = process.env;
             envVars.slave_process_env = JSON.stringify(options);
             deviceManagerSlaveOptions.env = envVars;
         }
 
         // reset the messageCounter back to 0
-        initializeMessageManaggement();
+        this.initializeMessageManagement();
 
-        if(deviceManagerSlaveOptions.spawnChildProcess && (validExecPath)) {
+        if (deviceManagerSlaveOptions.spawnChildProcess && (validExecPath)) {
             // console.log("calling child_process.spawn");
 
             // Instruct the new node process to execute the defined .js file
@@ -347,69 +345,44 @@ function createNewProcessManager() {
                 'pipe',
                 'pipe'
             ];
-            subProcess = child_process.spawn(
+            this.subProcess = child_process.spawn(
                 options.execPath,
                 deviceManagerSlaveArgs,
                 deviceManagerSlaveOptions
             );
-            
-            if(createStreamInterface) {
+
+            if (createStreamInterface) {
                 // console.log("HERE", subProcess.stdio);
-                self.subProcessPipe = subProcess.stdio[4];
-                self.subProcessPipe.write(Buffer('awesome'));
-                // console.log('here!', Object.keys(self.subProcessPipe));
+                this.subProcessPipe = this.subProcess.stdio[4];
+                this.subProcessPipe.write(new Buffer('awesome'));
+                // console.log('here!', Object.keys(this.subProcessPipe));
 
                 // trying to read data from a subprocess
                 // console.log('here1', subProcess.stdio[5]);
                 // console.log('here2', Object.keys(subProcess.stdio[5]));
 
-                // var readStream = fs.createReadStream(null, {fd: 5});
+                // const readStream = fs.createReadStream(null, {fd: 5});
                 // console.log("hereA", readStream);
                 // console.log("hereB", Object.keys(readStream));
                 // console.log("hereC", readStream._events);
 
-                var readStream = subProcess.stdio[5];
-                readStream.on('readable', function() {
+                const readStream = this.subProcess.stdio[5];
+                readStream.on('readable', () => {
                     console.log("-! M: my piped data 0");
-                    var chunk;
+                    let chunk;
                     while (null !== (chunk = readStream.read())) {
                         console.log('-! got %d bytes of data', chunk.length, ':', chunk.toString('ascii'));
                     }
                 });
-                // readStream.on('readable', function() {
-                //     console.log("my piped data 0");
-                //     var chunk;
-                //     while (null !== (chunk = readStream.read())) {
-                //         console.log('got %d bytes of data', chunk.length);
-                //     }
-                // });
-                // readStream.on('end', function() {
-                //     console.log("readStream Ended");
-                // });
-                // readStream.on('error', function(err) {
-                //     console.log("readStream Error", err);
-                // });
-                // self.bufferStream.pipe(pipe);
             }
         } else {
-            // Enable to print out important just-before starting subprocess info
-            if(false) {
-                console.log('');
-                console.log('Forking child_process');
-                console.log('cwd', process.cwd());
-                console.log('Starting Library', deviceManagerSlaveLocation);
-                // console.log('Args', deviceManagerSlaveArgs);
-                console.log('Starting cwd', deviceManagerSlaveOptions.cwd);
-                console.log('Starting execPath', deviceManagerSlaveOptions.execPath);
-                // deviceManagerSlaveArgs = {};
-            }
-            subProcess = child_process.fork(
+            this.subProcess = child_process.fork(
                 deviceManagerSlaveLocation,
                 deviceManagerSlaveArgs,
                 deviceManagerSlaveOptions
             );
         }
-        
+
 
         /*
         Spawn parameters:
@@ -439,242 +412,225 @@ function createNewProcessManager() {
         */
 
         // Attach a wide variety of event listeners
-        subProcess.on('error', errorListener);
-        subProcess.on('exit', exitListener);
-        subProcess.on('close', closeListener);
-        subProcess.on('disconnect', disconnectListener);
-        subProcess.on('message', messageListener);
-        if(isSilent) {
-            if(options.stdinListener) {
-                subProcess.stdout.on('data', options.stdinListener);
+        this.subProcess.on('error', data => this.errorListener(data));
+        this.subProcess.on('exit', data => this.exitListener(data));
+        this.subProcess.on('close', data => this.closeListener(data));
+        this.subProcess.on('disconnect', data => this.disconnectListener(data));
+        this.subProcess.on('message', data => this.messageListener(data));
+        if (isSilent) {
+            if (options.stdinListener) {
+                this.subProcess.stdout.on('data', options.stdinListener);
             } else {
-                subProcess.stdout.on('data', stdinListener);
+                this.subProcess.stdout.on('data', data => this.stdinListener(data));
             }
-            if(options.stderrListener) {
-                subProcess.stderr.on('data', options.stderrListener);
+            if (options.stderrListener) {
+                this.subProcess.stderr.on('data', options.stderrListener);
             } else {
-                subProcess.stderr.on('data', stderrListener);
+                this.subProcess.stderr.on('data', data => this.stderrListener(data));
             }
-        }  
-        receivedDisconnectMessage = false;
-        receivedExitMessage = false;
+        }
+        this.receivedDisconnectMessage = false;
+        this.receivedExitMessage = false;
 
-        addStartupListenerKey()
-        .then(startChildProcessDefered.resolve, startChildProcessDefered.reject);
-        return startChildProcessDefered.promise;
-    };
-    this.qSendInternalMessage = function(type, data) {
-        var defered = q.defer();
-        sendReceive(data, type)
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
-    };
-    this.qSendReceiveMessage = function(m) {
-        var defered = q.defer();
-        sendReceive(m, PM_MESSAGE)
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
-    };
-    this.sendReceiveMessage = function(m, onError, onSuccess) {
-        var saveFunc = function(func) {
+        return this.addStartupListenerKey();
+    }
+
+    qSendInternalMessage(type, data) {
+        return this.sendReceive(data, type);
+    }
+
+    qSendReceiveMessage(m) {
+        return this.sendReceive(m, PM_MESSAGE);
+    }
+
+    sendReceiveMessage(m, onError, onSuccess) {
+        const saveFunc = (func) => {
             return func;
         };
-        self.qSendMessage(m)
-        .then(saveFunc(onSuccess), saveFunc(onError));
-    };
-    this.sendMessage = function(m) {
-        var defered = q.defer();
-        sendEmitMessage(PM_EMIT_MESSAGE, m)
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
-    };
-    this.emitMessage = function(type, m) {
-        var defered = q.defer();
-        sendEmitMessage(type.toString(), m)
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
-    };
-    var sendReceive = function(m, type) {
+        this.qSendReceiveMessage(m).then(saveFunc(onSuccess), saveFunc(onError));
+    }
+
+    sendMessage(m) {
+        return this.sendEmitMessage(PM_EMIT_MESSAGE, m);
+    }
+
+    emitMessage(type, m) {
+        return this.sendEmitMessage(type.toString(), m);
+    }
+
+    sendReceive(m, type) {
         // create promise object
-        var childProcessMessage = q.defer();
+        return new Promise((resolve, reject) => {
 
-        // get and check the next available messageId
-        var messageId = getNewMessageId();
-        checkMessageId(messageId);
+            // get and check the next available messageId
+            const messageId = this.getNewMessageId();
+            this.checkMessageId(messageId);
 
-        // build a messageInfo object to be saved to the message buffer and is 
-        // used to execute the saved promise objects when the messages response
-        // is received.
-        var messageInfo = {};
-        messageInfo.id = messageId;
-        messageInfo.type = type;
-        messageInfo.reject = childProcessMessage.reject;
-        messageInfo.resolve = childProcessMessage.resolve;
+            // build a messageInfo object to be saved to the message buffer and is
+            // used to execute the saved promise objects when the messages response
+            // is received.
+            const messageInfo = {};
+            messageInfo.id = messageId;
+            messageInfo.type = type;
+            messageInfo.reject = reject;
+            messageInfo.resolve = resolve;
 
-        // save the message object to the buffer
-        messageBuffer.set(messageId, messageInfo);
+            // save the message object to the buffer
+            this.messageBuffer.set(messageId, messageInfo);
 
-        // build a newMessage object that wraps the message with a message id
-        // that will later resolve or reject on the promise object.
-        var newMessage = {};
-        newMessage.id = messageId;
-        newMessage.responseRequired = true;
-        newMessage.type = type;
-        newMessage.data = m;
+            // build a newMessage object that wraps the message with a message id
+            // that will later resolve or reject on the promise object.
+            const newMessage = {};
+            newMessage.id = messageId;
+            newMessage.responseRequired = true;
+            newMessage.type = type;
+            newMessage.data = m;
 
-        // send the newMessage object to the child process
-        subProcess.send(newMessage);
+            // send the newMessage object to the child process
+            this.subProcess.send(newMessage);
 
-        // return promise
-        return childProcessMessage.promise;
-    };
-    var sendEmitMessage = function(type, m) {
-        var defered = q.defer();
-        var newMessage = {};
+            // return promise
+        });
+    }
+
+    async sendEmitMessage(type, m) {
+        const newMessage = {};
         newMessage.id = PM_EMIT_MESSAGE;
         newMessage.responseRequired = false;
         newMessage.type = type;
         newMessage.data = m;
 
         // send the newMessage object to the child process
-        subProcess.send(newMessage);
-        
-        defered.resolve();
-        return defered.promise;
-    };
+        this.subProcess.send(newMessage);
+    }
 
-    this.stopChildProcess = function() {
-        var defered = q.defer();
-        stopOpenStreams()
-        .then(informChildProcessToStop)
-        .then(innerStopChildProcess)
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
-    };
-    var stopOpenStreams = function() {
-        var stopStreams = q.defer();
-        if(self.subProcessPipe) {
+    stopChildProcess() {
+        return this.stopOpenStreams()
+            .then(() => this.informChildProcessToStop())
+            .then(() => this.innerStopChildProcess());
+    }
+
+    stopOpenStreams() {
+        if(this.subProcessPipe) {
             console.log("Closing subProcessPipe");
-            self.subProcessPipe.end();
+            this.subProcessPipe.end();
         }
-        stopStreams.resolve();
-        return stopStreams.promise;
-    };
-    var informChildProcessToStop = function() {
-        var defered = q.defer();
-        self.qSendInternalMessage(PM_STOP_CHILD_PROCESS,'')
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
-    };
-   var innerStopChildProcess = function() {
-        var stopDefered = q.defer();
-        print('in stopChildProcess');
-        subProcess.disconnect();
-        var numIterations = 0;
-        var numToKill = 200;
-        var maxIterations = 400;
-        var loopTillSubprocessEnded = function() {
-            numIterations += 1;
-            if(receivedExitMessage && receivedDisconnectMessage) {
-                print('Lost Messages due to stoppingChildProcess', messageBuffer.size);
-                stopDefered.resolve({'numLostMessages': messageBuffer.size});
-            } else {
-                if(numIterations < maxIterations) {
-                    if(numIterations == numToKill) {
-                        console.log('Killing...');
-                        subProcess.kill();
-                    }
-                    setTimeout(loopTillSubprocessEnded, 10);
-                } else {
-                    console.log('Failed to verify ending...');
-                    // stopDefered.reject('Failed to verify that subProcess was ended');
-                    stopDefered.resolve({'numLostMessages': messageBuffer.size});
-                }
-            }
-        };
-        setTimeout(loopTillSubprocessEnded, 10);
-        return stopDefered.promise;
-    };
+        return Promise.resolve();
+    }
 
-    EventEmitter.call(this);
-    var self = this;
+    informChildProcessToStop() {
+        return this.qSendInternalMessage(PM_STOP_CHILD_PROCESS,'');
+    }
+
+    innerStopChildProcess() {
+       return new Promise((resolve) => {
+           print2('in stopChildProcess');
+           this.subProcess.disconnect();
+           let numIterations = 0;
+           const numToKill = 200;
+           const maxIterations = 400;
+           const loopTillSubprocessEnded = () => {
+               numIterations += 1;
+               if (this.receivedExitMessage && this.receivedDisconnectMessage) {
+                   print2('Lost Messages due to stoppingChildProcess', this.messageBuffer.size);
+                   resolve({'numLostMessages': this.messageBuffer.size});
+               } else {
+                   if (numIterations < maxIterations) {
+                       if (numIterations === numToKill) {
+                           console.log('Killing...');
+                           this.subProcess.kill();
+                       }
+                       setTimeout(loopTillSubprocessEnded, 10);
+                   } else {
+                       console.log('Failed to verify ending...');
+                       resolve({'numLostMessages': this.messageBuffer.size});
+                   }
+               }
+           };
+           setTimeout(loopTillSubprocessEnded, 10);
+       });
+    }
 }
-util.inherits(createNewProcessManager, EventEmitter);
 
-function createNewMasterProcess() {
-    NUM_MASTER_PROCESSES_CREATED += 1;
+class NewMasterProcess {
 
-    this.masterProcess = undefined;
+    constructor() {
+        NUM_MASTER_PROCESSES_CREATED += 1;
 
-    var criticalErrorListener = function(err) {
-        print('criticalError encountered', err);
-    };
-    var messageBufferFullListener = function(err) {
-        print('messagebufferFull', err);
-    };
-    var receivedInvalidMessage = function(err) {
-        print('invalid message received', err);
-    };
+        this.masterProcess = undefined;
+    }
 
-    this.init = function(messageReceiver) {
-        self.masterProcess = undefined;
-        self.masterProcess = new createNewProcessManager();
+    criticalErrorListener(err) {
+        print2('criticalError encountered', err);
+    }
 
-        // Attach some event listeners to the self.masterProcess
-        self.masterProcess.on(PM_CRITICAL_ERROR, criticalErrorListener);
-        self.masterProcess.on(PM_MESSAGE_BUFFER_FULL, messageBufferFullListener);
-        self.masterProcess.on(PM_RECEIVED_MESSAGE_INVALID, receivedInvalidMessage);
+    messageBufferFullListener(err) {
+        print2('messagebufferFull', err);
+    }
+
+    receivedInvalidMessage(err) {
+        print2('invalid message received', err);
+    }
+
+    init(messageReceiver) {
+        this.masterProcess = new NewProcessManager();
+
+        // Attach some event listeners to the this.masterProcess
+        this.masterProcess.on(PM_CRITICAL_ERROR, err => this.criticalErrorListener(err));
+        this.masterProcess.on(PM_MESSAGE_BUFFER_FULL, err => this.messageBufferFullListener(err));
+        this.masterProcess.on(PM_RECEIVED_MESSAGE_INVALID, err => this.receivedInvalidMessage(err));
 
         // If a messageReceiver was given, assign it to listen to the PM_EMIT_MESSAGE event
         if(messageReceiver) {
-            self.masterProcess.on(PM_EMIT_MESSAGE, messageReceiver);
+            this.masterProcess.on(PM_EMIT_MESSAGE, messageReceiver);
         }
 
-        return self.masterProcess;
-    };
-    this.start = function(processName, options, onError, onSuccess) {
-        processManager.startChildProcess(processName, options)
-        .then(onSuccess, onError);
-    };
-    this.qStart = function(processName, options) {
-        return self.masterProcess.startChildProcess(processName, options);
-    };
-    this.stop = function(onError, onSuccess) {
-        print('in stop');
-        self.masterprocess.stopChildProcess()
-        .then(onError, onSuccess);
-    };
-    this.qStop = function() {
-        print('in qStop');
-        return self.masterProcess.stopChildProcess();
-    };
+        return this.masterProcess;
+    }
 
-    this.sendReceive = function(m) {
-        return self.masterProcess.qSendReceiveMessage(m);
-    };
-    this.sendMessage = function(m) {
-        return self.masterProcess.sendMessage(m);
-    };
-    this.send = function(type, m) {
-        return self.masterProcess.emitMessage(type, m);
-    };
+    start(processName, options, onError, onSuccess) {
+        this.masterProcess.startChildProcess(processName, options).then(onSuccess, onError);
+    }
 
-    this.getProcessInfo = function() {
-        return self.masterProcess.qSendInternalMessage(PM_GET_PROCESS_INFO);
-    };
+    qStart(processName, options) {
+        return this.masterProcess.startChildProcess(processName, options);
+    }
 
-    this.getEventEmitter = function() {
-        return self.masterProcess;
-    };
+    stop(onError, onSuccess) {
+        print2('in stop');
+        this.masterProcess.stopChildProcess().then(onError, onSuccess);
+    }
 
-    var self = this;
+    qStop() {
+        print2('in qStop');
+        return this.masterProcess.stopChildProcess();
+    }
+
+    sendReceive(m) {
+        return this.masterProcess.qSendReceiveMessage(m);
+    }
+
+    sendMessage(m) {
+        return this.masterProcess.sendMessage(m);
+    }
+
+    send(type, m) {
+        return this.masterProcess.emitMessage(type, m);
+    }
+
+    getProcessInfo() {
+        return this.masterProcess.qSendInternalMessage(PM_GET_PROCESS_INFO);
+    }
+
+    getEventEmitter() {
+        return this.masterProcess;
+    }
 }
 
-
 // Start defining external interfaces
-exports.createNewMasterProcess = createNewMasterProcess;
+exports.NewMasterProcess = NewMasterProcess;
 
-exports.getStats = function() {
+exports.getStats = () => {
     return {
         'numProcessManagersCreated': NUM_PROCESSES_MANAGERS_CREATED,
         'numMasterProcessesCreated': NUM_MASTER_PROCESSES_CREATED

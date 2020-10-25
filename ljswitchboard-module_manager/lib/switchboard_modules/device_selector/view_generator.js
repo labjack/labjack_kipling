@@ -823,76 +823,7 @@ var createDeviceSelectorViewGenerator = function() {
 		return defered.promise;
 	};
 
-	var textTemplate = "There were errors collecting data from devices. {{#each devErrors}}{{dt}}: {{#each ctErrors}}{{num}}x{{ct}}{{/each}}{{/each}}";
-	var compiledTextTemplate = handlebars.compile(textTemplate);
-	innerDisplayScanResultErrors = function(bundle) {
-		var defered = q.defer();
-		try {
-			var errors = self.scanErrorsCache;
-			if(errors) {
-				if(errors.length > 0) {
-					/* Format a string that looks like:
-					There were errors collecting data from devices: 1xUSB, 1xEthernet, 1xWiFi.
-					*/
-					var errorsByDev = {};
-					var errorsByCT = {};
-					errors.forEach(function(error) {
-						var dt = error.dtName;
-						if(typeof(errorsByDev[dt]) === 'undefined') {
-							errorsByDev[dt] = {
-								'dt': dt,
-								'ctErrors': {},
-							};
-						}
-						var ct = error.ct;
-						var ctMedium = driver_const.CONNECTION_MEDIUM[ct];
-						var ctName = driver_const.CONNECTION_TYPE_NAMES[ctMedium];
-						if(typeof(errorsByDev[dt].ctErrors[ctName]) === 'undefined') {
-							errorsByDev[dt].ctErrors[ctName] = {
-								'num': 1,
-								'ct': ctName,
-							};
-						} else {
-							errorsByDev[dt].ctErrors[ctName].num += 1;
-						}
-					});
-
-					var dispErrors = [];
-					var devKeys = Object.keys(errorsByDev);
-					devKeys.forEach(function(devKey) {
-						var devErrs = errorsByDev[devKey];
-						var devErrsObj = {
-							'dt': devErrs.dt,
-							'ctErrors': [],
-						};
-						var ctErrors = devErrs.ctErrors;
-						var ctKeys = Object.keys(ctErrors);
-						ctKeys.forEach(function(ctKey) {
-							devErrsObj.ctErrors.push(ctErrors[ctKey]);
-						});
-						dispErrors.push(devErrsObj);
-					});
-					var str = compiledTextTemplate({
-						'devErrors': dispErrors,
-					});
-					showAlert(str);
-				}
-			}
-		} catch(err) {
-			// do nothing...
-			console.error('Error showing alert', err);
-		}
-		defered.resolve(bundle);
-		return defered.promise;
-	}
 	this.displayScanResults = function(scanResults, scanErrors) {
-		// if(typeof(scanResults.forEach) === 'undefined') {
-		// 	scanResults = [];
-		// }
-		// if(typeof(scanErrors.forEach) === 'undefined') {
-		// 	scanErrors = [];
-		// }
-
 		self.scanResultsCache = scanResults;
 		self.scanErrorsCache = scanErrors;
 

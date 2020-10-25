@@ -5,8 +5,6 @@
 **/
 
 var async = require('async');
-var dict = require('dict');
-var handlebars = require('handlebars');
 var q = require('q');
 
 var fs_facade = require('./fs_facade');
@@ -18,17 +16,6 @@ var INDIVIDUAL_TEMPLATE_SRC = 'digital_io_config/individual_device_config.html';
 var MULTIPLE_TEMPLATE_SRC = 'digital_io_config/multiple_device_config.html';
 var LOADING_IMAGE_SRC = 'static/img/progress-indeterminate-ring-light.gif';
 var REFRESH_DELAY = 1000;
-
-var DEVICE_SELECT_ID_TEMPLATE_STR = '#{{serial}}-selector';
-var DISPLAY_SELECT_ID_TEMPLATE_STR = '#{{deviceType}}-{{serial}}-{{register}}';
-var OUTPUT_SWITCH_TEMPLATE_STR = '#{{register}}-output-switch';
-
-var DEVICE_SELECT_ID_TEMPLATE = handlebars.compile(
-    DEVICE_SELECT_ID_TEMPLATE_STR);
-var DISPLAY_SELECT_ID_TEMPLATE = handlebars.compile(
-    DISPLAY_SELECT_ID_TEMPLATE_STR);
-var OUTPUT_SWITCH_TEMPLATE = handlebars.compile(
-    OUTPUT_SWITCH_TEMPLATE_STR);
 
 var targetedDevices = [];
 
@@ -132,7 +119,7 @@ function readInputs ()
         targetedDevices,
         function (device, callback) {
             var regs = $('.direction-switch-check:not(:checked)').map(
-                function () { 
+                function () {
                     return parseInt(this.id.replace('-switch', ''));
                 }
             ).get();
@@ -143,13 +130,7 @@ function readInputs ()
                     for (var i=0; i<numRegs; i++) {
                         var value = results[i];
                         var reg = regs[i];
-                        var targetID = DISPLAY_SELECT_ID_TEMPLATE(
-                            {
-                                'deviceType': device.getDeviceType(),
-                                'serial': device.getSerial(),
-                                'register': reg
-                            }
-                        );
+                        const targetID = '#' + device.getDeviceType() + '-' + device.getSerial() + '-' + reg;
 
                         $(targetID).removeClass('inactive');
                         $(targetID).removeClass('active');
@@ -169,7 +150,7 @@ function readInputs ()
                 deferred.reject(err);
             } else {
                 deferred.resolve();
-            } 
+            }
         }
     );
 
@@ -194,7 +175,7 @@ function writeOutputs ()
         targetedDevices,
         function (device, callback) {
             var regs = $('.direction-switch-check:checked').map(
-                function () { 
+                function () {
                     return parseInt(this.id.replace('-switch', ''));
                 }
             ).get();
@@ -203,9 +184,7 @@ function writeOutputs ()
             var values = [];
             for (var i=0; i<numRegs; i++) {
                 var reg = regs[i];
-                var targetID = OUTPUT_SWITCH_TEMPLATE(
-                    {'register': reg}
-                );
+                const targetID = '#' + reg + '-output-switch';
                 if($(targetID).is(":checked"))
                     values.push(1);
                 else
@@ -224,7 +203,7 @@ function writeOutputs ()
                 deferred.reject(err);
             } else {
                 deferred.resolve();
-            } 
+            }
         }
     );
 
@@ -274,7 +253,7 @@ function changeFIODir (event)
     var targetID = selectedSwitch.replace('-switch', '');
     var targetIndicators = '.state-indicator-' + targetID;
     var targetOutputSwitch = '#' + targetID + '-output-switch';
-    
+
     if ($(event.target).is(":checked")) {
         $(targetIndicators).slideUp(function () {
             $(targetOutputSwitch).parent().parent().slideDown();
@@ -319,7 +298,7 @@ function changeActiveDevices(registers)
             $('.direction-switch-check').change(changeFIODir);
             $('.output-switch-check').parent().parent().hide();
         };
-        
+
         if(devices.length == 1)
         {
             renderIndividualDeviceControls(registers, devices[0], onRender);
@@ -338,10 +317,8 @@ function changeActiveDevices(registers)
 $('#digital-io-configuration').ready(function(){
     var keeper = device_controller.getDeviceKeeper();
     var devices = keeper.getDevices();
-    var currentDeviceSelector = DEVICE_SELECT_ID_TEMPLATE(
-        {'serial': devices[0].getSerial()}
-    );
-    
+    const currentDeviceSelector = '#' + devices[0].getSerial() + '-selector';
+
     $(currentDeviceSelector).attr('checked', true);
 
     $(IO_CONFIG_PANE_SELECTOR).empty().append(
@@ -353,7 +330,7 @@ $('#digital-io-configuration').ready(function(){
         renderIndividualDeviceControls(
             registerData,
             devices[0],
-            function () { 
+            function () {
                 $('.direction-switch-check').change(changeFIODir);
                 $('.output-switch-check').parent().parent().hide();
             }

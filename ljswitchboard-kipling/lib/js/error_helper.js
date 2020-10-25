@@ -46,8 +46,9 @@ global.showInfoMessage = function (message) {
 		$('#info-message .close').one('click', global.hideInfoMessage);
 	}
 	setTimeout(global.hideInfoMessage, 5000);
-}
-function showInfoMessageNoTimeout(message) {
+};
+
+global.showInfoMessageNoTimeout = function(message) {
 	var alertMessageObj = $('#info-message');
 	var alertMessageHolder = $('#info-message .error-display');
 
@@ -56,15 +57,16 @@ function showInfoMessageNoTimeout(message) {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
 		$('#info-message .close').one('click', global.hideInfoMessage);
 	}
-}
+};
 
-function hideCriticalAlert() {
+global.hideCriticalAlert = function() {
 	var alertMessageObj = $('#alert-error-message');
 	var alertMessageHolder = $('#alert-error-message .error-display');
 	alertMessageHolder.html('');
 	alertMessageObj.slideUp(ALERT_MESSAGE_SLIDE_TIME);
-}
-function showCriticalAlert(message) {
+};
+
+global.showCriticalAlert = function(message) {
 	var alertMessageObj = $('#alert-error-message');
 	var alertMessageHolder = $('#alert-error-message .error-display');
 
@@ -73,4 +75,4 @@ function showCriticalAlert(message) {
 		alertMessageObj.slideDown(ALERT_MESSAGE_SLIDE_TIME);
 		$('#alert-error-message .close').one('click', hideCriticalAlert);
 	}
-}
+};

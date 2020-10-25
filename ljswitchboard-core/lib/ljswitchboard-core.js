@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const {handleBarsService} = require('./handlebar_service');
 const {MessageFormatter} = require('./message_formatter');
 
 exports.info = {
@@ -258,3 +259,4 @@ exports.initializePackage = function (injector) {
 	});
 };
 
+exports.handleBarsService = handleBarsService;

@@ -1,32 +1,30 @@
+'use strict';
+
 /**
  * This file defines the public interface to the io_manager.  It provides object
  * references that allow programs to communicate with the io_manager_process
  */
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var process_manager = require('process_manager');
-var q = require('q');
-var fs = require('fs');
-var path = require('path');
-var io_error_constants = require('./io_error_constants');
-var get_cwd = require('./common/get_cwd');
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const process_manager = require('process_manager');
+const fs = require('fs');
+const path = require('path');
+const io_error_constants = require('./io_error_constants');
+const get_cwd = require('./common/get_cwd');
 
 // Include the io controllers
-var driver_controller = require('./controllers/driver_controller');
-var device_controller = require('./controllers/device_controller');
-var file_io_controller = require('./controllers/file_io_controller');
+const driver_controller = require('./controllers/driver_controller');
+const device_controller = require('./controllers/device_controller');
 
 // Include the LJM installation verification function
-var ljmCheck = require('ljswitchboard-ljm_driver_checker');
+const ljmCheck = require('ljswitchboard-ljm_driver_checker');
 
 // Include the checkRequirements function
-var npm_build_check = require('./common/npm_build_check');
+const npm_build_check = require('./common/npm_build_check');
 
-var ioDelegatorPathFromRoot = 'lib/io_delegator.js';
-var ioDelegatorPath = './' + ioDelegatorPathFromRoot;
-var constants = require('./common/constants');
-var io_endpoint_key = constants.io_manager_endpoint_key;
-
+const ioDelegatorPathFromRoot = 'lib/io_delegator.js';
+const constants = require('./common/constants');
+const io_endpoint_key = constants.io_manager_endpoint_key;
 
 function runGarbageCollector() {
 	if(global.gc) {
@@ -35,199 +33,126 @@ function runGarbageCollector() {
 		}
 	}
 }
-var io_interface_gc = setInterval(runGarbageCollector, 5000);
+const io_interface_gc = setInterval(runGarbageCollector, 5000);
 
-function createIOInterface() {
-	this.mp = null;
-	this.mp_event_emitter = null;
-	this.oneWayMessageListeners = {};
+class IOInterface extends EventEmitter {
 
-	this.driver_controller = null;
-	this.device_controller = null;
-	this.file_io_controller = null;
+	constructor() {
+		super();
 
-	this.DEBUG_SUBPROCESS_START = false;
-	this.printStartMsg = function() {
-		if(self.DEBUG_SUBPROCESS_START) {
+		this.mp = null;
+		this.mp_event_emitter = null;
+		this.oneWayMessageListeners = {};
+
+		this.driver_controller = null;
+		this.device_controller = null;
+		this.file_io_controller = null;
+
+		this.DEBUG_SUBPROCESS_START = false;
+
+		this.eventList = {
+			'PROCESS_ERROR': 'PROCESS_ERROR',
+			'PROCESS_DISCONNECT': 'PROCESS_DISCONNECT',
+			'PROCESS_EXIT': 'PROCESS_EXIT',
+			'PROCESS_CLOSE': 'PROCESS_CLOSE',
+		};
+
+		this.callFunc = null;
+		this.sendReceive = null;
+		this.sendMessage = null;
+		this.send = null;
+	}
+
+	printStartMsg() {
+		if(this.DEBUG_SUBPROCESS_START) {
 			console.log.apply(console, arguments);
 		}
-	};
+	}
 
-	this.eventList = {
-		'PROCESS_ERROR': 'PROCESS_ERROR',
-		'PROCESS_DISCONNECT': 'PROCESS_DISCONNECT',
-		'PROCESS_EXIT': 'PROCESS_EXIT',
-		'PROCESS_CLOSE': 'PROCESS_CLOSE',
-	};
-	var createDriverController = function() {
-		self.driver_controller = new driver_controller.createNewDriverController(self);
-	};
-	var createDeviceController = function() {
-		self.device_controller = new device_controller.createNewDeviceController(self);
-	};
-	var createFileIOController = function() {
-		self.file_io_controller = new file_io_controller.createNewFileIOController(self);
-	};
+	createDriverController() {
+		this.driver_controller = new driver_controller.createNewDriverController(this);
+	}
 
-	var getDriverConstants = function(bundle) {
-		var defered = q.defer();
-		var onSucc = function() {
-			defered.resolve(bundle);
-		};
-		var onErr = function() {
-			defered.reject(bundle);
-		};
+	createDeviceController() {
+		this.device_controller = new device_controller.createNewDeviceController(this);
+	}
 
-		saveDriverConstants()
-		.then(onSucc, onErr);
-		return defered.promise;
-	};
-	var saveDriverConstants = function(driverConstants) {
-		var defered = q.defer();
-		defered.resolve();
-		return defered.promise;
-	};
+	getDriverConstants() {
+		return this.saveDriverConstants();
+	}
 
-	var callFunc = null;
-	var sendReceive = null;
-	var sendMessage = null;
-	var send = null;
+	saveDriverConstants() {
+		return Promise.resolve();
+	}
 
-	var internalListener = function(m) {
+
+	internalListener(m) {
 		console.log("* io_interface internalListener:", m);
-	};
-	var checkOneWayEndpoint = function(m) {
-		var defered = q.defer();
-		if(self.oneWayMessageListeners[m.endpoint]) {
-			defered.resolve(m);
+	}
+
+	checkOneWayEndpoint(m) {
+		if(this.oneWayMessageListeners[m.endpoint]) {
+			return Promise.resolve(m);
 		} else {
-			defered.reject(m);
+			return Promise.reject(m);
 		}
-		return defered.promise;
-	};
-	var handleOneWayMessageErrors = function(m) {
-		var defered = q.defer();
-		var msg = '* io_interface oneWayMessageError: ' + JSON.stringify(m);
+	}
+
+	async handleOneWayMessageErrors(m) {
+		const msg = '* io_interface oneWayMessageError: ' + JSON.stringify(m);
 		console.error(msg);
-		defered.reject(msg);
-		return defered.promise;
-	};
-	var delegateOneWayMessage = function(m) {
-		var defered = q.defer();
+		throw msg;
+	}
+
+	async delegateOneWayMessage(m) {
 		try {
-			self.oneWayMessageListeners[m.endpoint](m.data);
-			defered.resolve();
+			this.oneWayMessageListeners[m.endpoint](m.data);
 		} catch(err) {
-			var msg = '* io_interface oneWayMessageError: ' + JSON.stringify(m);
+			const msg = '* io_interface oneWayMessageError: ' + JSON.stringify(m);
 			console.error(msg);
-			defered.reject(msg);
+			throw msg;
 		}
-		return defered.promise;
-	};
-	var oneWayMessageListener = function(m) {
+	}
+
+	oneWayMessageListener(m) {
 		console.log('io_interface, oneWayMessageListener', m);
-		checkOneWayEndpoint(m)
-		.then(delegateOneWayMessage, handleOneWayMessageErrors);
-	};
+		this.checkOneWayEndpoint(m).then(m => this.delegateOneWayMessage(m), m => this.handleOneWayMessageErrors(m));
+	}
 
-	var saveLink = function(link) {
-		var defered = q.defer();
+	async saveLink(link) {
+		this.callFunc = link.callFunc;
+		this.sendReceive = link.sendReceive;
+		this.sendMessage = link.sendMessage;
+		this.send = link.send;
+	}
 
-		callFunc = link.callFunc;
-		sendReceive = link.sendReceive;
-		sendMessage = link.sendMessage;
-		send = link.send;
+	async initInternalMessenger() {
+		const link = await this.establishLink(io_endpoint_key, (m) => this.internalListener(m));
+		await this.saveLink(link);
+	}
 
-		defered.resolve();
-		return defered.promise;
-	};
+	getRegisteredEndpoints() {
+		return this.callFunc('getRegisteredEndpoints');
+	}
 
-	var initInternalMessenger = function() {
-		var defered = q.defer();
-		self.establishLink(io_endpoint_key, internalListener)
-		.then(saveLink)
-		.then(defered.resolve);
-		return defered.promise;
-	};
-
-	this.getRegisteredEndpoints = function() {
-		return callFunc('getRegisteredEndpoints');
-	};
-	this.testOneWayMessage = function() {
-		var defered = q.defer();
-		send("poke io_delegator");
-		setImmediate(function() {
-			defered.resolve();
+	testOneWayMessage() {
+		return new Promise((resolve) => {
+			this.send("poke io_delegator");
+				setImmediate(() => {
+					resolve();
+				});
 		});
-		return defered.promise;
-	};
-
-	/**
-	 * qExec is a function that aids in initializing the io_interface.  It saves
-	 * the results from each function call and allows each function call to be
-	 * passed data from a previously called function.  This allows for a final
-	 * 'defered' function call to return a plethora of error/debugging
-	 * information.
-	 * func: function, The function that should be called.
-	 * name: string, The name of the function that should be called.  Also used
-	 *     to store the function call's results to the results object.
-	 * passResults: string, The name of the previously called function's results
-	 *     that need to get passed into the function being executed.
-	 */
-	var qExec = function(func, name, passResults) {
-		var execFunc = function(results) {
-			var defered = q.defer();
-			var keys = Object.keys(results);
-
-			// Get previous function call's results & pass them along if
-			// necessary
-			var inputData;
-			if(passResults) {
-				if(passResults !== '') {
-					if(keys.indexOf(passResults) >= 0) {
-						inputData = results[passResults].result;
-					}
-				}
-			}
-
-			// Execute the function
-			func(inputData, results)
-			.then(function(res) {
-				var result = {
-					'name': name,
-					'isError': false,
-					'result': res
-				};
-				results[name] = result;
-				defered.resolve(results);
-			}, function(err) {
-				var result = {
-					'name': name,
-					'isError': true,
-					'result': err
-				};
-				results[name] = result;
-				results.failedStep = name;
-				results.faildStepData = result.result;
-				defered.reject(results);
-			});
-			return defered.promise;
-		};
-		return execFunc;
-	};
+	}
 
 	/**
 	 * The checkLabJackM function verifies that the LabJack LJM driver is
 	 * properly installed on a users machine.  If the driver isn't installed
 	 * properly the initialization routine for the io_interface will fail.
 	 */
-	var checkLabJackM = function() {
-		self.printStartMsg('in checkLabJackM');
-		var defered = q.defer();
-		ljmCheck.verifyLJMInstallation()
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
-	};
+	checkLabJackM() {
+		this.printStartMsg('in checkLabJackM');
+		return ljmCheck.verifyLJMInstallation();
+	}
 
 	/**
 	 * The checkRequirements function verifies that the labjack-nodejs library
@@ -241,13 +166,10 @@ function createIOInterface() {
 	 *     qExec function that contains all of the previous results from the
 	 *     io_interface initialization routine.
 	 */
-	var checkRequirements = function(cwdOverride, passedRequirements) {
-		self.printStartMsg('in checkRequirements');
-		var defered = q.defer();
-		npm_build_check.checkRequirements(cwdOverride, passedRequirements)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
-	};
+	checkRequirements(cwdOverride, passedResults) {
+		this.printStartMsg('in checkRequirements');
+		return npm_build_check.checkRequirements(cwdOverride, passedResults);
+	}
 
 	/**
 	 * Initializing the io_interface will initialize a new master_process
@@ -255,73 +177,82 @@ function createIOInterface() {
 	 * child process.  Once this is done it will create and initialize the
 	 * various manager processes that make up the io_interface.
 	**/
-	var innerGetNodePath = function(passedResult, passedResults) {
-		self.printStartMsg('in innerGetNodePath');
-		var defered = q.defer();
+	_innerGetNodePath(passedResult, passedResults) {
+		this.printStartMsg('in _innerGetNodePath');
+			return new Promise((resolve, reject) => {
 
-		// Collect information about the process
-		var isOkToRun = true;
-		var isValidInstance = true;
-		var platform = process.platform;
-		var errors = [];
+			// Collect information about the process
+			let isOkToRun = true;
+			let isValidInstance = true;
+			const platform = process.platform;
+			const errors = [];
 
-		// Determine what OS is being used.
-		var os = {
-		    'win32': 'win32',
-		    'darwin': 'darwin',
-		    'linux': 'linux',
-		    'freebsd': 'linux',
-		    'sunos': 'linux'
-		}[platform];
+			// Determine what OS is being used.
+			const os = {
+				'win32': 'win32',
+				'darwin': 'darwin',
+				'linux': 'linux',
+				'freebsd': 'linux',
+				'sunos': 'linux'
+			}[platform];
 
-		// Determine the exeName that should be executed vased off the OS
-		// selection.  TODO:
-		var exeName = {
-			'win32': 'node.exe',
-			'darwin': 'node',
-			'linux': 'node'
-		}[os];
+			// Determine the exeName that should be executed vased off the OS
+			// selection.  TODO:
+			const exeName = {
+				'win32': 'node.exe',
+				'darwin': 'node',
+				'linux': 'node'
+			}[os];
 
 
-		// If a defined exeName has not been found, prevent the subprocess from
-		// starting.
-		if(typeof(exeName) === 'undefined') {
-			console.error(
-				'OS:',
-				os,
-				'is not currently supported by the io_manager.  ' +
-				'Should be a simple fix for linux computers.'
-			);
-			isValidInstance = false;
-			isOkToRun = false;
-			errors.push('No suitable executable name found');
-		}
+			// If a defined exeName has not been found, prevent the subprocess from
+			// starting.
+			if(typeof(exeName) === 'undefined') {
+				console.error(
+					'OS:',
+					os,
+					'is not currently supported by the io_manager.  ' +
+					'Should be a simple fix for linux computers.'
+				);
+				isValidInstance = false;
+				isOkToRun = false;
+				errors.push('No suitable executable name found');
+			}
 
-		// If the os that the labjack-nodejs library was built for isn't
-		// the current platform, prevent the subprocess from starting.
-		if(os != passedResult.os) {
-			isOkToRun = false;
-			errors.push('Wrong OS detected');
-			console.log(os, passedResult);
-		}
+			// If the os that the labjack-nodejs library was built for isn't
+			// the current platform, prevent the subprocess from starting.
+			if(os !== passedResult.os) {
+				isOkToRun = false;
+				errors.push('Wrong OS detected');
+				console.log(os, passedResult);
+			}
 
-		// If the detected architecture is ia32 and the sub-process is x64 then
-		// prevent the subprocess from starting as there will likely be issues.
-		var arch = process.arch;
-		// arch = 'x64';
-		if(arch === 'ia32') {
-			if(passedResult.arch === 'x64') {
-				// If the labjack-nodejs library is built for x64 and we are a
-				// x64 machine, AND we started as a 32bit instance of node, then
-				// over-write the arch to be x64.  Otherwise there is nothing we
-				// can do but force an error. (Fix only for win32 OS, not sure
-				// how to detect this on mac/linux).
-				if(os === 'win32') {
-					if(process.env['PROGRAMFILES(x86)']) {
-						arch = 'x64';
-						console.error(
-							'**** forcing sub-process to run in 64bit mode ****'
-						);
+			// If the detected architecture is ia32 and the sub-process is x64 then
+			// prevent the subprocess from starting as there will likely be issues.
+			let arch = process.arch;
+			// arch = 'x64';
+			if(arch === 'ia32') {
+				if(passedResult.arch === 'x64') {
+					// If the labjack-nodejs library is built for x64 and we are a
+					// x64 machine, AND we started as a 32bit instance of node, then
+					// over-write the arch to be x64.  Otherwise there is nothing we
+					// can do but force an error. (Fix only for win32 OS, not sure
+					// how to detect this on mac/linux).
+					if(os === 'win32') {
+						if(process.env['PROGRAMFILES(x86)']) {
+							arch = 'x64';
+							console.error(
+								'**** forcing sub-process to run in 64bit mode ****'
+							);
+						} else {
+							isOkToRun = false;
+							errors.push(
+								'Wrong architecture detected, current arch is: ' +
+								arch +
+								', lj-nodejs is built for: ' +
+								passedResult.arch
+							);
+						}
 					} else {
 						isOkToRun = false;
 						errors.push(
@@ -331,94 +262,76 @@ function createIOInterface() {
 							passedResult.arch
 						);
 					}
-				} else {
-					isOkToRun = false;
-					errors.push(
-						'Wrong architecture detected, current arch is: ' +
-						arch +
-						', lj-nodejs is built for: ' +
-						passedResult.arch
-					);
+
 				}
-
 			}
-		}
 
+			// Save the root directory of the io_manager library
+			const resolvedCWD = get_cwd.getCWD();
+			const rootDir = passedResults.cwdOverride ? passedResults.cwdOverride : resolvedCWD;
 
+			// Define the version of the node binary to look for
+			// const version = '0_10_33';
+			// Force execution of node 0_10_35
+			// version = '0_10_35';
+			const version = {
+				'win32': '8_9_4',
+				'darwin': '8_9_4',
+				'linux': '8_9_4',
+			}[os];
 
-		// Save the root directory of the io_manager library
-		var resolvedCWD = get_cwd.getCWD();
-		var rootDir;
-		if(passedResults.cwdOverride) {
-			rootDir = passedResults.cwdOverride;
-		} else {
-			rootDir = resolvedCWD;
-		}
+			// If the labjack-nodejs lib`rary isn't built for the version defined
+			// then prevent the subprocess from starting.
+			if (version !== passedResult.node_version) {
+				console.warn(
+					'**** The node version being started does not match the ' +
+					'one that the labjack-nodejs library was built for. ****'
+				);
+				console.warn('**** Executed version', version, '****');
+				console.warn('**** Built for version', passedResult.node_version, '****');
+				// Disable for now, Chris: 01/23/2015
+				// isOkToRun = false;
+				// errors.push('Wrong node_version detected');
+			}
 
+			// Define the base directory to look for the node binaries in
+			const binariesDir = 'node_binaries';
 
-		// Define the version of the node binary to look for
-		// var version = '0_10_33';
-		// Force execution of node 0_10_35
-		// version = '0_10_35';
-		var version = '6_6_0';
-		version = {
-			'win32': '8_9_4',
-			'darwin': '8_9_4',
-			'linux': '8_9_4',
-		}[os];
+			const callerPath = process.execPath;
+			const callerName = path.basename(callerPath);
 
-		// If the labjack-nodejs lib`rary isn't built for the version defined
-		// then prevent the subprocess from starting.
-		if(version != passedResult.node_version) {
-			console.warn(
-				'**** The node version being started does not match the ' +
-				'one that the labjack-nodejs library was built for. ****'
+			const nodeBinaryPath = path.join(
+				rootDir,
+				binariesDir,
+				platform,
+				arch,
+				version,
+				exeName
 			);
-			console.warn('**** Executed version', version, '****');
-			console.warn('**** Built for version', passedResult.node_version, '****');
-			// Disable for now, Chris: 01/23/2015
-			// isOkToRun = false;
-			// errors.push('Wrong node_version detected');
-		}
 
-		// Define the base directory to look for the node binaries in
-		var binariesDir = 'node_binaries';
+			const retData = {
+				'path': nodeBinaryPath,
+				'cwd': rootDir,
+				'callerName': callerName
+			};
 
-		var callerPath = process.execPath;
-		var callerName = path.basename(callerPath);
-
-		var nodeBinaryPath = path.join(
-			rootDir,
-			binariesDir,
-			platform,
-			arch,
-			version,
-			exeName
-		);
-
-		var retData = {
-			'path': nodeBinaryPath,
-			'cwd': rootDir,
-			'callerName': callerName
-		};
-
-		fs.exists(nodeBinaryPath, function(exists) {
-			retData.exists = exists;
-			if(exists) {
-				if(isOkToRun) {
-					defered.resolve(retData);
+			fs.exists(nodeBinaryPath, (exists) => {
+				retData.exists = exists;
+				if(exists) {
+					if(isOkToRun) {
+						resolve(retData);
+					} else {
+						retData.errors = errors;
+						reject(retData);
+					}
 				} else {
+					errors.push('Node binary does not exist');
 					retData.errors = errors;
-					defered.reject(retData);
+					reject(retData);
 				}
-			} else {
-				errors.push('Node binary does not exist');
-				retData.errors = errors;
-				defered.reject(retData);
-			}
+			});
 		});
-		return defered.promise;
-	};
+	}
 
 	/**
 	 * the innerInitialize function only gets executed when all
@@ -428,67 +341,58 @@ function createIOInterface() {
 	 * happen in there is a syntax error/require error somewhere in the
 	 * io_delegator.js file/its requirements.
 	 */
-	var innerInitialize = function(info, passedResults) {
-		self.printStartMsg('in innerGetNodePath');
-		var defered = q.defer();
+	async innerInitialize(info, passedResults) {
+		this.printStartMsg('in innerInitialize');
 		// If debugging is enabled, print out information about that process
 		// that is about to start.
 		if(passedResults.debugProcess) {
 			console.log('  - Initialize Data:');
-			var infoKeys = Object.keys(info);
-			infoKeys.forEach(function(key) {
+			const infoKeys = Object.keys(info);
+			infoKeys.forEach((key) => {
 				console.log('    - ' + key + ': ' + JSON.stringify(info[key]));
 			});
 		}
 
-		self.mp = null;
-		self.mp_event_emitter = null;
-		self.oneWayMessageListeners = null;
-
-		delete self.mp;
-		delete self.mp_event_emitter;
-		delete self.oneWayMessageListeners;
-
-		self.mp = new process_manager.master_process();
-		self.mp_event_emitter = self.mp.init(oneWayMessageListener);
+		this.oneWayMessageListeners = {};
+		this.mp = new process_manager.master_process();
+		this.mp_event_emitter = this.mp.init(m => this.oneWayMessageListener(m));
 
 		// Attach a variety of event listeners to verify that the sub-process
 		// starts properly. If a user enables debugging.
-		self.mp_event_emitter.on('error', function(data) {
+		this.mp_event_emitter.on('error', (data) => {
 			if(passedResults.debugProcess || false) {
 				console.log('Error Received', data);
 			}
-			self.emit(self.eventList.PROCESS_ERROR, data);
+			this.emit(this.eventList.PROCESS_ERROR, data);
 		});
-		self.mp_event_emitter.on('exit', function(data) {
+		this.mp_event_emitter.on('exit', (data) => {
 			if(passedResults.debugProcess || false) {
 				console.log('exit Received', data);
 			}
-			self.emit(self.eventList.PROCESS_EXIT, data);
+			this.emit(this.eventList.PROCESS_EXIT, data);
 		});
-		self.mp_event_emitter.on('close', function(data) {
+		this.mp_event_emitter.on('close', (data) => {
 			if(passedResults.debugProcess || false) {
 				console.log('close Received', data);
 			}
-			self.emit(self.eventList.PROCESS_CLOSE, data);
+			this.emit(this.eventList.PROCESS_CLOSE, data);
 		});
-		self.mp_event_emitter.on('disconnect', function(data) {
+		this.mp_event_emitter.on('disconnect', (data) => {
 			if(passedResults.debugProcess || false) {
 				console.log('disconnect Received', data);
 			}
-			self.emit(self.eventList.PROCESS_DISCONNECT, data);
+			this.emit(this.eventList.PROCESS_DISCONNECT, data);
 		});
 
 		// Clear the one-way-listeners object that is used for routing
 		// one-way messages via send or sendMessage to the controllers.
-		self.oneWayMessageListeners = {};
 
 		// Create Controllers
-		createDriverController();
-		createDeviceController();
+		this.createDriverController();
+		this.createDeviceController();
 		// createFileIOController();
 
-		var options = {
+		const options = {
 			'execPath': info.path,
 			'cwd': info.cwd,
 			'spawnChildProcess': false,
@@ -505,14 +409,14 @@ function createIOInterface() {
 			if(passedResults.stdinListener) {
 				options.stdinListener = passedResults.stdinListener;
 			} else {
-				options.stdinListener = function(data) {
+				options.stdinListener = (data) => {
 					console.log(data.toString());
 				};
 			}
 			if(passedResults.stderrListener) {
 				options.stderrListener = passedResults.stderrListener;
 			} else {
-				options.stderrListener = function(data) {
+				options.stderrListener = (data) => {
 					console.error(data.toString());
 				};
 			}
@@ -531,41 +435,35 @@ function createIOInterface() {
 		// Build a direct-path reference for the io_delegator.js file.  Relative
 		// path's don't work very well when starting from node-webkit and the
 		// ljswitchboard project.
-		var filetoStart = path.join(info.cwd, ioDelegatorPathFromRoot);
-		self.printStartMsg('Starting sub-process');
+		const filetoStart = path.join(info.cwd, ioDelegatorPathFromRoot);
+		this.printStartMsg('Starting sub-process');
 		// Start the subprocess.
-		self.mp.qStart(filetoStart, options)
-		.then(initInternalMessenger, function(err) {
+
+		try {
+			await this.mp.qStart(filetoStart, options);
+		} catch (err) {
 			console.error('Failed to start subprocess', err);
-			var code = err.error;
-			var msg = io_error_constants.parseError(code);
+			const code = err.error;
+			const msg = io_error_constants.parseError(code);
 			err.errorMessage = msg;
-			defered.reject(err);
-		})
-		.then(getDriverConstants)
-		.then(function(res) {
-			// console.log('Initializing Controllers... (io_interface.js)');
-			// Initialize Controllers
-			self.driver_controller.init()
-			.then(self.device_controller.init)
-			// .then(self.file_io_controller.init)
-			.then(defered.resolve);
+			throw err;
+		}
 
-			// defered.resolve();
-		}, function(err) {
-			console.log("Error :(", err);
-			defered.reject();
-		}, function(err) {
-			console.log("BIG ERROR!", err);
-			defered.reject();
-		});
+		await this.initInternalMessenger();
 
-		return defered.promise;
-	};
-	this.initialize = function(options) {
-		var defered = q.defer();
+		try {
+			await this.getDriverConstants();
+		} catch (err) {
+			console.error("Error :(", err);
+			throw err;
+		}
 
-		var results = {};
+		await this.driver_controller.init();
+		await this.device_controller.init();
+	}
+
+	async initialize(options) {
+		const results = {};
 
 		// Check to see if the cwd is being over-ridden.  If so, save it into
 		// the results object for the initialization functions to use.
@@ -595,84 +493,59 @@ function createIOInterface() {
 			}
 		}
 
-		var errFunc = function(err) {
-			console.log('io_interface error', util.inspect(err));
-			defered.reject(err);
-		};
-
 		// For reference, qExec is in charge of passing the results object to
 		// each of the functions that get called and any required results to
 		// functions after the initial function.
-		self.printStartMsg('Starting Initialization Procedure');
+		this.printStartMsg('Starting Initialization Procedure');
 
-		// Check to make sure labjackm is properly installed
-		qExec(checkLabJackM,'checkLabJackM')(results)
+		const passedResults = {};
+		try {
+			// Check to make sure labjackm is properly installed
+			const cwdOverride = await this.checkLabJackM();
 
-		// Check to make sure that the io_manager has been built for this os/node arch. etc.
-		.then(qExec(checkRequirements,'checkRequirements', 'cwdOverride'), errFunc)
+			// Check to make sure that the io_manager has been built for this os/node arch. etc.
+			const requirements = await this.checkRequirements(cwdOverride, passedResults);
 
-		// Get various parameters required to start the subprocess
-		.then(qExec(innerGetNodePath,'innerGetNodePath', 'checkRequirements'), errFunc)
+			// Get various parameters required to start the subprocess
+			const info = await this._innerGetNodePath(requirements, passedResults);
 
-		// Initialize the subprocess
-		.then(qExec(innerInitialize,'innerInitialize', 'innerGetNodePath'), errFunc)
+			// Initialize the subprocess
+			await this.innerInitialize(info, passedResults);
+		} catch (err) {
+			console.log('io_interface error', util.inspect(err));
+			throw err;
+		}
+	}
 
-		// Resolve the initialize function
-		.then(defered.resolve, errFunc);
-		return defered.promise;
-	};
-
-	this.establishLink = function(name, listener) {
-		var endpoint = name;
-		var createMessage = function(m) {
-			var defered = q.defer();
-			var message = {
-				'endpoint': endpoint,
-				'data': m
-			};
-			defered.resolve(message);
-			return defered.promise;
+	establishLink(name, listener) {
+		const endpoint = name;
+		const createMessage = (m) => {
+			return new Promise((resolve, reject) => {
+				const message = {
+					'endpoint': endpoint,
+					'data': m
+				};
+				resolve(message);
+			});
 		};
-		var executeSendReceive = function(m) {
-			return self.mp.sendReceive(m);
+		const executeSendReceive = (m) => {
+			return this.mp.sendReceive(m);
 		};
-		var executeSendMessage = function(m) {
-			return self.mp.sendMessage(m);
+		const executeSendMessage = (m) => {
+			return this.mp.sendMessage(m);
 		};
-		var cleanMessage = function(m) {
-			var defered = q.defer();
-			defered.resolve(m);
-			return defered.promise;
+		const sendReceive = (m) => {
+			return createMessage(m).then(executeSendReceive);
 		};
-		var cleanError = function(err) {
-			var defered = q.defer();
-			defered.reject(err);
-			return defered.promise;
+		const sendMessage = (m) => {
+			return createMessage(m).then(executeSendMessage);
 		};
-		var sendReceive = function(m) {
-			var defered = q.defer();
-
-			// Execute sendReceive message
-			createMessage(m)
-			.then(executeSendReceive)
-			// .then(cleanMessage, cleanError)
-			.then(defered.resolve, defered.reject);
-
-			return defered.promise;
+		const send = (m) => {
+			return this.mp.send(endpoint, m);
 		};
-		var sendMessage = function(m) {
-			var defered = q.defer();
-			createMessage(m)
-			.then(executeSendMessage)
-			.then(defered.resolve, defered.reject);
-			return defered.promise;
-		};
-		var send = function(m) {
-			return self.mp.send(endpoint, m);
-		};
-		var callFunc = function(name, argList, options) {
-			var funcName = '';
-			var funcArgs = [];
+		const callFunc = (name, argList, options) => {
+			let funcName = '';
+			let funcArgs = [];
 			if(name) {
 				funcName = name;
 			}
@@ -686,53 +559,48 @@ function createIOInterface() {
 			});
 		};
 
-		self.mp_event_emitter.on(name, listener);
-		self.oneWayMessageListeners[name] = listener;
-		var defered = q.defer();
+		this.mp_event_emitter.on(name, listener);
+		this.oneWayMessageListeners[name] = listener;
 
-		var link = {
+		const link = {
 			'callFunc': callFunc,
 			'sendReceive': sendReceive,
 			'sendMessage': sendMessage,
 			'send': send
 		};
-		defered.resolve(link);
-		return defered.promise;
-	};
+		return Promise.resolve(link);
+	}
 
-	this.destroy = function() {
-		var defered = q.defer();
+	destroy() {
+		return new Promise((resolve, reject) => {
 
 		clearInterval(io_interface_gc);
 
-		self.mp.qStop()
-		.then(defered.resolve);
+		this.mp.qStop()
+		.then(resolve);
 
-		return defered.promise;
-	};
+		});
+	}
 
-	this.getDriverController = function() {
-		return self.driver_controller;
-	};
-	this.getDeviceController = function() {
-		return self.device_controller;
-	};
-	this.getFileIOController = function() {
-		return self.file_io_controller;
-	};
+	getDriverController() {
+		return this.driver_controller;
+	}
 
+	getDeviceController() {
+		return this.device_controller;
+	}
 
-
-	var self = this;
+	getFileIOController() {
+		return this.file_io_controller;
+	}
 }
-util.inherits(createIOInterface, EventEmitter);
 
-var IO_INTERFACE;
-exports.createIOInterface = function() {
+let IO_INTERFACE;
+exports.createIOInterface = () => {
 	if(IO_INTERFACE) {
 		return IO_INTERFACE;
 	} else {
-		IO_INTERFACE = new createIOInterface();
+		IO_INTERFACE = new IOInterface();
 		return IO_INTERFACE;
 	}
 };

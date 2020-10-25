@@ -6,7 +6,6 @@ var path = require('path');
 var fse = require('fs-extra');
 var async = require('async');
 var child_process = require('child_process');
-var handlebars = require('handlebars');
 
 const editPackageKeys = require('./edit_package_keys.js').editPackageKeys;
 

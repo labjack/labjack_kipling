@@ -57,9 +57,6 @@ for(var i = 0; i < testFiles.length; i++) {
 
 var package_loader = require('ljswitchboard-package_loader');
 var gns = package_loader.getNameSpace();
-var window_manager = require('ljswitchboard-window_manager');
-var startDir = global[gns].info.startDir;
-var handlebars = require('handlebars');
 /*
 	Function called to load the application's core resources.
 	The resources are loaded from the ljswitchboard-static_files/static
@@ -128,24 +125,18 @@ var getRunTest = function(testFile, testDiv) {
 	var runTest = function() {
 		var defered = q.defer();
 		var str = [
-			'<li id="{{id}}_result">',
+			'<li id="' + divID + '_result">',
 			'<div class="no_select">',
-				'<span>Test: {{testName}}</span>',
+				'<span>Test: ' + testName + '</span>',
 				'<div class="results_button">',
-					'<span>Status: <span id="{{id}}_status">In Progress</span></span>',
-					'<span id="{{id}}_button"class="icon-list-2 toggle_button"></span>',
+					'<span>Status: <span id="' + divID + '_status">In Progress</span></span>',
+					'<span id="' + divID + '_button" class="icon-list-2 toggle_button"></span>',
 				'</div>',
 			'</div>',
-			'<div id="{{id}}"><p>Test!</p></div>',
+			'<div id="' + divID + '"><p>Test!</p></div>',
 			'</li>'
 		].join('');
-		var template = handlebars.compile(str);
-		var newTxt = template({
-			'id': divID,
-			'testName':testName,
-			'fileName': fileName
-		});
-		testDiv.append($(newTxt));
+		testDiv.append($(str));
 		try {
 			var outputHTML = testunit_recorder.run(
 				[testFile],

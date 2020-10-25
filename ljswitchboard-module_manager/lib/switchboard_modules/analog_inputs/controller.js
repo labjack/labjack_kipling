@@ -4,7 +4,6 @@
  * @author A. Samuel Pottinger (LabJack Corp, 2013)
 **/
 
-var handlebars = require('handlebars');
 var q = require('q');
 
 var fs_facade = require('./fs_facade');
@@ -21,18 +20,7 @@ var selectedDevice;
 var devices = [];
 var targetInputsInfo;
 
-var INPUT_DISPLAY_TEMPLATE_STR = '#input-display-{{valueRegister}}';
-var INPUT_BAR_TEMPLATE_STR = '#input-bar-{{valueRegister}}';
-var RANGE_DISPLAY_TEMPLATE_STR = '#input-display-{{rangeRegister}}';
 var SINGLE_ENDED_CONFIG_VAL = 199;
-
-var INPUT_DISPLAY_TEMPLATE = handlebars.compile(
-    INPUT_DISPLAY_TEMPLATE_STR);
-var INPUT_BAR_TEMPLATE = handlebars.compile(
-    INPUT_BAR_TEMPLATE_STR);
-var RANGE_DISPLAY_TEMPLATE = handlebars.compile(
-    RANGE_DISPLAY_TEMPLATE_STR);
-
 var curDevSelection = 0;
 
 
@@ -58,7 +46,7 @@ function replaceAll(find, replace, str) {
  *
  * Load information about the various analog input ranges that are available
  * for the given device's analog inputs.
- * 
+ *
  * @return {q.promise} Promise for this operation. Resolves to undefined.
 **/
 function loadRangeOptions()
@@ -162,7 +150,7 @@ function setRange (rangeAddr, range)
     else if (Math.abs(range - 0.01) < 0.001)
         text = '-0.01 to 0.01V';
 
-    var selector  = RANGE_DISPLAY_TEMPLATE({rangeRegister: rangeAddr});
+    const selector = '#input-display-' + rangeAddr;
     $(selector).html(text);
 }
 
@@ -211,7 +199,7 @@ function readRangesAndStartReadingInputs (inputsInfo, targetDevSelection)
                 else if (Math.abs(value - 0.01) < 0.001)
                     text = '-0.01 to 0.01V';
 
-                var selector  = RANGE_DISPLAY_TEMPLATE({rangeRegister: regNum});
+                const selector = '#input-display-' + regNum;
                 $(selector).html(text);
             }
             setTimeout(function () {
@@ -265,10 +253,10 @@ function updateInputs (inputsInfo, targetDevSelection, curTabID) {
             for (var i=0; i<numResults; i++) {
                 var regNum = registers[i];
                 var value = results[i];
-                var selector = INPUT_DISPLAY_TEMPLATE({valueRegister: regNum});
-                var barSelect = INPUT_BAR_TEMPLATE({valueRegister: regNum});
+                var selector = '#input-display-' + regNum;
+                var barSelect = '#input-bar-' + regNum;
                 var width = 100 * ((value + 10) / 20);
-                
+
                 if (width > 100)
                     width = 100;
                 if (width < 0)
@@ -387,7 +375,7 @@ function changeSelectedDevice()
         function (err) {
             showAlert(err.retError);
         }
-    );    
+    );
 }
 
 

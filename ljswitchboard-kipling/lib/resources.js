@@ -119,9 +119,6 @@ async function loadResources(win, static_files) {
         // JS to add error helpers
         'js/error_helper.js',
 
-        // JS to extend standard handlebars features.
-        'js/handlebars_helpers.js',
-
         // JS for loading & manipulating the module_chrome
         // Creates a window-wide element "MODULE_CHROME"
         'js/module_chrome.js',

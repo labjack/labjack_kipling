@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * The slave_process is in charge of receiving and responding properly
  * to sendReceive messages from the master_process.
@@ -5,42 +7,23 @@
  * @author Chris Johnson (LabJack Corp.)
 **/
 
-// Enable to print out important processor debugging data
-if(false) {
-	console.log('');
-	console.log('*********************');
-	console.log('Subprocess Started!');
-	console.log('Node Version', process.versions.node);
-	console.log('Exec Path', process.execPath);
-	console.log('*********************');
-	console.log('');
-
-}
-var dict = require('dict');
-var q = require('q');
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var net = require('net');
-var fs = require('fs');
+const {EventEmitter} = require('events');
 
 // include various constants from the constants file
-var pm_constants = require('./process_manager_constants');
-var PM_MESSAGE = pm_constants.message;
-var PM_STOP_CHILD_PROCESS = pm_constants.stopChildProcess;
-var PM_CHILD_PROCESS_STARTED = pm_constants.childProcessStarted;
-var PM_GET_PROCESS_INFO = pm_constants.getProcessInfo;
-var PM_EMIT_MESSAGE = pm_constants.emitMessage;
-
-
+const pm_constants = require('./process_manager_constants');
+const PM_STOP_CHILD_PROCESS = pm_constants.stopChildProcess;
+const PM_CHILD_PROCESS_STARTED = pm_constants.childProcessStarted;
+const PM_GET_PROCESS_INFO = pm_constants.getProcessInfo;
+const PM_EMIT_MESSAGE = pm_constants.emitMessage;
 
 // valid user listener types
-var SP_Q_LISTENER_TYPE = 'q';
-var SP_CALLBACK_LISTENER_TYPE = 'callback';
+const SP_Q_LISTENER_TYPE = 'q';
+const SP_CALLBACK_LISTENER_TYPE = 'callback';
 
-var IS_DEBUG = false;
-var print = function(argA, argB) {
+const IS_DEBUG = false;
+const print2 = (argA, argB) => {
 	if(IS_DEBUG) {
-	    var msg = 'SP:';
+	    const msg = 'SP:';
 	    if(argA) {
 	        if(argB) {
 	            console.log(msg, argA, argB);
@@ -53,317 +36,248 @@ var print = function(argA, argB) {
 	}
 };
 
-var readStream = null;
-var writeStream = null;
-var createStreamInterface = false;
-var exitListenerFunc = undefined;
-if(createStreamInterface) {
-	try {
-		readStream = fs.createReadStream(null, {fd: 4});
-		writeStream = fs.createReadStream(null, {fd: 5, flags: 'r+', 'encoding': 'ascii'});
-		// readStreamB = fs.createReadStream(null, {fd: 5});
-		readStream.on('readable', function() {
-			console.log("S: my piped data 0");
-			var chunk;
-			while (null !== (chunk = readStream.read())) {
-				console.log('S: got %d bytes of data', chunk.length, ':', chunk.toString('ascii'));
-			}
-			// .write(Buffer('awesome'));
-		});
-		// readStream.on('data', function(buff) {
-		// 	console.log("my piped data 1", buff);
-		// });
-		readStream.on('end', function() {
-			console.log("S: readStream Ended");
-		});
-		readStream.on('error', function(err) {
-			console.log("S: readStream Error", err);
-		});
-		console.log("S: hh", writeStream.push);
-		console.log("S: here", writeStream);
-		// writeStream.push(new Buffer("HERE"));
-		
-		writeStream.on('open', function() {
-			console.log("* S: Writing Data");
-			var succ = writeStream.write('awesome','ascii', function(err) {
-				console.log('* S: Write Stream Callback', err);
-			});
-			console.log("* S: Write Success", succ);
-		});
-		fs.write(5, 'Start Pipe', function(err) {
-			console.log("* S: Write Callback", err);
-		});
-		// writeStream.write(Buffer('awesome'));
+let exitListenerFunc = null;
 
-	} catch(err) {
-		console.log("ERR", err);
-	}
-	// var pipe = new net.Socket({ fd: 1, readable: true });
-	// pipe.on('data', function(buf) {
-	// 	console.log("my piped data", buf);
-	// });
-	// print(fs.fstatSync(0));
-	// print(fs.fstatSync(1));
-	// print(fs.fstatSync(2));
-	// print(fs.fstatSync(3));
-	// print(fs.fstatSync('4'));
-	// console.log("pInfo", process.stdio);
-}
-var slave_process_env;
+let slave_process_env;
 if(process.env.slave_process_env) {
 	slave_process_env = JSON.parse(process.env.slave_process_env);
-	print('Passed Arguments via json', slave_process_env);
+	print2('Passed Arguments via json', slave_process_env);
 }
 
+class NewMessageManager extends EventEmitter {
 
-function createNewMessageManager(listeners) {
-	this.numMessagesReceived = 0;
-	this.numInternalMessagesReceived = 0;
-	this.numUserMessagesReceived = 0;
-	this.numResponces = 0;
+	constructor(listeners) {
+		super(listeners);
 
-	var savedListener = listeners;
-	var internalMessages = [
-		PM_STOP_CHILD_PROCESS,
-		PM_GET_PROCESS_INFO
-	];
-	var getProcessInfo = function(bundle) {
-		var defered = q.defer();
+		this.numMessagesReceived = 0;
+		this.numInternalMessagesReceived = 0;
+		this.numUserMessagesReceived = 0;
+		this.numResponces = 0;
 
-		var retData = {
-			'slave_process': {
-				'numMessagesReceived': self.numMessagesReceived,
-				'numInternalMessagesReceived': self.numInternalMessagesReceived,
-				'numUserMessagesReceived': self.numUserMessagesReceived,
-				'numResponces': self.numResponces
-			},
-			'cwd': process.cwd(),
-			'execPath': process.execPath,
-			'execArgv': process.execArgv,
-			'argv': process.argv,
-			'pid': process.pid,
-			'version': process.version,
-			// 'versions': process.versions,
-			'arch': process.arch,
-			'platform': process.platform,
-			// 'config': process.config,
-			'memoryUsage': process.memoryUsage(),
-			'uptime': process.uptime()
-		};
-		bundle.successData = retData;
-		bundle.isHandled = true;
-		defered.resolve(bundle);
-		return defered.promise;
-	};
-	var stopChildprocess = function(bundle) {
-		var retData;
-		var defered = q.defer();
-		if(exitListenerFunc) {
-			var exitHandler = exitListenerFunc();
-			var isPromise = false;
-			if(typeof(exitHandler) !== 'undefined') {
-				if(typeof(exitHandler.then) === 'function') {
-					isPromise = true;
+		this.savedListener = listeners;
+		this.internalMessages = [
+			PM_STOP_CHILD_PROCESS,
+			PM_GET_PROCESS_INFO
+		];
+
+		this.internalMessageBindings = {};
+		this.internalMessageBindings[PM_STOP_CHILD_PROCESS] = bundle => this.stopChildprocess(bundle);
+		this.internalMessageBindings[PM_GET_PROCESS_INFO] = bundle => this.getProcessInfo(bundle);
+	}
+
+	getProcessInfo(bundle) {
+		return new Promise((resolve, reject) => {
+			const retData = {
+				'slave_process': {
+					'numMessagesReceived': this.numMessagesReceived,
+					'numInternalMessagesReceived': this.numInternalMessagesReceived,
+					'numUserMessagesReceived': this.numUserMessagesReceived,
+					'numResponces': this.numResponces
+				},
+				'cwd': process.cwd(),
+				'execPath': process.execPath,
+				'execArgv': process.execArgv,
+				'argv': process.argv,
+				'pid': process.pid,
+				'version': process.version,
+				// 'versions': process.versions,
+				'arch': process.arch,
+				'platform': process.platform,
+				// 'config': process.config,
+				'memoryUsage': process.memoryUsage(),
+				'uptime': process.uptime()
+			};
+			bundle.successData = retData;
+			bundle.isHandled = true;
+			resolve(bundle);
+		});
+	}
+
+	stopChildprocess(bundle) {
+		let retData;
+		return new Promise((resolve, reject) => {
+			if(exitListenerFunc) {
+				const exitHandler = exitListenerFunc();
+				let isPromise = false;
+				if(typeof(exitHandler) !== 'undefined') {
+					if(typeof(exitHandler.then) === 'function') {
+						isPromise = true;
+					}
 				}
-			}
-			if(isPromise) {
-				exitHandler.then(function() {
+				if(isPromise) {
+					exitHandler.then(() => {
+						retData = 1;
+						bundle.successData = retData;
+						bundle.isHandled = true;
+						resolve(bundle);
+					});
+				} else {
 					retData = 1;
 					bundle.successData = retData;
 					bundle.isHandled = true;
-					defered.resolve(bundle);
-				});
+					resolve(bundle);
+				}
 			} else {
 				retData = 1;
 				bundle.successData = retData;
 				bundle.isHandled = true;
-				defered.resolve(bundle);
+				resolve(bundle);
 			}
-		} else {
-			retData = 1;
-			bundle.successData = retData;
-			bundle.isHandled = true;
-			defered.resolve(bundle);
-		}
-		return defered.promise;
-	};
-	var internalMessageBindings = {};
-	internalMessageBindings[PM_STOP_CHILD_PROCESS] = stopChildprocess;
-	internalMessageBindings[PM_GET_PROCESS_INFO] = getProcessInfo;
+		});
+	}
 
-	var isInternalMessage = function(messageType) {
-		var isInternalMessage = false;
-		if(internalMessages.indexOf(messageType) >= 0) {
-			isInternalMessage = true;
-		}
-		return isInternalMessage;
-	};
-	var getMessageType = function(message) {
-		return message.type;
-	};
+	isInternalMessage(messageType) {
+		return this.internalMessages.indexOf(messageType) < 0;
+	}
 
-	var handleMessageError = function(bundle) {
-		var errDefered = q.defer();
-		errDefered.reject(bundle);
-		return errDefered.promise;
-	};
-	
-	var markMessageHandler = function(bundle) {
-		var defered = q.defer();
-		var messageType = getMessageType(bundle.message);
-		if(isInternalMessage(messageType)) {
-			self.numInternalMessagesReceived += 1;
+	async markMessageHandler(bundle) {
+		const messageType = bundle.message.type;
+		if (this.isInternalMessage(messageType)) {
+			this.numInternalMessagesReceived += 1;
 			bundle.isInternalMessage = true;
 		} else {
-			self.numUserMessagesReceived += 1;
+			this.numUserMessagesReceived += 1;
 			bundle.executeUserListener = true;
 		}
-		defered.resolve(bundle);
-		return defered.promise;
-	};
-	var handleInternalMessage = function(bundle) {
-		var defered = q.defer();
-		if(bundle.isInternalMessage) {
+		return bundle;
+	}
+
+	async handleInternalMessage(bundle) {
+		if (bundle.isInternalMessage) {
 			// handle internal message
-			if(internalMessageBindings[bundle.message.type]) {
-				internalMessageBindings[bundle.message.type](bundle)
-				.then(defered.resolve, defered.reject);
+			if (this.internalMessageBindings[bundle.message.type]) {
+				return this.internalMessageBindings[bundle.message.type](bundle);
 			} else {
 				console.log("Internal Message Type Encountered", bundle.message);
-				print('internal message type encountered', bundle.message);
+				print2('internal message type encountered', bundle.message);
 				bundle.successData = 'internal message handled';
 				bundle.isHandled = true;
-				defered.resolve(bundle);
+				return bundle;
 			}
 		} else {
-			defered.resolve(bundle);
+			return bundle;
 		}
-		return defered.promise;
-	};
-	var executeListener = function(bundle) {
-		var defered = q.defer();
-		if((!bundle.isHandled) && (bundle.executeUserListener)) {
-			print('in executeListener', bundle.message);
-			var onSuccess = function(res) {
-					if(bundle.responseRequired) {
-					print(
-						'userData in executeListener-q', 
-						res
-					);
-					bundle.successData = res;
-					bundle.isHandled = true;
-					defered.resolve(bundle);
-				}
-			};
-			var onError = function(err) {
-				if(bundle.responseRequired) {
-					print(
-						'userError noticed in executeListener-q', 
-						err
-					);
-					bundle.returnError = true;
-					bundle.isHandled = true;
-					bundle.errorType = 'userError';
-					bundle.errorData = err;
-					defered.resolve(bundle);
-				}
-			};
-			var onSyntaxErr = function(syntaxError) {
-				if(bundle.responseRequired) {
-					print(
-						'syntaxError encountered in executeListener-q', 
-						syntaxError
-					);
-					bundle.returnError = true;
-					bundle.isHandled = true;
-					bundle.errorType = 'syntaxError';
-					bundle.errorData = syntaxError;
-					defered.resolve(bundle);
-				}
-			};
-			if(bundle.responseRequired) {
-				if(savedListener.type === SP_Q_LISTENER_TYPE) {
-					savedListener.func(bundle.message.data)
-					.then(onSuccess, onError, onSyntaxErr);
-				} else if (savedListener.type === SP_CALLBACK_LISTENER_TYPE) {
-					try {
-						savedListener.func(
-							bundle.message.data,
-							onError,
-							onSuccess
+	}
+
+	executeListener(bundle) {
+		return new Promise((resolve) => {
+			if((!bundle.isHandled) && (bundle.executeUserListener)) {
+				print2('in executeListener', bundle.message);
+				const onSuccess = (res) => {
+						if(bundle.responseRequired) {
+						print2(
+							'userData in executeListener-q',
+							res
 						);
-					} catch(syntaxError) {
-						onSyntaxErr(syntaxError);
+						bundle.successData = res;
+						bundle.isHandled = true;
+						resolve(bundle);
+					}
+				};
+				const onError = (err) => {
+					if(bundle.responseRequired) {
+						print2(
+							'userError noticed in executeListener-q',
+							err
+						);
+						bundle.returnError = true;
+						bundle.isHandled = true;
+						bundle.errorType = 'userError';
+						bundle.errorData = err;
+						resolve(bundle);
+					}
+				};
+				const onSyntaxErr = (syntaxError) => {
+					if(bundle.responseRequired) {
+						print2(
+							'syntaxError encountered in executeListener-q',
+							syntaxError
+						);
+						bundle.returnError = true;
+						bundle.isHandled = true;
+						bundle.errorType = 'syntaxError';
+						bundle.errorData = syntaxError;
+						resolve(bundle);
+					}
+				};
+				if(bundle.responseRequired) {
+					if (this.savedListener.type === SP_Q_LISTENER_TYPE) {
+						this.savedListener.func(bundle.message.data).then(onSuccess, onError, onSyntaxErr);
+					} else if (this.savedListener.type === SP_CALLBACK_LISTENER_TYPE) {
+						try {
+							this.savedListener.func(
+								bundle.message.data,
+								onError,
+								onSuccess
+							);
+						} catch(syntaxError) {
+							onSyntaxErr(syntaxError);
+						}
+					} else {
+						throw new Error('savedListener.type not valid, slave_process, OUCH! ' +this.savedListener.type);
 					}
 				} else {
-					throw new error('savedListener.type not valid, slave_process, OUCH!', savedListener.type);
+					this.emit(bundle.message.type, bundle.message.data);
+					resolve(bundle);
 				}
 			} else {
-				self.emit(bundle.message.type, bundle.message.data);
-				defered.resolve(bundle);
+				resolve(bundle);
 			}
-		} else {
-			defered.resolve(bundle);
-		}
-		return defered.promise;
-	};
-	var respond = function(bundle) {
-        var defered = q.defer();
+		});
+	}
 
-        // build a newMessage object that wraps the message with a message id
-        // that will later resolve or reject on the promise object.
-        var newMessage = {};
-        newMessage.id = bundle.id;
-        newMessage.type = bundle.message.type;
-        newMessage.isError = bundle.returnError;
-        if(bundle.returnError) {
-        	newMessage.errorType = bundle.errorType;
-        	newMessage.data = bundle.errorData;
-        } else {
-        	newMessage.data = bundle.successData;
-        }
-        
-        // increment response counter
-        self.numResponces += 1;
-
-        // Print Debug message
-        print('Responding to message', newMessage);
-        
-        // send the newMessage object to the child process
-        process.send(newMessage);
-        
-        defered.resolve(bundle);
-        return defered.promise;
-    };
-	var respondToMessage = function(bundle) {
-		var defered = q.defer();
-		if(bundle.isHandled) {
-			respond(bundle)
-			.then(defered.resolve, defered.reject);
+	respond(bundle) {
+		// build a newMessage object that wraps the message with a message id
+		// that will later resolve or reject on the promise object.
+		const newMessage = {};
+		newMessage.id = bundle.id;
+		newMessage.type = bundle.message.type;
+		newMessage.isError = bundle.returnError;
+		if(bundle.returnError) {
+			newMessage.errorType = bundle.errorType;
+			newMessage.data = bundle.errorData;
 		} else {
-			defered.resolve(bundle);
+			newMessage.data = bundle.successData;
 		}
-		
-		return defered.promise;
-	};
-	var cleanupMessage = function(bundle) {
-		var defered = q.defer();
-		var keys = Object.keys(bundle);
-		keys.forEach(function(key) {
+
+		// increment response counter
+		this.numResponces += 1;
+
+		// Print Debug message
+		print2('Responding to message', newMessage);
+
+		// send the newMessage object to the child process
+		process.send(newMessage);
+
+		return Promise.resolve(bundle);
+    }
+
+	respondToMessage(bundle) {
+		return new Promise((resolve, reject) => {
+			if(bundle.isHandled) {
+				this.respond(bundle).then(resolve, reject);
+			} else {
+				resolve(bundle);
+			}
+		});
+	}
+
+	cleanupMessage(bundle) {
+		const keys = Object.keys(bundle);
+		keys.forEach((key) => {
 			bundle[key] = undefined;
 			delete bundle[key];
 		});
 		bundle = undefined;
-		defered.resolve();
-		return defered.promise;
-	};
+		return Promise.resolve();
+	}
 
-	this.messageListener = function(m) {
-		self.numMessagesReceived += 1;
+	messageListener(m) {
+		this.numMessagesReceived += 1;
 
-		var messageBundle = {
-			'id':m.id,
-			'message':m,
+		const messageBundle = {
+			'id': m.id,
+			'message': m,
 			'isHandled': false,
 			'isInternalMessage': false,
 			'executeUserListener': false,
@@ -373,81 +287,64 @@ function createNewMessageManager(listeners) {
 			'errorType': '',
 			'errorData': null
 		};
-		markMessageHandler(messageBundle)
-		.then(handleInternalMessage, handleMessageError)
-		.then(executeListener, handleMessageError)
-		.then(respondToMessage, handleMessageError)
-		.then(cleanupMessage, cleanupMessage);
-	};
-	var setupProcessStartedMessage = function(retData) {
-		var defered = q.defer();
-		var data = {
+		this.markMessageHandler(messageBundle)
+			.then(bundle => this.handleInternalMessage(bundle))
+			.then(bundle => this.executeListener(bundle))
+			.then(bundle => this.respondToMessage(bundle))
+			.then(bundle => this.cleanupMessage(bundle), bundle => this.cleanupMessage(bundle));
+	}
+
+	setupProcessStartedMessage(retData) {
+		return Promise.resolve({
 			'id': PM_CHILD_PROCESS_STARTED,
-        	'message': {'type': PM_CHILD_PROCESS_STARTED},
-        	'returnError': false,
-        	'successData': retData
-		};
-		defered.resolve(data);
-		return defered.promise;
-	};
+			'message': {'type': PM_CHILD_PROCESS_STARTED},
+			'returnError': false,
+			'successData': retData
+		});
+	}
 
-	this.finishSetup = function(retData) {
-		var defered = q.defer();
-		setupProcessStartedMessage(retData)
-		.then(respond)
-		.then(cleanupMessage)
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
-	};
+	finishSetup(retData) {
+		return this.setupProcessStartedMessage(retData)
+			.then(bundle => this.respond(bundle))
+			.then(bundle => this.cleanupMessage(bundle));
+	}
 
-	var setupEmitMessage = function(m) {
-		var defered = q.defer();
-		var data = {
+	setupEmitMessage(m) {
+		return Promise.resolve({
 			'id': PM_EMIT_MESSAGE,
-        	'message': {'type': m.eventType},
-        	'returnError': false,
-        	'successData': m
-		};
-		defered.resolve(data);
-		return defered.promise;
-	};
+			'message': {'type': m.eventType},
+			'returnError': false,
+			'successData': m
+		});
+	}
 
-	this.emitMessage = function(m) {
-		var defered = q.defer();
-		setupEmitMessage(m)
-		.then(respond)
-		.then(cleanupMessage)
-		.then(defered.resolve, defered.reject);
-        return defered.promise;
-	};
-
-	EventEmitter.call(this);
-	var self = this;
+	emitMessage(m) {
+		return this.setupEmitMessage(m)
+			.then(bundle => this.respond(bundle))
+			.then(bundle => this.cleanupMessage(bundle));
+	}
 }
-util.inherits(createNewMessageManager, EventEmitter);
 
-var messageManager;
+let messageManager;
 
 // Start defining external interfaces
-exports.init = function(listener) {
+exports.init = (listener) => {
 	// Make sure the listeners object is valid
 	if(typeof(listener) === 'undefined') {
-		throw new error('listeners argument is not defined');
+		throw new Error('listeners argument is not defined');
 	}
 	if(typeof(listener.type) === 'undefined') {
-		throw new error('listeners.type is not defined');
+		throw new Error('listeners.type is not defined');
 	}
 	if((listener.type !== SP_Q_LISTENER_TYPE) && (listener.type !== SP_CALLBACK_LISTENER_TYPE)) {
-		throw new error('listeners.type is not valid', listener.type);
+		throw new Error('listeners.type is not valid: ' + listener.type);
 	}
 	if(typeof(listener.func) === 'undefined') {
-		throw new error('listeners.func is not defined');
+		throw new Error('listeners.func is not defined');
 	}
 
-
     // Create a new messageManager object
-	messageManager = new createNewMessageManager(listener);
-	
+	messageManager = new NewMessageManager(listener);
 
 	// Link the messageManager to the processes message event
 	process.on('message', messageManager.messageListener);
@@ -458,39 +355,39 @@ exports.init = function(listener) {
 
     return messageManager;
 };
-exports.finishedInit = function(retData) {
-	var defered = q.defer();
+exports.finishedInit = (retData) => {
+	return new Promise((resolve, reject) => {
 	// Indicate that this process is ready to receive messages
 	messageManager.finishSetup(retData)
-	.then(defered.resolve, defered.reject);
-    return defered.promise;
+	.then(resolve, reject);
+    });
 };
 
-exports.getSlaveProcessInfo = function() {
+exports.getSlaveProcessInfo = () => {
 	return slave_process_env;
 };
 
-exports.getStats = function() {
+exports.getStats = () => {
 	return {};
 };
-exports.sendMessage = function(data) {
+exports.sendMessage = (data) => {
 	if((typeof(data) !== 'undefined')) {
-		var message = {
+		const message = {
 			'eventType': PM_EMIT_MESSAGE,
 			'data': data
 		};
 		return messageManager.emitMessage(message);
 	}
 };
-exports.send = function(type, data) {
+exports.send = (type, data) => {
 	if((typeof(type) !== 'undefined') && (typeof(data) !== 'undefined')) {
-		var message = {
+		const message = {
 			'eventType': type,
 			'data': data
 		};
 		return messageManager.emitMessage(message);
 	}
 };
-exports.attachOnExitListener = function(onExitFunc) {
+exports.attachOnExitListener = (onExitFunc) => {
 	exitListenerFunc = onExitFunc;
-}
+};

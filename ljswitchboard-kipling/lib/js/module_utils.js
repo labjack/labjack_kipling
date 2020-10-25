@@ -26,17 +26,6 @@ var le = function(err) {
 global.CLEAR_CACHES = function() {
 	var debugClearing = false;
 	try {
-		if(MODULE_CHROME) {
-			if(debugClearing) {
-				console.log('Clearing MODULE_CHROME cache');
-			}
-			MODULE_CHROME.clearTemplateCache();
-		} else {
-			if(debugClearing) {
-				console.log('Not clearing MODULE_CHROME template cache');
-			}
-		}
-
 		if(module_manager) {
 			if(debugClearing) {
 				console.log('Clearing module_manager cache');
@@ -175,18 +164,17 @@ var TAKE_SCREENSHOTS = function() {
 
 function CLIPBOARD_FUNCTION_WRAPPER() {
 	const gui = global.lj_di_injector.get('gui');
-	var clipboard = nw.Clipboard.get();
 	function get() {
-		return clipboard.get('text');
+		return gui.clipboard.readText();
 	}
 	function set(txt) {
-		clipboard.set(txt,'text');
+		gui.clipboard.writeText(txt);
 	}
 	function clear(){
-		clipboard.clear();
+		gui.clipboard.clear();
 	}
 	this.get = get;
 	this.set = set;
 	this.clear = clear;
 }
-var CLIPBOARD_MANAGER = new CLIPBOARD_FUNCTION_WRAPPER();
+global.CLIPBOARD_MANAGER = new CLIPBOARD_FUNCTION_WRAPPER();

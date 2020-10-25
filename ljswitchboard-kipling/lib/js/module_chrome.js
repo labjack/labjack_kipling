@@ -50,13 +50,14 @@ class ModuleChrome extends EventEmitter {
 			DEVICE_SELECTOR_DEVICE_CLOSED: 'DEVICE_SELECTOR_DEVICE_CLOSED',
 		};
 
-		var documentURL;
+/*
+		let documentURL;
 		try {
 			documentURL = document.URL.split('file:///')[1];
 		} catch(err) {
 			documentURL = '';
 		}
-		var cwd = path.dirname(documentURL);
+		const cwd = path.dirname(documentURL);
 		try {
 			cwd = decodeURIComponent(cwd);
 		} catch(err) {
@@ -65,6 +66,7 @@ class ModuleChrome extends EventEmitter {
 		if (!path.isAbsolute(cwd)) {
 			cwd = path.resolve(path.sep, cwd);
 		}
+*/
 
 		this.cachedTemplates = {};
 
@@ -101,7 +103,7 @@ class ModuleChrome extends EventEmitter {
 				}
 			},
 			'subclass': (filterValues, deviceAttributes) => {
-				var isMet = false;
+				let isMet = false;
 				if (this.debugFilters) {
 					console.log('Checking subclass', filterValues, deviceAttributes.productType);
 				}
@@ -119,7 +121,7 @@ class ModuleChrome extends EventEmitter {
 				if (this.debugFilters) {
 					console.log('Checking type', filterValue, deviceAttributes.productType);
 				}
-				var isMet = true;
+				let isMet = true;
 				if (deviceAttributes.productType.indexOf(filterValue) < 0) {
 					if (this.debugFilters) {
 						console.log('FAILS!');
@@ -152,7 +154,7 @@ class ModuleChrome extends EventEmitter {
 
 	loadTemplateFile(name) {
 		return new Promise((resolve, reject) => {
-			var templatePath = path.join(
+			const templatePath = path.join(
 				cwd,
 				moduleChromeTemplatesDir,
 				name
@@ -166,7 +168,7 @@ class ModuleChrome extends EventEmitter {
 			// });
 
 			fs.readFile(templatePath, (err, data) => {
-				var pageStr = '';
+				const pageStr = '';
 				if (err) {
 					console.error('Error in _loadTemplateFile', err);
 					console.error('Data', {
@@ -183,52 +185,33 @@ class ModuleChrome extends EventEmitter {
 		});
 	}
 
-	clearTemplateCache() {
-		this.cachedTemplates = {};
+	async compileTemplate(name, context) {
+		if (this.cachedTemplates[name]) {
+			return this.cachedTemplates[name](context);
+		} else {
+			const templateData = await this.loadTemplateFile(name);
+			const handlebars = global.require('handlebars');
+			this.cachedTemplates[name] = handlebars.compile(templateData);
+			return this.cachedTemplates[name](context);
+		}
 	}
 
-	compileTemplate(name, context) {
-		return new Promise((resolve, reject) => {
-			if (this.cachedTemplates[name]) {
-				resolve(this.cachedTemplates[name](context));
-			} else {
-				this.loadTemplateFile(name)
-					.then((templateData) => {
-						const handlebars = global.require('handlebars');
-						this.cachedTemplates[name] = handlebars.compile(templateData);
-						resolve(this.cachedTemplates[name](context));
-					});
-			}
-		});
-	}
-
-	renderTemplate(location, name, context) {
-		return new Promise((resolve, reject) => {
-			this.compileTemplate(name, context)
-				.then((compiledData) => {
-					var bodyTabs;
-
-					location.empty();
-					location.append($(compiledData));
-					bodyTabs = location.find(sliderTabsClass);
-					if (bodyTabs.length > 0) {
-						bodyTabs.show();
-					}
-					resolve(context);
-				});
-		});
+	async renderTemplate(location, name, context) {
+		const compiledData = await this.compileTemplate(name, context);
+		location.empty();
+		location.append($(compiledData));
+		const bodyTabs = location.find(sliderTabsClass);
+		if (bodyTabs.length > 0) {
+			bodyTabs.show();
+		}
+		return context;
 	}
 
 	computeTabSizing(numTabs, offset, ele) {
-		var tabEl;
-		if (ele) {
-			tabEl = ele;
-		} else {
-			tabEl = $(TAB_SIZING_STYLE_CLASS);
-		}
-		let height = tabEl.height();
+		const tabEl = ele ? ele : $(TAB_SIZING_STYLE_CLASS);
 		const padding = 2 * parseInt(tabEl.css('padding'), 10);
 		const marginBottom = parseInt(tabEl.css('margin-bottom'), 10);
+		let height = tabEl.height();
 		height += (padding + marginBottom);
 		height = height * numTabs;
 		if (offset) {
@@ -240,18 +223,18 @@ class ModuleChrome extends EventEmitter {
 	adjustModuleChromeTabSpacing(tabSections, context) {
 		return new Promise((resolve, reject) => {
 
-			var headerHeight = this.computeTabSizing(context.header_modules.length);
-			var footerHeight = this.computeTabSizing(
+			const headerHeight = this.computeTabSizing(context.header_modules.length);
+			const footerHeight = this.computeTabSizing(
 				context.footer_modules.length,
 				-2,
 				$(MODULE_CHROME_FOOTER_TABS_CLASS)
 			);
-			var bottomPadding = this.computeTabSizing(
+			const bottomPadding = this.computeTabSizing(
 				context.footer_modules.length,
 				0,
 				$(MODULE_CHROME_FOOTER_TABS_CLASS)
 			);
-			// var bottomPadding = this.computeTabSizing(
+			// const bottomPadding = this.computeTabSizing(
 			// 	context.footer_modules.length,
 			// 	2
 			// );
@@ -265,18 +248,13 @@ class ModuleChrome extends EventEmitter {
 		});
 	}
 
-	updateVisibleTabs(location, context) {
-		return new Promise((resolve, reject) => {
-			this.renderTemplate(location, moduleChromeTabTemplateName, context)
-				.then((context, data) => {
-					resolve();
-				}, reject);
-		});
+	async updateVisibleTabs(location, context) {
+		await this.renderTemplate(location, moduleChromeTabTemplateName, context);
 	}
 
 	internalUpdateModuleListing(tabSections, context) {
 		return new Promise((resolve, reject) => {
-			var promises = [];
+			const promises = [];
 			tabSections.forEach((tabSection) => {
 				promises.push(this.updateVisibleTabs(
 					tabSection.location,
@@ -304,12 +282,12 @@ class ModuleChrome extends EventEmitter {
 		return new Promise((resolve, reject) => {
 			// Loop through each tab-section, ex: header, body, footer.
 			tabSections.forEach((tabSection) => {
-				var modules = tabSection.context;
+				const modules = tabSection.context;
 
 				// Loop through and attach listeners for each tab.
 				modules.forEach((module) => {
-					var tabID = '#' + module.name + '-tab';
-					var tab = $(tabID);
+					const tabID = '#' + module.name + '-tab';
+					const tab = $(tabID);
 					tab.on('click', module, res => this.moduleChromeTabClickHandler(res));
 				});
 			});
@@ -319,11 +297,11 @@ class ModuleChrome extends EventEmitter {
 
 	innerUpdatePrimaryModuleListing(modules) {
 		return new Promise((resolve, reject) => {
-			var context = {
+			const context = {
 				'header_modules': modules.header,
 				'footer_modules': modules.footer
 			};
-			var tabSections = [{
+			const tabSections = [{
 				'location': $(MODULE_CHROME_HEADER_TABS_ID),
 				'context': context.header_modules,
 			}, {
@@ -350,11 +328,11 @@ class ModuleChrome extends EventEmitter {
 
 	internalUpdateSecondaryModuleListing(modules) {
 		return new Promise((resolve, reject) => {
-			var context = {
+			const context = {
 				'modules': modules.body
 			};
 
-			var tabSections = [{
+			const tabSections = [{
 				'location': $(MODULE_CHROME_BODY_TABS_ID),
 				'context': context.modules,
 			}];
@@ -369,9 +347,9 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	checkDeviceForSupport(filters, deviceListing) {
-		var passedFilters = filters.some((filter) => {
-			var isSupportedDevice = true;
-			var keys = Object.keys(filter);
+		const passedFilters = filters.some((filter) => {
+			let isSupportedDevice = true;
+			const keys = Object.keys(filter);
 
 			// Check each filter to see if the current device meets all filter
 			// requirements.
@@ -407,8 +385,7 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	filterBodyModules(module) {
-		var showModule = true;
-		var isSupportedDevice;
+		let showModule = true;
 		// If there aren't any connected devices, make sure that no modules are
 		// shown.
 		if (this.cachedDeviceListing.length === 0) {
@@ -463,7 +440,7 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	runGC(data) {
-		var gcExecuted = false;
+		let gcExecuted = false;
 		if (global.gc) {
 			if (global.gc.call) {
 				if (typeof (global.gc.call) === 'function') {
@@ -505,7 +482,7 @@ class ModuleChrome extends EventEmitter {
 
 	conditionallyClearCaches() {
 		try {
-			var clearCaches = false;
+			let clearCaches = false;
 			if (typeof(this.gui.App.manifest.clearCachesOnModuleLoad) !== "undefined") {
 				clearCaches = clearCaches || this.gui.App.manifest.clearCachesOnModuleLoad;
 			}
@@ -538,7 +515,7 @@ class ModuleChrome extends EventEmitter {
 
 			// Clear all selected module styling classes
 			$('.module-chrome-tab').removeClass('selected');
-			var tabID = '#' + res.data.name + '-tab';
+			const tabID = '#' + res.data.name + '-tab';
 			$(tabID).addClass('selected');
 
 			this.emit(this.eventList.LOADING_MODULE, res);
@@ -555,8 +532,8 @@ class ModuleChrome extends EventEmitter {
 				// // console.log('Finished Loading Module', res.name);
 
 				// Delete loaded data (commented out to let gc handle it)
-				// var keys = Object.keys(res);
-				// var i;
+				// const keys = Object.keys(res);
+				// const i;
 				// for(i = 0; i < keys.length; i++) {
 				// res[keys[i]] = null;
 				// res[keys[i]] = undefined;
@@ -695,4 +672,4 @@ class ModuleChrome extends EventEmitter {
 	}
 }
 
-var MODULE_CHROME = new ModuleChrome();
+global.MODULE_CHROME = new ModuleChrome();

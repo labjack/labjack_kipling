@@ -54,4 +54,4 @@ function createMouseEventHandler() {
 
     var self = this;
 }
-var MOUSE_EVENT_HANDLER = new createMouseEventHandler();
+global.MOUSE_EVENT_HANDLER = new createMouseEventHandler();

@@ -1,87 +1,80 @@
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var path = require('path');
-var handlebars = global.require('handlebars');
-var module_manager = require('ljswitchboard-module_manager');
-var package_loader = require('ljswitchboard-package_loader');
-var static_files = require('ljswitchboard-static_files');
-var io_manager = require('ljswitchboard-io_manager');
+'use strict';
+
+const path = require('path');
+const {EventEmitter} = require('events');
+const package_loader = global.lj_di_injector.get('package_loader');
+const static_files = package_loader.getPackage('static_files');
+const io_manager = package_loader.getPackage('io_manager');
+const module_manager = package_loader.getPackage('module_manager');
 
 // Configure the module_manager persistent data path.
-var kiplingExtractionPath = package_loader.getExtractionPath();
-var moduleDataPath = path.normalize(path.join(
+const kiplingExtractionPath = package_loader.getExtractionPath();
+const moduleDataPath = path.normalize(path.join(
 	kiplingExtractionPath,
 	'module_data'
 ));
 module_manager.configurePersistentDataPath(moduleDataPath);
 module_manager.disableLinting();
 
+const MODULE_LOADER_CSS_DESTINATION_ID = 'module-chrome-loaded-module-css';
+const MODULE_LOADER_JS_DESTINATION_ID = 'module-chrome-loaded-module-js';
+const MODULE_LOADER_VIEW_DESTINATION_ID = 'module-chrome-loaded-module-view';
 
-function createModuleLoader() {
-	this.stats = {
-		'numLoaded': 0
-	};
-	this.current_module_data = {};
+const eventList = {
+	VIEW_READY: 'VIEW_READY',
+	UNLOAD_MODULE: 'UNLOAD_MODULE',
+	MODULE_READY: 'MODULE_READY',
+};
 
-	var eventList = {
-		VIEW_READY: 'VIEW_READY',
-		UNLOAD_MODULE: 'UNLOAD_MODULE',
-		MODULE_READY: 'MODULE_READY',
-	};
-	this.eventList = eventList;
+class ModuleLoader extends EventEmitter {
 
-	var MODULE_LOADER_CSS_DESTINATION_ID = 'module-chrome-loaded-module-css';
-	var MODULE_LOADER_JS_DESTINATION_ID = 'module-chrome-loaded-module-js';
-	var MODULE_LOADER_VIEW_DESTINATION_ID = 'module-chrome-loaded-module-view';
-	var MODULE_LOADER_VIEW_TEMPLATE_ARRAY = [
-		'<div id="module-chrome-current-module-{{numLoaded}}">',
-		'{{{viewData}}}',
-		'</div>'
-	];
-	var MODULE_LOADER_VIEW_TEMPLATE = handlebars.compile(
-		MODULE_LOADER_VIEW_TEMPLATE_ARRAY.join('')
-	);
-	var MODULE_LOADER_VIEW_ID_TEMPLATE = handlebars.compile([
-		'#module-chrome-current-module-{{numLoaded}}'
-	].join(''));
+	constructor() {
+		super();
+		this.stats = {
+			'numLoaded': 0
+		};
+		this.current_module_data = {};
 
+		this.eventList = eventList;
 
+		this.precompileFunctions = [];
+		this.unloadModuleFunctions = [];
+	}
 
-	var clearCurrentModule = function(newModule) {
+	clearCurrentModule(newModule) {
 		return new Promise((resolve, reject) => {
 			// Remove any current listeners from the VIEW_READY and UNLOAD_MODULE
 			// events.  They should only be listened to by the currently loaded
 			// module.
-			self.removeAllListeners(eventList.VIEW_READY);
-			self.removeAllListeners(eventList.UNLOAD_MODULE);
+			this.removeAllListeners(eventList.VIEW_READY);
+			this.removeAllListeners(eventList.UNLOAD_MODULE);
 
 			// Clear the DOM elements
-			var locationKeys = Object.keys(newModule.outputLocation);
-			locationKeys.forEach(function(locationKey) {
+			const locationKeys = Object.keys(newModule.outputLocation);
+			locationKeys.forEach((locationKey) => {
 				newModule.outputLocation[locationKey].empty();
 			});
 			resolve(newModule);
 		});
-	};
+	}
 
-	var getCreatePageElement = function(newModule) {
-		var createPageElement = function(newFile) {
+	getCreatePageElement(newModule) {
+		const createPageElement = (newFile) => {
 			return new Promise((resolve, reject) => {
-			var results = {
+			const results = {
 				'name': newFile.fileName,
 			};
 			try {
-				var fileType = path.extname(newFile.fileName);
-				var newElement;
+				const fileType = path.extname(newFile.fileName);
 				if(fileType === '.css') {
-					newElement = document.createElement('style');
+					const newElement = document.createElement('style');
 					newElement.setAttribute('type', 'text/css');
 
-					newElement.onload = function() {
+					newElement.onload = () => {
 						// console.info('!!! '+fileType+' file loaded', newFile.fileName);
 						resolve(results);
 					};
-					newElement.onerror = function() {
+					newElement.onerror = () => {
 						console.error('Error in file' + fileType);
 					};
 
@@ -90,12 +83,12 @@ function createModuleLoader() {
 					newElement.appendChild(document.createTextNode(newFile.fileData));
 					newModule.outputLocation.css.append(newElement);
 				} else if(fileType === '.js') {
-					newElement = document.createElement('script');
+					const newElement = document.createElement('script');
 					newElement.setAttribute('type', 'text/javascript');
 					//
 
 					// Isn't working for .js files :( idk why, it worked before.
-					// newElement.onload = function() {
+					// newElement.onload = () => {
 					// console.info('!!! '+fileType+' file loaded', newFile.fileName);
 					// resolve(results);
 					// };
@@ -120,84 +113,75 @@ function createModuleLoader() {
 			});
 		};
 		return createPageElement;
-	};
+	}
 
-	var loadCSSFiles = function(newModule) {
+	loadCSSFiles(newModule) {
 		return new Promise((resolve, reject) => {
-		var promises = newModule.css.map(getCreatePageElement(newModule));
+			const promises = newModule.css.map(this.getCreatePageElement(newModule));
 
-		Promise.allSettled(promises)
-		.then(function(results) {
-			resolve(newModule);
-		}, function(err) {
-			console.error('Finished Loading Err', err);
-			reject(newModule);
+			Promise.allSettled(promises)
+				.then((results) => {
+					resolve(newModule);
+				}, (err) => {
+					console.error('Finished Loading Err', err);
+					reject(newModule);
+				});
 		});
-		});
-	};
-	var loadJSFiles = function(newModule) {
+	}
+
+	loadJSFiles(newModule) {
 		return new Promise((resolve, reject) => {
-		var promises = newModule.js.map(getCreatePageElement(newModule));
+			const promises = newModule.js.map(this.getCreatePageElement(newModule));
 
-		Promise.allSettled(promises)
-		.then(function(results) {
-			resolve(newModule);
-		}, function(err) {
-			console.error('Finished Loading Err', err);
-			reject(newModule);
+			Promise.allSettled(promises)
+				.then((results) => {
+					resolve(newModule);
+				}, (err) => {
+					console.error('Finished Loading Err', err);
+					reject(newModule);
+				});
 		});
-		});
-	};
-	var precompileFunctions = [];
-	this.addPreloadStep = function(func) {
-		precompileFunctions.push(func);
-	};
+	}
 
-	var getModuleContext = function(newModule) {
+	addPreloadStep(func) {
+		this.precompileFunctions.push(func);
+	}
+
+	getModuleContext(newModule) {
 		return new Promise((resolve, reject) => {
-			var promises = [];
-			var i;
-			for(i = 0; i < precompileFunctions.length; i++) {
-				// console.info(
-				// 	'Executing precompile function',
-				// 	i,
-				// 	precompileFunctions.length
-				// );
-				promises.push(precompileFunctions[i](newModule));
+			const promises = [];
+			for(let i = 0; i < this.precompileFunctions.length; i++) {
+				promises.push(this.precompileFunctions[i](newModule));
 			}
 			Promise.allSettled(promises)
-				.then(function(results) {
-					// remove precompile functions
-					precompileFunctions = [];
+				.then((results) => {
+					this.precompileFunctions = [];
 					resolve(newModule);
-				}, function(err) {
+				}, (err) => {
 					console.error('Finished pre-compilation steps', err);
 					reject(newModule);
 				});
 		});
-	};
+	}
 
-	var getUpdatedDeviceListing = function(newModule) {
+	getUpdatedDeviceListing(newModule) {
 		return new Promise((resolve, reject) => {
-		var io_interface = io_manager.io_interface();
-		var device_controller = io_interface.getDeviceController();
+			const io_interface = io_manager.io_interface();
+			const device_controller = io_interface.getDeviceController();
 
-		// Filter what devices are displayed
-		var filters;
-		if(newModule.data.supportedDevices) {
-			filters = newModule.data.supportedDevices;
-		}
-		device_controller.getDeviceListing(filters)
-		.then(function(deviceListing) {
-			newModule.context.devices = deviceListing;
-			resolve(newModule);
+			// Filter what devices are displayed
+			const filters = newModule.data.supportedDevices ? newModule.data.supportedDevices : null;
+			device_controller.getDeviceListing(filters).then((deviceListing) => {
+				newModule.context.devices = deviceListing;
+				resolve(newModule);
+			});
 		});
-		});
-	};
-	var loadHTMLFiles = function(newModule) {
+	}
+
+	loadHTMLFiles(newModule) {
 		return new Promise((resolve, reject) => {
 		// console.log('loaded html files', newModule.htmlFiles);
-		var htmlFile = '<p>No view.html file loaded.</p>';
+		let htmlFile = '<p>No view.html file loaded.</p>';
 		// Check to see if a framework is being loaded:
 		if(newModule.data.framework) {
 			if(newModule.htmlFiles.framework_view) {
@@ -212,54 +196,52 @@ function createModuleLoader() {
 		}
 
 		// Compile & populate the view.html file
-		var template = handlebars.compile(htmlFile);
-		var data = template(newModule.context);
+		const template = handlebars.compile(htmlFile);
+		const data1 = template(newModule.context);
 
 		// Append a header & footer onto the template.
-		data = MODULE_LOADER_VIEW_TEMPLATE({
-			'numLoaded': newModule.context.stats.numLoaded,
-			'viewData': data,
-		});
+		const data = '<div id="module-chrome-current-module-' + newModule.context.stats.numLoaded + '">' + data1 + '</div>';
 
 		// Add the page data to the dom.
 		newModule.outputLocation.view.append(data);
 
 		// Build the elementID string that was assigned to the element when
 		// compiling the "MODULE_LOADER_VIEW_TEMPLATE"
-		var elementID = MODULE_LOADER_VIEW_ID_TEMPLATE({
-			'numLoaded': newModule.context.stats.numLoaded,
-		});
+
+		const elementID = '#module-chrome-current-module-' + newModule.context.stats.numLoaded;
 
 		// Attach to the .ready event of the element just created.
 		// Element must already be added because we use jquery to search for
 		// the element's ID to attach to the "ready" event.
-		$(elementID).ready(function() {
+		$(elementID).ready(() => {
 			resolve(newModule);
-			var loadedData = {
+			const loadedData = {
 				'name': newModule.name,
 				'id': elementID,
 				'data': newModule,
 				'humanName': newModule.data.humanName,
 			};
-			self.emit(eventList.VIEW_READY, loadedData);
-			self.current_module_data = null;
-			self.current_module_data = undefined;
-			self.current_module_data = loadedData;
+			this.emit(eventList.VIEW_READY, loadedData);
+			this.current_module_data = null;
+			this.current_module_data = undefined;
+			this.current_module_data = loadedData;
 		});
 		});
-	};
-	var updateStatistics = function(newModule) {
+	}
+
+	updateStatistics(newModule) {
 		return new Promise((resolve, reject) => {
-		self.stats.numLoaded += 1;
+		this.stats.numLoaded += 1;
 		resolve(newModule);
 		});
-	};
-	function runGC(data) {
-		var gcExecuted = false;
-		if(gc) {
-			if(gc.call) {
-				if(typeof(gc.call) === 'function') {
-					gc.call();
+	}
+
+	runGC(data) {
+		let gcExecuted = false;
+		if(global.gc) {
+			if(global.gc.call) {
+				if(typeof(global.gc.call) === 'function') {
+					global.gc.call();
 					gcExecuted = true;
 				}
 			}
@@ -273,91 +255,87 @@ function createModuleLoader() {
 		return Promise.resolve(data);
 	}
 
-	var unloadModuleFunctions = [];
-	this.addUnloadStep = function(func) {
-		unloadModuleFunctions.push(func);
-	};
+	addUnloadStep(func) {
+		this.unloadModuleFunctions.push(func);
+	}
 
-	var executeUnloadModuleFunctions = function(moduleData) {
+	executeUnloadModuleFunctions(moduleData) {
 		return new Promise((resolve, reject) => {
-
-		if(unloadModuleFunctions.length > 0) {
-			var promises = [];
-			var i;
-			for(i = 0; i < unloadModuleFunctions.length; i++) {
-				promises.push(unloadModuleFunctions[i]());
+			if (this.unloadModuleFunctions.length > 0) {
+				const promises = [];
+				for(let i = 0; i < this.unloadModuleFunctions.length; i++) {
+					promises.push(this.unloadModuleFunctions[i]());
+				}
+				Promise.allSettled(promises)
+					.then((results) => {
+						this.unloadModuleFunctions = [];
+						resolve(moduleData);
+					}, function(err) {
+						console.error('Finished unload-module steps', err);
+						resolve(moduleData);
+					});
+			} else {
+				resolve(moduleData);
 			}
-			Promise.allSettled(promises)
-				.then(function(results) {
-					unloadModuleFunctions = [];
-					resolve(moduleData);
-				}, function(err) {
-					console.error('Finished unload-module steps', err);
-					resolve(moduleData);
+		});
+	}
+
+	renderModule(moduleData) {
+		return new Promise((resolve, reject) => {
+			// Trigger any loaded module to halt its execution
+			this.emit(eventList.UNLOAD_MODULE, {
+				'data': 'testData...'
+			});
+			moduleData.loadResults = {
+				'overallResult': true,
+				'css': [],
+				'js': [],
+				'html': [],
+			};
+			// coppied directory of the static_files project location.
+			const cpdDir = JSON.parse(JSON.stringify(static_files.getDir()));
+			// console.log('coppied directory', cpdDir);
+			moduleData.context = {
+				'stats': this.stats,
+				'staticFiles': cpdDir,
+				'devices': undefined,
+			};
+			moduleData.outputLocation = {
+				'css': $('#' + MODULE_LOADER_CSS_DESTINATION_ID),
+				'js': $('#' + MODULE_LOADER_JS_DESTINATION_ID),
+				'view': $('#' + MODULE_LOADER_VIEW_DESTINATION_ID),
+			};
+			// moduleData.outputLocationID = MODULE_LOADER_DESTINATION_ID;
+			this.clearCurrentModule(moduleData)
+				.then(moduleData => this.loadCSSFiles(moduleData))
+				.then(moduleData => this.loadJSFiles(moduleData))
+				.then(moduleData => this.getUpdatedDeviceListing(moduleData))
+				.then(moduleData => this.getModuleContext(moduleData))
+				.then(moduleData => this.loadHTMLFiles(moduleData))
+				.then(moduleData => this.updateStatistics(moduleData))
+				.then(moduleData => this.runGC(moduleData))
+				.then(resolve, reject);
 				});
-		} else {
-			resolve(moduleData);
-		}
+	}
 
-		});
-	};
-	var renderModule = function(moduleData) {
+	loadModule(moduleObject) {
 		return new Promise((resolve, reject) => {
-		// Trigger any loaded module to halt its execution
-		self.emit(eventList.UNLOAD_MODULE, {
-			'data': 'testData...'
+			module_manager.loadModuleData(moduleObject)
+				.then(moduleData => this.executeUnloadModuleFunctions(moduleData))
+				.then(moduleData => this.renderModule(moduleData))
+				.then(resolve, reject);
 		});
-		moduleData.loadResults = {
-			'overallResult': true,
-			'css': [],
-			'js': [],
-			'html': [],
-		};
-		// coppied directory of the static_files project location.
-		var cpdDir = JSON.parse(JSON.stringify(static_files.getDir()));
-		// console.log('coppied directory', cpdDir);
-		moduleData.context = {
-			'stats': self.stats,
-			'staticFiles': cpdDir,
-			'devices': undefined,
-		};
-		moduleData.outputLocation = {
-			'css': $('#' + MODULE_LOADER_CSS_DESTINATION_ID),
-			'js': $('#' + MODULE_LOADER_JS_DESTINATION_ID),
-			'view': $('#' + MODULE_LOADER_VIEW_DESTINATION_ID),
-		};
-		// moduleData.outputLocationID = MODULE_LOADER_DESTINATION_ID;
-		clearCurrentModule(moduleData)
-		.then(loadCSSFiles)
-		.then(loadJSFiles)
-		.then(getUpdatedDeviceListing)
-		.then(getModuleContext)
-		.then(loadHTMLFiles)
-		.then(updateStatistics)
-		.then(() => runGC())
-		.then(resolve, reject);
-		});
-	};
+	}
 
-	this.loadModule = function(moduleObject) {
+	loadModuleByName(moduleName) {
 		return new Promise((resolve, reject) => {
-		module_manager.loadModuleData(moduleObject)
-		.then(executeUnloadModuleFunctions)
-		.then(renderModule)
-		.then(resolve, reject);
+			module_manager.loadModuleDataByName(moduleName)
+				.then(moduleData => this.executeUnloadModuleFunctions(moduleData))
+				.then(moduleData => this.renderModule(moduleData))
+				.then(resolve, reject);
 		});
-	};
+	}
 
-	this.loadModuleByName = function(moduleName) {
-		return new Promise((resolve, reject) => {
-		module_manager.loadModuleDataByName(moduleName)
-		.then(executeUnloadModuleFunctions)
-		.then(renderModule)
-		.then(resolve, reject);
-		});
-	};
-	var self = this;
 }
-util.inherits(createModuleLoader, EventEmitter);
 
-var MODULE_LOADER = new createModuleLoader();
+global.MODULE_LOADER = new ModuleLoader();
