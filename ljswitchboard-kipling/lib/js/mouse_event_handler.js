@@ -1,11 +1,16 @@
-// Define the Mouse event Handler.
-function createMouseEventHandler() {
-    this.lastMouseEventData = undefined;
-    this.keyboardEventHandler = undefined;
-    this.windowZoomManager = undefined;
+'use strict';
 
-    function handleMouseScroll(event) {
-        self.lastMouseEventData = event;
+// Define the Mouse event Handler.
+class MouseEventHandler {
+
+    constructor() {
+        this.lastMouseEventData = undefined;
+        this.keyboardEventHandler = undefined;
+        this.windowZoomManager = undefined;
+    }
+
+    handleMouseScroll(event) {
+        this.lastMouseEventData = event;
         // console.log('scroll detected!!');
         if(event.ctrlKey) {
             // console.log('Zooming!!');
@@ -19,39 +24,37 @@ function createMouseEventHandler() {
 
             // Enable only Y axis scroll deltas.
             // if(wheelDeltaY > 0) {
-            //     self.windowZoomManager.zoomIn();
+            //     this.windowZoomManager.zoomIn();
             // } else if(wheelDeltaY < 0) {
-            //     self.windowZoomManager.zoomOut();
+            //     this.windowZoomManager.zoomOut();
             // }
 
             // Enable X and Y axis scroll deltas.
             if(wheelDelta > 0) {
-                self.windowZoomManager.zoomIn();
+                this.windowZoomManager.zoomIn();
             } else if(wheelDelta < 0) {
-                self.windowZoomManager.zoomOut();
+                this.windowZoomManager.zoomOut();
             }
         }
     }
 
     // The mouse event handler is initialized by the index.js file in the
     // Kipling application.
-    this.init = function(bundle) {
-        // console.log('Initializing mouse event handler', bundle);
-        self.keyboardEventHandler = bundle.keyboard;
-        self.windowZoomManager = bundle.zoom;
+    init(bundle) {
+        this.keyboardEventHandler = bundle.keyboard;
+        this.windowZoomManager = bundle.zoom;
 
-        //adding the event listerner for Mozilla
+        //adding the event listener for Mozilla
         if(window.addEventListener) {
-            document.addEventListener('DOMMouseScroll', handleMouseScroll, false);
+            document.addEventListener('DOMMouseScroll', (event) => this.handleMouseScroll(event), false);
         }
 
         //for IE/OPERA etc
-        document.onmousewheel = handleMouseScroll;
+        document.onmousewheel = (event) => this.handleMouseScroll(event);
 
 
         return Promise.resolve(bundle);
-    };
-
-    var self = this;
+    }
 }
-global.MOUSE_EVENT_HANDLER = new createMouseEventHandler();
+
+global.MOUSE_EVENT_HANDLER = new MouseEventHandler();

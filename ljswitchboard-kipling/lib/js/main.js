@@ -34,18 +34,20 @@ function handleError(err, msg) {
     });
 }
 
-function performRemainingInitializationRoutines() {
-    return new Promise((resolve, reject) => {
-        const managers = {
-            'keyboard': global.KEYBOARD_EVENT_HANDLER,
-            'mouse': global.MOUSE_EVENT_HANDLER,
-            'zoom': global.WINDOW_ZOOM_MANAGER,
-        };
+async function performRemainingInitializationRoutines() {
+    const managers = {
+        'keyboard': global.KEYBOARD_EVENT_HANDLER,
+        'mouse': global.MOUSE_EVENT_HANDLER,
+        'zoom': global.WINDOW_ZOOM_MANAGER,
+    };
 
-        global.KEYBOARD_EVENT_HANDLER.init(managers)
-            .then(global.WINDOW_ZOOM_MANAGER.init)
-            .then(global.MOUSE_EVENT_HANDLER.init)
-            .then(resolve, reject);
+    console.log('aaaaaaaaa', global.KEYBOARD_EVENT_HANDLER, global.WINDOW_ZOOM_MANAGER, global.MOUSE_EVENT_HANDLER);
+
+    await global.KEYBOARD_EVENT_HANDLER.init(managers);
+    await global.WINDOW_ZOOM_MANAGER.init();
+    await global.MOUSE_EVENT_HANDLER.init({
+        keyboard: global.KEYBOARD_EVENT_HANDLER,
+        zoom: global.MOUSE_EVENT_HANDLER
     });
 }
 
@@ -197,4 +199,7 @@ async function startupKipling() {
     }
 }
 
-startupKipling();
+startupKipling()
+    .catch(err => {
+        console.error(err);
+    });

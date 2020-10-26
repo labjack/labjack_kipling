@@ -38,4 +38,4 @@ class WindowZoomManager extends EventEmitter {
     }
 }
 
-var WINDOW_ZOOM_MANAGER = new WindowZoomManager();
+global.WINDOW_ZOOM_MANAGER = new WindowZoomManager();

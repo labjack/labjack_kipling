@@ -5,7 +5,6 @@
  * references that allow programs to communicate with the io_manager_process
  */
 const EventEmitter = require('events').EventEmitter;
-const util = require('util');
 const process_manager = require('process_manager');
 const fs = require('fs');
 const path = require('path');
@@ -22,13 +21,12 @@ const ljmCheck = require('ljswitchboard-ljm_driver_checker');
 // Include the checkRequirements function
 const npm_build_check = require('./common/npm_build_check');
 
-const ioDelegatorPathFromRoot = 'lib/io_delegator.js';
 const constants = require('./common/constants');
 const io_endpoint_key = constants.io_manager_endpoint_key;
 
 function runGarbageCollector() {
-	if(global.gc) {
-		if(typeof(global.gc) === 'function') {
+	if (global.gc) {
+		if (typeof(global.gc) === 'function') {
 			global.gc();
 		}
 	}
@@ -64,7 +62,7 @@ class IOInterface extends EventEmitter {
 	}
 
 	printStartMsg() {
-		if(this.DEBUG_SUBPROCESS_START) {
+		if (this.DEBUG_SUBPROCESS_START) {
 			console.log.apply(console, arguments);
 		}
 	}
@@ -77,21 +75,8 @@ class IOInterface extends EventEmitter {
 		this.device_controller = new device_controller.createNewDeviceController(this);
 	}
 
-	getDriverConstants() {
-		return this.saveDriverConstants();
-	}
-
-	saveDriverConstants() {
-		return Promise.resolve();
-	}
-
-
-	internalListener(m) {
-		console.log("* io_interface internalListener:", m);
-	}
-
 	checkOneWayEndpoint(m) {
-		if(this.oneWayMessageListeners[m.endpoint]) {
+		if (this.oneWayMessageListeners[m.endpoint]) {
 			return Promise.resolve(m);
 		} else {
 			return Promise.reject(m);
@@ -127,21 +112,12 @@ class IOInterface extends EventEmitter {
 	}
 
 	async initInternalMessenger() {
-		const link = await this.establishLink(io_endpoint_key, (m) => this.internalListener(m));
+		const link = await this.establishLink(io_endpoint_key, (m) => console.log("* io_interface internalListener:", m));
 		await this.saveLink(link);
 	}
 
 	getRegisteredEndpoints() {
 		return this.callFunc('getRegisteredEndpoints');
-	}
-
-	testOneWayMessage() {
-		return new Promise((resolve) => {
-			this.send("poke io_delegator");
-				setImmediate(() => {
-					resolve();
-				});
-		});
 	}
 
 	/**
@@ -179,8 +155,8 @@ class IOInterface extends EventEmitter {
 	**/
 	_innerGetNodePath(passedResult, passedResults) {
 		this.printStartMsg('in _innerGetNodePath');
-			return new Promise((resolve, reject) => {
 
+		return new Promise((resolve, reject) => {
 			// Collect information about the process
 			let isOkToRun = true;
 			let isValidInstance = true;
@@ -204,10 +180,9 @@ class IOInterface extends EventEmitter {
 				'linux': 'node'
 			}[os];
 
-
 			// If a defined exeName has not been found, prevent the subprocess from
 			// starting.
-			if(typeof(exeName) === 'undefined') {
+			if (typeof(exeName) === 'undefined') {
 				console.error(
 					'OS:',
 					os,
@@ -221,7 +196,7 @@ class IOInterface extends EventEmitter {
 
 			// If the os that the labjack-nodejs library was built for isn't
 			// the current platform, prevent the subprocess from starting.
-			if(os !== passedResult.os) {
+			if (os !== passedResult.os) {
 				isOkToRun = false;
 				errors.push('Wrong OS detected');
 				console.log(os, passedResult);
@@ -231,15 +206,15 @@ class IOInterface extends EventEmitter {
 			// prevent the subprocess from starting as there will likely be issues.
 			let arch = process.arch;
 			// arch = 'x64';
-			if(arch === 'ia32') {
-				if(passedResult.arch === 'x64') {
+			if (arch === 'ia32') {
+				if (passedResult.arch === 'x64') {
 					// If the labjack-nodejs library is built for x64 and we are a
 					// x64 machine, AND we started as a 32bit instance of node, then
 					// over-write the arch to be x64.  Otherwise there is nothing we
 					// can do but force an error. (Fix only for win32 OS, not sure
 					// how to detect this on mac/linux).
-					if(os === 'win32') {
-						if(process.env['PROGRAMFILES(x86)']) {
+					if (os === 'win32') {
+						if (process.env['PROGRAMFILES(x86)']) {
 							arch = 'x64';
 							console.error(
 								'**** forcing sub-process to run in 64bit mode ****'
@@ -315,21 +290,20 @@ class IOInterface extends EventEmitter {
 				'callerName': callerName
 			};
 
-			fs.exists(nodeBinaryPath, (exists) => {
-				retData.exists = exists;
-				if(exists) {
-					if(isOkToRun) {
-						resolve(retData);
-					} else {
-						retData.errors = errors;
-						reject(retData);
-					}
+			const exists = fs.existsSync(nodeBinaryPath);
+			retData.exists = exists;
+			if (exists) {
+				if (isOkToRun) {
+					resolve(retData);
 				} else {
-					errors.push('Node binary does not exist');
 					retData.errors = errors;
 					reject(retData);
 				}
-			});
+			} else {
+				errors.push('Node binary does not exist');
+				retData.errors = errors;
+				reject(retData);
+			}
 		});
 	}
 
@@ -345,7 +319,7 @@ class IOInterface extends EventEmitter {
 		this.printStartMsg('in innerInitialize');
 		// If debugging is enabled, print out information about that process
 		// that is about to start.
-		if(passedResults.debugProcess) {
+		if (passedResults.debugProcess) {
 			console.log('  - Initialize Data:');
 			const infoKeys = Object.keys(info);
 			infoKeys.forEach((key) => {
@@ -360,25 +334,25 @@ class IOInterface extends EventEmitter {
 		// Attach a variety of event listeners to verify that the sub-process
 		// starts properly. If a user enables debugging.
 		this.mp_event_emitter.on('error', (data) => {
-			if(passedResults.debugProcess || false) {
+			if (passedResults.debugProcess) {
 				console.log('Error Received', data);
 			}
 			this.emit(this.eventList.PROCESS_ERROR, data);
 		});
 		this.mp_event_emitter.on('exit', (data) => {
-			if(passedResults.debugProcess || false) {
+			if (passedResults.debugProcess) {
 				console.log('exit Received', data);
 			}
 			this.emit(this.eventList.PROCESS_EXIT, data);
 		});
 		this.mp_event_emitter.on('close', (data) => {
-			if(passedResults.debugProcess || false) {
+			if (passedResults.debugProcess) {
 				console.log('close Received', data);
 			}
 			this.emit(this.eventList.PROCESS_CLOSE, data);
 		});
 		this.mp_event_emitter.on('disconnect', (data) => {
-			if(passedResults.debugProcess || false) {
+			if (passedResults.debugProcess) {
 				console.log('disconnect Received', data);
 			}
 			this.emit(this.eventList.PROCESS_DISCONNECT, data);
@@ -390,7 +364,6 @@ class IOInterface extends EventEmitter {
 		// Create Controllers
 		this.createDriverController();
 		this.createDeviceController();
-		// createFileIOController();
 
 		const options = {
 			'execPath': info.path,
@@ -402,18 +375,37 @@ class IOInterface extends EventEmitter {
 			'callStack': new Error().stack,
 		};
 
+
 		// Detect if the current process is node-webkit or node via checking for
 		// a declared version of node-webkit.
-		if(process.versions['node-webkit']) {
-			options.silent = true;
-			if(passedResults.stdinListener) {
+		if (!!process.versions['electron']) {
+			delete options.execPath;
+
+			if (passedResults.stdinListener) {
 				options.stdinListener = passedResults.stdinListener;
 			} else {
 				options.stdinListener = (data) => {
 					console.log(data.toString());
 				};
 			}
-			if(passedResults.stderrListener) {
+			if (passedResults.stderrListener) {
+				options.stderrListener = passedResults.stderrListener;
+			} else {
+				options.stderrListener = (data) => {
+					console.error(data.toString());
+				};
+			}
+		} else
+		if (process.versions['node-webkit']) {
+			options.silent = true;
+			if (passedResults.stdinListener) {
+				options.stdinListener = passedResults.stdinListener;
+			} else {
+				options.stdinListener = (data) => {
+					console.log(data.toString());
+				};
+			}
+			if (passedResults.stderrListener) {
 				options.stderrListener = passedResults.stderrListener;
 			} else {
 				options.stderrListener = (data) => {
@@ -421,13 +413,13 @@ class IOInterface extends EventEmitter {
 				};
 			}
 		} else {
-			if(passedResults.silent) {
+			if (passedResults.silent) {
 				options.silent = passedResults.silent;
 			}
-			if(passedResults.stdinListener) {
+			if (passedResults.stdinListener) {
 				options.stdinListener = passedResults.stdinListener;
 			}
-			if(passedResults.stderrListener) {
+			if (passedResults.stderrListener) {
 				options.stderrListener = passedResults.stderrListener;
 			}
 		}
@@ -435,28 +427,21 @@ class IOInterface extends EventEmitter {
 		// Build a direct-path reference for the io_delegator.js file.  Relative
 		// path's don't work very well when starting from node-webkit and the
 		// ljswitchboard project.
-		const filetoStart = path.join(info.cwd, ioDelegatorPathFromRoot);
 		this.printStartMsg('Starting sub-process');
 		// Start the subprocess.
 
 		try {
-			await this.mp.qStart(filetoStart, options);
+			console.log('bbb1', options);
+			await this.mp.qStart(path.join(info.cwd, 'lib/io_delegator.js'), options);
+			console.log('bbb2');
 		} catch (err) {
 			console.error('Failed to start subprocess', err);
 			const code = err.error;
-			const msg = io_error_constants.parseError(code);
-			err.errorMessage = msg;
+			err.errorMessage = io_error_constants.parseError(code);
 			throw err;
 		}
 
 		await this.initInternalMessenger();
-
-		try {
-			await this.getDriverConstants();
-		} catch (err) {
-			console.error("Error :(", err);
-			throw err;
-		}
 
 		await this.driver_controller.init();
 		await this.device_controller.init();
@@ -467,25 +452,25 @@ class IOInterface extends EventEmitter {
 
 		// Check to see if the cwd is being over-ridden.  If so, save it into
 		// the results object for the initialization functions to use.
-		if(options) {
+		if (options) {
 			// If the options argument was supplied copy over any relevant
 			// options to the results object.
-			if(options.cwdOverride) {
+			if (options.cwdOverride) {
 				results.cwdOverride = options.cwdOverride;
 			}
-			if(options.silent) {
+			if (options.silent) {
 				results.silent = options.silent;
 			}
-			if(options.stdinListener) {
+			if (options.stdinListener) {
 				results.stdinListener = options.stdinListener;
 			}
-			if(options.stderrListener) {
+			if (options.stderrListener) {
 				results.stderrListener = options.stderrListener;
 			}
 
 			// If a user defined the debug flag print out information about the
 			// currently running process.
-			if(options.debugProcess) {
+			if (options.debugProcess) {
 				console.log('Initializing sub-process');
 				console.log('Node Version', process.versions.node);
 				console.log('Exec Path', process.execPath);
@@ -512,46 +497,19 @@ class IOInterface extends EventEmitter {
 			// Initialize the subprocess
 			await this.innerInitialize(info, passedResults);
 		} catch (err) {
-			console.log('io_interface error', util.inspect(err));
+			console.error('io_interface error', err);
+			process.exit();
 			throw err;
 		}
 	}
 
-	establishLink(name, listener) {
-		const endpoint = name;
-		const createMessage = (m) => {
-			return new Promise((resolve, reject) => {
-				const message = {
-					'endpoint': endpoint,
-					'data': m
-				};
-				resolve(message);
-			});
-		};
-		const executeSendReceive = (m) => {
-			return this.mp.sendReceive(m);
-		};
-		const executeSendMessage = (m) => {
-			return this.mp.sendMessage(m);
-		};
-		const sendReceive = (m) => {
-			return createMessage(m).then(executeSendReceive);
-		};
-		const sendMessage = (m) => {
-			return createMessage(m).then(executeSendMessage);
-		};
-		const send = (m) => {
-			return this.mp.send(endpoint, m);
-		};
+	establishLink(endpoint, listener) {
+		const sendReceive = (data) => this.mp.sendReceive({ endpoint, data });
+		const sendMessage = (data) => this.mp.sendMessage({ endpoint, data });
+		const send = (data) => this.mp.send(endpoint, data);
 		const callFunc = (name, argList, options) => {
-			let funcName = '';
-			let funcArgs = [];
-			if(name) {
-				funcName = name;
-			}
-			if(argList) {
-				funcArgs = argList;
-			}
+			const funcName = name ? name : '';
+			const funcArgs = argList ? argList : [];
 			return sendReceive({
 				'func': funcName,
 				'args': funcArgs,
@@ -559,16 +517,15 @@ class IOInterface extends EventEmitter {
 			});
 		};
 
-		this.mp_event_emitter.on(name, listener);
-		this.oneWayMessageListeners[name] = listener;
+		this.mp_event_emitter.on(endpoint, listener);
+		this.oneWayMessageListeners[endpoint] = listener;
 
-		const link = {
+		return Promise.resolve({
 			'callFunc': callFunc,
 			'sendReceive': sendReceive,
 			'sendMessage': sendMessage,
 			'send': send
-		};
-		return Promise.resolve(link);
+		});
 	}
 
 	destroy() {
@@ -597,7 +554,7 @@ class IOInterface extends EventEmitter {
 
 let IO_INTERFACE;
 exports.createIOInterface = () => {
-	if(IO_INTERFACE) {
+	if (IO_INTERFACE) {
 		return IO_INTERFACE;
 	} else {
 		IO_INTERFACE = new IOInterface();

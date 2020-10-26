@@ -61,69 +61,58 @@ class NewMessageManager extends EventEmitter {
 		];
 
 		this.internalMessageBindings = {};
-		this.internalMessageBindings[PM_STOP_CHILD_PROCESS] = bundle => this.stopChildprocess(bundle);
+		this.internalMessageBindings[PM_STOP_CHILD_PROCESS] = bundle => this.stopChildProcess(bundle);
 		this.internalMessageBindings[PM_GET_PROCESS_INFO] = bundle => this.getProcessInfo(bundle);
 	}
 
-	getProcessInfo(bundle) {
-		return new Promise((resolve, reject) => {
-			const retData = {
-				'slave_process': {
-					'numMessagesReceived': this.numMessagesReceived,
-					'numInternalMessagesReceived': this.numInternalMessagesReceived,
-					'numUserMessagesReceived': this.numUserMessagesReceived,
-					'numResponces': this.numResponces
-				},
-				'cwd': process.cwd(),
-				'execPath': process.execPath,
-				'execArgv': process.execArgv,
-				'argv': process.argv,
-				'pid': process.pid,
-				'version': process.version,
-				// 'versions': process.versions,
-				'arch': process.arch,
-				'platform': process.platform,
-				// 'config': process.config,
-				'memoryUsage': process.memoryUsage(),
-				'uptime': process.uptime()
-			};
-			bundle.successData = retData;
-			bundle.isHandled = true;
-			resolve(bundle);
-		});
+	async getProcessInfo(bundle) {
+		bundle.successData = {
+			'slave_process': {
+				'numMessagesReceived': this.numMessagesReceived,
+				'numInternalMessagesReceived': this.numInternalMessagesReceived,
+				'numUserMessagesReceived': this.numUserMessagesReceived,
+				'numResponces': this.numResponces
+			},
+			'cwd': process.cwd(),
+			'execPath': process.execPath,
+			'execArgv': process.execArgv,
+			'argv': process.argv,
+			'pid': process.pid,
+			'version': process.version,
+			// 'versions': process.versions,
+			'arch': process.arch,
+			'platform': process.platform,
+			// 'config': process.config,
+			'memoryUsage': process.memoryUsage(),
+			'uptime': process.uptime()
+		};
+		bundle.isHandled = true;
+		return bundle;
 	}
 
-	stopChildprocess(bundle) {
+	async stopChildProcess(bundle) {
 		let retData;
-		return new Promise((resolve, reject) => {
-			if(exitListenerFunc) {
-				const exitHandler = exitListenerFunc();
-				let isPromise = false;
-				if(typeof(exitHandler) !== 'undefined') {
-					if(typeof(exitHandler.then) === 'function') {
-						isPromise = true;
-					}
-				}
-				if(isPromise) {
-					exitHandler.then(() => {
-						retData = 1;
-						bundle.successData = retData;
-						bundle.isHandled = true;
-						resolve(bundle);
-					});
-				} else {
+		if(exitListenerFunc) {
+			const exitHandler = exitListenerFunc();
+			if (typeof(exitHandler) !== 'undefined') {
+				if(typeof(exitHandler.then) === 'function') {
+					await exitHandler;
 					retData = 1;
 					bundle.successData = retData;
 					bundle.isHandled = true;
-					resolve(bundle);
+					return bundle;
 				}
-			} else {
-				retData = 1;
-				bundle.successData = retData;
-				bundle.isHandled = true;
-				resolve(bundle);
 			}
-		});
+			retData = 1;
+			bundle.successData = retData;
+			bundle.isHandled = true;
+			return bundle;
+		} else {
+			retData = 1;
+			bundle.successData = retData;
+			bundle.isHandled = true;
+			return bundle;
+		}
 	}
 
 	isInternalMessage(messageType) {
