@@ -143,7 +143,7 @@ class WindowManager extends EventEmitter {
 			console.log('  * Closing Window', windowName);
 		}
 
-		// Immediately hide the window for better user expereince.
+		// Immediately hide the window for better user experience.
 		this.managedWindows[windowName].win.hide();
 
 		// Manage the other window attributes

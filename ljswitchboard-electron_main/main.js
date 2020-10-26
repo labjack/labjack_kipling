@@ -35,6 +35,11 @@ const gui = {
       console.log('@TODO: quit');
     }
   },
+  Shell: {
+    openExternal(url) {
+      return electron.shell.openExternal(url);
+    }
+  },
   Window: fakeWindow
 };
 global.gui = gui;

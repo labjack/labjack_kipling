@@ -1,6 +1,6 @@
-
 var q = global.require('q');
-var static_files = global.require('ljswitchboard-static_files');
+const package_loader = global.lj_di_injector.get('package_loader');
+const static_files = package_loader.getPackage('static_files');
 
 exports.appendPageLogicToScanResults = function(scanResults, wifiImageTemplate) {
 	// console.log('Appending page logic');
@@ -38,7 +38,7 @@ exports.appendPageLogicToScanResults = function(scanResults, wifiImageTemplate) 
 
 						ct.button_title = ct.name + ' connection type was found';
 						ct.button_title += ' but failed verification.';
-						
+
 					} else {
 						if(ct.insertionMethod === 'attribute') {
 							ct.button_class = 'btn-warning';
@@ -48,7 +48,7 @@ exports.appendPageLogicToScanResults = function(scanResults, wifiImageTemplate) 
 						}
 					}
 				}
-				
+
 				try {
 					if(device.WIFI_STATUS) {
 						var imageName = 'wifiRSSI-unknown';

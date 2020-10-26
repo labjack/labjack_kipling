@@ -8,7 +8,6 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
-
 const package_loader = global.lj_di_injector.get('package_loader');
 const io_manager = package_loader.getPackage('io_manager');
 const module_manager = package_loader.getPackage('module_manager');

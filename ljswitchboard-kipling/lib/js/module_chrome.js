@@ -196,7 +196,7 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	async updateVisibleTabs(location, context) {
-		await this.renderTemplate(location, moduleChromeTabTemplateName, context);
+		await this.renderTemplate(location, window.moduleChromeTabTemplateName, context);
 	}
 
 	internalUpdateModuleListing(tabSections, context) {
@@ -533,7 +533,7 @@ class ModuleChrome extends EventEmitter {
 		// Render the module chrome template
 		await this.renderTemplate(
 			$(MODULE_CHROME_HOLDER_ID),
-			moduleChromeTemplateName,
+			window.moduleChromeTemplateName,
 			context
 		);
 
@@ -561,7 +561,7 @@ class ModuleChrome extends EventEmitter {
 			// Render the module chrome template
 			await this.renderTemplate(
 				$(MODULE_CHROME_HOLDER_ID),
-				moduleChromeTemplateName,
+				window.moduleChromeTemplateName,
 				context
 			);
 

@@ -728,7 +728,7 @@ var createDeviceSelectorViewGenerator = function() {
 
 			// Find the scan result that corresponds to the correct
 			// device type for the scan error.
-			var selectedScanResult = undefined;
+			var selectedScanResult;
 			var isFound = scanResults.some(function(scanResult) {
 				if(scanResult.deviceType == dt) {
 					selectedScanResult = scanResult;

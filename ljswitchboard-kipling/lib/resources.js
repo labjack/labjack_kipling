@@ -1,3 +1,5 @@
+const path = require('path');
+
 /*
 	Function called to load the application's core resources.
 	The resources are loaded from the ljswitchboard-static_files/static
@@ -100,14 +102,14 @@ async function loadResources(win, static_files) {
         'libs/bootstrap3-editable-1.5.1/bootstrap3-editable/js/bootstrap-editable.min.js',
 
         // Other JS
-        'js/kinetic.js',
-        'js/typeahead.bundle.min.js',
-        'js/d3.js',
+        // 'js/kinetic.js',
+        // 'js/typeahead.bundle.min.js',
         'js/ace/ace.js',
         'js/ace/ext-language_tools.js',
         'js/customSpinners.js',
         'libs/flot/jquery.flot.js',
-        'libs/epoch-0.6.0/epoch.min.js',
+        'js/main.js',
+        // 'libs/epoch-0.6.0/epoch.min.js',
     ];
     loadCoreResources(win, static_files, resourceList);
 

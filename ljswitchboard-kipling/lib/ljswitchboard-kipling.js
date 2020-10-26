@@ -138,7 +138,7 @@ exports.initializePackage = function (injector) {
 	const static_files = package_loader.getPackage('static_files');
 
 	const moduleChromeTemplateName = path.resolve(__dirname, 'templates', 'module_chrome.html');
-	const moduleChromeTabTemplateName = 'module_tab.html';
+	const moduleChromeTabTemplateName = path.resolve(__dirname, 'templates', 'module_tab.html');
 
 	window_manager.on(window_manager.eventList.OPENED_WINDOW, async (name) => {
 		if (name !== 'kipling') return;

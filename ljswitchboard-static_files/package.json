@@ -24,6 +24,19 @@
   "bugs": {
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
+  "dependencies": {
+    "d3": "^6.2.0",
+    "epoch-charting": "^0.8.4",
+    "kinetic": "^5.2.0",
+    "typeahead": "^0.2.2"
+  },
+  "devDependencies": {
+    "webpack": "^5.2.0",
+    "webpack-cli": "^4.1.0"
+  },
+  "scripts": {
+    "build": "webpack ./lib/compiled.js -o static/js"
+  },
   "directories": {
     "lib": "./lib",
     "static": "./static"
