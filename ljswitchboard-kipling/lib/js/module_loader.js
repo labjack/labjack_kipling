@@ -6,6 +6,8 @@ const package_loader = global.lj_di_injector.get('package_loader');
 const static_files = package_loader.getPackage('static_files');
 const io_manager = package_loader.getPackage('io_manager');
 const module_manager = package_loader.getPackage('module_manager');
+const core = package_loader.getPackage('core');
+const handleBarsService = core.handleBarsService;
 
 // Configure the module_manager persistent data path.
 const kiplingExtractionPath = package_loader.getExtractionPath();
@@ -178,8 +180,7 @@ class ModuleLoader extends EventEmitter {
 		});
 	}
 
-	loadHTMLFiles(newModule) {
-		return new Promise((resolve, reject) => {
+	async loadHTMLFiles(newModule) {
 		// console.log('loaded html files', newModule.htmlFiles);
 		let htmlFile = '<p>No view.html file loaded.</p>';
 		// Check to see if a framework is being loaded:
@@ -196,8 +197,7 @@ class ModuleLoader extends EventEmitter {
 		}
 
 		// Compile & populate the view.html file
-		const template = handlebars.compile(htmlFile);
-		const data1 = template(newModule.context);
+		const data1 = await handleBarsService.renderHtmlTemplate(htmlFile, newModule.context);
 
 		// Append a header & footer onto the template.
 		const data = '<div id="module-chrome-current-module-' + newModule.context.stats.numLoaded + '">' + data1 + '</div>';
@@ -210,22 +210,23 @@ class ModuleLoader extends EventEmitter {
 
 		const elementID = '#module-chrome-current-module-' + newModule.context.stats.numLoaded;
 
-		// Attach to the .ready event of the element just created.
-		// Element must already be added because we use jquery to search for
-		// the element's ID to attach to the "ready" event.
-		$(elementID).ready(() => {
-			resolve(newModule);
-			const loadedData = {
-				'name': newModule.name,
-				'id': elementID,
-				'data': newModule,
-				'humanName': newModule.data.humanName,
-			};
-			this.emit(eventList.VIEW_READY, loadedData);
-			this.current_module_data = null;
-			this.current_module_data = undefined;
-			this.current_module_data = loadedData;
-		});
+		return new Promise((resolve) => {
+			// Attach to the .ready event of the element just created.
+			// Element must already be added because we use jquery to search for
+			// the element's ID to attach to the "ready" event.
+			$(elementID).ready(() => {
+				resolve(newModule);
+				const loadedData = {
+					'name': newModule.name,
+					'id': elementID,
+					'data': newModule,
+					'humanName': newModule.data.humanName,
+				};
+				this.emit(eventList.VIEW_READY, loadedData);
+				this.current_module_data = null;
+				this.current_module_data = undefined;
+				this.current_module_data = loadedData;
+			});
 		});
 	}
 

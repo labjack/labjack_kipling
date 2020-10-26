@@ -8,21 +8,12 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
-var package_loader;
-var q;
-var io_manager;
-var driver_const;
-try {
-	package_loader = global.require.main.require('ljswitchboard-package_loader');
-	q = global.require.main.require('q');
-	io_manager = global.require.main.require('ljswitchboard-io_manager');
-	driver_const = global.require('ljswitchboard-ljm_driver_constants');
-} catch(err) {
-	package_loader = require.main.require('ljswitchboard-package_loader');
-	q = require.main.require('q');
-	io_manager = require.main.require('ljswitchboard-io_manager');
-	driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
-}
+
+const package_loader = global.lj_di_injector.get('package_loader');
+const io_manager = package_loader.getPackage('io_manager');
+const module_manager = package_loader.getPackage('module_manager');
+const driver_const = require('ljswitchboard-ljm_driver_constants');
+const q = require('q');
 
 var createModuleInstance = function() {
 	this.runRedraw = function() {

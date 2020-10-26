@@ -330,7 +330,6 @@ class NewProcessManager extends EventEmitter {
         // reset the messageCounter back to 0
         this.initializeMessageManagement();
 
-        console.log('cccc', deviceManagerSlaveOptions.spawnChildProcess, validExecPath);
         if (deviceManagerSlaveOptions.spawnChildProcess && (validExecPath)) {
             // console.log("calling child_process.spawn");
 

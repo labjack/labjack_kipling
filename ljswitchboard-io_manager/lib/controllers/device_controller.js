@@ -4,15 +4,10 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var constants = require('../common/constants');
 
-// Save event emitter variables for easy access.
-var DEVICE_CONTROLLER_DEVICE_OPENED = constants.DEVICE_CONTROLLER_DEVICE_OPENED;
-var DEVICE_CONTROLLER_DEVICE_CLOSED = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
-
 var q = require('q');
 
 var labjack_nodejs = require('labjack-nodejs');
 var driver_constants = labjack_nodejs.driver_const;
-var ljmConstants = labjack_nodejs.modbusMap.getConstants();
 
 var io_endpoint_key = constants.device_endpoint_key;
 
@@ -22,9 +17,6 @@ var t7_device_creator = require('./device_helpers/t7_device');
 var t4_device_creator = require('./device_helpers/t4_device');
 var t5_device_creator = require('./device_helpers/t5_device');
 var digit_device_creator = require('./device_helpers/digit_device');
-
-// var ljm_device_controller = require('./device_helpers/ljm_device');
-// var device_keeper = require('./device_helpers/device_keeper');
 
 function createDeviceController(io_interface) {
 
@@ -354,9 +346,9 @@ function createDeviceController(io_interface) {
 		return defered.promise;
 	};
 
-	
+
 	/**
-	 * Create several device objects that can be used to talk with the device 
+	 * Create several device objects that can be used to talk with the device
 	 * manager.
 	 */
 	this.getDevices = function(options) {
@@ -390,7 +382,7 @@ function createDeviceController(io_interface) {
 	'prepareForUpgrade', 'internalUpdateFirmware',
 	// 'readFlash',
 	'internalReadFlash',
-	
+
 	// Get information about the device.
 	// 'getRecoveryFirmwareVersion', 'getPrimaryFirmwareVersion', 'getCalibrationStatus',
 
@@ -470,9 +462,9 @@ function createDeviceController(io_interface) {
 					if(missing_funcs_to_ignore.indexOf(name) < 0) {
 						missingFunctions.push(name);
 
-						
 
-						// Since the function isn't defined, we need to 
+
+						// Since the function isn't defined, we need to
 						// Define the function.
 						// We need to generate a string that looks like this:
 						// "return self.callFunc('writeDeviceName', [newName]);"
@@ -512,9 +504,9 @@ function createDeviceController(io_interface) {
 	};
 	/**
 	 * Open a connection to a device, pass an options object containing:
-	 * @options {object} 
-	 *          'deviceType': 'LJM_dtANY', 
-	 *          'connectionType': 'LJM_ctANY', 
+	 * @options {object}
+	 *          'deviceType': 'LJM_dtANY',
+	 *          'connectionType': 'LJM_ctANY',
 	 *          'identifier': 'LJM_idANY'
 	 */
 	this.openDevice = function(options) {
@@ -534,7 +526,7 @@ function createDeviceController(io_interface) {
 	};
 
 	/**
-	 * Close a connection to a device. Uses deleteDeviceReference helper 
+	 * Close a connection to a device. Uses deleteDeviceReference helper
 	 * function to do the actual deleting of the device reference.
 	 */
 	var deleteDeviceReference = function(closeResult) {
@@ -584,47 +576,9 @@ function createDeviceController(io_interface) {
 			keys.forEach(deleteDeviceReference);
 			defered.resolve(res);
 		});
-		
+
 		return defered.promise;
 	};
-
-	
-	/**
-	 * Functions listed below are defined in the device object
-	 */
-	// this.open = function(deviceType, connectionType, identifier) {
-	// 	return callFunc('open', [deviceType, connectionType, identifier]);
-	// };
-	// this.getHandleInfo = function() {
-	// 	return callFunc('getHandleInfo');
-	// };
-	// this.readRaw = function(data) {
-	// 	return callFunc('readRaw', [data]);
-	// };
-	// this.read = function(address) {
-	// 	return callFunc('read', [address]);
-	// };
-	// this.readMany = function(addresses) {
-	// 	return callFunc('readMany', [addresses]);
-	// };
-	// this.writeRaw = function(data) {
-	// 	return callFunc('readRaw', [data]);
-	// };
-	// this.write = function(address, value) {
-	// 	return callFunc('write', [address, value]);
-	// };
-	// this.writeMany = function(addresses, values) {
-	// 	return callFunc('writeMany', [addresses, values]);
-	// };
-	// this.rwMany = function(addresses, directions, numValues, values) {
-	// 	return callFunc('rwMany', [addresses, directions, numValues, values]);
-	// };
-	// this.readUINT64 = function(type) {
-	// 	return callFunc('readUINT64', [type]);
-	// };
-	// this.close = function() {
-	// 	return callFunc('close');
-	// };
 
 	var self = this;
 }

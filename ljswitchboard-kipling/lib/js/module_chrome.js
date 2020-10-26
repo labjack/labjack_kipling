@@ -4,8 +4,10 @@ const EventEmitter = require('events').EventEmitter;
 
 const package_loader = global.lj_di_injector.get('package_loader');
 const module_manager = package_loader.getPackage('module_manager');
-// const modbus_map = require('ljswitchboard-modbus_map').getConstants();
+const core = package_loader.getPackage('core');
+const handleBarsService = core.handleBarsService;
 
+const io_manager = package_loader.getPackage('io_manager');
 
 const MODULE_CHROME_HOLDER_ID = '#module_chrome_holder';
 const MODULE_CHROME_HEADER_TABS_ID = '#header_tabs';
@@ -16,15 +18,8 @@ const MODULE_CHROME_HEADER_TABS_CLASS = '.module-chrome-header-tabs';
 const MODULE_CHROME_FOOTER_TABS_CLASS = '.module-chrome-footer-tabs';
 const MODULE_CHROME_BODY_TABS_CLASS = '.module-chrome-body-tabs';
 
-const MODULE_CHROME_TABS_CLASS = '.module-chrome-tab';
-const MODULE_CHROME_CLICK_ID = 'MODULE_CHROME_CLICK_ID';
-
 //related to the css styling in: module_chrome.css, ".module-list li", element height + 2
 const TAB_SIZING_STYLE_CLASS = '.module-list li';
-
-const moduleChromeTemplateName = 'module_chrome.html';
-const moduleChromeTabTemplateName = 'module_tab.html';
-const moduleChromeTemplatesDir = 'templates';
 
 const sliderTabsClass = '.body-tab';
 
@@ -68,10 +63,7 @@ class ModuleChrome extends EventEmitter {
 		}
 */
 
-		this.cachedTemplates = {};
-
 		// Initialize variables for communicating with the driver.
-		this.io_manager = undefined;
 		this.io_interface = undefined;
 		this.device_controller = undefined;
 		this.device_controller_events = undefined;
@@ -137,13 +129,13 @@ class ModuleChrome extends EventEmitter {
 		this.allowModuleToLoad = true;
 
 		this.deviceControllerEventListeners = {
-			'DEVICE_CONTROLLER_DEVICE_OPENED': (eventData) => {
+			'DEVICE_CONTROLLER_DEVICE_OPENED': () => {
 				// console.log('MODULE_CHROME, Device List Changed');
 
 				// this.updateSecondaryModuleListing()
 				this.deviceControllerDeviceListChanged();
 			},
-			'DEVICE_CONTROLLER_DEVICE_CLOSED': (eventData) => {
+			'DEVICE_CONTROLLER_DEVICE_CLOSED': () => {
 				// console.log('MODULE_CHROME, Device List Changed');
 
 				// this.updateSecondaryModuleListing()
@@ -152,52 +144,8 @@ class ModuleChrome extends EventEmitter {
 		};
 	}
 
-	loadTemplateFile(name) {
-		return new Promise((resolve, reject) => {
-			const templatePath = path.join(
-				cwd,
-				moduleChromeTemplatesDir,
-				name
-			);
-			if (!path.isAbsolute(templatePath)) {
-				templatePath = path.resolve(path.sep, templatePath);
-			}
-			// console.log('Executing fs.readFile', {
-			// 	'optionA': path.resolve(templatePath),
-			// 	'optionB': path.resolve(path.sep, templatePath)
-			// });
-
-			fs.readFile(templatePath, (err, data) => {
-				const pageStr = '';
-				if (err) {
-					console.error('Error in _loadTemplateFile', err);
-					console.error('Data', {
-						'path': templatePath,
-						'name': name,
-						'cwd': cwd,
-						'moduleChromeTemplatesDir': moduleChromeTemplatesDir,
-					});
-					resolve(pageStr);
-				} else {
-					resolve(data.toString());
-				}
-			});
-		});
-	}
-
-	async compileTemplate(name, context) {
-		if (this.cachedTemplates[name]) {
-			return this.cachedTemplates[name](context);
-		} else {
-			const templateData = await this.loadTemplateFile(name);
-			const handlebars = global.require('handlebars');
-			this.cachedTemplates[name] = handlebars.compile(templateData);
-			return this.cachedTemplates[name](context);
-		}
-	}
-
 	async renderTemplate(location, name, context) {
-		const compiledData = await this.compileTemplate(name, context);
+		const compiledData = await handleBarsService.renderTemplate(name, context);
 		location.empty();
 		location.append($(compiledData));
 		const bodyTabs = location.find(sliderTabsClass);
@@ -221,8 +169,7 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	adjustModuleChromeTabSpacing(tabSections, context) {
-		return new Promise((resolve, reject) => {
-
+		return new Promise((resolve) => {
 			const headerHeight = this.computeTabSizing(context.header_modules.length);
 			const footerHeight = this.computeTabSizing(
 				context.footer_modules.length,
@@ -264,7 +211,7 @@ class ModuleChrome extends EventEmitter {
 
 			// Wait for all of the operations to complete
 			Promise.allSettled(promises)
-				.then((res) => {
+				.then(() => {
 					if (context) {
 						this.adjustModuleChromeTabSpacing(tabSections, context)
 							.then(resolve, reject);
@@ -279,7 +226,7 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	attachTabClickHandlers(tabSections, context) {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			// Loop through each tab-section, ex: header, body, footer.
 			tabSections.forEach((tabSection) => {
 				const modules = tabSection.context;
@@ -296,58 +243,48 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	innerUpdatePrimaryModuleListing(modules) {
-		return new Promise((resolve, reject) => {
-			const context = {
-				'header_modules': modules.header,
-				'footer_modules': modules.footer
-			};
-			const tabSections = [{
-				'location': $(MODULE_CHROME_HEADER_TABS_ID),
-				'context': context.header_modules,
-			}, {
-				'location': $(MODULE_CHROME_FOOTER_TABS_ID),
-				'context': context.footer_modules,
-			}];
+		const context = {
+			'header_modules': modules.header,
+			'footer_modules': modules.footer
+		};
+		const tabSections = [{
+			'location': $(MODULE_CHROME_HEADER_TABS_ID),
+			'context': context.header_modules,
+		}, {
+			'location': $(MODULE_CHROME_FOOTER_TABS_ID),
+			'context': context.footer_modules,
+		}];
 
-			// Begin execution & return a promise.
-			this.internalUpdateModuleListing(tabSections, context)
-				.then((tabSections, context) => this.attachTabClickHandlers(tabSections, context))
-				.then(() => {
-					resolve(context);
-				});
-		});
+		// Begin execution & return a promise.
+		return this.internalUpdateModuleListing(tabSections, context)
+			.then((tabSections, context) => this.attachTabClickHandlers(tabSections, context));
 	}
 
 	updatePrimaryModuleListing() {
 		// Get the list of modules and have the inner-function perform logic on
 		// acquired data.
 		return module_manager.getModulesList()
-		.then(modules => this.innerUpdatePrimaryModuleListing(modules))
-		.then(updatedModules => this.reportModuleTabsUpdated(updatedModules));
+			.then(modules => this.innerUpdatePrimaryModuleListing(modules))
+			.then(updatedModules => this.reportModuleTabsUpdated(updatedModules));
 	}
 
 	internalUpdateSecondaryModuleListing(modules) {
-		return new Promise((resolve, reject) => {
-			const context = {
-				'modules': modules.body
-			};
+		const context = {
+			'modules': modules.body
+		};
 
-			const tabSections = [{
-				'location': $(MODULE_CHROME_BODY_TABS_ID),
-				'context': context.modules,
-			}];
+		const tabSections = [{
+			'location': $(MODULE_CHROME_BODY_TABS_ID),
+			'context': context.modules,
+		}];
 
-			// Begin execution & return a promise.
-			this.internalUpdateModuleListing(tabSections)
-				.then((tabSections, context) => this.attachTabClickHandlers(tabSections, context))
-				.then(() => {
-					resolve(context);
-				});
-		});
+		// Begin execution & return a promise.
+		return this.internalUpdateModuleListing(tabSections)
+			.then((tabSections, context) => this.attachTabClickHandlers(tabSections, context));
 	}
 
 	checkDeviceForSupport(filters, deviceListing) {
-		const passedFilters = filters.some((filter) => {
+		return filters.some((filter) => {
 			let isSupportedDevice = true;
 			const keys = Object.keys(filter);
 
@@ -355,7 +292,7 @@ class ModuleChrome extends EventEmitter {
 			// requirements.
 			keys.every((key) => {
 
-				if (typeof(this.filterOperations[key]) === 'function') {
+				if (typeof (this.filterOperations[key]) === 'function') {
 					if (this.debugFilters) {
 						console.log(
 							'Checking Filter - func - Key',
@@ -367,7 +304,7 @@ class ModuleChrome extends EventEmitter {
 						isSupportedDevice = false;
 						return false;
 					}
-				} else if (typeof(deviceListing[key]) !== 'undefined') {
+				} else if (typeof (deviceListing[key]) !== 'undefined') {
 					console.log(
 						'Checking Filter - attr - Key',
 						key,
@@ -381,7 +318,6 @@ class ModuleChrome extends EventEmitter {
 			});
 			return isSupportedDevice;
 		});
-		return passedFilters;
 	}
 
 	filterBodyModules(module) {
@@ -410,33 +346,28 @@ class ModuleChrome extends EventEmitter {
 		return showModule;
 	}
 
-	filterModulesList(modules) {
-		return new Promise((resolve, reject) => {
-			if (this.debugFilters) {
-				console.log('Filtering Secondary modules', modules.body);
-				console.log('Device Listing', this.cachedDeviceListing);
-			}
+	async filterModulesList(modules) {
+		if (this.debugFilters) {
+			console.log('Filtering Secondary modules', modules.body);
+			console.log('Device Listing', this.cachedDeviceListing);
+		}
 
-			this.filterFlags = {};
-			modules.body = modules.body.filter(module => this.filterBodyModules(module));
-			resolve(modules);
-		});
+		this.filterFlags = {};
+		modules.body = modules.body.filter(module => this.filterBodyModules(module));
+		return modules;
 	}
 
-	reportModuleTabsUpdated(updatedModules) {
-		return new Promise((resolve, reject) => {
-			this.emit(this.eventList.MODULE_TABS_UPDATED, updatedModules);
-			resolve();
-		});
+	async reportModuleTabsUpdated(updatedModules) {
+		this.emit(this.eventList.MODULE_TABS_UPDATED, updatedModules);
 	}
 
 	updateSecondaryModuleListing() {
 		// Get the list of modules and have the inner-function perform logic on
 		// acquired data.
 		return module_manager.getModulesList()
-		.then(modules => this.filterModulesList(modules))
-		.then(modules => this.internalUpdateSecondaryModuleListing(modules))
-		.then(updatedModules => this.reportModuleTabsUpdated(updatedModules));
+			.then(modules => this.filterModulesList(modules))
+			.then(modules => this.internalUpdateSecondaryModuleListing(modules))
+			.then(updatedModules => this.reportModuleTabsUpdated(updatedModules));
 	}
 
 	runGC(data) {
@@ -519,30 +450,30 @@ class ModuleChrome extends EventEmitter {
 			$(tabID).addClass('selected');
 
 			this.emit(this.eventList.LOADING_MODULE, res);
-			global.MODULE_LOADER.once('MODULE_READY', (res) => {
+			global.MODULE_LOADER.once('MODULE_READY', () => {
 				this.allowModuleToLoad = true;
 				global.hideInfoMessage();
 				global.hideAlert();
 			});
 
 			global.MODULE_LOADER.loadModule(res.data)
-			.then((res) => {
-				this.emit(this.eventList.MODULE_LOADED, res);
-				// this.allowModuleToLoad = true;
-				// // console.log('Finished Loading Module', res.name);
+				.then((res) => {
+					this.emit(this.eventList.MODULE_LOADED, res);
+					// this.allowModuleToLoad = true;
+					// // console.log('Finished Loading Module', res.name);
 
-				// Delete loaded data (commented out to let gc handle it)
-				// const keys = Object.keys(res);
-				// const i;
-				// for(i = 0; i < keys.length; i++) {
-				// res[keys[i]] = null;
-				// res[keys[i]] = undefined;
-				// delete res[keys[i]];
-				// }
-			}, (err) => {
-				this.allowModuleToLoad = true;
-				console.error('Error loading module', err);
-			});
+					// Delete loaded data (commented out to let gc handle it)
+					// const keys = Object.keys(res);
+					// const i;
+					// for(i = 0; i < keys.length; i++) {
+					// res[keys[i]] = null;
+					// res[keys[i]] = undefined;
+					// delete res[keys[i]];
+					// }
+				}, (err) => {
+					this.allowModuleToLoad = true;
+					console.error('Error loading module', err);
+				});
 		} else {
 			// console.log('Preventing module from loading');
 			if (this.moduleLockMessage) {
@@ -556,31 +487,23 @@ class ModuleChrome extends EventEmitter {
 		// module_manager.loadModuleData(res.data);
 	}
 
-	saveDeviceListingData(deviceInfoArray) {
-		return new Promise((resolve, reject) => {
-			console.log('Updated Device Listing', deviceInfoArray);
+	async saveDeviceListingData(deviceInfoArray) {
+		console.log('Updated Device Listing', deviceInfoArray);
 
-			this.emit(this.eventList.DEVICE_LIST_UPDATED, deviceInfoArray);
+		this.emit(this.eventList.DEVICE_LIST_UPDATED, deviceInfoArray);
 
-			this.cachedDeviceListing = deviceInfoArray;
-			resolve();
-		});
+		this.cachedDeviceListing = deviceInfoArray;
 	}
 
 	deviceControllerDeviceListChanged() {
-		return new Promise((resolve, reject) => {
-
-			// Get updated device listing from the device controller
-			this.device_controller.getDeviceListing()
-				.then(deviceInfoArray => this.saveDeviceListingData(deviceInfoArray))
-				.then(() => this.updateSecondaryModuleListing())
-				.then(resolve);
-		});
+		// Get updated device listing from the device controller
+		return this.device_controller.getDeviceListing()
+			.then(deviceInfoArray => this.saveDeviceListingData(deviceInfoArray))
+			.then(() => this.updateSecondaryModuleListing());
 	}
 
 	attachToDeviceControllerEvents() {
-		this.io_manager = global.require('ljswitchboard-io_manager');
-		this.io_interface = this.io_manager.io_interface();
+		this.io_interface = io_manager.io_interface();
 		this.device_controller = this.io_interface.getDeviceController();
 		this.device_controller_events = this.device_controller.eventList;
 
@@ -643,7 +566,7 @@ class ModuleChrome extends EventEmitter {
 			);
 
 			// Update the module chrome window with applicable modules
-			const bundle = await this.updateModuleListing();
+			await this.updateModuleListing();
 
 			// Attach to important device_controller events.
 			await this.attachToDeviceControllerEvents();

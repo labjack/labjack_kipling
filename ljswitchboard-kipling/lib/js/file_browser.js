@@ -156,4 +156,4 @@ class FileBrowser extends EventEmitter {
     }
 }
 
-const FILE_BROWSER = new FileBrowser();
+global.FILE_BROWSER = new FileBrowser();

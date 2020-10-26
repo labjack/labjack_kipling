@@ -4,9 +4,6 @@ const path = require('path');
 const {EventEmitter} = require('events');
 const package_loader = global.lj_di_injector.get('package_loader');
 const module_manager = package_loader.getPackage('module_manager');
-const core = package_loader.getPackage('core');
-
-const handleBarsService = core.handleBarsService;
 
 // Configure the module_manager persistent data path.
 const kiplingExtractionPath = package_loader.getExtractionPath();

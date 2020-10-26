@@ -40,6 +40,11 @@ class HandleBarsService {
         return template(data);
     }
 
+    async renderHtmlTemplate(html, data) {
+        const template = await this._compileTemplate(html);
+        return template(data);
+    }
+
 }
 
 exports.handleBarsService = new HandleBarsService();

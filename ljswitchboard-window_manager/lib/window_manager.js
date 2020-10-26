@@ -295,13 +295,21 @@ class WindowManager extends EventEmitter {
 		return Object.keys(this.managedWindows);
 	}
 
-
 	getWindow(name) {
 		if (!this.managedWindows[name]) {
 			throw 'Window not found: ' + name;
 		}
 
 		return this.managedWindows[name];
+	}
+
+	async setWindowVariable(winName, key, value) {
+		if (!this.managedWindows[winName]) {
+			throw 'Window not found: ' + winName;
+		}
+
+		const win = this.managedWindows[winName].win;
+		await win.webContents.executeJavaScript('global.' + key + ' = ' + JSON.stringify(value)+';');
 	}
 
 	isManagedWindow(windowName) {

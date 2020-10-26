@@ -431,9 +431,7 @@ class IOInterface extends EventEmitter {
 		// Start the subprocess.
 
 		try {
-			console.log('bbb1', options);
 			await this.mp.qStart(path.join(info.cwd, 'lib/io_delegator.js'), options);
-			console.log('bbb2');
 		} catch (err) {
 			console.error('Failed to start subprocess', err);
 			const code = err.error;

@@ -1,6 +1,7 @@
 'use strict';
 
 const async = require('async');
+const path = require('path');
 const {loadResources} = require('./resources');
 const window_manager = global.lj_di_injector.get('window_manager');
 const package_loader = global.lj_di_injector.get('package_loader');
@@ -136,10 +137,16 @@ exports.initializePackage = function (injector) {
 	const package_loader = injector.get('package_loader');
 	const static_files = package_loader.getPackage('static_files');
 
+	const moduleChromeTemplateName = path.resolve(__dirname, 'templates', 'module_chrome.html');
+	const moduleChromeTabTemplateName = 'module_tab.html';
+
 	window_manager.on(window_manager.eventList.OPENED_WINDOW, async (name) => {
 		if (name !== 'kipling') return;
 
 		const kiplingWindow = window_manager.getWindow('kipling');
+		await window_manager.setWindowVariable('kipling', 'moduleChromeTemplateName', moduleChromeTemplateName);
+		await window_manager.setWindowVariable('kipling', 'moduleChromeTabTemplateName', moduleChromeTabTemplateName);
+
 		await loadResources(kiplingWindow.win, static_files);
 
 	});

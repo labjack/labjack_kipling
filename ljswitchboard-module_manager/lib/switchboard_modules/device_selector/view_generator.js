@@ -4,27 +4,15 @@
 
 // console.log('in device_selector view_generator.js');
 
-var package_loader;
-var q;
-var static_files;
-var driver_const;
-try {
-	package_loader = global.require.main.require('ljswitchboard-package_loader');
-	q = global.require.main.require('q');
-	static_files = global.require('ljswitchboard-static_files');
-	driver_const = global.require('ljswitchboard-ljm_driver_constants');
-} catch(err) {
-	package_loader = require.main.require('ljswitchboard-package_loader');
-	q = require.main.require('q');
-	static_files = require('ljswitchboard-static_files');
-	driver_const = require('ljswitchboard-ljm_driver_constants');
-}
+const package_loader = global.lj_di_injector.get('package_loader');
+const static_files = package_loader.getPackage('static_files');
+const q = require('q');
+const driver_const = require('ljswitchboard-ljm_driver_constants');
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var handlebars = require('handlebars');
-var path = require('path');
-
+const {EventEmitter} = require('events');
+const util = require('util');
+const handlebars = require('handlebars');
+const path = require('path');
 
 var createDeviceSelectorViewGenerator = function() {
 	var self = this;

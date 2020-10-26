@@ -41,8 +41,6 @@ async function performRemainingInitializationRoutines() {
         'zoom': global.WINDOW_ZOOM_MANAGER,
     };
 
-    console.log('aaaaaaaaa', global.KEYBOARD_EVENT_HANDLER, global.WINDOW_ZOOM_MANAGER, global.MOUSE_EVENT_HANDLER);
-
     await global.KEYBOARD_EVENT_HANDLER.init(managers);
     await global.WINDOW_ZOOM_MANAGER.init();
     await global.MOUSE_EVENT_HANDLER.init({
@@ -97,7 +95,7 @@ function ioManagerMonitor(data, io_interface) {
         }
         io_interface.initialize()
             .then(bundle => saveGlobalSubprocessReference(bundle, io_interface))
-            .then(global.MODULE_CHROME.reloadModuleChrome);
+            .then(() => global.MODULE_CHROME.reloadModuleChrome());
     } else {
         console.log('subprocess exited and not restarting');
     }

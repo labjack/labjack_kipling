@@ -336,7 +336,7 @@ exports.init = (listener) => {
 	messageManager = new NewMessageManager(listener);
 
 	// Link the messageManager to the processes message event
-	process.on('message', messageManager.messageListener);
+	process.on('message', (event) => messageManager.messageListener(event));
 
     // Attach some event listeners to the processManager
     // messageManager.on(PM_CRITICAL_ERROR, criticalErrorListener);
