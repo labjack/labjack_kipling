@@ -173,10 +173,11 @@ class ModuleLoader extends EventEmitter {
 
 			// Filter what devices are displayed
 			const filters = newModule.data.supportedDevices ? newModule.data.supportedDevices : null;
-			device_controller.getDeviceListing(filters).then((deviceListing) => {
-				newModule.context.devices = deviceListing;
-				resolve(newModule);
-			});
+			device_controller.getDeviceListing(filters)
+				.then((deviceListing) => {
+					newModule.context.devices = deviceListing;
+					resolve(newModule);
+				});
 		});
 	}
 

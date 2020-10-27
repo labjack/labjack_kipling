@@ -1,4 +1,5 @@
-
+const package_loader = global.lj_di_injector.get('package_loader');
+const static_files = package_loader.getPackage('static_files');
 
 function getDashboardGuiConstants(deviceTypeName, productType) {
 
@@ -47,7 +48,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
     this.DEVICE_BUTTON_LEFT_PADDING = 5;
 
     // Determines the image+lines & register's offset. Higher #'s push registers higher up
-    this.DEVICE_LINE_Y_OFFSET = 4; 
+    this.DEVICE_LINE_Y_OFFSET = 4;
 
 
     // DB Image Info
@@ -120,7 +121,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             {register: 'FIO1', yLocation: 0.400-DEV_OFF,    yShift: 1,          yOffset: -6,        yOverlayOffset:  12,  type: 'dio', board: 'device', side: 'left'},
             {register: 'FIO2', yLocation: 0.308-DEV_OFF,    yShift: 3.5,        yOffset: 6,         yOverlayOffset:  15,  type: 'dio', board: 'device', side: 'left'},
             {register: 'FIO3', yLocation: 0.280-DEV_OFF,    yShift: 4,          yOffset: -6,        yOverlayOffset:  15,  type: 'dio', board: 'device', side: 'left'},
-            
+
             // Left Side, DB37
             {register: 'AIN1', yLocation: 0.900-0.01,       yOffset:  4*bNum,   type: null,  board: 'connector', side: 'left'},
             {register: 'AIN3', yLocation: 0.875-0.01,       yOffset:  3*bNum,   type: null,  board: 'connector', side: 'left'},
@@ -135,7 +136,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             {register: 'FIO2', yLocation: 0.575-0.015,      yOffset: -2*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'FIO4', yLocation: 0.550-0.015,      yOffset: -3*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'FIO6', yLocation: 0.525-0.015,      yOffset: -4*bNum,   type: 'dio', board: 'connector', side: 'left'},
-            
+
             // Left Side, DB15
             {register: 'EIO6', yLocation: 0.275+0.028,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'EIO4', yLocation: 0.250+0.024,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'left'},
@@ -143,7 +144,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             {register: 'EIO0', yLocation: 0.200+0.017,      yOffset: -1*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'CIO3', yLocation: 0.175+0.014,      yOffset: -2*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'CIO1', yLocation: 0.150+0.010,      yOffset: -3*bNum,   type: 'dio', board: 'connector', side: 'left'},
-            
+
             // Right Side, DB37
             {register: 'AIN0', yLocation: 0.900 + 0.005,    yOffset:  4*bNum,   type: null,  board: 'connector', side: 'right'},
             {register: 'AIN2', yLocation: 0.875 + 0.005,    yOffset:  3*bNum,   type: null,  board: 'connector', side: 'right'},
@@ -159,7 +160,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             {register: 'FIO3', yLocation: 0.550,            yOffset: -3*bNum,   type: 'dio', board: 'connector', side: 'right'},
             {register: 'FIO5', yLocation: 0.525,            yOffset: -4*bNum,   type: 'dio', board: 'connector', side: 'right'},
             {register: 'FIO7', yLocation: 0.500,            yOffset: -5*bNum,   type: 'dio', board: 'connector', side: 'right'},
-            
+
             // Right Side, DB15
             {register: 'EIO7', yLocation: 0.300+0.014,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'right'},
             {register: 'EIO5', yLocation: 0.275+0.012,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'right'},
@@ -184,7 +185,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             {register: 'AIN2', yLocation: 0.415-DEV_OFF,    yShift: 1,          yOffset: -6,        yOverlayOffset: 12,      type: null, board: 'device', side: 'right'},
             {register: 'DAC1', yLocation: 0.337-DEV_OFF,    yShift: 3.5,        yOffset: 6,         yOverlayOffset: 15,      type: 'dac', board: 'device', side: 'right'},
             {register: 'DAC0', yLocation: 0.310-DEV_OFF,    yShift: 4,          yOffset: -6,        yOverlayOffset: 15,      type: 'dac', board: 'device', side: 'right'},
-            
+
             // Left Side, DB15
             {register: 'EIO6', yLocation: 0.275+0.028,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'EIO4', yLocation: 0.250+0.025,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'left'},
@@ -192,7 +193,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             {register: 'EIO0', yLocation: 0.197+0.020,      yOffset: -1*bNum,   type: 'flex', board: 'connector', side: 'left'},
             {register: 'CIO3', yLocation: 0.170+0.019,      yOffset: -2*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'CIO1', yLocation: 0.140+0.020,      yOffset: -3*bNum,   type: 'dio', board: 'connector', side: 'left'},
-            
+
             // Right Side, DB15
             {register: 'EIO7', yLocation: 0.300+0.015,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'right'},
             {register: 'EIO5', yLocation: 0.275+0.010,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'right'},
@@ -211,7 +212,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             {register: 'FIO1', yLocation: 0.486-DEV_OFF,    yShift: -1,         yOffset: -6,        yOverlayOffset:  10,     type: 'dio', board: 'device', side: 'left'},
             {register: 'FIO2', yLocation: 0.405-DEV_OFF,    yShift: 0,          yOffset: 6,         yOverlayOffset:  12,     type: 'dio', board: 'device', side: 'left'},
             {register: 'FIO3', yLocation: 0.382-DEV_OFF,    yShift: 1,          yOffset: -6,        yOverlayOffset:  12,     type: 'dio', board: 'device', side: 'left'},
-            
+
 
             // Right Side, Device
             {register: 'AIN1', yLocation: 0.667-DEV_OFF,    yShift: -5,         yOffset: 6,         yOverlayOffset: 8,       type: null, board: 'device', side: 'right'},
@@ -222,7 +223,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             {register: 'AIN4', yLocation: 0.425-DEV_OFF,    yShift: 1,          yOffset: -6,        yOverlayOffset: 12,      type: null, board: 'device', side: 'right'},
             {register: 'AIN7', yLocation: 0.342-DEV_OFF,    yShift: 3.5,        yOffset: 6,         yOverlayOffset: 15,      type: null, board: 'device', side: 'right'},
             {register: 'AIN6', yLocation: 0.315-DEV_OFF,    yShift: 4,          yOffset: -6,        yOverlayOffset: 15,      type: null, board: 'device', side: 'right'},
-            
+
             // Left Side, DB15
             {register: 'EIO6', yLocation: 0.275+0.020,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'EIO4', yLocation: 0.250+0.020,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'left'},
@@ -230,7 +231,7 @@ function getDashboardGuiConstants(deviceTypeName, productType) {
             {register: 'EIO0', yLocation: 0.197+0.020,      yOffset: -1*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'CIO3', yLocation: 0.170+0.020,      yOffset: -2*bNum,   type: 'dio', board: 'connector', side: 'left'},
             {register: 'CIO1', yLocation: 0.140+0.020,      yOffset: -3*bNum,   type: 'dio', board: 'connector', side: 'left'},
-            
+
             // Right Side, DB15
             {register: 'EIO7', yLocation: 0.300+0.010,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'right'},
             {register: 'EIO5', yLocation: 0.275+0.010,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'right'},

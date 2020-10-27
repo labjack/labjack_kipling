@@ -2,7 +2,7 @@
 /* jshint undef: true, unused: true, undef: true */
 /* jshint strict: false */
 /* global global, require, console, handlebars, $ */
-/* global showAlert, showCriticalAlert, showInfoMessage, package_loader */
+/* global showAlert, showCriticalAlert, showInfoMessage */
 /* global MODULE_LOADER, MODULE_CHROME, TASK_LOADER */
 /* global KEYBOARD_EVENT_HANDLER, module_manager */
 
@@ -42,16 +42,15 @@ try {
     console.error('error loading fs_facade presenter_framework', err, err.stack);
 }
 
-var io_manager;
 var driver_const;
 var modbus_map;
 const gui = global.lj_di_injector.get('gui');
+const package_loader = global.lj_di_injector.get('package_loader');
+const io_manager = package_loader.getPackage('io_manager');
 try {
-    io_manager = global.require.main.require('ljswitchboard-io_manager');
     driver_const = global.require('ljswitchboard-ljm_driver_constants');
     modbus_map = global.require('ljswitchboard-modbus_map').getConstants();
 } catch(err) {
-    io_manager = require.main.require('ljswitchboard-io_manager');
     driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
     modbus_map = require('ljswitchboard-modbus_map').getConstants();
 }

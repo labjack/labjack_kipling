@@ -1,32 +1,31 @@
 
 /* jshint undef: true, unused: true, undef: true */
-/* global global, require, console, MODULE_LOADER, MODULE_CHROME, createDeviceSelectorViewGenerator, module_manager */
+/* global global, require, console, MODULE_LOADER, MODULE_CHROME, createDeviceSelectorViewGenerator */
 /* exported activeModule */
 
 // console.log('in device_selector, controller.js');
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
 
 const package_loader = global.lj_di_injector.get('package_loader');
 const io_manager = package_loader.getPackage('io_manager');
 const module_manager = package_loader.getPackage('module_manager');
 const driver_const = require('ljswitchboard-ljm_driver_constants');
-const q = require('q');
+const modbus_map = require('ljswitchboard-modbus_map');
 
-var createModuleInstance = function() {
+const createModuleInstance = function() {
 	this.runRedraw = function() {
-		document.body.style.display='none';
-		var h = document.body.offsetHeight; // no need to store this anywhere, the reference is enough
-		document.body.style.display='block';
+		document.body.style.display = 'none';
+		document.body.style.display = 'block';
 	};
-	var io_interface = io_manager.io_interface();
-	var driver_controller = io_interface.getDriverController();
-	var device_controller = io_interface.getDeviceController();
+	const io_interface = io_manager.io_interface();
+	const driver_controller = io_interface.getDriverController();
+	const device_controller = io_interface.getDeviceController();
 
-	var getCachedListAllDevices = device_controller.getCachedListAllDevices;
-	var listAllDevices = device_controller.listAllDevices;
-	var getListAllDevicesErrors = device_controller.getListAllDevicesErrors;
+	const getCachedListAllDevices = device_controller.getCachedListAllDevices;
+	const listAllDevices = device_controller.listAllDevices;
+	const getListAllDevicesErrors = device_controller.getListAllDevicesErrors;
 
 	this.getCachedListAllDevicesFunc = getCachedListAllDevices;
 	this.listAllDevicesFunc = listAllDevices;
@@ -46,14 +45,14 @@ var createModuleInstance = function() {
 		'VIEW_GEN_DEVICE_CLOSED': 'VIEW_GEN_DEVICE_CLOSED',
 		'VIEW_GEN_DEVICE_FAILED_TO_CLOSE': 'VIEW_GEN_DEVICE_FAILED_TO_CLOSE',
 	};
-	var forwardedViewGenEvents = {
+	const forwardedViewGenEvents = {
 		DEVICE_OPENED: 'VIEW_GEN_DEVICE_OPENED',
 		DEVICE_FAILED_TO_OPEN: 'VIEW_GEN_DEVICE_FAILED_TO_OPEN',
 		DEVICE_CLOSED: 'VIEW_GEN_DEVICE_CLOSED',
 		DEVICE_FAILED_TO_CLOSE: 'VIEW_GEN_DEVICE_FAILED_TO_CLOSE',
 	};
 
-	var eventsToForwardToModuleChrome = {
+	const eventsToForwardToModuleChrome = {
 		DEVICE_OPENED: 'DEVICE_SELECTOR_DEVICE_OPENED',
 		// DEVICE_FAILED_TO_OPEN: 'VIEW_GEN_DEVICE_FAILED_TO_OPEN',
 		DEVICE_CLOSED: 'DEVICE_SELECTOR_DEVICE_CLOSED',
@@ -64,73 +63,67 @@ var createModuleInstance = function() {
 	// Create a new viewGen object
 	this.viewGen = new createDeviceSelectorViewGenerator();
 
-	var allowDeviceControl = true;
+	let allowDeviceControl = true;
 	this.enableDeviceControl = function() {
 		allowDeviceControl = true;
 	};
 	this.disableDeviceControl = function() {
 		allowDeviceControl = false;
 	};
-	var verifyLJMSpecialAddresses = function(scanData) {
-		var defered = q.defer();
+	const verifyLJMSpecialAddresses = function(scanData) {
 		self.emit(self.eventList.VERIFY_LJM_SPECIAL_ADDRESSES, {});
-		defered.resolve(scanData);
-		return defered.promise;
+		return Promise.resolve(scanData);
 	};
 	this.verifyLJMSpecialAddressesExt = function() {
 		driver_controller.readLibraryS('LJM_SPECIAL_ADDRESSES_STATUS')
 		.then(function(res) {
 			console.log('Result:', res);
 		}, function(err) {
-			var errInfo = modbus_map.getErrorInfo(err);
+			const errInfo = modbus_map.getErrorInfo(err);
 			console.log('Err:', errInfo);
 		});
 	};
 	this.GetLJMSpecialAddressesLocationExt = function() {
 		driver_controller.readLibraryS('LJM_SPECIAL_ADDRESSES_FILE')
-		.then(function(res) {
-			console.log('Result:', res);
-		}, function(err) {
-			var errInfo = modbus_map.getErrorInfo(err);
-			console.log('Err:', errInfo);
-		});
+			.then(function(res) {
+				console.log('Result:', res);
+			}, function(err) {
+				const errInfo = modbus_map.getErrorInfo(err);
+				console.log('Err:', errInfo);
+			});
 	};
 	this.refreshLJMSpecialAddressesExt = function() {
 		driver_controller.readLibraryS('LJM_SPECIAL_ADDRESSES_FILE')
-		.then(function(res) {
-			console.log('Result:', res);
-		}, function(err) {
-			var errInfo = modbus_map.getErrorInfo(err);
-			console.log('Err:', errInfo);
-		});
+			.then(function(res) {
+				console.log('Result:', res);
+			}, function(err) {
+				const errInfo = modbus_map.getErrorInfo(err);
+				console.log('Err:', errInfo);
+			});
 	};
-	var reportScanStarted = function(scanData) {
-		var defered = q.defer();
+	const reportScanStarted = function(scanData) {
 		self.emit(self.eventList.DEVICE_SCAN_STARTED, scanData);
-		defered.resolve(scanData);
-		return defered.promise;
+		return Promise.resolve(scanData);
 	};
-	var reportScanFinished = function(scanData) {
-		var defered = q.defer();
+	const reportScanFinished = function(scanData) {
 		self.runRedraw();
 		self.emit(self.eventList.DEVICE_SCAN_COMPLETED, scanData);
-		defered.resolve(scanData);
-		return defered.promise;
+		return Promise.resolve(scanData);
 	};
 
 	// Saves the visibility state of the advanced scan options to the variable
 	// used to save to start-up data.
 	this.saveAdvancedScanOptionsState = function(data) {
-		var defered = q.defer();
+		return new Promise((resolve) => {
 		self.advancedScanOptions = data.isExpanded;
-		defered.resolve();
-		return defered.promise;
+		resolve();
+		});
 	};
 	this.saveShowDirectConnectOptionsState = function(data) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 		self.showDirectConnectOptions = data.isExpanded;
-		defered.resolve();
-		return defered.promise;
+		resolve();
+		});
 	};
 	function getHRMissingDirectConnectKey(key, enteredVal) {
 		if(key === 'dt') {
@@ -144,15 +137,13 @@ var createModuleInstance = function() {
 		}
 	}
 	this.attemptDirectConnection = function(data) {
-		var defered = q.defer();
+		return new Promise((resolve) => {
 
 		// console.log("attempting direct connection", data);
-		var missingValues = [];
+		const missingValues = [];
 
-		var keys = Object.keys(data.openParams);
-
-		var dt = driver_const.deviceTypes[data.openParams.dt.toUpperCase()];
-		var ct = driver_const.connectionTypes[data.openParams.ct.toUpperCase()];
+		const dt = driver_const.deviceTypes[data.openParams.dt.toUpperCase()];
+		const ct = driver_const.connectionTypes[data.openParams.ct.toUpperCase()];
 		if(typeof(dt) ==='undefined') {
 			missingValues.push(getHRMissingDirectConnectKey('dt', data.openParams.dt));
 		} else {
@@ -172,19 +163,19 @@ var createModuleInstance = function() {
 
 
 		if(missingValues.length > 0) {
-			var errStr = 'The following connection parameter';
+			let errStr = 'The following connection parameter';
 			if(missingValues.length > 1) {
 				errStr += 's are not valid';
 			} else {
-				errStr += ' is not valid'
+				errStr += ' is not valid';
 			}
-			errStr += '. Please try again.'
-			errStr += '<br><br>'
+			errStr += '. Please try again.';
+			errStr += '<br><br>';
 			errStr += missingValues.join('<br>');
 			showInfoMessageNoTimeout(errStr);
 		} else {
 			// Define data for the connection process.
-			var connectData = {
+			const connectData = {
 				'connectionType':{
 					'dt':dt,
 					'ct':ct,
@@ -195,18 +186,17 @@ var createModuleInstance = function() {
 
 			// Render & Display the connecting to devices template.
 			self.viewGen.displayConnectingToDevice(data.openParams)
-			.then(performConnection);
+				.then(performConnection);
 
 			// Connection logic needs to happen after elements have been hidden...
 			function performConnection() {
 				// Attempt to connect to a device.
-				internalConnectToDevice(connectData).then(function(res) {
+				internalConnectToDevice(connectData).then(() => {
 					// MODULE_LOADER.loadModuleByName(MODULE_LOADER.current_module_data.name);
 					// self.performDeviceScan();
 					getCachedListAllDevices()
-					.then(self.viewGen.displayScanResults)
-					.then(defered.resolve, defered.resolve);
-
+						.then(self.viewGen.displayScanResults)
+						.then(resolve, resolve);
 				}, function(err) {
 					function onDisplayed() {
 						if(typeof(err.errorMessage) !== 'undefined') {
@@ -216,7 +206,7 @@ var createModuleInstance = function() {
 						} else {
 							// showAlert('Failed to open the desired device');
 						}
-						defered.resolve();
+						resolve();
 					}
 
 					getCachedListAllDevices()
@@ -230,15 +220,14 @@ var createModuleInstance = function() {
 		}
 
 
-		return defered.promise;
+		});
 	};
 	this.getDeviceElement = function(sn) {
-		var deviceElements = $('.device');
-		var ele;
-		var i,j = 0;
-		for(i = 0; i<deviceElements.length; i++) {
-			var classList = deviceElements[i].classList;
-			for(j = 0; j<classList.length; j++) {
+		const deviceElements = $('.device');
+		let ele;
+		for(let i = 0; i < deviceElements.length; i++) {
+			const classList = deviceElements[i].classList;
+			for(let j = 0; j < classList.length; j++) {
 				if(classList[j].indexOf(sn.toString()) >= 0) {
 					ele = $(deviceElements[i]);
 					break;
@@ -248,8 +237,8 @@ var createModuleInstance = function() {
 		return ele;
 	};
 	this.blinkDevice = function(sn) {
-		var ele = self.getDeviceElement(sn);
-		var timeout = 500;
+		const ele = self.getDeviceElement(sn);
+		const timeout = 500;
 		ele.addClass('black-border');
 		setTimeout(function() {
 			ele.removeClass('black-border');
@@ -268,43 +257,42 @@ var createModuleInstance = function() {
 		},timeout);
 	};
 	this.performDeviceScan = function() {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
-		var scanResults = [];
+		let scanResults = [];
 		function getListAllDevices() {
-			var innerDefered = q.defer();
+			return new Promise((resolve) => {
+				// Update and save the scan selections
+				updateAndSaveScanSelections();
 
-			// Update and save the scan selections
-			updateAndSaveScanSelections();
-
-			// In parallel, scan for devices.
-			listAllDevices(self.scanOptions)
-			.then(function(res) {
-				scanResults = res;
-				innerDefered.resolve();
-			}, function(err) {
-				console.error('Error scanning for devices', err);
-				scanResults = [];
-				innerDefered.resolve();
+				// In parallel, scan for devices.
+				listAllDevices(self.scanOptions)
+					.then(function(res) {
+						scanResults = res;
+						resolve();
+					}, function(err) {
+						console.error('Error scanning for devices', err);
+						scanResults = [];
+						resolve();
+					});
 			});
-			return innerDefered.promise;
 		}
-		var scanErrors = [];
+		let scanErrors = [];
 		function getScanErrors() {
-			var innerDefered = q.defer();
-			getListAllDevicesErrors()
-			.then(function(res) {
-				scanErrors = res;
-				innerDefered.resolve();
-			}, function(err) {
-				console.error('Error getting errors...', err);
-				scanErrors = [];
-				innerDefered.resolve();
+			return new Promise((resolve) => {
+				getListAllDevicesErrors()
+					.then(function(res) {
+						scanErrors = res;
+						resolve();
+					}, function(err) {
+						console.error('Error getting errors...', err);
+						scanErrors = [];
+						resolve();
+					});
 			});
-			return innerDefered.promise;
 		}
 
-		var promises = [];
+		const promises = [];
 		promises.push(self.viewGen.displayScanInProgress());
 		promises.push(
 			reportScanStarted()
@@ -312,18 +300,18 @@ var createModuleInstance = function() {
 			.then(getScanErrors)
 		);
 
-		q.allSettled(promises)
-		.then(function(res) {
-			// var scanResults = res[1].value; // the second result (1st element);
-			console.log('Scan Results', scanResults);
-			console.log('Scan Errors', scanErrors);
-			self.viewGen.displayScanResults(scanResults, scanErrors)
-			.then(reportScanFinished)
-			.then(defered.resolve);
-		}, defered.reject);
-		return defered.promise;
+		Promise.allSettled(promises)
+			.then(function() {
+				// const scanResults = res[1].value; // the second result (1st element);
+				console.log('Scan Results', scanResults);
+				console.log('Scan Errors', scanErrors);
+				self.viewGen.displayScanResults(scanResults, scanErrors)
+				.then(reportScanFinished)
+				.then(resolve);
+			}, reject);
+		});
 	};
-	var buttonEventHandlers = {
+	const buttonEventHandlers = {
 		'REFRESH_DEVICES': this.performDeviceScan,
 		'DIRECT_OPEN_DEVICE': this.attemptDirectConnection,
 		'TOGGLE_ADVANCED_SCAN_OPTIONS': this.saveAdvancedScanOptionsState,
@@ -331,8 +319,8 @@ var createModuleInstance = function() {
 	};
 
 	// Attach to viewGen events
-	var getViewGenEventListener = function(eventName) {
-		var viewGenEventListener = function(eventData) {
+	const getViewGenEventListener = function(eventName) {
+		const viewGenEventListener = function(eventData) {
 			// console.log('viewGen event', eventName, eventData);
 			// If the event has some valid data, call its event handler.
 			if(eventData.type) {
@@ -357,42 +345,41 @@ var createModuleInstance = function() {
 		};
 		return viewGenEventListener;
 	};
-	var viewGenEvents = this.viewGen.eventList;
-	var viewGenEventKeys = Object.keys(viewGenEvents);
-	var i;
-	for(i = 0; i < viewGenEventKeys.length; i++) {
-		var viewGenEventKey = viewGenEventKeys[i];
-		var eventKey = viewGenEvents[viewGenEventKey];
+	const viewGenEvents = this.viewGen.eventList;
+	const viewGenEventKeys = Object.keys(viewGenEvents);
+	for (let i = 0; i < viewGenEventKeys.length; i++) {
+		const viewGenEventKey = viewGenEventKeys[i];
+		const eventKey = viewGenEvents[viewGenEventKey];
 		this.viewGen.on(
 			eventKey,
 			getViewGenEventListener(eventKey)
 		);
 	}
 
-	var handleInitialDisplayScanResults = function(cachedScanResults) {
-		var defered = q.defer();
+	const handleInitialDisplayScanResults = function(cachedScanResults) {
+		return new Promise((resolve, reject) => {
 		if(cachedScanResults.length > 0) {
-			defered.resolve();
+			resolve();
 		} else {
 			if(self.debug) {
 				console.log('Performing Device Scan');
 			}
 			self.performDeviceScan()
-			.then(defered.resolve, defered.reject);
+			.then(resolve, reject);
 		}
-		return defered.promise;
+		});
 	};
-	var internalConnectToDevice = function(data) {
-		var defered = q.defer();
-		// var device = data.device;
-		// var connectionType = data.connectionType;
+	const internalConnectToDevice = function(data) {
+		return new Promise((resolve, reject) => {
+		// const device = data.device;
+		// const connectionType = data.connectionType;
 		if(self.debug) {
 			console.log('Connecting to a device', data);
 		}
-		var dt = data.connectionType.dt;
-		var ct = data.connectionType.ct;
+		const dt = data.connectionType.dt;
+		const ct = data.connectionType.ct;
 
-		var id;
+		let id;
 		if(ct === driver_const.LJM_CT_USB) {
 			if(typeof(data.device.serialNumber) !== 'undefined') {
 				id = data.device.serialNumber;
@@ -416,7 +403,7 @@ var createModuleInstance = function() {
 		if(typeof(data.device.isMockDevice) === 'undefined') {
 			data.device.isMockDevice = false;
 		}
-		var openParams = {
+		const openParams = {
 			'deviceType': driver_const.DRIVER_DEVICE_TYPE_NAMES[dt],
 			'connectionType': driver_const.DRIVER_CONNECTION_TYPE_NAMES[ct],
 			'identifier': id,
@@ -439,66 +426,65 @@ var createModuleInstance = function() {
 						console.log('Device Listing after open', deviceTypes);
 					}
 					self.emit(self.eventList.DEVICE_OPENED, data);
-					defered.resolve(data);
+					resolve(data);
 				});
 			}, function(err) {
-				var handledReject = false;
+				const handledReject = false;
 
 				if(typeof(err) === 'number') {
 					// Handle LJM Error codes.
 					console.log('HERE');
-					var errorInfo = modbus_map.getErrorInfo(err);
-					var numStr = errorInfo.error.toString();
-					var errorText = 'Failed to connect to the selected device';
-					var description = '';
+					const errorInfo = modbus_map.getErrorInfo(err);
+					const numStr = errorInfo.error.toString();
+					let errorText = 'Failed to connect to the selected device';
+					let description = '';
 					if(errorInfo.description) {
 						description = errorInfo.description.toLowerCase();
 						errorText += ', ' + description;
 					} else {
 						errorText += '.';
 					}
-					var errorMessage = '<p>' + errorText + '<br>';
-					errorMessage += 'LabJack error code: ';
-					errorMessage += errorInfo.string + ' (' + numStr + ')</p>';
+					const errorMessage = '<p>' + errorText + '<br>' +
+						'LabJack error code: ' +
+						errorInfo.string + ' (' + numStr + ')</p>';
 					showAlertNoTimeout(errorMessage);
 				} else {
 					// Handle error objects that can be returned if the same
 					// handle number has been detected.
 					if(typeof(err.errorMessage) !== 'undefined') {
-						handeledReject = true;
-						defered.reject(err);
+						reject(err);
 					} else {
 						console.error('Open Error', err, openParams);
 					}
 				}
 				if(!handledReject) {
-					defered.reject(err);
+					reject(err);
 				}
 			});
 		} else {
-			defered.resolve(data);
+			resolve(data);
 		}
-		return defered.promise;
+		});
 	};
-	var connectToDevice = function(data) {
-		var defered = q.defer();
+	const connectToDevice = function(data) {
+		return new Promise((resolve, reject) => {
 
 		internalConnectToDevice(data)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+		.then(resolve, reject);
+		});
 	};
 	this.connectToDevice = connectToDevice;
-	var internalDisconnectFromDevice = function(data) {
-		var defered = q.defer();
-		// var device = data.device;
-		// var connectionType = data.connectionType;
+	const internalDisconnectFromDevice = function(data) {
+		return new Promise((resolve) => {
+		// const device = data.device;
+		// const connectionType = data.connectionType;
 		if(self.debug) {
 			console.log('Disconnecting from a device', data);
 		}
 		if(allowDeviceControl) {
-			var dt = data.device.deviceType;
-			var sn = data.device.serialNumber;
-			var options = {
+			const dt = data.device.deviceType;
+			const sn = data.device.serialNumber;
+			const options = {
 				'deviceType': dt,
 				'serialNumber': sn,
 			};
@@ -514,24 +500,24 @@ var createModuleInstance = function() {
 							console.log('HERE, Closed Device');
 						}
 						self.emit(self.eventList.DEVICE_CLOSED, data);
-						defered.resolve(data);
+						resolve(data);
 					});
 				} else {
 					console.error('Can not find device to close', options);
-					defered.resolve(data);
+					resolve(data);
 				}
 			});
 		} else {
-			defered.resolve(data);
+			resolve(data);
 		}
-		return defered.promise;
+		});
 	};
-	var disconnectFromDevice = function(data) {
-		var defered = q.defer();
+	const disconnectFromDevice = function(data) {
+		return new Promise((resolve, reject) => {
 
 		internalDisconnectFromDevice(data)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+		.then(resolve, reject);
+		});
 	};
 
 	this.scanOptions = {
@@ -566,9 +552,9 @@ var createModuleInstance = function() {
 		// });
 	}
 	function innerSaveStartupData() {
-		var dt = 'ANY';
-		var ct = 'ANY';
-		var id = 'ANY';
+		let dt = 'ANY';
+		let ct = 'ANY';
+		let id = 'ANY';
 		try {
 			dt = self.viewGen.pageElements.device_type_input.ref.val();
 			ct = self.viewGen.pageElements.connection_type_input.ref.val();
@@ -576,7 +562,7 @@ var createModuleInstance = function() {
 		} catch(err) {
 			console.error('Error getting ref...',err);
 		}
-		var startupData = {
+		const startupData = {
 			'scanOptions': self.scanOptions,
 			'advancedScanOptions': self.advancedScanOptions,
 			'directConnectParams': {
@@ -596,18 +582,15 @@ var createModuleInstance = function() {
 		return module_manager.revertModuleStartupData('device_selector');
 	}
 	function saveStartupData(startupData) {
-		var defered = q.defer();
-
 		// console.log('Loaded Startup Data', startupData);
 		self.scanOptions = startupData.scanOptions;
 		self.advancedScanOptions = startupData.advancedScanOptions;
 		self.directConnectParams = startupData.directConnectParams;
 		self.showDirectConnectOptions = startupData.showDirectConnectOptions;
-		defered.resolve();
-		return defered.promise;
+		return Promise.resolve();
 	}
 	function getDefaultStartupData() {
-		var defaultStartupData = {
+		const defaultStartupData = {
 			'scanOptions': {
 				'scanUSB': true,
 				'scanEthernet': true,
@@ -628,21 +611,21 @@ var createModuleInstance = function() {
 	}
 
 	function verifyStartupData(startupData) {
-		var defered = q.defer();
-		var isValid = true;
-		// console.log('In verifyStartupData', startupData);
+		return new Promise((resolve, reject) => {
+		let isValid = true;
+
 		try {
 			// verify the startup data..
-			var primaryKeys = Object.keys(startupData);
-			var requiredPrimaryKeys = ['scanOptions','advancedScanOptions', 'directConnectParams','showDirectConnectOptions'];
+			const primaryKeys = Object.keys(startupData);
+			const requiredPrimaryKeys = ['scanOptions','advancedScanOptions', 'directConnectParams','showDirectConnectOptions'];
 			requiredPrimaryKeys.forEach(function(requiredPrimaryKey) {
 				if(primaryKeys.indexOf(requiredPrimaryKey) < 0) {
 					isValid = false;
 				}
 
 				if(requiredPrimaryKey === requiredPrimaryKeys[0]) {
-					var secondaryKeys = Object.keys(startupData[requiredPrimaryKey]);
-					var reqSecondaryKeys = ['scanUSB', 'scanEthernet', 'scanWiFi','scanEthernetTCP', 'scanWiFiTCP'];
+					const secondaryKeys = Object.keys(startupData[requiredPrimaryKey]);
+					const reqSecondaryKeys = ['scanUSB', 'scanEthernet', 'scanWiFi','scanEthernetTCP', 'scanWiFiTCP'];
 					reqSecondaryKeys.forEach(function(reqSecondaryKey) {
 						if(secondaryKeys.indexOf(reqSecondaryKey) < 0) {
 							isValid = false;
@@ -651,8 +634,8 @@ var createModuleInstance = function() {
 				}
 
 				if(requiredPrimaryKey === requiredPrimaryKeys[2]) {
-					var secondaryKeys = Object.keys(startupData[requiredPrimaryKey]);
-					var reqSecondaryKeys = ['dt','ct','id','isMockDevice'];
+					const secondaryKeys = Object.keys(startupData[requiredPrimaryKey]);
+					const reqSecondaryKeys = ['dt','ct','id','isMockDevice'];
 					reqSecondaryKeys.forEach(function(reqSecondaryKey) {
 						if(secondaryKeys.indexOf(reqSecondaryKey) < 0) {
 							isValid = false;
@@ -663,40 +646,34 @@ var createModuleInstance = function() {
 
 			if(isValid) {
 				// console.log('startupData is valid', startupData);
-				defered.resolve(startupData);
+				resolve(startupData);
 			} else {
 				// console.warn('startupData is invalid', startupData);
 				innerRevertModuleStartupData()
 				.then(innerGetStartupData)
-				.then(defered.resolve, defered.reject);
+				.then(resolve, reject);
 			}
 		} catch(err) {
 			// console.log('ERROR', err);
 			innerRevertModuleStartupData()
 			.then(innerGetStartupData)
-			.then(defered.resolve, function(err) {
-				defered.resolve(getDefaultStartupData());
+			.then(resolve, () => {
+				resolve(getDefaultStartupData());
 			});
 		}
-		return defered.promise;
+		});
 	}
-	function handleGetStartupDataError(err) {
-		var defered = q.defer();
-		var defaultStartupData = getDefaultStartupData();
-		defered.resolve(defaultStartupData);
-		return defered.promise;
+	function handleGetStartupDataError() {
+		const defaultStartupData = getDefaultStartupData();
+		return Promise.resolve(defaultStartupData);
 	}
 	function getStartupData() {
-		var defered = q.defer();
-
-		innerGetStartupData()
-		.then(verifyStartupData, handleGetStartupDataError)
-		.then(saveStartupData)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+		return innerGetStartupData()
+			.then(verifyStartupData, handleGetStartupDataError)
+			.then(saveStartupData);
 	}
 
-	var startModule = function(newModule) {
+	async function startModule(newModule) {
 		// console.log('device_selector starting', newModule.name, newModule.id);
 		self.moduleData = newModule.data;
 
@@ -709,68 +686,60 @@ var createModuleInstance = function() {
 			disconnectFromDevice
 		);
 
-		// Load the startup-data
-		// getStartupData()
+		try {
+			// Load the startup-data
+			// getStartupData()
 
-		// Load and display cached device scan results
-		// .then(getCachedListAllDevices)
-		getCachedListAllDevices()
-		.then(self.viewGen.displayScanResults)
+			// Load and display cached device scan results
+			// .then(getCachedListAllDevices)
+			await getCachedListAllDevices();
+			await self.viewGen.displayScanResults();
 
-		// Don't load and display the cached device scan results because they
-		// don't currently  display devices that are open.  Force it to refresh.
-		// self.viewGen.displayScanResults([])
-		.then(handleInitialDisplayScanResults)
-		.then(function(scanResults) {
-			// console.log('device_selector started');
+			// Don't load and display the cached device scan results because they
+			// don't currently  display devices that are open.  Force it to refresh.
+
+			const scanResults = await handleInitialDisplayScanResults();
 			self.emit(self.eventList.MODULE_STARTED, scanResults);
-			var data = {
+			const data = {
 				'name': self.moduleData.name,
 			};
-			MODULE_CHROME.emit('MODULE_READY', data);
-			MODULE_LOADER.emit('MODULE_READY', data);
-		}, function(err) {
+			global.MODULE_CHROME.emit('MODULE_READY', data);
+			global.MODULE_LOADER.emit('MODULE_READY', data);
+		} catch (err) {
 			console.error('device_selector failed to start', err);
-		})
-		.catch(function(err) {
-			console.error('device selector failed to start', err);
-		});
-	};
-	var stopModule = function() {
+		}
+	}
+	const stopModule = function() {
 		// console.log('device_selector stopped');
 		self.emit(self.eventList.MODULE_STOPPED);
 	};
 
 	function preLoadStep(newModule) {
-		var defered = q.defer();
-		// console.log('Starting preLoadStep');
-		getStartupData()
-		.then(function() {
-			newModule.context.scanOptions = self.scanOptions;
-			newModule.context.advancedScanOptions = self.advancedScanOptions;
-			newModule.context.directConnectParams = self.directConnectParams;
-			newModule.context.showDirectConnectOptions = self.showDirectConnectOptions;
-			// console.log('Finished preLoadStep', newModule.context);
-			defered.resolve(newModule);
-		});
-
-		return defered.promise;
+		return getStartupData()
+			.then(() => {
+				newModule.context.scanOptions = self.scanOptions;
+				newModule.context.advancedScanOptions = self.advancedScanOptions;
+				newModule.context.directConnectParams = self.directConnectParams;
+				newModule.context.showDirectConnectOptions = self.showDirectConnectOptions;
+				// console.log('Finished preLoadStep', newModule.context);
+				return newModule;
+			});
 	}
 	MODULE_LOADER.addPreloadStep(preLoadStep);
 
 	function unloadStep() {
-		// var defered = q.defer();
-		// return defered.promise;
+		// return new Promise((resolve, reject) => {
+		// });
 		return updateAndSaveScanSelections();
 	}
 	MODULE_LOADER.addUnloadStep(unloadStep);
 	// Attach to MODULE_LOADER events that indicate to the module about what to
 	// do.  (start/stop).
-	var mlEvents = MODULE_LOADER.eventList;
+	const mlEvents = MODULE_LOADER.eventList;
 	MODULE_LOADER.on(mlEvents.VIEW_READY, startModule);
 	MODULE_LOADER.on(mlEvents.UNLOAD_MODULE, stopModule);
-	var self = this;
+	const self = this;
 };
 util.inherits(createModuleInstance, EventEmitter);
 
-var activeModule = new createModuleInstance();
+const activeModule = new createModuleInstance();

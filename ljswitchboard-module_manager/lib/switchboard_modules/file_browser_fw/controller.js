@@ -8,6 +8,8 @@
 **/
 
 console.log('Loaded Module');
+const package_loader = global.lj_di_injector.get('package_loader');
+const static_files = package_loader.getPackage('static_files');
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
 /**
@@ -57,7 +59,7 @@ function module() {
         }
         onSuccess();
     };
-    
+
     this.clickData = undefined;
     function startDownloadingFiles(data, onSuccess) {
         console.log('in startDownloadingFiles', data);
@@ -107,7 +109,7 @@ function module() {
 
     /**
      * Function is called several times giving the module a chance to verify its
-     * startupData.  Execute onError if it is not valid or onSuccess if it is 
+     * startupData.  Execute onError if it is not valid or onSuccess if it is
      * valid.
     **/
     this.verifyStartupData = function(framework, startupData, onError, onSuccess) {
@@ -156,15 +158,15 @@ function module() {
 
         // Create the view generator
         self.viewGenerator = new createFileBrowserViewGenerator();
-        
+
         // Share the compiled templates object with the view generator
         self.viewGenerator.saveTemplates(self.templates);
 
         onSuccess();
     };
-    
+
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -274,7 +276,7 @@ function module() {
                 customContext.download_controls = self.viewGenerator.getDownloadControlsRaw(context);
                 customContext.browser_controls = self.viewGenerator.getBrowserControlsRaw(context);
                 customContext.file_browser = self.viewGenerator.getFileBrowserRaw(context);
-                
+
             } catch(err) {
                 console.error('Error compiling template', err);
             }
@@ -330,7 +332,7 @@ function module() {
             continueFramework(data);
         });
     };
-    
+
     this.table = undefined;
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
         if(self.MODULE_LOADING_STATE_DEBUGGING) {

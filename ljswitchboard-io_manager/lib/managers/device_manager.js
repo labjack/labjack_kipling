@@ -15,7 +15,7 @@ function createDeviceManager(io_delegator) {
 	var send = null;
 
 	var deviceKeeper = null;
-	
+
 	var listener = function(m) {
 		// send responses to messaged
 		if(m.indexOf('testSendMessage') >= 0) {
@@ -62,7 +62,7 @@ function createDeviceManager(io_delegator) {
 				if(deviceKeeper.devices[deviceKey]) {
 					isValidFunc = true;
 					// Intercept device-centric close comands and re-route them
-					// to the deviceKeeper and add their deviceKey as an 
+					// to the deviceKeeper and add their deviceKey as an
 					// argument.
 					if(func === 'close') {
 						caller = deviceKeeper;
@@ -137,7 +137,7 @@ function createDeviceManager(io_delegator) {
 	};
 	this.init = function() {
 		var defered = q.defer();
-		
+
 		// Link with the io_delegator to receive messages
 		io_delegator.establishLink(io_endpoint_key, ipcMessageReceiver, listener)
 		.then(saveLink)

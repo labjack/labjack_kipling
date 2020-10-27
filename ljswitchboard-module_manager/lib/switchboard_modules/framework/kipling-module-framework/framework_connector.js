@@ -1,9 +1,14 @@
 // Define a placeholder for the user's module object.
 var sdModule = null;
 var sdFramework = null;
+const package_loader = global.lj_di_injector.get('package_loader');
+const core = package_loader.getPackage('core');
+const handleBarsService = core.handleBarsService;
+const path = require('path');
 
 var createModuleInstance = function() {
     this.DEBUG_FRAMEWORK_CONNECTOR = true;
+    const io_manager = package_loader.getPackage('io_manager');
     var io_interface = io_manager.io_interface();
     var device_controller = io_interface.getDeviceController();
 
@@ -55,7 +60,7 @@ var createModuleInstance = function() {
         var defered = q.defer();
 
         try {
-            // Try and link the framework to the various implemented functions, 
+            // Try and link the framework to the various implemented functions,
             // if they don't exist don't link them.
             if(typeof(sdModule.verifyStartupData) === "function") {
                 sdFramework.on('verifyStartupData',sdModule.verifyStartupData);
@@ -237,7 +242,7 @@ var createModuleInstance = function() {
             'jsonFiles': [],
         }
         */
-        
+
         // Start the framework.....
         initializeModule(moduleData.data)
         .then(linkModule)
@@ -264,7 +269,7 @@ var createModuleInstance = function() {
     };
 
     // Attach a pre-load step to the Module loader
-    var preLoadStep = function(newModule) {
+    var preLoadStep = async function(newModule) {
         var defered = q.defer();
         try {
             var flags = newModule.data.framework_flags;
@@ -274,21 +279,17 @@ var createModuleInstance = function() {
         if(self.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('In PRE-LOAD STEP', newModule);
         }
-        var template = handlebars.compile(
-            newModule.htmlFiles.device_errors_template
-        );
         // For each device, build a deviceErrorMessages object
         var i, j;
         var devices = newModule.context.devices;
         for(i = 0; i < devices.length; i++) {
-            
+
             devices[i].deviceErrorMessages = [];
             for (j = 0; j < devices[i].deviceErrors.length; j++) {
                 var errorMessage = '';
-                errorMessage = template(
-                    extrapolateDeviceErrorData(
-                        devices[i].deviceErrors[j]
-                    ));
+                errorMessage = await handleBarsService.renderHtmlTemplate(newModule.htmlFiles.device_errors_template, extrapolateDeviceErrorData(
+                    devices[i].deviceErrors[j]
+                ));
                 devices[i].deviceErrorMessages.push(errorMessage);
             }
         }
@@ -320,7 +321,7 @@ var createModuleInstance = function() {
             }
         }
         newModule.context.framework_options = framework_options;
-        
+
         defered.resolve(newModule);
         return defered.promise;
     };

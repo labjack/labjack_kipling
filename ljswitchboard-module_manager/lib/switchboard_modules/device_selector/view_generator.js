@@ -6,7 +6,6 @@
 
 const package_loader = global.lj_di_injector.get('package_loader');
 const static_files = package_loader.getPackage('static_files');
-const q = require('q');
 const driver_const = require('ljswitchboard-ljm_driver_constants');
 
 const {EventEmitter} = require('events');
@@ -190,48 +189,44 @@ var createDeviceSelectorViewGenerator = function() {
 
 	var getSlideUpElement = function(ele) {
 		var slideUp = function() {
-			var defered = q.defer();
-			ele.slideUp(self.slideDuration, defered.resolve);
-			return defered.promise;
+			return new Promise((resolve, reject) => {
+				ele.slideUp(self.slideDuration, resolve);
+			});
 		};
 		return slideUp;
 	};
 	var getSlideDownElement = function(ele) {
 		var slideDown = function() {
-			var defered = q.defer();
-			ele.slideDown(self.slideDuration, defered.resolve);
-			return defered.promise;
+			return new Promise((resolve, reject) => {
+				ele.slideDown(self.slideDuration, resolve);
+			});
 		};
 		return slideDown;
 	};
 	var getEmptyElement = function(ele) {
 		var emptyElement = function() {
-			var defered = q.defer();
 			ele.empty();
-			defered.resolve();
-			return defered.promise;
+			return Promise.resolve();
 		};
 		return emptyElement;
 	};
 	var getFillElement = function(ele) {
 		var fillElement = function(data) {
-			var defered = q.defer();
-			ele.empty();
-			ele.ready(function() {
-				defered.resolve(data);
+			return new Promise((resolve, reject) => {
+				ele.empty();
+				ele.ready(function () {
+					resolve(data);
+				});
+				ele.append($(data));
+				// resolve();
 			});
-			ele.append($(data));
-			// defered.resolve();
-			return defered.promise;
 		};
 		return fillElement;
 	};
 	var getSetTextElement = function(ele) {
 		var setTextElement = function(data) {
-			var defered = q.defer();
 			ele.text(data.toString());
-			defered.resolve();
-			return defered.promise;
+			return Promise.resolve();
 		};
 		return setTextElement;
 	};
@@ -286,7 +281,7 @@ var createDeviceSelectorViewGenerator = function() {
 	this.displayConnectingToDevice = function(openParams) {
 		var renderedData = self.directOpeningDeviceTemplate(openParams);
 		function hideElements() {
-			return q.all([
+			return Promise.all([
 				elements.device_scan_results.slideUp(),
 				elements.attempt_direct_connect_btn.slideUp(),
 				elements.refresh_devices_button.slideUp(),
@@ -311,7 +306,7 @@ var createDeviceSelectorViewGenerator = function() {
 	this.displayScanInProgress = function() {
 		var renderedData = self.scanningForDevicesTemplate();
 		function hideElements() {
-			return q.all([
+			return Promise.all([
 				elements.device_scan_results.slideUp(),
 				elements.attempt_direct_connect_btn.slideUp(),
 				elements.refresh_devices_button.slideUp(),
@@ -323,7 +318,7 @@ var createDeviceSelectorViewGenerator = function() {
 	};
 	this.displayScanResultsPageData = function(renderedData) {
 		function showElements() {
-			return q.all([
+			return Promise.all([
 				elements.device_scan_results.slideDown(),
 				elements.attempt_direct_connect_btn.slideDown(),
 				elements.refresh_devices_button.slideDown(),
@@ -335,66 +330,62 @@ var createDeviceSelectorViewGenerator = function() {
 	};
 
 	var handleOnConnectResult = function(results) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
-		var data;
-		var key;
-		var elements;
+			var data;
+			var key;
+			var elements;
 
-		var onConnectResult = results[0];
-		if(onConnectResult.state === "rejected") {
-			// Device opened successfully.
-			if(self.debug || true) {
-				console.log('Open Error', onConnectResult.reason);
+			var onConnectResult = results[0];
+			if (onConnectResult.state === "rejected") {
+				// Device opened successfully.
+				if (self.debug || true) {
+					console.log('Open Error', onConnectResult.reason);
+				}
+				data = onConnectResult.reason;
+				key = getDeviceControlKey(data.device);
+				elements = self.deviceControlElements[key];
+
+				// Slide up the scroller
+
+
+				// Re-attach connect button listeners
+				attachConnectListeners(data.device);
+				// elements.connectButtonsHolder.slideDown()
+
+				elements.connectingToDeviceHolder.slideUp()
+					.then(elements.connectButtonsHolder.slideDown)
+					.then(function () {
+						self.emit(self.eventList.DEVICE_FAILED_TO_OPEN, data);
+						resolve(results);
+					});
+			} else {
+				// Device opened successfully.
+				if (self.debug || true) {
+					console.log('Open Success', onConnectResult.value);
+				}
+				data = onConnectResult.value;
+				key = getDeviceControlKey(data.device);
+				elements = self.deviceControlElements[key];
+
+				// Attach to disconnect button listener
+				attachDisconnectListener(data.device);
+				// elements.disconnectButtonHolder.slideDown()
+
+				elements.connectingToDeviceHolder.slideUp()
+					.then(elements.disconnectButtonHolder.slideDown)
+					.then(function () {
+						self.emit(self.eventList.DEVICE_OPENED, data);
+						resolve(results);
+					});
 			}
-			data = onConnectResult.reason;
-			key = getDeviceControlKey(data.device);
-			elements = self.deviceControlElements[key];
-
-			// Slide up the scroller
-
-
-			// Re-attach connect button listeners
-			attachConnectListeners(data.device);
-			// elements.connectButtonsHolder.slideDown()
-
-			elements.connectingToDeviceHolder.slideUp()
-			.then(elements.connectButtonsHolder.slideDown)
-			.then(function() {
-				self.emit(self.eventList.DEVICE_FAILED_TO_OPEN, data);
-				defered.resolve(results);
-			});
-		} else {
-			// Device opened successfully.
-			if(self.debug || true) {
-				console.log('Open Success', onConnectResult.value);
-			}
-			data = onConnectResult.value;
-			key = getDeviceControlKey(data.device);
-			elements = self.deviceControlElements[key];
-
-			// Attach to disconnect button listener
-			attachDisconnectListener(data.device);
-			// elements.disconnectButtonHolder.slideDown()
-
-			elements.connectingToDeviceHolder.slideUp()
-			.then(elements.disconnectButtonHolder.slideDown)
-			.then(function() {
-				self.emit(self.eventList.DEVICE_OPENED, data);
-				defered.resolve(results);
-			});
-		}
-		return defered.promise;
+		});
 	};
 
 	var enableModuleSwitching = function() {
-		var defered = q.defer();
-
 		// Enable module-switching
 		MODULE_CHROME.enableModuleLoading();
-
-		defered.resolve();
-		return defered.promise;
+		return Promise.resolve();
 	};
 	var openDeviceListener = function(eventData) {
 		if(self.debug || true) {
@@ -431,52 +422,52 @@ var createDeviceSelectorViewGenerator = function() {
 		);
 
 		// Wait for both tasks to finish
-		q.allSettled(promises)
-		.then(handleOnConnectResult)
-		.then(enableModuleSwitching);
+		Promise.allSettled(promises)
+			.then(handleOnConnectResult)
+			.then(enableModuleSwitching);
 	};
 	var handleOnDisconnectResult = function(results) {
-		var defered = q.defer();
+		return new Promise((resolve, reject) => {
 
-		var data;
-		var key;
-		var elements;
+			var data;
+			var key;
+			var elements;
 
-		var onConnectResult = results[0];
-		if(onConnectResult.state === "rejected") {
-			// Device opened successfully.
-			if(self.debug) {
-				console.log('Close Error', onConnectResult.reason);
+			var onConnectResult = results[0];
+			if (onConnectResult.state === "rejected") {
+				// Device opened successfully.
+				if (self.debug) {
+					console.log('Close Error', onConnectResult.reason);
+				}
+				data = onConnectResult.reason;
+				key = getDeviceControlKey(data.device);
+				elements = self.deviceControlElements[key];
+
+				// Re-attach connect button listeners
+				attachDisconnectListener(data.device);
+				elements.disconnectButtonHolder.slideDown()
+					.then(function () {
+						self.emit(self.eventList.DEVICE_FAILED_TO_CLOSE, data);
+						resolve(results);
+					});
+			} else {
+				// Device opened successfully.
+				if (self.debug) {
+					console.log('Close Success', onConnectResult.value);
+				}
+				data = onConnectResult.value;
+				key = getDeviceControlKey(data.device);
+				elements = self.deviceControlElements[key];
+
+				// Attach to disconnect button listener
+				attachConnectListeners(data.device);
+				elements.connectButtonsHolder.slideDown()
+					.then(function () {
+						self.emit(self.eventList.DEVICE_CLOSED, data);
+						resolve(results);
+					});
 			}
-			data = onConnectResult.reason;
-			key = getDeviceControlKey(data.device);
-			elements = self.deviceControlElements[key];
-
-			// Re-attach connect button listeners
-			attachDisconnectListener(data.device);
-			elements.disconnectButtonHolder.slideDown()
-			.then(function() {
-				self.emit(self.eventList.DEVICE_FAILED_TO_CLOSE, data);
-				defered.resolve(results);
-			});
-		} else {
-			// Device opened successfully.
-			if(self.debug) {
-				console.log('Close Success', onConnectResult.value);
-			}
-			data = onConnectResult.value;
-			key = getDeviceControlKey(data.device);
-			elements = self.deviceControlElements[key];
-
-			// Attach to disconnect button listener
-			attachConnectListeners(data.device);
-			elements.connectButtonsHolder.slideDown()
-			.then(function() {
-				self.emit(self.eventList.DEVICE_CLOSED, data);
-				defered.resolve(results);
-			});
-		}
-		return defered.promise;
+		});
 	};
 	var closeDeviceListener = function(eventData) {
 		if(self.debug) {
@@ -491,8 +482,7 @@ var createDeviceSelectorViewGenerator = function() {
 		);
 
 		// Wait for both tasks to finish
-		q.allSettled(promises)
-		.then(handleOnDisconnectResult);
+		Promise.allSettled(promises).then(handleOnDisconnectResult);
 	};
 	var attachClickListener = function(ele, device, connectionType) {
 		var clickData = {
@@ -618,20 +608,19 @@ var createDeviceSelectorViewGenerator = function() {
 		return [dt,sn].join('_');
 	};
 	this.cacheDeviceControlElements = function(scanResults) {
-		var defered = q.defer();
 		// Clear previous elements cache TODO: Disconnect from listeners
 		self.deviceControlElements = {};
 
-		if(self.debug) {
+		if (self.debug) {
 			console.log('Caching Device Control Elements');
 		}
 		// console.log('numDeviceTypes', scanResults.length);
-		scanResults.forEach(function(deviceType) {
+		scanResults.forEach(function (deviceType) {
 			// console.log('Data:', Object.keys(deviceType), deviceType.devices.length);
-			deviceType.devices.forEach(function(device) {
+			deviceType.devices.forEach(function (device) {
 				// console.log('Device Data', device);
 				// Catch the currently claimed case...
-				if(typeof(device.errorCode) !== 'undefined') {
+				if (typeof (device.errorCode) !== 'undefined') {
 					console.warn('Returning early due to error case...', device);
 					return;
 				}
@@ -689,7 +678,7 @@ var createDeviceSelectorViewGenerator = function() {
 
 
 				// Establish connection type listeners
-				device.connectionTypes.forEach(function(connectionType) {
+				device.connectionTypes.forEach(function (connectionType) {
 					var selector = createConnectButtonSelector(
 						device,
 						connectionType
@@ -702,7 +691,7 @@ var createDeviceSelectorViewGenerator = function() {
 					};
 				});
 
-				if(!device.isActive) {
+				if (!device.isActive) {
 					// Attach connect button listeners
 					attachConnectListeners(device);
 				} else {
@@ -711,8 +700,7 @@ var createDeviceSelectorViewGenerator = function() {
 				}
 			});
 		});
-		defered.resolve(scanResults);
-		return defered.promise;
+		return Promise.resolve(scanResults);
 	};
 
 	/*
@@ -770,45 +758,44 @@ var createDeviceSelectorViewGenerator = function() {
 	}
 
 	var innerDisplayScanResults = function(scanResults) {
-
-		var defered = q.defer();
-		var data = '';
-		try {
-			if(scanResults.length === 0) {
-				if(self.moduleData.htmlFiles.no_devices_found) {
-					data = self.moduleData.htmlFiles.no_devices_found;
+		return new Promise((resolve, reject) => {
+			var data = '';
+			try {
+				if (scanResults.length === 0) {
+					if (self.moduleData.htmlFiles.no_devices_found) {
+						data = self.moduleData.htmlFiles.no_devices_found;
+					}
+					self.displayScanResultsPageData(data);
+					resolve(scanResults);
+				} else {
+					if (self.debug) {
+						console.log('Displaying Data', scanResults.length);
+					}
+					// Display Data
+					data += '<p>Found ';
+					data += scanResults.length.toString();
+					data += ' devices</p>';
+					if (self.deviceListingTemplate) {
+						data = self.deviceListingTemplate({
+							'device_types': scanResults,
+							'staticFiles': static_files.getDir(),
+						});
+					}
+					self.displayScanResultsPageData(data)
+						.then(function () {
+							resolve(scanResults);
+						});
 				}
+			} catch (err) {
+				data = '';
+				data += '<p>Error Displaying Scan Results: ';
+				data += JSON.stringify(err);
+				data += '</p>';
+				console.error('error displaying scan results');
 				self.displayScanResultsPageData(data);
-				defered.resolve(scanResults);
-			} else {
-				if(self.debug) {
-					console.log('Displaying Data', scanResults.length);
-				}
-				// Display Data
-				data += '<p>Found ';
-				data += scanResults.length.toString();
-				data += ' devices</p>';
-				if(self.deviceListingTemplate) {
-					data = self.deviceListingTemplate({
-						'device_types': scanResults,
-						'staticFiles': static_files.getDir(),
-					});
-				}
-				self.displayScanResultsPageData(data)
-				.then(function() {
-					defered.resolve(scanResults);
-				});
+				resolve([]);
 			}
-		} catch(err) {
-			data = '';
-			data += '<p>Error Displaying Scan Results: ';
-			data += JSON.stringify(err);
-			data += '</p>';
-			console.error('error displaying scan results');
-			self.displayScanResultsPageData(data);
-			defered.resolve([]);
-		}
-		return defered.promise;
+		});
 	};
 
 	this.displayScanResults = function(scanResults, scanErrors) {

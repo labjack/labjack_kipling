@@ -1,6 +1,12 @@
 const electron = require('electron');
 const getInjector = require('lj-di').getInjector;
 const injector = getInjector({ electron });
+global.lj_di_injector = injector;
+global.handlebars = require('handlebars');
+const package_loader = global.lj_di_injector.get('package_loader');
+global.io_manager = package_loader.getPackage('io_manager');
+global.module_manager = package_loader.getPackage('module_manager');
+global.package_loader = package_loader;
 
 console.log('preload');
 
@@ -14,4 +20,3 @@ electron.ipcRenderer.on('postMessage', (event, data) => {
     // window.postMessage({type: data.channel, payload: data.payload}, '*');
 });
 
-global.lj_di_injector = injector;

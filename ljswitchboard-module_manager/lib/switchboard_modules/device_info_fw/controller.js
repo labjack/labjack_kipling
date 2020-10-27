@@ -7,6 +7,8 @@
  * @author Chris Johnson (LabJack Corp, 2014)
 **/
 
+const package_loader = global.lj_di_injector.get('package_loader');
+const static_files = package_loader.getPackage('static_files');
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
 /**

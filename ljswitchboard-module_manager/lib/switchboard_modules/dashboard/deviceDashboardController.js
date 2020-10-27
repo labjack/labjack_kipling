@@ -1,8 +1,11 @@
+const package_loader = global.lj_di_injector.get('package_loader');
+const static_files = package_loader.getPackage('static_files');
+
 function getDeviceDashboardController(deviceInfo, moduleData) {
     var DEVICE_D3_CONTAINER;
     var DEVICE_IMAGE_CONTAINER;
     this.displayTemplateData = {};
-    
+
     var STATIC_FILES_DIR = static_files.getDir();
     // Device Image Info
     var LABJACK_OVERVIEW_IMG_SRC = 'img/' + deviceInfo.fullType + '-cartoon.png';
@@ -17,7 +20,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
     var CONNECTOR_SIZE_X = DEVICE_IMAGE_X_OFFSET + DEVICE_IMAGE_X_OVERLAP;
 
     // Determines the image+lines & register's offset. Higher #'s push registers higher up
-    var DEVICE_LINE_Y_OFFSET = 4; 
+    var DEVICE_LINE_Y_OFFSET = 4;
 
     // DB Image Info
     var LABJACK_DB_IMG_SRC = 'img/T7-DB-cartoon.png';
@@ -56,7 +59,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         {register: 'FIO1', yLocation: 0.400-DEV_OFF,    yShift: 1,          yOffset: -6,        yOverlayOffset:  12,     type: 'dio', board: 'device', side: 'left'},
         {register: 'FIO2', yLocation: 0.308-DEV_OFF,    yShift: 3.5,        yOffset: 6,         yOverlayOffset:  15,     type: 'dio', board: 'device', side: 'left'},
         {register: 'FIO3', yLocation: 0.280-DEV_OFF,    yShift: 4,          yOffset: -6,        yOverlayOffset:  15,     type: 'dio', board: 'device', side: 'left'},
-        
+
         // Left Side, DB37
         {register: 'AIN1', yLocation: 0.900-0.01,       yOffset:  4*bNum,   type: null, board: 'connector', side: 'left'},
         {register: 'AIN3', yLocation: 0.875-0.01,       yOffset:  3*bNum,   type: null, board: 'connector', side: 'left'},
@@ -71,7 +74,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         {register: 'FIO2', yLocation: 0.575-0.015,      yOffset: -2*bNum,   type: 'dio', board: 'connector', side: 'left'},
         {register: 'FIO4', yLocation: 0.550-0.015,      yOffset: -3*bNum,   type: 'dio', board: 'connector', side: 'left'},
         {register: 'FIO6', yLocation: 0.525-0.015,      yOffset: -4*bNum,   type: 'dio', board: 'connector', side: 'left'},
-        
+
         // Left Side, DB15
         {register: 'EIO6', yLocation: 0.275+0.020,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'left'},
         {register: 'EIO4', yLocation: 0.250+0.020,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'left'},
@@ -79,7 +82,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         {register: 'EIO0', yLocation: 0.200+0.020,      yOffset: -1*bNum,   type: 'dio', board: 'connector', side: 'left'},
         {register: 'CIO3', yLocation: 0.175+0.020,      yOffset: -2*bNum,   type: 'dio', board: 'connector', side: 'left'},
         {register: 'CIO1', yLocation: 0.150+0.020,      yOffset: -3*bNum,   type: 'dio', board: 'connector', side: 'left'},
-        
+
         // Right Side, DB37
         {register: 'AIN0', yLocation: 0.900 + 0.005,    yOffset:  4*bNum,   type: null, board: 'connector', side: 'right'},
         {register: 'AIN2', yLocation: 0.875 + 0.005,    yOffset:  3*bNum,   type: null, board: 'connector', side: 'right'},
@@ -95,7 +98,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         {register: 'FIO3', yLocation: 0.550,            yOffset: -3*bNum,   type: 'dio', board: 'connector', side: 'right'},
         {register: 'FIO5', yLocation: 0.525,            yOffset: -4*bNum,   type: 'dio', board: 'connector', side: 'right'},
         {register: 'FIO7', yLocation: 0.500,            yOffset: -5*bNum,   type: 'dio', board: 'connector', side: 'right'},
-        
+
         // Right Side, DB15
         {register: 'EIO7', yLocation: 0.300+0.010,      yOffset:  2*bNum,   type: 'dio', board: 'connector', side: 'right'},
         {register: 'EIO5', yLocation: 0.275+0.010,      yOffset:  1*bNum,   type: 'dio', board: 'connector', side: 'right'},
@@ -142,7 +145,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
             var yFromTopOfImage = registerInfo.yLocation * DB_IMG_HEIGHT;
             return DB_IMAGE_Y_OFFSET + yFromTopOfImage;
         };
-        // Determine the top-margin that should be applied to properly align the 
+        // Determine the top-margin that should be applied to properly align the
         // registers.
         var marginTopVal;
         // if($(window).width() < 768) {
@@ -161,8 +164,8 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
             'margin-top',
             marginTopVal.toString() + 'px'
         );
-        // Get a few module-attributes needed to calculate imageY, a constant 
-        // required to calculate the y-location of where each register-object 
+        // Get a few module-attributes needed to calculate imageY, a constant
+        // required to calculate the y-location of where each register-object
         // should be placed
         var moduleContentsOffset = $('#module-chrome-contents').position().top;
         var deviceSelectorOffset = $('#device-view').position().top;
@@ -183,7 +186,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
 
         //---------------------- Draw Lines image ------------------------------
         // Again, select the DIV containing the device visualization.  This time
-        // to draw the object that the lines protruding off to the left of the 
+        // to draw the object that the lines protruding off to the left of the
         // device will go into.
         var lineGroup = d3.select(DB_IMAGE_CONTAINER)
         .selectAll('.connector-line-left')                                      // Not quite sure what is being select here...
@@ -200,8 +203,8 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         })
         .attr('class','connector-line-left');
 
-        // Define a function that places the "spline" lines.  These 4 points 
-        // are why the some of the lines are curvey & others aren't.  
+        // Define a function that places the "spline" lines.  These 4 points
+        // are why the some of the lines are curvey & others aren't.
         var lineFunction = function (coordSpec) {
             var yOffset = coordSpec.yOffset;
             if (yOffset === undefined)                                          // if a yOffset is defined in REGISTER_OVERLAY_SPEC then use it.
@@ -235,8 +238,8 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
                 return 'crispEdges';
         };
 
-        // Append Paths that each of the previously defined line objects should 
-        // follow. Draw the white line that goes in each of the defined line 
+        // Append Paths that each of the previously defined line objects should
+        // follow. Draw the white line that goes in each of the defined line
         // groups. (3px tall)
         lineGroup.append('path')
         .attr('d', lineFunction)
@@ -244,9 +247,9 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         .attr('fill', 'none')
         .attr('stroke-width', 3)
         .style('shape-rendering', determineAntialiasing);
-        
-        // Append Paths that each of the previously defined line objects should 
-        // follow. Draw the black line that goes in each of the defined line 
+
+        // Append Paths that each of the previously defined line objects should
+        // follow. Draw the black line that goes in each of the defined line
         // groups. (1px tall)
         lineGroup.append('path')
         .attr('d', lineFunction)
@@ -336,7 +339,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
             return DEVICE_IMAGE_Y_OFFSET + yFromTopOfImage;
         };
 
-        // Determine the top-margin that should be applied to properly align the 
+        // Determine the top-margin that should be applied to properly align the
         // registers.
         var marginTopVal = (-1 * $('#device-view').offset().top);
 
@@ -350,8 +353,8 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
             (-1 * marginTopVal).toString() + 'px'
         );
 
-        // Get a few module-attributes needed to calculate imageY, a constant 
-        // required to calculate the y-location of where each register-object 
+        // Get a few module-attributes needed to calculate imageY, a constant
+        // required to calculate the y-location of where each register-object
         // should be placed
         var moduleContentsOffset = $('#module-chrome-contents').position().top;
         var deviceSelectorOffset = $('#device-view').position().top;
@@ -373,9 +376,9 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         .attr('y', DEVICE_IMAGE_Y_OFFSET)                                       // Set the Y-offset.  Padding added to the top of image.
         .attr('width', DEVICE_IMG_WIDTH)
         .attr('height', DEVICE_IMG_HEIGHT);
-        
+
         // Again, select the DIV containing the device visualization.  This time
-        // to draw the object that the lines protruding off to the left of the 
+        // to draw the object that the lines protruding off to the left of the
         // device will go into.
         var lineGroup = d3.select(DEVICE_IMAGE_CONTAINER)
         .selectAll('.connector-line')                                           // Not quite sure what is being select here...
@@ -396,8 +399,8 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         })
         .attr('class','connector-line');
 
-        // Define a function that places the "spline" lines.  These 4 points 
-        // are why the some of the lines are curvey & others aren't.  
+        // Define a function that places the "spline" lines.  These 4 points
+        // are why the some of the lines are curvey & others aren't.
         var lineFunction = function (coordSpec) {
             var yOffset = coordSpec.yOffset;
             if (yOffset === undefined)                                          // if a yOffset is defined in REGISTER_OVERLAY_SPEC then use it.
@@ -424,8 +427,8 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
                 return 'crispEdges';
         };
 
-        // Append Paths that each of the previously defined line objects should 
-        // follow. Draw the white line that goes in each of the defined line 
+        // Append Paths that each of the previously defined line objects should
+        // follow. Draw the white line that goes in each of the defined line
         // groups. (3px tall)
         lineGroup.append('path')
         .attr('d', lineFunction)
@@ -433,9 +436,9 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         .attr('fill', 'none')
         .attr('stroke-width', 3)
         .style('shape-rendering', determineAntialiasing);
-        
-        // Append Paths that each of the previously defined line objects should 
-        // follow. Draw the black line that goes in each of the defined line 
+
+        // Append Paths that each of the previously defined line objects should
+        // follow. Draw the black line that goes in each of the defined line
         // groups. (1px tall)
         lineGroup.append('path')
         .attr('d', lineFunction)
@@ -443,19 +446,19 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         .attr('fill', 'none')
         .attr('stroke-width', 1)
         .style('shape-rendering', determineAntialiasing);
-        
+
         // var lineFunction = d3.svg.line()
         // .x(function(d) { return d.x; })
         // .y(function(d) { return d.y; })
         // .interpolate("linear");
-        
+
         // lineGroup.append('path')
         // .attr('x1', LINE_X_OFFSET)
         // .attr('y1', 0)
         // .attr('stroke', 'white')
         // .attr('fill', 'none')
         // .attr('stroke-width', 3);
-        
+
         // lineGroup.append('line')
         // .attr('x1', LINE_X_OFFSET)
         // .attr('y1', 0)
@@ -560,7 +563,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         return value;
     }
     /**
-     * A function that gets called by the controller.js onRefreshed function 
+     * A function that gets called by the controller.js onRefreshed function
      * that updates the GUI with changed values.  Allows other applications to
      * edit the device settings over a different connection type and the values
      * to be automatically updated here.  More importantly it updates the analog

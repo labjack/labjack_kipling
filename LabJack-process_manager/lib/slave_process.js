@@ -116,7 +116,7 @@ class NewMessageManager extends EventEmitter {
 	}
 
 	isInternalMessage(messageType) {
-		return this.internalMessages.indexOf(messageType) < 0;
+		return this.internalMessages.indexOf(messageType) >= 0;
 	}
 
 	async markMessageHandler(bundle) {
@@ -150,7 +150,7 @@ class NewMessageManager extends EventEmitter {
 
 	executeListener(bundle) {
 		return new Promise((resolve) => {
-			if((!bundle.isHandled) && (bundle.executeUserListener)) {
+			if ((!bundle.isHandled) && (bundle.executeUserListener)) {
 				print2('in executeListener', bundle.message);
 				const onSuccess = (res) => {
 						if(bundle.responseRequired) {
@@ -191,13 +191,14 @@ class NewMessageManager extends EventEmitter {
 				};
 				if(bundle.responseRequired) {
 					if (this.savedListener.type === SP_Q_LISTENER_TYPE) {
-						this.savedListener.func(bundle.message.data).then(onSuccess, onError, onSyntaxErr);
+						this.savedListener.func(bundle.message.data)
+							.then(res => onSuccess(res), err => onError(err), err => onSyntaxErr(err));
 					} else if (this.savedListener.type === SP_CALLBACK_LISTENER_TYPE) {
 						try {
 							this.savedListener.func(
 								bundle.message.data,
-								onError,
-								onSuccess
+								err => onError(err),
+								res => onSuccess(res)
 							);
 						} catch(syntaxError) {
 							onSyntaxErr(syntaxError);
@@ -242,13 +243,11 @@ class NewMessageManager extends EventEmitter {
     }
 
 	respondToMessage(bundle) {
-		return new Promise((resolve, reject) => {
-			if(bundle.isHandled) {
-				this.respond(bundle).then(resolve, reject);
-			} else {
-				resolve(bundle);
-			}
-		});
+		if (bundle.isHandled) {
+			return this.respond(bundle);
+		} else {
+			return Promise.resolve(bundle);
+		}
 	}
 
 	cleanupMessage(bundle) {
@@ -261,7 +260,7 @@ class NewMessageManager extends EventEmitter {
 		return Promise.resolve();
 	}
 
-	messageListener(m) {
+	async messageListener(m) {
 		this.numMessagesReceived += 1;
 
 		const messageBundle = {
@@ -276,11 +275,22 @@ class NewMessageManager extends EventEmitter {
 			'errorType': '',
 			'errorData': null
 		};
-		this.markMessageHandler(messageBundle)
-			.then(bundle => this.handleInternalMessage(bundle))
-			.then(bundle => this.executeListener(bundle))
-			.then(bundle => this.respondToMessage(bundle))
-			.then(bundle => this.cleanupMessage(bundle), bundle => this.cleanupMessage(bundle));
+
+
+		let bundle;
+		try {
+			// console.log('ddddddddddddddddddddddddddddddddddddddddddd');
+			bundle = await this.markMessageHandler(messageBundle);
+			// console.log('d1', bundle);
+			bundle = await this.handleInternalMessage(bundle);
+			// console.log('d2', bundle);
+			bundle = await this.executeListener(bundle);
+			// console.log('d3', bundle);
+			bundle = await this.respondToMessage(bundle);
+			// console.log('d4', bundle);
+		} finally {
+			await this.cleanupMessage(bundle);
+		}
 	}
 
 	setupProcessStartedMessage(retData) {
@@ -345,11 +355,8 @@ exports.init = (listener) => {
     return messageManager;
 };
 exports.finishedInit = (retData) => {
-	return new Promise((resolve, reject) => {
 	// Indicate that this process is ready to receive messages
-	messageManager.finishSetup(retData)
-	.then(resolve, reject);
-    });
+	return messageManager.finishSetup(retData);
 };
 
 exports.getSlaveProcessInfo = () => {

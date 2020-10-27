@@ -148,18 +148,13 @@ class IODelegator {
 	 * @type {[type]}
 	 */
 	messageDelegator(m) {
-		return new Promise((resolve, reject) => {
-			const errFunc = (err) => {
-				reject(err);
-			};
-			const message = {
-				'isValidEndpoint': false,
-				'message': m.data,
-				'endpoint': m.endpoint
-			};
-			return this.checkEndpoint(message)
-				.then(m => this.delegateMessage(m), errFunc);
-		});
+		const message = {
+			'isValidEndpoint': false,
+			'message': m.data,
+			'endpoint': m.endpoint
+		};
+		return this.checkEndpoint(message)
+			.then(m => this.delegateMessage(m));
 	}
 
 	// Define functions to initialize the manager objects
@@ -178,8 +173,8 @@ class IODelegator {
 	 * counterparts in the master_process easier.
 	 */
 	establishLink(endpoint, messageReceiver, listener) {
-		this.endpoints[endpoint] = messageReceiver;
-		this.oneWayEndpoints[endpoint] = listener;
+		this.endpoints[endpoint] = (m) => messageReceiver(m);
+		this.oneWayEndpoints[endpoint] = (m) => listener(m);
 		const sendMessage = (data) => this.sp.sendMessage(data);
 		const send = (data) => this.sp.send(endpoint, data);
 
@@ -259,7 +254,7 @@ class IODelegator {
 		// process and save the returned event_emitter object
 		this.sp_event_emitter = this.sp.init({
 			'type': 'q',
-			'func': this.messageDelegator
+			'func': (res) => this.messageDelegator(res)
 		});
 
 		// Register a listener to the 'message' event emitter
