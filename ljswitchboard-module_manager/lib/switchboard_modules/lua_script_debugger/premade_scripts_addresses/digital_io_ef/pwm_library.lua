@@ -1,3 +1,6 @@
+--***Depreciated***
+-- We recommend using pwm_simple.lua for PWM configuration guidance rather than this example
+
 --This script can be used as a library of functions to configure the PWM registers for output and write new duty cycles to the PWM channel.
 --PWM is available on the T7 on FIO0-FIO5 (T4 PWM is on FIO6 & FIO7)
 --See the device datasheet for more information on PWM output.
