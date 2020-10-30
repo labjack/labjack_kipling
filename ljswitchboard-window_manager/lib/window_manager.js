@@ -138,6 +138,9 @@ class WindowManager extends EventEmitter {
 
 	closeListener(windowInfo) {
 		const windowName = windowInfo.name;
+		if (!this.managedWindows[windowName]) {
+			return;
+		}
 
 		if (DEBUG_WINDOW_EVENT_LISTENERS) {
 			console.log('  * Closing Window', windowName);
@@ -175,6 +178,9 @@ class WindowManager extends EventEmitter {
 
 	closedListener(windowInfo) {
 		const windowName = windowInfo.name;
+		if (!this.managedWindows[windowName]) {
+			return;
+		}
 
 		if (DEBUG_WINDOW_EVENT_LISTENERS) {
 			console.log('  * Window Closed', windowName);
