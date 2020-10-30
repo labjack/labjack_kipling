@@ -785,7 +785,7 @@ class PackageLoader extends EventEmitter {
 				if (exists) {
 					// Emit an event indicating that the package is being reset.
 					this.emit(EVENTS.RESETTING_PACKAGE, bundle);
-					fs.rmrf(bundle.currentPackage.location, (err) => {
+					fse.remove(bundle.currentPackage.location, (err) => {
 						if (err) {
 							console.error('  - Error resetPackageDirectory', err, bundle.name);
 							const msg = 'Error resetting the package-cache, try' +
@@ -884,46 +884,42 @@ class PackageLoader extends EventEmitter {
 		return extractWithYauzl(bundle, this, EVENTS);
 	}
 
-	performUpgrade(bundle) {
-		return new Promise((resolve, reject) => {
-			if (bundle.performUpgrade) {
-				// Save info to shorter variables
-				const upgradeType = bundle.chosenUpgrade ? bundle.chosenUpgrade.type : '';
+	async performUpgrade(bundle) {
+		if (bundle.performUpgrade) {
+			// Save info to shorter variables
+			const upgradeType = bundle.chosenUpgrade ? bundle.chosenUpgrade.type : '';
 
-				// Determine what kind of upgrade process we need to perform
-				if (upgradeType === 'directory') {
-					this._declarePackageInvalid(bundle)
-						.then(res => this._performDirectoryUpgrade(res))
-						.then(resolve, reject);
-				} else if (upgradeType === '.zip') {
-					this._declarePackageInvalid(bundle)
-						.then(res => this._performZipFileUpgrade(res))
-						.then(resolve, reject);
-				} else {
-					console.error('  - in performUpgrade, invalid upgradeType detected', bundle.name, upgradeType);
-					const msg = 'Failed to perform upgrade, invalid upgradeType ' +
-						'detected: ' + upgradeType;
-					bundle.resultMessages.push({
-						'step': 'performUpgrade',
-						'message': msg
-					});
-
-					// If the current installation isn't valid and we reset the
-					// package directory, we have issues because we can't
-					// load/upgrade/install this library...
-					const isCurrentValid = bundle.currentPackage.isValid;
-					if ((!isCurrentValid) && (bundle.resetPackage)) {
-						bundle.overallResult = false;
-						bundle.isError = true;
-					}
-					resolve(bundle);
-				}
+			// Determine what kind of upgrade process we need to perform
+			if (upgradeType === 'directory') {
+				let res = await this._declarePackageInvalid(bundle);
+				res = await this._performDirectoryUpgrade(res);
+				return res;
+			} else if (upgradeType === '.zip') {
+				return this._declarePackageInvalid(bundle)
+					.then(res => this._performZipFileUpgrade(res));
 			} else {
-				this.emit(EVENTS.SKIPPING_PACKAGE_UPGRADE, bundle);
-				resolve(bundle);
-			}
+				console.error('  - in performUpgrade, invalid upgradeType detected', bundle.name, upgradeType);
+				const msg = 'Failed to perform upgrade, invalid upgradeType ' +
+					'detected: ' + upgradeType;
+				bundle.resultMessages.push({
+					'step': 'performUpgrade',
+					'message': msg
+				});
 
-		});
+				// If the current installation isn't valid and we reset the
+				// package directory, we have issues because we can't
+				// load/upgrade/install this library...
+				const isCurrentValid = bundle.currentPackage.isValid;
+				if ((!isCurrentValid) && (bundle.resetPackage)) {
+					bundle.overallResult = false;
+					bundle.isError = true;
+				}
+				return bundle;
+			}
+		} else {
+			this.emit(EVENTS.SKIPPING_PACKAGE_UPGRADE, bundle);
+			return bundle;
+		}
 	}
 
 	verifyPackageUpgrade(bundle) {
@@ -1037,33 +1033,77 @@ class PackageLoader extends EventEmitter {
 		});
 	}
 
-	getManageSinglePackage(bundle) {
-		console.log('getManageSinglePackage', bundle.name);
-		return new Promise((resolve, reject) => {
-			const getOnErr = (msg) => {
-				return (err) => {
-					console.error('manageSinglePackage err', msg, err, bundle);
-					return Promise.reject(err);
-				};
-			};
+	async getManageSinglePackage(bundle) {
+ 		// Event a message indicating that we are starting to manage a
+		// package.
+		this.emit(EVENTS.PACKAGE_MANAGEMENT_STARTED, bundle);
 
-			// Event a message indicating that we are starting to manage a
-			// package.
-			this.emit(EVENTS.PACKAGE_MANAGEMENT_STARTED, bundle);
+		let res;
 
-			this.checkForExistingPackage(bundle)
-				.then(res => this.checkForUpgradeOptions(res), getOnErr('checkingForExistingPackage'))
-				.then(res => this.chooseValidUpgrade(res), getOnErr('checkForUpgradeOptions'))
-				.then(res => this.checkForExtractionErrors(res), getOnErr('chooseValidUpgrade'))
-				.then(res => this.determineRequiredOperations(res), getOnErr('checkForExtractionErrors'))
-				.then(res => this.resetPackageDirectory(res), getOnErr('determineRequiredOperations'))
-				.then(res => this.performUpgrade(res), getOnErr('resetPackageDirectory'))
-				.then(res => this.verifyPackageUpgrade(res), getOnErr('performUpgrade'))
-				.then(res => this.loadManagedPackage(res), getOnErr('verifyPackageUpgrade'))
-				.then((res) => {
-					resolve(res);
-				}, reject);
-		});
+		try {
+			res = await this.checkForExistingPackage(bundle);
+		} catch (err) {
+			console.error('manageSinglePackage err checkForExistingPackage', err);
+			throw err;
+		}
+
+		try {
+			res = await this.checkForUpgradeOptions(res);
+		} catch (err) {
+			console.error('manageSinglePackage err checkForExistingPackage', err);
+			throw err;
+		}
+
+		try {
+			res = await this.chooseValidUpgrade(res);
+		} catch (err) {
+			console.error('manageSinglePackage err chooseValidUpgrade', err);
+			throw err;
+		}
+
+		try {
+			res = await this.checkForExtractionErrors(res);
+		} catch (err) {
+			console.error('manageSinglePackage err checkForExtractionErrors', err);
+			throw err;
+		}
+
+		try {
+			res = await this.determineRequiredOperations(res);
+		} catch (err) {
+			console.error('manageSinglePackage err determineRequiredOperations', err);
+			throw err;
+		}
+
+		try {
+			res = await this.resetPackageDirectory(res);
+		} catch (err) {
+			console.error('manageSinglePackage err resetPackageDirectory', err);
+			throw err;
+		}
+
+		try {
+			res = await this.performUpgrade(res);
+		} catch (err) {
+			console.error('manageSinglePackage err performUpgrade', err);
+			throw err;
+		}
+
+		try {
+			res = await this.verifyPackageUpgrade(res);
+		} catch (err) {
+			console.error('manageSinglePackage err verifyPackageUpgrade', err);
+			throw err;
+		}
+
+		try {
+			res = await this.loadManagedPackage(res);
+		} catch (err) {
+			console.error('manageSinglePackage err loadManagedPackage', err);
+			throw err;
+		}
+
+		return res;
 	}
 
 	/**
