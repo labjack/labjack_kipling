@@ -4,11 +4,8 @@
             with SHT3x sensors (EIO4 used for SCL and EIO5 used for SDA)
     Note: This script will work with SHT30, SHT31, and SHT35 sensors
 
-          These sensors should have a 100nF capacitor between VDD and the
-          voltage supply line
-
           I2C examples assume power is provided by a LJTick-LVDigitalIO at 3.3V
-          (a DAC set to 5V or a DIO line could also be used for power)
+          (a DAC set to 3.3V or a DIO line could also be used for power)
 
           SHT3x datasheet:
             https://www.mouser.com/datasheet/2/682/Sensirion_Humidity_Sensors_SHT3x_Datasheet_digital-971521.pdf
@@ -16,9 +13,11 @@
 
 -- Depending on the sensor circuitry, the default slave address could be 0x45
 local SLAVE_ADDRESS = 0x44
+-- Set EIO3 to 1 and use it for power
+MB.W(2011, 0, 1)
 -- configure I2C options with the SHT3x sensor
--- SDA = EIO5, SCL = EIO4
-I2C.config(13,12,0,0,SLAVE_ADDRESS, 0)
+-- SDA = EIO5(DIO13), SCL = EIO4(DIO12). Use the 100KHz clock speed
+I2C.config(13,12,65516,0,SLAVE_ADDRESS, 0)
 local addrs = I2C.search(0, 127)
 local addrslen = table.getn(addrs)
 local found = 0
