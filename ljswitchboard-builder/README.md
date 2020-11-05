@@ -28,10 +28,6 @@ The other build scripts operate on the core modules (defined in `ljswitchboard-b
 
 Calls other npm scripts in the proper order to build a distributable Kipling bundle for the current OS.
 
-### quick_build_project
-
-TODO: Document.
-
 ### prepare_build
 
 Empties `output` build directory & copies NW files.

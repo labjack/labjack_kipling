@@ -1,40 +1,30 @@
+'use strict';
 
-var errorCatcher = require('./error_catcher');
-var fs = require('fs');
-var fse = require('fs-extra');
-var fsex = require('fs.extra');
-var path = require('path');
-var q = require('q');
+require('./utils/error_catcher');
 
-var execSync = require('child_process').execSync;
+const path = require('path');
+const fs = require('fs');
+const child_process = require('child_process');
+const labjackKiplingPackages = require('./utils/get_labjack_kipling_packages.js');
+const editPackageKeys = require('./utils/edit_package_keys.js').editPackageKeys;
+const {getBuildDirectory} = require('./utils/get_build_dir');
 
-const labjackKiplingPackages = require('./get_labjack_kipling_packages.js');
-const editPackageKeys = require('./edit_package_keys.js').editPackageKeys;
-
-var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
-var startingDir = process.cwd();
-var TEMP_PROJECT_FILES_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY);
+const TEMP_PUBLISH_PATH = path.join(getBuildDirectory(), 'temp_publish');
+const TEMP_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'temp_project_files');
 
 const graph = labjackKiplingPackages.getAdjacencyGraph();
 const packages = labjackKiplingPackages.getPackages();
 
-var DEBUG_INSTALLATION = true;
+const DEBUG_INSTALLATION = true;
 
+const buildData = require('../package.json');
 
-var buildData = require('../package.json');
+const kipling_dependencies = buildData.kipling_dependencies;
 
-var projectDirectories = [];
-kipling_dependencies = buildData.kipling_dependencies;
-
-function normalizeAndJoin(dirA, dirB) {
-	// console.log('HERE', dirA, dirB);
-	return path.normalize(path.join.apply(this, arguments));
-}
-
-projectDirectories = kipling_dependencies.map(function(kipling_dependency) {
-	var key = '';
-	for(var i = 0; i < 50; i ++) {
-		if(typeof(kipling_dependency[i]) === 'undefined') {
+const projectDirectories = kipling_dependencies.map(function(kipling_dependency) {
+	let key = '';
+	for (let i = 0; i < 50; i++) {
+		if (typeof(kipling_dependency[i]) === 'undefined') {
 			key += ' ';
 		} else {
 			key += kipling_dependency[i];
@@ -43,55 +33,47 @@ projectDirectories = kipling_dependencies.map(function(kipling_dependency) {
 	return {
 		'name': kipling_dependency,
 		'key': key,
-		'directory': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, kipling_dependency)
+		'directory': path.join(TEMP_PROJECT_FILES_PATH, kipling_dependency)
 	};
 });
 
-var installStatus = {};
+const installStatus = {};
 projectDirectories.forEach(function(dependency) {
 	installStatus[dependency.key] = false;
 });
-var startingTime = new Date();
-function getFinishedInstallFunc(dependency_key) {
-	return function fininishedInstallFunc() {
-		installStatus[dependency_key] = true;
-		printStatus();
-	};
-}
+const startingTime = new Date();
+
 function getHeaderStr() {
-	var outputText = [];
-	var startStr = 'Status:';
+	const outputText = [];
+	const curTime = new Date();
+	const curDuration = ((curTime - startingTime)/1000).toFixed(1);
 
-	var curTime = new Date();
-	var curDuration = ((curTime - startingTime)/1000).toFixed(1);
-
-
-	var keys = Object.keys(installStatus);
-	var num = keys.length;
-	var numComplete = 0;
+	const keys = Object.keys(installStatus);
+	const num = keys.length;
+	let numComplete = 0;
 	keys.forEach(function(key) {
-		if(installStatus[key]) {
+		if (installStatus[key]) {
 			numComplete += 1;
 		}
 	});
-	var percentComplete = ((numComplete/num) * 100).toFixed(1);
+	const percentComplete = ((numComplete / num) * 100).toFixed(1);
 	outputText.push('Status: ' + percentComplete + '%');
 	outputText.push('Duration: '+ curDuration.toString() + ' seconds');
 	return outputText;
 }
-var ENABLE_STATUS_UPDATES = false;
-var printStatus = function() {
-	if(ENABLE_STATUS_UPDATES) {
+
+const ENABLE_STATUS_UPDATES = false;
+
+const printStatus = function() {
+	if (ENABLE_STATUS_UPDATES) {
 		console.log('');
 		console.log('');
 		console.log('');
-		var outputText = [];
+		let outputText = [];
 		outputText = outputText.concat(getHeaderStr());
-		var keys = Object.keys(installStatus);
+		const keys = Object.keys(installStatus);
 		outputText = outputText.concat(keys.map(function(key) {
-			var outStr = key;
-			outStr += '\t' + installStatus[key].toString();
-			return outStr;
+			return key + '\t' + installStatus[key].toString();
 		}));
 		outputText.forEach(function(outputStr) {
 			console.log(outputStr);
@@ -100,123 +82,144 @@ var printStatus = function() {
 };
 
 function installLocalProductionDependencies(name, directory) {
-	var defered = q.defer();
-	if(DEBUG_INSTALLATION) {
-		console.log('installLocalProductionDependencies', name);
-	}
-
-	const pkgPath = path.join(directory, 'package.json');
-	const pkgName = require(pkgPath).name;
-
-	const packageDependencies = graph[pkgName];
-	if (!packageDependencies) {
-		throw new Error(`Could not find packageDependencies`);
-	}
-
-	packageDependencies.forEach(function(dependency) {
-		if (dependency in graph) {
-			const depInfo = Array.prototype.find.call(packages, function(package) {
-				return (package.name == dependency)
-			});
-			const depPackageName = depInfo.name;
-			const version = depInfo.version;
-			const dependencyTar = path.join(
-				'..','..','temp_publish',`${depPackageName}-${version}.tgz`
-			);
-			var bundle = {
-				'project_path': directory,
-				'required_keys': {
-					'dependencies': {
-					},
-				},
-			};
-			bundle.required_keys.dependencies[depPackageName] = dependencyTar;
-			editPackageKeys(bundle, true);
-
-			if(DEBUG_INSTALLATION) {
-				console.log(`${pkgPath} now dependent on ${dependencyTar}`);
-			}
-			// execSync(`npm install --production ${dependencyTar}`, {
-			// 	'cwd': directory,
-			// });
-
+	return new Promise((resolve) => {
+		if (DEBUG_INSTALLATION) {
+			console.log('installLocalProductionDependencies', name, directory);
 		}
-	})
 
-	if (name == 'ljswitchboard-io_manager') {
-		console.log(execSync(`npm install ../../temp_publish/ljswitchboard-device_manager-1.0.0.tgz --production --loglevel silent`, {
-			'cwd': directory
-		}).toString('utf-8'));
-	}
+		const pkgPath = path.join(directory, 'package.json');
+		const pkgName = require(pkgPath).name;
 
-	defered.resolve();
-	return defered.promise;
+		const packageDependencies = graph[pkgName];
+		if (!packageDependencies) {
+			throw new Error(`Could not find packageDependencies`);
+		}
+
+		for (const dependency of packageDependencies) {
+			if (dependency in graph) {
+				const depInfo = Array.prototype.find.call(packages, function(pack) {
+					return (pack.name === dependency);
+				});
+				const depPackageName = depInfo.name;
+				const version = depInfo.version;
+				const dependencyTar = path.join(
+					TEMP_PUBLISH_PATH, `${depPackageName}-${version}.tgz`
+				);
+				const bundle = {
+					'project_path': directory,
+					'required_keys': {
+						'dependencies': {
+						},
+					},
+				};
+				bundle.required_keys.dependencies[depPackageName] = dependencyTar;
+				editPackageKeys(bundle, true);
+
+				if (DEBUG_INSTALLATION) {
+					console.log(`${pkgPath} now dependent on ${dependencyTar}`);
+				}
+				// execSync(`npm install --production ${dependencyTar}`, {
+				// 	'cwd': directory,
+				// });
+
+			}
+		}
+
+		if (name === 'ljswitchboard-io_manager') {
+
+			return new Promise((resolve1, reject) => {
+				const npmCmd = `npm install ${TEMP_PUBLISH_PATH}/ljswitchboard-device_manager-1.0.0.tgz --production --loglevel silent`;
+				const child = child_process.exec(npmCmd, {
+					'cwd': directory
+				});
+
+				const debugStream = fs.createWriteStream(path.join(directory, 'debug.log'));
+				debugStream.write(npmCmd + '\n\n');
+				child.stdout.pipe(debugStream);
+				child.stderr.pipe(debugStream);
+
+				child.on('error', error => {
+					console.error(error);
+					console.error('Failed to execute:', npmCmd);
+					console.error('Debug log location:', path.join(directory, 'debug.log'));
+					reject();
+				});
+
+				child.on('exit', code => {
+					if (code > 0) {
+						console.error('Failed to execute:', npmCmd);
+						console.error('Debug log location:', path.join(directory, 'debug.log'));
+						reject();
+					} else {
+						resolve1();
+					}
+				});
+			});
+		}
+
+		resolve();
+	});
 }
 
 function innerInstallProductionDependency(name, directory) {
-	var defered = q.defer();
-	if(DEBUG_INSTALLATION) {
-		console.log('Directory', directory);
-	}
+	return new Promise((resolve, reject) => {
+		const npmCmd = 'npm install --production';
 
-	var exec = require('child_process').exec;
-	exec('npm install --production', {
-		'cwd': directory,
-		'maxBuffer': 1024 * 1024,
-	}, function(error, stdout, stderr) {
-		if(DEBUG_INSTALLATION || error) {
-			console.log('Finished installing', name);
-			console.log({
-				'error': error,
-				'stdout': stdout,
-				'stderr': stderr,
-			});
-		}
-		// exec('npm update', {
-		// 	'cwd': directory,
-		// }, function(error, stdout, stderr) {
-		// 	if(DEBUG_INSTALLATION) {
-		// 		console.log('Finished updating', name);
-		// 		console.log({
-		// 			'error': error,
-		// 			'stdout': stdout,
-		// 			'stderr': stderr,
-		// 		});
-		// 	}
-		// 	defered.resolve();
-		// });
-		defered.resolve();
+		const child = child_process.exec(npmCmd, {
+			'cwd': directory
+		});
+
+		const debugStream = fs.createWriteStream(path.join(directory, 'debug.log'));
+		debugStream.write(npmCmd + '\n\n');
+		child.stdout.pipe(debugStream);
+		child.stderr.pipe(debugStream);
+
+		child.on('error', error => {
+			console.error(error);
+			console.error('Failed to execute:', npmCmd);
+			console.error('Debug log location:', path.join(directory, 'debug.log'));
+			reject();
+		});
+
+		child.on('exit', code => {
+			if (code > 0) {
+				console.error('Failed to execute:', npmCmd);
+				console.error('Debug log location:', path.join(directory, 'debug.log'));
+				reject();
+			} else {
+				resolve();
+			}
+		});
+
 	});
-	return defered.promise;
 }
 
 function installProductionDependency(dependency) {
-	var defered = q.defer();
-	var name = dependency.name;
-	var key = dependency.key;
-	var directory = dependency.directory;
-	var finishedFunc = getFinishedInstallFunc(key);
+	const name = dependency.name;
+	const dependency_key = dependency.key;
+	const directory = dependency.directory;
 
-	installLocalProductionDependencies(name, directory)
+	return installLocalProductionDependencies(name, directory)
 		.then(function() {
-			innerInstallProductionDependency(name, directory)
+			return innerInstallProductionDependency(name, directory);
 		})
 		.then(function() {
-			finishedFunc();
-			defered.resolve();
+			installStatus[dependency_key] = true;
+			printStatus();
 		});
-
-	return defered.promise;
 }
 
 function installProductionDependencies() {
 	printStatus();
-	var promises = projectDirectories.map(installProductionDependency);
+	const promises = projectDirectories.map(installProductionDependency);
 
-	q.allSettled(promises)
-	.then(function() {
-		console.log('Finished Installing production dependencies');
-	});
+	Promise.allSettled(promises)
+		.then(function() {
+			console.log('Finished Installing production dependencies');
+		})
+		.catch(err => {
+			promises.exit(1);
+		});
 }
 
 installProductionDependencies();

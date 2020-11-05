@@ -1,11 +1,6 @@
+'use strict';
 
-
-var fs = require('fs');
-var fse = require('fs-extra');
-var path = require('path');
-var q = require('q');
-
-var extract = require('extract-zip');
+const extract = require('extract-zip');
 
 /*
  * Documentation for using extract-zip is found below:
@@ -17,17 +12,16 @@ var extract = require('extract-zip');
 */
 
 function extractWithExtractZip (from, to) {
-	var defered = q.defer();
-	extract(from, {dir: to}, function(err) {
-		if(err) {
-			console.log('Error!', err);
-			defered.reject();
-		} else {
-			console.log('Success');
-			defered.resolve();
-		}
+	return new Promise((resolve, reject) => {
+		extract(from, {dir: to}, function(err) {
+			if(err) {
+				console.log('Error!', err);
+				reject();
+			} else {
+				console.log('Success');
+				resolve();
+			}
+		});
 	});
-
-	return defered.promise;
 }
 exports.extractWithExtractZip = extractWithExtractZip;

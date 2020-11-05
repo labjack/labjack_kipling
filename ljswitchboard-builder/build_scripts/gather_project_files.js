@@ -1,43 +1,34 @@
+'use strict';
 
-var errorCatcher = require('./error_catcher');
-var fs = require('fs');
-var fse = require('fs-extra');
-var fsex = require('fs.extra');
-var path = require('path');
-var q = require('q');
-var rimraf = require('rimraf');
+require('./utils/error_catcher');
+const fs = require('fs');
+const fse = require('fs-extra');
+const path = require('path');
 
-var emptyDirectory = require('./empty_directory');
+const {getBuildDirectory} = require('./utils/get_build_dir');
 
-var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
-var startingDir = process.cwd();
-var TEMP_PROJECT_FILES_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY);
+const buildData = require('../package.json');
 
-const TEMP_STAGING_DIRECTORY = 'temp_staging';
-const TEMP_STAGING_PATH = path.join(startingDir, TEMP_STAGING_DIRECTORY);
+const startingDir = process.cwd();
+const TEMP_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'temp_project_files');
 
-var DEBUG_FILE_COPYING = false;
-var PROJECT_FILES_SEARCH_PATH = path.normalize(path.join(startingDir, '..'));
+const DEBUG_FILE_COPYING = false;
+const PROJECT_FILES_SEARCH_PATH = path.normalize(path.join(startingDir, '..'));
 
-// Empty the temp files dir.
-emptyDirectory.emptyDirectoryOrDie(TEMP_PROJECT_FILES_PATH);
-
-var buildData = require('../package.json');
-var isTest = false;
+let isTest = false;
 if(process.argv.length > 2) {
 	if(process.argv[2] === 'test') {
 		isTest = true;
 	}
 }
 
-var requiredFiles = [];
-requiredFiles = requiredFiles.concat(buildData.kipling_dependencies);
+let requiredFiles = [].concat(buildData.kipling_dependencies);
 if(isTest) {
 	requiredFiles = requiredFiles.concat(buildData.kipling_test_dependencies);
 }
 
 // A list of files and folders to not copy
-var filteredFilesAndFolders = [
+const filteredFilesAndFolders = [
 	'outFile.txt',
 	'.git',
 	'.gitignore',
@@ -58,7 +49,7 @@ var filteredFilesAndFolders = [
 	// 'package-lock.json',
 ];
 
-var os = {
+const os = {
     'win32': 'win32',
     'darwin': 'darwin',
     'linux': 'linux',
@@ -66,7 +57,7 @@ var os = {
     'sunos': 'linux'
 }[process.platform];
 
-var nodejsBinaryVersions = [
+const nodejsBinaryVersions = [
 	'0_10_33',
 	'0_10_35',
 	'0_12_1',
@@ -80,11 +71,11 @@ if(os === 'win32') {
 	nodejsBinaryVersions.push('6_3_1');
 }
 
-var addNodeVersionExclusions = function(os, arch) {
+const addNodeVersionExclusions = function(os, arch) {
 	// Get the currently running node version
-	var curVersion = process.versions.node.split('.').join('_');
+	const curVersion = process.versions.node.split('.').join('_');
 
-	var versionsToDelete = [];
+	const versionsToDelete = [];
 	nodejsBinaryVersions.forEach(function(nodejsBinaryVersion) {
 		if(nodejsBinaryVersion !== curVersion) {
 			versionsToDelete.push(nodejsBinaryVersion);
@@ -99,8 +90,8 @@ var addNodeVersionExclusions = function(os, arch) {
 		);
 	});
 };
-var addArchExclusions = function(os) {
-	var curArch = process.arch;
+const addArchExclusions = function(os) {
+	const curArch = process.arch;
 	addNodeVersionExclusions(os, curArch);
 	if(curArch !== 'x64') {
 		filteredFilesAndFolders.push('node_binaries/' + os + '/x64');
@@ -126,34 +117,28 @@ if(os === 'darwin') {
 	addArchExclusions('linux');
 }
 
-var copySingleFile = function(from, to) {
-	var defered = q.defer();
-	if(fs.statSync(from).isDirectory()) {
-		fse.ensureDirSync(to);
-	}
-	// console.log('in copySingleFile', from, to);
-	fse.copy(from, to, function(isErr) {
-		// console.log('Finished copying', from, to);
-		defered.resolve();
+const copySingleFile = function(from, to) {
+	return new Promise((resolve) => {
+		if(fs.statSync(from).isDirectory()) {
+			fse.ensureDirSync(to);
+		}
+		fse.copy(from, to, function() {
+			resolve();
+		});
 	});
-	return defered.promise;
 };
 
-var copyStatus = {};
-var startingTime = new Date();
-var getFinishedFunc = function(savedKey) {
-	var finishWorkingDir = function() {
+const copyStatus = {};
+const startingTime = new Date();
+const getFinishedFunc = function(savedKey) {
+	return function () {
 		copyStatus[savedKey] = true;
 		printStatus();
 	};
-	return finishWorkingDir;
 };
-var addWorkingDir = function(dir) {
-	var i;
-
-	var savedKey = '';
-	for(i = 0; i < 100; i++) {
-		savedKey = '[' + i.toString() + ']' + dir;
+const addWorkingDir = function(dir) {
+	for(let i = 0; i < 100; i++) {
+		const savedKey = '[' + i.toString() + ']' + dir;
 		if(typeof(copyStatus[savedKey]) === 'undefined') {
 			copyStatus[savedKey] = false;
 			printStatus();
@@ -162,66 +147,58 @@ var addWorkingDir = function(dir) {
 	}
 
 };
-var fixNameStr = function(nameStr) {
-	var minLength = 40;
-	var splitName = nameStr.split(']');
-	var i;
+const fixNameStr = function(nameStr) {
+	const minLength = 40;
+	const splitName = nameStr.split(']');
 	if(splitName.length > 0) {
 		nameStr = splitName[1];
 	}
-	var outStr = '';
-	outStr += nameStr;
-	var numToAdd = minLength - outStr.length;
+	let outStr = nameStr;
+	const numToAdd = minLength - outStr.length;
 
-	for(i = 0; i < numToAdd; i++) {
+	for (let i = 0; i < numToAdd; i++) {
 		outStr += ' ';
 	}
 	return outStr;
 };
-var getHeaderStr = function() {
-	var outputText = [];
-	var startStr = 'Status:';
+const getHeaderStr = function() {
+	const outputText = [];
+	const curTime = new Date();
+	const curDuration = ((curTime - startingTime)/1000).toFixed(1);
 
-	var str = fixNameStr('status');
-	var curTime = new Date();
-	var curDuration = ((curTime - startingTime)/1000).toFixed(1);
-
-
-	var keys = Object.keys(copyStatus);
-	var num = keys.length;
-	var numComplete = 0;
+	const keys = Object.keys(copyStatus);
+	const num = keys.length;
+	let numComplete = 0;
 	keys.forEach(function(key) {
 		if(copyStatus[key]) {
 			numComplete += 1;
 		}
 	});
-	var percentComplete = ((numComplete/num) * 100).toFixed(1);
+	const percentComplete = ((numComplete/num) * 100).toFixed(1);
 	outputText.push('Status: ' + percentComplete + '%');
 	outputText.push('Duration: '+ curDuration.toString() + ' seconds');
 	return outputText;
 };
 
-var ENABLE_STATUS_UPDATES = false;
-var innerPrintStatus = function() {
+const ENABLE_STATUS_UPDATES = false;
+const innerPrintStatus = function() {
 	if(ENABLE_STATUS_UPDATES) {
 		console.log('');
 		console.log('');
 		console.log('');
-		var outputText = [];
+		let outputText = [];
 		outputText = outputText.concat(getHeaderStr());
-		var keys = Object.keys(copyStatus);
+		const keys = Object.keys(copyStatus);
 		outputText = outputText.concat(keys.map(function(key) {
-			var outStr = fixNameStr(key);
-			outStr += '\t' + copyStatus[key].toString();
-			return outStr;
+			return fixNameStr(key) + '\t' + copyStatus[key].toString();
 		}));
 		outputText.forEach(function(outputStr) {
 			console.log(outputStr);
 		});
 	}
 };
-var printStatus = function() {
-	var printStatus = true;
+const printStatus = function() {
+	let printStatus = true;
 
 	requiredFiles.forEach(function(requiredFile) {
 		if(typeof(copyStatus['[0]'+requiredFile]) === 'undefined') {
@@ -232,130 +209,128 @@ var printStatus = function() {
 		innerPrintStatus();
 	}
 };
-var copyRelevantFiles = function(from, to, filters) {
+const copyRelevantFiles = function(from, to, filters) {
 
-	var fileListing = fs.readdirSync(from);
-	var promises = [];
-	var defered = q.defer();
+	const fileListing = fs.readdirSync(from);
+	const promises = [];
+	return new Promise((resolve, reject) => {
 
-	if(DEBUG_FILE_COPYING) {
-		console.log('in copyRelevantFiles:', from);
-		console.log('Filters:',filters);
-		console.log('Files in dir', fileListing);
-	} else {
-		// console.log('Working on:', path.parse(from).base);
-	}
-	var finishedFunc = addWorkingDir(path.parse(from).base);
-	fileListing.forEach(function(file) {
 		if(DEBUG_FILE_COPYING) {
-			console.log('Checking File', file);
+			console.log('in copyRelevantFiles:', from);
+			console.log('Filters:',filters);
+			console.log('Files in dir', fileListing);
+		} else {
+			// console.log('Working on:', path.parse(from).base);
 		}
-		var source_path = path.normalize(path.join(from, file));
-		var destination_path = path.normalize(path.join(to, file));
+		const finishedFunc = addWorkingDir(path.parse(from).base);
+		fileListing.forEach(function(file) {
+			if(DEBUG_FILE_COPYING) {
+				console.log('Checking File', file);
+			}
+			const source_path = path.normalize(path.join(from, file));
+			const destination_path = path.normalize(path.join(to, file));
 
-		var copyFile = true;
-		var recurseInto = false;
-		var secondaryFilters = [];
+			let copyFile = true;
+			let recurseInto = false;
+			const secondaryFilters = [];
 
-		filters.forEach(function(filter) {
-			var splitFilter = filter.split('/');
-			var folderFilter = splitFilter.shift();
-			// determine if the folder should be recursed into instead of
-			// coppied.
-			// Check to see if there is data to be recursed into.
-			if(splitFilter.length > 0) {
-				// If there is data to be recursed into then check to see if
-				// the folder matches the specified filter.
-				if(file === folderFilter) {
-					copyFile = false;
-					recurseInto = true;
-					secondaryFilters.push(splitFilter.join('/'));
-				}
-			} else {
-				if(file === folderFilter) {
-					if(DEBUG_FILE_COPYING) {
-						console.log('Not Copying', file, path.parse(from).base);
+			filters.forEach(function(filter) {
+				const splitFilter = filter.split('/');
+				const folderFilter = splitFilter.shift();
+				// determine if the folder should be recursed into instead of
+				// coppied.
+				// Check to see if there is data to be recursed into.
+				if(splitFilter.length > 0) {
+					// If there is data to be recursed into then check to see if
+					// the folder matches the specified filter.
+					if(file === folderFilter) {
+						copyFile = false;
+						recurseInto = true;
+						secondaryFilters.push(splitFilter.join('/'));
 					}
-					copyFile = false;
+				} else {
+					if(file === folderFilter) {
+						if(DEBUG_FILE_COPYING) {
+							console.log('Not Copying', file, path.parse(from).base);
+						}
+						copyFile = false;
+					}
 				}
+			});
+			if(copyFile) {
+				if(DEBUG_FILE_COPYING) {
+					console.log('Copying file', file, path.parse(from).base);
+				}
+				promises.push(copySingleFile(source_path, destination_path));
+			}
+			if(recurseInto) {
+				if(DEBUG_FILE_COPYING) {
+					console.log('Recursing into...', file);
+					console.log('With filters', secondaryFilters);
+				}
+				promises.push(copyRelevantFiles(
+					source_path,
+					destination_path,
+					secondaryFilters
+				));
 			}
 		});
-		if(copyFile) {
-			if(DEBUG_FILE_COPYING) {
-				console.log('Copying file', file, path.parse(from).base);
-			}
-			promises.push(copySingleFile(source_path, destination_path));
-		}
-		if(recurseInto) {
-			if(DEBUG_FILE_COPYING) {
-				console.log('Recursing into...', file);
-				console.log('With filters', secondaryFilters);
-			}
-			promises.push(copyRelevantFiles(
-				source_path,
-				destination_path,
-				secondaryFilters
-			));
-		}
+		Promise.allSettled(promises).then(
+			function() {
+				// finishWorkingDir(path.parse(from).base);
+				finishedFunc();
+				resolve();
+			}, reject);
 	});
-	q.allSettled(promises).then(
-		function() {
-			// finishWorkingDir(path.parse(from).base);
-			finishedFunc();
-			defered.resolve();
-		}, defered.reject);
-	return defered.promise;
 };
 
-var copyRequiredFiles = function() {
-	var promises = requiredFiles.map(function(required_file) {
+const copyRequiredFiles = function() {
+	const promises = requiredFiles.map(function(required_file) {
 		try {
-		// console.log('Copying:', required_file);
-		var source_path = path.normalize(path.join(
-			PROJECT_FILES_SEARCH_PATH,
-			required_file
-		));
-		var destination_path = path.normalize(path.join(
-			TEMP_PROJECT_FILES_PATH,
-			required_file
-		));
-		fs.mkdirSync(destination_path);
+			// console.log('Copying:', required_file);
+			const source_path = path.normalize(path.join(
+				PROJECT_FILES_SEARCH_PATH,
+				required_file
+			));
+			const destination_path = path.normalize(path.join(
+				TEMP_PROJECT_FILES_PATH,
+				required_file
+			));
+			fs.mkdirSync(destination_path);
 
-		// var projectInfo = require(path.normalize(path.join(
-		// 	PROJECT_FILES_SEARCH_PATH,
-		// 	required_file,
-		// 	'package.json'
-		// )));
+			// const projectInfo = require(path.normalize(path.join(
+			// 	PROJECT_FILES_SEARCH_PATH,
+			// 	required_file,
+			// 	'package.json'
+			// )));
 
-		// Dev dependency list
-		// var devFilters = [];
-		// if(projectInfo.devDependencies) {
-		// 	var devDeps = Object.keys(projectInfo.devDependencies);
-		// 	devFilters = devDeps.map(function(devDep) {
-		// 		return 'node_modules/' + devDep;
-		// 	});
-		// }
+			// Dev dependency list
+			// const devFilters = [];
+			// if(projectInfo.devDependencies) {
+			// 	const devDeps = Object.keys(projectInfo.devDependencies);
+			// 	devFilters = devDeps.map(function(devDep) {
+			// 		return 'node_modules/' + devDep;
+			// 	});
+			// }
 
-		var folderFilters = [];
+			const folderFilters = [];
 
-		filteredFilesAndFolders.forEach(function(filter) {
-			folderFilters.push(filter);
-		});
-		// devFilters.forEach(function(filter) {
-		// 	folderFilters.push(filter);
-		// });
-		// fse.copySync(source_path, destination_path);
-		// console.log('Calling...',required_file, source_path, destination_path);
-		return copyRelevantFiles(source_path, destination_path, folderFilters);
-	} catch(err) {
-		console.log('Error...', err);
-	}
+			filteredFilesAndFolders.forEach(function(filter) {
+				folderFilters.push(filter);
+			});
+			// devFilters.forEach(function(filter) {
+			// 	folderFilters.push(filter);
+			// });
+			// fse.copySync(source_path, destination_path);
+			// console.log('Calling...',required_file, source_path, destination_path);
+			return copyRelevantFiles(source_path, destination_path, folderFilters);
+		} catch(err) {
+			console.log('Error...', err);
+		}
 	});
-	return q.allSettled(promises);
+	return Promise.allSettled(promises);
 };
 copyRequiredFiles()
 .then(function() {
 	console.log('Finished Copying required files');
 });
-
-

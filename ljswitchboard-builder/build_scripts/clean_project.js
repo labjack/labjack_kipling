@@ -1,22 +1,17 @@
+'use strict';
 
-var errorCatcher = require('./error_catcher');
-var fs = require('fs');
-var fse = require('fs-extra');
-var fsex = require('fs.extra');
-var path = require('path');
-var q = require('q');
-var cwd = process.cwd();
-var rimraf = require('rimraf');
+const fs = require('fs');
+const fsex = require('fs.extra');
+const path = require('path');
+const {getBuildDirectory} = require('./utils/get_build_dir');
 
-var TEMP_FILES_DIR_NAME = 'temp_project_files';
-var DIRECTORY_OFFSET = path.normalize(path.join(cwd, TEMP_FILES_DIR_NAME));
+const DIRECTORY_OFFSET = path.normalize(path.join(getBuildDirectory(), 'temp_project_files'));
 
-var DEBUG_DIRECTORY_SEARCHING = false;
-var PRINT_FILES_BEING_DELETED = false;
-var PERFORM_DELETES = true;
+const DEBUG_DIRECTORY_SEARCHING = false;
+const PRINT_FILES_BEING_DELETED = false;
+const PERFORM_DELETES = true;
 
-
-var stdFilesToDelete = [
+const stdFilesToDelete = [
 	'.editorconfig',
 	'.eslintignore',
 	'.jshintignore',
@@ -52,7 +47,7 @@ var stdFilesToDelete = [
 	'jsdoc.json',	// New 9/8/2016
 ];
 
-var stdFoldersToDelete = [
+const stdFoldersToDelete = [
 	'benchmark',
 	'bin',
 	'example',
@@ -66,8 +61,8 @@ var stdFoldersToDelete = [
 	'docs',		// New 9/8/2016
 ];
 
-var createStdCleanModules = function(names) {
-	var obj = {};
+const createStdCleanModules = function(names) {
+	const obj = {};
 	names.forEach(function(name) {
 		obj[name] = {};
 		obj[name].filesToDelete = stdFilesToDelete;
@@ -77,7 +72,7 @@ var createStdCleanModules = function(names) {
 };
 
 
-var filesToDelete = {
+const filesToDelete = {
     'ljswitchboard-core': {
 		'foldersToDelete': ['test'],
 		'node_modules': {
@@ -102,7 +97,12 @@ var filesToDelete = {
 			'foldersToDelete': ['.bin'],
 		},
 	},
-	'ljswitchboard-splash_screen': {
+	'ljswitchboard-electron_main': {
+		'node_modules': {
+			'foldersToDelete': ['.bin', 'dist'],
+		},
+	},
+	'ljswitchboard-electron_splash_screen': {
 		'node_modules': {
 			'foldersToDelete': ['.bin'],
 		},
@@ -183,7 +183,7 @@ var filesToDelete = {
 };
 
 // Code that adds more cleaning requests...
-// var requestModulesToClean = createStdCleanModules([
+// const requestModulesToClean = createStdCleanModules([
 // 	'aws-sign2',
 // 	'bl',
 // 	'caseless',
@@ -203,9 +203,9 @@ var filesToDelete = {
 // 	'tough-cookie',
 // 	'tunnel-agent',
 // ]);
-// var keys_requestModulesToClean = Object.keys(requestModulesToClean);
+// const keys_requestModulesToClean = Object.keys(requestModulesToClean);
 // keys_requestModulesToClean.forEach(function(key) {
-// 	var obj = requestModulesToClean[key];
+// 	const obj = requestModulesToClean[key];
 
 // 	filesToDelete['ljswitchboard-io_manager'].node_modules[key] = obj;
 // });
@@ -217,14 +217,14 @@ function normalizeAndJoin(dirA, dirB) {
 
 
 // Get a list of the project parts
-var buildData = require('../package.json');
-var kipling_parts = buildData.kipling_dependencies;
+const buildData = require('../package.json');
+const kipling_parts = buildData.kipling_dependencies;
 kipling_parts.forEach(function(kipling_part) {
-	var kiplingPartPath = normalizeAndJoin(DIRECTORY_OFFSET, kipling_part);
-	var kiplingPartNMPath = normalizeAndJoin(kiplingPartPath, 'node_modules');
+	const kiplingPartPath = normalizeAndJoin(DIRECTORY_OFFSET, kipling_part);
+	const kiplingPartNMPath = normalizeAndJoin(kiplingPartPath, 'node_modules');
 
 
-	var kiplingPartDeps = [];
+	let kiplingPartDeps = [];
 
 	if (fs.existsSync(kiplingPartNMPath)) { // static_files.zip doesn't contain node_modules
 		try {
@@ -238,24 +238,24 @@ kipling_parts.forEach(function(kipling_part) {
 	// console.log('Kipling Part:', kipling_part);
 	// console.log('Kipling Part Deps:', kiplingPartDeps);
 
-	var stdCleanModulesObj = createStdCleanModules(kiplingPartDeps);
+	const stdCleanModulesObj = createStdCleanModules(kiplingPartDeps);
 
 	if(typeof(filesToDelete[kipling_part]) === 'undefined') {
 		filesToDelete[kipling_part] = {
 			'node_modules': stdCleanModulesObj,
 		};
 	} else {
-		var stdCleanModulesObjKeys = Object.keys(stdCleanModulesObj);
+		const stdCleanModulesObjKeys = Object.keys(stdCleanModulesObj);
 		stdCleanModulesObjKeys.forEach(function(key) {
-			var obj = stdCleanModulesObj[key];
-			var newFilesToDelete = obj.filesToDelete;
-			var newFoldersToDelete = obj.foldersToDelete;
+			const obj = stdCleanModulesObj[key];
+			const newFilesToDelete = obj.filesToDelete;
+			const newFoldersToDelete = obj.foldersToDelete;
 
 			if(typeof(filesToDelete[kipling_part].node_modules[key]) === 'undefined') {
 				filesToDelete[kipling_part].node_modules[key] = obj;
 			} else {
-				var mFilesToDelete = filesToDelete[kipling_part].node_modules[key].filesToDelete;
-				var mFoldersToDelete = filesToDelete[kipling_part].node_modules[key].foldersToDelete;
+				const mFilesToDelete = filesToDelete[kipling_part].node_modules[key].filesToDelete;
+				const mFoldersToDelete = filesToDelete[kipling_part].node_modules[key].foldersToDelete;
 				if(typeof(mFilesToDelete) !== 'undefined') {
 					filesToDelete[kipling_part].node_modules[key].filesToDelete = mFilesToDelete.concat(newFilesToDelete);
 				}
@@ -267,18 +267,18 @@ kipling_parts.forEach(function(kipling_part) {
 	}
 });
 
-var deleteOperations = [];
+const deleteOperations = [];
 
 
-var operationKeys = [
+const operationKeys = [
 	'filesToDelete',
 	'foldersToDelete',
 	'filesToSave',
 	'foldersToSave',
 ];
 
-var numTimesCalled = 0;
-var createDeleteOperations = function(map, directoryOffset, searchOffset) {
+let numTimesCalled = 0;
+const createDeleteOperations = function(map, directoryOffset, searchOffset) {
 	// console.log('In createDeleteOperations', directoryOffset, searchOffset);
 	// if(searchOffset.indexOf('javascript-natural-sort') >= 0) {
 	// 	console.log('In createDeleteOperations JS-N-S', map, directoryOffset, searchOffset);
@@ -286,8 +286,8 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 	numTimesCalled += 1;
 	// Debugging cleaning a flattened node_module's tree...
 	// console.log('Called...', numTimesCalled);
-	var keys = Object.keys(map);
-	var availableThings = [];
+	const keys = Object.keys(map);
+	let availableThings = [];
 	if (fs.existsSync(directoryOffset)) {
 		try {
 			availableThings = fs.readdirSync(directoryOffset);
@@ -303,7 +303,7 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 	}
 
 
-	var hasThingsToDelete = false;
+	let hasThingsToDelete = false;
 	if(keys.indexOf('filesToDelete') >= 0) {
 		hasThingsToDelete = true;
 	}
@@ -311,7 +311,7 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 		hasThingsToDelete = true;
 	}
 
-	var hasThingsToProtect = false;
+	let hasThingsToProtect = false;
 	if(keys.indexOf('filesToSave') >= 0) {
 		hasThingsToProtect = true;
 	}
@@ -322,11 +322,11 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 		hasThingsToDelete = true;
 	}
 
-	var addThingToBeDeleted = function(availableThing) {
-		var deletePath = path.normalize(path.join(
+	const addThingToBeDeleted = function(availableThing) {
+		const deletePath = path.normalize(path.join(
 			directoryOffset, availableThing
 		));
-		var newSearchOffset = path.normalize(path.join(
+		const newSearchOffset = path.normalize(path.join(
 			searchOffset, availableThing
 		));
 		deleteOperations.push({
@@ -348,7 +348,7 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 			// loop through all available files/folders and add them to the list
 			// of things to delete unless they are in the save-list
 			availableThings.forEach(function(availableThing) {
-				var deleteThing = true;
+				let deleteThing = true;
 				if(map.filesToSave) {
 					if(map.filesToSave.indexOf(availableThing) >= 0) {
 						deleteThing = false;
@@ -368,7 +368,7 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 			// and not the "save" keys, then delete only the files/folders
 			// specified.
 			availableThings.forEach(function(availableThing) {
-				var deleteThing = false;
+				let deleteThing = false;
 				if(map.filesToDelete) {
 					if(map.filesToDelete.indexOf(availableThing) >= 0) {
 						deleteThing = true;
@@ -386,12 +386,10 @@ var createDeleteOperations = function(map, directoryOffset, searchOffset) {
 		}
 	}
 
-	var subFolders = [];
 	keys.forEach(function(key) {
 		if(operationKeys.indexOf(key) < 0) {
-			subFolders.push(key);
-			var newOffset = path.normalize(path.join(directoryOffset, key));
-			var newSearchOffset = path.normalize(path.join(searchOffset, key));
+			const newOffset = path.normalize(path.join(directoryOffset, key));
+			const newSearchOffset = path.normalize(path.join(searchOffset, key));
 			createDeleteOperations(map[key], newOffset, newSearchOffset);
 		}
 	});
@@ -409,58 +407,55 @@ if(DEBUG_DIRECTORY_SEARCHING || PRINT_FILES_BEING_DELETED) {
 	console.log('Deleting', deleteOperations.length, 'things.');
 }
 
-var maxNumRetries = 100;
-var retryDelay = 1;
-var getDeleteThing = function(deleteOperation) {
-	var numRetries = 0;
-	var path = deleteOperation.path;
+const getDeleteThing = function(deleteOperation) {
+	const path = deleteOperation.path;
 
-	var deleteThing = function() {
-		var defered = q.defer();
+	const deleteThing = function() {
+		return new Promise((resolve) => {
+			fsex.rmrf(path, function(err) {
+				if(err) {
+					fsex.rmrf(path, function(err) {
+						if(err) {
+							console.log('ERROR Deleting File/Folder!', err);
+							deleteOperation.isError = true;
+							deleteOperation.isFinished = true;
+							deleteOperation.message = err.toString();
 
-		fsex.rmrf(path, function(err) {
-			if(err) {
-				fsex.rmrf(path, function(err) {
-					if(err) {
-						console.log('ERROR Deleting File/Folder!', err);
-						deleteOperation.isError = true;
-						deleteOperation.isFinished = true;
-						deleteOperation.message = err.toString();
-
-						defered.resolve(deleteOperation);
-					} else {
-						deleteOperation.isFinished = true;
-						defered.resolve(deleteOperation);
-					}
-				});
-			} else {
-				deleteOperation.isFinished = true;
-				defered.resolve(deleteOperation);
-			}
+							resolve(deleteOperation);
+						} else {
+							deleteOperation.isFinished = true;
+							resolve(deleteOperation);
+						}
+					});
+				} else {
+					deleteOperation.isFinished = true;
+					resolve(deleteOperation);
+				}
+			});
 		});
-		return defered.promise;
 	};
 	return deleteThing;
 };
 
-var performDeletes = function() {
-	var defered = q.defer();
+const performDeletes = function() {
+	return new Promise((resolve) => {
+		const promises = deleteOperations.map(function (deleteOperation) {
+			return getDeleteThing(deleteOperation)();
+		});
 
-	var promises = deleteOperations.map(function(deleteOperation) {
-		return getDeleteThing(deleteOperation)();
+		Promise.allSettled(promises)
+			.then(function (results) {
+				console.log('Finished Deleting!');
+				resolve();
+			}, function (errors) {
+				console.error('Failed deleting...', errors);
+				resolve();
+			});
 	});
-
-	q.allSettled(promises)
-	.then(function(results) {
-		console.log('Finished Deleting!');
-		defered.resolve();
-	}, function(errors) {
-		console.log('Failed deleting...', errors);
-		defered.resolve();
-	});
-	return defered.promise;
 };
 
 if(PERFORM_DELETES) {
-	performDeletes();
+	performDeletes()
+		.then(() => {
+		});
 }

@@ -4,7 +4,7 @@ var assert = require('chai').assert;
 
 var fse = require('fs-extra');
 
-var editPackageKeys = require('../build_scripts/edit_package_keys.js').editPackageKeys;
+var editPackageKeys = require('../build_scripts/utils/edit_package_keys.js').editPackageKeys;
 
 const TEST_REQUIRED_KEYS = {
 	"dependencies": {

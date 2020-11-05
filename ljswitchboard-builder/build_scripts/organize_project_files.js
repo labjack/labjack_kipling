@@ -1,54 +1,38 @@
+'use strict';
 
-var errorCatcher = require('./error_catcher');
-var fs = require('fs');
-var fse = require('fs-extra');
-var path = require('path');
-var q = require('q');
-var archiver = require('archiver');
+require('./utils/error_catcher');
 
-var fileOps = require('./file_operations');
+const path = require('path');
 
-var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
-var startingDir = process.cwd();
-var TEMP_PROJECT_FILES_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY);
+const {getBuildDirectory} = require('./utils/get_build_dir');
+const fileOps = require('./utils/file_operations');
 
-var DEBUG_FILE_COPYING = false;
-var OUTPUT_PROJECT_FILES_DIRECTORY = 'output';
-var OUTPUT_PROJECT_FILES_PATH = path.normalize(path.join(startingDir, OUTPUT_PROJECT_FILES_DIRECTORY));
+const TEMP_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'temp_project_files');
 
 // Add a few extra paths if we are building for mac-osx
-var buildOS = {
+const buildOS = {
 	'darwin': 'darwin',
 	'win32': 'win32'
-}[process.platform];
-if(typeof(buildOS) === 'undefined') {
-	buildOS = 'linux';
-}
-if(buildOS === 'darwin') {
-	OUTPUT_PROJECT_FILES_PATH = path.normalize(path.join(
-	 	OUTPUT_PROJECT_FILES_PATH,
-	 	'nwjs.app',
-	 	'Contents',
-	 	'Resources'
-	 ));
-}
+}[process.platform] || 'linux';
 
-var buildData = require('../package.json');
-var isTest = false;
-// console.log('Args', process.argv);
+const OUTPUT_PROJECT_FILES_PATH = (buildOS === 'darwin') ?
+	path.join(getBuildDirectory(), 'output', 'nwjs.app', 'Contents', 'Resources')
+	: path.join(getBuildDirectory(), 'output');
+
+const buildData = require('../package.json');
+let isTest = false;
 if(process.argv.length > 2) {
 	if(process.argv[2] === 'test') {
 		isTest = true;
 	}
 }
 
-var requiredFiles = [];
-var primaryProject = buildData.kipling_primary_dependency;
-var foldersToCompress = [];
+const requiredFiles = [];
+const primaryProject = buildData.kipling_primary_dependency;
+const foldersToCompress = [];
 
-function normalizeAndJoin(dirA, dirB) {
-	// console.log('HERE', dirA, dirB);
-	return path.normalize(path.join.apply(this, arguments));
+function normalizeAndJoin() {
+	return path.normalize(path.join(...arguments));
 }
 function addProjectFolder (folder) {
 	if(folder !== primaryProject) {
@@ -84,31 +68,17 @@ if(isTest) {
 	buildData.kipling_test_dependencies.forEach(addProjectFolder);
 }
 
-
-
-
-
-
-
-
-
 function organizeProjectFiles () {
-	var defered = q.defer();
-
-	var promises = [];
+	const promises = [];
 	promises.push(fileOps.compressFolders(foldersToCompress));
 	promises.push(fileOps.copyFolders(requiredFiles));
 
-	q.allSettled(promises)
-	.then(function() {
-		defered.resolve();
-	});
-	return defered.promise;
+	return Promise.allSettled(promises);
 }
 
 organizeProjectFiles()
-.then(function() {
-	console.log('Finished organizeProjectFiles');
-});
+	.then(function() {
+		console.log('Finished organizeProjectFiles');
+	});
 
 

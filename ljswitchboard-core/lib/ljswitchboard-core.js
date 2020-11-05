@@ -81,6 +81,7 @@ exports.initializePackage = function (injector) {
 
 					// If all fails, check the starting directory of the process for the
 					// zipped files originally distributed with the application.
+					path.join(startDir, 'resources', 'app', 'ljswitchboard-io_manager.zip'),
 					path.join(startDir, 'ljswitchboard-io_manager.zip')
 				]
 			},
@@ -105,6 +106,7 @@ exports.initializePackage = function (injector) {
 
 					// If all fails, check the starting directory of the process for the
 					// zipped files originally distributed with the application.
+					path.join(startDir, 'resources', 'app', 'ljswitchboard-module_manager.zip'),
 					path.join(startDir, 'ljswitchboard-module_manager.zip')
 				]
 			},
@@ -130,6 +132,7 @@ exports.initializePackage = function (injector) {
 
 					// If all fails, check the starting directory of the process for the
 					// zipped files originally distributed with the application.
+					path.join(startDir, 'resources', 'app', 'ljswitchboard-kipling.zip'),
 					path.join(startDir, 'ljswitchboard-kipling.zip')
 				]
 			}
@@ -149,6 +152,7 @@ exports.initializePackage = function (injector) {
 					// Add path to files for development purposes, out of a repo.
 					path.join(startDir, '..', 'ljswitchboard-kipling_tester'),
 					path.join(startDir, 'node_modules', 'ljswitchboard-kipling_tester'),
+					path.join(startDir, 'resources', 'app', 'ljswitchboard-kipling_tester.zip'),
 					path.join(startDir, 'ljswitchboard-kipling_tester.zip')
 				]
 			});

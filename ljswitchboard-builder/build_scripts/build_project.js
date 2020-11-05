@@ -1,121 +1,89 @@
-
-
 console.log('Building Kipling');
 
-var errorCatcher = require('./error_catcher');
-var fs = require('fs');
-var fse = require('fs-extra');
-var path = require('path');
-var cwd = process.cwd();
-var async = require('async');
-var child_process = require('child_process');
+const path = require('path');
+const child_process = require('child_process');
 
-// Figure out what OS we are building for
-var buildOS = {
-	'darwin': 'darwin',
-	'win32': 'win32'
-}[process.platform];
-if(typeof(buildOS) === 'undefined') {
-	buildOS = 'linux';
+async function runScript(buildScript) {
+	const cloned = JSON.parse(JSON.stringify(buildScript));
+
+	cloned.scriptPath = path.normalize(path.join(
+		__dirname, cloned.script + '.js'
+	));
+	cloned.cmd = 'node ' + cloned.scriptPath;
+	cloned.isFinished = false;
+	cloned.isSuccessful = false;
+
+	console.log('==============================================');
+	console.log('Starting Step:', cloned.text);
+	console.log();
+
+
+	return new Promise((resolve, reject) => {
+		const child = child_process.exec(cloned.cmd);
+		child.stdout.pipe(process.stdout);
+		child.stderr.pipe(process.stderr);
+
+		child.on('error', error => {
+			console.error('Error Executing:', cloned.script, '-', cloned.text);
+			console.error(error);
+			reject();
+		});
+
+		child.on('exit', code => {
+			if (code > 0) {
+				reject();
+			} else {
+				resolve();
+			}
+		});
+	});
 }
 
-var mac_notarize = false;
+// Figure out what OS we are building for
+const buildOS = {
+	'darwin': 'darwin',
+	'win32': 'win32'
+}[process.platform] || 'linux';
+
+const mac_notarize = process.argv.some(() => {return process.argv.indexOf('mac_sign') > 0;});
 // The LabJack macOS installer builder signs Kipling files, so we actually don't
 // want to sign here.
-if(process.argv.some((arg)=>{return process.argv.indexOf('mac_sign') > 0;})) {
-	mac_notarize = true;
-	console.log('**************************\n ****Signing ****\n**************************');
+if (mac_notarize) {
+	console.log('**************************\n**** Signing ****\n**************************');
 } else {
 	console.log('**************************\n**** Not Signing ****\n**************************');
 }
 
+(async () => {
+	try {
+		// await runScript({'script': 'electron_build', 'text': 'Run electron-builder'});
+		// return;
+		await runScript({'script': 'clean_build', 'text': 'Cleaning Build Directory'});
+		// await runScript({'script': 'copy_nwjs', 'text': 'Copy nwjs files'});
+		await runScript({'script': 'publish_locally', 'text': 'Publish Locally'});
+		await runScript({'script': 'gather_project_files', 'text': 'Gathering Project Files'});
+		await runScript({'script': 'edit_k3_startup_settings', 'text': 'Edit K3 Startup Settings'});
+		await runScript({'script': 'install_production_dependencies', 'text': 'Installing production dependencies'});
+		await runScript({'script': 'validate_internal_dependencies', 'text': 'Validating there are no duplicate internal dependencies'});
+		await runScript({'script': 'rebuild_native_modules', 'text': 'Rebuilding Native Modules (ffi & ref-napi)'});
+		await runScript({'script': 'clean_project', 'text': 'Cleaning Project'});
 
-var BUILD_SCRIPTS_DIR = 'build_scripts';
-
-var commands = {};
-var buildScripts = [
-	{'script': 'prepare_build', 'text': 'Preparing Build'},
-	{'script': 'publish_locally', 'text': 'Publish Locally'},
-	{'script': 'gather_project_files', 'text': 'Gathering Project Files'},
-	{'script': 'edit_k3_startup_settings', 'text': 'Edit K3 Startup Settings'},
-	{'script': 'install_production_dependencies', 'text': 'Installing production dependencies'},
-	{'script': 'validate_internal_dependencies', 'text': 'Validating there are no duplicate internal dependencies'},
-	{'script': 'rebuild_native_modules', 'text': 'Rebuilding Native Modules (ffi & ref)'},
-	{'script': 'clean_project', 'text': 'Cleaning Project'},
-]
-
-var conditionalMacBuildSteps = [
-	{'script': 'sign_mac_build_before_compression', 'text': 'Signing Mac OS Build.'},
-];
-
-if((buildOS === 'darwin') && mac_notarize) {
-	buildScripts = buildScripts.concat(conditionalMacBuildSteps);
-}
-
-var buildScriptsSecondary = [
-	{'script': 'organize_project_files', 'text': 'Organizing Project Files & compress into packages.'},
-	{'script': 'brand_project', 'text': 'Branding Project Files'},
-	{'script': 'compress_output', 'text': 'Compressing Output and renaming'},
-];
-buildScripts = buildScripts.concat(buildScriptsSecondary);
-
-var conditionalMacBuildStepsActerCompression = [
-	{'script': 'sign_mac_build_after_compression', 'text': 'Signing Mac OS Build.'},
-];
-
-if((buildOS === 'darwin') && mac_notarize) {
-	buildScripts = buildScripts.concat(conditionalMacBuildStepsActerCompression);
-}
-
-var finalBuildSteps = [
-	{'script': 'compress_output', 'text': 'Compressing Output and renaming'},
-];
-buildScripts = buildScripts.concat(finalBuildSteps);
-
-
-
-buildScripts.forEach(function(buildScript) {
-	buildScript.scriptPath = path.normalize(path.join(
-		BUILD_SCRIPTS_DIR, buildScript.script + '.js'
-	));
-	buildScript.cmd = 'node ' + buildScript.scriptPath;
-	buildScript.isFinished = false;
-	buildScript.isSuccessful = false;
-});
-
-
-// Synchronous version of executing scripts
-// buildScripts.forEach(function(buildScript) {
-// 	try {
-// 		console.log('Starting Step:', buildScript.text);
-// 		var execOutput = child_process.execSync(buildScript.cmd);
-// 		console.log('execOutput: ' , execOutput.toString());
-// 	} catch(err) {
-// 		console.log('Error Executing', buildScript.script, buildScript.text);
-// 		process.exit(1);
-// 	}
-// });
-
-// Asynchronous version of executing scripts
-async.eachSeries(
-	buildScripts,
-	function(buildScript, cb) {
-		console.log('Starting Step:', buildScript.text);
-		child_process.exec(buildScript.cmd, function(error, stdout, stderr) {
-			if (error) {
-				console.error('Error Executing', error);
-				console.error(buildScript.script, buildScript.text);
-				cb(error);
-			}
-			console.log('stdout: ',stdout);
-			console.log('stderr: ',stderr);
-			cb();
-		})
-	},
-	function(err) {
-		if(err) {
-			console.log('Error Executing Build Scripts...', err);
-			process.exit(1);
+		if ((buildOS === 'darwin') && mac_notarize) {
+			await runScript({'script': 'sign_mac_build_before_compression', 'text': 'Signing Mac OS Build.'});
 		}
-	});
 
+		await runScript({'script': 'organize_project_files', 'text': 'Organizing Project Files & compress into packages.'});
+		await runScript({'script': 'electron_build', 'text': 'Run electron-builder'});
+		// await runScript({'script': 'brand_project', 'text': 'Branding Project Files'});
+		return;
+		await runScript({'script': 'compress_output', 'text': 'Compressing Output and renaming'});
+
+		if((buildOS === 'darwin') && mac_notarize) {
+			await runScript({'script': 'sign_mac_build_after_compression', 'text': 'Signing Mac OS Build.'});
+		}
+
+		await runScript({'script': 'compress_output', 'text': 'Compressing Output and renaming'});
+	} catch (err) {
+		process.exit(1);
+	}
+})();

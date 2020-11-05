@@ -35,7 +35,7 @@
         "ljswitchboard-ljm_driver_constants": "*",
         "ljswitchboard-modbus_map": "*",
         "q": "1.5.1",
-        "ref-napi": "^1.4.3"
+        "ref-napi": "^3.0.1"
     },
     "devDependencies": {
         "deep-eql": "^4.0.0",

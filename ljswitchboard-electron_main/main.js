@@ -1,5 +1,6 @@
 const electron = require('electron');
 const path = require('path');
+const fs = require('fs');
 const url = require('url');
 
 const {PackageLoader} = require('ljswitchboard-package_loader');
@@ -54,6 +55,14 @@ const win = {
 };
 */
 
+const oldRequire = require;
+global.require = (name) => {
+  if (fs.existsSync(path.join(__dirname, 'node_modules', name))) {
+    return oldRequire(path.join(__dirname, 'node_modules', name));
+  }
+  return oldRequire(name);
+};
+
 const package_loader = new PackageLoader(injector);
 injector.bindSingleton('package_loader', package_loader);
 
@@ -91,7 +100,7 @@ app.on('ready', function() {
   // Create the browser window.
 
   splashWindow = fakeWindow.open(url.format({
-    pathname: path.join(__dirname, '..', 'ljswitchboard-electron_splash_screen', 'lib', 'index.html'),
+    pathname: path.join(__dirname, 'node_modules', 'ljswitchboard-electron_splash_screen', 'lib', 'index.html'),
     protocol: 'file:',
     slashes: true
   }));

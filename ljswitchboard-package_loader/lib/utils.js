@@ -133,6 +133,7 @@ function checkPackageType(packageInfo) {
 }
 
 function checkForExistingDirectory(packageInfo) {
+    packageInfo.debug = '1';
     return new Promise((resolve) => {
         fs.exists(packageInfo.location, (exists) => {
             packageInfo.exists = exists;

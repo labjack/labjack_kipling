@@ -1,53 +1,35 @@
-
+'use strict';
 
 console.log('Building Kipling');
 
-var errorCatcher = require('./error_catcher');
-var fs = require('fs');
-var fse = require('fs-extra');
-var path = require('path');
-var cwd = process.cwd();
-var child_process = require('child_process');
-var async = require('async');
+require('./utils/error_catcher');
+const path = require('path');
+const cwd = process.cwd();
+const child_process = require('child_process');
+const {getBuildDirectory} = require('./utils/get_build_dir');
 
-
-var commands = {};
-
-var NATIVE_MODULES_BASE_LOCATION = path.normalize(path.join(
+const NATIVE_MODULES_BASE_LOCATION = path.join(
+	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules'
-	// 'labjack-nodejs',
-	// 'node_modules'
-));
+);
 
-var buildScripts = [
-	{'lib': 'ffi', 'text': 'Building ffi'},
-	{'lib': 'ref', 'text': 'Building ref'},
+const buildScripts = [
+	{'lib': 'ffi-napi', 'text': 'Building ffi-napi'},
+	{'lib': 'ref-napi', 'text': 'Building ref-napi'},
 ];
 
-var buildCommands = [];
+const buildOS = {
+	'darwin': 'darwin',
+	'win32': 'win32'
+}[process.platform] || 'linux';
 
 buildScripts.forEach(function(buildScript) {
-	buildScript.libPath = path.normalize(path.join(
-		cwd, NATIVE_MODULES_BASE_LOCATION, buildScript.lib
-	));
-
-	var cleanProject = [
-		'node-gyp',
-		'clean'
-	].join(' ');
-
-	var buildOS = {
-		'darwin': 'darwin',
-		'win32': 'win32'
-	}[process.platform];
-	if(typeof(buildOS) === 'undefined') {
-		buildOS = 'linux';
-	}
+	buildScript.libPath = path.join( NATIVE_MODULES_BASE_LOCATION, buildScript.lib );
 
 	// Project configurations
-	var configureProject = {
+	const configureProject = {
 		'win32': [
 			'node-gyp',
 			'configure',
@@ -69,13 +51,12 @@ buildScripts.forEach(function(buildScript) {
 		]
 	}[buildOS].join(' ');
 
-	var buildProject = [
+	const buildProject = [
 		'node-gyp',
 		'build'
 	].join(' ');
 
 	buildScript.cmds = [
-		// cleanProject,
 		configureProject,
 		buildProject,
 	];
@@ -87,9 +68,9 @@ buildScripts.forEach(function(buildScript) {
 console.log('buildScripts', buildScripts);
 
 
-// var executeBuildStepAsync = function(buildStep, cb) {
+// const executeBuildStepAsync = function(buildStep, cb) {
 // 	console.log('Executing CMD', buildStep);
-// 	// var execOutput = child_process.execSync(buildStep);
+// 	// const execOutput = child_process.execSync(buildStep);
 // 	child_process.exec(
 // 		buildStep,
 // 		function(error, stdout, stderr) {
@@ -127,9 +108,9 @@ console.log('buildScripts', buildScripts);
 
 // 	});
 
-var executeBuildStep = function(buildStep) {
+const executeBuildStep = function(buildStep) {
 	console.log('Executing CMD', buildStep);
-	var execOutput = child_process.execSync(buildStep);
+	child_process.execSync(buildStep);
 };
 buildScripts.forEach(function(buildScript) {
 	// Change Directories

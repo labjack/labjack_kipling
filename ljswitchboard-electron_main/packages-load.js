@@ -93,6 +93,7 @@ function loadProgramPackages(injector, splashScreenUpdater) {
 
                 // If all fails, check the starting directory of the process for the
                 // zipped files originally distributed with the application.
+                path.join(startDir, 'resources', 'app', 'ljswitchboard-static_files.zip'),
                 path.join(startDir, 'ljswitchboard-static_files.zip')
             ]
         },
@@ -119,78 +120,81 @@ function loadProgramPackages(injector, splashScreenUpdater) {
 
                 // If all fails, check the starting directory of the process for the
                 // zipped files originally distributed with the application.
+                path.join(startDir, 'resources', 'app', 'ljswitchboard-core.zip'),
                 path.join(startDir, 'ljswitchboard-core.zip')
             ]
         }
     ];
 
-    const initializeProgram = function() {
-        return new Promise((resolve, reject) => {
-            // Show the window's dev tools
-            // win.showDevTools();
+    const initializeProgram = async function() {
+        // Show the window's dev tools
+        // win.showDevTools();
 
-            // Perform synchronous loading of modules:
-            rootPackages.forEach(function(packageInfo) {
-                package_loader.loadPackage(packageInfo);
-            });
-
-            // Perform async operations
-            // const ljm_driver_checker = global.ljswitchboard.ljm_driver_checker;
-
-            const ljm_driver_checker = package_loader.getPackage('ljm_driver_checker');
-
-            ljm_driver_checker.verifyCoreInstall()
-                .then(function(res) {
-                    console.log('Core Req Check', res);
-                    // Make sure that the LabJack directory has been created
-                    if (res.overallResult) {
-                        const lj_folder_path = res['LabJack folder'].path;
-
-                        let persistentDataManager;
-
-                        // Save to the global scope
-                        // global.ljswitchboard.labjackFolderPath = lj_folder_path;
-                        if(!!process.env.TEST_MODE || gui.App.manifest.test) {
-                            persistentDataManager = new persistent_data_manager.create(
-                                lj_folder_path,
-                                gui.App.manifest.testPersistentDataFolderName,
-                                gui.App.manifest.persistentDataVersion
-                            );
-                        } else {
-                            persistentDataManager = new persistent_data_manager.create(
-                                lj_folder_path,
-                                gui.App.manifest.persistentDataFolderName,
-                                gui.App.manifest.persistentDataVersion
-                            );
-                        }
-
-                        // Save the path to the global scope
-                        // global.ljswitchboard.appDataPath = persistentDataManager.getPath();
-                        const appDataPath = persistentDataManager.getPath();
-                        injector.bindSingleton('appDataPath', appDataPath);
-
-                        const forceRefresh = gui.App.manifest.forceRefreshOfPersistentData;
-                        persistentDataManager.init(forceRefresh)
-                            .then(function(res) {
-                                console.log('Re-Initialized Data:', res);
-                                resolve();
-                            }, function(err) {
-                                appExtractionFailed = true;
-                                console.log('Failed to initialize data', err);
-                                console.log('Write-access required for:', appDataPath.toString());
-                                splashScreenUpdater.update('App Failed: write-access required for: ' + appDataPath.toString());
-                                reject({'code': 'persistentData', 'data': err});
-                            });
-                    } else {
-                        reject({'code': 'core', 'data': res});
-                        console.log('Failed core-check');
-                        splashScreenUpdater.update('Failed installation verification');
-                    }
-                }, function(err) {
-                    console.log('Failed while executing verifyCoreInstall', err);
-                    splashScreenUpdater.update('Failed to verify installation');
-                });
+        // Perform synchronous loading of modules:
+        rootPackages.forEach(function(packageInfo) {
+            package_loader.loadPackage(packageInfo);
         });
+
+        // Perform async operations
+        // const ljm_driver_checker = global.ljswitchboard.ljm_driver_checker;
+
+        const ljm_driver_checker = package_loader.getPackage('ljm_driver_checker');
+
+        let res;
+        try {
+            res = await ljm_driver_checker.verifyCoreInstall();
+            console.log('Core Req Check', res);
+            // Make sure that the LabJack directory has been created
+            if (!res.overallResult) {
+                console.log('Failed core-check');
+                splashScreenUpdater.update('Failed installation verification');
+                throw {'code': 'core', 'data': res};
+            }
+
+        } catch (err) {
+            console.log('Failed while executing verifyCoreInstall', err);
+            splashScreenUpdater.update('Failed to verify installation');
+            throw err;
+        }
+
+        const lj_folder_path = res['LabJack folder'].path;
+
+        let persistentDataManager;
+
+        // Save to the global scope
+        // global.ljswitchboard.labjackFolderPath = lj_folder_path;
+        if(!!process.env.TEST_MODE || gui.App.manifest.test) {
+            persistentDataManager = new persistent_data_manager.create(
+                lj_folder_path,
+                gui.App.manifest.testPersistentDataFolderName,
+                gui.App.manifest.persistentDataVersion
+            );
+        } else {
+            persistentDataManager = new persistent_data_manager.create(
+                lj_folder_path,
+                gui.App.manifest.persistentDataFolderName,
+                gui.App.manifest.persistentDataVersion
+            );
+        }
+
+        // Save the path to the global scope
+        // global.ljswitchboard.appDataPath = persistentDataManager.getPath();
+        const appDataPath = persistentDataManager.getPath();
+        injector.bindSingleton('appDataPath', appDataPath);
+
+        const forceRefresh = gui.App.manifest.forceRefreshOfPersistentData;
+
+        try {
+            const initRes = await persistentDataManager.init(forceRefresh);
+            console.log('Re-Initialized Data:', initRes);
+            return;
+        } catch (err) {
+            appExtractionFailed = true;
+            console.log('Failed to initialize data', err);
+            console.log('Write-access required for:', appDataPath.toString());
+            splashScreenUpdater.update('App Failed: write-access required for: ' + appDataPath.toString());
+            throw {'code': 'persistentData', 'data': err};
+        }
     };
 
     let appExtractionFailed = false;

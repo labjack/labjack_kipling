@@ -6,7 +6,7 @@ var path = require('path');
 var cwd = process.cwd();
 // var ndd = require('node-dir-diff');
 
-var fileOps = require('../build_scripts/file_operations');
+var fileOps = require('../build_scripts/utils/file_operations');
 
 
 var TEMP_ZIP_TEST_DIR = 'temp_zip_test_dir';

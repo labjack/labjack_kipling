@@ -101,7 +101,7 @@ if(!!process.env.TEST_MODE || manifest.test) {
 
 } else {
 	// If this isn't a test then start ljswitchboard
-	var start_ljswitchboard = require('./lib/start_ljswitchboard');
+	// var start_ljswitchboard = require('./lib/start_ljswitchboard');
 }
 
 }

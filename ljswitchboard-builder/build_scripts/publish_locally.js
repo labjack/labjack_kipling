@@ -6,24 +6,21 @@
  * Expects to be called from cwd: labjack_kipling/ljswitchboard-builder
  */
 
-const childProcess = require('child_process')
+require('./utils/error_catcher');
+
+const childProcess = require('child_process');
 const path = require('path');
 
-const fse = require('fs-extra');
-const q = require('q');
+const emptyDirectory = require('./utils/empty_directory');
+const {getPackages} = require('./utils/get_labjack_kipling_packages.js');
+const {getBuildDirectory} = require('./utils/get_build_dir');
 
-const emptyDirectory = require('./empty_directory');
-const getPackages = require('./get_labjack_kipling_packages.js').getPackages;
-
-const startingDir = process.cwd();
-
-const TEMP_PUBLISH_DIRECTORY = 'temp_publish';
-const TEMP_PUBLISH_PATH = path.join(startingDir, TEMP_PUBLISH_DIRECTORY);
+const TEMP_PUBLISH_PATH = path.join(getBuildDirectory(), 'temp_publish');
 
 function getAllPackagesExceptBuilder() {
-	var packages = getPackages();
+	const packages = getPackages();
 	const index = packages.findIndex(function(el) {
-		return (el.name == 'ljswitchboard-builder')
+		return (el.name === 'ljswitchboard-builder');
 	});
 	packages.splice(index, 1);
 	return packages;
@@ -41,7 +38,7 @@ function localPublish() {
 
         console.log(childProcess.execSync(`npm pack ${pkg.location} --loglevel silent`, {
             'cwd': TEMP_PUBLISH_PATH
-		}).toString('utf-8'));
+		}).toString('utf-8').trim());
 	});
 }
 
