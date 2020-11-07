@@ -15,6 +15,8 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
+      - name: Set env
+        run: echo ::set-env name=workspace::$GITHUB_WORKSPACE
       - name: Download ljm
         uses: wei/wget@v1
         with:
@@ -33,5 +35,5 @@ jobs:
         run: node ./scripts/fix_lerna_backup.js
       - run: npm run build
         env:
-          BUILD_DIR: ${{ GITHUB_WORKSPACE }}/dist
-      - run: ls ${{ GITHUB_WORKSPACE }}/dist
+          BUILD_DIR: ${{ env.workspace }}/dist
+      - run: ls ${{ env.workspace }}/dist
