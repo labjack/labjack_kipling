@@ -3,10 +3,7 @@
   "version": "3.2.0",
   "description": "LabJack Kipling device configuration and general I/O GUI program.",
   "scripts": {
-    "build:old": "node scripts/prep_build_and_run.js",
-    "build:nw": "cd ljswitchboard-builder && node ./build_scripts/build_project.js && cd ..",
-    "pack": "npm run pack --prefix ljswitchboard-electron_main",
-    "dist": "npm run dist --prefix ljswitchboard-electron_main",
+    "build": "npm run build --prefix ljswitchboard-builder",
     "clean": "lerna clean",
     "clean_core": "node main.js --which=core do -c \"rm -r node_modules\"",
     "clean_temp_files": "node scripts/clean_temp_files.js",

@@ -87,6 +87,6 @@
 	"script_notes": "to run a script w/o using npm test, use npm run [script name]",
 	"scripts": {
 		"clean": "rimraf temp_project_files temp* output",
-		"build": "BUILD_DIR=/tmp/_labjack_build node ./build_scripts/build_project.js"
+		"build": "node ./build_scripts/build_project.js"
 	}
 }

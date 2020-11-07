@@ -2,14 +2,14 @@ name: Unit Tests
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ electron ] # master
 
 jobs:
   build:
 
     strategy:
       matrix:
-        node-version: [8.9.4]
+        node-version: [12.16.3]
         platform: [ubuntu-16.04]
 
     runs-on: ${{ matrix.platform }}
@@ -26,9 +26,9 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      #      - run: npm ci # doesn't work with node8
-      - run: npm install --global node-gyp@latest
+      - run: npm ci # doesn't work with node8
       - run: npm install
       - run: npm run setup
       - name: Fix lerna mess
         run: node ./scripts/fix_lerna_backup.js
+      - run: npm run build
