@@ -7,25 +7,23 @@ class NwFakeWindow {
         return BrowserWindow.getFocusedWindow();
     }
 
-    open(url) {
+    open(url, windowData) {
+        if (!windowData) {
+            windowData = {};
+        }
+
         console.log('NwFakeWindow.open', url);
-        const windowData = packageData.window;
-        const window = new BrowserWindow({
-            width: windowData.width,
-            height: windowData.height,
-            'min-width': windowData.min_width,
-            'min-height': windowData.min_height,
-            resizable: windowData.resizable,
-            title: windowData.title,
-            icon: windowData.icon,
-            frame: windowData.frame,
-            webPreferences: {
+
+        const options = Object.assign({}, windowData, {
+            webPreferences: Object.assign({}, windowData.webPreferences, {
                 preload: `${__dirname}/preload.js`,
                 nodeIntegration: true,
                 enableRemoteModule: true,
                 worldSafeExecuteJavaScript: true
-            }
+            })
         });
+
+        const window = new BrowserWindow(options);
         window.webContents.openDevTools();
 
         window.loadURL(url);

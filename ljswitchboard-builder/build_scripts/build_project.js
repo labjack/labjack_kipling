@@ -56,10 +56,7 @@ if (mac_notarize) {
 
 (async () => {
 	try {
-		// await runScript({'script': 'electron_build', 'text': 'Run electron-builder'});
-		// return;
 		await runScript({'script': 'clean_build', 'text': 'Cleaning Build Directory'});
-		// await runScript({'script': 'copy_nwjs', 'text': 'Copy nwjs files'});
 		await runScript({'script': 'publish_locally', 'text': 'Publish Locally'});
 		await runScript({'script': 'gather_project_files', 'text': 'Gathering Project Files'});
 		await runScript({'script': 'edit_k3_startup_settings', 'text': 'Edit K3 Startup Settings'});

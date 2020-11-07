@@ -1,7 +1,6 @@
 'use strict';
 
 const EventEmitter = require('events').EventEmitter;
-const async = require('async');
 
 const path = require('path');
 
@@ -412,7 +411,13 @@ class WindowManager extends EventEmitter {
 
 				gui.Window.open(
 					windowPath,
-					newWindowData,
+					Object.assign({}, newWindowData, {
+						webPreferences: {
+							additionalArguments: [
+								'--packageName=' + packageInfo.name
+							]
+						}
+					}),
 					(win) => {
 						const windowTitle = newWindowData.title ? newWindowData.title : '';
 						const initialVisibilityState = (typeof (newWindowData.show) !== 'undefined') ? newWindowData.show : true;
@@ -436,8 +441,13 @@ class WindowManager extends EventEmitter {
 				// Open a new window and save its reference
 
 				const newWindow = gui.Window.open(
-					windowPath,
-					newWindowData
+					windowPath, Object.assign({}, newWindowData, {
+						webPreferences: {
+							additionalArguments: [
+								'--packageName=' + packageInfo.name
+							]
+						}
+					})
 				);
 
 				const windowTitle = newWindowData.title ? newWindowData.title : '';
@@ -461,53 +471,38 @@ class WindowManager extends EventEmitter {
 		});
 	}
 
-	openManagedApps(packages) {
-		return new Promise((resolve, reject) => {
+	async openManagedApps(packages) {
+		const keys = Object.keys(packages);
 
-			const keys = Object.keys(packages);
+		for (const key of keys) {
+			try {
+				console.log('openManagedApp', key);
+				// Open the found nwApp libraries
+				let reqOpenWindow = false;
+				if (packages[key].packageData) {
+					const loadedAppData = packages[key].packageData;
+					if (loadedAppData['ljswitchboard-main']) {
+						const appFile = loadedAppData['ljswitchboard-main'];
+						const appType = path.extname(appFile);
+						if (appType === '.html') {
+							const requiredInfo = {
+								'main': appFile
+							};
+							reqOpenWindow = true;
 
-			console.log('this.openManagedApps', keys);
-			async.eachSeries(keys, (key, cb) => {
-				try {
-					// Open the found nwApp libraries
-					let reqOpenWindow = false;
-					if (packages[key].packageData) {
-						const loadedAppData = packages[key].packageData;
-						if (loadedAppData['ljswitchboard-main']) {
-							const appFile = loadedAppData['ljswitchboard-main'];
-							const appType = path.extname(appFile);
-							if (appType === '.html') {
-								const requiredInfo = {
-									'main': appFile
-								};
-								reqOpenWindow = true;
-								this.openWindow(
-									packages[key].packageInfo,
-									requiredInfo,
-									packages[key].packageData
-								).then((res) => {
-									cb();
-								}, (err) => {
-									cb(err);
-								});
-							}
+							await this.openWindow(
+								packages[key].packageInfo,
+								requiredInfo,
+								packages[key].packageData
+							);
 						}
 					}
-					if (!reqOpenWindow) {
-						cb();
-					}
-				} catch (err) {
-					console.error('Error Opening App', key, err);
 				}
-			}, (err) => {
-				if (err) {
-					reject(err);
-				} else {
-					resolve();
-				}
-			});
-
-		});
+			} catch (err) {
+				console.error('Error Opening App', key, err);
+				throw err;
+			}
+		}
 	}
 
 	linkOutput(console) {

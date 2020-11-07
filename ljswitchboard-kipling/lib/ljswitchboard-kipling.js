@@ -148,7 +148,6 @@ exports.initializePackage = function (injector) {
 		await window_manager.setWindowVariable('kipling', 'moduleChromeTabTemplateName', moduleChromeTabTemplateName);
 
 		await loadResources(kiplingWindow.win, static_files);
-
 	});
 };
 

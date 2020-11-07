@@ -6,6 +6,9 @@ const fse = require('fs-extra');
 const fsex = require('fs.extra');
 const path = require('path');
 const targz = require('targz');
+const tar = require('tar-fs');
+const zlib = require('zlib');
+const stream = require('stream');
 const yazl = require('yazl');
 
 exports.debug = false;
@@ -191,6 +194,67 @@ function compressFolderWithtargz (from, to) {
 
     });
 }
+
+class MemStream extends stream.Writable {
+    constructor(name) {
+        super();
+        this.name = name;
+        this._chunks = [];
+    }
+
+    _write(chunk, enc, cb) {
+        this._chunks.push(chunk);
+        cb();
+    }
+
+    toString() {
+        return Buffer.concat(this._chunks).toString();
+    }
+}
+
+exports.readTarGzPackageJson = function(filePath) {
+    return new Promise((resolve, reject) => {
+        const tarExtract = tar.extract('', {
+            ignore() { // Do not write to fs
+                return true;
+            }
+        });
+
+        tarExtract.on('error', (err) => {
+            reject(err);
+        });
+
+        tarExtract.on('entry', function(header, stream, next) {
+            stream.on('error', (err) => {
+                reject(err);
+            });
+            if (header.name === 'package/package.json') {
+                const writer = new MemStream(filePath);
+                writer.on('finish', () => {
+                    const str = writer.toString();
+                    try {
+                        const json = JSON.parse(str);
+                        resolve(json);
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+                stream.pipe(writer);
+                next();
+                return;
+            }
+            next();
+        });
+
+        tarExtract.on('finish', function() {
+            resolve({});
+        });
+
+        fs.createReadStream(filePath)
+            .pipe(zlib.createGunzip())
+            .pipe(tarExtract);
+    });
+};
 
 function compressFolder (folder) {
     if(folder.outputType && folder.outputType === '.tar.gz') {

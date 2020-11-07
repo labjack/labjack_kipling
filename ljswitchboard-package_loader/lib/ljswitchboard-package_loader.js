@@ -107,8 +107,13 @@ class PackageLoader extends EventEmitter {
 
 		// Open a new window and save its reference
 		curApp.win = gui.Window.open(
-			windowPath,
-			newWindowData
+			windowPath, Object.assign({}, newWindowData, {
+				webPreferences: {
+					additionalArguments: [
+						'--packageName=' + packageInfo.name
+					]
+				}
+			})
 		);
 
 		// If desired, open the window's devTools
@@ -229,6 +234,8 @@ class PackageLoader extends EventEmitter {
 
 	getPackage(name) {
 		if (!this._loadedPackages[name]) {
+			console.trace();
+			console.error('Package ' + name + ' not found');
 			throw 'Package ' + name + ' not found';
 		}
 

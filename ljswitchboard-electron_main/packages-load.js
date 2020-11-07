@@ -23,7 +23,7 @@ function loadProgramPackages(injector, splashScreenUpdater) {
     });
 
     package_loader.on('failed_to_initialize_package_manager', function(message) {
-        console.log('Failed to initialize pagkage_manager', message);
+        console.log('Failed to initialize package_manager', message);
         splashScreenUpdater.update(message.toString());
     });
     package_loader.on('failed_to_load_managed_package', function(message) {

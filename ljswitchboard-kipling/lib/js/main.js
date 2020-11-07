@@ -50,7 +50,6 @@ async function performRemainingInitializationRoutines() {
 }
 
 function showKiplingWindow(window_manager, splashScreenUpdater) {
-
     return new Promise((resolve, reject) => {
         splashScreenUpdater.update('Finished');
         window_manager.hideWindow('core');
@@ -121,35 +120,32 @@ function saveGlobalSubprocessReference(bundle, io_interface) {
     return Promise.resolve(bundle);
 }
 
-function startIOManager(io_interface, splashScreenUpdater) {
-    return new Promise((resolve, reject) => {
+async function startIOManager(io_interface, splashScreenUpdater) {
+    console.log('startIOManager');
 
-        function reportIOInitializationError(data) {
-            console.error('io_interface.initialize error:', data);
+    // Attach monitor
+    GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
+    io_interface.on(io_interface.eventList.PROCESS_CLOSE, data => ioManagerMonitor(data, io_interface));
 
-            let remainingMessage = '';
+    // Add monitors to the other error events.
+    io_interface.on(io_interface.eventList.PROCESS_ERROR, getIOManagerListener('PROCESS_ERROR'));
+    io_interface.on(io_interface.eventList.PROCESS_EXIT, getIOManagerListener('PROCESS_EXIT'));
+    io_interface.on(io_interface.eventList.PROCESS_DISCONNECT, getIOManagerListener('PROCESS_DISCONNECT'));
 
-            if (data.code === 'EPERM') {
-                remainingMessage += ', Permissions';
-            } else {
-                console.log(typeof (data.code), data.code);
-                remainingMessage += ', Subprocess Failed';
-            }
-            splashScreenUpdater.update('Failed to initialize IO Manager' + remainingMessage);
+    try {
+        const bundle = await io_interface.initialize();
+        return await saveGlobalSubprocessReference(bundle, io_interface);
+    } catch (data) {
+        let remainingMessage = '';
+
+        if (data.code === 'EPERM') {
+            remainingMessage += ', Permissions';
+        } else {
+            console.log(typeof (data.code), data.code);
+            remainingMessage += ', Subprocess Failed';
         }
-        // Attach monitor
-        GLOBAL_ALLOW_SUBPROCESS_TO_RESTART = true;
-        io_interface.on(io_interface.eventList.PROCESS_CLOSE, data => ioManagerMonitor(data, io_interface));
-
-        // Add monitors to the other error events.
-        io_interface.on(io_interface.eventList.PROCESS_ERROR, getIOManagerListener('PROCESS_ERROR'));
-        io_interface.on(io_interface.eventList.PROCESS_EXIT, getIOManagerListener('PROCESS_EXIT'));
-        io_interface.on(io_interface.eventList.PROCESS_DISCONNECT, getIOManagerListener('PROCESS_DISCONNECT'));
-
-        io_interface.initialize()
-            .then(bundle => saveGlobalSubprocessReference(bundle, io_interface), reportIOInitializationError)
-            .then(resolve, reject);
-    });
+        splashScreenUpdater.update('Failed to initialize IO Manager' + remainingMessage);
+    }
 }
 
 

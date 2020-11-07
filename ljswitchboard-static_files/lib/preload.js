@@ -9,7 +9,7 @@
 async function loadJsCssFile(filename, filetype, documentLocation) {
     const location = documentLocation ? documentLocation : 'head';
 
-    console.log('Loading resource:', filename);
+    console.info('Loading resource:', filename);
     return new Promise(function (resolve) {
         if (filetype === '.js') {
             const fileRef = document.createElement('script');

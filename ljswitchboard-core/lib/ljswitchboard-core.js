@@ -179,7 +179,7 @@ exports.initializePackage = function (injector) {
 					'payload': compiledData
 				});
 
-				splashScreenUpdater.update('Verifing LJM Installation');
+				splashScreenUpdater.update('Verifying LJM Installation');
 
 				const ljm_driver_checker = package_loader.getPackage('ljm_driver_checker');
 
@@ -259,7 +259,11 @@ exports.initializePackage = function (injector) {
 			});
 		}
 
-		checkRequirements().then(loadCorePackages);
+		checkRequirements()
+			.then(loadCorePackages)
+			.catch(err => {
+				console.error(err);
+			});
 	});
 };
 

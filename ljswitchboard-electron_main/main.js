@@ -1,6 +1,5 @@
 const electron = require('electron');
 const path = require('path');
-const fs = require('fs');
 const url = require('url');
 
 const {PackageLoader} = require('ljswitchboard-package_loader');
@@ -55,13 +54,8 @@ const win = {
 };
 */
 
-const oldRequire = require;
-global.require = (name) => {
-  if (fs.existsSync(path.join(__dirname, 'node_modules', name))) {
-    return oldRequire(path.join(__dirname, 'node_modules', name));
-  }
-  return oldRequire(name);
-};
+process.env.NODE_PATH = path.join(__dirname, '/node_modules/');
+require('module').Module._initPaths();
 
 const package_loader = new PackageLoader(injector);
 injector.bindSingleton('package_loader', package_loader);
@@ -99,17 +93,29 @@ app.on('window-all-closed', function() {
 app.on('ready', function() {
   // Create the browser window.
 
-  splashWindow = fakeWindow.open(url.format({
-    pathname: path.join(__dirname, 'node_modules', 'ljswitchboard-electron_splash_screen', 'lib', 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }));
+  const appData = require('./package.json');
+  const newWindowData = appData.window ? appData.window : {};
 
-/*
-  splashWindow.on('did-finish-load', (event) => {
-    console.log('did-finish-load', event);
-  });
-*/
+  splashWindow = fakeWindow.open(
+      url.format({
+        pathname: path.join(__dirname, 'node_modules', 'ljswitchboard-electron_splash_screen', 'lib', 'index.html'),
+        protocol: 'file:',
+        slashes: true
+      }),
+      Object.assign({}, newWindowData, {
+        webPreferences: {
+        additionalArguments: [
+          '--packageName=' + 'ljswitchboard-electron_splash_screen'
+        ]
+      }
+    })
+  );
+
+  /*
+    splashWindow.on('did-finish-load', (event) => {
+      console.log('did-finish-load', event);
+    });
+  */
 
   // console.log('Displaying Splash-Screen', packageData);
 

@@ -25,6 +25,7 @@ zlib: "1.2.5"
 */
 
 window.addEventListener('splash_update', (event) => {
+	console.log('88887778787',event);
 	const message = event.payload;
 	const titleTextObj = document.querySelector('.titleText');
 	titleTextObj.textContent = message.toString();
