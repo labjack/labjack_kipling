@@ -11,8 +11,6 @@ const config = require('../package.json').build;
 
 const OUTPUT_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'output');
 
-console.log('config', config);
-
 // Promise is returned
 builder
     .build({

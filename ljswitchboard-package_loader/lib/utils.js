@@ -85,23 +85,19 @@ function getPackageVersionOfDirectory(packageInfo) {
     });
 }
 
-function checkPackageVersion(packageInfo) {
-    return new Promise((resolve) => {
-        packageInfo.version = '';
-        if (packageInfo.exists) {
-            if (packageInfo.type === 'directory') {
-                getPackageVersionOfDirectory(packageInfo)
-                    .then(resolve);
-            } else if (packageInfo.type === '.zip') {
-                getPackageVersionOfZip(packageInfo)
-                    .then(resolve);
-            } else {
-                resolve(packageInfo);
-            }
+async function checkPackageVersion(packageInfo) {
+    packageInfo.version = '';
+    if (packageInfo.exists) {
+        if (packageInfo.type === 'directory') {
+            return await getPackageVersionOfDirectory(packageInfo);
+        } else if (packageInfo.type === '.zip') {
+            return await getPackageVersionOfZip(packageInfo);
         } else {
-            resolve(packageInfo);
+            return packageInfo;
         }
-    });
+    } else {
+        return packageInfo;
+    }
 }
 
 function checkPackageType(packageInfo) {

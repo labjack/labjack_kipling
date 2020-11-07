@@ -1,8 +1,9 @@
-
+const electron = require('electron');
 var path = require('path');
 
 var cwd = path.normalize(process.cwd());
-var execDir = path.normalize(path.dirname(process.execPath));
+// var execDir = path.normalize(path.dirname(process.execPath));
+var execDir = path.dirname(electron.app.getPath('exe'));
 var derivedCWD = path.resolve(path.join(execDir, '..','..','..'));
 
 var startMethod = '';
@@ -107,6 +108,7 @@ if(os === 'win32') {
 	console.log('sys info', {
 		'os': os, 'platform': process.platform, 'arch': process.arch
 	});
+	startDir = execDir;
 } else {
 	console.log('OS Not Supported', os, process.platform, process.arch);
 }
