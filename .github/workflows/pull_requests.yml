@@ -1,7 +1,7 @@
 name: Unit Tests
 
 on:
-  pull_request:
+  push: # pull_request:
     branches: [ electron ] # master
 
 jobs:
