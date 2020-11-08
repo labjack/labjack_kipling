@@ -28,6 +28,9 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - run: npm --version
+      - run: npm install npm@latest -g
+      - run: npm --version
       # - run: npm ci # doesn't work with node8
       - run: npm install
       - run: npm run setup
