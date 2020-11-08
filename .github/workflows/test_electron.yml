@@ -28,9 +28,9 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci # doesn't work with node8
+      #- run: npm ci # doesn't work with node8
       #- run: npm install
-      #- run: npm run setup
+      - run: npm run setup_ci
       #- name: Fix lerna mess
         #run: node ./scripts/fix_lerna_backup.js
       - run: npm run build
