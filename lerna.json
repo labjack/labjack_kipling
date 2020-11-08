@@ -4,6 +4,9 @@
     "./*"
   ],
   "version": "independent",
+  "bootstrap": {
+      "npmClientArgs": ["--no-package-lock"]
+  },
   "ignoreChanges": [
     "test*/**",
     "**/*.md",
