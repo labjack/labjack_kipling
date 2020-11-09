@@ -26,7 +26,9 @@ const buildOpts = {
     //     Platform.LINUX.createTarget()
     // ],
     config: Object.assign({}, config, {
-        output: BUILT_PROJECT_FILES_PATH
+        directories: {
+            output: BUILT_PROJECT_FILES_PATH
+        }
     })
 };
 
