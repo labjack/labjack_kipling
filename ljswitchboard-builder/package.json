@@ -80,7 +80,14 @@
 	"build": {
 		"appId": "com.labjack/kipling",
 		"mac": {
-			"category": "public.app-category.utilities"
+			"category": "public.app-category.utilities",
+			"publish": []
+		},
+		"win": {
+			"publish": []
+		},
+		"linux": {
+			"publish": []
 		},
 		"asar": false,
 		"npmArgs": ["--force"]
