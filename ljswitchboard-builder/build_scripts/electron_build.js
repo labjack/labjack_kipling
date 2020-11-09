@@ -25,11 +25,7 @@ const buildOpts = {
     // targets: [
     //     Platform.LINUX.createTarget()
     // ],
-    config: Object.assign({}, config, {
-        directories: {
-            output: BUILT_PROJECT_FILES_PATH
-        }
-    })
+    config
 };
 
 if ('darwin' === buildOS) {
