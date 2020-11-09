@@ -489,11 +489,22 @@ class IOInterface extends EventEmitter {
 			// Check to make sure that the io_manager has been built for this os/node arch. etc.
 			const requirements = await this.checkRequirements(cwdOverride, passedResults);
 
-			// Get various parameters required to start the subprocess
-			const info = await this._innerGetNodePath(requirements, passedResults);
+			if (!!process.versions['electron']) {
+				const resolvedCWD = get_cwd.getCWD();
+				const rootDir = passedResults.cwdOverride ? passedResults.cwdOverride : resolvedCWD;
+				const info = {
+					'path': null,
+					'cwd': rootDir,
+				};
 
-			// Initialize the subprocess
-			await this.innerInitialize(info, passedResults);
+				await this.innerInitialize(info, passedResults);
+			} else {
+				// Get various parameters required to start the subprocess
+				const info = await this._innerGetNodePath(requirements, passedResults);
+
+				// Initialize the subprocess
+				await this.innerInitialize(info, passedResults);
+			}
 		} catch (err) {
 			console.error('io_interface error', err);
 			process.exit();

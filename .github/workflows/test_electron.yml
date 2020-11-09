@@ -37,7 +37,6 @@ jobs:
         env:
           BUILD_DIR: ${{ env.workspace }}/build
           USE_HARD_LINKS: "false"
-          DEBUG: "electron-builder"
       - run: ls ${{ env.workspace }}/build/output/dist
 
       - uses: actions/upload-artifact@v2
