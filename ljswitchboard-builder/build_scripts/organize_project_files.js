@@ -50,17 +50,10 @@ function addProjectFolder (folder) {
 			});
 		}
 	} else {
-		if(buildOS !== 'darwin') {
-			requiredFiles.push({
-				'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
-				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH),
-			});
-		} else {
-			foldersToCompress.push({
-				'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
-				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH),
-			});
-		}
+		requiredFiles.push({
+			'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
+			'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH),
+		});
 	}
 }
 buildData.kipling_dependencies.forEach(addProjectFolder);
