@@ -15,9 +15,11 @@ const buildOS = {
 	'win32': 'win32'
 }[process.platform] || 'linux';
 
-const OUTPUT_PROJECT_FILES_PATH = (buildOS === 'darwin') ?
-	path.join(getBuildDirectory(), 'output', 'nwjs.app', 'Contents', 'Resources')
-	: path.join(getBuildDirectory(), 'output');
+// const OUTPUT_PROJECT_FILES_PATH = (buildOS === 'darwin') ?
+// 	path.join(getBuildDirectory(), 'output', 'nwjs.app', 'Contents', 'Resources')
+// 	: path.join(getBuildDirectory(), 'output');
+
+const OUTPUT_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'output');
 
 const buildData = require('../package.json');
 let isTest = false;
