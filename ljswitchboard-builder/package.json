@@ -82,7 +82,8 @@
 		"mac": {
 			"category": "public.app-category.utilities"
 		},
-		"asar": false
+		"asar": false,
+		"npmArgs": ["--force"]
 	},
 	"script_notes": "to run a script w/o using npm test, use npm run [script name]",
 	"scripts": {

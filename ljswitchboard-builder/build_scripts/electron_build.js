@@ -21,7 +21,6 @@ const buildOpts = {
     linux: ['default'],
     win: ['default'],
     publish: [],
-    npmArgs: ['--force'],
     // targets: [
     //     Platform.LINUX.createTarget()
     // ],
