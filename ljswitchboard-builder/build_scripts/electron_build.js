@@ -20,6 +20,7 @@ const buildOpts = {
     projectDir: OUTPUT_PROJECT_FILES_PATH,
     linux: ['default'],
     win: ['default'],
+    publish: [],
     // targets: [
     //     Platform.LINUX.createTarget()
     // ],

@@ -78,9 +78,9 @@
 		"electron-builder": "^22.9.1"
 	},
 	"build": {
-		"appId": "your.id",
+		"appId": "com.labjack/kipling",
 		"mac": {
-			"category": "your.app.category.type"
+			"category": "public.app-category.utilities"
 		},
 		"asar": false
 	},

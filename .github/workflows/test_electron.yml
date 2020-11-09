@@ -35,5 +35,5 @@ jobs:
         #run: node ./scripts/fix_lerna_backup.js
       - run: npm run build
         env:
-          BUILD_DIR: ${{ env.workspace }}/dist
-      - run: ls ${{ env.workspace }}/dist
+          BUILD_DIR: ${{ env.workspace }}/build
+      - run: ls ${{ env.workspace }}/build/dist
