@@ -11,17 +11,28 @@ const config = require('../package.json').build;
 
 const OUTPUT_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'output');
 
+const buildOS = {
+    'darwin': 'darwin',
+    'win32': 'win32'
+}[process.platform] || 'linux';
+
+const buildOpts = {
+    projectDir: OUTPUT_PROJECT_FILES_PATH,
+    linux: ['default'],
+    win: ['default'],
+    // targets: [
+    //     Platform.LINUX.createTarget()
+    // ],
+    config
+};
+
+if ('darwin' === buildOS) {
+    buildOpts.mac = ['default'];
+}
+
 // Promise is returned
 builder
-    .build({
-        projectDir: OUTPUT_PROJECT_FILES_PATH,
-        linux: ['default'],
-        win: ['default'],
-        // targets: [
-        //     Platform.LINUX.createTarget()
-        // ],
-        config
-    })
+    .build(buildOpts)
     .then(() => {
         // handle result
     })
