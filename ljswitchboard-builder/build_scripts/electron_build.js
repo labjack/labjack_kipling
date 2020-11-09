@@ -10,6 +10,7 @@ const Platform = builder.Platform;
 const config = require('../package.json').build;
 
 const OUTPUT_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'output');
+const BUILT_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'built');
 
 const buildOS = {
     'darwin': 'darwin',
@@ -24,7 +25,9 @@ const buildOpts = {
     // targets: [
     //     Platform.LINUX.createTarget()
     // ],
-    config
+    config: Object.assign({}, config, {
+        output: BUILT_PROJECT_FILES_PATH
+    })
 };
 
 if ('darwin' === buildOS) {
