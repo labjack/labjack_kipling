@@ -58,7 +58,7 @@ function addProjectFolder (folder) {
 		} else {
 			foldersToCompress.push({
 				'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
-				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH, 'app' + '.nw'),
+				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH),
 			});
 		}
 	}
