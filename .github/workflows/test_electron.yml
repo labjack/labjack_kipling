@@ -17,12 +17,12 @@ jobs:
     steps:
       - name: Set env
         run: echo ::set-env name=workspace::$GITHUB_WORKSPACE
-      - name: Download ljm
-        uses: wei/wget@v1
-        with:
-          args: -O labjack_ljm_software.tar.gz https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_07_16_x86_64.tar.gz
-      - name: Install ljm
-        run: tar xfz labjack_ljm_software.tar.gz && cd ./labjack_ljm_software_2019_07_16_x86_64 && sudo ./labjack_ljm_installer.run
+#      - name: Download ljm
+#        uses: wei/wget@v1
+#        with:
+#          args: -O labjack_ljm_software.tar.gz https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_07_16_x86_64.tar.gz
+#      - name: Install ljm
+#        run: tar xfz labjack_ljm_software.tar.gz && cd ./labjack_ljm_software_2019_07_16_x86_64 && sudo ./labjack_ljm_installer.run
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
