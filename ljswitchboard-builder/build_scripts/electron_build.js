@@ -10,7 +10,6 @@ const Platform = builder.Platform;
 const config = require('../package.json').build;
 
 const OUTPUT_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'output');
-const BUILT_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'built');
 
 const buildOS = {
     'darwin': 'darwin',
@@ -19,17 +18,15 @@ const buildOS = {
 
 const buildOpts = {
     projectDir: OUTPUT_PROJECT_FILES_PATH,
-    linux: ['default'],
-    win: ['default'],
     publish: 'never',
-    // targets: [
-    //     Platform.LINUX.createTarget()
-    // ],
     config
 };
 
 if ('darwin' === buildOS) {
     buildOpts.mac = ['default'];
+} else {
+    buildOpts.linux = ['default'];
+    buildOpts.win = ['default'];
 }
 
 // Promise is returned

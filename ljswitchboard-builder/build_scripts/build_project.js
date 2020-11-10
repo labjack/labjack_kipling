@@ -62,7 +62,11 @@ if (mac_notarize) {
 		await runScript({'script': 'edit_k3_startup_settings', 'text': 'Edit K3 Startup Settings'});
 		await runScript({'script': 'install_production_dependencies', 'text': 'Installing production dependencies'});
 		await runScript({'script': 'validate_internal_dependencies', 'text': 'Validating there are no duplicate internal dependencies'});
-		// await runScript({'script': 'rebuild_native_modules', 'text': 'Rebuilding Native Modules (ffi & ref-napi)'});
+
+		if (buildOS === 'linux') {
+			await runScript({'script': 'rebuild_native_modules', 'text': 'Rebuilding Native Modules (ffi & ref-napi)'});
+		}
+
 		await runScript({'script': 'clean_project', 'text': 'Cleaning Project'});
 
 		if ((buildOS === 'darwin') && mac_notarize) {
