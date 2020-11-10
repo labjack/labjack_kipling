@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Electron build
 
 on:
   push: # pull_request:
@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         node-version: [12.16.3]
-        platform: [ubuntu-16.04]
+        platform: [ubuntu-16.04, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.platform }}
 

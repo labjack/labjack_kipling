@@ -22,11 +22,13 @@ const buildOpts = {
     config
 };
 
+
 if ('darwin' === buildOS) {
     buildOpts.mac = ['default'];
+} else if ('win32' === buildOS) {
+    buildOpts.win = ['default'];
 } else {
     buildOpts.linux = ['default'];
-    buildOpts.win = ['default'];
 }
 
 // Promise is returned
