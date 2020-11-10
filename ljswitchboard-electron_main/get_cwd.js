@@ -18,7 +18,13 @@ var os = {
     'sunos': 'linux'
 }[process.platform];
 
-if(os === 'win32') {
+if (process.env.NODE_ENV === 'development') {
+	startDir = path.resolve(__dirname);
+
+	console.log('Project was started in development mode via npm start');
+	console.log('startDir', startDir);
+
+} else if(os === 'win32') {
 	if(cwd === derivedCWD) {
 		console.log('Project was started via npm start');
 		startMethod = 'npm start';

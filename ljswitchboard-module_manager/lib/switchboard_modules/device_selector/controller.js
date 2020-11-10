@@ -692,13 +692,13 @@ const createModuleInstance = function() {
 
 			// Load and display cached device scan results
 			// .then(getCachedListAllDevices)
-			await getCachedListAllDevices();
-			await self.viewGen.displayScanResults();
+			const cachedScanResults = await getCachedListAllDevices();
+			await self.viewGen.displayScanResults(cachedScanResults);
 
 			// Don't load and display the cached device scan results because they
 			// don't currently  display devices that are open.  Force it to refresh.
 
-			const scanResults = await handleInitialDisplayScanResults();
+			const scanResults = await handleInitialDisplayScanResults(cachedScanResults);
 			self.emit(self.eventList.MODULE_STARTED, scanResults);
 			const data = {
 				'name': self.moduleData.name,

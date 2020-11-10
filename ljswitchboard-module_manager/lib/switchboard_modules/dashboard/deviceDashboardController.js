@@ -1,5 +1,8 @@
-const package_loader = global.lj_di_injector.get('package_loader');
+console.log('iiiii1');
+const package_loader = global.package_loader;
+console.log('iiiii12');
 const static_files = package_loader.getPackage('static_files');
+console.log('iiiii13');
 
 function getDeviceDashboardController(deviceInfo, moduleData) {
     var DEVICE_D3_CONTAINER;

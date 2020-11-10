@@ -23,44 +23,25 @@ var dict = require('dict');
 var q = require('q');
 var sprintf = require('sprintf-js').sprintf;
 
-
-var ljmmm_parse = null;
-try {
-    ljmmm_parse = require('ljmmm-parse');
-    ljmmm_parse.expandLJMMMNameSync = function (name) {
-        return ljmmm_parse.expandLJMMMEntrySync(
-            {name: name, address: 0, type: 'FLOAT32'}
-        ).map(function (entry) { return entry.name; });
-    };
-} catch (err) {
-    console.error('error loading ljmmm_parse');
-}
-var fs_facade = null;
-try {
-    fs_facade = global.require('fs_facade');
-} catch (err) {
-    console.error('error loading fs_facade presenter_framework', err, err.stack);
-}
-
-var driver_const;
-var modbus_map;
 const gui = global.lj_di_injector.get('gui');
-const package_loader = global.lj_di_injector.get('package_loader');
-const io_manager = package_loader.getPackage('io_manager');
-try {
-    driver_const = global.require('ljswitchboard-ljm_driver_constants');
-    modbus_map = global.require('ljswitchboard-modbus_map').getConstants();
-} catch(err) {
-    driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
-    modbus_map = require('ljswitchboard-modbus_map').getConstants();
-}
+const io_manager = global.io_manager;
+const modbus_map = require('ljswitchboard-modbus_map').getConstants();
+
+const fs_facade = require('fs_facade');
+const ljmmm_parse = require('ljmmm-parse');
+
+ljmmm_parse.expandLJMMMNameSync = function (name) {
+    return ljmmm_parse.expandLJMMMEntrySync(
+        {name: name, address: 0, type: 'FLOAT32'}
+    ).map(function (entry) { return entry.name; });
+};
+
 
 var FADE_DURATION = 400;
 var DEFAULT_REFRESH_RATE = 1000;
 var CONFIGURING_DEVICE_TARGET = '#sd-ramework-configuring-device-display';
 var DEVICE_VIEW_TARGET = '#device-view';
 var CALLBACK_STRING_CONST = '-callback';
-
 
 /**
  * Creates a new binding info object with the metadata copied from another.
@@ -4053,7 +4034,7 @@ function Framework() {
     }
     function addProgramExitListener() {
         try {
-            ADD_K3_EXIT_LISTENER(exitProgramListenerName, programExitListener);
+            global.ADD_K3_EXIT_LISTENER(exitProgramListenerName, programExitListener);
         } catch(err) {
             console.log('presenter_framework.js addProgramExitListener err', err);
         }

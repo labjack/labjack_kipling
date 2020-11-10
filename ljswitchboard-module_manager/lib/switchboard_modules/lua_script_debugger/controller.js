@@ -1,8 +1,10 @@
+const fs_facade = require('fs_facade');
+
 /**
  * Goals for the Lua Script Debugger module.
  * This is a Lua script intro-app that performs a minimal number of scripting
  * operations.  It is simply capable of detecting whether or not a Lua script
- * is running and then prints out the debugging log to the window.  
+ * is running and then prints out the debugging log to the window.
  *
  * @author Chris Johnson (LabJack Corp, 2013)
  *
@@ -14,7 +16,7 @@
  *     2. Read from "LUA_DEBUG_NUM_BYTES" register to determine how much data is
  *         available in the debugging info buffer.
  *     3. If there is data available in the debugging buffer then get it from
- *         the device. 
+ *         the device.
 **/
 
 // Constant that determines device polling rate.  Use an increased rate to aid
@@ -190,7 +192,7 @@ function module() {
         var moduleHeightExtra = 8;
         moduleHeightEl.height((newModuleHeight + moduleHeightExtra).toString()+'px');
 
-        var magicHeightVal = 193; 
+        var magicHeightVal = 193;
         var heightAdjust = magicHeightVal;
         if(self.areTableDescriptionsHidden) {
             heightAdjust -= 49;
@@ -271,7 +273,7 @@ function module() {
         );
     };
 
-    
+
 
     var setDeviceData = function(classStr, result) {
         // Initialize variables
@@ -455,7 +457,7 @@ function module() {
         var scriptInfo = self.getLuaScriptInfo(scriptName, 'name');
         self.printUserDebugInfo("Getting Script Info, loadLuaExample: ", scriptInfo);
         fileLocation = scriptInfo.scriptInfo.location;
-        
+
         self.luaController.loadExampleScript(fileLocation)
         .then(
             self.handleIOSuccess(
@@ -664,14 +666,14 @@ function module() {
             deviceStatusEl.hide();
             luaBodyBarEl.addClass('deviceStatusBarHidden');
             luaBodyBarEl.removeClass('deviceStatusBarVisible');
-            
+
             setButtonIcon(self.viewConstants.deviceStatus, 0);
             self.isDeviceStatusBarHidden ^= true;
             self.refreshEditorHeights();
             onSuccess();
         }
 
-        
+
     };
     function manageResizeDraggableVisibility() {
         var ele = $('.draggable-divider-bar');
@@ -695,7 +697,7 @@ function module() {
             // Set button Icon & title
             setButtonIcon(self.viewConstants.luaEditor, 1);
 
-            // Toggle visibility status                
+            // Toggle visibility status
             self.isLuaEditorHidden ^= true;
             self.refreshEditorHeights();
             onSuccess();
@@ -729,7 +731,7 @@ function module() {
             // Set button Icon & title
             setButtonIcon(self.viewConstants.luaDebugger, 1);
 
-            // Toggle visibility status                
+            // Toggle visibility status
             self.isLuaDebuggerHidden ^= true;
             self.refreshEditorHeights();
             onSuccess();
@@ -762,7 +764,7 @@ function module() {
             // Set button Icon & title
             setButtonIcon(self.viewConstants.tableDescriptions, 1);
 
-            // Toggle visibility status                
+            // Toggle visibility status
             self.areTableDescriptionsHidden ^= true;
             self.refreshEditorHeights();
             onSuccess();
@@ -815,7 +817,7 @@ function module() {
 
     /**
      * Function is called several times giving the module a chance to verify its
-     * startupData.  Execute onError if it is not valid or onSuccess if it is 
+     * startupData.  Execute onError if it is not valid or onSuccess if it is
      * valid.
     **/
     this.verifyStartupData = function(framework, startupData, onError, onSuccess) {
@@ -892,7 +894,7 @@ function module() {
         self.isLuaEditorHidden = !self.constants.luaEditorShownAtStartup;
         self.isLuaDebuggerHidden = !self.constants.luaDebuggerShownAtStartup;
         self.areTableDescriptionsHidden = !self.constants.tableDescriptionsShownAtStartup;
-        
+
         // Save framework object reference
         self.framework = framework;
 
@@ -908,7 +910,7 @@ function module() {
         //     self.moduleWindowResizeListener
         // );
 
-        
+
 
         // Register the SaveButtonhandler function to capture 'save' keypresses
         self.registerSaveButtonHandler(saveButtonHandler);
@@ -1013,14 +1015,14 @@ function module() {
                 callback: clearConsoleTextWindow
             },
         ];
-        
+
 
         // Save the smartBindings to the framework instance.
         framework.putSmartBindings(smartBindings);
-        
+
         onSuccess();
     };
-    
+
     function getExampleScripts(framework, device) {
         var minFWVersions = framework.moduleConstants.min_names_fw_versions;
 
@@ -1046,7 +1048,7 @@ function module() {
         return activeScript;
     }
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -1110,13 +1112,13 @@ function module() {
         setViewData('luaEditor', self.constants.luaEditorShownAtStartup);
         setViewData('luaDebugger', self.constants.luaDebuggerShownAtStartup);
         setViewData('tableDescriptions', self.constants.tableDescriptionsShownAtStartup);
-        
+
         // Load default startup script & complete function
         var fileName;
         var fileLocation;
         var scripts = self.preBuiltScripts;
         var scriptInfo;
-        
+
         // scripts.some(function(script,index){
         //     if(script.name == fileName){
         //         fileLocation = script.location;
@@ -1438,7 +1440,7 @@ function module() {
         self.updateStartupData();
         self.removeResizedListener();
         self.removeEditorResizeDragListeners();
-        
+
         self.saveCurrentScriptNavigationHandler()
         .then(onSuccess);
     };
@@ -1465,7 +1467,7 @@ function module() {
         self.luaEditor = undefined;
         debuggingLog = undefined;
         self.debuggingLog = undefined;
-        
+
         self.saveCurrentScriptNavigationHandler()
         .then(onSuccess);
     };

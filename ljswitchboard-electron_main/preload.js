@@ -1,5 +1,6 @@
 console.info('preload start');
 
+console.log('NODE_PATH', process.env.NODE_PATH);
 require('module').Module._initPaths(); // Fix node_modules path
 
 process.argv.forEach(arg => {
@@ -21,6 +22,7 @@ if (-1 === ['ljswitchboard-electron_splash_screen', 'core'].indexOf(global.packa
     global.handlebars = require('handlebars');
     global.io_manager = package_loader.getPackage('io_manager');
     global.module_manager = package_loader.getPackage('module_manager');
+    global.ljmmm_parse = require('ljmmm-parse');
 }
 
 window.addEventListener('message', (event) => {

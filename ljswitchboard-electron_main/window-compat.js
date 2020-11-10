@@ -12,8 +12,6 @@ class NwFakeWindow {
             windowData = {};
         }
 
-        console.log('NwFakeWindow.open', url);
-
         const options = Object.assign({}, windowData, {
             webPreferences: Object.assign({}, windowData.webPreferences, {
                 preload: `${__dirname}/preload.js`,
@@ -22,6 +20,8 @@ class NwFakeWindow {
                 worldSafeExecuteJavaScript: true
             })
         });
+
+        console.log('NwFakeWindow.open', url, options);
 
         const window = new BrowserWindow(options);
         window.webContents.openDevTools();

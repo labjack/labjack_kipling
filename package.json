@@ -13,7 +13,7 @@
     "run_built_k3": "node scripts/run_built_k3.js",
     "setup": "lerna bootstrap",
     "setup_ci": "lerna bootstrap --no-ci",
-    "start": "npm run start --prefix ljswitchboard-electron_main",
+    "start": "cross-env NODE_ENV=development npm run start --prefix ljswitchboard-electron_main",
     "test": "lerna exec --ignore ljswitchboard-ljm_special_addresses -- npm test --if-present"
   },
   "repository": {
@@ -32,6 +32,7 @@
     "q": "^1.5.1"
   },
   "devDependencies": {
+    "cross-env": "^7.0.2",
     "eslint": "^5.16.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-standard": "^4.0.1",

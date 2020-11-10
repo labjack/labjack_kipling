@@ -54,7 +54,7 @@ const win = {
 };
 */
 
-process.env.NODE_PATH = path.join(__dirname, '/node_modules/');
+process.env.NODE_PATH = path.join(__dirname, 'node_modules'); //  + ':' + path.resolve(__dirname, '..');
 require('module').Module._initPaths();
 
 const package_loader = new PackageLoader(injector);

@@ -1,4 +1,6 @@
-function customSpinners(owner, infoArray, writeFunc, updateFunc) {
+console.log('customSpinners1');
+
+global.customSpinners = function (owner, infoArray, writeFunc, updateFunc) {
     var maxVal = 5.05;
     var minVal = -0.05;
 
@@ -74,7 +76,7 @@ function customSpinners(owner, infoArray, writeFunc, updateFunc) {
             if(typeof(self.dacListerners[targetID]) !== 'undefined') {
                 clearTimeout(self.dacListerners[targetID].timer);
                 self.dacListerners[targetID].timer = setTimeout(
-                    self.setVoltage(event,targetID,targetElement), 
+                    self.setVoltage(event,targetID,targetElement),
                     500
                 );
                 self.spinStopData = event;
@@ -143,7 +145,7 @@ function customSpinners(owner, infoArray, writeFunc, updateFunc) {
             self.setVoltage(event,targetID,targetElement)();
         }
     };
-    
+
     this.createSpinners = function() {
         $( ".spinner" ).unbind();
         $( ".spinner" ).spinner({
@@ -158,5 +160,4 @@ function customSpinners(owner, infoArray, writeFunc, updateFunc) {
         $( ".spinner" ).bind('keypress', self.handleKeypress);
     };
     var self = this;
-}
-
+};

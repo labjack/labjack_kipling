@@ -1,6 +1,8 @@
+const driver_const = require('ljswitchboard-ljm_driver_constants');
+
 /**
  * Goals for the Network Settings module.
- * This module will give the user the ability to configure Ethernet and WiFi 
+ * This module will give the user the ability to configure Ethernet and WiFi
  * device settings.
  *
  * @author Chris Johnson (LabJack Corp, 2013)
@@ -32,7 +34,7 @@ function module() {
     }
 
     this.debug_validators = false;
-    
+
     this.moduleConstants = {};
     this.configOnlyRegisters = {};
     this.ethernetRegisters = {};
@@ -247,7 +249,7 @@ function module() {
             // manEl.attr('placeholder',strVal);
             self.updateInput(manEl, strVal);
         });
-        
+
         try {
             self.updateDetailedStatusTable(type);
         } catch(err) {
@@ -270,7 +272,7 @@ function module() {
     this.updateWifiSettings = function() {
         var wifiSSID = self.currentValues.get('WIFI_SSID').val;
         var dhcpDefault = self.currentValues.get('WIFI_DHCP_ENABLE_DEFAULT').val;
-        
+
 
         var ssidEl = $('#WIFI_SSID_DEFAULT_VAL .WIFI_SSID_DEFAULT_AUTO_VAL');
         // ssidEl.val('');
@@ -376,7 +378,7 @@ function module() {
         var dhcpValues = {};
         dhcpValues[self.dhcpText[0]] = 0;
         dhcpValues[self.dhcpText[1]] = 1;
-        
+
         var strVal = manualValEl.text();
         var value = "";
         var isNew = false;
@@ -548,7 +550,7 @@ function module() {
         wifiSettingRegs.push('WIFI_DHCP_ENABLE_DEFAULT');
         wifiSettingVals.push(dhcpSetting.value);
         return {
-            newRegisters: newWifiSettingRegs, 
+            newRegisters: newWifiSettingRegs,
             newValues: newWifiSettingVals,
             registers: wifiSettingRegs,
             values: wifiSettingVals
@@ -570,7 +572,7 @@ function module() {
         alertEl.addClass('alert-block');
         alertEl.attr('title',"Invalid IP Address");
         inputTextEl.removeClass('inputVerified');
-        alertEl.show(); 
+        alertEl.show();
     };
     this.showValidAlertIcon = function(alertEl,inputTextEl) {
         var alertMessageEl = alertEl.find('.messageIcon');
@@ -615,7 +617,7 @@ function module() {
         }
 
         if(inputText !== currentValue) {
-            // Remove Existing styles 
+            // Remove Existing styles
             alertMessageEl.removeClass('icon-checkmark-3');
             alertEl.removeClass('alert-success');
             alertMessageEl.removeClass('icon-close');
@@ -636,7 +638,7 @@ function module() {
             } else {
                 self.showInvalidAlertIcon(alertEl,inputTextEl);
                 isValid = false;
-            } 
+            }
         } else {
             self.resetAlertIcon(alertEl,inputTextEl);
             isValid = true;
@@ -855,7 +857,7 @@ function module() {
             ['POWER_ETHERNET','POWER_ETHERNET'],
             [0,1]
         );
-        
+
         ioDeferred.resolve();
         return ioDeferred.promise;
     };
@@ -1438,7 +1440,7 @@ function module() {
             }
             return ioDeferred.promise;
         };
-        
+
         var performWrites = networkPassword.isNew;
         if(performWrites) {
             waitForWifi()
@@ -1609,7 +1611,7 @@ function module() {
             );
         }
     };
-    
+
     var templatesToCompile = [
         'ethernet_settings',
         'wifi_settings',
@@ -1636,15 +1638,15 @@ function module() {
         self.moduleData = framework.moduleData;
 
         // Compile module templates
-        
+
         templatesToCompile.forEach(self.compileTemplate);
 
-        
+
         onSuccess();
     };
-    
+
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {object} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -1701,7 +1703,7 @@ function module() {
             };
             var checkEthernetPower = function() {
                 if(currentPower == newPower) {
-                    
+
                 } else {
                     updateInfo = true;
                 }
@@ -1729,7 +1731,7 @@ function module() {
                     updateEthernetInfo();
                     onSuccess();
                 });
-                
+
             } else {
                 onSuccess();
             }
@@ -1804,7 +1806,7 @@ function module() {
                     updateWifiInfo();
                     onSuccess();
                 });
-                
+
             } else {
                 onSuccess();
             }
@@ -1820,7 +1822,7 @@ function module() {
         self.configOnlyRegisters.forEach(function(regInfo){
             if(regInfo.deviceTypes.indexOf(self.activeDevice.savedAttributes.deviceTypeName) >= 0) {
                 smartBindings.push({
-                    bindingName: regInfo.name, 
+                    bindingName: regInfo.name,
                     smartName: 'setupOnlyRegister',
                     configCallback: genericConfigCallback
                 });
@@ -1836,10 +1838,10 @@ function module() {
                 isPeriodic &= (regInfo.isPeriodic);
                 if (regInfo.type === 'ip') {
                     format = 'customFormat';
-                    customFormatFunc = self.formatIPAddress; 
+                    customFormatFunc = self.formatIPAddress;
                 } else if (regInfo.type === 'status') {
                     format = 'customFormat';
-                    customFormatFunc = self.formatStatus; 
+                    customFormatFunc = self.formatStatus;
                 } else if (regInfo.type === 'rssi') {
                     format = 'customFormat';
                     customFormatFunc = self.formatRSSI;
@@ -1847,16 +1849,16 @@ function module() {
                     format = 'customFormat';
                     customFormatFunc = self.formatWifiStatus;
                 }
-                
+
                 binding.bindingName = regInfo.name;
                 binding.format = format;
                 binding.customFormatFunc = customFormatFunc;
-                
+
                 if (isPeriodic) {
                     binding.smartName = 'readRegister';
                     // if (regInfo.name === 'ETHERNET_IP') {
                     //     binding.periodicCallback = ethernetStatusListner;
-                    // } else 
+                    // } else
                     if (regInfo.name === 'WIFI_STATUS') {
                         binding.periodicCallback = wifiStatusListner;
                     } else {
@@ -1879,57 +1881,57 @@ function module() {
         var customSmartBindings = [
             {
                 // Define binding to handle Ethernet-Status updates.
-                bindingName: 'ethernetStatusManager', 
+                bindingName: 'ethernetStatusManager',
                 smartName: 'periodicFunction',
                 periodicCallback: ethernetStatusListner
             },{
                 // Define binding to handle Ethernet Power button presses.
-                bindingName: 'ethernetPowerButton', 
+                bindingName: 'ethernetPowerButton',
                 smartName: 'clickHandler',
                 callback: self.ethernetPowerButton
             },{
                 // Define binding to handle Ethernet DHCP-select button presses.
-                bindingName: 'ethernet-DHCP-Select-Toggle', 
+                bindingName: 'ethernet-DHCP-Select-Toggle',
                 smartName: 'clickHandler',
                 callback: self.ethernetDHCPSelect
             },{
                 // Define binding to handle Ethernet Apply button presses.
-                bindingName: 'ethernetApplyButton', 
+                bindingName: 'ethernetApplyButton',
                 smartName: 'clickHandler',
                 callback: self.ethernetApplyButton
             },{
                 // Define binding to handle Ethernet Cancel button presses.
-                bindingName: 'ethernetCancelButton', 
+                bindingName: 'ethernetCancelButton',
                 smartName: 'clickHandler',
                 callback: self.ethernetCancelButton
             },{
                 // Define binding to handle Ethernet Cancel button presses.
-                bindingName: 'ethernetHelpButton', 
+                bindingName: 'ethernetHelpButton',
                 smartName: 'clickHandler',
                 callback: self.ethernetHelpButton
             },{
                 // Define binding to handle Wifi Power button presses.
-                bindingName: 'wifiPowerButton', 
+                bindingName: 'wifiPowerButton',
                 smartName: 'clickHandler',
                 callback: self.wifiPowerButton
             },{
                 // Define binding to handle Wifi DHCP-select button presses.
-                bindingName: 'wifi-DHCP-Select-Toggle', 
+                bindingName: 'wifi-DHCP-Select-Toggle',
                 smartName: 'clickHandler',
                 callback: self.wifiDHCPSelect
             },{
                 // Define binding to handle Wifi Apply button presses.
-                bindingName: 'wifiApplyButton', 
+                bindingName: 'wifiApplyButton',
                 smartName: 'clickHandler',
                 callback: self.wifiApplyButton
             },{
                 // Define binding to handle Wifi Cancel button presses.
-                bindingName: 'wifiCancelButton', 
+                bindingName: 'wifiCancelButton',
                 smartName: 'clickHandler',
                 callback: self.wifiCancelButton
             },{
                 // Define binding to handle Ethernet Cancel button presses.
-                bindingName: 'wifiHelpButton', 
+                bindingName: 'wifiHelpButton',
                 smartName: 'clickHandler',
                 callback: self.wifiHelpButton
             }
@@ -1962,7 +1964,7 @@ function module() {
 
     /**
      * Function to configure the module's view.html template.
-     * @param  {object} framework the sdFramework object returned by the 
+     * @param  {object} framework the sdFramework object returned by the
      * framework.
     **/
     this.configureModuleContext = function(framework) {
@@ -2047,7 +2049,7 @@ function module() {
             }
         }
 
-        
+
 
         var initialEthernetDHCPStatus = self.currentValues.get('ETHERNET_DHCP_ENABLE_DEFAULT');
         if (initialEthernetDHCPStatus.val === 0) {
@@ -2093,7 +2095,7 @@ function module() {
 
         var ethernetStatusMessage = self.getStatusMessage('ethernet');
         self.moduleContext.ethernetStatusMessage = ethernetStatusMessage;
-        
+
         var wifiStatusMessage;
         if(hasWiFi) {
             wifiStatusMessage = self.getStatusMessage('wifi');
@@ -2113,7 +2115,7 @@ function module() {
 
         self.moduleContext.ethernetStatusRegisters = self.getOrganizedEthernetIPSettingsRegList();
 
-        
+
         if(hasWiFi) {
             // Get and save wifiIPRegisterList
             var wifiIPRegisters = self.getIPRegisters(self.wifiRegisters);
@@ -2140,7 +2142,7 @@ function module() {
                 networkInterfaces[interfaceID].addresses = availableInterfaces[key];
                 networkInterfaces[interfaceID].id = interfaceID;
                 networkInterfaces[interfaceID].name = key;
-                
+
             });
             console.log('Available network interfaces (network_settings/controller.js)', networkInterfaces);
             self.moduleContext.networkInterfaces = networkInterfaces;
@@ -2187,9 +2189,9 @@ function module() {
             );
         });
 
-        // Asynchronously loop through the addresses that failed to read during 
+        // Asynchronously loop through the addresses that failed to read during
         // the modules initial load step.  This commonly happens when the T7's
-        // flash is un-available (wifi-module is starting) aka reading _DEFAULT 
+        // flash is un-available (wifi-module is starting) aka reading _DEFAULT
         // values.
         async.eachSeries(
             errorAddresses,
@@ -2211,8 +2213,8 @@ function module() {
                     callback();
                 });
             }, function(err){
-                // When we are finished re-reading values call function to 
-                // configure the module's initial display context & return 
+                // When we are finished re-reading values call function to
+                // configure the module's initial display context & return
                 // control back to the framework.
                 // console.log('Configure module context');
                 self.configureModuleContext(framework);
@@ -2244,7 +2246,7 @@ function module() {
      * been loaded.
      * @param  {object} framework the framework object
      * @param  {function} onError   function to be called if an error occurs.
-     * @param  {function} onSuccess function to be called when finished 
+     * @param  {function} onSuccess function to be called when finished
      *                            successfully.
     **/
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
@@ -2254,10 +2256,10 @@ function module() {
         // force validations to occur
         self.selectivelyShowEthernetAlerts();
         self.selectivelyShowWifiAlerts();
-        
+
         // Collapse tables
         $('.collapse').collapse();
-        
+
         onSuccess();
     };
     this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
