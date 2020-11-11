@@ -1,3 +1,4 @@
+--***Depreciated***
 --This performs a find_all function that detects and outputs all properly connected I2C Devices on the I2C Bus on EIO4(SCL) and EIO5(SDA)
 I2C_Utils= {}
 function I2C_Utils.configure(self, sda, scl, speed, options, slave, debug)--Returns nothing

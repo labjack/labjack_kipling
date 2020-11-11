@@ -1,3 +1,4 @@
+--***Depreciated***
 --Define the I2C Utility and some I2C Helper functions
 I2C_Utils= {}
 function I2C_Utils.configure(self, sda, scl, speed, options, slave, debug)--Returns nothing

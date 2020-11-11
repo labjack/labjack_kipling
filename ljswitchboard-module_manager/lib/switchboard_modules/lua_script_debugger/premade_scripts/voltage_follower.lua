@@ -1,5 +1,6 @@
+-- ***Depreciated***
 --[[
-    Name: 0_voltage_follower.lua
+    Name: voltage_follower.lua
     Desc: Read AIN0-1 and write them to DAC0-1
 --]]
 

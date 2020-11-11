@@ -21,7 +21,7 @@ Setup on Windows:
 2. **(Windows)** Install node-gyp.  Do this in a command prompt window (Windows key, type cmd) with standard user permissions, not admin.
 
 ```
-> npm install -g node-gyp
+> npm install -g node-gyp@v3.2.1
 ```
 
 3. **(Windows)** Configure msvs version

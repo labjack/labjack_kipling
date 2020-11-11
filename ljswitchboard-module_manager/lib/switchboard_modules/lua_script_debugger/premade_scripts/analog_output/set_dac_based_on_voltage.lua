@@ -1,5 +1,5 @@
 --[[
-    Name: 3_set_dac_based_on_voltage.lua
+    Name: set_dac_based_on_voltage.lua
     Desc: This example shows how to set a DAC according to an input voltage
     Note: This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]

@@ -104,9 +104,18 @@ local settling = 0
 local isdifferential = true
 local readconfaddressa = MB.nameToAddress("AIN0_EF_READ_A")
 
+-- Get the device type by reading the PRODUCT_ID register
+local devtype = MB.readName("PRODUCT_ID")
+-- If the user is not using a T7 exit the script
+if devtype == 4 then
+  print("The Thermocouple AIN Feature is not supported on the T4. Exiting script")
+  -- Write 0 to LUA_RUN to stop the script
+  MB.writeName("LUA_RUN", 0);
+end
+
 -- Configure each analog input
 for i=1,table.getn(ainchannels) do
-  -- As per our App-Note, we HIGHLY RECOMMEND configuring the AIN
+  -- Per our App-Note, we HIGHLY RECOMMEND configuring the AIN
   -- to use the differential input mode instead of single ended.
   -- Enable the following line to do so:
   ain_channel_config(ainchannels[i],range,resolution,settling,isdifferential)
