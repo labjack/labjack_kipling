@@ -253,19 +253,19 @@
 			"name": "AIN Configuration",
 			"location": "lua_script_debugger/premade_scripts/ain_config/ain_config.lua"
 		}, {
-			"name": "Num Sec Since Epoch",
+			"name": "AIN Thermocouple Configuration",
 			"location": "lua_script_debugger/premade_scripts/ain_config/ain_config_tc.lua"
 		}, {
-			"name": "Read RTC",
+			"name": "AIN Default Configuration",
 			"location": "lua_script_debugger/premade_scripts/ain_config/ain_ef_config_set_defaults.lua"
 		}]
 	}, {
 		"name": "Analog Output",
 		"subScripts": [{
-			"name": "Output sine wave",
+			"name": "Output Sine Wave",
 			"location": "lua_script_debugger/premade_scripts/analog_output/output_sine_wave.lua"
 		}, {
-			"name": "Output triangle wave",
+			"name": "Output Triangle Wave",
 			"location": "lua_script_debugger/premade_scripts/analog_output/output_triangle_wave.lua"
 		}, {
 			"name": "Set DAC based on voltage",
