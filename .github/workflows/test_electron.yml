@@ -42,7 +42,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: my-artifact
-          path: ${{ env.workspace }}/build/output/dist/ljswitchboard-electron_main*
+          path: ${{ env.workspace }}/build/output/dist/kipling-*
 
 
 
