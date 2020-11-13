@@ -77,10 +77,21 @@
 		"mocha": "7.2.0",
 		"electron-builder": "^22.9.1"
 	},
+	"directories": {
+		"buildResources": "branding_files"
+	},
 	"build": {
+		"productName": "kipling",
 		"appId": "com.labjack/kipling",
 		"mac": {
+			"icon": "Kipling3.icns",
 			"category": "public.app-category.utilities"
+		},
+		"linux": {
+			"icon": "Kipling_128x128.png"
+		},
+		"win": {
+			"icon": "Kipling3.ico"
 		},
 		"asar": false,
 		"npmArgs": ["--force"]
