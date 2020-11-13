@@ -94,6 +94,7 @@ function loadProgramPackages(injector, splashScreenUpdater) {
                 // If all fails, check the starting directory of the process for the
                 // zipped files originally distributed with the application.
                 path.join(startDir, 'resources', 'app', 'ljswitchboard-static_files.zip'),
+                path.resolve(startDir, '..', 'Resources', 'app', 'ljswitchboard-static_files.zip'),
                 path.join(startDir, 'ljswitchboard-static_files.zip')
             ]
         },
@@ -121,6 +122,7 @@ function loadProgramPackages(injector, splashScreenUpdater) {
                 // If all fails, check the starting directory of the process for the
                 // zipped files originally distributed with the application.
                 path.join(startDir, 'resources', 'app', 'ljswitchboard-core.zip'),
+                path.resolve(startDir, '..', 'Resources', 'app', 'ljswitchboard-core.zip'),
                 path.join(startDir, 'ljswitchboard-core.zip')
             ]
         }
