@@ -26,7 +26,7 @@ describe('test_kipling', function() {
 
 			package_loader = global.require('ljswitchboard-package_loader');
 			gns = package_loader.getNameSpace();
-			gui = global[gns].gui;
+			gui = global.gui;
 			screens = gui.Screen.Init();
 			var baseScreen = screens.screens[0];
 			var bounds = baseScreen.bounds;

@@ -42,14 +42,11 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 	}
 
 	renderTaskTemplate(name, context) {
-		return new Promise((resolve, reject) => {
-
-		resolve();
-		});
+		return Promise.resolve();
 	}
 
 	getTaskLoaderDestination() {
-		if(this.cachedTaskLoaderDestination) {
+		if (this.cachedTaskLoaderDestination) {
 			return this.cachedTaskLoaderDestination;
 		} else {
 			this.cachedTaskLoaderDestination = $('#' + TASK_LOADER_DESTINATION_ID);
@@ -58,18 +55,15 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 	}
 
 	loadTaskData(task) {
-		return new Promise((resolve, reject) => {
-			module_manager.loadModuleData(task.task)
+		return module_manager
+			.loadModuleData(task.task)
 			.then((taskData) => {
 				task.taskData = taskData;
-				resolve(task);
+				return task;
 			});
-		});
 	}
 
-	checkForViewData(task) {
-		return new Promise((resolve, reject) => {
-		// console.log('in checkForViewData', task, task.task.name);
+	async checkForViewData(task) {
 		let hasViewData = false;
 
 		// Search the current task for the "hasView" attribute and check to see
@@ -82,20 +76,20 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 		let viewIndex = -1;
 		let styleIndex = -1;
 
-		if(typeof(task.task.data.hasView) !== 'undefined') {
-			if(task.task.data.hasView) {
-				if(task.task.htmlFiles) {
+		if (typeof(task.task.data.hasView) !== 'undefined') {
+			if (task.task.data.hasView) {
+				if (task.task.htmlFiles) {
 					viewIndex = task.task.htmlFiles.indexOf('view.html');
 				}
-				if(task.task.cssFiles) {
+				if (task.task.cssFiles) {
 					styleIndex = task.task.cssFiles.indexOf('style.css');
 				}
-				if((viewIndex > -1) && (styleIndex > -1)) {
+				if ((viewIndex > -1) && (styleIndex > -1)) {
 					hasViewData = true;
 				}
 			}
 		}
-		if(hasViewData) {
+		if (hasViewData) {
 			task.hasViewData = true;
 			task.viewDataIndices = {
 				'view': viewIndex,
@@ -103,63 +97,56 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 			};
 		}
 
-		resolve(task);
-		});
+		return task;
 	}
 
-	renderViewData(task) {
-		return new Promise((resolve, reject) => {
-			if(task.hasViewData) {
-				const taskViewData = task.taskData.htmlFiles.view;
-				const viewTemplate = handlebars.compile(taskViewData);
-				try {
-					task.compiledViewData = viewTemplate(task.taskData);
-				} catch(err) {
-					console.error('Error Compiling Task view.html', err);
-				}
+	async renderViewData(task) {
+		if (task.hasViewData) {
+			const taskViewData = task.taskData.htmlFiles.view;
+			const viewTemplate = global.handlebars.compile(taskViewData);
+			try {
+				task.compiledViewData = viewTemplate(task.taskData);
+			} catch(err) {
+				console.error('Error Compiling Task view.html', err);
 			}
-			resolve(task);
-		});
+		}
+		return task;
 	}
 
-	constructTaskView(task) {
-		return new Promise((resolve, reject) => {
-		if(task.hasViewData) {
-			compileTemplate(TASK_VIEW_TEMPLATE_FILE_NAME, task)
-			.then((compiledTask) => {
-				// Save the compiled data
-				task.constructedTaskHTMLData = compiledTask;
-				resolve(task);
-			});
+	async constructTaskView(task) {
+		if (task.hasViewData) {
+			const compiledTask = await compileTemplate(TASK_VIEW_TEMPLATE_FILE_NAME, task);
+			// Save the compiled data
+			task.constructedTaskHTMLData = compiledTask;
+			return task;
 		} else {
-			resolve(task);
+			return task;
 		}
-		});
 	}
 
 	createAndLoadHTMLElement(task) {
-		return new Promise((resolve, reject) => {
-		try {
-			// Create the new element
-			const newElement = $(task.constructedTaskHTMLData);
+		return new Promise((resolve) => {
+			try {
+				// Create the new element
+				const newElement = $(task.constructedTaskHTMLData);
 
-			// Insert newly created element into the DOM
-			const taskViewHolder = $('#' + TASK_VIEW_DESTINATION_ID);
-			taskViewHolder.append(newElement);
+				// Insert newly created element into the DOM
+				const taskViewHolder = $('#' + TASK_VIEW_DESTINATION_ID);
+				taskViewHolder.append(newElement);
 
-			// Wait for the task's view to be ready & resolve.
-			const taskID = '#' + task.task.name + '_task_view';
-			$(taskID).ready(() => {
-				resolve(task);
-			});
-		} catch(err) {
-			console.error('Error in createAndLoadHTMLElement, task_loader.js', err);
-		}
+				// Wait for the task's view to be ready & resolve.
+				const taskID = '#' + task.task.name + '_task_view';
+				$(taskID).ready(() => {
+					resolve(task);
+				});
+			} catch(err) {
+				console.error('Error in createAndLoadHTMLElement, task_loader.js', err);
+			}
 		});
 	}
 
 	loadViewData(task) {
-		if(task.hasViewData) {
+		if (task.hasViewData) {
 			return this.createAndLoadHTMLElement(task);
 		} else {
 			return Promise.resolve(task);
@@ -167,18 +154,15 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 	}
 
 	constructTaskData(task) {
-		return new Promise((resolve, reject) => {
-			compileTemplate(TASK_LOADER_TEMPLATE_FILE_NAME, task.taskData)
-				.then((compiledTask) => {
-					task.compiledData = compiledTask;
-					task.taskCreatorName = 'create_task_' + task.taskData.name;
-					resolve(task);
-				});
-		});
+		return compileTemplate(TASK_LOADER_TEMPLATE_FILE_NAME, task.taskData)
+			.then((compiledTask) => {
+				task.compiledData = compiledTask;
+				task.taskCreatorName = 'create_task_' + task.taskData.name;
+				return task;
+			});
 	}
 
-	loadTaskIntoPage(task) {
-		return new Promise((resolve, reject) => {
+	async loadTaskIntoPage(task) {
 		try {
 			const newElement = document.createElement('script');
 			newElement.setAttribute('type', 'text/javascript');
@@ -187,27 +171,22 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 			task.element = newElement;
 			newElement.appendChild(document.createTextNode(task.compiledData));
 			task.destination.append(newElement);
-			resolve(task);
+			return task;
 		} catch(err) {
 			console.error('Error Loading Element', err);
 			console.error(task.task.name);
 			task.element = undefined;
-			resolve(task);
+			throw task;
 		}
-		// console.log('Loading task into page....');
-		// resolve(task);
-
-		});
 	}
 
-	executeLoadedTask(task) {
-		return new Promise((resolve, reject) => {
+	async executeLoadedTask(task) {
 		try {
 			const taskName = task.task.name;
 			const creatorName = task.taskCreatorName;
-			console.log('Saving Task Reference', taskName);
+			console.log('Saving Task Reference', taskName, creatorName);
 			this.tasks[taskName] = new window[creatorName](task.taskData);
-			resolve(task);
+			return task;
 		} catch(err) {
 			console.error(
 				'Error Executing Task',
@@ -215,20 +194,15 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 				err,
 				err.stack
 			);
-			resolve(task);
+			throw task;
 		}
-		});
 	}
 
 	updateStatistics(task) {
-		return new Promise((resolve, reject) => {
-		resolve(task);
-		});
+		return Promise.resolve(task);
 	}
 
 	loadTask(task) {
-		return new Promise((resolve, reject) => {
-
 		this.emit(eventList.LOADING_TASK, task);
 
 		const taskData = {
@@ -244,7 +218,7 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 			'constructedTaskHTMLData': ''
 		};
 		// module_manager.loadModuleDataByName(testTaskName)
-		this.loadTaskData(taskData)
+		return this.loadTaskData(taskData)
 			.then(task => this.checkForViewData(task))
 			.then(task => this.renderViewData(task))
 			.then(task => this.constructTaskView(task))
@@ -252,115 +226,90 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 			.then(task => this.constructTaskData(task))
 			.then(task => this.loadTaskIntoPage(task))
 			.then(task => this.executeLoadedTask(task))
-			.then(task => this.updateStatistics(task))
-			.then(resolve, reject);
-		});
+			.then(task => this.updateStatistics(task));
 	}
 
 	internalLoadTasks(tasks) {
-		return new Promise((resolve) => {
-			const promises = tasks.map(task => this.loadTask(task));
-			Promise.allSettled(promises)
-				.then((res) => {
-					resolve(tasks);
-				});
-		});
+		const promises = tasks.map(task => this.loadTask(task).catch((err) => {
+			console.error(err);
+		}));
+		return Promise.allSettled(promises)
+			.then((res) => {
+				return tasks;
+			});
 	}
 
-	internalStartTask(taskName) {
-		return new Promise((resolve, reject) => {
-			if(this.tasks[taskName]) {
-				const task = this.tasks[taskName];
-				if(task.startTask) {
-					console.log('Starting Task');
-					try {
-						task.startTask()
-						.then(resolve, reject);
-					} catch(err) {
-						console.error('Error Starting task', err);
-						resolve();
-					}
-				} else {
-					console.log('task does not have a startTask property', taskName);
-					resolve();
+	async internalStartTask(taskName) {
+		if (this.tasks[taskName]) {
+			const task = this.tasks[taskName];
+			if (task.startTask) {
+				console.log('Starting Task');
+				try {
+					return task.startTask();
+				} catch(err) {
+					console.error('Error Starting task', err);
 				}
 			} else {
-				resolve();
+				console.log('task does not have a startTask property', taskName);
 			}
-		});
+		}
 	}
 
 	startTask(taskName) {
-		return new Promise((resolve, reject) => {
-			this.internalStartTask(taskName)
-				.then(() => {
-					this.emit(eventList.STARTED_TASK, taskName);
-					resolve();
-				});
-		});
+		return this.internalStartTask(taskName)
+			.then(() => {
+				this.emit(eventList.STARTED_TASK, taskName);
+			});
 	}
 
 	startTasks(tasks) {
-		return new Promise((resolve, reject) => {
-			const keys = Object.keys(this.tasks);
-			const promises = keys.map(this.startTask);
+		const keys = Object.keys(this.tasks);
+		const promises = keys.map((taskName) => this.startTask(taskName).catch(err => {
+			console.error(err);
+		}));
 
-			Promise.allSettled(promises)
-				.then(() => {
-					this.emit(eventList.STARTED_TASKS);
-					resolve(tasks);
-				});
-		});
+		return Promise.allSettled(promises)
+			.then(() => {
+				this.emit(eventList.STARTED_TASKS);
+				return tasks;
+			});
 	}
 
-	internalStopTask(taskName) {
-		return new Promise((resolve, reject) => {
-			if(this.tasks[taskName]) {
-				const task = this.tasks[taskName];
-				if(task.stopTask) {
-					console.log('Stopping Task');
-					try {
-						task.stopTask()
-						.then(resolve, reject);
-					} catch(err) {
-						console.error('Error Stopping task', err);
-						resolve();
-					}
-				} else {
-					console.log('task does not have a stopTask property', taskName);
-					resolve();
+	async internalStopTask(taskName) {
+		if (this.tasks[taskName]) {
+			const task = this.tasks[taskName];
+			if (task.stopTask) {
+				console.log('Stopping Task');
+				try {
+					return task.stopTask();
+				} catch(err) {
+					console.error('Error Stopping task', err);
 				}
 			} else {
-				resolve();
+				console.log('task does not have a stopTask property', taskName);
 			}
-		});
+		}
 	}
 
 	stopTask(taskName) {
-		return new Promise((resolve, reject) => {
-			this.internalStopTask(taskName)
-				.then(() => {
-					this.tasks[taskName] = null;
-					this.tasks[taskName] = undefined;
-					delete this.tasks[taskName];
+		return this.internalStopTask(taskName)
+			.then(() => {
+				this.tasks[taskName] = null;
+				this.tasks[taskName] = undefined;
+				delete this.tasks[taskName];
 
-					this.emit(eventList.STOPPED_TASK, taskName);
-					resolve();
-				});
-		});
+				this.emit(eventList.STOPPED_TASK, taskName);
+			});
 	}
 
 	stopTasks() {
-		return new Promise((resolve, reject) => {
-			const keys = Object.keys(this.tasks);
-			const promises = keys.map(this.stopTask);
+		const keys = Object.keys(this.tasks);
+		const promises = keys.map(this.stopTask);
 
-			Promise.allSettled(promises)
-				.then(() => {
-					this.emit(eventList.STOPPED_TASKS);
-					resolve();
-				});
-		});
+		return Promise.allSettled(promises)
+			.then(() => {
+				this.emit(eventList.STOPPED_TASKS);
+			});
 	}
 
 	clearTasksFromDOM() {
@@ -375,14 +324,11 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 	}
 
 	loadTasks() {
-		return new Promise((resolve, reject) => {
-			this.stopTasks()
-				.then(() => this.clearTasksFromDOM())
-				.then(module_manager.getTaskList)
-				.then(tasks => this.internalLoadTasks(tasks))
-				.then(tasks => this.startTasks(tasks))
-				.then(resolve, reject);
-		});
+		return this.stopTasks()
+			.then(() => this.clearTasksFromDOM())
+			.then(module_manager.getTaskList)
+			.then(tasks => this.internalLoadTasks(tasks))
+			.then(tasks => this.startTasks(tasks))
 	}
 }
 

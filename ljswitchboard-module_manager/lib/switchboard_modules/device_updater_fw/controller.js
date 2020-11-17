@@ -13,7 +13,7 @@
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
-var firmware_verifier = global.require('ljswitchboard-firmware_verifier');
+var firmware_verifier = require('ljswitchboard-firmware_verifier');
 var fs = require('fs');
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -40,6 +40,7 @@ function module() {
     // var update_manager_vm = update_manager.vm;
 
     var device_updater_service = TASK_LOADER.tasks.device_updater_service;
+    console.log('TASK_LOADER.tasks', TASK_LOADER, TASK_LOADER.tasks);
     var deviceUpdaterService = device_updater_service.deviceUpdaterService;
     this.dts = deviceUpdaterService;
 
@@ -68,7 +69,7 @@ function module() {
         console.error('Error getting cached T4 versions');
     }
 
-    
+
 
     this.moduleContext.t7VersionData = this.t7VersionData;
     this.moduleContext.t4VersionData = this.t4VersionData;
@@ -166,7 +167,7 @@ function module() {
     };
 
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} devices     The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -176,7 +177,7 @@ function module() {
         self.activeDevices = devices;
         framework.clearConfigBindings();
         framework.setStartupMessage('Reading Device Configuration');
-        
+
         onSuccess();
     };
 
@@ -190,7 +191,7 @@ function module() {
     }
     this.onDeviceConfigured = function(framework, devices, setupBindings, onError, onSuccess) {
 
-        
+
         // self.getRegistersToDisplay()
         // .then(self.getRegistersModbusInfo)
         // .then(self.cachedRegistersToDisplay)
@@ -600,7 +601,7 @@ function module() {
                 return defered.promise;
             }
             // Check to make sure that the file is less than 1MB in size
-            
+
             var maxSize = 1000000;
             if(bundle.fileStats.size > maxSize) {
                 bundle.isValid = false;
@@ -609,7 +610,7 @@ function module() {
                 return defered.promise;
             }
         }
-        
+
         defered.resolve(bundle);
         return defered.promise;
     };
@@ -735,7 +736,7 @@ function module() {
         self.startUpgrade('file');
     };
 
-    
+
     this.pageElements = {};
     var pageElementsToCache = [{
         'key': 'selectedFW',
@@ -784,12 +785,12 @@ function module() {
         'selector': '#device_updater_holder #firmware-update-results-holder',
         'callback': this.hideUpgradeResults,
     }];
-    
+
     this.cachePageElements = function() {
         pageElementsToCache.forEach(function(pageElement) {
             var ele = $(pageElement.selector);
             pageElement.ele = ele;
-            
+
             if(pageElement.on) {
                 ele.off(pageElement.on);
                 if(pageElement.filter) {

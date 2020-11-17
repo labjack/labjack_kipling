@@ -1,9 +1,6 @@
-
 console.log('in tab_notification_manager.js', moduleData);
 
-var notifications = {};
-var q = global.require('q');
-
+const notifications = {};
 
 var getJQuerySelector = function(tabName, ext) {
 	var selector = [
@@ -12,46 +9,39 @@ var getJQuerySelector = function(tabName, ext) {
 		'#' + tabName + '-tab',
 
 	].join('');
-	if(ext) {
+	if (ext) {
 		selector += ' ';
 		selector += ext;
 	}
 	return selector;
 };
 var clearMessages = function(updateData) {
-	var defered = q.defer();
 	updateData.badge.text('');
-	defered.resolve(updateData);
-	return defered.promise;
+	return Promise.resolve(updateData);
 };
 var getTitleText = function(tabName, num) {
 	var baseText = ' Notification';
-	if(num > 1) {
+	if (num > 1) {
 		baseText += 's';
 	}
 
 	return num.toString() + baseText;
 };
 var displayMessages = function(updateData) {
-	var defered = q.defer();
 	var numMessages = updateData.numMessages;
 	var tabName = updateData.name;
-	if(numMessages > 0) {
+	if (numMessages > 0) {
 		var num = numMessages.toString();
 		var titleText = getTitleText(tabName, numMessages);
 		updateData.badge.text(numMessages.toString());
 		updateData.badge.attr('title', titleText);
 	}
-	
-	defered.resolve(updateData);
-	return defered.promise;
+
+	return Promise.resolve(updateData);
 };
 var updateVisibleNotification = function(tabName) {
-	var defered = q.defer();
-
-
 	var tabMessages = [];
-	if(notifications[tabName]) {
+	if (notifications[tabName]) {
 		tabMessages = notifications[tabName];
 	}
 	var badgeSelector = getJQuerySelector(tabName, '.badge');
@@ -65,27 +55,21 @@ var updateVisibleNotification = function(tabName) {
 		'badge': $(badgeSelector),
 		'tab': $(tabSelector),
 	};
-	clearMessages(updateData)
-	.then(displayMessages)
-	.then(defered.resolve);
-	return defered.promise;
+
+	return clearMessages(updateData)
+		.then(displayMessages);
 };
 
 var updateVisibleNotifications = function() {
-	var defered = q.defer();
-	var tabNames = Object.keys(notifications);
-	var promises = tabNames.map(updateVisibleNotification);
-	
+	const tabNames = Object.keys(notifications);
+	const promises = tabNames.map(updateVisibleNotification);
+
 	// Wait for all tabs to be updated.
-	q.allSettled(promises)
-	.then(function() {
-		defered.resolve();
-	});
-	return defered.promise;
+	return Promise.allSettled(promises);
 };
 
 var internalAddNotification = function(tabName, message) {
-	if(notifications[tabName]) {
+	if (notifications[tabName]) {
 		notifications[tabName].push(message);
 	} else {
 		notifications[tabName] = [];
@@ -93,7 +77,7 @@ var internalAddNotification = function(tabName, message) {
 	}
 };
 var internalClearNotifications = function(tabName) {
-	if(notifications[tabName]) {
+	if (notifications[tabName]) {
 		notifications[tabName] = null;
 		notifications[tabName] = undefined;
 		delete notifications[tabName];
@@ -106,9 +90,9 @@ var initializeNotifications = function() {
 	// 5/12/2015: This isn't particularly useful...  I think it was just a test
 	// of the startupData being available in tasks.
 	// Add startup-messages.
-	// if(moduleData.startupData) {
+	// if (moduleData.startupData) {
 	//	var initMessages = moduleData.startupData.initialMessages;
-	//	if(initMessages) {
+	//	if (initMessages) {
 	//		var tabKeys = Object.keys(initMessages);
 	//		tabKeys.forEach(function(tabKey) {
 	//			initMessages[tabKey].forEach(function(message) {
@@ -156,24 +140,26 @@ var self = this;
  * Create & add tab-change listener
  */
 var updatedTabsListener = function(tabSections) {
-	var sectionKes = Object.keys(tabSections);
+	var sectionKeys = Object.keys(tabSections);
 	var numSections = tabSections.length;
 	var promises = [];
-	sectionKes.forEach(function(sectionKey) {
-		// console.log('Tab section', sectionKey);
-		tabSections[sectionKey].forEach(function(tab) {
+
+	for (let sectionKey in tabSections) {
+		const tabSection = tabSections[sectionKey];
+		console.log('tabSection', tabSection);
+		for (const tab of tabSection.context) {
 			// console.log('Updating Tab', tab);
 			var name = tab.name;
 			var humanName = tab.humanName;
 			promises.push(updateVisibleNotification(name));
-		});
-	});
+		}
+	}
+
 	// Wait for all tabs to be updated.
-	q.allSettled(promises)
-	.then(function() {
-		console.log('Updated Tab Notifications');
-		defered.resolve();
-	});
+	return Promise.allSettled(promises)
+		.then(function() {
+			console.log('Updated Tab Notifications');
+		});
 };
 MODULE_CHROME.on(
 	MODULE_CHROME.eventList.MODULE_TABS_UPDATED,
@@ -181,9 +167,7 @@ MODULE_CHROME.on(
 );
 
 this.startTask = function(bundle) {
-	var defered = q.defer();
 	// console.log('TAB_NOTIFIER_BUNDLE - bundle keys',Object.keys(bundle));
 	// console.log('TAB_NOTIFIER_BUNDLE - bundle',bundle);
-	defered.resolve(bundle);
-	return defered.promise;
+	return Promise.resolve(bundle);
 };

@@ -8,18 +8,16 @@ const d3 = Object.assign({}, d3Base, {
     })
 });
 
-console.log('2', d3);
 global.d3 = d3;
 window.d3 = d3;
 
 const epoch = require('epoch-charting');
-console.log('epoch', epoch);
 global.epoch = epoch;
 
 const kinetic = require('kinetic');
 global.kinetic = kinetic;
 
-import * as typeahead from 'typeahead';
+const typeahead = require('typeahead');
 global.typeahead = typeahead;
 
 export {

@@ -45,7 +45,8 @@ const win = {
 };
 */
 
-process.env.NODE_PATH = path.join(__dirname, 'node_modules'); //  + ':' + path.resolve(__dirname, '..');
+const np_sep = (process.platform === 'win32') ? ';' : ':';
+process.env.NODE_PATH = path.join(__dirname, 'node_modules') + np_sep + path.resolve(__dirname, '..');
 require('module').Module._initPaths();
 
 const package_loader = new PackageLoader();
@@ -151,7 +152,9 @@ app.on('ready', function() {
     'title': 'splashWindow'
   });
 
-  splashWindow.webContents.openDevTools();
+  if (process.env.NODE_ENV === 'development') {
+    splashWindow.webContents.openDevTools();
+  }
 });
 
 app.on('activate', function () {

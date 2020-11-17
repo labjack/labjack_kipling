@@ -93,6 +93,10 @@
         "name": "simple_logger_epoch",
         "active": false
     }, {
+        "name": "device_updater_service",
+        "active": true,
+        "isTask": true
+    }, {
         "name": "device_updater_fw",
         "active": true
     }, {
@@ -101,10 +105,6 @@
         "isTask": true
     }, {
         "name": "update_manager",
-        "active": true,
-        "isTask": true
-    }, {
-        "name": "device_updater_service",
         "active": true,
         "isTask": true
     }, {

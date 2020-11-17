@@ -1,5 +1,3 @@
-console.log('customSpinners1');
-
 global.customSpinners = function (owner, infoArray, writeFunc, updateFunc) {
     var maxVal = 5.05;
     var minVal = -0.05;

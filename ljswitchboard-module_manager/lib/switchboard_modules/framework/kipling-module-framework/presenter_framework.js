@@ -23,8 +23,9 @@ var dict = require('dict');
 var q = require('q');
 var sprintf = require('sprintf-js').sprintf;
 
-const gui = global.gui;
-const io_manager = global.io_manager;
+const gui = package_loader.getPackage('gui');
+const io_manager = package_loader.getPackage('io_manager');
+const module_manager = package_loader.getPackage('module_manager');
 const modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 const fs_facade = require('fs_facade');

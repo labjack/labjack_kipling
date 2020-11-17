@@ -9,6 +9,7 @@ var UPDATE_K3_WINDOW_VERSION_NUMBER_STR = function(str) {
 };
 */
 
+const io_manager = package_loader.getPackage('io_manager');
 const io_interface = io_manager.io_interface();
 
 function K3_ON_APPLICATION_EXIT_LISTENER(io_interface) {

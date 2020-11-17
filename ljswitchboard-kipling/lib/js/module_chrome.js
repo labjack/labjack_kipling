@@ -1,6 +1,7 @@
 'use strict';
 
-const EventEmitter = require('events').EventEmitter;
+const {EventEmitter} = require('events');
+const path = require('path');
 
 const package_loader = global.package_loader;
 const module_manager = package_loader.getPackage('module_manager');
@@ -142,6 +143,11 @@ class ModuleChrome extends EventEmitter {
 				this.deviceControllerDeviceListChanged();
 			}
 		};
+	}
+
+	async compileTemplate(templateName, data) {
+		const handleBarsService = core.handleBarsService;
+		return await handleBarsService.renderTemplate(path.join(__dirname, 'templates', templateName), data);
 	}
 
 	async renderTemplate(location, name, context) {

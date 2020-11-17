@@ -24,7 +24,9 @@ class NwFakeWindow {
         console.log('NwFakeWindow.open', url, options);
 
         const window = new BrowserWindow(options);
-        window.webContents.openDevTools();
+        if (process.env.NODE_ENV === 'development') {
+            window.webContents.openDevTools();
+        }
 
         window.loadURL(url);
 

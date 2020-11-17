@@ -1,17 +1,18 @@
 
 /* jshint undef: true, unused: true, undef: true */
-/* global global, console, MODULE_CHROME, TASK_LOADER, gns, process */
+/* global console, TASK_LOADER, process */
 /* global UPDATE_K3_WINDOW_VERSION_NUMBER_STR */
 /* exported activeModule */
 
-
 console.log('in kipling_updater_service.js');
 
-var q = global.require('q');
-var io_manager = global[gns].io_manager;
-var io_interface = io_manager.io_interface();
-var driver = io_interface.getDriverController();
-var semver = global.require('semver_min');
+const async = require('async');
+const q = require('q');
+const package_loader = global.package_loader;
+const io_manager = package_loader.getPackage('io_manager');
+const io_interface = io_manager.io_interface();
+const driver = io_interface.getDriverController();
+const semver = package_loader.getPackage('semver');
 
 function createKiplingUpdaterService() {
 	console.log('Available tasks', Object.keys(TASK_LOADER.tasks));

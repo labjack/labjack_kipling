@@ -41,7 +41,7 @@ describe('mock register matrix', function() {
 	it('initialize test', function (done) {
 		package_loader = global.require('ljswitchboard-package_loader');
 		gns = package_loader.getNameSpace();
-		gui = global[gns].gui;
+		gui = global.gui;
 		window_manager = global.require('ljswitchboard-window_manager');
 
 		var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;

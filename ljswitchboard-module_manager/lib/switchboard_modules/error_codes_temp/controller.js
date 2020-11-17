@@ -1,14 +1,13 @@
 /* jshint undef: true, unused: true, undef: true */
-/* global global, require, console, MODULE_LOADER, MODULE_CHROME, createDeviceSelectorViewGenerator */
-/* global handlebars, process, modbus_map */
+/* global console, MODULE_LOADER, MODULE_CHROME */
+/* global handlebars */
 /* exported activeModule */
 
 // console.log('in device_selector, controller.js');
 
 var createModuleInstance = function() {
-	var io_manager = global[gns].io_manager;
+	var io_manager = global.package_loader.getPackage('io_manager');
 	var io_interface = io_manager.io_interface();
-	var driver = io_interface.getDriverController();
 
 	this.moduleData = undefined;
 	this.debug = false;

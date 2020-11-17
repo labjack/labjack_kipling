@@ -1,3 +1,4 @@
+'use strict';
 
 /* jshint undef: true, unused: true, undef: true */
 /* global global, console, MODULE_CHROME, TASK_LOADER */
@@ -6,7 +7,7 @@
 
 console.log('in device_updater_service.js');
 
-var q = global.require('q');
+const q = require('q');
 
 function createDeviceUpdaterService() {
 	// console.log('Available tasks', Object.keys(TASK_LOADER.tasks));
@@ -24,7 +25,7 @@ function createDeviceUpdaterService() {
 	this.getCachedT4Versions = function() {
 		return update_manager_vm.getCachedT4Versions();
 	};
-	
+
 	var supportedDevices = [
 		't7',
 		't4',

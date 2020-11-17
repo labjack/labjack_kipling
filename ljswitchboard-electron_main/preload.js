@@ -13,12 +13,10 @@ console.log("global.packageName:", global.packageName);
 const electron = require('electron');
 const package_loader = electron.remote.getGlobal('package_loader');
 global.package_loader = package_loader;
-global.gui = global.gui;
+global.gui = package_loader.getPackage('gui');
 
 if (-1 === ['ljswitchboard-electron_splash_screen', 'core'].indexOf(global.packageName)) {
     global.handlebars = require('handlebars');
-    global.io_manager = package_loader.getPackage('io_manager');
-    global.module_manager = package_loader.getPackage('module_manager');
     global.ljmmm_parse = require('ljmmm-parse');
 }
 

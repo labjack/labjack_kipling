@@ -567,12 +567,23 @@ function labjackVersionManager() {
             // for it
             if(!self.pageCache.has(url)) {
                 // Perform request to get pageData/body
-                fetch(url, {
-                    timeout: 20000
-                })
+                fetch(url, { timeout: 20000 })
                     .then(function (res) {
                         if (res.ok) {
                             return res.text();
+                        }
+
+                        if (res.status >= 400) {
+                            const err = {
+                                "num": -1,
+                                "str": res.statusText,
+                                "quit": true,
+                                "code": res.status,
+                                "url": url
+                            };
+                            self.reportError(err);
+                            // callback(err);
+                            return res.statusText;
                         }
 
                         var message = '';
@@ -622,11 +633,10 @@ function labjackVersionManager() {
                             console.error('Error calling strategy...', innerErr, name);
                         }
                         callback();
-
                     })
                     .catch(function (error) {
-                        console.error('fetch error', error.message);
-                        callback();
+                        console.error('fetch error', error);
+                        callback(error);
                     });
             } else {
                 // get pageData/body from cache

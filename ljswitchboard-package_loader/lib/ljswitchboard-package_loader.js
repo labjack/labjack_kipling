@@ -83,6 +83,12 @@ class PackageLoader extends EventEmitter {
 			'name': selfName,
 			'version': selfVersion
 		};
+
+		this.loadPackage({
+			'name': 'semver',
+			'loadMethod': 'set',
+			'ref': semver
+		});
 	}
 
 	_startNWApp(packageInfo, info) {

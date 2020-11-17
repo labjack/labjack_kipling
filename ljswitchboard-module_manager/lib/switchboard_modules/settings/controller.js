@@ -1,39 +1,17 @@
 
 /* jshint undef: true, unused: true, undef: true */
-/* global $, global, require, console, MODULE_LOADER, MODULE_CHROME, createDeviceSelectorViewGenerator */
-/* global handlebars, process, modbus_map */
+/* global $, require, console, MODULE_LOADER, MODULE_CHROME */
+/* global handlebars */
 /* exported activeModule */
 
 // console.log('in device_selector, controller.js');
 
-
-var package_loader;
-var q;
-var gns;
-var io_manager;
-var driver_const;
-var async;
-try {
-	package_loader = global.require.main.require('ljswitchboard-package_loader');
-	q = global.require.main.require('q');
-	gns = package_loader.getNameSpace();
-	io_manager = global.require.main.require('ljswitchboard-io_manager');
-	driver_const = global.require('ljswitchboard-ljm_driver_constants');
-	async = global.require('async');
-} catch(err) {
-	package_loader = require.main.require('ljswitchboard-package_loader');
-	q = require.main.require('q');
-	gns = package_loader.getNameSpace();
-	io_manager = require.main.require('ljswitchboard-io_manager');
-	driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
-	async = require.main.require('async');
-}
+const package_loader = require('ljswitchboard-package_loader');
+const q = require('q');
 
 var createModuleInstance = function() {
-	var io_manager = global[gns].io_manager;
+	var io_manager = package_loader.getPackage('io_manager');
 	var io_interface = io_manager.io_interface();
-	var driver = io_interface.getDriverController();
-
 
 	this.moduleData = undefined;
 	this.debug = false;
@@ -123,7 +101,7 @@ var createModuleInstance = function() {
 
 		// console.log('device_selector starting', newModule.name, newModule.id);
 		self.moduleData = newModule.data;
-		
+
 		// Compile module templates
         templatesToCompile.forEach(self.compileTemplate);
 

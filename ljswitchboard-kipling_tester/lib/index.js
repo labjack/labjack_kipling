@@ -56,7 +56,7 @@ for(var i = 0; i < testFiles.length; i++) {
 
 
 var package_loader = require('ljswitchboard-package_loader');
-var gns = package_loader.getNameSpace();
+const static_files = package_loader.getPackage('static_files');
 /*
 	Function called to load the application's core resources.
 	The resources are loaded from the ljswitchboard-static_files/static
@@ -64,7 +64,7 @@ var gns = package_loader.getNameSpace();
 */
 var coreResourcesLoaded = false;
 var loadCoreResources = function(resources) {
-	global[gns].static_files.loadResources(document, resources)
+	static_files.loadResources(document, resources)
 	.then(function(res) {
 		coreResourcesLoaded = true;
 	}, function(err) {
@@ -79,7 +79,7 @@ var loadCoreResources = function(resources) {
 */
 var localResourcesLoaded = false;
 var loadLocalResources = function(resources) {
-	global[gns].static_files.loadResources(document, resources, true)
+	static_files.loadResources(document, resources, true)
 	.then(function(res) {
 		localResourcesLoaded = true;
 	}, function(err) {
@@ -89,7 +89,7 @@ var loadLocalResources = function(resources) {
 
 var loadResources = function(resources, isLocal) {
 	var defered = q.defer();
-	global[gns].static_files.loadResources(document, resources, isLocal)
+	static_files.loadResources(document, resources, isLocal)
 	.then(function(res) {
 		defered.resolve();
 	}, function(err) {
