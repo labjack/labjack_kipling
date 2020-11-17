@@ -3,8 +3,6 @@
 const EventEmitter = require('events').EventEmitter;
 const constants = require('../common/constants');
 
-const package_loader = global.lj_di_injector.get('package_loader');
-
 const labjack_nodejs = require('labjack-nodejs');
 const driver_constants = labjack_nodejs.driver_const;
 
@@ -132,11 +130,10 @@ class DeviceController extends EventEmitter {
 		this.link = link;
 	}
 
-	async init() {
+	async init(io_manager) {
 		// Initialize the device keeper
 		this.devices = {};
 
-		const io_manager = package_loader.getPackage('io_manager');
 		const io_interface = io_manager.io_interface();
 
 		const link = await io_interface.establishLink(io_endpoint_key, (param) => this.listener(param));

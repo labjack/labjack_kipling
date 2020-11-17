@@ -47,11 +47,9 @@ const manifest = require('../package.json');
 
 // perform other requires
 
-const electron = require('electron');
-const getInjector = require('lj-di').getInjector;
-const injector = getInjector({ electron });
-
-const window_manager = injector.get('window_manager');
+// const electron = require('electron');
+const package_loader = global.package_loader;
+const window_manager = package_loader.getPackage('window_manager');
 console.log('window_manager', window_manager);
 
 if(false) {

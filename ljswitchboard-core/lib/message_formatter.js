@@ -9,8 +9,8 @@ const pageTemplatePath = path.join(cwd, pageTemplateName);
 
 class MessageFormatter {
 
-	constructor(injector) {
-		this.injector = injector;
+	constructor(package_loader) {
+		this.package_loader = package_loader;
 	}
 
 	async renderTemplate(context) {
@@ -24,7 +24,7 @@ class MessageFormatter {
 		}[context.result];
 
 		if (context.result === 'failed') {
-			const window_manager = this.injector.get('window_manager');
+			const window_manager = this.package_loader.getPackage('window_manager');
 			window_manager.showWindow('core');
 		}
 		const builtContext = {

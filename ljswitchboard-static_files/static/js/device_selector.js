@@ -16,7 +16,7 @@ try {
 } catch(err) {
     console.log('in device_selector.js, error requiring device_controller', err);
 }
-const gui = global.lj_di_injector.get('gui');
+const gui = global.gui;
 
 var resizeTimeout;
 

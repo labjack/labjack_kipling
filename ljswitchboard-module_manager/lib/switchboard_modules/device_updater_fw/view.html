@@ -115,7 +115,7 @@
             <script>
               $('#lj-link-holder-changeLog').unbind();
               $('#lj-link-holder-changeLog').bind('click',function(){
-                const gui = global.lj_di_injector.get('gui');
+                const gui = global.gui;
                 gui.Shell.openExternal("{{custom.dtInfo.changeLogLink}}");
               });
             </script>

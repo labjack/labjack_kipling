@@ -23,7 +23,7 @@ var dict = require('dict');
 var q = require('q');
 var sprintf = require('sprintf-js').sprintf;
 
-const gui = global.lj_di_injector.get('gui');
+const gui = global.gui;
 const io_manager = global.io_manager;
 const modbus_map = require('ljswitchboard-modbus_map').getConstants();
 

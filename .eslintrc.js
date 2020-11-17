@@ -14,8 +14,7 @@ module.exports = {
 
     "globals": {
         "Atomics": "readonly",
-        "SharedArrayBuffer": "readonly",
-        "lj_di_injector": true
+        "SharedArrayBuffer": "readonly"
     },
     "parserOptions": {
         "ecmaVersion": 2018,

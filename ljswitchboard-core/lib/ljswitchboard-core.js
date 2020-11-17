@@ -42,9 +42,8 @@ async function loadResources(win, static_files) {
 	await static_files.loadResources(win, resourceList);
 }
 
-exports.initializePackage = function (injector) {
-	const window_manager = injector.get('window_manager');
-	const package_loader = injector.get('package_loader');
+exports.initializePackage = function (package_loader) {
+	const window_manager = package_loader.getPackage('window_manager');
 	const static_files = package_loader.getPackage('static_files');
 
 	window_manager.on(window_manager.eventList.OPENED_WINDOW, async (name) => {
@@ -53,11 +52,10 @@ exports.initializePackage = function (injector) {
 		const coreWindow = window_manager.getWindow('core');
 		await loadResources(coreWindow.win, static_files);
 
-		const startDir = injector.get('startDir');
+		const startDir = package_loader.getPackage('info').startDir;
 
-		const gui = injector.get('gui');
-		const package_loader = injector.get('package_loader');
-		const splashScreenUpdater = injector.get('splashScreenUpdater');
+		const gui = package_loader.getPackage('gui');
+		const splashScreenUpdater = package_loader.getPackage('splashScreenUpdater');
 
 		const corePackages = [
 			{
@@ -165,7 +163,7 @@ exports.initializePackage = function (injector) {
 		function checkRequirements() {
 			return new Promise(async (resolve, reject) => {
 				console.log('checkRequirements');
-				const message_formatter = new MessageFormatter(injector);
+				const message_formatter = new MessageFormatter(package_loader);
 
 				// Configure the message_formatter
 				// message_formatter.configure($, $('#loadSteps'));
@@ -219,7 +217,7 @@ exports.initializePackage = function (injector) {
 		function loadCorePackages() {
 			console.log('loadCorePackages');
 
-			const message_formatter = new MessageFormatter(injector);
+			const message_formatter = new MessageFormatter(package_loader);
 
 			return new Promise((resolve, reject) => {
 				splashScreenUpdater.update('Loading Packages');

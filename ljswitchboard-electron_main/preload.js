@@ -11,12 +11,9 @@ process.argv.forEach(arg => {
 console.log("global.packageName:", global.packageName);
 
 const electron = require('electron');
-const getInjector = require('lj-di').getInjector;
-const injector = getInjector({ electron });
-global.lj_di_injector = injector;
-
-const package_loader = global.lj_di_injector.get('package_loader');
+const package_loader = electron.remote.getGlobal('package_loader');
 global.package_loader = package_loader;
+global.gui = global.gui;
 
 if (-1 === ['ljswitchboard-electron_splash_screen', 'core'].indexOf(global.packageName)) {
     global.handlebars = require('handlebars');

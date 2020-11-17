@@ -63,10 +63,8 @@ const packageInfoFileName = 'package_loader_data.json';
 
 class PackageLoader extends EventEmitter {
 
-	constructor(injector) {
+	constructor() {
 		super();
-
-		this.injector = injector;
 
 		this._loadedPackages = [];
 
@@ -89,7 +87,7 @@ class PackageLoader extends EventEmitter {
 
 	_startNWApp(packageInfo, info) {
 		console.log('nwApp detected', packageInfo, info);
-		const gui = this.injector.get('gui');
+		const gui = this.getPackage('gui');
 
 		// Local reference to nw.gui
 		const curApp = this._loadedPackages[packageInfo.name];
@@ -181,7 +179,7 @@ class PackageLoader extends EventEmitter {
 			}
 
 			if (loadedPackage.initializePackage) {
-				loadedPackage.initializePackage(this.injector);
+				loadedPackage.initializePackage(this);
 			}
 		} catch (err) {
 			console.error('  - package_loader: _startPackage Error', err, name);

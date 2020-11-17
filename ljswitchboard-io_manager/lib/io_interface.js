@@ -35,8 +35,10 @@ const io_interface_gc = setInterval(runGarbageCollector, 5000);
 
 class IOInterface extends EventEmitter {
 
-	constructor() {
+	constructor(io_manager) {
 		super();
+
+		this.io_manager = io_manager;
 
 		this.mp = null;
 		this.mp_event_emitter = null;
@@ -442,7 +444,7 @@ class IOInterface extends EventEmitter {
 		await this.initInternalMessenger();
 
 		await this.driver_controller.init();
-		await this.device_controller.init();
+		await this.device_controller.init(this.io_manager);
 	}
 
 	async initialize(options) {
@@ -562,11 +564,11 @@ class IOInterface extends EventEmitter {
 }
 
 let IO_INTERFACE;
-exports.createIOInterface = () => {
+exports.createIOInterface = (io_manager) => {
 	if (IO_INTERFACE) {
 		return IO_INTERFACE;
 	} else {
-		IO_INTERFACE = new IOInterface();
+		IO_INTERFACE = new IOInterface(io_manager);
 		return IO_INTERFACE;
 	}
 };

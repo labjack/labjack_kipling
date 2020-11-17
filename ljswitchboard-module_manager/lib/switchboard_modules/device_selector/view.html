@@ -4,7 +4,7 @@
 	<script>
         $('#lj-link-text').unbind();
         $('#lj-link-text').bind('click',function(){
-            const gui = global.lj_di_injector.get('gui');
+            const gui = global.gui;
             gui.Shell.openExternal("https://labjack.com");
         });
     </script>
@@ -186,7 +186,7 @@
         <script>
             $('#ct-info-text').unbind();
             $('#ct-info-text').bind('click',function(){
-                const gui = global.lj_di_injector.get('gui');
+                const gui = global.gui;
                 gui.Shell.openExternal("https://labjack.com/support/software/applications/t-series/kipling/device-selector");
             });
         </script>
@@ -237,7 +237,7 @@
 		linksToBindTo.forEach(function(linkToBindTo) {
 			$(linkToBindTo.id).unbind();
 			$(linkToBindTo.id).bind('click',function(){
-                const gui = global.lj_di_injector.get('gui');
+                const gui = global.gui;
 				gui.Shell.openExternal(linkToBindTo.url);
 			});
 		});

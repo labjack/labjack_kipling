@@ -22,8 +22,5 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/labjack/labjack_kipling/issues"
-  },
-  "dependencies": {
-    "lj-di": "*"
   }
 }

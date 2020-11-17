@@ -8,10 +8,7 @@
  * @author Chris Johnson (LabJack, 2014)
 **/
 
-const package_loader = global.lj_di_injector.get('package_loader');
-const gui = global.lj_di_injector.get('gui');
-
-const window_manager = package_loader.getPackage('window_manager');
+const gui = global.gui;
 
 const dict = require('dict');
 const path = require('path');
@@ -231,13 +228,13 @@ class KeyboardEventHandler {
 
     handleOpenConsole() {
         // console.log('in handleOpenConsole', info.name);
-        const gui = global.lj_di_injector.get('gui');
+        const gui = global.gui;
         gui.Window.get().showDevTools();
     }
 
     rebootKipling(info) {
         console.log('in rebootKipling', info.name);
-        const gui = global.lj_di_injector.get('gui');
+        const gui = global.gui;
         const child_process = require('child_process');
         let execStr = 'bash helper_scripts/reboot_scripts/mac_reboot.sh';
         const currentExecutable = process.execPath.split(' ')[0].split(/\.*\/Contents/g)[0];
@@ -253,7 +250,7 @@ class KeyboardEventHandler {
 
     rebuildKipling(info) {
         console.log('in rebuildKipling', info.name);
-        const gui = global.lj_di_injector.get('gui');
+        const gui = global.gui;
         const child_process = require('child_process');
         let execStr = 'bash helper_scripts/reboot_scripts/mac_reboot.sh';
         const currentExecutable = process.execPath.split(' ')[0].split(/\.*\/Contents/g)[0];

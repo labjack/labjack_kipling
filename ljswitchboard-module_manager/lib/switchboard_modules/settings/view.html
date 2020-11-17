@@ -5,7 +5,7 @@
   <script>
     $('#lj-link-text').unbind();
     $('#lj-link-text').bind('click',function(){
-      const gui = global.lj_di_injector.get('gui');
+      const gui = global.gui;
       gui.Shell.openExternal("https://labjack.com");
     });
   </script>
@@ -158,7 +158,7 @@
               <script>
                 $('#ljm-update-link').unbind();
                 $('#ljm-update-link').bind('click',function(){
-                  const gui = global.lj_di_injector.get('gui');
+                  const gui = global.gui;
                   gui.Shell.openExternal("{{availableLJMVersion.upgradeLink}}");
                 });
               </script>
@@ -169,7 +169,7 @@
               <script>
                 $('#kipling-update-link').unbind();
                 $('#kipling-update-link').bind('click',function(){
-                  const gui = global.lj_di_injector.get('gui');
+                  const gui = global.gui;
                   gui.Shell.openExternal("{{availableKiplingVersion.upgradeLink}}");
                 });
               </script>

@@ -1,9 +1,9 @@
+'use strict';
+
 const path = require('path');
 const persistent_data_manager = require('./persistent_data_manager');
 
-function loadProgramPackages(injector, splashScreenUpdater) {
-    const package_loader = injector.get('package_loader');
-
+function loadProgramPackages(package_loader, splashScreenUpdater) {
     // Attach various event listeners to the package_loader
 // package_loader.on('opened_window', windowManager.addWindow);
     package_loader.on('loaded_package', function(packageName) {
@@ -35,8 +35,10 @@ function loadProgramPackages(injector, splashScreenUpdater) {
         return Promise.reject(err);
     };
 
-    const gui = injector.get('gui');
-    const window_manager = injector.get('window_manager');
+    const gui = package_loader.getPackage('gui');
+    const window_manager = package_loader.getPackage('window_manager');
+
+    const info = require('./get_cwd');
 
     const rootPackages = [{
         'name': 'req',
@@ -51,25 +53,13 @@ function loadProgramPackages(injector, splashScreenUpdater) {
 //     'loadMethod': 'set',
 //     'ref': win
     }, {
-        'name': 'gui',
-        'loadMethod': 'set',
-        'ref': gui
-    }, {
-        'name': 'window_manager',
-        'loadMethod': 'set',
-        'ref': window_manager
-    }, {
-        'name': 'splash_screen',
-        'loadMethod': 'set',
-        'ref': splashScreenUpdater
-    }, {
         'name': 'info',
         'loadMethod': 'set',
-        'ref': "require('./get_cwd')"
+        'ref': info
     }
     ];
 
-    const startDir = injector.get('startDir');
+    const startDir = info.startDir;
 
     const secondaryPackages = [
         {
@@ -182,14 +172,12 @@ function loadProgramPackages(injector, splashScreenUpdater) {
         // Save the path to the global scope
         // global.ljswitchboard.appDataPath = persistentDataManager.getPath();
         const appDataPath = persistentDataManager.getPath();
-        injector.bindSingleton('appDataPath', appDataPath);
-
         const forceRefresh = gui.App.manifest.forceRefreshOfPersistentData;
 
         try {
             const initRes = await persistentDataManager.init(forceRefresh);
             console.log('Re-Initialized Data:', initRes);
-            return;
+            return persistentDataManager;
         } catch (err) {
             appExtractionFailed = true;
             console.log('Failed to initialize data', err);
@@ -201,15 +189,15 @@ function loadProgramPackages(injector, splashScreenUpdater) {
 
     let appExtractionFailed = false;
 
-    function loadSecondaryPackages() {
+    function loadSecondaryPackages(persistentDataManager) {
         return new Promise((resolve, reject) => {
             if(appExtractionFailed) {
                 reject();
             } else {
                 console.log('Loading Secondary Packages');
 
+                const appDataPath = persistentDataManager.getPath();
                 // Get the appDataPath
-                const appDataPath = injector.get('appDataPath');
 
                 // Configure the package_loader with this path
                 package_loader.setExtractionPath(appDataPath);
@@ -261,7 +249,7 @@ function loadProgramPackages(injector, splashScreenUpdater) {
 
 
     initializeProgram()
-        .then(loadSecondaryPackages, errorHandler)
+        .then((persistentDataManager) => loadSecondaryPackages(persistentDataManager), errorHandler)
         .then(() => {
             console.log('Program initialized');
         });

@@ -4,7 +4,7 @@
 
 // console.log('in device_selector view_generator.js');
 
-const package_loader = global.lj_di_injector.get('package_loader');
+const package_loader = global.package_loader;
 const static_files = package_loader.getPackage('static_files');
 const driver_const = require('ljswitchboard-ljm_driver_constants');
 

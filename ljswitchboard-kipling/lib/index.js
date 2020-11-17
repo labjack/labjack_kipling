@@ -1,6 +1,7 @@
 console.log("ljswitchboard-kipling index.js");
 
-const window_manager = global.lj_di_injector.get('window_manager');
+const package_loader = global.package_loader;
+const window_manager = package_loader.getPackage('window_manager');
 
 /*
 var UPDATE_K3_WINDOW_VERSION_NUMBER_STR = function(str) {

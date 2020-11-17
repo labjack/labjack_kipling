@@ -69,17 +69,17 @@
 	<script>
 		$('#lj-link-holder-productPage').unbind();
 		$('#lj-link-holder-productPage').bind('click',function(){
-			const gui = global.lj_di_injector.get('gui');
+			const gui = global.gui;
 			gui.Shell.openExternal("https://labjack.com/{{deviceTypeName}}");
 		});
 		$('#lj-link-holder-datasheet').unbind();
 		$('#lj-link-holder-datasheet').bind('click',function(){
-			const gui = global.lj_di_injector.get('gui');
+			const gui = global.gui;
 			gui.Shell.openExternal("https://labjack.com/support/datasheets/{{deviceTypeName}}");
 		});
 		$('#lj-link-holder-supportPage').unbind();
 		$('#lj-link-holder-supportPage').bind('click',function(){
-			const gui = global.lj_di_injector.get('gui');
+			const gui = global.gui;
 			gui.Shell.openExternal("https://labjack.com/support/{{deviceTypeName}}");
 		});
 	</script>

@@ -957,7 +957,7 @@ function module() {
             writeConfig(reg,val,isValid);
         };
         function helpTextURLClickHandler(event) {
-            const gui = global.lj_di_injector.get('gui');
+            const gui = global.gui;
             // gui.Shell.openExternal(linkToBindTo.url);
             var url = $(event.toElement).attr('url');
             console.log('Opening link...', url);

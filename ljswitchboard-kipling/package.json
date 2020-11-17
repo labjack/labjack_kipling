@@ -54,6 +54,6 @@
     "min_width": 600,
     "a-min_width": 785,
     "min_height": 400,
-    "show": false
+    "show": true
   }
 }

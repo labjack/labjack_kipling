@@ -1,12 +1,7 @@
 'use strict';
 
-const async = require('async');
 const path = require('path');
 const {loadResources} = require('./resources');
-const window_manager = global.lj_di_injector.get('window_manager');
-const package_loader = global.lj_di_injector.get('package_loader');
-const io_manager = package_loader.getPackage('io_manager');
-
 
 function handleError(err, msg) {
 	let reportError = true;
@@ -34,10 +29,10 @@ exports.info = {
 	'main': 'lib/index.html'
 };
 
-exports.initializePackage = function (injector) {
+exports.initializePackage = function (package_loader) {
+	const window_manager = package_loader.getPackage('window_manager');
+
 	console.log('Kipling initializePackage');
-	const window_manager = injector.get('window_manager');
-	const package_loader = injector.get('package_loader');
 	const static_files = package_loader.getPackage('static_files');
 
 	const moduleChromeTemplateName = path.resolve(__dirname, 'templates', 'module_chrome.html');

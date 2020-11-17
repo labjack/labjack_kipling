@@ -1,7 +1,7 @@
 // Define a placeholder for the user's module object.
 var sdModule = null;
 var sdFramework = null;
-const package_loader = global.lj_di_injector.get('package_loader');
+const package_loader = global.package_loader;
 const core = package_loader.getPackage('core');
 const handleBarsService = core.handleBarsService;
 const path = require('path');

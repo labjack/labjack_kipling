@@ -6,13 +6,6 @@ const {PackageLoader} = require('ljswitchboard-package_loader');
 const {WindowManager} = require('ljswitchboard-window_manager');
 const {NwFakeWindow} = require('./window-compat');
 
-const getInjector = require('lj-di').getInjector;
-const injector = getInjector({ electron });
-global.lj_di_injector = injector;
-
-const startDir = require('./get_cwd').startDir;
-injector.bindSingleton('startDir', startDir);
-
 // Module to control application life.
 const app = electron.app;
 // Module to create native browser window.
@@ -20,7 +13,6 @@ const app = electron.app;
 const packageData = require('./package.json');
 const {SplashScreenUpdater} = require('./splash');
 const {loadProgramPackages} = require('./packages-load');
-injector.bind('package.json', packageData);
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -43,7 +35,6 @@ const gui = {
   Window: fakeWindow
 };
 global.gui = gui;
-injector.bindSingleton('gui', gui);
 
 // gui.App.manifest.test
 /*
@@ -57,14 +48,24 @@ const win = {
 process.env.NODE_PATH = path.join(__dirname, 'node_modules'); //  + ':' + path.resolve(__dirname, '..');
 require('module').Module._initPaths();
 
-const package_loader = new PackageLoader(injector);
-injector.bindSingleton('package_loader', package_loader);
+const package_loader = new PackageLoader();
+global.package_loader = package_loader;
+package_loader.loadPackage({
+  'name': 'gui',
+  'loadMethod': 'set',
+  'ref': gui
+});
 
 const window_manager = new WindowManager();
+package_loader.loadPackage({
+  'name': 'window_manager',
+  'loadMethod': 'set',
+  'ref': window_manager
+});
+
 window_manager.configure({
   'gui': gui
 });
-injector.bindSingleton('window_manager', window_manager);
 
 // Add the -builder window to the window_manager to have it be managed.
 let initialAppVisibility = false;
@@ -134,8 +135,13 @@ app.on('ready', function() {
   splashWindow.webContents.once('dom-ready', () => {
     console.log('splashWindow::loaded');
     const splashScreenUpdater = new SplashScreenUpdater(splashWindow);
-    injector.bindSingleton('splashScreenUpdater', splashScreenUpdater);
-    loadProgramPackages(injector, splashScreenUpdater);
+
+    package_loader.loadPackage({
+      'name': 'splashScreenUpdater',
+      'loadMethod': 'set',
+      'ref': splashScreenUpdater
+    });
+    loadProgramPackages(package_loader, splashScreenUpdater);
   });
 
   window_manager.addWindow({

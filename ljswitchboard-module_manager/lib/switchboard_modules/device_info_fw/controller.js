@@ -1,5 +1,5 @@
 /* jshint undef: true, unused: true, undef: true */
-/* global handlebars, console, q, static_files, dict, $, showAlert, driver_const */
+/* global handlebars, console, q, dict, $, showAlert, driver_const */
 /**
  * Goals for the Device Info module.
  * This module displays basic device information about the Digit and T7 devices.
@@ -7,8 +7,7 @@
  * @author Chris Johnson (LabJack Corp, 2014)
 **/
 
-const package_loader = global.lj_di_injector.get('package_loader');
-const static_files = package_loader.getPackage('static_files');
+const package_loader = global.package_loader;
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
 /**
@@ -30,6 +29,7 @@ function module() {
     this.bufferedValues = dict();
     this.newBufferedValues = dict();
 
+    const static_files = package_loader.getPackage('static_files');
     var staticFilesDir = static_files.getDir();
 
     // var genericConfigCallback = function(data, onSuccess) {
@@ -94,7 +94,7 @@ function module() {
                 var workingDirPath = 'file:///' + posixPath;
                 var filePath = workingDirPath + path.posix.sep + cfgFileName;
                 console.log('HERE', data, progPath, posixPath, filePath);
-                const gui = global.lj_di_injector.get('gui');
+                const gui = global.gui;
                 gui.Shell.openExternal(filePath);
             } catch(errA) {
                 console.log('error opening application', errA);
@@ -128,7 +128,7 @@ function module() {
             'LJLogM': "file:///C:/Program Files (x86)/LabJack/Applications/LJLogM.exe",
             'LJStreamM': "file:///C:/Program Files (x86)/LabJack/Applications/LJStreamM.exe"
         }[appName];
-        const gui = global.lj_di_injector.get('gui');
+        const gui = global.gui;
         gui.Shell.openExternal(appPath);
     }
     function configAndOpenApp(appName) {

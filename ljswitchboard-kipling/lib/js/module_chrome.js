@@ -2,7 +2,7 @@
 
 const EventEmitter = require('events').EventEmitter;
 
-const package_loader = global.lj_di_injector.get('package_loader');
+const package_loader = global.package_loader;
 const module_manager = package_loader.getPackage('module_manager');
 const core = package_loader.getPackage('core');
 const handleBarsService = core.handleBarsService;
@@ -28,7 +28,7 @@ class ModuleChrome extends EventEmitter {
 	constructor() {
 		super();
 
-		this.gui = global.lj_di_injector.get('gui');
+		this.gui = package_loader.getPackage('gui');
 
 		this.moduleChromeStarted = false;
 

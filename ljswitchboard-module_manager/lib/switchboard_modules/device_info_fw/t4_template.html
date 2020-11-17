@@ -375,7 +375,7 @@
 		linksToBindTo.forEach(function(linkToBindTo) {
 			$(linkToBindTo.id).unbind();
 			$(linkToBindTo.id).bind('click',function(){
-				const gui = global.lj_di_injector.get('gui');
+				const gui = global.gui;
 				gui.Shell.openExternal(linkToBindTo.url);
 			});
 		});

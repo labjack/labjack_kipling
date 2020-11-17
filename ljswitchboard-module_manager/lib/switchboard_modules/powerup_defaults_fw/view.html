@@ -16,7 +16,7 @@
             <script>
                 $('#io-config-datasheet-link').unbind();
                 $('#io-config-datasheet-link').bind('click',function(){
-                    const gui = global.lj_di_injector.get('gui');
+                    const gui = global.gui;
                     gui.Shell.openExternal("https://labjack.com/support/datasheets/t7/io-config-default");
                 });
             </script>

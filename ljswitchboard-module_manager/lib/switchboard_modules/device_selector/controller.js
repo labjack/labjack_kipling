@@ -8,7 +8,7 @@
 const EventEmitter = require('events').EventEmitter;
 const util = require('util');
 
-const package_loader = global.lj_di_injector.get('package_loader');
+const package_loader = global.package_loader;
 const io_manager = package_loader.getPackage('io_manager');
 const module_manager = package_loader.getPackage('module_manager');
 const driver_const = require('ljswitchboard-ljm_driver_constants');

@@ -2,7 +2,7 @@
 
 const path = require('path');
 const {EventEmitter} = require('events');
-const package_loader = global.lj_di_injector.get('package_loader');
+const package_loader = global.package_loader;
 const static_files = package_loader.getPackage('static_files');
 const io_manager = package_loader.getPackage('io_manager');
 const module_manager = package_loader.getPackage('module_manager');

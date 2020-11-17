@@ -1,6 +1,6 @@
 console.log("ljswitchboard-kipling_tester index.js");
 
-const gui = global.lj_di_injector.get('gui');
+const gui = global.gui;
 var path = require('path');
 var q = require('q');
 var win = gui.Window.get();

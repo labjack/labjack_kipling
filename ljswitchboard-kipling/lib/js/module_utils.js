@@ -163,7 +163,7 @@ var TAKE_SCREENSHOTS = function() {
 };
 
 function CLIPBOARD_FUNCTION_WRAPPER() {
-	const gui = global.lj_di_injector.get('gui');
+	const gui = global.gui;
 	function get() {
 		return gui.clipboard.readText();
 	}
