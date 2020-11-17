@@ -45,8 +45,24 @@ const win = {
 };
 */
 
+
+const buildOS = {
+  'darwin': 'darwin',
+  'win32': 'win32'
+}[process.platform] || 'linux';
+
+const localK3FilesPath = {
+  win32: 'C:\\ProgramData\\LabJack\\K3',
+  darwin: '/usr/local/share/LabJack/K3',
+  linux:  '/usr/local/share/LabJack/K3',
+}[buildOS];
+
+
 const np_sep = (process.platform === 'win32') ? ';' : ':';
-process.env.NODE_PATH = path.join(__dirname, 'node_modules') + np_sep + path.resolve(__dirname, '..');
+process.env.NODE_PATH = path.join(__dirname, 'node_modules') + np_sep +
+    path.resolve(__dirname, '..') + np_sep +
+    path.join(localK3FilesPath, 'ljswitchboard-io_manager', 'node_modules') + np_sep +
+    path.join(localK3FilesPath, 'ljswitchboard-kipling', 'node_modules');
 require('module').Module._initPaths();
 
 const package_loader = new PackageLoader();
