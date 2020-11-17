@@ -2,6 +2,7 @@
 
 require('./utils/error_catcher');
 const path = require('path');
+const fs = require('fs');
 const {getBuildDirectory} = require('./utils/get_build_dir');
 
 const builder = require('electron-builder');
@@ -31,11 +32,24 @@ if ('darwin' === buildOS) {
     buildOpts.linux = ['default'];
 }
 
-// Promise is returned
+async function fixSnapName() {
+    const files = fs.readdirSync(path.join(OUTPUT_PROJECT_FILES_PATH, 'dist'));
+    for (const file of files) {
+        if (file.startsWith('ljswitchboard-electron_main_') && file.endsWith('_amd64.snap')) {
+            const newName = file
+                .replace('ljswitchboard-electron_main_', 'kipling_');
+            fs.renameSync(
+                path.join(OUTPUT_PROJECT_FILES_PATH, 'dist', file),
+                path.join(OUTPUT_PROJECT_FILES_PATH, 'dist', newName)
+            );
+        }
+    }
+}
+
 builder
     .build(buildOpts)
     .then(() => {
-        // handle result
+        return fixSnapName();
     })
     .catch((err) => {
         console.error(err);
