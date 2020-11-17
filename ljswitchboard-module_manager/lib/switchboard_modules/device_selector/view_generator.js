@@ -12,6 +12,7 @@ const {EventEmitter} = require('events');
 const util = require('util');
 const handlebars = require('handlebars');
 const path = require('path');
+const modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 var createDeviceSelectorViewGenerator = function() {
 	var self = this;
@@ -294,9 +295,7 @@ var createDeviceSelectorViewGenerator = function() {
 
 	this.displayDeviceConnectionError = function(error) {
 		var renderedData = self.deviceConnectionError();
-
-
-	}
+	};
 	// this.displayDirectConnectionResults = function(renderedData) {
 	// 	return elements.device_scan_results.fill(renderedData)
 	// 	.then(elements.device_scan_status.slideUp)
