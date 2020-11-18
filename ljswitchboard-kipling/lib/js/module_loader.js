@@ -6,8 +6,7 @@ const package_loader = global.package_loader;
 const static_files = package_loader.getPackage('static_files');
 const io_manager = package_loader.getPackage('io_manager');
 const module_manager = package_loader.getPackage('module_manager');
-const core = package_loader.getPackage('core');
-const handleBarsService = core.handleBarsService;
+const handleBarsService = package_loader.getPackage('handleBarsService');
 
 // Configure the module_manager persistent data path.
 const kiplingExtractionPath = package_loader.getExtractionPath();

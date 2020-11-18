@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const {handleBarsService} = require('./handlebar_service');
 const {MessageFormatter} = require('./message_formatter');
 
 exports.info = {
@@ -140,7 +139,7 @@ exports.initializePackage = function (package_loader) {
 		];
 
 
-		if(!!process.env.TEST_MODE || gui.App.manifest.test) {
+		if (!!process.env.TEST_MODE || gui.App.manifest.test) {
 			console.log('Adding kipling_tester');
 			corePackages.splice(2,0,{
 				'name': 'kipling_tester',
@@ -160,113 +159,100 @@ exports.initializePackage = function (package_loader) {
 			});
 		}
 
-		function checkRequirements() {
-			return new Promise(async (resolve, reject) => {
-				console.log('checkRequirements');
-				const message_formatter = new MessageFormatter(package_loader);
+		async function checkRequirements() {
+			console.log('checkRequirements');
+			const message_formatter = new MessageFormatter(package_loader);
 
-				// Configure the message_formatter
-				// message_formatter.configure($, $('#loadSteps'));
+			// Configure the message_formatter
+			// message_formatter.configure($, $('#loadSteps'));
 
-				// Display that the window has been initialized
-				const compiledData = await message_formatter.renderTemplate({
-					'result': 'passed',
-					'step': 'Initialized'
-				});
-
-				const coreWindow = window_manager.getWindow('core');
-
-				coreWindow.win.webContents.postMessage('postMessage', {
-					'channel': 'message_formatter_append',
-					'payload': compiledData
-				});
-
-				splashScreenUpdater.update('Verifying LJM Installation');
-
-				const ljm_driver_checker = package_loader.getPackage('ljm_driver_checker');
-
-				ljm_driver_checker.verifyLJMInstallation()
-					.then((res) => {
-						splashScreenUpdater.update('Finished Verifying LJM Installation');
-						console.log('result...', res);
-						const resultText = res.overallResult ? 'passed' : 'failed';
-						// Display that the window has been initialized
-						message_formatter.renderTemplate({
-							'result': resultText,
-							'step': 'Verified LJM Installation',
-							'message': 'LJM Version: ' + res.ljmVersion,
-							'code': JSON.stringify(res, undefined, 2)
-						});
-						resolve(res);
-					}, (err) => {
-						console.log('err...', err);
-						const resultText = err.overallResult ? 'passed' : 'failed';
-						// Display that the window has been initialized
-						message_formatter.renderTemplate({
-							'result': resultText,
-							'step': 'Verifying LJM Installation',
-							'message': 'LJM Version: ' + err.ljmVersion,
-							'code': JSON.stringify(err, undefined, 2)
-						});
-						reject(err);
-					});
-
+			// Display that the window has been initialized
+			const compiledData = await message_formatter.renderTemplate({
+				'result': 'passed',
+				'step': 'Initialized'
 			});
+
+			const coreWindow = window_manager.getWindow('core');
+
+			coreWindow.win.webContents.postMessage('postMessage', {
+				'channel': 'message_formatter_append',
+				'payload': compiledData
+			});
+
+			splashScreenUpdater.update('Verifying LJM Installation');
+
+			const ljm_driver_checker = package_loader.getPackage('ljm_driver_checker');
+
+			try {
+				const res = await ljm_driver_checker.verifyLJMInstallation()
+				splashScreenUpdater.update('Finished Verifying LJM Installation');
+				console.log('result...', res);
+				const resultText = res.overallResult ? 'passed' : 'failed';
+				// Display that the window has been initialized
+				await message_formatter.renderTemplate({
+					'result': resultText,
+					'step': 'Verified LJM Installation',
+					'message': 'LJM Version: ' + res.ljmVersion,
+					'code': JSON.stringify(res, undefined, 2)
+				});
+				return res;
+			} catch (err) {
+				console.log('err...', err);
+				const resultText = err.overallResult ? 'passed' : 'failed';
+				// Display that the window has been initialized
+				await message_formatter.renderTemplate({
+					'result': resultText,
+					'step': 'Verifying LJM Installation',
+					'message': 'LJM Version: ' + err.ljmVersion,
+					'code': JSON.stringify(err, undefined, 2)
+				});
+				throw err;
+			}
 		}
 
-		function loadCorePackages() {
+		async function loadCorePackages() {
 			console.log('loadCorePackages');
 
 			const message_formatter = new MessageFormatter(package_loader);
+			splashScreenUpdater.update('Loading Packages');
 
-			return new Promise((resolve, reject) => {
-				splashScreenUpdater.update('Loading Packages');
-
-				corePackages.forEach((corePackage) => {
-					package_loader.loadPackage(corePackage);
-				});
-				package_loader.runPackageManager()
-					.then(async (managedPackages) => {
-						console.log('Managed Packages', Object.keys(managedPackages));
-						const keys = Object.keys(managedPackages);
-						if (!!process.env.TEST_MODE || gui.App.manifest.test) {
-							const isKiplingTesterManaged = keys.indexOf('kipling_tester');
-							console.log('kipling_tester required', isKiplingTesterManaged);
-						}
-
-						let continueLaunch = true;
-						for (const key of keys) {
-							const curPackage = managedPackages[key];
-							const resultText = curPackage.isError ? 'failed' : 'passed';
-							if (curPackage.isError) {
-								continueLaunch = false;
-							}
-
-							await message_formatter.renderTemplate({
-								'result': resultText,
-								'step': 'Loading ' + curPackage.name,
-								'messages': [
-									'Version: ' + curPackage.packageInfo.version,
-									'Location: ' + curPackage.packageInfo.location
-								],
-								'code': JSON.stringify(curPackage.packageInfo, undefined, 2)
-							});
-						}
-						splashScreenUpdater.update('Launching Kipling');
-
-						// Instruct the window_manager to open any managed nwApps
-						await window_manager.openManagedApps(managedPackages);
-						resolve();
-					});
+			corePackages.forEach((corePackage) => {
+				package_loader.loadPackage(corePackage);
 			});
+
+			const managedPackages = await package_loader.runPackageManager();
+			console.log('Managed Packages', Object.keys(managedPackages));
+			const keys = Object.keys(managedPackages);
+			if (!!process.env.TEST_MODE || gui.App.manifest.test) {
+				const isKiplingTesterManaged = keys.indexOf('kipling_tester');
+				console.log('kipling_tester required', isKiplingTesterManaged);
+			}
+
+			let continueLaunch = true;
+			for (const key of keys) {
+				const curPackage = managedPackages[key];
+				const resultText = curPackage.isError ? 'failed' : 'passed';
+				if (curPackage.isError) {
+					continueLaunch = false;
+				}
+
+				await message_formatter.renderTemplate({
+					'result': resultText,
+					'step': 'Loading ' + curPackage.name,
+					'messages': [
+						'Version: ' + curPackage.packageInfo.version,
+						'Location: ' + curPackage.packageInfo.location
+					],
+					'code': JSON.stringify(curPackage.packageInfo, undefined, 2)
+				});
+			}
+			splashScreenUpdater.update('Launching Kipling');
+
+			// Instruct the window_manager to open any managed nwApps
+			await window_manager.openManagedApps(managedPackages);
 		}
 
-		checkRequirements()
-			.then(loadCorePackages)
-			.catch(err => {
-				console.error(err);
-			});
+		await checkRequirements();
+		await loadCorePackages();
 	});
 };
-
-exports.handleBarsService = handleBarsService;

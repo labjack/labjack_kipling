@@ -450,10 +450,6 @@ class WindowManager extends EventEmitter {
 			}
 		}
 	}
-
-	linkOutput(console) {
-		// global.console = console;
-	}
 }
 
 exports.eventList = eventList;
@@ -478,7 +474,6 @@ if(DEBUG_WINDOW_EVENT_LIST) {
 	});
 }
 exports.windowManager = WINDOW_MANAGER;
-exports.linkOutput = WINDOW_MANAGER.linkOutput;
 exports.open = WINDOW_MANAGER.openWindow;
 exports.openManagedApps = WINDOW_MANAGER.openManagedApps;
 exports.addWindow = WINDOW_MANAGER.addWindow;

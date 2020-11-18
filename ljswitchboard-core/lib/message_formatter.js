@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const {handleBarsService} = require('./handlebar_service');
 
 const cwd = path.dirname(module.filename);
 const pageTemplateName = 'message_template.html';
@@ -11,6 +10,7 @@ class MessageFormatter {
 
 	constructor(package_loader) {
 		this.package_loader = package_loader;
+		this.handleBarsService = package_loader.getPackage('handleBarsService');
 	}
 
 	async renderTemplate(context) {
@@ -36,7 +36,7 @@ class MessageFormatter {
 			'code': context.code
 		};
 
-		return await handleBarsService.renderTemplate(pageTemplatePath, builtContext);
+		return await this.handleBarsService.renderTemplate(pageTemplatePath, builtContext);
 	}
 
 }

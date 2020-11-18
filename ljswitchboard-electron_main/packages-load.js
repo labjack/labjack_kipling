@@ -3,9 +3,8 @@
 const path = require('path');
 const persistent_data_manager = require('./persistent_data_manager');
 
-function loadProgramPackages(package_loader, splashScreenUpdater) {
+async function loadProgramPackages(package_loader, splashScreenUpdater) {
     // Attach various event listeners to the package_loader
-// package_loader.on('opened_window', windowManager.addWindow);
     package_loader.on('loaded_package', function(packageName) {
         // console.log('Loaded New Package', packageName);
     });
@@ -30,40 +29,14 @@ function loadProgramPackages(package_loader, splashScreenUpdater) {
         // console.warn('failed_to_load_managed_package:', message);
     });
 
-    const errorHandler = function(err) {
-        console.log('Error encountered', err);
-        return Promise.reject(err);
-    };
-
     const gui = package_loader.getPackage('gui');
     const window_manager = package_loader.getPackage('window_manager');
-
     const info = require('./get_cwd');
-
-    const rootPackages = [{
-        'name': 'req',
-        'loadMethod': 'set',
-        'ref': require('ljswitchboard-require')
-    }, {
-        'name': 'ljm_driver_checker',
-        'loadMethod': 'set',
-        'ref': require('ljswitchboard-ljm_driver_checker')
-// }, {
-//     'name': 'win',
-//     'loadMethod': 'set',
-//     'ref': win
-    }, {
-        'name': 'info',
-        'loadMethod': 'set',
-        'ref': info
-    }
-    ];
 
     const startDir = info.startDir;
 
     const secondaryPackages = [
         {
-            // 'name': 'ljswitchboard-static_files',
             'name': 'static_files',
             'folderName': 'ljswitchboard-static_files',
             'loadMethod': 'managed',
@@ -89,7 +62,6 @@ function loadProgramPackages(package_loader, splashScreenUpdater) {
             ]
         },
         {
-            // 'name': 'ljswitchboard-core',
             'name': 'core',
             'folderName': 'ljswitchboard-core',
             'loadMethod': 'managed',
@@ -119,17 +91,8 @@ function loadProgramPackages(package_loader, splashScreenUpdater) {
     ];
 
     const initializeProgram = async function() {
-        // Show the window's dev tools
-        // win.showDevTools();
-
-        // Perform synchronous loading of modules:
-        rootPackages.forEach(function(packageInfo) {
-            package_loader.loadPackage(packageInfo);
-        });
-
         // Perform async operations
         // const ljm_driver_checker = global.ljswitchboard.ljm_driver_checker;
-
         const ljm_driver_checker = package_loader.getPackage('ljm_driver_checker');
 
         let res;
@@ -189,70 +152,61 @@ function loadProgramPackages(package_loader, splashScreenUpdater) {
 
     let appExtractionFailed = false;
 
-    function loadSecondaryPackages(persistentDataManager) {
-        return new Promise((resolve, reject) => {
-            if(appExtractionFailed) {
-                reject();
-            } else {
-                console.log('Loading Secondary Packages');
+    async function loadSecondaryPackages(persistentDataManager) {
+        if(appExtractionFailed) {
+            throw 'appExtractionFailed';
+        }
 
-                const appDataPath = persistentDataManager.getPath();
-                // Get the appDataPath
+        console.log('Loading Secondary Packages');
 
-                // Configure the package_loader with this path
-                package_loader.setExtractionPath(appDataPath);
+        const appDataPath = persistentDataManager.getPath();
+        // Get the appDataPath
 
-                secondaryPackages.forEach(function(packageInfo) {
-                    package_loader.loadPackage(packageInfo);
-                });
+        // Configure the package_loader with this path
+        package_loader.setExtractionPath(appDataPath);
 
-                package_loader.runPackageManager()
-                    .then(function(packages) {
-                        const managedPackageKeys = Object.keys(packages);
-                        console.log('Managed Packages', managedPackageKeys);
-                        managedPackageKeys.forEach((managedPackageKey) => {
-                            // Add the managed packages root locations to the req library.
-                            const baseDir = packages[managedPackageKey].packageInfo.location;
-                            const extraPaths = [
-                                '',
-                                'node_modules',
-                                'lib',
-                                path.join('lib', 'node_modules')
-                            ];
-                            extraPaths.forEach(function(extraPath) {
-                                const modulesDirToAdd = path.normalize(path.join(baseDir, extraPath));
-                                const req = package_loader.getPackage('req');
-                                req.addDirectory(modulesDirToAdd);
-                            });
-                        });
+        for (const packageInfo of secondaryPackages) {
+            await package_loader.loadPackage(packageInfo);
+        }
 
-                        console.log('Opening managed apps', Object.keys(packages));
-                        try {
-                            // Instruct the window_manager to open any managed nwApps
-                            window_manager.linkOutput(console);
-                            window_manager.openManagedApps(packages, console).then(resolve, reject);
-                        } catch(err) {
-                            console.error('Error opening', err);
-                            console.log('Failed to open managed apps (sp)', err);
-                            splashScreenUpdater.update('Failed to open managed apps (sp)');
-                            reject(err);
-                        }
-                    }, function(err) {
-                        console.log('Failed to run package manager (sp)', err);
-                        splashScreenUpdater.update('Failed to run package manager (sp)');
-
-                        reject();
-                    });
+        try {
+            const packages = await package_loader.runPackageManager()
+            console.log('Opening managed apps', Object.keys(packages));
+            try {
+                // Instruct the window_manager to open any managed nwApps
+                return window_manager.openManagedApps(packages);
+            } catch (err) {
+                console.error('Error opening', err);
+                console.log('Failed to open managed apps (sp)', err);
+                splashScreenUpdater.update('Failed to open managed apps (sp)');
+                throw err;
             }
-        });
+        } catch (err) {
+            console.log('Failed to run package manager (sp)', err);
+            splashScreenUpdater.update('Failed to run package manager (sp)');
+        }
     }
 
+    await package_loader.loadPackage({
+        'name': 'ljm_driver_checker',
+        'loadMethod': 'set',
+        'ref': require('ljswitchboard-ljm_driver_checker')
+    });
+    await package_loader.loadPackage({
+        'name': 'info',
+        'loadMethod': 'set',
+        'ref': info
+    });
+    await package_loader.loadPackage({
+        'name': 'handleBarsService',
+        'loadMethod': 'set',
+        'ref': require('./lib/handlebar_service').handleBarsService
+    });
 
-    initializeProgram()
-        .then((persistentDataManager) => loadSecondaryPackages(persistentDataManager), errorHandler)
-        .then(() => {
-            console.log('Program initialized');
-        });
+
+    const persistentDataManager = await initializeProgram();
+    await loadSecondaryPackages(persistentDataManager);
+    console.log('Program initialized');
 }
 
 exports.loadProgramPackages = loadProgramPackages;

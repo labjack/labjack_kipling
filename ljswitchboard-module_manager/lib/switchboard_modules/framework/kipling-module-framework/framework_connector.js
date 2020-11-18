@@ -2,8 +2,7 @@
 var sdModule = null;
 var sdFramework = null;
 const package_loader = global.package_loader;
-const core = package_loader.getPackage('core');
-const handleBarsService = core.handleBarsService;
+const handleBarsService = package_loader.getPackage('handleBarsService');
 const path = require('path');
 
 var createModuleInstance = function() {

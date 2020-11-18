@@ -50,6 +50,6 @@
     "height": 730,
     "min_width": 600,
     "min_height": 400,
-    "show": false
+    "show": true
   }
 }

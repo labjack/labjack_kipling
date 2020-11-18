@@ -6,7 +6,7 @@ const path = require('path');
 const package_loader = global.package_loader;
 const module_manager = package_loader.getPackage('module_manager');
 const core = package_loader.getPackage('core');
-const handleBarsService = core.handleBarsService;
+const handleBarsService = package_loader.getPackage('handleBarsService');
 
 const io_manager = package_loader.getPackage('io_manager');
 
@@ -146,7 +146,7 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	async compileTemplate(templateName, data) {
-		const handleBarsService = core.handleBarsService;
+		const handleBarsService = package_loader.getPackage('handleBarsService');
 		return await handleBarsService.renderTemplate(path.join(__dirname, 'templates', templateName), data);
 	}
 

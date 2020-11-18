@@ -13,9 +13,9 @@ function format(message) {
     // Colors: https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color#41407246
     switch (message.level) {
         case 'error':
-            return '\x1b[31m[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.join(' ');
+            return '\x1b[31m[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.map(a => JSON.stringify(a)).join(' ');
         default:
-            return '[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.join(' ');
+            return '[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.map(a => JSON.stringify(a)).join(' ');
     }
 }
 
@@ -38,7 +38,7 @@ class FileTransport {
     output(message) {
         const now = new Date();
         const source = ' ' + message.source;
-        const buffer = message.level.substr(0, 1).toUpperCase() + '[' + now.toISOString() + source + '] ' + message.data.join(' ') + os.EOL;
+        const buffer = message.level.substr(0, 1).toUpperCase() + '[' + now.toISOString() + source + '] ' + message.data.map(a => JSON.stringify(a)).join(' ') + os.EOL;
         fs.writeFileSync(this.handle, buffer);
     }
 }
