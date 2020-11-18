@@ -111,6 +111,14 @@ app.on('window-all-closed', function() {
 app.on('ready', function() {
   // Create the browser window.
 
+  // WORKAROUND: https://github.com/electron-userland/electron-webpack/issues/239
+  const appName = 'kipling';
+  electron.app.setName(appName);
+  const appDataPath = app.getPath('appData');
+  electron.app.setPath('userData', path.join(appDataPath, appName));
+
+  require('./error-handling');
+
   const appData = require('./package.json');
   const newWindowData = appData.window ? appData.window : {};
 

@@ -387,87 +387,33 @@ class WindowManager extends EventEmitter {
 				console.log('Reference to gui.Window', Object.keys(gui.Window));
 			}
 
-			let asyncOpen = false;
-			if (typeof (process.versions.nw) !== 'undefined') {
-				// crude NW version check
-				if (process.versions.nw > "0.12.3") {
-					asyncOpen = true;
-					if (typeof (newWindowData.toolbar) !== 'undefined') {
-						delete newWindowData.toolbar;
-						// TODO: This fails on NW 0.13++:
-						// https://github.com/nwjs/nw.js/issues/4418
-						// https://github.com/nwjs/nw.js/issues/6149
-						// Can't open new windows & share objects between them.
-						// Potentially worth adding (in the future, 10/21/2019, not working):
-						// -- "chromium-args": "--enable-features=nw2"
-						newWindowData.new_instance = true;
+			// Open a new window and save its reference
+			const newWindow = gui.Window.open(
+				windowPath, Object.assign({}, newWindowData, {
+					webPreferences: {
+						additionalArguments: [
+							'--packageName=' + packageInfo.name
+						]
 					}
-				}
-			}
+				})
+			);
 
+			const windowTitle = newWindowData.title ? newWindowData.title : '';
+			const initialVisibilityState = (typeof (newWindowData.show) !== 'undefined') ? newWindowData.show : true;
 
-			if (asyncOpen) {
-				// Open a new window and save its reference, nw0.13++ uses an async "open" call.
+			// Build the windowInfo object to be passed to the this.addWindow function
+			const windowInfo = {
+				'name': packageInfo.name,
+				'win': newWindow,
+				'initialVisibility': initialVisibilityState,
+				'title': windowTitle
+			};
+			this.addWindow(windowInfo);
 
-				gui.Window.open(
-					windowPath,
-					Object.assign({}, newWindowData, {
-						webPreferences: {
-							additionalArguments: [
-								'--packageName=' + packageInfo.name
-							]
-						}
-					}),
-					(win) => {
-						const windowTitle = newWindowData.title ? newWindowData.title : '';
-						const initialVisibilityState = (typeof (newWindowData.show) !== 'undefined') ? newWindowData.show : true;
+			// Emit an event indicating that a new window has been opened.
+			this.emit(eventList.OPENED_WINDOW, packageInfo.name);
 
-						// Build the windowInfo object to be passed to the this.addWindow function
-						const windowInfo = {
-							'name': packageInfo.name,
-							'win': win,
-							'initialVisibility': initialVisibilityState,
-							'title': windowTitle
-						};
-						this.addWindow(windowInfo);
-
-						// Emit an event indicating that a new window has been opened.
-						this.emit(eventList.OPENED_WINDOW, packageInfo.name);
-
-						resolve(win);
-					}
-				);
-			} else {
-				// Open a new window and save its reference
-
-				const newWindow = gui.Window.open(
-					windowPath, Object.assign({}, newWindowData, {
-						webPreferences: {
-							additionalArguments: [
-								'--packageName=' + packageInfo.name
-							]
-						}
-					})
-				);
-
-				const windowTitle = newWindowData.title ? newWindowData.title : '';
-				const initialVisibilityState = (typeof (newWindowData.show) !== 'undefined') ? newWindowData.show : true;
-
-				// Build the windowInfo object to be passed to the this.addWindow function
-				const windowInfo = {
-					'name': packageInfo.name,
-					'win': newWindow,
-					'initialVisibility': initialVisibilityState,
-					'title': windowTitle
-				};
-				this.addWindow(windowInfo);
-
-				// Emit an event indicating that a new window has been opened.
-				this.emit(eventList.OPENED_WINDOW, packageInfo.name);
-
-				resolve(newWindow);
-			}
-
+			resolve(newWindow);
 		});
 	}
 

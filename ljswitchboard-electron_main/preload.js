@@ -1,5 +1,7 @@
 console.info('preload start');
 
+const electron = require('electron');
+
 console.log('NODE_PATH', process.env.NODE_PATH);
 require('module').Module._initPaths(); // Fix node_modules path
 
@@ -8,9 +10,47 @@ process.argv.forEach(arg => {
         global.packageName = arg.substr('--packageName='.length);
     }
 });
+
 console.log("global.packageName:", global.packageName);
 
-const electron = require('electron');
+for (const level of ['log', 'error', 'warn', 'info', 'verbose', 'debug', 'silly']) {
+    global.console['_' + level] = global.console[level];
+    global.console[level] = (...args) => {
+        global.console['_' + level](...args);
+        const mainLogger = electron.remote.getGlobal('mainLogger');
+        const now = new Date();
+
+        let initiator = '';
+        if (level !== 'info') {
+            try {
+                throw new Error();
+            } catch (e) {
+                if (typeof e.stack === 'string') {
+                    let isFirst = true;
+                    for (const line of e.stack.split('\n')) {
+                        const matches = line.match(/^\s+at\s+(.*)/);
+                        if (matches) {
+                            if (!isFirst) { // first line - current function
+                                // second line - caller (what we are looking for)
+                                initiator = matches[1];
+                                break;
+                            }
+                            isFirst = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        mainLogger.browserOutput({
+            now,
+            level,
+            data: args,
+            source: global.packageName + (initiator ? ':' + initiator : '')
+        });
+    };
+}
+
 const package_loader = electron.remote.getGlobal('package_loader');
 global.package_loader = package_loader;
 global.gui = package_loader.getPackage('gui');

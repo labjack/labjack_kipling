@@ -1,7 +1,12 @@
+'use strict';
+
 const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow;
-const packageData = require('./package.json');
 
+/**
+ * Class created as a helper during porting from nwjs to electron (previously gui.window)
+ *
+ */
 class NwFakeWindow {
     get() {
         return BrowserWindow.getFocusedWindow();
