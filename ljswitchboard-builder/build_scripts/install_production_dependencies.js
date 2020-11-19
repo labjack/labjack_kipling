@@ -200,10 +200,21 @@ function installProductionDependencies() {
 
 	Promise.allSettled(promises)
 		.then(function() {
+			if (process.env.GITHUB_RUN_ID) {
+				const kipling_dependency = 'ljswitchboard-electron_main';
+				const bundle = {
+					'project_path': path.join(TEMP_PROJECT_FILES_PATH, kipling_dependency),
+					'required_keys': {
+						build_number: process.env.GITHUB_RUN_ID
+					}
+				};
+				editPackageKeys(bundle, false);
+			}
 			console.log('Finished Installing production dependencies');
 		})
 		.catch(err => {
-			promises.exit(1);
+			console.error(err);
+			process.exit(1);
 		});
 }
 

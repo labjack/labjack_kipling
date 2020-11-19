@@ -119,6 +119,13 @@ app.on('ready', function() {
 
   require('./lib/error-handling');
 
+  console.info('NodeJS version: ' + process.version);
+  console.info('Electron version: ' + process.versions['electron']);
+  console.info('Kipling version: ' + packageData.version);
+  if (packageData.build_number) {
+    console.info('Kipling build: ' + packageData.build_number);
+  }
+
   const pacakgeInfo = require('./package.json');
   const newWindowData = pacakgeInfo.window ? pacakgeInfo.window : {};
 
@@ -137,18 +144,6 @@ app.on('ready', function() {
     })
   );
 
-  /*
-    splashWindow.on('did-finish-load', (event) => {
-      console.log('did-finish-load', event);
-    });
-  */
-
-  // console.log('Displaying Splash-Screen', packageData);
-
-  // and load the index.html of the app.
-
-  // Open the DevTools.
-
   // Emitted when the window is closed.
   splashWindow.on('closed', function() {
     // Dereference the window object, usually you would store windows
@@ -158,12 +153,14 @@ app.on('ready', function() {
   });
 
   splashWindow.webContents.once('dom-ready', async () => {
-    console.log('splashWindow::loaded');
     const splashScreenUpdater = new SplashScreenUpdater(splashWindow);
 
     splashScreenUpdater.update('NodeJS version: ' + process.version, 'info');
     splashScreenUpdater.update('Electron version: ' + process.versions['electron'], 'info');
     splashScreenUpdater.update('Kipling version: ' + packageData.version, 'info');
+    if (packageData.build_number) {
+      splashScreenUpdater.update('Kipling build: ' + packageData.build_number);
+    }
 
     try {
       await package_loader.loadPackage({

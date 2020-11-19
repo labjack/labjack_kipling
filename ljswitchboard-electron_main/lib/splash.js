@@ -1,4 +1,5 @@
-// Define the splash screen updater
+'use strict';
+
 class SplashScreenUpdater {
 
     constructor(splashWindow) {
@@ -6,12 +7,10 @@ class SplashScreenUpdater {
     }
 
     update(message, level) {
-        // this.splashWindow.webContents.send('splash_update', message);
         this.splashWindow.webContents.postMessage('postMessage', {
             'channel': 'splash_update',
             'payload': {message, level},
         });
-        console.log('Updating message to:', message, level);
     }
 
     finish(logPath) {
