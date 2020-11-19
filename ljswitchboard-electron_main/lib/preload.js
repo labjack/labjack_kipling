@@ -42,10 +42,26 @@ for (const level of ['log', 'error', 'warn', 'info', 'verbose', 'debug', 'silly'
             }
         }
 
+        function filterArgs(arg, level) {
+            if (typeof arg === 'object') {
+                if (arg in HTMLElement) {
+                    return '[instanceof HTMLElement]';
+                }
+                if (arg instanceof Node) {
+                    return '[instanceof Node]';
+                }
+                if (level === 'error') {
+                    return JSON.stringify(arg, null, 2);
+                }
+                return JSON.stringify(arg).substr(0, 40);
+            }
+            return arg;
+        }
+
         mainLogger.browserOutput({
             now,
             level,
-            data: args,
+            data: args.map(arg => filterArgs(arg, level)),
             source: global.packageName + (initiator ? ':' + initiator : '')
         });
     };
@@ -55,7 +71,7 @@ const package_loader = electron.remote.getGlobal('package_loader');
 global.package_loader = package_loader;
 global.gui = package_loader.getPackage('gui');
 
-if (-1 === ['ljswitchboard-electron_splash_screen', 'core'].indexOf(global.packageName)) {
+if (-1 === ['ljswitchboard-electron_splash_screen'].indexOf(global.packageName)) {
     global.handlebars = require('handlebars');
     global.ljmmm_parse = require('ljmmm-parse');
 }

@@ -26,10 +26,8 @@ class NwFakeWindow {
             })
         });
 
-        console.log('NwFakeWindow.open', url, options);
-
         const window = new BrowserWindow(options);
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development' && windowData.name !== 'splash_win') {
             window.webContents.openDevTools();
         }
 

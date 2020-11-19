@@ -11,7 +11,7 @@ kiplingWindow.runInBackground = true;
 
 // win.showDevTools();
 // Start the application
-splashScreenUpdater.update('Starting IO Manager');
+splashScreenUpdater.update('Starting IO Manager', 'info');
 
 function handleError(err, msg) {
     let reportError = true;
@@ -51,10 +51,6 @@ async function performRemainingInitializationRoutines() {
 
 function showKiplingWindow(window_manager, splashScreenUpdater) {
     return new Promise((resolve, reject) => {
-        splashScreenUpdater.update('Finished');
-        window_manager.hideWindow('core');
-        // window_manager.showWindow('core');
-        window_manager.hideWindow('main');
         window_manager.showWindow('kipling');
 
         // Try and execute tests
@@ -144,7 +140,7 @@ async function startIOManager(io_interface, splashScreenUpdater) {
             console.log(typeof (data.code), data.code);
             remainingMessage += ', Subprocess Failed';
         }
-        splashScreenUpdater.update('Failed to initialize IO Manager' + remainingMessage);
+        splashScreenUpdater.update('Failed to initialize IO Manager' + remainingMessage, 'fail');
     }
 }
 

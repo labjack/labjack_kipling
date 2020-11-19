@@ -1,164 +1,99 @@
+'use strict';
+
 const path = require('path');
 const fs = require('fs');
 const semver = require('./semver_min');
+const {parseWithYauzl} = require('./parsers/parse_with_yauzl');
 
-const parse_with_yauzl = require('./parsers/parse_with_yauzl');
-const parseWithYauzl = parse_with_yauzl.parseWithYauzl;
-
-const DEBUG_PACKAGE_EXTRACTION_STEPS = false;
-function debugSteps () {
-    if(DEBUG_PACKAGE_EXTRACTION_STEPS) {
-        console.log.apply(console, arguments);
-    }
-}
-function debugPackageChecking () {
-    if(DEBUG_PACKAGE_EXTRACTION_STEPS) {
-        console.log.apply(console, arguments);
-    }
-}
-
-function checkPackageValidity(packageInfo) {
-    debugPackageChecking('in checkPackageValidity');
-    return new Promise((resolve) => {
-        if (packageInfo.exists) {
-            if (packageInfo.type) {
-                if (packageInfo.version) {
-                    packageInfo.isValid = true;
-                }
+async function checkPackageValidity(packageInfo) {
+    if (packageInfo.exists) {
+        if (packageInfo.type) {
+            if (packageInfo.version) {
+                return true;
             }
         }
-        resolve(packageInfo);
-    });
+    }
+    return false;
 }
 
 function getPackageVersionOfZip(packageInfo) {
-    // return parseWithUnzip(packageInfo);
-    debugPackageChecking('in getPackageVersionOfZip', packageInfo);
     return parseWithYauzl(packageInfo);
 }
 
 
-function getPackageVersionOfDirectory(packageInfo) {
-    return new Promise((resolve) => {
-        const packageDataDir = path.join(packageInfo.location, 'package.json');
-        const finishFunc = function (data) {
-            try {
-                const packageData = JSON.parse(data);
-                if (packageData.version) {
-                    if (semver.valid(packageData.version)) {
-                        packageInfo.version = packageData.version;
-                    }
+async function getPackageVersionOfDirectory(packageInfo) {
+    const packageDataDir = path.join(packageInfo.location, 'package.json');
+    const exists = fs.existsSync(packageDataDir);
+
+    if (exists) {
+        try {
+            const data = fs.readFileSync(packageDataDir);
+            const packageData = JSON.parse(data);
+            if (packageData.version) {
+                if (semver.valid(packageData.version)) {
+                    packageInfo.version = packageData.version;
                 }
-                if (packageData.ljswitchboardDependencies) {
-                    packageInfo.dependencies = packageData.ljswitchboardDependencies;
-                }
-                resolve(packageInfo);
-            } catch (jsonParseError) {
-                resolve(packageInfo);
             }
-        };
-        fs.exists(packageDataDir, function (exists) {
-            if (exists) {
-                fs.readFile(packageDataDir, function (err, data) {
-                    if (err) {
-                        fs.readFile(packageDataDir, function (err, data) {
-                            if (err) {
-                                fs.readFile(packageDataDir, function (err, data) {
-                                    if (err) {
-                                        resolve(packageInfo);
-                                    } else {
-                                        finishFunc(data);
-                                    }
-                                });
-                            } else {
-                                finishFunc(data);
-                            }
-                        });
-                    } else {
-                        finishFunc(data);
-                    }
-                });
-            } else {
-                resolve(packageInfo);
+            if (packageData.ljswitchboardDependencies) {
+                packageInfo.dependencies = packageData.ljswitchboardDependencies;
             }
-        });
-    });
+            return packageInfo;
+        } catch (err) {
+        }
+    }
+    return packageInfo;
 }
 
 async function checkPackageVersion(packageInfo) {
-    packageInfo.version = '';
     if (packageInfo.exists) {
         if (packageInfo.type === 'directory') {
-            return await getPackageVersionOfDirectory(packageInfo);
+            const packageInfo2 = await getPackageVersionOfDirectory(packageInfo);
+            return packageInfo2.version;
         } else if (packageInfo.type === '.zip') {
-            return await getPackageVersionOfZip(packageInfo);
-        } else {
-            return packageInfo;
+            const packageInfo2 = await getPackageVersionOfZip(packageInfo);
+            return packageInfo2.version;
         }
     } else {
-        return packageInfo;
+        return '';
     }
 }
 
-function checkPackageType(packageInfo) {
-    return new Promise((resolve) => {
-        if (packageInfo.exists) {
-            fs.stat(packageInfo.location, function (err, stats) {
-                if (err) {
-                    packageInfo.type = '';
-                    resolve(packageInfo);
-                } else {
-                    var isFile = stats.isFile();
-                    var isDirectory = stats.isDirectory();
+async function checkPackageType(packageInfo) {
+    if (packageInfo.exists) {
+        const stats = fs.statSync(packageInfo.location);
+        const isFile = stats.isFile();
+        const isDirectory = stats.isDirectory();
 
-                    packageInfo.type = '';
-                    if (isFile) {
-                        packageInfo.type = path.extname(packageInfo.location);
-                    }
-                    if (isDirectory) {
-                        packageInfo.type = 'directory';
-                    }
-                    resolve(packageInfo);
-                }
-            });
-        } else {
-            packageInfo.type = '';
-            resolve(packageInfo);
+        if (isFile) {
+            return path.extname(packageInfo.location);
         }
-    });
+        if (isDirectory) {
+            return 'directory';
+        }
+    }
 }
 
-function checkForExistingDirectory(packageInfo) {
-    packageInfo.debug = '1';
-    return new Promise((resolve) => {
-        fs.exists(packageInfo.location, (exists) => {
-            packageInfo.exists = exists;
-            resolve(packageInfo);
-        });
-    });
+async function checkForExistingDirectory(packageInfo) {
+    return fs.existsSync(packageInfo.location);
 }
 
-function checkForValidPackage(location) {
-    debugPackageChecking('in checkForValidPackage', location);
-    return new Promise((resolve) => {
-        const packageInfo = {
-            'location': location,
-            'exists': null,
-            'version': null,
-            'type': null,
-            'isValid': false,
-            'dependencies': {}
-        };
+async function checkForValidPackage(location) {
+    const packageInfo = {
+        'location': location,
+        'exists': null,
+        'version': null,
+        'type': '',
+        'isValid': false,
+        'dependencies': {},
+        'debug': '1',
+    };
 
-        checkForExistingDirectory(packageInfo)
-            .then(checkPackageType)
-            .then(checkPackageVersion)
-            .then(checkPackageValidity)
-            .then((info) => {
-                resolve(info);
-            });
-    });
+    packageInfo.exists = await checkForExistingDirectory(packageInfo);
+    packageInfo.type = await checkPackageType(packageInfo);
+    packageInfo.version = await checkPackageVersion(packageInfo);
+    packageInfo.isValid = await checkPackageValidity(packageInfo);
+
+    return packageInfo;
 }
 
-exports.debugSteps = debugSteps;
 exports.checkForValidPackage = checkForValidPackage;

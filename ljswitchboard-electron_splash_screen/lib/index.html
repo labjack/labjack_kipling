@@ -9,40 +9,57 @@
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"></meta>
         <title>LJSwitchboard</title>
         <style type="text/css">
-        	.splashScreen {
-        		width: 100%;
-        		height:100%;
-        		position:absolute;
-        		top:0;
-        		left:0;
-        		background-image: url(K3_Splash_Screen.png);
-				background-size: cover;
-				background-repeat: no-repeat;
-        	}
-        	.bottomleft {
-				position: absolute;
-				bottom: 0;
-				left: 0;
-				width: 100%;
-				color: #000;
-				height: 21px;
-			}
+            body {
+                background-image: url(K3_Splash_Screen.png);
+                background-size: cover;
+                background-repeat: no-repeat;
+            }
 			.titleText {
 				position: absolute;
 				width: 100%;
 				text-align: center;
 			}
+            .progress-text {
+                position: absolute;
+                bottom: 5px;
+                left: 12px;
+                right: 12px;
+                height: 16px;
+                font-size: 14px;
+                line-height: 16px;
+
+                margin: 0;
+                padding: 1px 4px;
+                box-sizing: border-box;
+
+                color: #000;
+
+                overflow-y: scroll;
+                overflow-x: hidden;
+
+                transition: height 0.5s ease-in;
+            }
+            .progress-text.finished.failed {
+                /*top: 5px;*/
+                height: calc(100% - 10px) !important;
+                border: #CCC;
+                background: #00000030;
+                overflow: auto;
+            }
+
+            .progress-text .info {
+                color: blue;
+            }
+            .progress-text .pass {
+                color: green;
+            }
+            .progress-text .fail {
+                color: red;
+            }
         </style>
         <script type="text/javascript" src="index.js"></script>
     </head>
     <body>
-    	<div class="splashScreen">
-    		<div class="bottomleft">
-    			<span class="titleText">Initializing...</span>
-    		</div>
-    	</div>
-    	<h1>Hello World!</h1>
-    We are using io.js <script>document.write(process.version)</script>
-    and Electron <script>document.write(process.versions['electron'])</script>.
+        <pre class="progress-text"></pre>
     </body>
 </html>

@@ -7,15 +7,35 @@ const os = require('os');
 
 const originalConsole = global.console;
 
+
+function formatParam(param, max) {
+    if (!max) {
+        max = 1000 * 10000;
+    }
+
+    if (!param) {
+        return param;
+    }
+
+    if (Object(param) === param) {
+        return JSON.stringify(param, null, 2).substr(0, max);
+    }
+    if (Array.isArray(param)) {
+        return JSON.stringify(param, null, 2).substr(0, max);
+    }
+
+    return param;
+}
+
 function format(message) {
     const source = ' ' + message.source;
 
     // Colors: https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color#41407246
     switch (message.level) {
         case 'error':
-            return '\x1b[31m[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.map(a => JSON.stringify(a)).join(' ');
+            return '\x1b[31m[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.map(p => formatParam(p, 1000)).join(' ');
         default:
-            return '[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.map(a => JSON.stringify(a)).join(' ');
+            return '[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.map(p => formatParam(p, 1000)).join(' ');
     }
 }
 
@@ -32,13 +52,14 @@ class FileTransport {
         fs.mkdirSync(path.join(electron.app.getPath('userData'), 'logs'), {
             recursive: true
         });
-        this.handle = fs.openSync(path.join(electron.app.getPath('userData'), 'logs', now.toISOString()) + '.log', 'a');
+        this.filePath = path.join(electron.app.getPath('userData'), 'logs', now.toISOString()) + '.log';
+        this.handle = fs.openSync(this.filePath, 'a');
     }
 
     output(message) {
         const now = new Date();
         const source = ' ' + message.source;
-        const buffer = message.level.substr(0, 1).toUpperCase() + '[' + now.toISOString() + source + '] ' + message.data.map(a => JSON.stringify(a)).join(' ') + os.EOL;
+        const buffer = message.level.substr(0, 1).toUpperCase() + '[' + now.toISOString() + source + '] ' + message.data.map(formatParam).join(' ') + os.EOL;
         fs.writeFileSync(this.handle, buffer);
     }
 }
@@ -127,6 +148,20 @@ class Logger {
     browserOutput(message) {
         for (const transport of this.transports) {
             transport.output(message);
+        }
+    }
+    trace(...args) {
+        originalConsole.trace(...args);
+    }
+    debug(...args) {
+        originalConsole.debug(...args);
+    }
+
+    getLogFilePath() {
+        for (const transport of this.transports) {
+            if (transport.filePath) {
+                return transport.filePath;
+            }
         }
     }
 

@@ -35,26 +35,6 @@ function extractWithYauzl (bundle, self, EVENTS) {
 
     var defered = q.defer();
 
-    var resolveError = function(err) {
-        logError('  - Error performZipFileUpgrade', err, bundle.name);
-        var msg = 'Error performing a .zip file upgrade.  Verify ' +
-        'the user-permissions for the directory and .zip file: ' +
-        upgradeZipFilePath + ', and ' + destinationPath;
-        bundle.resultMessages.push({
-            'step': 'performDirectoryUpgrade-copyRecursive',
-            'message': msg,
-            'isError': true,
-            'error': JSON.stringify(err)
-        });
-        bundle.overallResult = false;
-        bundle.isError = true;
-
-        // Emit events indicating that a zip file extraction has finished
-        // w/ an error
-        self.emit(EVENTS.FINISHED_EXTRACTION_ERROR, bundle);
-        self.emit(EVENTS.FINISHED_ZIP_FILE_EXTRACTION_ERROR, bundle);
-        defered.resolve(bundle);
-    };
     var resolveSuccess = function() {
         // Emit events indicating that a zip file extraction has finished
         self.emit(EVENTS.FINISHED_EXTRACTION, bundle);
@@ -65,15 +45,15 @@ function extractWithYauzl (bundle, self, EVENTS) {
     yauzl.open(from, {autoClose: false}, function(err, zipfile) {
         if (err) {
             console.error('Error opening zip', err);
-            resolveError(err);
+            defered.reject('Error opening zip: ' + from);
             return;
         }
 
         var cancelled = false;
         var finished = false;
-        
+
         var asyncQueue = async.queue(extractEntry, 1);
-        
+
         function drain() {
             if (!finished){
                 return;
@@ -86,37 +66,37 @@ function extractWithYauzl (bundle, self, EVENTS) {
 
             asyncQueue.error(function(err, task) {
                 console.error('!!! Task experienced an error', err, task);
-                resolveError(err);
-            })
+                defered.reject('!!! Task experienced an error');
+            });
         } catch(err) {
             asyncQueue.drain = drain;
         }
-        
+
         zipfile.on("entry", function(entry) {
             debug('zipfile entry', entry.fileName);
-            
+
             if (/\/$/.test(entry.fileName)) {
                 // directory file names end with '/'
                 return;
             }
-            
+
             if (/^__MACOSX\//.test(entry.fileName)) {
                 // dir name starts with __MACOSX/
                 return;
             }
-            
+
             asyncQueue.push(entry, function(err) {
                 debug('finished processing', entry.fileName, {err: err});
             });
         });
         zipfile.on('error', function(err) {
             console.error('Error opening zip', err);
-            resolveError(err);
+            defered.reject('Error opening zip');
         });
         zipfile.on('end', function() {
             finished = true;
         });
-        
+
         function extractEntry(entry, done) {
             if (cancelled) {
                 debug('skipping entry', entry.fileName, {cancelled: cancelled});
@@ -124,10 +104,10 @@ function extractWithYauzl (bundle, self, EVENTS) {
             } else {
                 debug('extracting entry', entry.fileName, to);
             }
-            
+
             var dest = path.join(to, entry.fileName);
             var destDir = path.dirname(dest);
-            
+
             // convert external file attr int into a fs stat mode int
             var mode = (entry.externalFileAttributes >> 16) & 0xFFFF;
             // check if it's a symlink or dir (using stat mode constants)
@@ -136,13 +116,13 @@ function extractWithYauzl (bundle, self, EVENTS) {
             var IFLNK = 40960;
             var symlink = (mode & IFMT) === IFLNK;
             var isDir = (mode & IFMT) === IFDIR;
-            
+
             // if no mode then default to readable
             if (mode === 0) {
                 if (isDir) mode = 0555;
                 else mode = 0444;
             }
-            
+
             // reverse umask first (~)
             var umask = ~process.umask();
             // & with processes umask to override invalid perms
@@ -171,7 +151,7 @@ function extractWithYauzl (bundle, self, EVENTS) {
                     if (symlink) writeSymlink();
                     else writeStream();
                 });
-                
+
                 function writeStream() {
                     debugFileExtract('writing file', dest);
                     var createdWriteStream = fs.createWriteStream(dest, {mode: procMode});
@@ -190,7 +170,7 @@ function extractWithYauzl (bundle, self, EVENTS) {
                         return done(err);
                     });
                 }
-                
+
                 // AFAICT the content of the symlink file itself is the symlink target filename string
                 function writeSymlink() {
                     readStream.pipe(concat(function(data) {
@@ -204,7 +184,6 @@ function extractWithYauzl (bundle, self, EVENTS) {
                 }
             });
         }
-
     });
     return defered.promise;
 }

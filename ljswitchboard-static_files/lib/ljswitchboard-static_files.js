@@ -42,7 +42,3 @@ exports.loadResources = loadResources;
 exports.info = {
 	'type': 'staticFiles'
 };
-
-exports.initializePackage = function (injector) {
-	console.log('Static Files initializePackage');
-};

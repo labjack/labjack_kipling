@@ -1,34 +1,45 @@
-/*
-node-webkit 0.11.6 process.versions:
-chromium: "38.0.2125.104"
-http_parser: "2.2"
-modules: "14"
-node: "0.11.13-pre"
-node-webkit: "0.11.6"
-nw-commit-id: "ec3b4f4-d8ecacd-e5d35ef-f2f89e2-d9a9d39-cdd879e"
-openssl: "1.0.1f"
-uv: "0.11.22"
-v8: "3.28.71.2"
-zlib: "1.2.5"
-
-nw 0.12.0-alpha2 process.versions:
-chromium: "41.0.2236.2"
-http_parser: "2.3"
-modules: "14"
-node: "1.0.0"
-node-webkit: "0.12.0-alpha2"
-nw-commit-id: "e0d5ce6-d017875-34492e5-2e978ac-1116f2c-fd87c8d"
-openssl: "1.0.1j"
-uv: "1.2.0"
-v8: "3.31.31"
-zlib: "1.2.5"
-*/
-
 window.addEventListener('splash_update', (event) => {
-	console.log('88887778787',event);
-	const message = event.payload;
-	const titleTextObj = document.querySelector('.titleText');
-	titleTextObj.textContent = message.toString();
+	const {message, level} = event.payload;
+	const progressTextElement = document.querySelector('.progress-text');
+	const stepResult = document.createElement('div');
+	stepResult.innerText = message;
+	if (level) {
+		stepResult.classList.add(level);
+	}
+	if ('fail' === level) {
+		progressTextElement.failed = true;
+	}
+	progressTextElement.appendChild(stepResult);
+
+	const scrollHeight = Math.max(progressTextElement.scrollHeight, progressTextElement.clientHeight);
+	progressTextElement.scrollTop = scrollHeight - progressTextElement.clientHeight;
+});
+
+window.addEventListener('splash_finish', (event) => {
+	const progressTextElement = document.querySelector('.progress-text');
+	const logPath = event.payload;
+	if (progressTextElement.failed) {
+		if (logPath) {
+			const stepResult = document.createElement('div');
+			stepResult.innerText = 'Detailed log can be found here: ';
+			const link = document.createElement('a');
+			link.setAttribute('href', 'file://' + logPath);
+			link.setAttribute('target', '_blank');
+			link.innerText = logPath;
+			link.addEventListener('click', (event) => {
+				event.stopPropagation();
+				event.preventDefault();
+				const shell = require('electron').shell;
+				shell.openExternal('file://' + logPath);
+			});
+
+			stepResult.appendChild(link);
+			progressTextElement.appendChild(stepResult);
+		}
+
+		progressTextElement.classList.add('finished');
+		progressTextElement.classList.add('failed');
+	}
 });
 
 const manifest = require('../package.json');
@@ -104,4 +115,3 @@ if(!!process.env.TEST_MODE || manifest.test) {
 }
 
 }
-

@@ -35,13 +35,11 @@
 	},
 	"un-managed-dependencies": {
 		"semver": "4.2.0",
-		"unzipper": "0.10.11",
-		"ljswitchboard-core": "*"
+		"unzipper": "0.10.11"
 	},
 	"kipling_dependencies": [
 		"ljswitchboard-electron_main",
 		"ljswitchboard-electron_splash_screen",
-		"ljswitchboard-core",
 		"ljswitchboard-io_manager",
 		"ljswitchboard-kipling",
 		"ljswitchboard-module_manager",

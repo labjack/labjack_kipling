@@ -18,15 +18,9 @@ var extractWithUnzip = function(bundle, self, EVENTS) {
 
 	unzipExtractor.on('error', function(err) {
 		console.error('  - Error performZipFileUpgrade', err, bundle.name);
-		var msg = 'Error performing a .zip file upgrade.  Verify ' +
+		var msg = 'Error performing a .zip file upgrade. Verify ' +
 		'the user-permissions for the directory and .zip file: ' +
 		upgradeZipFilePath + ', and ' + destinationPath;
-		bundle.resultMessages.push({
-			'step': 'performDirectoryUpgrade-copyRecursive',
-			'message': msg,
-			'isError': true,
-			'error': JSON.stringify(err)
-		});
 		bundle.overallResult = false;
 		bundle.isError = true;
 
@@ -34,7 +28,7 @@ var extractWithUnzip = function(bundle, self, EVENTS) {
 		// w/ an error
 		self.emit(EVENTS.FINISHED_EXTRACTION_ERROR, bundle);
 		self.emit(EVENTS.FINISHED_ZIP_FILE_EXTRACTION_ERROR, bundle);
-		defered.resolve(bundle);
+		defered.reject(msg);
 	});
 
 	unzipExtractor.on('close', function() {

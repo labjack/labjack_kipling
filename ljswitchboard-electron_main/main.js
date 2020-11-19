@@ -4,15 +4,15 @@ const url = require('url');
 
 const {PackageLoader} = require('ljswitchboard-package_loader');
 const {WindowManager} = require('ljswitchboard-window_manager');
-const {NwFakeWindow} = require('./window-compat');
+const {NwFakeWindow} = require('./lib/window-compat');
 
 // Module to control application life.
 const app = electron.app;
 // Module to create native browser window.
 
 const packageData = require('./package.json');
-const {SplashScreenUpdater} = require('./splash');
-const {loadProgramPackages} = require('./packages-load');
+const {SplashScreenUpdater} = require('./lib/splash');
+const {loadProgramPackages} = require('./lib/packages-load');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -117,10 +117,10 @@ app.on('ready', function() {
   const appDataPath = app.getPath('appData');
   electron.app.setPath('userData', path.join(appDataPath, appName));
 
-  require('./error-handling');
+  require('./lib/error-handling');
 
-  const appData = require('./package.json');
-  const newWindowData = appData.window ? appData.window : {};
+  const pacakgeInfo = require('./package.json');
+  const newWindowData = pacakgeInfo.window ? pacakgeInfo.window : {};
 
   splashWindow = fakeWindow.open(
       url.format({
@@ -157,16 +157,31 @@ app.on('ready', function() {
     splashWindow = null;
   });
 
-  splashWindow.webContents.once('dom-ready', () => {
+  splashWindow.webContents.once('dom-ready', async () => {
     console.log('splashWindow::loaded');
     const splashScreenUpdater = new SplashScreenUpdater(splashWindow);
 
-    package_loader.loadPackage({
-      'name': 'splashScreenUpdater',
-      'loadMethod': 'set',
-      'ref': splashScreenUpdater
-    });
-    loadProgramPackages(package_loader, splashScreenUpdater);
+    splashScreenUpdater.update('NodeJS version: ' + process.version, 'info');
+    splashScreenUpdater.update('Electron version: ' + process.versions['electron'], 'info');
+    splashScreenUpdater.update('Kipling version: ' + packageData.version, 'info');
+
+    try {
+      await package_loader.loadPackage({
+        'name': 'splashScreenUpdater',
+        'loadMethod': 'set',
+        'ref': splashScreenUpdater
+      });
+
+      await loadProgramPackages(package_loader);
+
+      splashScreenUpdater.update('Finished', 'info');
+      window_manager.hideWindow('main');
+    } catch (err) {
+      console.error(err);
+      splashScreenUpdater.update(err, 'fail');
+    } finally {
+      splashScreenUpdater.finish(global.mainLogger.getLogFilePath());
+    }
   });
 
   window_manager.addWindow({
@@ -177,7 +192,9 @@ app.on('ready', function() {
   });
 
   if (process.env.NODE_ENV === 'development') {
-    splashWindow.webContents.openDevTools();
+    // splashWindow.webContents.openDevTools({
+    //   mode: 'undocked'
+    // });
   }
 });
 

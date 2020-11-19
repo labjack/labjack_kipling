@@ -5,7 +5,6 @@ const path = require('path');
 
 const package_loader = global.package_loader;
 const module_manager = package_loader.getPackage('module_manager');
-const core = package_loader.getPackage('core');
 const handleBarsService = package_loader.getPackage('handleBarsService');
 
 const io_manager = package_loader.getPackage('io_manager');

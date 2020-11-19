@@ -29,7 +29,7 @@ exports.info = {
 	'main': 'lib/index.html'
 };
 
-exports.initializePackage = function (package_loader) {
+exports.initializePackage = async function (package_loader) {
 	const window_manager = package_loader.getPackage('window_manager');
 
 	console.log('Kipling initializePackage');

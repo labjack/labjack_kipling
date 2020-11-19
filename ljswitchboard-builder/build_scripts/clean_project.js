@@ -73,12 +73,6 @@ const createStdCleanModules = function(names) {
 
 
 const filesToDelete = {
-    'ljswitchboard-core': {
-		'foldersToDelete': ['test'],
-		'node_modules': {
-			'foldersToDelete': ['.bin'],
-		},
-	},
 	'ljswitchboard-kipling': {
 		'foldersToDelete': ['test'],
 		'node_modules': {
