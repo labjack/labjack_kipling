@@ -1,9 +1,9 @@
 const electron = require('electron');
 var path = require('path');
 
-var cwd = path.normalize(process.cwd());
+const cwd = path.normalize(process.cwd());
 // var execDir = path.normalize(path.dirname(process.execPath));
-var execDir = path.dirname(electron.app.getPath('exe'));
+const execDir = path.dirname(electron.app.getPath('exe'));
 var derivedCWD = path.resolve(path.join(execDir, '..','..','..'));
 
 var startMethod = '';
@@ -78,6 +78,7 @@ if (process.env.NODE_ENV === 'development') {
 		startMethod = 'npm start';
 		startDir = cwd;
 	}
+	startDir = execDir;
 	/*
 	 * Notes for MAC OS X: (packaged & Un-zipped)
 	 *   - cwd: "/Users/chrisjohn/git/ljswitchboard-project_manager/

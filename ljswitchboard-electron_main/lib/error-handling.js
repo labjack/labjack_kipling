@@ -43,7 +43,7 @@ function format(message) {
  * Writes log to file
  *
  * on Linux: ~/.config/{app name}/logs/{date}.log
- * on macOS: ~/Library/Logs/{app name}/{date}.log
+ * on macOS: ~/Library/Application Support/{app name}/logs/{date}.log
  * on Windows: %USERPROFILE%\AppData\Roaming\{app name}\logs\{date}.log
  */
 class FileTransport {
