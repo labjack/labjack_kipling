@@ -1,10 +1,7 @@
-var assert = require('chai').assert;
+'use strict';
 
-// Generic Application Objects
-var package_loader;
-var gns;
-var gui;
-var window_manager;
+const package_loader = global.package_loader;
+const window_manager = package_loader.getPackage('window_manager');
 
 // Window Objects
 var testerWin;
@@ -63,11 +60,6 @@ var configureMockDevice = function(deviceIndex) {
 
 describe('test_device_info', function() {
 	it('initialize test', function (done) {
-		package_loader = global.require('ljswitchboard-package_loader');
-		gns = package_loader.getNameSpace();
-		gui = global.gui;
-		window_manager = global.require('ljswitchboard-window_manager');
-
 		var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;
 		testerWin = managedTesterWindow.win;
 

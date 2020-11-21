@@ -1,15 +1,15 @@
-var assert = require('chai').assert;
+'use strict';
+
+const package_loader = global.package_loader;
+const gui = global.gui;
+const window_manager = package_loader.getPackage('window_manager');
+
+const {assert} = require('chai');
 
 var testOptions = {
 	'refreshDevices': false,
 	'realRefresh': false
 };
-
-// Generic Application Objects
-var package_loader;
-var gns;
-var gui;
-var window_manager;
 
 // Window Objects
 var testerWin;
@@ -48,10 +48,6 @@ mockDevices.forEach(function(mockDevice) {
 
 describe('mock_device_selector', function() {
 	it('initialize test', function (done) {
-		package_loader = global.require('ljswitchboard-package_loader');
-		gns = package_loader.getNameSpace();
-		gui = global.gui;
-		window_manager = global.require('ljswitchboard-window_manager');
 
 		var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;
 		testerWin = managedTesterWindow.win;

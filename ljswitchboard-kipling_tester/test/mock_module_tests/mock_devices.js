@@ -1,4 +1,6 @@
-var mockDevices = [{
+'use strict';
+
+const mockDevices = [{
 	'deviceType': 'LJM_dtT7',
 	'connectionType': 'LJM_ctUSB',
 	'serialNumber': 1,

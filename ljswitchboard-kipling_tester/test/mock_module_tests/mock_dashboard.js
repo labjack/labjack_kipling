@@ -1,8 +1,8 @@
-// Generic Application Objects
-var package_loader;
-var gns;
-var gui;
-var window_manager;
+'use strict';
+
+const package_loader = global.package_loader;
+const gui = global.gui;
+const window_manager = package_loader.getPackage('window_manager');
 
 // Window Objects
 var testerWin;
@@ -13,8 +13,6 @@ var kiplingWindow;
 var $;
 var MODULE_LOADER;
 var MODULE_CHROME;
-var io_manager;
-var io_interface;
 var deviceController;
 
 var mockDevices;
@@ -38,11 +36,6 @@ mockDevices.forEach(function(mockDevice) {
 
 describe('mock_dashboard', function() {
 	it('initialize test', function (done) {
-		package_loader = global.require('ljswitchboard-package_loader');
-		gns = package_loader.getNameSpace();
-		gui = global.gui;
-		window_manager = global.require('ljswitchboard-window_manager');
-
 		var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;
 		testerWin = managedTesterWindow.win;
 
@@ -55,8 +48,8 @@ describe('mock_dashboard', function() {
 		MODULE_CHROME = kiplingWindow.MODULE_CHROME;
 
 
-		io_manager = global.require('ljswitchboard-io_manager');
-		io_interface = io_manager.io_interface();
+		const io_manager = package_loader.getPackage('io_manager');
+		const io_interface = io_manager.io_interface();
 		deviceController = io_interface.getDeviceController();
 		done();
 	});

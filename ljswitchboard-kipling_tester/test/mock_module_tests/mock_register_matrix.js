@@ -1,8 +1,7 @@
-// Generic Application Objects
-var package_loader;
-var gns;
-var gui;
-var window_manager;
+'use strict';
+
+const package_loader = global.package_loader;
+const window_manager = package_loader.getPackage('window_manager');
 
 // Window Objects
 var testerWin;
@@ -18,12 +17,7 @@ var io_interface;
 var deviceController;
 
 
-var mockDevices;
-try {
-	mockDevices = require('./mock_devices').mockDevices;
-} catch(err) {
-	mockDevices = [];
-}
+var mockDevices = require('./mock_devices').mockDevices;
 var deviceScannerConfigData = [];
 var excludeKeys = ['deviceConfig'];
 mockDevices.forEach(function(mockDevice) {
@@ -39,11 +33,6 @@ mockDevices.forEach(function(mockDevice) {
 
 describe('mock register matrix', function() {
 	it('initialize test', function (done) {
-		package_loader = global.require('ljswitchboard-package_loader');
-		gns = package_loader.getNameSpace();
-		gui = global.gui;
-		window_manager = global.require('ljswitchboard-window_manager');
-
 		var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;
 		testerWin = managedTesterWindow.win;
 

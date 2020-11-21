@@ -1,14 +1,14 @@
+'use strict';
+
+const package_loader = global.package_loader;
+const gui = global.gui;
+const window_manager = package_loader.getPackage('window_manager');
+
 var assert = require('chai').assert;
 
 var testOptions = {
 	'forceLiveTest': true
 };
-
-// Generic Application Objects
-var package_loader;
-var gns;
-var gui;
-var window_manager;
 
 // Window Objects
 var testWin;
@@ -25,20 +25,8 @@ var deviceController;
 var activeModule;
 var eventList;
 
-var q;
-try {
-	q = require('q');
-} catch(err) {
-	q = global.require('q');
-}
-
 describe('test_device_selector', function() {
 	it('initialize test', function (done) {
-		package_loader = global.require('ljswitchboard-package_loader');
-		gns = package_loader.getNameSpace();
-		gui = global.gui;
-		window_manager = global.require('ljswitchboard-window_manager');
-
 		var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;
 		testerWin = managedTesterWindow.win;
 
@@ -76,18 +64,17 @@ describe('test_device_selector', function() {
 		var activeNums = [];
 		var promises = [];
 		var closeDevice = function(ele) {
-			var testDefered = q.defer();
-			var resolveFunc = function(updatedModules) {
-				testDefered.resolve();
-			};
-			MODULE_CHROME.once(
-				MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_CLOSED,
-				resolveFunc);
-			var disconnectButton = ele.find('.disconnect-button');
-			setImmediate(function() {
-				disconnectButton.trigger('click');
+			return new Promise((resolve, reject) => {
+				MODULE_CHROME.once(
+					MODULE_CHROME.eventList.DEVICE_SELECTOR_DEVICE_CLOSED,
+					(updatedModules) => {
+						resolve();
+					});
+				var disconnectButton = ele.find('.disconnect-button');
+				setImmediate(function() {
+					disconnectButton.trigger('click');
+				});
 			});
-			return testDefered.promise;
 		};
 		for(i = 0; i < num; i++) {
 			if(buttonClasses.eq(i).css('display') !== 'none') {
@@ -95,7 +82,7 @@ describe('test_device_selector', function() {
 				promises.push(closeDevice(buttonClasses.eq(i)));
 			}
 		}
-		q.allSettled(promises)
+		Promise.allSettled(promises)
 		.then(function() {
 			console.log('Closed All Devices!');
 			done();
