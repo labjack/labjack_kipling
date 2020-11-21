@@ -42,6 +42,35 @@ for (const level of ['log', 'error', 'warn', 'info', 'verbose', 'debug', 'silly'
             }
         }
 
+        function serializer() {
+            const stack = [], keys = [];
+
+            const cycleReplacer = function(key, value) {
+                if (stack[0] === value) return "[Circular ~]";
+                return "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]";
+            };
+
+            return function(key, value) {
+                if (stack.length > 0) {
+                    const thisPos = stack.indexOf(this);
+                    if (!thisPos) {
+                        stack.splice(thisPos + 1);
+                        keys.splice(thisPos, Infinity, key);
+                    } else {
+                        stack.push(this);
+                        keys.push(key);
+                    }
+                    if (!stack.indexOf(value)) {
+                        value = cycleReplacer.call(this, key, value);
+                    }
+                }
+                else {
+                    stack.push(value);
+                }
+                return value;
+            };
+        }
+
         function filterArgs(arg, level) {
             if (typeof arg === 'object') {
                 if (arg in HTMLElement) {
@@ -51,9 +80,9 @@ for (const level of ['log', 'error', 'warn', 'info', 'verbose', 'debug', 'silly'
                     return '[instanceof Node]';
                 }
                 if (level === 'error') {
-                    return JSON.stringify(arg, null, 2);
+                    return JSON.stringify(arg, serializer(), 2);
                 }
-                return JSON.stringify(arg).substr(0, 40);
+                return JSON.stringify(arg, serializer()).substr(0, 40);
             }
             return arg;
         }

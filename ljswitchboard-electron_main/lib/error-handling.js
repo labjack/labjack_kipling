@@ -59,7 +59,8 @@ class FileTransport {
     output(message) {
         const now = new Date();
         const source = ' ' + message.source;
-        const buffer = message.level.substr(0, 1).toUpperCase() + '[' + now.toISOString() + source + '] ' + message.data.map(formatParam).join(' ') + os.EOL;
+        const paramsString = message.data.map(formatParam).join(' ');
+        const buffer = Buffer.from(message.level.substr(0, 1).toUpperCase() + '[' + now.toISOString() + source + '] ' + paramsString + os.EOL);
         fs.writeFileSync(this.handle, buffer);
     }
 }

@@ -3,11 +3,10 @@ console.log("ljswitchboard-kipling index.js");
 const package_loader = global.package_loader;
 const window_manager = package_loader.getPackage('window_manager');
 
-/*
-var UPDATE_K3_WINDOW_VERSION_NUMBER_STR = function(str) {
-	win.title = 'Kipling '+str;
+global.UPDATE_K3_WINDOW_VERSION_NUMBER_STR = function(str) {
+    const win = window_manager.getWindow('kipling');
+    win.title = 'Kipling '+str;
 };
-*/
 
 const io_manager = package_loader.getPackage('io_manager');
 const io_interface = io_manager.io_interface();

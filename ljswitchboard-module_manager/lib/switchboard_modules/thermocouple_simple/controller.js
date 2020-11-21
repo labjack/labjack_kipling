@@ -8,7 +8,7 @@
  *  1. Read Device Information
  *  2. Periodically Refresh Device Information
  *  3. Accept user input to configure the device
- *  
+ *
  * Read Device Information:
  *  1. Read AINx_EF_INDEX register to determine what type is currently selected
  *  2. Read AINx_EF_CONFIG_A to determine temperature metric
@@ -27,7 +27,7 @@
         22: typeK
         23: typeR
         24: typeT
- *  4. Set AINx_EF_CONFIG_B to 60052 to __XXXX-DESCRIPTION-XXXX__  
+ *  4. Set AINx_EF_CONFIG_B to 60052 to __XXXX-DESCRIPTION-XXXX__
 **/
 var sprintf = require('sprintf-js').sprintf;
 
@@ -36,6 +36,7 @@ var MODULE_UPDATE_PERIOD_MS = 1000;
 
 // Constant that can be set to disable auto-linking the module to the framework
 var DISABLE_AUTOMATIC_FRAMEWORK_LINKAGE = false;
+const globalDeviceConstants = global.globalDeviceConstants;
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -77,7 +78,7 @@ function module() {
             return sprintf('%.4f',tcReading);
         }
     };
-    /** 
+    /**
      * Function to simplify configuring thermocouple channels.
      * ex: configureChannel(device, 'AIN0', 'TypeK', 'K');
      * ex: configureChannel(device, 'AIN0', 22, 0);
@@ -167,9 +168,9 @@ function module() {
         framework.putSetupBindings(setupBindings);
         onSuccess();
     };
-    
+
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -191,7 +192,7 @@ function module() {
         var configuredEFType = [];
         var configuredMetric = [];
 
-        //Loop through results and save them appropriately.  
+        //Loop through results and save them appropriately.
         setupBindings.forEach(function(binding, key){
             // console.log('key',key,'Address',binding.address,', Result: ',binding.result);
             if(key.search(AIN_EF_SETUP_CONFIG_STR) > 0) {
@@ -211,7 +212,7 @@ function module() {
             }
             if(key.search('_EF_CONFIG_A') > 0) {
                 configuredMetric.push({
-                    result: binding.result, 
+                    result: binding.result,
                     status: binding.status
                 });
             }
@@ -276,7 +277,7 @@ function module() {
             }
             moduleContext.tcInputs.push({
                 "name": reg,
-                "types": thermocoupleTypes, 
+                "types": thermocoupleTypes,
                 "metrics": tcTemperatureMetrics,
                 "isConfigured": validTCType,
                 confMetric: true,
@@ -284,7 +285,7 @@ function module() {
                 "typeOptions": efTypeMenuOptions,
                 "metricOptions": tcMetricMenuOptions
             });
-            
+
         });
         framework.setCustomContext(moduleContext);
         onSuccess();
@@ -294,10 +295,10 @@ function module() {
         var moduleBindings = [
             {bindingClass: baseReg+'-thermocouple-type-select',  template: baseReg+'-thermocouple-type-select', binding: baseReg+'_EF_INDEX',  direction: 'write', event: 'change'},
             {
-                bindingClass: baseReg+'-thermocouple-metric-select',  
-                template: baseReg+'-thermocouple-metric-select', 
-                binding: baseReg+'-callback',  
-                direction: 'write', 
+                bindingClass: baseReg+'-thermocouple-metric-select',
+                template: baseReg+'-thermocouple-metric-select',
+                binding: baseReg+'-callback',
+                direction: 'write',
                 event: 'change',
                 execCallback: true,
                 callback: function(data, onSuccess) {
@@ -312,7 +313,7 @@ function module() {
 
                     //Get the selected thermocouple temperature metric
                     var tcTempMetricNum = parseInt(value);
-                    
+
                     //Perform device IO to configure channel
                     self.configureChannel(
                         framework.getSelectedDevice(),
@@ -322,10 +323,10 @@ function module() {
                 }
             },
             {
-                bindingClass: baseReg+'-options-toggle-button',  
-                template: baseReg+'-options-toggle-button', 
-                binding: baseReg+'-callback',  
-                direction: 'write', 
+                bindingClass: baseReg+'-options-toggle-button',
+                template: baseReg+'-options-toggle-button',
+                binding: baseReg+'-callback',
+                direction: 'write',
                 event: 'click',
                 execCallback: true,
                 callback: function(data, onSuccess) {
@@ -367,7 +368,7 @@ function module() {
                 var tcTempMetric = parseInt($('#'+reg+'-thermocouple-metric-select').val());
                 var tcType = parseInt(value);
                 // console.log('overRidden',reg, 'type:',value, 'metric',tcTempMetric);
-                
+
                 // Delete active binding from framework:
                 self.editBindings(framework, 'delete',reg.split('AIN')[1]);
 
@@ -380,7 +381,7 @@ function module() {
                 } else {
                     $('#'+reg+'-table-data'+' .configuration-dependent-attribute').hide();
                 }
-                
+
             }
         });
         onSuccess(overRideWrite);

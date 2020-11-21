@@ -62,11 +62,18 @@ function showKiplingWindow(window_manager, splashScreenUpdater) {
             }
         });
         if (isKiplingTester) {
+            console._log('kipling_tester1');
             window_manager.showWindow('kipling_tester');
-            const testerWin = window_manager.managedWindows.kipling_tester.win;
+            console._log('kipling_tester2');
+            const testerWin = window_manager.getWindow('kipling_tester').win;
+            console._log('testerWin', testerWin);
             testerWin.focus();
-            const testerWindow = testerWin.window;
-            testerWindow.runTests();
+            console._log('testerWinfoc');
+            testerWin.webContents.postMessage('postMessage', {
+                'channel': 'runTests',
+                'payload': ''
+            });
+            console._log('posmsh');
         }
         resolve();
     });

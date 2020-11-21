@@ -1,7 +1,7 @@
 var ljs_modbus_map = require('ljswitchboard-modbus_map');
 var modbus_map = ljs_modbus_map.getConstants();
 
-var globalDeviceConstantsSwitch = {
+global.globalDeviceConstantsSwitch = {
     "T7":"t7DeviceConstants",
     "T7Pro":"t7ProDeviceConstants",
     "T7-Pro":"t7ProDeviceConstants"
@@ -91,7 +91,7 @@ var sharedAINEFData = {
         }
     },
 };
-var globalDeviceConstants = {
+global.globalDeviceConstants = {
     "t7DeviceConstants": {
         hasEFSystem: true,
         ainBitsPrecision: 6,
@@ -201,7 +201,7 @@ var globalDeviceConstants = {
                 //     return {value: val,name: val.toString()+"us"};
                 // } else {
                 //     return {value: val,name: (val/1000).toString()+"ms"};
-                // } 
+                // }
             }
         },
         ainEFTypeMap: {
@@ -587,7 +587,7 @@ var globalDeviceConstants = {
             rtd: [
                 {"reg": "_EF_INDEX", "value": 0, "description": ""},
                 {"reg": "_EF_INDEX", "configKey": "efType", "description": ""},
-                {"reg": "_EF_CONFIG_A", "value": 0, "description": "Configure Temperature Metric"},   
+                {"reg": "_EF_CONFIG_A", "value": 0, "description": "Configure Temperature Metric"},
                 {"reg": "_EF_CONFIG_B", "value": 0, "description": "Configure Excitation Type"},
                 {"reg": "_EF_CONFIG_C", "value": 0, "description": "Channel number of AIN used to measure RTD's excitation."},
                 {"reg": "_EF_CONFIG_B", "value": 0, "description": "Excitation detail - Volts"},
@@ -939,7 +939,7 @@ var globalDeviceConstants = {
                 "getOptions": function() {
                     return globalDeviceConstants.t7DeviceConstants.rtdTemperatureMetrics;
                 }
-            }, 
+            },
                 sharedAINEFData.ainEFConfigBExcitationCircuitCfgReg,
                 sharedAINEFData.ainEFConfigCExcitationCircuitCfgReg,
                 sharedAINEFData.ainEFConfigDExcitationCircuitCfgReg,
@@ -966,7 +966,7 @@ var globalDeviceConstants = {
                 "getOptions": function() {
                     return globalDeviceConstants.t7DeviceConstants.rtdTemperatureMetrics;
                 }
-            },  
+            },
                 sharedAINEFData.ainEFConfigBExcitationCircuitCfgReg,
                 sharedAINEFData.ainEFConfigCExcitationCircuitCfgReg,
                 sharedAINEFData.ainEFConfigDExcitationCircuitCfgReg,

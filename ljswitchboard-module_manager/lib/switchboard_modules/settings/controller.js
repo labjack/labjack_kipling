@@ -6,7 +6,7 @@
 
 // console.log('in device_selector, controller.js');
 
-const package_loader = require('ljswitchboard-package_loader');
+const package_loader = global.package_loader;
 const q = require('q');
 
 var createModuleInstance = function() {

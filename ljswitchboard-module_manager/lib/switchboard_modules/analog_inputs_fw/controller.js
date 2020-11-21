@@ -32,6 +32,11 @@ var MODULE_UPDATE_PERIOD_MS = 1500;
 
 // Constant that can be set to disable auto-linking the module to the framework
 var DISABLE_AUTOMATIC_FRAMEWORK_LINKAGE = false;
+const globalDeviceConstants = global.globalDeviceConstants;
+const globalDeviceConstantsSwitch = global.globalDeviceConstantsSwitch;
+
+const handleBarsService = package_loader.getPackage('handleBarsService');
+const dict = require('dict');
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -136,7 +141,7 @@ function module() {
         ];
         templatesToCompile.forEach(function(templateName) {
             try {
-                self.templates[templateName] = handlebars.compile(
+                self.templates[templateName] = handleBarsService._compileTemplate(
                     framework.moduleData.htmlFiles[templateName]
                 );
             } catch(err) {
@@ -234,7 +239,7 @@ function module() {
         var configArray = self.deviceConstants.allConfigRegisters;
         var chConfigArray = self.deviceConstants.configRegisters;
         var addParser = function(data,index) {
-            var formatReg = handlebars.compile(data.register);
+            var formatReg = handleBarsService._compileTemplate(data.register);
             var compReg = formatReg(self.deviceConstants);
             var addrList = ljmmm_parse.expandLJMMMNameSync(compReg);
             if((data.options !== 'func') && (data.options !== 'raw')) {
@@ -275,7 +280,7 @@ function module() {
         var chConfigArray = self.deviceConstants.configRegisters;
 
         var addOptions = function(data) {
-            var formatReg = handlebars.compile(data.register);
+            var formatReg = handleBarsService._compileTemplate(data.register);
             var compReg = formatReg(self.deviceConstants);
             var addrList = ljmmm_parse.expandLJMMMNameSync(compReg);
             var deviceOptionsData = {};
@@ -622,14 +627,10 @@ function module() {
     };
 
     this.configureModule = function(onSuccess) {
-        var devT;
-        var subClass;
         var devConstStr;
         var productType;
         var baseReg;
         try{
-            devT = self.activeDevice.savedAttributes.deviceTypeName;
-            subclass = self.activeDevice.savedAttributes.subclass;
             productType = self.activeDevice.savedAttributes.productType;
             devConstStr = globalDeviceConstantsSwitch[productType];
             self.deviceConstants = globalDeviceConstants[devConstStr];
@@ -653,12 +654,12 @@ function module() {
             var formatReg;
             var compReg;
             if(typeof(data.manual) === 'undefined') {
-                formatReg = handlebars.compile(data.register);
+                formatReg = handleBarsService._compileTemplate(data.register);
                 compReg = formatReg(self.deviceConstants);
                 bindingList.push({"name": compReg, "isPeriodic":true});
             } else {
                 if(!data.manual) {
-                    formatReg = handlebars.compile(data.register);
+                    formatReg = handleBarsService._compileTemplate(data.register);
                     compReg = formatReg(self.deviceConstants);
                     bindingList.push({"name": compReg, "isPeriodic":true});
                 }
@@ -1360,7 +1361,7 @@ function module() {
             self.deviceConstants.configRegisters.forEach(function(configReg){
                 var options = {};
                 var menuOptions;
-                var formatReg = handlebars.compile(configReg.register);
+                var formatReg = handleBarsService._compileTemplate(configReg.register);
                 var compReg = formatReg({ainChannelNames:reg});
 
                 options.menuTitle = configReg.name;

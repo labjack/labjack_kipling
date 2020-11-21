@@ -2,7 +2,7 @@
  * Goals for the Lua Script Debugger module.
  * This is a Lua script intro-app that performs a minimal number of scripting
  * operations.  It is simply capable of detecting whether or not a Lua script
- * is running and then prints out the debugging log to the window.  
+ * is running and then prints out the debugging log to the window.
  *
  * @author Chris Johnson (LabJack Corp, 2014)
  *
@@ -14,7 +14,7 @@
  *     2. Read from "LUA_DEBUG_NUM_BYTES" register to determine how much data is
  *         available in the debugging info buffer.
  *     3. If there is data available in the debugging buffer then get it from
- *         the device. 
+ *         the device.
 **/
 
 // Constant that determines device polling rate.  Use an increased rate to aid
@@ -23,6 +23,8 @@ var MODULE_UPDATE_PERIOD_MS = 250;
 
 // Constant that can be set to disable auto-linking the module to the framework
 var DISABLE_AUTOMATIC_FRAMEWORK_LINKAGE = false;
+
+const dict = require('dict');
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -49,7 +51,7 @@ function module() {
     this.spinnerController = undefined;
     this.updateDOM = true;
 
-    
+
 
     /**
      * Function is called once every time the module tab is selected, loads the module.
@@ -126,14 +128,14 @@ function module() {
             self.currentValues.set(reg,val);
             ioDeferred.resolve();
         }, function(err) {
-            onsole.error('AnalogOutputs-writeReg',address,err);
+            console.error('AnalogOutputs-writeReg',address,err);
             ioDeferred.reject(err);
         });
         return ioDeferred.promise;
     };
-    
+
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -193,7 +195,7 @@ function module() {
         $('#' + reg + '_input_slider').slider('setValue', updateNum);
     };
     /**
-     * Function to handle definitive spinner-write events.  
+     * Function to handle definitive spinner-write events.
      *     The DAC channel SHOULD be updated
      * @param  {string} reg Device register to be written
      * @param  {number} val Value to be written to device register.
@@ -244,7 +246,7 @@ function module() {
         self.updateSpinnerVal(register, selectedVoltage);
         self.updateSliderVal(register, selectedVoltage);
     };
-    
+
     /**
      * Create the DAC / analog output controls.
     **/
@@ -275,7 +277,7 @@ function module() {
             var val = self.currentValues.get(register.register);
             self.writeDisplayedVoltage(register.register,val);
         });
-        
+
         onSuccess();
     };
     this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
@@ -288,7 +290,7 @@ function module() {
         onSuccess();
     };
     this.onRefreshed = function(framework, results, onError, onSuccess) {
-        // Loop through the new buffered values, save them, and display their 
+        // Loop through the new buffered values, save them, and display their
         // changes
         self.newBufferedValues.forEach(function(value,key){
             if(self.updateDOM) {

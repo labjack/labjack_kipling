@@ -1,3 +1,4 @@
+'use strict';
 
 /* jshint undef: true, unused: true, undef: true */
 /* global console, TASK_LOADER, process */
@@ -14,42 +15,96 @@ const io_interface = io_manager.io_interface();
 const driver = io_interface.getDriverController();
 const semver = package_loader.getPackage('semver');
 
-function createKiplingUpdaterService() {
-	console.log('Available tasks', Object.keys(TASK_LOADER.tasks));
-	var tab_notification_manager = TASK_LOADER.tasks.tab_notification_manager;
-	var update_manager = TASK_LOADER.tasks.update_manager;
-	var update_manager_events = update_manager.eventList;
-	var update_manager_vm = update_manager.vm;
+const replacementOverrides = {
+	'io_manager': 'IO Manager',
+};
+const dataOrder = [
+	'Kipling',
+	'Splash Screen',
+	'Core',
+	'Module Manager',
+	'Static Files',
+	'IO Manager',
+];
+const requiredLJMInfo = [
+	{'func': 'readLibrary', 'attr': 'LJM_LIBRARY_VERSION', 'formatFunc': (val) => {
+		return val.toFixed(4);
+	}},
+	{'func': 'readLibraryS', 'attr': 'LJM_MODBUS_MAP_CONSTANTS_FILE'},
+	{'func': 'readLibraryS', 'attr': 'LJM_ERROR_CONSTANTS_FILE'},
+];
 
-	this.cachedVersionData = undefined;
-	this.currentVersionData = undefined;
+function toTitleCase(str) {
+	return str.replace(/\w\S*/g, function(txt) {
+		return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+	});
+}
 
-	this.getCachedLJMVersions = function() {
-		return update_manager_vm.getCachedLJMVersions();
-	};
-	this.getCachedKiplingVersions = function() {
-		return update_manager_vm.getCachedKiplingVersions();
-	};
+function librarySorter(a, b) {
+	const defaultVal = 100;
 
-	var getOS = function() {
-		var os ={
+	let indexA = dataOrder.indexOf(a.name);
+	if(indexA < 0) {
+		indexA = defaultVal;
+	}
+
+	let indexB = dataOrder.indexOf(b.name);
+	if(indexB < 0) {
+		indexB = defaultVal;
+	}
+
+	if (indexA > indexB) {
+		return 1;
+	}
+	if (indexA < indexB) {
+		return -1;
+	}
+	return 0;
+}
+
+class KiplingUpdaterService {
+
+	constructor() {
+		console.log('Available tasks', Object.keys(TASK_LOADER.tasks));
+		this.tab_notification_manager = TASK_LOADER.tasks.tab_notification_manager;
+		this.update_manager = TASK_LOADER.tasks.update_manager;
+		this.update_manager_events = this.update_manager.eventList;
+		this.update_manager_vm = this.update_manager.vm;
+
+		this.cachedVersionData = undefined;
+		this.currentVersionData = undefined;
+
+		this.update_manager_vm.on(
+			this.update_manager_events.UPDATED_VERSION_DATA,
+			(data) => this.updatedVersionData(data)
+		);
+	}
+
+	getCachedLJMVersions() {
+		this.update_manager_vm.getCachedLJMVersions();
+	}
+	getCachedKiplingVersions() {
+		return this.update_manager_vm.getCachedKiplingVersions();
+	}
+
+	getOS() {
+		const os ={
 			'darwin': 'mac',
 			'win32': 'win'
 		}[process.platform];
 		if(typeof(os) === 'undefined') {
-			var bitType = {
+			const bitType = {
 				'x64': '64',
 				'ia32': '32',
 				'arm': 'arm'
 			}[process.arch];
-
-			os = 'linux' + bitType;
+			return 'linux' + bitType;
 		}
 		return os;
-	};
+	}
 
-	this.getLatestVersion = function(appType) {
-		var latestVersion = {
+	getLatestVersion(appType) {
+		let latestVersion = {
 			'key': 'default',
 			'type': 'default',
 			'upgradeLink': 'https://labjack.com',
@@ -60,13 +115,13 @@ function createKiplingUpdaterService() {
 			latestVersion.version = '0.0';
 		}
 
-		if(self.cachedVersionData) {
-			var osKey = 'current_' + getOS();
-			if(self.cachedVersionData[appType][osKey]) {
-				var upgrades = self.cachedVersionData[appType][osKey];
-				upgrades.forEach(function(upgrade) {
-					var version = upgrade.version;
-					var selectedVersion = latestVersion.version;
+		if(this.cachedVersionData) {
+			const osKey = 'current_' + this.getOS();
+			if(this.cachedVersionData[appType][osKey]) {
+				const upgrades = this.cachedVersionData[appType][osKey];
+				upgrades.forEach((upgrade) => {
+					let version = upgrade.version;
+					let selectedVersion = latestVersion.version;
 					if(semver.valid(version)) {
 						if(semver.gt(version, selectedVersion)) {
 							latestVersion = upgrade;
@@ -82,26 +137,28 @@ function createKiplingUpdaterService() {
 			} else {
 				console.warn(
 					'Could not find ' + appType +' update obj',
-					self.cachedVersionData[appType]
+					this.cachedVersionData[appType]
 				);
 			}
 		}
 		return latestVersion;
-	};
-	this.getLatestKiplingVersion = function() {
-		return self.getLatestVersion('kipling');
-	};
-	this.getLatestLJMVersion = function() {
-		return self.getLatestVersion('ljm');
-	};
-	this.checkKiplingIsOld = function() {
-		var isOld = false;
-		if(self.currentVersionData) {
-			if(self.currentVersionData.kipling_data) {
-				if(self.currentVersionData.kipling_data.data) {
-					var currentVersion = self.currentVersionData.kipling_data.data;
+	}
 
-					var latestVersion = self.getLatestKiplingVersion().version;
+	getLatestKiplingVersion() {
+		return this.getLatestVersion('kipling');
+	}
+
+	getLatestLJMVersion() {
+		return this.getLatestVersion('ljm');
+	}
+
+	checkKiplingIsOld() {
+		let isOld = false;
+		if(this.currentVersionData) {
+			if(this.currentVersionData.kipling_data) {
+				if(this.currentVersionData.kipling_data.data) {
+					const currentVersion = this.currentVersionData.kipling_data.data;
+					const latestVersion = this.getLatestKiplingVersion().version;
 
 					if(semver.gt(latestVersion, currentVersion)) {
 						isOld = true;
@@ -110,17 +167,16 @@ function createKiplingUpdaterService() {
 			}
 		}
 		return isOld;
-	};
-	this.checkLJMIsOld = function() {
-		var isOld = false;
-		if(self.currentVersionData) {
-			if(self.currentVersionData.ljm_data) {
-				if(self.currentVersionData.ljm_data.LJM_LIBRARY_VERSION) {
-					var currentVersion = self.currentVersionData.ljm_data.LJM_LIBRARY_VERSION;
-					currentVersion = parseFloat(currentVersion);
+	}
 
-					var latestVersionStr = self.getLatestLJMVersion().version;
-					var latestVersion = parseFloat(latestVersionStr);
+	checkLJMIsOld() {
+		let isOld = false;
+		if(this.currentVersionData) {
+			if(this.currentVersionData.ljm_data) {
+				if(this.currentVersionData.ljm_data.LJM_LIBRARY_VERSION) {
+					const currentVersion = parseFloat(this.currentVersionData.ljm_data.LJM_LIBRARY_VERSION);
+					const latestVersionStr = this.getLatestLJMVersion().version;
+					const latestVersion = parseFloat(latestVersionStr);
 
 					if(latestVersion > currentVersion) {
 						isOld = true;
@@ -129,99 +185,63 @@ function createKiplingUpdaterService() {
 			}
 		}
 		return isOld;
-	};
-	this.generateDeviceMessage = function(cachedDevice) {
-		var str = JSON.stringify(cachedDevice);
-		return str;
-	};
-	this.refreshKiplingUpdaterModuleStatus = function() {
+	}
+
+	generateDeviceMessage(cachedDevice) {
+		return JSON.stringify(cachedDevice);
+	}
+
+	refreshKiplingUpdaterModuleStatus() {
 		var messages = [];
-		if(self.cachedVersionData) {
-			if(self.checkKiplingIsOld()) {
+		if(this.cachedVersionData) {
+			if(this.checkKiplingIsOld()) {
 				messages.push('New Kipling version available.');
 			}
-			if(self.checkLJMIsOld()) {
+			if(this.checkLJMIsOld()) {
 				messages.push('New LJM version available.');
 			}
 			console.log(
 				'kipling_updater_service data',
 				{
-					'isK3Old': self.checkKiplingIsOld(),
-					'isLJMOld': self.checkLJMIsOld()
+					'isK3Old': this.checkKiplingIsOld(),
+					'isLJMOld': this.checkLJMIsOld()
 			});
 		}
 
 		// console.info('Messages for device_updater_fw tab', messages);
-		tab_notification_manager.setNotifications(
+		this.tab_notification_manager.setNotifications(
 			'settings',
 			messages
 		);
-	};
-	this.updateKiplingWindowTitle = function() {
+	}
+
+	updateKiplingWindowTitle() {
 		try {
 			// Update Window title name with version number & update availability.
-			var msg = self.currentVersionData.versions.kipling.data;
-			if(self.checkKiplingIsOld() || self.checkLJMIsOld()) {
+			let msg = this.currentVersionData.versions.kipling.data;
+			if(this.checkKiplingIsOld() || this.checkLJMIsOld()) {
 				msg += ' (Updates Available)';
 			}
 
-			UPDATE_K3_WINDOW_VERSION_NUMBER_STR(msg)
+			global.UPDATE_K3_WINDOW_VERSION_NUMBER_STR(msg);
 		} catch(err) {
 
 		}
-	};
-	this.updatedVersionData = function(versionData) {
+	}
+
+	updatedVersionData(versionData) {
 		try {
-			console.log('in kipling_updater_service updatedVersionData', versionData, self.currentVersionData);
-			self.cachedVersionData = versionData;
-			self.refreshKiplingUpdaterModuleStatus();
-			self.updateKiplingWindowTitle();
+			console.log('in kipling_updater_service updatedVersionData', versionData, this.currentVersionData);
+			this.cachedVersionData = versionData;
+			this.refreshKiplingUpdaterModuleStatus();
+			this.updateKiplingWindowTitle();
 		} catch(err) {
 			console.error('Error in kipling_updater_service: updatedVersionData', err);
 		}
-	};
+	}
 
-	var toTitleCase = function (str) {
-	    return str.replace(/\w\S*/g, function(txt) {
-	    	return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-	    });
-	};
-
-	var replacementOverrides = {
-		'io_manager': 'IO Manager',
-	};
-	var dataOrder = [
-    	'Kipling',
-    	'Splash Screen',
-    	'Core',
-    	'Module Manager',
-    	'Static Files',
-    	'IO Manager',
-    ];
-    var librarySorter = function(a, b) {
-    	var defaultVal = 100;
-
-    	var indexA = dataOrder.indexOf(a.name);
-    	if(indexA < 0) {
-    		indexA = defaultVal;
-    	}
-
-    	var indexB = dataOrder.indexOf(b.name);
-    	if(indexB < 0) {
-    		indexB = defaultVal;
-    	}
-
-    	if (indexA > indexB) {
-			return 1;
-		}
-		if (indexA < indexB) {
-			return -1;
-		}
-		// a must be equal to b
-		return 0;
-    };
-    this.getProgramInfo = function() {
-    	var data = {
+    getProgramInfo() {
+    	const data = {
 			'info': {},
 			'packages': [],
 			'versions': {},
@@ -246,10 +266,10 @@ function createKiplingUpdaterService() {
 			'data': process.env.npm_package_version,
 		};
 
-		var managedPackages = package_loader.getDependencyData();
-		var packageKeys = Object.keys(managedPackages);
-		packageKeys.forEach(function(key) {
-			var humanName = key.split('ljswitchboard-').join('');
+		const managedPackages = package_loader.getDependencyData();
+		const packageKeys = Object.keys(managedPackages);
+		packageKeys.forEach((key) => {
+			let humanName = key.split('ljswitchboard-').join('');
 			humanName = humanName.split('-').join(' ');
 			humanName = humanName.split('_').join(' ');
 
@@ -273,7 +293,7 @@ function createKiplingUpdaterService() {
 
 		// console.log(JSON.stringify(data, null, 2));
 		var versionKeys = Object.keys(data.versions);
-		data.packages = versionKeys.map(function(versionKey) {
+		data.packages = versionKeys.map((versionKey) => {
 			return data.versions[versionKey];
 		});
 
@@ -281,58 +301,49 @@ function createKiplingUpdaterService() {
 		data.packages.sort(librarySorter);
 
 		return data;
-    };
+    }
 
-    var requiredLJMInfo = [
-    	{'func': 'readLibrary', 'attr': 'LJM_LIBRARY_VERSION', 'formatFunc': function(val) {
-    		return val.toFixed(4);
-    	}},
-    	{'func': 'readLibraryS', 'attr': 'LJM_MODBUS_MAP_CONSTANTS_FILE'},
-    	{'func': 'readLibraryS', 'attr': 'LJM_ERROR_CONSTANTS_FILE'},
-    ];
-    this.populateLJMInfo = function(data) {
-    	var defered = q.defer();
+    populateLJMInfo(data) {
+    	return new Promise((resolve) => {
+			async.eachSeries(
+				requiredLJMInfo,
+				(reqInfo, callback) => {
+					const func = reqInfo.func;
+					const attr = reqInfo.attr;
+					const fmatFunc = reqInfo.formatFunc;
 
-    	async.eachSeries(
-    		requiredLJMInfo,
-    		function(reqInfo, callback) {
-    			var func = reqInfo.func;
-    			var attr = reqInfo.attr;
-    			var fmatFunc = reqInfo.formatFunc;
+					if(driver[func]) {
+						driver[func](attr)
+						.then((ljmData) => {
+							if(typeof(fmatFunc) === 'function') {
+								data.ljm_data[attr] = fmatFunc(ljmData);
+							} else {
+								data.ljm_data[attr] = ljmData;
+							}
+							callback();
+						}, (ljmErr) => {
+							data.ljm_data[attr] = 'Error: ' + ljmErr.toString();
+							callback();
+						});
+					} else {
+						console.error('Driver function does not exist', func);
+						callback();
+					}
+				},
+				(err) => {
+					if(err) {
+						resolve();
+					} else {
+						resolve();
+					}
+				});
+		});
+    }
 
-    			if(driver[func]) {
-    				driver[func](attr)
-    				.then(function readSuccess(ljmData) {
-    					if(typeof(fmatFunc) === 'function') {
-    						data.ljm_data[attr] = fmatFunc(ljmData);
-    					} else {
-    						data.ljm_data[attr] = ljmData;
-    					}
-    					callback();
-    				}, function readError(ljmErr) {
-    					data.ljm_data[attr] = 'Error: ' + ljmErr.toString();
-    					callback();
-    				});
-    			} else {
-    				console.error('Driver function does not exist', func);
-    				callback();
-    			}
-    		},
-    		function(err) {
-    			if(err) {
-    				defered.resolve(data);
-    			} else {
-	    			defered.resolve(data);
-	    		}
-    		});
-    	return defered.promise;
-    };
-
-    this.populateModbusMapInfo = function(data) {
-    	var defered = q.defer();
-    	var headerInfo = {};
+    async populateModbusMapInfo(data) {
+    	let headerInfo = {};
     	try {
-	    	var ljmHeaderRef = modbus_map.origConstants.header;
+	    	const ljmHeaderRef = modbus_map.origConstants.header;
 	    	headerInfo = JSON.parse(JSON.stringify(ljmHeaderRef));
 	    } catch(err) {
 	    	headerInfo = {
@@ -347,69 +358,42 @@ function createKiplingUpdaterService() {
 	    	{'name': 'Support URL', 'data': headerInfo.support_url},
 	    ];
 	    data.modbus_map_version = headerInfo.version;
+    }
 
-    	defered.resolve(data);
-    	return defered.promise;
-    };
-    this.saveVersionInfo = function(data) {
-    	var defered = q.defer();
+    async saveVersionInfo(data) {
     	// console.log("We have current version:", data);
-    	var kiplingVersion = data.kipling_data.data;
-    	UPDATE_K3_WINDOW_VERSION_NUMBER_STR(kiplingVersion);
+    	const kiplingVersion = data.kipling_data.data;
+    	global.UPDATE_K3_WINDOW_VERSION_NUMBER_STR(kiplingVersion);
 
-    	self.currentVersionData = data;
-    	defered.resolve(data);
-    	return defered.promise;
-    };
+    	this.currentVersionData = data;
+    	return data;
+    }
 
-	this.initializeVersionData = function() {
-		var defered = q.defer();
-
-		var pageData = self.getProgramInfo();
-
-        self.populateLJMInfo(pageData)
-        .then(self.populateModbusMapInfo)
-        .then(self.saveVersionInfo)
-        .then(defered.resolve);
-		return defered.promise;
-	};
-
-	var self = this;
-
-	/* Attach to events */
-
-	// Event that gets fired when new version data is available.
-	update_manager_vm.on(
-		update_manager_events.UPDATED_VERSION_DATA,
-		self.updatedVersionData
-	);
+	async initializeVersionData() {
+		const pageData = this.getProgramInfo();
+        await this.populateLJMInfo(pageData);
+		await this.populateModbusMapInfo(pageData);
+		await this.saveVersionInfo(pageData);
+	}
 }
 
 var kus;
-var self = this;
 
-this.startTask = function(bundle) {
+this.startTask = async function(bundle) {
 	console.log('Starting kipling_version_manager task');
-	var defered = q.defer();
 	try {
-		kus = new createKiplingUpdaterService();
-		self.kus = kus;
-		kus.initializeVersionData()
-		.then(function() {
-			console.log('Initialized Kipling\'s kipling updater service');
-			defered.resolve(bundle);
-		});
-	} catch(err) {
+		kus = new KiplingUpdaterService();
+		await kus.initializeVersionData();
+		console.log('Initialized Kipling\'s kipling updater service');
+		return bundle;
+	} catch (err) {
 		console.error('Failed to initialize Kipling\'s kipling updater service', err);
-		defered.resolve(bundle);
+		return bundle;
 	}
-	return defered.promise;
 };
 
-this.kus = kus;
-
-this.getProgramInfo = function() {
-	var defered = q.defer();
+this.getProgramInfo = async function() {
+	console.log('kus', kus);
 
 	var data = JSON.parse(JSON.stringify(kus.currentVersionData));
 
@@ -429,17 +413,14 @@ this.getProgramInfo = function() {
 		updates.push('Kipling');
 	}
 
-	var updateText = 'None';
+	let updateText = 'None';
 	if(updates.length === 1) {
 		updateText = updates[0];
 	} else if(updates.length === 2) {
 		updateText = updates[0] + ' and ' + updates[1];
 	}
 
-	var pannelType = 'panel-success';
-	if(availableUpdates) {
-		pannelType = 'panel-danger';
-	}
+	const pannelType = availableUpdates ? 'panel-danger' : 'panel-success';
 
 	data.programUpdates = {
 		'availableUpdates': availableUpdates,
@@ -453,7 +434,6 @@ this.getProgramInfo = function() {
 		'availableKiplingVersion': availableKiplingVersion,
 	};
 
-	defered.resolve(data);
-	return defered.promise;
+	return data;
 };
 

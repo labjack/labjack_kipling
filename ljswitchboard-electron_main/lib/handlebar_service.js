@@ -10,6 +10,7 @@ handlebars.registerHelper('printContext', function() {
 handlebars.registerHelper('eachDict', function(context, options) {
     var ret = "";
     var data = {};
+    console.log('contextcontext', context);
     context.forEach(function(value,name){
         if(value) {
             data.key = name;
@@ -30,7 +31,7 @@ class HandleBarsService {
         return fs.readFileSync(templatePath).toString();
     }
 
-    async _compileTemplate(html) {
+    _compileTemplate(html) {
         return handlebars.compile(html);
     }
 
