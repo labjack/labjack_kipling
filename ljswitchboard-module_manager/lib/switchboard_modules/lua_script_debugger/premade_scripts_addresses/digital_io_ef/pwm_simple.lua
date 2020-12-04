@@ -18,8 +18,8 @@ local CORE_FREQ = 80000000
 --        two value U16 array
 -------------------------------------------------
 local function u32_to_u16_array(myU16)
-  local MSB = math.floor(myU16/256)
-  local LSB = myU16 - MSB*256
+  local MSB = math.floor(myU16/65536)
+  local LSB = myU16 - MSB*65536
   return {MSB, LSB}
 end
 
