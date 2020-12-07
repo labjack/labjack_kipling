@@ -1,3 +1,5 @@
+'use strict';
+
 const package_loader = global.package_loader;
 const splashScreenUpdater = package_loader.getPackage('splashScreenUpdater');
 const window_manager =  package_loader.getPackage('window_manager');
@@ -49,34 +51,21 @@ async function performRemainingInitializationRoutines() {
     });
 }
 
-function showKiplingWindow(window_manager, splashScreenUpdater) {
-    return new Promise((resolve, reject) => {
-        window_manager.showWindow('kipling');
-
-        // Try and execute tests
-        let isKiplingTester = false;
-        const windows = window_manager.getWindows();
-        windows.forEach(function (win) {
-            if (win === 'kipling_tester') {
-                isKiplingTester = true;
-            }
-        });
-        if (isKiplingTester) {
-            console._log('kipling_tester1');
-            window_manager.showWindow('kipling_tester');
-            console._log('kipling_tester2');
-            const testerWin = window_manager.getWindow('kipling_tester').win;
-            console._log('testerWin', testerWin);
-            testerWin.focus();
-            console._log('testerWinfoc');
-            testerWin.webContents.postMessage('postMessage', {
-                'channel': 'runTests',
-                'payload': ''
-            });
-            console._log('posmsh');
+async function showKiplingTestWindow(window_manager, splashScreenUpdater) {
+    // Try and execute tests
+    let isKiplingTester = false;
+    const windows = window_manager.getWindows();
+    windows.forEach(function (win) {
+        if (win === 'kipling_tester') {
+            isKiplingTester = true;
         }
-        resolve();
     });
+/*    if (isKiplingTester) {
+        console.log('isKiplingTester1', package_loader.getManagedPackages());
+        const kipling_tester = package_loader.getPackage('kipling_tester');
+        await kipling_tester.startPackage(package_loader);
+        console.log('isKiplingTester2');
+    }*/
 }
 
 function ioManagerMonitor(data, io_interface) {
@@ -90,8 +79,8 @@ function ioManagerMonitor(data, io_interface) {
         errorString += 'Current time is: ' + (new Date()).toString();
         errorString += '</p>';
 
-        showCriticalAlert(errorString);
-        console.log('Critical alert errorString', errorString);
+        // showCriticalAlert(errorString);
+        console.error('Critical alert errorString', errorString);
         if (global.MODULE_LOADER) {
             global.MODULE_LOADER.loadModuleByName('crash_module');
         }
@@ -183,7 +172,7 @@ async function startupKipling() {
 
     // Hide the splash screen & core windows & display the kipling window
     try {
-        await showKiplingWindow(window_manager, splashScreenUpdater);
+        await window_manager.showWindow('kipling');
     } catch (e) {
         await handleError(e, 'showKiplingWindow');
     }
@@ -193,6 +182,12 @@ async function startupKipling() {
         await global.TASK_LOADER.loadTasks();
     } catch (e) {
         await handleError(e, 'TASK_LOADER.loadTasks');
+    }
+
+    try {
+        await showKiplingTestWindow(window_manager, splashScreenUpdater);
+    } catch (e) {
+        await handleError(e, 'showKiplingTestWindow');
     }
 }
 

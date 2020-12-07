@@ -60,4 +60,4 @@ var createModuleInstance = function() {
 };
 // util.inherits(createModuleInstance, EventEmitter);
 
-var activeModule = new createModuleInstance();
+global.activeModule = new createModuleInstance();

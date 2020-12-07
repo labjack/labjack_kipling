@@ -52,21 +52,21 @@ function module() {
 
     // String key to trigger a clearing of current values
     var FORCE_AIN_VAL_REFRESH = 'FORCE_AIN_VAL_REFRESH';
-    this.currentValues = dict();
-    this.isValueNew = dict();
-    this.newBufferedValues = dict();
-    this.bufferedOutputValues = dict();
-    this.analogInputsDict = dict();
+    this.currentValues = new Map();
+    this.isValueNew = new Map();
+    this.newBufferedValues = new Map();
+    this.bufferedOutputValues = new Map();
+    this.analogInputsDict = new Map();
 
     this.ANALOG_INPUT_PRECISION = 6;
 
     this.deviceConstants = {};
-    this.curDeviceOptions = dict();
-    this.regParserDict = dict();
-    this.regParser = dict();
+    this.curDeviceOptions = new Map();
+    this.regParserDict = new Map();
+    this.regParser = new Map();
 
     this.initRegParser = function() {
-        self.regParser = {};
+        self.regParser = new Map();
         self.regParser.set = self.regParserDict.set;
         self.regParser.get = function(name) {
             var data = self.regParserDict.get(name);
@@ -188,11 +188,11 @@ function module() {
     // Supported extra options
     var extraAllAinOptions = globalDeviceConstants.t7DeviceConstants.extraAllAinOptions;
 
-    this.efTypeDict = dict();
-    this.rangeOptionsDict = dict();
-    this.resolutionOptionsDict = dict();
-    this.settlingOptionsDict = dict();
-    this.negativeChannelDict = dict();
+    this.efTypeDict = new Map();
+    this.rangeOptionsDict = new Map();
+    this.resolutionOptionsDict = new Map();
+    this.settlingOptionsDict = new Map();
+    this.negativeChannelDict = new Map();
 
     var overrideGraphRanges = false;
     var minGraphRange;
@@ -216,7 +216,7 @@ function module() {
         var parsers = self.deviceConstants.parsers;
         parsers.forEach(function(name){
             var dictName = name+'Dict';
-            self.deviceConstants[dictName] = dict();
+            self.deviceConstants[dictName] = new Map();
             if(typeof(self.deviceConstants[name].numbers) !== 'undefined'){
                 var options = [];
                 var base = self.deviceConstants[name];
@@ -249,7 +249,7 @@ function module() {
                     return {value: val, name: dataObj.get(value.toString())};
                 };
                 addrList.forEach(function(addr){
-                    self.regParser.set(addr,getData);
+                    self.regParser.set(addr, getData);
                 });
             } else if (data.options === 'raw') {
                 addrList.forEach(function(addr){
@@ -1305,22 +1305,22 @@ function module() {
         for (i = 0; i < 13; i++) {
             self.removeAinEFInfo(i);
         }
-        self.currentValues = dict();
-        self.newBufferedValues = dict();
-        self.isValueNew = dict();
-        self.bufferedOutputValues = dict();
-        self.analogInputsDict = dict();
+        self.currentValues = new Map();
+        self.newBufferedValues = new Map();
+        self.isValueNew = new Map();
+        self.bufferedOutputValues = new Map();
+        self.analogInputsDict = new Map();
 
         self.deviceConstants = {};
-        self.curDeviceOptions = dict();
-        self.regParserDict = dict();
-        self.regParser = dict();
+        self.curDeviceOptions = new Map();
+        self.regParserDict = new Map();
+        self.regParser = new Map();
 
-        self.efTypeDict = dict();
-        self.rangeOptionsDict = dict();
-        self.resolutionOptionsDict = dict();
-        self.settlingOptionsDict = dict();
-        self.negativeChannelDict = dict();
+        self.efTypeDict = new Map();
+        self.rangeOptionsDict = new Map();
+        self.resolutionOptionsDict = new Map();
+        self.settlingOptionsDict = new Map();
+        self.negativeChannelDict = new Map();
     };
     /**
      * Function is called once every time a user selects a new device.
@@ -1342,7 +1342,7 @@ function module() {
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
         // Initialize variable where module config data will go.
         self.moduleContext = {};
-        self.analogInputsDict = dict();
+        self.analogInputsDict = new Map();
         if(self.defineDebuggingArrays){
             var analogInputs = [];
         }
@@ -1408,7 +1408,7 @@ function module() {
 
         };
 
-        var configRegistersDict = dict();
+        var configRegistersDict = new Map();
 
         self.moduleContext.allEFTypeVal = null;
         self.moduleContext.allEFTypesSame = true;
@@ -1425,7 +1425,7 @@ function module() {
                 // Switch on
                 var newData;
                 if(!findNum.test(name)) {
-                    newData = self.regParser.get(name)(value);
+                    newData = self.regParser.get(name);
                     var optionsData = self.curDeviceOptions.get(name);
                     dataObj.curStr = newData.name;
                     dataObj.curVal = newData.value;
@@ -1439,7 +1439,7 @@ function module() {
                     // Get currently saved values
                     var ainInfo = self.analogInputsDict.get('AIN'+index.toString());
 
-                    newData = self.regParser.get(name)(value);
+                    newData = self.regParser.get(name);
                     if(isFound(name,'_')) {
                         var menuOptions = ainInfo.optionsDict.get(name);
                         menuOptions.curStr = newData.name;
@@ -1465,7 +1465,7 @@ function module() {
 
         self.moduleContext.analogInputsDict = self.analogInputsDict;
         self.moduleContext.configRegistersDict = configRegistersDict;
-        console.log('moduleContext',self.moduleContext);
+
         framework.setCustomContext(self.moduleContext);
         onSuccess();
     };

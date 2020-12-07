@@ -3978,6 +3978,16 @@ function Framework() {
 
     this.setCustomContext = function(data) {
         moduleTemplateBindings.custom = data;
+        for (let k in data) {
+            let v = data[k];
+            if (v instanceof Map) { // Electron fix
+                const obj = {};
+                v.forEach((value, name) => {
+                    obj[name] = value;
+                });
+                data[k] = obj;
+            }
+        }
         self.moduleTemplateBindings.custom = data;
     };
     var setCustomContext = this.setCustomContext;

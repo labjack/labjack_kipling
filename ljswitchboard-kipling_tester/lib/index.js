@@ -1,103 +1,120 @@
+'use strict';
+
 console.log("ljswitchboard-kipling_tester index.js");
 
-const path = require('path');
-const testunit_recorder = require('./nodeunit_recorder');
+window.addEventListener('clearReport', async (event) => {
+    console.log('clearReport', event);
+    document.getElementById('nodeunit_test_results').innerHTML = '';
 
-const testFiles = [
-	'test_kipling.js',
-	// Execute Mock-Device compatable Tests
-	'mock_module_tests/mock_device_selector.js',
-	// 'mock_module_tests/mock_device_info.js',
-	// 'mock_module_tests/mock_dashboard.js',
-	// 'mock_module_tests/mock_register_matrix.js',
-	// 'mock_module_tests/mock_simple_logger.js',
+});
 
-	/* T4 Mock Tests */
+window.addEventListener('addSuite', async (event) => {
+    console.log('addSuite', event);
 
+    if (document.getElementById('suite_' + event.payload.suiteId)) return;
 
-	// Execute Mock-Settings test.
-	// 'mock_module_tests/settings.js',
+    const resultsElem = document.getElementById('nodeunit_test_results');
+    const liElem = document.createElement('li');
+    liElem.classList.add('suite');
+    resultsElem.appendChild(liElem);
 
-	// Execute stand-alone mock tests
-	// 'mock_module_tests/mock_file_browser.js',
+    const hElem = document.createElement('h1');
+    liElem.appendChild(hElem);
+    hElem.innerText = event.payload.suiteName;
 
-	// Execute Live-Device tests
-	// 'module_tests/test_device_info.js', //Perform a live-device scan and select a USB-T7
-	// 'module_tests/test_device_updater.js',
+    const suiteListElem = document.createElement('ul');
+    suiteListElem.id = 'suite_' + event.payload.suiteId;
+    liElem.appendChild(suiteListElem);
+});
 
-	// 'mock_module_tests/mock_lua_script_debugger.js',
+window.addEventListener('addTest', async (event) => {
+    console.log('addTest', event.payload);
 
-	'finish_testing.js',
-];
+    const testFile = event.payload.testFile;
+    const testId = event.payload.testId;
 
-const getUpdateTestResults = function(divID) {
-	const updateTestResults = function() {
-		const savedText = testunit_recorder.getSavedText();
-		const cachedTestDiv = document.getElementById(divID);
-		cachedTestDiv.innerHTML = savedText;
-	};
-	return updateTestResults;
-};
-function runTest(testFile, testDiv) {
-	const testName = path.basename(testFile);
-	const fileEnding = path.extname(testName);
-	const fileName = path.basename(testFile).split(fileEnding).join('');
+    const suiteListElem = document.getElementById('suite_' + event.payload.suiteId);
 
-	const divID = fileName + '-test';
-	return new Promise((resolve, reject) => {
-		const str = [
-			'<li id="' + divID + '_result">',
-			'<div class="no_select">',
-				'<span>Test: ' + testName + '</span>',
-				'<div class="results_button">',
-					'<span>Status: <span id="' + divID + '_status">In Progress</span></span>',
-					'<span id="' + divID + '_button" class="icon-list-2 toggle_button"></span>',
-				'</div>',
-			'</div>',
-			'<div id="' + divID + '"><p>Test!</p></div>',
-			'</li>'
-		].join('');
-		testDiv.append($(str));
-		try {
-			const outputHTML = testunit_recorder.run(
-				[testFile],
-				{},
-				getUpdateTestResults(divID),
-				function(err) {
-					const testResults = $('#' + divID);
-					let status;
-					if(err) {
-						console.log('Error running test', err, testFile);
-						status = $('#' + divID + '_status');
-						status.text('Error');
-						status.css('color', 'red');
-					} else {
-						status = $('#' + divID + '_status');
-						status.text('Success');
-						status.css('color', 'green');
-						testResults.slideUp();
-						// console.log('Finished running test', testFile);
-					}
+    const liElem = document.createElement('li');
+    suiteListElem.appendChild(liElem);
+    liElem.classList.add('test');
+    liElem.id = 'test_' + event.payload.testId;
 
-					const btn = $('#' + divID + '_button');
-					btn.on('click', function() {
-						testResults.slideToggle();
-					});
-					resolve();
-				});
-		} catch(err) {
-			console.error('Error Running nodeunit tester', err, testFile);
-			reject();
-		}
-	});
-}
+    const divElement = document.createElement('div');
+    liElem.appendChild(divElement);
+    divElement.classList.add('no_select');
 
-window.addEventListener('runTests', async (event) => {
-	console.log('runTestsrunTests');
-	const testDiv = $('#nodeunit_test_results');
-	// testDiv.empty();
-	for (const testFile of testFiles) {
-		const normalizedFile = path.resolve(__dirname, '..', 'test', testFile);
-		await runTest(normalizedFile, testDiv);
-	}
+    const titleElem = document.createElement('span');
+    divElement.appendChild(titleElem);
+    titleElem.innerText = 'Test: ' + event.payload.title;
+
+    const divElement2 = document.createElement('div');
+    divElement.appendChild(divElement2);
+
+    const statusElem = document.createElement('span');
+    divElement2.appendChild(statusElem);
+    statusElem.innerText = 'Status: ';
+
+    const progElem = document.createElement('span');
+    statusElem.appendChild(progElem);
+    progElem.id = 'test_prog_' + event.payload.testId;
+    progElem.innerText = 'In progress';
+
+    const errorElem = document.createElement('pre');
+    statusElem.appendChild(errorElem);
+    errorElem.id = 'test_err_' + event.payload.testId;
+    errorElem.style.display = 'none';
+
+    /*
+        const str = [
+            '<li id="' + divID + '_result">',
+            '<div class="no_select">',
+            '<span>Test: ' + testFile + '</span>',
+    /!*
+            '<div class="results_button">',
+            '<span>Status: <span id="' + divID + '_status">In Progress</span></span>',
+            '<span id="' + divID + '_button" class="icon-list-2 toggle_button"></span>',
+            '</div>',
+    *!/
+            '</div>',
+            '</li>'
+        ].join('');
+    */
+    // const testResults = $('#nodeunit_test_results');
+    // testResults.append($(str));
+
+/*
+    const btn = $('#' + divID + '_button');
+    btn.on('click', function() {
+        testResults.slideToggle();
+    });
+*/
+});
+
+window.addEventListener('setProgress', async (event) => {
+    console.log('setProgress', event);
+
+    const testResults = $('#nodeunit_test_results');
+    const passed = event.payload.passed;
+    const testFile = event.payload.testFile;
+    const testId = event.payload.testId;
+    const divID = testId + '-test';
+
+    // const testDiv = document.getElementById('nodeunit_test_results').innerHTML = '';
+    const progElem = document.getElementById('test_prog_' + event.payload.testId);
+    if (passed) {
+        progElem.innerText = 'Success';
+        progElem.style.color = 'green';
+    } else {
+        progElem.innerText = 'Error';
+        progElem.style.color = 'red';
+    }
+
+    if (event.payload.err) {
+        console.error(event.payload.err);
+        const errorElem = document.getElementById('test_err_' + event.payload.testId);
+        errorElem.innerText = event.payload.err.toString();
+        errorElem.style.display = 'block';
+    }
+
 });

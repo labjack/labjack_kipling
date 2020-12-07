@@ -742,4 +742,4 @@ const createModuleInstance = function() {
 };
 util.inherits(createModuleInstance, EventEmitter);
 
-const activeModule = new createModuleInstance();
+global.activeModule = new createModuleInstance();

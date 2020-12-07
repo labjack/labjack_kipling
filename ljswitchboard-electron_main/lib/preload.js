@@ -82,7 +82,7 @@ for (const level of ['log', 'error', 'warn', 'info', 'verbose', 'debug', 'silly'
                 if (level === 'error') {
                     return JSON.stringify(arg, serializer(), 2);
                 }
-                return JSON.stringify(arg, serializer()).substr(0, 40);
+                return JSON.stringify(arg, serializer()).substr(0, 100);
             }
             return arg;
         }
@@ -113,6 +113,15 @@ electron.ipcRenderer.on('postMessage', (event, data) => {
     event2.payload = data.payload;
     window.dispatchEvent(event2);
     // window.postMessage({type: data.channel, payload: data.payload}, '*');
+});
+
+window.addEventListener('test_click', async (event) => {
+    const selector = event.payload.selector;
+    const elem = document.querySelector(selector);
+
+    console.log('test_click', event, elem);
+
+    $(elem).click();
 });
 
 console.info('preload end');

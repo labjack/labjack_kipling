@@ -179,6 +179,13 @@ app.on('ready', function() {
     } finally {
       splashScreenUpdater.finish(global.mainLogger.getLogFilePath());
     }
+
+    console.log('isKiplingTester1', package_loader.getManagedPackages());
+    const kipling_tester = package_loader.getPackage('kipling_tester');
+    await kipling_tester.startPackage(package_loader);
+    console.log('isKiplingTester2');
+
+
   });
 
   window_manager.addWindow({

@@ -35,6 +35,10 @@ async function loadResources(win, resourceLinks, isLocal, location) {
 			resources, isLocal, location
 		}
 	});
+
+	return new Promise((resolve) => {
+		setTimeout(resolve, 500);
+	});
 }
 
 exports.getDir = getDir;

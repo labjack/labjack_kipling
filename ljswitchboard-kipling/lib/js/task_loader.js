@@ -243,7 +243,7 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 		if (this.tasks[taskName]) {
 			const task = this.tasks[taskName];
 			if (task.startTask) {
-				console.log('Starting Task');
+				console.log('Starting Task', taskName);
 				try {
 					return task.startTask();
 				} catch(err) {
@@ -323,12 +323,17 @@ class TaskLoader extends EventEmitter { // jshint ignore:line
 		});
 	}
 
-	loadTasks() {
-		return this.stopTasks()
-			.then(() => this.clearTasksFromDOM())
-			.then(module_manager.getTaskList)
-			.then(tasks => this.internalLoadTasks(tasks))
-			.then(tasks => this.startTasks(tasks))
+	async loadTasks() {
+		await this.stopTasks();
+		await this.clearTasksFromDOM();
+
+		const tasks = await module_manager.getTaskList();
+		console.log('Load tasks', tasks.map(t => t.name));
+
+		await this.internalLoadTasks(tasks);
+		await this.startTasks(tasks);
+
+		return tasks;
 	}
 }
 

@@ -3,41 +3,28 @@
 const package_loader = global.package_loader;
 const gui = global.gui;
 const window_manager = package_loader.getPackage('window_manager');
+const kiplingWin = window_manager.getWindow('kipling').win;
 
 const {assert} = require('chai');
 
-var testOptions = {
+const testOptions = {
 	'refreshDevices': false,
 	'realRefresh': false
 };
 
-// Window Objects
-var testerWin;
-var kiplingWin;
+const io_manager = package_loader.getPackage('io_manager');
+const io_interface = io_manager.io_interface();
+const deviceController = io_interface.getDeviceController();
 
-// Kipling Application Objects
-var kiplingWindow;
-var $;
-var MODULE_LOADER;
-var MODULE_CHROME;
-var io_manager;
-var io_interface;
-var deviceController;
-var activeModule;
-var viewGen;
-var eventList;
+let MODULE_LOADER;
+let activeModule;
 
-var mockDevices;
-try {
-	mockDevices = require('./mock_devices').mockDevices;
-} catch(err) {
-	mockDevices = [];
-}
-var deviceScannerConfigData = [];
-var excludeKeys = ['deviceConfig'];
+const mockDevices = require('./mock_devices').mockDevices;
+const deviceScannerConfigData = [];
+const excludeKeys = ['deviceConfig'];
 mockDevices.forEach(function(mockDevice) {
-	var deviceData = {};
-	var keys = Object.keys(mockDevice);
+	const deviceData = {};
+	const keys = Object.keys(mockDevice);
 	keys.forEach(function(key) {
 		if(excludeKeys.indexOf(key) < 0) {
 			deviceData[key] = mockDevice[key];
@@ -47,128 +34,84 @@ mockDevices.forEach(function(mockDevice) {
 });
 
 describe('mock_device_selector', function() {
-	it('initialize test', function (done) {
-
-		var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;
-		testerWin = managedTesterWindow.win;
-
-		var managedKiplingWindow = window_manager.windowManager.managedWindows.kipling;
-		kiplingWin = managedKiplingWindow.win;
-
-
-		kiplingWindow = kiplingWin.window;
-		$ = kiplingWindow.$;
-		MODULE_LOADER = kiplingWindow.MODULE_LOADER;
-		MODULE_CHROME = kiplingWindow.MODULE_CHROME;
-
-
-		io_manager = global.require('ljswitchboard-io_manager');
-		io_interface = io_manager.io_interface();
-		deviceController = io_interface.getDeviceController();
-		done();
+	it('initialize test', async function () {
+		const injectScript = 'global.MODULE_LOADER;';
+		MODULE_LOADER = await kiplingWin.webContents.executeJavaScript(injectScript.toString('utf-8'));
 	});
-	it('disable device scanning', function (done) {
-		deviceController.enableMockDeviceScanning()
-		.then(function() {
-			done();
-		});
-	});
-	it('Add mock devices', function (done) {
-		deviceController.addMockDevices(deviceScannerConfigData)
-		.then(function() {
-			done();
-		});
-	});
-	it('load the device_selector module', function (done) {
-		MODULE_LOADER.loadModuleByName('device_selector')
-		.then(function(res) {
-			done();
-		});
-	});
-	it('save save device_selector information', function (done) {
-		activeModule = kiplingWindow.activeModule;
-		viewGen = activeModule.viewGen;
-		eventList = activeModule.eventList;
-		done();
-	});
-	it('wait for device selector module to start', function (done) {
-		activeModule.once(eventList.MODULE_STARTED, function(scanResults) {
-			var numResults = scanResults.length = 0;
-			assert.strictEqual(numResults, 0, 'No results should currently be cached');
-			done();
-		});
-	});
-	it('check page elements', function (done) {
-		var labjackLogo = $('#labjack-logo-image');
-		var isLogoValid = true;
-		if(labjackLogo.height() != 49) {
-			isLogoValid = false;
+	it('disable device scanning', async function () {
+		while (!deviceController.link) {
+			await new Promise(resolve => setTimeout(resolve, 100));
 		}
-		if(labjackLogo.width() != 290) {
-			isLogoValid = false;
+		await deviceController.enableMockDeviceScanning();
+	});
+	it('Add mock devices', async function () {
+		await deviceController.addMockDevices(deviceScannerConfigData);
+	});
+	it('load the device_selector module', async function () {
+		await kiplingWin.webContents.executeJavaScript('MODULE_LOADER.loadModuleByName(\'device_selector\');Promise.resolve();');
+	});
+	it('wait for device selector module to start', async function () {
+		let hasActiveModule = await kiplingWin.webContents.executeJavaScript('!!global.activeModule');
+		while (!hasActiveModule) {
+			await new Promise(resolve => setTimeout(resolve, 100));
+			hasActiveModule = await kiplingWin.webContents.executeJavaScript('!!global.activeModule');
 		}
+
+		const injectScript = 'new Promise(resolve => global.activeModule.once(\'MODULE_STARTED\', (scanResults) => resolve(scanResults.length)));';
+		const scanResultsLength = await kiplingWin.webContents.executeJavaScript(injectScript.toString('utf-8'));
+
+		assert.strictEqual(scanResultsLength, 0, 'No results should currently be cached');
+	});
+	it('check page elements', async function () {
+		const injectScript = '($(\'#labjack-logo-image\').height() === 49 && $(\'#labjack-logo-image\').width() === 290);';
+		const isLogoValid = await kiplingWin.webContents.executeJavaScript(injectScript.toString('utf-8'));
+
 		assert.isOk(isLogoValid, 'LabJack logo not displayed');
-		var labjackLink = $('#lj-link-text');
-		// labjackLink.trigger('click');
-
-		done();
 	});
-	it('refresh device list', function (done) {
-		function ensureChecked(elName) {
-			var checkbox = $(elName);
-			checkbox.prop('checked', true);
-		}
-		ensureChecked('#usb_scan_enabled');
-		ensureChecked('#ethernet_scan_enabled');
-		ensureChecked('#wifi_scan_enabled');
+	it('refresh device list', async function () {
+		await kiplingWin.webContents.executeJavaScript('$(\'#usb_scan_enabled\').prop(\'checked\', true); Promise.resolve();');
+		await kiplingWin.webContents.executeJavaScript('$(\'#ethernet_scan_enabled\').prop(\'checked\', true);Promise.resolve();');
+		await kiplingWin.webContents.executeJavaScript('$(\'#wifi_scan_enabled\').prop(\'checked\', true);Promise.resolve();');
 
 		if(testOptions.refreshDevices) {
-			var startedScanEventCaught = false;
-			activeModule.once(
-				eventList.DEVICE_SCAN_STARTED,
-				function() {
-					startedScanEventCaught = true;
-				});
-			activeModule.once(
-				eventList.DEVICE_SCAN_COMPLETED,
-				function(scanResults) {
-					assert.isOk(startedScanEventCaught, 'should triggered scan started event');
-					console.log('scanResults', scanResults);
-					done();
-				});
-			var viewGen = activeModule.viewGen;
-			var refreshButton = viewGen.pageElements.refresh_devices_button.ref;
+			const injectScript = 'new Promise(resolve => {\n' +
+				'\tlet startedScanEventCaught = false;\n' +
+				'\tglobal.activeModule.once(\'DEVICE_SCAN_STARTED\', () => { startedScanEventCaught = true; });\n' +
+				'\tglobal.activeModule.once(\'DEVICE_SCAN_COMPLETED\', (scanResults) => {\n' +
+				'\t\tconsole.log(\'scanResults\', scanResults);\n' +
+				'\t\tresolve(startedScanEventCaught);\n' +
+				'\t});\n' +
+				'});';
+			const startedScanEventCaught =await kiplingWin.webContents.executeJavaScript(injectScript.toString('utf-8'));
 
-			// Trigger the click event for the refresh button and make sure the scan
-			// happens.
-			refreshButton.trigger('click');
-			// done();
+			assert.isOk(startedScanEventCaught, 'should triggered scan started event');
+
+			await kiplingWin.webContents.executeJavaScript('global.activeModule.viewGen.pageElements.refresh_devices_button.ref.trigger(\'click\'); Promise.resolve();');
 		} else {
-			done();
 		}
+
+		// await kiplingWin.webContents.executeJavaScript(injectScript.toString('utf-8'));
 	});
 
-	it('check displayed scan results', function (done) {
+	it('check displayed scan results', async function () {
 		// Verify there being some number of found device types
-		var deviceTypes = $('.device-type');
-		assert.strictEqual(deviceTypes.length, 4, 'Unexpected number of device types');
+		const deviceTypes = await kiplingWin.webContents.executeJavaScript('$(\'.device-type\').length;');
+		assert.strictEqual(deviceTypes, 4, 'Unexpected number of device types');
 
-		var devices = $('.device');
-		assert.strictEqual(devices.length, 5, 'Unexpected number of devices');
+		const devices = await kiplingWin.webContents.executeJavaScript('$(\'.device\').length;');
+		assert.strictEqual(devices, 5, 'Unexpected number of devices');
 
-		var digits = $('.DEVICE_TYPE_Digit .device');
-		assert.strictEqual(digits.length, 1, 'Unexpected number of digits found');
+		const digits = await kiplingWin.webContents.executeJavaScript('$(\'.DEVICE_TYPE_Digit .device\').length;');
+		assert.strictEqual(digits, 1, 'Unexpected number of digits found');
 
-		var t7s = $('.DEVICE_TYPE_T7 .device');
-		assert.strictEqual(t7s.length, 2, 'Unexpected number of T7s found');
+		const t7s = await kiplingWin.webContents.executeJavaScript('$(\'.DEVICE_TYPE_T7 .device\').length;');
+		assert.strictEqual(t7s, 2, 'Unexpected number of T7s found');
 
-		var t4s = $('.DEVICE_TYPE_T4 .device');
-		assert.strictEqual(t4s.length, 1, 'Unexpected number of T4s found');
+		const t4s = await kiplingWin.webContents.executeJavaScript('$(\'.DEVICE_TYPE_T4 .device\').length;');
+		assert.strictEqual(t4s, 1, 'Unexpected number of T4s found');
 
-		var t5s = $('.DEVICE_TYPE_T5 .device');
-		assert.strictEqual(t5s.length, 1, 'Unexpected number of T5s found');
-
-		done();
+		const t5s = await kiplingWin.webContents.executeJavaScript('$(\'.DEVICE_TYPE_T5 .device\').length;');
+		assert.strictEqual(t5s, 1, 'Unexpected number of T5s found');
 	});
 	it('Enable device scanning', function (done) {
 		if(testOptions.realRefresh) {
@@ -182,7 +125,7 @@ describe('mock_device_selector', function() {
 	});
 	it('refresh device list - live', function (done) {
 		if(gui.App.manifest.performLiveTests || testOptions.realRefresh) {
-			var startedScanEventCaught = false;
+			let startedScanEventCaught = false;
 			activeModule.once(
 				eventList.DEVICE_SCAN_STARTED,
 				function() {
@@ -195,8 +138,8 @@ describe('mock_device_selector', function() {
 					console.log('scanResults', scanResults);
 					done();
 				});
-			var viewGen = activeModule.viewGen;
-			var refreshButton = viewGen.pageElements.refresh_devices_button.ref;
+			const viewGen = activeModule.viewGen;
+			const refreshButton = viewGen.pageElements.refresh_devices_button.ref;
 
 			// Trigger the click event for the refresh button and make sure the scan
 			// happens.
@@ -214,8 +157,8 @@ describe('mock_device_selector', function() {
 	// 		});
 
 	// 	// Connect to the first found USB-T7
-	// 	var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_USB');
-	// 	var t7 = t7s.first();
+	// 	const t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_USB');
+	// 	const t7 = t7s.first();
 	// 	t7.trigger('click');
 	// },
 	// 'disconnect from T7': function(test) {
@@ -227,8 +170,8 @@ describe('mock_device_selector', function() {
 	// 		});
 
 	// 	// Connect to the first found USB-T7
-	// 	var t7s = $('.DEVICE_TYPE_T7 .disconnect-button');
-	// 	var t7 = t7s.first();
+	// 	const t7s = $('.DEVICE_TYPE_T7 .disconnect-button');
+	// 	const t7 = t7s.first();
 	// 	t7.trigger('click');
 	// },
 });

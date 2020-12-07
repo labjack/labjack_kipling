@@ -25,6 +25,7 @@ var MODULE_UPDATE_PERIOD_MS = 250;
 var DISABLE_AUTOMATIC_FRAMEWORK_LINKAGE = false;
 
 const dict = require('dict');
+const sprintf = require('sprintf-js').sprintf;
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -179,7 +180,7 @@ function module() {
     };
 
     this.formatVoltageTooltip = function(value) {
-        return sprintf.sprintf("%.2f V", value);
+        return sprintf("%.2f V", value);
     };
     this.updateSpinnerVal = function(reg, val) {
         var spinner = $('#' + reg + '_input_spinner');

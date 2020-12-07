@@ -7,7 +7,6 @@ const os = require('os');
 
 const originalConsole = global.console;
 
-
 function formatParam(param, max) {
     if (!max) {
         max = 1000 * 10000;
@@ -17,6 +16,12 @@ function formatParam(param, max) {
         return param;
     }
 
+    if (param instanceof Error) {
+        return param.toString() + (param.stack ? param.stack.toString() : '');
+    }
+    if (param instanceof Function) {
+        return param.toString();
+    }
     if (Object(param) === param) {
         return JSON.stringify(param, null, 2).substr(0, max);
     }
@@ -35,7 +40,7 @@ function format(message) {
         case 'error':
             return '\x1b[31m[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.map(p => formatParam(p, 1000)).join(' ');
         default:
-            return '[' + message.now.toISOString() + source + ']\x1b[0m ' + message.data.map(p => formatParam(p, 1000)).join(' ');
+            return '[' + message.now.toISOString() + source + '] ' + message.data.map(p => formatParam(p, 1000)).join(' ');
     }
 }
 
@@ -99,7 +104,7 @@ class Logger {
             throw new Error();
         } catch (e) {
             if (typeof e.stack === 'string') {
-                let isFirst = true;
+                let isFirst = 2;
                 for (const line of e.stack.split('\n')) {
                     const matches = line.match(/^\s+at\s+(.*)/);
                     if (matches) {
@@ -108,7 +113,7 @@ class Logger {
                             initiator = matches[1];
                             break;
                         }
-                        isFirst = false;
+                        isFirst--;
                     }
                 }
             }
@@ -172,9 +177,15 @@ const logger = new Logger();
 
 global.mainLogger = logger;
 logger.originalConsole = originalConsole;
-global.console = logger;
-/*
-for (const level of ['log', 'error', 'warn', 'info']) {
-    global.console[level] = logger[level];
+// global.console = logger;
+
+global.console = {};
+
+for (const k in originalConsole) {
+    global.console[k] = originalConsole[k];
 }
-*/
+
+for (const level of ['log', 'error', 'warn', 'info']) {
+    global.console['_' + level] = global.console[level];
+    global.console[level] = (...args) => logger[level](...args);
+}

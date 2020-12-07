@@ -43,6 +43,11 @@ async function loadProgramPackages(package_loader) {
     await checkRequirements(package_loader);
 
     await package_loader.loadPackage({
+        'name': 'manifest',
+        'loadMethod': 'set',
+        'ref': manifest
+    });
+    await package_loader.loadPackage({
         'name': 'info',
         'loadMethod': 'set',
         'ref': info
@@ -97,6 +102,7 @@ async function loadProgramPackages(package_loader) {
     await package_loader.setExtractionPath(appDataPath);
 
     const startDir = info.startDir;
+
     await package_loader.loadPackage({
         'name': 'static_files',
         'folderName': 'ljswitchboard-static_files',
@@ -219,7 +225,6 @@ async function loadProgramPackages(package_loader) {
             ]
         });
     }
-
 
     const managedPackages = await package_loader.runPackageManager();
     console.log('Managed Packages', Object.keys(managedPackages));

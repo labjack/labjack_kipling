@@ -8,16 +8,17 @@ handlebars.registerHelper('printContext', function() {
 });
 
 handlebars.registerHelper('eachDict', function(context, options) {
-    var ret = "";
-    var data = {};
-    console.log('contextcontext', context);
-    context.forEach(function(value,name){
+    let ret = "";
+    const data = {};
+
+    for (let name in context) {
+        const value = context[name];
         if(value) {
             data.key = name;
             data.info = value;
         }
         ret = ret + options.fn(value, {data: data});
-    });
+    }
     return ret;
 });
 

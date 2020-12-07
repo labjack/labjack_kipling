@@ -1,5 +1,8 @@
+const {runTests} = require('./run_tests');
+const { screen } = require('electron');
+
 function loadCoreResources(win, static_files, resources) {
-	static_files.loadResources(win, resources)
+	return static_files.loadResources(win, resources)
 		.catch(function(err) {
 			console.error('Error Loading resources', err);
 		});
@@ -46,7 +49,7 @@ async function loadResources(win, static_files) {
 		'libs/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js',
 	];
 
-	loadCoreResources(win, static_files, resourceList);
+	return loadCoreResources(win, static_files, resourceList);
 }
 
 exports.info = {
@@ -54,16 +57,27 @@ exports.info = {
 	'main': 'lib/index.html'
 };
 
-exports.initializePackage = async function (package_loader) {
+exports.startPackage = async function (package_loader) {
 	const window_manager = package_loader.getPackage('window_manager');
 	const static_files = package_loader.getPackage('static_files');
 
-	window_manager.on(window_manager.eventList.OPENED_WINDOW, async (name) => {
-		console.log('OPENED_WINDOW', name);
-		if (name !== 'kipling_tester') return;
+	window_manager.showWindow('kipling_tester');
+	const kiplingTesterWindow = window_manager.getWindow('kipling_tester');
 
-		const kiplingTesterWindow = window_manager.getWindow('kipling_tester');
-		await loadResources(kiplingTesterWindow.win, static_files);
-	});
+	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+	const winHeight = height - 35;
+	const winWidth = width / 2;
+	const testWinPos = 0;
+	const kiplingWinPos = winWidth;
 
+	kiplingTesterWindow.win.setBounds({ x: testWinPos, y: 0, width: winWidth - 300, height: winHeight });
+
+	const managedKiplingWindow = window_manager.getWindow('kipling');
+	let kiplingWin = managedKiplingWindow.win;
+	kiplingWin.setBounds({ x: kiplingWinPos-300, y: 0, width: winWidth + 300, height: winHeight });
+	// kiplingWin.closeDevTools();
+	kiplingTesterWindow.win.focus();
+
+	await loadResources(kiplingTesterWindow.win, static_files);
+	await runTests(window_manager, package_loader);
 };

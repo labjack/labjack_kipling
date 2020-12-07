@@ -239,7 +239,6 @@ class PackageLoader extends EventEmitter {
 
 	getPackage(name) {
 		if (!this._loadedPackages[name]) {
-			console.trace();
 			console.error('Package ' + name + ' not found');
 			throw 'Package ' + name + ' not found';
 		}
@@ -948,7 +947,7 @@ class PackageLoader extends EventEmitter {
 					'performUpgrade': false,
 					'chosenUpgrade': null,
 					'overallResult': false,
-					'resultMessages': [], // TODO usunsed, remove
+					'resultMessages': [], // TODO unused, remove
 					'isError': false,
 					'packageLoaded': false
 				};
