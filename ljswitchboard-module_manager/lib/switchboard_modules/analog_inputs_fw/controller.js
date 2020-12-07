@@ -38,6 +38,14 @@ const globalDeviceConstantsSwitch = global.globalDeviceConstantsSwitch;
 const handleBarsService = package_loader.getPackage('handleBarsService');
 const dict = require('dict');
 
+const ljmmm_parse = require('ljmmm-parse');
+
+ljmmm_parse.expandLJMMMNameSync = function (name) {
+    return ljmmm_parse.expandLJMMMEntrySync(
+        {name: name, address: 0, type: 'FLOAT32'}
+    ).map(function (entry) { return entry.name; });
+};
+
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
  * When using the 'singleDevice' framework it is instantiated as sdModule.
