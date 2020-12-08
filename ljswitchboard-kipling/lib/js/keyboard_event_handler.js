@@ -546,8 +546,8 @@ class KeyboardEventHandler {
         });
 
         // bind listener to document's keypress event
-        $(document).keydown(this.keydownListener);
-        $(document).keyup(this.keyupListener);
+        $(document).keydown(event => this.keydownListener(event));
+        $(document).keyup(event => this.keyupListener(event));
 
         return Promise.resolve(bundle);
     }
