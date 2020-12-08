@@ -22,6 +22,10 @@ handlebars.registerHelper('eachDict', function(context, options) {
     return ret;
 });
 
+handlebars.registerHelper('toJSON', function(obj) {
+    return JSON.stringify(obj, null, 3);
+});
+
 handlebars.registerHelper('printContext', function() {
     return new handlebars.SafeString(JSON.stringify({'context': this}, null, 2));
 });

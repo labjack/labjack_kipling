@@ -22,12 +22,6 @@
 					{{#eachDict custom.configRegistersDict}}
 					<th class="{{cssClass}}-header">{{name}}</th>
 					{{/eachDict}}
-					{{!--<th>Range</th>
-					<th>Resolution Index</th>
-					<th>Settling</th>
-					<th>Negative Channel</th>
-					<th>EF Status</th>--}}
-					{{!--<th>Options</th>--}}
 					<th></th>
 				</tr>
 				</thead>
@@ -67,12 +61,6 @@
 										<option title="Use Default Ranges" value="0" selected>Default</option>
 										<option title="Use Custom Ranges" value="1">Custom</option>
 									</select>
-									{{!--<input type="checkbox" id="Graph-Range-Options0" value="option1">
-									<select id="module-options-range-override" class="wrap-select">
-										{{#each custom.graphRangeOverrideMenuOptions}}
-										<option title="{{optionDesc}}" value="{{value}}" {{selected}}>{{name}}</option>
-										{{/each}}
-									</select>--}}
 								</td>
 								<td title="Configure Graph Min Ranges">
 									<input type="number" id="Graph-Range-Options1" value="-10">

@@ -364,9 +364,8 @@ function Framework() {
     this.DEBUG_STARTUP_DATA = false;
     var self = this;
     this.reportSyntaxError = function(location, err) {
-        console.error('Error in:',location);
-        console.error('Error obj',err,err.message);
-        console.error('Error Str',err.toString());
+        console.error('Error in:', location);
+        console.error('Error obj', err);
         var stackSplit = err.stack.split('\n');
         var caller_line = err.stack.split('\n')[4];
         var index = caller_line.indexOf('at ');
@@ -3976,19 +3975,25 @@ function Framework() {
     };
     var saveModuleName = this.saveModuleName;
 
-    this.setCustomContext = function(data) {
-        moduleTemplateBindings.custom = data;
+    function fixElextron(data) {
         for (let k in data) {
             let v = data[k];
             if (v instanceof Map) { // Electron fix
                 const obj = {};
                 v.forEach((value, name) => {
-                    obj[name] = value;
+                    obj[name] = fixElextron(value);
                 });
                 data[k] = obj;
+            } else if (typeof v === 'object') {
+                data[k] = fixElextron(v);
             }
         }
-        self.moduleTemplateBindings.custom = data;
+        return data;
+    }
+
+    this.setCustomContext = function(data) {
+        moduleTemplateBindings.custom = data;
+        self.moduleTemplateBindings.custom = fixElextron(data);
     };
     var setCustomContext = this.setCustomContext;
 

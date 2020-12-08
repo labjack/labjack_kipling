@@ -36,7 +36,6 @@ const globalDeviceConstants = global.globalDeviceConstants;
 const globalDeviceConstantsSwitch = global.globalDeviceConstantsSwitch;
 
 const handleBarsService = package_loader.getPackage('handleBarsService');
-const dict = require('dict');
 
 const ljmmm_parse = require('ljmmm-parse');
 
@@ -1310,7 +1309,7 @@ function module() {
     };
 
     this.clearCachedData = function() {
-        for (i = 0; i < 13; i++) {
+        for (let i = 0; i < 13; i++) {
             self.removeAinEFInfo(i);
         }
         self.currentValues = new Map();
@@ -1359,7 +1358,7 @@ function module() {
                 "name":reg,
                 "value":null,
                 "strVal":null,
-                "optionsDict":dict(),
+                "optionsDict":new Map(),
                 "minGraphVal":null,
                 "maxGraphVal":null
             };

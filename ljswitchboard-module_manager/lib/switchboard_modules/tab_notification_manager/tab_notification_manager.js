@@ -146,7 +146,6 @@ var updatedTabsListener = function(tabSections) {
 
 	for (let sectionKey in tabSections) {
 		const tabSection = tabSections[sectionKey];
-		console.log('tabSection', tabSection);
 		for (const tab of tabSection.context) {
 			// console.log('Updating Tab', tab);
 			var name = tab.name;
