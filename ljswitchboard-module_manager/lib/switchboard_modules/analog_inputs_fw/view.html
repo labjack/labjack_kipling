@@ -2,20 +2,6 @@
 	<div id="advanced-ain-measurement-obj">
 		<div id="configure-all-inputs-options" class="">
 			<h3>Configure All Inputs</h3>
-			{{#each custom.analogInputsDict}}
-			<p>{{name}}</p>
-			<p>Dict:</p>
-			<ul>
-				{{#eachDict optionsDict}}
-				<li>{{menuTitle}}</li>
-				<li>{{testObj.test}}</li>
-				{{#each testArr}}
-				<li>{{test}}</li>
-				{{/each}}
-
-				{{/eachDict}}
-			</ul>
-			{{/each}}
 			<table class="table table-non-striped ainConfigTable" id="All-device-config-options-table">
 				<thead>
 				<tr class="table-dataHeader">

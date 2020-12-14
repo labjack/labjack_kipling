@@ -74,19 +74,36 @@ function module() {
 
     this.initRegParser = function() {
         self.regParser = new Map();
-        self.regParser.set = self.regParserDict.set;
+        // self.regParser.set = (name, value) => {
+        //     self.regParserDict.set(name, value);
+        // };
+        self.regParserGet = function (name, value) {
+            var data = self.regParser.get(name);
+            if(typeof(data) === 'undefined') {
+                return self.deviceConstants.extraAllAinOptions[0];
+            }
+            if (typeof data === 'function') {
+                return data(value);
+            }
+            return data;
+        };
+/*
         self.regParser.get = function(name) {
             var data = self.regParserDict.get(name);
             if(typeof(data) === 'undefined') {
                 return self.deviceConstants.extraAllAinOptions[0];
             } else {
+                if (typeof data === 'function') {
+                    return data();
+                }
                 return data;
             }
         };
-        self.regParser.delete = self.regParserDict.delete;
-        self.regParser.forEach = self.regParserDict.forEach;
-        self.regParser.size = self.regParserDict.size;
-        self.regParser.has = self.regParserDict.has;
+*/
+        // self.regParser.delete = self.regParserDict.delete;
+        // self.regParser.forEach = self.regParserDict.forEach;
+        // self.regParser.size = self.regParserDict.size;
+        // self.regParser.has = self.regParserDict.has;
 
     };
 
@@ -609,7 +626,7 @@ function module() {
                 //Perform device IO
                 self.writeReg(register,value)
                 .then(function(){
-                    console.log('Successfully wrote data!');
+                    console.log('Successfully wrote data!', register, value);
                 }, function(err){
                     console.log('Failed to write data :(',err,register,value);
                     var errorInfo;
@@ -1198,7 +1215,7 @@ function module() {
                         curStr = menuOption.name;
                     }
                 });
-                newEFConfigData.curStr = curStr;
+                newEFConfigData.curStr = '112' + curStr;
                 newEFConfigData.menuOptions = menuOptions;
                 efControlsData +=  ainEFTypeConfigTemplates.select(newEFConfigData);
                 var getCallback = function(options) {
@@ -1432,7 +1449,7 @@ function module() {
                 // Switch on
                 var newData;
                 if(!findNum.test(name)) {
-                    newData = self.regParser.get(name);
+                    newData = self.regParserGet(name, value);
                     var optionsData = self.curDeviceOptions.get(name);
                     dataObj.curStr = newData.name;
                     dataObj.curVal = newData.value;
@@ -1446,7 +1463,7 @@ function module() {
                     // Get currently saved values
                     var ainInfo = self.analogInputsDict.get('AIN'+index.toString());
 
-                    newData = self.regParser.get(name);
+                    newData = self.regParserGet(name, value);
                     if(isFound(name,'_')) {
                         var menuOptions = ainInfo.optionsDict.get(name);
                         menuOptions.curStr = newData.name;
@@ -1692,16 +1709,11 @@ function module() {
                         buttonID = '#' + name + '-SELECT';
                         buttonEl = $(buttonID);
                         selectEl = buttonEl.find('.currentValue');
-                        var parserFunc = self.regParser.get(name,{'value':-9999,'name':'N/A'});
+                        var parserFunc = self.regParserGet(name, value);
                         if(typeof(parserFunc) === 'undefined') {
                             // console.log('parserFunc not defined',typeof(parserFunc),name);
                         } else {
-                            var newText;
-                            try {
-                                newText = parserFunc(value);
-                            } catch(err) {
-                                newText = parserFunc;
-                            }
+                            var newText = parserFunc;
                             var stringVal = value.toString();
                             var newTitle = name + ' is set to ' + stringVal;
                             var rangeReg = findRangeRegisterRegex.exec(name);
