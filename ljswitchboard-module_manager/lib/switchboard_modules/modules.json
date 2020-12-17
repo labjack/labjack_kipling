@@ -83,6 +83,10 @@
         "description": "A starting point for the device logger.",
         "active": false
     }, {
+        "name": "xlogger",
+        "description": "A device logger with graphing.",
+        "active": true
+    }, {
         "name": "file_browser_fw",
         "description":"A SD Card file browser for the  T7.",
         "active": false
