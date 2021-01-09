@@ -1,3 +1,6 @@
+--***Depreciated***
+-- We recommend using pwm_simple.lua for PWM configuration guidance rather than this example
+
 --[[
     Name: pwm_library.lua
     Desc: This script can be used as a library of functions to configure the

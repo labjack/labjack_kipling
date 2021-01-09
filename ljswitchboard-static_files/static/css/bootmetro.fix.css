@@ -125,6 +125,12 @@ input[type=radio] ~ span.metro-radio::before {
   text-decoration: none;
   text-shadow: none;
 }
+.nav-tabs {
+  margin-top: 30px;
+}
+.nav>li>a {
+  background-color: #dbdbdb;
+}
 
 /* Command Icons with custom coloring */
 .win-command.green .win-commandicon,
