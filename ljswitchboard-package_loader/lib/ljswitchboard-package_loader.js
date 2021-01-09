@@ -64,6 +64,8 @@ class PackageLoader extends EventEmitter {
 	constructor() {
 		super();
 
+		this.eventList = EVENTS;
+
 		this._loadedPackages = [];
 
 		this.extractionPath = '';
@@ -222,7 +224,7 @@ class PackageLoader extends EventEmitter {
 
 			switch (method) {
 				case 'require':
-					return this._requirePackage(packageInfo);
+					return await this._requirePackage(packageInfo);
 				case 'set':
 					return this._setPackage(packageInfo);
 				case 'managed':
@@ -269,12 +271,7 @@ class PackageLoader extends EventEmitter {
 	deleteManagedPackage(name) {
 		if (this.managedPackages[name]) {
 			// Delete the item from the managedPackagesList
-			const newList = [];
-			this.managedPackagesList.forEach((item) => {
-				if (item !== name) {
-					newList.push(item);
-				}
-			});
+			const newList = this.managedPackagesList.filter((item) => item.name !== name);
 			this.managedPackagesList = newList;
 
 			this.managedPackages[name] = null;
@@ -299,7 +296,12 @@ class PackageLoader extends EventEmitter {
 		this.managedPackagesList.forEach((packageToDelete) => {
 			packagesToDelete.push(packageToDelete);
 		});
-		packagesToDelete.forEach(this.deleteManagedPackage);
+		packagesToDelete.forEach((name) => this.deleteManagedPackage(name));
+	}
+
+	reset() {
+		this.deleteAllManagedPackages();
+		this._loadedPackages = [];
 	}
 
 	async _initializeInfoFile() {
@@ -873,10 +875,11 @@ class PackageLoader extends EventEmitter {
 
 		const bundles = [];
 
-		packageNames.forEach((packageName) => {
+		for (const packageName of packageNames) {
 			// Only add packages that aren't in the global name space;
+
 			const gnsObjs = Object.keys(this._loadedPackages);
-			if(gnsObjs.indexOf(packageName) < 0) {
+			if (gnsObjs.indexOf(packageName) < 0) {
 				const bundle = {
 					'name': packageName,
 					'packageInfo': this.managedPackages[packageName],
@@ -895,7 +898,7 @@ class PackageLoader extends EventEmitter {
 				// Commented out async operation
 				bundles.push(bundle);
 			}
-		});
+		}
 
 		if (bundles.length > 0) {
 			try {

@@ -1,6 +1,7 @@
 var assert = require('chai').assert;
 
-var package_loader = require('../lib/ljswitchboard-package_loader');
+const PackageLoader = require('../lib/ljswitchboard-package_loader').PackageLoader;
+const package_loader = new PackageLoader();
 
 var capturedEvents = [];
 
@@ -43,6 +44,7 @@ var currentTestStartTime;
 describe('huge package', function() {
 	beforeEach(function (done) {
 		currentTestStartTime = new Date();
+		package_loader.reset();
 		done();
 	});
 	afterEach(function (done) {
@@ -65,120 +67,102 @@ describe('huge package', function() {
 		package_loader.setExtractionPath(directory);
 		done();
 	});
-	it('start extraction', function (done) {
+	it('start extraction', async function () {
 		// Clear the fired-events list
 		capturedEvents = [];
 
-		console.log(testPackages.staticFiles_Long)
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFiles_Long);
+		await package_loader.loadPackage(testPackages.staticFiles_Long);
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.core);
+		await package_loader.loadPackage(testPackages.core);
 
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UNINITIALIZED_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UNINITIALIZED_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-			];
+		const updatedPackages = await package_loader.runPackageManager();
+		// Define the required event list
+		var requiredEvents = [
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.DETECTED_UNINITIALIZED_PACKAGE,
+			eventList.STARTING_EXTRACTION,
+			eventList.STARTING_DIRECTORY_EXTRACTION,
+			eventList.FINISHED_EXTRACTION,
+			eventList.FINISHED_DIRECTORY_EXTRACTION,
+			eventList.LOADED_PACKAGE,
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.DETECTED_UNINITIALIZED_PACKAGE,
+			eventList.STARTING_EXTRACTION,
+			eventList.STARTING_DIRECTORY_EXTRACTION,
+			eventList.FINISHED_EXTRACTION,
+			eventList.FINISHED_DIRECTORY_EXTRACTION,
+			eventList.LOADED_PACKAGE,
+		];
 
-			// Test to make sure the staticFiles were loaded
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'initialize',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
+		// Test to make sure the staticFiles were loaded
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'initialize',
+			'directory',
+			requiredEvents,
+			capturedEvents
+		);
 
-			// Test to make sure the core library was loaded
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'initialize',
-				'directory',
-				requiredEvents,
-				capturedEvents,
-				1
-			);
-			done();
-		}, function(err) {
-			assert.isOk(false, 'failed to run the packageManager');
-			done();
-		});
+		// Test to make sure the core library was loaded
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'initialize',
+			'directory',
+			requiredEvents,
+			capturedEvents,
+			1
+		);
 	});
-	it('Force upgrade if greater than/equal to current', function (done) {
+	it('Force upgrade if greater than/equal to current', async function () {
 		// Clear the fired-events list
 		capturedEvents = [];
 
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFiles_Long);
+		await package_loader.loadPackage(testPackages.staticFiles_Long);
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.forceRefreshCore);
+		await package_loader.loadPackage(testPackages.forceRefreshCore);
 
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UP_TO_DATE_PACKAGE,
-				eventList.SKIPPING_PACKAGE_RESET,
-				eventList.SKIPPING_PACKAGE_UPGRADE,
-				eventList.LOADED_PACKAGE,
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.RESETTING_PACKAGE,
-				eventList.FINISHED_RESETTING_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-			];
-			try {
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'existingSkipUpgrade',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'existingPerformUpgrade',
-				'directory',
-				requiredEvents,
-				capturedEvents,
-				1
-			);
-		} catch(err) {
-			console.log('error', err);
-		}
-
-			done();
-		}, function(err) {
-			assert.isOk(false, 'failed to run the packageManager');
-			done();
-		});
+		const updatedPackages = await package_loader.runPackageManager();
+		// Define the required event list
+		var requiredEvents = [
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.DETECTED_UP_TO_DATE_PACKAGE,
+			eventList.SKIPPING_PACKAGE_RESET,
+			eventList.SKIPPING_PACKAGE_UPGRADE,
+			eventList.LOADED_PACKAGE,
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.RESETTING_PACKAGE,
+			eventList.FINISHED_RESETTING_PACKAGE,
+			eventList.STARTING_EXTRACTION,
+			eventList.STARTING_DIRECTORY_EXTRACTION,
+			eventList.FINISHED_EXTRACTION,
+			eventList.FINISHED_DIRECTORY_EXTRACTION,
+			eventList.LOADED_PACKAGE,
+		];
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'existingSkipUpgrade',
+			'directory',
+			requiredEvents,
+			capturedEvents
+		);
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'existingPerformUpgrade',
+			'directory',
+			requiredEvents,
+			capturedEvents,
+			1
+		);
 	});
 	// 'check test durations': function(test) {
 	// 	// console.log('Durations:', testDurationTimes);

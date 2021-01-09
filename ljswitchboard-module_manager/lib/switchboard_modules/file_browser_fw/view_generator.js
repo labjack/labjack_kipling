@@ -4,18 +4,12 @@
 
 // console.log('in device_selector view_generator.js');
 
-var q;
-try {
-	q = global.require.main.require('q');
-} catch(err) {
-	q = require.main.require('q');
-}
+const q = require('q');
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var handlebars = require('handlebars');
-var path = require('path');
-
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const handlebars = require('handlebars');
+const path = require('path');
 
 var createFileBrowserViewGenerator = function() {
 	var self = this;

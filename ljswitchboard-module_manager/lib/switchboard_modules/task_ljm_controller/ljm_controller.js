@@ -1,6 +1,6 @@
 
 /* jshint undef: true, unused: true, undef: true */
-/* global global, require, console, MODULE_LOADER, MODULE_CHROME, TASK_LOADER, moduleData */
+/* global require, console, moduleData */
 /* exported activeModule */
 
 console.log('in ljm_controller.js', Object.keys(moduleData));
@@ -8,26 +8,11 @@ this.run = function() {
 	console.log('Running ljm_controller');
 };
 
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const q = require('q');
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var q = global.require('q');
-
-var q;
-var io_manager;
-var driver_const;
-var async;
-try {
-	q = global.require.main.require('q');
-	io_manager = global.require.main.require('ljswitchboard-io_manager');
-	driver_const = global.require('ljswitchboard-ljm_driver_constants');
-	async = global.require('async');
-} catch(err) {
-	q = require.main.require('q');
-	io_manager = require.main.require('ljswitchboard-io_manager');
-	driver_const = require.main.require('ljswitchboard-ljm_driver_constants');
-	async = require.main.require('async');
-}
+const io_manager = require('ljswitchboard-io_manager');
 
 var io_interface = io_manager.io_interface();
 var driver = io_interface.getDriverController();

@@ -6,7 +6,8 @@ var path = require('path');
 // var semver = require('semver');
 var semver = require('../lib/semver_min');
 
-var package_loader = require('../lib/ljswitchboard-package_loader');
+const PackageLoader = require('../lib/ljswitchboard-package_loader').PackageLoader;
+const package_loader = new PackageLoader();
 
 var cleanExtractionPath = function(directory) {
 	try {
@@ -109,29 +110,18 @@ var testSinglePackageUpdate = function(assert, updatedPackages, step, upgradeTyp
 		emittedEvents.push(capturedEvent.eventName);
 	});
 
-	// console.log(emittedEvents.length, requiredEvents.length);
-	// emittedEvents.forEach(function(emittedEvent, i) {
-	// 	console.log(emittedEvent,' : ', requiredEvents[i]);
-	// });
 	var msg = 'Required events not fired';
 	assert.deepEqual(emittedEvents, requiredEvents, msg);
-
-	// Check to make sure that the library was properly loaded into the
-	// global[cns] aka global.labjackswitchboardData name space.
-	var cns = package_loader.getNameSpace();
-	var loadedLibKeys = Object.keys(global[cns]);
 
 	var requiredLibKeys = [];
 	if(!testConditions.shouldHaveFailed) {
 		requiredLibKeys.push('ljswitchboard-static_files');
 	}
 	requiredLibKeys.forEach(function(requiredLibKey) {
-		if(loadedLibKeys.indexOf(requiredLibKey) >= 0) {
+		if(package_loader.hasPackage(requiredLibKey)) {
 			assert.isOk(true, 'found required key');
-			// console.log('Required Data', global[cns][requiredLibKey]);
 		} else {
 			assert.isOk(false, 'did not find required key: ' + requiredLibKey);
-			console.log('loadedLibKeys', loadedLibKeys);
 		}
 	});
 };
