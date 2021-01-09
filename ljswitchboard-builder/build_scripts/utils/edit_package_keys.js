@@ -101,6 +101,13 @@ function editPackageKeys(bundle, recursive=false) {
 				obj[key] = reqKeys[key];
 			}
 		});
+
+		if (bundle.modify_json) {
+			for (const key in bundle.modify_json) {
+				obj[key] = bundle.modify_json[key];
+			}
+		}
+
 		return obj;
 	}
 

@@ -74,6 +74,7 @@ if (mac_notarize) {
 		}
 
 		await runScript({'script': 'organize_project_files', 'text': 'Organizing Project Files & compress into packages.'});
+
 		await runScript({'script': 'electron_build', 'text': 'Run electron-builder'});
 		// await runScript({'script': 'brand_project', 'text': 'Branding Project Files'});
 		return;

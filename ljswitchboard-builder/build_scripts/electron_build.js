@@ -4,8 +4,10 @@ require('./utils/error_catcher');
 const path = require('path');
 const fs = require('fs');
 const {getBuildDirectory} = require('./utils/get_build_dir');
+const fse = require('fs-extra');
 
 const builder = require('electron-builder');
+const {editPackageKeys} = require("./utils/edit_package_keys");
 const Platform = builder.Platform;
 
 const config = require('../package.json').build;
@@ -22,7 +24,6 @@ const buildOpts = {
     publish: 'never',
     config
 };
-
 
 if ('darwin' === buildOS) {
     buildOpts.mac = ['default'];
@@ -45,6 +46,20 @@ async function fixSnapName() {
         }
     }
 }
+
+const from = path.join(__dirname, '..', 'branding_files', 'Kipling_512x512.png');
+const to = path.join(OUTPUT_PROJECT_FILES_PATH, 'build', 'icon.png');
+
+editPackageKeys({
+    'project_path': path.join(OUTPUT_PROJECT_FILES_PATH),
+    'required_keys': [],
+    'modify_json': {
+        'name': 'kipling'
+    }
+});
+
+fse.removeSync(to);
+fse.copySync(from, to);
 
 builder
     .build(buildOpts)
