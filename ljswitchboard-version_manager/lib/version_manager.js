@@ -59,7 +59,7 @@ function labjackVersionManager() {
 
     // define dict object with various urls in it
     this.urlDict = {
-        "kipling": {
+        "kipling_old": {
             "type":"kipling",
             "upgradeReference": "https://labjack.com/support/software/installers/ljm",
             "platformDependent": true,
@@ -124,7 +124,6 @@ function labjackVersionManager() {
                 {"url": "https://labjack.com/support/firmware/t7", "type": "organizer-current"},
                 {"url": "https://labjack.com/support/firmware/t7", "type": "current"},
                 {"url": "https://labjack.com/support/firmware/t7/beta", "type": "beta"},
-                {"url": "https://labjack.com/support/firmware/t7/old", "type": "old"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -136,8 +135,7 @@ function labjackVersionManager() {
                 // {"url": "https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
                 {"url": "https://labjack.com/support/firmware/t4", "type": "organizer-current"},
                 {"url": "https://labjack.com/support/firmware/t4", "type": "current"},
-                {"url": "https://labjack.com/support/firmware/t4/beta", "type": "beta"},
-                {"url": "https://labjack.com/support/firmware/t4/old", "type": "old"},
+                // {"url": "https://labjack.com/support/firmware/t4/beta", "type": "beta"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },

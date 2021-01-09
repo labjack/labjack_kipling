@@ -77,6 +77,6 @@
   },
   "js-flags": "--expose-gc",
   "persistentDataFolderName": "K3",
-  "persistentDataVersion": "0.0.1",
+  "persistentDataVersion": "0.0.2",
   "forceRefreshOfPersistentData": false
 }

@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const persistent_data_manager = require('./persistent_data_manager');
+const PersistentDataManager = require('./persistent_data_manager').PersistentDataManager;
 const {checkRequirements} = require('./check_requirements');
 const manifest = require('../package.json');
 
@@ -83,7 +83,7 @@ async function loadProgramPackages(package_loader) {
 
     const lj_folder_path = res['LabJack folder'].path;
 
-    const persistentDataManager = new persistent_data_manager.create(
+    const persistentDataManager = new PersistentDataManager(
         lj_folder_path,
         (!!process.env.TEST_MODE || manifest.test) ? manifest.testPersistentDataFolderName : manifest.persistentDataFolderName,
         manifest.persistentDataVersion

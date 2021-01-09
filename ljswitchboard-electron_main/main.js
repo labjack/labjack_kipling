@@ -94,12 +94,6 @@ window_manager.configure({
   'gui': gui
 });
 
-// Add the -builder window to the window_manager to have it be managed.
-let initialAppVisibility = false;
-if(packageData.window.show) {
-  initialAppVisibility = true;
-}
-
 async function createWindow() {
   // Create the browser window.
 
@@ -146,12 +140,20 @@ async function createWindow() {
     'ref': splashScreenUpdater
   });
 
+  window_manager.addWindow({
+    'name': 'main',
+    'win': splashWindow,
+    'title': 'splashWindow'
+  });
+
   splashScreenUpdater.update('NodeJS version: ' + process.version, 'info');
   splashScreenUpdater.update('Electron version: ' + process.versions['electron'], 'info');
   splashScreenUpdater.update('Kipling version: ' + packageData.version, 'info');
   if (packageData.build_number) {
     splashScreenUpdater.update('Kipling build: ' + packageData.build_number);
   }
+
+  await new Promise(resolve => setTimeout(resolve, 20));
 
   try {
     await loadProgramPackages(package_loader);
@@ -167,18 +169,14 @@ async function createWindow() {
 
   await window_manager.openPackageWindow(package_loader.getPackage('kipling'));
 
+  // window_manager.closeWindow('')
+
   if (package_loader.hasPackage('kipling_tester')) {
     const kipling_tester = package_loader.getPackage('kipling_tester');
     await window_manager.openPackageWindow(kipling_tester);
     await kipling_tester.startPackage(package_loader);
   }
 
-  window_manager.addWindow({
-    'name': 'main',
-    'win': splashWindow,
-    'initialVisibility': initialAppVisibility,
-    'title': 'splashWindow'
-  });
 }
 
 app.whenReady().then(createWindow);
