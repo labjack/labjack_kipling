@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "diff": ">=3.5.0",
-    "mocha": "7.2.0",
+    "mocha": "^8.2.1",
     "chai": "^4.2.0",
     "supports-color": "3.1.0"
   },

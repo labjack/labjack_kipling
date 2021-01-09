@@ -41,7 +41,7 @@
         "deep-eql": "^4.0.0",
         "rewire": "4.0.1",
         "diff": ">=3.5.0",
-        "mocha": "7.2.0",
+        "mocha": "^8.2.1",
         "chai": "^4.2.0"
     },
     "script_notes": "to run a script w/o using npm test, use npm run [script name]",

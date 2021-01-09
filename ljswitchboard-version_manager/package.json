@@ -25,14 +25,14 @@
   },
   "dependencies": {
     "async": "1.5.2",
-    "cheerio": "1.0.0-rc.3",
+    "cheerio": "^1.0.0-rc.5",
     "q": "1.5.1",
-    "node-fetch": "1.7.3"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "diff": ">=3.5.0",
     "colors": "1.4.0",
-    "mocha": "7.2.0",
+    "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },
   "directories": {
