@@ -36,7 +36,7 @@ function module() {
     this.REGISTER_OVERLAY_SPEC = {};
     this.startupRegList = {};
     this.interpretRegisters = {};
-    this.startupRegListDict = dict();
+    this.startupRegListDict = new Map();
 
     this.moduleContext = {};
     this.activeDevice = undefined;
@@ -46,9 +46,9 @@ function module() {
         fullType: ''
     };
 
-    this.currentValues = dict();
-    this.newBufferedValues = dict();
-    this.bufferedOutputValues = dict();
+    this.currentValues = new Map();
+    this.newBufferedValues = new Map();
+    this.bufferedOutputValues = new Map();
 
     this.deviceDashboardController = undefined;
 
@@ -145,8 +145,8 @@ function module() {
      * This function does what?
      */
     this.createProcessConfigStatesAndDirections = function () {
-        var registersByDirectionReg = dict();
-        var registersByStateReg = dict();
+        var registersByDirectionReg = new Map();
+        var registersByStateReg = new Map();
         var registersToExpand;
         var expandedRegisters;
 
@@ -223,7 +223,7 @@ function module() {
 
         self.processConfigStatesAndDirections = function (registers,
             onSuccess) {
-            var viewRegInfoDict = dict();
+            var viewRegInfoDict = new Map();
             registers.forEach(function (regValue, regAddress) {
                 if (hasText(regAddress, 'STATE')) {
                     handleStates(regValue, regAddress, viewRegInfoDict);
@@ -762,7 +762,7 @@ function module() {
         onSuccess();
     };
     this.onRefreshed = function(framework, results, onError, onSuccess) {
-        var extraData = dict();
+        var extraData = new Map();
         // Save buffered output values to the dict.
         self.bufferedOutputValues.forEach(function(value,name){
             self.currentValues.set(name,value);

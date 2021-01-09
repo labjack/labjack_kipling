@@ -36,7 +36,6 @@
   "dependencies": {
     "async": "1.5.2",
     "comment-json": "2.x.x",
-    "dict": "1.4.0",
     "ffi-napi": "^3.0.1",
     "ref-napi": "^3.0.1",
     "handlebars": "4.7.6",

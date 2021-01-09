@@ -4,12 +4,11 @@ var sdFramework = null;
 const package_loader = global.package_loader;
 const handleBarsService = package_loader.getPackage('handleBarsService');
 const path = require('path');
+const util = require('util');
+const EventEmitter = require('events').EventEmitter;
 
 var createModuleInstance = function() {
     this.DEBUG_FRAMEWORK_CONNECTOR = true;
-    const io_manager = package_loader.getPackage('io_manager');
-    var io_interface = io_manager.io_interface();
-    var device_controller = io_interface.getDeviceController();
 
     this.moduleData = {};
     this.eventList = {
@@ -21,10 +20,9 @@ var createModuleInstance = function() {
         if(self.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('initializing framework', moduleData.data);
         }
-        var defered = q.defer();
         try {
             // Create an instance of the sdFramework
-            sdFramework = new Framework();
+            sdFramework = new global.Framework();
 
             // Configure framework with the jQueryWrapper
             sdFramework._SetJQuery(new JQueryWrapper());
@@ -48,15 +46,13 @@ var createModuleInstance = function() {
         } catch(err) {
             console.log('Error Initializing Module', err, err.stack);
         }
-        defered.resolve(moduleData);
-        return defered.promise;
+        return Promise.resolve(moduleData);
     };
 
     var linkModule = function(moduleData) {
         if(self.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('linking framework to module', moduleData.data);
         }
-        var defered = q.defer();
 
         try {
             // Try and link the framework to the various implemented functions,
@@ -115,108 +111,104 @@ var createModuleInstance = function() {
         } catch(err) {
             console.error('Error Linking sdFramework to current module', err);
         }
-        defered.resolve(moduleData);
-        return defered.promise;
+        return Promise.resolve(moduleData);
     };
 
     var loadModule = function(moduleData) {
         if(self.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('loading framework module', moduleData.data);
         }
-        var defered = q.defer();
+        return new Promise((resolve, reject) => {
+            try {
+                //Configure framework's update frequency
+                if(typeof(MODULE_UPDATE_PERIOD_MS) === "number") {
+                    sdFramework.setRefreshRate(MODULE_UPDATE_PERIOD_MS);
+                } else if(typeof(moduleData.data.refreshRate) === 'number') {
+                    sdFramework.setRefreshRate(moduleData.data.refreshRate);
+                } else {
+                    sdFramework.setRefreshRate(1000);
+                }
 
-        try {
-            //Configure framework's update frequency
-            if(typeof(MODULE_UPDATE_PERIOD_MS) === "number") {
-                sdFramework.setRefreshRate(MODULE_UPDATE_PERIOD_MS);
-            } else if(typeof(moduleData.data.refreshRate) === 'number') {
-                sdFramework.setRefreshRate(moduleData.data.refreshRate);
-            } else {
-                sdFramework.setRefreshRate(1000);
+                var numLoaded = moduleData.context.stats.numLoaded;
+                var uniqueTabName = moduleData.name + '-' + numLoaded.toString();
+
+                var moduleViewPath = path.join(moduleData.path, 'view.html');
+                var moduleDataPath = path.join(moduleData.path, 'moduleData.json');
+
+                // Configure the framework to use the module's 'view.html' by default
+                // Also configure the framework to use module's data, 'moduleData.json'
+                sdFramework.configFramework(moduleViewPath);
+                sdFramework.configureFrameworkData([moduleDataPath]);
+
+                //Save loaded module data to the framework instance
+                sdFramework.saveModuleInfo(
+                    moduleData.data,
+                    moduleData.json.moduleConstants,
+                    sdModule,
+                    moduleData
+                );
+
+                var createFakeDriver = function() {
+                    this.logSSync = function(level, str) {
+                        console.log('in fake driver logSSync');
+                    };
+                    this.writeLibrarySync = function(str, val) {
+                        console.log('in fake driver writeLibrarySync');
+                    };
+                    this.readLibrarySync = function(str) {
+                        console.log('in fake driver readLibrarySync');
+                    };
+                };
+                sdFramework.ljmDriver = new createFakeDriver();
+
+                // Start the framework
+                if(self.DEBUG_FRAMEWORK_CONNECTOR) {
+                    console.debug('Starting Module', moduleData.name);
+                }
+                sdFramework.startFramework()
+                    .then(function() {
+                        // console.debug('Started FW');
+                        resolve(moduleData);
+                    },function() {
+                        console.error('Failed Starting FW');
+                        resolve(moduleData);
+                    }).done();
+            } catch(err) {
+                console.error('Error Loading sdFramework', err);
             }
-
-            var numLoaded = moduleData.context.stats.numLoaded;
-            var uniqueTabName = moduleData.name + '-' + numLoaded.toString();
-
-            var moduleViewPath = path.join(moduleData.path, 'view.html');
-            var moduleDataPath = path.join(moduleData.path, 'moduleData.json');
-
-            // Configure the framework to use the module's 'view.html' by default
-            // Also configure the framework to use module's data, 'moduleData.json'
-            sdFramework.configFramework(moduleViewPath);
-            sdFramework.configureFrameworkData([moduleDataPath]);
-
-            //Save loaded module data to the framework instance
-            sdFramework.saveModuleInfo(
-                moduleData.data,
-                moduleData.json.moduleConstants,
-                sdModule,
-                moduleData
-            );
-
-            var createFakeDriver = function() {
-                this.logSSync = function(level, str) {
-                    console.log('in fake driver logSSync');
-                };
-                this.writeLibrarySync = function(str, val) {
-                    console.log('in fake driver writeLibrarySync');
-                };
-                this.readLibrarySync = function(str) {
-                    console.log('in fake driver readLibrarySync');
-                };
-            };
-            sdFramework.ljmDriver = new createFakeDriver();
-
-            // Start the framework
-            if(self.DEBUG_FRAMEWORK_CONNECTOR) {
-                console.debug('Starting Module', moduleData.name);
-            }
-            sdFramework.startFramework()
-            .then(function() {
-                // console.debug('Started FW');
-                defered.resolve(moduleData);
-            },function() {
-                console.error('Failed Starting FW');
-                defered.resolve(moduleData);
-            }).done();
-        } catch(err) {
-            console.error('Error Loading sdFramework', err);
-        }
-        return defered.promise;
+        });
     };
     var runModule = function(moduleData) {
         if(self.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('running module', moduleData.data);
         }
-        var defered = q.defer();
-        var resolveFunc = function() {
-            defered.resolve(moduleData);
-        };
-        try {
-            // console.debug('Running FW');
-            sdFramework.runFramework()
-            .then(resolveFunc, resolveFunc);
-        } catch(err) {
-            console.error('Error Running sdFramework', err);
-            defered.resolve();
-        }
-        return defered.promise;
+        return new Promise((resolve, reject) => {
+            var resolveFunc = function () {
+                resolve(moduleData);
+            };
+            try {
+                // console.debug('Running FW');
+                sdFramework.runFramework()
+                    .then(resolveFunc, resolveFunc);
+            } catch (err) {
+                console.error('Error Running sdFramework', err);
+                resolve();
+            }
+        });
     };
     var reportModuleStarted = function(moduleData) {
         if(self.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('Reporting Module Started');
         }
-        var defered = q.defer();
 
         self.emit(self.eventList.MODULE_STARTED);
         var data = {
             'name': moduleData.name,
         };
-        MODULE_CHROME.emit('MODULE_READY', data);
-        MODULE_LOADER.emit('MODULE_READY', data);
+        global.MODULE_CHROME.emit('MODULE_READY', data);
+        global.MODULE_LOADER.emit('MODULE_READY', data);
 
-        defered.resolve(moduleData);
-        return defered.promise;
+        return Promise.resolve(moduleData);
     };
 
     var startModule = function(moduleData) {
@@ -250,17 +242,17 @@ var createModuleInstance = function() {
         .then(reportModuleStarted);
     };
     var unloadStep = function() {
-        var defered = q.defer();
-        if(sdFramework) {
-            sdFramework.qExecOnUnloadModule()
-            .then(function() {
-                if(self.DEBUG_FRAMEWORK_CONNECTOR) {
-                    console.info('sdFramework Stopped');
-                }
-                defered.resolve();
-            });
-        }
-        return defered.promise;
+        return new Promise((resolve, reject) => {
+            if (sdFramework) {
+                sdFramework.qExecOnUnloadModule()
+                    .then(function () {
+                        if (self.DEBUG_FRAMEWORK_CONNECTOR) {
+                            console.info('sdFramework Stopped');
+                        }
+                        resolve();
+                    });
+            }
+        });
     };
     var stopModule = function() {
         // console.log('device_selector stopped');
@@ -269,7 +261,6 @@ var createModuleInstance = function() {
 
     // Attach a pre-load step to the Module loader
     var preLoadStep = async function(newModule) {
-        var defered = q.defer();
         try {
             var flags = newModule.data.framework_flags;
             self.DEBUG_FRAMEWORK_CONNECTOR = flags.debug_framework_connector;
@@ -321,17 +312,16 @@ var createModuleInstance = function() {
         }
         newModule.context.framework_options = framework_options;
 
-        defered.resolve(newModule);
-        return defered.promise;
+        return Promise.resolve(newModule);
     };
-    MODULE_LOADER.addPreloadStep(preLoadStep);
-    MODULE_LOADER.addUnloadStep(unloadStep);
+    global.MODULE_LOADER.addPreloadStep(preLoadStep);
+    global.MODULE_LOADER.addUnloadStep(unloadStep);
 
     // Attach to MODULE_LOADER events that indicate to the module about what to
     // do.  (start/stop).
-    var mlEvents = MODULE_LOADER.eventList;
-    MODULE_LOADER.on(mlEvents.VIEW_READY, startModule);
-    MODULE_LOADER.on(mlEvents.UNLOAD_MODULE, stopModule);
+    var mlEvents = global.MODULE_LOADER.eventList;
+    global.MODULE_LOADER.on(mlEvents.VIEW_READY, startModule);
+    global.MODULE_LOADER.on(mlEvents.UNLOAD_MODULE, stopModule);
     var self = this;
 };
 util.inherits(createModuleInstance, EventEmitter);

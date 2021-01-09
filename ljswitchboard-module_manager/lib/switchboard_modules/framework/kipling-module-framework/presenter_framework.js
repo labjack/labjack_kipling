@@ -4,7 +4,7 @@
 /* global global, require, console, handlebars, $ */
 /* global showAlert, showCriticalAlert, showInfoMessage */
 /* global MODULE_LOADER, MODULE_CHROME, TASK_LOADER */
-/* global KEYBOARD_EVENT_HANDLER, module_manager */
+/* global KEYBOARD_EVENT_HANDLER */
 
 // Flags
 /* global DISABLE_AUTO_CLEAR_CONFIG_BINDINGS */
@@ -19,7 +19,6 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var async = require('async');
-var dict = require('dict');
 var q = require('q');
 var sprintf = require('sprintf-js').sprintf;
 
@@ -28,7 +27,7 @@ const io_manager = package_loader.getPackage('io_manager');
 const module_manager = package_loader.getPackage('module_manager');
 const modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
-const fs_facade = require('fs_facade');
+const fs_facade = package_loader.getPackage('fs_facade');
 const ljmmm_parse = require('ljmmm-parse');
 
 ljmmm_parse.expandLJMMMNameSync = function (name) {
@@ -222,7 +221,7 @@ function extrapolateDeviceErrorData(data) {
 function Framework() {
 
     // List of events that the framework handels
-    var eventListener = dict({
+    const defaultEntries = {
         verifyStartupData: null,
         onModuleLoaded: null,
         onDevicesSelected: null,
@@ -239,10 +238,12 @@ function Framework() {
         onUnloadModule: null,
         onLoadError: null,
         onWriteError: null,
-        onRefreshError: null,
-        onExecutionError: function (params) { throw params; }
-    });
-    this.eventListener = eventListener;
+        onRefreshError: null
+    };
+    const eventListener = new Map();
+    for (const k in defaultEntries) {
+        eventListener.set(k, defaultEntries[k]);
+    }
 
     // io_manager object references.
     var io_interface = io_manager.io_interface();
@@ -263,14 +264,14 @@ function Framework() {
     var connectedDevicesRefreshRate = 1000;
     var configControls = [];
 
-    var bindings = dict({});
-    var readBindings = dict({});
-    var writeBindings = dict({});
-    var smartBindings = dict({});
+    var bindings = new Map();
+    var readBindings = new Map();
+    var writeBindings = new Map();
+    var smartBindings = new Map();
 
-    var setupBindings = dict({});
-    var readSetupBindings = dict({});
-    var writeSetupBindings = dict({});
+    var setupBindings = new Map();
+    var readSetupBindings = new Map();
+    var writeSetupBindings = new Map();
 
     var activeDevices = [];
     var selectedDevices = [];
@@ -986,7 +987,6 @@ function Framework() {
         }
         eventListener.set(name, listener);
     };
-    var on = this.on;
 
     /**
      * Force-cause an event to occur through the framework.
@@ -2160,8 +2160,8 @@ function Framework() {
             names[names.length] = smartBinding.smartName;
         });
         self.deleteSmartBindings(names);
-        self.smartBindings = dict({});
-        self.setupBindings = dict({});
+        self.smartBindings = new Map();
+        self.setupBindings = new Map();
     }
     /**
      * Function to add a single binding that gets read once upon device
@@ -2523,7 +2523,7 @@ function Framework() {
         // Function that executes the device setup commands
         function executeDeviceSetupQueue (bindings) {
             var deferred = q.defer();
-            var results = dict({});
+            var results = new Map();
 
             var executionQueue = createDeviceIOExecutionQueue(
                 bindings,
@@ -2575,7 +2575,7 @@ function Framework() {
                     values
                     ).then(
                     function(results) {
-                        var configResults = dict({});
+                        var configResults = new Map();
                         if(results.length != self.setupBindings.size) {
                             console.error('presenter_framework setupBindings ERROR!!');
                             console.error('resultsLength',results.length);
@@ -2824,9 +2824,9 @@ function Framework() {
     };
 
     this.clearConfigBindings = function() {
-        bindings = dict({});
-        readBindings = dict({});
-        writeBindings = dict({});
+        bindings = new Map();
+        readBindings = new Map();
+        writeBindings = new Map();
         moduleTemplateBindings = {};
 
         self.bindings = bindings;
@@ -3433,7 +3433,6 @@ function Framework() {
         return innerDeferred.promise;
     };
 
-
     var processDeviceValues = function (valuesInfo) {
         var innerDeferred = q.defer();
         self.daqLoopStatus = 'processDeviceValues';
@@ -3443,7 +3442,7 @@ function Framework() {
         var customFormatFuncs = valuesInfo.customFormatFuncs;
         var numAddresses = addresses.length;
         var bindings = valuesInfo.bindings;
-        var retDict = dict({});
+        var retDict = new Map();
 
         // Iterate through the bindings executed using the async library
         var curDeviceIOIndex = 0;
@@ -4214,3 +4213,4 @@ function Framework() {
 }
 
 util.inherits(Framework, EventEmitter);
+global.Framework = Framework;

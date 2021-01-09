@@ -7,7 +7,8 @@
 var async = require('async');
 var q = require('q');
 
-var fs_facade = require('./fs_facade');
+const package_loader = global.package_loader;
+const fs_facade = package_loader.getPackage('fs_facade');
 
 var IO_CONFIG_PANE_SELECTOR = '#io-config-pane';
 

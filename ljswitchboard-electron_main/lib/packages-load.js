@@ -57,6 +57,11 @@ async function loadProgramPackages(package_loader) {
         'loadMethod': 'set',
         'ref': require('./handlebar_service').handleBarsService
     });
+    await package_loader.loadPackage({
+        'name': 'fs_facade',
+        'loadMethod': 'set',
+        'ref': require('./fs_facade')
+    });
 
     const ljm_driver_checker = package_loader.getPackage('ljm_driver_checker');
 

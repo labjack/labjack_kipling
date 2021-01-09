@@ -24,7 +24,6 @@ var MODULE_UPDATE_PERIOD_MS = 250;
 // Constant that can be set to disable auto-linking the module to the framework
 var DISABLE_AUTOMATIC_FRAMEWORK_LINKAGE = false;
 
-const dict = require('dict');
 const sprintf = require('sprintf-js').sprintf;
 
 /**
@@ -37,10 +36,10 @@ function module() {
     this.moduleContext = {};
     this.activeDevice = undefined;
 
-    this.currentValues = dict();
-    this.bufferedValues = dict();
-    this.newBufferedValues = dict();
-    this.bufferedOutputValues = dict();
+    this.currentValues = new Map();
+    this.bufferedValues = new Map();
+    this.newBufferedValues = new Map();
+    this.bufferedOutputValues = new Map();
 
 
     this.hasChanges = false;
@@ -86,10 +85,10 @@ function module() {
                 self.bufferedOutputValues.forEach(function(newVal,address){
                     self.writeReg(address,newVal);
                 });
-                self.bufferedOutputValues = dict();
+                self.bufferedOutputValues = new Map();
                 self.hasChanges = false;
             }else if(self.bufferedOutputValues.size > 0) {
-                self.bufferedOutputValues = dict();
+                self.bufferedOutputValues = new Map();
             }
             onSuccess();
         };

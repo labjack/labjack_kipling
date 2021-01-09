@@ -36,7 +36,6 @@
   "dependencies": {
     "async": "1.5.2",
     "compute-gcd": "1.2.0",
-    "dict": "1.4.0",
     "dns-chk-https-get": "^1.0.0",
     "labjack-nodejs": "*",
     "lj-apps-win-registry-info": "*",

@@ -25,9 +25,9 @@ function module() {
     var savePeriodicRegisters = function(regInfo) {
         self.periodicRegisters[regInfo.name] = regInfo;
     };
-    this.currentValues = dict();
-    this.bufferedValues = dict();
-    this.newBufferedValues = dict();
+    this.currentValues = new Map();
+    this.bufferedValues = new Map();
+    this.newBufferedValues = new Map();
 
     const static_files = package_loader.getPackage('static_files');
     var staticFilesDir = static_files.getDir();

@@ -38,7 +38,7 @@ function createNewBuffer(initData) {
 	this.activeBuffer = 0;
 	this.inactiveBuffer = 1;
 
-	this.fileReferences = dict();
+	this.fileReferences = new Map();
 
 	var lastProcessTime = 0;
 	var getTimeDifference = function() {
@@ -111,7 +111,7 @@ function createNewBuffer(initData) {
 		newBufferInfo.numFilesCreated = 0;
 		self.bufferInfo = newBufferInfo;
 		self.dataBuffers = [[],[]];
-		self.fileReferences = dict();
+		self.fileReferences = new Map();
 
 		getTimeDifference();
 	};
@@ -637,8 +637,8 @@ var initTask = function() {
 	updateIntervalHandler = undefined;
 	isStarted = false;
 	startDefered = undefined;
-	dataBuffersDict = dict();
-	activeDataBuffersDict = dict();
+	dataBuffersDict = new Map();
+	activeDataBuffersDict = new Map();
 	bufferModifications = [];
 
 	// Set state to 'initialized'

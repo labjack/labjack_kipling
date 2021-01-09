@@ -55,8 +55,8 @@ function module() {
     this.refreshEthernetInfo = false;
     this.refreshWifiInfo = false;
 
-    this.currentValues = dict();
-    this.bufferedValues = dict();
+    this.currentValues = new Map();
+    this.bufferedValues = new Map();
 
     this.dhcpText = ['Manual','Use DHCP'];
 
@@ -2167,7 +2167,7 @@ function module() {
         // console.log('In onDeviceConfigured');
         var isConfigError = false;
         var errorAddresses = [];
-        var errorBindings = dict();
+        var errorBindings = new Map();
         setupBindings.forEach(function(setupBinding){
             if(setupBinding.status === 'error') {
                 isConfigError = true;

@@ -1,4 +1,4 @@
-const fs_facade = require('fs_facade');
+const fs_facade = global.package_loader.getPackage('fs_facade');
 
 /**
  * Goals for the Lua Script Debugger module.

@@ -1,6 +1,4 @@
-var dict = require('dict');
 var q = require('q');
-
 
 var process_manager = require('LabJack-process_manager');
 var slave_process = process_manager.slave_process;

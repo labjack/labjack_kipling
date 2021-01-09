@@ -86,7 +86,6 @@ class ModuleLoader extends EventEmitter {
 				} else if(fileType === '.js') {
 					const newElement = document.createElement('script');
 					newElement.setAttribute('type', 'text/javascript');
-					//
 
 					// Isn't working for .js files :( idk why, it worked before.
 					// newElement.onload = () => {
@@ -97,7 +96,10 @@ class ModuleLoader extends EventEmitter {
 
 					// Save the file's data
 					results.element = newElement;
-					newElement.appendChild(document.createTextNode(newFile.fileData));
+					let fileData = newFile.fileData;
+					fileData += '\n' + "//# sourceURL=" + newFile.filePath + ";";
+
+					newElement.appendChild(document.createTextNode(fileData));
 					newModule.outputLocation.js.append(newElement);
 					resolve(results);
 				} else {

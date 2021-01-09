@@ -38,10 +38,10 @@ function module() {
     this.moduleContext = {};
     this.activeDevice = undefined;
 
-    this.currentValues = dict();
-    this.bufferedValues = dict();
-    this.newBufferedValues = dict();
-    this.bufferedOutputValues = dict();
+    this.currentValues = new Map();
+    this.bufferedValues = new Map();
+    this.newBufferedValues = new Map();
+    this.bufferedOutputValues = new Map();
 
     // Templates:
     this.templates = {};
@@ -536,7 +536,7 @@ function module() {
     };
 
     this.arrayValueStatistics = function(data) {
-        var occurances = dict();
+        var occurances = new Map();
         var i;
         for(i = 0; i < data.length; i++) {
             if(occurances.has(data[i])) {

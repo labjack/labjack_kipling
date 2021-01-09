@@ -6,7 +6,6 @@
 **/
 
 
-var dict = require('dict');
 var q = require('q');
 var rewire = require('rewire');
 
@@ -428,7 +427,7 @@ module.exports = {
 
         this.testFramework.putConfigBinding(testBinding);
 
-        this.testFramework._OnRead(dict({
+        this.testFramework._OnRead(new Map({
             'AIN0': 0
         }));
 
@@ -449,7 +448,7 @@ module.exports = {
 
         this.testFramework.putConfigBinding(testBinding);
 
-        this.testFramework._OnRead(dict({
+        this.testFramework._OnRead(new Map({
             'AIN0': 0,
             'AIN1': 1
         }));

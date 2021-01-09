@@ -1,7 +1,4 @@
-
-
 var async = require('async');
-var dict = require('dict');
 var q = require('q');
 var driver_const = require('labjack-nodejs').driver_const;
 var stats = require('stats-lite');

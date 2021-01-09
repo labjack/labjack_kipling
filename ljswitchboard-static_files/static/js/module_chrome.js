@@ -9,7 +9,6 @@
  *
  * Requires (from global_requires.js):
  *     device_controller = require('./device_controller');
- *     fs_facade = require('./fs_facade');
 **/
 
 // Include module_manager that handles searching through switchboard_modules

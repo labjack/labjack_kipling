@@ -6,7 +6,6 @@
 
 
 var async = require('async');
-var dict = require('dict');
 var handlebars = require('handlebars')
 var extend = require('node.extend');
 var q = require('q');
@@ -338,7 +337,7 @@ function getRegistersByTag(registers)
 {
     var deferred = q.defer();
 
-    var retDict = dict();
+    var retDict = new Map();
     async.each(
         registers,
         function(register, callback)

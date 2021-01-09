@@ -2,9 +2,9 @@ var labjack = require('labjack-nodejs');
 var q = require('q');
 
 var framework_standalone_ui = require('./framework_standalone_ui');
-var fs_facade = require('./fs_facade');
+const package_loader = global.package_loader;
+const fs_facade = package_loader.getPackage('fs_facade');
 var presenter_framework = require('./presenter_framework');
-
 
 /**
  * Fire an event listener and resolve a given deferred after it returns.

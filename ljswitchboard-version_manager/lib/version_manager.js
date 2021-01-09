@@ -15,7 +15,6 @@ var util = require('util');
 var q = require('q');
 var fetch = require('node-fetch');
 var async = require('async');
-var dict = require('dict');
 var path = require('path');
 
 var cheerio = require('cheerio');
@@ -542,8 +541,8 @@ function labjackVersionManager() {
             return;
         },
     };
-    this.cachedDoms = dict();
-    this.pageCache = dict();
+    this.cachedDoms = new Map();
+    this.pageCache = new Map();
     this.infoCache = {};
     this.dataCache = {};
     this.isDataComplete = false;
@@ -787,7 +786,7 @@ function labjackVersionManager() {
             if(typeof(strategy) !== 'undefined') {
                 // build an array of querys that need to be made to collect data
                 var prefetchQuerys = [];
-                var prefetchDict = dict();
+                var prefetchDict = new Map();
                 var querys  = [];
 
                 // Make an effort to minimize the number of requests

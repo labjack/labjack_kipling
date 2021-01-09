@@ -1,5 +1,5 @@
 /* jshint undef: true, unused: true, undef: true */
-/* global handlebars, console, q, static_files, dict, $, showAlert */
+/* global handlebars, console, q, $ */
 /**
  * Goals for the Device Info module.
  * This module displays basic device information about the Digit and T7 devices.
@@ -31,9 +31,9 @@ function module() {
     var savePeriodicRegisters = function(regInfo) {
         self.periodicRegisters[regInfo.name] = regInfo;
     };
-    this.currentValues = dict();
-    this.bufferedValues = dict();
-    this.newBufferedValues = dict();
+    this.currentValues = new Map();
+    this.bufferedValues = new Map();
+    this.newBufferedValues = new Map();
 
     this.viewGenerator = undefined;
 

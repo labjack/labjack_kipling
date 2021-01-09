@@ -1,23 +1,19 @@
-console.log('in fs_facade');
+'use strict';
 
-var fs = require('fs');
-var path = require('path');
-
-var dict = global.require('dict');
-var handlebars = global.require('handlebars');
+const fs = require('fs');
+const path = require('path');
 
 const package_loader = global.package_loader;
-const module_manager = package_loader.getPackage('module_manager');
 const handleBarsService = package_loader.getPackage('handleBarsService');
 
-var FS_FACADE_TEMPLATE_CACHE = dict();
+const FS_FACADE_TEMPLATE_CACHE = new Map();
 exports.numCachedTemplates = function() {
     return FS_FACADE_TEMPLATE_CACHE.size;
 };
 
 exports.clearCache = function() {
-    FS_FACADE_TEMPLATE_CACHE = dict();
-}
+    FS_FACADE_TEMPLATE_CACHE.clear();
+};
 
 /**
  * Render a Handlebars template.
@@ -33,7 +29,7 @@ exports.clearCache = function() {
 **/
 exports.renderTemplate = function(location, context, onError, onSuccess) {
     if (FS_FACADE_TEMPLATE_CACHE.has(location)) {
-        var curTemplate = FS_FACADE_TEMPLATE_CACHE.get(location);
+        const curTemplate = FS_FACADE_TEMPLATE_CACHE.get(location);
         onSuccess(curTemplate(context));
     } else {
         fs.exists(location, function(exists) {
@@ -43,7 +39,7 @@ exports.renderTemplate = function(location, context, onError, onSuccess) {
                         if (error) {
                             onError(error);
                         } else {
-                            var curTemplate = handleBarsService._compileTemplate(template);
+                            const curTemplate = handleBarsService._compileTemplate(template);
                             FS_FACADE_TEMPLATE_CACHE.set(location,curTemplate);
                             onSuccess(curTemplate(context));
                         }
@@ -56,12 +52,11 @@ exports.renderTemplate = function(location, context, onError, onSuccess) {
     }
 };
 
-var renderTemplateData = function(template, context) {
+const renderTemplateData = function(template, context) {
     return new Promise((resolve, reject) => {
-        var data = "";
         try {
-            var curTemplate = handleBarsService._compileTemplate(template);
-            data = curTemplate(context);
+            const curTemplate = handleBarsService._compileTemplate(template);
+            const data = curTemplate(context);
             resolve(data);
         } catch (err) {
             resolve('');
@@ -72,12 +67,11 @@ exports.renderTemplateData = renderTemplateData;
 
 exports.renderCachedTemplateData = function(key, template, context) {
 	return new Promise((resolve, reject) => {
-        var curTemplate;
         if (FS_FACADE_TEMPLATE_CACHE.has(key)) {
-            curTemplate = FS_FACADE_TEMPLATE_CACHE.get(key);
+            const curTemplate = FS_FACADE_TEMPLATE_CACHE.get(key);
             resolve(curTemplate(context));
         } else {
-            curTemplate = handleBarsService._compileTemplate(template);
+            const curTemplate = handleBarsService._compileTemplate(template);
             FS_FACADE_TEMPLATE_CACHE.set(key, curTemplate);
             resolve(curTemplate(context));
         }
@@ -114,17 +108,16 @@ Function calls in luaDeviceController.js:
 
 */
 
-var fileSaveAsID = "#file-save-dialog-hidden";
-var getFileLoadID = "#file-dialog-hidden";
+const fileSaveAsID = "#file-save-dialog-hidden";
+const getFileLoadID = "#file-dialog-hidden";
 
-
-var windowsDefaultFilePath = 'C:\\Windows';
+let windowsDefaultFilePath = 'C:\\Windows';
 
 if(process.env.HOME) {
     windowsDefaultFilePath = process.env.HOME;
 }
 
-var defaultFilePath = {
+const defaultFilePath = {
     'linux': '/home/path',
     'linux2': '/home/path',
     'sunos': '/home/path',
@@ -186,18 +179,19 @@ exports.loadFile = function(location, onError, onSuccess) {
                 }
             );
         } else {
-            var error = new Error('Could not find File at ' + location + '.');
+            const error = new Error('Could not find File at ' + location + '.');
             onError(error);
         }
     });
 };
 
 exports.getExternalURI = function(filePath) {
-    var modulesDir = module_manager.getModulesDirectory();
+    const module_manager = package_loader.getPackage('module_manager');
+    const modulesDir = module_manager.getModulesDirectory();
     return path.normalize(path.join(modulesDir, filePath));
 };
 exports.readModuleFile = function(filePath, onError, onSuccess) {
-    var fullPath = exports.getExternalURI(filePath);
+    const fullPath = exports.getExternalURI(filePath);
     fs.exists(fullPath, function(exists) {
         if (exists) {
             fs.readFile(fullPath, 'utf8',
@@ -210,7 +204,7 @@ exports.readModuleFile = function(filePath, onError, onSuccess) {
                 }
             );
         } else {
-            var error = new Error(
+            const error = new Error(
                 'Could not find modules info at ' + fullPath + '.'
             );
             onError(error);

@@ -10,7 +10,6 @@
 
 const gui = global.gui;
 
-const dict = require('dict');
 const path = require('path');
 // const decache = require('decache');
 
@@ -44,7 +43,6 @@ class KeyboardEventHandler {
             }
         ];
 
-        this.lastElementOriginalData = dict();
         this.lastOnFocusEvent = null;
         this.lastOnFocusElementValue = '';
         this.lastOnFocusElementID = '';
@@ -62,86 +60,86 @@ class KeyboardEventHandler {
                 'key':'esc',
                 'platforms':['mac','win','linux'],
                 'func': this.handleEscapeKey,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // keypress to open debugging console
                 'name':'openConsole',
                 'key':'ctrl+alt+shift+c',
                 'platforms':['mac','win','linux'],
                 'func': this.handleOpenConsole,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // keypress to reboot kipling
                 'name':'rebootKipling',
                 'key':'ctrl+alt+shift+w',
                 'platforms':['mac','win','linux'],
                 'func': this.rebootKipling,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // keypress to reboot kipling
                 'name':'rebootKipling',
                 'key':'ctrl+alt+shift+q',
                 'platforms':['mac','win','linux'],
                 'func': this.rebuildKipling,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // keypress to reload io-manager kipling
                 'name':'reloadCurrentModule',
                 'key':'ctrl+r',
                 'platforms':['mac','win','linux'],
                 'func': this.reloadCurrentModule,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // keypress to reload io-manager kipling
                 'name':'forceReloadCurrentModule',
                 'key':'ctrl+shift+f',
                 'platforms':['mac','win','linux'],
                 'func': this.forceReloadCurrentModule,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // keypress to reload io-manager kipling
                 'name':'devReLoadIOManager',
                 'key':'ctrl+shift+r',
                 'platforms':['mac','win','linux'],
                 'func': this.devReLoadIOManager,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // keypress to update and reload io-manager kipling
                 'name':'devUpdateAndReLoadIOManager',
                 'key':'ctrl+alt+shift+r',
                 'platforms':['mac','win','linux'],
                 'func': this.devUpdateAndReLoadIOManager,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // windows keypress to save
                 'name':'save',
                 'key':'ctrl+s',
                 'platforms':['win','linux'],
                 'func': this.handleGenericKeypress,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // mac keypress to save
                 'name':'save',
                 'key':'meta+s',
                 'platforms':['mac'],
                 'func': this.handleGenericKeypress,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // zoom in
                 'name':'zoomIn',
                 'key':'ctrl+shift+=',
                 'platforms':['mac','win','linux'],
                 'func': this.handleZoomIn,
-                'listeners': dict()
+                'listeners': new Map()
             },{ // zoom out
                 'name':'zoomOut',
                 'key':'ctrl+-',
                 'platforms':['mac','win','linux'],
                 'func': this.handleZoomOut,
-                'listeners': dict()
+                'listeners': new Map()
             }
             // },{ // zoom inB
             //     'name':'zoomInB',
             //     'key':'+',
             //     'platforms':['mac','win','linux'],
             //     'func': this.handleZoomIn,
-            //     'listeners': dict()
+            //     'listeners': new Map()
             // },{ // zoom outB
             //     'name':'zoomOutB',
             //     'key':'-',
             //     'platforms':['mac','win','linux'],
             //     'func': this.handleZoomOut,
-            //     'listeners': dict()
+            //     'listeners': new Map()
             // }
         ];
         this.curPlatform = {
@@ -171,7 +169,7 @@ class KeyboardEventHandler {
         });
         this.keysMap = keysMap;
 
-        this.keyFunctions = dict();
+        this.keyFunctions = new Map();
 
         this.keyMap = {
             16:{'key':'shift', 'isPressed': false},

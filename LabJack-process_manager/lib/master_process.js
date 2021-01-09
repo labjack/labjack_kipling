@@ -8,7 +8,6 @@
 **/
 
 const child_process = require('child_process');
-const dict = require('dict');
 const {EventEmitter} = require('events');
 
 // include various constants from the constants file
@@ -82,7 +81,7 @@ class NewProcessManager extends EventEmitter {
 
     initializeMessageManagement() {
         this.messageCounter = 0;
-        this.messageBuffer = dict();
+        this.messageBuffer = new Map();
     }
 
     addStartupListenerKey() {

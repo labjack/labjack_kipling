@@ -667,7 +667,6 @@ function searchRegisters(entries, allTags, tag, searchTerm)
 {
     var filteredEntries = entries;
     var filteredTags = [];
-    var tagsDict = dict();
     $('#searching-status').show();
     console.log('HERE 0');
 

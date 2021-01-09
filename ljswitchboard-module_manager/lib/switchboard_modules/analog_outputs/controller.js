@@ -4,7 +4,6 @@
  * @author A. Samuel Pottinger (LabJack Corp, 2013)
 **/
 
-var dict = require('dict');
 var q = require('q');
 var sprintf = require('sprintf-js');
 
@@ -23,7 +22,7 @@ var devices;
 **/
 function AnalogOutputDeviceController () {
     var connectedDevices = [];
-    var outputs = dict();
+    var outputs = new Map();
 
     /**
      * Configure the current selected devices to have certain DAC values.

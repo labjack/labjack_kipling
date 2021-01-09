@@ -6,7 +6,8 @@
 
 var q = require('q');
 
-var fs_facade = require('./fs_facade');
+const package_loader = global.package_loader;
+const fs_facade = package_loader.getPackage('fs_facade');
 
 var INPUTS_DATA_SRC = 'analog_inputs/inputs.json';
 var RANGES_DATA_SRC = 'analog_inputs/ranges.json';
