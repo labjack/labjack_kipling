@@ -11,7 +11,6 @@ const eventList = {
 	PREVENTING_WINDOW_FROM_CLOSING: 'preventing_window_from_closing',
 	ALL_WINDOWS_ARE_HIDDEN: 'all_windows_are_hidden',
 	QUITTING_APPLICATION: 'quitting_application',
-	CLOSED_PRIMARY_WINDOW: 'closed_primary_window',
 	CLOSING_WINDOW: 'closing_window',
 	CLOSED_WINDOW: 'closed_window'
 };
@@ -25,9 +24,7 @@ class WindowManager extends EventEmitter {
 		super();
 
 		// Define default options
-		this.options = {
-			'primaryWindowName': 'main'
-		};
+		this.options = {};
 
 		this.eventList = eventList;
 
@@ -159,12 +156,7 @@ class WindowManager extends EventEmitter {
 		this.managedWindows[windowName].isOpen = false;
 		this.managedWindows[windowName].status = 'closed';
 
-		if (this.managedWindows[windowName].isPrimary) {
-			this.emit(eventList.CLOSED_PRIMARY_WINDOW, windowInfo);
-			this.emit(eventList.CLOSED_WINDOW, windowInfo);
-		} else {
-			this.emit(eventList.CLOSED_WINDOW, windowInfo);
-		}
+		this.emit(eventList.CLOSED_WINDOW, windowInfo);
 
 		// Check to see if there aren't any more visible windows after
 		// closing the window to see if the application should be allowed to
@@ -185,7 +177,6 @@ class WindowManager extends EventEmitter {
 		'runInBackground': defaults to false.
 
 		// Appended to object
-		'isPrimary': undefined,
 		'isVisible': undefined,
 		'status': undefined,
 		'isOpen': undefined
@@ -209,7 +200,6 @@ class WindowManager extends EventEmitter {
 		this.managedWindows[windowName].isOpen = false;
 		this.managedWindows[windowName].isVisible = false;
 
-		this.managedWindows[windowName].isPrimary = windowName === 'main';
 		this.managedWindows[windowName].runInBackground = windowInfo.runInBackground;
 		this.managedWindows[windowName].autoShow = windowInfo.autoShow;
 

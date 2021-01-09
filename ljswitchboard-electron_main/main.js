@@ -77,25 +77,26 @@ require('module').Module._initPaths();
 
 const package_loader = new PackageLoader();
 global.package_loader = package_loader;
-package_loader.loadPackage({
-  'name': 'gui',
-  'loadMethod': 'set',
-  'ref': gui
-});
 
 const window_manager = new WindowManager();
-package_loader.loadPackage({
-  'name': 'window_manager',
-  'loadMethod': 'set',
-  'ref': window_manager
-});
-
 window_manager.configure({
   'gui': gui
 });
 
 async function createWindow() {
   // Create the browser window.
+
+  await package_loader.loadPackage({
+    'name': 'gui',
+    'loadMethod': 'set',
+    'ref': gui
+  });
+
+  await package_loader.loadPackage({
+    'name': 'window_manager',
+    'loadMethod': 'set',
+    'ref': window_manager
+  });
 
   // WORKAROUND: https://github.com/electron-userland/electron-webpack/issues/239
   const appName = 'kipling';
@@ -141,7 +142,7 @@ async function createWindow() {
   });
 
   window_manager.addWindow({
-    'name': 'main',
+    'name': 'splash',
     'win': splashWindow,
     'title': 'splashWindow'
   });
@@ -159,15 +160,15 @@ async function createWindow() {
     await loadProgramPackages(package_loader);
 
     splashScreenUpdater.update('Finished', 'info');
-    window_manager.hideWindow('main');
   } catch (err) {
     console.error(err);
     splashScreenUpdater.update(err, 'fail');
   } finally {
     splashScreenUpdater.finish(global.mainLogger.getLogFilePath());
+    await window_manager.openPackageWindow(package_loader.getPackage('kipling'));
+    window_manager.closeWindow('splash');
+    window_manager.showWindow('kipling');
   }
-
-  await window_manager.openPackageWindow(package_loader.getPackage('kipling'));
 
   // window_manager.closeWindow('')
 
