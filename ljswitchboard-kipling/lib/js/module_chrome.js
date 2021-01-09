@@ -27,9 +27,6 @@ class ModuleChrome extends EventEmitter {
 
 	constructor() {
 		super();
-
-		this.gui = package_loader.getPackage('gui');
-
 		this.moduleChromeStarted = false;
 
 		this.eventList = {
@@ -419,11 +416,8 @@ class ModuleChrome extends EventEmitter {
 	conditionallyClearCaches() {
 		try {
 			let clearCaches = false;
-			if (typeof(this.gui.App.manifest.clearCachesOnModuleLoad) !== "undefined") {
-				clearCaches = clearCaches || this.gui.App.manifest.clearCachesOnModuleLoad;
-			}
-			if (!!process.env.TEST_MODE || typeof(this.gui.App.manifest.test) !== "undefined") {
-				clearCaches = clearCaches || !!process.env.TEST_MODE || this.gui.App.manifest.test;
+			if (!!process.env.TEST_MODE) {
+				clearCaches = clearCaches || !!process.env.TEST_MODE;
 			}
 			if (clearCaches) {
 				if (global.CLEAR_CACHES) {
@@ -433,8 +427,7 @@ class ModuleChrome extends EventEmitter {
 			} else {
 				console.log('not clearing caches',
 					clearCaches,
-					this.gui.App.manifest.clearCachesOnModuleLoad,
-					!!process.env.TEST_MODE || this.gui.App.manifest.test
+					!!process.env.TEST_MODE
 				);
 			}
 		} catch(err) {
@@ -561,23 +554,23 @@ class ModuleChrome extends EventEmitter {
 	// Almost identical to the "internalLoadModuleChrome", however it doesn't
 	// start the device_selector module.
 	async loadTestModuleChrome() {
-			const context = {};
+		const context = {};
 
-			// Render the module chrome template
-			await this.renderTemplate(
-				$(MODULE_CHROME_HOLDER_ID),
-				window.moduleChromeTemplateName,
-				context
-			);
+		// Render the module chrome template
+		await this.renderTemplate(
+			$(MODULE_CHROME_HOLDER_ID),
+			window.moduleChromeTemplateName,
+			context
+		);
 
-			// Update the module chrome window with applicable modules
-			await this.updateModuleListing();
+		// Update the module chrome window with applicable modules
+		await this.updateModuleListing();
 
-			// Attach to important device_controller events.
-			await this.attachToDeviceControllerEvents();
+		// Attach to important device_controller events.
+		await this.attachToDeviceControllerEvents();
 
-			// Report that the module chrome has started
-			await this.reportModuleChromeStarted();
+		// Report that the module chrome has started
+		await this.reportModuleChromeStarted();
 	}
 
 	reloadModuleChrome() {
@@ -585,7 +578,7 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	loadModuleChrome() {
-		if (!!process.env.TEST_MODE || this.gui.App.manifest.test) {
+		if (!!process.env.TEST_MODE) {
 			return this.loadTestModuleChrome();
 		} else {
 			return this.internalLoadModuleChrome();

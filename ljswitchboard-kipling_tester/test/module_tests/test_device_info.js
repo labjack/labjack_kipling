@@ -91,7 +91,7 @@ describe('test_device_selector', function() {
 		});
 	});
 	it('Enable device scanning', function (done) {
-		if(gui.App.manifest.performLiveTests || testOptions.forceLiveTest) {
+		if(gui.appManifest.performLiveTests || testOptions.forceLiveTest) {
 			deviceController.disableMockDeviceScanning()
 			.then(function() {
 				done();
@@ -101,7 +101,7 @@ describe('test_device_selector', function() {
 		}
 	});
 	it('refresh device list - live', function (done) {
-		if(gui.App.manifest.performLiveTests || testOptions.forceLiveTest) {
+		if(gui.appManifest.performLiveTests || testOptions.forceLiveTest) {
 			var startedScanEventCaught = false;
 			activeModule.once(
 				eventList.DEVICE_SCAN_STARTED,

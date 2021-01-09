@@ -278,7 +278,7 @@ class KeyboardEventHandler {
     }
 
     devUpdateAndReLoadIOManager(info) {
-        if (gui.App.manifest.clearCachesOnModuleLoad || !!process.env.TEST_MODE || gui.App.manifest.test) {
+        if (!!process.env.TEST_MODE) {
             this.performUpgrade = true;
             this.devReLoadIOManager(info);
         }
@@ -339,7 +339,6 @@ class KeyboardEventHandler {
         this.reloading = true;
         console.log('Trying to restart subprocess');
 
-
         this.startReload()
             .then(() => {
                 return new Promise((resolve) => {
@@ -349,17 +348,11 @@ class KeyboardEventHandler {
                     }, 10);
                 });
             })
-            .then(io_interface.destroy)
-            .then(() => {
-                // Destroy io_manager cache
-                // decache('ljswitchboard-io_manager');
-                // window_manager.managedWindows.kipling.win.reload();
-                // this.reloading = false;
-            });
+            .then(io_interface.destroy);
     }
 
     devReLoadIOManager(info) {
-        if(gui.App.manifest.clearCachesOnModuleLoad || !!process.env.TEST_MODE || gui.App.manifest.test) {
+        if (!!process.env.TEST_MODE) {
             if(!this.reloading) {
                 this.performDevReload(info);
             }

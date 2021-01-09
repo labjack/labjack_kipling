@@ -42,6 +42,9 @@ const gui = {
 
     return window;
   },
+  App: {
+    manifest: packageData
+  },
   quitApp() {
     app.quit();
   },

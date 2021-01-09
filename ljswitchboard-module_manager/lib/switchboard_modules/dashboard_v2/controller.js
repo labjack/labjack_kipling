@@ -148,7 +148,6 @@ function module() {
         var registersByDirectionReg = new Map();
         var registersByStateReg = new Map();
         var registersToExpand;
-        var expandedRegisters;
 
         /* Step 1 in expanding the LJM registers. */
         registersToExpand = self.interpretRegisters.filter(function (reg) {
@@ -156,12 +155,12 @@ function module() {
         });
 
         /* Expand the LJM registers */
-        expandedRegisters = registersToExpand.map(function (reg) {
+        registersToExpand.map(function (reg) {
             var names = self.expandLJMMMNameSync(reg.name);
             var regList;
-            
+
             // Set up a mapping by the state reg
-            regList = registersByStateReg.get(reg.stateReg, []);
+            regList = registersByStateReg.get(reg.stateReg) || [];
             regList = regList.concat(names.map(function (name, index) {
                 return {
                     name: name,
@@ -173,7 +172,7 @@ function module() {
             registersByStateReg.set(reg.stateReg, regList);
 
             // Set up a mapping by the direction reg
-            regList = registersByDirectionReg.get(reg.directionReg, []);
+            regList = registersByDirectionReg.get(reg.directionReg) || [];
             regList = regList.concat(names.map(function (name, index) {
                 return {
                     name: name,
@@ -186,10 +185,10 @@ function module() {
         });
         
         var handleStates = function (states, address, viewRegInfoDict) {
-            var registers = registersByStateReg.get(address, []);
+            var registers = registersByStateReg.get(address) || [];
             registers.forEach(function (register) {
                 var state = states >> register.index & 0x1;
-                var viewRegInfo = viewRegInfoDict.get(register.name, {});
+                var viewRegInfo = viewRegInfoDict.get(register.name) || {};
                 viewRegInfo.state = state;
                 viewRegInfo.type = 'dynamic';
                 viewRegInfoDict.set(register.name, viewRegInfo);
@@ -197,17 +196,17 @@ function module() {
         };
 
         var handleDirections = function (directions, address, viewRegInfoDict) {
-            var registers = registersByDirectionReg.get(address, []);
+            var registers = registersByDirectionReg.get(address) || [];
             registers.forEach(function (register) {
                 var direction = directions >> register.index & 0x1;
-                var viewRegInfo = viewRegInfoDict.get(register.name, {});
+                var viewRegInfo = viewRegInfoDict.get(register.name) || {};
                 viewRegInfo.direction = direction;
                 viewRegInfoDict.set(register.name, viewRegInfo);
             });
         };
 
         var handleOther = function (value, address, viewRegInfoDict) {
-            var viewRegInfo = viewRegInfoDict.get(address, {});
+            var viewRegInfo = viewRegInfoDict.get(address) || {};
             viewRegInfo.value = value;
             if(address.indexOf('DAC') !== -1) {
                 viewRegInfo.type = 'analogOutput';
@@ -221,8 +220,7 @@ function module() {
             return haystack.indexOf(needle) != -1;
         };
 
-        self.processConfigStatesAndDirections = function (registers,
-            onSuccess) {
+        self.processConfigStatesAndDirections = function (registers, onSuccess) {
             var viewRegInfoDict = new Map();
             registers.forEach(function (regValue, regAddress) {
                 if (hasText(regAddress, 'STATE')) {
@@ -736,21 +734,6 @@ function module() {
         self.attachIOListeners();
 
         onSuccess();
-        // // Display info...
-        // self.processConfigStatesAndDirections(self.currentValues, function(initializedData){
-        //     self.deviceDashboardController.drawDevice('#device-display-container',initializedData);
-        //     self.deviceDashboardController.drawDBs('#db-display-container', initializedData);
-        //     self.spinnerController.createSpinners();
-
-        
-
-        //     // Register click listeners to DIO and Flex channels.
-        //     self.attachDIOListners();
-        //     self.attachFlexIOListeners();
-
-        //     onSuccess();
-        // });
-        // KEYBOARD_EVENT_HANDLER.initInputListeners();
     };
     this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
         onSuccess();

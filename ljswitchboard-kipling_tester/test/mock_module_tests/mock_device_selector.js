@@ -124,7 +124,7 @@ describe('mock_device_selector', function() {
 		}
 	});
 	it('refresh device list - live', function (done) {
-		if(gui.App.manifest.performLiveTests || testOptions.realRefresh) {
+		if(gui.appManifest.performLiveTests || testOptions.realRefresh) {
 			let startedScanEventCaught = false;
 			activeModule.once(
 				eventList.DEVICE_SCAN_STARTED,

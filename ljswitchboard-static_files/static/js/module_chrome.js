@@ -546,7 +546,6 @@ $('#module-chrome').ready(function(){
     $('#manage-link').click(function () {
         var keeper = device_controller.getDeviceKeeper();
         keeper.clearRecord();
-        renderDeviceSelector();
     });
 
     var updateModuleChromeHeight = function() {
