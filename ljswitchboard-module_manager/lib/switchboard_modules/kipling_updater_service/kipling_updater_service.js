@@ -2,18 +2,17 @@
 
 /* jshint undef: true, unused: true, undef: true */
 /* global console, TASK_LOADER, process */
-/* global UPDATE_K3_WINDOW_VERSION_NUMBER_STR */
 /* exported activeModule */
 
 console.log('in kipling_updater_service.js');
 
 const async = require('async');
-const q = require('q');
 const package_loader = global.package_loader;
 const io_manager = package_loader.getPackage('io_manager');
 const io_interface = io_manager.io_interface();
 const driver = io_interface.getDriverController();
 const semver = package_loader.getPackage('semver');
+const modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 const replacementOverrides = {
 	'io_manager': 'IO Manager',

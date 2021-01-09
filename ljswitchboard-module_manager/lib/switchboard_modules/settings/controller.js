@@ -1,41 +1,32 @@
+'use strict';
 
 /* jshint undef: true, unused: true, undef: true */
-/* global $, require, console, MODULE_LOADER, MODULE_CHROME */
+/* global $, console, MODULE_LOADER, MODULE_CHROME */
 /* global handlebars */
 /* exported activeModule */
 
-// console.log('in device_selector, controller.js');
+class ModuleInstance {
+	constructor() {
+		this.moduleData = undefined;
+		this.debug = false;
 
-const package_loader = global.package_loader;
-const q = require('q');
+		this.templatesToCompile = [
+			'settings'
+		];
+		this.templates = {};
+		this.kipling_updater_service = global.TASK_LOADER.tasks.kipling_updater_service;
+		MODULE_LOADER.addPreloadStep((data) => this.preLoadStep(data));
+		this.table = undefined;
 
-var createModuleInstance = function() {
-	var io_manager = package_loader.getPackage('io_manager');
-	var io_interface = io_manager.io_interface();
+		const mlEvents = MODULE_LOADER.eventList;
+		MODULE_LOADER.on(mlEvents.VIEW_READY, () => this.startModule());
+		MODULE_LOADER.on(mlEvents.UNLOAD_MODULE, () => this.stopModule());
+	}
 
-	this.moduleData = undefined;
-	this.debug = false;
-
-	var toTitleCase = function (str) {
-	    return str.replace(/\w\S*/g, function(txt) {
-	    	return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-	    });
-	};
-
-	var replacementOverrides = {
-		'io_manager': 'IO Manager',
-	};
-
-	var templatesToCompile = [
-		'settings'
-	];
-	this.templates = {};
-
-
-	this.compileTemplate = function(templateName) {
+	compileTemplate(templateName) {
         try {
-            self.templates[templateName] = handlebars.compile(
-                self.moduleData.htmlFiles[templateName]
+            this.templates[templateName] = handlebars.compile(
+				this.moduleData.htmlFiles[templateName]
             );
         } catch(err) {
             console.error(
@@ -44,33 +35,17 @@ var createModuleInstance = function() {
                 err
             );
         }
-    };
-
-
-    this.kipling_updater_service = TASK_LOADER.tasks.kipling_updater_service;
+    }
 
     // Attach a pre-load step to the Module loader
-    var preLoadStep = function(newModule) {
-        var defered = q.defer();
+	async preLoadStep(newModule) {
+		newModule.context.pageData = await this.kipling_updater_service.getProgramInfo();
+		console.log('prrrr', newModule.context.pageData);
+		return newModule;
+    }
 
-        var onSuccees = function(data) {
-        	newModule.context.pageData = data;
-        	defered.resolve(newModule);
-        };
-        var onErr = function(data) {
-        	onSuccees(data);
-        };
-
-        self.kipling_updater_service.getProgramInfo()
-        .then(onSuccees, onErr);
-
-        return defered.promise;
-    };
-    MODULE_LOADER.addPreloadStep(preLoadStep);
-
-    this.table = undefined;
-	var startModule = function(newModule) {
-		self.table = $('#ljm_special_addresses_table').DataTable({
+	startModule(newModule) {
+		this.table = $('#ljm_special_addresses_table').DataTable({
 			"columns": [
 				{'title': 'IP Address',		'data': 'ip'},
 				{'title': 'Description', 	'data': 'comments'},
@@ -100,30 +75,21 @@ var createModuleInstance = function() {
 		});
 
 		// console.log('device_selector starting', newModule.name, newModule.id);
-		self.moduleData = newModule.data;
+		this.moduleData = newModule.data;
 
 		// Compile module templates
-        templatesToCompile.forEach(self.compileTemplate);
+        this.templatesToCompile.forEach(this.compileTemplate);
 
-		var reportedData = {
-			'name': self.moduleData.name,
+		const reportedData = {
+			'name': this.moduleData.name,
 		};
 		MODULE_CHROME.emit('MODULE_READY', reportedData);
 		MODULE_LOADER.emit('MODULE_READY', reportedData);
-	};
-	var stopModule = function() {
+	}
+	stopModule() {
 		// console.log('device_selector stopped');
-		// self.emit(self.eventList.MODULE_STOPPED);
-	};
+		// this.emit(this.eventList.MODULE_STOPPED);
+	}
+}
 
-	// Attach to MODULE_LOADER events that indicate to the module about what to
-	// do.  (start/stop).
-	var mlEvents = MODULE_LOADER.eventList;
-	MODULE_LOADER.on(mlEvents.VIEW_READY, startModule);
-	MODULE_LOADER.on(mlEvents.UNLOAD_MODULE, stopModule);
-
-	var self = this;
-};
-// util.inherits(createModuleInstance, EventEmitter);
-
-global.activeModule = new createModuleInstance();
+global.activeModule = new ModuleInstance();
