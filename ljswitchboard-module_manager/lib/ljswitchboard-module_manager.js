@@ -214,33 +214,22 @@ var cachedReadFile = function(fileName) {
 
 var innerCachedReadFile = function(filePath) {
 	return new Promise((resolve, reject) => {
-	cachedReadFile(filePath)
-	.then(file_linter.getLinter(filePath))
-	.then(function(lintData) {
-		// if(lintData.lintResult) {
-		// 	if(!lintData.lintResult.overallResult) {
-		// 		console.log(
-		// 			'Bad File Detected:',
-		// 			path.basename(filePath)
-		// 		);
-		// 		console.log(filePath);
-		// 		console.log(lintData.lintResult);
-		// 	}
-		// }
+		cachedReadFile(filePath)
+			.then(file_linter.getLinter(filePath))
+			.then(function(lintData) {
+				var fileData = lintData.fileData;
 
-		var fileData = lintData.fileData;
+				if (filePath.endsWith('.js')) {
+					fileData += "\n//# sourceURL=" + filePath;
+				}
 
-		if (filePath.endsWith('.js')) {
-			fileData += "\n//# sourceURL=" + filePath;
-		}
-
-		resolve({
-			'fileName': path.basename(filePath),
-			'filePath': filePath,
-			'fileData': fileData,
-			'lintResult': lintData.lintResult
-		});
-	});
+				resolve({
+					'fileName': path.basename(filePath),
+					'filePath': filePath,
+					'fileData': fileData,
+					'lintResult': lintData.lintResult
+				});
+			});
 	});
 };
 var cachedReadFiles = function(fileNames) {

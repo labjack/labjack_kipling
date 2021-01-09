@@ -31,7 +31,6 @@ async function loadProgramPackages(package_loader) {
         splashScreenUpdater.update('Detected an uninitialized package with no upgrade options: ' + bundle.name, 'fail');
     });
 
-    const window_manager = package_loader.getPackage('window_manager');
     const info = require('./get_cwd');
 
     await package_loader.loadPackage({
@@ -189,7 +188,6 @@ async function loadProgramPackages(package_loader) {
         'folderName': 'ljswitchboard-kipling',
         'loadMethod': 'managed',
         'forceRefresh': false,
-        'startApp': false,
         'directLoad': true,
         'locations': [
             // Add path to files for development purposes, out of a repo.
@@ -218,7 +216,6 @@ async function loadProgramPackages(package_loader) {
             'folderName': 'ljswitchboard-kipling_tester',
             'loadMethod': 'managed',
             'forceRefresh': false,
-            'startApp': false,
             'directLoad': true,
             'locations': [
                 // Add path to files for development purposes, out of a repo.
@@ -231,35 +228,18 @@ async function loadProgramPackages(package_loader) {
         });
     }
 
-    const managedPackages = await package_loader.runPackageManager();
-    console.log('Managed Packages', Object.keys(managedPackages));
-    const keys = Object.keys(managedPackages);
-
-    let continueLaunch = true;
-    for (const key of keys) {
-        const curPackage = managedPackages[key];
-        const resultText = curPackage.isError ? 'failed' : 'passed';
-        if (curPackage.isError) {
-            continueLaunch = false;
-        }
-
-        splashScreenUpdater.update('Launching ' + curPackage.name, 'info');
-    }
-
-    // Instruct the window_manager to open any managed nwApps
-    await window_manager.openManagedApps(managedPackages);
-
     try {
-        const packages = await package_loader.runPackageManager();
-        console.log('Opening managed apps', Object.keys(packages));
-        try {
-            // Instruct the window_manager to open any managed nwApps
-            return window_manager.openManagedApps(packages);
-        } catch (err) {
-            console.error('Error opening', err);
-            console.log('Failed to open managed apps (sp)', err);
-            splashScreenUpdater.update('Failed to open managed apps (sp)', 'fail');
-            throw err;
+        const managedPackages = await package_loader.runPackageManager();
+        console.log('Managed Packages', Object.keys(managedPackages));
+        const keys = Object.keys(managedPackages);
+
+        let continueLaunch = true;
+        for (const key of keys) {
+            const curPackage = managedPackages[key];
+            if (curPackage.isError) {
+                continueLaunch = false;
+            }
+            splashScreenUpdater.update('Launching ' + curPackage.name, 'info');
         }
     } catch (err) {
         console.log('Failed to run package manager (sp)', err);

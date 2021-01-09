@@ -15,8 +15,6 @@ const extractWithYauzl = extract_with_yauzl.extractWithYauzl;
 const EVENTS = {
 	// Events emitted during the loadPackage function, they all return the
 	// name of the package being handled.
-	OPENED_WINDOW: 'opened_window',
-	NOT_STARTING_NW_APP: 'not_starting_nw_app',
 	LOADED_PACKAGE: 'loaded_package',
 	NOT_LOADING_PACKAGE: 'not_loading_package',
 	SET_PACKAGE: 'set_package',
@@ -91,44 +89,6 @@ class PackageLoader extends EventEmitter {
 		});
 	}
 
-	async _startNWApp(packageInfo, info) {
-		console.log('nwApp detected', packageInfo, info);
-		const gui = this.getPackage('gui');
-
-		// Local reference to nw.gui
-		const curApp = this._loadedPackages[packageInfo.name];
-
-		// Get the module's data that should be used when opening the new window
-		let newWindowData;
-		if (curApp.data) {
-			if (curApp.data.window) {
-				newWindowData = curApp.data.window;
-			}
-		}
-
-		// Build the url and moduleData path
-		const windowPath = 'file:///' + path.join(packageInfo.location, info.main);
-
-		// Open a new window and save its reference
-		curApp.win = gui.Window.open(
-			windowPath, Object.assign({}, newWindowData, {
-				webPreferences: {
-					additionalArguments: [
-						'--packageName=' + packageInfo.name
-					]
-				}
-			})
-		);
-
-		// If desired, open the window's devTools
-		if (packageInfo.showDevTools) {
-			curApp.win.showDevTools();
-		}
-
-		// Emit an event indicating that a new window has been opened.
-		this.emit(EVENTS.OPENED_WINDOW, packageInfo.name);
-	}
-
 	async _startPackage(packageInfo, name) {
 		const loadedPackage = this._loadedPackages[name];
 
@@ -156,30 +116,7 @@ class PackageLoader extends EventEmitter {
 						}
 					}
 				});
-
 				loadedPackage.data = moduleData;
-				if (loadedPackage.info.type) {
-					if (loadedPackage.info.type === 'nwApp') {
-						// Determine if the app should be started.
-						let startApp = false;
-						if (typeof (packageInfo.startApp) !== 'undefined') {
-							if (packageInfo.startApp) {
-								startApp = true;
-							}
-						} else {
-							startApp = true;
-						}
-
-						// If desired, start the application.
-						if (startApp) {
-							await this._startNWApp(packageInfo, loadedPackage.info);
-						} else {
-							// Emit an event indicating that we aren't
-							// starting the detected nwApp
-							this.emit(EVENTS.NOT_STARTING_NW_APP, packageInfo.name);
-						}
-					}
-				}
 			} else {
 				console.warn('Info Object does not exist, not doing anything special', packageInfo, name);
 			}
@@ -235,6 +172,10 @@ class PackageLoader extends EventEmitter {
 		} else {
 			this.emit(EVENTS.NOT_LOADING_PACKAGE, packageInfo);
 		}
+	}
+
+	hasPackage(name) {
+		return !!this._loadedPackages[name];
 	}
 
 	getPackage(name) {
@@ -1037,24 +978,4 @@ class PackageLoader extends EventEmitter {
 
 }
 
-// const PACKAGE_LOADER = new PackageLoader();
-
 exports.PackageLoader = PackageLoader;
-/*
-
-// Define the functions to be exported
-exports.on = function(eventName, callback) {
-	PACKAGE_LOADER.on(eventName, callback);
-};
-exports.loadPackage = PACKAGE_LOADER.loadPackage;
-exports.setExtractionPath = PACKAGE_LOADER.setExtractionPath;
-
-exports.getExtractionPath = PACKAGE_LOADER.getExtractionPath;
-exports.getManagedPackages = PACKAGE_LOADER.getManagedPackages;
-exports.getDependencyList = PACKAGE_LOADER.getDependencyList;
-exports.getDependencyData = PACKAGE_LOADER.getDependencyData;
-
-exports.deleteManagedPackage = PACKAGE_LOADER.deleteManagedPackage;
-exports.deleteAllManagedPackages = PACKAGE_LOADER.deleteAllManagedPackages;
-exports.runPackageManager = PACKAGE_LOADER.runPackageManager;
-*/

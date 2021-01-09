@@ -11,7 +11,6 @@ const io_interface = io_manager.io_interface();
 // aka close app manually.
 kiplingWindow.runInBackground = true;
 
-// win.showDevTools();
 // Start the application
 splashScreenUpdater.update('Starting IO Manager', 'info');
 
@@ -49,23 +48,6 @@ async function performRemainingInitializationRoutines() {
         keyboard: global.KEYBOARD_EVENT_HANDLER,
         zoom: global.MOUSE_EVENT_HANDLER
     });
-}
-
-async function showKiplingTestWindow(window_manager, splashScreenUpdater) {
-    // Try and execute tests
-    let isKiplingTester = false;
-    const windows = window_manager.getWindows();
-    windows.forEach(function (win) {
-        if (win === 'kipling_tester') {
-            isKiplingTester = true;
-        }
-    });
-/*    if (isKiplingTester) {
-        console.log('isKiplingTester1', package_loader.getManagedPackages());
-        const kipling_tester = package_loader.getPackage('kipling_tester');
-        await kipling_tester.startPackage(package_loader);
-        console.log('isKiplingTester2');
-    }*/
 }
 
 function ioManagerMonitor(data, io_interface) {
@@ -108,7 +90,6 @@ function getIOManagerListener(eventName) {
 
 function saveGlobalSubprocessReference(bundle, io_interface) {
     GLOBAL_SUBPROCESS_REFERENCE = io_interface.mp.masterProcess.getSubprocess();
-    // console.log('subprocess pid', GLOBAL_SUBPROCESS_REFERENCE.pid);
     return Promise.resolve(bundle);
 }
 
@@ -182,12 +163,6 @@ async function startupKipling() {
         await global.TASK_LOADER.loadTasks();
     } catch (e) {
         await handleError(e, 'TASK_LOADER.loadTasks');
-    }
-
-    try {
-        await showKiplingTestWindow(window_manager, splashScreenUpdater);
-    } catch (e) {
-        await handleError(e, 'showKiplingTestWindow');
     }
 }
 

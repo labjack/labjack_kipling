@@ -68,11 +68,6 @@ function requireTest(groupName, fileNamePartials, isEnabled, destObj) {
 			exports[basicGroupName] = {};
 		}
 		exports[basicGroupName][testName] = require(filePath);
-		// if(groupName !== '') {
-		// 	exports[groupName] = require(filePath);
-		// } else {
-		// 	exports[testName] = require(filePath);
-		// }
 	} else {
 		console.log(' - Skipping Test:', filePath);
 	}

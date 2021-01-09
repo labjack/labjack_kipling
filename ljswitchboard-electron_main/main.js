@@ -4,7 +4,6 @@ const url = require('url');
 
 const {PackageLoader} = require('ljswitchboard-package_loader');
 const {WindowManager} = require('ljswitchboard-window_manager');
-const {NwFakeWindow} = require('./lib/window-compat');
 
 // Module to control application life.
 const app = electron.app;
@@ -18,33 +17,41 @@ const {loadProgramPackages} = require('./lib/packages-load');
 // be closed automatically when the JavaScript object is garbage collected.
 let splashWindow = null;
 
-const fakeWindow = new NwFakeWindow();
-
 const gui = {
-  App: {
-    manifest: packageData,
-    quit() {
-      console.log('@TODO: quit');
+  openDevTools() {
+    console.log('openDevTools');
+    electron.BrowserWindow.getFocusedWindow().maximize();
+    electron.BrowserWindow.getFocusedWindow().openDevTools();
+  },
+  async openWindow(url, windowData) {
+    if (!windowData) {
+      windowData = {};
     }
+
+    const options = Object.assign({}, windowData, {
+      webPreferences: Object.assign({}, windowData.webPreferences, {
+        preload: `${__dirname}/lib/preload.js`,
+        nodeIntegration: true,
+        enableRemoteModule: true,
+        worldSafeExecuteJavaScript: true
+      })
+    });
+
+    const window = new electron.BrowserWindow(options);
+    await window.loadURL(url);
+
+    return window;
+  },
+  quitApp() {
+    app.quit();
   },
   Shell: {
     openExternal(url) {
       return electron.shell.openExternal(url);
     }
-  },
-  Window: fakeWindow
-};
-global.gui = gui;
-
-// gui.App.manifest.test
-/*
-const win = {
-  on(a, b) {
-    console.log(a, b);
   }
 };
-*/
-
+global.gui = gui;
 
 const buildOS = {
   'darwin': 'darwin',
@@ -90,25 +97,7 @@ if(packageData.window.show) {
   initialAppVisibility = true;
 }
 
-
-// Attach to the "Quitting Application" event
-window_manager.on(window_manager.eventList.QUITTING_APPLICATION, function() {
-  console.log('Quitting Application');
-  gui.App.quit();
-});
-
-// Quit when all windows are closed.
-app.on('window-all-closed', function() {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-});
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-app.on('ready', function() {
+async function createWindow() {
   // Create the browser window.
 
   // WORKAROUND: https://github.com/electron-userland/electron-webpack/issues/239
@@ -129,7 +118,8 @@ app.on('ready', function() {
   const pacakgeInfo = require('./package.json');
   const newWindowData = pacakgeInfo.window ? pacakgeInfo.window : {};
 
-  splashWindow = fakeWindow.open(
+  console.log('splashWindow');
+  splashWindow = await gui.openWindow(
       url.format({
         pathname: path.join(__dirname, 'node_modules', 'ljswitchboard-electron_splash_screen', 'lib', 'index.html'),
         protocol: 'file:',
@@ -137,56 +127,48 @@ app.on('ready', function() {
       }),
       Object.assign({}, newWindowData, {
         webPreferences: {
-        additionalArguments: [
-          '--packageName=' + 'ljswitchboard-electron_splash_screen'
-        ]
-      }
-    })
+          additionalArguments: [
+            '--packageName=' + 'ljswitchboard-electron_splash_screen'
+          ]
+        }
+      })
   );
 
-  // Emitted when the window is closed.
-  splashWindow.on('closed', function() {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    splashWindow = null;
+  // await new Promise(resolve => window.webContents.once('dom-ready', resolve));
+
+  const splashScreenUpdater = new SplashScreenUpdater(splashWindow);
+  await package_loader.loadPackage({
+    'name': 'splashScreenUpdater',
+    'loadMethod': 'set',
+    'ref': splashScreenUpdater
   });
 
-  splashWindow.webContents.once('dom-ready', async () => {
-    const splashScreenUpdater = new SplashScreenUpdater(splashWindow);
+  splashScreenUpdater.update('NodeJS version: ' + process.version, 'info');
+  splashScreenUpdater.update('Electron version: ' + process.versions['electron'], 'info');
+  splashScreenUpdater.update('Kipling version: ' + packageData.version, 'info');
+  if (packageData.build_number) {
+    splashScreenUpdater.update('Kipling build: ' + packageData.build_number);
+  }
 
-    splashScreenUpdater.update('NodeJS version: ' + process.version, 'info');
-    splashScreenUpdater.update('Electron version: ' + process.versions['electron'], 'info');
-    splashScreenUpdater.update('Kipling version: ' + packageData.version, 'info');
-    if (packageData.build_number) {
-      splashScreenUpdater.update('Kipling build: ' + packageData.build_number);
-    }
+  try {
+    await loadProgramPackages(package_loader);
 
-    try {
-      await package_loader.loadPackage({
-        'name': 'splashScreenUpdater',
-        'loadMethod': 'set',
-        'ref': splashScreenUpdater
-      });
+    splashScreenUpdater.update('Finished', 'info');
+    window_manager.hideWindow('main');
+  } catch (err) {
+    console.error(err);
+    splashScreenUpdater.update(err, 'fail');
+  } finally {
+    splashScreenUpdater.finish(global.mainLogger.getLogFilePath());
+  }
 
-      await loadProgramPackages(package_loader);
+  await window_manager.openPackageWindow(package_loader.getPackage('kipling'));
 
-      splashScreenUpdater.update('Finished', 'info');
-      window_manager.hideWindow('main');
-    } catch (err) {
-      console.error(err);
-      splashScreenUpdater.update(err, 'fail');
-    } finally {
-      splashScreenUpdater.finish(global.mainLogger.getLogFilePath());
-    }
-
-    console.log('isKiplingTester1', package_loader.getManagedPackages());
+  if (package_loader.hasPackage('kipling_tester')) {
     const kipling_tester = package_loader.getPackage('kipling_tester');
+    await window_manager.openPackageWindow(kipling_tester);
     await kipling_tester.startPackage(package_loader);
-    console.log('isKiplingTester2');
-
-
-  });
+  }
 
   window_manager.addWindow({
     'name': 'main',
@@ -194,18 +176,23 @@ app.on('ready', function() {
     'initialVisibility': initialAppVisibility,
     'title': 'splashWindow'
   });
+}
 
-  if (process.env.NODE_ENV === 'development') {
-    // splashWindow.webContents.openDevTools({
-    //   mode: 'undocked'
-    // });
+app.whenReady().then(createWindow);
+
+// Quit when all windows are closed.
+app.on('window-all-closed', function() {
+  // On OS X it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform !== 'darwin') {
+    app.quit();
   }
 });
 
-app.on('activate', function () {
+app.on('activate', async function () {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (splashWindow === null) {
-    createWindow();
+    await createWindow();
   }
 });

@@ -106,7 +106,6 @@ If you want to customize code loaded by window check the html file and locate th
 
 ```js
 exports.info = {
-'type': 'nwApp',
 'main': 'lib/index.html'
 };
 exports.initializePackage = async function (package_loader) {

@@ -1232,7 +1232,6 @@ execStr += '/Users/chrisjohnson/Downloads/kipling_test_mac(2)/ '
 execStr += 'Kipling.app '
 execStr += '/Users/chrisjohnson/Downloads/kipling_test_mac(2)/Kipling.app/Contents/Resources/update_scripts'
 child_process.exec(formatPath(execStr));
-gui.App.quit();
 
 Script Arguments 1:
 /Applications/Kiplingv3

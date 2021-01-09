@@ -8,7 +8,6 @@
     "url": "https://labjack.com"
   },
   "main": "./lib/ljswitchboard-kipling.js",
-  "ljswitchboard-type": "nwApp",
   "ljswitchboard-main": "lib/index.html",
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-kipling",
   "repository": {

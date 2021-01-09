@@ -59,86 +59,86 @@ class KeyboardEventHandler {
                 'name':'esc',
                 'key':'esc',
                 'platforms':['mac','win','linux'],
-                'func': this.handleEscapeKey,
+                'func': (param) => this.handleEscapeKey(param),
                 'listeners': new Map()
             },{ // keypress to open debugging console
                 'name':'openConsole',
                 'key':'ctrl+alt+shift+c',
                 'platforms':['mac','win','linux'],
-                'func': this.handleOpenConsole,
+                'func': (param) => this.handleOpenConsole(param),
                 'listeners': new Map()
             },{ // keypress to reboot kipling
                 'name':'rebootKipling',
                 'key':'ctrl+alt+shift+w',
                 'platforms':['mac','win','linux'],
-                'func': this.rebootKipling,
+                'func': (param) => this.rebootKipling(param),
                 'listeners': new Map()
             },{ // keypress to reboot kipling
                 'name':'rebootKipling',
                 'key':'ctrl+alt+shift+q',
                 'platforms':['mac','win','linux'],
-                'func': this.rebuildKipling,
+                'func': (param) => this.rebuildKipling(param),
                 'listeners': new Map()
             },{ // keypress to reload io-manager kipling
                 'name':'reloadCurrentModule',
                 'key':'ctrl+r',
                 'platforms':['mac','win','linux'],
-                'func': this.reloadCurrentModule,
+                'func': (param) => this.reloadCurrentModule(param),
                 'listeners': new Map()
             },{ // keypress to reload io-manager kipling
                 'name':'forceReloadCurrentModule',
                 'key':'ctrl+shift+f',
                 'platforms':['mac','win','linux'],
-                'func': this.forceReloadCurrentModule,
+                'func': (param) => this.forceReloadCurrentModule(param),
                 'listeners': new Map()
             },{ // keypress to reload io-manager kipling
                 'name':'devReLoadIOManager',
                 'key':'ctrl+shift+r',
                 'platforms':['mac','win','linux'],
-                'func': this.devReLoadIOManager,
+                'func': (param) => this.devReLoadIOManager(param),
                 'listeners': new Map()
             },{ // keypress to update and reload io-manager kipling
                 'name':'devUpdateAndReLoadIOManager',
                 'key':'ctrl+alt+shift+r',
                 'platforms':['mac','win','linux'],
-                'func': this.devUpdateAndReLoadIOManager,
+                'func': (param) => this.devUpdateAndReLoadIOManager(param),
                 'listeners': new Map()
             },{ // windows keypress to save
                 'name':'save',
                 'key':'ctrl+s',
                 'platforms':['win','linux'],
-                'func': this.handleGenericKeypress,
+                'func': (param) => this.handleGenericKeypress(param),
                 'listeners': new Map()
             },{ // mac keypress to save
                 'name':'save',
                 'key':'meta+s',
                 'platforms':['mac'],
-                'func': this.handleGenericKeypress,
+                'func': (param) => this.handleGenericKeypress(param),
                 'listeners': new Map()
             },{ // zoom in
                 'name':'zoomIn',
                 'key':'ctrl+shift+=',
                 'platforms':['mac','win','linux'],
-                'func': this.handleZoomIn,
+                'func': (param) => this.handleZoomIn(param),
                 'listeners': new Map()
             },{ // zoom out
                 'name':'zoomOut',
                 'key':'ctrl+-',
                 'platforms':['mac','win','linux'],
-                'func': this.handleZoomOut,
+                'func': (param) => this.handleZoomOut(param),
                 'listeners': new Map()
             }
             // },{ // zoom inB
             //     'name':'zoomInB',
             //     'key':'+',
             //     'platforms':['mac','win','linux'],
-            //     'func': this.handleZoomIn,
+            //     'func': this.handleZoomIn(param),
             //     'listeners': new Map()
             // },{ // zoom outB
             //     'name':'zoomOutB',
             //     'key':'-',
             //     'platforms':['mac','win','linux'],
-            //     'func': this.handleZoomOut,
+            //     'func': this.handleZoomOut(param),
             //     'listeners': new Map()
             // }
         ];
@@ -225,9 +225,7 @@ class KeyboardEventHandler {
     }
 
     handleOpenConsole() {
-        // console.log('in handleOpenConsole', info.name);
-        const gui = global.gui;
-        gui.Window.get().showDevTools();
+        global.gui.openDevTools();
     }
 
     rebootKipling(info) {
@@ -243,7 +241,7 @@ class KeyboardEventHandler {
         });
         child_process.exec(execStr);
         console.log('Executed Script');
-        gui.App.quit();
+        gui.quitApp();
     }
 
     rebuildKipling(info) {
@@ -259,7 +257,7 @@ class KeyboardEventHandler {
         });
         child_process.exec(execStr);
         console.log('Executed Script');
-        gui.App.quit();
+        gui.quitApp();
     }
 
     reloadCurrentModule() {

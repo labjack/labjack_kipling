@@ -100,7 +100,7 @@ describe('mock_device_info', function() {
 		t7.trigger('click');
 	});
 	it('load device info', function (done) {
-		kiplingWin.showDevTools();
+		kiplingWin.openDevTools();
 
 		MODULE_LOADER.once('MODULE_READY', function(res) {
 			done();

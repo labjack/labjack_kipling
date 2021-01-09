@@ -13,7 +13,6 @@ describe('test_kipling', function() {
 		const basename = path.basename(extractionPath);
 		const msg = 'Extraction Path should not be the default extraction path';
 		assert.notStrictEqual(basename, 'K3', msg);
-		// testerWin.showDevTools();
 		// console.log('Dev Tools shown');
 		done();
 	});

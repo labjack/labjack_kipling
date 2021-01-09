@@ -92,7 +92,6 @@ describe('test_device_info', function() {
 	// 	t7.trigger('click');
 	// },
 	// 'load device info': function(test) {
-	// 	kiplingWin.showDevTools();
 
 	// 	MODULE_LOADER.once('MODULE_READY', function(res) {
 	// 		done();

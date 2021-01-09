@@ -53,7 +53,6 @@ async function loadResources(win, static_files) {
 }
 
 exports.info = {
-	'type': 'nwApp',
 	'main': 'lib/index.html'
 };
 

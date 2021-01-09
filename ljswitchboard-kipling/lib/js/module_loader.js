@@ -87,13 +87,6 @@ class ModuleLoader extends EventEmitter {
 					const newElement = document.createElement('script');
 					newElement.setAttribute('type', 'text/javascript');
 
-					// Isn't working for .js files :( idk why, it worked before.
-					// newElement.onload = () => {
-					// console.info('!!! '+fileType+' file loaded', newFile.fileName);
-					// resolve(results);
-					// };
-					// newElement.setAttribute('src', newFile.filePath);
-
 					// Save the file's data
 					results.element = newElement;
 					let fileData = newFile.fileData;

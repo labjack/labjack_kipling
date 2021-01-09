@@ -25,7 +25,6 @@ function handleError(err, msg) {
 }
 
 exports.info = {
-	'type': 'nwApp',
 	'main': 'lib/index.html'
 };
 
@@ -44,10 +43,7 @@ exports.initializePackage = async function (package_loader) {
 		const kiplingWindow = window_manager.getWindow('kipling');
 		await window_manager.setWindowVariable('kipling', 'moduleChromeTemplateName', moduleChromeTemplateName);
 		await window_manager.setWindowVariable('kipling', 'moduleChromeTabTemplateName', moduleChromeTabTemplateName);
-
-		console.log('loadResources');
 		await loadResources(kiplingWindow.win, static_files);
-		console.log('/loadResources');
 	});
 };
 

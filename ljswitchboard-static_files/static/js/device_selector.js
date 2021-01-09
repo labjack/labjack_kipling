@@ -223,20 +223,6 @@ function kiplingStartupManager() {
     };
     var loadConfigData = this.loadConfigData;
 
-    this.startDevTools = function(configData) {
-        var innerDeferred = q.defer();
-        if (typeof(configData.displayDevTools) === "boolean") {
-            if(configData.displayDevTools){
-                // Display Dev-tools window, code ref:
-                // https://github.com/rogerwang/node-webkit/wiki/Debugging-with-devtools
-                gui.Window.get().showDevTools();
-            }
-        }
-        innerDeferred.resolve(configData);
-        return innerDeferred.promise;
-    };
-    var startDevTools = this.startDevTools;
-
     this.checkIfAutoConfigure = function(configData) {
         var innerDeferred = q.defer();
         if (configData.autoConnectToDevices !== undefined) {
@@ -405,7 +391,6 @@ function kiplingStartupManager() {
     this.autoStart = function() {
         var deferred = q.defer();
         self.loadConfigData()
-        .then(self.startDevTools, handleErrors)
         .then(self.configureStartUpModule, handleErrors)
         .then(self.checkIfAutoConfigure, handleErrors)
         .then(self.connectToDevices, handleErrors)
