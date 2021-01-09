@@ -12,7 +12,7 @@ const package_loader = global.package_loader;
 const io_manager = package_loader.getPackage('io_manager');
 const module_manager = package_loader.getPackage('module_manager');
 const driver_const = require('ljswitchboard-ljm_driver_constants');
-const modbus_map = require('ljswitchboard-modbus_map');
+const modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
 const createModuleInstance = function() {
 	this.runRedraw = function() {
@@ -433,7 +433,7 @@ const createModuleInstance = function() {
 
 				if(typeof(err) === 'number') {
 					// Handle LJM Error codes.
-					console.log('HERE');
+					console.log('HERE', modbus_map, modbus_map.getErrorInfo);
 					const errorInfo = modbus_map.getErrorInfo(err);
 					const numStr = errorInfo.error.toString();
 					let errorText = 'Failed to connect to the selected device';
@@ -447,7 +447,7 @@ const createModuleInstance = function() {
 					const errorMessage = '<p>' + errorText + '<br>' +
 						'LabJack error code: ' +
 						errorInfo.string + ' (' + numStr + ')</p>';
-					showAlertNoTimeout(errorMessage);
+					global.showAlertNoTimeout(errorMessage);
 				} else {
 					// Handle error objects that can be returned if the same
 					// handle number has been detected.

@@ -20,6 +20,7 @@ global.showAlert = function (message) {
 };
 
 global.showAlertNoTimeout = function (message) {
+	console.error('showAlertNoTimeout', message);
 	var alertMessageObj = $('#alert-message');
 	var alertMessageHolder = $('#alert-message .error-display');
 
