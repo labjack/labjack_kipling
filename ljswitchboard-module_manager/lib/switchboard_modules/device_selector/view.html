@@ -1,5 +1,5 @@
 <div class="device-selector-header">
-	<div id="logo-holder" class="center-text"><img id="labjack-logo-image" src="{{staticFiles}}img/labjack-logo.png"></img></div>
+	<div id="logo-holder" class="center-text"><img alt="LabJack" id="labjack-logo-image" src="{{staticFiles}}img/labjack-logo.png" /></div>
 	<div id="lj-link-holder" class="link center-text"><a id="lj-link-text" title="Open LabJack home page in your default browser">labjack.com</a></div>
 	<script>
         $('#lj-link-text').unbind();
@@ -30,48 +30,52 @@
 <div class="scan-options-and-info unselectable-text" style="margin:0px 0px 0px 0px;">
     <div class="scan-options-and-info-tr">
         <div class="scanOptionsTableDiv">
-            <table class="table table-sm table-hover scanOptionsTable unselectable-text" style="margin:0px 0px 5px 20px" unselectable="on">
+            <table class="table table-sm table-hover scanOptionsTable unselectable-text" style="margin:0px 0px 5px 20px">
                 <thead>
-                    <th class="enabled"/>
-                    <th colspan="2" class="connectionType" unselectable="on">Scan Options <span id="advancedOptions" class="advanced-scan-options-toggle {{#if advancedScanOptions}}icon-minus{{else}}icon-plus{{/if}}" title="Show Advanced Options"/></th>
-                    <th class="estimatedScanTime"/>
+                <tr>
+                    <th class="enabled"></th>
+                    <th colspan="2" class="connectionType">Scan Options <span id="advancedOptions" class="advanced-scan-options-toggle {{#if advancedScanOptions}}icon-minus{{else}}icon-plus{{/if}}" title="Show Advanced Options"></span></th>
+                    <th class="estimatedScanTime"></th>
+                </tr>
                 </thead>
                 <tbody style="background-color:transparent">
-                    <tr title="Search for devices with a USB connection." unselectable="on">
+                    <tr title="Search for devices with a USB connection.">
                         <td><input id="usb_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanUSB}}checked{{/if}}/></td>
                         <td><span class="scan-medium">USB</span></td>
                         <td><span class="time-estimate">(1s)</span></td>
                     </tr>
-                    <tr title="Search for devices with a Ethernet connection." unselectable="on">
+                    <tr title="Search for devices with a Ethernet connection.">
                         <td><input id="ethernet_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanEthernet}}checked{{/if}}/></td>
                         <td><span class="scan-medium">Ethernet</span></td>
                         <td><span class="time-estimate">(3-10s)</span></td>
                     </tr>
-                    <tr title="Search for devices with a WiFi connection." unselectable="on">
+                    <tr title="Search for devices with a WiFi connection.">
                         <td><input id="wifi_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanWiFi}}checked{{/if}}/></td>
                         <td><span class="scan-medium">WiFi</span></td>
                         <td><span class="time-estimate">(10-60s)</span></td>
                     </tr>
-                    <tr class="advanced-scan-option" id="ethernet_tcp_scan_option" title="Search for devices with a Ethernet connection with TCP open calls." style="{{#if advancedScanOptions}}{{else}}display:none;{{/if}}" unselectable="on">
+                    <tr class="advanced-scan-option" id="ethernet_tcp_scan_option" title="Search for devices with a Ethernet connection with TCP open calls." style="{{#if advancedScanOptions}}{{else}}display:none;{{/if}}">
                         <td><input id="ethernet_tcp_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanEthernetTCP}}checked{{/if}}/></td>
                         <td><span class="scan-medium">Eth. TCP</span></td>
                         <td><span class="time-estimate">(3-10s)</span></td>
                     </tr>
-                    <tr class="advanced-scan-option" id="wifi_tcp_scan_option" title="Search for devices with a WiFi connection with TCP open calls." style="{{#if advancedScanOptions}}{{else}}display:none;{{/if}}" unselectable="on">
+                    <tr class="advanced-scan-option" id="wifi_tcp_scan_option" title="Search for devices with a WiFi connection with TCP open calls." style="{{#if advancedScanOptions}}{{else}}display:none;{{/if}}">
                         <td><input id="wifi_tcp_scan_enabled" type="checkbox" value="" {{#if scanOptions.scanWiFiTCP}}checked{{/if}}/></td>
                         <td><span class="scan-medium">WiFi TCP</span></td>
                         <td><span class="time-estimate">(10-60s)</span></td>
                     </tr>
                 </tbody>
             </table>
-            <button id="refresh_devices_button" class="btn btn-primary" style="width:150px; margin:0px 0px 0px 20px;display:none;"><span class="icon-refresh-3"/> Refresh Devices</button>
+            <button id="refresh_devices_button" class="btn btn-primary" style="width:150px; margin:0px 0px 0px 20px;display:none;"><span class="icon-refresh-3"></span> Refresh Devices</button>
         </div>
         <div class="directConnectOptionsDiv">
-            <table class="table table-sm table-hover direct-connect-options unselectable-text" style="margin:0px 0px 0px 20px" unselectable="on">
+            <table class="table table-sm table-hover direct-connect-options unselectable-text" style="margin:0px 0px 0px 20px">
                 <thead>
+                <tr>
                     <!-- <th class="description"></th> -->
-                    <th colspan="2" class="direct-connect-input" unselectable="on">Direct Connect Options <span id="direct_connect_options" class="direct-connect-options-toggle {{#if showDirectConnectOptions}}icon-minus{{else}}icon-plus{{/if}}" title="Show Direct Connect Options"/></th>
+                    <th colspan="2" class="direct-connect-input">Direct Connect Options <span id="direct_connect_options" class="direct-connect-options-toggle {{#if showDirectConnectOptions}}icon-minus{{else}}icon-plus{{/if}}" title="Show Direct Connect Options"></span></th>
                     <th class="drop-down-select"></th>
+                </tr>
                 </thead>
                 <tbody style="background-color:transparent;{{#unless showDirectConnectOptions}}display:none;{{/unless}}" class="direct-connect-options-page-data">
                     <tr title="The Device Type can be ANY, T4, or T7">
@@ -139,42 +143,46 @@
                     </tr>
                 </tbody>
                 <tfoot class="direct-connect-options-page-data" style="{{#unless showDirectConnectOptions}}display:none;{{/unless}}">
+                <tr>
                     <td style="min-width: 130px;">
                         <div id="dco-info-link-holder" class="link"><a id="dco-info-text" title="Open the Direct Connection Options support page your default browser">More Information...</a></div>
                     </td>
                     <td colspan="1" style="text-align:right;">
-                        <button id="attempt_direct_connect_btn" class="btn btn-primary" style="display:none;"><span class="icon-power-cord"/> Connect</button>
+                        <button id="attempt_direct_connect_btn" class="btn btn-primary" style="display:none;"><span class="icon-power-cord"></span> Connect</button>
                     </td>
+                </tr>
                 </tfoot>
         </table>
     </div>
     <div class="connectButtonColorsLegendDiv unselectable-text">
-        <table class="table table-sm table-hover connectButtonColorsLegend unselectable-text" style="margin:0px 0px 0px 20px" unselectable="on">
+        <table class="table table-sm table-hover connectButtonColorsLegend unselectable-text" style="margin:0px 0px 0px 20px">
             <thead>
-                <th class="enabled"/>
-                <th class="foundMethod" unselectable="on">Connection Button Colors</th>
+            <tr>
+                <th class="enabled"></th>
+                <th class="foundMethod">Connection Button Colors</th>
                 <th class="connectionVerification"></th>
+            </tr>
             </thead>
             <tbody style="background-color:transparent">
-                <tr unselectable="on">
-                    <td/>
-                    <td title="Devices can be found using an LJM scan function or by reading its attributes." unselectable="on">Discovery Method</td>
-                    <td title="Connections are verified by opening and closing a device." unselectable="on">Verified Connection</td>
+                <tr>
+                    <td></td>
+                    <td title="Devices can be found using an LJM scan function or by reading its attributes.">Discovery Method</td>
+                    <td title="Connections are verified by opening and closing a device.">Verified Connection</td>
                 </tr>
-                <tr unselectable="on">
+                <tr>
                     <td><div class="green-button-color"></div></td>
-                    <td title="Device was discovered using an LJM ListAll function." unselectable="on">LJM Scan</td>
-                    <td title="Device was successfully opened and closed." unselectable="on">Yes</td>
+                    <td title="Device was discovered using an LJM ListAll function.">LJM Scan</td>
+                    <td title="Device was successfully opened and closed.">Yes</td>
                 </tr>
-                <tr unselectable="on">
+                <tr>
                     <td><div class="yellow-button-color"></div></td>
-                    <td title="Connection type was found by reading a device's IP address registers." unselectable="on">Device Attributes</td>
-                    <td title="Device was successfully opened and closed." unselectable="on">Yes</td>
+                    <td title="Connection type was found by reading a device's IP address registers.">Device Attributes</td>
+                    <td title="Device was successfully opened and closed.">Yes</td>
                 </tr>
-                <tr unselectable="on">
+                <tr>
                     <td><div class="grey-button-color"></div></td>
-                    <td title="Connection type was found by either the ListAll function or through its attributes." unselectable="on">Scan or Attributes</td>
-                    <td title="Device was not able to be opened and closed using this connection type." unselectable="on">No</td>
+                    <td title="Connection type was found by either the ListAll function or through its attributes.">Scan or Attributes</td>
+                    <td title="Device was not able to be opened and closed using this connection type.">No</td>
                 </tr>
                 <!-- <tr>
                     <td><div class="red-button-color"></div></td>

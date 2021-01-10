@@ -1,5 +1,5 @@
 
-/* jshint undef: true, unused: true, undef: true */
+/* jshint esversion: 6, undef: true, unused: true, undef: true */
 /* global global, require, console, MODULE_LOADER, MODULE_CHROME, createDeviceSelectorViewGenerator */
 /* exported activeModule */
 
