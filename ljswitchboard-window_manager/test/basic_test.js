@@ -1,6 +1,7 @@
 var assert = require('chai').assert;
 
-var window_manager = require('../lib/window_manager');
+var WindowManager = require('../lib/window_manager').WindowManager;
+const window_manager = new WindowManager();
 var mock_window = require('../lib/mock_window');
 
 var eventList = mock_window.eventList;
@@ -31,13 +32,14 @@ describe('basic_test', function() {
 	it('configure window_manager', function (done) {
 		window_manager.configure({
 			'gui': {
+				openWindow() {
+					return mock_window.open();
+				},
 				'Window': mock_window,
-				'App': {
-					'quit': function() {
-						guiAppQuitDetected = true;
-					}
-				}
 			}
+		});
+		window_manager.on(window_manager.eventList.QUITTING_APPLICATION, () => {
+			guiAppQuitDetected = true;
 		});
 		done();
 	});
@@ -117,19 +119,16 @@ describe('basic_test', function() {
 		window_manager.closeWindow('firstWindow');
 	});
 	it('open window test', function (done) {
-		var packageInfo = {
+		const packageInfo = {
 			'name': 'MyWindow',
 			'location': '',
 		};
-		var requiredInfo = {
-			'main': '',
-		};
-		var appData = {};
-		window_manager.open(
+		window_manager.openPackageWindow({
 			packageInfo,
-			requiredInfo,
-			appData
-		).then(function(openedWindow) {
+			data: {
+				'ljswitchboard-main': ''
+			}
+		}).then(function(openedWindow) {
 			// Wait for the on LOADED event to finish the test indicating that a
 			// new window has opened.
 			openedWindow.on(eventList.LOADED, function() {
@@ -154,7 +153,7 @@ describe('basic_test', function() {
 		};
 
 		// Register the QUIT_APPLICATION event listener
-		window_manager.on(eventList.QUITTING_APPLICATION, quitListener);
+		window_manager.on(window_manager.eventList.QUITTING_APPLICATION, quitListener);
 
 		// Hide the main window and close the secondary window
 		window_manager.hideWindow('main');

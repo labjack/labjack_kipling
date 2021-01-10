@@ -24,7 +24,9 @@ class WindowManager extends EventEmitter {
 		super();
 
 		// Define default options
-		this.options = {};
+		this.options = {
+			gui: global.gui
+		};
 
 		this.eventList = eventList;
 
@@ -137,6 +139,9 @@ class WindowManager extends EventEmitter {
 		if (this.managedWindows[windowName].runInBackground) {
 			this.emit(eventList.PREVENTING_WINDOW_FROM_CLOSING, windowInfo);
 		} else {
+			if (this.managedWindows[windowName].status === 'closing') {
+				return;
+			}
 			this.managedWindows[windowName].status = 'closing';
 			this.emit(eventList.CLOSING_WINDOW, windowInfo);
 			this.managedWindows[windowName].win.close(true);
@@ -163,6 +168,10 @@ class WindowManager extends EventEmitter {
 		// run in the background.  If not, exit the program
 		if (this.numVisibleWindows() === 0) {
 			this.emit(eventList.QUITTING_APPLICATION);
+
+			for (const windowName in this.managedWindows) {
+				this.managedWindows[windowName].isOpen = false;
+			}
 		}
 	}
 
@@ -205,15 +214,15 @@ class WindowManager extends EventEmitter {
 
 		this.managedWindows[windowName].win.on(
 			'loaded',
-			windowInfo => this.loadedListener(windowInfo)
+			windowInfo => this.loadedListener(this.managedWindows[windowName])
 		);
 		this.managedWindows[windowName].win.on(
 			'close',
-			windowInfo => this.closeListener(windowInfo)
+			windowInfo => this.closeListener(this.managedWindows[windowName])
 		);
 		this.managedWindows[windowName].win.on(
 			'closed',
-			windowInfo => this.closedListener(windowInfo)
+			windowInfo => this.closedListener(this.managedWindows[windowName])
 		);
 	}
 
@@ -289,10 +298,8 @@ class WindowManager extends EventEmitter {
 		// Build the url and moduleData path
 		const windowPath = 'file:///' + path.join(packageInfo.location, pack.data['ljswitchboard-main']);
 
-		console.log('openPackageWindow', windowPath);
-
 		// Open a new window and save its reference
-		const newWindow = await global.gui.openWindow(
+		const newWindow = await this.options.gui.openWindow(
 			windowPath, Object.assign({}, newWindowData, {
 				webPreferences: {
 					additionalArguments: [
