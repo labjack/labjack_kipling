@@ -36,7 +36,7 @@ function localPublish() {
         // fse.ensureDirSync(prePublishPackage)
         // fse.copySync(pkg.location, prePublishPackage);
 
-        console.log(childProcess.execSync(`npm pack ${pkg.location} --loglevel silent`, {
+        console.log(childProcess.execSync(`npm pack ${pkg.location}`, {
             'cwd': TEMP_PUBLISH_PATH
 		}).toString('utf-8').trim());
 	});

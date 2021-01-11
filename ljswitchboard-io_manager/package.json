@@ -36,8 +36,6 @@
   "dependencies": {
     "async": "3.2.0",
     "comment-json": "2.x.x",
-    "ffi-napi": "^3.1.0",
-    "ref-napi": "^3.0.1",
     "handlebars": "4.7.6",
     "json-parser": "^3.1.2",
     "labjack-nodejs": "*",

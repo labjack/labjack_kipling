@@ -33,7 +33,7 @@ const lernaBin = path.join(startingDir,'..','node_modules','.bin','lerna');
  * ]
  */
 function getPackages() {
-	const command = `${lernaBin} ls --all --json --loglevel silent`;
+	const command = `${lernaBin} ls --all --json`;
 	const modulesStr = childProcess.execSync(command);
 	return JSON.parse(modulesStr);
 }
@@ -56,7 +56,7 @@ function getPackages() {
  * }
  */
 function getAdjacencyGraph() {
-	const command = `${lernaBin} ls --all --graph --loglevel silent`;
+	const command = `${lernaBin} ls --all --graph`;
 	const modulesStr = childProcess.execSync(command);
 	return JSON.parse(modulesStr);
 }

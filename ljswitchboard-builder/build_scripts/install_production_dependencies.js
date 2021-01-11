@@ -124,7 +124,7 @@ async function installSubDeps(dependencies, directory) {
 
 			console.log(`npm install --production ${dependencyTar}`);
 			try {
-				await promiseExecute(`npm install --production ${dependencyTar}`, directory, path.join(directory, 'debug.log'));
+				await promiseExecute(`npm install -f --production ${dependencyTar}`, directory, path.join(directory, 'debug.log'));
 			} catch (e) {
 				const debugLog = fs.readFileSync(path.join(directory, 'debug.log'));
 				console.log('debugLog:', debugLog);
@@ -139,7 +139,7 @@ async function installSubDeps(dependencies, directory) {
 function installLocalProductionDependencies(name, directory) {
 	return new Promise(async (resolve, reject) => {
 		if (DEBUG_INSTALLATION) {
-			console.log('installLocalProductionDependencies', name, directory);
+			console.log('installLocalProductionDependencies', name, directory, );
 		}
 
 		const pkgPath = path.join(directory, 'package.json');
@@ -149,6 +149,8 @@ function installLocalProductionDependencies(name, directory) {
 		if (!packageDependencies) {
 			throw new Error(`Could not find packageDependencies`);
 		}
+
+		console.log('packageDependencies', pkgPath, packageDependencies);
 
 		for (const dependency of packageDependencies) {
 			if (dependency in graph) {
@@ -181,7 +183,12 @@ function installLocalProductionDependencies(name, directory) {
 					return;
 				}
 
-				await promiseExecute(`npm install --production ${dependencyTar}`, directory, path.join(directory, 'debug.log'));
+				try {
+					await promiseExecute(`npm install -f --production ${dependencyTar}`, directory, path.join(directory, 'debug.log'));
+				} catch (err) {
+					const debugLog = fs.readFileSync(path.join(directory, 'debug.log'));
+					console.log('debugLog:', debugLog);
+				}
 			}
 		}
 		resolve();

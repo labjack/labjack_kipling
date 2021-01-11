@@ -115,24 +115,7 @@ const executeBuildStep = function(buildStep) {
 buildScripts.forEach(function(buildScript) {
 	// Change Directories
 
-	try {
-		process.chdir(buildScript.libPath);
-	} catch (e) {
-		const parts = buildScript.libPath.split(path.sep);
-
-		for (let steps = 0; steps < 3; steps++) {
-			const dir = parts.slice(0, parts.length - steps).join(path.sep);
-			console.log('ls -l ' + dir);
-			try {
-				console.log(child_process.execSync('ls -l ' + dir).toString());
-			} catch(err) {
-				console.log('Error Executing ls  -l ' + dir, err);
-			}
-		}
-
-		throw e;
-	}
-
+	process.chdir(buildScript.libPath);
 	console.log('Current Dir', process.cwd());
 	try {
 		console.log('Starting Step:', buildScript.text);
