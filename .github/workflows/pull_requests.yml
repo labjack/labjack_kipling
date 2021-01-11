@@ -29,6 +29,6 @@ jobs:
       #      - run: npm ci # doesn't work with node8
       - run: npm install --global node-gyp@latest
       - run: npm install
-      - run: npm run setup
+      - run: npm run setup_ci
       - name: Fix lerna mess
         run: node ./scripts/fix_lerna_backup.js
