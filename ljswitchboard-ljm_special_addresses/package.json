@@ -35,7 +35,7 @@
     "q": "1.5.1",
     "ljm-ffi": "*",
     "javascript-natural-sort": "0.x.x",
-    "fs-extra": "0.18.4"
+    "fs-extra": "^9.0.1"
   },
   "devDependencies": {
     "diff": ">=3.5.0",

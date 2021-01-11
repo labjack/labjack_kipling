@@ -32,7 +32,7 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "async": "1.5.2",
+    "async": "3.2.0",
     "labjack-nodejs": "*",
     "ljm-ffi": "*",
     "ljswitchboard-data_parser": "*",

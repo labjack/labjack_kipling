@@ -24,8 +24,8 @@
         "lib"
     ],
     "dependencies": {
-        "async": "1.5.2",
-        "ffi-napi": "3.0.1",
+        "async": "3.2.0",
+        "ffi-napi": "^3.1.0",
         "ljswitchboard-ljm_driver_constants": "*",
         "ljswitchboard-modbus_map": "*",
         "q": "1.5.1",

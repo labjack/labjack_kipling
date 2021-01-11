@@ -13,9 +13,9 @@
 	"dependencies": {
 		"adm-zip": "0.4.13",
 		"archiver": "3.1.1",
-		"async": "3.1.0",
+		"async": "3.2.0",
 		"colors": "1.4.0",
-		"concat-stream": "1.5.2",
+		"concat-stream": "^2.0.0",
 		"decompress": "4.2.1",
 		"decompress-unzip": "3.2.2",
 		"decompress-zip": "0.2.2",
