@@ -15,7 +15,7 @@ const TEMP_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'temp_project_fil
 const graph = labjackKiplingPackages.getAdjacencyGraph();
 const packages = labjackKiplingPackages.getPackages();
 
-const DEBUG_INSTALLATION = false;
+const DEBUG_INSTALLATION = true;
 
 const buildData = require('../package.json');
 
@@ -63,7 +63,7 @@ function getHeaderStr() {
 	return outputText;
 }
 
-const ENABLE_STATUS_UPDATES = false;
+const ENABLE_STATUS_UPDATES = true;
 
 const printStatus = function() {
 	if (ENABLE_STATUS_UPDATES) {
@@ -119,6 +119,7 @@ async function installSubDeps(dependencies, directory) {
 				throw err;
 			}
 
+			console.log(`npm install --production ${dependencyTar}`);
 			await promiseExecute(`npm install --production ${dependencyTar}`, directory, path.join(directory, 'debug.log'));
 			alreadyInstalled[directory + dependencyTar] = true;
 		}

@@ -124,7 +124,7 @@ buildScripts.forEach(function(buildScript) {
 			const dir = parts.slice(0, parts.length - steps).join(path.sep);
 			console.log('ls -l ' + dir);
 			try {
-				console.log(child_process.execSync('ls -l ' + dir));
+				console.log(child_process.execSync('ls -l ' + dir).toString());
 			} catch(err) {
 				console.log('Error Executing ls  -l ' + dir, err);
 			}
