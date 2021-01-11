@@ -2,6 +2,7 @@
 
 require('./utils/error_catcher');
 
+const fs = require('fs');
 const path = require('path');
 const labjackKiplingPackages = require('./utils/get_labjack_kipling_packages.js');
 const {editPackageKeys} = require('./utils/edit_package_keys.js');
@@ -65,11 +66,12 @@ function getHeaderStr() {
 
 const ENABLE_STATUS_UPDATES = true;
 
-const printStatus = function() {
+const printStatus = function(text) {
 	if (ENABLE_STATUS_UPDATES) {
 		console.log('');
 		console.log('');
 		console.log('');
+		console.log(text);
 		let outputText = [];
 		outputText = outputText.concat(getHeaderStr());
 		const keys = Object.keys(installStatus);
@@ -86,6 +88,7 @@ const alreadyInstalled = {};
 
 async function installSubDeps(dependencies, directory) {
 	if (!dependencies || Object.keys(dependencies).length === 0) {
+		console.log('No dependencies');
 		return Promise.resolve();
 	}
 
@@ -120,7 +123,12 @@ async function installSubDeps(dependencies, directory) {
 			}
 
 			console.log(`npm install --production ${dependencyTar}`);
-			await promiseExecute(`npm install --production ${dependencyTar}`, directory, path.join(directory, 'debug.log'));
+			try {
+				await promiseExecute(`npm install --production ${dependencyTar}`, directory, path.join(directory, 'debug.log'));
+			} catch (e) {
+				const debugLog = fs.readFileSync(path.join(directory, 'debug.log'));
+				console.log('debugLog:', debugLog);
+			}
 			alreadyInstalled[directory + dependencyTar] = true;
 		}
 	}
@@ -188,12 +196,14 @@ function installProductionDependency(dependency) {
 	return installLocalProductionDependencies(name, directory)
 		.then(function() {
 			installStatus[dependency_key] = true;
-			printStatus();
+			printStatus('installProductionDependency: ' + name);
+		}).catch(err => {
+			console.log('installProductionDependency error', err);
 		});
 }
 
 function installProductionDependencies() {
-	printStatus();
+	printStatus('main level');
 
 	const promises = projectDirectories
 		// .filter(dir => dir.name === 'ljswitchboard-io_manager')
@@ -214,7 +224,7 @@ function installProductionDependencies() {
 			console.log('Finished Installing production dependencies');
 		})
 		.catch(err => {
-			console.error(err);
+			console.error('Error installProductionDependencies', err);
 			process.exit(1);
 		});
 }
