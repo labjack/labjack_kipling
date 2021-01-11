@@ -1,5 +1,5 @@
 --[[
-    Name: 10b_user_ram_fifo.lua
+    Name: user_ram_fifo.lua
     Desc: Example showing how to use USER RAM FIFO buffers to transfer an array
           of data to/from an external computer
     Note: This system is considered an advanced topic. Simple data transfer

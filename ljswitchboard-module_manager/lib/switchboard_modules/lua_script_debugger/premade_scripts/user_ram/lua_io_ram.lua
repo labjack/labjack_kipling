@@ -1,5 +1,5 @@
 --[[
-    Name: 10_lua_io_ram.lua
+    Name: lua_io_ram.lua
     Desc: Example showing how to save and access data in USER RAM
     Note: The USER_RAM registers are useful in situations when a script is
           collecting readings, but external software running on a remote

@@ -1,5 +1,5 @@
 --[[
-    Name: 5_output_sine_wave.lua
+    Name: output_sine_wave.lua
     Desc: This example shows how to output a sine wave on DAC0
     Note: Faster(higher frequency) sine waves can be created using stream out:
             https://labjack.com/support/datasheets/t-series/communication/stream-mode

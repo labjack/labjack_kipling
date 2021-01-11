@@ -1,5 +1,5 @@
 --[[
-    Name: 11_average_min_max.lua
+    Name: average_min_max.lua
     Desc: Example program that samples an analog input at a set frequency for a
           certain number of samples. It takes the average, minimum, and maximum
           of sampled data and prints it to the console as well as saving them

@@ -1,3 +1,4 @@
+--***Depreciated***
 --NOTE: THIS EXAMPLE IS OLD. Updated I2C examples can be found in the I2C folder.
 print("Communicate with a HMC6352 via I2C")
 --When using I2C remember to wire SDA and SCL to VS through a resistor (pull-up).

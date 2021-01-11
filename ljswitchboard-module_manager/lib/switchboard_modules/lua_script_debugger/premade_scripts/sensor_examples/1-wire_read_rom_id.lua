@@ -1,5 +1,5 @@
 --[[
-    Name: 9_1-wire_read_rom_id.lua
+    Name: 1-wire_read_rom_id.lua
     Desc: Example showing how to read the ROM ID of a DS18B20 1-wire sensor
     Note: There are several kinds of 1-wire sensors from Maxim. Some variants:
           DS1820, DS1821, DS1822, DS18S20, and DS18B20.

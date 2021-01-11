@@ -1,5 +1,5 @@
 --[[
-    Name: 7_log_voltage_to_file.lua
+    Name: log_voltage_to_file.lua
     Desc: This example shows how to log voltage measurements to file
     Note: Requires an SD Card installed inside the T7 or T7-Pro
 

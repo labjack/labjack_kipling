@@ -1,5 +1,5 @@
 --[[
-    Name: 6_output_triangle_wave.lua
+    Name: output_triangle_wave.lua
     Desc: This example shows how to output a triangle wave on DAC0
     Note: Faster(higher frequency) sine waves can be created using stream out:
             https://labjack.com/support/datasheets/t-series/communication/stream-mode

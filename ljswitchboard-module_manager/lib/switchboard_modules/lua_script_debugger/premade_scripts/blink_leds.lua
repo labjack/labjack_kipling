@@ -1,5 +1,5 @@
 --[[
-    Name: 13_blink_leds.lua
+    Name: blink_leds.lua
     Desc: This example shows how to blink the status and COMM LEDs
     Note: This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]

@@ -1,5 +1,5 @@
 --[[
-    Name: 12_uart_example.lua
+    Name: uart_example.lua
     Desc: Example showing how to use a UART
     Note: This example requires you to connect a jumper between the RX and TX pins
 
