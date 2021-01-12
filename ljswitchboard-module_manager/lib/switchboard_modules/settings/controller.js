@@ -19,8 +19,8 @@ class ModuleInstance {
 		this.table = undefined;
 
 		const mlEvents = MODULE_LOADER.eventList;
-		MODULE_LOADER.on(mlEvents.VIEW_READY, () => this.startModule());
-		MODULE_LOADER.on(mlEvents.UNLOAD_MODULE, () => this.stopModule());
+		MODULE_LOADER.on(mlEvents.VIEW_READY, (param) => this.startModule(param));
+		MODULE_LOADER.on(mlEvents.UNLOAD_MODULE, (param) => this.stopModule(param));
 	}
 
 	compileTemplate(templateName) {
@@ -40,7 +40,6 @@ class ModuleInstance {
     // Attach a pre-load step to the Module loader
 	async preLoadStep(newModule) {
 		newModule.context.pageData = await this.kipling_updater_service.getProgramInfo();
-		console.log('prrrr', newModule.context.pageData);
 		return newModule;
     }
 
@@ -74,11 +73,10 @@ class ModuleInstance {
 			}]
 		});
 
-		// console.log('device_selector starting', newModule.name, newModule.id);
 		this.moduleData = newModule.data;
 
 		// Compile module templates
-        this.templatesToCompile.forEach(this.compileTemplate);
+        this.templatesToCompile.forEach((param) => this.compileTemplate(param));
 
 		const reportedData = {
 			'name': this.moduleData.name,

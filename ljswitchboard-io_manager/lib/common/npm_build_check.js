@@ -231,6 +231,7 @@ const checkRequirements = function(passedResult, passedResults) {
             'labjack-nodejs': [
                 path.normalize(baseDirectory + '')
             ],
+            /*
             'ffi': [
                 path.normalize(baseDirectory + '/node_modules/ffi-napi')
             ],
@@ -240,6 +241,7 @@ const checkRequirements = function(passedResult, passedResults) {
             'ref': [
                 path.normalize(baseDirectory + '/node_modules/ref-napi')
             ],
+            */
             /* // TODO: commented while porting to electron, try to uncomment someday?
                     'ref-build-info': [
                         path.normalize(baseDirectory + '/node_modules/ref-napi/build/config.gypi')
