@@ -9,7 +9,7 @@ var ljm_ffi = require('../../lib/ljm-ffi');
 var ljm = ljm_ffi.load();
 
 function parseIPAddress(ipInt) {
-	var ipAddr = new Buffer(4);
+	var ipAddr = Buffer.alloc(4);
 	ipAddr.writeUInt32LE(ipInt, 0);
 	
 	var ipStr = "";
