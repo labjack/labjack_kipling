@@ -1,3 +1,4 @@
+--***Depreciated***
 --This is an example to help get users started with the Lua LabJack I2C Library
 --The calc_I2C_options function allows for easily readable and easily changed
 --vals for the register I2C_OPTIONS - Address: 5103 (See modbus map for more)

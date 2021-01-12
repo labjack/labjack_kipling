@@ -1,5 +1,5 @@
 --[[
-    Name: 2_toggle_dio_1hz.lua
+    Name: toggle_dio_1hz.lua
     Desc: This example shows how to toggle DIO
     Note: This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]

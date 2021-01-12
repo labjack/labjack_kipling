@@ -1,8 +1,8 @@
 --[[
-    Name: ain_ef_config_set_defaults_and_powercycle.lua
+    Name: ain_ef_config_set_defaults.lua
     Desc: This is a general AIN_EF config example that shows the basic process
-          for configuring any AIN_EF feature on a T-Series device, saving them
-          as defaults, and powercycling the device. This example configures
+          for configuring any AIN_EF feature on a T-Series device, and saving them
+          as defaults. This example configures
           AIN0 and AIN2 to enable the Average/Min/Max extended feature.
           For a list of all AIN_EF options, see the T-Series datasheet:
             https://labjack.com/support/datasheets/t-series/ain/extended-features
@@ -75,11 +75,7 @@ end
 
 -- Set as power-up default
 print("Saving settings as power-up defaults")
-MB.writeName("IO_CONFIG_SET_DEFAULT_TO_CURRENT", 1)
+MB.writeNameArray("IO_CONFIG_SET_DEFAULT_TO_CURRENT", 2, {0,1}, 0)
 
--- Re-set device
-print("Rebooting Device")
--- Write to SYSTEM_REBOOT so the system reboots after 200ms (last 4 hex vals of
--- the write value tells the device how many 50ms ticks to wait before reboot)
-MB.writeNameArray("SYSTEM_REBOOT", 2, {0x4C4A, 0x0004}, 0)
-
+-- Stop the script
+MB.writeNameArray("LUA_RUN", 2, {0,0}, 0)

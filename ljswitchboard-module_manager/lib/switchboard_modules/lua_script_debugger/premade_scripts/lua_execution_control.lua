@@ -1,15 +1,15 @@
 --[[
-  Name: 16_lua_execution_control.lua
-  Desc: This example shows how to control LUA execution blocks using an LJM
-        host app and the USER_RAM registers.
+  Name: lua_execution_control.lua
+  Desc: This example shows how to control LUA execution blocks using a host
+        app and the USER_RAM registers.
   Note: Information on the USER_RAM registers and LJM host applications that
         work in conjunction with this example can be found here:
           https://labjack.com/support/datasheets/t-series/lua-scripting#user-ram
+          
 --]]
 
 -- Use USER_RAM0_U16 (register 46180) to determine which control loop to run
 local ramval = 0
-MB.W(46180, 0, ramval)
 local loop0 = 0
 local loop1 = 1
 local loop2 = 2
@@ -18,7 +18,7 @@ local loop2 = 2
 LJ.IntervalConfig(0,1000)
 while true do
   if LJ.CheckInterval(0) then
-    ramval = MB.R(46180, 0)
+    ramval = MB.readName("USER_RAM0_U16")
 
     if ramval == loop0 then
       print("using loop0")

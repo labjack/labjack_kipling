@@ -69,5 +69,6 @@ while true do
       local ainval = MB.R(ainchannels[i] * 2, 3)
       print(string.format("AIN%d: %.3f", ainchannels[i], ainval))
     end
+    print("")
   end
 end

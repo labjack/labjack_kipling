@@ -1,5 +1,5 @@
 --[[
-    Name: 7b_log_voltage_to_file_wifi.lua
+    Name: log_voltage_to_file_wifi.lua
     Desc: This example shows how to log voltage measurements to file if
           communicating over WiFi (WiFi needs 5s or more to initialize)
           without comm

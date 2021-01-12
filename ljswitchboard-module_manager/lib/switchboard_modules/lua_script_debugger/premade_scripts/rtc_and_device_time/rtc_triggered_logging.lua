@@ -1,5 +1,5 @@
 --[[
-    Name: 12_rtc_triggered_logging.lua
+    Name: rtc_triggered_logging.lua
     Desc: Example showing how to log AIN values to file on an SD card
     Note: Requires a micro SD Card installed inside the T7 or T7-Pro
 
