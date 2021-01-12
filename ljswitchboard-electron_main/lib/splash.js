@@ -11,6 +11,11 @@ class SplashScreenUpdater {
 
     update(message, level) {
         if (!this.splashWindow) return;
+
+        if (Object.prototype.toString.call(message) === '[object Object]') {
+            message = JSON.stringify(message);
+        }
+
         this.splashWindow.webContents.postMessage('postMessage', {
             'channel': 'splash_update',
             'payload': {message, level},

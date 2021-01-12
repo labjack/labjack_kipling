@@ -19,18 +19,33 @@ class PersistentDataManager {
 
 	initializeDirectory() {
 		const exists = fs.existsSync(this.basePath);
+		let createMainDir = false;
 		if (exists) {
 			try {
 				rmdir.sync(this.basePath);
+				createMainDir = true;
 			} catch (err) {
-				throw 'failed to remove dir:' + this.basePath;
+				try {
+					const files = fs.readdirSync(this.basePath);
+					for (const file of files) {
+						console.log('Removing: ', path.join(this.basePath, file));
+						rmdir.sync(path.join(this.basePath, file));
+					}
+				} catch (e) {
+					console.error(e);
+					throw 'failed to remove dir: ' + this.basePath + ' ' + e.message;
+				}
 			}
+		} else {
+			createMainDir = true;
 		}
 
-		try {
-			fs.mkdirSync(this.basePath);
-		} catch (e) {
-			throw 'failed to make dir:' + this.basePath;
+		if (createMainDir) {
+			try {
+				fs.mkdirSync(this.basePath);
+			} catch (e) {
+				throw 'failed to make dir: ' + this.basePath + ' ' + e.message;
+			}
 		}
 	}
 
