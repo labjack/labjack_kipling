@@ -18,12 +18,9 @@ class PersistentDataManager {
 	}
 
 	initializeDirectory() {
-		const exists = fs.existsSync(this.basePath);
-		let createMainDir = false;
-		if (exists) {
+		if (fs.existsSync(this.basePath)) {
 			try {
 				rmdir.sync(this.basePath);
-				createMainDir = true;
 			} catch (err) {
 				try {
 					const files = fs.readdirSync(this.basePath);
@@ -36,11 +33,9 @@ class PersistentDataManager {
 					throw 'failed to remove dir: ' + this.basePath + ' ' + e.message;
 				}
 			}
-		} else {
-			createMainDir = true;
 		}
 
-		if (createMainDir) {
+		if (!fs.existsSync(this.basePath)) {
 			try {
 				fs.mkdirSync(this.basePath);
 			} catch (e) {
