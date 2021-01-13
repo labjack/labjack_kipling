@@ -15,7 +15,7 @@ var parseIP = function(ipNum) {
 		isReal = true;
 	}
 	var ipStr = '';
-	var ipAddr = new Buffer(4);
+	var ipAddr = Buffer.alloc(4);
 	var text = '';
 	ipAddr.writeUInt32LE(ipNum, 0);
 	ipStr += ipAddr.readUInt8(3).toString();
@@ -49,7 +49,7 @@ var encodeIP = function(ipStr) {
 				convert = true;
 			}
 			if(convert) {
-				ipBuf = new Buffer(4);
+				ipBuf = Buffer.alloc(4);
 				ipBuf.fill(0);
 				if(ipVals.length == 4) {
 					for(i = 0; i < 4; i ++) {

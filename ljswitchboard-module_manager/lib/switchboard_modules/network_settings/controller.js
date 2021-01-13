@@ -126,7 +126,6 @@ function module() {
     this.sendUDPMessage = function() {
         try {
             var dgram = require('dgram');
-            // var message = new Buffer('Some bytes');
             // var message = Buffer.from('Some bytes');
             var client = dgram.createSocket('udp4');
 

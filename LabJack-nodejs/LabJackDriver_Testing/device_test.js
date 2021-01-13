@@ -476,7 +476,7 @@ module.exports = {
 	testReadRaw: function(test) {
 		var data=[0,0,0,0,0,0,0,0,0,0];
 
-		var testBuf = new Buffer(data.length);
+		var testBuf = Buffer.alloc(data.length);
 		testBuf.fill(testVal);//Fill buffer with success data
 		dev.readRaw(data,function(res) {
 			//Error

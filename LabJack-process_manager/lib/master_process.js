@@ -353,7 +353,7 @@ class NewProcessManager extends EventEmitter {
             if (createStreamInterface) {
                 // console.log("HERE", subProcess.stdio);
                 this.subProcessPipe = this.subProcess.stdio[4];
-                this.subProcessPipe.write(new Buffer('awesome'));
+                this.subProcessPipe.write(Buffer.from('awesome'));
                 // console.log('here!', Object.keys(this.subProcessPipe));
 
                 // trying to read data from a subprocess

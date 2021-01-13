@@ -15,8 +15,6 @@ var dns = require('dns');
 var modbus_map = require('ljswitchboard-modbus_map').getConstants();
 var semver = require('semver');
 
-var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');
-
 var driver_const = labjack_nodejs.driver_const;
 
 var DEBUG_CHECK_ERASE = false;
@@ -568,12 +566,7 @@ this.readFirmwareFile = function(fileSrc, bundle)
             return;
         }
 
-        var imageFile;
-        if(USE_MODERN_BUFFER_ALLOC) {
-            imageFile = Buffer.from(data);
-        } else {
-            imageFile = new Buffer(data);
-        }
+        const imageFile = Buffer.from(data);
         var imageInformation;
 
         try {

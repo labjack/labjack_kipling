@@ -6,7 +6,6 @@ var constants = require('ljswitchboard-ljm_driver_constants');
 var modbus_map = require('ljswitchboard-modbus_map');
 var modbusMap = modbus_map.getConstants();
 var data_parser = require('ljswitchboard-data_parser');
-var semver = require('semver');
 
 var NUM_OPEN_DEVICES = 0;
 var FAKE_IP_ADDRESS = '192.168.1.12';
@@ -42,13 +41,13 @@ function device() {
 		},
 		'ETHERNET_IP': function() {
 			// return 192.168.1.96
-			return 0xC0A80160
+			return 0xC0A80160;
 		},
 		'WIFI_IP': function() {
 			// return 192.168.1.97
 			var dtn = constants.deviceTypes[self.devAttr.deviceType];
 			if(dtn == 7) {
-				return 0xC0A80161
+				return 0xC0A80161;
 			} else {
 				return 0;
 			}
@@ -311,12 +310,7 @@ function device() {
 	
 	this.readRaw = function(data, onErr, onSucc) {
 		saveCall('readRaw', arguments);
-		var aData;
-		if(semver.gt(process.version, '8.0.0')) {
-            aData = Buffer.alloc(data.length);
-        } else {
-            aData = new Buffer(data.length);
-        }
+		const aData = Buffer.alloc(data.length);
 		aData.fill(0);
 		finishCall('readRaw', aData).then(onSucc, onErr);
 	};

@@ -3,7 +3,6 @@ var q = require('q');
 var driver_const = require('labjack-nodejs').driver_const;
 var stats = require('stats-lite');
 var semver = require('semver');
-var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');
 
 var DEBUG_HW_TESTS = false;
 var ENABLE_ERROR_OUTPUT = false;
@@ -268,13 +267,7 @@ var getInterpretFlashResults = function(curatedDevice) {
         // Convert the read calibration data to floating point values
         var floatingPointData = [];
         data.results.forEach(function(result){
-            var buf;
-
-            if(USE_MODERN_BUFFER_ALLOC) {
-                buf = Buffer.alloc(4);
-            } else {
-                buf = new Buffer(4);
-            }
+            const buf = Buffer.alloc(4);
             buf.writeUInt32BE(result,0);
             var floatVal = buf.readFloatBE(0);
             floatingPointData.push(floatVal);
@@ -1253,12 +1246,7 @@ function getCalValues(bundle) {
         // Convert the read calibration data to floating point values
         var floatingPointData = [];
         data.results.forEach(function(result){
-            var buf;
-            if(USE_MODERN_BUFFER_ALLOC) {
-                buf = Buffer.alloc(4);
-            } else {
-                buf = new Buffer(4);
-            }
+            const buf = Buffer.alloc(4);
             buf.writeUInt32BE(result,0);
             var floatVal = buf.readFloatBE(0);
             floatingPointData.push(floatVal);

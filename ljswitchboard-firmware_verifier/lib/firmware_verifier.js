@@ -6,7 +6,7 @@ var q = require('q');
 var DEBUG_FIRMWARE_CHECK = false;
 
 var parseFirmwareFile = function(parsedData, fileData) {
-    var imageFile = new Buffer(fileData);
+    var imageFile = Buffer.from(fileData);
 
     try {
         

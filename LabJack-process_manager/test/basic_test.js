@@ -279,7 +279,7 @@ describe('basic_test', function() {
 			// Check to make sure that the the sendReceive/master_process
 			// functions were called properly
 			// console.log('retData', returnedData[5].retData);
-			// var buff = new Buffer(1);
+			// var buff = Buffer.alloc(1);
 			// console.log('types', Buffer.isBuffer(buff), Buffer.isBuffer(returnedData[5].retData));
 			assert.deepEqual(returnedData, expectedReturnData, 'Issue with send receive messaging');
 			done();
