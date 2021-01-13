@@ -195,13 +195,23 @@ function installLocalProductionDependencies(name, directory) {
 	});
 }
 
+async function innerInstallProductionDependency(name, directory) {
+	try {
+		await promiseExecute(`npm install -f --production`, directory, path.join(directory, 'debug.log'));
+	} catch (err) {
+		const debugLog = fs.readFileSync(path.join(directory, 'debug.log'));
+		console.log('debugLog:', debugLog);
+	}
+}
+
 function installProductionDependency(dependency) {
 	const name = dependency.name;
 	const dependency_key = dependency.key;
 	const directory = dependency.directory;
 
 	return installLocalProductionDependencies(name, directory)
-		.then(function() {
+		.then(async function() {
+			await innerInstallProductionDependency(name, directory);
 			installStatus[dependency_key] = true;
 			printStatus('installProductionDependency: ' + name);
 		}).catch(err => {
@@ -213,7 +223,7 @@ function installProductionDependencies() {
 	printStatus('main level');
 
 	const promises = projectDirectories
-		// .filter(dir => dir.name === 'ljswitchboard-io_manager')
+		// .filter(dir => dir.name === 'ljswitchboard-electron_main')
 		.map(installProductionDependency);
 
 	Promise.allSettled(promises)
