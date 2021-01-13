@@ -2300,7 +2300,7 @@ function device(useMockDevice) {
 			}
 		}
 		function onError(err) {
-			console.log('In isAuthorized onError')
+			console.log('In isAuthorized onError');
 			defered.reject(err);
 		}
 

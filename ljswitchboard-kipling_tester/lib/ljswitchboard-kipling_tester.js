@@ -65,10 +65,11 @@ exports.startPackage = async function (package_loader) {
 
 	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 	const winHeight = height - 35;
-	const winWidth = width / 2;
+	const winWidth = Math.floor(width / 2);
 	const testWinPos = 0;
 	const kiplingWinPos = winWidth;
 
+	console.log('ddd', { x: testWinPos, y: 0, width: winWidth - 300, height: winHeight });
 	kiplingTesterWindow.win.setBounds({ x: testWinPos, y: 0, width: winWidth - 300, height: winHeight });
 
 	const managedKiplingWindow = window_manager.getWindow('kipling');

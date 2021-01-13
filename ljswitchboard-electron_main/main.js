@@ -42,9 +42,7 @@ const gui = {
 
     return window;
   },
-  App: {
-    manifest: packageData
-  },
+  appManifest: packageData,
   quitApp() {
     app.quit();
   },
@@ -173,6 +171,7 @@ async function createWindow() {
   // window_manager.closeWindow('')
 
   if (package_loader.hasPackage('kipling_tester')) {
+    console.log('HAAAAAAAAAAAAAAAAAAAAAAS');
     const kipling_tester = package_loader.getPackage('kipling_tester');
     await window_manager.openPackageWindow(kipling_tester);
     await kipling_tester.startPackage(package_loader);

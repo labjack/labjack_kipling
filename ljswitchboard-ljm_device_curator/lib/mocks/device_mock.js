@@ -10,7 +10,7 @@ var data_parser = require('ljswitchboard-data_parser');
 var NUM_OPEN_DEVICES = 0;
 var FAKE_IP_ADDRESS = '192.168.1.12';
 var NO_IP_ADDRESS = '0.0.0.0';
-var TEST_SERIAL_NUMBER = 0123456789;
+var TEST_SERIAL_NUMBER = 123456789;
 
 function device() {
 	this.handle = null;
@@ -444,6 +444,9 @@ function device() {
 		finishCall('close', result).then(onSucc, onErr);
 	};
 
+	this.isAuthorized = function(onError, onSuccess) {
+		onSuccess(true);
+	};
 
 	var self = this;
 }
