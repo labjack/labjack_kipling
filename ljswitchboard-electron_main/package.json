@@ -4,7 +4,7 @@
   "private": true,
   "description": "The primary loading file for LabJack's Kipling program.",
   "author": {
-    "name": "Grzegorz Godlewski",
+    "name": "LabJack Corporation (https://labjack.com)",
     "url": "https://labjack.com"
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-electron_main",
