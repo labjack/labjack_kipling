@@ -1,0 +1,386 @@
+<div class="device-info-div">
+	<img id="device-image" class="product-image" src="{{staticFiles}}/img/devices/{{productType}}.png">
+	<p/>
+	<p style="display:none" class="todo-paragraph">TODO: Select a specific device image for being connected over Ethernet, USB.  Have it detect whether or not the Ethernet cable should be plugged in by determining if the device has an IP address.  The image should switch when a user connects/disconnects their ethernet cable.</p>
+	<h3>Device Overview</h3>
+	<div class="info-section" id="general-section">
+		<div class="pane-popover">
+			General
+		</div>
+		<div class="important-info">
+			<div class="device-detail">
+				Serial Number:
+				<span id="serial-number-display" class="selectableText">{{serialNumber}}</span>
+			</div>
+			<div class="device-detail">
+				Model:
+				<span id="type-display" class="selectableText">{{productType}}</span>
+			</div>
+			<div id="name-display-holder" class="device-detail">
+				Name:
+				<div id="name-display">
+					<span id="current-name-display" class="selectableText">{{DEVICE_NAME_DEFAULT}}</span>
+					<button id="change-name-link" class="icon-pencil btn btn-link" title="Edit Device Name"></button>
+					{{!--<div><button id="change-name-link" class="btn">Change Name</button></div>--}}
+					<div id="change-name-controls">
+						<div><input type="text" id="new-name-input" placeholder="new name"></div>
+						<div>
+							<button id="change-name-button" class="btn">Change Name</button>
+							<button id="cancel-change-name-button" class="btn">Cancel</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="device-detail">
+			Ethernet Mac Address: 
+			<span class="selectableText">
+				{{ETHERNET_MAC.val}}
+			</span>
+		</div>
+
+		{{#if isAuthorized}}
+		<div class="device-detail">
+			Authorization Status: 
+			<span id="authorization-status-display" class="authorization-message selectableText {{#if isAuthorized.val}}isa_success{{else}}isa_error{{/if}}" title="{{isAuthorized.message}}">
+				{{isAuthorized.shortMessage}}&nbsp;&nbsp;<span class="{{#if isAuthorized.val}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
+			</span>
+		</div>
+		{{/if}}
+
+		{{!--{{#unless calibrationStatus.overall}}
+		{{#if calibrationStatus}}
+		<div class="device-detail">
+			Calibration Status: 
+			<span id="calibration-status-display" class="calibration-message selectableText {{#if calibrationStatus.overall}}isa_success{{else}}isa_error{{/if}}" title="{{calibrationStatus.message}}">
+				{{calibrationStatus.shortMessage}}&nbsp;&nbsp;<span class="{{#if calibrationStatus.overall}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
+			</span>
+		</div>
+		{{/if}}
+		{{/unless}}--}}
+
+		{{#if hwIssues}}
+		<div class="selectableText">
+		{{#unless hwIssues.overallResult}}
+		<div class="device-detail">
+			Hardware Status:
+			<span id="calibration-status-display" class="calibration-message selectableText {{#if hwIssues.overallResult}}isa_success{{else}}isa_error{{/if}}" title="{{hwIssues.overallMessage}}">
+				{{hwIssues.shortMessage}}&nbsp;&nbsp;<span class="{{#if hwIssues.overallResult}}icon-checkmark{{else}} icon-cross{{/if}}"></span>
+			</span>
+		</div>
+		{{#each hwIssues.testResults}}
+		{{#unless status}}
+		<div class="device-detail">
+			<strong><span title="{{description}}">{{name}}</span></strong>
+			<br>- <span>{{testMessage}}</span>
+		</div>
+		{{/unless}}
+		{{/each}}
+		<div class="device-detail">
+			<span>Possible hardware issues have been detected, please <a id="lj-link-holder-hw-issues-detected" class="lj-link-holder">click here</a> for more details.</span>
+		</div>
+		{{/unless}}
+		</div>
+		{{/if}}
+
+		<div class="block-separator"/>
+		<div class="pane-popover">
+			Versions
+		</div>
+		<div id="firmware-display-holder" class="device-detail selectableText">
+			Hardware Version: 
+			<span id="firmware-display" class="">
+					{{HARDWARE_VERSION.str}}
+			</span>
+		</div>
+		<div id="firmware-display-holder" class="device-detail selectableText">
+			Firmware Version: 
+			<span id="firmware-display" class="">
+					{{FIRMWARE_VERSION}}
+			</span>
+		</div>
+		<div id="bootloader-display-holder" class="device-detail selectableText">
+			Bootloader Version: 
+			<span id="bootloader-display" class="">
+					{{BOOTLOADER_VERSION}}
+			</span>
+		</div>
+		<div id="recovery-firmware-display-holder" class="device-detail selectableText">
+			Recovery Firmware Version: 
+			<span id="bootloader-display" class="">
+					{{recoveryFirmwareVersion.val}}
+			</span>
+		</div>
+		<div class="block-separator"/>
+		<div class="pane-popover">
+			Current Status
+		</div>
+
+		<div class="device-detail selectableText">
+			Ethernet IP Address: 
+			<span id="ethernet-ip-address" class="">
+				{{#if ETHERNET_IP.isReal}}{{ETHERNET_IP.val}}{{else}}Not Connected{{/if}}
+			</span>
+		</div>
+
+		 <!-- Not applicable for T4 -->
+		<div class="device-detail selectableText">
+			Device Temperature:
+			<span id="internal-device-temperature" class="">
+				{{TEMPERATURE_DEVICE_K.val}}
+			</span> K
+		</div>
+
+
+		<div class="block-separator"/>
+		<div class="block-separator"/>
+		<div class="pane-popover">
+			Enabled Features
+		</div>
+		<div id="power-overview">
+			<div><span class="power-indicator {{#if WATCHDOG_ENABLE_DEFAULT.val }}powered{{/if}}"></span> Watchdog {{#if WATCHDOG_ENABLE_DEFAULT.val }}Enabled{{/if}} {{#unless WATCHDOG_ENABLE_DEFAULT.val}}Disabled{{/unless}}</div>
+			<div><span class="power-indicator {{#if POWER_LED.val }}powered{{/if}}"></span> Device LED {{#if POWER_LED.val }}Powered{{/if}} {{#unless POWER_LED.val}}Not Powered{{/unless}}</div>
+		</div>
+
+		<!--
+		<div class="block-separator"/>
+		<div class="pane-popover">
+			Current Time
+		</div>
+		<div class="device-detail selectableText">
+			Device Time: 
+			<span id="rtc-device-time" class="">
+				{{RTC_TIME_S.t7TimeStr}}
+			</span>
+		</div>
+		<div class="device-detail selectableText">
+			System Time: 
+			<span id="rtc-system-time" class="">
+				{{RTC_TIME_S.pcTimeStr}}
+			</span>
+		</div>
+		<div class="device-detail selectableText">
+			SNTP Update Interval: 
+			<span id="rtc-system-time" class="">
+				{{SNTP_UPDATE_INTERVAL.str}}
+			</span>
+		</div>
+		-->
+
+		<!-- <div class="device-detail selectableText">
+			Time Difference (s): 
+			<span id="rtc-time-difference" class="">
+				{{RTC_TIME_S.timeDifferenceSec}}
+			</span>
+		</div>
+		<div>
+		<button id="set_rtc_time" class="btn btn-mini">Set Device Time to System Time.</button>
+		</div>
+		{{#unless HARDWARE_INSTALLED.rtc }}
+		<div class="device-detail selectableText">
+			Device time is not kept by a battery-backed</br> RTC. It will be reset on power-cycle!
+		</div>
+		{{/unless}}
+		 -->
+	</div>
+</div>
+<div class="device-links-div">
+	{{#if enableBetaFeatures}}
+	{{/if}}
+	{{#if isPlatformWindows}}
+	<!-- <p style="padding: 0px;margin: 0px;}"><strong>BETA FEATURE</strong> (Windows Only)</p> -->
+	<h2>Launch Applications</h2>
+	<ul style="margin:0px">
+		<!-- <button id="lj-config-and-open-link-holder-ljLogMApp" class="btn btn-mini lj-link-holder" title="Open the LJLogM app after configuring the _open.cgf file.">
+			<img style="width:30px;" src="C:/Users/chris/Dropbox/LabJack-Shared/Shared VI's/LabVIEW_LJM/LJLogM/LJLogM_2.ico"/>
+			<br><span>LJLogM</span>
+		</button>
+		<button id="lj-config-and-open-link-holder-ljStreamMApp" class="btn btn-mini lj-link-holder" title="Open the LJStreamM app after configuring the _open.cgf file.">
+			<img style="width:30px;" src="C:/Users/chris/Dropbox/LabJack-Shared/Shared VI's/LabVIEW_LJM/LJStreamM/LJStreamM_2.ico"/>
+			<br><span>LJStreamM</span>
+		</button> -->
+		<div class="btn-group">
+			<button class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#" title="Open the LJLogM app after configuring the _open.cgf file.">
+			<img style="width:30px;" src="{{staticFiles}}/img/LJLogM_2.ico"/>
+			<br><span>LJLogM</span>
+			<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<!-- <li><a href="#" id="lj-config-and-open-link-holder-ljLogMApp">Current Connection</a></li>
+				<li class="divider"></li> -->
+				{{#if availableConnections.isUSB}}
+				<li><a href="#" id="lj-config-and-open-link-holder-ljLogMApp-USB">USB</a></li>
+				{{/if}}
+				{{#if availableConnections.isEth}}
+				<li><a href="#" id="lj-config-and-open-link-holder-ljLogMApp-Ethernet">Ethernet</a></li>
+				{{/if}}
+				{{#if availableConnections.isWiFi}}
+				<li><a href="#" id="lj-config-and-open-link-holder-ljLogMApp-WiFi">WiFi</a></li>
+				{{/if}}
+			</ul>
+		</div>
+		<div class="btn-group">
+			<button class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#" title="Open the LJStreamM app after configuring the _open.cgf file.">
+			<img style="width:30px;" src="{{staticFiles}}/img/LJStreamM_2.ico"/>
+			<br><span>LJStreamM</span>
+			<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<!-- <li><a href="#" id="lj-config-and-open-link-holder-ljStreamMApp">Current Connection</a></li>
+				<li class="divider"></li> -->
+				{{#if availableConnections.isUSB}}
+				<li><a href="#" id="lj-config-and-open-link-holder-ljStreamMApp-USB">USB</a></li>
+				{{/if}}
+				{{#if availableConnections.isEth}}
+				<li><a href="#" id="lj-config-and-open-link-holder-ljStreamMApp-Ethernet">Ethernet</a></li>
+				{{/if}}
+				{{#if availableConnections.isWiFi}}
+				<li><a href="#" id="lj-config-and-open-link-holder-ljStreamMApp-WiFi">WiFi</a></li>{{/if}}
+			</ul>
+		</div>
+	</ul>
+	<!-- <p style="padding: 0px;margin: 0px;}">(Windows Only)</p> -->
+	<br>
+	{{/if}}
+	<h2>{{deviceTypeName}} Support Resources</h2>
+	<h3>Important Device Website Links</h3>
+	<ul>
+		<li><div title="Open the {{deviceTypeName}} product page in your default browser"><a id="lj-link-holder-productPage" class="lj-link-holder">Product Page</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} getting started/quickstart guide in your default browser"><a id="lj-link-holder-gettingStarted" class="lj-link-holder">Getting Started/Quickstart</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} datasheet in your default browser"><a id="lj-link-holder-datasheet" class="lj-link-holder">Datasheet</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} scripting datasheet page in your default browser"><a id="lj-link-holder-luaScripting" class="lj-link-holder">Lua Scripting</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} Support Homepage in your default browser"><a id="lj-link-holder-supportPage" class="lj-link-holder">Support</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} firmware page in your default browser"><a id="lj-link-holder-firmwarePage" class="lj-link-holder">Firmware Changelog</a></div></li>
+	</ul>
+	<h3>Other {{deviceTypeName}} Applications</h3>
+	<ul>
+		<li><div title="Open the LJLogM application documentation page in your default browser"><a id="lj-link-holder-ljLogMApp" class="lj-link-holder">LJLogM</a>- data logging</div></li>
+		<li><div title="Open the LJStreamM application documentation page in your default browser"><a id="lj-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM</a>- high speed data logging</div></li>
+	</ul>
+	<h3>Example Code</h3>
+	<ul>
+		<li><div title="Open the {{deviceTypeName}} C/C++ Examples page in your default browser"><a id="lj-link-holder-c-cpp-examples" class="lj-link-holder">C/C++</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} LabVIEW Examples page in your default browser"><a id="lj-link-holder-labview-examples" class="lj-link-holder">LabVIEW</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} Python Examples page in your default browser"><a id="lj-link-holder-python-examples" class="lj-link-holder">Python</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} DAQFactory Examples page in your default browser"><a id="lj-link-holder-daqfactory-examples" class="lj-link-holder">DAQFactory</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} Java Examples page in your default browser"><a id="lj-link-holder-java-examples" class="lj-link-holder">Java</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} .NET(C#,VB) Examples page in your default browser"><a id="lj-link-holder-dotnet-examples" class="lj-link-holder">.NET(C#,VB)</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} Node.js Examples page in your default browser"><a id="lj-link-holder-nodejs-examples" class="lj-link-holder">Node.js</a></div></li>
+		<li><div title="Open the {{deviceTypeName}} More Examples page in your default browser"><a id="lj-link-holder-all-examples" class="lj-link-holder">More</a></div></li>
+	</ul>
+	<h3>Lua Script Examples</h3>
+	<ul>
+		<li><div title="Open the {{deviceTypeName}} Lua Scripting Examples page in your default browser"><a id="lj-link-holder-lua-scripting-examples" class="lj-link-holder">Lua Scripting</a></div></li>
+	</ul>
+	<h3>Programming Resources</h3>
+	<ul>
+		<li><div title="Open the modbus map page in your default browser"><a id="lj-link-holder-modbusMap" class="lj-link-holder">LJM Modbus Map</a></div></li>
+		<li><div title="Open the LJM Library Documents page in your default browser"><a id="lj-link-holder-ljmAPIDocs" class="lj-link-holder">LJM Library Docs</a></div></li>
+	</ul>
+	<p>Note 1: Clicking on these links will open up your computer's default web browser and take you to the labjack.com website.<br>
+	Note 2: When running a secondary application (LJLogM/LJStreamM) you may need to close the application in order for it to be used in Kipling again.</br><br>
+	</p>
+
+
+	{{#if enableBetaFeatures}}
+	{{#if isPlatformWindows}}
+	<p><strong>BETA FEATURE, APP OPENING</strong></p>
+	<h3>Windows Application Shortcuts</h3>
+	<ul>
+		<li><div title="Start the LJLogM application"><a id="lj-app-link-holder-ljLogMApp" class="lj-link-holder">LJLogM</a>- data logging</div></li>
+		<li><div title="Start the LJStreamM application"><a id="lj-app-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM</a>- high speed data logging</div></li>
+		<!--<li><div title="Open the MicroSD Card Utility application documentation page in your default browser"><a id="lj-app-link-holder-microSDApp" class="lj-link-holder">T7 microSD Card Utility</a>- file downloader</div></li>-->
+	</ul>
+	<p>If these applications aren't properly opening a device edit the appropriate _open.cfg file (links below) to instruct them to open the correct device.</p>
+	<h3>Configuration Files for Logging Applications</h3>
+	<ul>
+		<li><div title="Open the LJLogM open config file in your default text editor"><a id="lj-file-link-holder-ljLogMApp" class="lj-link-holder">LJLogM_open.cfg</a></div></li>
+		<li><div title="Open the LJStreamM open config file in your default text editor"><a id="lj-file-link-holder-ljStreamMApp" class="lj-link-holder">LJStreamM_open.cfg</a></div></li>
+	</ul>
+	{{/if}}
+	{{/if}}
+
+	<p style="display:none">TODO: Add button/config-tool that lets user configure LJLogM/LJStreamM to open the currently connected device.  Consider just opening the file in a user's default text editor and telling them what the file path is.  The tool can automatically search the user's Let the user configure Kipling to remember where each application's default directory is.  You can do this by running a bash command: http://stackoverflow.com/questions/8066679/how-to-do-a-simple-file-search-in-cmd, On Windows: "dir /b/s LJLogM.cfg".	Add a quick-disconnect/re-connect button to the module-header section.  Add an Open-Application button for LJLogM/LJStreamM/T7uSDCardUtility.</p>
+	<script>
+
+
+		var linksToBindTo = [{
+			'id': '#lj-link-holder-productPage',
+			'url': "https://labjack.com/{{deviceTypeName}}"
+		}, {
+			'id': '#lj-link-holder-gettingStarted',
+			'url': "https://labjack.com/support/quickstart/{{deviceTypeName}}"
+		}, {
+			'id': '#lj-link-holder-datasheet',
+			'url': "https://labjack.com/support/datasheets/t-series"
+			// 'url': "https://labjack.com/support/datasheets/{{deviceTypeName}}"
+		}, {
+			'id': '#lj-link-holder-luaScripting',
+			'url': "https://labjack.com/support/datasheets/t-series/scripting"
+			// 'url': "https://labjack.com/support/datasheets/{{deviceTypeName}}/scripting"
+		}, {
+			'id': '#lj-link-holder-supportPage',
+			'url': "https://labjack.com/support/{{deviceTypeName}}"
+		}, {
+			'id': '#lj-link-holder-hw-issues-detected',
+			'url': "https://labjack.com/support/software/applications/t-series/kipling/device-information/hardware-issues-detected"
+		}, {
+			'id': '#lj-link-holder-firmwarePage',
+			'url': "https://labjack.com/support/firmware/{{deviceTypeName}}"
+		}, {
+			'id': '#lj-link-holder-ljLogMApp',
+			'url': "https://labjack.com/support/software/applications/ljlogm"
+		}, {
+			'id': '#lj-link-holder-ljStreamMApp',
+			'url': "https://labjack.com/support/software/applications/ljstreamm"
+		}, {
+			'id': '#lj-link-holder-microSDApp',
+			'url': "https://labjack.com/news/beta-t7-%C2%B5sd-card-file-downloader"
+		}, {
+			'id': '#lj-link-holder-c-cpp-examples',
+			'url': "https://labjack.com/support/software/examples/ljm/c"
+		}, {
+			'id': '#lj-link-holder-labview-examples',
+			'url': "https://labjack.com/support/software/examples/ljm/labview"
+		}, {
+			'id': '#lj-link-holder-python-examples',
+			'url': "https://labjack.com/support/software/examples/ljm/python"
+		}, {
+			'id': '#lj-link-holder-daqfactory-examples',
+			'url': "https://labjack.com/support/software/examples/ljm/daqfactory"
+		}, {
+			'id': '#lj-link-holder-nodejs-examples',
+			'url': "https://labjack.com/support/software/examples/ljm/nodejs"
+		}, {
+			'id': '#lj-link-holder-java-examples',
+			'url': "https://labjack.com/support/software/examples/ljm/java"
+		}, {
+			'id': '#lj-link-holder-dotnet-examples',
+			'url': "https://labjack.com/support/software/examples/ljm/net"
+		}, {
+			'id': '#lj-link-holder-all-examples',
+			'url': "https://labjack.com/support/software/examples/ljm"
+		}, {
+			'id': '#lj-link-holder-modbusMap',
+			'url': "https://labjack.com/support/software/api/modbus/modbus-map"
+		}, {
+			'id': '#lj-link-holder-ljmAPIDocs',
+			'url': "https://labjack.com/support/software/api/ljm"
+		}, {
+			'id': '#lj-link-holder-lua-scripting-examples',
+			'url': "https://labjack.com/support/software/examples/lua-scripting"
+		}];
+
+
+		linksToBindTo.forEach(function(linkToBindTo) {
+			$(linkToBindTo.id).unbind();
+			$(linkToBindTo.id).bind('click',function(){
+				if(typeof(gui) === 'undefined') {
+					gui = require('nw.gui');
+				}
+				gui.Shell.openExternal(linkToBindTo.url);
+			});
+		});
+	</script>
+</div>
+{{!--<pre>{{printContext}}</pre>--}}

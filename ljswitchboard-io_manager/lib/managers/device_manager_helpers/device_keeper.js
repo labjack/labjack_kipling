@@ -639,6 +639,7 @@ function createDeviceKeeper(io_delegator, link) {
 		.then(function(data) {
 			defered.resolve(data);
 		}, defered.reject);
+
 		return defered.promise;
 	};
 
@@ -682,6 +683,12 @@ function createDeviceKeeper(io_delegator, link) {
 	this.addMockDevice = function(deviceInfo) {
 		var defered = q.defer();
 		deviceScanner.addMockDevice(deviceInfo)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	this.removeAllMockDevices = function() {
+		var defered = q.defer();
+		deviceScanner.removeAllMockDevices()
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};

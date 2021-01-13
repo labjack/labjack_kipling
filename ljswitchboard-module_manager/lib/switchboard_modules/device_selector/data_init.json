@@ -4,7 +4,8 @@
 		"scanEthernet": true,
 		"scanWiFi": false,
 		"scanEthernetTCP": false,
-		"scanWiFiTCP": false
+		"scanWiFiTCP": false,
+		"enableDemoMode": false
 	},
 	"advancedScanOptions": false,
 	"directConnectParams": {

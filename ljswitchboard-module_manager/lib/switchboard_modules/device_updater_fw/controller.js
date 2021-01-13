@@ -40,7 +40,6 @@ function module() {
     // var update_manager_vm = update_manager.vm;
 
     var device_updater_service = TASK_LOADER.tasks.device_updater_service;
-    console.log('TASK_LOADER.tasks', TASK_LOADER, TASK_LOADER.tasks);
     var deviceUpdaterService = device_updater_service.deviceUpdaterService;
     this.dts = deviceUpdaterService;
 
@@ -69,7 +68,12 @@ function module() {
         console.error('Error getting cached T4 versions');
     }
 
-
+    const defaultVersionData = {
+        'current': [],
+        'beta': [],
+        'old': [],
+        'isValid': false
+    };
 
     this.moduleContext.t7VersionData = this.t7VersionData;
     this.moduleContext.t4VersionData = this.t4VersionData;
@@ -77,6 +81,7 @@ function module() {
     this.availableVersionData = {
         'T4': this.t4VersionData,
         'T7': this.t7VersionData,
+        'T8': defaultVersionData,
     };
     this.currentDTVersionData = {};
     this.selectedDT = '';
@@ -181,14 +186,17 @@ function module() {
         onSuccess();
     };
 
-    var deviceSpecificInfo = {
+    const deviceSpecificInfo = {
         'T4': {
             'changeLogLink': 'https://labjack.com/support/firmware/t4',
         },
         'T7': {
             'changeLogLink': 'https://labjack.com/support/firmware/t7',
-        }
-    }
+        },
+        'T8': {
+            'changeLogLink': 'https://labjack.com/support/firmware',
+        },
+    };
     this.onDeviceConfigured = function(framework, devices, setupBindings, onError, onSuccess) {
 
 

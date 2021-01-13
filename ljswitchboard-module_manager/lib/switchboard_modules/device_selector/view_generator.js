@@ -46,6 +46,7 @@ var createDeviceSelectorViewGenerator = function() {
 		{'id': '#device_scan_results', 'name': 'device_scan_results'},
 		{'id': '#ethernet_tcp_scan_option', 'name': 'ethernet_tcp_scan_option'},
 		{'id': '#wifi_tcp_scan_option', 'name': 'wifi_tcp_scan_option'},
+		{'id': '#demo_scan_option', 'name': 'demo_scan_option'},
 		{'id': '.advanced-scan-option', 'name': 'advanced_scan_options'},
 		{'id': '.direct-connect-options-page-data', 'name': 'direct_connect_options_page_data'},
 		{'id': '#device_type_input', 'name': 'device_type_input'},

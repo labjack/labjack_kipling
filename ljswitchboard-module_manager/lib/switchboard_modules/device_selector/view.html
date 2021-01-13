@@ -64,6 +64,11 @@
                         <td><span class="scan-medium">WiFi TCP</span></td>
                         <td><span class="time-estimate">(10-60s)</span></td>
                     </tr>
+                    <tr class="advanced-scan-option" id="demo_scan_option" title="Display supported demo devices." style="{{#if advancedScanOptions}}{{else}}display:none;{{/if}}" unselectable="on">
+                        <td><input id="demo_scan_enabled" type="checkbox" value="" {{#if scanOptions.enableDemoMode}}checked{{/if}}/></td>
+                        <td><span class="scan-medium">Demo Mode</span></td>
+                        <td><span class="time-estimate"></span></td>
+                    </tr>
                 </tbody>
             </table>
             <button id="refresh_devices_button" class="btn btn-primary" style="width:150px; margin:0px 0px 0px 20px;display:none;"><span class="icon-refresh-3"></span> Refresh Devices</button>

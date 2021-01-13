@@ -110,8 +110,8 @@ describe('mock_device_selector', function() {
 		const t4s = await kiplingWin.webContents.executeJavaScript('$(\'.DEVICE_TYPE_T4 .device\').length;');
 		assert.strictEqual(t4s, 1, 'Unexpected number of T4s found');
 
-		const t5s = await kiplingWin.webContents.executeJavaScript('$(\'.DEVICE_TYPE_T5 .device\').length;');
-		assert.strictEqual(t5s, 1, 'Unexpected number of T5s found');
+		const t8s = await kiplingWin.webContents.executeJavaScript('$(\'.DEVICE_TYPE_T8 .device\');');
+		assert.strictEqual(t8s.length, 1, 'Unexpected number of T8s found');
 	});
 	it('Enable device scanning', function (done) {
 		if(testOptions.realRefresh) {

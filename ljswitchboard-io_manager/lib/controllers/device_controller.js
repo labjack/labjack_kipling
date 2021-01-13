@@ -10,6 +10,7 @@ const io_endpoint_key = constants.device_endpoint_key;
 
 // device creators:
 const ljm_device_creator = require('./device_helpers/ljm_device');
+const t8_device_creator = require('./device_helpers/t8_device');
 const t7_device_creator = require('./device_helpers/t7_device');
 const t4_device_creator = require('./device_helpers/t4_device');
 const t5_device_creator = require('./device_helpers/t5_device');
@@ -40,6 +41,7 @@ const missing_funcs_to_ignore = [
 
 	// Lua script functions
 	// 'stopLuaScript', 'startLuaScript', 'loadLuaScript',
+
 
 	// File I/O Functions
 	// 'getCWD', 'readdir', 'changeDirectory',
@@ -423,8 +425,10 @@ class DeviceController extends EventEmitter {
 				deviceCreator = t5_device_creator;
 			} else if (deviceInfo.deviceType === driver_constants.deviceTypes.digit) {
 				deviceCreator = digit_device_creator;
+			} else if (deviceInfo.deviceType == driver_constants.deviceTypes.t8) {
+				deviceCreator = t8_device_creator;
 			} else {
-				console.warn('Creating a non-standard ljm device object', deviceInfo);
+				console.warn('Creating a default ljm device object', deviceInfo);
 				deviceCreator = ljm_device_creator;
 			}
 
