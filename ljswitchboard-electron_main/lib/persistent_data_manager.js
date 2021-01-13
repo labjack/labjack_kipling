@@ -19,19 +19,15 @@ class PersistentDataManager {
 
 	initializeDirectory() {
 		if (fs.existsSync(this.basePath)) {
+			const files = fs.readdirSync(this.basePath);
 			try {
+				for (const file of files) {
+					console.log('Removing: ', path.join(this.basePath, file));
+					rmdir.sync(path.join(this.basePath, file));
+				}
 				rmdir.sync(this.basePath);
 			} catch (err) {
-				try {
-					const files = fs.readdirSync(this.basePath);
-					for (const file of files) {
-						console.log('Removing: ', path.join(this.basePath, file));
-						rmdir.sync(path.join(this.basePath, file));
-					}
-				} catch (e) {
-					console.error(e);
-					throw 'failed to remove dir: ' + this.basePath + ' ' + e.message;
-				}
+				console.error(err);
 			}
 		}
 
