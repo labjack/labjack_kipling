@@ -416,26 +416,24 @@ function module() {
         );
     };
 
-    var loadLuaFile = function(data, onSuccess) {
+    var loadLuaFile = async function(data, onSuccess) {
         self.printUserDebugInfo('Loading file....');
 
         try {
-            var eventStr = FILE_BROWSER.eventList.FILE_SELECTED;
-            FILE_BROWSER.removeAllListeners(eventStr);
-            FILE_BROWSER.once(eventStr, function loadSelectedLuaScriptFile(fileLoc) {
+            const fileLoc = await FILE_BROWSER.browseForFile({'filters':'lua'});
+            if (fileLoc) {
                 self.luaController.loadScriptFromFile(fileLoc)
-                .then(
-                    self.handleIOSuccess(
-                        setActiveScriptInfo(onSuccess),
-                        'Script File Loaded'
-                    ),
-                    self.handleIOError(
-                        setActiveScriptInfo(onSuccess),
-                        'Err: Script File Not Loaded'
-                    )
-                );
-            });
-            FILE_BROWSER.browseForFile({'filters':'.lua'});
+                    .then(
+                        self.handleIOSuccess(
+                            setActiveScriptInfo(onSuccess),
+                            'Script File Loaded'
+                        ),
+                        self.handleIOError(
+                            setActiveScriptInfo(onSuccess),
+                            'Err: Script File Not Loaded'
+                        )
+                    );
+            }
         } catch(err) {
             console.error('Error loadingLuaFile', err);
         }

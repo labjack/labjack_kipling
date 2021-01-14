@@ -714,23 +714,12 @@ function module() {
     this.fileSelectedWithFileBrowser = function(fileLoc) {
         self.updateSelectedFWFile(fileLoc);
     };
-    this.browseForFile = function() {
+    this.browseForFile = async function() {
         try {
-
-            // var chooser = $('#file-dialog-hidden');
-            // chooser.off('change');
-            // chooser.one('change', function(evt) {
-            //     var fileLoc = $(this).val();
-            //     console.log('Selected File', fileLoc);
-            //     self.updateSelectedFWFile(fileLoc);
-            //     // $('#file-loc-input').val(fileLoc);
-            // });
-
-            // chooser.trigger('click');
-            var eventStr = FILE_BROWSER.eventList.FILE_SELECTED;
-            FILE_BROWSER.removeAllListeners(eventStr);
-            FILE_BROWSER.once(eventStr, self.fileSelectedWithFileBrowser);
-            FILE_BROWSER.browseForFile({'filters':'.bin'});
+            const fileLoc = await FILE_BROWSER.browseForFile({'filters':'bin'});
+            if (fileLoc) {
+                self.fileSelectedWithFileBrowser(fileLoc);
+            }
         } catch(err) {
             console.error('Error in browseForFile', err);
         }

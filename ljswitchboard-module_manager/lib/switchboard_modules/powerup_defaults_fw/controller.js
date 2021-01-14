@@ -12,7 +12,8 @@
 // Constant that determines device polling rate.  Use an increased rate to aid
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000;
-var fs = require('fs');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -866,28 +867,26 @@ function module() {
             })
             return defered.promise;
         },
-        browseForConfigFile: function(guiObj) {
+        browseForConfigFile: async function(guiObj) {
             var defered = q.defer();
             // console.log('In the browseForConfigFile click handler...');
 
             try {
-                var fileSelectedEventStr = FILE_BROWSER.eventList.FILE_SELECTED;
-                FILE_BROWSER.removeAllListeners(fileSelectedEventStr);
-                FILE_BROWSER.once(fileSelectedEventStr, function selectedFile(fileLoc) {
-                    debugSFTL('We got a file path', fileLoc);
-                    self.selectedFileInfo.path = fileLoc;
-                    self.updateStartupData();
-                    self.loadParseAndDisplaySelectedCfgFile()
-                    .then(function handledFileSelection(bundle) {
-                        debugSFTL('Selected a file!', bundle);
-                        debugSFTL('Info...', self.selectedFileInfo);
-                    });
-                });
                 var options = {'filters':'.json'};
                 if(self.selectedFileInfo.path !== '') {
                     options.workingDirectory = path.dirname(self.selectedFileInfo.path);
                 }
-                FILE_BROWSER.browseForFile(options);
+                const fileLoc = await FILE_BROWSER.browseForFile(options);
+                if (fileLoc) {
+                    debugSFTL('We got a file path', fileLoc);
+                    self.selectedFileInfo.path = fileLoc;
+                    self.updateStartupData();
+                    self.loadParseAndDisplaySelectedCfgFile()
+                        .then(function handledFileSelection(bundle) {
+                            debugSFTL('Selected a file!', bundle);
+                            debugSFTL('Info...', self.selectedFileInfo);
+                        });
+                }
 
                 // Do not wait for the file browser to return information to resolve
                 // the promise b/c the cancel button can not be listened for.
@@ -919,28 +918,26 @@ function module() {
             });
             return defered.promise;
         },
-        browseForOutputDir: function(guiObj) {
+        browseForOutputDir: async function(guiObj) {
             var defered = q.defer();
             debugBFOD('In the browseForOutputDir click handler...');
             try {
-                var fileSelectedEventStr = FILE_BROWSER.eventList.FILE_SELECTED;
-                FILE_BROWSER.removeAllListeners(fileSelectedEventStr);
-                FILE_BROWSER.once(fileSelectedEventStr, function selectedFolder(fileLoc) {
+                var options = {};
+                if(self.selectedOutputDirInfo.path !== '') {
+                    options.workingDirectory = self.selectedOutputDirInfo.path;
+                }
+                const fileLoc = await FILE_BROWSER.browseForFolder(options);
+                if (fileLoc) {
                     debugBFOD('We got a folder path', fileLoc);
                     self.selectedOutputDirInfo.path = fileLoc;
                     self.updateStartupData();
 
                     self.displaySelectedOutputDir()
-                    .then(function handledFileSelection(bundle) {
-                        debugBFOD('Selected a folder!', bundle);
-                        debugBFOD('Info...', self.selectedOutputDirInfo);
-                    });
-                });
-                var options = {};
-                if(self.selectedOutputDirInfo.path !== '') {
-                    options.workingDirectory = self.selectedOutputDirInfo.path;
+                        .then(function handledFileSelection(bundle) {
+                            debugBFOD('Selected a folder!', bundle);
+                            debugBFOD('Info...', self.selectedOutputDirInfo);
+                        });
                 }
-                FILE_BROWSER.browseForFolder(options);
 
                 // Do not wait for the file browser to return information to resolve
                 // the promise b/c the cancel button can not be listened for.

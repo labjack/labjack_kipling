@@ -1,7 +1,10 @@
 'use strict';
 
+const electron = require('electron');
 const {EventEmitter} = require('events');
+const path = require('path');
 
+const dialog = electron.remote.dialog;
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
 
@@ -10,7 +13,6 @@ class FileBrowser extends EventEmitter {
     constructor() {
         super();
 
-        this.fileBrowserDialog = undefined;
         this.fileSaveDialog = undefined;
         this.folderSelectDialog = undefined;
 
@@ -21,141 +23,118 @@ class FileBrowser extends EventEmitter {
     }
 
     initialize(bundle) {
-        this.fileBrowserDialog = $('#file-dialog-hidden');
         this.fileSaveDialog = $('#file-save-dialog-hidden');
         this.folderSelectDialog = $('#folder-select-dialog-hidden');
 
         return Promise.resolve(bundle);
     }
 
-    innerBrowseForFile() {
-        this.fileBrowserDialog.val('');
-        this.fileBrowserDialog.off('change');
-        this.fileBrowserDialog.one('change', (evt) => {
-            const fileLoc = $(this).val();
-
-            if(fileLoc === '') {
-                console.log('FILE_BROWSER file not selected');
-                this.emit(this.eventList.FILE_NOT_SELECTED, fileLoc);
-            } else {
-                console.log('FILE_BROWSER file selected');
-                this.emit(this.eventList.FILE_SELECTED, fileLoc);
-            }
-
-            // Reset the selected value to empty
-            $(this).val('');
-        });
-
-        this.fileBrowserDialog.trigger('click');
-    }
-
-    browseForFile(options) {
+    async browseForFile(options) {
         let fileFilters = '';
         let workingDirectory = fs_facade.getDefaultFilePath();
-        if(options) {
-            if(options.filters) {
+        if (options) {
+            if (options.filters) {
                 fileFilters = options.filters.toString();
             }
-            if(options.workingDirectory) {
+            if (options.workingDirectory) {
                 workingDirectory = options.workingDirectory.toString();
             }
         }
-        // Configuring as per:
-        // https://github.com/nwjs/nw.js/wiki/File-dialogs
 
-        // Configure file-filters
-        // this.fileBrowserDialog.attr('accept', fileFilters);
-        // this.fileSaveDialog.attr('nwworkingdir', workingDirectory);
-        this.fileBrowserDialog[0].setAttribute('accept', fileFilters);
-        this.fileBrowserDialog[0].setAttribute('nwworkingdir', workingDirectory);
-
-        setTimeout(() => this.innerBrowseForFile(), 1);
+        const result = await dialog.showOpenDialog({
+            properties: ['openFile'],
+            defaultPath: workingDirectory,
+            filters: [
+                {
+                    name: fileFilters,
+                    extensions: [fileFilters]
+                }
+            ]
+        });
+        if (result.filePaths && result.filePaths.length > 0) {
+            const fileLoc = result.filePaths[0];
+            if(fileLoc === '') {
+                console.log('FILE_BROWSER file not selected');
+                this.emit(this.eventList.FILE_NOT_SELECTED);
+            } else {
+                console.log('FILE_BROWSER file selected');
+                this.emit(this.eventList.FILE_SELECTED, fileLoc);
+                return fileLoc;
+            }
+        } else {
+            console.log('FILE_BROWSER file not selected');
+            this.emit(this.eventList.FILE_NOT_SELECTED);
+        }
     }
 
-    innerBrowseForFolder() {
-        this.folderSelectDialog.val('');
-        this.folderSelectDialog.off('change');
-        this.folderSelectDialog.one('change', (evt) => {
-            const fileLoc = $(this).val();
+    async browseForFolder(options) {
+        let workingDirectory = fs_facade.getDefaultFilePath();
+        if (options) {
+            if (options.workingDirectory) {
+                workingDirectory = options.workingDirectory.toString();
+            }
+        }
 
+        const result = await dialog.showOpenDialog({
+            properties: ['openDirectory'],
+            defaultPath: workingDirectory,
+        });
+        if (result.filePaths && result.filePaths.length > 0) {
+            const fileLoc = result.filePaths[0];
             if(fileLoc === '') {
                 console.log('FILE_BROWSER folder not selected');
                 this.emit(this.eventList.FILE_NOT_SELECTED, fileLoc);
             } else {
                 console.log('FILE_BROWSER folder selected');
                 this.emit(this.eventList.FILE_SELECTED, fileLoc);
-            }
-
-            // Reset the selected value to empty
-            $(this).val('');
-        });
-        this.folderSelectDialog.trigger('click');
-    }
-
-    browseForFolder(options) {
-        let workingDirectory = fs_facade.getDefaultFilePath();
-        if(options) {
-            if(options.workingDirectory) {
-                workingDirectory = options.workingDirectory.toString();
+                return fileLoc;
             }
         }
-        // Configuring as per:
-        // https://github.com/nwjs/nw.js/wiki/File-dialogs
-
-        // Configure folder-options
-        this.folderSelectDialog[0].setAttribute('nwworkingdir', workingDirectory);
-
-        setTimeout(() => this.innerBrowseForFolder(), 1);
     }
 
-    innerSaveFile() {
-        this.fileSaveDialog.val('');
-        this.fileSaveDialog.off('change');
-        this.fileSaveDialog.one('change', (evt) => {
-            const fileLoc = $(this).val();
-
-            if(fileLoc === '') {
-                console.log('FILE_BROWSER file not selected');
-                this.emit(this.eventList.FILE_NOT_SELECTED, fileLoc);
-            } else {
-                console.log('FILE_BROWSER file selected');
-                this.emit(this.eventList.FILE_SELECTED, fileLoc);
-            }
-
-            // Reset the selected value to empty
-            $(this).val('');
-        });
-
-        this.fileSaveDialog.trigger('click');
-    }
-
-    saveFile(options) {
+    async saveFile(options) {
         let fileFilters = '';
         let suggestedName = '';
         let workingDirectory = fs_facade.getDefaultFilePath();
-        if(options) {
-            if(options.filters) {
+        if (options) {
+            if (options.filters) {
                 fileFilters = options.filters.toString();
             }
-            if(options.suggestedName) {
+            if (options.suggestedName) {
                 suggestedName = options.suggestedName.toString();
             }
-            if(options.workingDirectory) {
+            if (options.workingDirectory) {
                 workingDirectory = options.workingDirectory.toString();
             }
         }
-        // Configuring as per:
-        // https://github.com/nwjs/nw.js/wiki/File-dialogs
 
-        // Configure file-filters
-        // this.fileSaveDialog.attr('accept', fileFilters);
-        // this.fileSaveDialog.attr('nwsaveas', suggestedName);
-        // this.fileSaveDialog.attr('nwworkingdir', workingDirectory);
-        this.fileSaveDialog[0].setAttribute('accept', fileFilters);
-        this.fileSaveDialog[0].setAttribute('nwsaveas', suggestedName);
-        this.fileSaveDialog[0].setAttribute('nwworkingdir', workingDirectory);
+        if (suggestedName) {
+            workingDirectory = path.join(workingDirectory, suggestedName);
+        }
 
-        setTimeout(() => this.innerSaveFile(), 1);
+        // TODO suggestedName
+        const result = await dialog.showSaveDialog({
+            defaultPath: workingDirectory,
+            filters: [
+                {
+                    name: fileFilters,
+                    extensions: [fileFilters]
+                }
+            ]
+        });
+
+        if (result.filePath) {
+            const fileLoc = result.filePath;
+            if (fileLoc === '') {
+            } else {
+                console.log('FILE_BROWSER file selected');
+                this.emit(this.eventList.FILE_SELECTED, fileLoc);
+                return fileLoc;
+            }
+        }
+
+        console.log('FILE_BROWSER file not selected');
+        this.emit(this.eventList.FILE_NOT_SELECTED);
     }
 }
 

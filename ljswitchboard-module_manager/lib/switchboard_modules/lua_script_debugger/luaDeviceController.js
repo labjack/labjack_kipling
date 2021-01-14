@@ -5,7 +5,8 @@
  * @author Chris Johnson (LabJack Corp, 2013)
  *
 **/
-
+const package_loader = global.package_loader;
+const fs_facade = package_loader.getPackage('fs_facade');
 
 function luaDeviceController() {
     var device;
@@ -666,6 +667,7 @@ function luaDeviceController() {
         // Update Internal Constants
         self.configureAsUserScript(filePath);
 
+        console.log('ggggggggggg', filePath);
         // Load File
         fs_facade.loadFile(
             filePath,
@@ -744,7 +746,7 @@ function luaDeviceController() {
         // Return q instance
         return fileIODeferred.promise;
     };
-    this.saveLoadedScriptHandler = function(saveType) {
+    this.saveLoadedScriptHandler = async function(saveType) {
         var fileIODeferred = q.defer();
         var saveFileCommand = 'notSaving';
 
@@ -794,13 +796,6 @@ function luaDeviceController() {
             // Perform saveAs command
             self.print('Performing saveAs method, opening file dialog');
 
-            var fileSelectedEventStr = FILE_BROWSER.eventList.FILE_SELECTED;
-            var fileNotSelectedEventStr = FILE_BROWSER.eventList.FILE_NOT_SELECTED;
-
-            // Remove existing file broser listeners.
-            FILE_BROWSER.removeAllListeners(fileSelectedEventStr);
-            FILE_BROWSER.removeAllListeners(fileNotSelectedEventStr);
-
             // Define file-selected function.
             var saveAsFileSelected = function(fileLoc) {
                 var scriptData = self.codeEditorDoc.getValue();
@@ -834,15 +829,17 @@ function luaDeviceController() {
                 return;
             };
 
-            // Attach to file browser events.
-            FILE_BROWSER.once(fileSelectedEventStr, saveAsFileSelected);
-            FILE_BROWSER.once(fileNotSelectedEventStr, saveAsFileNotSelected);
-
-            // Trigger the file broser window to open.
-            FILE_BROWSER.saveFile({
-                'filters':'.lua',
+            const fileLoc = await FILE_BROWSER.saveFile({
+                'filters': 'lua',
                 'suggestedName': 'luaScript.lua',
             });
+
+            if (fileLoc) {
+                saveAsFileSelected(fileLoc);
+            } else {
+                saveAsFileNotSelected();
+            }
+
         } else {
             // Don't perform any save operations
             self.print('Not performing any save operations');
