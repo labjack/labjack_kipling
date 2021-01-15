@@ -29,12 +29,6 @@ const modbus_map = require('ljswitchboard-modbus_map').getConstants();
 const fs_facade = package_loader.getPackage('fs_facade');
 const ljmmm_parse = require('ljmmm-parse');
 
-ljmmm_parse.expandLJMMMNameSync = function (name) {
-    return ljmmm_parse.expandLJMMMEntrySync(
-        {name: name, address: 0, type: 'FLOAT32'}
-    ).map(function (entry) { return entry.name; });
-};
-
 const FADE_DURATION = 400;
 const DEFAULT_REFRESH_RATE = 1000;
 const CONFIGURING_DEVICE_TARGET = '#sd-framework-configuring-device-display';
@@ -1322,18 +1316,16 @@ function Framework() {
     this.qExecOnTemplateLoaded = function() {
         return new Promise((resolve, reject) => {
             if (self.allowModuleExecution) {
-                var rejectFunc = function (data) {
-                    reject(data);
-                };
-                var resolveFunc = function (data) {
-                    resolve(data);
-                };
                 try {
                     self.fire(
                         'onTemplateLoaded',
                         [],
-                        rejectFunc,
-                        resolveFunc
+                        function (data) {
+                            reject(data);
+                        },
+                        function (data) {
+                            resolve(data);
+                        }
                     );
                 } catch (err) {
                     if (err.name === 'SyntaxError') {
@@ -1353,12 +1345,12 @@ function Framework() {
         detachDeviceStatusListeners();
         return new Promise((resolve, reject) => {
             var finishSuccess = function (data) {
-                var continueExec = function () {
-                    resolve(data);
-                };
-
                 self.saveModuleStartupData('qExecOnCloseDevice-suc')
-                    .then(continueExec, continueExec);
+                    .then(function () {
+                        resolve(data);
+                    }, function () {
+                        resolve(data);
+                    });
             };
             var finishError = function (data) {
                 var continueExec = function () {
@@ -1420,12 +1412,12 @@ function Framework() {
         return new Promise((resolve, reject) => {
             if (self.isModuleLoaded) {
                 var finishError = function (data) {
-                    var continueExec = function () {
-                        reject(data);
-                    };
-
                     self.saveModuleStartupData('qExecOnUnloadModule-err')
-                        .then(continueExec, continueExec);
+                        .then(function () {
+                            reject(data);
+                        }, function () {
+                            reject(data);
+                        });
                 };
 
                 //Halt the daq loop

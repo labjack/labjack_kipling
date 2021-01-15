@@ -232,104 +232,75 @@ class ModuleLoader extends EventEmitter {
 		});
 	}
 
-	runGC(data) {
-		let gcExecuted = false;
-		if(global.gc) {
-			if(global.gc.call) {
-				if(typeof(global.gc.call) === 'function') {
-					global.gc.call();
-					gcExecuted = true;
-				}
-			}
-		}
-		if(gcExecuted) {
-			// console.log('gc.call executed');
-		} else {
-			// console.log('gc.call not executed');
-		}
-
-		return Promise.resolve(data);
-	}
-
 	addUnloadStep(func) {
 		this.unloadModuleFunctions.push(func);
 	}
 
 	executeUnloadModuleFunctions(moduleData) {
-		return new Promise((resolve, reject) => {
-			if (this.unloadModuleFunctions.length > 0) {
-				const promises = [];
-				for(let i = 0; i < this.unloadModuleFunctions.length; i++) {
-					promises.push(this.unloadModuleFunctions[i]());
-				}
-				Promise.allSettled(promises)
-					.then((results) => {
-						this.unloadModuleFunctions = [];
-						resolve(moduleData);
-					}, function(err) {
-						console.error('Finished unload-module steps', err);
-						resolve(moduleData);
-					});
-			} else {
-				resolve(moduleData);
+		console.log('executeUnloadModuleFunctions', this.unloadModuleFunctions.length > 0);
+		if (this.unloadModuleFunctions.length > 0) {
+			const promises = [];
+			for(let i = 0; i < this.unloadModuleFunctions.length; i++) {
+				promises.push(this.unloadModuleFunctions[i]());
 			}
-		});
+			return Promise.allSettled(promises)
+				.then((results) => {
+					this.unloadModuleFunctions = [];
+					return moduleData;
+				}, function(err) {
+					console.error('Finished unload-module steps', err);
+					return Promise.resolve(moduleData);
+				});
+		} else {
+			return Promise.resolve(moduleData);
+		}
 	}
 
 	renderModule(moduleData) {
-		return new Promise((resolve, reject) => {
-			// Trigger any loaded module to halt its execution
-			this.emit(eventList.UNLOAD_MODULE, {
-				'data': 'testData...'
-			});
-			moduleData.loadResults = {
-				'overallResult': true,
-				'css': [],
-				'js': [],
-				'html': [],
-			};
-			// coppied directory of the static_files project location.
-			const cpdDir = JSON.parse(JSON.stringify(static_files.getDir()));
-			// console.log('coppied directory', cpdDir);
-			moduleData.context = {
-				'stats': this.stats,
-				'staticFiles': cpdDir,
-				'devices': undefined,
-			};
-			moduleData.outputLocation = {
-				'css': $('#' + MODULE_LOADER_CSS_DESTINATION_ID),
-				'js': $('#' + MODULE_LOADER_JS_DESTINATION_ID),
-				'view': $('#' + MODULE_LOADER_VIEW_DESTINATION_ID),
-			};
-			// moduleData.outputLocationID = MODULE_LOADER_DESTINATION_ID;
-			this.clearCurrentModule(moduleData)
-				.then(moduleData => this.loadCSSFiles(moduleData))
-				.then(moduleData => this.loadJSFiles(moduleData))
-				.then(moduleData => this.getUpdatedDeviceListing(moduleData))
-				.then(moduleData => this.getModuleContext(moduleData))
-				.then(moduleData => this.loadHTMLFiles(moduleData))
-				.then(moduleData => this.updateStatistics(moduleData))
-				.then(moduleData => this.runGC(moduleData))
-				.then(resolve, reject);
-				});
+		// Trigger any loaded module to halt its execution
+		this.emit(eventList.UNLOAD_MODULE, {
+			'data': 'testData...'
+		});
+		moduleData.loadResults = {
+			'overallResult': true,
+			'css': [],
+			'js': [],
+			'html': [],
+		};
+		// copied directory of the static_files project location.
+		const cpdDir = JSON.parse(JSON.stringify(static_files.getDir()));
+		moduleData.context = {
+			'stats': this.stats,
+			'staticFiles': cpdDir,
+			'devices': undefined,
+		};
+		moduleData.outputLocation = {
+			'css': $('#' + MODULE_LOADER_CSS_DESTINATION_ID),
+			'js': $('#' + MODULE_LOADER_JS_DESTINATION_ID),
+			'view': $('#' + MODULE_LOADER_VIEW_DESTINATION_ID),
+		};
+		return this.clearCurrentModule(moduleData)
+			.then(moduleData => this.loadCSSFiles(moduleData))
+			.then(moduleData => this.loadJSFiles(moduleData))
+			.then(moduleData => this.getUpdatedDeviceListing(moduleData))
+			.then(moduleData => this.getModuleContext(moduleData))
+			.then(moduleData => this.loadHTMLFiles(moduleData))
+			.then(moduleData => this.updateStatistics(moduleData));
 	}
 
-	loadModule(moduleObject) {
-		return new Promise((resolve, reject) => {
-			module_manager.loadModuleData(moduleObject)
-				.then(moduleData => this.executeUnloadModuleFunctions(moduleData))
-				.then(moduleData => this.renderModule(moduleData))
-				.then(resolve, reject);
-		});
+	async loadModule(moduleObject) {
+		console.log('loadModule1', moduleObject.name);
+		const moduleData = await module_manager.loadModuleData(moduleObject);
+		console.log('loadModule2');
+		const moduleData2 = await this.executeUnloadModuleFunctions(moduleData);
+		console.log('loadModule3');
+		return await this.renderModule(moduleData2);
 	}
 
 	loadModuleByName(moduleName) {
-		return new Promise((resolve, reject) => {
-			module_manager.loadModuleDataByName(moduleName)
-				.then(moduleData => this.executeUnloadModuleFunctions(moduleData))
-				.then(moduleData => this.renderModule(moduleData))
-				.then(resolve, reject);
-		});
+		return module_manager.loadModuleDataByName(moduleName)
+			.then(moduleData => this.executeUnloadModuleFunctions(moduleData))
+			.then(moduleData => this.renderModule(moduleData));
 	}
 
 }

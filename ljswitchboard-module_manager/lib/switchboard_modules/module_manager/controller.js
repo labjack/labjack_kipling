@@ -80,11 +80,6 @@ function getModuleList()
     return new Promise((resolve, reject) => {
         var data = [
             {
-                "name": "test_module",
-                "humanName": "Test Module",
-                "version": "0.0.1"
-            },
-            {
                 "name": "device_info_inspector",
                 "humanName": "Device Info Inspector",
                 "version": "0.0.1"

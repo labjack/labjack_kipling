@@ -39,12 +39,6 @@ const handleBarsService = package_loader.getPackage('handleBarsService');
 
 const ljmmm_parse = require('ljmmm-parse');
 
-ljmmm_parse.expandLJMMMNameSync = function (name) {
-    return ljmmm_parse.expandLJMMMEntrySync(
-        {name: name, address: 0, type: 'FLOAT32'}
-    ).map(function (entry) { return entry.name; });
-};
-
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
  * When using the 'singleDevice' framework it is instantiated as sdModule.
@@ -265,7 +259,9 @@ function module() {
         var addParser = function(data,index) {
             var formatReg = handleBarsService._compileTemplate(data.register);
             var compReg = formatReg(self.deviceConstants);
-            var addrList = ljmmm_parse.expandLJMMMNameSync(compReg);
+            var addrList = ljmmm_parse.expandLJMMMEntrySync(
+                    {name: compReg, address: 0, type: 'FLOAT32'}
+                ).map(function (entry) { return entry.name; });
             if((data.options !== 'func') && (data.options !== 'raw')) {
                 var dataObj = self.deviceConstants[data.options+'Dict'];
                 var getData = function(val) {
@@ -306,7 +302,10 @@ function module() {
         var addOptions = function(data) {
             var formatReg = handleBarsService._compileTemplate(data.register);
             var compReg = formatReg(self.deviceConstants);
-            var addrList = ljmmm_parse.expandLJMMMNameSync(compReg);
+            var addrList = ljmmm_parse.expandLJMMMEntrySync(
+                {name: compReg, address: 0, type: 'FLOAT32'}
+            ).map(function (entry) { return entry.name; });
+
             var deviceOptionsData = {};
             deviceOptionsData.name = data.name;
             deviceOptionsData.cssClass = data.cssClass;

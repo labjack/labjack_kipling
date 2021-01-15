@@ -19,8 +19,8 @@
 
 /* jshint undef: true, unused: true, undef: true */
 /* jshint strict: false */
-/* global console, $, dict, ljmmm_parse, device_controller */
-/* global KEYBOARD_EVENT_HANDLER, customSpinners, getDeviceDashboardController */
+/* global console, $, ljmmm_parse, device_controller */
+/* global customSpinners, getDeviceDashboardController */
 /* global sprintf */
 
 // Constant that determines device polling rate.  Use an increased rate to aid
@@ -36,7 +36,6 @@ function module() {
     this.REGISTER_OVERLAY_SPEC = {};
     this.startupRegList = {};
     this.interpretRegisters = {};
-    this.startupRegListDict = new Map();
 
     this.moduleContext = {};
     this.activeDevice = undefined;
@@ -81,60 +80,12 @@ function module() {
         self.startupRegList = framework.moduleConstants.startupRegList;
         self.interpretRegisters = framework.moduleConstants.interpretRegisters;
         self.REGISTER_OVERLAY_SPEC = framework.moduleConstants.REGISTER_OVERLAY_SPEC;
-        
-        /*
-         * Commented out in preparation for switching to device-controller 
-         * built in functionality.
-        var genericConfigCallback = function(data, onSuccess) {
-            onSuccess();
-        };
-        var genericPeriodicCallback = function(data, onSuccess) {
-            var name = data.binding.binding;
-            var value = data.value;
-            var oldValue = self.currentValues.get(name);
-            if(oldValue != value) {
-                self.newBufferedValues.set(name,value);
-            } else {
-                self.newBufferedValues.delete(name);
-            }
-            onSuccess();
-        };
-
-        // console.log('moduleConstants', self.moduleConstants);
-        var smartBindings = [];
-        var addSmartBinding = function(regInfo) {
-            var binding = {};
-            binding.bindingName = regInfo.name;
-            if(regInfo.isPeriodic && regInfo.isConfig){
-                // Add to list of config & periodicically read registers
-                binding.smartName = 'readRegister';
-                binding.periodicCallback = genericPeriodicCallback;
-            } else if ((!regInfo.isPeriodic) && regInfo.isConfig) {
-                // Add to list of config registers
-                binding.smartName = 'setupOnlyRegister';
-            }
-            binding.configCallback = genericConfigCallback;
-            smartBindings.push(binding);
-        };
-
-        // Add general readRegisters
-        self.startupRegList.forEach(addSmartBinding);
-
-        // Save the smartBindings to the framework instance.
-        framework.putSmartBindings(smartBindings);
-        */
 
         // Save the customSmartBindings to the framework instance.
         // framework.putSmartBindings(customSmartBindings);
 
         self.createProcessConfigStatesAndDirections();
         onSuccess();
-    };
-
-    this.expandLJMMMNameSync = function (name) {
-        return ljmmm_parse.expandLJMMMEntrySync(
-            {name: name, address: 0, type: 'FLOAT32'}
-        ).map(function (entry) { return entry.name; });
     };
 
     /*
@@ -152,7 +103,9 @@ function module() {
 
         /* Expand the LJM registers */
         registersToExpand.map(function (reg) {
-            var names = self.expandLJMMMNameSync(reg.name);
+            var names = ljmmm_parse.expandLJMMMEntrySync(
+                {name: reg.name, address: 0, type: 'FLOAT32'}
+                ).map(function (entry) { return entry.name; });
             var regList;
 
             // Set up a mapping by the state reg
@@ -630,11 +583,8 @@ function module() {
         }
     }
 
-    
-    this.parentClkEvent = undefined;
     function digitalParentClickHandler(event) {
         try {
-            self.parentClkEvent = event;
             var ioEventType = '';
             var isFlexIO = false;
             if(event.target.className === "menuOption") {

@@ -4,9 +4,6 @@
         "active": true
     }],
     "body": [{
-        "name": "test_module",
-        "active": false
-    }, {
         "name": "device_info",
         "active": false
     }, {
@@ -14,9 +11,6 @@
         "active": true
     }, {
         "name": "device_overview",
-        "active": false
-    }, {
-        "name": "dashboard",
         "active": false
     }, {
         "name": "dashboard_v2",
@@ -84,7 +78,7 @@
         "active": false
     }, {
         "name": "file_browser_fw",
-        "description":"A SD Card file browser for the  T7.",
+        "description":"A SD Card file browser for the T7.",
         "active": false
     }, {
         "name": "simple_logger_flot",
@@ -129,9 +123,6 @@
         "isTask": true
     }],
     "footer": [{
-        "name": "error_codes_temp",
-        "active": false
-    }, {
         "name": "settings",
         "active": true
     }]

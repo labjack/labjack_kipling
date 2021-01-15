@@ -4,20 +4,43 @@ var sdFramework = null;
 const package_loader = global.package_loader;
 const handleBarsService = package_loader.getPackage('handleBarsService');
 const path = require('path');
-const util = require('util');
 const EventEmitter = require('events').EventEmitter;
 
-var createModuleInstance = function() {
-    this.DEBUG_FRAMEWORK_CONNECTOR = true;
+class FakeDriver {
+    logSSync() {
+        console.log('in fake driver logSSync');
+    }
+    writeLibrarySync() {
+        console.log('in fake driver writeLibrarySync');
+    }
+    readLibrarySync() {
+        console.log('in fake driver readLibrarySync');
+    }
+}
 
-    this.moduleData = {};
-    this.eventList = {
-        'MODULE_STARTED': 'MODULE_STARTED',
-        'MODULE_STOPPED': 'MODULE_STOPPED',
-    };
+class ModuleInstance extends EventEmitter {
+    constructor() {
+        super();
+        this.DEBUG_FRAMEWORK_CONNECTOR = true;
 
-    var initializeModule = function(moduleData) {
-        if(self.DEBUG_FRAMEWORK_CONNECTOR) {
+        this.moduleData = {};
+        this.eventList = {
+            'MODULE_STARTED': 'MODULE_STARTED',
+            'MODULE_STOPPED': 'MODULE_STOPPED',
+        };
+
+        global.MODULE_LOADER.addPreloadStep((param) => this.preLoadStep(param));
+        global.MODULE_LOADER.addUnloadStep(() => this.unloadStep());
+
+        // Attach to MODULE_LOADER events that indicate to the module about what to
+        // do.  (start/stop).
+        const mlEvents = global.MODULE_LOADER.eventList;
+        global.MODULE_LOADER.on(mlEvents.VIEW_READY, (param) => this.startModule(param));
+        global.MODULE_LOADER.on(mlEvents.UNLOAD_MODULE, () => this.stopModule());
+    }
+
+    initializeModule(moduleData) {
+        if (this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('initializing framework', moduleData.data);
         }
         try {
@@ -31,7 +54,7 @@ var createModuleInstance = function() {
             sdModule = new module();
 
             // Configure the module's name
-            var createdModuleName = '';
+            let createdModuleName = '';
             try {
                 createdModuleName += moduleData.name;
                 createdModuleName += '-';
@@ -47,10 +70,10 @@ var createModuleInstance = function() {
             console.log('Error Initializing Module', err, err.stack);
         }
         return Promise.resolve(moduleData);
-    };
+    }
 
-    var linkModule = function(moduleData) {
-        if(self.DEBUG_FRAMEWORK_CONNECTOR) {
+    linkModule(moduleData) {
+        if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('linking framework to module', moduleData.data);
         }
 
@@ -112,28 +135,25 @@ var createModuleInstance = function() {
             console.error('Error Linking sdFramework to current module', err);
         }
         return Promise.resolve(moduleData);
-    };
+    }
 
-    var loadModule = function(moduleData) {
-        if(self.DEBUG_FRAMEWORK_CONNECTOR) {
+    loadModule(moduleData) {
+        if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('loading framework module', moduleData.data);
         }
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             try {
                 //Configure framework's update frequency
-                if(typeof(MODULE_UPDATE_PERIOD_MS) === "number") {
-                    sdFramework.setRefreshRate(MODULE_UPDATE_PERIOD_MS);
+                if(typeof(global.MODULE_UPDATE_PERIOD_MS) === "number") {
+                    sdFramework.setRefreshRate(global.MODULE_UPDATE_PERIOD_MS);
                 } else if(typeof(moduleData.data.refreshRate) === 'number') {
                     sdFramework.setRefreshRate(moduleData.data.refreshRate);
                 } else {
                     sdFramework.setRefreshRate(1000);
                 }
 
-                var numLoaded = moduleData.context.stats.numLoaded;
-                var uniqueTabName = moduleData.name + '-' + numLoaded.toString();
-
-                var moduleViewPath = path.join(moduleData.path, 'view.html');
-                var moduleDataPath = path.join(moduleData.path, 'moduleData.json');
+                const moduleViewPath = path.join(moduleData.path, 'view.html');
+                const moduleDataPath = path.join(moduleData.path, 'moduleData.json');
 
                 // Configure the framework to use the module's 'view.html' by default
                 // Also configure the framework to use module's data, 'moduleData.json'
@@ -148,21 +168,10 @@ var createModuleInstance = function() {
                     moduleData
                 );
 
-                var createFakeDriver = function() {
-                    this.logSSync = function(level, str) {
-                        console.log('in fake driver logSSync');
-                    };
-                    this.writeLibrarySync = function(str, val) {
-                        console.log('in fake driver writeLibrarySync');
-                    };
-                    this.readLibrarySync = function(str) {
-                        console.log('in fake driver readLibrarySync');
-                    };
-                };
-                sdFramework.ljmDriver = new createFakeDriver();
+                sdFramework.ljmDriver = new FakeDriver();
 
                 // Start the framework
-                if(self.DEBUG_FRAMEWORK_CONNECTOR) {
+                if(this.DEBUG_FRAMEWORK_CONNECTOR) {
                     console.debug('Starting Module', moduleData.name);
                 }
                 sdFramework.startFramework()
@@ -177,17 +186,17 @@ var createModuleInstance = function() {
                 console.error('Error Loading sdFramework', err);
             }
         });
-    };
-    var runModule = function(moduleData) {
-        if(self.DEBUG_FRAMEWORK_CONNECTOR) {
+    }
+
+    runModule(moduleData) {
+        if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('running module', moduleData.data);
         }
-        return new Promise((resolve, reject) => {
-            var resolveFunc = function () {
+        return new Promise((resolve) => {
+            const resolveFunc = function () {
                 resolve(moduleData);
             };
             try {
-                // console.debug('Running FW');
                 sdFramework.runFramework()
                     .then(resolveFunc, resolveFunc);
             } catch (err) {
@@ -195,89 +204,68 @@ var createModuleInstance = function() {
                 resolve();
             }
         });
-    };
-    var reportModuleStarted = function(moduleData) {
-        if(self.DEBUG_FRAMEWORK_CONNECTOR) {
+    }
+
+    reportModuleStarted(moduleData) {
+        if (this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('Reporting Module Started');
         }
 
-        self.emit(self.eventList.MODULE_STARTED);
-        var data = {
+        this.emit(this.eventList.MODULE_STARTED);
+        const data = {
             'name': moduleData.name,
         };
         global.MODULE_CHROME.emit('MODULE_READY', data);
         global.MODULE_LOADER.emit('MODULE_READY', data);
 
         return Promise.resolve(moduleData);
-    };
+    }
 
-    var startModule = function(moduleData) {
-        if(self.DEBUG_FRAMEWORK_CONNECTOR) {
+    startModule(moduleData) {
+        if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('framework starting', moduleData.data);
         }
-        // self.moduleData = newModule.data;
-
-        /*
-        ex:
-        moduleData.id = "#module-chrome-current-module-2",
-        moduleData.name = "device_info_fw"
-        moduleData.data = {
-            'baseData',
-            'context',
-            'css': [],
-            'data': {},
-            'html': [],
-            'htmlFiles': {},
-            'js': [],
-            'json': {},
-            'jsonFiles': [],
-        }
-        */
 
         // Start the framework.....
-        initializeModule(moduleData.data)
-        .then(linkModule)
-        .then(loadModule)
-        .then(runModule)
-        .then(reportModuleStarted);
-    };
-    var unloadStep = function() {
-        return new Promise((resolve, reject) => {
-            if (sdFramework) {
-                sdFramework.qExecOnUnloadModule()
-                    .then(function () {
-                        if (self.DEBUG_FRAMEWORK_CONNECTOR) {
-                            console.info('sdFramework Stopped');
-                        }
-                        resolve();
-                    });
-            }
-        });
-    };
-    var stopModule = function() {
-        // console.log('device_selector stopped');
-        self.emit(self.eventList.MODULE_STOPPED);
-    };
+        this.initializeModule(moduleData.data)
+            .then((param) => this.linkModule(param))
+            .then((param) => this.loadModule(param))
+            .then((param) => this.runModule(param))
+            .then((param) => this.reportModuleStarted(param));
+    }
+
+    unloadStep() {
+        if (sdFramework) {
+            return sdFramework.qExecOnUnloadModule()
+                .then(function () {
+                    if (this.DEBUG_FRAMEWORK_CONNECTOR) {
+                        console.info('sdFramework Stopped');
+                    }
+                });
+        }
+    }
+
+    stopModule() {
+        this.emit(this.eventList.MODULE_STOPPED);
+    }
 
     // Attach a pre-load step to the Module loader
-    var preLoadStep = async function(newModule) {
+    async preLoadStep(newModule) {
         try {
-            var flags = newModule.data.framework_flags;
-            self.DEBUG_FRAMEWORK_CONNECTOR = flags.debug_framework_connector;
+            const flags = newModule.data.framework_flags;
+            this.DEBUG_FRAMEWORK_CONNECTOR = flags.debug_framework_connector;
         } catch(err) {}
 
-        if(self.DEBUG_FRAMEWORK_CONNECTOR) {
+        if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('In PRE-LOAD STEP', newModule);
         }
         // For each device, build a deviceErrorMessages object
-        var i, j;
-        var devices = newModule.context.devices;
-        for(i = 0; i < devices.length; i++) {
 
+        const devices = newModule.context.devices;
+        for(let i = 0; i < devices.length; i++) {
             devices[i].deviceErrorMessages = [];
-            for (j = 0; j < devices[i].deviceErrors.length; j++) {
-                var errorMessage = '';
-                errorMessage = await handleBarsService.renderHtmlTemplate(newModule.htmlFiles.device_errors_template, extrapolateDeviceErrorData(
+            for (let j = 0; j < devices[i].deviceErrors.length; j++) {
+               const errorMessage = await handleBarsService.renderHtmlTemplate(newModule.htmlFiles.device_errors_template, global.extrapolateDeviceErrorData(
                     devices[i].deviceErrors[j]
                 ));
                 devices[i].deviceErrorMessages.push(errorMessage);
@@ -292,19 +280,19 @@ var createModuleInstance = function() {
         }
 
         // Determine if device selection is disabled
-        var framework_options = {
+        const framework_options = {
             device_selection: true,
         };
-        if(newModule.data.framework_options) {
-            var device_selection = newModule.data.framework_options.device_selection;
-            var device_selection_type = typeof(device_selection);
+        if (newModule.data.framework_options) {
+            const device_selection = newModule.data.framework_options.device_selection;
+            const device_selection_type = typeof(device_selection);
             if(device_selection) {
                 framework_options.device_selection = true;
-            } else if(device_selection_type === 'undefined') {
+            } else if (device_selection_type === 'undefined') {
                 framework_options.device_selection = true;
-            } else if(device_selection_type === 'null') {
+            } else if (device_selection_type === 'null') {
                 framework_options.device_selection = true;
-            } else if(device_selection === false) {
+            } else if (device_selection === false) {
                 framework_options.device_selection = false;
             } else {
                 framework_options.device_selection = true;
@@ -313,17 +301,6 @@ var createModuleInstance = function() {
         newModule.context.framework_options = framework_options;
 
         return Promise.resolve(newModule);
-    };
-    global.MODULE_LOADER.addPreloadStep(preLoadStep);
-    global.MODULE_LOADER.addUnloadStep(unloadStep);
-
-    // Attach to MODULE_LOADER events that indicate to the module about what to
-    // do.  (start/stop).
-    var mlEvents = global.MODULE_LOADER.eventList;
-    global.MODULE_LOADER.on(mlEvents.VIEW_READY, startModule);
-    global.MODULE_LOADER.on(mlEvents.UNLOAD_MODULE, stopModule);
-    var self = this;
-};
-util.inherits(createModuleInstance, EventEmitter);
-
-global.activeModule = new createModuleInstance();
+    }
+}
+global.activeModule = new ModuleInstance();

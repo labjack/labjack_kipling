@@ -731,8 +731,6 @@ const createModuleInstance = function() {
 	MODULE_LOADER.addPreloadStep(preLoadStep);
 
 	function unloadStep() {
-		// return new Promise((resolve, reject) => {
-		// });
 		return updateAndSaveScanSelections();
 	}
 	MODULE_LOADER.addUnloadStep(unloadStep);

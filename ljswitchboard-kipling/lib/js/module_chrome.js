@@ -357,25 +357,6 @@ class ModuleChrome extends EventEmitter {
 			.then(updatedModules => this.reportModuleTabsUpdated(updatedModules));
 	}
 
-	runGC(data) {
-		let gcExecuted = false;
-		if (global.gc) {
-			if (global.gc.call) {
-				if (typeof (global.gc.call) === 'function') {
-					global.gc.call();
-					gcExecuted = true;
-				}
-			}
-		}
-		if (gcExecuted) {
-			// console.log('gc.call executed');
-		} else {
-			// console.log('gc.call not executed');
-		}
-
-		return Promise.resolve(data);
-	}
-
 	updateModuleListing() {
 		// Instruct both the primary & secondary modules to update.
 		const promises = [
@@ -384,8 +365,7 @@ class ModuleChrome extends EventEmitter {
 		];
 
 		// Wait for all of the operations to complete
-		return Promise.allSettled(promises)
-			.then(() => this.runGC());
+		return Promise.allSettled(promises);
 	}
 
 	disableModuleLoading(message) {
@@ -439,20 +419,11 @@ class ModuleChrome extends EventEmitter {
 				global.hideAlert();
 			});
 
+			console.log('global.MODULE_LOADER', res.data);
 			global.MODULE_LOADER.loadModule(res.data)
 				.then((res) => {
 					this.emit(this.eventList.MODULE_LOADED, res);
 					// this.allowModuleToLoad = true;
-					// // console.log('Finished Loading Module', res.name);
-
-					// Delete loaded data (commented out to let gc handle it)
-					// const keys = Object.keys(res);
-					// const i;
-					// for(i = 0; i < keys.length; i++) {
-					// res[keys[i]] = null;
-					// res[keys[i]] = undefined;
-					// delete res[keys[i]];
-					// }
 				}, (err) => {
 					this.allowModuleToLoad = true;
 					console.error('Error loading module', err);
