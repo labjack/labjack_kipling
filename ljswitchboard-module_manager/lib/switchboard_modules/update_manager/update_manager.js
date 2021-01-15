@@ -1,4 +1,3 @@
-
 /* jshint undef: true, unused: true, undef: true */
 /* global global, require, console, MODULE_LOADER, MODULE_CHROME, TASK_LOADER */
 /* exported activeModule */
@@ -8,10 +7,8 @@ this.run = function() {
 	console.log('Running update_manager');
 };
 
-
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var q = global.require('q');
 
 var eventList = {
 	'UPDATED_VERSION_DATA': 'UPDATED_VERSION_DATA',
@@ -57,7 +54,6 @@ function versionManager() {
 
 
 	var cacheVersionData = function(data) {
-		var defered = q.defer();
 		self.isQueryActive = false;
 		self.cachedData = JSON.parse(JSON.stringify(data));
 
@@ -67,17 +63,13 @@ function versionManager() {
 		}
 
 		self.emit(eventList.UPDATED_VERSION_DATA, self.cachedData);
-		defered.resolve();
-		return defered.promise;
+		return Promise.resolve();
 	};
 	var handleInitializeError = function(err) {
-		var defered = q.defer();
 		console.error('Error initializing update_manager' + JSON.stringify(err));
-		defered.resolve();
-		return defered.promise;
+		return Promise.resolve();
 	};
 	this.queryForData = function() {
-		var defered = q.defer();
 		self.queryStartTime = new Date();
 		if(self.debug) {
 			console.log('querying for version data, update_manager');
@@ -87,10 +79,8 @@ function versionManager() {
 		// Clear the cached page data
 		self.version_manager.lvm.clearPageCache();
 
-		self.version_manager.getAllVersions()
-		.then(cacheVersionData, handleInitializeError)
-		.then(defered.resolve);
-		return defered.promise;
+		return self.version_manager.getAllVersions()
+			.then(cacheVersionData, handleInitializeError)
 	};
 	this.getAllVersions = function() {
 		return self.version_manager.getAllVersions();
@@ -148,11 +138,8 @@ try {
 }
 this.startTask = function(bundle) {
 	console.log('Starting version_manager task');
-	var defered = q.defer();
-
 	vm.startVersionManager();
-	defered.resolve(bundle);
-	return defered.promise;
+	return Promise.resolve(bundle);
 };
 
 /**

@@ -1,5 +1,3 @@
-
-var process_manager = require('process_manager');
 var q = require('q');
 var async = require('async');
 
@@ -8,7 +6,6 @@ var constants = require('../../common/constants');
 // Save event emitter variables for easy access.
 var DEVICE_CONTROLLER_DEVICE_OPENED = constants.DEVICE_CONTROLLER_DEVICE_OPENED;
 var DEVICE_CONTROLLER_DEVICE_CLOSED = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
-
 
 // var device_interface = require('../../single_device_interface');
 // var device_delegator_path = './lib/delegators/single_device_delegator.js';
@@ -24,7 +21,6 @@ var modbus_map = require('ljswitchboard-modbus_map');
 var ljmConstants = modbus_map.getConstants();
 
 var simple_logger = require('ljswitchboard-simple_logger');
-
 
 var ENABLE_PRINTING = false;
 function print() {
@@ -62,20 +58,16 @@ function printNewData() {
 
 
 function createDeviceKeeper(io_delegator, link) {
-	var send = link.send;
-	var sendMessage = link.sendMessage;
-	// var deviceScanner = new device_scanner.deviceScanner();
 	var deviceScanner = device_scanner;
 
-
 	var deviceSendMessage = function(deviceKey, message) {
-		send({
+		link.send({
 			'deviceKey': deviceKey,
 			'message': message
 		});
 	};
 	var sendEvent = function(eventName, data) {
-		send({
+		link.send({
 			'eventName': eventName,
 			'data': data
 		});
@@ -313,7 +305,6 @@ function createDeviceKeeper(io_delegator, link) {
 	};
 	this.closeAllDevices = function() {
 		var defered = q.defer();
-		var numDevicesClosed = 0;
 
 		var comKeys = Object.keys(self.devices);
 
@@ -355,12 +346,9 @@ function createDeviceKeeper(io_delegator, link) {
 	 *	managing.
 	 */
 	this.getNumDevices = function() {
-		var defered = q.defer();
-		var numDevices = Object.keys(self.devices).length;
-		defered.resolve(numDevices);
-		return defered.promise;
+		const numDevices = Object.keys(self.devices).length;
+		return Promise.resolve(numDevices);
 	};
-
 
 	/**
 	 * Accessory functions for getDeviceListing that filters out devices from the

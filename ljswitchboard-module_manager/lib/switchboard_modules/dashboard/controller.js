@@ -58,16 +58,12 @@ function module() {
         return Math.round(reading*1000)/1000;
     };
     this.writeReg = function(address,value) {
-        var ioDeferred = q.defer();
-        self.activeDevice.qWrite(address,value)
-        .then(function(){
-            self.bufferedOutputValues.set(address,value);
-            ioDeferred.resolve();
-        },function(err){
-            console.error('Dashboard-writeReg',address,err);
-            ioDeferred.reject(err);
-        });
-        return ioDeferred.promise;
+        return self.activeDevice.qWrite(address,value)
+            .then(function(){
+                self.bufferedOutputValues.set(address,value);
+            }, function(err){
+                console.error('Dashboard-writeReg',address,err);
+            });
     };
     /**
      * Function is called once every time the module tab is selected, loads the module.

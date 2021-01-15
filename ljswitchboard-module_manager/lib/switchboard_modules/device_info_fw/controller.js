@@ -7,6 +7,7 @@
  * @author Chris Johnson (LabJack Corp, 2014)
 **/
 
+const q = require('q');
 const package_loader = global.package_loader;
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
@@ -16,7 +17,7 @@ var MODULE_UPDATE_PERIOD_MS = 1000;
  */
 function module() {
     this.MODULE_DEBUGGING = true;
-    this.MODULE_LOADING_STATE_DEBUGGING = false;
+    this.MODULE_LOADING_STATE_DEBUGGING = true;
     this.activeDevice = undefined;
     this.framework = undefined;
     this.moduleContext = {};
@@ -732,7 +733,7 @@ function module() {
             promises.push(getExtraOperation(device,'getLatestDeviceErrors'));
         }
 
-        q.allSettled(promises)
+        Promise.allSettled(promises)
         .then(function(results) {
             var data = {};
             results.forEach(function(result) {

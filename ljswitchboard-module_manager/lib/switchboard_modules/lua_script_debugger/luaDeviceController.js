@@ -7,6 +7,7 @@
 **/
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
+const q = require('q');
 
 function luaDeviceController() {
     var device;

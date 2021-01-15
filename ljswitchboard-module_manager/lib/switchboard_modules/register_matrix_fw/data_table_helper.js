@@ -1,6 +1,6 @@
 
 /* jshint undef: true, unused: true, undef: true */
-/* global console, module_manager, dict, q, showAlert, modbus_map, $ */
+/* global console, module_manager, dict, showAlert, modbus_map, $ */
 /* global ljmmm_parse, handlebars */
 
 // Imported as an extra module file.
@@ -1098,8 +1098,6 @@ function dataTableCreator() {
         self.activeDevice = activeDevice;
     };
     this.updateData = function() {
-        var defered = q.defer();
-
         var deviceTypeName = self.activeDevice.savedAttributes.deviceTypeName;
         dataTableFormatter.updateCachedRegisterData(deviceTypeName);
         
@@ -1108,8 +1106,7 @@ function dataTableCreator() {
         self.dataTableData = dataTableFormatter.dataTableData;
         self.cachedRegisterTags = dataTableFormatter.cachedRegisterTags;
 
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     var self = this;
 }

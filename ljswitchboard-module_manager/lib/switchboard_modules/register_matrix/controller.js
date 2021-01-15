@@ -11,6 +11,8 @@ AUTO_ENABLE_TAB_CLICK = false;
 var curTemplateVals = null;
 var curPaginationObj = null;
 var latestKeypress = null;
+const q = require('q');
+
 function ACTIVE_KIPLING_MODULE() {
 
 // Functions to analyze performance
@@ -138,7 +140,7 @@ function showError(err) {
  *
  * @param {Array} entries An Array of Object with information about registers
  *      whose name field should be interpreted as LJMMM fields.
- * @return {q.deferred.promise} A Q promise that resolves to an Array of Array
+ * @return {Promise} A Q promise that resolves to an Array of Array
  *      of Objects with information about registers. Each sub-array is the
  *      result of interpreting a register entry's name field as LJMMM and
  *      enumerating as appropriate.
@@ -174,7 +176,7 @@ function expandLJMMMEntries(entries)
 /**
  * Load information about registers for all devices.
  *
- * @return {q.defer.promise} A Q promise that will resolve to an Array of Object
+ * @return {Promise} A Q promise that will resolve to an Array of Object
  *      where each object contains information about a register or set of
  *      registers. The later will have a name field that can be interpreted as
  *      LJMMM.
@@ -197,7 +199,7 @@ function getRegisterInfo()
  *      with the type of Array of Object, each element having a name field.
  * @param {String} deviceName The device type to look for. All register entries
  *      that do not have this device type will be filtered out.
- * @return {q.defer.promise} A Q promise that will resolve to an Array of Object
+ * @return {Promise} A Q promise that will resolve to an Array of Object
  *      where each Object contains information about an register or class of
  *      registers. This Array will contain all of the registers originally
  *      passed in that have the given device type listed in their devices
@@ -264,7 +266,7 @@ function createDeviceFilter(device)
  *      to decorate.
  * @param {String} device The name of the device type to find the minimum
  *      firmware version for.
- * @return {q.defer.promise} A Q promise that resovles to an Array of Object
+ * @return {Promise} A Q promise that resovles to an Array of Object
  *      with information about a register or class of registers. These modified
  *      Objects will have an added relevantFwmin field.
 **/
@@ -491,7 +493,7 @@ function initializeTypeahead() {
  * @param {String} currentTag The tag that the user is currently filtereing
  *      on. Can be 'all' if no registers should be filtered out by tags.
  * @param {String} currentSearchTerm The term the user is searching for.
- * @return {q.defer.promise} A Q promise that resolves to null.
+ * @return {Promise} A Q promise that resolves to null.
 **/
 function renderRegistersTable(entries, tags, filteredEntries, filteredTags,
     currentTag, currentSearchTerm)
@@ -743,7 +745,7 @@ function searchRegisters(entries, allTags, tag, searchTerm)
  * information to an Array of the same Objects.
  *
  * @param {Array} entries The Array of Arrays to convert.
- * @return {q.defer.promise} A Q promise that resolves to the "flattened" or
+ * @return {Promise} A Q promise that resolves to the "flattened" or
  *      converted Array of Object.
 **/
 function flattenEntries(entries)
@@ -782,7 +784,7 @@ function flattenEntries(entries)
  *
  * @param {Array} registers An Array of Objects with register information to
  *      create flattened tag strings for.
- * @return {q.defer.promise} A Q promise that resolves to the new Array of
+ * @return {Promise} A Q promise that resolves to the new Array of
  *      Object with flattened tag strings.
 **/
 function flattenTags(registers)
@@ -823,7 +825,7 @@ function flattenTags(registers)
  *
  * @param {Array} registers An Array of Object with register inforamtion to
  *      decorate.
- * @return {q.promise} A promise that resovles to the decorated / updated
+ * @return {Promise} A promise that resovles to the decorated / updated
  *      register information objects.
 **/
 function addRWInfo(registers)

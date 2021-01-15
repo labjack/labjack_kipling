@@ -220,27 +220,29 @@ function module() {
         }
     }
     function getExtraOperationSaveOp(device, operation, input) {
-        var defered = q.defer();
-        function onSuccess(res) {
-            var data = {'func': operation};
-            Object.keys(res).forEach(function(key) {
-                data[key] = res[key];
-            });
-            defered.resolve(data);
-        }
-        function onError(res) {
-            var data = {'func': operation};
-            Object.keys(res).forEach(function(key) {
-                data[key] = res[key];
-            });
-            defered.resolve(data);
-        }
-        if(input) {
-            device[operation](input).then(onSuccess, onError);
-        } else {
-            device[operation]().then(onSuccess, onError);
-        }
-        return defered.promise;
+        return new Promise((resolve, reject) => {
+            function onSuccess(res) {
+                var data = {'func': operation};
+                Object.keys(res).forEach(function (key) {
+                    data[key] = res[key];
+                });
+                resolve(data);
+            }
+
+            function onError(res) {
+                var data = {'func': operation};
+                Object.keys(res).forEach(function (key) {
+                    data[key] = res[key];
+                });
+                resolve(data);
+            }
+
+            if (input) {
+                device[operation](input).then(onSuccess, onError);
+            } else {
+                device[operation]().then(onSuccess, onError);
+            }
+        });
     }
 
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
@@ -309,7 +311,7 @@ function module() {
         }
 
         console.log('Waiting for extra device data');
-        q.allSettled(promises)
+        Promise.allSettled(promises)
         .then(function(results) {
             var data = {};
             results.forEach(function(result) {

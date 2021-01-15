@@ -1,20 +1,6 @@
-var async = require('async');
-var q = require('q');
+const async = require('async');
 
-var ainDeviceController = new AINDeviceWrapper();
-
-
-var generateCheckErrorAndFinish = function (deferred)
-{
-    return function (err) {
-        if (err) {
-            deferred.reject(err);
-        } else {
-            deferred.resolve();
-        }
-    };
-};
-
+const ainDeviceController = new AINDeviceWrapper();
 
 var createDeviceWritter = function (ainRanges, device) {
 
@@ -39,64 +25,65 @@ function AINDeviceWrapper()
 
     this.setAINRanges = function () {
 
-        var deferred = q.defer();
+        return new Promise((resolve, reject) => {
+            var setAINRangesDevice = createDeviceWritter(ainRanges);
 
-        var setAINRangesDevice = createDeviceWritter(ainRanges);
-        
-        var processDevice = function (device, callback) {
-            setAINRangesDevice(device).then(
-                function () {
-                    callback(null);
-                },
-                function (err) {
-                    callback(err);
+            var processDevice = function (device, callback) {
+                setAINRangesDevice(device).then(
+                    function () {
+                        callback(null);
+                    },
+                    function (err) {
+                        callback(err);
+                    }
+                );
+            };
+
+            var checkErrorAndFinish = function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
                 }
-            );
-        };
-
-        var checkErrorAndFinish = generateCheckErrorAndFinish(deferred);
-        async.eachSeries(connectedDevices, processDevice, checkErrorAndFinish);
-
-        return deferred.promise;
+            };
+            async.eachSeries(connectedDevices, processDevice, checkErrorAndFinish);
+        });
     };
 
-    this.setConnectedDevices = function (newConnectedDevices) {
+    this.setConnectedDevices = (newConnectedDevices) => {
         connectedDevices = newConnectedDevices;
-        return setAINRanges();
-    };
-
-    this.addAINRange = function (ainNum, rangeConstant) {
-        ainRanges.push({ ainNum: ainNum, rangeConstant: rangeConstant });
+        return this.setAINRanges();
     };
 
     this.getAINValues = function () {
-        var deferred = q.defer();
-        var valuesByAIN = {};
-        var numAINRanges = ainRanges.length;
-        
-        for (var i=0; i<numAINRanges; i++) {
-            valuesByAIN[ainRanges[i].ainNum] = {};
-        }
+        return new Promise((resolve, reject) => {
+            var valuesByAIN = {};
+            var numAINRanges = ainRanges.length;
 
-        var processDevice = function (device, callback) {
-            getAINValuesForDevice(device).then(
-                function (values) {
-                    async.each(
-                        values,
-                        function (item, innerCallback) {
-                            var valueIndex = valuesByAIN[item.ainNum];
-                            valueIndex[device.getSerial()] = item.val;
-                        },
-                        function (err) {
-                            if (err)
-                                throw new Error(err);
-                        }
-                    );
-                },
-                function (err) { callback(err); }
-            );
-        };
+            for (var i = 0; i < numAINRanges; i++) {
+                valuesByAIN[ainRanges[i].ainNum] = {};
+            }
 
-        return deferred.promise;
+            var processDevice = function (device, callback) {
+                getAINValuesForDevice(device).then(
+                    function (values) {
+                        async.each(
+                            values,
+                            function (item, innerCallback) {
+                                var valueIndex = valuesByAIN[item.ainNum];
+                                valueIndex[device.getSerial()] = item.val;
+                            },
+                            function (err) {
+                                if (err)
+                                    throw new Error(err);
+                            }
+                        );
+                    },
+                    function (err) {
+                        callback(err);
+                    }
+                );
+            };
+        });
     };
 }

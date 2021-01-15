@@ -9,7 +9,7 @@ var util = require('util');
 // to emmit an event:
 // module.exports.emit('ready');
 
-var q;
+const q = require('q');
 var dict;
 var async;
 var exposedLibs;
@@ -603,7 +603,6 @@ exports.getTaskState = function() {
  */
 exports.includeTask = function(exposedLibs) {
 	exposedLibs = exposedLibs;
-	q = exposedLibs['q'];
 	dict = exposedLibs['dict'];
 	async = exposedLibs['async'];
 	task_manager = exposedLibs['task_manager'];

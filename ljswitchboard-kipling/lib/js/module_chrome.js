@@ -63,7 +63,6 @@ class ModuleChrome extends EventEmitter {
 		// Initialize variables for communicating with the driver.
 		this.io_interface = undefined;
 		this.device_controller = undefined;
-		this.device_controller_events = undefined;
 
 		this.cachedDeviceListing = [];
 
@@ -124,21 +123,6 @@ class ModuleChrome extends EventEmitter {
 		this.filterFlags = {};
 		this.moduleLockMessage = '';
 		this.allowModuleToLoad = true;
-
-		this.deviceControllerEventListeners = {
-			'DEVICE_CONTROLLER_DEVICE_OPENED': () => {
-				// console.log('MODULE_CHROME, Device List Changed');
-
-				// this.updateSecondaryModuleListing()
-				this.deviceControllerDeviceListChanged();
-			},
-			'DEVICE_CONTROLLER_DEVICE_CLOSED': () => {
-				// console.log('MODULE_CHROME, Device List Changed');
-
-				// this.updateSecondaryModuleListing()
-				this.deviceControllerDeviceListChanged();
-			}
-		};
 	}
 
 	async compileTemplate(templateName, data) {
@@ -364,6 +348,7 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	updateSecondaryModuleListing() {
+		console.trace();
 		// Get the list of modules and have the inner-function perform logic on
 		// acquired data.
 		return module_manager.getModulesList()
@@ -503,15 +488,21 @@ class ModuleChrome extends EventEmitter {
 	attachToDeviceControllerEvents() {
 		this.io_interface = io_manager.io_interface();
 		this.device_controller = this.io_interface.getDeviceController();
-		this.device_controller_events = this.device_controller.eventList;
 
-		const listenerKeys = Object.keys(this.deviceControllerEventListeners);
-		listenerKeys.forEach((key) => {
-			this.device_controller.on(
-				this.device_controller_events[key],
-				this.deviceControllerEventListeners[key]
-			);
-		});
+		this.device_controller.on(
+			this.device_controller.eventList.DEVICE_CONTROLLER_DEVICE_OPENED,
+			() => {
+				// this.updateSecondaryModuleListing()
+				this.deviceControllerDeviceListChanged();
+			}
+		);
+		this.device_controller.on(
+			this.device_controller.eventList.DEVICE_CONTROLLER_DEVICE_CLOSED,
+			() => {
+				// this.updateSecondaryModuleListing()
+				this.deviceControllerDeviceListChanged();
+			}
+		);
 
 		return Promise.resolve();
 	}

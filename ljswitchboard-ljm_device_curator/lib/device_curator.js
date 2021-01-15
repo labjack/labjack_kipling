@@ -1,4 +1,3 @@
-
 // Configure the number of max listeners on the process object to be infinity.
 process.setMaxListeners(0);
 
@@ -6,9 +5,6 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
 var async = require('async');
-var vm = require('vm');
-var fs = require('fs');
-
 
 var data_parser = require('ljswitchboard-data_parser');
 
@@ -19,7 +15,6 @@ var modbusMap = ljm.modbusMap.getConstants();
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 var ljm_ffi_req = require('ljm-ffi');
 var ljm_ffi = ljm_ffi_req.load();
-
 
 // Special T7 additional functions/operations
 var lj_t7_flash_operations = require('./t7_flash_operations');
@@ -58,8 +53,6 @@ var DEVICE_INITIALIZING = device_events.DEVICE_INITIALIZING;
 var DASHBOARD_DATA_UPDATE = device_events.DASHBOARD_DATA_UPDATE;
 var DEVICE_RELEASED = device_events.DEVICE_RELEASED; // Events thrown in the external_app_operations.js file
 var DEVICE_ACQUIRED = device_events.DEVICE_ACQUIRED; // Events thrown in the external_app_operations.js file
-
-
 
 // Break out various buffer constants to make them easier to use
 // for buffer manipulation.

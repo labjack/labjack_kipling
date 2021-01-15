@@ -172,7 +172,7 @@ var createModuleInstance = function() {
                     },function() {
                         console.error('Failed Starting FW');
                         resolve(moduleData);
-                    }).done();
+                    });
             } catch(err) {
                 console.error('Error Loading sdFramework', err);
             }

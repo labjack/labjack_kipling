@@ -14,6 +14,7 @@
 var MODULE_UPDATE_PERIOD_MS = 1000;
 const fs = require('fs');
 const path = require('path');
+const q = require('q');
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -464,50 +465,6 @@ function module() {
         .catch(handleLoadCfgFileErrors);
     };
 
-/**
- * OLD CONFIGURE DEVICE CODE
-    var TARGET_REGISTER = {
-        factory: 'IO_CONFIG_SET_DEFAULT_TO_FACTORY',
-        current: 'IO_CONFIG_SET_DEFAULT_TO_CURRENT'
-    };
-    var configureDeviceStrategies = {
-        factory: function(device) {
-            // Write a 1 to the appropriate register.
-            return device.iWrite(TARGET_REGISTER.factory, 1);
-        },
-        current: function(device) {
-            // Write a 1 to the appropriate register.
-            return device.iWrite(TARGET_REGISTER.current, 1);
-        }
-    };
-    this.configureSelectedDevice = function(device) {
-        try {
-            var selectedOption = $('.radio input:checked');
-            var selectedVal = selectedOption.val();
-            return configureDeviceStrategies[selectedVal](device);
-        } catch(err) {
-            console.error('Error writing to device', err);
-        }
-    };
-    this.configureSelectedDevices = function() {
-        var defered = q.defer();
-        var promises = self.activeDevices.map(self.configureSelectedDevice);
-        q.allSettled(promises)
-        .then(function() {
-            defered.resolve();
-        });
-        return defered.promise;
-    };
-    
-    
-    /*
-    this.configureDevice = function() {
-        self.hideSaveButtons()
-        .then(self.configureSelectedDevices)
-        .then(self.showSaveButtons)
-        .then(self.attachListener);
-    };
-    */
     var TARGET_REGISTER = {
         factory: 'IO_CONFIG_SET_DEFAULT_TO_FACTORY',
         current: 'IO_CONFIG_SET_DEFAULT_TO_CURRENT'

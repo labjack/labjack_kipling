@@ -1424,15 +1424,15 @@ function module() {
         }
     };
     this.saveCurrentScriptNavigationHandler = function() {
-        var defered = q.defer();
-        var canSave = self.luaController.curScriptOptions.canSave;
-        if(canSave) {
-            console.info('Saving User Script b/c of nav');
-            saveCurrentLuaScript(defered.resolve);
-        } else {
-            defered.resolve();
-        }
-        return defered.promise;
+        return new Promise((resolve, reject) => {
+            var canSave = self.luaController.curScriptOptions.canSave;
+            if (canSave) {
+                console.info('Saving User Script b/c of nav');
+                saveCurrentLuaScript(resolve);
+            } else {
+                return Promise.resolve();
+            }
+        });
     };
     this.onCloseDevice = function(framework, device, onError, onSuccess) {
         self.updateStartupData();
@@ -1617,81 +1617,76 @@ var readRomId = function(d, eioNum) {
     };
     var configOneWire = function(info) {
         return function() {
-            var ioDeferred = q.defer();
-            var addresses = [
-                'ONEWIRE_DQ_DIONUM',
-                'ONEWIRE_DPU_DIONUM',
-                'ONEWIRE_OPTIONS',
-                'ONEWIRE_FUNCTION',
-                'ONEWIRE_NUM_BYTES_TX',
-                'ONEWIRE_NUM_BYTES_RX',
-                'ONEWIRE_ROM_MATCH_H',
-                'ONEWIRE_ROM_MATCH_L',
-                'ONEWIRE_PATH_H',
-                'ONEWIRE_PATH_L'
-            ];
-            var values = [
-                info.dq,
-                info.dpu,
-                info.options,
-                info.func,
-                info.numTx,
-                info.numRx,
-                info.romH,
-                info.romL,
-                info.pathH,
-                info.pathL
-            ];
-            console.log('romH',info.romH,'romL',info.romL);
+            return new Promise((resolve, reject) => {
 
-            // perform IO
-            d.writeMany(addresses,values)
-            .then(function(data){
-                ioDeferred.resolve();
-            },function(err){
-                console.log('Error on config',err);
-                ioDeferred.reject();
+                var addresses = [
+                    'ONEWIRE_DQ_DIONUM',
+                    'ONEWIRE_DPU_DIONUM',
+                    'ONEWIRE_OPTIONS',
+                    'ONEWIRE_FUNCTION',
+                    'ONEWIRE_NUM_BYTES_TX',
+                    'ONEWIRE_NUM_BYTES_RX',
+                    'ONEWIRE_ROM_MATCH_H',
+                    'ONEWIRE_ROM_MATCH_L',
+                    'ONEWIRE_PATH_H',
+                    'ONEWIRE_PATH_L'
+                ];
+                var values = [
+                    info.dq,
+                    info.dpu,
+                    info.options,
+                    info.func,
+                    info.numTx,
+                    info.numRx,
+                    info.romH,
+                    info.romL,
+                    info.pathH,
+                    info.pathL
+                ];
+                console.log('romH', info.romH, 'romL', info.romL);
+
+                // perform IO
+                d.writeMany(addresses, values)
+                    .then(function (data) {
+                        resolve();
+                    }, function (err) {
+                        console.log('Error on config', err);
+                        reject();
+                    });
             });
-            return ioDeferred.promise;
         };
     };
     var oneWireGo = function() {
-        var ioDeferred = q.defer();
-        d.qWrite('ONEWIRE_GO',1)
-        .then(ioDeferred.resolve,ioDeferred.reject);
-        return ioDeferred.promise;
+        return d.qWrite('ONEWIRE_GO',1);
     };
     var getWriteDataFunc = function(info) {
         return function() {
-            var ioDeferred = q.defer();
-            if(info.numTx > 0) {
-                d.qWriteArray('ONEWIRE_DATA_TX',info.dataTx)
-                .then(ioDeferred.resolve,ioDeferred.reject);
+            if (info.numTx > 0) {
+                return d.qWriteArray('ONEWIRE_DATA_TX', info.dataTx);
             } else {
-                ioDeferred.resolve();
+                return Promise.resolve();
             }
-            return ioDeferred.promise;
         };
     };
     var readInfoFunc = function() {
-        var ioDeferred = q.defer();
-        var addresses = [
-            'ONEWIRE_ROM_BRANCHS_FOUND_H',
-            'ONEWIRE_ROM_BRANCHS_FOUND_L',
-            'ONEWIRE_SEARCH_RESULT_H',
-            'ONEWIRE_SEARCH_RESULT_L'
-        ];
-        d.readMany(addresses)
-        .then(
-            function(data){
-                ioDeferred.resolve(data);
-            },
-            function(err){
-                console.log('Error',err);
-                ioDeferred.reject();
-            }
-        );
-        return ioDeferred.promise;
+        return new Promise((resolve, reject) => {
+            var addresses = [
+                'ONEWIRE_ROM_BRANCHS_FOUND_H',
+                'ONEWIRE_ROM_BRANCHS_FOUND_L',
+                'ONEWIRE_SEARCH_RESULT_H',
+                'ONEWIRE_SEARCH_RESULT_L'
+            ];
+            d.readMany(addresses)
+                .then(
+                    function (data) {
+                        resolve(data);
+                    },
+                    function (err) {
+                        console.log('Error', err);
+                        reject();
+                    }
+                );
+        });
     };
 
     var configFunc = configOneWire(oneWireConfig);
@@ -1700,15 +1695,13 @@ var readRomId = function(d, eioNum) {
     var writeHighResProbeDataFunc = getWriteDataFunc(highResProbeConfig);
 
     var dispErrors = function(err) {
-        var errDeferred = q.defer();
         console.log('Error in 1-wire config',err);
         if(typeof(err) === 'number') {
             console.log(device_controller.ljm_driver.errToStrSync(err));
         } else {
             console.log('Typeof Err',typeof(err));
         }
-        errDeferred.reject();
-        return errDeferred.promise;
+        return Promise.reject();
     };
     configFunc()
     .then(writeDataFunc,dispErrors)
@@ -1716,7 +1709,6 @@ var readRomId = function(d, eioNum) {
     .then(readInfoFunc,dispErrors)
     .then(
         function(data) {
-            var ioDeferred = q.defer();
             console.log('Success!',data);
             var ramId = []
             ramId[0] = dec2hex((data[2]>>16)&0xFFFF);
@@ -1726,23 +1718,20 @@ var readRomId = function(d, eioNum) {
             highResProbeConfig.romH = data[2];
             highResProbeConfig.romL = data[3];
             console.log('Ram Id:',ramId);
-            ioDeferred.resolve();
-            return ioDeferred.promise;
+            return Promise.resolve();
         },
         function(err) {
-            var ioDeferred = q.defer();
             if(typeof(err) === 'number') {
                 console.log(device_controller.ljm_driver.errToStrSync(err));
             } else {
                 console.log('Typeof Err',typeof(err));
             }
             console.log('Failed',err);
-            ioDeferred.resolve();
-            return ioDeferred.promise;
+            return Promise.resolve();
         }
     )
     .then(configHighResProbeFunc,dispErrors)
     .then(writeHighResProbeDataFunc,dispErrors)
-    .then(oneWireGo,dispErrors)
+    .then(oneWireGo,dispErrors);
 };
 

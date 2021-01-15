@@ -125,7 +125,6 @@ function module() {
     });
 
     this.saveActiveRegisters = function() {
-        var defered = q.defer();
         var registerList = [];
         var keys = Object.keys(self.tableWatchRegisterCache);
         keys.forEach(function(key) {
@@ -144,13 +143,11 @@ function module() {
         
         if(displayMethod === 'registers_by_sn') {
             self.startupData.registers_by_sn[sn] = registerList;
-            defered.resolve();
+            return Promise.resolve();
         } else {
             showAlert('Unable to save currently watched registers: ' + displayMethod);
-            defered.resolve();
+            return Promise.resolve();
         }
-
-        return defered.promise;
     };
 
     
@@ -310,7 +307,6 @@ function module() {
     };
 
     this.getRegistersToDisplay = function() {
-        var defered = q.defer();
         var registers = [];
         var saveStartupData = false;
         var saveReasons = [];
@@ -362,12 +358,9 @@ function module() {
         }
 
         dbgIDR('In getRegistersToDisplay, resolving to:', registers);
-        defered.resolve(registers);
-
-        return defered.promise;
+        return Promise.resolve(registers);
     };
     this.initializeSelectedRegisters = function(registers) {
-        var defered = q.defer();
         self.tableWatchRegisterCache = {};
 
         registers.forEach(function(register) {
@@ -375,11 +368,9 @@ function module() {
             self.initializeTableWatchRegisterCacheVal(register, true);
         });
         dbgIDR('In initializeSelectedRegisters, resolving to:', registers);
-        defered.resolve(registers);
-        return defered.promise;
+        return Promise.resolve(registers);
     };
     this.getRegistersModbusInfo = function(registers) {
-        var defered = q.defer();
         var expandedRegisters = [];
         var invalidRegisters = [];
         var addedRegisters = [];
@@ -404,11 +395,9 @@ function module() {
             console.log('Invalid registers detected:', invalidRegisters);
         }
         dbgIDR('In getRegistersModbusInfo, resolving to:', expandedRegisters);
-        defered.resolve(expandedRegisters);
-        return defered.promise;
+        return Promise.resolve(expandedRegisters);
     };
     this.cachedRegistersToDisplay = function(registers) {
-        var defered = q.defer();
         var registerList = [];
         registers.forEach(function(register) {
             registerList.push(register.name);
@@ -417,11 +406,9 @@ function module() {
         self.displayedRegisters = registerList;
         dbgIDR('In cachedRegistersToDisplay, updated self.displayedRegisters to:', registerList);
         dbgIDR('In cachedRegistersToDisplay, resolving to:', registers);
-        defered.resolve(registers);
-        return defered.promise;
+        return Promise.resolve(registers);
     };
     this.getInitialDeviceData = function(registers) {
-        var defered = q.defer();
         dbgIDR('In getInitialDeviceData, getting data for:', self.displayedRegisters);
 
         var registersToRead = [];
@@ -445,7 +432,7 @@ function module() {
             });
             return index;
         }
-        self.activeDevice.sReadMultiple(registersToRead)
+        return self.activeDevice.sReadMultiple(registersToRead)
         .then(function(results) {
             results.forEach(function(result, i) {
                 dbgIDR('Initial Read RESULT:', result);
@@ -454,9 +441,8 @@ function module() {
             });
 
             dbgIDR('In getInitialDeviceData, resolving to:', registers);
-            defered.resolve(registers);
+            return Promise.resolve(registers);
         });
-        return defered.promise;
     };
 
     this.getActiveRegisterData = function(register) {
@@ -773,7 +759,6 @@ function module() {
         onSuccess();
     };
     this.updateActiveRegisterValues = function(results) {
-        var defered = q.defer();
         var data = {};
         try {
             results.forEach(function(result) {
@@ -814,8 +799,7 @@ function module() {
             console.error('Error updating data', err);
         }
         // console.log('Updated Data', data);
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     this.onRefreshed = function(framework, results, onError, onSuccess) {
         // console.log('in onRefreshed');

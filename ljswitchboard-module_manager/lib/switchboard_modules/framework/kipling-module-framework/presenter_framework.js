@@ -1,9 +1,8 @@
-
 /* jshint undef: true, unused: true, undef: true */
 /* jshint strict: false */
 /* global global, require, console, handlebars, $ */
 /* global showAlert, showCriticalAlert, showInfoMessage */
-/* global MODULE_LOADER, MODULE_CHROME, TASK_LOADER */
+/* global TASK_LOADER */
 /* global KEYBOARD_EVENT_HANDLER */
 
 // Flags
@@ -16,12 +15,12 @@
  * @author: Sam Pottinger (LabJack, 2014)
 **/
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var async = require('async');
-var q = require('q');
-var sprintf = require('sprintf-js').sprintf;
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const async = require('async');
+const sprintf = require('sprintf-js').sprintf;
 
+const package_loader = global.package_loader;
 const gui = package_loader.getPackage('gui');
 const io_manager = package_loader.getPackage('io_manager');
 const module_manager = package_loader.getPackage('module_manager');
@@ -36,12 +35,11 @@ ljmmm_parse.expandLJMMMNameSync = function (name) {
     ).map(function (entry) { return entry.name; });
 };
 
-
-var FADE_DURATION = 400;
-var DEFAULT_REFRESH_RATE = 1000;
-var CONFIGURING_DEVICE_TARGET = '#sd-ramework-configuring-device-display';
-var DEVICE_VIEW_TARGET = '#device-view';
-var CALLBACK_STRING_CONST = '-callback';
+const FADE_DURATION = 400;
+const DEFAULT_REFRESH_RATE = 1000;
+const CONFIGURING_DEVICE_TARGET = '#sd-framework-configuring-device-display';
+const DEVICE_VIEW_TARGET = '#device-view';
+const CALLBACK_STRING_CONST = '-callback';
 
 /**
  * Creates a new binding info object with the metadata copied from another.
@@ -52,9 +50,9 @@ var CALLBACK_STRING_CONST = '-callback';
  * into a new one. Namely, it will re-use original's class, direction, and
  * event attributes but add in new binding and template values.
  *
- * @param {Object} orginal The object with the original binding information.
+ * @param {Object} original The object with the original binding information.
  * @param {String} binding The register name to bind the GUI element(s) to.
- *      If given an LJMMM string, will be exapnded and all registers named after
+ *      If given an LJMMM string, will be expanded and all registers named after
  *      the expansion will be bound to the GUI. Note that this expansion
  *      is executed later in the framework and only a single binding will be
  *      returned from this function.
@@ -111,18 +109,18 @@ function cloneBindingInfo (original, bindingClass, binding, template) {
  *      with a single binding info object will be returned.
 **/
 function expandBindingInfo (bindingInfo) {
-    var expandedBindingClasses = ljmmm_parse.expandLJMMMName(bindingInfo.bindingClass);
-    var expandedBindings = ljmmm_parse.expandLJMMMName(bindingInfo.binding);
-    var expandedTemplates = ljmmm_parse.expandLJMMMName(bindingInfo.template);
+    const expandedBindingClasses = ljmmm_parse.expandLJMMMName(bindingInfo.bindingClass);
+    const expandedBindings = ljmmm_parse.expandLJMMMName(bindingInfo.binding);
+    const expandedTemplates = ljmmm_parse.expandLJMMMName(bindingInfo.template);
 
-    if (expandedBindings.length != expandedTemplates.length) {
+    if (expandedBindings.length !== expandedTemplates.length) {
         throw 'Unexpected ljmmm expansion mismatch.';
     }
 
     var newBindingsInfo = [];
     var numBindings = expandedBindings.length;
-    for (var i=0; i<numBindings; i++) {
-        var clone = cloneBindingInfo(
+    for (let i = 0; i < numBindings; i++) {
+        const clone = cloneBindingInfo(
             bindingInfo,
             expandedBindingClasses[i],
             expandedBindings[i],
@@ -156,14 +154,14 @@ function expandSetupBindingInfo (bindingInfo) {
     var expandedBindingClasses = ljmmm_parse.expandLJMMMName(bindingInfo.bindingClass);
     var expandedBindings = ljmmm_parse.expandLJMMMName(bindingInfo.binding);
 
-    if (expandedBindingClasses.length != expandedBindings.length) {
+    if (expandedBindingClasses.length !== expandedBindings.length) {
         throw 'Unexpected ljmmm expansion mismatch.';
     }
 
     var newBindingsInfo = [];
     var numBindings = expandedBindings.length;
 
-    for (var i=0; i<numBindings; i++) {
+    for (let i = 0; i < numBindings; i++) {
         var clone = cloneSetupBindingInfo(
             bindingInfo,
             expandedBindingClasses[i],
@@ -184,18 +182,14 @@ function runRedraw()
     document.body.style.display='block';
 }
 function qRunRedraw() {
-    var innerDeferred = q.defer();
     runRedraw();
-    innerDeferred.resolve();
-    return innerDeferred.promise;
+    return Promise.resolve();
 }
 
 /**
  * Function to render device error data
 */
 function extrapolateDeviceErrorData(data) {
-    var compiledMessage = '';
-
     // Get the error description (if it exists);
     var description = modbus_map.getErrorInfo(data.code).description;
     data.description = description;
@@ -220,7 +214,7 @@ function extrapolateDeviceErrorData(data) {
 **/
 function Framework() {
 
-    // List of events that the framework handels
+    // List of events that the framework handles
     const defaultEntries = {
         verifyStartupData: null,
         onModuleLoaded: null,
@@ -293,8 +287,7 @@ function Framework() {
     var ljmDriverLogEnabled = false;
 
     // Framework Deletion constant
-    var frameworkActive = true;
-    this.frameworkActive = frameworkActive;
+    this.frameworkActive = true;
 
     this.deviceSelectionListenersAttached = deviceSelectionListenersAttached;
     this.jquery = jquery;
@@ -335,7 +328,7 @@ function Framework() {
     this.uniqueTabID = '';
 
     //Constants for auto-debugging on slow DAQ loops
-    var moduleStartTimeObj = new Date();
+    const moduleStartTimeObj = new Date();
     this.iterationTime = iterationTime;
     this.iterationTime = moduleStartTimeObj.valueOf();
     this.ljmDriverLogEnabled = ljmDriverLogEnabled;
@@ -363,45 +356,17 @@ function Framework() {
     this.isStartupDataValid = false;
 
     this.DEBUG_STARTUP_DATA = false;
-    var self = this;
+    const self = this;
     this.reportSyntaxError = function(location, err) {
         console.error('Error in:', location);
         console.error('Error obj', err);
-        var stackSplit = err.stack.split('\n');
-        var caller_line = err.stack.split('\n')[4];
-        var index = caller_line.indexOf('at ');
-        var clean = caller_line.slice(index+2, caller_line.length);
-        // console.error('other output:',err.stack);
-        console.error('stackSplit',stackSplit);
-        // console.error('Stack Dump');
-        // stackSplit.forEach(function(stackStr,i){
-        //     var str = "";
-        //     str += stackStr
-        //     console.error(i.toString()+'.',str);
-        // });
-        // console.error('line:',err.line);
-        // console.error('caller',caller_line);
-        // console.error('index',index);
-        // console.error('clean',clean);
         showCriticalAlert(err.toString());
     };
     this.enableLoopTimingAnalysis = function() {
         self.sdFrameworkDebugTiming = true;
     };
-    this.disableLoopTimingAnalysis = function() {
-        self.sdFrameworkDebugTiming = true;
-    };
-    this.enableLoopErrorAnalysis = function() {
-        self.sdFrameworkDebugTiming = true;
-    };
-    this.disableLoopErrorAnalysis = function() {
-        self.sdFrameworkDebugTiming = false;
-    };
     this.enableLoopMonitorAnalysis = function() {
         self.sdFrameworkDebugDAQLoopMonitor = true;
-    };
-    this.disableLoopMonitorAnalysis = function() {
-        self.sdFrameworkDebugDAQLoopMonitor = false;
     };
     this.print = function(functionName,info,errName) {
         if(typeof(errName) === 'undefined') {
@@ -463,7 +428,6 @@ function Framework() {
 
         self.selectedDevices = selectedDevices;
     };
-    var _SetSelectedDevices = this._SetSelectedDevices;
 
     var getConnectedDeviceInfoJquerySelector = function(serialNumber, extra) {
         var selector = [
@@ -480,14 +444,14 @@ function Framework() {
         return selector;
     };
     var getDeviceErrorJquerySelector = function(serialNumber, extra) {
-        var selector = getConnectedDeviceInfoJquerySelector(
+        let selector = getConnectedDeviceInfoJquerySelector(
             serialNumber,
             '.device-selector-table-status'
         );
 
-        if(extra) {
+        if (extra) {
             if(Array.isArray(extra)) {
-                var extraData = extra.join(' ');
+                const extraData = extra.join(' ');
                 selector += ' '+ extraData;
             } else {
                 selector += ' '+ extra;
@@ -505,10 +469,6 @@ function Framework() {
         var statusIconSelector = getConnectedDeviceInfoJquerySelector(
             serialNumber,
             ['.connection-status-icon']
-        );
-        var badgeSelector = getDeviceErrorJquerySelector(
-            serialNumber,
-            ['.module-chrome-tab-badge', '.badge']
         );
         var messagesSelector = getDeviceErrorJquerySelector(
             serialNumber,
@@ -531,10 +491,13 @@ function Framework() {
             ['.device-name-holder']
         );
 
-
         elements.deviceInfo = $(deviceInfoSelector);
         elements.statusIcon = $(statusIconSelector);
-        elements.badge = $(badgeSelector);
+
+        elements.badge = $(getDeviceErrorJquerySelector(
+            serialNumber,
+            ['.module-chrome-tab-badge', '.badge']
+        ));
         elements.messagesSelector = $(messagesSelector);
         elements.clearErrorsButton = $(clearMessagesButtonSelector);
         elements.copyMessagesButtonSelector = $(copyMessagesButtonSelector);
@@ -672,7 +635,6 @@ function Framework() {
                 var pt = data.attrs.productType;
                 var sn = data.attrs.serialNumber.toString();
                 var appName = data.attrs.sharedAppName;
-                var isConnected = data.attrs.isConnected;
                 var msg = '';
                 if(isShared) {
                     msg = 'The ' + pt + ' with the SN: ' + sn;
@@ -736,7 +698,7 @@ function Framework() {
             }
         }
     }
-    var deviceDisconnectedEventListener = function(data) {
+    function deviceDisconnectedEventListener(data) {
         // console.warn('Device Disconnected', data);
         self.emit('FRAMEWORK_HANDLED_DEVICE_DISCONNECTED', data);
         if(data.serialNumber) {
@@ -746,8 +708,9 @@ function Framework() {
                 self.deviceErrorControls[sn].updateConnectionStatus(false);
             }
         }
-    };
-    var deviceReconnectedEventListener = function(data) {
+    }
+
+    function deviceReconnectedEventListener(data) {
         // console.warn('Device Reconnected', data);
         self.emit('FRAMEWORK_HANDLED_DEVICE_RECONNECTED', data);
         if(data.serialNumber) {
@@ -757,9 +720,9 @@ function Framework() {
                 self.deviceErrorControls[sn].updateConnectionStatus(true);
             }
         }
-    };
+    }
 
-    var deviceErrorEventListener = function(data) {
+    function deviceErrorEventListener(data) {
         // console.warn('Device Error', data);
         try {
             self.emit('FRAMEWORK_HANDLED_DEVICE_ERROR', data);
@@ -777,9 +740,10 @@ function Framework() {
         } catch(err) {
             console.error('Error Handling Error', err);
         }
-    };
-    var deviceReconnectingEventListener = function(data) {
-        // console.warn('Device Reconnecting', data);
+    }
+
+    function deviceReconnectingEventListener(data) {
+        console.warn('Device Reconnecting', data);
         try {
             if(data.serialNumber) {
                 var sn = data.serialNumber;
@@ -792,8 +756,8 @@ function Framework() {
         } catch(err) {
             console.error('Error Handling Reconnecting message', err);
         }
-    };
-    var deviceAttributesChangedEventListener = function(data) {
+    }
+    function deviceAttributesChangedEventListener(data) {
         try {
             console.log('in DEVICE_ATTRIBUTES_CHANGED event', data);
             if(data.serialNumber) {
@@ -847,6 +811,7 @@ function Framework() {
         });
     };
     var detachDeviceStatusListeners = function() {
+        console.log('detachDeviceStatusListeners');
         self.activeDevices.forEach(function(device) {
             device.removeListener('DEVICE_DISCONNECTED', deviceDisconnectedEventListener);
             device.removeListener('DEVICE_RECONNECTED', deviceReconnectedEventListener);
@@ -876,7 +841,7 @@ function Framework() {
         newActiveDevices.forEach(function(device) {
             var sn = device.savedAttributes.serialNumber;
 
-            var controls = buildDeviceErrorControls(sn);
+            buildDeviceErrorControls(sn);
             // Initialize the error log
             var messages = [];
             if(!device.savedAttributes.isConnected) {
@@ -891,32 +856,21 @@ function Framework() {
         // Attach Device Listeners
         attachDeviceStatusListeners();
     };
-    var _SetActiveDevices = this._SetActiveDevices;
 
     this.getActiveDevices = function() {
         return self.activeDevices;
     };
-    var getActiveDevices = this.getActiveDevices;
 
     this._SetActiveDevice = function(newActiveDevice) {
         activeDevice = newActiveDevice;
         self.activeDevice = newActiveDevice;
     };
-    var _SetActiveDevice = this._SetActiveDevice;
 
     this.getActiveDevice = function() {
         return self.activeDevice;
     };
     var getActiveDevice = this.getActiveDevice;
 
-
-
-    var updateDisplayedDeviceErrors = function() {
-        var serialNumbers = Object.keys(self.deviceErrorLog);
-        serialNumbers.forEach(function(serialNumber) {
-
-        });
-    };
     this.reportDeviceError = function(message, serialNumber) {
         if(typeof(serialNumber) === 'undefined') {
             var activeDevice = getActiveDevice();
@@ -1043,7 +997,7 @@ function Framework() {
                 }
                 console.error(
                     'Error firing: '+name,
-                    'moduleData: ', self.moduleData,
+                    // 'moduleData: ', self.moduleData,
                     'typeof sdModule: ', typeof(sdModule),
                     'typeof sdFramework: ', typeof(sdFramework),
                     'frameworkActive', self.frameworkActive,
@@ -1068,7 +1022,6 @@ function Framework() {
             onSuccess();
         }
     };
-    var fire = this.fire;
 
     /**
      * Function deletes various 'window.' objects that need to be removed in
@@ -1078,7 +1031,7 @@ function Framework() {
      */
     this.unloadModuleLibraries = function(moduleLibraries) {
         if(moduleLibraries !== undefined) {
-            moduleLibraries.forEach(function(element, index, array){
+            moduleLibraries.forEach(function(element){
                 var delStr = 'delete ' + element;
                 try{
                     eval(delStr);
@@ -1086,87 +1039,64 @@ function Framework() {
                     console.error('presenter_framework Error Deleting Element',element);
                 }
             });
-        } else {
-            // console.warn('presenter_framework, "third_party_code_unload" undefined');
         }
     };
-    var unloadModuleLibraries = this.unloadModuleLibraries;
 
-    this.getExitFuncs = function(curState) {
-        var exitPath = q.defer();
-        var exitErrHandle = function() {
-            var exitDeferred = q.defer();
-            exitDeferred.resolve();
-            return exitDeferred.promise;
-        };
+    this.getExitFuncs = async function(curState) {
         if(curState === 'onModuleLoaded') {
-            self.qExecOnUnloadModule()
-            .then(exitPath.resolve,exitPath.reject);
+            return self.qExecOnUnloadModule();
         } else if(curState === 'onDeviceSelected') {
-            self.qExecOnCloseDevice()
-            .then(self.qExecOnUnloadModule,self.qExecOnUnloadModule)
-            .then(exitPath.resolve,exitPath.reject);
+            return self.qExecOnCloseDevice()
+                .then(self.qExecOnUnloadModule, self.qExecOnUnloadModule);
         } else if(curState === 'onLoadError') {
-            exitPath.reject();
+            return Promise.reject();
         } else {
-            self.qExecOnCloseDevice()
-            .then(self.qExecOnUnloadModule,self.qExecOnUnloadModule)
-            .then(exitPath.resolve,exitPath.reject);
+            return self.qExecOnCloseDevice()
+                .then(self.qExecOnUnloadModule, self.qExecOnUnloadModule);
         }
-
-        return exitPath.promise;
     };
-    var getExitFuncs = this.getExitFuncs;
 
     this.convertBindingsToDict = function() {
         return self.moduleTemplateBindings;
     };
-    var convertBindingsToDict = this.convertBindingsToDict;
 
     this.qHideUserTemplate = function() {
-        var innerDeferred = q.defer();
-        self.jquery.fadeOut(
-            DEVICE_VIEW_TARGET,
-            FADE_DURATION,
-            function(){
-                self.jquery.fadeIn(
-                    CONFIGURING_DEVICE_TARGET,
-                    FADE_DURATION,
-                    innerDeferred.resolve
-                );
-            }
-        );
-        return innerDeferred.promise;
+        return new Promise((resolve) => {
+            self.jquery.fadeOut(
+                DEVICE_VIEW_TARGET,
+                FADE_DURATION,
+                function() {
+                    self.jquery.fadeIn(
+                        CONFIGURING_DEVICE_TARGET,
+                        FADE_DURATION,
+                        resolve
+                    );
+                }
+            );
+        });
     };
-    var qHideUserTemplate = this.qHideUserTemplate;
 
     this.qShowUserTemplate = function() {
-        var innerDeferred = q.defer();
-        self.jquery.fadeOut(
-            CONFIGURING_DEVICE_TARGET,
-            FADE_DURATION,
-            function(){
-                self.jquery.fadeIn(
-                    DEVICE_VIEW_TARGET,
-                    FADE_DURATION,
-                    innerDeferred.resolve
-                );
-            }
-        );
-        return innerDeferred.promise;
+        return new Promise((resolve) => {
+            self.jquery.fadeOut(
+                CONFIGURING_DEVICE_TARGET,
+                FADE_DURATION,
+                function(){
+                    self.jquery.fadeIn(
+                        DEVICE_VIEW_TARGET,
+                        FADE_DURATION,
+                        resolve
+                    );
+                }
+            );
+        });
     };
-    var qShowUserTemplate = this.qShowUserTemplate;
 
     this.saveModuleStartupDataReference = function(newStartupData) {
-        var defered = q.defer();
-
         self.saveStartupDataReference(newStartupData);
-
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     this.resetModuleStartupData = function() {
-        var defered = q.defer();
         var moduleName = self.currentModuleName;
 
         if(self.DEBUG_STARTUP_DATA) {
@@ -1194,15 +1124,11 @@ function Framework() {
                 showAlert('Resetting persistent data for: ' + moduleName);
             }
         });
-        module_manager.revertModuleStartupData(moduleName)
-        .then(module_manager.getModuleStartupData)
-        .then(self.saveModuleStartupDataReference)
-        .then(defered.resolve, defered.reject);
-
-        return defered.promise;
+        return module_manager.revertModuleStartupData(moduleName)
+            .then(module_manager.getModuleStartupData)
+            .then(self.saveModuleStartupDataReference);
     };
     this.saveModuleStartupData = function(callerInfo) {
-        var defered = q.defer();
         var moduleName = self.currentModuleName;
         var dataToSave;
         var isDataValid = self.isStartupDataValid;
@@ -1252,15 +1178,12 @@ function Framework() {
             };
 
             var reportSavedStartupData = function() {
-                var defered = q.defer();
-                defered.resolve();
-                return defered.promise;
+                return Promise.resolve();
             };
 
-            self.qExecVerifyStartupData('saveStartupData')
+            return self.qExecVerifyStartupData('saveStartupData')
             .then(innerSaveStartupData)
-            .then(reportSavedStartupData)
-            .then(defered.resolve, defered.reject);
+            .then(reportSavedStartupData);
         } else {
             if(self.DEBUG_STARTUP_DATA) {
                 console.info(
@@ -1270,360 +1193,319 @@ function Framework() {
                     saveReasons
                 );
             }
-            defered.resolve();
+            return Promise.resolve();
         }
-
-        return defered.promise;
     };
     this.qExecVerifyStartupData = function(callerData) {
-        var innerDeferred = q.defer();
-        if(self.DEBUG_STARTUP_DATA) {
-            console.info(
-                'presenter_framework: in verifyStartupData',
-                callerData,
-                self.currentModuleName
-            );
-        }
+        return new Promise((resolve, reject) => {
+            if(self.DEBUG_STARTUP_DATA) {
+                console.info(
+                    'presenter_framework: in verifyStartupData',
+                    callerData,
+                    self.currentModuleName
+                );
+            }
 
-        var finishWithError = function(errData) {
-            console.warn('presenter_framework: verifyStartupData, finishWithError', errData);
-            self.resetModuleStartupData()
-            .then(innerDeferred.resolve, innerDeferred.reject);
-        };
-        var finishSuccessfully = function() {
-            innerDeferred.resolve();
-        };
+            var finishWithError = function(errData) {
+                console.warn('presenter_framework: verifyStartupData, finishWithError', errData);
+                self.resetModuleStartupData()
+                    .then(resolve, reject);
+            };
+            var finishSuccessfully = function() {
+                resolve();
+            };
 
-        if(self.allowModuleExecution) {
-            self.fire(
-                'verifyStartupData',
-                [self.startupData],
-                finishWithError,
-                finishSuccessfully
-            );
-        } else {
-            console.log('allowModuleExecution == false', self.allowModuleExecution);
-            self.getExitFuncs('onModuleLoaded')
-            .then(innerDeferred.reject,innerDeferred.reject);
-        }
-        return innerDeferred.promise;
+            if(self.allowModuleExecution) {
+                self.fire(
+                    'verifyStartupData',
+                    [self.startupData],
+                    finishWithError,
+                    finishSuccessfully
+                );
+            } else {
+                console.log('allowModuleExecution == false', self.allowModuleExecution);
+                self.getExitFuncs('onModuleLoaded')
+                    .then(reject, reject);
+            }
+        });
     };
     this.initializeStartupData = function() {
-        var defered = q.defer();
         var moduleName = self.currentModuleName;
         var executeVerifyStartupData = function() {
             return self.qExecVerifyStartupData('initializeStartupData');
         };
 
-        module_manager.getModuleStartupData(moduleName)
-        .then(self.saveModuleStartupDataReference)
-        .then(executeVerifyStartupData)
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
+        return module_manager.getModuleStartupData(moduleName)
+            .then(self.saveModuleStartupDataReference)
+            .then(executeVerifyStartupData);
     };
     this.qExecOnModuleLoaded = function() {
-        var innerDeferred = q.defer();
-        if(self.allowModuleExecution) {
-            //Save module info if not already defined
-            // if(self.moduleInfoObj === undefined) {
-            //     self.moduleInfoObj = LOADED_MODULE_INFO_OBJECT;
-            //     moduleInfoObj = LOADED_MODULE_INFO_OBJECT;
-            // }
-            //Fire onModuleLoaded function
-            self.fire(
-                'onModuleLoaded',
-                [],
-                innerDeferred.reject,
-                function() {
-                    self.isModuleLoaded = true;
-                    innerDeferred.resolve();
-                }
-            );
-        } else {
-            self.getExitFuncs('onModuleLoaded')
-            .then(innerDeferred.reject,innerDeferred.reject);
-        }
-        return innerDeferred.promise;
+        return new Promise((resolve, reject) => {
+            if (self.allowModuleExecution) {
+                self.fire(
+                    'onModuleLoaded',
+                    [],
+                    (err) => reject(err),
+                    function () {
+                        self.isModuleLoaded = true;
+                        resolve();
+                    }
+                );
+            } else {
+                return self.getExitFuncs('onModuleLoaded');
+            }
+        });
     };
-    var qExecOnModuleLoaded = this.qExecOnModuleLoaded;
 
     this.qExecOnDeviceSelected = function() {
-        var innerDeferred = q.defer();
-
-        if(self.allowModuleExecution) {
-            self.fire(
-                'onDeviceSelected',
-                [self.smartGetSelectedDevices()],
-                innerDeferred.reject,
-                function() {
-                    self.isDeviceOpen = true;
-                    innerDeferred.resolve();
-                }
-            );
-        } else {
-            self.getExitFuncs('onDeviceSelected')
-            .then(innerDeferred.reject,innerDeferred.reject);
-        }
-        return innerDeferred.promise;
+        return new Promise((resolve, reject) => {
+            if (self.allowModuleExecution) {
+                self.fire(
+                    'onDeviceSelected',
+                    [self.smartGetSelectedDevices()],
+                    (err) => reject(err),
+                    function () {
+                        self.isDeviceOpen = true;
+                        resolve();
+                    }
+                );
+            } else {
+                return self.getExitFuncs('onDeviceSelected');
+            }
+        });
     };
-    var qExecOnDeviceSelected = this.qExecOnDeviceSelected;
 
     this.qExecOnDeviceConfigured = function(data) {
-        var innerDeferred = q.defer();
-
-        if(self.allowModuleExecution) {
-            self.fire(
-                'onDeviceConfigured',
-                [self.smartGetSelectedDevices(), data],
-                innerDeferred.reject,
-                innerDeferred.resolve
-            );
-        } else {
-            self.getExitFuncs('onDeviceConfigured')
-            .then(innerDeferred.reject,innerDeferred.reject);
-        }
-        return innerDeferred.promise;
+        return new Promise((resolve, reject) => {
+            if (self.allowModuleExecution) {
+                self.fire(
+                    'onDeviceConfigured',
+                    [self.smartGetSelectedDevices(), data],
+                    (err) => reject(err),
+                    (res) => resolve(res)
+                );
+            } else {
+                return self.getExitFuncs('onDeviceConfigured');
+            }
+        });
     };
-    var qExecOnDeviceConfigured = this.qExecOnDeviceConfigured;
 
     this.qExecOnTemplateDisplayed = function() {
-        var innerDeferred = q.defer();
-
-        if(self.allowModuleExecution) {
-            var rejectFunc = function(data) {
-                innerDeferred.reject(data);
-            };
-            var resolveFunc = function(data) {
-                KEYBOARD_EVENT_HANDLER.initInputListeners();
-                innerDeferred.resolve(data);
-            };
-            try{
-                self.fire(
-                    'onTemplateDisplayed',
-                    [],
-                    rejectFunc,
-                    resolveFunc
-                );
-            } catch (err) {
-                if(err.name === 'SyntaxError') {
-                    console.error('Syntax Error captured');
+        return new Promise((resolve, reject) => {
+            if (self.allowModuleExecution) {
+                var rejectFunc = function (data) {
+                    reject(data);
+                };
+                var resolveFunc = function (data) {
+                    KEYBOARD_EVENT_HANDLER.initInputListeners();
+                    resolve(data);
+                };
+                try {
+                    self.fire(
+                        'onTemplateDisplayed',
+                        [],
+                        rejectFunc,
+                        resolveFunc
+                    );
+                } catch (err) {
+                    if (err.name === 'SyntaxError') {
+                        console.error('Syntax Error captured');
+                    }
+                    console.error('Error caught in qExecOnTemplateDisplayed', err);
                 }
-                console.error('Error caught in qExecOnTemplateDisplayed',err);
+            } else {
+                return self.getExitFuncs('onTemplateDisplayed');
             }
-        } else {
-            self.getExitFuncs('onTemplateDisplayed')
-            .then(innerDeferred.reject,innerDeferred.reject);
-        }
-        return innerDeferred.promise;
+        });
     };
-    var qExecOnTemplateDisplayed = this.qExecOnTemplateDisplayed;
 
     this.qExecOnTemplateLoaded = function() {
-        var innerDeferred = q.defer();
-
-        if(self.allowModuleExecution) {
-            var rejectFunc = function(data) {
-                innerDeferred.reject(data);
-            };
-            var resolveFunc = function(data) {
-                innerDeferred.resolve(data);
-            };
-            try{
-                self.fire(
-                    'onTemplateLoaded',
-                    [],
-                    rejectFunc,
-                    resolveFunc
-                );
-            } catch (err) {
-                if(err.name === 'SyntaxError') {
-                    console.error('Syntax Error captured');
+        return new Promise((resolve, reject) => {
+            if (self.allowModuleExecution) {
+                var rejectFunc = function (data) {
+                    reject(data);
+                };
+                var resolveFunc = function (data) {
+                    resolve(data);
+                };
+                try {
+                    self.fire(
+                        'onTemplateLoaded',
+                        [],
+                        rejectFunc,
+                        resolveFunc
+                    );
+                } catch (err) {
+                    if (err.name === 'SyntaxError') {
+                        console.error('Syntax Error captured');
+                    }
+                    console.error('Error caught in qExecOnTemplateLoaded', err);
                 }
-                console.error('Error caught in qExecOnTemplateLoaded',err);
+            } else {
+                return self.getExitFuncs('onTemplateLoaded');
             }
-        } else {
-             self.getExitFuncs('onTemplateLoaded')
-            .then(innerDeferred.reject,innerDeferred.reject);
-        }
-        return innerDeferred.promise;
+        });
     };
-    var qExecOnTemplateLoaded = this.qExecOnTemplateLoaded;
 
     this.qExecOnCloseDevice = function() {
         var device = self.smartGetSelectedDevices();
         // Detach device event emitters
         detachDeviceStatusListeners();
-        var innerDeferred = q.defer();
-
-        var finishSuccess = function(data) {
-            var continueExec = function() {
-                innerDeferred.resolve(data);
-            };
-
-            self.saveModuleStartupData('qExecOnCloseDevice-suc')
-            .then(continueExec, continueExec);
-        };
-        var finishError = function(data) {
-            var continueExec = function() {
-                innerDeferred.reject(data);
-            };
-
-            self.saveModuleStartupData('qExecOnCloseDevice-err')
-            .then(continueExec, continueExec);
-        };
-        if(self.isDeviceOpen) {
-            if(self.allowModuleExecution) {
-                self.fire(
-                    'onCloseDevice',
-                    [device],
-                    finishError,
-                    finishSuccess
-                );
-            } else {
-                var finishExecution = function() {
-                    self.isDeviceOpen = false;
-                    self.qExecOnUnloadModule()
-                    .then(finishError,finishError);
+        return new Promise((resolve, reject) => {
+            var finishSuccess = function (data) {
+                var continueExec = function () {
+                    resolve(data);
                 };
-                self.fire(
-                    'onCloseDevice',
-                    [device],
-                    finishExecution,
-                    finishExecution
-                );
+
+                self.saveModuleStartupData('qExecOnCloseDevice-suc')
+                    .then(continueExec, continueExec);
+            };
+            var finishError = function (data) {
+                var continueExec = function () {
+                    reject(data);
+                };
+
+                self.saveModuleStartupData('qExecOnCloseDevice-err')
+                    .then(continueExec, continueExec);
+            };
+            if (self.isDeviceOpen) {
+                if (self.allowModuleExecution) {
+                    self.fire(
+                        'onCloseDevice',
+                        [device],
+                        finishError,
+                        finishSuccess
+                    );
+                } else {
+                    var finishExecution = function () {
+                        self.isDeviceOpen = false;
+                        self.qExecOnUnloadModule()
+                            .then(finishError, finishError);
+                    };
+                    self.fire(
+                        'onCloseDevice',
+                        [device],
+                        finishExecution,
+                        finishExecution
+                    );
+                }
+            } else {
+                console.error('in qExecOnCloseDevice, device is not open');
+                reject();
             }
-        } else {
-            console.error('in qExecOnCloseDevice, device is not open');
-            innerDeferred.reject();
-        }
-        return innerDeferred.promise;
+        });
     };
-    var qExecOnCloseDevice = this.qExecOnCloseDevice;
 
     this.qExecOnLoadError = function(err) {
-        var innerDeferred = q.defer();
+        return new Promise((resolve) => {
 
-        if(self.allowModuleExecution) {
-            self.fire(
-                'onLoadError',
-                [
-                    [ err ],
-                    function (shouldContinue) {
-                        self.runLoop = shouldContinue;
-                        innerDeferred.resolve();
-                    }
-                ]
-            );
-        } else {
-             self.getExitFuncs('onLoadError')
-            .then(innerDeferred.reject,innerDeferred.reject);
-        }
-        return innerDeferred.promise;
+            if (self.allowModuleExecution) {
+                self.fire(
+                    'onLoadError',
+                    [
+                        [err],
+                        function (shouldContinue) {
+                            self.runLoop = shouldContinue;
+                            resolve();
+                        }
+                    ]
+                );
+            } else {
+                return self.getExitFuncs('onLoadError');
+            }
+        });
     };
-    var qExecOnLoadError = this.qExecOnLoadError;
 
     this.qExecOnUnloadModule = function() {
-        var innerDeferred = q.defer();
+        return new Promise((resolve, reject) => {
+            if (self.isModuleLoaded) {
+                var finishError = function (data) {
+                    var continueExec = function () {
+                        reject(data);
+                    };
 
-        if(self.isModuleLoaded) {
-            var finishError = function(data) {
-                var continueExec = function() {
-                    innerDeferred.reject(data);
+                    self.saveModuleStartupData('qExecOnUnloadModule-err')
+                        .then(continueExec, continueExec);
                 };
 
-                self.saveModuleStartupData('qExecOnUnloadModule-err')
-                .then(continueExec, continueExec);
-            };
+                //Halt the daq loop
+                self.stopLoop();
 
-            //Halt the daq loop
-            self.stopLoop();
+                //clean up module's third party libraries
+                self.unloadModuleLibraries(self.moduleInfoObj.third_party_code_unload);
 
-            //clean up module's third party libraries
-            self.unloadModuleLibraries(self.moduleInfoObj.third_party_code_unload);
+                // Ensure the pgm exit listener has been removed.
+                removeProgramExitListener();
 
-            // Ensure the pgm exit listener has been removed.
-            removeProgramExitListener();
+                // clear any "ModuleWindowResizeListeners" window resize listeners
+                // clearModuleWindowResizeListners();
 
-            // clear any "ModuleWindowResizeListeners" window resize listeners
-            // clearModuleWindowResizeListners();
-
-            //If LJM's debug log was enabled, disable it
-            if(self.ljmDriverLogEnabled) {
-                console.info('disabling LJM-log');
-                console.info('File:',self.ljmDriver.readLibrarySync('LJM_DEBUG_LOG_FILE'));
-                self.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_MODE',1);
-                self.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_LEVEL',10);
-                self.ljmDriverLogEnabled = false;
-            }
-
-            //Inform the module that it has been unloaded.
-            self.fire(
-                'onUnloadModule',
-                [],
-                finishError,
-                function() {
-                    // Detach Device Listeners
-                    detachDeviceStatusListeners();
-
-                    self.isModuleLoaded = false;
-                    self.saveModuleStartupData('qExecOnUnloadModule-suc')
-                    .then(innerDeferred.resolve, innerDeferred.resolve);
+                //If LJM's debug log was enabled, disable it
+                if (self.ljmDriverLogEnabled) {
+                    console.info('disabling LJM-log');
+                    console.info('File:', self.ljmDriver.readLibrarySync('LJM_DEBUG_LOG_FILE'));
+                    self.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_MODE', 1);
+                    self.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_LEVEL', 10);
+                    self.ljmDriverLogEnabled = false;
                 }
-            );
-        } else {
-            innerDeferred.resolve();
-        }
-        return innerDeferred.promise;
+
+                //Inform the module that it has been unloaded.
+                self.fire(
+                    'onUnloadModule',
+                    [],
+                    finishError,
+                    function () {
+                        // Detach Device Listeners
+                        detachDeviceStatusListeners();
+
+                        self.isModuleLoaded = false;
+                        self.saveModuleStartupData('qExecOnUnloadModule-suc')
+                            .then(resolve, resolve);
+                    }
+                );
+            } else {
+                resolve();
+            }
+        });
     };
-    var qExecOnUnloadModule = this.qExecOnUnloadModule;
 
     this.qRenderModuleTemplate = function() {
-        var innerDeferred = q.defer();
-        self.setDeviceView(
+        return self.setDeviceView(
             self.userViewFile,
             self.moduleJsonFiles,
             self.convertBindingsToDict()
-        )
-        .then(innerDeferred.resolve, innerDeferred.reject);
-        return innerDeferred.promise;
+        );
     };
-    var qRenderModuleTemplate = this.qRenderModuleTemplate;
 
     var innerUpdateActiveDevice = function(data) {
-        var defered = q.defer();
-        device_controller.getSelectedDevice()
-        .then(function(activeDevice) {
-            data.activeDevice = activeDevice;
-            defered.resolve(data);
-        });
-        return defered.promise;
+        return device_controller.getSelectedDevice()
+            .then(function(activeDevice) {
+                data.activeDevice = activeDevice;
+                return Promise.resolve(data);
+            });
     };
     var innerGetDeviceListing = function(data) {
-        var defered = q.defer();
         var filters;
         if(self.moduleData.data.supportedDevices) {
             filters = self.moduleData.data.supportedDevices;
         }
-        device_controller.getDeviceListing(filters)
-        .then(function(deviceListing) {
-            data.deviceListing = deviceListing;
-            defered.resolve(data);
-        });
-        return defered.promise;
+        return device_controller.getDeviceListing(filters)
+            .then(function(deviceListing) {
+                data.deviceListing = deviceListing;
+                return Promise.resolve(data);
+            });
     };
     var innerGetDeviceObjects = function(data) {
-        var defered = q.defer();
         var filters;
         if(self.moduleData.data.supportedDevices) {
             filters = self.moduleData.data.supportedDevices;
         }
 
-        device_controller.getDevices(filters)
-        .then(function(devices) {
-            data.activeDevices = devices;
-            defered.resolve(data);
-        });
-        return defered.promise;
+        return device_controller.getDevices(filters)
+            .then(function(devices) {
+                data.activeDevices = devices;
+                return Promise.resolve(data);
+            });
     };
     this.getDeviceSelectorClass = function() {
         var key = '.device-selection-radio';
@@ -1635,102 +1517,88 @@ function Framework() {
         return key;
     };
     var updateSelectedDeviceList = function(data) {
-        var defered = q.defer();
+        return new Promise((resolve) => {
+            // Save device references
+            self._SetActiveDevices(data.activeDevices);
+            self._SetActiveDevice(data.activeDevice);
+            self._SetSelectedDevices(data.activeDevices);
 
-        // Save device references
-        self._SetActiveDevices(data.activeDevices);
-        self._SetActiveDevice(data.activeDevice);
-        self._SetSelectedDevices(data.activeDevices);
+            var devs = self.jquery.get(self.getDeviceSelectorClass());
+            // console.log('What things are chedked?');
+            // for(var i = 0; i < devs.length; i++) {
+            //     console.log('sn',devs.eq(i).prop('value'),devs.eq(i).prop('checked'));
+            // }
 
-        var devs = self.jquery.get(self.getDeviceSelectorClass());
-        // console.log('What things are chedked?');
-        // for(var i = 0; i < devs.length; i++) {
-        //     console.log('sn',devs.eq(i).prop('value'),devs.eq(i).prop('checked'));
-        // }
-
-        var foundActiveDevice = false;
-        var activeDevices = self.getSelectedDevices();
-        activeDevices.forEach(function(activeDev) {
-            var activeSN = activeDev.savedAttributes.serialNumber;
-            for(var i = 0; i < devs.length; i++) {
-                if (activeSN == devs.eq(i).val()) {
-                    devs.eq(i).prop('checked', true);
-                    foundActiveDevice = true;
+            var foundActiveDevice = false;
+            var activeDevices = self.getSelectedDevices();
+            activeDevices.forEach(function(activeDev) {
+                if (!activeDev.savedAttributes) return;
+                var activeSN = activeDev.savedAttributes.serialNumber;
+                for(var i = 0; i < devs.length; i++) {
+                    if (activeSN == devs.eq(i).val()) {
+                        devs.eq(i).prop('checked', true);
+                        foundActiveDevice = true;
+                    }
                 }
-            }
-        });
+            });
 
-        // Sloppy code warning...
-        function finishFunc() {
-            var selectorKey = '.device-selector-table-device-selector .radio';
-            if(self.frameworkType === 'multipleDevices') {
-                selectorKey = '.device-selector-table-device-selector .checkbox';
+            // Sloppy code warning...
+            function finishFunc() {
+                var selectorKey = '.device-selector-table-device-selector .radio';
+                if(self.frameworkType === 'multipleDevices') {
+                    selectorKey = '.device-selector-table-device-selector .checkbox';
+                }
+                var selectors = self.jquery.get(selectorKey);
+                selectors.show();
+                resolve();
             }
-            var selectors = self.jquery.get(selectorKey);
-            selectors.show();
+            function repeatCallOnSuccess() {
+                console.log('Repeating Execution of getting active device info...');
+                self.qUpdateActiveDevice().then(finishFunc, finishFunc);
+            }
+            // End of sloppy code warning...
+            if(!foundActiveDevice) {
+                // Did not find an active device
+                if(self.frameworkType === 'multipleDevices') {
+                    console.warn('Not sure what to do... presenter_framework.js - updateSelectedDeviceList');
+                    finishFunc();
+                } else {
+                    var activeDev = devs.eq(0);
+                    // Marking first found device
+                    var activeDevSN = 0;
+                    try {
+                        activeDevSN = activeDev.prop('value');
+                    } catch(err) {
+                        activeDevSN = 0;
+                        console.error('ERROR converting SN string to a number', err);
+                    }
+                    // console.log('SN:', activeDevSN, 'snType', typeof(activeDevSN));
 
-            defered.resolve();
-        }
-        function repeatCallOnSuccess(data) {
-            console.log('Repeating Execution of getting active device info...');
-            self.qUpdateActiveDevice()
-            .then(finishFunc,finishFunc);
-        }
-        function onSuccess(data) {
-            finishFunc();
-        }
-        function onError(err) {
-            finishFunc();
-        }
-        // End of sloppy code warning...
-        if(!foundActiveDevice) {
-            // Did not find an active device
-            if(self.frameworkType === 'multipleDevices') {
-                console.warn('Not sure what to do... presenter_framework.js - updateSelectedDeviceList');
-                onSuccess();
+                    // Populate radio box with buble.
+                    activeDev.prop('checked', true);
+
+                    // Communicate with device_manager...?
+                    // device_controller.selectDevice(activeDevSN);
+                    getSmartSaveSelectedDevices(activeDevSN)().then(repeatCallOnSuccess, finishFunc());
+                }
+
             } else {
-                var activeDev = devs.eq(0);
-                // Marking first found device
-                var activeDevSN = 0;
-                try {
-                    activeDevSN = activeDev.prop('value');
-                } catch(err) {
-                    activeDevSN = 0;
-                    console.error('ERROR converting SN string to a number', err);
-                }
-                // console.log('SN:', activeDevSN, 'snType', typeof(activeDevSN));
-
-                // Populate radio box with buble.
-                activeDev.prop('checked', true);
-
-                // Communicate with device_manager...?
-                // device_controller.selectDevice(activeDevSN);
-                getSmartSaveSelectedDevices(activeDevSN)().then(repeatCallOnSuccess,onError);
+                finishFunc();
             }
 
-        } else {
-            onSuccess();
-        }
-
-
-        return defered.promise;
+        });
     };
     this.qUpdateActiveDevice = function() {
-        var defered = q.defer();
-
         var data = {
             'activeDevice': undefined,      // is populated by func "innerUpdateActiveDevice".
             'deviceListing': undefined,     // is populated by func "innerGetDeviceListing".
             'activeDevices': undefined,     // is populated by func "innerGetDeviceObjects".
         };
-        innerUpdateActiveDevice(data)
-        .then(innerGetDeviceListing)
-        .then(innerGetDeviceObjects)
-        .then(updateSelectedDeviceList)     // Computes based on queried for objects.
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
+        return innerUpdateActiveDevice(data)
+            .then(innerGetDeviceListing)
+            .then(innerGetDeviceObjects)
+            .then(updateSelectedDeviceList);
     };
-    var qUpdateActiveDevice = this.qUpdateActiveDevice;
 
     /**
      * Set how frequently the framework should read from the device.
@@ -1740,7 +1608,6 @@ function Framework() {
     this.setRefreshRate = function (newRefreshRate) {
         self.refreshRate = newRefreshRate;
     };
-    var setRefreshRate = this.setRefreshRate;
 
     /**
      * Indicate which HTML controls should cause device configured to fire.
@@ -1759,22 +1626,17 @@ function Framework() {
     this.setConfigControls = function (newConfigControls) {
         self.configControls = newConfigControls;
     };
-    var setConfigControls = this.setConfigControls;
 
     this.qEstablishWriteBindings = function() {
-        var innerDeferred = q.defer();
         self.establishWriteBindings(self.writeBindings);
-        innerDeferred.resolve();
-        return innerDeferred.promise;
+        return Promise.resolve();
     };
-    var qEstablishWriteBindings = this.qEstablishWriteBindings;
 
     this.establishWriteBindings = function(bindings) {
         bindings.forEach(function(binding){
             self.establishWriteBinding(binding);
         });
     };
-    var establishWriteBindings = this.establishWriteBindings;
 
     this.establishWriteBinding = function(binding) {
         // writeBindings.set(newBinding.template, newBinding);
@@ -1788,7 +1650,6 @@ function Framework() {
             }
         );
     };
-    var establishWriteBinding = this.establishWriteBinding;
     /**
      * Register a new configuration binding.
      *
@@ -1959,8 +1820,6 @@ function Framework() {
         }
         bindings.set(newBinding.template, newBinding);
 
-
-        var jquerySelector = '#' + newBinding.template;
         if (newBinding.direction === 'read') {
             readBindings.set(newBinding.template, newBinding);
         } else if (newBinding.direction === 'write') {
@@ -1982,8 +1841,6 @@ function Framework() {
             self.putConfigBinding(bindings[i]);
         }
     };
-    var putConfigBindings = this.putConfigBindings;
-
 
     this.putSmartBinding = function(newSmartBinding) {
         var onErrorHandle = function(bundle) {
@@ -2111,22 +1968,18 @@ function Framework() {
         }
 
     };
-    var putSmartBinding = this.putSmartBinding;
 
     this.putSmartBindings = function(newSmartBindings) {
         newSmartBindings.forEach(function(newSmartBinding) {
             self.putSmartBinding(newSmartBinding);
         });
     };
-    var putSmartBindings = this.putSmartBindings;
 
     this.qUpdateSmartBindings = function() {
-        var deferred = q.defer();
-        self.smartBindings.forEach(function(smartBinding, key) {
+        self.smartBindings.forEach(function(smartBinding) {
             self.putSmartBinding(smartBinding);
         });
-        deferred.resolve();
-        return deferred.promise;
+        return Promise.resolve();
     };
     this.printSmartBindings = function() {
         self.smartBindings.forEach(function(smartBinding, key) {
@@ -2156,13 +2009,13 @@ function Framework() {
     };
     this.deleteAllSmartBindings = function() {
         var names = [];
-        self.smartBindings.forEach(function(smartBinding, key) {
+        self.smartBindings.forEach(function(smartBinding) {
             names[names.length] = smartBinding.smartName;
         });
         self.deleteSmartBindings(names);
         self.smartBindings = new Map();
         self.setupBindings = new Map();
-    }
+    };
     /**
      * Function to add a single binding that gets read once upon device
      * selection.
@@ -2284,7 +2137,6 @@ function Framework() {
             self.putSetupBinding(binding);
         });
     };
-    var putSetupBindings = this.putSetupBindings;
 
     this.deleteSetupBinding = function(setupBinding) {
         var name = setupBinding.bindingClass;
@@ -2307,70 +2159,31 @@ function Framework() {
     };
 
     this.executeSetupBindings = function() {
-        var deferred = q.defer();
-
-        var addresses = [];
-        var directions = [];
-        var numValues = [];
-        var values = [];
-        var bindingClasses = [];
-
-        var rwManyData = {
-            bindingClasses: bindingClasses,
-            addresses: addresses,
-            directions: directions,
-            numValues: numValues,
-            values: values
-        };
-
-        // return this.rwMany(addresses, directions, numValues, values);
-
-        var saveSetupBindings = function(setupInfo) {
-            var innerDeferred = q.defer();
-            self.setupBindings.forEach(function(binding, index){
-                setupInfo.formats.push(binding.format);
-                setupInfo.formatFuncs.push(binding.formatFunc);
-                setupInfo.bindingClasses.push(binding.bindingClass);
-                setupInfo.addresses.push(binding.binding);
-                setupInfo.numValues.push(1);
-                if ( binding.direction === 'read' ) {
-                    setupInfo.directions.push(0);
-                    setupInfo.values.push(-1);
-                } else if ( binding.direction === 'write' ) {
-                    setupInfo.directions.push(1);
-                    setupInfo.values.push(setupInfo.defaultVal);
-                }
-            });
-            innerDeferred.resolve(setupInfo);
-            return innerDeferred.promise;
-        };
-
         // Function for executing user-callback
         function executeCallback (binding, result) {
-            var callbackDeferred = q.defer();
-            if(binding.execCallback) {
-                binding.callback(
-                    {
-                        framework: self,
-                        module: self.module,
-                        device: self.getSelectedDevice(),
-                        binding: binding,
-                        value: result.result,
-                        result: result
-                    },
-                    function() {
-                        callbackDeferred.resolve();
-                    }
-                );
-            } else {
-                callbackDeferred.resolve();
-            }
-            return callbackDeferred.promise;
-
+            return new Promise((resolve) => {
+                if (binding.execCallback) {
+                    binding.callback(
+                        {
+                            framework: self,
+                            module: self.module,
+                            device: self.getSelectedDevice(),
+                            binding: binding,
+                            value: result.result,
+                            result: result
+                        },
+                        function () {
+                            resolve();
+                        }
+                    );
+                } else {
+                    resolve();
+                }
+            });
         }
         // Function for saving successful write i/o attempts
-        function createSuccessfulWriteFunc (ioDeferred, binding, results) {
-            return function (value) {
+        function createSuccessfulWriteFunc (resolve, reject, binding, results) {
+            return function () {
                 var result = {
                     status: 'success',
                     result: -1,
@@ -2379,12 +2192,12 @@ function Framework() {
                 };
                 results.set(binding.bindingClass, result);
                 executeCallback(binding,result)
-                .then(ioDeferred.resolve,ioDeferred.resolve);
+                .then(resolve, resolve);
             };
         }
 
         // Function for saving failed write i/o attempts
-        function createFailedWriteFunc (ioDeferred, binding, results) {
+        function createFailedWriteFunc(resolve, reject, binding, results) {
             return function (error) {
                 var result = {
                     status: 'error',
@@ -2394,15 +2207,13 @@ function Framework() {
                 };
                 results.set(binding.bindingClass, result);
                 executeCallback(binding,result)
-                .then(ioDeferred.resolve,ioDeferred.resolve);
-                // ioDeferred.resolve();
+                .then(resolve, reject);
             };
         }
 
         // Function for saving successful read i/o attempts
-        function createSuccessfulReadFunc (ioDeferred, binding, results) {
+        function createSuccessfulReadFunc(resolve, reject, binding, results) {
             return function (value) {
-                // console.log('Successful Read',value);
                 value = value.val;
                 var formattedValue = '';
                 var curFormat = binding.format;
@@ -2411,12 +2222,7 @@ function Framework() {
                         if(isNaN(value)) {
                             formattedValue = value;
                         } else {
-                            if(typeof(value) === 'number') {
-                                formattedValue = sprintf(curFormat, value);
-                            } else {
-                                console.warn('Replacing a non-value in createSuccessfulReadFunc', value, curFormat);
-                                formattedValue = 0;
-                            }
+                            formattedValue = sprintf(curFormat, value);
                         }
                     } else {
                         formattedValue = binding.formatFunc({
@@ -2436,13 +2242,12 @@ function Framework() {
                 };
                 results.set(binding.bindingClass, result);
                 executeCallback(binding,result)
-                .then(ioDeferred.resolve,ioDeferred.resolve);
-                // ioDeferred.resolve();
+                .then(resolve, reject);
             };
         }
 
         // Function for saving failed read i/o attempts
-        function createFailedReadFunc (ioDeferred, binding, results) {
+        function createFailedReadFunc(resolve, reject, binding, results) {
             return function (error) {
                 // console.log('Error on Read',error);
                 var result = {
@@ -2452,9 +2257,7 @@ function Framework() {
                     address: binding.binding
                 };
                 results.set(binding.bindingClass, result);
-                executeCallback(binding,result)
-                .then(ioDeferred.resolve,ioDeferred.resolve);
-                // ioDeferred.resolve();
+                executeCallback(binding,result).then(resolve, reject);
             };
         }
 
@@ -2462,46 +2265,48 @@ function Framework() {
         function createFutureDeviceIOOperation (binding, results) {
             return function() {
                 //Create execution queue
-                var innerDeferred = q.defer();
-                var device = self.getSelectedDevice();
+                return new Promise((resolve, reject) => {
+                    var device = self.getSelectedDevice();
 
-                //Create various read/write functions
-                var successfulWriteFunc = createSuccessfulWriteFunc(
-                    innerDeferred,
-                    binding,
-                    results
-                );
-                var failedWriteFunc = createFailedWriteFunc(
-                    innerDeferred,
-                    binding,
-                    results
-                );
-                var successfulReadFunc = createSuccessfulReadFunc(
-                    innerDeferred,
-                    binding,
-                    results
-                );
-                var failedReadFunc = createFailedReadFunc(
-                    innerDeferred,
-                    binding,
-                    results
-                );
-                // console.log('Executing IO Operation', binding.binding);
-                //Link various function calls based off read/write property
-                if(binding.direction === 'write') {
-                    //Define write I/O procedure
-                    device.qWrite(binding.binding, binding.defaultVal)
-                    .then(successfulWriteFunc, failedWriteFunc);
-                } else if (binding.direction === 'read') {
-                    //Define read I/O procedure
-                    device.sRead(binding.binding)
-                    .then(successfulReadFunc, failedReadFunc);
-                } else {
-                    console.warn('invalid binding.direction', binding.direction);
-                }
-
-                //Return execution queue reference
-                return innerDeferred.promise;
+                    //Create various read/write functions
+                    var successfulWriteFunc = createSuccessfulWriteFunc(
+                        resolve,
+                        reject,
+                        binding,
+                        results
+                    );
+                    var failedWriteFunc = createFailedWriteFunc(
+                        resolve,
+                        reject,
+                        binding,
+                        results
+                    );
+                    var successfulReadFunc = createSuccessfulReadFunc(
+                        resolve,
+                        reject,
+                        binding,
+                        results
+                    );
+                    var failedReadFunc = createFailedReadFunc(
+                        resolve,
+                        reject,
+                        binding,
+                        results
+                    );
+                    // console.log('Executing IO Operation', binding.binding);
+                    //Link various function calls based off read/write property
+                    if(binding.direction === 'write') {
+                        //Define write I/O procedure
+                        device.qWrite(binding.binding, binding.defaultVal)
+                            .then(successfulWriteFunc, failedWriteFunc);
+                    } else if (binding.direction === 'read') {
+                        //Define read I/O procedure
+                        device.sRead(binding.binding)
+                            .then(successfulReadFunc, failedReadFunc);
+                    } else {
+                        console.warn('invalid binding.direction', binding.direction);
+                    }
+                });
             };
         }
 
@@ -2511,7 +2316,7 @@ function Framework() {
             var bindingList = [];
 
             // Populating the execution queue
-            bindings.forEach(function (binding, key) {
+            bindings.forEach(function (binding) {
                 bindingList.push(createFutureDeviceIOOperation(
                     binding,
                     results
@@ -2522,100 +2327,37 @@ function Framework() {
 
         // Function that executes the device setup commands
         function executeDeviceSetupQueue (bindings) {
-            var deferred = q.defer();
-            var results = new Map();
+            return new Promise((resolve) => {
+                var results = new Map();
 
-            var executionQueue = createDeviceIOExecutionQueue(
-                bindings,
-                results
-            );
+                var executionQueue = createDeviceIOExecutionQueue(
+                    bindings,
+                    results
+                );
 
-            //Execute the created execution queue of device IO commands
-            async.eachSeries(
-                executionQueue,
-                function (request, callback) {
-                    var successFunc = function() {
-                        // console.log('eachSeries Success')
-                        callback();
-                    };
-                    var errorFunc = function(err) {
-                        // console.log('eachSeries Err',err);
-                        callback(err);
-                    };
+                //Execute the created execution queue of device IO commands
+                async.eachSeries(
+                    executionQueue,
+                    function (request, callback) {
+                        var successFunc = function () {
+                            // console.log('eachSeries Success')
+                            callback();
+                        };
+                        var errorFunc = function (err) {
+                            // console.log('eachSeries Err',err);
+                            callback(err);
+                        };
 
-                    request().then(successFunc,errorFunc);
-                },
-                function (err) {
-                    // console.log('eachSeries Callback',err);
-                    deferred.resolve(results);
-                });
-            return deferred.promise;
+                        request().then(successFunc, errorFunc);
+                    },
+                    function () {
+                        // console.log('eachSeries Callback',err);
+                       resolve(results);
+                    });
+            });
         }
 
-        var performDeviceWrites = function(setupInfo) {
-            var innerDeferred = q.defer();
-
-            var device;
-            var addresses = [];
-            var directions = [];
-            var numValues = [];
-            var values = [];
-
-            device = self.getSelectedDevice();
-            addresses = setupInfo.addresses;
-            directions = setupInfo.directions;
-            numValues = setupInfo.numValues;
-            values = setupInfo.values;
-
-            try{
-                device.rwMany(
-                    addresses,
-                    directions,
-                    numValues,
-                    values
-                    ).then(
-                    function(results) {
-                        var configResults = new Map();
-                        if(results.length != self.setupBindings.size) {
-                            console.error('presenter_framework setupBindings ERROR!!');
-                            console.error('resultsLength',results.length);
-                            console.error('setupBindings length', self.setupBindings.size);
-                        } else {
-                            var i = 0;
-                            self.setupBindings.forEach(function(binding, key){
-                                configResults.set(
-                                    key,
-                                    {
-                                        binding: binding,
-                                        address: addresses[i],
-                                        result: results[i]
-                                    });
-                                i += 1;
-                            });
-                        }
-                        innerDeferred.resolve(configResults);
-                    },
-                    function(err) {
-                        innerDeferred.reject(err);
-                    });
-            }
-            catch(err) {
-                console.error('performDeviceWrites err',err);
-                innerDeferred.reject(err);
-            }
-            return innerDeferred.promise;
-        };
-
-        // Save the setup information
-
-    // Code for executing requests in a single rwMany request:
-        // saveSetupBindings(rwManyData)
-        // .then(performDeviceWrites,self.qExecOnLoadError)
-
-    // Code for executing requests one at a time
-        executeDeviceSetupQueue(self.setupBindings)
-        .then(deferred.resolve,deferred.reject);
-        return deferred.promise;
+        return executeDeviceSetupQueue(self.setupBindings);
     };
 
     this._writeToDevice = function (bindingInfo, eventData) {
@@ -2623,27 +2365,54 @@ function Framework() {
         var newVal = self.jquery.val(jquerySelector);
 
         var alertRegisterWrite = function () {
-            var innerDeferred = q.defer();
-            self.fire(
-                'onRegisterWrite',
-                [
-                    bindingInfo,
-                    newVal
-                ],
-                innerDeferred.reject,
-                innerDeferred.resolve
-            );
-            return innerDeferred.promise;
+            return new Promise((resolve, reject) => {
+                self.fire(
+                    'onRegisterWrite',
+                    [
+                        bindingInfo,
+                        newVal
+                    ],
+                    reject,
+                    resolve
+                );
+            });
         };
 
         var performCallbacks = function(skipWrite) {
-            var innerDeferred = q.defer();
-            var callbackString = CALLBACK_STRING_CONST;
-            var baseStr = bindingInfo.binding;
-            var searchIndex = baseStr.search(callbackString);
-            if( searchIndex >= 0) {
-                if((baseStr.length - searchIndex - callbackString.length) === 0) {
-                    if(bindingInfo.execCallback) {
+            return new Promise((resolve) => {
+                var callbackString = CALLBACK_STRING_CONST;
+                var baseStr = bindingInfo.binding;
+                var searchIndex = baseStr.search(callbackString);
+                if (searchIndex >= 0) {
+                    if ((baseStr.length - searchIndex - callbackString.length) === 0) {
+                        if (bindingInfo.execCallback) {
+                            try {
+                                bindingInfo.callback(
+                                    {
+                                        framework: self,
+                                        module: self.module,
+                                        device: self.getSelectedDevice(),
+                                        binding: bindingInfo,
+                                        eventData: eventData,
+                                        value: newVal,
+                                    },
+                                    function () {
+                                        resolve(skipWrite, true);
+                                    });
+                            } catch (e) {
+                                self.reportSyntaxError(
+                                    {
+                                        'location': '_writeToDevice.performCallbacks',
+                                        data: {binding: bindingInfo, eventData: eventData}
+                                    }, e);
+                                resolve(skipWrite, true);
+                            }
+                        } else {
+                            resolve(skipWrite, false);
+                        }
+                    }
+                } else {
+                    if (bindingInfo.execCallback) {
                         try {
                             bindingInfo.callback(
                                 {
@@ -2654,55 +2423,25 @@ function Framework() {
                                     eventData: eventData,
                                     value: newVal,
                                 },
-                                function(err) {
-                                    innerDeferred.resolve(skipWrite, true);
+                                function () {
+                                    resolve(skipWrite, false);
                                 });
                         } catch (e) {
                             self.reportSyntaxError(
                                 {
-                                    'location':'_writeToDevice.performCallbacks',
+                                    'location': '_writeToDevice.performCallbacks(2)',
                                     data: {binding: bindingInfo, eventData: eventData}
-                                },e);
-                            innerDeferred.resolve(skipWrite, true);
+                                }, e);
+                            resolve(skipWrite, false);
                         }
-                        return innerDeferred.promise;
                     } else {
-                        innerDeferred.resolve(skipWrite, false);
+                        resolve(skipWrite, false);
                     }
                 }
-            } else {
-                if(bindingInfo.execCallback) {
-                        try {
-                            bindingInfo.callback(
-                                {
-                                    framework: self,
-                                    module: self.module,
-                                    device: self.getSelectedDevice(),
-                                    binding: bindingInfo,
-                                    eventData: eventData,
-                                    value: newVal,
-                                },
-                                function() {
-                                    innerDeferred.resolve(skipWrite, false);
-                                });
-                        } catch (e) {
-                            self.reportSyntaxError(
-                                {
-                                    'location':'_writeToDevice.performCallbacks(2)',
-                                    data: {binding: bindingInfo, eventData: eventData}
-                                },e);
-                            innerDeferred.resolve(skipWrite, false);
-                        }
-                        return innerDeferred.promise;
-                    } else {
-                        innerDeferred.resolve(skipWrite, false);
-                    }
-            }
-            return innerDeferred.promise;
+            });
         };
 
         var writeToDevice = function (skipWrite, skip) {
-            var innerDeferred = q.defer();
             if(skip) {
                 var device = self.getSelectedDevice();
                 var invalidString = '-invalid';
@@ -2710,65 +2449,54 @@ function Framework() {
                 var searchIndex = baseStr.search(invalidString);
                 if( searchIndex >= 0) {
                     if((baseStr.length - searchIndex - invalidString.length) === 0) {
-                        innerDeferred.resolve(false);
-                        return innerDeferred.promise;
+                        return Promise.resolve(false);
                     }
                 }
                 if(typeof(skipWrite) === undefined) {
                     device.write(bindingInfo.binding, newVal);
-                    innerDeferred.resolve(true);
+                    return Promise.resolve(true);
                 } else if(typeof(skipWrite) === "boolean") {
                     if(skipWrite === false) {
                         device.write(bindingInfo.binding, newVal);
-                        innerDeferred.resolve(true);
+                        return Promise.resolve(true);
                     }
                     else {
-                        innerDeferred.resolve(false);
+                        return Promise.resolve(false);
                     }
                 } else {
-                    innerDeferred.resolve(false);
+                    return Promise.resolve(false);
                 }
             } else {
-                innerDeferred.resolve(false);
+                return Promise.resolve(false);
             }
-            return innerDeferred.promise;
         };
 
         var alertRegisterWritten = function (wasNotHandledExternally) {
             if(wasNotHandledExternally) {
-                var innerDeferred = q.defer();
-                self.fire(
-                    'onRegisterWritten',
-                    [
-                        bindingInfo.binding,
-                        newVal
-                    ],
-                    innerDeferred.reject,
-                    innerDeferred.resolve
-                );
-                return innerDeferred.promise;
+                return new Promise((resolve, reject) => {
+                    self.fire(
+                        'onRegisterWritten',
+                        [
+                            bindingInfo.binding,
+                            newVal
+                        ],
+                        reject,
+                        resolve
+                    );
+                });
             }
         };
 
-        var deferred = q.defer();
-
         // Alert to module that a write is about to happen
-        alertRegisterWrite()
-
-        // Perform callback if necessary
-        .then(performCallbacks, deferred.reject)
-
-        // Perform un-handled device IO
-        .then(writeToDevice, deferred.reject)
-
-        // Notify module that the write has finished
-        .then(alertRegisterWritten, deferred.reject)
-
-        // Re-draw the window to prevent crazy-window issues
-        .then(qRunRedraw, deferred.reject)
-
-        .then(deferred.resolve, deferred.reject);
-        return deferred.promise;
+        return alertRegisterWrite()
+            // Perform callback if necessary
+            .then(performCallbacks)
+            // Perform un-handled device IO
+            .then(writeToDevice)
+            // Notify module that the write has finished
+            .then(alertRegisterWritten)
+            // Re-draw the window to prevent crazy-window issues
+            .then(qRunRedraw);
     };
 
     /**
@@ -2835,7 +2563,6 @@ function Framework() {
         self.moduleTemplateBindings = moduleTemplateBindings;
     };
     this.qClearConfigBindings = function() {
-        var deferred = q.defer();
         var clearBindings = true;
         if(typeof(DISABLE_AUTO_CLEAR_CONFIG_BINDINGS) === 'boolean') {
             if(DISABLE_AUTO_CLEAR_CONFIG_BINDINGS) {
@@ -2845,12 +2572,8 @@ function Framework() {
         if(clearBindings) {
             self.clearConfigBindings();
         }
-        deferred.resolve();
-        return deferred.promise;
+        return Promise.resolve();
     };
-    var qClearConfigBindings = this.qClearConfigBindings;
-
-    var deleteConfigBindings = this.deleteConfigBindings;
 
     /**
      * Render the HTML view to use for the current module.
@@ -2864,8 +2587,6 @@ function Framework() {
      *      and the value is the JSON loaded from that file.
     **/
     this.setDeviceView = function (loc, jsonFiles, context) {
-        var defered = q.defer();
-
         if (jsonFiles === undefined)
             jsonFiles = [];
 
@@ -2897,19 +2618,12 @@ function Framework() {
         // Load the supporting JSON files for use in the template
         var jsonTemplateVals = {};
         var loadJSONFiles = function () {
-            var innerDefered = q.defer();
-            // Set the jsonTemplateVals object equal to the already loaded .json
-            // lodata object.
             jsonTemplateVals = self.moduleData.json;
-
-            innerDefered.resolve();
-            return innerDefered.promise;
+            return Promise.resolve();
         };
 
         // Load the HTML view template and render
         var prepareHTMLTemplate = function () {
-            var innerDefered = q.defer();
-
             var cacheKey = '';
             var i;
             for(i = 0; i < self.moduleData.html.length; i++) {
@@ -2921,43 +2635,22 @@ function Framework() {
 
             context.json = jsonTemplateVals;
             // console.log('in prepareHTMLTemplate', self.getSelectedDevices());
-            fs_facade.renderCachedTemplateData(
+            return fs_facade.renderCachedTemplateData(
                 cacheKey,
                 self.moduleData.htmlFiles.view,
                 context
-            )
-            .then(innerDefered.resolve, innerDefered.reject);
-            return innerDefered.promise;
-        };
-
-        var introduceDelay = function() {
-            var innerDefered = q.defer();
-            setTimeout(innerDefered.resolve, 200);
-            return innerDefered.promise;
-        };
-        var forceRefresh = function() {
-            var innerDefered = q.defer();
-            runRedraw();
-            innerDefered.resolve();
-            return innerDefered.promise;
+            );
         };
 
         var injectHTMLTemplate = function (htmlContents) {
-            var innerDefered = q.defer();
-            // var moduleDiv = $(DEVICE_VIEW_TARGET);
-            // moduleDiv.html(htmlContents);
-
             htmlContents = '<div class="framework-template">' + htmlContents + '</div>';
             self.jquery.html(DEVICE_VIEW_TARGET, htmlContents);
             $('.framework-template').ready(runRedraw);
 
-            innerDefered.resolve();
-            return innerDefered.promise;
+            return Promise.resolve();
         };
 
         var attachListeners = function () {
-            var innerDefered = q.defer();
-
             if(self.deviceSelectionListenersAttached === false) {
                 self.jquery.on(
                     self.getDeviceSelectorClass(),
@@ -2967,37 +2660,24 @@ function Framework() {
                 self.deviceSelectionListenersAttached = true;
                 deviceSelectionListenersAttached = true;
             }
-
-            innerDefered.resolve();
-            return innerDefered.promise;
+            return Promise.resolve();
         };
 
-        loadJSONFiles()
-        .then(prepareHTMLTemplate, reportLoadError)
-        .then(injectHTMLTemplate, reportLoadError)
-        //.then(introduceDelay, reportLoadError)
-        //.then(forceRefresh, reportLoadError)
-        .then(attachListeners, reportLoadError)
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
+        return loadJSONFiles()
+            .then(prepareHTMLTemplate, reportLoadError)
+            .then(injectHTMLTemplate, reportLoadError)
+            .then(attachListeners, reportLoadError);
     };
-    var setDeviceView = self.setDeviceView;
 
     var getSaveSelectedDevice = function(serialNumber) {
         var saveSelectedDevice = function() {
-            var defered = q.defer();
-            device_controller.selectDevice(serialNumber)
-            .then(defered.resolve, defered.reject);
-            return defered.promise;
+            return device_controller.selectDevice(serialNumber);
         };
         return saveSelectedDevice;
     };
     var getSaveSelectedDevices = function(serialNumbers) {
         var saveSelectedDevices = function() {
-            var defered = q.defer();
-            device_controller.selectDevices(serialNumbers)
-            .then(defered.resolve, defered.reject);
-            return defered.promise;
+            return device_controller.selectDevices(serialNumbers);
         };
         return saveSelectedDevices;
     };
@@ -3011,14 +2691,10 @@ function Framework() {
         }
     };
 
-    this._changeSelectedDeviceUI = function (data) {
-        // var serialNumber = self.jquery.get(
-        //     '.device-selection-radio:checked'
-        // );
+    this._changeSelectedDeviceUI = function() {
         var serialNumber;
         var serialNumbers = [];
         var selectDevicesData;
-
 
         try {
             var elements = self.jquery.get(
@@ -3107,7 +2783,6 @@ function Framework() {
     this.getSelectedDevice = function () {
         return self.activeDevice;
     };
-    var getSelectedDevice = this.getSelectedDevice;
 
     this.getSelectedDevices = function() {
         if(self.frameworkType === 'singleDevice') {
@@ -3142,7 +2817,6 @@ function Framework() {
             jquery.on(value.selector, value.event, listener);
         });
     };
-    var establishConfigControlBindings = this.establishConfigControlBindings;
 
     /**
      * Stop the module's refresh loop.
@@ -3150,29 +2824,28 @@ function Framework() {
     this.stopLoop = function () {
         self.runLoop = false;
     };
-    var stopLoop = this.stopLoop;
 
     this.qStopLoop = function() {
-        var defered = q.defer();
-        self.runLoop = false;
-        if(self.frameworkLoopProcessing) {
-            // console.log('framework loop is currently processing (qStopLoop)...');
-            clearTimeout(self.frameworkLoopReference);
-            var num = 0;
-            var checkDAQLoop = function() {
-                // console.log('Delaying (qStopLoop)....', num);
-                num += 1;
-                if(self.isDAQLoopActive) {
-                    setTimeout(checkDAQLoop, 100);
-                } else {
-                    defered.resolve();
-                }
-            };
-            var daqLoopChecker = setTimeout(checkDAQLoop, 100);
-        } else {
-            defered.resolve();
-        }
-        return defered.promise;
+        return new Promise((resolve) => {
+            self.runLoop = false;
+            if (self.frameworkLoopProcessing) {
+                // console.log('framework loop is currently processing (qStopLoop)...');
+                clearTimeout(self.frameworkLoopReference);
+                var num = 0;
+                var checkDAQLoop = function () {
+                    // console.log('Delaying (qStopLoop)....', num);
+                    num += 1;
+                    if (self.isDAQLoopActive) {
+                        setTimeout(checkDAQLoop, 100);
+                    } else {
+                        resolve();
+                    }
+                };
+                setTimeout(checkDAQLoop, 100);
+            } else {
+                resolve();
+            }
+        });
     };
 
     /**
@@ -3185,12 +2858,9 @@ function Framework() {
         // self.loopIteration();
         self.runLoopIteration();
     };
-    var startLoop = this.startLoop;
     self.qStartLoop = function() {
-        var defered = q.defer();
         self.startLoop();
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     this.printCurTime = function(message) {
         var d = new Date();
@@ -3202,10 +2872,8 @@ function Framework() {
         }
     };
     this.qConfigureTimer = function() {
-        var innerDeferred = q.defer();
         if(!self.frameworkActive) {
-            innerDeferred.reject();
-            return innerDeferred.promise;
+            return Promise.reject();
         }
         var d = new Date();
         var curTime = d.valueOf();
@@ -3267,15 +2935,12 @@ function Framework() {
         } else {
             console.info('sdModule or sdFramework not defined!!');
         }
-        innerDeferred.resolve();
-        return innerDeferred.promise;
+        return Promise.resolve();
     };
-    var qConfigureTimer = this.qConfigureTimer;
 
     this.unpauseFramework = function() {
         self.isDAQLoopPaused = false;
     };
-    var unpauseFramework = this.unpauseFramework;
     this.pauseFramework = function(pauseNotification) {
         self.pauseDAQLoop = true;
         self.isPausedListenerFunc = pauseNotification;
@@ -3283,7 +2948,6 @@ function Framework() {
             self.isDAQLoopPaused = false;
         };
     };
-    var pauseFramework = this.pauseFramework;
     this.testPauseFramework = function() {
         self.pauseFramework(
             function() {
@@ -3294,357 +2958,344 @@ function Framework() {
     };
 
     var reportStartingDaqLoop = function() {
-        var defered = q.defer();
         self.daqLoopFinished = false;
         self.daqLoopStatus = 'startingLoop';
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     var reportFinishedDaqLoop = function(data) {
-        var defered = q.defer();
-        var finishedFunc = function() {
-            self.daqLoopFinished = true;
-            self.daqLoopStatus = 'finishedDaqLoop';
-            defered.resolve();
-        };
-        var executeFinishedFunc = true;
-        if(data) {
-            // console.log('DAQ Loop Finished', data);
-            if(data === 'delay') {
-                executeFinishedFunc = false;
-                try {
-                    triggerModuleOnRefreshed([])
-                    .then(finishedFunc, finishedFunc);
-                } catch(err) {
-                    console.error('Error in reportFinishedDaqLoop', err);
-                    finishedFunc();
-                }
-            } else {
+        return new Promise((resolve) => {
+            var finishedFunc = function () {
+                self.daqLoopFinished = true;
+                self.daqLoopStatus = 'finishedDaqLoop';
+                resolve();
+            };
+            var executeFinishedFunc = true;
+            if (data) {
                 // console.log('DAQ Loop Finished', data);
-            }
-        }
-
-        if(executeFinishedFunc) {
-            finishedFunc();
-        }
-
-        return defered.promise;
-    };
-    var getNeededAddresses = function () {
-        var defered = q.defer();
-        self.daqLoopStatus = 'getNeededAddresses';
-        var addresses = [];
-        var formats = [];
-        var customFormatFuncs = [];
-        var bindings = [];
-
-        // Loop through all registered bindings and determine what should be
-        // done.
-        self.readBindings.forEach(function (value, key) {
-            // For each binding check to see if it should be executed by
-            // checking its currentDelay.  If it equals zero than it needs
-            // to be executed.
-            if(value.currentDelay <= 0) {
-                // Search bindings for custom bindings
-                var callbackString = CALLBACK_STRING_CONST;
-                var baseStr = value.binding;
-                var searchIndex = baseStr.search(callbackString);
-                if( searchIndex < 0) {
-                    // if the CALLBACK_STRING_CONST tag wasn't found then
-                    // add the binding to the list of registers that needs
-                    // to be queried from the device.
-                    addresses.push(value.binding);
-                    formats.push(value.format);
-                    customFormatFuncs.push(value.customFormatFunc);
+                if (data === 'delay') {
+                    executeFinishedFunc = false;
+                    try {
+                        triggerModuleOnRefreshed([])
+                            .then(finishedFunc, finishedFunc);
+                    } catch (err) {
+                        console.error('Error in reportFinishedDaqLoop', err);
+                        finishedFunc();
+                    }
                 } else {
-
+                    // console.log('DAQ Loop Finished', data);
                 }
-                bindings.push(value);
+            }
 
-                // Re-set the binding's delay with the new delay
-                value.currentDelay = value.iterationDelay;
-                self.readBindings.set(key, value);
-            } else {
-                // Decrement the binding's delay
-                value.currentDelay = value.currentDelay - 1;
-                self.readBindings.set(key, value);
+            if (executeFinishedFunc) {
+                finishedFunc();
             }
         });
-        if(addresses.length > 0) {
-            defered.resolve({
-                addresses: addresses,
-                formats: formats,
-                customFormatFuncs: customFormatFuncs,
-                bindings: bindings
-            });
-        } else {
-            defered.reject('delay');
-        }
-        return defered.promise;
     };
-    var triggerModuleOnRefresh = function (bindingsInfo) {
-        var innerDeferred = q.defer();
-        self.daqLoopStatus = 'triggerModuleOnRefresh';
-        self.fire(
-            'onRefresh',
-            [ bindingsInfo ],
-            function() {
-                innerDeferred.reject();
-            },
-            function () {
-                innerDeferred.resolve(bindingsInfo);
-            }
-        );
-        return innerDeferred.promise;
-    };
-    var requestDeviceValues = function (bindingsInfo) {
-        var innerDeferred = q.defer();
-        self.daqLoopStatus = 'requestDeviceValues';
-        var device = self.getSelectedDevice();
+    var getNeededAddresses = function () {
+        return new Promise((resolve, reject) => {
+            self.daqLoopStatus = 'getNeededAddresses';
+            var addresses = [];
+            var formats = [];
+            var customFormatFuncs = [];
+            var bindings = [];
 
-        var addresses = bindingsInfo.addresses;
-        var formats = bindingsInfo.formats;
-        var customFormatFuncs = bindingsInfo.customFormatFuncs;
-        var bindings = bindingsInfo.bindings;
+            // Loop through all registered bindings and determine what should be
+            // done.
+            self.readBindings.forEach(function (value, key) {
+                // For each binding check to see if it should be executed by
+                // checking its currentDelay.  If it equals zero than it needs
+                // to be executed.
+                if (value.currentDelay <= 0) {
+                    // Search bindings for custom bindings
+                    var callbackString = CALLBACK_STRING_CONST;
+                    var baseStr = value.binding;
+                    var searchIndex = baseStr.search(callbackString);
+                    if (searchIndex < 0) {
+                        // if the CALLBACK_STRING_CONST tag wasn't found then
+                        // add the binding to the list of registers that needs
+                        // to be queried from the device.
+                        addresses.push(value.binding);
+                        formats.push(value.format);
+                        customFormatFuncs.push(value.customFormatFunc);
+                    } else {
 
-        if (addresses.length === 0) {
-            innerDeferred.resolve({
-                values: [],
-                addresses: [],
-                formats: [],
-                customFormatFuncs: []
+                    }
+                    bindings.push(value);
+
+                    // Re-set the binding's delay with the new delay
+                    value.currentDelay = value.iterationDelay;
+                    self.readBindings.set(key, value);
+                } else {
+                    // Decrement the binding's delay
+                    value.currentDelay = value.currentDelay - 1;
+                    self.readBindings.set(key, value);
+                }
             });
-            return innerDeferred.promise;
-        }
-        device.sReadMany(addresses)
-        .then(
-            function (values) {
-                innerDeferred.resolve({
-                    values: values,
+            if (addresses.length > 0) {
+                resolve({
                     addresses: addresses,
                     formats: formats,
                     customFormatFuncs: customFormatFuncs,
                     bindings: bindings
                 });
-            },
-            innerDeferred.reject
-        );
+            } else {
+                reject('delay');
+            }
+        });
+    };
+    var triggerModuleOnRefresh = function (bindingsInfo) {
+        return new Promise((resolve, reject) => {
+            self.daqLoopStatus = 'triggerModuleOnRefresh';
+            self.fire(
+                'onRefresh',
+                [bindingsInfo],
+                function () {
+                    reject();
+                },
+                function () {
+                    resolve(bindingsInfo);
+                }
+            );
+        });
+    };
+    var requestDeviceValues = function (bindingsInfo) {
+        return new Promise((resolve, reject) => {
+            self.daqLoopStatus = 'requestDeviceValues';
+            var device = self.getSelectedDevice();
 
-        return innerDeferred.promise;
+            var addresses = bindingsInfo.addresses;
+            var formats = bindingsInfo.formats;
+            var customFormatFuncs = bindingsInfo.customFormatFuncs;
+            var bindings = bindingsInfo.bindings;
+
+            if (addresses.length === 0) {
+                resolve({
+                    values: [],
+                    addresses: [],
+                    formats: [],
+                    customFormatFuncs: []
+                });
+            }
+            device.sReadMany(addresses)
+                .then(
+                    function (values) {
+                        resolve({
+                            values: values,
+                            addresses: addresses,
+                            formats: formats,
+                            customFormatFuncs: customFormatFuncs,
+                            bindings: bindings
+                        });
+                    },
+                    reject
+                );
+
+        });
     };
 
     var processDeviceValues = function (valuesInfo) {
-        var innerDeferred = q.defer();
-        self.daqLoopStatus = 'processDeviceValues';
-        var values = valuesInfo.values;
-        var addresses = valuesInfo.addresses;
-        var formats = valuesInfo.formats;
-        var customFormatFuncs = valuesInfo.customFormatFuncs;
-        var numAddresses = addresses.length;
-        var bindings = valuesInfo.bindings;
-        var retDict = new Map();
+        return new Promise((resolve) => {
+            self.daqLoopStatus = 'processDeviceValues';
+            var values = valuesInfo.values;
+            var addresses = valuesInfo.addresses;
+            var formats = valuesInfo.formats;
+            var customFormatFuncs = valuesInfo.customFormatFuncs;
+            var bindings = valuesInfo.bindings;
+            var retDict = new Map();
 
-        // Iterate through the bindings executed using the async library
-        var curDeviceIOIndex = 0;
+            // Iterate through the bindings executed using the async library
+            var curDeviceIOIndex = 0;
 
-        var innerProcessSingleDeviceValue = function(binding, nextStep) {
+            const innerProcessSingleDeviceValue = function (binding, nextStep) {
+                //Executed for each binding
+                // Search binding string for callback bindings tag
+                var callbackString = CALLBACK_STRING_CONST;
+                var baseStr = binding.binding;
+                var searchIndex = baseStr.search(callbackString);
+                var dataKey = binding.dataKey;
+                var index = curDeviceIOIndex;
+                var curResult = values[index];
+                var curAddress = addresses[index];
+                var stringVal;
+                var curValue;
+                var curVal;
 
-            //Executed for each binding
-            // Search binding string for callback bindings tag
-            var callbackString = CALLBACK_STRING_CONST;
-            var baseStr = binding.binding;
-            var searchIndex = baseStr.search(callbackString);
-            var dataKey = binding.dataKey;
-            var index = curDeviceIOIndex;
-            var curResult = values[index];
-            var curAddress = addresses[index];
-            var stringVal;
-            var curValue;
-            var curVal;
-
-            // Periodic bindings (ones that don't perform any device IO
-            // will have a "undefined" curResult value.
-            if(curResult) {
-                if(dataKey === '') {
-                    curValue = curResult;
-                } else {
-                    if(typeof(curResult[dataKey] !== 'undefined')) {
-                        curValue = curResult[dataKey];
+                // Periodic bindings (ones that don't perform any device IO
+                // will have a "undefined" curResult value.
+                if (curResult) {
+                    if (dataKey === '') {
+                        curValue = curResult;
                     } else {
-                        curValue = curResult.val;
-                    }
-                }
-                curVal = curResult.res;
-             }
-
-            if( searchIndex < 0) {
-                //If the tag was not found then perform auto-formatting
-                var curFormat = formats[index];
-                var curCustomFormatFunc = customFormatFuncs[index];
-
-                if(curFormat !== 'customFormat') {
-                    if(isNaN(curVal)){
-                        stringVal = curVal;
-                    } else {
-                        if(typeof(curVal) === 'number') {
-                            stringVal = sprintf(curFormat, curVal);
+                        if (typeof (curResult[dataKey] !== 'undefined')) {
+                            curValue = curResult[dataKey];
                         } else {
-                            if(curResult.str === '-Infinity') {
-                                stringVal = (NaN).toString();
-                            } else if((curResult.str === '+Infinity') || (curResult.str === 'Infinity')) {
-                                stringVal = (NaN).toString();
-                            } else {
-                                console.warn('Replacing a non-value in processDeviceValues', curVal, curFormat, baseStr, curResult);
-                                stringVal = (0).toString();
-                            }
+                            curValue = curResult.val;
                         }
-                        // stringVal = curVal.toString();
+                    }
+                    curVal = curResult.res;
+                }
+
+                if (searchIndex < 0) {
+                    //If the tag was not found then perform auto-formatting
+                    var curFormat = formats[index];
+                    var curCustomFormatFunc = customFormatFuncs[index];
+
+                    if (curFormat !== 'customFormat') {
+                        if (isNaN(curVal)) {
+                            stringVal = curVal;
+                        } else {
+                            if (typeof (curVal) === 'number') {
+                                stringVal = sprintf(curFormat, curVal);
+                            } else {
+                                if (curResult.str === '-Infinity') {
+                                    stringVal = (NaN).toString();
+                                } else if ((curResult.str === '+Infinity') || (curResult.str === 'Infinity')) {
+                                    stringVal = (NaN).toString();
+                                } else {
+                                    console.warn('Replacing a non-value in processDeviceValues', curVal, curFormat, baseStr, curResult);
+                                    stringVal = (0).toString();
+                                }
+                            }
+                            // stringVal = curVal.toString();
+                        }
+                    } else {
+                        stringVal = curCustomFormatFunc({
+                            value: curVal,
+                            address: curAddress,
+                            binding: binding
+                        });
+                    }
+                    retDict.set(
+                        curAddress.toString(),
+                        stringVal
+                    );
+
+                    //Increment current index
+                    curDeviceIOIndex += 1;
+                } else {
+                    if (binding.execCallback === false) {
+                        console.warn('Warning, PeriodicFunction Found but not executing', binding);
+                    }
+                }
+                // If the current binding has a defined binding that
+                // needs to be executed execute it now
+                if (binding.execCallback) {
+                    // Execute read-binding function callback
+                    try {
+                        binding.callback(
+                            {   //Data to be passed to callback function
+                                framework: self,
+                                module: self.module,
+                                device: self.getSelectedDevice(),
+                                binding: binding,
+                                value: curValue,
+                                stringVal: stringVal
+                            },
+                            function executeNextStep() {
+                                //Instruct async to perform the next step
+                                nextStep();
+                            });
+                    } catch (e) {
+                        self.reportSyntaxError(
+                            {
+                                'location': 'loopIteration.processDeviceValues',
+                                data: {binding: binding, value: curValue, stringVal: stringVal}
+                            }, e);
+                        nextStep();
                     }
                 } else {
-                    stringVal = curCustomFormatFunc({
-                        value: curVal,
-                        address: curAddress,
-                        binding: binding
-                        });
-                }
-                retDict.set(
-                    curAddress.toString(),
-                    stringVal
-                );
-
-                //Increment current index
-                curDeviceIOIndex += 1;
-            } else {
-                if(binding.execCallback === false) {
-                    console.warn('Warning, PeriodicFunction Found but not executing',binding);
-                }
-            }
-            // If the current binding has a defined binding that
-            // needs to be executed execute it now
-            if(binding.execCallback) {
-                // Execute read-binding function callback
-                try {
-                    binding.callback(
-                        {   //Data to be passed to callback function
-                            framework: self,
-                            module: self.module,
-                            device: self.getSelectedDevice(),
-                            binding: binding,
-                            value: curValue,
-                            stringVal: stringVal
-                        },
-                        function executeNextStep() {
-                            //Instruct async to perform the next step
-                            nextStep();
-                        });
-                } catch (e) {
-                    self.reportSyntaxError(
-                        {
-                            'location':'loopIteration.processDeviceValues',
-                            data: {binding: binding,value:curValue,stringVal:stringVal}
-                        },e);
+                    //Instruct async to perform the next step
                     nextStep();
                 }
-            } else {
-                //Instruct async to perform the next step
-                nextStep();
-            }
-        };
+            };
 
-        async.eachSeries(
-            bindings,
-            function processSingleDeviceValue (binding, nextStep) {
-                try {
-                    innerProcessSingleDeviceValue(binding, nextStep);
-                } catch(err) {
-                    console.warn('Caught error while in processSingleDeviceValue', err);
-                    nextStep();
-                }
-            },
-            function(err) {
-                //Executed when all bindings have been executed
-                innerDeferred.resolve(retDict);
-            });
-        return innerDeferred.promise;
+            async.eachSeries(
+                bindings,
+                function processSingleDeviceValue(binding, nextStep) {
+                    try {
+                        innerProcessSingleDeviceValue(binding, nextStep);
+                    } catch (err) {
+                        console.warn('Caught error while in processSingleDeviceValue', err);
+                        nextStep();
+                    }
+                },
+                function () {
+                    //Executed when all bindings have been executed
+                    resolve(retDict);
+                });
+        });
     };
     var displayDeviceValues = function (valuesDict) {
-        var innerDeferred = q.defer();
         self.daqLoopStatus = 'displayDeviceValues';
         self._OnRead(valuesDict);
-        innerDeferred.resolve(valuesDict);
-        return innerDeferred.promise;
+        return Promise.resolve(valuesDict);
     };
     var triggerModuleOnRefreshed = function (valuesDict) {
-        var innerDeferred = q.defer();
-        self.daqLoopStatus = 'triggerModuleOnRefreshed';
-        self.fire(
-            'onRefreshed',
-            [ valuesDict ],
-            innerDeferred.reject,
-            function () { innerDeferred.resolve(); }
-        );
-        return innerDeferred.promise;
+        return new Promise((resolve, reject) => {
+            self.daqLoopStatus = 'triggerModuleOnRefreshed';
+            self.fire(
+                'onRefreshed',
+                [valuesDict],
+                reject,
+                function () {
+                    resolve();
+                }
+            );
+        });
     };
-    var verifyFrameworkIsActive = function(bundle) {
-        var defered = q.defer();
-
+    function verifyFrameworkIsActive(bundle) {
         // Make sure that this framework instance is active.
         if(!self.frameworkActive) {
             self.isDAQLoopActive = false;
-            defered.reject('stoppingLoop');
-            return defered.promise;
+            return Promise.reject('stoppingLoop');
         }
 
         // Make sure that the loop should be executing.
         if (!self.runLoop) {
             self.isDAQLoopActive = false;
-            defered.reject('stoppingLoop');
-            return defered.promise;
+            return Promise.reject('stoppingLoop');
         }
 
-        defered.resolve(bundle);
-        return defered.promise;
-    };
-    var reportLoopError = function (details) {
-        var defered = q.defer();
-        if(details !== 'delay') {
-            if(details === 'stoppingLoop') {
-                defered.reject(details);
-                return;
-            } else {
-                self.daqLoopStatus = 'reportError';
-                // TODO: Get register names from readBindings.
-                self.fire(
-                    'onRefreshError',
-                    [ self.readBindings , details ],
-                    function (shouldContinue) {
-                        self.loopErrorEncountered = true;
-                        self.loopErrors.push({details:details,func:'reportError'});
-                        self.runLoop = shouldContinue;
-                        if(shouldContinue) {
-                            self.printLoopErrors(
-                                'onRefreshError b/c loopIteration.reportError',
-                                details
-                            );
-                            defered.reject('delay');
-                        } else {
-                            defered.reject('stoppingLoop');
+        return Promise.resolve(bundle);
+    }
+    function reportLoopError(details) {
+        return new Promise((resolve, reject) => {
+            if(details !== 'delay') {
+                if(details === 'stoppingLoop') {
+                    return Promise.reject(details);
+                } else {
+                    self.daqLoopStatus = 'reportError';
+                    // TODO: Get register names from readBindings.
+                    self.fire(
+                        'onRefreshError',
+                        [ self.readBindings , details ],
+                        function (shouldContinue) {
+                            self.loopErrorEncountered = true;
+                            self.loopErrors.push({details:details,func:'reportError'});
+                            self.runLoop = shouldContinue;
+                            if(shouldContinue) {
+                                self.printLoopErrors(
+                                    'onRefreshError b/c loopIteration.reportError',
+                                    details
+                                );
+                                reject('delay');
+                            } else {
+                                reject('stoppingLoop');
+                            }
                         }
-                    }
-                );
+                    );
+                }
+            } else {
+                reject(details);
             }
-        } else {
-            defered.reject(details);
-        }
-        return defered.promise;
-    };
+        });
+    }
 
-    var innerRunDAQLoop = function(deviceAttributes) {
-        var defered = q.defer();
+    function innerRunDAQLoop(deviceAttributes) {
         // Only run the DAQ loop if the active device is connected.
         // if(deviceAttributes.isConnected) {
         if(deviceAttributes.isConnected) {
-            reportStartingDaqLoop()
+            return reportStartingDaqLoop()
 
             // Get the current list of bindings
             .then(getNeededAddresses, reportLoopError)
@@ -3671,110 +3322,70 @@ function Framework() {
             .then(verifyFrameworkIsActive, reportLoopError)
 
             // Report that the DAQ loop has finished executing
-            .then(reportFinishedDaqLoop, reportFinishedDaqLoop)
-            .then(defered.resolve, defered.reject);
+            .then(reportFinishedDaqLoop, reportFinishedDaqLoop);
         } else {
             // Resolve & wait for the next iteration.
-            triggerModuleOnRefreshed([])
-            .then(defered.resolve, defered.reject);
+            return triggerModuleOnRefreshed([]);
         }
-
-        return defered.promise;
-    };
-    this.qRunDAQLoop = function() {
-        var defered = q.defer();
-        innerRunDAQLoop(self.activeDevice.savedAttributes)
-        .then(defered.resolve, defered.reject);
-
-        return defered.promise;
-    };
-    this.runDAQLoop = function(onSuccess) {
-        innerRunDAQLoop(self.activeDevice.savedAttributes)
-        .then(onSuccess);
-    };
-    this.runDAQMonitor = function() {
-        var defered = q.defer();
-        defered.resolve();
-        return defered.promise;
-    };
-    var configureLoopTimer = function() {
-        // var defered = q.defer();
+    }
+    function configureLoopTimer() {
         self.frameworkLoopProcessing = false;
         self.frameworkLoopReference = setTimeout(
             self.runLoopIteration,
             self.refreshRate
         );
-        // defered.resolve();
-        // return defered.promise;
-    };
-    var configurePausedLoopTimer = function() {
-        var defered = q.defer();
+    }
+    function configurePausedLoopTimer() {
         self.frameworkLoopProcessing = false;
         self.frameworkLoopReference = setTimeout(
             self.runLoopIteration,
             self.pausedRefreshRate
         );
-        defered.resolve();
-        return defered.promise;
-    };
+        return Promise.resolve();
+    }
     this.frameworkLoopProcessing = false;
     this.frameworkLoopReference = undefined;
     this.runLoopIteration = function() {
-        // var defered = q.defer();
         self.frameworkLoopProcessing = true;
         // Make sure that this framework instance is active.
         if(!self.frameworkActive) {
             self.isDAQLoopActive = false;
-            // defered.reject();
-            // return defered.promise;
         }
 
         // Make sure that the loop should be executing.
         if (!self.runLoop) {
             self.isDAQLoopActive = false;
-            // defered.reject('Loop not running.');
-            // return defered.promise;
         }
 
         if(self.isDAQLoopPaused) {
             // If the framework is paused then don't execute any of the update
             // code and configure a shorter timer.
-            verifyFrameworkIsActive()
-            .then(configurePausedLoopTimer)
-            // .then(configurePausedLoopTimer, defered.reject)
-            // .then(defered.resolve, defered.reject);
+            return verifyFrameworkIsActive().then(configurePausedLoopTimer)
+                .catch(() => Promise.resolve());
         } else {
-            if(true) {
-                var promises = [];
-                promises.push(self.qRunDAQLoop());
-                // promises.push(self.runDAQMonitor());
+            const promises = [];
+            promises.push(() => {
+                return innerRunDAQLoop(self.activeDevice.savedAttributes);
+            });
 
-                q.allSettled(promises)
-                .then(function(){
-                    verifyFrameworkIsActive()
-                    .then(configureLoopTimer)
-                    // .then(configureLoopTimer, defered.reject)
-                    // .then(defered.resolve, defered.reject);
+            return Promise.allSettled(promises)
+                .then(() => {
+                    return verifyFrameworkIsActive().then(configureLoopTimer)
+                        .catch(() => Promise.resolve());
                 });
-            } else {
-                self.runDAQLoop(configureLoopTimer);
-            }
         }
-        // return defered.promise;
     };
     /**
      * Function to run a single iteration of the module's refresh loop.
      *
-     * @return {q.promise} Promise that resolves after the iteration of the
+     * @return {Promise} Promise that resolves after the iteration of the
      *      refresh loop finishes running. Rejects if an error was encountered
      *      during the loop iteration.
     **/
     this.loopIteration = function () {
         // !!! DEPRECATED !!! Now uses "this.runLoopIteration" !!!!
-        var deferred = q.defer();
         if(!self.frameworkActive) {
-            deferred.reject();
-            return deferred.promise;
+            return Promise.reject();
         }
         self.daqLoopFinished = false;
         self.daqLoopStatus = 'startingLoop';
@@ -3799,101 +3410,76 @@ function Framework() {
         };
 
         var pauseLoop = function() {
-            var innerDeferred = q.defer();
-            if (self.pauseDAQLoop) {
-                // DAQ loop is paused
-                self.isDAQLoopPaused = true;
-                self.daqLoopStatus = 'loopPaused';
-                setTimeout(getIsPausedChecker(innerDeferred.resolve),100);
-            } else {
-                innerDeferred.resolve();
-            }
-            return innerDeferred.promise;
+            return new Promise((resolve) => {
+                if (self.pauseDAQLoop) {
+                    // DAQ loop is paused
+                    self.isDAQLoopPaused = true;
+                    self.daqLoopStatus = 'loopPaused';
+                    setTimeout(getIsPausedChecker(resolve),100);
+                } else {
+                    resolve();
+                }
+            });
         };
         var initLoopTimer = function() {
-            var innerDeferred = q.defer();
             self.daqLoopStatus = 'startingLoopMonitorTimer';
             clearTimeout(self.daqLoopMonitorTimer);
             self.daqLoopMonitorTimer = setTimeout(self.daqMonitor, 1000);
-            innerDeferred.resolve();
-            return innerDeferred.promise;
+            return Promise.resolve();
         };
         if (!self.runLoop) {
-            deferred.reject('Loop not running.');
-            return deferred.promise;
+            return Promise.reject('Loop not running.');
         }
         var checkModuleStatus = function(bindingsInfo) {
-            var innerDeferred = q.defer();
             self.daqLoopStatus = 'checkModuleStatus';
             self.daqLoopFinished = true;
             clearTimeout(self.daqLoopMonitorTimer);
-            if(self.moduleName === getActiveTabID()) {
-                innerDeferred.resolve(bindingsInfo);
+            if (self.moduleName === self.getActiveTabID()) {
+                return Promise.resolve(bindingsInfo);
             } else {
-                innerDeferred.reject(bindingsInfo);
+                return Promise.reject(bindingsInfo);
             }
-            return innerDeferred.promise;
         };
         var handleDelayErr = function (details) {
-            var innerDeferred = q.defer();
             self.daqLoopStatus = 'handleDelayErr';
             if(details === 'delay') {
-                innerDeferred.resolve();
+                return Promise.resolve();
             } else {
-                innerDeferred.resolve();
+                return Promise.resolve();
             }
-            return innerDeferred.promise;
         };
         var reportError = function(bundle) {
-            var innerDefered = q.defer();
             console.error('in reportError (presenter_framework.js)');
-            innerDefered.reject(bundle);
-            return innerDefered.promise;
+            return Promise.reject(bundle);
         };
         var alertRefresh = function(bundle) {
-            var innerDefered = q.defer();
             console.log('in alertRefresh (presenter_framework.js)');
-            innerDefered.resolve(bundle);
-            return innerDefered.promise;
+            return Promise.resolve(bundle);
         };
         var alertRefreshed = function(bundle) {
-            var innerDefered = q.defer();
             console.log('in alertRefreshed (presenter_framework.js)');
-            innerDefered.resolve(bundle);
-            return innerDefered.promise;
+            return Promise.resolve(bundle);
         };
         var alertOn = function(bundle) {
-            var innerDefered = q.defer();
             console.log('in alertOn (presenter_framework.js)');
-            innerDefered.resolve(bundle);
-            return innerDefered.promise;
+            return Promise.resolve(bundle);
         };
         var handleIOError = function(bundle) {
-            var innerDefered = q.defer();
             console.error('in handleIOError (presenter_framework.js)');
-            innerDefered.reject(bundle);
-            return innerDefered.promise;
-        }
+            return Promise.reject(bundle);
+        };
 
-        // var setTimeout = function () {
-
-        // };
-        //checkModuleStatus()
-        pauseLoop()
-        .then(initLoopTimer, reportError)
-        .then(getNeededAddresses, reportError)
-        .then(alertRefresh, reportError)
-        .then(requestDeviceValues, handleIOError)
-        .then(processDeviceValues, reportError)
-        .then(alertOn, reportError)
-        .then(alertRefreshed, reportError)
-        .then(checkModuleStatus, handleDelayErr)
-        .then(self.qConfigureTimer, self.qExecOnUnloadModule)
-        .then(deferred.resolve, deferred.reject);
-
-        return deferred.promise;
+        return pauseLoop()
+            .then(initLoopTimer, reportError)
+            .then(getNeededAddresses, reportError)
+            .then(alertRefresh, reportError)
+            .then(requestDeviceValues, handleIOError)
+            .then(processDeviceValues, reportError)
+            .then(alertOn, reportError)
+            .then(alertRefreshed, reportError)
+            .then(checkModuleStatus, handleDelayErr)
+            .then(self.qConfigureTimer, self.qExecOnUnloadModule);
     };
-    var loopIteration = this.loopIteration;
 
     /**
      * Determine how many bindings have been registered for the module.
@@ -3903,44 +3489,40 @@ function Framework() {
     this.numBindings = function () {
         return self.bindings.size();
     };
-    var numBindings = this.numBindings;
 
     this._OnRead = function (valueReadFromDevice) {
         var jquery = self.jquery;
         if(valueReadFromDevice !== undefined) {
-            self.readBindings.forEach(function updateEachValue(bindingInfo, template) {
-                try {
-                var bindingName = bindingInfo.binding;
-                var valRead = valueReadFromDevice.get(bindingName.toString())
-                if (valRead !== undefined) {
-                    var jquerySelector = '#' + bindingInfo.template;
-                    if (bindingInfo.displayType === 'standard') {
-                        var vals = jquery.html(jquerySelector, valRead.replace(' ','&nbsp;'));
-                        if (vals.length === 0) {
-                            jquerySelector = '.' + bindingInfo.template;
-                            jquery.html(jquerySelector, valRead.replace(' ','&nbsp;'));
-                        }
-                    } else if (bindingInfo.displayType === 'input') {
-                        if (!jquery.is(jquerySelector, ':focus')) {
-                            jquery.val(jquerySelector, valRead.toString());
-                        }
-                    } else {
+            self.readBindings.forEach(function updateEachValue(bindingInfo) {
+                const bindingName = bindingInfo.binding;
+                    try {
+                    var valRead = valueReadFromDevice.get(bindingName.toString());
+                    if (valRead !== undefined) {
+                        var jquerySelector = '#' + bindingInfo.template;
+                        if (bindingInfo.displayType === 'standard') {
+                            var vals = jquery.html(jquerySelector, valRead.replace(' ','&nbsp;'));
+                            if (vals.length === 0) {
+                                jquerySelector = '.' + bindingInfo.template;
+                                jquery.html(jquerySelector, valRead.replace(' ','&nbsp;'));
+                            }
+                        } else if (bindingInfo.displayType === 'input') {
+                            if (!jquery.is(jquerySelector, ':focus')) {
+                                jquery.val(jquerySelector, valRead.toString());
+                            }
+                        } else {
 
+                        }
                     }
+                } catch(err) {
+                    console.warn('Error in FW updateEachValue', bindingName, err);
                 }
-            } catch(err) {
-                console.warn('Error in FW updateEachValue', bindingName, err);
-            }
             });
         }
     };
-    var _OnRead = this._OnRead;
-
     this._OnConfigControlEvent = function (event) {
         self.fire('onRegisterWrite', [event]);
         self.fire('onRegisterWritten', [event]);
     };
-    var _OnConfigControlEvent = this._OnConfigControlEvent;
 
     this.numModuleReloads = 0;
     this.currentModuleName = '';
@@ -3964,7 +3546,6 @@ function Framework() {
         moduleJsonFiles = jsonDataFiles;
         self.moduleJsonFiles = jsonDataFiles;
     };
-    var configureFrameworkData = this.configureFrameworkData;
 
     this.incrementNumberOfModuleReloads = function() {
         self.numModuleReloads += 1;
@@ -3972,19 +3553,18 @@ function Framework() {
     this.saveModuleName = function() {
         self.moduleName = self.getActiveTabID();
     };
-    var saveModuleName = this.saveModuleName;
 
-    function fixElextron(data) {
+    function fixElectron(data) {
         for (let k in data) {
             let v = data[k];
             if (v instanceof Map) { // Electron fix
                 const obj = {};
                 v.forEach((value, name) => {
-                    obj[name] = fixElextron(value);
+                    obj[name] = fixElectron(value);
                 });
                 data[k] = obj;
             } else if (typeof v === 'object') {
-                data[k] = fixElextron(v);
+                data[k] = fixElectron(v);
             }
         }
         return data;
@@ -3992,60 +3572,41 @@ function Framework() {
 
     this.setCustomContext = function(data) {
         moduleTemplateBindings.custom = data;
-        self.moduleTemplateBindings.custom = fixElextron(data);
+        self.moduleTemplateBindings.custom = fixElectron(data);
     };
-    var setCustomContext = this.setCustomContext;
 
     this.tabClickHandler = function() {
-        var visibleTabs = self.jquery.get('.module-tab');
+        const visibleTabs = self.jquery.get('.module-tab');
         visibleTabs.off('click.sdFramework'+self.moduleName);
 
-        var manageDevicesLink = self.jquery.get('#manage-link');
         visibleTabs.off('click.sdFramework'+self.moduleName);
         self.qExecOnUnloadModule();
     };
-    var tabClickHandler = this.tabClickHandler;
-
-    this.attachNavListeners = function() {
-        var visibleTabs = self.jquery.get('.module-tab');
-        visibleTabs.on('click.sdFramework'+self.getActiveTabID(),self.tabClickHandler);
-
-        var manageDevicesLink = self.jquery.get('#manage-link');
-        manageDevicesLink.on('click.sdFramework'+self.getActiveTabID(),self.tabClickHandler);
-    };
-    var attachNavListeners = this.attachNavListeners;
 
     this.startFramework = function() {
-        var deferred = q.defer();
         if(self.flags.debug_startup) {
             console.info('executing qExecOnModuleLoaded');
         }
 
-        self.initializeStartupData()
-        .then(self.qExecOnModuleLoaded)
-        // self.qExecOnModuleLoaded()
-        // .then(self.attachNavListeners, self.qExecOnLoadError)
-        .then(deferred.resolve, deferred.reject);
-        return deferred.promise;
+        return self.initializeStartupData()
+            .then(self.qExecOnModuleLoaded);
     };
 
-    var exitProgramListenerName = 'presenter-framework-notifier';
+    const exitProgramListenerName = 'presenter-framework-notifier';
     function programExitListener() {
-        var defered = q.defer();
-
-        function onSucc() {
-            console.log('Finished saving successfully');
-            defered.resolve();
-        }
-        function onErr(err) {
-            console.log('Got an error saving',err);
-            defered.resolve();
-        }
-        // Save module startup data & always finish successfully.
-        self.saveModuleStartupData('programExitListener')
-        .then(onSucc, onErr);
-
-        return defered.promise;
+        return new Promise((resolve) => {
+            function onSucc() {
+                console.log('Finished saving successfully');
+                resolve();
+            }
+            function onErr(err) {
+                console.log('Got an error saving',err);
+                resolve();
+            }
+            // Save module startup data & always finish successfully.
+            self.saveModuleStartupData('programExitListener')
+                .then(onSucc, onErr);
+        });
     }
     function addProgramExitListener() {
         try {
@@ -4056,86 +3617,68 @@ function Framework() {
     }
     function removeProgramExitListener() {
         try {
-            DELETE_K3_EXIT_LISTENER(exitProgramListenerName);
+            global.DELETE_K3_EXIT_LISTENER(exitProgramListenerName);
         } catch(err) {
             console.log('presenter_framework.js removeProgramExitListener err', err);
         }
     }
 
     this.runFramework = function() {
-        var deferred = q.defer();
-        var handleError = function(details) {
-            var innerDeferred = q.defer();
-            console.error('Presenter_Framework, runFramework Error:', details);
-            deferred.reject(details);
-            innerDeferred.resolve();
-            return innerDeferred.promise;
-        };
         var checkFirstDevice = function() {
-            var innerDeferred = q.defer();
-            // self.jquery.checkFirstDeviceRadioButton();
-            innerDeferred.resolve();
-            return innerDeferred.promise;
+            return Promise.resolve();
         };
         var setModuleName = function() {
-            var innerDeferred = q.defer();
             self.incrementNumberOfModuleReloads();
             self.saveModuleName();
-            innerDeferred.resolve();
-            return innerDeferred.promise;
+            return Promise.resolve();
         };
 
         // Add exit listener.
         addProgramExitListener();
 
-        checkFirstDevice()
+        return checkFirstDevice()
 
-        // Save the module's current instance name
-        .then(setModuleName, self.qExecOnLoadError)
+            // Save the module's current instance name
+            .then(setModuleName, self.qExecOnLoadError)
 
-        // Update the currently-active device (This will force a valid device to be selected).
-        .then(self.qUpdateActiveDevice, self.qExecOnLoadError)
+            // Update the currently-active device (This will force a valid device to be selected).
+            .then(self.qUpdateActiveDevice, self.qExecOnLoadError)
 
-        // Report that a new device has been selected
-        .then(self.qExecOnDeviceSelected, self.qExecOnLoadError)
+            // Report that a new device has been selected
+            .then(self.qExecOnDeviceSelected, self.qExecOnLoadError)
 
-        // Clear all config-bindings (if not disabled)
-        .then(self.qClearConfigBindings, self.qExecOnLoadError)
+            // Clear all config-bindings (if not disabled)
+            .then(self.qClearConfigBindings, self.qExecOnLoadError)
 
-        // Re-configure any smartBindings
-        .then(self.qUpdateSmartBindings, self.qExecOnLoadError)
+            // Re-configure any smartBindings
+            .then(self.qUpdateSmartBindings, self.qExecOnLoadError)
 
-        // Configure the device
-        .then(self.executeSetupBindings, self.qExecOnLoadError)
+            // Configure the device
+            .then(self.executeSetupBindings, self.qExecOnLoadError)
 
-        // Report that the device has been configured
-        .then(self.qExecOnDeviceConfigured, self.qExecOnLoadError)
+            // Report that the device has been configured
+            .then(self.qExecOnDeviceConfigured, self.qExecOnLoadError)
 
-        // Render the module's template
-        .then(self.qRenderModuleTemplate, self.qExecOnLoadError)
+            // Render the module's template
+            .then(self.qRenderModuleTemplate, self.qExecOnLoadError)
 
-        // Connect connect any established writeBindings to jquery events
-        .then(self.qEstablishWriteBindings, self.qExecOnLoadError)
+            // Connect connect any established writeBindings to jquery events
+            .then(self.qEstablishWriteBindings, self.qExecOnLoadError)
 
-        // Report that the module's template has been loaded
-        .then(self.qExecOnTemplateLoaded, self.qExecOnLoadError)
+            // Report that the module's template has been loaded
+            .then(self.qExecOnTemplateLoaded, self.qExecOnLoadError)
 
-        // Start the DAQ loop
-        .then(self.qStartLoop, self.qExecOnLoadError)
+            // Start the DAQ loop
+            .then(self.qStartLoop, self.qExecOnLoadError)
 
-        // Display the module's template
-        .then(self.qShowUserTemplate, self.qExecOnLoadError)
+            // Display the module's template
+            .then(self.qShowUserTemplate, self.qExecOnLoadError)
 
-        // Report that the module's template has been displayed
-        .then(self.qExecOnTemplateDisplayed, self.qExecOnLoadError)
+            // Report that the module's template has been displayed
+            .then(self.qExecOnTemplateDisplayed, self.qExecOnLoadError)
 
-        // Re-draw the window to prevent window-disapearing issues
-        .then(qRunRedraw, self.qExecOnLoadError)
-
-        .then(deferred.resolve, deferred.reject);
-        return deferred.promise;
-
-
+            // Re-draw the window to prevent window-disapearing issues
+            .then(qRunRedraw, self.qExecOnLoadError);
     };
     this.manageLJMError = function(errNum) {
         var isHandled = false;
@@ -4146,12 +3689,10 @@ function Framework() {
         }
         return isHandled;
     };
-    var manageLJMError = this.manageLJMError;
 
     this.manageError = function(err) {
         showAlert('Error: '+err.toString());
     };
-    var manageError = this.manageError;
 
     this.saveStartupDataReference = function(newStartupData) {
         self.startupData = undefined;
@@ -4206,10 +3747,6 @@ function Framework() {
             console.error('Error compiling deviceErrors template', err);
         }
     };
-    this.killInstance = function () {
-        self.frameworkActive = false;
-    };
-    var killInstance = this.killInstance;
 }
 
 util.inherits(Framework, EventEmitter);

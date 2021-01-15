@@ -4,8 +4,6 @@
  * @author A. Samuel Pottinger (LabJack Corp, 2013)
 **/
 
-var q = require('q');
-
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
 
@@ -48,54 +46,51 @@ function replaceAll(find, replace, str) {
  * Load information about the various analog input ranges that are available
  * for the given device's analog inputs.
  *
- * @return {q.promise} Promise for this operation. Resolves to undefined.
+ * @return {Promise} Promise for this operation. Resolves to undefined.
 **/
 function loadRangeOptions()
 {
-    var deferred = q.defer();
-    var templateLocation = fs_facade.getExternalURI(RANGES_TEMPLATE_SRC);
-    var rangesSrc = fs_facade.getExternalURI(RANGES_DATA_SRC);
+    return new Promise((resolve, reject) => {
+        var templateLocation = fs_facade.getExternalURI(RANGES_TEMPLATE_SRC);
+        var rangesSrc = fs_facade.getExternalURI(RANGES_DATA_SRC);
 
-    fs_facade.getJSON(rangesSrc, genericErrorHandler, function(rangeInfo){
+        fs_facade.getJSON(rangesSrc, genericErrorHandler, function (rangeInfo) {
 
-        fs_facade.renderTemplate(
-            templateLocation,
-            {'ranges': rangeInfo},
-            deferred.reject,
-            function(renderedHTML)
-            {
-                $(RANGE_LISTS_SELECTOR).each(function (index, e) {
-                    var reg = e.id.replace('-select', '');
-                    $(e).html(replaceAll('HOLD', reg, renderedHTML));
-                });
-                $(RANGE_LOADING_INDICATOR_SELECTOR).fadeOut();
+            fs_facade.renderTemplate(
+                templateLocation,
+                {'ranges': rangeInfo},
+                reject,
+                function (renderedHTML) {
+                    $(RANGE_LISTS_SELECTOR).each(function (index, e) {
+                        var reg = e.id.replace('-select', '');
+                        $(e).html(replaceAll('HOLD', reg, renderedHTML));
+                    });
+                    $(RANGE_LOADING_INDICATOR_SELECTOR).fadeOut();
 
-                $('.range-selector').click(function (event) {
-                    var pieces = event.target.id;
-                    pieces = pieces.replace('-range-selector', '').split('-');
-                    rangeVal = parseFloat(pieces[0]);
-                    if (pieces[1] === '') {
-                        var numInputs = targetInputsInfo.length;
-                        for (var i=0; i<numInputs; i++)
-                        {
-                            setRange(
-                                targetInputsInfo[i].range_register,
-                                rangeVal
-                            );
+                    $('.range-selector').click(function (event) {
+                        var pieces = event.target.id;
+                        pieces = pieces.replace('-range-selector', '').split('-');
+                        rangeVal = parseFloat(pieces[0]);
+                        if (pieces[1] === '') {
+                            var numInputs = targetInputsInfo.length;
+                            for (var i = 0; i < numInputs; i++) {
+                                setRange(
+                                    targetInputsInfo[i].range_register,
+                                    rangeVal
+                                );
+                            }
+                        } else {
+                            rangeReg = parseInt(pieces[1], 10);
+                            setRange(rangeReg, rangeVal);
                         }
-                    } else {
-                        rangeReg = parseInt(pieces[1], 10);
-                        setRange(rangeReg, rangeVal);
-                    }
-                });
+                    });
 
-                deferred.resolve();
-            }
-        );
+                    resolve();
+                }
+            );
 
+        });
     });
-
-    return deferred.promise;
 }
 
 
@@ -106,24 +101,16 @@ function loadRangeOptions()
  *      operation on.
  * @param {Array} results The array to extend with results of the read many.
  * @param {Array} registers Array of addresses or register names to read.
- * @return {q.promise} Promise that resolves after the read many completes or
+ * @return {Promise} Promise that resolves after the read many completes or
  *      rejects on error. Resolves to nothing as results will be extended to
  *      provide access to the read results.
 **/
 function extendReadMany (device, results, registers)
 {
     return function () {
-        var deferred = q.defer();
-
-        device.readMany(registers).then(function (subResults) {
+        return device.readMany(registers).then(function (subResults) {
             results.push.apply(results, subResults);
-            deferred.resolve();
-        },
-        function (err) {
-            deferred.reject(err);
         });
-
-        return deferred.promise;
     };
 }
 
@@ -283,35 +270,32 @@ function updateInputs (inputsInfo, targetDevSelection, curTabID) {
 /**
  * Load the list of inputs for the given device.
  *
- * @return {q.promise} A Q promise that resolves to undefined.
+ * @return {Promise} A Q promise that resolves to undefined.
 **/
 function loadInputs()
 {
-    var deferred = q.defer();
-    var templateLocation = fs_facade.getExternalURI(INPUTS_TEMPLATE_SRC);
-    var inputsSrc = fs_facade.getExternalURI(INPUTS_DATA_SRC);
+    return new Promise((resolve, reject) => {
+        var templateLocation = fs_facade.getExternalURI(INPUTS_TEMPLATE_SRC);
+        var inputsSrc = fs_facade.getExternalURI(INPUTS_DATA_SRC);
 
-    fs_facade.getJSON(inputsSrc, genericErrorHandler, function(inputsInfo){
-        targetInputsInfo = inputsInfo;
-        fs_facade.renderTemplate(
-            templateLocation,
-            {'inputs': inputsInfo},
-            genericErrorHandler,
-            function(renderedHTML)
-            {
-                $(CONTROLS_MATRIX_SELECTOR).hide(function(){
-                    $(CONTROLS_MATRIX_SELECTOR).html(renderedHTML);
-                    $(CONTROLS_MATRIX_SELECTOR).fadeIn();
+        fs_facade.getJSON(inputsSrc, genericErrorHandler, function (inputsInfo) {
+            targetInputsInfo = inputsInfo;
+            fs_facade.renderTemplate(
+                templateLocation,
+                {'inputs': inputsInfo},
+                genericErrorHandler,
+                function (renderedHTML) {
+                    $(CONTROLS_MATRIX_SELECTOR).hide(function () {
+                        $(CONTROLS_MATRIX_SELECTOR).html(renderedHTML);
+                        $(CONTROLS_MATRIX_SELECTOR).fadeIn();
 
-                    deferred.resolve();
-                });
-            }
-        );
+                        resolve();
+                    });
+                }
+            );
+        });
     });
-
-    return deferred.promise;
 }
-
 
 /**
  * Set the current device's analog inputs to be single ended.

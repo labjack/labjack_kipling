@@ -397,7 +397,7 @@ function range(start, stop, step) {
  * @param {Number} startAddress The address to start erasing flash pages on.
  * @param {Number} numPages The number of pages to erase;
  * @param {Number} key Permissions key for that range.
- * @return {q.promise} Promise that resolves to the provided bundle after the
+ * @return {Promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
 exports.eraseFlash = function(device, startAddress, numPages, key) {

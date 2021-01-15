@@ -122,16 +122,12 @@ function module() {
         onSuccess();
     };
     this.writeReg = function(reg, val) {
-        var ioDeferred = q.defer();
-        self.activeDevice.qWrite(reg,val)
-        .then(function() {
-            self.currentValues.set(reg,val);
-            ioDeferred.resolve();
-        }, function(err) {
-            console.error('AnalogOutputs-writeReg',address,err);
-            ioDeferred.reject(err);
-        });
-        return ioDeferred.promise;
+        return self.activeDevice.qWrite(reg,val)
+            .then(function() {
+                self.currentValues.set(reg,val);
+            }, function(err) {
+                console.error('AnalogOutputs-writeReg',address,err);
+            });
     };
 
     /**

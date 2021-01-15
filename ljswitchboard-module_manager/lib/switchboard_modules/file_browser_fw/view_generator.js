@@ -4,8 +4,6 @@
 
 // console.log('in device_selector view_generator.js');
 
-const q = require('q');
-
 const EventEmitter = require('events').EventEmitter;
 const util = require('util');
 const handlebars = require('handlebars');
@@ -167,38 +165,36 @@ var createFileBrowserViewGenerator = function() {
 
 	var getSlideUpElement = function(ele) {
 		var slideUp = function() {
-			var defered = q.defer();
-			ele.slideUp(self.slideDuration, defered.resolve);
-			return defered.promise;
+			return new Promise(resolve => {
+				ele.slideUp(self.slideDuration, resolve);
+			});
 		};
 		return slideUp;
 	};
 	var getSlideDownElement = function(ele) {
 		var slideDown = function() {
-			var defered = q.defer();
-			ele.slideDown(self.slideDuration, defered.resolve);
-			return defered.promise;
+			return new Promise(resolve => {
+				ele.slideDown(self.slideDuration, resolve);
+			});
 		};
 		return slideDown;
 	};
 	var getEmptyElement = function(ele) {
 		var emptyElement = function() {
-			var defered = q.defer();
 			ele.empty();
-			defered.resolve();
-			return defered.promise;
+			return Promise.resolve();
 		};
 		return emptyElement;
 	};
 	var getFillElement = function(ele) {
 		var fillElement = function(data) {
-			var defered = q.defer();
-			ele.empty();
-			ele.ready(function() {
-				defered.resolve(data);
+			return new Promise(resolve => {
+				ele.empty();
+				ele.ready(function () {
+					resolve(data);
+				});
+				ele.append($(data));
 			});
-			ele.append($(data));
-			return defered.promise;
 		};
 		return fillElement;
 	};
@@ -261,22 +257,18 @@ var createFileBrowserViewGenerator = function() {
 
 	this.isFileListingDisplayed = false;
 	function innerDeclareFileListingDisplayed() {
-		var defered = q.defer();
 		self.isFileListingDisplayed = true;
 		self.emit(self.eventList.FILE_LISTING_DISPLAYED, {
 			isFileListingDisplayed: self.isFileListingDisplayed,
 		});
-		defered.resolve();
-		return defered.promise;
+		return Promise.resolve();
 	}
 	function innerDeclareFileListingHidden() {
-		var defered = q.defer();
 		self.isFileListingDisplayed = false;
 		self.emit(self.eventList.FILE_LISTING_HIDDEN, {
 			isFileListingDisplayed: self.isFileListingDisplayed,
 		});
-		defered.resolve();
-		return defered.promise;
+		return Promise.resolve();
 	}
 	// Start defining externally accessable page control methods.
 	// Function for displaying that file listing data is being queried aka
@@ -292,7 +284,7 @@ var createFileBrowserViewGenerator = function() {
 		// Hide the file listing table
 		promises.push(elements.file_listing_table.slideUp());
 
-		return q.allSettled(promises)
+		return Promise.allSettled(promises)
 
 		// Show the file listing refreshing loader
 		.then(elements.file_listing_refreshing.slideDown)
@@ -308,7 +300,7 @@ var createFileBrowserViewGenerator = function() {
 		// promises.push(elements.refresh_file_listing_button.slideUp());
 		// Show the file listing table.
 		promises.push(elements.file_listing_table.slideDown());
-		return q.allSettled(promises);
+		return Promise.allSettled(promises);
 	}
 
 	// An example snippit of data to be rendered and displayed.

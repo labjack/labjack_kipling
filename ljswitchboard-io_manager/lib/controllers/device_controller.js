@@ -393,9 +393,10 @@ class DeviceController extends EventEmitter {
 	 * Create several device objects that can be used to talk with the device
 	 * manager.
 	 */
-	getDevices(options) {
-		return this.getDeviceListing(options)
-			.then(devicesAttributes => this.getDeviceObjects(devicesAttributes));
+	async getDevices(options) {
+		const devicesAttributes = await this.getDeviceListing(options);
+		const deviceObjects = await this.getDeviceObjects(devicesAttributes);
+		return deviceObjects;
 	}
 
 	/**

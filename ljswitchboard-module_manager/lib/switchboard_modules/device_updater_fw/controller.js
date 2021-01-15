@@ -13,6 +13,7 @@
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
+const q = require('q');
 var firmware_verifier = require('ljswitchboard-firmware_verifier');
 var fs = require('fs');
 /**
@@ -444,7 +445,7 @@ function module() {
                 promises.push(deviceUpgrader.startUpgrade());
             });
 
-            q.allSettled(promises)
+            Promise.allSettled(promises)
             .then(function(promiseResults) {
                 var results = [];
                 promiseResults.forEach(function(promiseResult) {

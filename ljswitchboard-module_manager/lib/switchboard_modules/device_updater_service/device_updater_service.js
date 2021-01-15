@@ -7,8 +7,6 @@
 
 console.log('in device_updater_service.js');
 
-const q = require('q');
-
 function createDeviceUpdaterService() {
 	// console.log('Available tasks', Object.keys(TASK_LOADER.tasks));
 	var tab_notification_manager = TASK_LOADER.tasks.tab_notification_manager;
@@ -125,15 +123,13 @@ var self = this;
 
 this.startTask = function(bundle) {
 	console.log('Starting device_updater_service task');
-	var defered = q.defer();
 	try {
 		deviceUpdaterService = new createDeviceUpdaterService();
 		self.deviceUpdaterService = deviceUpdaterService;
 	} catch(err) {
 		console.error('Failed to initialize Kipling\'s device updater service', err);
 	}
-	defered.resolve(bundle);
-	return defered.promise;
+	return Promise.resolve(bundle);
 };
 
 this.deviceUpdaterService = deviceUpdaterService;

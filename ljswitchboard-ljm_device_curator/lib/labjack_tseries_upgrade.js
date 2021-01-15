@@ -552,7 +552,7 @@ function DeviceFirmwareBundle() {
  * that the entire file is read into memory.
  *
  * @param {String} fileSrc The full path to the file to read.
- * @return {q.promise} New DeviceFirmwareBundle without a device loaded but
+ * @return {Promise} New DeviceFirmwareBundle without a device loaded but
  *      initalized with the contents of the specified firmware file.
 **/
 this.readFirmwareFile = function(fileSrc, bundle)
@@ -679,7 +679,7 @@ this.readFirmwareFile = function(fileSrc, bundle)
  *
  * @param {DeviceFirmwareBundle} bundle The firmware and corresponding device to
  *      check compatability for.
- * @return {q.promise} Promise that resolves to the provided device bundle.
+ * @return {Promise} Promise that resolves to the provided device bundle.
  * @throws {Error} Thrown if the firmware image is not compatible.
 **/
 this.checkCompatibility = function(bundle)
@@ -857,7 +857,7 @@ this.getInitialDeviceFWState = function(bundle) {
  * @param {Number} startAddress The address to start erasing flash pages on.
  * @param {Number} numPages The number of pages to erase;
  * @param {Number} key Permissions key for that range.
- * @return {q.promise} Promise that resolves to the provided bundle after the
+ * @return {Promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
 this.eraseFlash = function(bundle, startAddress, numPages, key) {
@@ -893,7 +893,7 @@ this.eraseFlash = function(bundle, startAddress, numPages, key) {
  *
  * @param {DeviceFirmwareBundle} bundle The bundle with the device to perform
  *      the erase operation on.
- * @return {q.promise} Promise that resolves to the provided bundle after the
+ * @return {Promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
 this.eraseImage = function(bundle) {
@@ -927,7 +927,7 @@ this.eraseImage = function(bundle) {
  *
  * @param {DeviceFirmwareBundle} bundle The bundle with the device to perform
  *      the erase operation on.
- * @return {q.promise} Promise that resolves to the provided bundle after the
+ * @return {Promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
 this.eraseImageInformation = function(bundle)
@@ -1182,7 +1182,7 @@ this.readFlash = function(bundle, startAddress, length, size)
  * Reads image from flash memory.
  *
  * @param {DeviceFirmwareBundle} bundle The bundle with the device to read from.
- * @return {q.promise} Promise that resolves to the image as read from memory
+ * @return {Promise} Promise that resolves to the image as read from memory
  *      contents.
 **/
 this.readImage = function(bundle)
@@ -1211,7 +1211,7 @@ this.readImage = function(bundle)
  * Reads image information from flash memory.
  *
  * @param {DeviceFirmwareBundle} bundle The bundle with the device to read from.
- * @return {q.promise} Promise that resolves to the image information as read
+ * @return {Promise} Promise that resolves to the image information as read
  *      from memory contents.
 **/
 this.readImageInformation = function(bundle)
@@ -1240,7 +1240,7 @@ this.readImageInformation = function(bundle)
  * Check that all image information and image pages have been erased.
  *
  * @param {DeviceFirmwareBundle} bundle The bundle with the device to check.
- * @return {q.promise} Promise that resovles to the provided bundle.
+ * @return {Promise} Promise that resovles to the provided bundle.
  * @throws {Error} Error thrown if the image and image information pages on the
  *      specified device are not zeroed.
 **/
@@ -1333,7 +1333,7 @@ this.writeFlash = function(bundle, startAddress, length, size, key, data) {
  * Write the image in the provided bundle to the device in that bundle.
  *
  * @param {DeviceFirmwareBundle} bundle The bundle to perform the write in.
- * @return {q.promise} Promise that resolves to the provided bundle after the
+ * @return {Promise} Promise that resolves to the provided bundle after the
  *      write is complete.
 **/
 this.writeImage = function(minPercent, maxPercent) {
@@ -1379,7 +1379,7 @@ this.writeImage = function(minPercent, maxPercent) {
  * bundle.
  *
  * @param {DeviceFirmwareBundle} bundle The bundle to perform the write in.
- * @return {q.promise} Promise that resolves to the provided bundle after the
+ * @return {Promise} Promise that resolves to the provided bundle after the
  *      write is complete.
 **/
 this.writeImageInformation = function(minPercent, maxPercent)
@@ -1427,7 +1427,7 @@ this.writeImageInformation = function(minPercent, maxPercent)
  * Check that the proper image / image information was written.
  *
  * @param {DeviceFirmwareBundle} bundle The bundle to perform the check in.
- * @return {q.promise} Promise that resolves to the provided bundle after the
+ * @return {Promise} Promise that resolves to the provided bundle after the
  *      check.
  * @throws {Error} Error thrown if the check fails.
 **/
@@ -1455,7 +1455,7 @@ this.checkImageWrite = function(bundle)
  * Soft reboot the device, instructing it to upgrade in the process.
  *
  * @param {DeviceFirmwareBundle} bundle The bundle to perform the upgrade in.
- * @return {q.promise} Promise that resolves to the provided bundle after the
+ * @return {Promise} Promise that resolves to the provided bundle after the
  *      upgrade and reboot has started.
 **/
 this.restartAndUpgrade = function(bundle) {
@@ -1583,7 +1583,7 @@ this.pauseForClose = function(bundle) {
  *
  * @param {DeviceFirmwareBundle} bundle The bundle with the device information
  *      to match.
- * @return {q.promise} Promise that resolves to the updated bundle.
+ * @return {Promise} Promise that resolves to the updated bundle.
 **/
 this.waitForEnumeration = function(bundle)
 {
@@ -1736,7 +1736,7 @@ this.waitForEnumeration = function(bundle)
  *
  * @param {DeviceFirmwareBundle} bundle The bundle with the device to check and
  *      the firmware image / image info to check for.
- * @return {q.promise} Promise that resolves to the provided bundle.
+ * @return {Promise} Promise that resolves to the provided bundle.
  * @throws {Error} Error thrown if the firmware does not match.
 **/
 this.checkNewFirmware = function(bundle)
@@ -1798,7 +1798,7 @@ this.checkNewFirmware = function(bundle)
  * @param {labjack-nodejs.device} device The device to update.
  * @param {String} firmwareFileLocation The location of the bin file to read the
  *      firmware from.
- * @return {q.promise} Promise that resolves after the build process completes.
+ * @return {Promise} Promise that resolves after the build process completes.
 **/
 var internalUpdateFirmware = function(curatedDevice, device, firmwareFileLocation,
     connectionType, progressListener)

@@ -158,7 +158,6 @@ function dataTableCreator() {
         self.activeDevice = activeDevice;
     };
     this.updateData = function() {
-        var defered = q.defer();
 
         var deviceTypeName = self.activeDevice.savedAttributes.deviceTypeName;
         dataTableFormatter.updateCachedRegisterData(deviceTypeName);
@@ -168,8 +167,7 @@ function dataTableCreator() {
         self.dataTableData = dataTableFormatter.dataTableData;
         self.cachedRegisterTags = dataTableFormatter.cachedRegisterTags;
 
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     var self = this;
 }

@@ -25,7 +25,7 @@
  *  2. Accept input to change AINx_RESOLUTION_INDEX
  *  3. Accept input to change AINx_SETTLING_US
 **/
-var sprintf = require('sprintf-js').sprintf;
+const sprintf = require('sprintf-js').sprintf;
 
 // Constant that determines device polling rate.
 var MODULE_UPDATE_PERIOD_MS = 1500;
@@ -333,24 +333,15 @@ function module() {
     };
 
     this.writeReg = function(address,value) {
-        var ioDeferred = q.defer();
-        self.activeDevice.iWrite(address,value)
-        .then(function(){
-            self.bufferedOutputValues.set(address,value);
-            ioDeferred.resolve();
-        },function(err){
-            ioDeferred.reject(err);
-        });
-        return ioDeferred.promise;
+        return self.activeDevice.iWrite(address,value)
+            .then(function(){
+                self.bufferedOutputValues.set(address,value);
+            });
     };
     this.getWriteReg = function(address, value) {
-        var ioDeferred = q.defer();
-        var execute = function() {
-            self.writeReg(address,value)
-            .then(ioDeferred.resolve,ioDeferred.reject);
-            return ioDeferred.promise;
+        return function() {
+            return self.writeReg(address,value)
         };
-        return execute;
     };
 
     /**
@@ -539,24 +530,24 @@ function module() {
                 return ioArray;
             };
             var configDevice = function(ioArray) {
-                var configDefered = q.defer();
-                var step = 0;
-                async.eachSeries (ioArray, function(func,callback) {
-                    step += 1;
-                    func()
-                    .then(callback,function(err) {
-                        console.error('IO Error Step',step,func);
-                        callback(err);
+                return new Promise((resolve, reject) => {
+                    var step = 0;
+                    async.eachSeries(ioArray, function (func, callback) {
+                        step += 1;
+                        func()
+                            .then(callback, function (err) {
+                                console.error('IO Error Step', step, func);
+                                callback(err);
+                            });
+                    }, function (err) {
+                        if (err) {
+                            console.error('EF Config Failed -configDevice', err);
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
                     });
-                }, function(err) {
-                    if( err ) {
-                        console.error('EF Config Failed -configDevice',err);
-                        configDefered.reject(err);
-                    } else {
-                        configDefered.resolve();
-                    }
                 });
-                return configDefered.promise;
             };
 
             if(register.indexOf('AIN_ALL') === 0) {

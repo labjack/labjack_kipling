@@ -19,7 +19,7 @@
 
 /* jshint undef: true, unused: true, undef: true */
 /* jshint strict: false */
-/* global console, $, dict, q, ljmmm_parse, device_controller */
+/* global console, $, dict, ljmmm_parse, device_controller */
 /* global KEYBOARD_EVENT_HANDLER, customSpinners, getDeviceDashboardController */
 /* global sprintf */
 
@@ -59,16 +59,12 @@ function module() {
     };
     //Should start using the device.configIO(channelName, attribute, value) function.
     this.writeReg = function(address,value) {
-        var ioDeferred = q.defer();
-        self.activeDevice.qWrite(address,value)
-        .then(function(){
-            self.bufferedOutputValues.set(address,value);
-            ioDeferred.resolve();
-        },function(err){
-            console.error('Dashboard-writeReg',address,err);
-            ioDeferred.reject(err);
-        });
-        return ioDeferred.promise;
+        return self.activeDevice.qWrite(address,value)
+            .then(function(){
+                self.bufferedOutputValues.set(address,value);
+            }, function(err){
+                console.error('Dashboard-writeReg',address,err);
+            });
     };
     
 

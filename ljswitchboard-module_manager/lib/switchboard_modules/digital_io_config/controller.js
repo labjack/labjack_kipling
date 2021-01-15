@@ -4,8 +4,7 @@
  * @author A. Samuel Pottinger (LabJack Corp, 2013)
 **/
 
-var async = require('async');
-var q = require('q');
+const async = require('async');
 
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
@@ -110,52 +109,51 @@ function renderManyDeviceControls(registers, devices, onSuccess)
  * Read the state of the digital (FIO) lines configured as input on the selected
  * devices. This function will update the view in the process.
  *
- * @return {q.promise} Promise that resolves after the read is complete.
+ * @return {Promise} Promise that resolves after the read is complete.
  *      Rejects on error and resolves to nothing.
 **/
 function readInputs ()
 {
-    var deferred = q.defer();
-    async.each(
-        targetedDevices,
-        function (device, callback) {
-            var regs = $('.direction-switch-check:not(:checked)').map(
-                function () {
-                    return parseInt(this.id.replace('-switch', ''));
-                }
-            ).get();
-            var promise = device.readMany(regs, callback);
-            promise.then(
-                function (results) {
-                    var numRegs = regs.length;
-                    for (var i=0; i<numRegs; i++) {
-                        var value = results[i];
-                        var reg = regs[i];
-                        const targetID = '#' + device.getDeviceType() + '-' + device.getSerial() + '-' + reg;
-
-                        $(targetID).removeClass('inactive');
-                        $(targetID).removeClass('active');
-                        if (Math.abs(value - 1) < 0.1) {
-                            $(targetID).addClass('active');
-                        } else {
-                            $(targetID).addClass('inactive');
-                        }
+    return new Promise((resolve, reject) => {
+        async.each(
+            targetedDevices,
+            function (device, callback) {
+                var regs = $('.direction-switch-check:not(:checked)').map(
+                    function () {
+                        return parseInt(this.id.replace('-switch', ''));
                     }
-                    callback();
-                },
-                callback
-            );
-        },
-        function (err) {
-            if (err) {
-                deferred.reject(err);
-            } else {
-                deferred.resolve();
-            }
-        }
-    );
+                ).get();
+                var promise = device.readMany(regs, callback);
+                promise.then(
+                    function (results) {
+                        var numRegs = regs.length;
+                        for (var i = 0; i < numRegs; i++) {
+                            var value = results[i];
+                            var reg = regs[i];
+                            const targetID = '#' + device.getDeviceType() + '-' + device.getSerial() + '-' + reg;
 
-    return deferred.promise;
+                            $(targetID).removeClass('inactive');
+                            $(targetID).removeClass('active');
+                            if (Math.abs(value - 1) < 0.1) {
+                                $(targetID).addClass('active');
+                            } else {
+                                $(targetID).addClass('inactive');
+                            }
+                        }
+                        callback();
+                    },
+                    callback
+                );
+            },
+            function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            }
+        );
+    });
 }
 
 
@@ -166,49 +164,48 @@ function readInputs ()
  * Sets of all of the digital (FIO) lines to the user selected state on all of
  * the currently selected devices.
  *
- * @return {q.promise} Promise that resolves (to nothing) after the device
+ * @return {Promise} Promise that resolves (to nothing) after the device
  *      write operations complete. Rejects on error.
 **/
 function writeOutputs ()
 {
-    var deferred = q.defer();
-    async.each(
-        targetedDevices,
-        function (device, callback) {
-            var regs = $('.direction-switch-check:checked').map(
-                function () {
-                    return parseInt(this.id.replace('-switch', ''));
+    return new Promise((resolve, reject) => {
+        async.each(
+            targetedDevices,
+            function (device, callback) {
+                var regs = $('.direction-switch-check:checked').map(
+                    function () {
+                        return parseInt(this.id.replace('-switch', ''));
+                    }
+                ).get();
+                var numRegs = regs.length;
+                var addresses = [];
+                var values = [];
+                for (var i = 0; i < numRegs; i++) {
+                    var reg = regs[i];
+                    const targetID = '#' + reg + '-output-switch';
+                    if ($(targetID).is(":checked"))
+                        values.push(1);
+                    else
+                        values.push(0);
+                    addresses.push(reg);
                 }
-            ).get();
-            var numRegs = regs.length;
-            var addresses = [];
-            var values = [];
-            for (var i=0; i<numRegs; i++) {
-                var reg = regs[i];
-                const targetID = '#' + reg + '-output-switch';
-                if($(targetID).is(":checked"))
-                    values.push(1);
-                else
-                    values.push(0);
-                addresses.push(reg);
+                if (addresses.length == 0) {
+                    resolve();
+                } else {
+                    var promise = device.writeMany(addresses, values);
+                    promise.then(callback, callback);
+                }
+            },
+            function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
             }
-            if (addresses.length == 0) {
-                deferred.resolve();
-            } else {
-                var promise = device.writeMany(addresses, values);
-                promise.then(callback, callback);
-            }
-        },
-        function (err) {
-            if (err) {
-                deferred.reject(err);
-            } else {
-                deferred.resolve();
-            }
-        }
-    );
-
-    return deferred.promise;
+        );
+    });
 }
 
 

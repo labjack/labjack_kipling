@@ -6,34 +6,12 @@
 
 // console.log('in device_selector, controller.js');
 
-const q = require('q');
-
 var createModuleInstance = function() {
 	function initializeWindowData() {
-		var defered = q.defer();
-		defered.resolve({
+		return Promise.resolve({
 			'my_data': 'test',
 		});
-		return defered.promise;
 	}
-    // Attach a pre-load step to the Module loader
-    var preLoadStep = function(newModule) {
-        var defered = q.defer();
-
-        var onSuccees = function(data) {
-        	newModule.context.pageData = data;
-        	defered.resolve(newModule);
-        };
-        var onErr = function(data) {
-        	onSuccees(data);
-        };
-
-        initializeWindowData()
-        .then(onSuccees, onErr);
-
-        return defered.promise;
-    };
-    // MODULE_LOADER.addPreloadStep(preLoadStep);
 
 	var startModule = function(newModule) {
 		// console.log('device_selector starting', newModule.name, newModule.id);

@@ -10,7 +10,6 @@ this.run = function() {
 
 const EventEmitter = require('events').EventEmitter;
 const util = require('util');
-const q = require('q');
 
 const io_manager = require('ljswitchboard-io_manager');
 
@@ -44,54 +43,10 @@ function ljmController() {
 		self.emit(eventList.UPDATED_SPECIAL_ADDRESSES_DATA, self.cachedSpecialAddressesData);
 	}
 
-	this.refreshSpecialAddressesFileData = function() {
-		var defered = q.defer();
-		if(!self.isRefreshingFileData) {
-			self.isRefreshingFileData = true;
-
-			var specialAddresses = driver.specialAddresses;
-			specialAddresses.load()
-			.then(function(data) {
-				console.log('finished refreshing specialAddresses:', data);
-
-				self.cachedSpecialAddressesData = data;
-				self.cachedFileData = data.fileData;
-
-				reportUpdatedSpecialAddressesData();
-				resolveUnresolvedDefereds();
-			}, function(errData) {
-				console.log('errData (refreshing specialAddresses):', errData);
-				resolveUnresolvedDefereds();
-			});
-		} else {
-			addUnresolvedDefered(defered);
-		}
-		return defered.promise;
-	};
-
-	this.saveSpecialAddressesFileData = function(fileData) {
-		var defered = q.defer();
-		var specialAddresses = driver.specialAddresses;
-		specialAddresses.save(fileData)
-		.then(function(data) {
-			console.log('finished saving specialAddresses:', data);
-
-			self.cachedSpecialAddressesData = data;
-			self.cachedFileData = data.fileData;
-
-			reportUpdatedSpecialAddressesData();
-			defered.resolve();
-		}, function(errData) {
-			console.log('errData (saving specialAddresses):', errData);
-			defered.resolve();
-		});
-		return defered.promise;
-	};
 	this.startLJMController = function() {
-		var defered = q.defer();
 		console.log('Starting LJM Controller!!!', self.myVar);
 		var specialAddresses = driver.specialAddresses;
-		specialAddresses.load()
+		return specialAddresses.load()
 		.then(function(data) {
 			console.log('finished loading specialAddresses:', data);
 
@@ -99,12 +54,10 @@ function ljmController() {
 			self.cachedFileData = data.fileData;
 
 			reportUpdatedSpecialAddressesData();
-			defered.resolve();
 		}, function(errData) {
 			console.log('errData (loading specialAddresses):', errData);
-			defered.resolve();
+			return Promise.resolve();
 		});
-		return defered.promise;
 	};
 
 	var self = this;
@@ -119,11 +72,9 @@ try {
 }
 this.startTask = function(bundle) {
 	console.log('Starting ljm_controller task', bundle);
-	var defered = q.defer();
 
 	ljc.startLJMController();
-	defered.resolve(bundle);
-	return defered.promise;
+	return Promise.resolve(bundle);
 };
 
 /**

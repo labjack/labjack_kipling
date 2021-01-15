@@ -6,9 +6,11 @@
 
 
 var async = require('async');
-var handlebars = require('handlebars')
+var handlebars = require('handlebars');
 var extend = require('node.extend');
-var q = require('q');
+
+const package_loader = global.package_loader;
+const fs_facade = package_loader.getPackage('fs_facade');
 
 var ljmmm = require('./ljmmm');
 
@@ -33,7 +35,7 @@ var selectedRegisters = [];
  * the registers with that tag.
  *
  * @param {Event} event jQuery event information.
- * @param {dict} registersByTag Dictionary with register tags as keys and Arrays
+ * @param {Map} registersByTag Dictionary with register tags as keys and Arrays
  *       of register information objects as values.
 **/
 function selectDevice(event, registersByTag)
@@ -164,7 +166,7 @@ function refreshWatchList()
  * that registers list, associating the appropriate event listeners.
  *
  * @param {Event} event jQuery event information.
- * @param {dict} registersByTag An indexed layer for register information. A
+ * @param {Map} registersByTag An indexed layer for register information. A
  *      dict that acts as an index for register information. Keys should be
  *      String tags and values should be Array of Objects with register info
  *      for registers with that tag.
@@ -247,49 +249,46 @@ function selectCategory(event, registersByTag, selectedSerial, selectedName)
  * Render the controls that allow for the selection of a channel to display
  * and / or log. Creates appropriate event listeners for those controls.
  *
- * @param {dict} registersByTag Dictionary with information about available
+ * @param {Map} registersByTag Dictionary with information about available
  *      registers organized by tag. The key is the String tag and the value is
  *      an Array of Object with register information.
- * @return {q.promise} A promise that resovles to undefined.
+ * @return {Promise} A promise that resovles to undefined.
 **/
 function renderChannelSelectControls(registersByTag)
 {
-    var deferred = q.defer();
+    return new Promise((resolve, reject) => {
+        var devices = device_controller.getDeviceKeeper().getDevices();
+        var categories = [];
+        registersByTag.forEach(function (value, key) {
+            categories.push(key);
+        });
 
-    var devices = device_controller.getDeviceKeeper().getDevices();
-    var categories = [];
-    registersByTag.forEach(function(value, key){
-        categories.push(key);    
+        var templateVals = {
+            'devices': devices,
+            'categories': categories
+        };
+
+        var location = fs_facade.getExternalURI(DEVICE_CATEG_SELECT_TEMPLATE_SRC);
+        fs_facade.renderTemplate(
+            location,
+            templateVals,
+            genericErrorHandler,
+            function (renderedHTML) {
+                $(CHANNEL_SELECTOR_HOLDER_SELECTOR).html(renderedHTML);
+                $('#category-selector').hide();
+                $('#register-selector').hide();
+
+                $('#device-select-menu option').click(function (event) {
+                    selectDevice(event, registersByTag)
+                });
+
+                $('#choose-different-device-link').click(chooseDifferentDevice);
+                $('#choose-different-category-link').click(chooseDifferentCategory);
+
+                resolve();
+            }
+        );
     });
-
-    var templateVals = {
-        'devices': devices,
-        'categories': categories
-    };
-
-    var location = fs_facade.getExternalURI(DEVICE_CATEG_SELECT_TEMPLATE_SRC);
-    fs_facade.renderTemplate(
-        location,
-        templateVals,
-        genericErrorHandler,
-        function(renderedHTML)
-        {
-            $(CHANNEL_SELECTOR_HOLDER_SELECTOR).html(renderedHTML);
-            $('#category-selector').hide();
-            $('#register-selector').hide();
-
-            $('#device-select-menu option').click(function(event){
-                selectDevice(event, registersByTag)
-            });
-
-            $('#choose-different-device-link').click(chooseDifferentDevice);
-            $('#choose-different-category-link').click(chooseDifferentCategory);
-
-            deferred.resolve();
-        }
-    );
-
-    return deferred.promise;
 }
 
 /**
@@ -331,45 +330,39 @@ function chooseDifferentCategory()
  * as values.
  *
  * @param {Array} registers An Array of Object with reigster information.
- * @return {q.promise} A promise that resolves to a dict indexed by tag.
+ * @return {Promise} A promise that resolves to a dict indexed by tag.
 **/
 function getRegistersByTag(registers)
 {
-    var deferred = q.defer();
+    return new Promise((resolve, reject) => {
 
-    var retDict = new Map();
-    async.each(
-        registers,
-        function(register, callback)
-        {
-            var tagsLen = register.tags.length;
-            for(var i=0; i<tagsLen; i++)
-            {
-                var tag = register.tags[i]
-                if(tag.replace(' ', '') !== '')
-                {
-                    if(!retDict.has(tag))
-                        retDict.set(tag, []);
-                    retDict.get(tag).push(register);
+
+        var retDict = new Map();
+        async.each(
+            registers,
+            function (register, callback) {
+                var tagsLen = register.tags.length;
+                for (var i = 0; i < tagsLen; i++) {
+                    var tag = register.tags[i]
+                    if (tag.replace(' ', '') !== '') {
+                        if (!retDict.has(tag))
+                            retDict.set(tag, []);
+                        retDict.get(tag).push(register);
+                    }
                 }
-            }
 
-            callback();
-        },
-        function(err)
-        {
-            if(err !== null)
-            {
-                genericErrorHandler(err);
-                return;
+                callback();
+            },
+            function (err) {
+                if (err !== null) {
+                    genericErrorHandler(err);
+                    return;
+                }
+                resolve(retDict);
             }
-            deferred.resolve(retDict);
-        }
-    );
-
-    return deferred.promise;
+        );
+    });
 }
-
 
 /**
  * Get information about the registers that can be logged / watched.
@@ -377,19 +370,17 @@ function getRegistersByTag(registers)
  * Load register information for all devices, a complete record of registers
  * that can be logged or watched.
  *
- * @return {q.promise} A promise that resolves to an Object with register
+ * @return {Promise} A promise that resolves to an Object with register
  *      information. See the registers section of the ljm_constants JSON file.
 **/
 function getRegisters()
 {
-    var deferred = q.defer();
-
-    var registerInfoSrc = fs_facade.getExternalURI(REGISTERS_DATA_SRC);
-    fs_facade.getJSON(registerInfoSrc, genericErrorHandler, function(info){
-        deferred.resolve(info['registers']);        
+    return new Promise((resolve) => {
+        var registerInfoSrc = fs_facade.getExternalURI(REGISTERS_DATA_SRC);
+        fs_facade.getJSON(registerInfoSrc, genericErrorHandler, function (info) {
+            resolve(info['registers']);
+        });
     });
-
-    return deferred.promise;
 }
 
 
@@ -402,28 +393,26 @@ function getRegisters()
  *
  * @param {Array} entries An Array of Object with information about registers
  *      whose name field should be interpreted as LJMMM fields.
- * @return {q.deferred.promise} A Q promise that resolves to an Array of Array
+ * @return {Promise} A Q promise that resolves to an Array of Array
  *      of Objects with information about registers. Each sub-array is the
  *      result of interpreting a register entry's name field as LJMMM and
  *      enumerating as appropriate.
 **/
 function expandLJMMMEntries(entries)
 {
-    var deferred = q.defer();
-
-    async.map(
-        entries,
-        function(entry, callback){
-            ljmmm.expandLJMMMEntry(entry, function(newEntries){
-                callback(null, newEntries);
-            });
-        },
-        function(error, newEntries){
-            deferred.resolve(newEntries);
-        }
-    );
-
-    return deferred.promise;
+    return new Promise((resolve, reject) => {
+        async.map(
+            entries,
+            function (entry, callback) {
+                ljmmm.expandLJMMMEntry(entry, function (newEntries) {
+                    callback(null, newEntries);
+                });
+            },
+            function (error, newEntries) {
+                resolve(newEntries);
+            }
+        );
+    });
 }
 
 
@@ -435,37 +424,33 @@ function expandLJMMMEntries(entries)
  * hierarchical information.
  *
  * @param {Array} registers Array of Array of Object to flatten.
- * @return {q.promise} A promise that resolves to the flattened Array.
+ * @return {Promise} A promise that resolves to the flattened Array.
 **/
 function flattenRegisters(registers)
 {
-    var deferred = q.defer();
+    return new Promise((resolve, reject) => {
 
-    var retArray = [];
-    async.each(
-        registers,
-        function(registerSet, callback)
-        {
-            var registerSetLen = registerSet.length;
-            for(var i=0; i<registerSetLen; i++)
-            {
-                retArray.push(registerSet[i]);
+
+        var retArray = [];
+        async.each(
+            registers,
+            function (registerSet, callback) {
+                var registerSetLen = registerSet.length;
+                for (var i = 0; i < registerSetLen; i++) {
+                    retArray.push(registerSet[i]);
+                }
+
+                callback();
+            },
+            function (err) {
+                if (err !== null) {
+                    genericErrorHandler(err);
+                    return;
+                }
+                resolve(retArray);
             }
-
-            callback();
-        },
-        function(err)
-        {
-            if(err !== null)
-            {
-                genericErrorHandler(err);
-                return;
-            }
-            deferred.resolve(retArray);
-        }
-    );
-
-    return deferred.promise;
+        );
+    });
 }
 
 

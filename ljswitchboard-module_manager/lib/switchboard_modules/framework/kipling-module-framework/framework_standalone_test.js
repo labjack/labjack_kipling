@@ -12,11 +12,9 @@ module.exports = {
         var frameworkProvidedToEvent = null;
 
         var fakeFire = function (event, framework) {
-            var innerDeferred = q.defer();
             eventFired = event;
             frameworkProvidedToEvent = framework;
-            innerDeferred.resolve();
-            return innerDeferred.promise;
+            return Promise.resolve();
         };
         var testFramework = {
             fire: fakeFire
@@ -24,20 +22,20 @@ module.exports = {
         var testEnvironment = {
             framework: testFramework
         };
-        var testDeferred = q.defer();
-        var testPromise = testDeferred.promise;
 
-        testPromise.then(function () {
-            assert.deepEqual(eventFired, testEvent);
-            assert.deepEqual(frameworkProvidedToEvent, testFramework);
-            done();
-        });
-
-        framework_standalone.fireAndResolve(
-            testEvent,
-            testEnvironment,
-            testDeferred
-        );
+        const testPromise = new Promise((resolve, reject) => {
+                framework_standalone.fireAndResolve(
+                    testEvent,
+                    testEnvironment,
+                    resolve,
+                    reject
+                );
+            })
+            .then(function () {
+                assert.deepEqual(eventFired, testEvent);
+                assert.deepEqual(frameworkProvidedToEvent, testFramework);
+                done();
+            });
     },
 
     testPrepareFramework: function (test) {
