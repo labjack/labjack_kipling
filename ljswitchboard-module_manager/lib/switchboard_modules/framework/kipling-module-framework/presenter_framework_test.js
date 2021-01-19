@@ -67,7 +67,7 @@ function TestDevice() {
 
 module.exports = {
     setUp: function (callback) {
-        this.testFramework = new presenter_framework.Framework();
+        this.testFramework = new presenter_framework.PresenterFramework();
         this.testJquery = new TestJQuery();
         this.testFramework._SetJQuery(this.testJquery);
         callback();

@@ -1,6 +1,7 @@
+'use strict';
+
 // Define a placeholder for the user's module object.
 var sdModule = null;
-var sdFramework = null;
 const package_loader = global.package_loader;
 const handleBarsService = package_loader.getPackage('handleBarsService');
 const path = require('path');
@@ -45,10 +46,10 @@ class ModuleInstance extends EventEmitter {
         }
         try {
             // Create an instance of the sdFramework
-            sdFramework = new global.Framework();
+            this.sdFramework = new global.PresenterFramework();
 
             // Configure framework with the jQueryWrapper
-            sdFramework._SetJQuery(new JQueryWrapper());
+            this.sdFramework._SetJQuery(new JQueryWrapper());
 
             // Create an instance of the user's module.
             sdModule = new module();
@@ -62,18 +63,17 @@ class ModuleInstance extends EventEmitter {
             } catch(err) {
                 createdModuleName = '';
             }
-            sdFramework.numModuleReloads = 0;
-            sdFramework.currentModuleName = moduleData.name;
-            sdFramework.preConfiguredModuleName = createdModuleName;
-            sdFramework.saveModuleName();
+            console.log('initializeModule', createdModuleName);
+            this.sdFramework.numModuleReloads = 0;
+            this.sdFramework.currentModuleName = moduleData.name;
+            this.sdFramework.saveModuleName();
         } catch(err) {
             console.log('Error Initializing Module', err, err.stack);
         }
-        return Promise.resolve(moduleData);
     }
 
     linkModule(moduleData) {
-        if(this.DEBUG_FRAMEWORK_CONNECTOR) {
+        if (this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('linking framework to module', moduleData.data);
         }
 
@@ -81,60 +81,59 @@ class ModuleInstance extends EventEmitter {
             // Try and link the framework to the various implemented functions,
             // if they don't exist don't link them.
             if(typeof(sdModule.verifyStartupData) === "function") {
-                sdFramework.on('verifyStartupData',sdModule.verifyStartupData);
+                this.sdFramework.on('verifyStartupData', sdModule.verifyStartupData);
             }
             if(typeof(sdModule.onModuleLoaded) === "function") {
-                sdFramework.on('onModuleLoaded',sdModule.onModuleLoaded);
+                this.sdFramework.on('onModuleLoaded',sdModule.onModuleLoaded);
             }
             if(typeof(sdModule.onDevicesSelected) === "function") {
-                sdFramework.on('onDevicesSelected',sdModule.onDevicesSelected);
+                this.sdFramework.on('onDevicesSelected',sdModule.onDevicesSelected);
             }
             if(typeof(sdModule.onDevicesConfigured) === "function") {
-                sdFramework.on('onDevicesConfigured',sdModule.onDevicesConfigured);
+                this.sdFramework.on('onDevicesConfigured',sdModule.onDevicesConfigured);
             }
             if(typeof(sdModule.onDeviceSelected) === "function") {
-                sdFramework.on('onDeviceSelected',sdModule.onDeviceSelected);
+                this.sdFramework.on('onDeviceSelected',sdModule.onDeviceSelected);
             }
             if(typeof(sdModule.onDeviceConfigured) === "function") {
-                sdFramework.on('onDeviceConfigured',sdModule.onDeviceConfigured);
+                this.sdFramework.on('onDeviceConfigured',sdModule.onDeviceConfigured);
             }
             if(typeof(sdModule.onTemplateLoaded) === "function") {
-                sdFramework.on('onTemplateLoaded',sdModule.onTemplateLoaded);
+                this.sdFramework.on('onTemplateLoaded',sdModule.onTemplateLoaded);
             }
             if(typeof(sdModule.onTemplateDisplayed) === "function") {
-                sdFramework.on('onTemplateDisplayed',sdModule.onTemplateDisplayed);
+                this.sdFramework.on('onTemplateDisplayed', (a,b,c,d) => sdModule.onTemplateDisplayed(a,b,c,d));
             }
             if(typeof(sdModule.onRegisterWrite) === "function") {
-                sdFramework.on('onRegisterWrite',sdModule.onRegisterWrite);
+                this.sdFramework.on('onRegisterWrite',sdModule.onRegisterWrite);
             }
             if(typeof(sdModule.onRegisterWritten) === "function") {
-                sdFramework.on('onRegisterWritten',sdModule.onRegisterWritten);
+                this.sdFramework.on('onRegisterWritten',sdModule.onRegisterWritten);
             }
             if(typeof(sdModule.onRefresh) === "function") {
-                sdFramework.on('onRefresh',sdModule.onRefresh);
+                this.sdFramework.on('onRefresh',sdModule.onRefresh);
             }
             if(typeof(sdModule.onRefreshed) === "function") {
-                sdFramework.on('onRefreshed',sdModule.onRefreshed);
+                this.sdFramework.on('onRefreshed',sdModule.onRefreshed);
             }
             if(typeof(sdModule.onCloseDevice) === "function") {
-                sdFramework.on('onCloseDevice',sdModule.onCloseDevice);
+                this.sdFramework.on('onCloseDevice',sdModule.onCloseDevice);
             }
             if(typeof(sdModule.onUnloadModule) === "function") {
-                sdFramework.on('onUnloadModule',sdModule.onUnloadModule);
+                this.sdFramework.on('onUnloadModule',sdModule.onUnloadModule);
             }
             if(typeof(sdModule.onLoadError) === "function") {
-                sdFramework.on('onLoadError',sdModule.onLoadError);
+                this.sdFramework.on('onLoadError',sdModule.onLoadError);
             }
             if(typeof(sdModule.onWriteError) === "function") {
-                sdFramework.on('onWriteError',sdModule.onWriteError);
+                this.sdFramework.on('onWriteError',sdModule.onWriteError);
             }
             if(typeof(sdModule.onRefreshError) === "function") {
-                sdFramework.on('onRefreshError',sdModule.onRefreshError);
+                this.sdFramework.on('onRefreshError',sdModule.onRefreshError);
             }
         } catch(err) {
             console.error('Error Linking sdFramework to current module', err);
         }
-        return Promise.resolve(moduleData);
     }
 
     loadModule(moduleData) {
@@ -145,38 +144,40 @@ class ModuleInstance extends EventEmitter {
             try {
                 //Configure framework's update frequency
                 if(typeof(global.MODULE_UPDATE_PERIOD_MS) === "number") {
-                    sdFramework.setRefreshRate(global.MODULE_UPDATE_PERIOD_MS);
+                    this.sdFramework.setRefreshRate(global.MODULE_UPDATE_PERIOD_MS);
                 } else if(typeof(moduleData.data.refreshRate) === 'number') {
-                    sdFramework.setRefreshRate(moduleData.data.refreshRate);
+                    this.sdFramework.setRefreshRate(moduleData.data.refreshRate);
                 } else {
-                    sdFramework.setRefreshRate(1000);
+                    this.sdFramework.setRefreshRate(1000);
                 }
 
-                const moduleViewPath = path.join(moduleData.path, 'view.html');
-                const moduleDataPath = path.join(moduleData.path, 'moduleData.json');
+                console.log('moduleData', moduleData);
+
+                const moduleViewPath = path.join(moduleData.data.path, 'view.html');
+                const moduleDataPath = path.join(moduleData.data.path, 'moduleData.json');
 
                 // Configure the framework to use the module's 'view.html' by default
                 // Also configure the framework to use module's data, 'moduleData.json'
-                sdFramework.configFramework(moduleViewPath);
-                sdFramework.configureFrameworkData([moduleDataPath]);
+                this.sdFramework.configFramework(moduleViewPath);
+                this.sdFramework.configureFrameworkData([moduleDataPath]);
 
                 //Save loaded module data to the framework instance
-                sdFramework.saveModuleInfo(
+                this.sdFramework.saveModuleInfo(
                     moduleData.data,
-                    moduleData.json.moduleConstants,
+                    moduleData.data.json.moduleConstants,
                     sdModule,
                     moduleData
                 );
 
-                sdFramework.ljmDriver = new FakeDriver();
+                this.sdFramework.ljmDriver = new FakeDriver();
 
                 // Start the framework
                 if(this.DEBUG_FRAMEWORK_CONNECTOR) {
                     console.debug('Starting Module', moduleData.name);
                 }
-                sdFramework.startFramework()
+                this.sdFramework.startFramework()
                     .then(function() {
-                        // console.debug('Started FW');
+                        console.debug('Started FW');
                         resolve(moduleData);
                     },function() {
                         console.error('Failed Starting FW');
@@ -188,22 +189,15 @@ class ModuleInstance extends EventEmitter {
         });
     }
 
-    runModule(moduleData) {
+    async runModule(moduleData) {
         if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('running module', moduleData.data);
         }
-        return new Promise((resolve) => {
-            const resolveFunc = function () {
-                resolve(moduleData);
-            };
-            try {
-                sdFramework.runFramework()
-                    .then(resolveFunc, resolveFunc);
-            } catch (err) {
-                console.error('Error Running sdFramework', err);
-                resolve();
-            }
-        });
+        try {
+            await this.sdFramework.runFramework();
+        } catch (err) {
+            console.error('Error Running sdFramework', err);
+        }
     }
 
     reportModuleStarted(moduleData) {
@@ -217,26 +211,24 @@ class ModuleInstance extends EventEmitter {
         };
         global.MODULE_CHROME.emit('MODULE_READY', data);
         global.MODULE_LOADER.emit('MODULE_READY', data);
-
-        return Promise.resolve(moduleData);
     }
 
-    startModule(moduleData) {
+    async startModule(moduleData) {
         if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('framework starting', moduleData.data);
         }
 
         // Start the framework.....
-        this.initializeModule(moduleData.data)
-            .then((param) => this.linkModule(param))
-            .then((param) => this.loadModule(param))
-            .then((param) => this.runModule(param))
-            .then((param) => this.reportModuleStarted(param));
+        await this.initializeModule(moduleData.data);
+        await this.linkModule(moduleData);
+        await this.loadModule(moduleData);
+        await this.runModule(moduleData);
+        await this.reportModuleStarted(moduleData);
     }
 
     unloadStep() {
-        if (sdFramework) {
-            return sdFramework.qExecOnUnloadModule()
+        if (this.sdFramework) {
+            return this.sdFramework.qExecOnUnloadModule()
                 .then(function () {
                     if (this.DEBUG_FRAMEWORK_CONNECTOR) {
                         console.info('sdFramework Stopped');
@@ -251,11 +243,6 @@ class ModuleInstance extends EventEmitter {
 
     // Attach a pre-load step to the Module loader
     async preLoadStep(newModule) {
-        try {
-            const flags = newModule.data.framework_flags;
-            this.DEBUG_FRAMEWORK_CONNECTOR = flags.debug_framework_connector;
-        } catch(err) {}
-
         if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('In PRE-LOAD STEP', newModule);
         }
@@ -286,16 +273,10 @@ class ModuleInstance extends EventEmitter {
         if (newModule.data.framework_options) {
             const device_selection = newModule.data.framework_options.device_selection;
             const device_selection_type = typeof(device_selection);
-            if(device_selection) {
+            if (device_selection || device_selection_type === 'undefined' || device_selection_type === 'null') {
                 framework_options.device_selection = true;
-            } else if (device_selection_type === 'undefined') {
-                framework_options.device_selection = true;
-            } else if (device_selection_type === 'null') {
-                framework_options.device_selection = true;
-            } else if (device_selection === false) {
-                framework_options.device_selection = false;
             } else {
-                framework_options.device_selection = true;
+                framework_options.device_selection = device_selection !== false;
             }
         }
         newModule.context.framework_options = framework_options;

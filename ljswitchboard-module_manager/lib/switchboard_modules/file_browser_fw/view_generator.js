@@ -249,12 +249,6 @@ var createFileBrowserViewGenerator = function() {
 		});
 	};
 
-	// This function.... not really needed??
-	this.saveDeviceControlFunctions = function(onConnect, onDisconnect) {
-		self.onConnect = onConnect;
-		self.onDisconnect = onDisconnect;
-	};
-
 	this.isFileListingDisplayed = false;
 	function innerDeclareFileListingDisplayed() {
 		self.isFileListingDisplayed = true;

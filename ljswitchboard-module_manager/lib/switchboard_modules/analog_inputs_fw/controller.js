@@ -26,6 +26,7 @@
  *  3. Accept input to change AINx_SETTLING_US
 **/
 const sprintf = require('sprintf-js').sprintf;
+const async = require('async');
 
 // Constant that determines device polling rate.
 var MODULE_UPDATE_PERIOD_MS = 1500;
@@ -1308,10 +1309,6 @@ function module() {
         compileTemplates(framework);
 
         // Enable framework-timing debugging
-        if(self.ENABLE_DEBUGGING) {
-            framework.enableLoopTimingAnalysis();
-            framework.enableLoopMonitorAnalysis();
-        }
         onSuccess();
     };
 

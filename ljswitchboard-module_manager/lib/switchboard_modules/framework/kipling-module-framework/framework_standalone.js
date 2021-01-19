@@ -27,7 +27,7 @@ function fireAndResolve(event, environment, resolve, reject) {
  *      to the presenter. Resolves to the environment.
 **/
 function prepareFramework (environment) {
-    environment.framework = new presenter_framework.Framework();
+    environment.framework = new presenter_framework.PresenterFramework();
     return Promise.resolve(environment);
 }
 

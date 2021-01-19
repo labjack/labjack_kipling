@@ -16,6 +16,7 @@ var MODULE_UPDATE_PERIOD_MS = 1000;
  * When using the 'singleDevice' framework it is instantiated as sdModule.
  */
 function module() {
+    console.log('ddddddddddddddddddddddddddddddddddddddddddddddd');
     this.MODULE_DEBUGGING = true;
     this.MODULE_LOADING_STATE_DEBUGGING = true;
     this.activeDevice = undefined;
@@ -343,6 +344,7 @@ function module() {
         var promises = [];
         var deviceTemplate;
         var continueFramework = function(template, missingData) {
+            console.log('continueFramework', template, missingData);
             var compiledData = '';
             var keys;
             var context = {'isPlatformWindows': process.platform==='win32'};
@@ -511,6 +513,7 @@ function module() {
             promises.push(getExtraOperation(device,'sReadMany', extraRegisters));
             promises.push(getExtraOperation(device,'getLatestDeviceErrors'));
         } else if(device.savedAttributes.deviceTypeName === 'T4') {
+            console.log('t44');
             deviceTemplate = handlebars.compile(
                 framework.moduleData.htmlFiles.t4_template
             );
@@ -758,6 +761,8 @@ function module() {
                 }
             });
             continueFramework(deviceTemplate, data);
+        }).catch(err => {
+            console.error(err);
         });
     };
 

@@ -27,9 +27,5 @@
     "third_party_code": [
             "customSpinners.js"
     ],
-    "a-third_party_code_unload":[],
-    "framework_flags": {
-        "debug_framework_connector": false,
-        "debug_framework": false
-    }
+    "a-third_party_code_unload":[]
 }

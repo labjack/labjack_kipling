@@ -939,20 +939,17 @@ var resetModuleStartupData = function(key) {
 exports.resetModuleStartupData = resetModuleStartupData;
 
 var revertModuleStartupData = function(moduleName) {
-	return new Promise((resolve, reject) => {
 	var moduleDataInitFilePath = path.normalize(path.join(
 		MODULES_DIR,
 		moduleName,
 		MODULE_INIT_PERSISTENT_DATA_FILE_NAME
 	));
 
-	cachedReadFile(moduleDataInitFilePath)
-	.then(parseJSONFile)
-	.then(function(initialData) {
-		saveModuleStartupData(moduleName, initialData)
-		.then(resolve);
-	});
-	});
+	return cachedReadFile(moduleDataInitFilePath)
+		.then(parseJSONFile)
+		.then((initialData) => {
+			return saveModuleStartupData(moduleName, initialData);
+		});
 };
 exports.revertModuleStartupData = revertModuleStartupData;
 
@@ -970,7 +967,6 @@ var clearCachedModuleStartupData = function(moduleName) {
 exports.clearCachedModuleStartupData = clearCachedModuleStartupData;
 
 var getModuleStartupData = function(moduleName) {
-	return new Promise((resolve, reject) => {
 	var moduleDataDir = path.normalize(path.join(
 		MODULES_PERSISTENT_DATA_PATH,
 		moduleName
@@ -981,17 +977,12 @@ var getModuleStartupData = function(moduleName) {
 	);
 
 	// Perform a cachedRead request for the file & parse it.
-	cachedReadFile(moduleDataFilePath)
-	.then(parseJSONFile)
-	.then(resolve);
-
-	});
+	return cachedReadFile(moduleDataFilePath)
+		.then(parseJSONFile);
 };
 exports.getModuleStartupData = getModuleStartupData;
 
 var saveModuleStartupData = function(moduleName, data) {
-	return new Promise((resolve, reject) => {
-
 	var dataManager = {
 		'dataManagerData': {},
 		'moduleName': moduleName,
@@ -1024,17 +1015,14 @@ var saveModuleStartupData = function(moduleName, data) {
 		return cachedReadFile(MODULES_PERSISTENT_DATA_FILE);
 	};
 
-	executeCachedReadFile()
-	.then(parseJSONFile)
-	.then(invalidateDesiredModule)
-	.then(writeAndValidateDataManagerFile)
-	.then(writeAndValidateModuleDataFile)
-	.then(validateDesiredModule)
-	.then(writeAndValidateDataManagerFile)
-	.then(returnModuleName, returnModuleName)
-	.then(resolve);
-
-	});
+	return executeCachedReadFile()
+		.then(parseJSONFile)
+		.then(invalidateDesiredModule)
+		.then(writeAndValidateDataManagerFile)
+		.then(writeAndValidateModuleDataFile)
+		.then(validateDesiredModule)
+		.then(writeAndValidateDataManagerFile)
+		.then(returnModuleName, returnModuleName)
 };
 exports.saveModuleStartupData = saveModuleStartupData;
 

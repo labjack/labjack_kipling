@@ -225,34 +225,30 @@ class ModuleLoader extends EventEmitter {
 		});
 	}
 
-	updateStatistics(newModule) {
-		return new Promise((resolve, reject) => {
+	async updateStatistics() {
 		this.stats.numLoaded += 1;
-		resolve(newModule);
-		});
 	}
 
 	addUnloadStep(func) {
 		this.unloadModuleFunctions.push(func);
 	}
 
-	executeUnloadModuleFunctions(moduleData) {
-		console.log('executeUnloadModuleFunctions', this.unloadModuleFunctions.length > 0);
+	async executeUnloadModuleFunctions() {
 		if (this.unloadModuleFunctions.length > 0) {
-			const promises = [];
-			for(let i = 0; i < this.unloadModuleFunctions.length; i++) {
+			const promises = this.unloadModuleFunctions; //.map(func => func());
+/*
+			for (let i = 0; i < this.unloadModuleFunctions.length; i++) {
 				promises.push(this.unloadModuleFunctions[i]());
 			}
-			return Promise.allSettled(promises)
-				.then((results) => {
-					this.unloadModuleFunctions = [];
-					return moduleData;
-				}, function(err) {
-					console.error('Finished unload-module steps', err);
-					return Promise.resolve(moduleData);
-				});
-		} else {
-			return Promise.resolve(moduleData);
+*/
+			console.log('executeUnloadModuleFunctions', this.unloadModuleFunctions.length > 0);
+			try {
+				await Promise.allSettled(promises);
+				this.unloadModuleFunctions = [];
+				console.log('executeUnloadModuleFunctions executed');
+			} catch (err) {
+				console.error('Finished unload-module steps', err);
+			}
 		}
 	}
 
@@ -285,22 +281,31 @@ class ModuleLoader extends EventEmitter {
 			.then(moduleData => this.getUpdatedDeviceListing(moduleData))
 			.then(moduleData => this.getModuleContext(moduleData))
 			.then(moduleData => this.loadHTMLFiles(moduleData))
-			.then(moduleData => this.updateStatistics(moduleData));
+			.then(moduleData => this.updateStatistics());
 	}
 
 	async loadModule(moduleObject) {
-		console.log('loadModule1', moduleObject.name);
-		const moduleData = await module_manager.loadModuleData(moduleObject);
-		console.log('loadModule2');
-		const moduleData2 = await this.executeUnloadModuleFunctions(moduleData);
-		console.log('loadModule3');
-		return await this.renderModule(moduleData2);
+		try {
+			console.log('loadModule1', moduleObject.name);
+			const moduleData = await module_manager.loadModuleData(moduleObject);
+			console.log('loadModule2');
+			await this.executeUnloadModuleFunctions(moduleData);
+			console.log('loadModule3');
+			await this.renderModule(moduleData);
+			console.log('loadModule4');
+		} catch (err) {
+			console.error('Error in loadModule', err);
+		}
 	}
 
-	loadModuleByName(moduleName) {
-		return module_manager.loadModuleDataByName(moduleName)
-			.then(moduleData => this.executeUnloadModuleFunctions(moduleData))
-			.then(moduleData => this.renderModule(moduleData));
+	async loadModuleByName(moduleName) {
+		console.log('loadModulebyname1', moduleName);
+		const moduleData = await module_manager.loadModuleDataByName(moduleName);
+		console.log('loadModulebyname2');
+		await this.executeUnloadModuleFunctions(moduleData);
+		console.log('loadModulebyname3');
+		await this.renderModule(moduleData);
+		console.log('loadModulebyname4');
 	}
 
 }

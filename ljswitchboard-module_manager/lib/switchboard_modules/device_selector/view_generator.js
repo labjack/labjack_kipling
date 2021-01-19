@@ -276,10 +276,6 @@ var createDeviceSelectorViewGenerator = function() {
 			}
 		});
 	};
-	this.saveDeviceControlFunctions = function(onConnect, onDisconnect) {
-		self.onConnect = onConnect;
-		self.onDisconnect = onDisconnect;
-	};
 	this.displayConnectingToDevice = function(openParams) {
 		var renderedData = self.directOpeningDeviceTemplate(openParams);
 		function hideElements() {
@@ -293,15 +289,6 @@ var createDeviceSelectorViewGenerator = function() {
 		.then(hideElements)
 		.then(elements.device_scan_status.slideDown);
 	};
-
-	this.displayDeviceConnectionError = function(error) {
-		var renderedData = self.deviceConnectionError();
-	};
-	// this.displayDirectConnectionResults = function(renderedData) {
-	// 	return elements.device_scan_results.fill(renderedData)
-	// 	.then(elements.device_scan_status.slideUp)
-	// 	.then(elements.device_scan_results.slideDown);
-	// };
 
 	this.displayScanInProgress = function() {
 		var renderedData = self.scanningForDevicesTemplate();

@@ -1,12 +1,11 @@
+'use strict';
+
 /* jshint undef: true, unused: true, undef: true */
 /* jshint strict: false */
 /* global global, require, console, handlebars, $ */
 /* global showAlert, showCriticalAlert, showInfoMessage */
 /* global TASK_LOADER */
 /* global KEYBOARD_EVENT_HANDLER */
-
-// Flags
-/* global DISABLE_AUTO_CLEAR_CONFIG_BINDINGS */
 
 /**
  * Event driven framework for easy module construction.
@@ -16,7 +15,6 @@
 **/
 
 const EventEmitter = require('events').EventEmitter;
-const util = require('util');
 const async = require('async');
 const sprintf = require('sprintf-js').sprintf;
 
@@ -34,6 +32,22 @@ const DEFAULT_REFRESH_RATE = 1000;
 const CONFIGURING_DEVICE_TARGET = '#sd-framework-configuring-device-display';
 const DEVICE_VIEW_TARGET = '#device-view';
 const CALLBACK_STRING_CONST = '-callback';
+
+function fixElectron(data) {
+    for (let k in data) {
+        let v = data[k];
+        if (v instanceof Map) { // Electron fix
+            const obj = {};
+            v.forEach((value, name) => {
+                obj[name] = fixElectron(value);
+            });
+            data[k] = obj;
+        } else if (typeof v === 'object') {
+            data[k] = fixElectron(v);
+        }
+    }
+    return data;
+}
 
 /**
  * Creates a new binding info object with the metadata copied from another.
@@ -58,10 +72,9 @@ const CALLBACK_STRING_CONST = '-callback';
  *      returned from this function.
  * @return {Object} New binding.
 **/
-function cloneBindingInfo (original, bindingClass, binding, template) {
-    var retVar = {};
-    try{
-        retVar = {
+function cloneBindingInfo(original, bindingClass, binding, template) {
+    try {
+        return {
             bindingClass: bindingClass,
             template: template,
             binding: binding,
@@ -76,11 +89,9 @@ function cloneBindingInfo (original, bindingClass, binding, template) {
         };
     } catch (err) {
         console.error('ERROR: ',err);
-        retVar = {};
+        return {};
     }
-    return retVar;
 }
-
 
 /**
  * Expands the LJMMM in the bindingClass, binding, and template names.
@@ -89,9 +100,9 @@ function cloneBindingInfo (original, bindingClass, binding, template) {
  * register on the device to bind from as well as a template attribute that
  * specifies the ID of the HTML element to bind to. So, binding AIN0 and
  * template analog-input-0 would bind the device register for AIN0 to
- * the HTML element with the id analog-input-0. This function will exapnd
+ * the HTML element with the id analog-input-0. This function will expand
  * LJMMM names found in either the template or binding attributes. Binding
- * AIN#(0:1) will exapnd to [AIN0, AIN1] and analog-input-#(0:1) will expand
+ * AIN#(0:1) will expand to [AIN0, AIN1] and analog-input-#(0:1) will expand
  * to [analog-input-0, analog-input-1].
  *
  * @param {Object} bindingInfo The object with info about the binding to
@@ -111,8 +122,8 @@ function expandBindingInfo (bindingInfo) {
         throw 'Unexpected ljmmm expansion mismatch.';
     }
 
-    var newBindingsInfo = [];
-    var numBindings = expandedBindings.length;
+    const newBindingsInfo = [];
+    const numBindings = expandedBindings.length;
     for (let i = 0; i < numBindings; i++) {
         const clone = cloneBindingInfo(
             bindingInfo,
@@ -127,9 +138,8 @@ function expandBindingInfo (bindingInfo) {
 }
 
 function cloneSetupBindingInfo (original, bindingClass, binding) {
-    var retVar = {};
-    try{
-        retVar = {
+    try {
+        return {
             bindingClass: bindingClass,
             binding: binding,
             direction: original.direction,
@@ -139,24 +149,23 @@ function cloneSetupBindingInfo (original, bindingClass, binding) {
         };
     } catch (err) {
         console.error('ERROR: ',err);
-        retVar = {};
+        return {};
     }
-    return retVar;
 }
 
 function expandSetupBindingInfo (bindingInfo) {
-    var expandedBindingClasses = ljmmm_parse.expandLJMMMName(bindingInfo.bindingClass);
-    var expandedBindings = ljmmm_parse.expandLJMMMName(bindingInfo.binding);
+    const expandedBindingClasses = ljmmm_parse.expandLJMMMName(bindingInfo.bindingClass);
+    const expandedBindings = ljmmm_parse.expandLJMMMName(bindingInfo.binding);
 
     if (expandedBindingClasses.length !== expandedBindings.length) {
         throw 'Unexpected ljmmm expansion mismatch.';
     }
 
-    var newBindingsInfo = [];
-    var numBindings = expandedBindings.length;
+    const newBindingsInfo = [];
+    const numBindings = expandedBindings.length;
 
     for (let i = 0; i < numBindings; i++) {
-        var clone = cloneSetupBindingInfo(
+        const clone = cloneSetupBindingInfo(
             bindingInfo,
             expandedBindingClasses[i],
             expandedBindings[i]
@@ -166,331 +175,257 @@ function expandSetupBindingInfo (bindingInfo) {
 
     return newBindingsInfo;
 }
-/**
- * Force a redraw on the rendering engine.
-**/
-function runRedraw()
-{
-    document.body.style.display='none';
-    var h = document.body.offsetHeight; // no need to store this anywhere, the reference is enough
-    document.body.style.display='block';
-}
-function qRunRedraw() {
-    runRedraw();
-    return Promise.resolve();
-}
 
 /**
  * Function to render device error data
 */
-function extrapolateDeviceErrorData(data) {
+function extrapolateDeviceErrorData(err) {
     // Get the error description (if it exists);
-    var description = modbus_map.getErrorInfo(data.code).description;
-    data.description = description;
+    err.description = modbus_map.getErrorInfo(err.code).description;
 
     // Format the "caller" information
-    var callInfo = [];
-    var callKeys = Object.keys(data.data);
-    callKeys.forEach(function(callKey) {
-        callInfo.push(
-            // '"' + callKey + '": ' + data.data[callKey].toString()
-            callKey + ': ' + JSON.stringify(data.data[callKey])
-        );
+    const callKeys = Object.keys(err.data);
+    const callInfo = callKeys.map((callKey) => {
+        return callKey + ': ' + JSON.stringify(err.data[callKey]);
     });
-    callInfo = callInfo.join(', ');
-    data.callInfo = callInfo;
-    return data;
+    err.callInfo = callInfo.join(', ');
+    return err;
 }
-
 
 /**
  * Object that manages the modules using the Kipling Module Framework.
 **/
-function Framework() {
+class PresenterFramework extends EventEmitter {
+    constructor() {
+        super();
 
-    // List of events that the framework handles
-    const defaultEntries = {
-        verifyStartupData: null,
-        onModuleLoaded: null,
-        onDevicesSelected: null,
-        onDeviceSelected: null,
-        onDevicesConfigured: null,
-        onDeviceConfigured: null,
-        onTemplateLoaded: null,
-        onTemplateDisplayed: null,
-        onRegisterWrite: null,
-        onRegisterWritten: null,
-        onRefresh: null,
-        onRefreshed: null,
-        onCloseDevice: null,
-        onUnloadModule: null,
-        onLoadError: null,
-        onWriteError: null,
-        onRefreshError: null
-    };
-    const eventListener = new Map();
-    for (const k in defaultEntries) {
-        eventListener.set(k, defaultEntries[k]);
+        // List of events that the framework handles
+        this.eventListener = new Map();
+        this.eventListener.set('verifyStartupData', null);
+        this.eventListener.set('onModuleLoaded', null);
+        this.eventListener.set('onDevicesSelected', null);
+        this.eventListener.set('onDeviceSelected', null);
+        this.eventListener.set('onDevicesConfigured', null);
+        this.eventListener.set('onDeviceConfigured', null);
+        this.eventListener.set('onTemplateLoaded', null);
+        this.eventListener.set('onTemplateDisplayed', null);
+        this.eventListener.set('onRegisterWrite', null);
+        this.eventListener.set('onRegisterWritten', null);
+        this.eventListener.set('onRefresh', null);
+        this.eventListener.set('onRefreshed', null);
+        this.eventListener.set('onCloseDevice', null);
+        this.eventListener.set('onUnloadModule', null);
+        this.eventListener.set('onLoadError', null);
+        this.eventListener.set('onWriteError', null);
+        this.eventListener.set('onRefreshError', null);
+
+        // io_manager object references.
+        const io_interface = io_manager.io_interface();
+
+        this.driver_controller = io_interface.getDriverController();
+        this.device_controller = io_interface.getDeviceController();
+
+        this.frameworkType = 'singleDevice';
+
+        // Framework Deletion constant
+        this.frameworkActive = true;
+
+        this.deviceSelectionListenersAttached = false;
+        this.jquery = null;
+        this.refreshRate = DEFAULT_REFRESH_RATE;
+        this.pausedRefreshRate = 100;
+        this.errorRefreshRate = 1000;
+        this.configControls = [];
+
+        this.bindings = new Map();
+        this.readBindings = new Map();
+        this.writeBindings = new Map();
+        this.smartBindings = new Map();
+
+        this.setupBindings = new Map();
+        this.readSetupBindings = new Map();
+        this.writeSetupBindings = new Map();
+
+        this.activeDevices = [];
+        this.activeDevice = undefined;
+        this.selectedDevices = [];
+        this.deviceErrorLog = {};
+        this.runLoop = false;
+        this.userViewFile = '';
+        this.moduleTemplateBindings = new Map();
+        this.moduleTemplateSetupBindings = {};
+        this.moduleName = '';
+        this.moduleJsonFiles = [];
+        this.moduleInfoObj = undefined;
+        this.moduleConstants = undefined;
+        this.module = module;
+        this.moduleData = undefined;
+        this.deviceErrorCompiledTemplate = undefined;
+        this.printableDeviceErrorCompiledTemplate = undefined;
+        this.uniqueTabID = '';
+
+        //Constants for auto-debugging on slow DAQ loops
+        const moduleStartTimeObj = new Date();
+        this.iterationTime = moduleStartTimeObj.valueOf();
+        this.ljmDriverLogEnabled = false;
+        this.sdFrameworkDebug = true;
+        this.sdFrameworkDebugLoopErrors = true;
+        this.sdFrameworkDebugTiming = true;
+        this.sdFrameworkDebugDAQLoopMonitor = true;
+        this.sdFrameworkDebugDAQLoopMonitorInfo = true;
+        this.numContinuousRegLoopIterations = 0;
+        this.loopErrorEncountered = false;
+        this.loopErrors = [];
+        this.daqLoopFinished = false;
+        this.daqLoopMonitorTimer = null;
+        this.daqLoopStatus = 'un-initialized';
+
+        this.pauseDAQLoop = false;
+        this.isDAQLoopPaused = false;
+
+        this.allowModuleExecution = true;
+        this.isModuleLoaded = false;
+        this.isDeviceOpen = false;
+
+        this.startupData = undefined;
+        this.isStartupDataValid = false;
+
+        this.DEBUG_STARTUP_DATA = false;
+        this.deviceErrorControls = {};
+        this.isDAQLoopActive = false;
+        this.frameworkLoopProcessing = false;
+        this.frameworkLoopReference = undefined;
+        this.numModuleReloads = 0;
+        this.currentModuleName = '';
     }
 
-    // io_manager object references.
-    var io_interface = io_manager.io_interface();
-    var driver_controller = io_interface.getDriverController();
-    var device_controller = io_interface.getDeviceController();
-
-    this.driver_controller = driver_controller;
-    this.device_controller = device_controller;
-
-    var frameworkType = 'singleDevice';
-    this.frameworkType = frameworkType;
-
-    var deviceSelectionListenersAttached = false;
-    var jquery = null;
-    var refreshRate = DEFAULT_REFRESH_RATE;
-    var pausedRefreshRate = 100;
-    var errorRefreshRate = 1000; // Default to 1sec
-    var connectedDevicesRefreshRate = 1000;
-    var configControls = [];
-
-    var bindings = new Map();
-    var readBindings = new Map();
-    var writeBindings = new Map();
-    var smartBindings = new Map();
-
-    var setupBindings = new Map();
-    var readSetupBindings = new Map();
-    var writeSetupBindings = new Map();
-
-    var activeDevices = [];
-    var selectedDevices = [];
-    var activeDevice;
-    var deviceErrorLog = {};
-    var userViewFile = '';
-    var moduleTemplateBindings = {};
-    var moduleTemplateSetupBindings = {};
-    var moduleJsonFiles = [];
-    var moduleInfoObj;
-    var moduleConstants;
-    var module;
-    var moduleData;
-    var deviceErrorCompiledTemplate;
-    var printableDeviceErrorCompiledTemplate;
-
-    //Constants for auto-debugging on slow DAQ loops
-    var iterationTime;
-    var ljmDriverLogEnabled = false;
-
-    // Framework Deletion constant
-    this.frameworkActive = true;
-
-    this.deviceSelectionListenersAttached = deviceSelectionListenersAttached;
-    this.jquery = jquery;
-    this.refreshRate = refreshRate;
-    this.pausedRefreshRate = pausedRefreshRate;
-    this.errorRefreshRate = errorRefreshRate;
-    this.connectedDevicesRefreshRate = connectedDevicesRefreshRate;
-    this.configControls = configControls;
-
-    this.bindings = bindings;
-    this.readBindings = readBindings;
-    this.writeBindings = writeBindings;
-    this.smartBindings = smartBindings;
-
-    this.setupBindings = setupBindings;
-    this.readSetupBindings = readSetupBindings;
-    this.writeSetupBindings = writeSetupBindings;
-
-    this.activeDevices = activeDevices;
-    this.activeDevice = activeDevice;
-    this.selectedDevices = selectedDevices;
-    this.deviceErrorLog = deviceErrorLog;
-    this.runLoop = false;
-    this.userViewFile = userViewFile;
-    this.moduleTemplateBindings = moduleTemplateBindings;
-    this.moduleTemplateSetupBindings = moduleTemplateSetupBindings;
-    this.moduleName = '';
-    this.moduleJsonFiles = moduleJsonFiles;
-    this.moduleInfoObj = moduleInfoObj;
-    this.moduleConstants = moduleConstants;
-    this.module = module;
-    this.moduleData = moduleData;
-    this.flags = {
-        'debug_startup': false,
-    };
-    this.deviceErrorCompiledTemplate = deviceErrorCompiledTemplate;
-    this.printableDeviceErrorCompiledTemplate = printableDeviceErrorCompiledTemplate;
-    this.uniqueTabID = '';
-
-    //Constants for auto-debugging on slow DAQ loops
-    const moduleStartTimeObj = new Date();
-    this.iterationTime = iterationTime;
-    this.iterationTime = moduleStartTimeObj.valueOf();
-    this.ljmDriverLogEnabled = ljmDriverLogEnabled;
-    this.sdFrameworkDebug = true;
-    this.sdFrameworkDebugLoopErrors = true;
-    this.sdFrameworkDebugTiming = true;
-    this.sdFrameworkDebugDAQLoopMonitor = true;
-    this.sdFrameworkDebugDAQLoopMonitorInfo = true;
-    this.numContinuousRegLoopIterations = 0;
-    this.loopErrorEncountered = false;
-    this.loopErrors = [];
-    this.daqLoopFinished = false;
-    this.daqLoopMonitorTimer = null;
-    this.daqLoopStatus = 'un-initialized';
-
-    this.pauseDAQLoop = false;
-    this.isDAQLoopPaused = false;
-    this.hasNotifiedUserOfPause = false;
-
-    this.allowModuleExecution = true;
-    this.isModuleLoaded = false;
-    this.isDeviceOpen = false;
-
-    this.startupData = undefined;
-    this.isStartupDataValid = false;
-
-    this.DEBUG_STARTUP_DATA = false;
-    const self = this;
-    this.reportSyntaxError = function(location, err) {
+    reportSyntaxError(location, err) {
         console.error('Error in:', location);
         console.error('Error obj', err);
         showCriticalAlert(err.toString());
-    };
-    this.enableLoopTimingAnalysis = function() {
-        self.sdFrameworkDebugTiming = true;
-    };
-    this.enableLoopMonitorAnalysis = function() {
-        self.sdFrameworkDebugDAQLoopMonitor = true;
-    };
-    this.print = function(functionName,info,errName) {
-        if(typeof(errName) === 'undefined') {
+    }
+
+    print(functionName,info,errName) {
+        if (typeof(errName) === 'undefined') {
             errName = 'sdFrameworkDebug';
         }
-        if(self.sdFrameworkDebug) {
-            var fnDefined = (typeof(functionName) !== 'undefined');
-            var infoDefined = (typeof(info) !== 'undefined');
-            if(fnDefined && infoDefined) {
-                console.log(errName,self.moduleName,functionName,info);
+        if (this.sdFrameworkDebug) {
+            const fnDefined = (typeof(functionName) !== 'undefined');
+            const infoDefined = (typeof(info) !== 'undefined');
+            if (fnDefined && infoDefined) {
+                console.log(errName,this.moduleName,functionName,info);
             } else if (!fnDefined && infoDefined) {
-                console.log(errName,self.moduleName,info);
+                console.log(errName,this.moduleName,info);
             } else if (fnDefined && !infoDefined) {
-                console.log(errName,self.moduleName,functionName);
+                console.log(errName,this.moduleName,functionName);
             } else {
-                console.log(errName,self.moduleName);
+                console.log(errName,this.moduleName);
             }
 
         }
-    };
-    this.printDAQLoopInfo = function(functionName,info) {
-        if(self.sdFrameworkDebugDAQLoopMonitor) {
-            self.print(functionName,info,'sdFrameworkDebugDAQLoopInfo');
-        }
-    };
-    this.printDAQLoopMonitorInfo = function(functionName,info) {
-        if(self.sdFrameworkDebugDAQLoopMonitorInfo) {
-            self.print(functionName,info,'sdFrameworkDebugDAQLoopMonitorInfo');
-        }
-    };
-    this.printTimingInfo = function(functionName,info) {
-        if(self.sdFrameworkDebugTiming) {
-            self.print(functionName,info,'sdFrameworkDebugTiming');
-        }
-    };
-    this.printLoopErrors = function(functionName,info) {
-        if(self.sdFrameworkDebugLoopErrors) {
-            self.print(functionName,info,'sdFrameworkDebugLoopErrors');
-        }
-    };
-    this.setStartupMessage = function(message) {
-        var idString = '#single-device-framework-loading-message';
-        $(idString).text(message);
-    };
-    this._SetJQuery = function(newJQuery) {
-        jquery = newJQuery;
-        this.jquery = newJQuery;
-    };
+    }
 
-    this._SetSelectedDevices = function(newSelectedDevices) {
-        // Initialize the selectedDevices arra
-        selectedDevices = [];
-        newSelectedDevices.forEach(function(device) {
-            var savedAttributes = device.savedAttributes;
-            if(savedAttributes['isSelected-CheckBox']) {
-                selectedDevices.push(device);
+    printDAQLoopInfo(functionName,info) {
+        if (this.sdFrameworkDebugDAQLoopMonitor) {
+            this.print(functionName,info,'sdFrameworkDebugDAQLoopInfo');
+        }
+    }
+
+    printDAQLoopMonitorInfo(functionName,info) {
+        if (this.sdFrameworkDebugDAQLoopMonitorInfo) {
+            this.print(functionName,info,'sdFrameworkDebugDAQLoopMonitorInfo');
+        }
+    }
+
+    printTimingInfo(functionName,info) {
+        if (this.sdFrameworkDebugTiming) {
+            this.print(functionName,info,'sdFrameworkDebugTiming');
+        }
+    }
+
+    printLoopErrors(functionName,info) {
+        if (this.sdFrameworkDebugLoopErrors) {
+            this.print(functionName,info,'sdFrameworkDebugLoopErrors');
+        }
+    }
+
+    setStartupMessage(message) {
+        $('#single-device-framework-loading-message').text(message);
+    }
+
+    _SetJQuery(newJQuery) {
+        this.jquery = newJQuery;
+    }
+
+    _SetSelectedDevices(newSelectedDevices) {
+        // Initialize the selectedDevices array
+        this.selectedDevices = [];
+        newSelectedDevices.forEach((device) => {
+            const savedAttributes = device.savedAttributes;
+            if (savedAttributes['isSelected-CheckBox']) {
+                this.selectedDevices.push(device);
             }
         });
+    }
 
-        self.selectedDevices = selectedDevices;
-    };
-
-    var getConnectedDeviceInfoJquerySelector = function(serialNumber, extra) {
-        var selector = [
-            '.SERIAL_NUMBER_' + serialNumber.toString(),
-        ].join(' ');
-        if(extra) {
-            if(Array.isArray(extra)) {
-                var extraData = extra.join(' ');
-                selector += ' '+ extraData;
-            } else {
-                selector += ' '+ extra;
-            }
+    getConnectedDeviceInfoJquerySelector(serialNumber, extra) {
+        let selector = '.SERIAL_NUMBER_' + serialNumber.toString();
+        if (extra) {
+            selector += ' '+ extra;
         }
         return selector;
-    };
-    var getDeviceErrorJquerySelector = function(serialNumber, extra) {
-        let selector = getConnectedDeviceInfoJquerySelector(
+    }
+
+    getDeviceErrorJquerySelector(serialNumber, extra) {
+        let selector = this.getConnectedDeviceInfoJquerySelector(
             serialNumber,
             '.device-selector-table-status'
         );
 
         if (extra) {
-            if(Array.isArray(extra)) {
-                const extraData = extra.join(' ');
-                selector += ' '+ extraData;
-            } else {
-                selector += ' '+ extra;
-            }
+            selector += ' '+ extra;
         }
         return selector;
-    };
-    this.getDeviceErrorElements = function(serialNumber) {
-        var elements = {};
+    }
+
+    buildDeviceErrorControls(serialNumber) {
+        const elements = {};
         elements.statusIcon = undefined;
 
-        var deviceInfoSelector = getConnectedDeviceInfoJquerySelector(
+        const deviceInfoSelector = this.getConnectedDeviceInfoJquerySelector(
             serialNumber
         );
-        var statusIconSelector = getConnectedDeviceInfoJquerySelector(
+        const statusIconSelector = this.getConnectedDeviceInfoJquerySelector(
             serialNumber,
-            ['.connection-status-icon']
+            '.connection-status-icon'
         );
-        var messagesSelector = getDeviceErrorJquerySelector(
+        const messagesSelector = this.getDeviceErrorJquerySelector(
             serialNumber,
-            ['.dropdown-menu-errors']
+            '.dropdown-menu-errors'
         );
-        var clearMessagesButtonSelector = getDeviceErrorJquerySelector(
+        const clearMessagesButtonSelector = this.getDeviceErrorJquerySelector(
             serialNumber,
-            ['.clear-error-messages']
+            '.clear-error-messages'
         );
-        var copyMessagesButtonSelector = getDeviceErrorJquerySelector(
+        const copyMessagesButtonSelector = this.getDeviceErrorJquerySelector(
             serialNumber,
-            ['.copy-to-clipboard']
+            '.copy-to-clipboard'
         );
-        var deviceVersionNumberSelector = getConnectedDeviceInfoJquerySelector(
+        const deviceVersionNumberSelector = this.getConnectedDeviceInfoJquerySelector(
             serialNumber,
-            ['.device-firmware-version-holder']
+            '.device-firmware-version-holder'
         );
-        var deviceNameSelector = getConnectedDeviceInfoJquerySelector(
+        const deviceNameSelector = this.getConnectedDeviceInfoJquerySelector(
             serialNumber,
-            ['.device-name-holder']
+            '.device-name-holder'
         );
 
         elements.deviceInfo = $(deviceInfoSelector);
         elements.statusIcon = $(statusIconSelector);
 
-        elements.badge = $(getDeviceErrorJquerySelector(
+        elements.badge = $(this.getDeviceErrorJquerySelector(
             serialNumber,
-            ['.module-chrome-tab-badge', '.badge']
+            '.module-chrome-tab-badge .badge'
         ));
         elements.messagesSelector = $(messagesSelector);
         elements.clearErrorsButton = $(clearMessagesButtonSelector);
@@ -498,54 +433,44 @@ function Framework() {
         elements.firmwareVersion = $(deviceVersionNumberSelector);
         elements.deviceName = $(deviceNameSelector);
 
-        return elements;
-    };
-
-    this.deviceErrorControls = {};
-    var buildDeviceErrorControls = function(serialNumber) {
-        var elements = self.getDeviceErrorElements(serialNumber);
-
-        var isFlashing = false;
-        var flashBadge = function() {
-            if(!isFlashing) {
+        let isFlashing = false;
+        const flashBadge = () => {
+            if (!isFlashing) {
                 isFlashing = true;
                 elements.badge.addClass('badge-important');
-                setTimeout(function() {
+                setTimeout(() => {
                     elements.badge.removeClass('badge-important');
                     isFlashing = false;
                 }, 500);
             }
         };
-        var saveMessage = function(message) {
-            var currentMessages = elements.messagesSelector.find('.error-message');
-            var numMessages = currentMessages.length;
-            var numErrors = 0;
-            var badgeText = elements.badge.text();
-            if(isNaN(badgeText)) {
-                numErrors = 0;
-            } else {
+        const saveMessage = (message) => {
+            let currentMessages = elements.messagesSelector.find('.error-message');
+            let numMessages = currentMessages.length;
+            let numErrors = 0;
+            const badgeText = elements.badge.text();
+            if (!isNaN(badgeText)) {
                 numErrors = parseInt(badgeText);
             }
-            if(numErrors === 0) {
-                // If there were n
+            if (numErrors === 0) {
+                // If there were no errors
                 elements.messagesSelector.find('.error-message').remove();
                 currentMessages = elements.messagesSelector.find('.error-message');
                 numMessages = currentMessages.length;
             }
 
-            var newItem = '<li class="error-message">' + message.toString() + '</li>';
-            // if(numMessages < 2) {
+            const newItem = '<li class="error-message">' + message.toString() + '</li>';
+            // if (numMessages < 2) {
             //     elements.messagesSelector.css('height','inherit');
             // } else {
             //     elements.messagesSelector.css('height','200px');
             // }
-            if(numMessages < 5) {
+            if (numMessages < 5) {
                 // Simply add the message to the top of the list
                 elements.messagesSelector.prepend(newItem);
-                numMessages += 1;
             } else {
                 // Remove the bottom messages (fixes any previous over-5 limits)
-                for(var i = 4; i < numMessages; i++) {
+                for (let i = 4; i < numMessages; i++) {
                     currentMessages.eq(i).remove();
                 }
                 // Add the new message
@@ -554,69 +479,68 @@ function Framework() {
 
             // Update the num-messages badge.
             numErrors += 1;
-            var numText = numErrors.toString();
-            elements.badge.text(numText);
+            elements.badge.text(numErrors.toString());
             flashBadge();
         };
-        var saveMessages = function(messages) {
+        const saveMessages = (messages) => {
             messages.forEach(saveMessage);
         };
-        var clearMessages = function() {
+        const clearMessages = () => {
             elements.messagesSelector.find('.error-message').remove();
-            var newItem = '<li class="error-message">No Errors</li>';
+            const newItem = '<li class="error-message">No Errors</li>';
             // elements.messagesSelector.css('height','inherit');
             elements.messagesSelector.prepend(newItem);
             elements.badge.text('0');
-            self.device_controller.getDevice({'serialNumber': serialNumber})
-            .then(function(device) {
+            this.device_controller.getDevice({'serialNumber': serialNumber})
+            .then((device) => {
                 device.clearDeviceErrors();
             });
         };
-        var copyErrorDataToClipboard = function(errorData) {
+        const copyErrorDataToClipboard = (errorData) => {
             try {
-                var errorsArray = [];
-                errorData.errors.forEach(function(err, i) {
-                    var extrapolatedData = extrapolateDeviceErrorData(err);
+                const errorsArray = [];
+                errorData.errors.forEach((err, i) => {
+                    const extrapolatedData = extrapolateDeviceErrorData(err);
                     extrapolatedData.errNum = i + 1;
                     errorsArray.push(extrapolatedData);
                 });
                 errorData.errors = errorsArray;
-                var outputText = self.printableDeviceErrorCompiledTemplate(
+                const outputText = this.printableDeviceErrorCompiledTemplate(
                     errorData
                 );
-                var clipboard = gui.Clipboard.get();
+                const clipboard = gui.Clipboard.get();
                 clipboard.set(outputText, 'text');
             } catch(err) {
                 console.error('Error Copying data to clipboard', err);
             }
         };
-        var controls = {
+        this.deviceErrorControls[serialNumber] = {
             'saveMessage': saveMessage,
             'saveMessages': saveMessages,
             'clearMessages': clearMessages,
-            'setMessages': function(messages) {
-                 // Empty the current list of messages
+            'setMessages': (messages) => {
+                // Empty the current list of messages
                 clearMessages();
 
                 // Set the number of events displayed on the badge
-                var num = messages.length;
-                var numText = num.toString();
+                const num = messages.length;
+                const numText = num.toString();
                 elements.badge.text(numText);
 
-                var items = [];
-                messages.forEach(function(message) {
+                const items = [];
+                messages.forEach((message) => {
                     items.push('<li class="error-message">' + message.toString() + '</li>');
                 });
 
-                items.forEach(function(item) {
+                items.forEach((item) => {
                     elements.messagesSelector.prepend(item);
                 });
 
                 flashBadge();
             },
             'flashBadge': flashBadge,
-            'updateConnectionStatus': function(isConnected) {
-                if(isConnected) {
+            'updateConnectionStatus': (isConnected) => {
+                if (isConnected) {
                     elements.deviceInfo.removeClass('text-error');
                     elements.statusIcon.hide();
                 } else {
@@ -624,16 +548,16 @@ function Framework() {
                     elements.statusIcon.show();
                 }
             },
-            'updateSharingStatus': function(isShared, data) {
+            'updateSharingStatus': (isShared, data) => {
                 console.log('in presenter_framework updateSharingStatus', isShared, data);
-                var pt = data.attrs.productType;
-                var sn = data.attrs.serialNumber.toString();
-                var appName = data.attrs.sharedAppName;
-                var msg = '';
-                if(isShared) {
+                const pt = data.attrs.productType;
+                const sn = data.attrs.serialNumber.toString();
+                const appName = data.attrs.sharedAppName;
+                let msg = '';
+                if (isShared) {
                     msg = 'The ' + pt + ' with the SN: ' + sn;
-                    msg += ' has been opened in ' + appName +'.';
-                    // if(isConnected) {
+                    msg += ' has been opened in ' + appName + '.';
+                    // if (isConnected) {
                     msg += '  Please exit ' + appName + ' to continue using the device.';
                     // }
                 } else {
@@ -642,21 +566,21 @@ function Framework() {
                 }
                 showInfoMessage(msg);
             },
-            'copyErrors': function() {
-                self.device_controller.getDevice({'serialNumber': serialNumber})
-                .then(function(device) {
-                    device.getLatestDeviceErrors()
-                    .then(copyErrorDataToClipboard);
-                });
+            'copyErrors': () => {
+                this.device_controller.getDevice({'serialNumber': serialNumber})
+                    .then((device) => {
+                        device.getLatestDeviceErrors()
+                            .then(copyErrorDataToClipboard);
+                    });
             },
-            'setDeviceFirmwareVersion': function(newVersion) {
+            'setDeviceFirmwareVersion': (newVersion) => {
                 elements.firmwareVersion.text(newVersion);
                 elements.firmwareVersion.attr(
                     'title',
                     'Device Name (' + newVersion + ')'
                 );
             },
-            'setDeviceName': function(newName) {
+            'setDeviceName': (newName) => {
                 elements.deviceName.text(newName);
                 elements.deviceName.attr(
                     'title',
@@ -665,70 +589,70 @@ function Framework() {
             },
             'elements': elements
         };
-        self.deviceErrorControls[serialNumber] = controls;
-    };
+    }
 
-    function deviceReleasedEventListener(data) {
+    deviceReleasedEventListener(data) {
         // Device has been shared to an external application.
         console.warn('in deviceReleasedEventListener', data);
-        self.emit('FRAMEWORK_HANDLED_DEVICE_RELEASED', data);
-        if(data.attrs.serialNumber) {
-            var sn = data.attrs.serialNumber;
-            if(self.deviceErrorControls[sn]) {
+        this.emit('FRAMEWORK_HANDLED_DEVICE_RELEASED', data);
+        if (data.attrs.serialNumber) {
+            const sn = data.attrs.serialNumber;
+            if (this.deviceErrorControls[sn]) {
                 // Indicate that the device is no longer connected
-                self.deviceErrorControls[sn].updateSharingStatus(true, data);
+                this.deviceErrorControls[sn].updateSharingStatus(true, data);
             }
         }
     }
-    function deviceAcquiredEventListener(data) {
+
+    deviceAcquiredEventListener(data) {
         // Device released from the external application.
         console.warn('in deviceAcquiredEventListener', data);
-        self.emit('FRAMEWORK_HANDLED_DEVICE_ACQUIRED', data);
-        if(data.attrs.serialNumber) {
-            var sn = data.attrs.serialNumber;
-            if(self.deviceErrorControls[sn]) {
+        this.emit('FRAMEWORK_HANDLED_DEVICE_ACQUIRED', data);
+        if (data.attrs.serialNumber) {
+            const sn = data.attrs.serialNumber;
+            if (this.deviceErrorControls[sn]) {
                 // Indicate that the device is no longer connected
-                self.deviceErrorControls[sn].updateSharingStatus(false, data);
+                this.deviceErrorControls[sn].updateSharingStatus(false, data);
             }
         }
     }
-    function deviceDisconnectedEventListener(data) {
+    deviceDisconnectedEventListener(data) {
         // console.warn('Device Disconnected', data);
-        self.emit('FRAMEWORK_HANDLED_DEVICE_DISCONNECTED', data);
-        if(data.serialNumber) {
-            var sn = data.serialNumber;
-            if(self.deviceErrorControls[sn]) {
+        this.emit('FRAMEWORK_HANDLED_DEVICE_DISCONNECTED', data);
+        if (data.serialNumber) {
+            const sn = data.serialNumber;
+            if (this.deviceErrorControls[sn]) {
                 // Indicate that the device is no longer connected
-                self.deviceErrorControls[sn].updateConnectionStatus(false);
+                this.deviceErrorControls[sn].updateConnectionStatus(false);
             }
         }
     }
 
-    function deviceReconnectedEventListener(data) {
+    deviceReconnectedEventListener(data) {
         // console.warn('Device Reconnected', data);
-        self.emit('FRAMEWORK_HANDLED_DEVICE_RECONNECTED', data);
-        if(data.serialNumber) {
-            var sn = data.serialNumber;
-            if(self.deviceErrorControls[sn]) {
+        this.emit('FRAMEWORK_HANDLED_DEVICE_RECONNECTED', data);
+        if (data.serialNumber) {
+            const sn = data.serialNumber;
+            if (this.deviceErrorControls[sn]) {
                 // Indicate that the device is connected
-                self.deviceErrorControls[sn].updateConnectionStatus(true);
+                this.deviceErrorControls[sn].updateConnectionStatus(true);
             }
         }
     }
 
-    function deviceErrorEventListener(data) {
+    deviceErrorEventListener(data) {
         // console.warn('Device Error', data);
         try {
-            self.emit('FRAMEWORK_HANDLED_DEVICE_ERROR', data);
-            if(data.deviceInfo) {
-                var sn = data.deviceInfo.serialNumber;
-                if(self.deviceErrorControls[sn]) {
+            this.emit('FRAMEWORK_HANDLED_DEVICE_ERROR', data);
+            if (data.deviceInfo) {
+                const sn = data.deviceInfo.serialNumber;
+                if (this.deviceErrorControls[sn]) {
                     // Expand on & compile the error message data
-                    var compiledMessage = self.deviceErrorCompiledTemplate(
+                    const compiledMessage = this.deviceErrorCompiledTemplate(
                         extrapolateDeviceErrorData(data)
                     );
                     // Display the error message
-                    self.deviceErrorControls[sn].saveMessage(compiledMessage);
+                    this.deviceErrorControls[sn].saveMessage(compiledMessage);
                 }
             }
         } catch(err) {
@@ -736,145 +660,146 @@ function Framework() {
         }
     }
 
-    function deviceReconnectingEventListener(data) {
+    deviceReconnectingEventListener(data) {
         console.warn('Device Reconnecting', data);
         try {
-            if(data.serialNumber) {
-                var sn = data.serialNumber;
-                if(self.deviceErrorControls[sn]) {
+            if (data.serialNumber) {
+                const sn = data.serialNumber;
+                if (this.deviceErrorControls[sn]) {
                     // Flash the device error badge
                     // console.log('Flashing badge');
-                    self.deviceErrorControls[sn].flashBadge();
+                    this.deviceErrorControls[sn].flashBadge();
                 }
             }
         } catch(err) {
             console.error('Error Handling Reconnecting message', err);
         }
     }
-    function deviceAttributesChangedEventListener(data) {
+
+    deviceAttributesChangedEventListener(data) {
         try {
             console.log('in DEVICE_ATTRIBUTES_CHANGED event', data);
-            if(data.serialNumber) {
-                var sn = data.serialNumber;
-                if(self.deviceErrorControls[sn]) {
+            if (data.serialNumber) {
+                const sn = data.serialNumber;
+                if (this.deviceErrorControls[sn]) {
                     // Update the displayed device name
-                    var newName = data.DEVICE_NAME_DEFAULT;
-                    self.deviceErrorControls[sn].setDeviceName(newName);
+                    const newName = data.DEVICE_NAME_DEFAULT;
+                    this.deviceErrorControls[sn].setDeviceName(newName);
 
                     // Update the displayed firmware version
-                    var newFirmwareVersion = data.FIRMWARE_VERSION;
-                    self.deviceErrorControls[sn].setDeviceFirmwareVersion(
+                    const newFirmwareVersion = data.FIRMWARE_VERSION;
+                    this.deviceErrorControls[sn].setDeviceFirmwareVersion(
                         newFirmwareVersion
                     );
                 }
             }
 
             // Relay-information to the device_updater_service
-            var device_updater_service = TASK_LOADER.tasks.device_updater_service;
-            var deviceUpdaterService = device_updater_service.deviceUpdaterService;
-            var newData = self.activeDevices.map(function(dev) {
+            const device_updater_service = TASK_LOADER.tasks.device_updater_service;
+            const deviceUpdaterService = device_updater_service.deviceUpdaterService;
+            const newData = this.activeDevices.map((dev) => {
                 return dev.savedAttributes;
             });
             deviceUpdaterService.updatedDeviceList(newData);
         } catch(err) {
             console.error('Error Handling Device Attributes changed message', err);
         }
-    };
-    var attachDeviceStatusListeners = function() {
-        self.activeDevices.forEach(function(device) {
-            device.on('DEVICE_DISCONNECTED', deviceDisconnectedEventListener);
-            device.on('DEVICE_RECONNECTED', deviceReconnectedEventListener);
-            device.on('DEVICE_ERROR', deviceErrorEventListener);
-            device.on('DEVICE_RECONNECTING', deviceReconnectingEventListener);
-            device.on('DEVICE_ATTRIBUTES_CHANGED', deviceAttributesChangedEventListener);
-            device.on('DEVICE_RELEASED', deviceReleasedEventListener);
-            device.on('DEVICE_ACQUIRED', deviceAcquiredEventListener);
+    }
+
+    attachDeviceStatusListeners() {
+        for (const device of this.activeDevices) {
+            device.on('DEVICE_DISCONNECTED', data => this.deviceDisconnectedEventListener(data));
+            device.on('DEVICE_RECONNECTED', data => this.deviceReconnectedEventListener(data));
+            device.on('DEVICE_ERROR', data => this.deviceErrorEventListener(data));
+            device.on('DEVICE_RECONNECTING', data => this.deviceReconnectingEventListener(data));
+            device.on('DEVICE_ATTRIBUTES_CHANGED', data => this.deviceAttributesChangedEventListener(data));
+            device.on('DEVICE_RELEASED', data => this.deviceReleasedEventListener(data));
+            device.on('DEVICE_ACQUIRED', data => this.deviceAcquiredEventListener(data));
 
             // Attach to the "clear errors" button handlers
-            var sn = device.savedAttributes.serialNumber;
-            self.deviceErrorControls[sn].elements.clearErrorsButton.on(
+            const sn = device.savedAttributes.serialNumber;
+            this.deviceErrorControls[sn].elements.clearErrorsButton.on(
                 'click',
-                self.deviceErrorControls[sn].clearMessages
+                this.deviceErrorControls[sn].clearMessages
             );
 
             // Attach to the "copy errors" button handlers
-            self.deviceErrorControls[sn].elements.copyMessagesButtonSelector.on(
+            this.deviceErrorControls[sn].elements.copyMessagesButtonSelector.on(
                 'click',
-                self.deviceErrorControls[sn].copyErrors
+                this.deviceErrorControls[sn].copyErrors
             );
-        });
-    };
-    var detachDeviceStatusListeners = function() {
+        }
+    }
+    
+    detachDeviceStatusListeners() {
+        console.trace();
         console.log('detachDeviceStatusListeners');
-        self.activeDevices.forEach(function(device) {
-            device.removeListener('DEVICE_DISCONNECTED', deviceDisconnectedEventListener);
-            device.removeListener('DEVICE_RECONNECTED', deviceReconnectedEventListener);
-            device.removeListener('DEVICE_ERROR', deviceErrorEventListener);
-            device.removeListener('DEVICE_RECONNECTING', deviceReconnectingEventListener);
-            device.removeListener('DEVICE_ATTRIBUTES_CHANGED', deviceAttributesChangedEventListener);
-            device.removeListener('DEVICE_RELEASED', deviceReleasedEventListener);
-            device.removeListener('DEVICE_ACQUIRED', deviceAcquiredEventListener);
+        for (const device of this.activeDevices) {
+            device.removeListener('DEVICE_DISCONNECTED', data => this.deviceDisconnectedEventListener(data));
+            device.removeListener('DEVICE_RECONNECTED', data => this.deviceReconnectedEventListener(data));
+            device.removeListener('DEVICE_ERROR', data => this.deviceErrorEventListener(data));
+            device.removeListener('DEVICE_RECONNECTING', data => this.deviceReconnectingEventListener(data));
+            device.removeListener('DEVICE_ATTRIBUTES_CHANGED', data => this.deviceAttributesChangedEventListener(data));
+            device.removeListener('DEVICE_RELEASED', data => this.deviceReleasedEventListener(data));
+            device.removeListener('DEVICE_ACQUIRED', data => this.deviceAcquiredEventListener(data));
 
             // Turn off "clear errors" button click handlers
-            var sn = device.savedAttributes.serialNumber;
-            self.deviceErrorControls[sn].elements.copyMessagesButtonSelector.off(
+            const sn = device.savedAttributes.serialNumber;
+            this.deviceErrorControls[sn].elements.copyMessagesButtonSelector.off(
                 'click'
             );
-            self.deviceErrorControls[sn].elements.clearErrorsButton.off(
+            this.deviceErrorControls[sn].elements.clearErrorsButton.off(
                 'click'
             );
-        });
-    };
-    this._SetActiveDevices = function(newActiveDevices) {
-        activeDevices = newActiveDevices;
-        self.activeDevices = newActiveDevices;
+        }
+    }
 
+    _SetActiveDevices(newActiveDevices) {
+        this.activeDevices = newActiveDevices;
 
         // Initialize a new error-log
-        self.deviceErrorLog = {};
-        newActiveDevices.forEach(function(device) {
-            var sn = device.savedAttributes.serialNumber;
+        this.deviceErrorLog = {};
+        for (const device of this.activeDevices) {
+            const sn = device.savedAttributes.serialNumber;
 
-            buildDeviceErrorControls(sn);
+            this.buildDeviceErrorControls(sn);
             // Initialize the error log
-            var messages = [];
-            if(!device.savedAttributes.isConnected) {
+            const messages = [];
+            if (!device.savedAttributes.isConnected) {
                 messages.push('Device Not Connected');
             }
-            self.deviceErrorLog[sn] = {
+            this.deviceErrorLog[sn] = {
                 'messages': messages,
                 'isConnected': device.savedAttributes.isConnected,
             };
-        });
+        }
 
         // Attach Device Listeners
-        attachDeviceStatusListeners();
-    };
+        this.attachDeviceStatusListeners();
+    }
 
-    this.getActiveDevices = function() {
-        return self.activeDevices;
-    };
+    getActiveDevices() {
+        return this.activeDevices;
+    }
 
-    this._SetActiveDevice = function(newActiveDevice) {
-        activeDevice = newActiveDevice;
-        self.activeDevice = newActiveDevice;
-    };
+    _SetActiveDevice(newActiveDevice) {
+        this.activeDevice = newActiveDevice;
+    }
 
-    this.getActiveDevice = function() {
-        return self.activeDevice;
-    };
-    var getActiveDevice = this.getActiveDevice;
+    getActiveDevice() {
+        return this.activeDevice;
+    }
 
-    this.reportDeviceError = function(message, serialNumber) {
-        if(typeof(serialNumber) === 'undefined') {
-            var activeDevice = getActiveDevice();
+    reportDeviceError(message, serialNumber) {
+        if (typeof(serialNumber) === 'undefined') {
+            const activeDevice = this.getActiveDevice();
             serialNumber = activeDevice.savedAttributes.serialNumber;
         }
 
-        if(self.deviceErrorLog[serialNumber]) {
-            self.deviceErrorLog[serialNumber].push(message);
+        if (this.deviceErrorLog[serialNumber]) {
+            this.deviceErrorLog[serialNumber].push(message);
         } else {
-            var errStr = [
+            const errStr = [
                 '<h3>Reporting Device Error:</h3>',
                 '<ul>',
                 '<li>Serial Number: ' + JSON.stringify(serialNumber) + '</li>',
@@ -888,30 +813,29 @@ function Framework() {
             );
             showAlert(errStr);
         }
-    };
-    this.reportError = function(data) {
+    }
+
+    reportError(data) {
         try {
             // determine where the error should be displayed
-            if(data.message) {
+            if (data.message) {
                 // If the data object has a serial number then it is a device error
-                if(data.serialNumber) {
-                    self.reportDeviceError(data.message, data.serialNumber);
+                if (data.serialNumber) {
+                    this.reportDeviceError(data.message, data.serialNumber);
                 } else {
                     console.warn('Showing Error', data, data.message);
                     showAlert(data.message);
                 }
             } else {
                 console.warn('Showing Error', data);
-                var errorStr = '<h3>Program Error:</h3><pre>';
-                errorStr += JSON.stringify(data, null, '2');
-                errorStr += '</pre>';
-                showAlert(errorStr);
+                showAlert('<h3>Program Error:</h3><pre>' +JSON.stringify(data, null, '2') + '</pre>');
             }
         } catch(err) {
             console.error('Error reporting error', err, err.stack);
             showCriticalAlert('Error reporting error (presenter_framework.js)');
         }
-    };
+    }
+
     /**
      * Set the callback that should be called for an event.
      *
@@ -924,17 +848,17 @@ function Framework() {
      *      encountered. Should take a single argument: an object whose
      *      attributes are parameters supplied to the event.
     **/
-    this.on = function (name, listener) {
-        if (!eventListener.has(name)) {
-            self.fire(
+    on(name, listener) {
+        if (!this.eventListener.has(name)) {
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing direction' ],
-                function (shouldContinue) { self.runLoop = shouldContinue; }
+                (shouldContinue) => { this.runLoop = shouldContinue; }
             );
             return;
         }
-        eventListener.set(name, listener);
-    };
+        this.eventListener.set(name, listener);
+    }
 
     /**
      * Force-cause an event to occur through the framework.
@@ -943,79 +867,64 @@ function Framework() {
      * @param {Object} params Object whose attributes should be used as
      *      parameters for the event.
      * @param {function} onErr Function to call if an error was encountered
-     *      while running event listeneres. Optional.
+     *      while running event listeners. Optional.
      * @param {function} onSuccess Function to call after the event listeners
      *      finish running. Optional.
     **/
-    this.fire = function (name, params, onErr, onSuccess) {
-        var noop = function () {};
-
-        if (!params)
-            params = [];
-
-        if (!onSuccess)
-            onSuccess = noop;
-
-        if (!onErr)
-            onErr = noop;
-
-        if (!eventListener.has(name)) {
+    fire(name, params, onErr = () => {}, onSuccess = () => {}) {
+        if (!this.eventListener.has(name)) {
             onSuccess();
             return;
         }
-        var isValidCall = true;
-        if (self.moduleName !== self.getActiveTabID()) {
-            console.error('Should Skip Call',name, self.moduleName, self.getActiveTabID());
-            self.allowModuleExecution = false;
-        }
-        var listener = eventListener.get(name);
-        var isValidListener = false;
-        if(listener !== null) {
-            isValidListener = true;
+
+        const listener = this.eventListener.get(name);
+        if (!listener) {
+            onSuccess();
+            return;
         }
 
-        if (isValidCall && isValidListener) {
-            var passParams = [];
-            passParams.push(self);
+        if (!params) {
+            params = [];
+        }
+
+        if (this.moduleName !== this.getActiveTabID()) {
+            console.error('Should Skip Call', name, this.moduleName, this.getActiveTabID());
+            this.allowModuleExecution = false;
+        }
+
+        try {
+            const passParams = [];
+            passParams.push(this);
             passParams.push.apply(passParams, params);
             passParams.push(onErr);
             passParams.push(onSuccess);
-            try{
-                if(self.flags.debug_runtime) {
-                    // console.info('executing module function', name);
-                }
-                listener.apply(null, passParams);
-            } catch (err) {
-                if(self.flags.debug_startup) {
-                    console.error('error executing module function', name);
-                }
-                console.error(
-                    'Error firing: '+name,
-                    // 'moduleData: ', self.moduleData,
-                    'typeof sdModule: ', typeof(sdModule),
-                    'typeof sdFramework: ', typeof(sdFramework),
-                    'frameworkActive', self.frameworkActive,
-                    ' Error caught is: ',err.name,
-                    'message: ',err.message,err.stack);
-                try{
-                    var isHandled = false;
-                    if (err.name === 'Driver Operation Error') {
-                        isHandled = self.manageLJMError(err.message);
+            listener.apply(null, passParams);
+        } catch (err) {
+            console.error(
+                'Error firing: ' + name,
+                // 'moduleData: ', this.moduleData,
+                'typeof sdModule: ', typeof(sdModule),
+                'typeof sdFramework: ', typeof(sdFramework),
+                'frameworkActive', this.frameworkActive);
+            console.error(err);
+            try {
+                if (err.name === 'Driver Operation Error') {
+                    // Error for old firmware version...
+                    if (err.message === 1307) {
+                        showAlert('Current Device Firmware Version Not Supported By This Module');
                     }
-                    onErr(err);
-                } catch (newError) {
-                    // Not an LJM error...
-                    showCriticalAlert(
-                        'Error Firing: '+name+
-                        '<br>--Error Type: '+err.name+
-                        '<br>--Error Message: '+err.message);
-                    onErr(err);
                 }
+                onErr(err);
+            } catch (newError) {
+                // Not an LJM error...
+                showCriticalAlert(
+                    'Error Firing: '+name+
+                    '<br>--Error Type: '+err.name+
+                    '<br>--Error Message: '+err.message);
+                onErr(err);
             }
-        } else {
-            onSuccess();
         }
-    };
+    }
 
     /**
      * Function deletes various 'window.' objects that need to be removed in
@@ -1023,10 +932,10 @@ function Framework() {
      * @param  {Array} moduleLibraries Array of string "window.xxx" calls that
      *      need to be deleted, (delete window.xxx) when a module gets unloaded.
      */
-    this.unloadModuleLibraries = function(moduleLibraries) {
-        if(moduleLibraries !== undefined) {
-            moduleLibraries.forEach(function(element){
-                var delStr = 'delete ' + element;
+    unloadModuleLibraries(moduleLibraries) {
+        if (moduleLibraries !== undefined) {
+            moduleLibraries.forEach((element) => {
+                const delStr = 'delete ' + element;
                 try{
                     eval(delStr);
                 } catch(err) {
@@ -1034,33 +943,19 @@ function Framework() {
                 }
             });
         }
-    };
+    }
 
-    this.getExitFuncs = async function(curState) {
-        if(curState === 'onModuleLoaded') {
-            return self.qExecOnUnloadModule();
-        } else if(curState === 'onDeviceSelected') {
-            return self.qExecOnCloseDevice()
-                .then(self.qExecOnUnloadModule, self.qExecOnUnloadModule);
-        } else if(curState === 'onLoadError') {
-            return Promise.reject();
-        } else {
-            return self.qExecOnCloseDevice()
-                .then(self.qExecOnUnloadModule, self.qExecOnUnloadModule);
-        }
-    };
+    convertBindingsToDict() {
+        return this.moduleTemplateBindings;
+    }
 
-    this.convertBindingsToDict = function() {
-        return self.moduleTemplateBindings;
-    };
-
-    this.qHideUserTemplate = function() {
+    qHideUserTemplate() {
         return new Promise((resolve) => {
-            self.jquery.fadeOut(
+            this.jquery.fadeOut(
                 DEVICE_VIEW_TARGET,
                 FADE_DURATION,
-                function() {
-                    self.jquery.fadeIn(
+                () => {
+                    this.jquery.fadeIn(
                         CONFIGURING_DEVICE_TARGET,
                         FADE_DURATION,
                         resolve
@@ -1068,15 +963,15 @@ function Framework() {
                 }
             );
         });
-    };
+    }
 
-    this.qShowUserTemplate = function() {
+    qShowUserTemplate() {
         return new Promise((resolve) => {
-            self.jquery.fadeOut(
+            this.jquery.fadeOut(
                 CONFIGURING_DEVICE_TARGET,
                 FADE_DURATION,
-                function(){
-                    self.jquery.fadeIn(
+                () => {
+                    this.jquery.fadeIn(
                         DEVICE_VIEW_TARGET,
                         FADE_DURATION,
                         resolve
@@ -1084,54 +979,53 @@ function Framework() {
                 }
             );
         });
-    };
+    }
 
-    this.saveModuleStartupDataReference = function(newStartupData) {
-        self.saveStartupDataReference(newStartupData);
+    saveModuleStartupDataReference(newStartupData) {
+        this.saveStartupDataReference(newStartupData);
         return Promise.resolve();
-    };
-    this.resetModuleStartupData = function() {
-        var moduleName = self.currentModuleName;
-
-        if(self.DEBUG_STARTUP_DATA) {
+    }
+    
+    async resetModuleStartupData() {
+        if (this.DEBUG_STARTUP_DATA) {
             console.info('presenter_framework: resetModuleStartupData');
         }
-        module_manager.getModulesList()
-        .then(function(moduleSections) {
-            var humanName = '';
-            var i,j;
-            var moduleSectionKeys = Object.keys(moduleSections);
-            for(i = 0; i < moduleSectionKeys.length; i++) {
-                var moduleSectionKey = moduleSectionKeys[i];
-                var moduleSection = moduleSections[moduleSectionKey];
-                for(j = 0; j < moduleSection.length; j++) {
-                    var moduleInfo = moduleSection[j];
-                    if(moduleInfo.name === moduleName) {
-                        humanName = moduleInfo.humanName;
-                        break;
+        await module_manager.getModulesList()
+            .then((moduleSections) => {
+                let humanName = '';
+                const moduleSectionKeys = Object.keys(moduleSections);
+                for (let i = 0; i < moduleSectionKeys.length; i++) {
+                    const moduleSectionKey = moduleSectionKeys[i];
+                    const moduleSection = moduleSections[moduleSectionKey];
+                    for (let j = 0; j < moduleSection.length; j++) {
+                        const moduleInfo = moduleSection[j];
+                        if (moduleInfo.name === this.currentModuleName) {
+                            humanName = moduleInfo.humanName;
+                            break;
+                        }
                     }
                 }
-            }
-            if(humanName) {
-                showInfoMessage('Resetting persistent data for: ' + humanName);
-            } else {
-                showAlert('Resetting persistent data for: ' + moduleName);
-            }
-        });
-        return module_manager.revertModuleStartupData(moduleName)
-            .then(module_manager.getModuleStartupData)
-            .then(self.saveModuleStartupDataReference);
-    };
-    this.saveModuleStartupData = function(callerInfo) {
-        var moduleName = self.currentModuleName;
-        var dataToSave;
-        var isDataValid = self.isStartupDataValid;
-        var saveReasons = [];
+                if (humanName) {
+                    showInfoMessage('Resetting persistent data for: ' + humanName);
+                } else {
+                    showAlert('Resetting persistent data for: ' + this.currentModuleName);
+                }
+            });
+        await module_manager.revertModuleStartupData(this.currentModuleName);
+        const newStartupData = await module_manager.getModuleStartupData(this.currentModuleName);
+        await this.saveModuleStartupDataReference(newStartupData);
+    }
 
-        var saveData = false;
+    saveModuleStartupData(callerInfo) {
+        const moduleName = this.currentModuleName;
+        let dataToSave;
+        const isDataValid = this.isStartupDataValid;
+        const saveReasons = [];
+
+        let saveData = false;
         try {
-            if(isDataValid) {
-                dataToSave = JSON.parse(JSON.stringify(self.startupData));
+            if (isDataValid) {
+                dataToSave = JSON.parse(JSON.stringify(this.startupData));
                 saveData = true;
                 saveReasons.push('Data is valid');
             }
@@ -1141,9 +1035,9 @@ function Framework() {
         }
 
         try {
-            if(saveData) {
-                var keys = Object.keys(dataToSave);
-                if(keys.length > 0) {
+            if (saveData) {
+                const keys = Object.keys(dataToSave);
+                if (keys.length > 0) {
                     saveReasons.push('Data has keys');
                     saveData = true;
                 } else {
@@ -1155,8 +1049,8 @@ function Framework() {
             saveData = false;
         }
 
-        if(saveData) {
-            if(self.DEBUG_STARTUP_DATA) {
+        if (saveData) {
+            if (this.DEBUG_STARTUP_DATA) {
                 console.info(
                     'presenter_framework: saving startupData:',
                     callerInfo,
@@ -1164,22 +1058,16 @@ function Framework() {
                     saveReasons
                 );
             }
-            var innerSaveStartupData = function() {
-                return module_manager.saveModuleStartupData(
-                    moduleName,
-                    dataToSave
-                );
-            };
 
-            var reportSavedStartupData = function() {
-                return Promise.resolve();
-            };
-
-            return self.qExecVerifyStartupData('saveStartupData')
-            .then(innerSaveStartupData)
-            .then(reportSavedStartupData);
+            return this.qExecVerifyStartupData('saveStartupData')
+                .then(() => {
+                    return module_manager.saveModuleStartupData(
+                        moduleName,
+                        dataToSave
+                    );
+                });
         } else {
-            if(self.DEBUG_STARTUP_DATA) {
+            if (this.DEBUG_STARTUP_DATA) {
                 console.info(
                     'presenter_framework: not saving startupData',
                     callerInfo,
@@ -1189,117 +1077,85 @@ function Framework() {
             }
             return Promise.resolve();
         }
-    };
-    this.qExecVerifyStartupData = function(callerData) {
-        return new Promise((resolve, reject) => {
-            if(self.DEBUG_STARTUP_DATA) {
-                console.info(
-                    'presenter_framework: in verifyStartupData',
-                    callerData,
-                    self.currentModuleName
-                );
-            }
+    }
 
-            var finishWithError = function(errData) {
-                console.warn('presenter_framework: verifyStartupData, finishWithError', errData);
-                self.resetModuleStartupData()
-                    .then(resolve, reject);
-            };
-            var finishSuccessfully = function() {
-                resolve();
-            };
+    qExecVerifyStartupData(callerData) {
+        if (this.DEBUG_STARTUP_DATA) {
+            console.info(
+                'presenter_framework: in verifyStartupData',
+                callerData,
+                this.currentModuleName
+            );
+        }
 
-            if(self.allowModuleExecution) {
-                self.fire(
+        if (this.allowModuleExecution) {
+            return new Promise((resolve, reject) => {
+                this.fire(
                     'verifyStartupData',
-                    [self.startupData],
-                    finishWithError,
-                    finishSuccessfully
-                );
-            } else {
-                console.log('allowModuleExecution == false', self.allowModuleExecution);
-                self.getExitFuncs('onModuleLoaded')
-                    .then(reject, reject);
-            }
-        });
-    };
-    this.initializeStartupData = function() {
-        var moduleName = self.currentModuleName;
-        var executeVerifyStartupData = function() {
-            return self.qExecVerifyStartupData('initializeStartupData');
-        };
-
-        return module_manager.getModuleStartupData(moduleName)
-            .then(self.saveModuleStartupDataReference)
-            .then(executeVerifyStartupData);
-    };
-    this.qExecOnModuleLoaded = function() {
-        return new Promise((resolve, reject) => {
-            if (self.allowModuleExecution) {
-                self.fire(
-                    'onModuleLoaded',
-                    [],
-                    (err) => reject(err),
-                    function () {
-                        self.isModuleLoaded = true;
+                    [this.startupData],
+                    (errData) => {
+                        console.warn('presenter_framework: verifyStartupData, finishWithError', errData);
+                        this.resetModuleStartupData()
+                            .then(resolve, reject);
+                    },
+                    () => {
                         resolve();
                     }
                 );
-            } else {
-                return self.getExitFuncs('onModuleLoaded');
-            }
-        });
-    };
+            });
+        } else {
+            console.log('allowModuleExecution == false', this.allowModuleExecution);
+            return this.qExecOnUnloadModule();
+        }
+    }
 
-    this.qExecOnDeviceSelected = function() {
-        return new Promise((resolve, reject) => {
-            if (self.allowModuleExecution) {
-                self.fire(
+    qExecOnDeviceSelected() {
+        if (this.allowModuleExecution) {
+            return new Promise((resolve, reject) => {
+                this.fire(
                     'onDeviceSelected',
-                    [self.smartGetSelectedDevices()],
+                    [this.smartGetSelectedDevices()],
                     (err) => reject(err),
-                    function () {
-                        self.isDeviceOpen = true;
+                    () => {
+                        this.isDeviceOpen = true;
                         resolve();
                     }
                 );
-            } else {
-                return self.getExitFuncs('onDeviceSelected');
-            }
-        });
-    };
+            });
+        } else {
+            return this.qExecOnCloseDevice()
+                .then(this.qExecOnUnloadModule, this.qExecOnUnloadModule);
+        }
+    }
 
-    this.qExecOnDeviceConfigured = function(data) {
+    qExecOnDeviceConfigured(data) {
         return new Promise((resolve, reject) => {
-            if (self.allowModuleExecution) {
-                self.fire(
+            if (this.allowModuleExecution) {
+                this.fire(
                     'onDeviceConfigured',
-                    [self.smartGetSelectedDevices(), data],
+                    [this.smartGetSelectedDevices(), data],
                     (err) => reject(err),
                     (res) => resolve(res)
                 );
             } else {
-                return self.getExitFuncs('onDeviceConfigured');
+                return this.qExecOnCloseDevice()
+                    .then(this.qExecOnUnloadModule, this.qExecOnUnloadModule);
             }
         });
-    };
+    }
 
-    this.qExecOnTemplateDisplayed = function() {
-        return new Promise((resolve, reject) => {
-            if (self.allowModuleExecution) {
-                var rejectFunc = function (data) {
-                    reject(data);
-                };
-                var resolveFunc = function (data) {
-                    KEYBOARD_EVENT_HANDLER.initInputListeners();
-                    resolve(data);
-                };
+    qExecOnTemplateDisplayed() {
+        if (this.allowModuleExecution) {
+            return new Promise((resolve, reject) => {
                 try {
-                    self.fire(
+                    this.fire(
                         'onTemplateDisplayed',
                         [],
-                        rejectFunc,
-                        resolveFunc
+                        (err) => reject(err),
+                        (data) => {
+                            KEYBOARD_EVENT_HANDLER.initInputListeners();
+                            resolve(data);
+                        }
                     );
                 } catch (err) {
                     if (err.name === 'SyntaxError') {
@@ -1307,23 +1163,24 @@ function Framework() {
                     }
                     console.error('Error caught in qExecOnTemplateDisplayed', err);
                 }
-            } else {
-                return self.getExitFuncs('onTemplateDisplayed');
-            }
-        });
-    };
+            });
+        } else {
+            return this.qExecOnCloseDevice()
+                .then(this.qExecOnUnloadModule, this.qExecOnUnloadModule);
+        }
+    }
 
-    this.qExecOnTemplateLoaded = function() {
+    qExecOnTemplateLoaded() {
         return new Promise((resolve, reject) => {
-            if (self.allowModuleExecution) {
+            if (this.allowModuleExecution) {
                 try {
-                    self.fire(
+                    this.fire(
                         'onTemplateLoaded',
                         [],
-                        function (data) {
+                        (data) => {
                             reject(data);
                         },
-                        function (data) {
+                        (data) => {
                             resolve(data);
                         }
                     );
@@ -1334,272 +1191,228 @@ function Framework() {
                     console.error('Error caught in qExecOnTemplateLoaded', err);
                 }
             } else {
-                return self.getExitFuncs('onTemplateLoaded');
+                return this.qExecOnCloseDevice()
+                    .then(this.qExecOnUnloadModule, this.qExecOnUnloadModule);
             }
         });
-    };
+    }
 
-    this.qExecOnCloseDevice = function() {
-        var device = self.smartGetSelectedDevices();
+    qExecOnCloseDevice() {
+        const device = this.smartGetSelectedDevices();
         // Detach device event emitters
-        detachDeviceStatusListeners();
-        return new Promise((resolve, reject) => {
-            var finishSuccess = function (data) {
-                self.saveModuleStartupData('qExecOnCloseDevice-suc')
-                    .then(function () {
-                        resolve(data);
-                    }, function () {
-                        resolve(data);
-                    });
-            };
-            var finishError = function (data) {
-                var continueExec = function () {
-                    reject(data);
-                };
-
-                self.saveModuleStartupData('qExecOnCloseDevice-err')
-                    .then(continueExec, continueExec);
-            };
-            if (self.isDeviceOpen) {
-                if (self.allowModuleExecution) {
-                    self.fire(
+        this.detachDeviceStatusListeners();
+        if (this.isDeviceOpen) {
+            return new Promise((resolve, reject) => {
+                if (this.allowModuleExecution) {
+                    this.fire(
                         'onCloseDevice',
                         [device],
-                        finishError,
-                        finishSuccess
+                        (data) => {
+                            this.saveModuleStartupData('qExecOnCloseDevice-err')
+                                .then(() => {
+                                    reject(data);
+                                }, () => {
+                                    reject(data);
+                                });
+                        },
+                        (data) => {
+                            this.saveModuleStartupData('qExecOnCloseDevice-suc')
+                                .then(() => {
+                                    resolve(data);
+                                }, () => {
+                                    resolve(data);
+                                });
+                        }
                     );
                 } else {
-                    var finishExecution = function () {
-                        self.isDeviceOpen = false;
-                        self.qExecOnUnloadModule()
-                            .then(finishError, finishError);
-                    };
-                    self.fire(
+                    this.fire(
                         'onCloseDevice',
                         [device],
-                        finishExecution,
-                        finishExecution
+                        async () => {
+                            this.isDeviceOpen = false;
+                            await this.qExecOnUnloadModule();
+                            this.saveModuleStartupData('qExecOnCloseDevice-err');
+                            reject();
+                        },
+                        async () => {
+                            this.isDeviceOpen = false;
+                            await this.qExecOnUnloadModule();
+                            this.saveModuleStartupData('qExecOnCloseDevice-err');
+                            reject();
+                        }
                     );
                 }
-            } else {
-                console.error('in qExecOnCloseDevice, device is not open');
-                reject();
-            }
-        });
-    };
+            });
+        } else {
+            console.error('in qExecOnCloseDevice, device is not open');
+            return Promise.reject();
+        }
+    }
 
-    this.qExecOnLoadError = function(err) {
-        return new Promise((resolve) => {
-
-            if (self.allowModuleExecution) {
-                self.fire(
+    qExecOnLoadError(err) {
+        if (this.allowModuleExecution) {
+            return new Promise((resolve) => {
+                this.fire(
                     'onLoadError',
                     [
                         [err],
-                        function (shouldContinue) {
-                            self.runLoop = shouldContinue;
+                        (shouldContinue) => {
+                            this.runLoop = shouldContinue;
                             resolve();
                         }
                     ]
                 );
-            } else {
-                return self.getExitFuncs('onLoadError');
+            });
+        } else {
+            return Promise.reject();
+        }
+    }
+
+    async qExecOnUnloadModule() {
+        if (this.isModuleLoaded) {
+            //Halt the daq loop
+            this.stopLoop();
+
+            //clean up module's third party libraries
+            this.unloadModuleLibraries(this.moduleInfoObj.third_party_code_unload);
+
+            // Ensure the pgm exit listener has been removed.
+            try {
+                global.DELETE_K3_EXIT_LISTENER('presenter-framework-notifier');
+            } catch(err) {
+                console.log('presenter_framework.js removeProgramExitListener err', err);
             }
-        });
-    };
 
-    this.qExecOnUnloadModule = function() {
-        return new Promise((resolve, reject) => {
-            if (self.isModuleLoaded) {
-                var finishError = function (data) {
-                    self.saveModuleStartupData('qExecOnUnloadModule-err')
-                        .then(function () {
-                            reject(data);
-                        }, function () {
-                            reject(data);
-                        });
-                };
+            // clear any "ModuleWindowResizeListeners" window resize listeners
+            // clearModuleWindowResizeListners();
 
-                //Halt the daq loop
-                self.stopLoop();
+            //If LJM's debug log was enabled, disable it
+            if (this.ljmDriverLogEnabled) {
+                console.info('disabling LJM-log');
+                console.info('File:', this.ljmDriver.readLibrarySync('LJM_DEBUG_LOG_FILE'));
+                this.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_MODE', 1);
+                this.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_LEVEL', 10);
+                this.ljmDriverLogEnabled = false;
+            }
 
-                //clean up module's third party libraries
-                self.unloadModuleLibraries(self.moduleInfoObj.third_party_code_unload);
-
-                // Ensure the pgm exit listener has been removed.
-                removeProgramExitListener();
-
-                // clear any "ModuleWindowResizeListeners" window resize listeners
-                // clearModuleWindowResizeListners();
-
-                //If LJM's debug log was enabled, disable it
-                if (self.ljmDriverLogEnabled) {
-                    console.info('disabling LJM-log');
-                    console.info('File:', self.ljmDriver.readLibrarySync('LJM_DEBUG_LOG_FILE'));
-                    self.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_MODE', 1);
-                    self.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_LEVEL', 10);
-                    self.ljmDriverLogEnabled = false;
-                }
-
+            await new Promise((resolve, reject) => {
                 //Inform the module that it has been unloaded.
-                self.fire(
+                this.fire(
                     'onUnloadModule',
                     [],
-                    finishError,
-                    function () {
+                    (data) => {
+                        this.saveModuleStartupData('qExecOnUnloadModule-err')
+                            .then(() => {
+                                reject(data);
+                            }, () => {
+                                reject(data);
+                            });
+                    },
+                    () => {
                         // Detach Device Listeners
-                        detachDeviceStatusListeners();
+                        this.detachDeviceStatusListeners();
 
-                        self.isModuleLoaded = false;
-                        self.saveModuleStartupData('qExecOnUnloadModule-suc')
+                        this.isModuleLoaded = false;
+                        this.saveModuleStartupData('qExecOnUnloadModule-suc')
                             .then(resolve, resolve);
                     }
                 );
-            } else {
-                resolve();
-            }
-        });
-    };
+            });
+        }
+    }
 
-    this.qRenderModuleTemplate = function() {
-        return self.setDeviceView(
-            self.userViewFile,
-            self.moduleJsonFiles,
-            self.convertBindingsToDict()
+    qRenderModuleTemplate() {
+        return this.setDeviceView(
+            this.userViewFile,
+            this.moduleJsonFiles,
+            this.convertBindingsToDict()
         );
-    };
+    }
 
-    var innerUpdateActiveDevice = function(data) {
-        return device_controller.getSelectedDevice()
-            .then(function(activeDevice) {
-                data.activeDevice = activeDevice;
-                return Promise.resolve(data);
-            });
-    };
-    var innerGetDeviceListing = function(data) {
-        var filters;
-        if(self.moduleData.data.supportedDevices) {
-            filters = self.moduleData.data.supportedDevices;
+    getDeviceSelectorClass() {
+        if (this.frameworkType === 'singleDevice') {
+            return '.device-selection-radio';
+        } else if (this.frameworkType === 'multipleDevices') {
+            return '.device-selection-checkbox';
         }
-        return device_controller.getDeviceListing(filters)
-            .then(function(deviceListing) {
-                data.deviceListing = deviceListing;
-                return Promise.resolve(data);
-            });
-    };
-    var innerGetDeviceObjects = function(data) {
-        var filters;
-        if(self.moduleData.data.supportedDevices) {
-            filters = self.moduleData.data.supportedDevices;
-        }
+        return '.device-selection-radio';
+    }
 
-        return device_controller.getDevices(filters)
-            .then(function(devices) {
-                data.activeDevices = devices;
-                return Promise.resolve(data);
-            });
-    };
-    this.getDeviceSelectorClass = function() {
-        var key = '.device-selection-radio';
-        if(self.frameworkType === 'singleDevice') {
-            key = '.device-selection-radio';
-        } else if(self.frameworkType === 'multipleDevices') {
-            key = '.device-selection-checkbox';
-        }
-        return key;
-    };
-    var updateSelectedDeviceList = function(data) {
-        return new Promise((resolve) => {
-            // Save device references
-            self._SetActiveDevices(data.activeDevices);
-            self._SetActiveDevice(data.activeDevice);
-            self._SetSelectedDevices(data.activeDevices);
-
-            var devs = self.jquery.get(self.getDeviceSelectorClass());
-            // console.log('What things are chedked?');
-            // for(var i = 0; i < devs.length; i++) {
-            //     console.log('sn',devs.eq(i).prop('value'),devs.eq(i).prop('checked'));
-            // }
-
-            var foundActiveDevice = false;
-            var activeDevices = self.getSelectedDevices();
-            activeDevices.forEach(function(activeDev) {
-                if (!activeDev.savedAttributes) return;
-                var activeSN = activeDev.savedAttributes.serialNumber;
-                for(var i = 0; i < devs.length; i++) {
-                    if (activeSN == devs.eq(i).val()) {
-                        devs.eq(i).prop('checked', true);
-                        foundActiveDevice = true;
-                    }
-                }
-            });
-
-            // Sloppy code warning...
-            function finishFunc() {
-                var selectorKey = '.device-selector-table-device-selector .radio';
-                if(self.frameworkType === 'multipleDevices') {
-                    selectorKey = '.device-selector-table-device-selector .checkbox';
-                }
-                var selectors = self.jquery.get(selectorKey);
-                selectors.show();
-                resolve();
-            }
-            function repeatCallOnSuccess() {
-                console.log('Repeating Execution of getting active device info...');
-                self.qUpdateActiveDevice().then(finishFunc, finishFunc);
-            }
-            // End of sloppy code warning...
-            if(!foundActiveDevice) {
-                // Did not find an active device
-                if(self.frameworkType === 'multipleDevices') {
-                    console.warn('Not sure what to do... presenter_framework.js - updateSelectedDeviceList');
-                    finishFunc();
-                } else {
-                    var activeDev = devs.eq(0);
-                    // Marking first found device
-                    var activeDevSN = 0;
-                    try {
-                        activeDevSN = activeDev.prop('value');
-                    } catch(err) {
-                        activeDevSN = 0;
-                        console.error('ERROR converting SN string to a number', err);
-                    }
-                    // console.log('SN:', activeDevSN, 'snType', typeof(activeDevSN));
-
-                    // Populate radio box with buble.
-                    activeDev.prop('checked', true);
-
-                    // Communicate with device_manager...?
-                    // device_controller.selectDevice(activeDevSN);
-                    getSmartSaveSelectedDevices(activeDevSN)().then(repeatCallOnSuccess, finishFunc());
-                }
-
-            } else {
-                finishFunc();
-            }
-
-        });
-    };
-    this.qUpdateActiveDevice = function() {
-        var data = {
-            'activeDevice': undefined,      // is populated by func "innerUpdateActiveDevice".
-            'deviceListing': undefined,     // is populated by func "innerGetDeviceListing".
-            'activeDevices': undefined,     // is populated by func "innerGetDeviceObjects".
+    async qUpdateActiveDevice() {
+        const data = {
+            'activeDevice': await this.device_controller.getSelectedDevice(),
+            'deviceListing': await this.device_controller.getDeviceListing(this.moduleData.data.supportedDevices),
+            'activeDevices': await this.device_controller.getDevices(this.moduleData.data.supportedDevices),
         };
-        return innerUpdateActiveDevice(data)
-            .then(innerGetDeviceListing)
-            .then(innerGetDeviceObjects)
-            .then(updateSelectedDeviceList);
-    };
+
+        // Save device references
+        this._SetActiveDevices(data.activeDevices);
+        this._SetActiveDevice(data.activeDevice);
+        this._SetSelectedDevices(data.activeDevices);
+
+        const devs = this.jquery.get(this.getDeviceSelectorClass());
+
+        let foundActiveDevice = false;
+        const activeDevices = this.getSelectedDevices();
+        activeDevices.forEach((activeDev) => {
+            if (!activeDev.savedAttributes) return;
+            const activeSN = String(activeDev.savedAttributes.serialNumber);
+            for (let i = 0; i < devs.length; i++) {
+                if (activeSN === devs.eq(i).val()) {
+                    devs.eq(i).prop('checked', true);
+                    foundActiveDevice = true;
+                }
+            }
+        });
+
+        // End of sloppy code warning...
+        if (!foundActiveDevice) {
+            // Did not find an active device
+            if (this.frameworkType !== 'multipleDevices') {
+                const activeDev = devs.eq(0);
+                // Marking first found device
+                let activeDevSN = 0;
+                try {
+                    activeDevSN = activeDev.prop('value');
+                } catch (err) {
+                    console.error('ERROR converting SN string to a number', err);
+                }
+                // console.log('SN:', activeDevSN, 'snType', typeof(activeDevSN));
+
+                // Populate radio box with bubble.
+                activeDev.prop('checked', true);
+
+                // Communicate with device_manager...?
+                // device_controller.selectDevice(activeDevSN);
+                try {
+                    await this.smartSaveSelectedDevices(activeDevSN);
+                    console.log('activeDevices', activeDevices.length, devs.length, this.getDeviceSelectorClass());
+                    console.log('Repeating Execution of getting active device info...');
+                    await this.qUpdateActiveDevice();
+                } catch (err) {
+                    console.error(err);
+                }
+            } else {
+                console.warn('Not sure what to do... presenter_framework.js - updateSelectedDeviceList');
+            }
+        }
+
+        let selectorKey = '.device-selector-table-device-selector .radio';
+        if (this.frameworkType === 'multipleDevices') {
+            selectorKey = '.device-selector-table-device-selector .checkbox';
+        }
+        const selectors = this.jquery.get(selectorKey);
+        selectors.show();
+    }
 
     /**
      * Set how frequently the framework should read from the device.
      *
      * @param {int} newRefreshRate The number of milliseconds between updates.
     **/
-    this.setRefreshRate = function (newRefreshRate) {
-        self.refreshRate = newRefreshRate;
-    };
+    setRefreshRate(newRefreshRate) {
+        this.refreshRate = newRefreshRate;
+    }
 
     /**
      * Indicate which HTML controls should cause device configured to fire.
@@ -1615,33 +1428,23 @@ function Framework() {
      *      jQuery selector for the HTML elements to bind the event listener
      *      to.
     **/
-    this.setConfigControls = function (newConfigControls) {
-        self.configControls = newConfigControls;
-    };
+    setConfigControls(newConfigControls) {
+        this.configControls = newConfigControls;
+    }
 
-    this.qEstablishWriteBindings = function() {
-        self.establishWriteBindings(self.writeBindings);
-        return Promise.resolve();
-    };
-
-    this.establishWriteBindings = function(bindings) {
-        bindings.forEach(function(binding){
-            self.establishWriteBinding(binding);
+    establishWriteBindings(bindings) {
+        bindings.forEach((binding) => {
+            this.establishWriteBinding(binding);
         });
-    };
+    }
 
-    this.establishWriteBinding = function(binding) {
-        // writeBindings.set(newBinding.template, newBinding);
-        var jquerySelector = '#' + binding.template;
-        jquery.unbind(jquerySelector,binding.event);
-        jquery.bind(
-            jquerySelector,
-            binding.event,
-            function (eventData) {
-                self._writeToDevice(binding, eventData);
-            }
-        );
-    };
+    establishWriteBinding(binding) {
+        this.jquery.unbind('#' + binding.template, binding.event);
+        this.jquery.bind('#' + binding.template, binding.event, async (eventData) => {
+            await this._writeToDevice(binding, eventData);
+        });
+    }
+
     /**
      * Register a new configuration binding.
      *
@@ -1678,50 +1481,54 @@ function Framework() {
      * @param {Object} newBinding The binding information object (as described
      *      above) that should be registered.
     **/
-    this.putConfigBinding = function (newBinding) {
-        var onErrorHandle = function (shouldContinue) {
-            self.runLoop = shouldContinue;
-        };
-
+    putConfigBinding(newBinding) {
         // ------------------------------------
         // Begin checking for potential binding object related errors
 
         // if bindingClass isn't defined execute onLoadError
         if (newBinding.bindingClass === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing bindingClass' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
             return;
         }
 
         // if template isn't defined execute onLoadError
         if (newBinding.template === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing template' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
             return;
         }
 
         // if binding isn't defined execute onLoadError
         if (newBinding.binding === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing binding' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
             return;
         }
 
         // if direction isn't defined execute onLoadError
         if (newBinding.direction === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing direction' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
             return;
         }
@@ -1751,10 +1558,9 @@ function Framework() {
         // if a customFormatFunc isn't defined define a dummy function
         // just incase
         if (newBinding.customFormatFunc === undefined) {
-            newBinding.customFormatFunc = function(rawReading){
+            newBinding.customFormatFunc = (rawReading) => {
                 console.info('Here, val:',rawReading);
-                var retStr = "'customFormatFunc' NotDefined";
-                return retStr;
+                return "'customFormatFunc' NotDefined";
             };
         }
 
@@ -1763,9 +1569,9 @@ function Framework() {
         }
 
         // if there is supposed to be a callback but it isn't defined define one
-        var isCallback = newBinding.execCallback === true;
-        if(isCallback && (newBinding.callback === undefined)) {
-            newBinding.callback = function(binding, data, onSuccess){
+        const isCallback = newBinding.execCallback === true;
+        if (isCallback && (newBinding.callback === undefined)) {
+            newBinding.callback = (binding, data, onSuccess) => {
                 console.info('callback, binding:',binding,', data: ', data);
                 onSuccess();
             };
@@ -1773,17 +1579,19 @@ function Framework() {
 
         // if adding a write binding and the desired event is undefined execute
         // onLoadError
-        var isWrite = newBinding.direction === 'write';
+        const isWrite = newBinding.direction === 'write';
         if (isWrite && newBinding.event === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing direction' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
             return;
         }
 
-        if(newBinding.dataKey === undefined) {
+        if (newBinding.dataKey === undefined) {
             newBinding.dataKey = 'res';
         }
         // Finished checking for potential binding object related errors
@@ -1791,82 +1599,91 @@ function Framework() {
 
         // BEGIN:
         // Code for recursively adding configBindings:
-        var expandedBindings = expandBindingInfo(newBinding);
-        var numBindings = expandedBindings.length;
+        const expandedBindings = expandBindingInfo(newBinding);
+        const numBindings = expandedBindings.length;
         if (numBindings > 1) {
-            for (var i=0; i<numBindings; i++)
-                putConfigBinding(expandedBindings[i]);
+            for (let i = 0; i < numBindings; i++) {
+                this.putConfigBinding(expandedBindings[i]);
+            }
             return;
         }
         // END:
 
         // Code for adding individual bindings to the moduleTemplateBindings,
         // readBindings, writeBindings, and bindings objects
-        try{
-            if(self.moduleTemplateBindings[newBinding.bindingClass] === undefined) {
-                self.moduleTemplateBindings[newBinding.bindingClass] = [];
+        try {
+            const arr = this.moduleTemplateBindings.get(newBinding.bindingClass) || [];
+/*
+            if (this.moduleTemplateBindings[newBinding.bindingClass] === undefined) {
+                this.moduleTemplateBindings[newBinding.bindingClass] = [];
             }
-            self.moduleTemplateBindings[newBinding.bindingClass].push(newBinding);
+            this.moduleTemplateBindings.get()
+                [newBinding.bindingClass].push(newBinding);
+*/
+            arr.push(newBinding);
+            this.moduleTemplateBindings.set(newBinding.bindingClass, arr);
         } catch (err) {
             console.error('Error in presenter_framework.js, putConfigBinding',err);
         }
-        bindings.set(newBinding.template, newBinding);
+        this.bindings.set(newBinding.template, newBinding);
 
         if (newBinding.direction === 'read') {
-            readBindings.set(newBinding.template, newBinding);
+            this.readBindings.set(newBinding.template, newBinding);
         } else if (newBinding.direction === 'write') {
-            writeBindings.set(newBinding.template, newBinding);
-            self.establishWriteBinding(newBinding);
+            this.writeBindings.set(newBinding.template, newBinding);
+            this.establishWriteBinding(newBinding);
         } else {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding has invalid direction' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
         }
-    };
-    var putConfigBinding = this.putConfigBinding;
+    }
 
-    this.putConfigBindings = function(bindings) {
-        var numBindings = bindings.length;
-        for(var i = 0; i < numBindings; i++) {
-            self.putConfigBinding(bindings[i]);
+    putConfigBindings(bindings) {
+        const numBindings = bindings.length;
+        for (let i = 0; i < numBindings; i++) {
+            this.putConfigBinding(bindings[i]);
         }
-    };
+    }
 
-    this.putSmartBinding = function(newSmartBinding) {
-        var onErrorHandle = function(bundle) {
-            console.error('in this.putSmartBinding, onErrorHandle', bundle);
-        };
+    putSmartBinding(newSmartBinding) {
         // if bindingName isn't defined execute onLoadError
         if (newSmartBinding.bindingName === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'SmartBinding binding missing bindingName' ],
-                onErrorHandle
+                (bundle) => {
+                    console.error('in this.putSmartBinding, onErrorHandle', bundle);
+                }
             );
             return;
         }
         // if smartName isn't defined execute onLoadError
         if (newSmartBinding.smartName === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'SmartBinding binding missing smartName' ],
-                onErrorHandle
+                (bundle) => {
+                    console.error('in this.putSmartBinding, onErrorHandle', bundle);
+                }
             );
             return;
         }
 
         // if dataKey isn't defined, define it as 'res'
-        if(newSmartBinding.dataKey === undefined) {
+        if (newSmartBinding.dataKey === undefined) {
             newSmartBinding.dataKey = 'res';
         }
 
-        var bindingName = newSmartBinding.bindingName;
-        var smartName = newSmartBinding.smartName;
-        var binding = {};
-        var setupBinding = {};
-        var isValid = false;
+        const bindingName = newSmartBinding.bindingName;
+        const smartName = newSmartBinding.smartName;
+        const binding = {};
+        const setupBinding = {};
+        let isValid = false;
 
         // Add generic info to binding
         binding.bindingClass = bindingName;
@@ -1875,7 +1692,7 @@ function Framework() {
         // Add generic info to setupBinding
         setupBinding.bindingClass = bindingName;
 
-        if(smartName === 'clickHandler') {
+        if (smartName === 'clickHandler') {
             // Add information to binding object
             binding.binding = bindingName+CALLBACK_STRING_CONST;
             binding.direction = 'write';
@@ -1884,7 +1701,7 @@ function Framework() {
             binding.callback = newSmartBinding.callback;
 
             // Save binding to framework
-            self.putConfigBinding(binding);
+            this.putConfigBinding(binding);
             isValid = true;
         } else if (smartName === 'readRegister') {
             // Add information to binding object
@@ -1897,7 +1714,7 @@ function Framework() {
             binding.displayType = newSmartBinding.displayType;
             binding.dataKey = newSmartBinding.dataKey;
 
-            if(typeof(newSmartBinding.periodicCallback) === 'function') {
+            if (typeof(newSmartBinding.periodicCallback) === 'function') {
                 binding.execCallback = true;
             }
             binding.callback = newSmartBinding.periodicCallback;
@@ -1910,14 +1727,14 @@ function Framework() {
             setupBinding.formatFunc = newSmartBinding.customFormatFunc;
             setupBinding.dataKey = newSmartBinding.dataKey;
 
-            if(typeof(newSmartBinding.configCallback) === 'function') {
+            if (typeof(newSmartBinding.configCallback) === 'function') {
                 setupBinding.execCallback = true;
             }
             setupBinding.callback = newSmartBinding.configCallback;
 
             // Save binding to framework
-            self.putConfigBinding(binding);
-            self.putSetupBinding(setupBinding);
+            this.putConfigBinding(binding);
+            this.putSetupBinding(setupBinding);
             isValid = true;
         } else if (smartName === 'setupOnlyRegister') {
             // Add information to setupBinding object
@@ -1928,13 +1745,13 @@ function Framework() {
             setupBinding.formatFunc = newSmartBinding.customFormatFunc;
             setupBinding.dataKey = newSmartBinding.dataKey;
 
-            if(typeof(newSmartBinding.configCallback) === 'function') {
+            if (typeof(newSmartBinding.configCallback) === 'function') {
                 setupBinding.execCallback = true;
             }
             setupBinding.callback = newSmartBinding.configCallback;
 
             // Save binding to framework
-            self.putSetupBinding(setupBinding);
+            this.putSetupBinding(setupBinding);
             isValid = true;
         } else if (smartName === 'periodicFunction') {
             // Add information to binding object
@@ -1945,105 +1762,97 @@ function Framework() {
             binding.iterationDelay = newSmartBinding.iterationDelay;
             binding.initialDelay = newSmartBinding.initialDelay;
 
-            if(typeof(newSmartBinding.periodicCallback) === 'function') {
+            if (typeof(newSmartBinding.periodicCallback) === 'function') {
                 binding.execCallback = true;
             }
             binding.callback = newSmartBinding.periodicCallback;
 
             // Save binding to framework
-            self.putConfigBinding(binding);
+            this.putConfigBinding(binding);
             isValid = true;
         }
 
-        if(isValid) {
-            self.smartBindings.set(newSmartBinding.bindingName, newSmartBinding);
+        if (isValid) {
+            this.smartBindings.set(newSmartBinding.bindingName, newSmartBinding);
         }
 
-    };
+    }
 
-    this.putSmartBindings = function(newSmartBindings) {
-        newSmartBindings.forEach(function(newSmartBinding) {
-            self.putSmartBinding(newSmartBinding);
+    putSmartBindings(newSmartBindings) {
+        newSmartBindings.forEach((newSmartBinding) => {
+            this.putSmartBinding(newSmartBinding);
         });
-    };
+    }
 
-    this.qUpdateSmartBindings = function() {
-        self.smartBindings.forEach(function(smartBinding) {
-            self.putSmartBinding(smartBinding);
-        });
-        return Promise.resolve();
-    };
-    this.printSmartBindings = function() {
-        self.smartBindings.forEach(function(smartBinding, key) {
-            console.log('Smart Binding Keys: ',key);
-        });
-    };
-
-    this.deleteSmartBinding = function(bindingName) {
-        if(self.smartBindings.has(bindingName)) {
-            var info = self.smartBindings.get(bindingName);
-            var deleteBinding = {
+    deleteSmartBinding(bindingName) {
+        if (this.smartBindings.has(bindingName)) {
+            const info = this.smartBindings.get(bindingName);
+            const deleteBinding = {
                 'direction': 'read',
                 'bindingClass': bindingName,
                 'template': bindingName,
             };
-            if(info.smartName === 'clickHandler') {
+            if (info.smartName === 'clickHandler') {
                 deleteBinding.direction = 'write';
                 deleteBinding.event = 'click';
             }
-            self.deleteConfigBinding(deleteBinding);
-            self.deleteSetupBinding(deleteBinding);
-            self.smartBindings.delete(bindingName);
+            this.deleteConfigBinding(deleteBinding);
+            this.deleteSetupBinding(deleteBinding);
+            this.smartBindings.delete(bindingName);
         }
-    };
-    this.deleteSmartBindings = function(bindingNames) {
-        bindingNames.forEach(self.deleteSmartBinding);
-    };
-    this.deleteAllSmartBindings = function() {
-        var names = [];
-        self.smartBindings.forEach(function(smartBinding) {
+    }
+
+    deleteSmartBindings(bindingNames) {
+        bindingNames.forEach(this.deleteSmartBinding);
+    }
+
+    deleteAllSmartBindings() {
+        const names = [];
+        this.smartBindings.forEach((smartBinding) => {
             names[names.length] = smartBinding.smartName;
         });
-        self.deleteSmartBindings(names);
-        self.smartBindings = new Map();
-        self.setupBindings = new Map();
-    };
+        this.deleteSmartBindings(names);
+        this.smartBindings = new Map();
+        this.setupBindings = new Map();
+    }
+
     /**
      * Function to add a single binding that gets read once upon device
      * selection.
-     * @param  {[type]} binding [description]
-     * @return {[type]}         [description]
+     * @param  {[type]} newBinding [description]
      */
-    this.putSetupBinding = function(newBinding) {
-        var onErrorHandle = function (shouldContinue) {
-            self.runLoop = shouldContinue;
-        };
-
+    putSetupBinding(newBinding) {
         // Check for various required binding attributes & report onLoadErrors
         // if they dont exist
         if (newBinding.bindingClass === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing bindingClass' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
             return;
         }
 
         if (newBinding.binding === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing binding' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
             return;
         }
 
         if (newBinding.direction === undefined) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing direction' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
             return;
         }
@@ -2054,518 +1863,381 @@ function Framework() {
 
         // if a customFormatFunc isn't defined define a dummy function
         if (newBinding.formatFunc === undefined) {
-            newBinding.formatFunc = function(rawReading){
+            newBinding.formatFunc = (rawReading) => {
                 console.info('Here, val:',rawReading);
-                var retStr = "'customFormatFunc' NotDefined";
-                return retStr;
+                return "'customFormatFunc' NotDefined";
             };
         }
 
-        if(newBinding.dataKey === undefined) {
+        if (newBinding.dataKey === undefined) {
             newBinding.dataKey = 'res';
         }
 
-        var isWrite = newBinding.direction === 'write';
+        const isWrite = newBinding.direction === 'write';
         if ( (isWrite) && (newBinding.defaultVal === undefined) ) {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding missing defaultVal' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
             return;
         }
 
-        if(newBinding.execCallback === undefined) {
+        if (newBinding.execCallback === undefined) {
             newBinding.execCallback = false;
         }
-        if(newBinding.callback === undefined) {
-            newBinding.callback = function(data, onSuccess) {
+        if (newBinding.callback === undefined) {
+            newBinding.callback = (data, onSuccess) => {
                 console.info('SetupBinding requested a callback but is not defined');
                 onSuccess();
             };
         }
 
-
-        var expandedBindings = expandSetupBindingInfo(newBinding);
-        var numBindings = expandedBindings.length;
+        const expandedBindings = expandSetupBindingInfo(newBinding);
+        const numBindings = expandedBindings.length;
         if (numBindings > 1) {
-            for (var i=0; i<numBindings; i++)
-                putSetupBinding(expandedBindings[i]);
+            for (let i = 0; i < numBindings; i++) {
+                this.putSetupBinding(expandedBindings[i]);
+            }
             return;
         }
 
         try{
-            if(self.moduleTemplateSetupBindings[newBinding.bindingClass] === undefined) {
-                self.moduleTemplateSetupBindings[newBinding.bindingClass] = [];
+            if (this.moduleTemplateSetupBindings[newBinding.bindingClass] === undefined) {
+                this.moduleTemplateSetupBindings[newBinding.bindingClass] = [];
             }
-            self.moduleTemplateSetupBindings[newBinding.bindingClass].push(newBinding);
+            this.moduleTemplateSetupBindings[newBinding.bindingClass].push(newBinding);
         } catch (err) {
             console.error('Error in presenter_framework.js, putSetupBinding', err);
         }
-        self.setupBindings.set(newBinding.bindingClass, newBinding);
+        this.setupBindings.set(newBinding.bindingClass, newBinding);
 
         if (newBinding.direction === 'read') {
-            self.readSetupBindings.set(newBinding.bindingClass, newBinding);
+            this.readSetupBindings.set(newBinding.bindingClass, newBinding);
         } else if (newBinding.direction === 'write') {
-            self.writeSetupBindings.set(newBinding.bindingClass, newBinding);
+            this.writeSetupBindings.set(newBinding.bindingClass, newBinding);
         } else {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding has invalid direction' ],
-                onErrorHandle
+                (shouldContinue) => {
+                    this.runLoop = shouldContinue;
+                }
             );
         }
-    };
-    var putSetupBinding = this.putSetupBinding;
+    }
 
     /**
      * Function to add multiple bindings that get read once upon device
      * selection.
-     * @param  {[type]} binding [description]
+     * @param  {[type]} bindings [description]
      * @return {[type]}         [description]
      */
-    this.putSetupBindings = function(bindings) {
-        bindings.forEach(function(binding){
-            self.putSetupBinding(binding);
+    putSetupBindings(bindings) {
+        bindings.forEach((binding) => {
+            this.putSetupBinding(binding);
         });
-    };
+    }
 
-    this.deleteSetupBinding = function(setupBinding) {
-        var name = setupBinding.bindingClass;
-        if(self.setupBindings.has(name)) {
-            var info = self.setupBindings.get(name);
-            if(info.direction === 'read') {
-                if(self.readSetupBindings.has(name)) {
-                    self.readSetupBindings.delete(name);
+    deleteSetupBinding(setupBinding) {
+        const name = setupBinding.bindingClass;
+        if (this.setupBindings.has(name)) {
+            const info = this.setupBindings.get(name);
+            if (info.direction === 'read') {
+                if (this.readSetupBindings.has(name)) {
+                    this.readSetupBindings.delete(name);
                 }
-            } else if(info.direction === 'write') {
-                if(self.writeSetupBindings.has(name)) {
-                    self.writeSetupBindings.delete(name);
+            } else if (info.direction === 'write') {
+                if (this.writeSetupBindings.has(name)) {
+                    this.writeSetupBindings.delete(name);
                 }
             }
-            self.setupBindings.delete(name);
+            this.setupBindings.delete(name);
         }
-    };
-    this.deleteSetupBindings = function(setupBindings) {
-        setupBindings.forEach(self.deleteSetupBinding);
-    };
+    }
 
-    this.executeSetupBindings = function() {
-        // Function for executing user-callback
-        function executeCallback (binding, result) {
+    executeCallback(binding, result) {
+        if (binding.execCallback) {
             return new Promise((resolve) => {
-                if (binding.execCallback) {
-                    binding.callback(
-                        {
-                            framework: self,
-                            module: self.module,
-                            device: self.getSelectedDevice(),
-                            binding: binding,
-                            value: result.result,
-                            result: result
-                        },
-                        function () {
-                            resolve();
-                        }
-                    );
-                } else {
-                    resolve();
-                }
-            });
-        }
-        // Function for saving successful write i/o attempts
-        function createSuccessfulWriteFunc (resolve, reject, binding, results) {
-            return function () {
-                var result = {
-                    status: 'success',
-                    result: -1,
-                    formattedResult: '-1',
-                    address: binding.binding
-                };
-                results.set(binding.bindingClass, result);
-                executeCallback(binding,result)
-                .then(resolve, resolve);
-            };
-        }
-
-        // Function for saving failed write i/o attempts
-        function createFailedWriteFunc(resolve, reject, binding, results) {
-            return function (error) {
-                var result = {
-                    status: 'error',
-                    result: error,
-                    formattedResult: null,
-                    address: binding.binding
-                };
-                results.set(binding.bindingClass, result);
-                executeCallback(binding,result)
-                .then(resolve, reject);
-            };
-        }
-
-        // Function for saving successful read i/o attempts
-        function createSuccessfulReadFunc(resolve, reject, binding, results) {
-            return function (value) {
-                value = value.val;
-                var formattedValue = '';
-                var curFormat = binding.format;
-                if(typeof(value) === 'number') {
-                    if(curFormat !== 'customFormat') {
-                        if(isNaN(value)) {
-                            formattedValue = value;
-                        } else {
-                            formattedValue = sprintf(curFormat, value);
-                        }
-                    } else {
-                        formattedValue = binding.formatFunc({
-                            value: value,
-                            address: binding.binding,
-                            binding: binding
-                        });
+                binding.callback(
+                    {
+                        framework: this,
+                        module: this.module,
+                        device: this.getSelectedDevice(),
+                        binding: binding,
+                        value: result.result,
+                        result: result
+                    },
+                    () => {
+                        resolve();
                     }
-                } else {
-                    formattedValue = value;
-                }
-                var result = {
-                    status: 'success',
-                    result: value,
-                    formattedResult: formattedValue,
-                    address: binding.binding
-                };
-                results.set(binding.bindingClass, result);
-                executeCallback(binding,result)
-                .then(resolve, reject);
-            };
+                );
+            });
+        } else {
+            return Promise.resolve();
         }
+    }
 
-        // Function for saving failed read i/o attempts
-        function createFailedReadFunc(resolve, reject, binding, results) {
-            return function (error) {
-                // console.log('Error on Read',error);
-                var result = {
-                    status: 'error',
-                    result: error,
-                    formattedResult: null,
-                    address: binding.binding
-                };
-                results.set(binding.bindingClass, result);
-                executeCallback(binding,result).then(resolve, reject);
-            };
-        }
+    executeSetupBindings() {
+        const results = new Map();
 
-        // Function that creates future device I/O operations to be executed
-        function createFutureDeviceIOOperation (binding, results) {
-            return function() {
+        // Function that executes the device setup commands
+        const executionQueue = [];
+
+        // Populating the execution queue
+        this.setupBindings.forEach((binding) => {
+            executionQueue.push(async () => {
                 //Create execution queue
-                return new Promise((resolve, reject) => {
-                    var device = self.getSelectedDevice();
+                const device = this.getSelectedDevice();
+                // console.log('Executing IO Operation', binding.binding);
+                //Link various function calls based off read/write property
+                try {
+                    if (binding.direction === 'write') {
+                    //Define write I/O procedure
+                        await device.qWrite(binding.binding, binding.defaultVal);
 
-                    //Create various read/write functions
-                    var successfulWriteFunc = createSuccessfulWriteFunc(
-                        resolve,
-                        reject,
-                        binding,
-                        results
-                    );
-                    var failedWriteFunc = createFailedWriteFunc(
-                        resolve,
-                        reject,
-                        binding,
-                        results
-                    );
-                    var successfulReadFunc = createSuccessfulReadFunc(
-                        resolve,
-                        reject,
-                        binding,
-                        results
-                    );
-                    var failedReadFunc = createFailedReadFunc(
-                        resolve,
-                        reject,
-                        binding,
-                        results
-                    );
-                    // console.log('Executing IO Operation', binding.binding);
-                    //Link various function calls based off read/write property
-                    if(binding.direction === 'write') {
-                        //Define write I/O procedure
-                        device.qWrite(binding.binding, binding.defaultVal)
-                            .then(successfulWriteFunc, failedWriteFunc);
+                        const result = {
+                            status: 'success',
+                            result: -1,
+                            formattedResult: '-1',
+                            address: binding.binding
+                        };
+                        results.set(binding.bindingClass, result);
+                        await this.executeCallback(binding, result);
                     } else if (binding.direction === 'read') {
-                        //Define read I/O procedure
-                        device.sRead(binding.binding)
-                            .then(successfulReadFunc, failedReadFunc);
+                    //Define read I/O procedure
+                        const readValue = await device.sRead(binding.binding);
+                        const value = readValue.val;
+                        let formattedValue = '';
+                        const curFormat = binding.format;
+                        if (typeof(value) === 'number') {
+                            if (curFormat !== 'customFormat') {
+                                if (isNaN(value)) {
+                                    formattedValue = value;
+                                } else {
+                                    formattedValue = sprintf(curFormat, value);
+                                }
+                            } else {
+                                formattedValue = binding.formatFunc({
+                                    value: value,
+                                    address: binding.binding,
+                                    binding: binding
+                                });
+                            }
+                        } else {
+                            formattedValue = value;
+                        }
+                        const result = {
+                            status: 'success',
+                            result: value,
+                            formattedResult: formattedValue,
+                            address: binding.binding
+                        };
+                        results.set(binding.bindingClass, result);
+                        await this.executeCallback(binding, result);
                     } else {
                         console.warn('invalid binding.direction', binding.direction);
                     }
-                });
-            };
-        }
-
-        // Function that creates the IO execution queue
-        function createDeviceIOExecutionQueue (bindings, results) {
-            // Execution queue
-            var bindingList = [];
-
-            // Populating the execution queue
-            bindings.forEach(function (binding) {
-                bindingList.push(createFutureDeviceIOOperation(
-                    binding,
-                    results
-                ));
+                } catch (error) {
+                    const result = {
+                        status: 'error',
+                        result: error,
+                        formattedResult: null,
+                        address: binding.binding
+                    };
+                    results.set(binding.bindingClass, result);
+                    await this.executeCallback(binding, result);
+                }
             });
-            return bindingList;
-        }
+        });
 
-        // Function that executes the device setup commands
-        function executeDeviceSetupQueue (bindings) {
-            return new Promise((resolve) => {
-                var results = new Map();
-
-                var executionQueue = createDeviceIOExecutionQueue(
-                    bindings,
-                    results
-                );
-
-                //Execute the created execution queue of device IO commands
-                async.eachSeries(
-                    executionQueue,
-                    function (request, callback) {
-                        var successFunc = function () {
-                            // console.log('eachSeries Success')
-                            callback();
-                        };
-                        var errorFunc = function (err) {
-                            // console.log('eachSeries Err',err);
-                            callback(err);
-                        };
-
-                        request().then(successFunc, errorFunc);
-                    },
-                    function () {
-                        // console.log('eachSeries Callback',err);
-                       resolve(results);
+        return new Promise((resolve) => {
+            //Execute the created execution queue of device IO commands
+            async.eachSeries(
+                executionQueue,
+                (request, callback) => {
+                    request().then(() => {
+                        // console.log('eachSeries Success')
+                        callback();
+                    }, (err) => {
+                        // console.log('eachSeries Err',err);
+                        callback(err);
                     });
-            });
-        }
+                },
+                () => {
+                    // console.log('eachSeries Callback',err);
+                    resolve(results);
+                });
+        });
+    }
 
-        return executeDeviceSetupQueue(self.setupBindings);
-    };
+    async _writeToDevice(bindingInfo, eventData) {
+        const jquerySelector = '#' + bindingInfo.template;
+        const newVal = this.jquery.val(jquerySelector);
 
-    this._writeToDevice = function (bindingInfo, eventData) {
-        var jquerySelector = '#' + bindingInfo.template;
-        var newVal = self.jquery.val(jquerySelector);
+        // Alert to module that a write is about to happen
+        const skipWrite = await new Promise((resolve, reject) => {
+            this.fire(
+                'onRegisterWrite',
+                [
+                    bindingInfo,
+                    newVal
+                ],
+                reject,
+                resolve
+            );
+        });
 
-        var alertRegisterWrite = function () {
-            return new Promise((resolve, reject) => {
-                self.fire(
-                    'onRegisterWrite',
+        const skip = await new Promise((resolve) => {
+            const callbackString = CALLBACK_STRING_CONST;
+            const baseStr = bindingInfo.binding;
+            const searchIndex = baseStr.search(callbackString);
+            if (searchIndex >= 0) {
+                if ((baseStr.length - searchIndex - callbackString.length) === 0) {
+                    if (bindingInfo.execCallback) {
+                        try {
+                            bindingInfo.callback(
+                                {
+                                    framework: this,
+                                    module: this.module,
+                                    device: this.getSelectedDevice(),
+                                    binding: bindingInfo,
+                                    eventData: eventData,
+                                    value: newVal,
+                                },
+                                () => {
+                                    resolve(true);
+                                });
+                        } catch (e) {
+                            this.reportSyntaxError(
+                                {
+                                    'location': '_writeToDevice.performCallbacks',
+                                    data: {binding: bindingInfo, eventData: eventData}
+                                }, e);
+                            resolve(true);
+                        }
+                    } else {
+                        resolve(false);
+                    }
+                }
+            } else {
+                if (bindingInfo.execCallback) {
+                    try {
+                        bindingInfo.callback(
+                            {
+                                framework: this,
+                                module: this.module,
+                                device: this.getSelectedDevice(),
+                                binding: bindingInfo,
+                                eventData: eventData,
+                                value: newVal,
+                            },
+                            () => {
+                                resolve(false);
+                            });
+                    } catch (e) {
+                        this.reportSyntaxError(
+                            {
+                                'location': '_writeToDevice.performCallbacks(2)',
+                                data: {binding: bindingInfo, eventData: eventData}
+                            }, e);
+                        resolve(false);
+                    }
+                } else {
+                    resolve(false);
+                }
+            }
+        });
+
+        if (skip) {
+            const device = this.getSelectedDevice();
+            const invalidString = '-invalid';
+            const baseStr = bindingInfo.binding;
+            const searchIndex = baseStr.search(invalidString);
+            if ( searchIndex >= 0) {
+                if ((baseStr.length - searchIndex - invalidString.length) === 0) {
+                    return;
+                }
+            }
+            if (typeof(skipWrite) === undefined) {
+                device.write(bindingInfo.binding, newVal);
+            } else if (typeof(skipWrite) === "boolean" && (skipWrite === false)) {
+                device.write(bindingInfo.binding, newVal);
+            }
+
+            await new Promise((resolve, reject) => {
+                this.fire(
+                    'onRegisterWritten',
                     [
-                        bindingInfo,
+                        bindingInfo.binding,
                         newVal
                     ],
                     reject,
                     resolve
                 );
             });
-        };
-
-        var performCallbacks = function(skipWrite) {
-            return new Promise((resolve) => {
-                var callbackString = CALLBACK_STRING_CONST;
-                var baseStr = bindingInfo.binding;
-                var searchIndex = baseStr.search(callbackString);
-                if (searchIndex >= 0) {
-                    if ((baseStr.length - searchIndex - callbackString.length) === 0) {
-                        if (bindingInfo.execCallback) {
-                            try {
-                                bindingInfo.callback(
-                                    {
-                                        framework: self,
-                                        module: self.module,
-                                        device: self.getSelectedDevice(),
-                                        binding: bindingInfo,
-                                        eventData: eventData,
-                                        value: newVal,
-                                    },
-                                    function () {
-                                        resolve(skipWrite, true);
-                                    });
-                            } catch (e) {
-                                self.reportSyntaxError(
-                                    {
-                                        'location': '_writeToDevice.performCallbacks',
-                                        data: {binding: bindingInfo, eventData: eventData}
-                                    }, e);
-                                resolve(skipWrite, true);
-                            }
-                        } else {
-                            resolve(skipWrite, false);
-                        }
-                    }
-                } else {
-                    if (bindingInfo.execCallback) {
-                        try {
-                            bindingInfo.callback(
-                                {
-                                    framework: self,
-                                    module: self.module,
-                                    device: self.getSelectedDevice(),
-                                    binding: bindingInfo,
-                                    eventData: eventData,
-                                    value: newVal,
-                                },
-                                function () {
-                                    resolve(skipWrite, false);
-                                });
-                        } catch (e) {
-                            self.reportSyntaxError(
-                                {
-                                    'location': '_writeToDevice.performCallbacks(2)',
-                                    data: {binding: bindingInfo, eventData: eventData}
-                                }, e);
-                            resolve(skipWrite, false);
-                        }
-                    } else {
-                        resolve(skipWrite, false);
-                    }
-                }
-            });
-        };
-
-        var writeToDevice = function (skipWrite, skip) {
-            if(skip) {
-                var device = self.getSelectedDevice();
-                var invalidString = '-invalid';
-                var baseStr = bindingInfo.binding;
-                var searchIndex = baseStr.search(invalidString);
-                if( searchIndex >= 0) {
-                    if((baseStr.length - searchIndex - invalidString.length) === 0) {
-                        return Promise.resolve(false);
-                    }
-                }
-                if(typeof(skipWrite) === undefined) {
-                    device.write(bindingInfo.binding, newVal);
-                    return Promise.resolve(true);
-                } else if(typeof(skipWrite) === "boolean") {
-                    if(skipWrite === false) {
-                        device.write(bindingInfo.binding, newVal);
-                        return Promise.resolve(true);
-                    }
-                    else {
-                        return Promise.resolve(false);
-                    }
-                } else {
-                    return Promise.resolve(false);
-                }
-            } else {
-                return Promise.resolve(false);
-            }
-        };
-
-        var alertRegisterWritten = function (wasNotHandledExternally) {
-            if(wasNotHandledExternally) {
-                return new Promise((resolve, reject) => {
-                    self.fire(
-                        'onRegisterWritten',
-                        [
-                            bindingInfo.binding,
-                            newVal
-                        ],
-                        reject,
-                        resolve
-                    );
-                });
-            }
-        };
-
-        // Alert to module that a write is about to happen
-        return alertRegisterWrite()
-            // Perform callback if necessary
-            .then(performCallbacks)
-            // Perform un-handled device IO
-            .then(writeToDevice)
-            // Notify module that the write has finished
-            .then(alertRegisterWritten)
-            // Re-draw the window to prevent crazy-window issues
-            .then(qRunRedraw);
-    };
+        }
+    }
 
     /**
      * Delete a previously added configuration binding.
      *
-     * @param {String} bindingName The name of the binding (the binding info
+     * @param {String} binding The name of the binding (the binding info
      *      object's original "template" attribute) to delete.
     **/
-    this.deleteConfigBinding = function (binding) {
-        var bindingName = binding.bindingClass;
-        var expandedBindings = ljmmm_parse.expandLJMMMName(bindingName);
-        var numBindings = expandedBindings.length;
+    deleteConfigBinding(binding) {
+        const bindingName = binding.bindingClass;
+        const expandedBindings = ljmmm_parse.expandLJMMMName(bindingName);
+        const numBindings = expandedBindings.length;
         if (numBindings > 1) {
-            for (var i=0; i<numBindings; i++) {
-                deleteConfigBinding(expandedBindings[i]);
+            for (let i = 0; i < numBindings; i++) {
+                this.deleteConfigBinding(expandedBindings[i]);
             }
             return;
         }
 
-        if (!self.bindings.has(bindingName)) {
-            self.fire(
+        if (!this.bindings.has(bindingName)) {
+            this.fire(
                 'onLoadError',
                 [ 'No binding for ' + bindingName ],
-                function (shouldContinue) { self.runLoop = shouldContinue; }
+                (shouldContinue) => { this.runLoop = shouldContinue; }
             );
             return;
         }
 
-        var bindingInfo = self.bindings.get(bindingName);
+        const bindingInfo = this.bindings.get(bindingName);
 
-        self.bindings.delete(bindingName);
+        this.bindings.delete(bindingName);
 
         if (bindingInfo.direction === 'read') {
-            self.readBindings.delete(bindingName);
+            this.readBindings.delete(bindingName);
         } else if (bindingInfo.direction === 'write') {
-            self.writeBindings.delete(bindingName);
-            var jquerySelector = '#' + bindingInfo.template;
-            jquery.off(jquerySelector, bindingInfo.event);
+            this.writeBindings.delete(bindingName);
+            const jquerySelector = '#' + bindingInfo.template;
+            this.jquery.off(jquerySelector, bindingInfo.event);
         } else {
-            self.fire(
+            this.fire(
                 'onLoadError',
                 [ 'Config binding has invalid direction' ],
-                function (shouldContinue) { self.runLoop = shouldContinue; }
+                (shouldContinue) => { this.runLoop = shouldContinue; }
             );
         }
-    };
-    var deleteConfigBinding = this.deleteConfigBinding;
+    }
 
-    this.deleteConfigBindings = function(bindings) {
-        bindings.forEach(function(binding){
-            self.deleteConfigBinding(binding);
+    deleteConfigBindings(bindings) {
+        bindings.forEach((binding) => {
+            this.deleteConfigBinding(binding);
         });
-    };
+    }
 
-    this.clearConfigBindings = function() {
-        bindings = new Map();
-        readBindings = new Map();
-        writeBindings = new Map();
-        moduleTemplateBindings = {};
-
-        self.bindings = bindings;
-        self.readBindings = readBindings;
-        self.writeBindings = writeBindings;
-        self.moduleTemplateBindings = moduleTemplateBindings;
-    };
-    this.qClearConfigBindings = function() {
-        var clearBindings = true;
-        if(typeof(DISABLE_AUTO_CLEAR_CONFIG_BINDINGS) === 'boolean') {
-            if(DISABLE_AUTO_CLEAR_CONFIG_BINDINGS) {
-                clearBindings = false;
-            }
-        }
-        if(clearBindings) {
-            self.clearConfigBindings();
-        }
-        return Promise.resolve();
-    };
+    clearConfigBindings() {
+        this.bindings.clear();
+        this.readBindings.clear();
+        this.writeBindings.clear();
+        this.moduleTemplateBindings.clear();
+    }
 
     /**
      * Render the HTML view to use for the current module.
@@ -2578,223 +2250,180 @@ function Framework() {
      *      be set to an object where the attribute is the name of the JSON file
      *      and the value is the JSON loaded from that file.
     **/
-    this.setDeviceView = function (loc, jsonFiles, context) {
-        if (jsonFiles === undefined)
-            jsonFiles = [];
-
-        if (context === undefined)
-            context = {};
-
+    async setDeviceView(templateLoc, jsonFiles = [], map = new Map()) {
         // Append the selected devices array to the context to allow templates
         // to adjust their displayed content based on what devices are available.
 
-        context.devices = self.getSelectedDevices();
+        const context = {};
+        for (const entry of map.entries()) {
+            context[entry[0]] = entry[1];
+        }
 
-        var onErr = function(data) {
-            console.error('in this.setDeviceView, onErr', data);
-        };
-        // console.log('context (analogInputs)', context);
-        // console.log('moduleTemplateBindings:', self.moduleTemplateBindings);
+        context.devices = this.getSelectedDevices();
 
         // Create an error handler
-        var reportLoadError = function (details) {
-            console.error('reporting load error', details);
-            onErr({'msg': details});
-            self.fire(
-                'onLoadError',
-                [ details ],
-                function (shouldContinue) { self.runLoop = shouldContinue; }
-            );
-        };
-
         // Load the supporting JSON files for use in the template
-        var jsonTemplateVals = {};
-        var loadJSONFiles = function () {
-            jsonTemplateVals = self.moduleData.json;
-            return Promise.resolve();
-        };
+        const jsonTemplateVals = this.moduleData.json;
 
-        // Load the HTML view template and render
-        var prepareHTMLTemplate = function () {
-            var cacheKey = '';
-            var i;
-            for(i = 0; i < self.moduleData.html.length; i++) {
-                if(self.moduleData.html[i].fileName === 'view.html') {
-                    cacheKey = self.moduleData.html[i].filePath;
-                    break;
-                }
+        let cacheKey = '';
+        for (let i = 0; i < this.moduleData.html.length; i++) {
+            if (this.moduleData.html[i].fileName === 'view.html') {
+                cacheKey = this.moduleData.html[i].filePath;
+                break;
             }
-
-            context.json = jsonTemplateVals;
-            // console.log('in prepareHTMLTemplate', self.getSelectedDevices());
-            return fs_facade.renderCachedTemplateData(
-                cacheKey,
-                self.moduleData.htmlFiles.view,
-                context
-            );
-        };
-
-        var injectHTMLTemplate = function (htmlContents) {
-            htmlContents = '<div class="framework-template">' + htmlContents + '</div>';
-            self.jquery.html(DEVICE_VIEW_TARGET, htmlContents);
-            $('.framework-template').ready(runRedraw);
-
-            return Promise.resolve();
-        };
-
-        var attachListeners = function () {
-            if(self.deviceSelectionListenersAttached === false) {
-                self.jquery.on(
-                    self.getDeviceSelectorClass(),
-                    'click',
-                    self._changeSelectedDeviceUI
-                );
-                self.deviceSelectionListenersAttached = true;
-                deviceSelectionListenersAttached = true;
-            }
-            return Promise.resolve();
-        };
-
-        return loadJSONFiles()
-            .then(prepareHTMLTemplate, reportLoadError)
-            .then(injectHTMLTemplate, reportLoadError)
-            .then(attachListeners, reportLoadError);
-    };
-
-    var getSaveSelectedDevice = function(serialNumber) {
-        var saveSelectedDevice = function() {
-            return device_controller.selectDevice(serialNumber);
-        };
-        return saveSelectedDevice;
-    };
-    var getSaveSelectedDevices = function(serialNumbers) {
-        var saveSelectedDevices = function() {
-            return device_controller.selectDevices(serialNumbers);
-        };
-        return saveSelectedDevices;
-    };
-
-    var getSmartSaveSelectedDevices = function(serialNumberData) {
-        // If the data is an array, call and return the saveDevices function
-        if(Array.isArray(serialNumberData)) {
-            return getSaveSelectedDevices(serialNumberData);
-        } else {
-            return getSaveSelectedDevice(serialNumberData);
         }
-    };
 
-    this._changeSelectedDeviceUI = function() {
-        var serialNumber;
-        var serialNumbers = [];
-        var selectDevicesData;
+        context.json = jsonTemplateVals;
 
         try {
-            var elements = self.jquery.get(
-                self.getDeviceSelectorClass() + ':checked'
+            const htmlContents = await fs_facade.renderCachedTemplateData(
+                cacheKey,
+                this.moduleData.htmlFiles.view,
+                context
             );
-            if(self.frameworkType === 'singleDevice') {
-                serialNumber = elements.val();
-                selectDevicesData = serialNumber;
-            } else if(self.frameworkType === 'multipleDevices') {
-                var numEle = elements.length;
-                for(var i = 0; i < numEle; i++) {
+
+            const htmlContents2 = '<div class="framework-template">' + htmlContents + '</div>';
+            this.jquery.html(DEVICE_VIEW_TARGET, htmlContents2);
+
+            if (this.deviceSelectionListenersAttached === false) {
+                this.jquery.on(
+                    this.getDeviceSelectorClass(),
+                    'click',
+                    () => this._changeSelectedDeviceUI()
+                );
+                this.deviceSelectionListenersAttached = true;
+            }
+        } catch (err) {
+            console.error('reporting load error', err);
+            console.error('in this.setDeviceView, onErr', {'msg': err});
+            this.fire(
+                'onLoadError',
+                [ err ],
+                (shouldContinue) => { this.runLoop = shouldContinue; }
+            );
+        }
+    }
+
+    smartSaveSelectedDevices(serialNumberData) {
+        // If the data is an array, call and return the saveDevices function
+        if (Array.isArray(serialNumberData)) {
+            return this.device_controller.selectDevices(serialNumberData);
+        } else {
+            return this.device_controller.selectDevice(serialNumberData);
+        }
+    }
+
+    _changeSelectedDeviceUI() {
+        let selectDevicesData;
+
+        try {
+            const elements = this.jquery.get(
+                this.getDeviceSelectorClass() + ':checked'
+            );
+            if (this.frameworkType === 'singleDevice') {
+                selectDevicesData = elements.val();
+            } else if (this.frameworkType === 'multipleDevices') {
+                const numEle = elements.length;
+                const serialNumbers = [];
+                for (let i = 0; i < numEle; i++) {
                     serialNumbers.push(elements.eq(i).val());
                 }
+
                 selectDevicesData = serialNumbers;
             } else {
-                console.warn('Wrong frameworkType', self.frameworkType);
-                serialNumber = elements.val();
-                selectDevicesData = serialNumber;
+                console.warn('Wrong frameworkType', this.frameworkType);
+                selectDevicesData = elements.val();
             }
         } catch(err) {
             console.error('error in _changeSelectedDeviceUI', err);
         }
 
-        // console.log('in _changeSelectedDeviceUI', selectDevicesData);
         //Perform necessary actions:
-        setTimeout(function() {
+        setTimeout(async () => {
             // Stop the DAQ loop
-            self.qStopLoop()
+            try {
+                await this.qStopLoop();
 
-            // Report that the device has been closed
-            .then(self.qExecOnCloseDevice, self.qExecOnLoadError)
+                // Report that the device has been closed
+                await this.qExecOnCloseDevice();
 
-            // Hide the module's template
-            .then(self.qHideUserTemplate, self.qExecOnLoadError)
+                // Hide the module's template
+                await this.qHideUserTemplate();
 
-            // Save the selected device (to allow for device switching w/o module re-loading)
-            .then(getSmartSaveSelectedDevices(selectDevicesData), self.qExecOnLoadError)
+                // Save the selected device (to allow for device switching w/o module re-loading)
+                await this.smartSaveSelectedDevices(selectDevicesData);
 
-            // Update the currently-active device (This will force a valid device to be selected).
-            .then(self.qUpdateActiveDevice, self.qExecOnLoadError)
+                // Update the currently-active device (This will force a valid device to be selected).
+                await this.qUpdateActiveDevice();
 
-            // Report that a new device has been selected
-            .then(self.qExecOnDeviceSelected, self.qExecOnLoadError)
+                // Report that a new device has been selected
+                await this.qExecOnDeviceSelected();
 
-            // Clear all config-bindings (if not disabled)
-            .then(self.qClearConfigBindings, self.qExecOnLoadError)
+                // Clear all config-bindings (if not disabled)
+                this.clearConfigBindings();
 
-            // Re-configure any smartBindings
-            .then(self.qUpdateSmartBindings, self.qExecOnLoadError)
+                // Re-configure any smartBindings
+                this.smartBindings.forEach((smartBinding) => {
+                    this.putSmartBinding(smartBinding);
+                });
 
-            // Configure the device
-            .then(self.executeSetupBindings, self.qExecOnLoadError)
+                // Configure the device
+                const results = await this.executeSetupBindings();
 
-            // Report that the device has been configured
-            .then(self.qExecOnDeviceConfigured, self.qExecOnLoadError)
+                // Report that the device has been configured
+                await this.qExecOnDeviceConfigured(results);
 
-            // Render the module's template
-            .then(self.qRenderModuleTemplate, self.qExecOnLoadError)
+                // Render the module's template
+                await this.qRenderModuleTemplate();
 
-            // Connect connect any established writeBindings to jquery events
-            .then(self.qEstablishWriteBindings, self.qExecOnLoadError)
+                // Connect connect any established writeBindings to jquery events
+                this.establishWriteBindings(this.writeBindings);
 
-            // Report that the module's template has been loaded
-            .then(self.qExecOnTemplateLoaded, self.qExecOnLoadError)
+                // Report that the module's template has been loaded
+                await this.qExecOnTemplateLoaded();
 
-            // Start the DAQ loop
-            .then(self.qStartLoop, self.qExecOnLoadError)
+                // Start the DAQ loop
+                await this.startLoop();
 
-            // Display the module's template
-            .then(self.qShowUserTemplate, self.qExecOnLoadError)
+                // Display the module's template
+                await this.qShowUserTemplate();
 
-            // Report that the module's template has been displayed
-            .then(self.qExecOnTemplateDisplayed, self.qExecOnLoadError)
-
-            // Re-draw the window to prevent window-disapearing issues
-            .then(qRunRedraw, self.qExecOnLoadError)
-            .done();
+                // Report that the module's template has been displayed
+                await this.qExecOnTemplateDisplayed();
+            } catch (err) {
+                await this.qExecOnLoadError(err);
+            }
         },5);
-    };
+    }
 
     /**
      * Get the currently selected device.
      *
      * @return {presenter.Device} The device selected as the "active" device.
     **/
-    this.getSelectedDevice = function () {
-        return self.activeDevice;
-    };
+    getSelectedDevice() {
+        return this.activeDevice;
+    }
 
-    this.getSelectedDevices = function() {
-        if(self.frameworkType === 'singleDevice') {
-            return [self.activeDevice];
-        } else if(self.frameworkType === 'multipleDevices') {
-            return self.selectedDevices;
+    getSelectedDevices() {
+        if (this.frameworkType === 'singleDevice') {
+            return [this.activeDevice];
+        } else if (this.frameworkType === 'multipleDevices') {
+            return this.selectedDevices;
         } else {
-            return [self.activeDevice];
+            return [this.activeDevice];
         }
-    };
+    }
 
-    this.smartGetSelectedDevices = function() {
-        if(self.frameworkType === 'singleDevice') {
-            return self.getSelectedDevice();
-        } else if(self.frameworkType === 'multipleDevices') {
-            return self.getSelectedDevices();
+    smartGetSelectedDevices() {
+        if (this.frameworkType === 'singleDevice') {
+            return this.getSelectedDevice();
+        } else if (this.frameworkType === 'multipleDevices') {
+            return this.getSelectedDevices();
         } else {
-            return self.getSelectedDevice();
+            return this.getSelectedDevice();
         }
-    };
+    }
 
     /**
      * Function that should be called after all of the bindings have been added.
@@ -2802,408 +2431,257 @@ function Framework() {
      * Function that should be called after all of the config bindings have been
      * added and all of the config controls have been set.
     **/
-    this.establishConfigControlBindings = function () {
-        var listener = self._OnConfigControlEvent;
-        var jquery = self.jquery;
-        self.configControls.forEach(function (value) {
-            jquery.on(value.selector, value.event, listener);
+    establishConfigControlBindings() {
+        const jquery = this.jquery;
+        this.configControls.forEach((value) => {
+            jquery.on(value.selector, value.event, (event) => this._OnConfigControlEvent(event));
         });
-    };
+    }
 
     /**
      * Stop the module's refresh loop.
     **/
-    this.stopLoop = function () {
-        self.runLoop = false;
-    };
+    stopLoop() {
+        this.runLoop = false;
+    }
 
-    this.qStopLoop = function() {
-        return new Promise((resolve) => {
-            self.runLoop = false;
-            if (self.frameworkLoopProcessing) {
-                // console.log('framework loop is currently processing (qStopLoop)...');
-                clearTimeout(self.frameworkLoopReference);
-                var num = 0;
-                var checkDAQLoop = function () {
-                    // console.log('Delaying (qStopLoop)....', num);
-                    num += 1;
-                    if (self.isDAQLoopActive) {
-                        setTimeout(checkDAQLoop, 100);
-                    } else {
-                        resolve();
-                    }
-                };
-                setTimeout(checkDAQLoop, 100);
-            } else {
-                resolve();
+    async qStopLoop() {
+        this.runLoop = false;
+        if (this.frameworkLoopProcessing) {
+            // console.log('framework loop is currently processing (qStopLoop)...');
+            clearTimeout(this.frameworkLoopReference);
+            let num = 0;
+
+            while (this.isDAQLoopActive) {
+                num++;
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
-        });
-    };
+        }
+    }
 
     /**
      * Start the module's refresh loop.
     **/
-    this.isDAQLoopActive = false;
-    this.startLoop = function () {
-        self.runLoop = true;
-        self.isDAQLoopActive = true;
-        // self.loopIteration();
-        self.runLoopIteration();
-    };
-    self.qStartLoop = function() {
-        self.startLoop();
-        return Promise.resolve();
-    };
-    this.printCurTime = function(message) {
-        var d = new Date();
-        console.log(message,d.valueOf() - self.iterationTime - self.refreshRate);
-    };
-    this.daqMonitor = function() {
-        if(!self.daqLoopFinished) {
-            self.printDAQLoopMonitorInfo('DAQ-Loop-Lock-Detected',self.daqLoopStatus);
-        }
-    };
-    this.qConfigureTimer = function() {
-        if(!self.frameworkActive) {
-            return Promise.reject();
-        }
-        var d = new Date();
-        var curTime = d.valueOf();
-        var elapsedTime = curTime - self.iterationTime - self.refreshRate;
-        self.printTimingInfo('elapsedTime',elapsedTime);
-        var delayTime = self.refreshRate;
+    async startLoop() {
+        this.runLoop = true;
+        this.isDAQLoopActive = true;
+        // this.loopIteration();
+        await this.runLoopIteration();
+    }
 
-        if ((errorRefreshRate - elapsedTime) < 0) {
-            if(self.loopErrorEncountered) {
-                self.printDAQLoopInfo('sdFramework DAQ Loop is slow (Due to error)...',elapsedTime);
-            } else {
-                self.printDAQLoopInfo('sdFramework DAQ Loop is slow (Not due to error)...',elapsedTime);
-            }
-            device_controller.ljm_driver.readLibrarySync('LJM_DEBUG_LOG_MODE');
-            if(!self.ljmDriverLogEnabled) {
-                console.info('enabling LJM-log', elapsedTime);
-                self.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_MODE',2);
-                self.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_LEVEL',2);
-                var confTimeout = self.ljmDriver.readLibrarySync('LJM_SEND_RECEIVE_TIMEOUT_MS');
-                self.ljmDriver.logSSync(2,'initDebug: Slow DAQ Loop: '+elapsedTime.toString());
-                self.ljmDriver.logSSync(2,self.moduleName);
-                self.ljmDriver.logSSync(2,'TCP_SEND_RECEIVE_TIMEOUT: '+confTimeout.toString());
+    printCurTime(message) {
+        const d = new Date();
+        console.log(message, d.valueOf() - this.iterationTime - this.refreshRate);
+    }
 
-                self.ljmDriverLogEnabled = true;
-                self.numContinuousRegLoopIterations = 0;
-            } else {
-                self.ljmDriver.logSSync(2,'Slow DAQ Loop: '+elapsedTime.toString());
-                self.numContinuousRegLoopIterations = 0;
-            }
-            delayTime = 10;
-        } else {
-            if(self.ljmDriverLogEnabled) {
-                console.info('sdFramework DAQ Loop is running normally...',elapsedTime);
-                if(self.numContinuousRegLoopIterations > 5) {
-                    var numIt = self.numContinuousRegLoopIterations;
-                    console.info('disabling LJM-log,  loop is running smoothly again');
-                    self.ljmDriver.logSSync(2,'Slow DAQ Loop (RESOLVED) after: '+numIt.toString());
-                    self.ljmDriver.writeLibrarySync('LJM_DEBUG_LOG_MODE',1);
-                    self.numContinuousRegLoopIterations = 0;
-                    self.ljmDriverLogEnabled = false;
-                } else {
-                    self.numContinuousRegLoopIterations += 1;
+    async getNeededAddresses() {
+        this.daqLoopStatus = 'getNeededAddresses';
+        const addresses = [];
+        const formats = [];
+        const customFormatFuncs = [];
+        const bindings = [];
+
+        // Loop through all registered bindings and determine what should be
+        // done.
+        this.readBindings.forEach((value, key) => {
+            // For each binding check to see if it should be executed by
+            // checking its currentDelay.  If it equals zero than it needs
+            // to be executed.
+            if (value.currentDelay <= 0) {
+                // Search bindings for custom bindings
+                const callbackString = CALLBACK_STRING_CONST;
+                const baseStr = value.binding;
+                const searchIndex = baseStr.search(callbackString);
+                if (searchIndex < 0) {
+                    // if the CALLBACK_STRING_CONST tag wasn't found then
+                    // add the binding to the list of registers that needs
+                    // to be queried from the device.
+                    addresses.push(value.binding);
+                    formats.push(value.format);
+                    customFormatFuncs.push(value.customFormatFunc);
                 }
+                bindings.push(value);
+
+                // Re-set the binding's delay with the new delay
+                value.currentDelay = value.iterationDelay;
+                this.readBindings.set(key, value);
+            } else {
+                // Decrement the binding's delay
+                value.currentDelay = value.currentDelay - 1;
+                this.readBindings.set(key, value);
             }
-        }
-        self.iterationTime = curTime;
-
-        if(self.loopErrorEncountered) {
-            self.loopErrors.forEach(function(error){
-                self.printLoopErrors('Loop Errors',error);
-            });
-        }
-        // Clear loop errors
-        self.loopErrorEncountered = false;
-        self.loopErrors = [];
-        self.daqLoopStatus = 'timerConfigured';
-        if((typeof(sdModule) !== 'undefined') && (typeof(sdFramework) !== 'undefined')) {
-            setTimeout(self.runLoopIteration, self.refreshRate);
-        } else {
-            console.info('sdModule or sdFramework not defined!!');
-        }
-        return Promise.resolve();
-    };
-
-    this.unpauseFramework = function() {
-        self.isDAQLoopPaused = false;
-    };
-    this.pauseFramework = function(pauseNotification) {
-        self.pauseDAQLoop = true;
-        self.isPausedListenerFunc = pauseNotification;
-        return function() {
-            self.isDAQLoopPaused = false;
-        };
-    };
-    this.testPauseFramework = function() {
-        self.pauseFramework(
-            function() {
-                console.info('Framework is paused!');
-                self.unpauseFramework();
-            }
-        );
-    };
-
-    var reportStartingDaqLoop = function() {
-        self.daqLoopFinished = false;
-        self.daqLoopStatus = 'startingLoop';
-        return Promise.resolve();
-    };
-    var reportFinishedDaqLoop = function(data) {
-        return new Promise((resolve) => {
-            var finishedFunc = function () {
-                self.daqLoopFinished = true;
-                self.daqLoopStatus = 'finishedDaqLoop';
-                resolve();
+        });
+        if (addresses.length > 0) {
+            return {
+                addresses: addresses,
+                formats: formats,
+                customFormatFuncs: customFormatFuncs,
+                bindings: bindings
             };
-            var executeFinishedFunc = true;
-            if (data) {
-                // console.log('DAQ Loop Finished', data);
-                if (data === 'delay') {
-                    executeFinishedFunc = false;
-                    try {
-                        triggerModuleOnRefreshed([])
-                            .then(finishedFunc, finishedFunc);
-                    } catch (err) {
-                        console.error('Error in reportFinishedDaqLoop', err);
-                        finishedFunc();
-                    }
-                } else {
-                    // console.log('DAQ Loop Finished', data);
-                }
-            }
+        } else {
+            throw 'delay';
+        }
+    }
 
-            if (executeFinishedFunc) {
-                finishedFunc();
-            }
-        });
-    };
-    var getNeededAddresses = function () {
+    triggerModuleOnRefresh(bindingsInfo) {
         return new Promise((resolve, reject) => {
-            self.daqLoopStatus = 'getNeededAddresses';
-            var addresses = [];
-            var formats = [];
-            var customFormatFuncs = [];
-            var bindings = [];
-
-            // Loop through all registered bindings and determine what should be
-            // done.
-            self.readBindings.forEach(function (value, key) {
-                // For each binding check to see if it should be executed by
-                // checking its currentDelay.  If it equals zero than it needs
-                // to be executed.
-                if (value.currentDelay <= 0) {
-                    // Search bindings for custom bindings
-                    var callbackString = CALLBACK_STRING_CONST;
-                    var baseStr = value.binding;
-                    var searchIndex = baseStr.search(callbackString);
-                    if (searchIndex < 0) {
-                        // if the CALLBACK_STRING_CONST tag wasn't found then
-                        // add the binding to the list of registers that needs
-                        // to be queried from the device.
-                        addresses.push(value.binding);
-                        formats.push(value.format);
-                        customFormatFuncs.push(value.customFormatFunc);
-                    } else {
-
-                    }
-                    bindings.push(value);
-
-                    // Re-set the binding's delay with the new delay
-                    value.currentDelay = value.iterationDelay;
-                    self.readBindings.set(key, value);
-                } else {
-                    // Decrement the binding's delay
-                    value.currentDelay = value.currentDelay - 1;
-                    self.readBindings.set(key, value);
-                }
-            });
-            if (addresses.length > 0) {
-                resolve({
-                    addresses: addresses,
-                    formats: formats,
-                    customFormatFuncs: customFormatFuncs,
-                    bindings: bindings
-                });
-            } else {
-                reject('delay');
-            }
-        });
-    };
-    var triggerModuleOnRefresh = function (bindingsInfo) {
-        return new Promise((resolve, reject) => {
-            self.daqLoopStatus = 'triggerModuleOnRefresh';
-            self.fire(
+            this.daqLoopStatus = 'triggerModuleOnRefresh';
+            this.fire(
                 'onRefresh',
                 [bindingsInfo],
-                function () {
+                () => {
                     reject();
                 },
-                function () {
+                () => {
                     resolve(bindingsInfo);
                 }
             );
         });
-    };
-    var requestDeviceValues = function (bindingsInfo) {
-        return new Promise((resolve, reject) => {
-            self.daqLoopStatus = 'requestDeviceValues';
-            var device = self.getSelectedDevice();
+    }
 
-            var addresses = bindingsInfo.addresses;
-            var formats = bindingsInfo.formats;
-            var customFormatFuncs = bindingsInfo.customFormatFuncs;
-            var bindings = bindingsInfo.bindings;
+    requestDeviceValues(bindingsInfo) {
+        this.daqLoopStatus = 'requestDeviceValues';
 
-            if (addresses.length === 0) {
-                resolve({
-                    values: [],
-                    addresses: [],
-                    formats: [],
-                    customFormatFuncs: []
-                });
+        if (bindingsInfo.addresses.length === 0) {
+            return Promise.resolve({
+                values: [],
+                addresses: [],
+                formats: [],
+                customFormatFuncs: []
+            });
+        }
+
+        const device = this.getSelectedDevice();
+        return device.sReadMany(bindingsInfo.addresses)
+            .then((values) => {
+                    return {
+                        values: values,
+                        addresses: bindingsInfo.addresses,
+                        formats: bindingsInfo.formats,
+                        customFormatFuncs: bindingsInfo.customFormatFuncs,
+                        bindings: bindingsInfo.bindings
+                    };
+                }
+            );
+    }
+
+    processDeviceValues(valuesInfo) {
+        this.daqLoopStatus = 'processDeviceValues';
+        const values = valuesInfo.values;
+        const addresses = valuesInfo.addresses;
+        const formats = valuesInfo.formats;
+        const customFormatFuncs = valuesInfo.customFormatFuncs;
+        const bindings = valuesInfo.bindings;
+        const retDict = new Map();
+
+        // Iterate through the bindings executed using the async library
+        let curDeviceIOIndex = 0;
+
+        const innerProcessSingleDeviceValue = (binding, nextStep) => {
+            // Executed for each binding
+            // Search binding string for callback bindings tag
+            const baseStr = binding.binding;
+            const searchIndex = binding.binding.search(CALLBACK_STRING_CONST);
+            const dataKey = binding.dataKey;
+            const index = curDeviceIOIndex;
+            const curResult = values[index];
+            const curAddress = addresses[index];
+            let stringVal;
+            let curValue;
+            let curVal;
+
+            // Periodic bindings (ones that don't perform any device IO
+            // will have a "undefined" curResult value.
+            if (curResult) {
+                if (dataKey === '') {
+                    curValue = curResult;
+                } else {
+                    if (typeof (curResult[dataKey] !== 'undefined')) {
+                        curValue = curResult[dataKey];
+                    } else {
+                        curValue = curResult.val;
+                    }
+                }
+                curVal = curResult.res;
             }
-            device.sReadMany(addresses)
-                .then(
-                    function (values) {
-                        resolve({
-                            values: values,
-                            addresses: addresses,
-                            formats: formats,
-                            customFormatFuncs: customFormatFuncs,
-                            bindings: bindings
-                        });
-                    },
-                    reject
+
+            if (searchIndex < 0) {
+                //If the tag was not found then perform auto-formatting
+                const curFormat = formats[index];
+                const curCustomFormatFunc = customFormatFuncs[index];
+
+                if (curFormat !== 'customFormat') {
+                    if (isNaN(curVal)) {
+                        stringVal = curVal;
+                    } else {
+                        if (typeof (curVal) === 'number') {
+                            stringVal = sprintf(curFormat, curVal);
+                        } else {
+                            if (curResult.str === '-Infinity') {
+                                stringVal = (NaN).toString();
+                            } else if ((curResult.str === '+Infinity') || (curResult.str === 'Infinity')) {
+                                stringVal = (NaN).toString();
+                            } else {
+                                console.warn('Replacing a non-value in processDeviceValues', curVal, curFormat, baseStr, curResult);
+                                stringVal = (0).toString();
+                            }
+                        }
+                    }
+                } else {
+                    stringVal = curCustomFormatFunc({
+                        value: curVal,
+                        address: curAddress,
+                        binding: binding
+                    });
+                }
+                retDict.set(
+                    curAddress.toString(),
+                    stringVal
                 );
 
-        });
-    };
-
-    var processDeviceValues = function (valuesInfo) {
-        return new Promise((resolve) => {
-            self.daqLoopStatus = 'processDeviceValues';
-            var values = valuesInfo.values;
-            var addresses = valuesInfo.addresses;
-            var formats = valuesInfo.formats;
-            var customFormatFuncs = valuesInfo.customFormatFuncs;
-            var bindings = valuesInfo.bindings;
-            var retDict = new Map();
-
-            // Iterate through the bindings executed using the async library
-            var curDeviceIOIndex = 0;
-
-            const innerProcessSingleDeviceValue = function (binding, nextStep) {
-                //Executed for each binding
-                // Search binding string for callback bindings tag
-                var callbackString = CALLBACK_STRING_CONST;
-                var baseStr = binding.binding;
-                var searchIndex = baseStr.search(callbackString);
-                var dataKey = binding.dataKey;
-                var index = curDeviceIOIndex;
-                var curResult = values[index];
-                var curAddress = addresses[index];
-                var stringVal;
-                var curValue;
-                var curVal;
-
-                // Periodic bindings (ones that don't perform any device IO
-                // will have a "undefined" curResult value.
-                if (curResult) {
-                    if (dataKey === '') {
-                        curValue = curResult;
-                    } else {
-                        if (typeof (curResult[dataKey] !== 'undefined')) {
-                            curValue = curResult[dataKey];
-                        } else {
-                            curValue = curResult.val;
-                        }
-                    }
-                    curVal = curResult.res;
+                //Increment current index
+                curDeviceIOIndex += 1;
+            } else {
+                if (binding.execCallback === false) {
+                    console.warn('Warning, PeriodicFunction Found but not executing', binding);
                 }
-
-                if (searchIndex < 0) {
-                    //If the tag was not found then perform auto-formatting
-                    var curFormat = formats[index];
-                    var curCustomFormatFunc = customFormatFuncs[index];
-
-                    if (curFormat !== 'customFormat') {
-                        if (isNaN(curVal)) {
-                            stringVal = curVal;
-                        } else {
-                            if (typeof (curVal) === 'number') {
-                                stringVal = sprintf(curFormat, curVal);
-                            } else {
-                                if (curResult.str === '-Infinity') {
-                                    stringVal = (NaN).toString();
-                                } else if ((curResult.str === '+Infinity') || (curResult.str === 'Infinity')) {
-                                    stringVal = (NaN).toString();
-                                } else {
-                                    console.warn('Replacing a non-value in processDeviceValues', curVal, curFormat, baseStr, curResult);
-                                    stringVal = (0).toString();
-                                }
-                            }
-                            // stringVal = curVal.toString();
-                        }
-                    } else {
-                        stringVal = curCustomFormatFunc({
-                            value: curVal,
-                            address: curAddress,
-                            binding: binding
+            }
+            // If the current binding has a defined binding that
+            // needs to be executed execute it now
+            if (binding.execCallback) {
+                // Execute read-binding function callback
+                try {
+                    binding.callback(
+                        {   //Data to be passed to callback function
+                            framework: this,
+                            module: this.module,
+                            device: this.getSelectedDevice(),
+                            binding: binding,
+                            value: curValue,
+                            stringVal: stringVal
+                        },
+                        function executeNextStep() {
+                            //Instruct async to perform the next step
+                            nextStep();
                         });
-                    }
-                    retDict.set(
-                        curAddress.toString(),
-                        stringVal
-                    );
-
-                    //Increment current index
-                    curDeviceIOIndex += 1;
-                } else {
-                    if (binding.execCallback === false) {
-                        console.warn('Warning, PeriodicFunction Found but not executing', binding);
-                    }
-                }
-                // If the current binding has a defined binding that
-                // needs to be executed execute it now
-                if (binding.execCallback) {
-                    // Execute read-binding function callback
-                    try {
-                        binding.callback(
-                            {   //Data to be passed to callback function
-                                framework: self,
-                                module: self.module,
-                                device: self.getSelectedDevice(),
-                                binding: binding,
-                                value: curValue,
-                                stringVal: stringVal
-                            },
-                            function executeNextStep() {
-                                //Instruct async to perform the next step
-                                nextStep();
-                            });
-                    } catch (e) {
-                        self.reportSyntaxError(
-                            {
-                                'location': 'loopIteration.processDeviceValues',
-                                data: {binding: binding, value: curValue, stringVal: stringVal}
-                            }, e);
-                        nextStep();
-                    }
-                } else {
-                    //Instruct async to perform the next step
+                } catch (e) {
+                    this.reportSyntaxError(
+                        {
+                            'location': 'loopIteration.processDeviceValues',
+                            data: {binding: binding, value: curValue, stringVal: stringVal}
+                        }, e);
                     nextStep();
                 }
-            };
+            } else {
+                //Instruct async to perform the next step
+                nextStep();
+            }
+        };
 
+        return new Promise((resolve) => {
             async.eachSeries(
                 bindings,
-                function processSingleDeviceValue(binding, nextStep) {
+                (binding, nextStep) => {
                     try {
                         innerProcessSingleDeviceValue(binding, nextStep);
                     } catch (err) {
@@ -3211,291 +2689,181 @@ function Framework() {
                         nextStep();
                     }
                 },
-                function () {
+                () => {
                     //Executed when all bindings have been executed
                     resolve(retDict);
                 });
         });
-    };
-    var displayDeviceValues = function (valuesDict) {
-        self.daqLoopStatus = 'displayDeviceValues';
-        self._OnRead(valuesDict);
-        return Promise.resolve(valuesDict);
-    };
-    var triggerModuleOnRefreshed = function (valuesDict) {
+    }
+
+    triggerModuleOnRefreshed(valuesDict) { // Probably not user anywhere
         return new Promise((resolve, reject) => {
-            self.daqLoopStatus = 'triggerModuleOnRefreshed';
-            self.fire(
+            this.daqLoopStatus = 'triggerModuleOnRefreshed';
+            this.fire(
                 'onRefreshed',
                 [valuesDict],
                 reject,
-                function () {
+                () => {
                     resolve();
                 }
             );
         });
-    };
-    function verifyFrameworkIsActive(bundle) {
+    }
+
+    async verifyFrameworkIsActive() {
         // Make sure that this framework instance is active.
-        if(!self.frameworkActive) {
-            self.isDAQLoopActive = false;
-            return Promise.reject('stoppingLoop');
+        if (!this.frameworkActive) {
+            this.isDAQLoopActive = false;
+            throw 'stoppingLoop';
         }
 
         // Make sure that the loop should be executing.
-        if (!self.runLoop) {
-            self.isDAQLoopActive = false;
-            return Promise.reject('stoppingLoop');
+        if (!this.runLoop) {
+            this.isDAQLoopActive = false;
+            throw 'stoppingLoop';
         }
-
-        return Promise.resolve(bundle);
-    }
-    function reportLoopError(details) {
-        return new Promise((resolve, reject) => {
-            if(details !== 'delay') {
-                if(details === 'stoppingLoop') {
-                    return Promise.reject(details);
-                } else {
-                    self.daqLoopStatus = 'reportError';
-                    // TODO: Get register names from readBindings.
-                    self.fire(
-                        'onRefreshError',
-                        [ self.readBindings , details ],
-                        function (shouldContinue) {
-                            self.loopErrorEncountered = true;
-                            self.loopErrors.push({details:details,func:'reportError'});
-                            self.runLoop = shouldContinue;
-                            if(shouldContinue) {
-                                self.printLoopErrors(
-                                    'onRefreshError b/c loopIteration.reportError',
-                                    details
-                                );
-                                reject('delay');
-                            } else {
-                                reject('stoppingLoop');
-                            }
-                        }
-                    );
-                }
-            } else {
-                reject(details);
-            }
-        });
     }
 
-    function innerRunDAQLoop(deviceAttributes) {
+    async innerRunDAQLoop(deviceAttributes) {
         // Only run the DAQ loop if the active device is connected.
-        // if(deviceAttributes.isConnected) {
-        if(deviceAttributes.isConnected) {
-            return reportStartingDaqLoop()
+        // if (deviceAttributes.isConnected) {
+        if (deviceAttributes.isConnected) {
+
+            this.daqLoopFinished = false;
+            this.daqLoopStatus = 'startingLoop';
 
             // Get the current list of bindings
-            .then(getNeededAddresses, reportLoopError)
-            .then(verifyFrameworkIsActive, reportLoopError)
+            try {
+                const bindingsInfo = await this.getNeededAddresses(); // throws 'delay'
+                await this.verifyFrameworkIsActive(); // throws stoppingLoop
 
-            // Inform the active module that data is being refreshed
-            .then(triggerModuleOnRefresh, reportLoopError)
-            .then(verifyFrameworkIsActive, reportLoopError)
+                // Inform the active module that data is being refreshed
+                // await this.triggerModuleOnRefresh(bindingsInfo); // NOT USED?
+                // await this.verifyFrameworkIsActive();
 
-            // Collect data from the active device
-            .then(requestDeviceValues, reportLoopError)
-            .then(verifyFrameworkIsActive, reportLoopError)
+                // Collect data from the active device
+                const valuesInfo = await this.requestDeviceValues(bindingsInfo);
+                await this.verifyFrameworkIsActive();
 
-            // Process the collected device data
-            .then(processDeviceValues, reportLoopError)
-            .then(verifyFrameworkIsActive, reportLoopError)
+                // Process the collected device data
+                const valuesDict = await this.processDeviceValues(valuesInfo);
+                await this.verifyFrameworkIsActive();
 
-            // Render collected data/perform DOM manipulations
-            .then(displayDeviceValues, reportLoopError)
-            .then(verifyFrameworkIsActive, reportLoopError)
+                // Render collected data/perform DOM manipulations
+                this.daqLoopStatus = 'displayDeviceValues';
+                this._OnRead(valuesDict);
 
-            // Inform the active module that data was refreshed
-            .then(triggerModuleOnRefreshed, reportLoopError)
-            .then(verifyFrameworkIsActive, reportLoopError)
+                await this.verifyFrameworkIsActive();
 
-            // Report that the DAQ loop has finished executing
-            .then(reportFinishedDaqLoop, reportFinishedDaqLoop);
+                // Inform the active module that data was refreshed
+                await this.triggerModuleOnRefreshed(valuesDict);
+                await this.verifyFrameworkIsActive();
+
+             } catch (err) {
+                if (err !== 'delay') {
+                    if (err === 'stoppingLoop') {
+                        return Promise.reject(err);
+                    } else {
+                        this.daqLoopStatus = 'reportError';
+                        return new Promise((resolve, reject) => {
+                            // TODO: Get register names from readBindings.
+                            this.fire(
+                                'onRefreshError',
+                                [ this.readBindings , err ],
+                                (shouldContinue) => {
+                                    this.loopErrorEncountered = true;
+                                    this.loopErrors.push({details:err,func:'reportError'});
+                                    this.runLoop = shouldContinue;
+                                    if (shouldContinue) {
+                                        this.printLoopErrors(
+                                            'onRefreshError b/c loopIteration.reportError',
+                                            err
+                                        );
+                                        reject('delay');
+                                    } else {
+                                        reject('stoppingLoop');
+                                    }
+                                }
+                            );
+                        });
+                    }
+                } else {
+                    // Report that the DAQ loop has finished executing
+                    // console.log('DAQ Loop Finished', data);
+                    try {
+                        await this.triggerModuleOnRefreshed([]);
+                    } catch (err) {
+                        console.error('Error in reportFinishedDaqLoop', err);
+                    }
+                }
+                this.daqLoopFinished = true;
+                this.daqLoopStatus = 'finishedDaqLoop';
+            }
         } else {
             // Resolve & wait for the next iteration.
-            return triggerModuleOnRefreshed([]);
+            return this.triggerModuleOnRefreshed([]);
         }
     }
-    function configureLoopTimer() {
-        self.frameworkLoopProcessing = false;
-        self.frameworkLoopReference = setTimeout(
-            self.runLoopIteration,
-            self.refreshRate
+
+    configureLoopTimer() {
+        this.frameworkLoopProcessing = false;
+        this.frameworkLoopReference = setTimeout(
+            () => this.runLoopIteration(),
+            this.refreshRate
         );
     }
-    function configurePausedLoopTimer() {
-        self.frameworkLoopProcessing = false;
-        self.frameworkLoopReference = setTimeout(
-            self.runLoopIteration,
-            self.pausedRefreshRate
-        );
-        return Promise.resolve();
-    }
-    this.frameworkLoopProcessing = false;
-    this.frameworkLoopReference = undefined;
-    this.runLoopIteration = function() {
-        self.frameworkLoopProcessing = true;
+
+    async runLoopIteration() {
+        this.frameworkLoopProcessing = true;
         // Make sure that this framework instance is active.
-        if(!self.frameworkActive) {
-            self.isDAQLoopActive = false;
+        if (!this.frameworkActive) {
+            this.isDAQLoopActive = false;
         }
 
         // Make sure that the loop should be executing.
-        if (!self.runLoop) {
-            self.isDAQLoopActive = false;
+        if (!this.runLoop) {
+            this.isDAQLoopActive = false;
         }
 
-        if(self.isDAQLoopPaused) {
-            // If the framework is paused then don't execute any of the update
-            // code and configure a shorter timer.
-            return verifyFrameworkIsActive().then(configurePausedLoopTimer)
-                .catch(() => Promise.resolve());
-        } else {
-            const promises = [];
-            promises.push(() => {
-                return innerRunDAQLoop(self.activeDevice.savedAttributes);
-            });
+        try {
+            if (this.isDAQLoopPaused) {
+                // If the framework is paused then don't execute any of the update
+                // code and configure a shorter timer.
+                await this.verifyFrameworkIsActive();
 
-            return Promise.allSettled(promises)
-                .then(() => {
-                    return verifyFrameworkIsActive().then(configureLoopTimer)
-                        .catch(() => Promise.resolve());
+                this.frameworkLoopProcessing = false;
+                this.frameworkLoopReference = setTimeout(
+                    () => this.runLoopIteration(),
+                    this.pausedRefreshRate
+                );
+            } else {
+                const promises = [];
+                promises.push(() => {
+                    return this.innerRunDAQLoop(this.activeDevice.savedAttributes);
                 });
-        }
-    };
-    /**
-     * Function to run a single iteration of the module's refresh loop.
-     *
-     * @return {Promise} Promise that resolves after the iteration of the
-     *      refresh loop finishes running. Rejects if an error was encountered
-     *      during the loop iteration.
-    **/
-    this.loopIteration = function () {
-        // !!! DEPRECATED !!! Now uses "this.runLoopIteration" !!!!
-        if(!self.frameworkActive) {
-            return Promise.reject();
-        }
-        self.daqLoopFinished = false;
-        self.daqLoopStatus = 'startingLoop';
-        var getIsPausedChecker = function(unPauseLoop) {
-            var isPausedChecker = function() {
-                if(self.isDAQLoopPaused) {
-                    if(!self.hasNotifiedUserOfPause) {
-                        self.isPausedListenerFunc();
-                        self.hasNotifiedUserOfPause = true;
-                    }
-                    console.info('DAQ Loop is still paused');
-                    setTimeout(isPausedChecker,100);
-                } else {
-                    self.pauseDAQLoop = false;
-                    self.hasNotifiedUserOfPause = false;
-                    console.info('Resuming DAQ Loop');
-                    self.daqLoopStatus = 'loopResuming';
-                    unPauseLoop();
-                }
-            };
-            return isPausedChecker;
-        };
 
-        var pauseLoop = function() {
-            return new Promise((resolve) => {
-                if (self.pauseDAQLoop) {
-                    // DAQ loop is paused
-                    self.isDAQLoopPaused = true;
-                    self.daqLoopStatus = 'loopPaused';
-                    setTimeout(getIsPausedChecker(resolve),100);
-                } else {
-                    resolve();
-                }
-            });
-        };
-        var initLoopTimer = function() {
-            self.daqLoopStatus = 'startingLoopMonitorTimer';
-            clearTimeout(self.daqLoopMonitorTimer);
-            self.daqLoopMonitorTimer = setTimeout(self.daqMonitor, 1000);
-            return Promise.resolve();
-        };
-        if (!self.runLoop) {
-            return Promise.reject('Loop not running.');
-        }
-        var checkModuleStatus = function(bindingsInfo) {
-            self.daqLoopStatus = 'checkModuleStatus';
-            self.daqLoopFinished = true;
-            clearTimeout(self.daqLoopMonitorTimer);
-            if (self.moduleName === self.getActiveTabID()) {
-                return Promise.resolve(bindingsInfo);
-            } else {
-                return Promise.reject(bindingsInfo);
+                await Promise.allSettled(promises);
+                await this.verifyFrameworkIsActive();
+                await this.configureLoopTimer();
             }
-        };
-        var handleDelayErr = function (details) {
-            self.daqLoopStatus = 'handleDelayErr';
-            if(details === 'delay') {
-                return Promise.resolve();
-            } else {
-                return Promise.resolve();
-            }
-        };
-        var reportError = function(bundle) {
-            console.error('in reportError (presenter_framework.js)');
-            return Promise.reject(bundle);
-        };
-        var alertRefresh = function(bundle) {
-            console.log('in alertRefresh (presenter_framework.js)');
-            return Promise.resolve(bundle);
-        };
-        var alertRefreshed = function(bundle) {
-            console.log('in alertRefreshed (presenter_framework.js)');
-            return Promise.resolve(bundle);
-        };
-        var alertOn = function(bundle) {
-            console.log('in alertOn (presenter_framework.js)');
-            return Promise.resolve(bundle);
-        };
-        var handleIOError = function(bundle) {
-            console.error('in handleIOError (presenter_framework.js)');
-            return Promise.reject(bundle);
-        };
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
-        return pauseLoop()
-            .then(initLoopTimer, reportError)
-            .then(getNeededAddresses, reportError)
-            .then(alertRefresh, reportError)
-            .then(requestDeviceValues, handleIOError)
-            .then(processDeviceValues, reportError)
-            .then(alertOn, reportError)
-            .then(alertRefreshed, reportError)
-            .then(checkModuleStatus, handleDelayErr)
-            .then(self.qConfigureTimer, self.qExecOnUnloadModule);
-    };
-
-    /**
-     * Determine how many bindings have been registered for the module.
-     *
-     * @return {int} The number of bindings registered for this module.
-    **/
-    this.numBindings = function () {
-        return self.bindings.size();
-    };
-
-    this._OnRead = function (valueReadFromDevice) {
-        var jquery = self.jquery;
-        if(valueReadFromDevice !== undefined) {
-            self.readBindings.forEach(function updateEachValue(bindingInfo) {
+    _OnRead(valueReadFromDevice) {
+        const jquery = this.jquery;
+        if (valueReadFromDevice !== undefined) {
+            this.readBindings.forEach((bindingInfo) => {
                 const bindingName = bindingInfo.binding;
                     try {
-                    var valRead = valueReadFromDevice.get(bindingName.toString());
+                    const valRead = valueReadFromDevice.get(bindingName.toString());
                     if (valRead !== undefined) {
-                        var jquerySelector = '#' + bindingInfo.template;
+                        const jquerySelector = '#' + bindingInfo.template;
                         if (bindingInfo.displayType === 'standard') {
-                            var vals = jquery.html(jquerySelector, valRead.replace(' ','&nbsp;'));
+                            const vals = jquery.html(jquerySelector, valRead.replace(' ','&nbsp;'));
                             if (vals.length === 0) {
-                                jquerySelector = '.' + bindingInfo.template;
-                                jquery.html(jquerySelector, valRead.replace(' ','&nbsp;'));
+                                jquery.html('.' + bindingInfo.template, valRead.replace(' ','&nbsp;'));
                             }
                         } else if (bindingInfo.displayType === 'input') {
                             if (!jquery.is(jquerySelector, ':focus')) {
@@ -3505,241 +2873,170 @@ function Framework() {
 
                         }
                     }
-                } catch(err) {
+                } catch (err) {
                     console.warn('Error in FW updateEachValue', bindingName, err);
                 }
             });
         }
-    };
-    this._OnConfigControlEvent = function (event) {
-        self.fire('onRegisterWrite', [event]);
-        self.fire('onRegisterWritten', [event]);
-    };
-
-    this.numModuleReloads = 0;
-    this.currentModuleName = '';
-    this.preConfiguredModuleName = '';
-    this.getActiveTabID = function() {
-        var integerModuleName = '';
-        integerModuleName += self.currentModuleName;
-        integerModuleName += '-';
-        integerModuleName += self.numModuleReloads.toString();
-        return integerModuleName;
-    };
-    this.configureActiveTabID = function(tabID) {
-        self.uniqueTabID = tabID;
-    };
-    this.configFramework = function(viewLoc) {
-        userViewFile = viewLoc;
-        self.userViewFile = viewLoc; // [moduleName]/view.html
-        //self.fire('onModuleLoaded')
-    };
-    this.configureFrameworkData = function(jsonDataFiles) {
-        moduleJsonFiles = jsonDataFiles;
-        self.moduleJsonFiles = jsonDataFiles;
-    };
-
-    this.incrementNumberOfModuleReloads = function() {
-        self.numModuleReloads += 1;
-    };
-    this.saveModuleName = function() {
-        self.moduleName = self.getActiveTabID();
-    };
-
-    function fixElectron(data) {
-        for (let k in data) {
-            let v = data[k];
-            if (v instanceof Map) { // Electron fix
-                const obj = {};
-                v.forEach((value, name) => {
-                    obj[name] = fixElectron(value);
-                });
-                data[k] = obj;
-            } else if (typeof v === 'object') {
-                data[k] = fixElectron(v);
-            }
-        }
-        return data;
     }
 
-    this.setCustomContext = function(data) {
-        moduleTemplateBindings.custom = data;
-        self.moduleTemplateBindings.custom = fixElectron(data);
-    };
+    _OnConfigControlEvent(event) {
+        this.fire('onRegisterWrite', [event]);
+        this.fire('onRegisterWritten', [event]);
+    }
 
-    this.tabClickHandler = function() {
-        const visibleTabs = self.jquery.get('.module-tab');
-        visibleTabs.off('click.sdFramework'+self.moduleName);
+    getActiveTabID() {
+        return this.currentModuleName + '-' + this.numModuleReloads.toString();
+    }
 
-        visibleTabs.off('click.sdFramework'+self.moduleName);
-        self.qExecOnUnloadModule();
-    };
+    configureActiveTabID(tabID) {
+        this.uniqueTabID = tabID;
+    }
 
-    this.startFramework = function() {
-        if(self.flags.debug_startup) {
-            console.info('executing qExecOnModuleLoaded');
+    configFramework(viewLoc) {
+        this.userViewFile = viewLoc; // [moduleName]/view.html
+    }
+
+    configureFrameworkData(jsonDataFiles) {
+        this.moduleJsonFiles = jsonDataFiles;
+    }
+
+    saveModuleName() {
+        this.moduleName = this.getActiveTabID();
+    }
+
+    setCustomContext(data) {
+        console.log('setCustomContext', data);
+        this.moduleTemplateBindings.set('custom', fixElectron(data));
+    }
+
+    async startFramework() {
+        const newStartupData = await module_manager.getModuleStartupData(this.currentModuleName);
+        await this.saveModuleStartupDataReference(newStartupData);
+        await this.qExecVerifyStartupData('initializeStartupData');
+
+        if (this.allowModuleExecution) {
+            await new Promise((resolve, reject) => {
+                this.fire(
+                    'onModuleLoaded',
+                    [],
+                    (err) => reject(err),
+                    () => {
+                        this.isModuleLoaded = true;
+                        resolve();
+                    }
+                );
+            });
+        } else {
+            await this.qExecOnUnloadModule();
         }
+    }
 
-        return self.initializeStartupData()
-            .then(self.qExecOnModuleLoaded);
-    };
-
-    const exitProgramListenerName = 'presenter-framework-notifier';
-    function programExitListener() {
-        return new Promise((resolve) => {
-            function onSucc() {
+    programExitListener() {
+        // Save module startup data & always finish successfully.
+        return this.saveModuleStartupData('programExitListener')
+            .then(() => {
                 console.log('Finished saving successfully');
-                resolve();
-            }
-            function onErr(err) {
-                console.log('Got an error saving',err);
-                resolve();
-            }
-            // Save module startup data & always finish successfully.
-            self.saveModuleStartupData('programExitListener')
-                .then(onSucc, onErr);
-        });
+            }, (err) => {
+                console.error('Got an error saving', err);
+            });
     }
-    function addProgramExitListener() {
+
+    async runFramework() {
+        // Add exit listener.
         try {
-            global.ADD_K3_EXIT_LISTENER(exitProgramListenerName, programExitListener);
+            global.ADD_K3_EXIT_LISTENER('presenter-framework-notifier', () => this.programExitListener());
         } catch(err) {
             console.log('presenter_framework.js addProgramExitListener err', err);
         }
-    }
-    function removeProgramExitListener() {
+
+        this.numModuleReloads += 1;
+        this.saveModuleName();
+
         try {
-            global.DELETE_K3_EXIT_LISTENER(exitProgramListenerName);
-        } catch(err) {
-            console.log('presenter_framework.js removeProgramExitListener err', err);
-        }
-    }
-
-    this.runFramework = function() {
-        var checkFirstDevice = function() {
-            return Promise.resolve();
-        };
-        var setModuleName = function() {
-            self.incrementNumberOfModuleReloads();
-            self.saveModuleName();
-            return Promise.resolve();
-        };
-
-        // Add exit listener.
-        addProgramExitListener();
-
-        return checkFirstDevice()
-
-            // Save the module's current instance name
-            .then(setModuleName, self.qExecOnLoadError)
-
             // Update the currently-active device (This will force a valid device to be selected).
-            .then(self.qUpdateActiveDevice, self.qExecOnLoadError)
+            await this.qUpdateActiveDevice();
 
             // Report that a new device has been selected
-            .then(self.qExecOnDeviceSelected, self.qExecOnLoadError)
+            await this.qExecOnDeviceSelected();
 
             // Clear all config-bindings (if not disabled)
-            .then(self.qClearConfigBindings, self.qExecOnLoadError)
+            this.clearConfigBindings();
 
             // Re-configure any smartBindings
-            .then(self.qUpdateSmartBindings, self.qExecOnLoadError)
+            this.smartBindings.forEach((smartBinding) => {
+                this.putSmartBinding(smartBinding);
+            });
 
             // Configure the device
-            .then(self.executeSetupBindings, self.qExecOnLoadError)
+            const results = await this.executeSetupBindings();
 
             // Report that the device has been configured
-            .then(self.qExecOnDeviceConfigured, self.qExecOnLoadError)
+            await this.qExecOnDeviceConfigured(results);
 
             // Render the module's template
-            .then(self.qRenderModuleTemplate, self.qExecOnLoadError)
+            await this.qRenderModuleTemplate();
 
             // Connect connect any established writeBindings to jquery events
-            .then(self.qEstablishWriteBindings, self.qExecOnLoadError)
+            this.establishWriteBindings(this.writeBindings);
 
             // Report that the module's template has been loaded
-            .then(self.qExecOnTemplateLoaded, self.qExecOnLoadError)
+            await this.qExecOnTemplateLoaded();
 
             // Start the DAQ loop
-            .then(self.qStartLoop, self.qExecOnLoadError)
+            this.startLoop();
 
             // Display the module's template
-            .then(self.qShowUserTemplate, self.qExecOnLoadError)
+            await this.qShowUserTemplate();
 
             // Report that the module's template has been displayed
-            .then(self.qExecOnTemplateDisplayed, self.qExecOnLoadError)
-
-            // Re-draw the window to prevent window-disapearing issues
-            .then(qRunRedraw, self.qExecOnLoadError);
-    };
-    this.manageLJMError = function(errNum) {
-        var isHandled = false;
-        // Error for old firmware version...
-        if (errNum === 1307) {
-            showAlert('Current Device Firmware Version Not Supported By This Module');
-            isHandled = true;
+            await this.qExecOnTemplateDisplayed();
+        } catch (err) {
+            await this.qExecOnLoadError(err);
         }
-        return isHandled;
-    };
+    }
 
-    this.manageError = function(err) {
-        showAlert('Error: '+err.toString());
-    };
-
-    this.saveStartupDataReference = function(newStartupData) {
-        self.startupData = undefined;
-        self.isStartupDataValid = false;
-        if(newStartupData) {
+    saveStartupDataReference(newStartupData) {
+        this.startupData = undefined;
+        this.isStartupDataValid = false;
+        if (newStartupData) {
             try {
-                self.startupData = JSON.parse(JSON.stringify(newStartupData));
-                self.isStartupDataValid = true;
+                this.startupData = JSON.parse(JSON.stringify(newStartupData));
+                this.isStartupDataValid = true;
             } catch(err) {
                 console.error(
                     'presenter_framework: Error Copying startupData object',
                     err
                 );
-                self.startupData = {};
-                self.isStartupDataValid = false;
+                this.startupData = {};
+                this.isStartupDataValid = false;
             }
         }
-    };
-    this.saveModuleInfo = function (infoObj, constantsObj, moduleObj, moduleDataObj) {
-        self.moduleData = moduleDataObj;
-        moduleData = moduleDataObj;
-        self.saveModuleName();
-        self.moduleInfoObj = infoObj; // The module.json file obj
-        moduleInfoObj = infoObj;
-        self.moduleConstants = constantsObj; // The moduleConstants.json file obj
-        moduleConstants = constantsObj;
-        self.module = moduleObj;  // A reference to the created module
-        module = moduleObj;
+    }
 
+    saveModuleInfo(infoObj, constantsObj, moduleObj, moduleDataObj) {
+        this.moduleData = moduleDataObj.data;
+        this.saveModuleName();
+        this.moduleInfoObj = infoObj; // The module.json file obj
+        this.moduleConstants = constantsObj; // The moduleConstants.json file obj
+        this.module = moduleObj;  // A reference to the created module
 
-        self.startupData = undefined;
-        self.isStartupDataValid = false;
+        this.startupData = undefined;
+        this.isStartupDataValid = false;
 
-
-        self.frameworkType = infoObj.framework;
-        frameworkType = infoObj.framework;
-
-        if(infoObj.framework_flags) {
-            if(infoObj.framework_flags.debug_framework) {
-                self.flags.debug_startup = true;
-            }
-        }
+        this.frameworkType = infoObj.data.framework;
 
         try {
-            self.deviceErrorCompiledTemplate = handlebars.compile(
-                moduleDataObj.htmlFiles.device_errors_template
+            this.deviceErrorCompiledTemplate = handlebars.compile(
+                moduleDataObj.data.htmlFiles.device_errors_template
             );
-            self.printableDeviceErrorCompiledTemplate = handlebars.compile(
-                moduleDataObj.htmlFiles.printable_device_errors_template
+            this.printableDeviceErrorCompiledTemplate = handlebars.compile(
+                moduleDataObj.data.htmlFiles.printable_device_errors_template
             );
         } catch(err) {
             console.error('Error compiling deviceErrors template', err);
         }
-    };
+    }
 }
 
-util.inherits(Framework, EventEmitter);
-global.Framework = Framework;
+global.PresenterFramework = PresenterFramework;

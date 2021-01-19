@@ -387,7 +387,7 @@ function module() {
         var configDeviceGlobal = function(data, onSuccess) {
             var handleConfigError = function(err) {
                 console.log('configError',err,binding,value);
-                sdFramework.manageError(err);
+                showAlert('Error: '+err.toString());
                 onSuccess();
             }
             console.log(data.binding.bindingClass,'!event!');

@@ -240,6 +240,9 @@ function module() {
             var keys = Object.keys(channelData);
             keys.forEach(function(key) {
                 var newValue = channelData[key];
+                if (!self.dataCache[channelName]) {
+                    self.dataCache[channelName] = {};
+                }
                 self.dataCache[channelName][key] = newValue;
             });
         });

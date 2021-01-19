@@ -369,11 +369,13 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	disableModuleLoading(message) {
+		console.log('MODULE_CHROME.disableModuleLoading', message);
 		this.allowModuleToLoad = false;
 		this.moduleLockMessage = message;
 	}
 
 	enableModuleLoading() {
+		console.log('MODULE_CHROME.enableModuleLoading');
 		this.moduleLockMessage = '';
 		this.allowModuleToLoad = true;
 	}
@@ -403,6 +405,7 @@ class ModuleChrome extends EventEmitter {
 	moduleChromeTabClickHandler(res) {
 		// console.log('Clicked Tab', res.data.name);
 		if (this.allowModuleToLoad) {
+			console.log('MODULE_CHROME.moduleChromeTabClickHandler');
 			this.allowModuleToLoad = false;
 
 			this.conditionallyClearCaches();
@@ -414,6 +417,7 @@ class ModuleChrome extends EventEmitter {
 
 			this.emit(this.eventList.LOADING_MODULE, res);
 			global.MODULE_LOADER.once('MODULE_READY', () => {
+				console.log('MODULE_CHROME.MODULE_READY');
 				this.allowModuleToLoad = true;
 				global.hideInfoMessage();
 				global.hideAlert();
@@ -422,9 +426,11 @@ class ModuleChrome extends EventEmitter {
 			console.log('global.MODULE_LOADER', res.data);
 			global.MODULE_LOADER.loadModule(res.data)
 				.then((res) => {
+					console.log('MODULE_CHROME.loadModule - ok');
 					this.emit(this.eventList.MODULE_LOADED, res);
 					// this.allowModuleToLoad = true;
 				}, (err) => {
+					console.log('MODULE_CHROME.loadModule - err');
 					this.allowModuleToLoad = true;
 					console.error('Error loading module', err);
 				});
