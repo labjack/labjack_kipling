@@ -281,7 +281,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
             // var curData = initializedData.get(registerInfo.register,{state:null,direction:null,type:null,value:null});
             registerInfo.state = curData.state;
             registerInfo.direction = curData.direction;
-            registerInfo.regType = curData.type.toLowerCase();
+            registerInfo.regType = curData.type ? curData.type.toLowerCase() : '';
             registerInfo.value = curData.val;
             registerInfo.ainEnabled = curData.ainEnabled;
             registerInfo.directionStr = curData.directionStr;
@@ -534,7 +534,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
             // var curData = initializedData.get(registerInfo.register,{state:null,direction:null,type:null,value:null});
             registerInfo.state = curData.state;
             registerInfo.direction = curData.direction;
-            registerInfo.regType = curData.type.toLowerCase();
+            registerInfo.regType = curData.type ? curData.type.toLowerCase() : '';
             registerInfo.value = curData.val;
             registerInfo.ainEnabled = curData.ainEnabled;
             registerInfo.directionStr = curData.directionStr;

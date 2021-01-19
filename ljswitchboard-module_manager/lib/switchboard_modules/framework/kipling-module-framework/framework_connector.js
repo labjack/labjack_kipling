@@ -19,6 +19,19 @@ class FakeDriver {
     }
 }
 
+function extrapolateDeviceErrorData(err) {
+    // Get the error description (if it exists);
+    err.description = modbus_map.getErrorInfo(err.code).description;
+
+    // Format the "caller" information
+    const callKeys = Object.keys(err.data);
+    const callInfo = callKeys.map((callKey) => {
+        return callKey + ': ' + JSON.stringify(err.data[callKey]);
+    });
+    err.callInfo = callInfo.join(', ');
+    return err;
+}
+
 class ModuleInstance extends EventEmitter {
     constructor() {
         super();
@@ -252,7 +265,7 @@ class ModuleInstance extends EventEmitter {
         for(let i = 0; i < devices.length; i++) {
             devices[i].deviceErrorMessages = [];
             for (let j = 0; j < devices[i].deviceErrors.length; j++) {
-               const errorMessage = await handleBarsService.renderHtmlTemplate(newModule.htmlFiles.device_errors_template, global.extrapolateDeviceErrorData(
+               const errorMessage = await handleBarsService.renderHtmlTemplate(newModule.htmlFiles.device_errors_template, extrapolateDeviceErrorData(
                     devices[i].deviceErrors[j]
                 ));
                 devices[i].deviceErrorMessages.push(errorMessage);
@@ -281,7 +294,7 @@ class ModuleInstance extends EventEmitter {
         }
         newModule.context.framework_options = framework_options;
 
-        return Promise.resolve(newModule);
+        return newModule;
     }
 }
 global.activeModule = new ModuleInstance();

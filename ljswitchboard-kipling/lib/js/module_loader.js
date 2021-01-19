@@ -143,21 +143,21 @@ class ModuleLoader extends EventEmitter {
 		this.precompileFunctions.push(func);
 	}
 
-	getModuleContext(newModule) {
-		return new Promise((resolve, reject) => {
-			const promises = [];
-			for(let i = 0; i < this.precompileFunctions.length; i++) {
-				promises.push(this.precompileFunctions[i](newModule));
-			}
-			Promise.allSettled(promises)
-				.then((results) => {
-					this.precompileFunctions = [];
-					resolve(newModule);
-				}, (err) => {
-					console.error('Finished pre-compilation steps', err);
-					reject(newModule);
-				});
+	async getModuleContext(newModule) {
+		const promises = this.precompileFunctions.map(func => {
+			return new Promise((resolve1) => {
+				func(newModule).then(resolve1);
+			});
 		});
+
+		try {
+			await Promise.allSettled(promises);
+			this.precompileFunctions = [];
+		} catch (err) {
+			console.error('Finished pre-compilation steps', err);
+		}
+
+		return newModule;
 	}
 
 	getUpdatedDeviceListing(newModule) {
@@ -286,26 +286,18 @@ class ModuleLoader extends EventEmitter {
 
 	async loadModule(moduleObject) {
 		try {
-			console.log('loadModule1', moduleObject.name);
 			const moduleData = await module_manager.loadModuleData(moduleObject);
-			console.log('loadModule2');
 			await this.executeUnloadModuleFunctions(moduleData);
-			console.log('loadModule3');
 			await this.renderModule(moduleData);
-			console.log('loadModule4');
 		} catch (err) {
 			console.error('Error in loadModule', err);
 		}
 	}
 
 	async loadModuleByName(moduleName) {
-		console.log('loadModulebyname1', moduleName);
 		const moduleData = await module_manager.loadModuleDataByName(moduleName);
-		console.log('loadModulebyname2');
 		await this.executeUnloadModuleFunctions(moduleData);
-		console.log('loadModulebyname3');
 		await this.renderModule(moduleData);
-		console.log('loadModulebyname4');
 	}
 
 }

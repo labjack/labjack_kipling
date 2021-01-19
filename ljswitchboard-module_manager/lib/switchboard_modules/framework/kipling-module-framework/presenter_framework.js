@@ -732,8 +732,6 @@ class PresenterFramework extends EventEmitter {
     }
     
     detachDeviceStatusListeners() {
-        console.trace();
-        console.log('detachDeviceStatusListeners');
         for (const device of this.activeDevices) {
             device.removeListener('DEVICE_DISCONNECTED', data => this.deviceDisconnectedEventListener(data));
             device.removeListener('DEVICE_RECONNECTED', data => this.deviceReconnectedEventListener(data));
@@ -1350,7 +1348,10 @@ class PresenterFramework extends EventEmitter {
         this._SetActiveDevice(data.activeDevice);
         this._SetSelectedDevices(data.activeDevices);
 
-        const devs = this.jquery.get(this.getDeviceSelectorClass());
+        let devs = this.jquery.get('.device-selection-radio');
+        if (devs.length === 0) {
+            devs = this.jquery.get('.device-selection-checkbox');
+        }
 
         let foundActiveDevice = false;
         const activeDevices = this.getSelectedDevices();
@@ -1386,7 +1387,6 @@ class PresenterFramework extends EventEmitter {
                 // device_controller.selectDevice(activeDevSN);
                 try {
                     await this.smartSaveSelectedDevices(activeDevSN);
-                    console.log('activeDevices', activeDevices.length, devs.length, this.getDeviceSelectorClass());
                     console.log('Repeating Execution of getting active device info...');
                     await this.qUpdateActiveDevice();
                 } catch (err) {

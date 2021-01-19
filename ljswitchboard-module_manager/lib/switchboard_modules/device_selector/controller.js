@@ -56,7 +56,6 @@ class ModuleInstance extends EventEmitter {
 		this.debug = false;
 
 		// Create a new viewGen object
-		console.log('createDeviceSelectorView');
 		this.viewGen = new createDeviceSelectorViewGenerator();
 
 		this.allowDeviceControl = true;
@@ -85,7 +84,7 @@ class ModuleInstance extends EventEmitter {
 			const eventKey = viewGenEvents[viewGenEventKey];
 			this.viewGen.on(
 				eventKey,
-				this.getViewGenEventListener(eventKey)
+				(data) => this.getViewGenEventListener(eventKey)(data)
 			);
 		}
 
@@ -187,13 +186,13 @@ class ModuleInstance extends EventEmitter {
 
 			try {
 				await this.connectToDevice(connectData);
-				return this.getCachedListAllDevices()
-					.then(this.viewGen.displayScanResults);
+				await this.getCachedListAllDevices();
+				this.viewGen.displayScanResults();
 			} catch (err) {
 				try {
-					await this.getCachedListAllDevices()
-						.then(this.viewGen.displayScanResults, this.viewGen.displayScanResults);
+					await this.getCachedListAllDevices();
 				} finally {
+					this.viewGen.displayScanResults();
 					if(typeof(err.errorMessage) !== 'undefined') {
 						if(err.errorMessage.indexOf('device object already created for handle') >= 0) {
 							this.blinkDevice(err.deviceInfo.serialNumber);
@@ -243,10 +242,9 @@ class ModuleInstance extends EventEmitter {
 		let scanResults = [];
 		let scanErrors = [];
 
-		const promises = [];
-		promises.push(this.viewGen.displayScanInProgress());
-		promises.push(
-			this.reportScanStarted()
+		await this.viewGen.displayScanInProgress();
+
+		await this.reportScanStarted()
 				.then(() => {
 					return new Promise((resolve) => {
 						// Update and save the scan selections
@@ -274,10 +272,7 @@ class ModuleInstance extends EventEmitter {
 								resolve();
 							});
 					});
-				})
-		);
-
-		await Promise.allSettled(promises);
+				});
 
 		// const scanResults = res[1].value; // the second result (1st element);
 		console.log('Scan Results', scanResults);
@@ -293,10 +288,10 @@ class ModuleInstance extends EventEmitter {
 	// Attach to viewGen events
 	getViewGenEventListener(eventName) {
 		const buttonEventHandlers = {
-			'REFRESH_DEVICES': this.performDeviceScan,
-			'DIRECT_OPEN_DEVICE': this.attemptDirectConnection,
-			'TOGGLE_ADVANCED_SCAN_OPTIONS': this.saveAdvancedScanOptionsState,
-			'TOGGLE_DIRECT_CONNECT_OPTIONS': this.saveShowDirectConnectOptionsState,
+			'REFRESH_DEVICES': (data) => this.performDeviceScan(data),
+			'DIRECT_OPEN_DEVICE': (data) => this.attemptDirectConnection(data),
+			'TOGGLE_ADVANCED_SCAN_OPTIONS': (data) => this.saveAdvancedScanOptionsState(data),
+			'TOGGLE_DIRECT_CONNECT_OPTIONS': (data) => this.saveShowDirectConnectOptionsState(data),
 		};
 
 		const viewGenEventListener = (eventData) => {
