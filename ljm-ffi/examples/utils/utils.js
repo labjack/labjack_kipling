@@ -1,10 +1,3 @@
-
-try {
-    ref = require('ref');       //Load variable type module
-} catch(err) {
-    ref = require('ref-napi');       //Load variable type module
-}
-
 var ljm_ffi = require('../../lib/ljm-ffi');
 var ljm = ljm_ffi.load();
 

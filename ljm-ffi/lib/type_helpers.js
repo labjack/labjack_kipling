@@ -1,10 +1,4 @@
-
-var ref;
-try {
-    ref = require('ref');       //Load variable type module
-} catch(err) {
-    ref = require('ref-napi');       //Load variable type module
-}
+const ref = require('ref-napi');       //Load variable type module
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 var semver = require('semver');

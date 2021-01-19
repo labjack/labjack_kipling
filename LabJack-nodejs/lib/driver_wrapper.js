@@ -4,15 +4,6 @@
  * @author Chris Johnson (chrisjohn404, LabJack Corp.)
  */
 
-
-
-var ref;
-try {
-    ref = require('ref');       //Load variable type module
-} catch(err) {
-	ref = require('ref-napi');
-}
-var fs = require('fs');         //Load File System module
 var jsonConstants = require('ljswitchboard-modbus_map');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 

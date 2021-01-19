@@ -2,15 +2,7 @@
  * LJM dll & dynlib interface using ffi.
 */
 var child_process = require('child_process');
-var ffi;
-var ref;
-try {
-    ffi = require('ffi');
-    ref = require('ref');       //Load variable type module
-} catch(err) {
-    ffi = require('ffi-napi');
-    ref = require('ref-napi');       //Load variable type module
-}
+const ffi = require('ffi-napi');
 var util = require('util');
 
 var fs = require('fs');         //Load File System module

@@ -279,15 +279,10 @@ class NewMessageManager extends EventEmitter {
 
 		let bundle;
 		try {
-			// console.log('ddddddddddddddddddddddddddddddddddddddddddd');
 			bundle = await this.markMessageHandler(messageBundle);
-			// console.log('d1', bundle);
 			bundle = await this.handleInternalMessage(bundle);
-			// console.log('d2', bundle);
 			bundle = await this.executeListener(bundle);
-			// console.log('d3', bundle);
 			bundle = await this.respondToMessage(bundle);
-			// console.log('d4', bundle);
 		} finally {
 			await this.cleanupMessage(bundle);
 		}

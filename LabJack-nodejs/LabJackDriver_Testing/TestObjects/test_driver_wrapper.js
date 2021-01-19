@@ -10,12 +10,7 @@
 
 var ljmJsonManager = require('ljswitchboard-modbus_map');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
-var ref;
-try {
-    ref = require('ref');       //Load variable type module
-} catch(err) {
-	ref = require('ref-napi');
-}
+var ref = require('ref-napi');
 
 function createCallableObject (defaultFunction, asyncFunction) {
     var retFunction = function () {

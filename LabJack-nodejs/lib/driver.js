@@ -5,7 +5,6 @@
 **/
 
 const ref = require('ref-napi');
-const util = require('util');//
 const driverLib = require('./driver_wrapper');
 
 const jsonConstants = require('ljswitchboard-modbus_map');
@@ -21,6 +20,21 @@ const ARCH_DOUBLE_NUM_BYTES = driver_const.ARCH_DOUBLE_NUM_BYTES;
 const ARCH_POINTER_SIZE = driver_const.ARCH_POINTER_SIZE;
 const LJM_LIST_ALL_SIZE = driver_const.LJM_LIST_ALL_SIZE;
 
+function buildAsyncError(code, message, errFrame) {
+    let errorInfo = ljm_mm.getErrorInfo(code);
+    let error = {
+        code: code,
+        string: errorInfo.string,
+        description: errorInfo.description,
+    };
+    if(typeof(message) !== 'undefined') {
+        this.message = message.toString();
+    }
+    if(typeof(errFrame) !== 'undefined') {
+        this.errFrame = errFrame;
+    }
+    return error;
+}
 
 /**
  * Create a new DriverOperationError object.
@@ -37,26 +51,28 @@ const LJM_LIST_ALL_SIZE = driver_const.LJM_LIST_ALL_SIZE;
  * @param {array} results Optional parameter passed when some but not
  *   all results may be valid.
 **/
-function DriverOperationError(code, message, errFrame, results)
-{
-    this.code = code;
-    let errorInfo = ljm_mm.getErrorInfo(code);
-    this.string = errorInfo.string;
-    this.description = errorInfo.description;
-    if(typeof(message) !== 'undefined') {
-        this.message = message.toString();
-    }
-    if(typeof(errFrame) !== 'undefined') {
-        this.errFrame = errFrame;
-    }
-    if(typeof(results) !== 'undefined') {
-        this.results = results;
-    }
-    
-}
-util.inherits(DriverOperationError, Error);
-DriverOperationError.prototype.name = 'Driver Operation Error - device';
+class DriverOperationError extends Error {
+    constructor(code, message, errFrame, results) {
+        super(message);
 
+        this.name = 'Driver Operation Error - device';
+
+        console.error('DriverOperationError', code);
+        this.code = code;
+        let errorInfo = ljm_mm.getErrorInfo(code);
+        this.string = errorInfo.string;
+        this.description = errorInfo.description;
+        if(typeof(message) !== 'undefined') {
+            this.message = message.toString();
+        }
+        if(typeof(errFrame) !== 'undefined') {
+            this.errFrame = errFrame;
+        }
+        if(typeof(results) !== 'undefined') {
+            this.results = results;
+        }
+    }
+}
 
 /**
  * Create a new DriverInterfaceError object.
@@ -68,14 +84,13 @@ DriverOperationError.prototype.name = 'Driver Operation Error - device';
  * @param {String/Number} description The integer error code or string
  *      description of the error encountered.
 **/
-function DriverInterfaceError(description) {
-    this.description = description;
-    this.message = description;
+class DriverInterfaceError extends Error {
+    constructor(description) {
+        super(description);
+        this.name = 'Driver Interface Error - device';
+        this.description = description;
+    }
 }
-util.inherits(DriverInterfaceError, Error);
-DriverInterfaceError.prototype.name = 'Driver Interface Error - device';
-
-
 
 /**
  * Constructor for an object acting as LJM driver wrapper.
@@ -322,8 +337,8 @@ exports.ljmDriver = function(ljmOverride) {
                 }
             }
             return output;
-        };
-        function numInterpret(input) {return input;};
+        }
+        function numInterpret(input) {return input;}
         let bufFuncs = {
             'STRING': {func:'toString',argA:'utf8',argB:index,argC:index+50,intFunc:strInterpret},
             // 'UINT64': {func:'readFloatLE',argA:index,argB:undefined,argC:undefined},
@@ -429,13 +444,11 @@ exports.ljmDriver = function(ljmOverride) {
             message = 'Invalid number of arguments passed to listAllExtra';
             errorCode = self.errors.LJN_INVALID_ARGUMENTS.error;
             throw new DriverOperationError(self.errors.LJN_INVALID_ARGUMENTS.error, message);
-            return onErr(buildAsyncError(errorCode, message));
         }
 
         if (typeof(regs) !== 'object') {
             message = 'Invalid Argument parsed as desired read registers';
             throw new DriverOperationError(errorCode, message);
-            return onErr(buildAsyncError(errorCode, message));
         }
 
         if(isNaN(devT)) {
@@ -728,7 +741,7 @@ exports.ljmDriver = function(ljmOverride) {
         me.deviceType = deviceType;
         me.connType = driver_const.connectionTypes[connectionType];
         me.connectionType = connectionType;
-    };
+    }
 
     /**
      * Desc: Internal helper function to extract return data from an OpenAll call.
@@ -782,23 +795,7 @@ exports.ljmDriver = function(ljmOverride) {
         results.errors = errorsObj;
 
         return results;
-    };
-
-    // function asyncUnallocateErrorsHandle(handle, callback) {
-    //     self.ljm.LJM_CleanInfo.async(
-    //         handle,
-    //         function (err, res) {
-    //             callback();
-    //         });
-    // }
-    // function syncUnallocateErrorsHandle(handle) {
-    //     try {
-    //         self.ljm.LJM_CleanInfo(handle);
-    //     } catch(err) {
-    //         // Error...
-    //     }
-    //     return;
-    // }
+    }
     this.cleanInfo = function(handle, onError, onSuccess) {
         let bHandle = new ref.alloc('int', handle);
         self.ljm.LJM_CleanInfo.async(
@@ -808,7 +805,7 @@ exports.ljmDriver = function(ljmOverride) {
                 if (res !== 0) return onError(new DriverOperationError(res));
                 onSuccess();
             });
-    }
+    };
     this.cleanInfoSync = function(handle) {
         let bHandle = new ref.alloc('int', handle);
         let errorResult = self.ljm.LJM_CleanInfo(bHandle);
@@ -816,7 +813,7 @@ exports.ljmDriver = function(ljmOverride) {
             throw new DriverOperationError(errorResult);
         }
         return;
-    }
+    };
 
     /**
      * Desc: Opens all LabJacks of the specified device type and connection type.
@@ -894,7 +891,7 @@ exports.ljmDriver = function(ljmOverride) {
         info.info = allocBuffer(ARCH_POINTER_SIZE);
         
         return info;
-    };
+    }
     function extractGetHandlesResults(info) {
         let results = {
             infoHandle: infoHandle,
@@ -943,8 +940,7 @@ exports.ljmDriver = function(ljmOverride) {
                 );
             }
         );
-
-    }
+    };
 
     this.getHandlesSync = function() {
         let info = {};
@@ -961,8 +957,7 @@ exports.ljmDriver = function(ljmOverride) {
         let results = extractGetHandlesResults(info);
         self.cleanInfoSync(results.infoHandle);
         return results.infoObj;
-
-    }
+    };
 
     /**
      * Converts an error number to a string asynchronously.
@@ -1363,7 +1358,6 @@ exports.ljmDriver = function(ljmOverride) {
             throw new DriverOperationError(errorResult);
         }
     };
-    this.logSSync = this.logSync;
 
     /**
      * Reset LJM's internall logging system.
@@ -1812,7 +1806,7 @@ exports.ljmDriver = function(ljmOverride) {
         } else {
             throw new DriverOperationError(output);
         }
-    }
+    };
 
     /*
      * Define functions to call the LJM_eReadAddressString function.
@@ -1890,7 +1884,7 @@ exports.ljmDriver = function(ljmOverride) {
         } else {
             throw new DriverOperationError(output);
         }
-    }
+    };
 
     /**
      * Asynchronously reads a single modbus buffer address.
@@ -2053,10 +2047,10 @@ exports.ljmDriver = function(ljmOverride) {
 
         //Define buffers
         let results = allocBuffer(ARCH_DOUBLE_NUM_BYTES * length);
-        let errors = new ref.alloc('int',1);
+        let errorVal = new ref.alloc('int',1);
         
         // Make sure buffers are empty.
-        errors.fill(0);
+        errorVal.fill(0);
 
         if(length < 1) {
             // throw new DriverInterfaceError("Addresses array must contain data");
@@ -2096,7 +2090,7 @@ exports.ljmDriver = function(ljmOverride) {
             addrBuff,
             addrTypeBuff,
             results,
-            errors,
+            errorVal,
             function(err, res) {
                 if(err) {
                     return onError(self.errors.LJN_UNEXPECTED_ASYNC_CALL_ERROR, err, 'LJM_eReadAddressArray');
@@ -2193,7 +2187,7 @@ exports.ljmDriver = function(ljmOverride) {
             }
             return returnResults;
         } else {
-            throw new DriverOperationError(self.errors.LJME_INVALID_ADDRESS.error,'Invalid Address',i,returnResults);
+            throw new DriverOperationError(self.errors.LJME_INVALID_ADDRESS.error,'Invalid Address', i, returnResults);
         }
     };
 };
