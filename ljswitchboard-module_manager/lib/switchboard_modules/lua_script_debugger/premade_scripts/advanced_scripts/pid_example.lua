@@ -1,5 +1,5 @@
 --[[
-    Name: 13_pid_example.lua
+    Name: pid_example.lua
     Desc: This is a PID example script that sets a DAC0 output using AIN2 for
           feedback
     Note: Gets a setpoint from a host computer.  Host computer writes the new
