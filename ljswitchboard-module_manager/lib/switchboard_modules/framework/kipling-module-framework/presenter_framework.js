@@ -181,7 +181,13 @@ function expandSetupBindingInfo (bindingInfo) {
 */
 function extrapolateDeviceErrorData(err) {
     // Get the error description (if it exists);
-    err.description = modbus_map.getErrorInfo(err.code).description;
+    if (err.code === -1 && err.rawError) {
+        err.code = err.rawError.code;
+        err.description = err.rawError.description;
+        err.name = err.rawError.name;
+    } else {
+        err.description = modbus_map.getErrorInfo(err.code).description;
+    }
 
     // Format the "caller" information
     const callKeys = Object.keys(err.data);
