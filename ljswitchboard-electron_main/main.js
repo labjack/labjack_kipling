@@ -18,6 +18,17 @@ const {loadProgramPackages} = require('./lib/packages-load');
 let splashWindow = null;
 
 const gui = {
+  clipboard: {
+    readText(type) {
+      return electron.clipboard.readText(type);
+    },
+    writeText(text, type) {
+      return electron.clipboard.writeText(text, type);
+    },
+    clear() {
+      return electron.clipboard.clear();
+    }
+  },
   openDevTools() {
     console.log('openDevTools');
     electron.BrowserWindow.getFocusedWindow().maximize();

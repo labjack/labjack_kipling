@@ -514,8 +514,7 @@ class PresenterFramework extends EventEmitter {
                 const outputText = this.printableDeviceErrorCompiledTemplate(
                     errorData
                 );
-                const clipboard = gui.Clipboard.get();
-                clipboard.set(outputText, 'text');
+                gui.clipboard.writeText(outputText);
             } catch(err) {
                 console.error('Error Copying data to clipboard', err);
             }
