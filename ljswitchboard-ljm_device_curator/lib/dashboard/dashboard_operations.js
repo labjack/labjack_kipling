@@ -1,14 +1,9 @@
+'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var q = require('q');
-var fs = require('fs');
-var path = require('path');
-var modbusMap = require('ljswitchboard-modbus_map').getConstants();
-var dashboard_data_collector = require('./dashboard_data_collector');
-var device_events = require('../device_events');
-var dashboard_channel_parser = require('./dashboard_channel_parser');
-
+const EventEmitter = require('events').EventEmitter;
+const DashboardDataCollector = require('./dashboard_data_collector');
+const device_events = require('../device_events');
+const dashboard_channel_parser = require('./dashboard_channel_parser');
 
 /*
  * Two functions to generate an object-diff used to only report 
@@ -19,32 +14,30 @@ var dashboard_channel_parser = require('./dashboard_channel_parser');
  */
 
 function isObject(value) {
-	var type = typeof(value);
+	const type = typeof(value);
 	return value != null & (type === 'object' || type === 'function');
 }
 
 function objDiff(newObj, oldObj) {
-	var diffObj = {};
+	const diffObj = {};
 
-	var newKeys = Object.keys(newObj);
-	var oldKeys = Object.keys(oldObj);
+	const newKeys = Object.keys(newObj);
 	newKeys.forEach(function(newKey) {
-		var newObjProp = newObj[newKey];
-		var oldObjProp = undefined;
-		if(typeof(oldObj[newKey])) {
-			oldObjProp = oldObj[newKey];
+		const newObjProp = newObj[newKey];
+		if (typeof(oldObj[newKey])) {
+			const oldObjProp = oldObj[newKey];
 
-			if(isObject(oldObjProp)) {
+			if (isObject(oldObjProp)) {
 				diffObj[newKey] = {};
 				// If we are comparing two objects... recurse & extend.
-				var subDiffObj = objDiff(newObjProp, oldObjProp);
-				var subDiffKeys = Object.keys(subDiffObj);
+				const subDiffObj = objDiff(newObjProp, oldObjProp);
+				const subDiffKeys = Object.keys(subDiffObj);
 				subDiffKeys.forEach(function(key) {
 					diffObj[newKey][key] = subDiffObj[key];
 				});
 			} else {
 				// If we are comparing two ~values
-				if(newObjProp !== oldObjProp) {
+				if (newObjProp !== oldObjProp) {
 					diffObj[newKey] = newObjProp;
 				}
 			}
@@ -56,29 +49,19 @@ function objDiff(newObj, oldObj) {
 	return diffObj;
 }
 
-var DEBUG_DASHBOARD_OPERATIONS = false;
-var DEBUG_DASHBOARD_GET_ALL = false;
-var DEBUG_DASHBOARD_UPDATE = false;
-var DEBUG_DASHBOARD_TEST_FUNC = false;
-var DEBUG_DASHBOARD_START = false;
-var DEBUG_DASHBOARD_DATA_COLLECTOR = true;
-var ENABLE_ERROR_OUTPUT = false;
+const DEBUG_DASHBOARD_TEST_FUNC = false;
+const DEBUG_DASHBOARD_START = false;
 
 function getLogger(bool) {
 	return function logger() {
-		if(bool) {
+		if (bool) {
 			console.log.apply(console, arguments);
 		}
 	};
 }
 
-var debugDOps = getLogger(DEBUG_DASHBOARD_OPERATIONS);
-var debugDGA = getLogger(DEBUG_DASHBOARD_GET_ALL);
-var debugDU = getLogger(DEBUG_DASHBOARD_UPDATE);
-var debugDTF = getLogger(DEBUG_DASHBOARD_TEST_FUNC);
-var debugDStart = getLogger(DEBUG_DASHBOARD_START);
-var debugDDC = getLogger(DEBUG_DASHBOARD_DATA_COLLECTOR);
-var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
+const debugDTF = getLogger(DEBUG_DASHBOARD_TEST_FUNC);
+const debugDStart = getLogger(DEBUG_DASHBOARD_START);
 
 /*
  * Most of the documentation on this feature of the T7
@@ -89,137 +72,122 @@ var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
  * This object is an event-emitter.  It emits events that should also
  * be emitted by the curated device object.
  */
-function getDashboardOperations(self) {
-	var curatedDevice = self;
+class GetDashboardOperations extends EventEmitter {
 
-	// Object that stores the registered listeners.  When there are
-	// no listeners, the dashboard data collection should be stopped.
-	var dashboardListeners = {};
+	constructor(self) {
+		super();
 
-	// Object that caches the data.
-	this.dataCache = {};
+		this.curatedDevice = self;
+
+		// Object that stores the registered listeners.  When there are
+		// no listeners, the dashboard data collection should be stopped.
+		this.dashboardListeners = {};
+
+		// Object that caches the data.
+		this.dataCache = {};
+
+		// variable that stores the dataCollector
+		this.dataCollector = null;
+	}
 
 	// Function that adds a data listener.
-	function addListener(uid) {
-		var addedListener = false;
-		if(typeof(dashboardListeners[uid]) === 'undefined') {
-			dashboardListeners[uid] = {
+	addListener(uid) {
+		if (typeof(this.dashboardListeners[uid]) === 'undefined') {
+			this.dashboardListeners[uid] = {
 				'startTime': new Date(),
 				'numIterations': 0,
 				'uid': uid,
 				'numStarts': 1,
 			};
-			addedListener = true;
+			return true;
 		} else {
 			// Don't add the listener.
-			dashboardListeners[uid].numStarts += 1;
+			this.dashboardListeners[uid].numStarts += 1;
+			return false;
 		}
-		return addedListener;
 	}
 
 	// Function that removes a data listener.  
-	function removeListener(uid) {
-		var removedListener = false;
-		if(typeof(dashboardListeners[uid]) !== 'undefined') {
-			dashboardListeners[uid] = undefined;
-			delete dashboardListeners[uid];
-			removedListener = true;
+	removeListener(uid) {
+		if (typeof(this.dashboardListeners[uid]) !== 'undefined') {
+			this.dashboardListeners[uid] = undefined;
+			delete this.dashboardListeners[uid];
+			return true;
 		}
-		return removedListener;
+		return false;
 	}
 
 	// Function that gets the number of listeners.
-	function getNumListeners() {
-		return Object.keys(dashboardListeners).length;
+	getNumListeners() {
+		return Object.keys(this.dashboardListeners).length;
 	}
 
 	// This is a test function that just prooves "basic signs of life".
-	this.testFunc = function() {
-		var defered = q.defer();
+	async testFunc() {
 		debugDTF("In Dashboard testFunc",
-			self.savedAttributes.productType,
-			self.savedAttributes.serialNumber,
-			self.savedAttributes.serialNumber
+			this.curatedDevice.savedAttributes.productType,
+			this.curatedDevice.savedAttributes.serialNumber,
+			this.curatedDevice.savedAttributes.serialNumber
 		);
-		var info = {
-			'pt': self.savedAttributes.productType,
-			'sn': self.savedAttributes.serialNumber,
+		return {
+			'pt': this.curatedDevice.savedAttributes.productType,
+			'sn': this.curatedDevice.savedAttributes.serialNumber,
 		};
-		defered.resolve(info);
-		return defered.promise;
-	};
+	}
 
-	// variable that stores the dataCollector
-	var dataCollector;
-
-	// Function that handles the data collection "data" events.  This
+	// Function that handles the data collection "data" events. This
 	// data is the data returned by the read-commands that are performed.
 	// This data still needs to be interpreted saved, cached, and organized
 	// into "channels".
-	// Maybe?? The dashboard_data_collector has logic for each of the devices.
+	// Maybe?? The DashboardDataCollector has logic for each of the devices.
 	// This logic should probably be put there?
-	function dataCollectorHandler(data) {
-		// debugDDC('New data', data['FIO0']);
-		var diffObj = objDiff(data, self.dataCache);
-
-		// console.log('Data Difference - diff', diffObj);
+	dataCollectorHandler(data) {
+		const diffObj = objDiff(data, this.dataCache);
 
 		// Clean the object to get rid of empty results.
-		var selectedResults = {};
+		const selectedResults = {};
 		Object.keys(diffObj).forEach(function(key) {
-			if(Object.keys(diffObj[key]).length > 0) {
+			if (Object.keys(diffObj[key]).length > 0) {
 				selectedResults[key] = diffObj[key];
 			}
 		});
 
-		var numKeys = Object.keys(data);
-		var numNewKeys = Object.keys(selectedResults);
+		// const numKeys = Object.keys(data);
+		// const numNewKeys = Object.keys(selectedResults);
 		// console.log('Num Keys for new data', numKeys, numNewKeys);
 		// console.log('Data Difference - pickBy', selectedResults);
-		self.dataCache = data;
+		this.dataCache = data;
 
-		self.emit(device_events.DASHBOARD_DATA_UPDATE, selectedResults);
-	}
-
-	// Function that creates the "bundle" that is built-up and passed between
-	// the steps that perform the "start" method.
-	function createStartBundle(uid) {
-		// Create and define the bundle object.
-		return {
-			'uid': uid,
-			'data': {},
-		};
+		this.emit(device_events.DASHBOARD_DATA_UPDATE, selectedResults);
 	}
 
 	// This function starts the data collector and registers event listeners.
-	function innerStart (bundle) {
-		var defered = q.defer();
+	innerStart(bundle) {
+		return new Promise(resolve => {
+			// Device Type is either T4, T5, or T7
+			const deviceType = this.curatedDevice.savedAttributes.deviceTypeName;
 
-		// Device Type is either T4, T5, or T7
-		var deviceType = self.savedAttributes.deviceTypeName;
+			// Save the created data collector object
+			this.dataCollector = new DashboardDataCollector(deviceType);
 
-		// Save the created data collector object
-		dataCollector = new dashboard_data_collector.create(deviceType);
+			// Listen to only the next 'data' event emitted by the dataCollector.
+			this.dataCollector.once('data', (data) => {
+				debugDStart('dev_cur-dash_ops: First bit of data!');
 
-		// Listen to only the next 'data' event emitted by the dataCollector.
-		dataCollector.once('data', function(data) {
-			debugDStart('dev_cur-dash_ops: First bit of data!');
+				// Listen to future data.
+				this.dataCollector.on('data', (data) => this.dataCollectorHandler(data));
 
-			// Listen to future data.
-			dataCollector.on('data', dataCollectorHandler);
+				// Save the data to the data cache.
+				this.dataCache = data;
+				bundle.data = data;
 
-			// Save the data to the data cache.
-			self.dataCache = data;
-			bundle.data = data;
+				// Declare the innerStart function to be finished.
+				resolve(bundle);
+			});
 
-			// Declare the innerStart function to be finished.
-			defered.resolve(bundle);
+			// Start the data collector.
+			this.dataCollector.start(this.curatedDevice);
 		});
-
-		// Start the data collector.
-		dataCollector.start(self);
-
-		return defered.promise;
 	}
 
 	/*
@@ -228,93 +196,57 @@ function getDashboardOperations(self) {
 	 * the listener already exists then its uid isn't added (since it is already
 	 * there).
 	*/
-	this.start = function(uid) {
-		var defered = q.defer();
-		var addedListener = addListener(uid);
-		var numListeners = getNumListeners();
-		var bundle = createStartBundle(uid);
+	async dashboard_start(uid) {
+		const addedListener = this.addListener(uid);
+		const numListeners = this.getNumListeners();
+		const bundle = {
+			'uid': uid,
+			'data': {},
+		};
 
-		function onSuccess(rBundle) {
-			defered.resolve(rBundle);
-		}
-		function onError(rBundle) {
-			defered.resolve(rBundle);
-		}
-
-		if(addedListener && (numListeners == 1)) {
+		if (addedListener && (numListeners === 1)) {
 			// We need to start the dashboard-service and we need to return 
 			// the current state of all of the channels.
-			innerStart(bundle)
-			.then(onSuccess, onError);
+			try {
+				await this.innerStart(bundle);
+			} catch (err) {
+				console.error(err);
+			}
 		} else {
-			// We don't need to start the dashboard-service.  We just need to
-			// return the current state of all of the channels.
-			onSuccess(bundle);
+			bundle.data = this.dataCache;
 		}
-		return defered.promise;
-	};
-
-	/*
-	 * These functions "pause" and "resume" the data-reporting
-	 */
-	this.pauseReporting = function(){};
-	this.resumeReporting = function(){};
-
-	/*
-	 * These functions "pause" and "resume" the DAQ loop collecting data from
-	 * the device.
-	 */
-	this.pauseCollecting = function(){};
-	this.resumeCollecting = function(){};
-
-
-	function createStopBundle(uid) {
-		return {
-			'uid': uid,
-			'isStopped': false,
-		};
-	}
-	function innerStop(bundle) {
-		var defered = q.defer();
-
-		var isStopped = dataCollector.stop();
-		bundle.isStopped = isStopped;
-		defered.resolve(bundle);
-
-		return defered.promise;
+		return bundle;
 	}
 
-	/* 
+	/*
 	 * This function stops the dashboard-ops procedure and un-registers a listener.
 	 * If there are zero remaining listeners than the DAQ loop actually stops running.
 	 */
-	this.stop = function(uid){
-		var defered = q.defer();
-		var removedListener = removeListener(uid);
-		var numListeners = getNumListeners();
-		var bundle = createStopBundle(uid);
+	async dashboard_stop(uid) {
+		const removedListener = this.removeListener(uid);
+		const numListeners = this.getNumListeners();
+		const bundle = {
+			'uid': uid,
+			'isStopped': false,
+		};
 
-		function onSuccess(rBundle) {
-			defered.resolve(rBundle);
-		}
-		function onError(rBundle) {
-			defered.resolve(rBundle);
-		}
-
-		if(removedListener && (numListeners === 0)) {
+		if (removedListener && (numListeners === 0)) {
 			// We need to stop the dashboard-service.
-			innerStop(bundle)
-			.then(onSuccess, onError);
+			try {
+				bundle.isStopped = this.dataCollector.stop();
+				return bundle;
+			} catch (err) {
+				return bundle;
+			}
 		} else {
 			// We don't need to stop the dashboard-service.  It should already
 			// be stopped.
-			onSuccess(bundle);
+			return bundle;
 		}
-		return defered.promise;
-	};
+	}
 
-	function createConfigIOBundle(channelName, attribute, value) {
-		var bundle = {
+	createConfigIOBundle(channelName, attribute, value) {
+		return {
 			'channelName': channelName,
 			'attribute': attribute,
 			'value': value,
@@ -325,64 +257,53 @@ function getDashboardOperations(self) {
 			'isError': false,
 			'errMessage': '',
 		};
-		return bundle;
 	}
 
-	
-	function getChannelInfo(channelName) {
-		var deviceTypeName = curatedDevice.savedAttributes.deviceTypeName;
-		var channels = dashboard_channel_parser.channels[deviceTypeName];
+	getChannelInfo(channelName) {
+		const deviceTypeName = this.curatedDevice.savedAttributes.deviceTypeName;
+		const channels = dashboard_channel_parser.channels[deviceTypeName];
 
-		var chInfo = channels[channelName];
+		const chInfo = channels[channelName];
 
-		var info = {
+		return {
 			'type': chInfo.type,
 			'ioNum': chInfo.ioNum,
 			'name': chInfo.name,
 		};
-
-		return info;
 	}
-	function performWrites(bundle) {
-		var executeWrite = false;
-		if(bundle.registersToWrite.length >= 0) {
-			if(bundle.valuesToWrite.length >= 0) {
-				executeWrite = true;
-			}
-		}
-		var defered = q.defer();
-		if(executeWrite) {
+
+	async performWrites(bundle) {
+		const executeWrite = (bundle.registersToWrite.length >= 0 && bundle.valuesToWrite.length >= 0);
+
+		if (executeWrite) {
 			// console.log('Executing iWriteMany', bundle.registersToWrite, bundle.valuesToWrite);
-			curatedDevice.iWriteMany(bundle.registersToWrite, bundle.valuesToWrite)
-			.then(function(res) {
-				defered.resolve({
+			try {
+				await this.curatedDevice.iWriteMany(bundle.registersToWrite, bundle.valuesToWrite);
+				return {
 					'registers': bundle.registersToWrite,
 					'values': bundle.valuesToWrite,
-				});
-			})
-			.catch(function(err) {
-				defered.resolve({
+				};
+			} catch (err) {
+				return {
 					'registers': bundle.registersToWrite,
 					'values': bundle.valuesToWrite,
 					'err': err,
-				});
-			});
+				};
+			}
 		} else {
-			defered.resolve({
+			return {
 				'registers': bundle.registersToWrite,
 				'values': bundle.valuesToWrite,
-			});
+			};
 		}
-		return defered.promise;
 	}
 
-	this.configIO = function(channelName, attribute, value) {
+	async dashboard_configIO(channelName, attribute, value) {
 		// console.log('in this.configIO', channelName, attribute, value);
-		var defered = q.defer();
 
-		var bundle = createConfigIOBundle(channelName, attribute, value);
+		const bundle = this.createConfigIOBundle(channelName, attribute, value);
 
-		var validAttributes = {
+		const validAttributes = {
 			'analogEnable': {
 				'enable': 1,
 				'disable': 0,
@@ -397,60 +318,59 @@ function getDashboardOperations(self) {
 			},
 		};
 
-		var chInfo = getChannelInfo(channelName);
-		var chType = chInfo.type;
+		const chInfo = this.getChannelInfo(channelName);
+		const chType = chInfo.type;
 
-		var chNum = 0;
-		var chNumValid = false;
+		let chNum = 0;
+		let chNumValid = false;
 		try {
-			if(typeof(value) === 'string') {
+			if (typeof(value) === 'string') {
 				chNum = validAttributes[attribute][value];
-			} else if(typeof(value) === 'number') {
+			} else if (typeof(value) === 'number') {
 				chNum = value;
 			}
-			if(typeof(chNum) === 'number') {
+			if (typeof(chNum) === 'number') {
 				chNumValid = true;
 			}
 		} catch(err) {
 			// catch the error...
 		}
 
-		
-		var bitMask = 0x0FFFFFFF;
-		if(chNumValid) {
-			if(chType === 'AIN') {
+		const bitMask = 0x0FFFFFFF;
+		if (chNumValid) {
+			if (chType === 'AIN') {
 				// We don't have to really write anything...
-			} else if(chType === 'DIO') {
-				if(attribute === 'digitalDirection') {
+			} else if (chType === 'DIO') {
+				if (attribute === 'digitalDirection') {
 					bundle.registersToWrite.push('DIO_INHIBIT');
 					bundle.valuesToWrite.push(bitMask ^ (1<<chInfo.ioNum));
 					bundle.registersToWrite.push('DIO_DIRECTION');
 					bundle.valuesToWrite.push(chNum<<chInfo.ioNum);
-				} else if(attribute === 'digitalState') {
+				} else if (attribute === 'digitalState') {
 					bundle.registersToWrite.push('DIO_INHIBIT');
 					bundle.valuesToWrite.push(bitMask ^ (1<<chInfo.ioNum));
 					bundle.registersToWrite.push('DIO_STATE');
 					bundle.valuesToWrite.push(chNum<<chInfo.ioNum);
 				}
-			} else if(chType === 'FLEX') {
-				if(attribute === 'digitalDirection') {
+			} else if (chType === 'FLEX') {
+				if (attribute === 'digitalDirection') {
 					bundle.registersToWrite.push('DIO_INHIBIT');
 					bundle.valuesToWrite.push(bitMask ^ (1<<chInfo.ioNum));
 					bundle.registersToWrite.push('DIO_DIRECTION');
 					bundle.valuesToWrite.push(chNum<<chInfo.ioNum);
-				} else if(attribute === 'digitalState') {
+				} else if (attribute === 'digitalState') {
 					bundle.registersToWrite.push('DIO_INHIBIT');
 					bundle.valuesToWrite.push(bitMask ^ (1<<chInfo.ioNum));
 					bundle.registersToWrite.push('DIO_STATE');
 					bundle.valuesToWrite.push(chNum<<chInfo.ioNum);
-				} else if(attribute === 'analogEnable') {
+				} else if (attribute === 'analogEnable') {
 					bundle.registersToWrite.push('DIO_INHIBIT');
 					bundle.valuesToWrite.push(bitMask ^ (1<<chInfo.ioNum));
 					bundle.registersToWrite.push('DIO_ANALOG_ENABLE');
 					bundle.valuesToWrite.push(chNum<<chInfo.ioNum);
 				}
-			} else if(chType === 'AO') {
-				if(attribute === 'analogValue') {
+			} else if (chType === 'AO') {
+				if (attribute === 'analogValue') {
 					bundle.registersToWrite.push(chInfo.name);
 					bundle.valuesToWrite.push(value);
 				}
@@ -460,13 +380,8 @@ function getDashboardOperations(self) {
 		}
 
 		// console.log('resolving..', chInfo, chType, chNum, chNumValid, bundle.registersToWrite, bundle.valuesToWrite);
-		performWrites(bundle)
-		.then(defered.resolve)
-		.catch(defered.resolve);
-		return defered.promise;
-	};
+		return await this.performWrites(bundle);
+	}
 }
 
-util.inherits(getDashboardOperations, EventEmitter);
-
-module.exports.get = getDashboardOperations;
+module.exports.get = GetDashboardOperations;

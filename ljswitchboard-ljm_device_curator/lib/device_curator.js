@@ -13,8 +13,6 @@ var ljm = require('labjack-nodejs');
 var ljmDeviceReference = ljm.getDevice();
 var modbusMap = ljm.modbusMap.getConstants();
 var driver_const = require('ljswitchboard-ljm_driver_constants');
-var ljm_ffi_req = require('ljm-ffi');
-var ljm_ffi = ljm_ffi_req.load();
 
 // Special T7 additional functions/operations
 var lj_t7_flash_operations = require('./t7_flash_operations');
@@ -2743,14 +2741,12 @@ function device(useMockDevice) {
 		return defered.promise;
 	};
 
-	var i;
-
 	/**
 	 * Device functions that allow for waiting...
 	**/
     var deviceValueChecker = new device_value_checker.get(this);
     var deviceValueCheckerKeys = Object.keys(deviceValueChecker);
-    for(i = 0; i < deviceValueCheckerKeys.length; i++) {
+    for(let i = 0; i < deviceValueCheckerKeys.length; i++) {
 		this[deviceValueCheckerKeys[i]] = deviceValueChecker[deviceValueCheckerKeys[i]];
 	}
 
@@ -2759,7 +2755,7 @@ function device(useMockDevice) {
 	**/
 	var luaScriptOperations = new lua_script_operations.get(this);
 	var luaScriptOperationKeys = Object.keys(luaScriptOperations);
-	for(i = 0; i < luaScriptOperationKeys.length; i++) {
+	for (let i = 0; i < luaScriptOperationKeys.length; i++) {
 		this[luaScriptOperationKeys[i]] = luaScriptOperations[luaScriptOperationKeys[i]];
 	}
 
@@ -2768,7 +2764,7 @@ function device(useMockDevice) {
 	**/
 	var fileSystemOperations = new file_system_operations.get(this);
 	var fileSystemOperationKeys = Object.keys(fileSystemOperations);
-	for(i = 0; i < fileSystemOperationKeys.length; i++) {
+	for (let i = 0; i < fileSystemOperationKeys.length; i++) {
 		this[fileSystemOperationKeys[i]] = fileSystemOperations[fileSystemOperationKeys[i]];
 	}
 
@@ -2777,7 +2773,7 @@ function device(useMockDevice) {
 	**/
 	var manufacturingInfoOperations = new manufacturing_info_operations.get(this);
 	var manufacturingInfoKeys = Object.keys(manufacturingInfoOperations);
-	for(i = 0; i < manufacturingInfoKeys.length; i++) {
+	for (let i = 0; i < manufacturingInfoKeys.length; i++) {
 		this[manufacturingInfoKeys[i]] = manufacturingInfoOperations[manufacturingInfoKeys[i]];
 	}
 
@@ -2786,7 +2782,7 @@ function device(useMockDevice) {
 	**/
 	var startupConfigOperations = new startup_config_operations.get(this);
 	var startupConfigKeys = Object.keys(startupConfigOperations);
-	for(i = 0; i < startupConfigKeys.length; i++) {
+	for (let i = 0; i < startupConfigKeys.length; i++) {
 		this[startupConfigKeys[i]] = startupConfigOperations[startupConfigKeys[i]];
 	}
 
@@ -2794,10 +2790,9 @@ function device(useMockDevice) {
 	 * Dashboard back-end functions:
 	**/
 	var dashboardOperations = new dashboard_operations.get(this);
-	var dashboardOperationKeys = Object.keys(dashboardOperations);
-	for(i = 0; i < dashboardOperationKeys.length; i++) {
-		this["dashboard_" + dashboardOperationKeys[i]] = dashboardOperations[dashboardOperationKeys[i]];
-	}
+	this.dashboard_start = (uid) => dashboardOperations.dashboard_start(uid);
+	this.dashboard_stop = (uid) => dashboardOperations.dashboard_stop(uid);
+	this.dashboard_configIO = (channelName, attribute, value) => dashboardOperations.dashboard_configIO(channelName, attribute, value);
 	// This shouldn't be necessary since we pass "this" into the dashboard_operations object.
 	// dashboardOperations.on(DASHBOARD_DATA_UPDATE, function dashboardDataUpdate(data) {
 	// 	console.log('!! Received data update from dashboard', data);
@@ -2809,7 +2804,7 @@ function device(useMockDevice) {
 	 */
 	var externalApplicationOperations = new external_application_operations.get(this);
 	var externalApplicationOperationKeys = Object.keys(externalApplicationOperations);
-	for(i = 0; i < externalApplicationOperationKeys.length; i++) {
+	for (let i = 0; i < externalApplicationOperationKeys.length; i++) {
 		this[externalApplicationOperationKeys[i]] = externalApplicationOperations[externalApplicationOperationKeys[i]];
 	}
 
@@ -2818,7 +2813,7 @@ function device(useMockDevice) {
 	 */
 	var availableConnectionsOperations = new available_connections_operations.get(this);
 	var availableConnectionsOperationKeys = Object.keys(availableConnectionsOperations);
-	for(i = 0; i < availableConnectionsOperationKeys.length; i++) {
+	for (let i = 0; i < availableConnectionsOperationKeys.length; i++) {
 		this[availableConnectionsOperationKeys[i]] = availableConnectionsOperations[availableConnectionsOperationKeys[i]];
 	}
 

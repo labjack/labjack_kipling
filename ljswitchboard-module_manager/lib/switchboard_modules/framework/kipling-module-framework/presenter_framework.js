@@ -903,13 +903,13 @@ class PresenterFramework extends EventEmitter {
             passParams.push(onSuccess);
             listener.apply(null, passParams);
         } catch (err) {
-            console.error(
-                'Error firing: ' + name,
-                // 'moduleData: ', this.moduleData,
-                'typeof sdModule: ', typeof(sdModule),
-                'typeof sdFramework: ', typeof(sdFramework),
-                'frameworkActive', this.frameworkActive);
             console.error(err);
+            console.error('Error firing: ' + name, {
+                // 'moduleData: ', this.moduleData,
+                'typeof sdModule': typeof(sdModule),
+                'typeof sdFramework': typeof(sdFramework),
+                'frameworkActive': this.frameworkActive
+            });
             try {
                 if (err.name === 'Driver Operation Error') {
                     // Error for old firmware version...
@@ -1127,7 +1127,7 @@ class PresenterFramework extends EventEmitter {
             });
         } else {
             return this.qExecOnCloseDevice()
-                .then(this.qExecOnUnloadModule, this.qExecOnUnloadModule);
+                .then(() => this.qExecOnUnloadModule(), () => this.qExecOnUnloadModule());
         }
     }
 
@@ -1142,7 +1142,7 @@ class PresenterFramework extends EventEmitter {
                 );
             } else {
                 return this.qExecOnCloseDevice()
-                    .then(this.qExecOnUnloadModule, this.qExecOnUnloadModule);
+                    .then(() => this.qExecOnUnloadModule(), () => this.qExecOnUnloadModule());
             }
         });
     }
@@ -1169,7 +1169,7 @@ class PresenterFramework extends EventEmitter {
             });
         } else {
             return this.qExecOnCloseDevice()
-                .then(this.qExecOnUnloadModule, this.qExecOnUnloadModule);
+                .then(() => this.qExecOnUnloadModule(), () => this.qExecOnUnloadModule());
         }
     }
 
@@ -1195,7 +1195,7 @@ class PresenterFramework extends EventEmitter {
                 }
             } else {
                 return this.qExecOnCloseDevice()
-                    .then(this.qExecOnUnloadModule, this.qExecOnUnloadModule);
+                    .then(() => this.qExecOnUnloadModule(), () => this.qExecOnUnloadModule());
             }
         });
     }
@@ -1287,7 +1287,7 @@ class PresenterFramework extends EventEmitter {
             }
 
             // clear any "ModuleWindowResizeListeners" window resize listeners
-            // clearModuleWindowResizeListners();
+            // clearModuleWindowResizeListeners();
 
             //If LJM's debug log was enabled, disable it
             if (this.ljmDriverLogEnabled) {

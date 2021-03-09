@@ -525,6 +525,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         .html(function (registerInfo) {
             var curData;
             var registerName = registerInfo.register;
+
             if(initializedData[registerName]) {
                 // console.log('Drawing Register', registerName, registerInfo, initializedData[registerName]);
                 curData = initializedData[registerName];
@@ -666,6 +667,7 @@ function getDeviceDashboardController(deviceInfo, moduleData) {
         }
     };
     this.updateValues_v2 = function(channelList, newData, cachedData) {
+        cachedData = JSON.parse(JSON.stringify(cachedData));
         // console.log('Channels to Update', channelList.filter(function(ch) {
         //     if(ch.indexOf('AIN') >= 0) {
         //         return false;

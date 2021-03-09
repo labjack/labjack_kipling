@@ -348,7 +348,6 @@ class ModuleChrome extends EventEmitter {
 	}
 
 	updateSecondaryModuleListing() {
-		console.trace();
 		// Get the list of modules and have the inner-function perform logic on
 		// acquired data.
 		return module_manager.getModulesList()
