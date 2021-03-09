@@ -2790,6 +2790,7 @@ function device(useMockDevice) {
 	 * Dashboard back-end functions:
 	**/
 	var dashboardOperations = new dashboard_operations.get(this);
+	this.on = (uid, callback) => dashboardOperations.on(uid, callback);
 	this.dashboard_start = (uid) => dashboardOperations.dashboard_start(uid);
 	this.dashboard_stop = (uid) => dashboardOperations.dashboard_stop(uid);
 	this.dashboard_configIO = (channelName, attribute, value) => dashboardOperations.dashboard_configIO(channelName, attribute, value);

@@ -271,7 +271,6 @@ class DashboardController {
         this.dataCollectorDevice.dashboard_start(DASHBOARD_DATA_COLLECTOR_UID)
         .then((res) => {
             res = JSON.parse(JSON.stringify(res));
-            console.log('F7', res);
             this.dataCache = res.data;
             // Register an event handler with the data-update event.
             this.dataCollectorDevice.on('DASHBOARD_DATA_UPDATE', event => this.frameworkDataUpdateHandler(event));
