@@ -646,7 +646,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     deviceErrorEventListener(data) {
-        // console.warn('Device Error', data);
         try {
             this.emit('FRAMEWORK_HANDLED_DEVICE_ERROR', data);
             if (data.deviceInfo) {
@@ -2950,7 +2949,9 @@ class PresenterFramework extends EventEmitter {
     async runFramework() {
         // Add exit listener.
         try {
-            global.ADD_K3_EXIT_LISTENER('presenter-framework-notifier', () => this.programExitListener());
+            if (global.ADD_K3_EXIT_LISTENER) {
+                global.ADD_K3_EXIT_LISTENER('presenter-framework-notifier', () => this.programExitListener());
+            }
         } catch(err) {
             console.log('presenter_framework.js addProgramExitListener err', err);
         }

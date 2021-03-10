@@ -1,6 +1,5 @@
 'use strict';
 
-const EventEmitter = require('events').EventEmitter;
 const DashboardDataCollector = require('./dashboard_data_collector');
 const device_events = require('../device_events');
 const dashboard_channel_parser = require('./dashboard_channel_parser');
@@ -72,12 +71,10 @@ const debugDStart = getLogger(DEBUG_DASHBOARD_START);
  * This object is an event-emitter.  It emits events that should also
  * be emitted by the curated device object.
  */
-class GetDashboardOperations extends EventEmitter {
+class GetDashboardOperations {
 
-	constructor(self) {
-		super();
-
-		this.curatedDevice = self;
+	constructor(curatedDevice) {
+		this.curatedDevice = curatedDevice;
 
 		// Object that stores the registered listeners.  When there are
 		// no listeners, the dashboard data collection should be stopped.
@@ -158,7 +155,7 @@ class GetDashboardOperations extends EventEmitter {
 		// console.log('Data Difference - pickBy', selectedResults);
 		this.dataCache = data;
 
-		this.emit(device_events.DASHBOARD_DATA_UPDATE, selectedResults);
+		this.curatedDevice.emit(device_events.DASHBOARD_DATA_UPDATE, selectedResults);
 	}
 
 	// This function starts the data collector and registers event listeners.
