@@ -28,11 +28,6 @@
 const sprintf = require('sprintf-js').sprintf;
 const async = require('async');
 
-// Constant that determines device polling rate.
-var MODULE_UPDATE_PERIOD_MS = 1500;
-
-// Constant that can be set to disable auto-linking the module to the framework
-var DISABLE_AUTOMATIC_FRAMEWORK_LINKAGE = false;
 const globalDeviceConstants = global.globalDeviceConstants;
 const globalDeviceConstantsSwitch = global.globalDeviceConstantsSwitch;
 
@@ -1320,7 +1315,7 @@ function module() {
         self.newBufferedValues = new Map();
         self.isValueNew = new Map();
         self.bufferedOutputValues = new Map();
-        self.analogInputsDict = new Map();
+        self.analogInputsDict.clear();
 
         self.deviceConstants = {};
         self.curDeviceOptions = new Map();
@@ -1353,7 +1348,7 @@ function module() {
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
         // Initialize variable where module config data will go.
         self.moduleContext = {};
-        self.analogInputsDict = new Map();
+        self.analogInputsDict.clear();
         if(self.defineDebuggingArrays){
             var analogInputs = [];
         }
@@ -1396,7 +1391,7 @@ function module() {
             if(self.defineDebuggingArrays){
                 analogInputs.push(ainChannel);
             }
-            self.analogInputsDict.set(reg,ainChannel);
+            self.analogInputsDict.set(reg, ainChannel);
         });
 
         var findNum = new RegExp("[0-9]{1,2}");
@@ -1469,7 +1464,7 @@ function module() {
                     }
 
                     // Update saved values
-                    self.analogInputsDict.set('AIN'+index.toString(),ainInfo);
+                    self.analogInputsDict.set('AIN'+index.toString(), ainInfo);
                 }
             }
         });
@@ -1541,7 +1536,7 @@ function module() {
     };
     this.initializeD3Graphs = function(onSuccess) {
         // For each analog input channel, create graphs using D3!
-        self.analogInputsDict.forEach(function(val,name){
+        self.analogInputsDict.forEach(function(val, name) {
             // Save the current value
             var curVal = val.value;
 

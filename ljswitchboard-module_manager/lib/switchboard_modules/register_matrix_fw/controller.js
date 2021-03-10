@@ -802,7 +802,6 @@ function module() {
         return Promise.resolve();
     };
     this.onRefreshed = function(framework, results, onError, onSuccess) {
-        // console.log('in onRefreshed');
         var readRegisters = self.getRegistersToRead();
         // console.log('Trying to read registers', readRegisters);
         if(readRegisters.length > 0) {

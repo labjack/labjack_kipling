@@ -2843,9 +2843,9 @@ class PresenterFramework extends EventEmitter {
                 );
             } else {
                 const promises = [];
-                promises.push(() => {
-                    return this.innerRunDAQLoop(this.activeDevice.savedAttributes);
-                });
+                promises.push(new Promise(async (resolve) => {
+                    resolve(await this.innerRunDAQLoop(this.activeDevice.savedAttributes));
+                }));
 
                 await Promise.allSettled(promises);
                 await this.verifyFrameworkIsActive();
