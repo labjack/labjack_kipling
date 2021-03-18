@@ -18,7 +18,7 @@ local offset = 2.5
 local frequency = 1
 -- Radians per step. A smaller number increases waveform resolution
 local radstep = .1
-local interval = 1000 / (2 * (frequency / radstep) )
+local interval = 1000 / (2 * math.pi * (frequency / radstep))
 local rads = 0
 LJ.IntervalConfig(0, interval)
 

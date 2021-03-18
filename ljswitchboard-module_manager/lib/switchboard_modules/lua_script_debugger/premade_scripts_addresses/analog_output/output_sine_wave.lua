@@ -13,7 +13,7 @@ local offset = 2.5            --offset, or centerline voltage in volts
 local frequency = 1           --frequency in Hz
 local rad_step = .1           --radians per step. A smaller number increases waveform resolution
 
-local timer_ms = 1000 / (2 * (frequency / rad_step) )
+local timer_ms = 1000 / (2 * math.pi * (frequency / rad_step))
 local rads = 0
 
 LJ.IntervalConfig(0, timer_ms)                   --set interval to 10 for 10ms
