@@ -1,9 +1,7 @@
 /* jshint undef: true, unused: true, undef: true */
-/* global console, global, module_manager, dict, q, showAlert, modbus_map, $ */
-/* global ljmmm_parse, handlebars, TASK_LOADER, MODULE_CHROME, path, FILE_BROWSER */
-
-/* global dataTableCreator */
-/* exported activeModule, module, MODULE_UPDATE_PERIOD_MS */
+/* global console, showAlert, $ */
+/* global TASK_LOADER, MODULE_CHROME, FILE_BROWSER */
+/* exported activeModule, module */
 
 /**
  * Goals for the Register Matrix module:
@@ -11,11 +9,11 @@
 
 // Constant that determines device polling rate.  Use an increased rate to aid
 // in user experience.
-var MODULE_UPDATE_PERIOD_MS = 1000;
 
-const q = require('q');
-var firmware_verifier = require('ljswitchboard-firmware_verifier');
-var fs = require('fs');
+const handlebars = require('handlebars');
+const path = require('path');
+const fs = require('fs');
+const firmware_verifier = require('ljswitchboard-firmware_verifier');
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
  * When using the 'singleDevice' framework it is instantiated as sdModule.
@@ -33,25 +31,16 @@ function module() {
     this.userSelectedFWFile = undefined;
     this.upgradeInProgress = false;
 
-    // var update_manager = TASK_LOADER.tasks.update_manager;
-
-
-
-    // var update_manager_events = update_manager.eventList;
-    // var update_manager_vm = update_manager.vm;
-
-    var device_updater_service = TASK_LOADER.tasks.device_updater_service;
-    var deviceUpdaterService = device_updater_service.deviceUpdaterService;
+    const device_updater_service = TASK_LOADER.tasks.device_updater_service;
+    const deviceUpdaterService = device_updater_service.deviceUpdaterService;
     this.dts = deviceUpdaterService;
 
     this.versionData = undefined;
-    this.hasValidWebData = false;
     try {
         if(deviceUpdaterService.cachedVersionData) {
             this.versionData = JSON.parse(JSON.stringify(
                 deviceUpdaterService.cachedVersionData
             ));
-            this.hasValidWebData = true;
         } else {
             console.warn('Version Data not yet ready...');
         }
@@ -88,12 +77,12 @@ function module() {
     this.selectedDT = '';
 
     this.selectNewestCurrentFirmware = function() {
-        var selectedFW = {};
-        var selectedVersion = 0;
-        var currentFWs;
+        let selectedFW = {};
+        let selectedVersion = 0;
+        let currentFWs;
 
         // Select what FW category we want to pick the newest version from.
-        var subCategories = ['current', 'beta', 'alpha', 'old'];
+        const subCategories = ['current', 'beta', 'alpha', 'old'];
         subCategories.some(function(subCategory) {
             if(self.currentDTVersionData[subCategory]) {
                 currentFWs = self.currentDTVersionData[subCategory];
@@ -105,8 +94,8 @@ function module() {
 
         // Select the highest FW version.
         currentFWs.forEach(function(currentFW) {
-            var versionStr = currentFW.version;
-            var version = parseFloat(versionStr, 10);
+            const versionStr = currentFW.version;
+            const version = parseFloat(versionStr, 10);
             if(version > selectedVersion) {
                 selectedVersion = version;
                 selectedFW = currentFW;
@@ -116,9 +105,9 @@ function module() {
         self.userSelectedFW = selectedFW;
     };
     this.getSelectedFirmwareData = function(key) {
-        var selectedFW;
+        let selectedFW;
 
-        var subCategories = ['current', 'beta', 'alpha', 'old'];
+        const subCategories = ['current', 'beta', 'alpha', 'old'];
         subCategories.some(function(subCategory) {
             if(self.currentDTVersionData[subCategory]) {
                 return self.currentDTVersionData[subCategory].some(function(versionData) {
@@ -159,7 +148,7 @@ function module() {
         self.moduleData = framework.moduleData;
 
         // Compile module templates
-        var templatesToCompile = [
+        const templatesToCompile = [
             'selected_firmware',
             'firmware_file_info',
             'device_upgrade_status',
@@ -214,21 +203,21 @@ function module() {
         //     onSuccess();
         // });
 
-        var deviceTypeCounts = {};
+        const deviceTypeCounts = {};
         devices.forEach(function(device) {
-            var attrs = device.savedAttributes;
-            var dtn = attrs.deviceTypeName;
+            const attrs = device.savedAttributes;
+            const dtn = attrs.deviceTypeName;
             if(deviceTypeCounts[dtn]) {
                 deviceTypeCounts[dtn] += 1;
             } else {
                 deviceTypeCounts[dtn] = 1;
             }
-        })
-        var dtcKeys = Object.keys(deviceTypeCounts);
-        var numDTs = dtcKeys.length;
-        var dtCountsArray = [];
+        });
+        const dtcKeys = Object.keys(deviceTypeCounts);
+        const numDTs = dtcKeys.length;
+        const dtCountsArray = [];
         dtcKeys.forEach(function(key) {
-            var plural = deviceTypeCounts[key] > 1;
+            const plural = deviceTypeCounts[key] > 1;
             dtCountsArray.push({
                 'deviceType': key,
                 'numDevices': deviceTypeCounts[key],
@@ -240,20 +229,20 @@ function module() {
         self.moduleContext.deviceTypeCounts = deviceTypeCounts;
         self.moduleContext.deviceTypeCountsArray = dtCountsArray;
 
-        var selectedDT = '';
-        var deviceTypeInfo = {};
+        let selectedDT = '';
+        const deviceTypeInfo = {};
         if(numDTs == 1) {
             selectedDT = dtcKeys[0];
             self.selectedDT = selectedDT;
             deviceTypeInfo.dt = selectedDT;
-            var dtInfo = deviceSpecificInfo[selectedDT];
-            var infoKeys = Object.keys(dtInfo);
+            const dtInfo = deviceSpecificInfo[selectedDT];
+            const infoKeys = Object.keys(dtInfo);
             infoKeys.forEach(function(key) {
                 deviceTypeInfo[key] = dtInfo[key];
             });
             self.moduleContext.dtInfo = deviceTypeInfo;
 
-            var versionData = self.availableVersionData[selectedDT];
+            const versionData = self.availableVersionData[selectedDT];
             self.moduleContext.versionData = versionData;
             self.currentDTVersionData = versionData;
 
@@ -279,13 +268,13 @@ function module() {
         onSuccess();
     };
     this.updateSelectedFW = function(selectedFW) {
-        var newData = self.templates.selected_firmware(selectedFW);
+        const newData = self.templates.selected_firmware(selectedFW);
         self.pageElements.selectedFW.ele.html(newData);
         self.userSelectedFW = selectedFW;
     };
     this.onVersionSelected = function() {
         try {
-            var selectedFW = self.getSelectedFirmwareData(this.id);
+            const selectedFW = self.getSelectedFirmwareData(this.id);
             self.updateSelectedFW(selectedFW);
         } catch(err) {
             console.error('Error Selecting new fw', err);
@@ -294,13 +283,12 @@ function module() {
     };
     this.viewTransitionDelay = 200;
     this.disableUpgradeButtons = function() {
-        var defered = q.defer();
-        self.pageElements.upgradeElements.ele.fadeOut(
-            self.viewTransitionDelay,
-            defered.resolve
-        );
-        // defered.resolve();
-        return defered.promise;
+        return new Promise((resolve) => {
+            self.pageElements.upgradeElements.ele.fadeOut(
+                self.viewTransitionDelay,
+                resolve
+            );
+        });
     };
     function getDeviceUpgrader(device, firmwareInfo, index) {
         console.log('Created index...', index);
@@ -308,9 +296,9 @@ function module() {
         this.numStepUpdates = 0;
         this.sn = device.savedAttributes.serialNumber;
 
-        var eleID = '#' + 'upgrade_status_' + this.sn.toString();
-        var stepID = eleID + ' .upgrade-step';
-        var barID = eleID + ' .progress .bar';
+        const eleID = '#' + 'upgrade_status_' + this.sn.toString();
+        const stepID = eleID + ' .upgrade-step';
+        const barID = eleID + ' .progress .bar';
         this.stepEle = $(stepID);
         this.barEle = $(barID);
         this.upgradeInfo = {
@@ -321,7 +309,7 @@ function module() {
             'firmwareInfo': firmwareInfo,
             'productType': device.savedAttributes.productType,
         };
-        var debugUpdateManager = false;
+        const debugUpdateManager = false;
         this.percentListener = function(percent) {
             // console.log(
             //     'in percentListener',
@@ -329,7 +317,7 @@ function module() {
             //     percent
             // );
             try {
-                var percentStr = percent.toString() + '%';
+                const percentStr = percent.toString() + '%';
                 upgradeManager.barEle.width(percentStr);
                 upgradeManager.numPercentUpdates += 1;
             } catch(err) {
@@ -349,11 +337,11 @@ function module() {
                 console.warn('Error in stepListener', err);
             }
         };
-        var populateUpgradeData = function(err) {
-            var endTime = new Date();
-            var startTime = upgradeManager.upgradeInfo.startTime;
-            var durationNum = endTime - startTime;
-            var durationStr = (durationNum/1000).toFixed(1) + ' seconds';
+        const populateUpgradeData = function(err) {
+            const endTime = new Date();
+            const startTime = upgradeManager.upgradeInfo.startTime;
+            const durationNum = endTime - startTime;
+            const durationStr = (durationNum/1000).toFixed(1) + ' seconds';
             upgradeManager.upgradeInfo.endTime = endTime;
             upgradeManager.upgradeInfo.duration = durationStr;
             upgradeManager.upgradeInfo.numPercentUpdates = upgradeManager.numPercentUpdates;
@@ -385,167 +373,162 @@ function module() {
                 }
             }
         };
-        var upgradeDevice = function() {
-            var defered = q.defer();
-            console.log('Upgrading Device', device.savedAttributes, firmwareInfo);
-            // setTimeout(defered.resolve, 2000);
-            upgradeManager.upgradeInfo.startTime = new Date();
-            function reportError(err) {
-                populateUpgradeData(err);
-                defered.resolve(upgradeManager.upgradeInfo);
-            }
-            function onAuthSuccess(res) {
-                console.log('Is Device Authorized?', res);
-                if(res) { // If the device is authorized...
-                    device.updateFirmware(
-                        firmwareInfo.path,
-                        upgradeManager.percentListener,
-                        upgradeManager.stepListener
-                    ).then(function() {
-                        populateUpgradeData();
-                        defered.resolve(upgradeManager.upgradeInfo);
-                    }, reportError);
-                } else {
-                    upgradeManager.percentListener(100);
-                    upgradeManager.stepListener("Upgrade Failed, Device is not Authorized.  Please email support@labjack.com.");
-                    reportError({"errorMessage": "Device is not Authorized.  Please email support@labjack.com."});
-                }
-            }
+        const upgradeDevice = function() {
+            return new Promise((resolve) => {
+                console.log('Upgrading Device', device.savedAttributes, firmwareInfo);
+                upgradeManager.upgradeInfo.startTime = new Date();
 
-            if(device.savedAttributes.deviceTypeName === 'T4') {
-                device.isAuthorized().then(onAuthSuccess, reportError);
-            } else {
-                onAuthSuccess(true);
-            }
-            return defered.promise;
+                function reportError(err) {
+                    populateUpgradeData(err);
+                    resolve(upgradeManager.upgradeInfo);
+                }
+
+                function onAuthSuccess(res) {
+                    console.log('Is Device Authorized?', res);
+                    if (res) { // If the device is authorized...
+                        device.updateFirmware(
+                            firmwareInfo.path,
+                            upgradeManager.percentListener,
+                            upgradeManager.stepListener
+                        ).then(function () {
+                            populateUpgradeData();
+                            resolve(upgradeManager.upgradeInfo);
+                        }, reportError);
+                    } else {
+                        upgradeManager.percentListener(100);
+                        upgradeManager.stepListener("Upgrade Failed, Device is not Authorized.  Please email support@labjack.com.");
+                        reportError({"errorMessage": "Device is not Authorized.  Please email support@labjack.com."});
+                    }
+                }
+
+                if (device.savedAttributes.deviceTypeName === 'T4') {
+                    device.isAuthorized().then(onAuthSuccess, reportError);
+                } else {
+                    onAuthSuccess(true);
+                }
+            });
         };
         this.startUpgrade = function() {
-            var defered = q.defer();
-            upgradeDevice()
-            .then(defered.resolve);
-            return defered.promise;
+            return new Promise((resolve) => {
+                upgradeDevice()
+                    .then(resolve);
+            });
         };
-        var upgradeManager = this;
+        const upgradeManager = this;
     }
     this.getUpgradeDevices = function(firmwareInfo, devices) {
-        var upgradeDevices = function() {
-            var defered = q.defer();
-            console.log(
-                'Upgrading',
-                devices.length,
-                ' devices to firmware version',
-                firmwareInfo.version
-            );
-            console.log('Upgrade Path', firmwareInfo.path);
-            var promises = [];
-            var deviceUpgraders = [];
-            devices.forEach(function(device, i) {
-                var deviceUpgrader = new getDeviceUpgrader(device, firmwareInfo, i);
-                deviceUpgraders.push(deviceUpgrader);
-                promises.push(deviceUpgrader.startUpgrade());
-            });
-
-            Promise.allSettled(promises)
-            .then(function(promiseResults) {
-                var results = [];
-                promiseResults.forEach(function(promiseResult) {
-                    if(promiseResult.state === 'fulfilled') {
-                        results.push(promiseResult.value);
-                    }
+        const upgradeDevices = function() {
+            return new Promise((resolve) => {
+                console.log(
+                    'Upgrading',
+                    devices.length,
+                    ' devices to firmware version',
+                    firmwareInfo.version
+                );
+                console.log('Upgrade Path', firmwareInfo.path);
+                const promises = [];
+                const deviceUpgraders = [];
+                devices.forEach(function (device, i) {
+                    const deviceUpgrader = new getDeviceUpgrader(device, firmwareInfo, i);
+                    deviceUpgraders.push(deviceUpgrader);
+                    promises.push(deviceUpgrader.startUpgrade());
                 });
-                console.log('Upgrade Results', results);
-                defered.resolve(results);
+
+                Promise.allSettled(promises)
+                    .then(function (promiseResults) {
+                        const results = [];
+                        promiseResults.forEach(function (promiseResult) {
+                            if (promiseResult.state === 'fulfilled') {
+                                results.push(promiseResult.value);
+                            }
+                        });
+                        console.log('Upgrade Results', results);
+                        resolve(results);
+                    });
             });
-            return defered.promise;
         };
-        var displayUpgradeView = function() {
-            var defered = q.defer();
-            var data = self.templates.device_upgrade_status({
-                'devices': devices,
-                'firmwareInfo': firmwareInfo
+        const displayUpgradeView = function() {
+            return new Promise((resolve) => {
+                const data = self.templates.device_upgrade_status({
+                    'devices': devices,
+                    'firmwareInfo': firmwareInfo
+                });
+                self.pageElements.upgradeStatusHolder.ele.html(data);
+                self.pageElements.upgradeStatusHolder.ele.fadeIn(
+                    self.viewTransitionDelay,
+                    () => resolve()
+                );
             });
-            self.pageElements.upgradeStatusHolder.ele.html(data);
-            self.pageElements.upgradeStatusHolder.ele.fadeIn(
-                self.viewTransitionDelay,
-                defered.resolve
-            );
-            return defered.promise;
         };
-        var createUpgradeResultsElement = function(results) {
-            var defered = q.defer();
-            var pageData = self.templates.upgrade_results({
-                'results': results
+        const createUpgradeResultsElement = function(results) {
+            return new Promise((resolve) => {
+                const pageData = self.templates.upgrade_results({
+                    'results': results
+                });
+                self.pageElements.upgradeResults.ele.html(pageData);
+                resolve();
             });
-            self.pageElements.upgradeResults.ele.html(pageData);
-            defered.resolve();
-            return defered.promise;
         };
-        var upgradeManager = function() {
-            var defered = q.defer();
-            displayUpgradeView()
-            .then(upgradeDevices)
-            .then(createUpgradeResultsElement)
-            .then(defered.resolve);
-            return defered.promise;
+        const upgradeManager = function() {
+            return new Promise((resolve) => {
+                displayUpgradeView()
+                    .then(upgradeDevices)
+                    .then(createUpgradeResultsElement)
+                    .then(() => resolve());
+            });
         };
         return upgradeManager;
     };
     this.hideUpgradeResults = function() {
-        var defered = q.defer();
-        self.pageElements.upgradeResults.ele.slideUp(function() {
-            self.pageElements.upgradeResults.ele.empty();
-            defered.resolve();
+        return new Promise((resolve) => {
+            self.pageElements.upgradeResults.ele.slideUp(function () {
+                self.pageElements.upgradeResults.ele.empty();
+                resolve();
+            });
         });
-        return defered.promise;
     };
     this.clearPreviousUpgradeResults = function() {
-        var state = self.pageElements.upgradeResults.ele.css('display');
+        const state = self.pageElements.upgradeResults.ele.css('display');
         if(state !== 'none') {
             return self.hideUpgradeResults();
         } else {
-            var defered = q.defer();
-            defered.resolve();
-            return defered.promise;
+            return new Promise((resolve) => {
+                resolve();
+            });
         }
     };
     this.hideUpgradeView = function() {
-        var defered = q.defer();
-        self.pageElements.upgradeStatusHolder.ele.fadeOut(
-            self.viewTransitionDelay,
-            defered.resolve
-        );
-        return defered.promise;
+        return new Promise((resolve) => {
+            self.pageElements.upgradeStatusHolder.ele.fadeOut(
+                self.viewTransitionDelay,
+                () => resolve()
+            );
+        });
     };
     this.emptyUpgradeView = function() {
-        var defered = q.defer();
         self.pageElements.upgradeStatusHolder.ele.empty();
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     this.showUpgradeResults = function() {
-        var defered = q.defer();
-        self.pageElements.upgradeResults.ele.slideDown(function() {
-            defered.resolve();
+        return new Promise((resolve) => {
+            self.pageElements.upgradeResults.ele.slideDown(function () {
+                resolve();
+            });
         });
-        return defered.promise;
     };
     this.enableUpgradeButtons = function() {
-        var defered = q.defer();
-        console.log('Finished Upgrading');
-        // defered.resolve();
-        self.pageElements.upgradeElements.ele.fadeIn(
-            self.viewTransitionDelay,
-            defered.resolve
-        );
-        return defered.promise;
+        return new Promise((resolve) => {
+            console.log('Finished Upgrading');
+            self.pageElements.upgradeElements.ele.fadeIn(
+                self.viewTransitionDelay,
+                () => resolve()
+            );
+        });
     };
     this.indicateUpgradeFinished = function() {
-        var defered = q.defer();
-
         MODULE_CHROME.enableModuleLoading();
         self.upgradeInProgress = false;
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     this.startUpgrade = function(type) {
         try {
@@ -553,7 +536,7 @@ function module() {
                 self.upgradeInProgress = true;
                 MODULE_CHROME.disableModuleLoading('Please wait for upgrade to finish.');
                 console.log('Starting Upgrade');
-                var firmwareInfo = {};
+                const firmwareInfo = {};
                 if(type === 'file') {
                     firmwareInfo.path = self.userSelectedFWFile.path;
                     firmwareInfo.version = self.userSelectedFWFile.version;
@@ -561,7 +544,7 @@ function module() {
                     firmwareInfo.path = self.userSelectedFW.upgradeLink;
                     firmwareInfo.version = self.userSelectedFW.version;
                 }
-                var devicesToUpgrade = self.activeDevices;
+                const devicesToUpgrade = self.activeDevices;
 
                 self.disableUpgradeButtons()
                 .then(self.clearPreviousUpgradeResults)
@@ -584,106 +567,104 @@ function module() {
     };
 
 
-    var getSelectedFileStats = function(bundle) {
-        var defered = q.defer();
-        fs.stat(bundle.path, function(err, stats) {
-            if(err) {
-                bundle.isValid = false;
-                bundle.message = 'Failed to read selected file, file probably does not exist.';
-                defered.resolve(bundle);
-            } else {
-                bundle.fileStats = stats;
-                defered.resolve(bundle);
-            }
-        });
-        return defered.promise;
-    };
-    var checkSelectedFileEnding = function(bundle) {
-        var defered = q.defer();
-
-        if(bundle.isValid) {
-            // Check to make sure that the file's ending is .bin
-            if(bundle.extension !== '.bin') {
-                bundle.isValid = false;
-                bundle.message = 'File ending should be .bin not ' + bundle.extension + '.';
-                defered.resolve(bundle);
-                return defered.promise;
-            }
-            // Check to make sure that the file is less than 1MB in size
-
-            var maxSize = 1000000;
-            if(bundle.fileStats.size > maxSize) {
-                bundle.isValid = false;
-                bundle.message = 'File size is greater than 1MB, it is probably not a firmware file.';
-                defered.resolve(bundle);
-                return defered.promise;
-            }
-        }
-
-        defered.resolve(bundle);
-        return defered.promise;
-    };
-    var loadSelectedBinaryFile = function(bundle) {
-        var defered = q.defer();
-        if(bundle.isValid) {
-            fs.readFile(bundle.path, function(err, data) {
-                if(err) {
+    const getSelectedFileStats = function(bundle) {
+        return new Promise((resolve) => {
+            fs.stat(bundle.path, function (err, stats) {
+                if (err) {
                     bundle.isValid = false;
-                    bundle.message = 'Failed to read selected file.';
+                    bundle.message = 'Failed to read selected file, file probably does not exist.';
+                    resolve(bundle);
                 } else {
-                    bundle.fileData = data;
+                    bundle.fileStats = stats;
+                    resolve(bundle);
                 }
-                defered.resolve(bundle);
             });
-        } else {
-            defered.resolve(bundle);
-        }
-        return defered.promise;
+        });
     };
-    var verifySelectedBinaryFile = function(bundle) {
-        var defered = q.defer();
-        try {
-            if(bundle.isValid) {
-                firmware_verifier.validateFirmwareFile(bundle.fileData, {
-                    'version': bundle.version,
-                    'deviceType': self.selectedDT,
-                })
-                .then(function(parsedData) {
-                    bundle.isValidBinary = parsedData.isValid;
-                    bundle.message = parsedData.message;
-                    defered.resolve(bundle);
+    const checkSelectedFileEnding = function(bundle) {
+        return new Promise((resolve) => {
+
+            if (bundle.isValid) {
+                // Check to make sure that the file's ending is .bin
+                if (bundle.extension !== '.bin') {
+                    bundle.isValid = false;
+                    bundle.message = 'File ending should be .bin not ' + bundle.extension + '.';
+                    return resolve(bundle);
+                }
+                // Check to make sure that the file is less than 1MB in size
+
+                const maxSize = 1000000;
+                if (bundle.fileStats.size > maxSize) {
+                    bundle.isValid = false;
+                    bundle.message = 'File size is greater than 1MB, it is probably not a firmware file.';
+                    return resolve(bundle);
+                }
+            }
+
+            resolve(bundle);
+        });
+    };
+    const loadSelectedBinaryFile = function(bundle) {
+        return new Promise((resolve) => {
+            if (bundle.isValid) {
+                fs.readFile(bundle.path, function (err, data) {
+                    if (err) {
+                        bundle.isValid = false;
+                        bundle.message = 'Failed to read selected file.';
+                    } else {
+                        bundle.fileData = data;
+                    }
+                    resolve(bundle);
                 });
             } else {
-                defered.resolve(bundle);
+                resolve(bundle);
             }
-        } catch(err) {
-            console.log('ERR in verifySelectedBinaryFile', err);
-            // Error verifying the file
-            defered.resolve(bundle);
-        }
-        return defered.promise;
+        });
     };
-    var displaySelectedFileInfo = function(bundle) {
-        var defered = q.defer();
-        self.pageElements.chosenFilePath.ele.val(bundle.path);
-        var fileInfo = self.templates.firmware_file_info(
-            bundle
-        );
-        self.pageElements.userSelectedFileInfo.ele.html(fileInfo);
+    const verifySelectedBinaryFile = function(bundle) {
+        return new Promise((resolve) => {
+            try {
+                if (bundle.isValid) {
+                    firmware_verifier.validateFirmwareFile(bundle.fileData, {
+                        'version': bundle.version,
+                        'deviceType': self.selectedDT,
+                    })
+                        .then(function (parsedData) {
+                            bundle.isValidBinary = parsedData.isValid;
+                            bundle.message = parsedData.message;
+                            resolve(bundle);
+                        });
+                } else {
+                    resolve(bundle);
+                }
+            } catch (err) {
+                console.log('ERR in verifySelectedBinaryFile', err);
+                // Error verifying the file
+                resolve(bundle);
+            }
+        });
+    };
+    const displaySelectedFileInfo = function(bundle) {
+        return new Promise((resolve) => {
+            self.pageElements.chosenFilePath.ele.val(bundle.path);
+            const fileInfo = self.templates.firmware_file_info(
+                bundle
+            );
+            self.pageElements.userSelectedFileInfo.ele.html(fileInfo);
 
-        if(bundle.isValid && bundle.isValidBinary) {
-            self.userSelectedFWFile = bundle;
-            self.pageElements.localUpdate.ele.attr('disabled', false);
-        } else {
-            self.userSelectedFWFile = undefined;
-            self.pageElements.localUpdate.ele.attr('disabled', true);
-        }
-        defered.resolve(bundle);
-        return defered.promise;
+            if (bundle.isValid && bundle.isValidBinary) {
+                self.userSelectedFWFile = bundle;
+                self.pageElements.localUpdate.ele.attr('disabled', false);
+            } else {
+                self.userSelectedFWFile = undefined;
+                self.pageElements.localUpdate.ele.attr('disabled', true);
+            }
+            resolve(bundle);
+        });
     };
     this.updateSelectedFWFile = function(filePath) {
-        var info = path.parse(filePath);
-        var fileData = {
+        const info = path.parse(filePath);
+        const fileData = {
             'path': filePath,
             'name': info.name,
             'fileName': info.base,
@@ -697,9 +678,9 @@ function module() {
         };
 
         try {
-            var splitName = info.name.split('_');
-            var versionStr = splitName[1];
-            var fullNum = Number(versionStr)/10000;
+            const splitName = info.name.split('_');
+            const versionStr = splitName[1];
+            const fullNum = Number(versionStr)/10000;
             fileData.version = fullNum.toFixed(4);
         } catch(err) {
             fileData.version = '';
@@ -727,7 +708,7 @@ function module() {
         // return false;
     };
     this.chosenFilePathChanged = function() {
-        var fileLoc = $(this).val();
+        const fileLoc = $(this).val();
         self.updateSelectedFWFile(fileLoc);
     };
     this.updateFromLocalFile = function() {
@@ -736,7 +717,7 @@ function module() {
 
 
     this.pageElements = {};
-    var pageElementsToCache = [{
+    const pageElementsToCache = [{
         'key': 'selectedFW',
         'selector': '#internet-controls #selected-firmware',
     }, {
@@ -786,7 +767,7 @@ function module() {
 
     this.cachePageElements = function() {
         pageElementsToCache.forEach(function(pageElement) {
-            var ele = $(pageElement.selector);
+            const ele = $(pageElement.selector);
             pageElement.ele = ele;
 
             if(pageElement.on) {
@@ -853,5 +834,5 @@ function module() {
         onHandle(true);
     };
 
-    var self = this;
+    const self = this;
 }
