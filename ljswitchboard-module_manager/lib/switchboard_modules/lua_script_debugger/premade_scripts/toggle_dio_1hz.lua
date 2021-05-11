@@ -31,6 +31,6 @@ while true do
       print(diostatus, "high")
     end
     -- Apply the change to the DIO pin register (toggle on or off)
-    MB.W(outpin, diostatus)
+    MB.W(outpin, 0, diostatus)
   end
 end
