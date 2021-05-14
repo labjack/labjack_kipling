@@ -2,7 +2,8 @@ var ljs_modbus_map = require('ljswitchboard-modbus_map');
 var modbus_map = ljs_modbus_map.getConstants();
 
 global.globalDeviceConstantsSwitch = {
-    "T7":"t7DeviceConstants",
+    "T4":"t4DeviceConstants",
+    "T7":"t7DeviceConstants ",
     "T7Pro":"t7ProDeviceConstants",
     "T7-Pro":"t7ProDeviceConstants"
 };
@@ -92,6 +93,16 @@ var sharedAINEFData = {
     },
 };
 global.globalDeviceConstants = {
+    "t4DeviceConstants": {
+        ainChannelNames: "AIN#(0:3)",
+        parsers: [
+            "ainRangeOptions",
+            "ainResolutionOptions",
+            "ainSettlingOptions",
+            "ainNegativeCHOptions",
+            "ainEFTypeOptions"
+        ],
+    },
     "t7DeviceConstants": {
         hasEFSystem: true,
         ainBitsPrecision: 6,

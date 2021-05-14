@@ -235,13 +235,10 @@ class ModuleLoader extends EventEmitter {
 
 	async executeUnloadModuleFunctions() {
 		if (this.unloadModuleFunctions.length > 0) {
-			const promises = this.unloadModuleFunctions; //.map(func => func());
-/*
+			const promises = [].concat(this.unloadModuleFunctions); //.map(func => func());
 			for (let i = 0; i < this.unloadModuleFunctions.length; i++) {
 				promises.push(this.unloadModuleFunctions[i]());
 			}
-*/
-			console.log('executeUnloadModuleFunctions', this.unloadModuleFunctions.length > 0);
 			try {
 				await Promise.allSettled(promises);
 				this.unloadModuleFunctions = [];

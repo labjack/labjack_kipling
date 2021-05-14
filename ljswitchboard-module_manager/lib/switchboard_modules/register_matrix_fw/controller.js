@@ -2,7 +2,6 @@
 /* global console, module_manager, dict, q, showAlert, modbus_map, $ */
 /* global ljmmm_parse, handlebars */
 
-/* global dataTableCreator */
 /* exported activeModule, module, MODULE_UPDATE_PERIOD_MS */
 
 /**
@@ -117,7 +116,7 @@ function module() {
         
         return self.isTableWatchRegisterActive(registerName);
     };
-    this.tableManager = new dataTableCreator();
+    this.tableManager = new DataTableCreator();
 
     this.tableManager.saveControls({
         'getRegisterWatchStatus': this.getRegisterWatchStatus,
@@ -140,7 +139,7 @@ function module() {
             showAlert('startupData is corrupted');
             console.error('Corrupted Data', self.startupData);
         }
-        
+
         if(displayMethod === 'registers_by_sn') {
             self.startupData.registers_by_sn[sn] = registerList;
             return Promise.resolve();
@@ -335,7 +334,7 @@ function module() {
 
         var deviceAttribute = self.activeDevice.savedAttributes[attributeKey];
         if(typeof(deviceAttribute) === 'undefined') {
-            showAlert('Un-supported deviceAttribute: ' + attributeKey + 'Changing to serialNumber.');
+            showAlert('Un-supported deviceAttribute: ' + attributeKey + ' Changing to serialNumber.');
             console.log('in getRegistersToDisplay B', attributeKey, self.activeDevice.savedAttributes);
 
             saveStartupData = true;

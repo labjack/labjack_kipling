@@ -2523,7 +2523,7 @@ class PresenterFramework extends EventEmitter {
                 bindings: bindings
             };
         } else {
-            throw 'delay';
+            throw 'delay1';
         }
     }
 
@@ -2718,13 +2718,13 @@ class PresenterFramework extends EventEmitter {
         // Make sure that this framework instance is active.
         if (!this.frameworkActive) {
             this.isDAQLoopActive = false;
-            throw 'stoppingLoop';
+            throw 'stoppingLoop0';
         }
 
         // Make sure that the loop should be executing.
         if (!this.runLoop) {
             this.isDAQLoopActive = false;
-            throw 'stoppingLoop';
+            throw 'stoppingLoop1';
         }
     }
 
@@ -2783,9 +2783,9 @@ class PresenterFramework extends EventEmitter {
                                             'onRefreshError b/c loopIteration.reportError',
                                             err
                                         );
-                                        reject('delay');
+                                        reject('delay2');
                                     } else {
-                                        reject('stoppingLoop');
+                                        reject('stoppingLoop2');
                                     }
                                 }
                             );

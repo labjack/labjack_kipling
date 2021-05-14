@@ -1,164 +1,229 @@
 
 /* jshint undef: true, unused: true, undef: true */
-/* global console, module_manager, dict, showAlert, modbus_map, $ */
-/* global ljmmm_parse, handlebars */
+/* global console, showAlert, modbus_map, $ */
 
 // Imported as an extra module file.
 /* global dataTableDataFormatter */
 
-/* exported dataTableCreator */
+/* exported DataTableCreator */
 
-function dataTableCreator() {
-    var _ = global.require('underscore-min');
-    this.activeDevice = undefined;
-    var dataTableFormatter = new dataTableDataFormatter();
+const _ = require('underscore-min');
 
-    // Data references from the dataTableDataFormatter.
-    this.cachedRegisterData = undefined;
-    this.dataTableData = undefined;
-    this.cachedRegisterTags = undefined;
+const tableFiltersElementID = '#tableFilters';
+const ljmTagGroupMap = {
+    'AIN': 'Analog Inputs',
+    'AIN_EF': 'Analog Inputs',
+    'MUX80': 'Analog Inputs',
 
-    this.templates = {};
+    'DAC': 'Analog Outputs',
+    'TDAC': 'Analog Outputs',
 
-    var getUndefinedControlFunction = function(name) {
-        var func = function(registerName, state) {
-            console.log(
-                'Register Watch Control Not Linked',
-                name,
-                registerName,
-                state
-            );
-            if(name === 'getRegisterWatchStatus') {
-                return false;
-            } else {
-                return false;
-            }
+    'DIO': 'Digital I/O',
+    'DIO_EF': 'Digital I/O',
+
+    'SPI': 'Serial Comm',
+    'I2C': 'Serial Comm',
+    'SBUS': 'Serial Comm',
+    'ASYNCH': 'Serial Comm',
+    'UART': 'Serial Comm',
+    'ONEWIRE': 'Serial Comm',
+
+    'RTC': 'Peripherals',
+    'WATCHDOG': 'Peripherals',
+
+
+    'LUA': 'Scripting',
+    'USER_RAM': 'Scripting',
+    'FILE_IO': 'Scripting',
+
+    'ETHERNET': 'Networking',
+    'WIFI': 'Networking',
+};
+
+const ljmTagTranslations = {
+    'AIN': 'Analog Input',
+    'AIN_EF': 'Analog Input Extended Features',
+    'MUX80': 'Mux 80',
+    'DIO': 'Digital Input/Output',
+};
+
+// Filter groups as defined +- by caleb
+// https://docs.google.com/spreadsheets/d/1Nj19BnnVcqLxjrUjzP9YZNEKXQduPS0HYVnQKTaxQvE/edit
+
+const ljmTagGroups = [
+    'Analog Inputs',
+    'Analog Outputs',
+    'Digital I/O',
+    'Networking',
+    'Peripherals',
+    'Scripting',
+    'Serial Comm',
+    'Other',
+];
+
+const ljmTagsMultiselectElementIDStr = 'ljmTagsMultiselect';
+const ljmTagsMultiselectElementID = '#' + ljmTagsMultiselectElementIDStr;
+
+function getUndefinedControlFunction(name) {
+    return (registerName, state) => {
+        console.log(
+            'Register Watch Control Not Linked',
+            name,
+            registerName,
+            state
+        );
+        if (name === 'getRegisterWatchStatus') {
+            return false;
+        } else {
+            return false;
+        }
+    };
+}
+
+class DataTableCreator {
+    constructor() {
+        this.activeDevice = undefined;
+        this.dataTableFormatter = new dataTableDataFormatter();
+
+        // Data references from the dataTableDataFormatter.
+        this.cachedRegisterData = undefined;
+        this.dataTableData = undefined;
+        this.cachedRegisterTags = undefined;
+
+        this.templates = {};
+
+        this.groupsWithExtraData = [];
+        this.recentlyUpdatedRows = [];
+        this.table = undefined;
+
+        this.controls = {
+            'getRegisterWatchStatus': getUndefinedControlFunction(
+                'getRegisterWatchStatus'
+            ),
+            'saveRegisterWatchStatus': getUndefinedControlFunction(
+                'saveRegisterWatchStatus'
+            ),
         };
-        return func;
-    };
-    var controls = {
-        'getRegisterWatchStatus': getUndefinedControlFunction(
-            'getRegisterWatchStatus'
-        ),
-        'saveRegisterWatchStatus': getUndefinedControlFunction(
-            'saveRegisterWatchStatus'
-        ),
-    };
 
-    this.saveControls = function(newControls) {
-        if(newControls.getRegisterWatchStatus) {
-            controls.getRegisterWatchStatus = newControls.getRegisterWatchStatus;
-        }
-        if(newControls.saveRegisterWatchStatus) {
-            controls.saveRegisterWatchStatus = newControls.saveRegisterWatchStatus;
-        }
-    };
+         this.selectedLJMTags = {};
+    }
 
-    this.removeControls = function() {
-        controls.getRegisterWatchStatus = getUndefinedControlFunction(
+    saveControls(newControls) {
+        console.log('saveControls', newControls);
+        console.trace();
+        if (newControls.getRegisterWatchStatus) {
+            this.controls.getRegisterWatchStatus = newControls.getRegisterWatchStatus;
+        }
+        if (newControls.saveRegisterWatchStatus) {
+            this.controls.saveRegisterWatchStatus = newControls.saveRegisterWatchStatus;
+        }
+    }
+
+    removeControls() {
+        this.controls.getRegisterWatchStatus = getUndefinedControlFunction(
             'getRegisterWatchStatus'
         );
-        controls.saveRegisterWatchStatus = getUndefinedControlFunction(
+        this.controls.saveRegisterWatchStatus = getUndefinedControlFunction(
             'saveRegisterWatchStatus'
         );
-    };
+    }
 
-    this.getRegisterWatchStatus = function(registerName) {
-        return controls.getRegisterWatchStatus(registerName);
-    };
-    this.saveRegisterWatchStatus = function(registerName, newState) {
-        return controls.saveRegisterWatchStatus(registerName, newState);
-    };
+    getRegisterWatchStatus(registerName) {
+        return this.controls.getRegisterWatchStatus(registerName);
+    }
 
-    var generateChildTableID = function(data) {
-        var dataIndices = self.dataTableData.headers;
-        // var filteredChildDataIndex = dataIndices.filteredChildData;
-        // var filteredChildData = data[filteredChildDataIndex];
+    saveRegisterWatchStatus(registerName, newState) {
+        return this.controls.saveRegisterWatchStatus(registerName, newState);
+    }
 
-        var groupName = data[dataIndices.group];
+    generateChildTableID(data) {
+        const dataIndices = this.dataTableData.headers;
+        // const filteredChildDataIndex = dataIndices.filteredChildData;
+        // const filteredChildData = data[filteredChildDataIndex];
+
+        let groupName = data[dataIndices.group];
 
         // create a safe ID name by replacing un-safe characters with "_".
-        var unsafeStrs = ['#','(',')', ':'];
-        unsafeStrs.forEach(function(unsafeStr) {
+        const unsafeStrs = ['#', '(', ')', ':'];
+        unsafeStrs.forEach((unsafeStr) => {
             groupName = groupName.split(unsafeStr).join('_');
         });
 
         // create the childTableID
-        var childTableID = groupName + '_CHILD_TABLE';
+        return groupName + '_CHILD_TABLE';
+    }
 
-        return childTableID;
-    };
+    initializeChildTable(data) {
+        const dataIndices = this.dataTableData.headers;
+        const filteredChildDataIndex = dataIndices.filteredChildData;
+        const filteredChildData = data[filteredChildDataIndex];
+        const currentRowIndex = dataIndices.index;
+        const childTableIndex = dataIndices.childTable;
 
-    this.initializeChildTable = function(data) {
-        var dataIndices = self.dataTableData.headers;
-        var filteredChildDataIndex = dataIndices.filteredChildData;
-        var filteredChildData = data[filteredChildDataIndex];
-        var currentRowIndex = dataIndices.index;
-        var childTableIndex = dataIndices.childTable;
+        const childTableID = this.generateChildTableID(data);
 
-        var childTableID = generateChildTableID(data);
+        const self = this;
 
         // Initialize the child's dataTable.
-        var childTable = $('#' + childTableID)
-        .on('error.dt', function(e, settings, techNote, message) {
-            var msg = 'An error has been reported by DataTables (child table ';
-            msg += data[dataIndices.group] + ')';
+        const childTable = $('#' + childTableID)
+            .on('error.dt', (e, settings, techNote, message) => {
+                const msg = 'An error has been reported by DataTables (child table ' + data[dataIndices.group] + ')';
 
-            console.error(
-                msg,
-                message
-            );
-            showAlert(msg);
-        })
-        .DataTable({
-            'data': filteredChildData,
-            'columns': [{
-                'data': 'isSelected',
-                'title': 'selected',
-                'className': 'select-button ct-select-control',
-                'orderable': false,
-                'targets': 0,
-                'width': '14px',
-            },{
-                'data': 'name',
-                'title': 'name',
-                'className': 'ct-name-header ct-select-control'
-            },{
-                'data': 'address',
-                'title': 'address',
-                'className': 'ct-address-header ct-select-control'
-            }],
-            'columnDefs': [],
+                console.error(
+                    msg,
+                    message
+                );
+                showAlert(msg);
+            })
+            .DataTable({
+                'data': filteredChildData,
+                'columns': [{
+                    'data': 'isSelected',
+                    'title': 'selected',
+                    'className': 'select-button ct-select-control',
+                    'orderable': false,
+                    'targets': 0,
+                    'width': '14px',
+                }, {
+                    'data': 'name',
+                    'title': 'name',
+                    'className': 'ct-name-header ct-select-control'
+                }, {
+                    'data': 'address',
+                    'title': 'address',
+                    'className': 'ct-address-header ct-select-control'
+                }],
+                'columnDefs': [],
 
-            // Striping
-            'stripeClasses': [ 'secondary_row odd', 'secondary_row even'],
-            'drawCallback': function () {
-                var api = this.api();
-                var rows = api.rows({page:'current'});
-                var data = rows.data();
-                var nodes = rows.nodes();
-                for(var i = 0; i < data.length; i++) {
-                    var ele = $(nodes[i]);
-                    var name = data[i].name;
-                    var isSelected = self.getRegisterWatchStatus(name);
-                    if(isSelected) {
-                        ele.addClass('selected');
-                    } else {
-                        ele.removeClass('selected');
+                // Striping
+                'stripeClasses': ['secondary_row odd', 'secondary_row even'],
+                'drawCallback': function () {
+                    const api = this.api();
+                    const rows = api.rows({page: 'current'});
+                    const data = rows.data();
+                    const nodes = rows.nodes();
+                    for (let i = 0; i < data.length; i++) {
+                        const ele = $(nodes[i]);
+                        const name = data[i].name;
+                        const isSelected = self.getRegisterWatchStatus(name);
+                        if (isSelected) {
+                            ele.addClass('selected');
+                        } else {
+                            ele.removeClass('selected');
+                        }
                     }
-                }
-            },
-            'dom': 'tip',
-            'order': [[ 2, 'asc']],
-            'pageLength': 5,
-            'autoWidth': false,
-        });
+                },
+                'dom': 'tip',
+                'order': [[2, 'asc']],
+                'pageLength': 5,
+                'autoWidth': false,
+            });
 
         // console.log('Getting current data');
         // Get the current row's data
-        var currentRow = self.table.row(currentRowIndex);
-        var currentRowData = currentRow.data();
-        
+        const currentRow = this.table.row(currentRowIndex);
+        const currentRowData = currentRow.data();
+
         // console.log('Updating current data');
         // update the current row's childTable element
         currentRowData[childTableIndex] = childTable;
@@ -166,84 +231,79 @@ function dataTableCreator() {
         // console.log('Saving the rows new data');
         // Save the updated row's data.
         currentRow.data(currentRowData);
-    };
+    }
 
     /**
      * This function creates a child's description box and if necessary it
-     * initializes the child's sub-table if there is more than one 
+     * initializes the child's sub-table if there is more than one
      * @param  {[type]} data       [description]
-     * @param  {[type]} searchTerm [description]
      * @return {[type]}            [description]
      */
-    this.formatChildTable = function(data) {
+    formatChildTable(data) {
         // data is the original data object for the row
-        var context = {};
+        const context = {};
 
-        var dataIndices = self.dataTableData.headers;
-        var filteredChildDataIndex = dataIndices.filteredChildData;
-        var filteredChildData = data[filteredChildDataIndex];
-        var nameArrayIndex = dataIndices.nameArray;
-        var nameArray = data[nameArrayIndex];
+        const dataIndices = this.dataTableData.headers;
+        const filteredChildDataIndex = dataIndices.filteredChildData;
+        const filteredChildData = data[filteredChildDataIndex];
+        const nameArrayIndex = dataIndices.nameArray;
+        const nameArray = data[nameArrayIndex];
 
-        if(nameArray.length > 1) {
+        if (nameArray.length > 1) {
             // Construct the child's table id.
-            var tableID = generateChildTableID(data);
-            context.childTableID = tableID;
+            context.childTableID = this.generateChildTableID(data);
         }
 
-        var tableDisplayStyle = 'none';
-        if(filteredChildData.length > 1) {
-            tableDisplayStyle = 'inherit';
-        }
-        context.tableDisplayStyle = tableDisplayStyle;
-        
-        var keys = [
+        context.tableDisplayStyle = (filteredChildData.length > 1) ? 'inherit' : 'none';
+
+        const keys = [
             'group', 'altnames', 'type', 'access', 'address',
             'description', 'streamable', 'tags', 'luatype',
         ];
-        keys.forEach(function(key) {
-            context[key] = data[self.dataTableData.headers[key]];
+        keys.forEach((key) => {
+            context[key] = data[this.dataTableData.headers[key]];
         });
 
         console.log('Available Data', data);
         console.log('Selected Data', context);
-        context.register_details = self.templates.register_details(context);
-        return self.templates.child_table(context);
-    };
-    this.updateChildTableData = function(data) {
+        context.register_details = this.templates.register_details(context);
+        return this.templates.child_table(context);
+    }
+
+    updateChildTableData(data) {
         console.log('in updateChildTableData');
-        var dataIndices = self.dataTableData.headers;
-        var filteredChildDataIndex = dataIndices.filteredChildData;
-        var filteredChildData = data[filteredChildDataIndex];
-        var currentRowIndex = dataIndices.index;
-        var childTableIndex = dataIndices.childTable;
+        const dataIndices = this.dataTableData.headers;
+        const filteredChildDataIndex = dataIndices.filteredChildData;
+        const filteredChildData = data[filteredChildDataIndex];
+        const currentRowIndex = dataIndices.index;
+        const childTableIndex = dataIndices.childTable;
 
-        var row = self.table.row(currentRowIndex);
-        var rowData = row.data();
-        var childTable = rowData[childTableIndex];
+        const row = this.table.row(currentRowIndex);
+        const rowData = row.data();
+        const childTable = rowData[childTableIndex];
 
-        var childTableID = generateChildTableID(data);
-        var tableElementID = '#' + childTableID + '_holder';
-        // var tableElement = $(tableElementID);
+        const childTableID = this.generateChildTableID(data);
+        const tableElementID = '#' + childTableID + '_holder';
+        // const tableElement = $(tableElementID);
         /*
          * 3 things need to happen:
          * 1. A childs table needs to be updated to reflect new search data.
          * 2. A childs table needs to be hidden if it is no longer relevant.
          * 3. A childs table needs to be re-displayed if it is relevant again.
          */
-        
+
         // Start with basics, always updating the childs table.
-        if(childTable) {
-            if(childTable.clear) {
+        if (childTable) {
+            if (childTable.clear) {
                 childTable.clear().rows.add(filteredChildData).draw();
             }
         }
 
         // If there is only one register to be displayed then hide the table
-        
-        if(filteredChildData.length > 1) {
+
+        if (filteredChildData.length > 1) {
             console.log('Showing childTableID', childTableID, tableElementID);
-            setTimeout(function() {
+            setTimeout(() => {
                 console.log('Performing hide/show', tableElementID);
                 // tableElement.show();
                 // $(tableElementID).show();
@@ -252,7 +312,7 @@ function dataTableCreator() {
             console.log('After');
         } else {
             console.log('Hiding childTableID', childTableID, tableElementID);
-            setTimeout(function() {
+            setTimeout(() => {
                 console.log('Performing hide/show', tableElementID);
                 // tableElement.hide();
                 // $(tableElementID).hide();
@@ -260,18 +320,14 @@ function dataTableCreator() {
             }, 10);
             console.log('After');
         }
-    };
+    }
 
-    this.groupsWithExtraData = [];
-    this.recentlyUpdatedRows = [];
-    this.table = undefined;
-
-    var primaryTablePreDrawCallback = function() {
+    primaryTablePreDrawCallback(element) {
         // Clear the cache that holds special group data.
-        self.groupsWithExtraData = [];
-        self.recentlyUpdatedRows = [];
+        this.groupsWithExtraData = [];
+        this.recentlyUpdatedRows = [];
 
-        var api = this.api();
+        const api = element.api();
 
         // Using the rows modifier:
         // https://datatables.net/reference/type/selector-modifier
@@ -279,18 +335,16 @@ function dataTableCreator() {
         // https://datatables.net/reference/api/rows().indexes()
         // Get an array of the rows that should be updated to reflect
         // filtered addresses & children re-rendered.
-        var indexes = api.rows({page: 'current'}).indexes();
+        const indexes = api.rows({page: 'current'}).indexes();
 
         // Get the current search string.
-        var searchStr = api.search();
-        var isBlank = false;
-        if(searchStr === '') {isBlank = true;}
-        var findNumRegex = /\d+/;
-        var findAddressRegex = /^\d+$/;
-        var containsNumber = false;
-        var modbusMapInfo;
-        var matchResult;
-        var searchData = {
+        const searchStr = api.search();
+        const isBlank = (searchStr === '');
+
+        const findNumRegex = /\d+/;
+        const findAddressRegex = /^\d+$/;
+        const containsNumber = false;
+        const searchData = {
             'isBlank': isBlank,
             'containsNumber': containsNumber,
             'number': 0,
@@ -302,119 +356,107 @@ function dataTableCreator() {
             'isModbusName': false
         };
 
-        if(!isBlank) {
-            matchResult = searchStr.match(findNumRegex);
-            if(matchResult) {
+        if (!isBlank) {
+            let modbusMapInfo;
+            let matchResult = searchStr.match(findNumRegex);
+
+            if (matchResult) {
                 searchData.parsedNumber = matchResult[0];
                 searchData.number = parseInt(matchResult[0], 10);
                 searchData.numberStr = searchData.number.toString();
                 searchData.containsNumber = true;
 
                 modbusMapInfo = modbus_map.getAddressInfo(searchStr);
-                if(modbusMapInfo.type >= 0) {
+                if (modbusMapInfo.type >= 0) {
                     searchData.isModbusName = true;
                 }
             }
 
             matchResult = searchStr.match(findAddressRegex);
-            if(matchResult) {
+            if (matchResult) {
                 searchData.isAddress = true;
 
                 modbusMapInfo = modbus_map.getAddressInfo(searchStr);
-                if(modbusMapInfo.type >= 0) {
+                if (modbusMapInfo.type >= 0) {
                     searchData.isModbusAddress = true;
                 }
             }
 
-            
+
         }
 
-        if(self.debugSearching) {
+        if (this.debugSearching) {
             console.log('Search term data', searchData);
         }
 
         // Get the names index.
-        // var index = self.dataTableData.headers.index;
-        var indices = self.dataTableData.headers;
-        var names = indices.names;
-        var name = indices.name;
-        var groupIndex = indices.group;
-        var address = indices.address;
-        var groupAddress = indices.groupAddress;
-        var nameArray = indices.nameArray;
-        var childData = indices.childData;
-        var filteredChildData = indices.filteredChildData;
-        var selectIndex = indices.select;
+        // const index = this.dataTableData.headers.index;
+        const indices = this.dataTableData.headers;
+        const name = indices.name;
+        const groupIndex = indices.group;
+        const address = indices.address;
+        const groupAddress = indices.groupAddress;
+        const nameArray = indices.nameArray;
+        const childData = indices.childData;
+        const filteredChildData = indices.filteredChildData;
+        const selectIndex = indices.select;
 
         // Loop through the visible rows and change their visible name
         // to reflec the filtered addresses as well as any visible
         // children.
-        if(self.debugSearching) {
+        if (this.debugSearching) {
             console.log('indexes', indexes, api.rows({page: 'current'}).data());
         }
-        for(var i = 0; i < indexes.length; i++) {
-            var index = indexes[i];
-            var row = api.row(index);
-            var currentRow = row.data();
+        for (let i = 0; i < indexes.length; i++) {
+            const index = indexes[i];
+            const row = api.row(index);
+            const currentRow = row.data();
 
             // Make sure that the row's child is an empty array.
             currentRow[filteredChildData] = [];
 
             // If the current row has multiple registers perform table 
             // augmentations to display & filter sub-registers.
-            if(currentRow[nameArray].length > 1) {
-                var childRef = row.child;
-                var child = row.child();
-                
-                var newStr = '';
-                var newAddressStr = '';
-                var newSelectStr = '';
-                var num = 0;
-                var groupName = currentRow[groupIndex];
-                var currentState = currentRow[selectIndex];
-                
-                // Initialize the new name & address strings
-                newStr += groupName;
-                newAddressStr += currentRow[groupAddress];
-                
-                // if(isBlank) {
-                //     num = currentRow[names].split(',').length;
-                // } else {
-                //     num = self.ocurrences(currentRow[names], searchStr);
-                // }
+            if (currentRow[nameArray].length > 1) {
+                const childRef = row.child;
 
-                
-                
+                let newSelectStr = '';
+                let num = 0;
+                const groupName = currentRow[groupIndex];
+
+                // Initialize the new name & address strings
+                let newStr = groupName;
+                let newAddressStr = currentRow[groupAddress];
+
                 // Loop through each sub-register and filter the results
                 // into the currentRow[filteredChildData] array.
-                var ignoreRemainingResults = false;
-                for(var j = 0; j < currentRow[childData].length; j++) {
-                    var passesFilter = false;
-                    var childName = currentRow[childData][j].name;
-                    var childAddress = currentRow[childData][j].address;
-                    var childAddressStr = childAddress.toString();
-                    var childIsSelected = currentRow[childData][j].isSelected;
+                let ignoreRemainingResults = false;
+                for (let j = 0; j < currentRow[childData].length; j++) {
+                    let passesFilter = false;
+                    const childName = currentRow[childData][j].name;
+                    const childAddress = currentRow[childData][j].address;
+                    const childAddressStr = childAddress.toString();
 
                     // Check to see if the child's name contains the
                     // upper case version of the search term.
-                    var basicSearchRes = childName.indexOf(searchData.upperCase);
-                    if(basicSearchRes === 0) {
+                    const basicSearchRes = childName.indexOf(searchData.upperCase);
+                    if (basicSearchRes === 0) {
                         passesFilter = true;
                         // If the match started at the front of the
                         // string and there was a number in the search
                         // term then we have very likely found the 
                         // correct register and shouldn't show any more
                         // results.
-                        if(searchData.containsNumber) {
+                        if (searchData.containsNumber) {
                             ignoreRemainingResults = true;
                         }
-                    } else if(basicSearchRes >= 0) {
+                    } else if (basicSearchRes >= 0) {
                         passesFilter = true;
                     }
 
                     // Check to see if the child's name contains the
                     // parsed numberStr.
-                    if(childName.indexOf(searchData.numberStr) >= 0) {
+                    if (childName.indexOf(searchData.numberStr) >= 0) {
                         passesFilter = true;
                     }
 
@@ -423,8 +465,8 @@ function dataTableCreator() {
                     // address.
                     // Only allow this filter to pass if the address
                     // isn't a modbus name.
-                    if(!searchData.isModbusName) {
-                        if(childAddress == searchData.number) {
+                    if (!searchData.isModbusName) {
+                        if (childAddress === searchData.number) {
                             passesFilter = true;
                         }
                     }
@@ -432,41 +474,41 @@ function dataTableCreator() {
                     // If the search term included a number, check to 
                     // see if that number string matches the 
                     // stringified version of the address.
-                    if(searchData.isAddress) {
-                        if(childAddressStr.indexOf(searchData.parsedNumber) >= 0) {
+                    if (searchData.isAddress) {
+                        if (childAddressStr.indexOf(searchData.parsedNumber) >= 0) {
                             passesFilter = true;
                         }
                     }
 
                     // No numbers are in the search result force it to
                     // be shown.
-                    if(!searchData.containsNumber) {
+                    if (!searchData.containsNumber) {
                         passesFilter = true;
                     }
 
                     // If the filter has been passed add the data to
                     // the filteredChildData array and increase the
                     // number of hidden registers.
-                    if(passesFilter) {
+                    if (passesFilter) {
                         currentRow[filteredChildData].push(
                             currentRow[childData][j]
                         );
                         num += 1;
-                        if(ignoreRemainingResults) {
+                        if (ignoreRemainingResults) {
                             break;
                         }
                     }
                 }
 
-                if(num > 1) {
+                if (num > 1) {
                     newStr += ' (';
                     newStr += num.toString();
                     newStr += ' Registers)';
                     newAddressStr = currentRow[childData][0].address;
-                    newSelectStr = self.dataTableData.selectText.details;
+                    newSelectStr = this.dataTableData.selectText.details;
                     // currentNode.addClass('details-control');
                 } else {
-                    if(num == 1) {
+                    if (num === 1) {
                         newStr = currentRow[filteredChildData][0].name;
                         newAddressStr = currentRow[filteredChildData][0].address;
                         newSelectStr = currentRow[filteredChildData][0].isSelected;
@@ -477,7 +519,7 @@ function dataTableCreator() {
                     // currentNode.addClass('details-control');
                     // newStr += '(no hidden registers)';
                 }
-                
+
                 currentRow[address] = newAddressStr;
                 currentRow[name] = newStr;
                 currentRow[selectIndex] = newSelectStr;
@@ -486,324 +528,261 @@ function dataTableCreator() {
                 // If the row's child is shown then we can assume that
                 // its childTable data element has been initialized and
                 // can update its DataTable with new data.
-                if(childRef.isShown()) {
-                    
+                if (childRef.isShown()) {
+
                     // console.log('Current Row w/ visible child', index, child, childRef.isShown());
                     // console.log('Marking child to be re-drawn');
-                    self.groupsWithExtraData.push({
+                    this.groupsWithExtraData.push({
                         'group': groupName,
                         'row': index
                     });
-                    // childRef(self.formatChildTable(
+                    // childRef(this.formatChildTable(
                     //     currentRow,
                     //     searchStr
                     // )).show();
-                    
+
                 }
             }
         }
         return true;
-    };
+    }
 
     // Actual arguments given:
     // (rowElement, data, pageIndex)
-    var primaryTableRowCallback = function( rowElement, data ) {
-        // var row = self.table.row(rowElement);
-        var indices = self.dataTableData.headers;
-        var filteredChildDataIndex = indices.filteredChildData;
-        var nameIndex = indices.name;
+    primaryTableRowCallback(rowElement, data) {
+        // const row = this.table.row(rowElement);
+        const indices = this.dataTableData.headers;
+        const filteredChildDataIndex = indices.filteredChildData;
+        const nameIndex = indices.name;
 
         // Get required data out of the row's data
-        var rowIndex = data[indices.index];
-        var filteredChildData = data[filteredChildDataIndex];
+        const rowIndex = data[indices.index];
+        const filteredChildData = data[filteredChildDataIndex];
 
-        var currentState = false;
-        var registerName;
-        var hasHiddenData = false;
+        let currentState = false;
+        let registerName;
+        let hasHiddenData = false;
 
-        
-        if(filteredChildData.length > 1) {
+        if (filteredChildData.length > 1) {
             hasHiddenData = true;
-        } else if(filteredChildData.length == 1) {
+        } else if (filteredChildData.length == 1) {
             registerName = filteredChildData[0].name;
-            currentState = self.getRegisterWatchStatus(registerName);
+            currentState = this.getRegisterWatchStatus(registerName);
         } else {
             registerName = data[nameIndex];
-            currentState = self.getRegisterWatchStatus(registerName);
+            currentState = this.getRegisterWatchStatus(registerName);
         }
-        self.recentlyUpdatedRows.push({
+        this.recentlyUpdatedRows.push({
             'index': rowIndex,
             'isSelected': currentState,
             'hasHiddenData': hasHiddenData,
         });
-    };
-    var primaryTableDrawCallback = function() {
+    }
+
+    primaryTableDrawCallback(element) {
         // console.log('in primaryTableDrawCallback');
-        var api = this.api();
-        var searchStr = api.search();
+        const api = element.api();
+        const searchStr = api.search();
 
         // console.log('Special Groups:')
-        self.groupsWithExtraData.forEach(function(groupData) {
+        this.groupsWithExtraData.forEach((groupData) => {
             // console.log(groupData.group);
-            
-            var row = api.row(groupData.row);
-            var rowData = row.data();
-            // var node = row.node();
-            // var childRef = row.child;
-            // var child = row.child();
+
+            const row = api.row(groupData.row);
+            const rowData = row.data();
+            // const node = row.node();
+            // const childRef = row.child;
+            // const child = row.child();
             // Determine if we need to update the row's child, only
             // rows with visible & existing children need to be 
             // re-rendered.
-            self.updateChildTableData(rowData, searchStr);
+            this.updateChildTableData(rowData, searchStr);
             // console.log('Finished updating the current child table');
 
         });
 
-        self.recentlyUpdatedRows.forEach(function(updatedInfo) {
-            var index = updatedInfo.index;
-            var isSelected = updatedInfo.isSelected;
-            var hasHiddenData = updatedInfo.hasHiddenData;
-            var row = api.row(index);
-            var node = row.node();
-            var ele = $(node);
-            if(isSelected) {
+        this.recentlyUpdatedRows.forEach((updatedInfo) => {
+            const index = updatedInfo.index;
+            const isSelected = updatedInfo.isSelected;
+            const hasHiddenData = updatedInfo.hasHiddenData;
+            const row = api.row(index);
+            const node = row.node();
+            const ele = $(node);
+            if (isSelected) {
                 ele.addClass('selected');
             } else {
                 ele.removeClass('selected');
             }
 
-            if(hasHiddenData) {
+            if (hasHiddenData) {
                 ele.addClass('hidden-data');
             } else {
                 ele.removeClass('hidden-data');
             }
 
         });
-    };
+    }
 
-    var childTableSelectControlCallback = function() {
-        var td = $(this);
-        var registerName;
+    childTableSelectControlCallback(element) {
+        const td = $(element);
+        let registerName;
 
         // Determine which element got clicked in order to get the register
         // name.
-        if(td.hasClass('select-button')) {
+        if (td.hasClass('select-button')) {
             registerName = td.next().text();
-        } else if(td.hasClass('ct-name-header')) {
+        } else if (td.hasClass('ct-name-header')) {
             registerName = td.text();
-        } else if(td.hasClass('ct-address-header')) {
+        } else if (td.hasClass('ct-address-header')) {
             registerName = td.prev().text();
         } else {
-            console.warn('child-table clicked... element saved as self.ctClickData');
-            self.ctClickData = td;
+            console.warn('child-table clicked... element saved as this.ctClickData');
+            this.ctClickData = td;
         }
 
-        if(registerName) {
-            var tr = $(this).closest('tr');
+        if (registerName) {
+            const tr = $(this).closest('tr');
             // Get the closest register_matrix_child_row & then its parent via
             // getting the previous element.
-            var matrix_row_div = tr.closest('.register_matrix_child_row');
-            var matrix_tr = matrix_row_div.closest('tr').prev();
+            const matrix_row_div = tr.closest('.register_matrix_child_row');
+            const matrix_tr = matrix_row_div.closest('tr').prev();
 
-            var row = self.table.row(matrix_tr);
-            var rowData = row.data();
+            this.table.row(matrix_tr);
+            // const row = this.table.row(matrix_tr);
+            // const rowData = row.data();
 
-            // var registerName = rowData[1];
-            var currentState = self.getRegisterWatchStatus(registerName);
-            var newState = self.saveRegisterWatchStatus(registerName, !currentState);
-            // var newButtonStr = self.getRegisterWatchStatusStr(registerName);
+            // const registerName = rowData[1];
+            const currentState = this.getRegisterWatchStatus(registerName);
+            this.saveRegisterWatchStatus(registerName, !currentState);
+            // const newButtonStr = this.getRegisterWatchStatusStr(registerName);
             // console.log('in ct select', rowData, registerName, newButtonStr, currentState, newState);
             // td.html(newButtonStr);
-            
+
             tr.toggleClass('selected');
         }
-    };
+    }
 
-    var primaryTableHandleDetailsControlClick = function(tr, row) {
-        var rowData = row.data();
-        var searchStr = self.table.search();
+    primaryTableHandleDetailsControlClick(tr, row) {
+        const rowData = row.data();
+        const searchStr = this.table.search();
 
-        var dataIndices = self.dataTableData.headers;
-        var filteredChildDataIndex = dataIndices.filteredChildData;
-        var nameArrayIndex = dataIndices.nameArray;
-        var selectIndex = dataIndices.select;
-        var detailsIndex = dataIndices.details;
+        const dataIndices = this.dataTableData.headers;
+        // const filteredChildDataIndex = dataIndices.filteredChildData;
+        const nameArrayIndex = dataIndices.nameArray;
 
         // Toggle the details icon.
         tr.toggleClass('details-visible');
 
-        if(row.child.isShown()) {
+        if (row.child.isShown()) {
             row.child.hide();
-            // rowData[detailsIndex] = self.dataTableData.detailsText.show;
+            // rowData[detailsIndex] = this.dataTableData.detailsText.show;
         } else {
             // Indicate to the user that the +- button has changed.
-            // rowData[detailsIndex] = self.dataTableData.detailsText.hide;
+            // rowData[detailsIndex] = this.dataTableData.detailsText.hide;
 
             // Format and display the childRow
-            var filteredChildData = rowData[filteredChildDataIndex];
-            var nameArray = rowData[nameArrayIndex];
-            
-            row.child(self.formatChildTable(rowData, searchStr)).show();
+            const nameArray = rowData[nameArrayIndex];
+
+            row.child(this.formatChildTable(rowData, searchStr)).show();
 
             // If necessary, initialize the child's table as a new DataTable
-            if(nameArray.length > 1) {
+            if (nameArray.length > 1) {
                 // console.log('Initializing Child\'s DataTable');
-                self.initializeChildTable(rowData, searchStr);
+                this.initializeChildTable(rowData, searchStr);
                 // console.log('Finished initializing Child\'s DataTable');
             } else {
-                // console.log('Not Initializing child\'s data....', filteredChildData);
+                // console.log('Not Initializing child\'s data....', rowData[filteredChildDataIndex]);
             }
         }
 
         // Update the row's data
         row.data(rowData);
-    };
-    var primaryTableSelectControlCallback = function() {
-        var td = $(this);
-        var tr = $(this).closest('tr');
-        var row = self.table.row(tr);
-        var rowData = row.data();
+    }
 
-        var dataIndices = self.dataTableData.headers;
-        var filteredChildDataIndex = dataIndices.filteredChildData;
-        var nameArrayIndex = dataIndices.nameArray;
-        var selectIndex = dataIndices.select;
-        var groupIndex = dataIndices.group;
+    primaryTableSelectControlCallback(element) {
+        const tr = $(element).closest('tr');
+        const row = this.table.row(tr);
+        const rowData = row.data();
 
-        var filteredChildData = rowData[filteredChildDataIndex];
+        const dataIndices = this.dataTableData.headers;
+        const filteredChildDataIndex = dataIndices.filteredChildData;
+        const groupIndex = dataIndices.group;
 
-        var registerName, currentState, newState;
-        if(filteredChildData.length > 1) {
+        const filteredChildData = rowData[filteredChildDataIndex];
 
-            primaryTableHandleDetailsControlClick(tr, row);
-        } else if(filteredChildData.length == 1) {
+        let registerName, currentState;
+        if (filteredChildData.length > 1) {
+            this.primaryTableHandleDetailsControlClick(tr, row);
+        } else if (filteredChildData.length === 1) {
             registerName = filteredChildData[0].name;
-            currentState = self.getRegisterWatchStatus(registerName);
-            newState = self.saveRegisterWatchStatus(registerName, !currentState);
+            currentState = this.getRegisterWatchStatus(registerName);
+            this.saveRegisterWatchStatus(registerName, !currentState);
             tr.toggleClass('selected');
         } else {
             registerName = rowData[groupIndex];
-            currentState = self.getRegisterWatchStatus(registerName);
-            newState = self.saveRegisterWatchStatus(registerName, !currentState);
+            currentState = this.getRegisterWatchStatus(registerName);
+            this.saveRegisterWatchStatus(registerName, !currentState);
             tr.toggleClass('selected');
         }
-    };
-    var primaryTableDetailsControlCallback = function() {
-        var td = $(this);
-        var tr = $(this).closest('tr');
-        var row = self.table.row(tr);
-        
-        primaryTableHandleDetailsControlClick(tr, row);
-    };
-    var ljmTagTranslations = {
-        'AIN': 'Analog Input',
-        'AIN_EF': 'Analog Input Extended Features',
-        'MUX80': 'Mux 80',
-        'DIO': 'Digital Input/Output',
-    };
-    
-    // Filter groups as defined +- by caleb
-    // https://docs.google.com/spreadsheets/d/1Nj19BnnVcqLxjrUjzP9YZNEKXQduPS0HYVnQKTaxQvE/edit
+    }
 
-    var ljmTagGroupMap = {
-        'AIN': 'Analog Inputs',
-        'AIN_EF': 'Analog Inputs',
-        'MUX80': 'Analog Inputs',
+    primaryTableDetailsControlCallback(element) {
+        const tr = $(element).closest('tr');
+        const row = this.table.row(tr);
 
-        'DAC': 'Analog Outputs',
-        'TDAC': 'Analog Outputs',
+        this.primaryTableHandleDetailsControlClick(tr, row);
+    }
 
-        'DIO': 'Digital I/O',
-        'DIO_EF': 'Digital I/O',
-        
-        'SPI': 'Serial Comm',
-        'I2C': 'Serial Comm',
-        'SBUS': 'Serial Comm',
-        'ASYNCH': 'Serial Comm',
-        'UART': 'Serial Comm',
-        'ONEWIRE': 'Serial Comm',
+    primaryTableInitComplete(element) {
+        const api = element.api();
 
-        'RTC': 'Peripherals',
-        'WATCHDOG': 'Peripherals',
-
-
-        'LUA': 'Scripting',
-        'USER_RAM': 'Scripting',
-        'FILE_IO': 'Scripting',
-
-        'ETHERNET': 'Networking',
-        'WIFI': 'Networking',
-    };
-
-    var ljmTagGroups = [
-        'Analog Inputs',
-        'Analog Outputs',
-        'Digital I/O',
-        'Networking',
-        'Peripherals',
-        'Scripting',
-        'Serial Comm',
-        'Other',
-    ];
-
-    this.selectedLJMTags = {};
-
-    var tableFiltersElementID = '#tableFilters';
-    var ljmTagsMultiselectElementIDStr = 'ljmTagsMultiselect';
-    var ljmTagsMultiselectElementID = '#' + ljmTagsMultiselectElementIDStr;
-    var primaryTableInitComplete = function() {
-        var api = this.api();
-
-        var tableFiltersEle = $(tableFiltersElementID);
+        const tableFiltersEle = $(tableFiltersElementID);
 
         // Empty the table's filters
         tableFiltersEle.empty();
 
-        
-        var newEleStr = '';
-        newEleStr += '<select id="' + ljmTagsMultiselectElementIDStr;
-        newEleStr += '" multiple="multiple"></select>';
-        var newEle = $(newEleStr);
+
+        const newEleStr = '<select id="' + ljmTagsMultiselectElementIDStr + '" multiple="multiple"></select>';
+        const newEle = $(newEleStr);
 
         tableFiltersEle.append(newEle);
 
-        var ljmTagsFilter = $(ljmTagsMultiselectElementID);
+        const ljmTagsFilter = $(ljmTagsMultiselectElementID);
 
-        var onTagSelectChange = function() {
-            var tableHeaders = self.dataTableData.headers;
-            var tagsColumnIndex = tableHeaders.tags;
+        const onTagSelectChange = () => {
+            const tableHeaders = this.dataTableData.headers;
+            const tagsColumnIndex = tableHeaders.tags;
 
-            var tagsColumn = self.table.column(tagsColumnIndex);
+            const tagsColumn = this.table.column(tagsColumnIndex);
 
             // Apply column search
             // tagsColumn.search('String...');
-            // self.table.draw();
+            // this.table.draw();
 
-            var selectedTags = [];
-            var keys = Object.keys(self.selectedLJMTags);
-            keys.forEach(function(key) {
-                if(self.selectedLJMTags[key]) {
+            const selectedTags = [];
+            const keys = Object.keys(this.selectedLJMTags);
+            keys.forEach((key) => {
+                if (this.selectedLJMTags[key]) {
                     selectedTags.push(key);
                 }
             });
             // console.log('Option Selected', selectedTags);
 
-            var searchStr = '';
-            var searchStrs = selectedTags.map(function(selectedTag) {
+            const searchStrs = selectedTags.map((selectedTag) => {
                 return '(' + selectedTag + ')';
             });
-            searchStr = searchStrs.join('|');
+            const searchStr = searchStrs.join('|');
             // console.log('search str', searchStr);
 
             tagsColumn.search(searchStr, true);
-            self.table.draw();
+            this.table.draw();
         };
-        var debouncedOnTagSelectChange = _.debounce(
+        const debouncedOnTagSelectChange = _.debounce(
             onTagSelectChange,
             10);
 
-        self.tempOption = '';
-        var options = {
+        this.tempOption = '';
+        const options = {
             // Defining button width
             // 'buttonWidth': '100%',
             'buttonWidth': '275px',
@@ -824,12 +803,12 @@ function dataTableCreator() {
             // Forces the insertion of a "selectAll" option
             'includeSelectAllOption': true,
             'selectAllText': 'Select None', // will re-define this button to always select none.
-            'onSelectAll': function() {
-                // var numSelectedOptions = $(ljmTagsMultiselectElementID + 'option:selected');
+            'onSelectAll': () => {
+                // const numSelectedOptions = $(ljmTagsMultiselectElementID + 'option:selected');
 
                 ljmTagsFilter.multiselect('deselectAll', false);
                 ljmTagsFilter.multiselect('updateButtonText');
-                // var api = this;
+                // const api = this;
                 // console.log('All Options Selected', arguments, Object.keys(api));
             },
 
@@ -845,51 +824,30 @@ function dataTableCreator() {
 
 
             // Function that gets called when the selected options changes.
-            'onChange': function(option, checked, select) {
-                if(option) {
-                    var ljmTag = option.attr('value');
-                    // var title = option.attr('title');
-                    // var label = option.attr('label');
+            'onChange': (option, checked) => {
+                if (option) {
+                    const ljmTag = option.attr('value');
+                    // const title = option.attr('title');
+                    // const label = option.attr('label');
 
                     // console.log('Option Selected', ljmTag, checked);
 
-                    if(checked) {
-                        self.selectedLJMTags[ljmTag] = true;
-                    } else {
-                        self.selectedLJMTags[ljmTag] = false;
-                    }
+                    this.selectedLJMTags[ljmTag] = !!checked;
                 } else {
                     // Clear all options...
-                    var keys = Object.keys(self.selectedLJMTags);
-                    keys.forEach(function(key) {
-                        self.selectedLJMTags[key] = false;
+                    const keys = Object.keys(this.selectedLJMTags);
+                    keys.forEach((key) => {
+                        this.selectedLJMTags[key] = false;
                     });
                 }
-                self.tempOption = option;
+                this.tempOption = option;
                 debouncedOnTagSelectChange();
             },
         };
         // Enable the element as a bootstrap-multiselect element
         ljmTagsFilter.multiselect(options);
 
-        // Look at the section "dataprovider" .multiselect('dataprovider', data)
-        
-
-        
-
-        // var multiselectOptions = self.cachedRegisterTags.map(function(ljmTag) {
-            // var label = ljmTag;
-            // var title = ljmTag;
-            // if(typeof(ljmTagTranslations[ljmTag]) !== 'undefined') {
-            //     label = ljmTagTranslations[ljmTag];
-            //     title = ljmTagTranslations[ljmTag] + ' (' + ljmTag + ')';
-            // }
-
-            // var value = ljmTag;
-        //     return {'label': label, 'title': title, 'value': value};
-        // });
-
-        var multiselectOptions = ljmTagGroups.map(function(ljmTagGroup) {
+        const multiselectOptions = ljmTagGroups.map((ljmTagGroup) => {
             return {
                 'label': ljmTagGroup,
                 'children': [],
@@ -899,29 +857,25 @@ function dataTableCreator() {
         // ljmTagGroupMap
         // ljmTagGroups
 
-        self.cachedRegisterTags.forEach(function(ljmTag) {
-            var label = ljmTag;
-            var title = ljmTag;
-            if(typeof(ljmTagTranslations[ljmTag]) !== 'undefined') {
+        this.cachedRegisterTags.forEach((ljmTag) => {
+            let label = ljmTag;
+            let title = ljmTag;
+            if (typeof (ljmTagTranslations[ljmTag]) !== 'undefined') {
                 label = ljmTagTranslations[ljmTag];
                 title = ljmTagTranslations[ljmTag] + ' (' + ljmTag + ')';
             }
-            var value = ljmTag;
-            var tagObj = {'label': label, 'title': title, 'value': value};
+            const tagObj = {'label': label, 'title': title, 'value': ljmTag};
 
-            var  ljmTagGroup = 'Other';
-            if(ljmTagGroupMap[ljmTag]) {
-                ljmTagGroup = ljmTagGroupMap[ljmTag];
-            }
+            const ljmTagGroup = ljmTagGroupMap[ljmTag] ? ljmTagGroupMap[ljmTag] : 'Other';
 
-            var  groupIndex = ljmTagGroups.indexOf(ljmTagGroup);
-            if(groupIndex < 0) {
+            let groupIndex = ljmTagGroups.indexOf(ljmTagGroup);
+            if (groupIndex < 0) {
                 groupIndex = ljmTagGroups.indexOf('Other');
             }
 
             try {
                 multiselectOptions[groupIndex].children.push(tagObj);
-            } catch(err) {
+            } catch (err) {
                 console.error('Error adding ljm tag group', err, ljmTag);
             }
         });
@@ -932,25 +886,20 @@ function dataTableCreator() {
         // Rebuild the multiselect element
         ljmTagsFilter.multiselect('dataprovider', multiselectOptions);
 
-        var tableHeaders = self.dataTableData.headers;
-        var tagsColumnIndex = tableHeaders.tags;
-
-        // var tagsColumn = self.table.column(tagsColumnIndex);
+        // const tagsColumn = this.table.column(this.dataTableData.headers.tags);
 
         // Apply column search
         // tagsColumn.search('String...');
-        // self.table.draw();
+        // this.table.draw();
 
-
-        var columns = api.columns();
-        columns.every(function() {
-            var column = this;
-            var header = column.header();
-            var footer = column.footer();
-            // console.log('primaryTableInitComplete - Columns...', header, footer);
+        const columns = api.columns();
+        columns.every(function () {
+            // const column = this;
+            // console.log('primaryTableInitComplete - Columns...', column.header(), column.footer());
         });
-    };
-    var innerCreateDataTable = function(tableElement, tableElementStr) {
+    }
+
+    innerCreateDataTable(tableElement, tableElementStr) {
         /*
             Elements of datatables used:
             Bootstrap:
@@ -983,130 +932,148 @@ function dataTableCreator() {
             Adding Tag-Filters
              - https://www.datatables.net/examples/api/multi_filter_select.html
         */
-        var domLayout = '';
+        let domLayout = '';
         domLayout += '<"dataTableWrapper"';
-        domLayout +=   '<"top row"';
-        domLayout +=     '<"col-sm-6"';
-        domLayout +=       '<"' + tableFiltersElementID + '.dataTables_length">';
-        domLayout +=     '>';
-        domLayout +=     '<"col-sm-6"f>';
-        domLayout +=   '>';
-        domLayout +=   'rt';
-        domLayout +=   '<"bottom row"';
-        domLayout +=     '<"col-sm-4"li>';
-        domLayout +=     '<"col-sm-8"p>';
-        domLayout +=   '>';
+        domLayout += '<"top row"';
+        domLayout += '<"col-sm-6"';
+        domLayout += '<"' + tableFiltersElementID + '.dataTables_length">';
         domLayout += '>';
-        
-        
-        self.table = tableElement.on('error.dt', function(e, settings, techNote, message) {
+        domLayout += '<"col-sm-6"f>';
+        domLayout += '>';
+        domLayout += 'rt';
+        domLayout += '<"bottom row"';
+        domLayout += '<"col-sm-4"li>';
+        domLayout += '<"col-sm-8"p>';
+        domLayout += '>';
+        domLayout += '>';
+
+        const self = this;
+
+        this.table = tableElement.on('error.dt', (e, settings, techNote, message) => {
             console.error('An error has been reported by DataTables', message);
             showAlert('Data Tables reported an error');
         })
-        .DataTable({
-            // Responsive row-control
-            'responsive': {
-                'details': {
-                    'type': 'column',
-                    'target': 'tr'
-                }
-            },
+            .DataTable({
+                // Responsive row-control
+                'responsive': {
+                    'details': {
+                        'type': 'column',
+                        'target': 'tr'
+                    }
+                },
 
-            // Search.regex
-            'search': {'regex': false, 'smart': true},
+                // Search.regex
+                'search': {'regex': false, 'smart': true},
 
-            // Javascript sourced data
-            'data': self.cachedRegisterData,
-            'columns': self.dataTableData.columns,
-            
-            // Alternative Pagination
-            'pagingType': 'full_numbers',
-            'autoWidth': false,
-            
-            // Adding a custom toolbar
-            // https://datatables.net/examples/advanced_init/dom_toolbar.html
-            // 
-            // Default is: ''
-            // Multiple table control elements
-            // 'dom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
-            // 'dom': '<"dataTableWrapper"<"' + tableFiltersElementID + '"><"top row" <"col-sm-6"l><"col-sm-6"f>>rt<"bottom"ip>>',
-            // 'dom': '<"dataTableWrapper"<"top row"<"col-sm-6"<"' + tableFiltersElementID + '.dataTables_length">><"col-sm-6"f>>rt<"bottom row"lip>>',
-            // 'dom': 'lfrtip',
-            'dom': domLayout,
+                // Javascript sourced data
+                'data': this.cachedRegisterData,
+                'columns': this.dataTableData.columns,
 
-            // Striping
-            'stripeClasses': [ 'primary_row odd', 'primary_row even'],
+                // Alternative Pagination
+                'pagingType': 'full_numbers',
+                'autoWidth': false,
 
-            // Setting visibility
-            'columnDefs': self.dataTableData.columnDefs,
+                // Adding a custom toolbar
+                // https://datatables.net/examples/advanced_init/dom_toolbar.html
+                //
+                // Default is: ''
+                // Multiple table control elements
+                // 'dom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
+                // 'dom': '<"dataTableWrapper"<"' + tableFiltersElementID + '"><"top row" <"col-sm-6"l><"col-sm-6"f>>rt<"bottom"ip>>',
+                // 'dom': '<"dataTableWrapper"<"top row"<"col-sm-6"<"' + tableFiltersElementID + '.dataTables_length">><"col-sm-6"f>>rt<"bottom row"lip>>',
+                // 'dom': 'lfrtip',
+                'dom': domLayout,
 
-            // 
-            'order': [[ self.dataTableData.headers.address, 'asc']],
+                // Striping
+                'stripeClasses': ['primary_row odd', 'primary_row even'],
 
-            // Pre-Draw Callback
-            'preDrawCallback': primaryTablePreDrawCallback,
+                // Setting visibility
+                'columnDefs': this.dataTableData.columnDefs,
 
-            // Row Callback
-            'rowCallback': primaryTableRowCallback,
+                //
+                'order': [[this.dataTableData.headers.address, 'asc']],
 
-            // Created Row
-            // 'createdRow': function(row, data, dataIndex) {},
+                // Pre-Draw Callback
+                'preDrawCallback': function () {
+                    return self.primaryTablePreDrawCallback(this);
+                },
 
-            // Draw Callback
-            'drawCallback': primaryTableDrawCallback,
+                // Row Callback
+                'rowCallback': function() {
+                    return self.primaryTableRowCallback(...arguments);
+                },
 
-            // Adding Tag-Filters
-            'initComplete': primaryTableInitComplete,
-        });
+                // Created Row
+                // 'createdRow': (row, data, dataIndex) => {},
+
+                // Draw Callback
+                'drawCallback': function () {
+                    return self.primaryTableDrawCallback(this);
+                },
+
+                // Adding Tag-Filters
+                'initComplete': function () {
+                    return self.primaryTableInitComplete(this);
+                },
+            });
 
         // Attach callbacks
         $(tableElementStr).on(
             'click',
             'td.ct-select-control',
-            childTableSelectControlCallback
+            function () {
+                return this.childTableSelectControlCallback(this);
+            }
         );
         $(tableElementStr).on(
             'click',
             'td.select-control',
-            primaryTableSelectControlCallback
+            function () {
+                return self.primaryTableSelectControlCallback(this);
+            }
         );
         $(tableElementStr).on(
             'click',
             'td.details-control',
-            primaryTableDetailsControlCallback
+            function () {
+                return self.primaryTableDetailsControlCallback(this);
+            }
         );
-    };
-    this.createDataTable = function(tableElementID) {
-        var tableElement = $(tableElementID);
-        if(tableElement.length >= 1) {
+    }
+
+    createDataTable(tableElementID) {
+        const tableElement = $(tableElementID);
+        if (tableElement.length >= 1) {
             try {
-                innerCreateDataTable(tableElement, tableElementID);
-            } catch(err) {
+                this.innerCreateDataTable(tableElement, tableElementID);
+            } catch (err) {
                 console.error('Error creating dataTable', err);
             }
         } else {
             console.error('Table element', tableElementID, 'does not exist');
         }
-        return self.table;
-    };
+        return this.table;
+    }
 
-    this.updateTemplates = function(templates) {
-        self.templates = templates;
-    };
+    updateTemplates(templates) {
+        this.templates = templates;
+    }
 
-    this.updateActiveDevice = function(activeDevice) {
-        self.activeDevice = activeDevice;
-    };
-    this.updateData = function() {
-        var deviceTypeName = self.activeDevice.savedAttributes.deviceTypeName;
-        dataTableFormatter.updateCachedRegisterData(deviceTypeName);
-        
+    updateActiveDevice(activeDevice) {
+        this.activeDevice = activeDevice;
+    }
+
+    updateData() {
+        const deviceTypeName = this.activeDevice.savedAttributes.deviceTypeName;
+        this.dataTableFormatter.updateCachedRegisterData(deviceTypeName);
+
         // Update pointers to the formatted data.
-        self.cachedRegisterData = dataTableFormatter.cachedRegisterData;
-        self.dataTableData = dataTableFormatter.dataTableData;
-        self.cachedRegisterTags = dataTableFormatter.cachedRegisterTags;
+        this.cachedRegisterData = this.dataTableFormatter.cachedRegisterData;
+        this.dataTableData = this.dataTableFormatter.dataTableData;
+        this.cachedRegisterTags = this.dataTableFormatter.cachedRegisterTags;
 
         return Promise.resolve();
-    };
-    var self = this;
+    }
 }
+
+global.DataTableCreator = DataTableCreator;

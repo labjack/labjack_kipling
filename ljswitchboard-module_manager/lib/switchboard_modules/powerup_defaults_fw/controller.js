@@ -2,7 +2,6 @@
 /* global console, module_manager, dict, q, showAlert, modbus_map, $ */
 /* global ljmmm_parse, handlebars, FILE_BROWSER */
 
-/* global dataTableCreator */
 /* exported activeModule, module, MODULE_UPDATE_PERIOD_MS */
 
 /**
