@@ -109,8 +109,6 @@ class DataTableCreator {
     }
 
     saveControls(newControls) {
-        console.log('saveControls', newControls);
-        console.trace();
         if (newControls.getRegisterWatchStatus) {
             this.controls.getRegisterWatchStatus = newControls.getRegisterWatchStatus;
         }

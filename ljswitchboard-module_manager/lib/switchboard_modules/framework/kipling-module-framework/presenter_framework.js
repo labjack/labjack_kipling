@@ -2783,9 +2783,9 @@ class PresenterFramework extends EventEmitter {
                                             'onRefreshError b/c loopIteration.reportError',
                                             err
                                         );
-                                        reject('delay2');
+                                        reject(new Error('delay2'));
                                     } else {
-                                        reject('stoppingLoop2');
+                                        reject(new Error('stoppingLoop2'));
                                     }
                                 }
                             );
@@ -2842,8 +2842,13 @@ class PresenterFramework extends EventEmitter {
                 );
             } else {
                 const promises = [];
-                promises.push(new Promise(async (resolve) => {
-                    resolve(await this.innerRunDAQLoop(this.activeDevice.savedAttributes));
+                promises.push(new Promise(async (resolve, reject) => {
+                    try {
+                        const result = await this.innerRunDAQLoop(this.activeDevice.savedAttributes)
+                        resolve(result);
+                    } catch (err) {
+                        reject(err);
+                    }
                 }));
 
                 await Promise.allSettled(promises);
