@@ -4,6 +4,7 @@ const electron = require('electron');
 
 console.log('NODE_PATH', process.env.NODE_PATH);
 require('module').Module._initPaths(); // Fix node_modules path
+const Flatted = require('./Flatted');
 
 process.argv.forEach(arg => {
     if (arg.startsWith('--packageName=')) {
@@ -80,7 +81,7 @@ for (const level of ['log', 'error', 'warn', 'info', 'verbose', 'debug', 'silly'
                     return '[instanceof Node]';
                 }
                 if (level === 'error') {
-                    return JSON.stringify(arg, serializer(), 2);
+                    return Flatted.stringify(arg, serializer(), 2);
                 }
                 return JSON.stringify(arg, serializer()).substr(0, 100);
             }

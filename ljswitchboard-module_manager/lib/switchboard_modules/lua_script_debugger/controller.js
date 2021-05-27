@@ -360,8 +360,8 @@ function module() {
         var constants = self.luaVariables.runStatus;
         conditionalExecution(
             constants,
-            self.luaController.loadAndStartScript,
-            self.luaController.stopScript,
+            () => self.luaController.loadAndStartScript(),
+            () => self.luaController.stopScript(),
             self.handleIOSuccess(setActiveScriptInfo(continueFunc),'Configured LUA_RUN')
         );
     };
@@ -387,8 +387,8 @@ function module() {
         var constants = self.luaVariables.startupStatus;
         conditionalExecution(
             constants,
-            self.luaController.enableStartupLuaScript,
-            self.luaController.disableStartupLuaScript,
+            () => self.luaController.enableStartupLuaScript(),
+            () => self.luaController.disableStartupLuaScript(),
             self.handleIOSuccess(onSuccess,'Configured LUA_RUN_DEFAULT')
         );
     };
@@ -425,11 +425,11 @@ function module() {
                 self.luaController.loadScriptFromFile(fileLoc)
                     .then(
                         self.handleIOSuccess(
-                            setActiveScriptInfo(onSuccess),
+                            setActiveScriptInfo(() => onSuccess()),
                             'Script File Loaded'
                         ),
                         self.handleIOError(
-                            setActiveScriptInfo(onSuccess),
+                            setActiveScriptInfo(() => onSuccess()),
                             'Err: Script File Not Loaded'
                         )
                     );

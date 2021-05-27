@@ -77,7 +77,7 @@ class ModuleInstance extends EventEmitter {
 
             // Create an instance of the user's module.
             sdModule = new module();
-            // global.sdModule = sdModule;
+            global.sdModule = sdModule;
 
             // Configure the module's name
             let createdModuleName = '';

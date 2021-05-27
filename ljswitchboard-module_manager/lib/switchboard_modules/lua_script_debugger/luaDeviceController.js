@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * An accessory file for the Lua script debugger module that defines the
  * luaDeviceController object.
@@ -7,106 +9,110 @@
 **/
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
-const q = require('q');
+const modbus_map = require('ljswitchboard-modbus_map');
 
-function luaDeviceController() {
-    var device;
-    var codeEditor;
-    var codeEditorSession;
-    var codeEditorDoc;
-    var debuggingLog;
-    var debuggingLogSession;
-    var scriptConstants = {};
-    var curScriptFilePath = "";
-    var curScriptType = "";
-    var curScriptOptions;
-    var codeEditorHeight = 0;
-    var debuggingLogHeight = 0;
+class luaDeviceController {
 
-    this.dataToAppendToSource = "";
-    this.sourceSizeOffset = 0;
-    this.finalPacketSubtraction = 0;
+    constructor() {
+        this.device = null;
+        this.codeEditor = null;
+        this.codeEditorSession = null;
+        this.codeEditorDoc = null;
+        this.debuggingLog = null;
+        this.debuggingLogSession = null;
+        this.scriptConstants = {};
+        this.curScriptFilePath = "";
+        this.curScriptType = "";
+        this.curScriptOptions = null;
 
-    this.DEBUG_START_EXECUTIONS = false;
-    this.DEBUG_HIGH_FREQ_START_EXECUTIONS = false;
-    this.DEBUG_SCRIPT_LOADING_EXECUTIONS = false;
-    var MAX_ARRAY_PACKET_SIZE = 32; //Set packet size to be 32 bytes
+        this.dataToAppendToSource = "";
+        this.sourceSizeOffset = 0;
+        this.finalPacketSubtraction = 0;
 
-    this.catchError = function(err) {
-        var errDeferred = q.defer();
-        if(typeof(err) !== 'undefined') {
-            if(typeof(err.stack) !== 'undefined') {
+        this.DEBUG_START_EXECUTIONS = false;
+        this.DEBUG_HIGH_FREQ_START_EXECUTIONS = false;
+        this.DEBUG_SCRIPT_LOADING_EXECUTIONS = false;
+        this.luaRunStatusListeners = [];
+        this.cachedRunPauseButtonEle = undefined;
+    }
+
+    catchError(err) {
+        if (typeof(err) !== 'undefined') {
+            if (typeof(err.stack) !== 'undefined') {
                 console.log('luaControllerErr:',err, err.stack);
             } else {
                 console.log('luaControllerErr:',err);
             }
         }
-        errDeferred.reject();
-        return errDeferred.promise;
-    };
-    this.printInfo = function() {
-        console.log('Device Name',self.device.cachedName);
-        console.log('Num Lines',self.codeEditorDoc.getLength());
-        console.log('Num Bytes',self.codeEditorDoc.getValue().length);
-    };
-    this.printHighFreq = function(data) {
-        if(self.DEBUG_HIGH_FREQ_START_EXECUTIONS) {
-            self.print(data);
+        return Promise.reject();
+    }
+
+    printInfo() {
+        console.log('Device Name', this.device.cachedName);
+        console.log('Num Lines', this.codeEditorDoc.getLength());
+        console.log('Num Bytes', this.codeEditorDoc.getValue().length);
+    }
+
+    printHighFreq(data) {
+        if (this.DEBUG_HIGH_FREQ_START_EXECUTIONS) {
+            this.print(data);
         }
-    };
-    this.print = function(data) {
-        if(self.DEBUG_START_EXECUTIONS) {
+    }
+
+    print(data) {
+        if (this.DEBUG_START_EXECUTIONS) {
             console.log.apply(console, arguments);
         }
-    };
-    this.printLoadedScriptInfo = function(data) {
-        if(self.DEBUG_SCRIPT_LOADING_EXECUTIONS) {
-            if(data) {
-                console.log('Current Script Info', data, self.curScriptOptions, self.curScriptType);
+    }
+
+    printLoadedScriptInfo(data) {
+        if (this.DEBUG_SCRIPT_LOADING_EXECUTIONS) {
+            if (data) {
+                console.log('Current Script Info', data, this.curScriptOptions, this.curScriptType);
             } else {
-                console.log('Current Script Info', self.curScriptOptions, self.curScriptType);
+                console.log('Current Script Info', this.curScriptOptions, this.curScriptType);
             }
         }
-    };
-    this.isLuaCodeError = function() {
-        return self.codeEditor.errorsExist();
-    };
-    this.getErrorLine = function() {
-        var lineNum = '';
-        var errors = $('#lua-code-editor .ace_error');
-        if(errors.length > 0) {
+    }
+
+    isLuaCodeError() {
+        return this.codeEditor.errorsExist();
+    }
+
+    getErrorLine() {
+        let lineNum = '';
+        const errors = $('#lua-code-editor .ace_error');
+        if (errors.length > 0) {
             lineNum = errors.text();
         }
         return lineNum;
-    };
+    }
 
-    this.luaRunStatusListeners = [];
-    var cachedRunPauseButtonEle = undefined;
-    this.updateLuaRunStatus = function(status) {
-        self.print('LUA_RUN update:', status);
-        var numListeners = self.luaRunStatusListeners.length;
-        var i, numTempListeners;
-        var tempListeners = [];
-        var curTime = new Date();
-        for(i = 0; i < numListeners; i++) {
-            var tempListener = self.luaRunStatusListeners.pop();
-            var executeListener = false;
-            var executeListenerTimedOut = false;
+    updateLuaRunStatus(status) {
+        this.print('LUA_RUN update:', status);
+        const numListeners = this.luaRunStatusListeners.length;
+        let numTempListeners;
+        const tempListeners = [];
+        const curTime = new Date();
+        for (let i = 0; i < numListeners; i++) {
+            const tempListener = this.luaRunStatusListeners.pop();
+            let executeListener = false;
+            let executeListenerTimedOut = false;
 
-            if(tempListener.val == status) {
+            if (tempListener.val === status) {
                 executeListener = true;
             }
 
-            if(!executeListener) {
-                if(curTime - tempListener.startTime > tempListener.maxTime) {
+            if (!executeListener) {
+                if (curTime - tempListener.startTime > tempListener.maxTime) {
                     executeListener = true;
                     executeListenerTimedOut = true;
                 }
             }
 
-            if(executeListener) {
+            if (executeListener) {
                 try {
-                    if(executeListenerTimedOut) {
+                    if (executeListenerTimedOut) {
                         console.warn('LUA_RUN timed-out');
                         tempListener.promise.reject();
                     } else {
@@ -122,650 +128,461 @@ function luaDeviceController() {
         }
 
         numTempListeners = tempListeners.length;
-        for(i = 0; i < numTempListeners; i++) {
-            self.luaRunStatusListeners.push(tempListeners.pop());
+        for (let i = 0; i < numTempListeners; i++) {
+            this.luaRunStatusListeners.push(tempListeners.pop());
         }
 
-        if(self.luaRunStatusListeners.length === 0) {
-            var runPauseButton;
-            if(cachedRunPauseButtonEle) {
-                runPauseButton = cachedRunPauseButtonEle;
-            } else {
-                cachedRunPauseButtonEle = $('#run-lua-script-button');
-                runPauseButton = cachedRunPauseButtonEle;
+        if (this.luaRunStatusListeners.length === 0) {
+            if (!this.cachedRunPauseButtonEle) {
+                this.cachedRunPauseButtonEle = $('#run-lua-script-button');
             }
+            const runPauseButton = this.cachedRunPauseButtonEle;
 
-            var isDisabled = runPauseButton.prop('disabled');
-            if(!isDisabled) {
+            const isDisabled = runPauseButton.prop('disabled');
+            if (!isDisabled) {
                 runPauseButton.prop('disabled', false);
             }
         }
-    };
-    this.addLuaRunStatusListener = function(val, promise) {
-        self.luaRunStatusListeners.push({
+    }
+
+    addLuaRunStatusListener(val, promise) {
+        this.luaRunStatusListeners.push({
             'val': val,
             'promise': promise,
             'startTime': new Date(),
             'maxTime': 500,
         });
-    };
-    this.getWaitForLuaRunStateChange = function(val) {
-        var waitForLuaRunStateChange = function() {
-            var innerDeferred = q.defer();
+    }
+
+    getWaitForLuaRunStateChange(val) {
+        return new Promise((resolve, reject) => {
             console.log('Waiting for LUA_RUN to become', val);
-            self.addLuaRunStatusListener(val, innerDeferred);
-            return innerDeferred.promise;
-        };
-        return waitForLuaRunStateChange;
-    };
-    this.stopLuaScript = function() {
-        self.print('disabling LUA_RUN');
-        var innerDeferred = q.defer();
-        // Disable the LUA script
-        self.device.qWrite('LUA_RUN',0)
-
-        // Wait for the LUA_RUN register to be read-back as the appropriate val.
-        .then(self.getWaitForLuaRunStateChange(0))
-
-        // Handle errors & return
-        .then(innerDeferred.resolve, innerDeferred.reject);
-        return innerDeferred.promise;
-    };
-    this.enableLuaScript = function() {
-        self.print('enabling LUA_RUN');
-        var innerDeferred = q.defer();
-
-        // Perform Device IO
-        self.device.qWrite('LUA_RUN',1)
-
-        // Wait for the LUA_RUN register to be read-back as the appropriate val.
-        .then(self.getWaitForLuaRunStateChange(1))
-
-        // Handle errors & return
-        .then(innerDeferred.resolve, innerDeferred.reject);
-        return innerDeferred.promise;
-    };
-    this.writeLuaSourceSize = function() {
-        self.print('setting LUA_SOURCE_SIZE');
-        var innerDeferred = q.defer();
-        var sourceSize = self.codeEditorDoc.getValue().length;
-
-        // Add space for 3 null characters.
-        sourceSize += 3;
-
-        // Perform Device IO
-        self.LUA_SOURCE_SIZE_written = sourceSize;
-        self.device.qWrite('LUA_SOURCE_SIZE',sourceSize)
-        .then(innerDeferred.resolve, innerDeferred.reject);
-
-        return innerDeferred.promise;
-    };
-    
-    this.LUA_SOURCE_SIZE_written = null;
-    this.lastScriptWrittenData = {};
-    
-    
-    this.writeLuaScript = function() {
-        self.print('writing to LUA_SOURCE_WRITE');
-        var innerDefered = q.defer();
-
-        var luaSource;
-        var luaSourceBuf;
-        var luaDataArray = [];
-        try {
-            luaSource = self.codeEditorDoc.getValue();
-            luaSourceBuf = JSON.parse(JSON.stringify(luaSource));
-            for(var i = 0; i < luaSourceBuf.length; i++) {
-                luaDataArray.push(luaSourceBuf.charCodeAt(i));
-            }
-
-            // Add 3 null characters
-            luaDataArray.push(0);
-            luaDataArray.push(0);
-            luaDataArray.push(0);
-        } catch(err) {
-            console.error('Not writing source, in luaDeviceController.writeLuaScript', err);
-            innerDefered.resolve();
-            return;
-        }
-
-        // Perform Device IO
-        console.log('Writing Data', luaDataArray.length);
-        self.device.writeArray('LUA_SOURCE_WRITE',luaDataArray)
-        .then(
-            function(data) {
-                innerDefered.resolve();
-            },
-            function(err) {
-                console.error('Error on SRC write',err);
-                try {
-                    console.error('Error Info', modbus_map.getErrorInfo(err));
-                } catch(newErr) {
-                    //
-                }
-                innerDefered.resolve();
-            }
-        );
-        return innerDefered.promise;
-    };
-    this.oldWriteLuaScript = function() {
-        self.print('writing to LUA_SOURCE_WRITE');
-        self.lastDataWritten = [];
-        var innerDeferred = q.defer();
-        var numPackets = 0;
-        var luaSource = self.codeEditorDoc.getValue();
-        luaSource += self.dataToAppendToSource;
-        var luaSourceBuf = luaSource;
-        var luaSourceSize = luaSource.length;
-        var packetSize = MAX_ARRAY_PACKET_SIZE;
-
-        var packetData = [];
-        var i,j;
-
-        // Determine how many packets need to be sent
-        numPackets = (luaSourceSize - (luaSourceSize % packetSize));
-        numPackets = numPackets / packetSize;
-
-        // Determine if an extra packet of a smaller size should be sent
-        if ((luaSourceSize % packetSize) !== 0) {
-            numPackets += 1;
-        }
-
-        console.log('Num Packets', numPackets);
-        // Push data into packetData array
-        for (i = 0; i < numPackets; i++) {
-            var subPacketSize = 0;
-            var srcData = "";
-            var binaryData = [];
-
-            // Determine how much data to add to buffer, add at most the max
-            // packet size
-            if (luaSourceBuf.length >= packetSize) {
-                subPacketSize = packetSize;
-            } else {
-                subPacketSize = luaSourceBuf.length - self.finalPacketSubtraction;
-            }
-
-            // Get the data that should be sent
-            srcData = luaSourceBuf.slice(0,subPacketSize);
-            
-            // Parse the string data into bytes
-            for (j = 0; j < srcData.length; j++) {
-                binaryData.push(srcData.charCodeAt(j));
-            }
-            
-
-            // Modify the luaSourceBuf to only have what is remaining
-            luaSourceBuf = luaSourceBuf.slice(subPacketSize);
-
-            // Add the srcData to the packetData buffer
-            packetData.push(binaryData);
-        }
-
-        var resultingDataBytesWritten = 0;
-        var resultingPacketSizes = [];
-        packetData.forEach(function(data) {
-            resultingDataBytesWritten += data.length;
-            resultingPacketSizes.push(data.length);
+            this.addLuaRunStatusListener(val, {resolve, reject});
         });
-        self.lastScriptWrittenData = {
-            'numPackets': packetData.length,
-            'packetSizes': resultingPacketSizes,
-            'sourceSize': luaSourceSize,
-            'numBytesWritten': resultingDataBytesWritten,
-            'editorSize': self.codeEditorDoc.getValue().length,
-            'LUA_SOURCE_SIZE': self.LUA_SOURCE_SIZE_written,
-            'data': packetData,
-        };
-        // Synchronously write each packet of data to the device
-        async.eachSeries(
-            packetData,
-            function(data, callback) {
-                // Perform Device IO
-                self.device.writeArray('LUA_SOURCE_WRITE',data)
+    }
+
+    async stopLuaScript() {
+        this.print('disabling LUA_RUN');
+        await this.device.qWrite('LUA_RUN', 0);
+        // Wait for the LUA_RUN register to be read-back as the appropriate val.
+        return this.getWaitForLuaRunStateChange(0);
+    }
+
+    async enableLuaScript() {
+        this.print('enabling LUA_RUN');
+        await this.device.qWrite('LUA_RUN', 1);
+        // Wait for the LUA_RUN register to be read-back as the appropriate val.
+        return this.getWaitForLuaRunStateChange(1);
+    }
+
+    writeLuaSourceSize() {
+        this.print('setting LUA_SOURCE_SIZE');
+        const sourceSize = this.codeEditorDoc.getValue().length + 3; // Add space for 3 null characters.
+        return this.device.qWrite('LUA_SOURCE_SIZE', sourceSize);
+    }
+    
+    writeLuaScript() {
+        this.print('writing to LUA_SOURCE_WRITE');
+        return new Promise(resolve => {
+            const luaDataArray = [];
+            try {
+                const luaSource = this.codeEditorDoc.getValue();
+                const luaSourceBuf = JSON.parse(JSON.stringify(luaSource));
+                for (let i = 0; i < luaSourceBuf.length; i++) {
+                    luaDataArray.push(luaSourceBuf.charCodeAt(i));
+                }
+
+                // Add 3 null characters
+                luaDataArray.push(0);
+                luaDataArray.push(0);
+                luaDataArray.push(0);
+            } catch(err) {
+                console.error('Not writing source, in luaDeviceController.writeLuaScript', err);
+                resolve();
+                return;
+            }
+
+            // Perform Device IO
+            console.log('Writing Data', luaDataArray.length);
+            this.device
+                .writeArray('LUA_SOURCE_WRITE',luaDataArray)
                 .then(
-                    function(data) {
-                        callback();
+                    (data) => {
+                        resolve(data);
                     },
-                    function(err) {
-                        console.log('Error on SRC write',err);
-                        console.log('Check .json for "type" of BYTE');
-                        callback(err);
+                    (err) => {
+                        console.error('Error on SRC write',err);
+                        try {
+                            console.error('Error Info', modbus_map.getErrorInfo(err));
+                        } catch(newErr) {
+                            //
+                        }
+                        resolve();
                     }
                 );
-            },
-            function(err) {
-                self.print('Finished writing to LUA_SOURCE_WRITE');
-                innerDeferred.resolve();
-            }
-        );
-        return innerDeferred.promise;
-    };
-    this.getAndAddDebugData = function(numBytes) {
-        self.printHighFreq('reading & saving to LUA_DEBUG_DATA');
-        var innerDefered = q.defer();
-        /*
-        Future Chris: If you are looking for where the even/odd fix happened
-        It was in the "controller.js" file. Function: "numDebugBytes".  It is 
-        the function that calls this function and makes sure only even amounts
-        of data are read at any given time unless there is only 1 remaining
-        byte.
-        */
-        self.device.readArray('LUA_DEBUG_DATA', numBytes)
-        .then(
-            // Handle successful reads
-            function(data) {
-                // Define variable to save debug-data to
-                var textData = '';
-
-                // Loop through read data & convert to ASCII text
-                data.forEach(function(newChar){
-                    if(newChar !== 0) {
-                        textData += String.fromCharCode(newChar);
-                    } else {
-
-                    }
-                });
-
-                self.debuggingLog.appendText(textData);
-
-                innerDefered.resolve();
-            },
-            // Handle read errors
-            function(err) {
-                // Report that an error has occurred
-                console.log('Error on LUA_DEBUG_DATA',err);
-                try {
-                    console.log('Err Info', modbus_map.getErrorInfo(err));
-                } catch(newError) {
-                    console.log('Error getting error info');
-                }
-                // console.log('Check .json for "type" of BYTE');
-
-                innerDefered.resolve();
-            }
-        );
-        return innerDefered.promise;
-    };
-    this.enableLuaDebugging = function() {
-        self.print('enabling LUA_DEBUG_ENABLE');
-        var innerDeferred = q.defer();
-
-        // Perform Device IO
-        self.device.qWrite('LUA_DEBUG_ENABLE',1)
-        .then(innerDeferred.resolve, innerDeferred.reject);
-        return innerDeferred.promise;
-    };
-    this.enableLuaDebuggingDefault = function() {
-        self.print('enabling LUA_DEBUG_ENABLE_DEFAULT');
-        var innerDeferred = q.defer();
-
-        // Perform Device IO
-        self.device.qWrite('LUA_DEBUG_ENABLE_DEFAULT',1)
-        .then(innerDeferred.resolve, innerDeferred.reject);
-        return innerDeferred.promise;
-    };
-    
-    this.handleNoScriptError = function(err) {
-        console.log('Handling error',err);
-        var innerDeferred = q.defer();
-        self.saveScriptToFlash()
-        .then(self.enableStartupLuaScript, innerDeferred.reject)
-        .then(innerDeferred.resolve, innerDeferred.reject);
-        return innerDeferred.promise;
-
-    };
-    this.enableLuaRunDefault = function() {
-        self.print('enabling LUA_RUN_DEFAULT');
-        var innerDeferred = q.defer();
-
-        // Perform Device IO
-        self.device.qWrite('LUA_RUN_DEFAULT',1)
-        .then(function(){
-            innerDeferred.resolve();
-        }, self.handleNoScriptError)
-        .then(innerDeferred.resolve, innerDeferred.reject);
-        return innerDeferred.promise;
-    };
-    this.disableLuaRunDefault = function() {
-        self.print('disabling LUA_RUN_DEFAULT');
-        var innerDeferred = q.defer();
-
-        // Perform Device IO
-        self.device.qWrite('LUA_RUN_DEFAULT',0)
-        .then(function(){
-            innerDeferred.resolve();
-        }, innerDeferred.reject);
-        return innerDeferred.promise;
-    };
-    this.rebootDevice = function() {
-        self.print('rebooting device LUA_RUN_DEFAULT');
-        var innerDeferred = q.defer();
-
-        // Perform Device IO
-        self.device.qWrite('SYSTEM_REBOOT',0x4C4A0002)
-        .then(function(){
-            innerDeferred.resolve();
-        }, innerDeferred.reject);
-        return innerDeferred.promise;
+        });
     }
-    this.saveEnableLuaSaveToFlash = function() {
-        self.print('saving LUA_SAVE_TO_FLASH');
-        var innerDeferred = q.defer();
+
+    getAndAddDebugData(numBytes) {
+        this.printHighFreq('reading & saving to LUA_DEBUG_DATA');
+        return new Promise(resolve => {
+            /*
+            Future Chris: If you are looking for where the even/odd fix happened
+            It was in the "controller.js" file. Function: "numDebugBytes".  It is
+            the function that calls this function and makes sure only even amounts
+            of data are read at any given time unless there is only 1 remaining
+            byte.
+            */
+            this.device.readArray('LUA_DEBUG_DATA', numBytes)
+                .then(
+                    // Handle successful reads
+                    (data) => {
+                        // Define variable to save debug-data to
+                        let textData = '';
+
+                        // Loop through read data & convert to ASCII text
+                        data.forEach((newChar) => {
+                            if (newChar !== 0) {
+                                textData += String.fromCharCode(newChar);
+                            } else {
+
+                            }
+                        });
+
+                        this.debuggingLog.appendText(textData);
+
+                        resolve();
+                    },
+                    // Handle read errors
+                    (err) => {
+                        // Report that an error has occurred
+                        console.log('Error on LUA_DEBUG_DATA', err);
+                        try {
+                            console.log('Err Info', modbus_map.getErrorInfo(err));
+                        } catch (newError) {
+                            console.log('Error getting error info');
+                        }
+                        // console.log('Check .json for "type" of BYTE');
+
+                        resolve();
+                    }
+                );
+        });
+    }
+
+    enableLuaDebugging() {
+        this.print('enabling LUA_DEBUG_ENABLE');
+        return this.device.qWrite('LUA_DEBUG_ENABLE',1);
+    }
+
+    enableLuaDebuggingDefault() {
+        this.print('enabling LUA_DEBUG_ENABLE_DEFAULT');
+        return this.device.qWrite('LUA_DEBUG_ENABLE_DEFAULT',1);
+    }
+    
+    handleNoScriptError(err) {
+        console.log('Handling error',err);
+        return this.saveScriptToFlash();
+    }
+
+    enableLuaRunDefault() {
+        this.print('enabling LUA_RUN_DEFAULT');
+
+        return new Promise(resolve => {
+            // Perform Device IO
+            this.device.qWrite('LUA_RUN_DEFAULT',1)
+                .then(() => resolve(), this.handleNoScriptError);
+        });
+    }
+
+    disableLuaRunDefault() {
+        this.print('disabling LUA_RUN_DEFAULT');
 
         // Perform Device IO
-        self.device.qWrite('LUA_SAVE_TO_FLASH',1)
-        .then(innerDeferred.resolve, innerDeferred.reject);
-        return innerDeferred.promise;
-    };
-    this.checkForCodeErrors = function() {
-        var codeDeferred = q.defer();
-        if(self.isLuaCodeError()) {
-            var msg = 'Syntax errors detected:\n';
-            self.codeEditor.getLinterErrors().forEach(function(err) {
-                msg += err + '\n';
-            });
-            // var msg = 'Syntax error detected, line: '+self.getErrorLine();
+        return this.device.qWrite('LUA_RUN_DEFAULT',0);
+    }
 
-            showAlert('Syntax error detected, not running script.');
-            // showAlert('Check Script for Errors, line: '+self.getErrorLine());
+    rebootDevice() {
+        this.print('rebooting device LUA_RUN_DEFAULT');
 
-            self.debuggingLog.setValue(msg);
-            self.debuggingLog.scrollToEnd();
-            
-            codeDeferred.reject();
-        } else {
-            var compat = self.codeEditor.checkScriptFWCompatibility(self.device);
-            if(compat.isError) {
-                showAlert('FW Compatibility error detected, not running script.');
-                self.debuggingLog.setValue(msg);
-                self.debuggingLog.scrollToEnd();
-            
-                codeDeferred.reject();
+        // Perform Device IO
+        return this.device.qWrite('SYSTEM_REBOOT',0x4C4A0002);
+    }
+
+    saveEnableLuaSaveToFlash() {
+        this.print('saving LUA_SAVE_TO_FLASH');
+
+        // Perform Device IO
+        return this.device.qWrite('LUA_SAVE_TO_FLASH',1);
+    }
+
+    checkForCodeErrors() {
+        return new Promise((resolve, reject) => {
+            if (this.isLuaCodeError()) {
+                let msg = 'Syntax errors detected:\n';
+                this.codeEditor.getLinterErrors().forEach((err) => {
+                    msg += err + '\n';
+                });
+                // const msg = 'Syntax error detected, line: '+this.getErrorLine();
+
+                global.showAlert('Syntax error detected, not running script.');
+                // showAlert('Check Script for Errors, line: '+this.getErrorLine());
+
+                this.debuggingLog.setValue(msg);
+                this.debuggingLog.scrollToEnd();
+
+                reject();
             } else {
-                codeDeferred.resolve();
+                const compat = this.codeEditor.checkScriptFWCompatibility(this.device);
+                if (compat.isError) {
+                    global.showAlert('FW Compatibility error detected, not running script.');
+                    this.debuggingLog.setValue(compat.message);
+                    this.debuggingLog.scrollToEnd();
+
+                    reject();
+                } else {
+                    resolve();
+                }
             }
+        });
+    }
+
+    async saveScriptToFlash() {
+        this.print('loading & saving lua script to flash');
+
+        try {
+            await this.onRunSaveScript();
+
+            // Check LUA Script for Errors
+            await this.checkForCodeErrors();
+
+            // Disable the LUA script
+            await this.stopLuaScript();
+
+            // Set the LUA Source Size
+            await this.writeLuaSourceSize();
+
+            // Write the LUA script
+            await this.writeLuaScript();
+
+            // Configure LUA_SAVE_TO_FLASH register
+            return await this.saveEnableLuaSaveToFlash();
+        } catch (err) {
+            await this.catchError(err);
         }
-        return codeDeferred.promise;
-    };
-    this.saveScriptToFlash = function() {
-        self.print('loading & saving lua script to flash');
-        var innerDeferred = q.defer();
+    }
 
-        // perform onRun save script operation
-        self.onRunSaveScript()
+    async enableStartupLuaScript() {
+        this.print('enabling startup script');
 
-        // Check LUA Script for Errors
-        .then(self.checkForCodeErrors, self.catchError)
+        try {
+            // Disable the LUA script
+            await this.stopLuaScript();
 
-        // Disable the LUA script
-        .then(self.stopLuaScript, self.catchError)
+            // Configure LUA_RUN_DEFAULT register
+            await this.enableLuaRunDefault();
 
-        // Set the LUA Source Size
-        .then(self.writeLuaSourceSize, self.catchError)
+            // Configure LUA_DEBUG_ENABLE_DEFAULT register
+            return await this.enableLuaDebuggingDefault();
+        } catch (err) {
+            await this.catchError(err);
+        }
+    }
 
-        // Write the LUA script
-        .then(self.writeLuaScript, self.catchError)
-
-        // Configure LUA_SAVE_TO_FLASH register
-        .then(self.saveEnableLuaSaveToFlash, self.catchError)
-
-        .then(innerDeferred.resolve, innerDeferred.reject);
-        return innerDeferred.promise;
-    };
-    this.enableStartupLuaScript = function() {
-        self.print('enabling startup script');
-        var ioDeferred = q.defer();
+    disableStartupLuaScript() {
+        this.print('disabling startup script');
 
         // Disable the LUA script
-        self.stopLuaScript()
+        return this.stopLuaScript()
 
         // Configure LUA_RUN_DEFAULT register
-        .then(self.enableLuaRunDefault, self.catchError)
+        .then(this.disableLuaRunDefault, this.catchError);
+    }
 
-        // Configure LUA_DEBUG_ENABLE_DEFAULT register
-        .then(self.enableLuaDebuggingDefault, self.catchError)
+    moveDebuggingCursorToEnd() {
+        this.debuggingLog.scrollToEnd();
+        return Promise.resolve();
+    }
 
-        .then(ioDeferred.resolve, ioDeferred.reject);
-        return ioDeferred.promise;
-    };
-    this.disableStartupLuaScript = function() {
-        self.print('disabling startup script');
-        var ioDeferred = q.defer();
+    async copyDebuggingConsoleText() {
+        const txt = this.debuggingLog.getValue();
 
-        // Disable the LUA script
-        self.stopLuaScript()
+        global.CLIPBOARD_MANAGER.set(txt);
+        global.showInfoMessage('Console text copied to clipboard');
+    }
 
-        // Configure LUA_RUN_DEFAULT register
-        .then(self.disableLuaRunDefault, self.catchError)
+    clearDebuggingConsoleText() {
+        this.debuggingLog.clear();
+        return Promise.resolve();
+    }
 
-        .then(ioDeferred.resolve, ioDeferred.reject);
-        return ioDeferred.promise;
-    };
-    this.moveDebuggingCursorToEnd = function() {
-        var defered = q.defer();
-        self.debuggingLog.scrollToEnd();
-        defered.resolve();
-        return defered.promise;
-    };
-    this.copyDebuggingConsoleText = function() {
-        var defered = q.defer();
-        var txt = self.debuggingLog.getValue();
+    async loadAndStartScript() {
+        this.print('loading & starting Lua script');
 
-        CLIPBOARD_MANAGER.set(txt);
-        showInfoMessage('Console text copied to clipboard');
-        defered.resolve();
-        return defered.promise;
-    };
-    this.clearDebuggingConsoleText = function() {
-        var defered = q.defer();
-        self.debuggingLog.clear();
-        defered.resolve();
-        return defered.promise;
-    };
+        try {
+            // perform onRun save script operation
+            await this.onRunSaveScript();
 
-    this.loadAndStartScript = function() {
-        self.print('loading & starting Lua script');
-        var ioDeferred = q.defer();
+            // Check LUA Script for Errors
+            await this.checkForCodeErrors();
 
-        // perform onRun save script operation
-        self.onRunSaveScript()
+            // Disable the LUA script
+            await this.stopLuaScript();
 
-        // Check LUA Script for Errors
-        .then(self.checkForCodeErrors, self.catchError)
-        
-        // Disable the LUA script
-        .then(self.stopLuaScript, self.catchError)
+            // Set the LUA Source Size
+            await this.writeLuaSourceSize();
 
-        // Set the LUA Source Size
-        .then(self.writeLuaSourceSize, self.catchError)
+            // Write the LUA script
+            await this.writeLuaScript();
 
-        // Write the LUA script
-        .then(self.writeLuaScript, self.catchError)
-        
-        // Enable Debugging
-        .then(self.enableLuaDebugging, self.catchError)
+            // Enable Debugging
+            await this.enableLuaDebugging();
 
-        // Enable Debugging Default
-        .then(self.enableLuaDebuggingDefault, self.catchError)
+            // Enable Debugging Default
+            await this.enableLuaDebuggingDefault();
 
-        // Move debuggingLog cursor to the end of the file
-        .then(self.moveDebuggingCursorToEnd, self.catchError)
+            // Move debuggingLog cursor to the end of the file
+            await this.moveDebuggingCursorToEnd();
 
-        // Enable LUA script
-        .then(self.enableLuaScript, self.catchError)
+            // Enable LUA script
+            await this.enableLuaScript();
+        } catch (err) {
+            await this.catchError(err);
+        }
+    }
 
-        // Handle errors & return
-        .then(ioDeferred.resolve, ioDeferred.reject);
+    async loadLuaScript() {
+        this.print('loading Lua script');
 
-        // Return q instance
-        return ioDeferred.promise;
-    };
+        try {
+            // Check LUA Script for Errors
+            await this.checkForCodeErrors();
 
-    this.loadLuaScript = function() {
-        self.print('loading Lua script');
-        var ioDeferred = q.defer();
+            // Disable the LUA script
+            await this.stopLuaScript();
 
-        // Check LUA Script for Errors
-        self.checkForCodeErrors()
-        
-        // Disable the LUA script
-        .then(self.stopLuaScript, self.catchError)
+            // Set the LUA Source Size
+            await this.writeLuaSourceSize();
 
-        // Set the LUA Source Size
-        .then(self.writeLuaSourceSize, self.catchError)
+            // Write the LUA script
+            await this.writeLuaScript();
 
-        // Write the LUA script
-        .then(self.writeLuaScript, self.catchError)
+            // Enable Debugging
+            await this.enableLuaDebugging();
 
-        // Enable Debugging
-        .then(self.enableLuaDebugging, self.catchError)
+            // Enable Debugging Default
+            await this.enableLuaDebuggingDefault();
+        } catch (err) {
+            await this.catchError(err);
+        }
+    }
 
-        // Enable Debugging Default
-        .then(self.enableLuaDebuggingDefault, self.catchError)
-
-        // Handle errors & return
-        .then(ioDeferred.resolve, ioDeferred.reject);
-
-        // Return q instance
-        return ioDeferred.promise;
-    };
-    this.stopScript = function() {
-        self.print('stopping Lua script');
-        var ioDeferred = q.defer();
+    stopScript() {
+        this.print('stopping Lua script');
 
         // Disable the LUA script
-        self.stopLuaScript()
+        return this.stopLuaScript();
+    }
 
-        // Handle errors & return
-        .then(ioDeferred.resolve, ioDeferred.reject);
-
-        // Return q instance
-        return ioDeferred.promise;
-    };
-    this.createNewScript = function() {
-        self.print('creating new Lua Script');
-        var ioDeferred = q.defer();
-
+    createNewScript() {
+        this.print('creating new Lua Script');
         // Update Internal Constants
-        self.configureAsNewScript();
+        this.configureAsNewScript();
 
         // clear the codeEditor
-        self.codeEditorDoc.setValue("");
+        this.codeEditorDoc.setValue("");
 
-        self.printLoadedScriptInfo('in createNewScript');
+        this.printLoadedScriptInfo('in createNewScript');
 
-        ioDeferred.resolve();
+        return Promise.resolve();
+    }
 
-        // Return q instance
-        return ioDeferred.promise;
-    };
+    loadScriptFromFile(filePath) {
+        this.print('loading Lua Script from file');
+        return new Promise((resolve, reject) => {
 
-    this.loadScriptFromFile = function(filePath) {
-        self.print('loading Lua Script from file');
-        var ioDeferred = q.defer();
+            // Update Internal Constants
+            this.configureAsUserScript(filePath);
 
-        // Update Internal Constants
-        self.configureAsUserScript(filePath);
+            // Load File
+            fs_facade.loadFile(
+                filePath,
+                (err) => {
+                    this.print('Error loading script', err);
+                    this.codeEditorDoc.setValue('-- Failed to load script file: ' + filePath);
+                    reject();
+                },
+                (data) => {
+                    this.print('Successfully loaded script');
+                    this.codeEditorDoc.setValue(data);
+                    resolve();
+                }
+            );
+        });
+    }
 
-        console.log('ggggggggggg', filePath);
-        // Load File
-        fs_facade.loadFile(
-            filePath,
-            function(err) {
-                self.print('Error loading script',err);
-                self.codeEditorDoc.setValue('-- Failed to load script file: ' + filePath);
-                ioDeferred.reject();
-            },
-            function(data) {
-                self.print('Successfully loaded script');
-                self.codeEditorDoc.setValue(data);
-                ioDeferred.resolve();
-            }
-        );
-        // Return q instance
-        return ioDeferred.promise;
-    };
-    this.loadExampleScript = function(filePath) {
-        self.print('loading example script', filePath);
-        var ioDeferred = q.defer();
+    loadExampleScript(filePath) {
+        this.print('loading example script', filePath);
+        return new Promise((resolve, reject) => {
 
-        // Update Internal Constants
-        self.configureAsExample(filePath);
+            // Update Internal Constants
+            this.configureAsExample(filePath);
 
-        // Load Script File
-        fs_facade.readModuleFile(
-            filePath,
-            function(err) {
-                var scriptLoadErMessage = "Error loading example script: ";
-                scriptLoadErMessage += filePath + ". Error Message: ";
-                scriptLoadErMessage += err.toString();
+            // Load Script File
+            fs_facade.readModuleFile(
+                filePath,
+                (err) => {
+                    const scriptLoadErMessage = "Error loading example script: " + filePath + ". Error Message: " + err.toString();
 
-                console.log(scriptLoadErMessage,err);
-                self.codeEditorDoc.setValue(scriptLoadErMessage);
-                ioDeferred.reject();
-            },
-            function(data) {
-                self.print('Successfully loaded script');
-                self.codeEditorDoc.setValue(data);
-                ioDeferred.resolve();
-            }
-        );
+                    console.log(scriptLoadErMessage, err);
+                    this.codeEditorDoc.setValue(scriptLoadErMessage);
+                    reject();
+                },
+                (data) => {
+                    this.print('Successfully loaded script');
+                    this.codeEditorDoc.setValue(data);
+                    resolve();
+                }
+            );
 
-        // Return q instance
-        return ioDeferred.promise;
-    };
+        });
+    }
 
-    this.saveLoadedScriptAs = function() {
-        self.print('Saving Lua Script as...');
-        var fileIODeferred = q.defer();
-        
+    saveLoadedScriptAs() {
+        this.print('Saving Lua Script as...');
+
         // Perform a saveAs operation
-        self.saveLoadedScriptHandler('saveAs')
-        .then(fileIODeferred.resolve, fileIODeferred.reject);
-
-        // Return q instance
-        return fileIODeferred.promise;
-    };
-    this.saveLoadedScript = function() {
-        self.print('Saving Lua Script');
-        var fileIODeferred = q.defer();
-        
+        return this.saveLoadedScriptHandler('saveAs');
+    }
+    saveLoadedScript() {
+        this.print('Saving Lua Script');
         // Perform a save operation
-        self.saveLoadedScriptHandler('save')
-        .then(fileIODeferred.resolve, fileIODeferred.reject);
 
-        // Return q instance
-        return fileIODeferred.promise;
-    };
-    this.onRunSaveScript = function() {
-        var fileIODeferred = q.defer();
+        return this.saveLoadedScriptHandler('save');
+    }
 
-        self.saveLoadedScriptHandler('onRun')
-        .then(fileIODeferred.resolve, fileIODeferred.reject);
+    onRunSaveScript() {
+        return this.saveLoadedScriptHandler('onRun');
+    }
 
-        // Return q instance
-        return fileIODeferred.promise;
-    };
-    this.saveLoadedScriptHandler = async function(saveType) {
-        var fileIODeferred = q.defer();
-        var saveFileCommand = 'notSaving';
+    async saveLoadedScriptHandler(saveType) {
+        let saveFileCommand = 'notSaving';
 
-        var canSave = self.curScriptOptions.canSave;
-        var saveOnRun = self.curScriptOptions.saveOnRun;
-        var filePath = self.curScriptFilePath;
-        var scriptData = self.codeEditorDoc.getValue();
-        self.printLoadedScriptInfo('in saveLoadedScriptHandler');
-        if(saveType === 'onRun') {
-            if(saveOnRun) {
-                if(canSave) {
+        const canSave = this.curScriptOptions.canSave;
+        const saveOnRun = this.curScriptOptions.saveOnRun;
+        const filePath = this.curScriptFilePath;
+        const scriptData = this.codeEditorDoc.getValue();
+        this.printLoadedScriptInfo('in saveLoadedScriptHandler');
+        if (saveType === 'onRun') {
+            if (saveOnRun) {
+                if (canSave) {
                     saveFileCommand = 'save';
                 } else {
                     saveFileCommand = 'saveAs';
                 }
             }
         } else if (saveType === 'save') {
-            if(canSave) {
+            if (canSave) {
                 saveFileCommand = 'save';
             } else {
                 saveFileCommand = 'saveAs';
@@ -774,129 +591,121 @@ function luaDeviceController() {
             saveFileCommand = 'saveAs';
         }
         console.log('Save Command...', saveFileCommand, saveType);
-        // Determine if the script can be saved 
+        // Determine if the script can be saved
         // aka: switch between user script & example
+
         if (saveFileCommand === 'save') {
             // Perform save operation
-            self.print('Saving Script to file - save');
-            fs_facade.saveDataToFile(
-                filePath,
-                scriptData,
-                function(err) {
-                    // onError function
-                    console.log('Failed to Save Script to file', err);
-                    fileIODeferred.reject(err);
-                },
-                function() {
-                    // onSuccess function
-                    self.print('Successfuly Saved Script to File');
-                    fileIODeferred.resolve();
-                }
-            );
-        } else if (saveFileCommand === 'saveAs') {
-            // Perform saveAs command
-            self.print('Performing saveAs method, opening file dialog');
-
-            // Define file-selected function.
-            var saveAsFileSelected = function(fileLoc) {
-                var scriptData = self.codeEditorDoc.getValue();
-
-                self.print('Saving Script to file - saveAs', '"' + fileLoc + '"');
-
+            this.print('Saving Script to file - save');
+            return new Promise((resolve, reject) => {
                 fs_facade.saveDataToFile(
-                    fileLoc,
+                    filePath,
                     scriptData,
-                    function(err) {
-                        // onError function
-                        console.log('Failed to Save Script to file', err);
-                        fileIODeferred.reject(err);
+                    (err) => {
+                        console.error('Failed to Save Script to file', err);
+                        reject(err);
                     },
-                    function() {
-                        // onSuccess function
-                        self.print('Successfuly Saved Script to File');
-
-                        // Update Internal Constants
-                        self.configureAsUserScript(fileLoc);
-
-                        fileIODeferred.resolve();
+                    () => {
+                        this.print('Successfuly Saved Script to File');
+                        resolve();
                     }
                 );
-            };
+            });
+        } else if (saveFileCommand === 'saveAs') {
+            // Perform saveAs command
+            this.print('Performing saveAs method, opening file dialog');
 
-            // Define file-not-selected function.
-            var saveAsFileNotSelected = function() {
-                console.log('No File Selected');
-                fileIODeferred.resolve();
-                return;
-            };
-
-            const fileLoc = await FILE_BROWSER.saveFile({
+            const fileLoc = await global.FILE_BROWSER.saveFile({
                 'filters': 'lua',
                 'suggestedName': 'luaScript.lua',
             });
 
             if (fileLoc) {
-                saveAsFileSelected(fileLoc);
+                const scriptData = this.codeEditorDoc.getValue();
+
+                this.print('Saving Script to file - saveAs', '"' + fileLoc + '"');
+
+                return new Promise((resolve, reject) => {
+                    fs_facade.saveDataToFile(
+                        fileLoc,
+                        scriptData,
+                        (err) => {
+                            console.error('Failed to Save Script to file', err);
+                            reject(err);
+                        },
+                        () => {
+                            this.print('Successfuly Saved Script to File');
+
+                            // Update Internal Constants
+                            this.configureAsUserScript(fileLoc);
+
+                            resolve();
+                        }
+                    );
+                });
             } else {
-                saveAsFileNotSelected();
+                console.log('No File Selected');
             }
 
         } else {
             // Don't perform any save operations
-            self.print('Not performing any save operations');
-            fileIODeferred.resolve();
+            this.print('Not performing any save operations');
         }
-        // Return q instance
-        return fileIODeferred.promise;
-    };
-    this.configureAsExample = function(filePath) {
-        self.curScriptType = self.scriptConstants.types[0];
-        self.curScriptOptions = self.scriptConstants[self.curScriptType];
-        self.curScriptFilePath = filePath;
-    };
-    this.configureAsUserScript = function(filePath) {
-        self.curScriptType = self.scriptConstants.types[1];
-        self.curScriptOptions = self.scriptConstants[self.curScriptType];
-        self.curScriptFilePath = filePath;
-    };
-    this.configureAsNewScript = function() {
-        self.curScriptType = self.scriptConstants.types[2];
-        self.curScriptOptions = self.scriptConstants[self.curScriptType];
-        self.curScriptFilePath = "";
-    };
+    }
 
-    this.setDevice = function(device) {
-        self.device = device;
-    };
+    configureAsExample(filePath) {
+        this.curScriptType = this.scriptConstants.types[0];
+        this.curScriptOptions = this.scriptConstants[this.curScriptType];
+        this.curScriptFilePath = filePath;
+    }
 
-    this.setCodeEditor = function(codeEditor) {
+    configureAsUserScript(filePath) {
+        this.curScriptType = this.scriptConstants.types[1];
+        this.curScriptOptions = this.scriptConstants[this.curScriptType];
+        this.curScriptFilePath = filePath;
+    }
+
+    configureAsNewScript() {
+        this.curScriptType = this.scriptConstants.types[2];
+        this.curScriptOptions = this.scriptConstants[this.curScriptType];
+        this.curScriptFilePath = '';
+    }
+
+    setDevice(device) {
+        this.device = device;
+    }
+
+    setCodeEditor(codeEditor) {
         // Save the editor and various attributes
-        self.codeEditor = codeEditor;
-        self.codeEditorSession = codeEditor.editor.session;
-        self.codeEditorDoc = codeEditor;
+        this.codeEditor = codeEditor;
+        this.codeEditorSession = codeEditor.editor.session;
+        this.codeEditorDoc = codeEditor;
 
         // Configure the editor
-        self.codeEditorSession.setTabSize(2);
-        self.codeEditorSession.setUseSoftTabs(true);
-        self.codeEditorSession.setUseWrapMode(true);
-    };
-    this.setDebuggingLog = function(debuggingLog) {
-        self.debuggingLog = debuggingLog;
-        self.debuggingLogSession = debuggingLog.editor.session;
-        self.debuggingLog.editor.setReadOnly(true);
+        this.codeEditorSession.setTabSize(2);
+        this.codeEditorSession.setUseSoftTabs(true);
+        this.codeEditorSession.setUseWrapMode(true);
+    }
 
-        self.debuggingLogSession.setTabSize(2);
-        self.debuggingLogSession.setUseSoftTabs(false);
-        self.debuggingLogSession.setUseWrapMode(true);
-    };
-    this.setScriptConstants = function(constants) {
-        self.scriptConstants = constants;
-    };
-    this.setScriptType = function(type, options, filePath) {
-        self.curScriptType = type;
-        self.curScriptOptions = options;
-        self.curScriptFilePath = filePath;
-    };
-    var self = this;
+    setDebuggingLog(debuggingLog) {
+        this.debuggingLog = debuggingLog;
+        this.debuggingLogSession = debuggingLog.editor.session;
+        this.debuggingLog.editor.setReadOnly(true);
+
+        this.debuggingLogSession.setTabSize(2);
+        this.debuggingLogSession.setUseSoftTabs(false);
+        this.debuggingLogSession.setUseWrapMode(true);
+    }
+
+    setScriptConstants(constants) {
+        this.scriptConstants = constants;
+    }
+
+    setScriptType(type, options, filePath) {
+        this.curScriptType = type;
+        this.curScriptOptions = options;
+        this.curScriptFilePath = filePath;
+    }
 }
 
+global.luaDeviceController = luaDeviceController;
