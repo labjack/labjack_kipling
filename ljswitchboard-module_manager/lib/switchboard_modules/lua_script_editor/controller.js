@@ -59,7 +59,7 @@ function module() {
         // Save the bindings to the framework instance.
         framework.putConfigBindings(moduleBindings);
         onSuccess();
-    }
+    };
     
     /**
      * Function is called once every time a user selects a new device.  
@@ -78,7 +78,7 @@ function module() {
         // rendering the module's template.
         framework.setCustomContext(moduleContext);
         onSuccess();
-    }
+    };
 
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
         //Initialize ace editor:
@@ -87,41 +87,26 @@ function module() {
         aceEditor.getSession().setMode("ace/mode/javascript");
 
         onSuccess();
-    }
-    this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
-        onSuccess();
-    }
-    this.onRegisterWritten = function(framework, registerName, value, onError, onSuccess) {
-        onSuccess();
-    }
-    this.onRefresh = function(framework, registerNames, onError, onSuccess) {
-        onSuccess();
-    }
+    };
     this.onRefreshed = function(framework, results, onError, onSuccess) {
         // console.log('in onRefreshed',results);
         results.forEach(function(key, value){
             // console.log('results['+value+']:',key)
         });
         onSuccess();
-    }
-    this.onCloseDevice = function(framework, device, onError, onSuccess) {
-        onSuccess();
-    }
-    this.onUnloadModule = function(framework, onError, onSuccess) {
-        onSuccess();
-    }
+    };
     this.onLoadError = function(framework, description, onHandle) {
         console.log('in onLoadError', description);
         onHandle(true);
-    }
+    };
     this.onWriteError = function(framework, registerName, value, description, onHandle) {
         console.log('in onConfigError', description);
         onHandle(true);
-    }
+    };
     this.onRefreshError = function(framework, registerNames, description, onHandle) {
         console.log('in onRefreshError', description);
         onHandle(true);
-    }
+    };
 
     var self = this;
 }

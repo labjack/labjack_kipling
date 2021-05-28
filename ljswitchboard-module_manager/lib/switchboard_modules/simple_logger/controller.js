@@ -80,38 +80,6 @@ function module() {
         onSuccess();
     };
 
-    this.onTemplateLoaded = function(framework, onError, onSuccess) {
-        onSuccess();
-    };
-
-    /**
-     * Function that gets executed after the module's template is displayed.
-     * @param  {object} framework framework object.
-     * @param  {function} onError   function to be called on error.
-     * @param  {function} onSuccess function to be called on success
-     * @return {[type]}           [description]
-     */
-    this.onTemplateDisplayed = function(framework, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRegisterWritten = function(framework, registerName, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefresh = function(framework, registerNames, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefreshed = function(framework, results, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onCloseDevice = function(framework, device, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onUnloadModule = function(framework, onError, onSuccess) {
-        onSuccess();
-    };
     this.onLoadError = function(framework, description, onHandle) {
         console.log('in onLoadError', description);
         onHandle(true);

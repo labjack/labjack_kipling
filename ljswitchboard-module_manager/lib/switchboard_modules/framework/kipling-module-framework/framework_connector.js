@@ -251,14 +251,12 @@ class ModuleInstance extends EventEmitter {
         await this.reportModuleStarted(moduleData);
     }
 
-    unloadStep() {
+    async unloadStep() {
         if (this.sdFramework) {
-            return this.sdFramework.qExecOnUnloadModule()
-                .then(function () {
-                    if (this.DEBUG_FRAMEWORK_CONNECTOR) {
-                        console.info('sdFramework Stopped');
-                    }
-                });
+            await this.sdFramework.qExecOnUnloadModule();
+            if (this.DEBUG_FRAMEWORK_CONNECTOR) {
+                console.info('sdFramework Stopped');
+            }
         }
     }
 

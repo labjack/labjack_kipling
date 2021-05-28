@@ -1650,15 +1650,6 @@ function module() {
         // Initialize the D3 Graphs
         self.initializeD3Graphs(onSuccess);
     };
-    this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRegisterWritten = function(framework, registerName, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefresh = function(framework, registerNames, onError, onSuccess) {
-        onSuccess();
-    };
     var findRangeRegisterRegex = new RegExp("AIN[0-9]{1,2}_RANGE");
     var findEFIndexRegister = new RegExp("AIN[0-9]{1,2}_EF_INDEX");
     var findOnlyActiveChannel = new RegExp("^AIN[0-9]{1,2}$");
@@ -1731,9 +1722,6 @@ function module() {
     };
     this.onCloseDevice = function(framework, device, onError, onSuccess) {
         self.clearCachedData();
-        onSuccess();
-    };
-    this.onUnloadModule = function(framework, onError, onSuccess) {
         onSuccess();
     };
     this.onLoadError = function(framework, description, onHandle) {

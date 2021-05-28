@@ -180,29 +180,6 @@ function module() {
         onSuccess();
     };
 
-
-    this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
-
-        // self.getRegistersToDisplay()
-        // .then(self.getRegistersModbusInfo)
-        // .then(self.cachedRegistersToDisplay)
-        // .then(self.getInitialDeviceData)
-        // .then(function(registers) {
-        //     console.log('Registers to display:', registers);
-        //     self.moduleContext = {
-        //         'activeRegisters': self.getActiveRegistersData(registers)
-        //     };
-        //     framework.setCustomContext(self.moduleContext);
-        //     onSuccess();
-        // });
-        // framework.setCustomContext(self.moduleContext);
-        onSuccess();
-    };
-
-    this.onTemplateLoaded = function(framework, onError, onSuccess) {
-        onSuccess();
-    };
-
     /**
      * Function that gets executed after the module's template is displayed.
      * @param  {object} framework framework object.
@@ -218,21 +195,6 @@ function module() {
         var ioi = io_manager.io_interface();
         var lc = ioi.getLoggerController();
         console.log('We got the logger controller',lc);
-        onSuccess();
-    };
-    this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRegisterWritten = function(framework, registerName, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefresh = function(framework, registerNames, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefreshed = function(framework, results, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onCloseDevice = function(framework, device, onError, onSuccess) {
         onSuccess();
     };
     this.onUnloadModule = function(framework, onError, onSuccess) {

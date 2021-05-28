@@ -279,9 +279,9 @@ function module() {
     this.onCloseDevice = function(framework, device, onError, onSuccess) {
         onSuccess();
     };
-    this.onUnloadModule = function(framework, onError, onSuccess) {
+    this.onUnloadModule = function() {
         aceEditor = undefined;
-        onSuccess();
+        return Promise.resolve();
     };
     this.onLoadError = function(framework, description, onHandle) {
         console.log('in onLoadError', description);

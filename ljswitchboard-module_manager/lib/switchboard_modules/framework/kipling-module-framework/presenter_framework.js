@@ -900,7 +900,10 @@ class PresenterFramework extends EventEmitter {
             passParams.push.apply(passParams, params);
             passParams.push(onErr);
             passParams.push(onSuccess);
-            listener.apply(null, passParams);
+            const retVal = listener.apply(null, passParams);
+            if (retVal && retVal instanceof Promise) {
+                retVal.then(() => onSuccess());
+            }
         } catch (err) {
             console.error(err);
             console.error('Error firing: ' + name, {

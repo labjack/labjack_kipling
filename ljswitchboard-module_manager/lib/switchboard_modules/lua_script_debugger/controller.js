@@ -533,8 +533,10 @@ function module() {
                 'Active Script FilePath:',
                 self.luaController.curScriptFilePath
             );
-            $('#'+sdModule.scriptOptions.scriptTypeID).text(scriptType);
-            $('#'+sdModule.scriptOptions.scriptNameID).text(scriptName);
+            if (sdModule.scriptOptions) {
+                $('#'+sdModule.scriptOptions.scriptTypeID).text(scriptType);
+                $('#'+sdModule.scriptOptions.scriptNameID).text(scriptName);
+            }
             onSuccess();
         };
     };
@@ -1430,7 +1432,7 @@ function module() {
                 console.info('Saving User Script b/c of nav');
                 saveCurrentLuaScript(resolve);
             } else {
-                return Promise.resolve();
+                resolve();
             }
         });
     };
@@ -1466,8 +1468,7 @@ function module() {
         debuggingLog = undefined;
         self.debuggingLog = undefined;
 
-        self.saveCurrentScriptNavigationHandler()
-        .then(onSuccess);
+        return self.saveCurrentScriptNavigationHandler();
     };
     this.onLoadError = function(framework, description, onHandle) {
         console.log('in onLoadError', description);
