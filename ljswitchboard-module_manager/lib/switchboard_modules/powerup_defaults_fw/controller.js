@@ -1,6 +1,6 @@
 /* jshint undef: true, unused: true, undef: true */
-/* global console, module_manager, dict, q, showAlert, modbus_map, $ */
-/* global ljmmm_parse, handlebars, FILE_BROWSER */
+/* global console, showAlert, $ */
+/* global FILE_BROWSER */
 
 /* exported activeModule, module, MODULE_UPDATE_PERIOD_MS */
 
@@ -10,10 +10,10 @@
 
 // Constant that determines device polling rate.  Use an increased rate to aid
 // in user experience.
-var MODULE_UPDATE_PERIOD_MS = 1000;
 const fs = require('fs');
 const path = require('path');
-const q = require('q');
+const async = require('async');
+const driver_const = require('ljswitchboard-ljm_driver_constants');
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -21,28 +21,27 @@ const q = require('q');
  */
 function module() {
     
-    var DEBUG_SELECT_DEFAULTS_SOURCE = false;
-    var DEBUG_SELECT_FILE_TO_LOAD = false;
-    var DEBUG_CONFIGURING_DEVICE_DEFAULTS = false;
-    var DEGUB_BROWSE_FOR_OUTPUT_DIRECTORY = false;
-    var DEBUG_SAVE_POWERUP_DEFAULTS_BTN_PRESS = false;
-    var ENABLE_ERROR_OUTPUT = true;
+    const DEBUG_SELECT_DEFAULTS_SOURCE = false;
+    const DEBUG_SELECT_FILE_TO_LOAD = false;
+    const DEBUG_CONFIGURING_DEVICE_DEFAULTS = false;
+    const DEGUB_BROWSE_FOR_OUTPUT_DIRECTORY = false;
+    const DEBUG_SAVE_POWERUP_DEFAULTS_BTN_PRESS = false;
+    const ENABLE_ERROR_OUTPUT = true;
 
     function getLogger(bool) {
         return function logger() {
-            if(bool) {
+            if (bool) {
                 console.log.apply(console, arguments);
             }
         };
     }
 
-    var debugSDS = getLogger(DEBUG_SELECT_DEFAULTS_SOURCE);
-    var debugSFTL = getLogger(DEBUG_SELECT_FILE_TO_LOAD);
-    var debugCDD = getLogger(DEBUG_CONFIGURING_DEVICE_DEFAULTS);
-    var debugBFOD = getLogger(DEGUB_BROWSE_FOR_OUTPUT_DIRECTORY);
-    var debugSPBTN = getLogger(DEBUG_SAVE_POWERUP_DEFAULTS_BTN_PRESS);
-    var errorLog = getLogger(ENABLE_ERROR_OUTPUT);
-
+    const debugSDS = getLogger(DEBUG_SELECT_DEFAULTS_SOURCE);
+    const debugSFTL = getLogger(DEBUG_SELECT_FILE_TO_LOAD);
+    const debugCDD = getLogger(DEBUG_CONFIGURING_DEVICE_DEFAULTS);
+    const debugBFOD = getLogger(DEGUB_BROWSE_FOR_OUTPUT_DIRECTORY);
+    const debugSPBTN = getLogger(DEBUG_SAVE_POWERUP_DEFAULTS_BTN_PRESS);
+    const errorLog = getLogger(ENABLE_ERROR_OUTPUT);
 
     this.moduleConstants = {};
     this.framework = undefined;
@@ -51,24 +50,23 @@ function module() {
     this.moduleContext = {};
     this.activeDevice = undefined;
 
-
-    var requiredStartupDataKeys = [
+    const requiredStartupDataKeys = [
         'selected_config_file_directory',
         'selected_output_directory',
     ];
     this.verifyStartupData = function(framework, startupData, onError, onSuccess) {
         try {
-            var isDataValid = true;
-            var messages = [];
+            let isDataValid = true;
+            const messages = [];
 
             requiredStartupDataKeys.forEach(function(requiredAttr) {
-                if(typeof(startupData[requiredAttr]) === 'undefined') {
+                if (typeof(startupData[requiredAttr]) === 'undefined') {
                     isDataValid = false;
                     messages.push('Missing a primary key: ' + requiredAttr);
                 }
             });
 
-            if(isDataValid) {
+            if (isDataValid) {
                 onSuccess();
             } else {
                 console.warn(
@@ -90,10 +88,10 @@ function module() {
     **/
     this.onModuleLoaded = function(framework, onError, onSuccess) {
         self.startupData = framework.moduleData.startupData;
-        if(self.startupData.selected_config_file_directory !== '') {
+        if (self.startupData.selected_config_file_directory !== '') {
             self.selectedFileInfo.path = self.startupData.selected_config_file_directory;
         }
-        if(self.startupData.selected_output_directory !== '') {
+        if (self.startupData.selected_output_directory !== '') {
             self.selectedOutputDirInfo.path = self.startupData.selected_output_directory;
             self.selectedOutputDirInfo.exists = true;
         }
@@ -148,15 +146,15 @@ function module() {
     };
 
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
-        var silentError = true;
+        const silentError = true;
         // Load & Parse file if one is selected.
         self.loadParseAndDisplaySelectedCfgFile(silentError)
-        .then(function() {
+        .then(() => {
             // Regardless of what happens, update the selected device list.
             updateConfigDefaultsDeviceSelectionList()
-            .then(function() {
+            .then(() => {
                 onSuccess();
-            },function() {
+            }, () => {
                 onSuccess();
             });
         })
@@ -175,22 +173,21 @@ function module() {
     
 
     this.getSelectedDefaultsSource = function() {
-        var selectedoOption = $('#select-defaults-source .radio input:checked');
-        var selectedVal = selectedoOption.val();
+        const selectedOption = $('#select-defaults-source .radio input:checked');
         // selectedVal is either "current", "factory", or "file".
-        return selectedVal;
+        return selectedOption.val();
     };
 
     function getSelectedDevicesFromTable(tableID) {
-        var fullString = tableID + ' .checkbox :checked';
-        var devsToCfgTable = $(fullString);
+        const fullString = tableID + ' .checkbox :checked';
+        const devsToCfgTable = $(fullString);
 
-        var num = devsToCfgTable.length;
-        var serialNumbers = [];
-        for(var i = 0; i < num; i++) {
-            var val = $(devsToCfgTable[i]).val();
-            var sn;
-            if(val.indexOf('_') >= 0) {
+        const num = devsToCfgTable.length;
+        const serialNumbers = [];
+        for (let i = 0; i < num; i++) {
+            const val = $(devsToCfgTable[i]).val();
+            let sn;
+            if (val.indexOf('_') >= 0) {
                 sn = val.split('_')[2];
             } else {
                 sn = val;
@@ -198,41 +195,38 @@ function module() {
             serialNumbers.push(parseInt(sn));
         }
         
-        var selectedDevices = [];
-        self.activeDevices.forEach(function(activeDevice) {
-            var sn = activeDevice.savedAttributes.serialNumber;
-            if(serialNumbers.indexOf(sn) >= 0) {
+        const selectedDevices = [];
+        self.activeDevices.forEach((activeDevice) => {
+            const sn = activeDevice.savedAttributes.serialNumber;
+            if (serialNumbers.indexOf(sn) >= 0) {
                 selectedDevices.push(activeDevice);
             }
         });
 
         return selectedDevices;
     }
-    this.getSelectedDevicesToConfigure = function() {
+    this.getSelectedDevicesToConfigure = () => {
         return getSelectedDevicesFromTable('#configure-defaults-device-selection-table');
     };
 
-    this.getSelectedDevicesToBackup = function() {
+    this.getSelectedDevicesToBackup = () => {
         return getSelectedDevicesFromTable('#save-defaults-device-selection-table');
     };
-    this.getDateStringForFileName = function() {
-        var time = new Date();
-        var year = time.getFullYear();
-        var month = time.getMonth() +1;
-        var day = time.getDate();
-        var str = year.toString();
-        str += '-' + month.toString();
-        str += '-' + day.toString();
-        return str;
+    this.getDateStringForFileName = () => {
+        const time = new Date();
+        const year = time.getFullYear();
+        const month = time.getMonth() +1;
+        const day = time.getDate();
+        return year.toString() + '-' + month.toString() + '-' + day.toString();
     };
-    this.getOutputFileNameForDevice = function(deviceObj, numericalIncrement) {
-        var savedAttributes = deviceObj.savedAttributes;
-        var productType = savedAttributes.productType;
-        var serialNumber = savedAttributes.serialNumber;
-        var name = savedAttributes.DEVICE_NAME_DEFAULT;
-        var timeStr = self.getDateStringForFileName();
-        var fileName = [timeStr, productType, serialNumber, name].join('_');
-        if(numericalIncrement) {
+    this.getOutputFileNameForDevice = (deviceObj, numericalIncrement) => {
+        const savedAttributes = deviceObj.savedAttributes;
+        const productType = savedAttributes.productType;
+        const serialNumber = savedAttributes.serialNumber;
+        const name = savedAttributes.DEVICE_NAME_DEFAULT;
+        const timeStr = self.getDateStringForFileName();
+        let fileName = [timeStr, productType, serialNumber, name].join('_');
+        if (numericalIncrement) {
             fileName += '(' + numericalIncrement.toString() + ')';
         }
         fileName += '.json';
@@ -258,65 +252,62 @@ function module() {
     /* Functions for loading and checking a config file. */
     function loadSelectedConfigFile(bundle) {
         debugBFOD('in loadSelectedConfigFile');
-        var defered = q.defer();
-
-        var filePath = self.selectedFileInfo.path;
-        fs.readFile(filePath, function(err, data) {
-			if(err) {
-				fs.readFile(filePath, function(err, data) {
-					if(err) {
-						fs.readFile(filePath, function(err, data) {
-							if(err) {
-								console.error('Error Reading File', err, filePath);
-                                bundle.isError = true;
-                                bundle.error = err;
-                                bundle.errorStep = 'editOpenConfigFile';
-								defered.reject(bundle);
-							} else {
-                                self.selectedFileInfo.rawData = data;
-								defered.resolve(bundle);
-							}
-						});
-					} else {
-                        self.selectedFileInfo.rawData = data;
-						defered.resolve(bundle);
-					}
-				});
-			} else {
-                self.selectedFileInfo.rawData = data;
-				defered.resolve(bundle);
-			}
-		});
-        return defered.promise;
+        return new Promise((resolve, reject) => {
+            const filePath = self.selectedFileInfo.path;
+            fs.readFile(filePath, (err, data) => {
+                if (err) {
+                    fs.readFile(filePath, (err, data) => {
+                        if (err) {
+                            fs.readFile(filePath, (err, data) => {
+                                if (err) {
+                                    console.error('Error Reading File', err, filePath);
+                                    bundle.isError = true;
+                                    bundle.error = err;
+                                    bundle.errorStep = 'editOpenConfigFile';
+                                    reject(bundle);
+                                } else {
+                                    self.selectedFileInfo.rawData = data;
+                                    resolve(bundle);
+                                }
+                            });
+                        } else {
+                            self.selectedFileInfo.rawData = data;
+                            resolve(bundle);
+                        }
+                    });
+                } else {
+                    self.selectedFileInfo.rawData = data;
+                    resolve(bundle);
+                }
+            });
+        });
     }
     function parseLoadedConfigFile(bundle) {
         debugBFOD('in parseLoadedConfigFile');
-        var defered = q.defer();
-        if(!bundle.isError) {
+        if (!bundle.isError) {
             try {
-                var requiredKeys = ['startupConfigsData'];
-                var data = JSON.parse(self.selectedFileInfo.rawData);
-                var keys = Object.keys(data);
+                const requiredKeys = ['startupConfigsData'];
+                const data = JSON.parse(self.selectedFileInfo.rawData);
+                const keys = Object.keys(data);
                 debugBFOD('File Data', data, keys);
-                var isValid = true;
-                var missingKeys = [];
+                let isValid = true;
+                const missingKeys = [];
                 requiredKeys.forEach(function(requiredKey) {
-                    if(keys.indexOf(requiredKey) < 0) {
+                    if (keys.indexOf(requiredKey) < 0) {
                         isValid = false;
                         missingKeys.push(requiredKey);
                     }
                 });
 
-                if(isValid) {
+                if (isValid) {
                     self.selectedFileInfo.data = data.startupConfigsData;
                     data.startupConfigsData.forEach(function(configData) {
-                        var type = configData.type;
-                        var group = configData.group;
-                        var data = configData.data;
-                        if(group === 'RequiredInfo') {
+                        const group = configData.group;
+                        const data = configData.data;
+                        if (group === 'RequiredInfo') {
                             data.forEach(function(regData) {
-                                if(regData.reg === 'PRODUCT_ID') {
-                                    var deviceTypeName = driver_const.DEVICE_TYPE_NAMES[regData.res];
+                                if (regData.reg === 'PRODUCT_ID') {
+                                    const deviceTypeName = driver_const.DEVICE_TYPE_NAMES[regData.res];
                                     self.selectedFileInfo.targetDevice = deviceTypeName;
                                 } else if (regData.reg === 'FIRMWARE_VERSION') {
                                     self.selectedFileInfo.targetFWVersion = regData.res;
@@ -333,20 +324,18 @@ function module() {
                 bundle.errorStep = 'parseLoadedConfigFile';
             }
         }
-        defered.resolve(bundle);
-        return defered.promise;
+        return Promise.resolve(bundle);
     }
     function displayLoadedConfigFile(bundle) {
         debugBFOD('in displayLoadedConfigFile');
-        var defered = q.defer();
-        var fileInfoObj = $('.selected-file-details');
-        var noCFGFileSelected = $('.no-config-file-selected');
-        if(self.selectedFileInfo.isDataValid) {
-            var fileNameObj = fileInfoObj.find('.file-name .selectableText');
-            var productName = fileInfoObj.find('.product-name  .selectableText');
-            var firmwareVersion = fileInfoObj.find('.fw-version .selectableText');
+        const fileInfoObj = $('.selected-file-details');
+        const noCFGFileSelected = $('.no-config-file-selected');
+        if (self.selectedFileInfo.isDataValid) {
+            const fileNameObj = fileInfoObj.find('.file-name .selectableText');
+            const productName = fileInfoObj.find('.product-name  .selectableText');
+            const firmwareVersion = fileInfoObj.find('.fw-version .selectableText');
 
-            var fileName = path.basename(sdModule.selectedFileInfo.path);
+            const fileName = path.basename(global.sdModule.selectedFileInfo.path);
             fileNameObj.text(fileName);
             productName.text(self.selectedFileInfo.targetDevice);
             firmwareVersion.text(self.selectedFileInfo.targetFWVersion);
@@ -357,39 +346,37 @@ function module() {
             fileInfoObj.slideUp();
             noCFGFileSelected.slideDown();
         }
-        defered.resolve(bundle);
-        return defered.promise;
+        return Promise.resolve(bundle);
     }
     function updateConfigDefaultsDeviceSelectionList(bundle) {
         debugBFOD('in disableIncompatibleDevices');
 
-        var deviceCheckBoxes = $('.configure-device-defaults-device-checkbox');
-        var userWarningTextObj = $('.user-fw-warning-text');
-        var num = deviceCheckBoxes.length;
-        var i = 0;
-        var selectedSource = self.getSelectedDefaultsSource();
-        if(selectedSource === 'file') {
-            var oneDeviceIsDisabled = false;
-            for(i = 0; i < num; i++) {
-                var deviceCheckBox = deviceCheckBoxes[i];
-                var valText = deviceCheckBox.value;
-                var infoArray = valText.split('_');
-                var FW = infoArray[0];
-                var dt = infoArray[1];
+        const deviceCheckBoxes = $('.configure-device-defaults-device-checkbox');
+        const userWarningTextObj = $('.user-fw-warning-text');
+        const num = deviceCheckBoxes.length;
+        const selectedSource = self.getSelectedDefaultsSource();
+        if (selectedSource === 'file') {
+            let oneDeviceIsDisabled = false;
+            for (let i = 0; i < num; i++) {
+                const deviceCheckBox = deviceCheckBoxes[i];
+                const valText = deviceCheckBox.value;
+                const infoArray = valText.split('_');
+                const FW = infoArray[0];
+                const dt = infoArray[1];
 
-                var isEnabled = true;
-                if(FW != self.selectedFileInfo.targetFWVersion) {
+                let isEnabled = true;
+                if (FW != self.selectedFileInfo.targetFWVersion) {
                     isEnabled = false;
                 }
-                if(dt !== self.selectedFileInfo.targetDevice) {
+                if (dt !== self.selectedFileInfo.targetDevice) {
                     isEnabled = false;
                 }
-                if(!self.selectedFileInfo.isDataValid) {
+                if (!self.selectedFileInfo.isDataValid) {
                     isEnabled = false;
                 }
 
-                var fwText = $(deviceCheckBox.parentElement.parentElement.parentElement).find('.device-fw-version');
-                if(isEnabled) {
+                const fwText = $(deviceCheckBox.parentElement.parentElement.parentElement).find('.device-fw-version');
+                if (isEnabled) {
                     deviceCheckBox.checked = true;
                     deviceCheckBox.disabled = false;
                     fwText.css('color','');
@@ -400,57 +387,49 @@ function module() {
                     fwText.css('color','#c9302c');
                 }
             }
-            if(oneDeviceIsDisabled) {
+            if (oneDeviceIsDisabled) {
                 userWarningTextObj.css('color','#c9302c');
             } else {
                 userWarningTextObj.css('color','');
             }
-        } else if(selectedSource === 'current') {
-            for(i = 0; i < num; i++) {
-                var deviceCheckBox = deviceCheckBoxes[i];
-                var fwText = $(deviceCheckBox.parentElement.parentElement.parentElement).find('.device-fw-version');
+        } else if (selectedSource === 'current') {
+            for (let i = 0; i < num; i++) {
+                const deviceCheckBox = deviceCheckBoxes[i];
+                const fwText = $(deviceCheckBox.parentElement.parentElement.parentElement).find('.device-fw-version');
                 fwText.css('color','');
                 deviceCheckBox.checked = true;
                 deviceCheckBox.disabled = false;
             }
             userWarningTextObj.css('color','');
-        } else if(selectedSource === 'factory') {
-            for(i = 0; i < num; i++) {
-                var deviceCheckBox = deviceCheckBoxes[i];
-                var fwText = $(deviceCheckBox.parentElement.parentElement.parentElement).find('.device-fw-version');
+        } else if (selectedSource === 'factory') {
+            for (let i = 0; i < num; i++) {
+                const deviceCheckBox = deviceCheckBoxes[i];
+                const fwText = $(deviceCheckBox.parentElement.parentElement.parentElement).find('.device-fw-version');
                 fwText.css('color','');
                 deviceCheckBox.checked = true;
                 deviceCheckBox.disabled = false;
             }
             userWarningTextObj.css('color','');
         }
-        var defered = q.defer();
-        defered.resolve(bundle);
-        return defered.promise;
+        return Promise.resolve(bundle);
     }
-    function autoSelectApplicableDevices(bundle) {
-        debugBFOD('in autoSelectApplicableDevices');
-        var defered = q.defer();
-        defered.resolve(bundle);
-        return defered.promise;
-    }
+    // function autoSelectApplicableDevices(bundle) {
+    //     debugBFOD('in autoSelectApplicableDevices');
+    //     return Promise.resolve(bundle);
+    // }
     function handleLoadCfgFileErrors(bundle) {
-        var defered = q.defer();
-        if(!bundle.silentError) {
+        if (!bundle.silentError) {
             showAlert('Failed to load selected config file.  Please try again.');
         }
         errorLog('Failed to load cfg file. Error:', bundle);
 
-        var fileInfoObj = $('.selected-file-details');
-        fileInfoObj.slideUp();
-        var noCFGFileSelected = $('.no-config-file-selected');
-        noCFGFileSelected.slideDown();
-        defered.resolve(bundle);
-        return defered.promise;
+        $('.selected-file-details').slideUp();
+        $('.no-config-file-selected').slideDown();
+        return Promise.resolve(bundle);
     }
     this.loadParseAndDisplaySelectedCfgFile = function(silentError) {
         debugBFOD('in loadParseAndDisplaySelectedCfgFile');
-        var bundle = {
+        const bundle = {
             'silentError': silentError,
             'isError': false,
             'error': null,
@@ -464,182 +443,171 @@ function module() {
         .catch(handleLoadCfgFileErrors);
     };
 
-    var TARGET_REGISTER = {
+    const TARGET_REGISTER = {
         factory: 'IO_CONFIG_SET_DEFAULT_TO_FACTORY',
         current: 'IO_CONFIG_SET_DEFAULT_TO_CURRENT'
     };
     this.configureDeviceStrategies = {
         factory: function(operation) {
-            var defered = q.defer();
-
-            // Write a 1 to the appropriate register.
-            operation.device.iWrite(TARGET_REGISTER.factory, 1)
-            .then(function(res) {
-                defered.resolve(operation);
-            })
-            .catch(function(err) {
-                operation.isError = true;
-                operation.error = err;
-                operation.errorStep = 'configureDeviceStrategies-factory';
-                defered.reject(operation);
+            return new Promise((resolve, reject) => {
+                // Write a 1 to the appropriate register.
+                operation.device.iWrite(TARGET_REGISTER.factory, 1)
+                    .then(() => {
+                        resolve(operation);
+                    })
+                    .catch((err) => {
+                        operation.isError = true;
+                        operation.error = err;
+                        operation.errorStep = 'configureDeviceStrategies-factory';
+                        reject(operation);
+                    });
             });
-            return defered.promise;
         },
         current: function(operation) {
-            var defered = q.defer();
+            return new Promise((resolve, reject) => {
 
-            // Write a 1 to the appropriate register.
-            operation.device.iWrite(TARGET_REGISTER.current, 1)
-            .then(function(res) {
-                defered.resolve(operation);
-            })
-            .catch(function(err) {
-                operation.isError = true;
-                operation.error = err;
-                operation.errorStep = 'configureDeviceStrategies-current';
-                defered.reject(operation);
+                // Write a 1 to the appropriate register.
+                operation.device.iWrite(TARGET_REGISTER.current, 1)
+                    .then(() => {
+                        resolve(operation);
+                    })
+                    .catch((err) => {
+                        operation.isError = true;
+                        operation.error = err;
+                        operation.errorStep = 'configureDeviceStrategies-current';
+                        reject(operation);
+                    });
             });
-            return defered.promise;
         },
-        file: function(operation) {
-            var defered = q.defer();
+        file: (operation) => {
+            return new Promise((resolve, reject) => {
 
-            if(self.selectedFileInfo.isDataValid) {
-                operation.device.writeConfigs(self.selectedFileInfo.data)
-                .then(function(res) {
-                    defered.resolve(operation);
-                })
-                .catch(function(err) {
-                    operation.isError = true;
-                    operation.error = err;
-                    operation.errorStep = 'configureDeviceStrategies-file';
-                    defered.reject(operation);
-                });
-            } else {
-                defered.reject(operation);
-            }
-            // From test file: deviceB.writeConfigs(deviceConfigs)
-            return defered.promise;
+                if (self.selectedFileInfo.isDataValid) {
+                    operation.device.writeConfigs(self.selectedFileInfo.data)
+                        .then(() => {
+                            resolve(operation);
+                        })
+                        .catch((err) => {
+                            operation.isError = true;
+                            operation.error = err;
+                            operation.errorStep = 'configureDeviceStrategies-file';
+                            reject(operation);
+                        });
+                } else {
+                    reject(operation);
+                }
+                // From test file: deviceB.writeConfigs(deviceConfigs)
+            });
         },
     };
-    this.getSelectedDefaultsSource = function() {
-        return $('#select-defaults-source .radio input:checked').val();;
+    this.getSelectedDefaultsSource = () => {
+        return $('#select-defaults-source .radio input:checked').val();
     };
-    this.configureSelectedDevices = function() {
-        var defered = q.defer();
-
+    this.configureSelectedDevices = async () => {
         try {
-        var configSelection = self.getSelectedDefaultsSource();
+            const configSelection = self.getSelectedDefaultsSource();
 
-        var bundle = {
-            'configSelection': configSelection,
-            'operations': [],
-            'isError': false,
-            'error': null,
-            'errorStep': '',
-        }
-        var devices = self.getSelectedDevicesToConfigure();
-        if(devices.length === 0) {
-            if(configSelection === 'file') {
-                showAlert('No Devices Selected.  Please select a compatible device to configure. Double check the files intended firmware version.')
-            } else {
-                showAlert('No Devices Selected.  Please select a device to configure.');
-            }
-        }
-        devices.forEach(function(device) {
-            bundle.operations.push({
-                'device': device,
+            const bundle = {
+                'configSelection': configSelection,
+                'operations': [],
                 'isError': false,
                 'error': null,
                 'errorStep': '',
-            });
-        });
-
-        async.each(
-            bundle.operations,
-            function(operation, cb) {
-                debugCDD('Configuring Device:',operation.device.savedAttributes.serialNumber, configSelection);
-                self.configureDeviceStrategies[configSelection](operation)
-                .then(function(res) {
-                    cb();
-                })
-                .catch(function(err) {
-                    cb();
-                })
-            },
-            function(err) {
-                defered.resolve(bundle);
+            };
+            const devices = self.getSelectedDevicesToConfigure();
+            if (devices.length === 0) {
+                if (configSelection === 'file') {
+                    showAlert('No Devices Selected.  Please select a compatible device to configure. Double check the files intended firmware version.');
+                } else {
+                    showAlert('No Devices Selected.  Please select a device to configure.');
+                }
             }
-        );
-        } catch(err) {
-            errorLog('in configureSelectedDevices', err);
-            defered.resolve(bundle);
-        }
-        return defered.promise;
-    };
-    this.rebootDevicesSelectedToBeConfigured = function() {
-        var defered = q.defer();
-        var devices = self.getSelectedDevicesToConfigure();
-        async.each(
-            devices,
-            function(device, cb) {
-                device.write('SYSTEM_REBOOT', 0x4C4A0004)
-                .then(function(res) {
-                    cb();
-                }, function(err) {
-                    cb();
+            devices.forEach(function (device) {
+                bundle.operations.push({
+                    'device': device,
+                    'isError': false,
+                    'error': null,
+                    'errorStep': '',
                 });
-            }, function(err) {
-                defered.resolve();
             });
-        return defered.promise;
-    }
+
+            await new Promise(resolve => {
+                async.each(
+                    bundle.operations,
+                    function (operation, cb) {
+                        debugCDD('Configuring Device:', operation.device.savedAttributes.serialNumber, configSelection);
+                        self.configureDeviceStrategies[configSelection](operation)
+                            .then(() => {
+                                cb();
+                            })
+                            .catch(() => {
+                                cb();
+                            });
+                    },
+                    () => {
+                        resolve();
+                    }
+                );
+            });
+        } catch (err) {
+            errorLog('in configureSelectedDevices', err);
+        }
+    };
+
+    this.rebootDevicesSelectedToBeConfigured = function() {
+        return new Promise(resolve => {
+            const devices = self.getSelectedDevicesToConfigure();
+            async.each(
+                devices,
+                function (device, cb) {
+                    device.write('SYSTEM_REBOOT', 0x4C4A0004)
+                        .then(() => {
+                            cb();
+                        }, () => {
+                            cb();
+                        });
+                }, () => {
+                    resolve();
+                });
+        });
+    };
 
     /* Functions for downloading and saving configs */
     this.displaySelectedOutputDir = function() {
-        var defered = q.defer();
-        var directoryObject = $('#current-directory-display');
-        var path = self.selectedOutputDirInfo.path;
-        if(path === '') {
-            path = 'No folder Selected. Please browse for an output directory.';
-        } else {
-
-        }
+        const directoryObject = $('#current-directory-display');
+        const path = self.selectedOutputDirInfo.path || 'No folder Selected. Please browse for an output directory.';
         directoryObject.text(path);
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
 
     function verifyOutputDirectory(bundle) {
-        debugSPBTN('in verifyOutputDirectory',bundle);
-        var defered = q.defer();
-        var path =self.selectedOutputDirInfo.path;
-        if(path !== '') {
-            fs.stat(path, function(err, stats) {
-                if(stats.isDirectory()) {
-                    self.selectedOutputDirInfo.exists = true;
-                }
-                defered.resolve(bundle);
-            });
-        } else {
-            bundle.isError = true;
-            bundle.error = 'No selected otuput directory';
-            bundle.errorStep = 'verifyOutputDirectory';
-            defered.reject(bundle);
-        }
-        return defered.promise;
+        debugSPBTN('in verifyOutputDirectory', bundle);
+        return new Promise((resolve, reject) => {
+            const path = self.selectedOutputDirInfo.path;
+            if (path !== '') {
+                fs.stat(path, (err, stats) => {
+                    if (stats.isDirectory()) {
+                        self.selectedOutputDirInfo.exists = true;
+                    }
+                    resolve();
+                });
+            } else {
+                bundle.isError = true;
+                bundle.error = 'No selected output directory';
+                bundle.errorStep = 'verifyOutputDirectory';
+                reject(new Error('No selected output directory'));
+            }
+        });
     }
-    function buildDownloadAndSaveConfigsOperationsList(bundle) {
+    async function buildDownloadAndSaveConfigsOperationsList(bundle) {
         debugSPBTN('in buildDownloadAndSaveConfigsOperationsList',bundle);
-        var defered = q.defer();
 
-        var devices = self.getSelectedDevicesToBackup();
-        var operations = [];
+        const devices = self.getSelectedDevicesToBackup();
+        const operations = [];
         devices.forEach(function(device) {
-            var fileName = self.getOutputFileNameForDevice(device);
-            var newFilePath = '';
-            if(self.selectedOutputDirInfo.exists) {
-                newFilePath = path.join(self.selectedOutputDirInfo.path, fileName);
+            const fileName = self.getOutputFileNameForDevice(device);
+            if (self.selectedOutputDirInfo.exists) {
+                const newFilePath = path.join(self.selectedOutputDirInfo.path, fileName);
                 operations.push({
                     'device': device,
                     'baseFilePath': self.selectedOutputDirInfo.path,
@@ -650,186 +618,171 @@ function module() {
                     'error': null,
                     'errorStep': '',
                 });
-            } else {
-
             }
         });
         debugSPBTN('Created Operations', operations.length, operations);
         bundle.operations = operations;
-        defered.resolve(bundle);
-        return defered.promise;
     }
     function downloadDeviceConfigsToBundle(bundle) {
         debugSPBTN('in downloadDeviceConfigsToBundle',bundle);
-        var defered = q.defer();
-        
-        var operations = bundle.operations;
-        async.each(
-            operations,
-            function(operation, cb) {
-                var device = operation.device;
-                device.readConfigs([
-                    'StartupPowerSettings', 
-                    'StartupSettings', 
-                    'CommSettings', 
-                    // 'SWDTSettings', 
-                    'AIN_EF_Settings'
-                ])
-                .then(function(results) {
-                    var configData = {'startupConfigsData': results};
-                    try {
-                        operation.configData = JSON.stringify(configData);
-                    } catch(err) {
-                        errorLog('Failed to download configs', err);
-                        operation.isError = true;
-                        operation.error = err;
-                        operation.errorStep = 'parsingConfigData-in-downloadDeviceConfigsToBundle';
-                    }
-                    cb();
-                }, function(err) {
-                    errorLog('Failed to download configs', err);
-                    operation.isError = true;
-                    operation.error = err;
-                    operation.errorStep = 'downloadDeviceConfigsToBundle';
-                    cb();
+        return new Promise((resolve) => {
+
+            const operations = bundle.operations;
+            async.each(
+                operations,
+                (operation, cb) => {
+                    const device = operation.device;
+                    device.readConfigs([
+                        'StartupPowerSettings',
+                        'StartupSettings',
+                        'CommSettings',
+                        // 'SWDTSettings',
+                        'AIN_EF_Settings'
+                    ])
+                        .then((results) => {
+                            const configData = {'startupConfigsData': results};
+                            try {
+                                operation.configData = JSON.stringify(configData);
+                            } catch (err) {
+                                errorLog('Failed to download configs', err);
+                                operation.isError = true;
+                                operation.error = err;
+                                operation.errorStep = 'parsingConfigData-in-downloadDeviceConfigsToBundle';
+                            }
+                            cb();
+                        }, function (err) {
+                            errorLog('Failed to download configs', err);
+                            operation.isError = true;
+                            operation.error = err;
+                            operation.errorStep = 'downloadDeviceConfigsToBundle';
+                            cb();
+                        });
+                },
+                () => {
+                    resolve(bundle);
                 });
-            },
-            function(err) {
-                defered.resolve(bundle);
-            });
-        return defered.promise;
+        });
     }
     function checkForFileConflects(operation) {
         debugSPBTN('in checkForFileConflects', operation.filePathNumInc);
-        var defered = q.defer();
+        return new Promise(resolve => {
+            const selectedOption = $('#prevent-file-overwriting-selector');
+            const isChecked = selectedOption[0].checked;
+            if (!isChecked) {
+                const filePath = operation.outputFilePath;
+                fs.stat(filePath, function(err, stats) {
+                    if (err) {
+                        // Error getting file path, therefore file does not exist.
+                        resolve(operation);
+                    } else if (stats.isFile()) {
+                        debugSPBTN('Iterating for a new file name');
 
-        var selectedOption = $('#prevent-file-overwriting-selector');
-        var isChecked = selectedOption[0].checked;
-        if(!isChecked) {
-            var filePath = operation.outputFilePath;
-            fs.stat(filePath, function(err, stats) {
-                if(err) {
-                    // Error getting file path, therefore file does not exist.
-                    defered.resolve(operation);
-                } else if(stats.isFile()) {
-                    debugSPBTN('Iterating for a new file name');
-
-                    // The file exists... choose a new name.
-                    operation.filePathNumInc+=1;
-                    var newName = self.getOutputFileNameForDevice(
-                        operation.device,
-                        operation.filePathNumInc
-                    );
-                    var newPath = path.join(operation.baseFilePath, newName);
-                    operation.outputFilePath = newPath;
-                    debugSPBTN('Checking a new name', operation.outputFilePath);
-                    return checkForFileConflects(operation).then(defered.resolve);
-                } else {
-                    defered.resolve(operation);
-                }
-            });
-        } else {
-            defered.resolve(operation);
-        }
-        return defered.promise;
-    }
-    function saveDeviceDataToFile(operation) {
-        debugSPBTN('in saveDeviceDataToFile');
-        var defered = q.defer();
-
-        var filePath = operation.outputFilePath;
-        var data = operation.configData;
-
-        fs.writeFile(filePath, data, function(err) {
-            if(err) {
-                fs.writeFile(filePath, data, function(err) {
-                    if(err) {
-                        fs.writeFile(filePath, data, function(err) {
-                            if(err) {
-                                errorLog('Error Writing File', err, filePath);
-                                operation.isError = true;
-                                operation.error = err;
-                                operation.errorStep = 'saveDeviceDataToFile';
-                                defered.resolve(operation);
-                            } else {
-                                defered.resolve(operation);
-                            }
-                        });
+                        // The file exists... choose a new name.
+                        operation.filePathNumInc+=1;
+                        const newName = self.getOutputFileNameForDevice(
+                            operation.device,
+                            operation.filePathNumInc
+                        );
+                        operation.outputFilePath = path.join(operation.baseFilePath, newName);
+                        debugSPBTN('Checking a new name', operation.outputFilePath);
+                        return checkForFileConflects(operation).then(resolve);
                     } else {
-                        defered.resolve(operation);
+                        resolve(operation);
                     }
                 });
             } else {
-                defered.resolve(operation);
+                resolve(operation);
             }
         });
-        return defered.promise;
+    }
+    function saveDeviceDataToFile(operation) {
+        debugSPBTN('in saveDeviceDataToFile');
+        return new Promise((resolve) => {
+            const filePath = operation.outputFilePath;
+            const data = operation.configData;
+
+            fs.writeFile(filePath, data, function (err) {
+                if (err) {
+                    fs.writeFile(filePath, data, function (err) {
+                        if (err) {
+                            fs.writeFile(filePath, data, function (err) {
+                                if (err) {
+                                    errorLog('Error Writing File', err, filePath);
+                                    operation.isError = true;
+                                    operation.error = err;
+                                    operation.errorStep = 'saveDeviceDataToFile';
+                                    resolve(operation);
+                                } else {
+                                    resolve(operation);
+                                }
+                            });
+                        } else {
+                            resolve(operation);
+                        }
+                    });
+                } else {
+                    resolve(operation);
+                }
+            });
+        });
     }
     function saveConfigDataToFile(bundle) {
-        var defered = q.defer();
-        
-
-        var operations = bundle.operations;
-        async.each(
-            operations,
-            function(operation, cb) {
-                checkForFileConflects(operation)
-                .then(saveDeviceDataToFile)
-                .then(function(operation) {
-                    debugSPBTN('Finished Writing data to file', operation);
-                    cb();
-                })
-                .catch(function(operation) {
-                    errorLog('Error writing data to file', operation);
-                    cb();
+        return new Promise((resolve) => {
+            const operations = bundle.operations;
+            async.each(
+                operations,
+                (operation, cb) => {
+                    checkForFileConflects(operation)
+                        .then(saveDeviceDataToFile)
+                        .then((operation) => {
+                            debugSPBTN('Finished Writing data to file', operation);
+                            cb();
+                        })
+                        .catch((operation) => {
+                            errorLog('Error writing data to file', operation);
+                            cb();
+                        });
+                },
+                () => {
+                    resolve(bundle);
                 });
-            },
-            function(err) {
-                defered.resolve(bundle);
-            });
-
-        return defered.promise;
+        });
     }
-    function handleDownloadAndSaveConfigsErrors(bundle) {
-        var defered = q.defer();
-        showAlert('Failed to save selected device configs to file.  Please try again.');
-        errorLog('Failed to save selected device configs to file. Error:', bundle);
-        defered.resolve(bundle);
-        return defered.promise;
-    }
-    this.downloadAndSaveConfigsToFile = function() {
+    this.downloadAndSaveConfigsToFile = async () => {
         debugSPBTN('in downloadAndSaveConfigsToFile');
-        var bundle = {
+        const bundle = {
             'operations': [],
             'isError': false,
             'error': null,
             'errorStep': '',
         };
 
-        return verifyOutputDirectory(bundle)
-        .then(buildDownloadAndSaveConfigsOperationsList)
-        .then(downloadDeviceConfigsToBundle)
-        .then(saveConfigDataToFile)
-        .catch(handleDownloadAndSaveConfigsErrors);
+        try {
+            await verifyOutputDirectory(bundle);
+            await buildDownloadAndSaveConfigsOperationsList(bundle);
+            await downloadDeviceConfigsToBundle(bundle);
+            await saveConfigDataToFile(bundle);
+        } catch (err) {
+            showAlert('Failed to save selected device configs to file. Please try again.');
+            console.error(err, bundle);
+        }
+
+        return bundle;
     };
 
     this.clickHandlers = {
-        selectDefaultsSource: function(guiObj) {
-            var defered = q.defer();
+        selectDefaultsSource: async (guiObj) => {
             debugSDS('in selectDefaultsSource', guiObj);
-            updateConfigDefaultsDeviceSelectionList()
-            .then(function() {
-                defered.resolve(guiObj);
-            })
-            return defered.promise;
+
+            await updateConfigDefaultsDeviceSelectionList();
+            return guiObj;
         },
-        browseForConfigFile: async function(guiObj) {
-            var defered = q.defer();
+        browseForConfigFile: async (guiObj) => {
             // console.log('In the browseForConfigFile click handler...');
 
             try {
-                var options = {'filters':'.json'};
-                if(self.selectedFileInfo.path !== '') {
+                const options = {'filters': 'json'};
+                if (self.selectedFileInfo.path !== '') {
                     options.workingDirectory = path.dirname(self.selectedFileInfo.path);
                 }
                 const fileLoc = await FILE_BROWSER.browseForFile(options);
@@ -846,40 +799,30 @@ function module() {
 
                 // Do not wait for the file browser to return information to resolve
                 // the promise b/c the cancel button can not be listened for.
-                defered.resolve(guiObj);
-            } catch(err) {
+            } catch (err) {
                 console.error('Error loadingLuaFile', err);
-                defered.resolve(guiObj);
             }
-            return defered.promise;
+
+            return guiObj;
         },
-        configDefaults: function(guiObj) {
-            var defered = q.defer();
+        configDefaults: async (guiObj) => {
             debugCDD('In the configDefaults click handler...');
             // execute the "self.configureSelectedDevices" function.
-            self.configureSelectedDevices()
-            .then(function() {
-                defered.resolve(guiObj);
-            });
-            return defered.promise;
+            await self.configureSelectedDevices();
+            return guiObj;
         },
-        rebootConfiguredDevices: function(guiObj) {
-            var defered = q.defer();
+        rebootConfiguredDevices: async (guiObj) => {
             debugCDD('In the rebootConfiguredDevices click handler...');
 
-            self.rebootDevicesSelectedToBeConfigured()
-            .then(function() {
-                showInfoMessage('Device(s) are rebooting, watch for them to disconnect and then get re-connected.')
-                defered.resolve(guiObj);
-            });
-            return defered.promise;
+            await self.rebootDevicesSelectedToBeConfigured();
+            global.showInfoMessage('Device(s) are rebooting, watch for them to disconnect and then get re-connected.');
+            return guiObj;
         },
-        browseForOutputDir: async function(guiObj) {
-            var defered = q.defer();
+        browseForOutputDir: async (guiObj) => {
             debugBFOD('In the browseForOutputDir click handler...');
             try {
-                var options = {};
-                if(self.selectedOutputDirInfo.path !== '') {
+                const options = {};
+                if (self.selectedOutputDirInfo.path !== '') {
                     options.workingDirectory = self.selectedOutputDirInfo.path;
                 }
                 const fileLoc = await FILE_BROWSER.browseForFolder(options);
@@ -897,22 +840,16 @@ function module() {
 
                 // Do not wait for the file browser to return information to resolve
                 // the promise b/c the cancel button can not be listened for.
-                defered.resolve(guiObj);
-            } catch(err) {
+            } catch (err) {
                 console.error('Error loadingLuaFile', err);
-                defered.resolve(guiObj);
             }
-            return defered.promise;
+            return guiObj;
         },
-        saveDefaults: function(guiObj) {
-            var defered = q.defer();
+        saveDefaults: async (guiObj) => {
             debugSPBTN('In the saveDefaults click handler...');
-            self.downloadAndSaveConfigsToFile()
-            .then(function handledFileSelection(bundle) {
-                debugSPBTN('Saved Power-up defaults', bundle);
-                defered.resolve(guiObj);
-            });
-            return defered.promise;
+            const bundle = await self.downloadAndSaveConfigsToFile();
+            debugSPBTN('Saved Power-up defaults', bundle);
+            return guiObj;
         }
     };
 
@@ -974,7 +911,6 @@ function module() {
     };
 
     this.hideSaveButtons = function(guiObj) {
-        var defered = q.defer();
 
         // Hide the guiObj button
         guiObj.buttonObj.slideUp();
@@ -982,34 +918,30 @@ function module() {
         // show the guiObj indicator
         guiObj.indicatorObj.slideDown();
         
-        defered.resolve(guiObj);
-        return defered.promise;
+        return Promise.resolve(guiObj);
     };
     this.showSaveButtons = function(guiObj) {
-        var defered = q.defer();
-
         //Hide the guiObj indicator
         guiObj.indicatorObj.slideUp();
 
         // Show the guiObj button
         guiObj.buttonObj.slideDown();
 
-        defered.resolve(guiObj);
-        return defered.promise;
+        return Promise.resolve(guiObj);
     };
 
     function getReactiveButtonClickHandler(info) {
         function reactiveButtonClickHandler() {
-            var clickHandlerName = info.clickHandler;
-            var clickHandlerFunction = self.clickHandlers[clickHandlerName];
-            if(typeof(clickHandlerFunction) === 'function') {
+            const clickHandlerName = info.clickHandler;
+            const clickHandlerFunction = self.clickHandlers[clickHandlerName];
+            if (typeof(clickHandlerFunction) === 'function') {
                 self.hideSaveButtons(info)
                 .then(clickHandlerFunction)
                 .then(self.showSaveButtons)
                 .then(self.attachListener)
-                .then(function(successData) {
+                .then(() => {
                     // Do something w/ successData...
-                }, function(errorData) {
+                }, (errorData) => {
                     console.error('Error handling reactiveButton', info, errorData);
                 });
             } else {
@@ -1020,14 +952,14 @@ function module() {
     }
     function getBasicButtonClickHandler(info) {
         function basicButtonClickHandler() {
-            var clickHandlerName = info.clickHandler;
-            var clickHandlerFunction = self.clickHandlers[clickHandlerName];
-            if(typeof(clickHandlerFunction) === 'function') {
+            const clickHandlerName = info.clickHandler;
+            const clickHandlerFunction = self.clickHandlers[clickHandlerName];
+            if (typeof(clickHandlerFunction) === 'function') {
                 clickHandlerFunction(info)
                 .then(self.attachListener)
-                .then(function(successData) {
+                .then(() => {
                     // Do something w/ successData...
-                }, function(errorData) {
+                }, (errorData) => {
                     console.error('Error handling basicButton', info, errorData);
                 });
             } else {
@@ -1038,16 +970,16 @@ function module() {
     }
     function getSelectionOptionClickHandler(info) {
         function selectionOptionClickHandler(evt) {
-            var clickHandlerName = info.clickHandler;
-            var clickHandlerFunction = self.clickHandlers[clickHandlerName];
-            if(typeof(clickHandlerFunction) === 'function') {
+            const clickHandlerName = info.clickHandler;
+            const clickHandlerFunction = self.clickHandlers[clickHandlerName];
+            if (typeof(clickHandlerFunction) === 'function') {
                 // debugSDS('in selectionOptionClickHandler', evt.currentTarget.value)
                 info.selectedOption = evt.currentTarget.value;
                 clickHandlerFunction(info)
                 .then(self.attachListener)
-                .then(function(successData) {
+                .then(() => {
                     // debugSDS('end of selectionOptionClickHandler', evt)
-                }, function(errorData){
+                }, (errorData) => {
                     console.error('Error handling selectionOptionClick', info, errorData);
                 });
             } else {
@@ -1058,24 +990,24 @@ function module() {
     }
 
     this.generateGUIObjects = function() {
-        var guiKeys = Object.keys(self.guiControlIDs);
+        const guiKeys = Object.keys(self.guiControlIDs);
         guiKeys.forEach(function(guiKey) {
-            var guiObj = self.guiControlIDs[guiKey];
-            var type = guiObj.type;
-            var clickHandlerFunc;
+            const guiObj = self.guiControlIDs[guiKey];
+            const type = guiObj.type;
+            let clickHandlerFunc;
 
-            if(type === 'button') {
+            if (type === 'button') {
                 guiObj.buttonObj = $(guiObj.id);
                 clickHandlerFunc = getBasicButtonClickHandler(guiObj);
 
-            } else if(type === 'reactiveButton') {
+            } else if (type === 'reactiveButton') {
                 guiObj.buttonObj = $(guiObj.id);
                 guiObj.indicatorObj = $(guiObj.indicator);
                 clickHandlerFunc = getReactiveButtonClickHandler(guiObj);
                 
-            } else if(type === 'deviceSelectionTable') {
+            } else if (type === 'deviceSelectionTable') {
                 // Not sure if this is needed...
-            } else if(type === 'optionSelect') {
+            } else if (type === 'optionSelect') {
                 // clickSelector
                 guiObj.rootSelectorObj = $(guiObj.id);
                 clickHandlerFunc = getSelectionOptionClickHandler(guiObj);
@@ -1084,37 +1016,32 @@ function module() {
     };
 
     this.attachListener = function(guiObj) {
-        var defered = q.defer();
+        const type = guiObj.type;
+        let clickHandlerFunc;
 
-        var type = guiObj.type;
-        var clickHandlerFunc;
-
-        if(type === 'button') {
+        if (type === 'button') {
             clickHandlerFunc = getBasicButtonClickHandler(guiObj);
             guiObj.buttonObj.one('click', clickHandlerFunc);
-        } else if(type === 'reactiveButton') {
+        } else if (type === 'reactiveButton') {
             clickHandlerFunc = getReactiveButtonClickHandler(guiObj);
             guiObj.buttonObj.one('click', clickHandlerFunc);
-        } else if(type === 'optionSelect') {
+        } else if (type === 'optionSelect') {
             clickHandlerFunc = getSelectionOptionClickHandler(guiObj);
             guiObj.rootSelectorObj.one('click', guiObj.clickSelector, clickHandlerFunc);
         }
-        defered.resolve(guiObj);
-        return defered.promise;
+        return Promise.resolve(guiObj);
     };
 
     this.attachListeners = function() {
-        var defered = q.defer();
-        var promises = [];
+        const promises = [];
 
-        var guiKeys = Object.keys(self.guiControlIDs);
+        const guiKeys = Object.keys(self.guiControlIDs);
         guiKeys.forEach(function(guiKey) {
-            var guiObj = self.guiControlIDs[guiKey];
+            const guiObj = self.guiControlIDs[guiKey];
             promises.push(self.attachListener(guiObj));
         });
-        q.allSettled(promises)
-        .then(defered.resolve, defered.reject);
-        return defered.promise;
+
+        return Promise.allSettled(promises);
     };
 
     /**
@@ -1145,10 +1072,10 @@ function module() {
     };
     this.updateStartupData = function() {
         try {
-            if(self.selectedFileInfo.path !== '') {
+            if (self.selectedFileInfo.path !== '') {
                 self.framework.startupData.selected_config_file_directory = self.selectedFileInfo.path;
             }
-            if(self.selectedOutputDirInfo.path !== '') {
+            if (self.selectedOutputDirInfo.path !== '') {
                 self.framework.startupData.selected_output_directory = self.selectedOutputDirInfo.path;
             }
         } catch(err) {
@@ -1157,7 +1084,7 @@ function module() {
     };
     this.onCloseDevice = function(framework, device, onError, onSuccess) {
         self.updateStartupData();
-        var buttonEle = $('#configure-button');
+        const buttonEle = $('#configure-button');
         buttonEle.off('click');
         onSuccess();
     };
@@ -1178,5 +1105,5 @@ function module() {
         onHandle(true);
     };
 
-    var self = this;
+    const self = this;
 }
