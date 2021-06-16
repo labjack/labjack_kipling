@@ -6,12 +6,8 @@
 **/
 
 
-var dict = require('dict');
-var q = require('q');
-var rewire = require('rewire');
-
-var presenter_framework = rewire('./presenter_framework.js');
-
+const rewire = require('rewire');
+const presenter_framework = rewire('./presenter_framework.js');
 
 function TestJQuery() {
 
@@ -25,7 +21,7 @@ function TestJQuery() {
     };
 
     this.html = function (element, newHTML) {
-        this.updates.push({element: element, html: newHTML})
+        this.updates.push({element: element, html: newHTML});
     };
 
     this.val = function (element) {
@@ -43,7 +39,7 @@ function TestJQuery() {
                     'prop': function (property, defaultVal) {
                         return defaultVal;
                     }
-                }
+                };
             }
         };
     };
@@ -63,17 +59,15 @@ function TestDevice() {
     };
 
     this.readMany = function (addresses) {
-        var deferred = q.defer();
         this.readAddresses = addresses;
-        deferred.resolve(this.readResults);
-        return deferred.promise;
+        return Promise.resolve(this.readResults);
     };
 }
 
 
 module.exports = {
     setUp: function (callback) {
-        this.testFramework = new presenter_framework.Framework();
+        this.testFramework = new presenter_framework.PresenterFramework();
         this.testJquery = new TestJQuery();
         this.testFramework._SetJQuery(this.testJquery);
         callback();
@@ -325,7 +319,7 @@ module.exports = {
                 onSuccess();
             },
             getExternalURI: function (name) {
-                var ALLOWED_NAMES = ['test URI', 'testLoc.json'];
+                const ALLOWED_NAMES = ['test URI', 'testLoc.json'];
                 assert.isOk(ALLOWED_NAMES.indexOf(name) != -2);
                 return 'test external URI';
             },
@@ -338,7 +332,7 @@ module.exports = {
     },
 
     testGetSelectedDevice: function (test) {
-        var testDevice = new TestDevice();
+        const testDevice = new TestDevice();
         this.testFramework._SetSelectedDevices([testDevice]);
         assert.deepEqual(this.testFramework.getSelectedDevice(), testDevice);
         done();
@@ -356,7 +350,7 @@ module.exports = {
 
         this.testFramework.establishConfigControlBindings();
 
-        var newEvent = this.testJquery.events[0];
+        const newEvent = this.testJquery.events[0];
         test.notDeepEqual(newEvent, undefined);
 
         assert.deepEqual(newEvent.event, 'click');
@@ -371,7 +365,7 @@ module.exports = {
     },
 
     testStartLoop: function (test) {
-        var self = this;
+        const self = this;
         this.testFramework.loopIteration = function () {
             assert.isOk(self.testFramework.runLoop);
             done();
@@ -380,8 +374,8 @@ module.exports = {
     },
 
     testLoopIteration: function (test) {
-        var self = this;
-        var testDevice = new TestDevice();
+        const self = this;
+        const testDevice = new TestDevice();
         testDevice.readResults = [0, 1];
         self.testFramework._SetSelectedDevices([testDevice]);
 
@@ -397,12 +391,12 @@ module.exports = {
             function (framework, valuesDict, onError, onSuccess) {
                 self.testFramework.stopLoop();
 
-                var update1 = self.testJquery.updates[0];
+                const update1 = self.testJquery.updates[0];
                 test.notDeepEqual(update1, undefined);
                 assert.deepEqual(update1.element, '#ain-0');
                 assert.deepEqual(update1.html, 0);
 
-                var update2 = self.testJquery.updates[1];
+                const update2 = self.testJquery.updates[1];
                 test.notDeepEqual(update2, undefined);
                 assert.deepEqual(update2.element, '#ain-1');
                 assert.deepEqual(update2.html, 1);
@@ -428,11 +422,11 @@ module.exports = {
 
         this.testFramework.putConfigBinding(testBinding);
 
-        this.testFramework._OnRead(dict({
+        this.testFramework._OnRead(new Map({
             'AIN0': 0
         }));
 
-        var update = this.testJquery.updates[0];
+        const update = this.testJquery.updates[0];
         test.notDeepEqual(update, undefined);
         assert.deepEqual(update.element, '#ain-0');
         assert.deepEqual(update.html, 0);
@@ -449,17 +443,17 @@ module.exports = {
 
         this.testFramework.putConfigBinding(testBinding);
 
-        this.testFramework._OnRead(dict({
+        this.testFramework._OnRead(new Map({
             'AIN0': 0,
             'AIN1': 1
         }));
 
-        var update1 = this.testJquery.updates[0];
+        const update1 = this.testJquery.updates[0];
         test.notDeepEqual(update1, undefined);
         assert.deepEqual(update1.element, '#ain-0');
         assert.deepEqual(update1.html, 0);
 
-        var update2 = this.testJquery.updates[1];
+        const update2 = this.testJquery.updates[1];
         test.notDeepEqual(update2, undefined);
         assert.deepEqual(update2.element, '#ain-1');
         assert.deepEqual(update2.html, 1);
@@ -468,11 +462,11 @@ module.exports = {
     },
 
     testConfigBindingSimpleWrite: function (test) {
-        var testDevice = new TestDevice();
+        const testDevice = new TestDevice();
         this.testFramework._SetSelectedDevices([testDevice]);
 
         this.testFramework.on('onRegisterWritten', function () {
-            var writeOp = testDevice.writings[0];
+            const writeOp = testDevice.writings[0];
             assert.deepEqual(writeOp.register, 'DAC0');
             assert.deepEqual(writeOp.value, 1);
             assert.isOk(true);
@@ -491,7 +485,7 @@ module.exports = {
 
         this.testFramework.putConfigBinding(testBinding);
 
-        var newEvent = this.testJquery.events[0];
+        const newEvent = this.testJquery.events[0];
         test.notDeepEqual(newEvent, undefined);
 
         assert.deepEqual(newEvent.event, 'change');
@@ -499,11 +493,11 @@ module.exports = {
     },
 
     testConfigBindingComplexWrite: function (test) {
-        var testDevice = new TestDevice();
+        const testDevice = new TestDevice();
         this.testFramework._SetSelectedDevices([testDevice]);
 
         this.testFramework.on('onRegisterWritten', function () {
-            var writeOp = testDevice.writings[0];
+            const writeOp = testDevice.writings[0];
             assert.deepEqual(writeOp.register, 'DAC0');
             assert.deepEqual(writeOp.value, 1);
             assert.isOk(true);
@@ -522,7 +516,7 @@ module.exports = {
 
         this.testFramework.putConfigBinding(testBinding);
 
-        var newEvent = this.testJquery.events[0];
+        const newEvent = this.testJquery.events[0];
         assert.equal(this.testJquery.events.length, 2);
         test.notDeepEqual(newEvent, undefined);
 

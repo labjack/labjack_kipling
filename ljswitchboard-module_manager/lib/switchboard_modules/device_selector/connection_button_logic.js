@@ -1,10 +1,8 @@
-
-var q = global.require('q');
-var static_files = global.require('ljswitchboard-static_files');
+const package_loader = global.package_loader;
+const static_files = package_loader.getPackage('static_files');
 
 exports.appendPageLogicToScanResults = function(scanResults, wifiImageTemplate) {
 	// console.log('Appending page logic');
-	var defered = q.defer();
 	try {
 		var i, j, k;
 		for(i = 0; i < scanResults.length; i++) {
@@ -38,7 +36,7 @@ exports.appendPageLogicToScanResults = function(scanResults, wifiImageTemplate) 
 
 						ct.button_title = ct.name + ' connection type was found';
 						ct.button_title += ' but failed verification.';
-						
+
 					} else {
 						if(ct.insertionMethod === 'attribute') {
 							ct.button_class = 'btn-warning';
@@ -48,7 +46,7 @@ exports.appendPageLogicToScanResults = function(scanResults, wifiImageTemplate) 
 						}
 					}
 				}
-				
+
 				try {
 					if(device.WIFI_STATUS) {
 						var imageName = 'wifiRSSI-unknown';
@@ -66,7 +64,6 @@ exports.appendPageLogicToScanResults = function(scanResults, wifiImageTemplate) 
 							imageName = rssiImage;
 						}
 						if(wifiImageTemplate) {
-							// console.log('connection_button_logic.js Trying to get the directory of static_files', static_files.getDir());
 							imageDataContext = {
 								'imageTitle': imageTitle,
 								'imageName': imageName,
@@ -93,6 +90,5 @@ exports.appendPageLogicToScanResults = function(scanResults, wifiImageTemplate) 
 	} catch(err) {
 		console.error('Error', err);
 	}
-	defered.resolve(scanResults);
-	return defered.promise;
+	return Promise.resolve(scanResults);
 };

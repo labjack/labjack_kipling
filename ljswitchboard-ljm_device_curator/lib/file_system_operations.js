@@ -981,8 +981,7 @@ function getFileSystemOperations(self) {
 			debugRF('in readFile res', rBundle.readFileData.length);
 			defered.resolve({
 				'data': rBundle.readFileData,
-				'fileInfo': rBundle.fileInfo,
-				// 'filePathInfo': rBundle.filePathInfo,
+				'fileInfo': rBundle.fileInfo
 			});
 		}
 		function errFunc(rBundle) {

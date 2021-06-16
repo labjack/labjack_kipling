@@ -1,15 +1,11 @@
 
 console.log('sign_mac_build_after_compression');
 
-var errorCatcher = require('./error_catcher');
-var fs = require('fs');
-var fse = require('fs-extra');
-var fsex = require('fs.extra');
+require('./utils/error_catcher');
 var path = require('path');
-var q = require('q');
-var async = require('async')
+var async = require('async');
 var child_process = require('child_process');
-
+const {getBuildDirectory} = require('./utils/get_build_dir');
 
 // Figure out what OS we are building for
 var buildOS = {
@@ -21,8 +17,7 @@ if(typeof(buildOS) === 'undefined') {
 }
 
 var pathToKiplingAppPartials = [
-	__dirname,
-	'..',
+	getBuildDirectory(),
 	'output',
 	'Kipling.app'
 ].join(path.sep);

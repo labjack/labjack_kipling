@@ -38,6 +38,7 @@ var getDeviceInfos;
 
 /* Define Test Cases */
 describe('open_all', function() {
+	this.timeout(20000);
 	it('include ljm', function (done) {
 		var ljm_ffi = require('../../lib/ljm-ffi');
 

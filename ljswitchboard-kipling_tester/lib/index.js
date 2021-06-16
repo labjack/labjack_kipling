@@ -1,223 +1,120 @@
+'use strict';
+
 console.log("ljswitchboard-kipling_tester index.js");
 
-var gui = require('nw.gui');
-var path = require('path');
-var q = require('q');
-var win = gui.Window.get();
+window.addEventListener('clearReport', async (event) => {
+    console.log('clearReport', event);
+    document.getElementById('nodeunit_test_results').innerHTML = '';
 
-var documentURL;
-try {
-	documentURL = document.URL.split('file:///')[1];
-} catch(err) {
-	documentURL = '';
-}
-var cwd = path.dirname(documentURL);
-try {
-	cwd = decodeURIComponent(cwd);
-} catch(err) {
-	cwd = cwd.split('%20').join(' ');
-}
-if(!path.isAbsolute(cwd)) {
-	cwd = path.resolve(path.sep, cwd);
-}
+});
 
-var testunit_recorder = require(path.normalize(path.join(cwd, 'nodeunit_recorder')));
+window.addEventListener('addSuite', async (event) => {
+    console.log('addSuite', event);
 
-var testFiles = [
-	'test_kipling.js',
-	// Execute Mock-Device compatable Tests
-	'mock_module_tests/mock_device_selector.js',
-	// 'mock_module_tests/mock_device_info.js',
-	// 'mock_module_tests/mock_dashboard.js',
-	// 'mock_module_tests/mock_register_matrix.js',
-	// 'mock_module_tests/mock_simple_logger.js',
+    if (document.getElementById('suite_' + event.payload.suiteId)) return;
 
-	/* T4 Mock Tests */
+    const resultsElem = document.getElementById('nodeunit_test_results');
+    const liElem = document.createElement('li');
+    liElem.classList.add('suite');
+    resultsElem.appendChild(liElem);
 
+    const hElem = document.createElement('h1');
+    liElem.appendChild(hElem);
+    hElem.innerText = event.payload.suiteName;
 
-	// Execute Mock-Settings test.
-	// 'mock_module_tests/settings.js',
+    const suiteListElem = document.createElement('ul');
+    suiteListElem.id = 'suite_' + event.payload.suiteId;
+    liElem.appendChild(suiteListElem);
+});
 
-	// Execute stand-alone mock tests
-	// 'mock_module_tests/mock_file_browser.js',
+window.addEventListener('addTest', async (event) => {
+    console.log('addTest', event.payload);
 
-	// Execute Live-Device tests
-	// 'module_tests/test_device_info.js', //Perform a live-device scan and select a USB-T7
-	// 'module_tests/test_device_updater.js',
+    const testFile = event.payload.testFile;
+    const testId = event.payload.testId;
 
-	// 'mock_module_tests/mock_lua_script_debugger.js',
+    const suiteListElem = document.getElementById('suite_' + event.payload.suiteId);
 
-	'finish_testing.js',
-];
-var test_dir = '../test';
-for(var i = 0; i < testFiles.length; i++) {
-	testFiles[i] = path.normalize(path.join(cwd, test_dir, testFiles[i]));
-}
+    const liElem = document.createElement('li');
+    suiteListElem.appendChild(liElem);
+    liElem.classList.add('test');
+    liElem.id = 'test_' + event.payload.testId;
 
+    const divElement = document.createElement('div');
+    liElem.appendChild(divElement);
+    divElement.classList.add('no_select');
 
-var package_loader = require('ljswitchboard-package_loader');
-var gns = package_loader.getNameSpace();
-var window_manager = require('ljswitchboard-window_manager');
-var startDir = global[gns].info.startDir;
-var handlebars = require('handlebars');
-/*
-	Function called to load the application's core resources.
-	The resources are loaded from the ljswitchboard-static_files/static
-	directory.
-*/
-var coreResourcesLoaded = false;
-var loadCoreResources = function(resources) {
-	global[gns].static_files.loadResources(document, resources)
-	.then(function(res) {
-		coreResourcesLoaded = true;
-	}, function(err) {
-		console.error('Error Loading resources', err);
-	});
-};
+    const titleElem = document.createElement('span');
+    divElement.appendChild(titleElem);
+    titleElem.innerText = 'Test: ' + event.payload.title;
 
-/*
-	Function called to load the application's local resources.
-	The resources are loaded starting from the directory of the
-	index.html/index.js file aka the cwd of the window.
-*/
-var localResourcesLoaded = false;
-var loadLocalResources = function(resources) {
-	global[gns].static_files.loadResources(document, resources, true)
-	.then(function(res) {
-		localResourcesLoaded = true;
-	}, function(err) {
-		console.error('Error Loading resources', err);
-	});
-};
+    const divElement2 = document.createElement('div');
+    divElement.appendChild(divElement2);
 
-var loadResources = function(resources, isLocal) {
-	var defered = q.defer();
-	global[gns].static_files.loadResources(document, resources, isLocal)
-	.then(function(res) {
-		defered.resolve();
-	}, function(err) {
-		console.error('Error Loading resources', err);
-		defered.reject(err);
-	});
-	return defered.promise;
-};
+    const statusElem = document.createElement('span');
+    divElement2.appendChild(statusElem);
+    statusElem.innerText = 'Status: ';
 
+    const progElem = document.createElement('span');
+    statusElem.appendChild(progElem);
+    progElem.id = 'test_prog_' + event.payload.testId;
+    progElem.innerText = 'In progress';
 
-var getUpdateTestResults = function(divID) {
-	var cachedTestDiv;
-	cachedTestDiv = undefined;
-	var updateTestResults = function() {
+    const errorElem = document.createElement('pre');
+    statusElem.appendChild(errorElem);
+    errorElem.id = 'test_err_' + event.payload.testId;
+    errorElem.style.display = 'none';
 
-		var savedText = testunit_recorder.getSavedText();
-		if(cachedTestDiv) {
-			cachedTestDiv.html(savedText);
-		} else {
-			cachedTestDiv = $(divID);
-			cachedTestDiv.html(savedText);
-		}
-	};
-	return updateTestResults;
-};
-var getRunTest = function(testFile, testDiv) {
-	var testName = path.basename(testFile);
-	var fileName = path.basename(testFile);
-	var fileEnding = path.extname(testName);
-	fileName = fileName.split(fileEnding).join('');
-
-	var divID = fileName + '-test';
-	var runTest = function() {
-		var defered = q.defer();
-		var str = [
-			'<li id="{{id}}_result">',
-			'<div class="no_select">',
-				'<span>Test: {{testName}}</span>',
-				'<div class="results_button">',
-					'<span>Status: <span id="{{id}}_status">In Progress</span></span>',
-					'<span id="{{id}}_button"class="icon-list-2 toggle_button"></span>',
-				'</div>',
-			'</div>',
-			'<div id="{{id}}"><p>Test!</p></div>',
-			'</li>'
-		].join('');
-		var template = handlebars.compile(str);
-		var newTxt = template({
-			'id': divID,
-			'testName':testName,
-			'fileName': fileName
-		});
-		testDiv.append($(newTxt));
-		try {
-			var outputHTML = testunit_recorder.run(
-				[testFile],
-				{},
-				getUpdateTestResults('#' + divID),
-				function(err) {
-					var testResults = $('#' + divID);
-					var status;
-					if(err) {
-						console.log('Error running test', err, testFile);
-						status = $('#' + divID + '_status');
-						status.text('Error');
-						status.css('color', 'red');
-					} else {
-						status = $('#' + divID + '_status');
-						status.text('Success');
-						status.css('color', 'green');
-						testResults.slideUp();
-						// console.log('Finished running test', testFile);
-					}
-
-					var btn = $('#' + divID + '_button');
-					btn.on('click', function() {
-						testResults.slideToggle();
-					});
-					defered.resolve();
-				});
-		} catch(err) {
-			console.error('Error Running nodeunit tester', err, testFile);
-			defered.resolve();
-		}
-		return defered.promise;
-	};
-	return runTest;
-};
-
-var runTests = function() {
-	var testDiv = $('#nodeunit_test_results');
-	// testDiv.empty();
-	var testFuncs = [];
-	testFiles.forEach(function(testFile) {
-		testFuncs.push(getRunTest(testFile, testDiv));
-	});
-	return testFuncs.reduce(q.when, q({}));
-};
-
-var numLoadDelay = 0;
-var startCoreApp = function() {
-	if(coreResourcesLoaded && localResourcesLoaded) {
-		// win.showDevTools();
-	} else {
-		numLoadDelay += 1;
-		if(numLoadDelay > 5) {
-			win.showDevTools();
-			console.log('numLoadDelay', numLoadDelay);
-			setTimeout(startCoreApp, 100);
-		} else {
-			setTimeout(startCoreApp, 10);
-		}
-	}
-};
+    /*
+        const str = [
+            '<li id="' + divID + '_result">',
+            '<div class="no_select">',
+            '<span>Test: ' + testFile + '</span>',
+    /!*
+            '<div class="results_button">',
+            '<span>Status: <span id="' + divID + '_status">In Progress</span></span>',
+            '<span id="' + divID + '_button" class="icon-list-2 toggle_button"></span>',
+            '</div>',
+    *!/
+            '</div>',
+            '</li>'
+        ].join('');
+    */
+    // const testResults = $('#nodeunit_test_results');
+    // testResults.append($(str));
 
 /*
-	When the window finishes loading start the core application.
-
-	The application is started in a timeout-loop because some of the resources
-	are asynchronously loaded upon start.  The application attempts to start
-	every 10ms until those resources are loaded.
+    const btn = $('#' + divID + '_button');
+    btn.on('click', function() {
+        testResults.slideToggle();
+    });
 */
-window.onload = function(e) {
-	setTimeout(startCoreApp, 10);
-};
+});
 
-// gui.App.sharedData.appWindows.core.show();
-// gui.App.sharedData.appWindows.core.showDevTools();
+window.addEventListener('setProgress', async (event) => {
+    console.log('setProgress', event);
+
+    const testResults = $('#nodeunit_test_results');
+    const passed = event.payload.passed;
+    const testFile = event.payload.testFile;
+    const testId = event.payload.testId;
+    const divID = testId + '-test';
+
+    // const testDiv = document.getElementById('nodeunit_test_results').innerHTML = '';
+    const progElem = document.getElementById('test_prog_' + event.payload.testId);
+    if (passed) {
+        progElem.innerText = 'Success';
+        progElem.style.color = 'green';
+    } else {
+        progElem.innerText = 'Error';
+        progElem.style.color = 'red';
+    }
+
+    if (event.payload.err) {
+        console.error(event.payload.err);
+        const errorElem = document.getElementById('test_err_' + event.payload.testId);
+        errorElem.innerText = event.payload.err.toString();
+        errorElem.style.display = 'block';
+    }
+
+});

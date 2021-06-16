@@ -1,24 +1,15 @@
-
-var errorCatcher = require('./error_catcher');
-var fs = require('fs');
-var fse = require('fs-extra');
+require('./utils/error_catcher');
 var path = require('path');
-var q = require('q');
 var async = require('async');
-var archiver = require('archiver');
 
-var fileOps = require('./file_operations');
+var fileOps = require('./utils/file_operations');
+const {getBuildDirectory} = require('./utils/get_build_dir');
 
-var TEMP_PROJECT_FILES_DIRECTORY = 'temp_project_files';
 var startingDir = process.cwd();
-var TEMP_PROJECT_FILES_PATH = path.join(startingDir, TEMP_PROJECT_FILES_DIRECTORY);
+var TEMP_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'temp_project_files');
+var OUTPUT_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'output');
 
-var DEBUG_FILE_COPYING = false;
-var OUTPUT_PROJECT_FILES_DIRECTORY = 'output';
-var OUTPUT_PROJECT_FILES_PATH = path.normalize(path.join(startingDir, OUTPUT_PROJECT_FILES_DIRECTORY));
-
-
-var kiplingPackagePath = path.join(TEMP_PROJECT_FILES_PATH,'ljswitchboard-kipling','package.json');
+var kiplingPackagePath = path.join(TEMP_PROJECT_FILES_PATH, 'ljswitchboard-kipling', 'package.json');
 var kiplingPackageInfo = require(kiplingPackagePath);
 var k3Version = kiplingPackageInfo.version;
 
@@ -118,76 +109,3 @@ async.eachSeries(
 	function(err) {
 		console.log('Finished.');
 	});
-
-// console.log('operations', operations);
-
-// var requiredFiles = [];
-// var primaryProject = buildData.kipling_primary_dependency;
-// var foldersToCompress = [];
-
-// function normalizeAndJoin(dirA, dirB) {
-// 	// console.log('HERE', dirA, dirB);
-// 	return path.normalize(path.join.apply(this, arguments));
-// }
-// function addProjectFolder (folder) {
-// 	if(folder !== primaryProject) {
-// 		if(isTest) {
-// 			requiredFiles.push({
-// 				'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
-// 				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH, folder),
-// 			});
-// 		} else {
-// 			foldersToCompress.push({
-// 				'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
-// 				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH, folder + '.zip'),
-// 			});
-// 		}
-// 	} else {
-// 		if(buildOS !== 'darwin') {
-// 			requiredFiles.push({
-// 				'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
-// 				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH),
-// 			});
-// 		} else {
-// 			foldersToCompress.push({
-// 				'from': normalizeAndJoin(TEMP_PROJECT_FILES_PATH, folder),
-// 				'to': normalizeAndJoin(OUTPUT_PROJECT_FILES_PATH, 'app' + '.nw'),
-// 			});
-// 		}
-// 	}
-// }
-// buildData.kipling_dependencies.forEach(addProjectFolder);
-
-// if(isTest) {
-// 	// requiredFiles = requiredFiles.concat(buildData.kipling_test_dependencies);
-// 	buildData.kipling_test_dependencies.forEach(addProjectFolder);
-// }
-
-
-
-
-
-
-
-
-
-// function organizeProjectFiles () {
-// 	var defered = q.defer();
-
-// 	var promises = [];
-// 	promises.push(fileOps.compressFolders(foldersToCompress));
-// 	promises.push(fileOps.copyFolders(requiredFiles));
-
-// 	q.allSettled(promises)
-// 	.then(function() {
-// 		defered.resolve();
-// 	});
-// 	return defered.promise;
-// }
-
-// organizeProjectFiles()
-// .then(function() {
-// 	console.log('Finished organizeProjectFiles');
-// });
-
-

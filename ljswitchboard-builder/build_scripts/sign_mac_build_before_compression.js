@@ -1,15 +1,11 @@
+require('./utils/error_catcher');
 
 console.log('sign_mac_build_before_compression');
 
-var errorCatcher = require('./error_catcher');
-var fs = require('fs');
-var fse = require('fs-extra');
-var fsex = require('fs.extra');
 var path = require('path');
-var q = require('q');
 var async = require('async');
 var child_process = require('child_process');
-
+const {getBuildDirectory} = require('./utils/get_build_dir');
 
 // Figure out what OS we are building for
 var buildOS = {
@@ -23,8 +19,7 @@ if(typeof(buildOS) === 'undefined') {
 var curVersion = process.versions.node.split('.').join('_');
 
 var pathToBinaryPartials = [
-	__dirname,
-	'..',
+	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_binaries',
@@ -35,8 +30,7 @@ var pathToBinaryPartials = [
 ].join(path.sep);
 
 var pathToRefBindingNode = [
-	__dirname,
-	'..',
+	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
@@ -44,8 +38,7 @@ var pathToRefBindingNode = [
 ].join(path.sep);
 
 var pathToFFIBindingNode = [
-	__dirname,
-	'..',
+	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
@@ -87,17 +80,17 @@ if(typeof(process.argv) !== 'undefined') {
 
 console.log('nodePath', nodePath);
 var buildScripts = [{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime', 
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + nodePath + '"'].join(' '),
 	'text': 'Signing Node.exe',
 }, {
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime', 
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + refBindingPath + '"'].join(' '),
 	'text': 'Signing ref: binding.node',
 }, {
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime', 
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + ffiBindingPath + '"'].join(' '),
 	'text': 'Signing ffi: ffi_binding.node',
@@ -138,7 +131,7 @@ async.eachSeries(
 // 		var execOutput = child_process.execSync(buildScript.cmd);
 // 		console.log('execOutput: ' , execOutput.toString());
 // 	} catch(err) {
-		
+
 // 		process.exit(1);
 // 	}
 // });

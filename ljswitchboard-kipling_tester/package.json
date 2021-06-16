@@ -8,7 +8,6 @@
     "url": "https://labjack.com"
   },
   "main": "./lib/ljswitchboard-kipling_tester.js",
-  "ljswitchboard-type": "nwApp",
   "ljswitchboard-main": "lib/index.html",
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-kipling_tester",
   "repository": {
@@ -27,9 +26,9 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "async": "1.5.2",
+    "async": "3.2.0",
     "diff": ">=3.5.0",
-    "mocha": "5.2.0",
+    "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },
   "devDependencies": {

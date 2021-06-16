@@ -34,9 +34,8 @@
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_device_curator",
   "dependencies": {
-    "async": "1.5.2",
+    "async": "3.2.0",
     "compute-gcd": "1.2.0",
-    "dict": "1.4.0",
     "dns-chk-https-get": "^1.0.0",
     "labjack-nodejs": "*",
     "lj-apps-win-registry-info": "*",
@@ -60,7 +59,7 @@
   "devDependencies": {
     "colors": "1.4.0",
     "diff": ">=3.5.0",
-    "mocha": "7.2.0",
+    "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },
   "directories": {

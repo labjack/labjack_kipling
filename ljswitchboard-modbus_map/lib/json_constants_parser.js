@@ -372,8 +372,8 @@ var parseConstants = function(LJMJSONFileLocation) {
 		}
 		if(typeof(result) === 'undefined') {
 			result = {
-				'error': -1,
-				'string': 'Unknown Error Numer'
+				'error': err,
+				'string': 'Unknown Error Number'
 			};
 		}
 		return result;

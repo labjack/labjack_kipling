@@ -12,3 +12,9 @@ static/css/switchboard_base.css
 static/js/device_selector.js
 static/js/module_chrome.js
 ```
+
+Rebuild d3, kinetic, epoch and typeahead with:
+
+```
+npm run build
+```

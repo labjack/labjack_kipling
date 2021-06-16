@@ -8,9 +8,9 @@
 
 /* exported dataTableCreator */
 
+const ljmmm_parse = require('ljmmm-parse');
+
 function dataTableCreator() {
-    var ljmmm_parse = global.require('ljmmm-parse');
-    
     this.activeDevice = undefined;
     var dataTableFormatter = new dataTableDataFormatter();
 
@@ -160,7 +160,7 @@ function dataTableCreator() {
         // Get the current row's data
         var currentRow = self.table.row(currentRowIndex);
         var currentRowData = currentRow.data();
-        
+
         // console.log('Updating current data');
         // update the current row's childTable element
         currentRowData[childTableIndex] = childTable;
@@ -172,7 +172,7 @@ function dataTableCreator() {
 
     /**
      * This function creates a child's description box and if necessary it
-     * initializes the child's sub-table if there is more than one 
+     * initializes the child's sub-table if there is more than one
      * @param  {[type]} data       [description]
      * @param  {[type]} searchTerm [description]
      * @return {[type]}            [description]
@@ -198,7 +198,7 @@ function dataTableCreator() {
             tableDisplayStyle = 'inherit';
         }
         context.tableDisplayStyle = tableDisplayStyle;
-        
+
         var keys = [
             'group', 'altnames', 'type', 'access', 'address',
             'description', 'streamable', 'tags',
@@ -233,7 +233,7 @@ function dataTableCreator() {
          * 2. A childs table needs to be hidden if it is no longer relevant.
          * 3. A childs table needs to be re-displayed if it is relevant again.
          */
-        
+
         // Start with basics, always updating the childs table.
         if(childTable) {
             if(childTable.clear) {
@@ -242,7 +242,7 @@ function dataTableCreator() {
         }
 
         // If there is only one register to be displayed then hide the table
-        
+
         if(filteredChildData.length > 1) {
             console.log('Showing childTableID', childTableID, tableElementID);
             setTimeout(function() {
@@ -328,7 +328,7 @@ function dataTableCreator() {
                 }
             }
 
-            
+
         }
 
         if(self.debugSearching) {
@@ -362,31 +362,31 @@ function dataTableCreator() {
             // Make sure that the row's child is an empty array.
             currentRow[filteredChildData] = [];
 
-            // If the current row has multiple registers perform table 
+            // If the current row has multiple registers perform table
             // augmentations to display & filter sub-registers.
             if(currentRow[nameArray].length > 1) {
                 var childRef = row.child;
                 var child = row.child();
-                
+
                 var newStr = '';
                 var newAddressStr = '';
                 var newSelectStr = '';
                 var num = 0;
                 var groupName = currentRow[groupIndex];
                 var currentState = currentRow[selectIndex];
-                
+
                 // Initialize the new name & address strings
                 newStr += groupName;
                 newAddressStr += currentRow[groupAddress];
-                
+
                 // if(isBlank) {
                 //     num = currentRow[names].split(',').length;
                 // } else {
                 //     num = self.ocurrences(currentRow[names], searchStr);
                 // }
 
-                
-                
+
+
                 // Loop through each sub-register and filter the results
                 // into the currentRow[filteredChildData] array.
                 var ignoreRemainingResults = false;
@@ -404,7 +404,7 @@ function dataTableCreator() {
                         passesFilter = true;
                         // If the match started at the front of the
                         // string and there was a number in the search
-                        // term then we have very likely found the 
+                        // term then we have very likely found the
                         // correct register and shouldn't show any more
                         // results.
                         if(searchData.containsNumber) {
@@ -421,7 +421,7 @@ function dataTableCreator() {
                     }
 
                     // If the search term included a number, check to
-                    // see if that parsed number matches the child's 
+                    // see if that parsed number matches the child's
                     // address.
                     // Only allow this filter to pass if the address
                     // isn't a modbus name.
@@ -431,8 +431,8 @@ function dataTableCreator() {
                         }
                     }
 
-                    // If the search term included a number, check to 
-                    // see if that number string matches the 
+                    // If the search term included a number, check to
+                    // see if that number string matches the
                     // stringified version of the address.
                     if(searchData.isAddress) {
                         if(childAddressStr.indexOf(searchData.parsedNumber) >= 0) {
@@ -479,7 +479,7 @@ function dataTableCreator() {
                     // currentNode.addClass('details-control');
                     // newStr += '(no hidden registers)';
                 }
-                
+
                 currentRow[address] = newAddressStr;
                 currentRow[name] = newStr;
                 currentRow[selectIndex] = newSelectStr;
@@ -489,7 +489,7 @@ function dataTableCreator() {
                 // its childTable data element has been initialized and
                 // can update its DataTable with new data.
                 if(childRef.isShown()) {
-                    
+
                     // console.log('Current Row w/ visible child', index, child, childRef.isShown());
                     // console.log('Marking child to be re-drawn');
                     self.groupsWithExtraData.push({
@@ -500,7 +500,7 @@ function dataTableCreator() {
                     //     currentRow,
                     //     searchStr
                     // )).show();
-                    
+
                 }
             }
         }
@@ -523,7 +523,7 @@ function dataTableCreator() {
         var registerName;
         var hasHiddenData = false;
 
-        
+
         if(filteredChildData.length > 1) {
             hasHiddenData = true;
         } else if(filteredChildData.length == 1) {
@@ -547,14 +547,14 @@ function dataTableCreator() {
         // console.log('Special Groups:')
         self.groupsWithExtraData.forEach(function(groupData) {
             // console.log(groupData.group);
-            
+
             var row = api.row(groupData.row);
             var rowData = row.data();
             // var node = row.node();
             // var childRef = row.child;
             // var child = row.child();
             // Determine if we need to update the row's child, only
-            // rows with visible & existing children need to be 
+            // rows with visible & existing children need to be
             // re-rendered.
             self.updateChildTableData(rowData, searchStr);
             // console.log('Finished updating the current child table');
@@ -616,7 +616,7 @@ function dataTableCreator() {
             // var newButtonStr = self.getRegisterWatchStatusStr(registerName);
             // console.log('in ct select', rowData, registerName, newButtonStr, currentState, newState);
             // td.html(newButtonStr);
-            
+
             tr.toggleClass('selected');
         }
     };
@@ -644,7 +644,7 @@ function dataTableCreator() {
             // Format and display the childRow
             var filteredChildData = rowData[filteredChildDataIndex];
             var nameArray = rowData[nameArrayIndex];
-            
+
             row.child(self.formatChildTable(rowData, searchStr)).show();
 
             // If necessary, initialize the child's table as a new DataTable
@@ -694,7 +694,7 @@ function dataTableCreator() {
         var td = $(this);
         var tr = $(this).closest('tr');
         var row = self.table.row(tr);
-        
+
         primaryTableHandleDetailsControlClick(tr, row);
     };
     var innerCreateDataTable = function(tableElement, tableElementStr) {
@@ -748,14 +748,14 @@ function dataTableCreator() {
             // Javascript sourced data
             'data': self.cachedRegisterData,
             'columns': self.dataTableData.columns,
-            
+
             // Alternative Pagination
             'pagingType': 'full_numbers',
             'autoWidth': false,
-            
+
             // Adding a custom toolbar
             // https://datatables.net/examples/advanced_init/dom_toolbar.html
-            // 
+            //
             // Default is: ''
             // Multiple table control elements
             // 'dom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
@@ -766,7 +766,7 @@ function dataTableCreator() {
             // Setting visibility
             'columnDefs': self.dataTableData.columnDefs,
 
-            // 
+            //
             'order': [[ self.dataTableData.headers.address, 'asc']],
 
             // Pre-Draw Callback
@@ -821,7 +821,7 @@ function dataTableCreator() {
     this.updateData = function() {
         // Update the cached data to be inserted into the table.
         dataTableFormatter.updateCachedRegisterData();
-        
+
         // Update pointers to the formatted data.
         self.cachedRegisterData = dataTableFormatter.cachedRegisterData;
         self.dataTableData = dataTableFormatter.dataTableData;

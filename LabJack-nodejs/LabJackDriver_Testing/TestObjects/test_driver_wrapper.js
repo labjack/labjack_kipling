@@ -10,12 +10,7 @@
 
 var ljmJsonManager = require('ljswitchboard-modbus_map');
 var driver_const = require('ljswitchboard-ljm_driver_constants');
-var ref;
-try {
-    ref = require('ref');       //Load variable type module
-} catch(err) {
-	ref = require('ref-napi');
-}
+var ref = require('ref-napi');
 
 function createCallableObject (defaultFunction, asyncFunction) {
     var retFunction = function () {
@@ -591,7 +586,7 @@ function populateOpenAllValues(NumOpened, aHandles, NumErrors, InfoHandle, Info)
 	// Write Info String...
 	var userData = '{"exceptions": [], "networkInterfaces": [], "returnedDevices": [], "specificIPs": []}';
 
-	var strBuffer = new Buffer(userData.length + 1);
+	var strBuffer = Buffer.alloc(userData.length + 1);
     strBuffer.fill(0);
     ref.writeCString(strBuffer, 0, userData);
     ref.writePointer(Info, 0, strBuffer);

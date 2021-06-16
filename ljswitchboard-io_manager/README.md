@@ -9,7 +9,7 @@ A promise based &amp; multi-process based wrapper for the labjack-nodejs library
 From the master process, to get the current version of Node that the subprocess is using, enter the following into the Kipling console:
 
 ```
-global.ljswitchboard.io_manager.io_interface().mp.getProcessInfo().then(pr,pe);
+io_manager.io_interface().mp.getProcessInfo().then(pr,pe);
 ```
 
 `pr` is a globally defined promise result printer. `pe` prints an error. `version` contains the subprocess Node version.

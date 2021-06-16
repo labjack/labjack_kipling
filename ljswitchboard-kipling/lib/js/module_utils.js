@@ -1,4 +1,3 @@
-
 var p = function(promiseFunc) {
 	if(promiseFunc) {
 		if(promiseFunc.then) {
@@ -24,20 +23,9 @@ var le = function(err) {
 	console.log('Error:', err);
 };
 
-var CLEAR_CACHES = function() {
+global.CLEAR_CACHES = function() {
 	var debugClearing = false;
 	try {
-		if(MODULE_CHROME) {
-			if(debugClearing) {
-				console.log('Clearing MODULE_CHROME cache');
-			}
-			MODULE_CHROME.clearTemplateCache();
-		} else {
-			if(debugClearing) {
-				console.log('Not clearing MODULE_CHROME template cache');
-			}
-		}
-
 		if(module_manager) {
 			if(debugClearing) {
 				console.log('Clearing module_manager cache');
@@ -125,8 +113,8 @@ var TAKE_SCREENSHOT = function(name_prefix, name_append, callback) {
 			"c:/Users/chris/kipling_screen_shots/" + name.toString() + ".png",
 			base64Data,
 			'base64',
-			function(err) { 
-				if(err) { 
+			function(err) {
+				if(err) {
 					alert(err);
 				}
 				if(typeof(callback) === 'function') {
@@ -171,23 +159,22 @@ var TAKE_SCREENSHOTS = function() {
 			var duration = ((stopTime - startTime)/1000).toFixed(3);
 			console.log('Finished Taking Screen Shots', duration);
 		});
-	
+
 };
 
 function CLIPBOARD_FUNCTION_WRAPPER() {
-	var nw = require('nw.gui');
-	var clipboard = nw.Clipboard.get();
+	const gui = global.gui;
 	function get() {
-		return clipboard.get('text');
-	};
+		return gui.clipboard.readText();
+	}
 	function set(txt) {
-		clipboard.set(txt,'text');
-	};
+		gui.clipboard.writeText(txt);
+	}
 	function clear(){
-		clipboard.clear();
+		gui.clipboard.clear();
 	}
 	this.get = get;
 	this.set = set;
 	this.clear = clear;
 }
-var CLIPBOARD_MANAGER = new CLIPBOARD_FUNCTION_WRAPPER();
+global.CLIPBOARD_MANAGER = new CLIPBOARD_FUNCTION_WRAPPER();

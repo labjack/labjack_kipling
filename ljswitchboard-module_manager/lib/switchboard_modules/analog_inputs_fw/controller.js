@@ -8,9 +8,9 @@
  *  1. Read Device Information
  *  2. Periodically Refresh Device Information
  *  3. Accept user input to Configure AINx Channels
- *  
+ *
  * Read Device Information:
- *  1. Read AINx_EF_INDEX register to determine if configuring a channel will 
+ *  1. Read AINx_EF_INDEX register to determine if configuring a channel will
  *     potentially have negative effects elsewhere.
  *  2. Read AINx_RANGE
  *  3. Read AINx_RESOLUTION_INDEX
@@ -25,13 +25,15 @@
  *  2. Accept input to change AINx_RESOLUTION_INDEX
  *  3. Accept input to change AINx_SETTLING_US
 **/
-var sprintf = require('sprintf-js').sprintf;
+const sprintf = require('sprintf-js').sprintf;
+const async = require('async');
 
-// Constant that determines device polling rate.
-var MODULE_UPDATE_PERIOD_MS = 1500;
+const globalDeviceConstants = global.globalDeviceConstants;
+const globalDeviceConstantsSwitch = global.globalDeviceConstantsSwitch;
 
-// Constant that can be set to disable auto-linking the module to the framework
-var DISABLE_AUTOMATIC_FRAMEWORK_LINKAGE = false;
+const handleBarsService = package_loader.getPackage('handleBarsService');
+
+const ljmmm_parse = require('ljmmm-parse');
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -47,34 +49,51 @@ function module() {
 
     // String key to trigger a clearing of current values
     var FORCE_AIN_VAL_REFRESH = 'FORCE_AIN_VAL_REFRESH';
-    this.currentValues = dict();
-    this.isValueNew = dict();
-    this.newBufferedValues = dict();
-    this.bufferedOutputValues = dict();
-    this.analogInputsDict = dict();
+    this.currentValues = new Map();
+    this.isValueNew = new Map();
+    this.newBufferedValues = new Map();
+    this.bufferedOutputValues = new Map();
+    this.analogInputsDict = new Map();
 
     this.ANALOG_INPUT_PRECISION = 6;
 
     this.deviceConstants = {};
-    this.curDeviceOptions = dict();
-    this.regParserDict = dict();
-    this.regParser = dict();
+    this.curDeviceOptions = new Map();
+    this.regParserDict = new Map();
+    this.regParser = new Map();
 
     this.initRegParser = function() {
-        self.regParser = {};
-        self.regParser.set = self.regParserDict.set;
+        self.regParser = new Map();
+        // self.regParser.set = (name, value) => {
+        //     self.regParserDict.set(name, value);
+        // };
+        self.regParserGet = function (name, value) {
+            var data = self.regParser.get(name);
+            if(typeof(data) === 'undefined') {
+                return self.deviceConstants.extraAllAinOptions[0];
+            }
+            if (typeof data === 'function') {
+                return data(value);
+            }
+            return data;
+        };
+/*
         self.regParser.get = function(name) {
             var data = self.regParserDict.get(name);
             if(typeof(data) === 'undefined') {
                 return self.deviceConstants.extraAllAinOptions[0];
             } else {
+                if (typeof data === 'function') {
+                    return data();
+                }
                 return data;
             }
         };
-        self.regParser.delete = self.regParserDict.delete;
-        self.regParser.forEach = self.regParserDict.forEach;
-        self.regParser.size = self.regParserDict.size;
-        self.regParser.has = self.regParserDict.has;
+*/
+        // self.regParser.delete = self.regParserDict.delete;
+        // self.regParser.forEach = self.regParserDict.forEach;
+        // self.regParser.size = self.regParserDict.size;
+        // self.regParser.has = self.regParserDict.has;
 
     };
 
@@ -116,9 +135,9 @@ function module() {
 
     // ef config templates
     var ainEFTypeConfigTemplates = {
-        // 'value': 
-        // 'select': 
-        // 'modbusRegister': 
+        // 'value':
+        // 'select':
+        // 'modbusRegister':
     };
 
     // Templates
@@ -136,7 +155,7 @@ function module() {
         ];
         templatesToCompile.forEach(function(templateName) {
             try {
-                self.templates[templateName] = handlebars.compile(
+                self.templates[templateName] = handleBarsService._compileTemplate(
                     framework.moduleData.htmlFiles[templateName]
                 );
             } catch(err) {
@@ -183,11 +202,11 @@ function module() {
     // Supported extra options
     var extraAllAinOptions = globalDeviceConstants.t7DeviceConstants.extraAllAinOptions;
 
-    this.efTypeDict = dict();
-    this.rangeOptionsDict = dict();
-    this.resolutionOptionsDict = dict();
-    this.settlingOptionsDict = dict();
-    this.negativeChannelDict = dict();
+    this.efTypeDict = new Map();
+    this.rangeOptionsDict = new Map();
+    this.resolutionOptionsDict = new Map();
+    this.settlingOptionsDict = new Map();
+    this.negativeChannelDict = new Map();
 
     var overrideGraphRanges = false;
     var minGraphRange;
@@ -211,7 +230,7 @@ function module() {
         var parsers = self.deviceConstants.parsers;
         parsers.forEach(function(name){
             var dictName = name+'Dict';
-            self.deviceConstants[dictName] = dict();
+            self.deviceConstants[dictName] = new Map();
             if(typeof(self.deviceConstants[name].numbers) !== 'undefined'){
                 var options = [];
                 var base = self.deviceConstants[name];
@@ -234,9 +253,11 @@ function module() {
         var configArray = self.deviceConstants.allConfigRegisters;
         var chConfigArray = self.deviceConstants.configRegisters;
         var addParser = function(data,index) {
-            var formatReg = handlebars.compile(data.register);
+            var formatReg = handleBarsService._compileTemplate(data.register);
             var compReg = formatReg(self.deviceConstants);
-            var addrList = ljmmm_parse.expandLJMMMNameSync(compReg);
+            var addrList = ljmmm_parse.expandLJMMMEntrySync(
+                    {name: compReg, address: 0, type: 'FLOAT32'}
+                ).map(function (entry) { return entry.name; });
             if((data.options !== 'func') && (data.options !== 'raw')) {
                 var dataObj = self.deviceConstants[data.options+'Dict'];
                 var getData = function(val) {
@@ -244,7 +265,7 @@ function module() {
                     return {value: val, name: dataObj.get(value.toString())};
                 };
                 addrList.forEach(function(addr){
-                    self.regParser.set(addr,getData);
+                    self.regParser.set(addr, getData);
                 });
             } else if (data.options === 'raw') {
                 addrList.forEach(function(addr){
@@ -275,9 +296,12 @@ function module() {
         var chConfigArray = self.deviceConstants.configRegisters;
 
         var addOptions = function(data) {
-            var formatReg = handlebars.compile(data.register);
+            var formatReg = handleBarsService._compileTemplate(data.register);
             var compReg = formatReg(self.deviceConstants);
-            var addrList = ljmmm_parse.expandLJMMMNameSync(compReg);
+            var addrList = ljmmm_parse.expandLJMMMEntrySync(
+                {name: compReg, address: 0, type: 'FLOAT32'}
+            ).map(function (entry) { return entry.name; });
+
             var deviceOptionsData = {};
             deviceOptionsData.name = data.name;
             deviceOptionsData.cssClass = data.cssClass;
@@ -304,24 +328,15 @@ function module() {
     };
 
     this.writeReg = function(address,value) {
-        var ioDeferred = q.defer();
-        self.activeDevice.iWrite(address,value)
-        .then(function(){
-            self.bufferedOutputValues.set(address,value);
-            ioDeferred.resolve();
-        },function(err){
-            ioDeferred.reject(err);
-        });
-        return ioDeferred.promise;
+        return self.activeDevice.iWrite(address,value)
+            .then(function(){
+                self.bufferedOutputValues.set(address,value);
+            });
     };
     this.getWriteReg = function(address, value) {
-        var ioDeferred = q.defer();
-        var execute = function() {
-            self.writeReg(address,value)
-            .then(ioDeferred.resolve,ioDeferred.reject);
-            return ioDeferred.promise;
+        return function() {
+            return self.writeReg(address,value)
         };
-        return execute;
     };
 
     /**
@@ -344,7 +359,7 @@ function module() {
         var minRangeText = $(minValIdName).text();
         var maxRangeText = $(maxValIdName).text();
         var tStr;
-        
+
         tStr = (-1 * rangeVal).toString();
         if (minRangeText !== tStr) {
             $(minValIdName).text(tStr);
@@ -353,7 +368,7 @@ function module() {
         if (maxRangeText !== tStr) {
             $(maxValIdName).text(tStr);
         }
-        
+
         switch (rangeVal) {
             case 10:
                 break;
@@ -452,7 +467,7 @@ function module() {
             value = Number(rootEl.getAttribute('value'));
             newText = rootEl.text;
             newTitle = register + ' is set to ' + value.toString();
-           
+
             //Set title
             selectEl.title = newTitle;
             //Set new text
@@ -475,7 +490,7 @@ function module() {
             var isIndex = register.indexOf('_EF_INDEX') > -1;
             var isType = register.indexOf('_EF_TYPE') > -1;
 
-            
+
             var getDeviceCalls = function(efInfo, register, value) {
                 var ioArray = [];
                 var curChannel = findActiveChannel.exec(register);
@@ -510,24 +525,24 @@ function module() {
                 return ioArray;
             };
             var configDevice = function(ioArray) {
-                var configDefered = q.defer();
-                var step = 0;
-                async.eachSeries (ioArray, function(func,callback) {
-                    step += 1;
-                    func()
-                    .then(callback,function(err) {
-                        console.error('IO Error Step',step,func);
-                        callback(err);
+                return new Promise((resolve, reject) => {
+                    var step = 0;
+                    async.eachSeries(ioArray, function (func, callback) {
+                        step += 1;
+                        func()
+                            .then(callback, function (err) {
+                                console.error('IO Error Step', step, func);
+                                callback(err);
+                            });
+                    }, function (err) {
+                        if (err) {
+                            console.error('EF Config Failed -configDevice', err);
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
                     });
-                }, function(err) {
-                    if( err ) {
-                        console.error('EF Config Failed -configDevice',err);
-                        configDefered.reject(err);
-                    } else {
-                        configDefered.resolve();
-                    }
                 });
-                return configDefered.promise;
             };
 
             if(register.indexOf('AIN_ALL') === 0) {
@@ -597,7 +612,7 @@ function module() {
                 //Perform device IO
                 self.writeReg(register,value)
                 .then(function(){
-                    console.log('Successfully wrote data!');
+                    console.log('Successfully wrote data!', register, value);
                 }, function(err){
                     console.log('Failed to write data :(',err,register,value);
                     var errorInfo;
@@ -622,14 +637,10 @@ function module() {
     };
 
     this.configureModule = function(onSuccess) {
-        var devT;
-        var subClass;
         var devConstStr;
         var productType;
         var baseReg;
         try{
-            devT = self.activeDevice.savedAttributes.deviceTypeName;
-            subclass = self.activeDevice.savedAttributes.subclass;
             productType = self.activeDevice.savedAttributes.productType;
             devConstStr = globalDeviceConstantsSwitch[productType];
             self.deviceConstants = globalDeviceConstants[devConstStr];
@@ -653,12 +664,12 @@ function module() {
             var formatReg;
             var compReg;
             if(typeof(data.manual) === 'undefined') {
-                formatReg = handlebars.compile(data.register);
+                formatReg = handleBarsService._compileTemplate(data.register);
                 compReg = formatReg(self.deviceConstants);
                 bindingList.push({"name": compReg, "isPeriodic":true});
             } else {
                 if(!data.manual) {
-                    formatReg = handlebars.compile(data.register);
+                    formatReg = handleBarsService._compileTemplate(data.register);
                     compReg = formatReg(self.deviceConstants);
                     bindingList.push({"name": compReg, "isPeriodic":true});
                 }
@@ -695,7 +706,7 @@ function module() {
                 clickBinding.callback = self.genericDropdownClickHandler;
                 smartBindings.push(clickBinding);
             }
-            
+
         };
         bindingList.forEach(addAINInputReg);
 
@@ -827,7 +838,7 @@ function module() {
                 value = Number(rootEl.getAttribute('value'));
                 newText = rootEl.text;
                 newTitle = register + ' is set to ' + value.toString();
-               
+
                 //Set title
                 selectEl.title = newTitle;
                 //Set new text
@@ -858,7 +869,7 @@ function module() {
                 value = Number(rootEl.getAttribute('value'));
                 newText = rootEl.text;
                 newTitle = register + ' is set to ' + value.toString();
-               
+
                 //Set title
                 // selectEl.title = newTitle;
                 //Set new text
@@ -882,11 +893,11 @@ function module() {
 
                 // Un-focus the element
                 rootEl.blur();
-                
+
                 // Code to support writing modbusRegister addresses as values.
                 var ele = $(rootEl);
                 var ljtype = ele.attr('ljtype');
-                if(ljtype) { 
+                if(ljtype) {
                     if(ljtype === 'modbusRegister') {
                         val = rawVal;
                         var regInfo = modbus_map.getAddressInfo(val, 'R');
@@ -898,7 +909,7 @@ function module() {
                         }
                     }
                 }
-                
+
                 writeConfig(reg,val,isValid);
             } else {
                 console.log('Other keypress captured',event.which);
@@ -909,7 +920,7 @@ function module() {
             var toElement = event.toElement;
             var rootEl;
             var valEL;
-            
+
             if(toElement.tagName === 'SPAN') {
                 rootEl = toElement.parentElement;
                 valEl = rootEl.parentElement.children[0];
@@ -942,7 +953,7 @@ function module() {
             // Code to support writing modbusRegister addresses as values.
             var ele = $(rootEl);
             var ljtype = ele.attr('ljtype');
-            if(ljtype) { 
+            if(ljtype) {
                 if(ljtype === 'modbusRegister') {
                     val = rawVal;
                     var regInfo = modbus_map.getAddressInfo(val, 'R');
@@ -957,9 +968,7 @@ function module() {
             writeConfig(reg,val,isValid);
         };
         function helpTextURLClickHandler(event) {
-            if(typeof(gui) === 'undefined') {
-                gui = require('nw.gui');
-            }
+            const gui = global.gui;
             // gui.Shell.openExternal(linkToBindTo.url);
             var url = $(event.toElement).attr('url');
             console.log('Opening link...', url);
@@ -1094,7 +1103,7 @@ function module() {
             }
             readBindings.push(newBinding);
         });
-        
+
         // Loop through and add config reg info
         configRegs.forEach(function(configReg) {
             var regName = chName + configReg.configReg;
@@ -1186,13 +1195,13 @@ function module() {
                 if(typeof(configReg.notFoundText) !== 'undefined') {
                     curStr = configReg.notFoundText;
                 }
-                
+
                 menuOptions.forEach(function(menuOption){
                     if(menuOption.value === curVal) {
                         curStr = menuOption.name;
                     }
                 });
-                newEFConfigData.curStr = curStr;
+                newEFConfigData.curStr = '112' + curStr;
                 newEFConfigData.menuOptions = menuOptions;
                 efControlsData +=  ainEFTypeConfigTemplates.select(newEFConfigData);
                 var getCallback = function(options) {
@@ -1238,7 +1247,7 @@ function module() {
             // Add config register to bindings list
             readBindings.push(newBinding);
         });
-        
+
 
         var nameEle = $(baseID + ' .efTypeName');
         var primaryEle = $(baseID + ' .efPrimaryReading');
@@ -1246,7 +1255,7 @@ function module() {
         var helperTextEle = $(efBaseID + ' .efExtendedInfoHelperText');
         var efConfigsEle = $(efBaseID + ' .ainEFConfigs');
         var secondaryReadsEle = $(efBaseID + ' .ainEFSecondaryReadRegisters');
-        
+
         var finishedPages = [];
         var numFinished = 0;
         var pageInfos = [
@@ -1270,7 +1279,7 @@ function module() {
                 KEYBOARD_EVENT_HANDLER.initInputListeners();
             }
         };
-        
+
         pageInfos.forEach(function(pageInfo) {
             if(pageInfo.data !== '') {
                 pageInfo.ele.slideUp(function() {
@@ -1293,38 +1302,34 @@ function module() {
     this.onModuleLoaded = function(framework, onError, onSuccess) {
         self.framework = framework;
         compileTemplates(framework);
-        
+
         // Enable framework-timing debugging
-        if(self.ENABLE_DEBUGGING) {
-            framework.enableLoopTimingAnalysis();
-            framework.enableLoopMonitorAnalysis();
-        }
         onSuccess();
     };
-    
+
     this.clearCachedData = function() {
-        for (i = 0; i < 13; i++) {
+        for (let i = 0; i < 13; i++) {
             self.removeAinEFInfo(i);
         }
-        self.currentValues = dict();
-        self.newBufferedValues = dict();
-        self.isValueNew = dict();
-        self.bufferedOutputValues = dict();
-        self.analogInputsDict = dict();
+        self.currentValues = new Map();
+        self.newBufferedValues = new Map();
+        self.isValueNew = new Map();
+        self.bufferedOutputValues = new Map();
+        self.analogInputsDict.clear();
 
         self.deviceConstants = {};
-        self.curDeviceOptions = dict();
-        self.regParserDict = dict();
-        self.regParser = dict();
+        self.curDeviceOptions = new Map();
+        self.regParserDict = new Map();
+        self.regParser = new Map();
 
-        self.efTypeDict = dict();
-        self.rangeOptionsDict = dict();
-        self.resolutionOptionsDict = dict();
-        self.settlingOptionsDict = dict();
-        self.negativeChannelDict = dict();
+        self.efTypeDict = new Map();
+        self.rangeOptionsDict = new Map();
+        self.resolutionOptionsDict = new Map();
+        self.settlingOptionsDict = new Map();
+        self.negativeChannelDict = new Map();
     };
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -1332,7 +1337,7 @@ function module() {
     **/
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
         self.activeDevice = device;
-        
+
         self.clearCachedData();
 
         framework.clearConfigBindings();
@@ -1343,7 +1348,7 @@ function module() {
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
         // Initialize variable where module config data will go.
         self.moduleContext = {};
-        self.analogInputsDict = dict();
+        self.analogInputsDict.clear();
         if(self.defineDebuggingArrays){
             var analogInputs = [];
         }
@@ -1352,7 +1357,7 @@ function module() {
                 "name":reg,
                 "value":null,
                 "strVal":null,
-                "optionsDict":dict(),
+                "optionsDict":new Map(),
                 "minGraphVal":null,
                 "maxGraphVal":null
             };
@@ -1362,7 +1367,7 @@ function module() {
             self.deviceConstants.configRegisters.forEach(function(configReg){
                 var options = {};
                 var menuOptions;
-                var formatReg = handlebars.compile(configReg.register);
+                var formatReg = handleBarsService._compileTemplate(configReg.register);
                 var compReg = formatReg({ainChannelNames:reg});
 
                 options.menuTitle = configReg.name;
@@ -1377,7 +1382,7 @@ function module() {
                     menuOptions = menuGenFunc(index);
                 }
                 options.menuOptions = menuOptions;
-                
+
                 ainChannel.optionsDict.set(compReg,options);
                 if(self.defineDebuggingArrays){
                     ainChannel.options.push(options);
@@ -1386,7 +1391,7 @@ function module() {
             if(self.defineDebuggingArrays){
                 analogInputs.push(ainChannel);
             }
-            self.analogInputsDict.set(reg,ainChannel);
+            self.analogInputsDict.set(reg, ainChannel);
         });
 
         var findNum = new RegExp("[0-9]{1,2}");
@@ -1409,7 +1414,7 @@ function module() {
 
         };
 
-        var configRegistersDict = dict();
+        var configRegistersDict = new Map();
 
         self.moduleContext.allEFTypeVal = null;
         self.moduleContext.allEFTypesSame = true;
@@ -1423,10 +1428,10 @@ function module() {
                 console.error('in onDeviceConfigured, currentValue is undefined...',name,value);
             } else {
                 var strVal = value.toString();
-                // Switch on 
+                // Switch on
                 var newData;
                 if(!findNum.test(name)) {
-                    newData = self.regParser.get(name)(value);
+                    newData = self.regParserGet(name, value);
                     var optionsData = self.curDeviceOptions.get(name);
                     dataObj.curStr = newData.name;
                     dataObj.curVal = newData.value;
@@ -1440,12 +1445,12 @@ function module() {
                     // Get currently saved values
                     var ainInfo = self.analogInputsDict.get('AIN'+index.toString());
 
-                    newData = self.regParser.get(name)(value);
+                    newData = self.regParserGet(name, value);
                     if(isFound(name,'_')) {
                         var menuOptions = ainInfo.optionsDict.get(name);
                         menuOptions.curStr = newData.name;
                         menuOptions.curVal = newData.value;
-                        
+
                         if(name.indexOf('_RANGE') !== -1) {
                             var rangeStr = newData.value.toString();
                             ainInfo.rangeVal = newData.value;
@@ -1459,14 +1464,14 @@ function module() {
                     }
 
                     // Update saved values
-                    self.analogInputsDict.set('AIN'+index.toString(),ainInfo);
+                    self.analogInputsDict.set('AIN'+index.toString(), ainInfo);
                 }
             }
         });
-        
+
         self.moduleContext.analogInputsDict = self.analogInputsDict;
         self.moduleContext.configRegistersDict = configRegistersDict;
-        console.log('moduleContext',self.moduleContext);
+
         framework.setCustomContext(self.moduleContext);
         onSuccess();
     };
@@ -1531,7 +1536,7 @@ function module() {
     };
     this.initializeD3Graphs = function(onSuccess) {
         // For each analog input channel, create graphs using D3!
-        self.analogInputsDict.forEach(function(val,name){
+        self.analogInputsDict.forEach(function(val, name) {
             // Save the current value
             var curVal = val.value;
 
@@ -1543,7 +1548,7 @@ function module() {
             var svgEle = $(svgID);
             var graphWidth = svgEle.width();
 
-            // Calculate half the width and/or the offset to be used for the 
+            // Calculate half the width and/or the offset to be used for the
             // second graph.
             var halfWidth = graphWidth / 2;
 
@@ -1645,15 +1650,6 @@ function module() {
         // Initialize the D3 Graphs
         self.initializeD3Graphs(onSuccess);
     };
-    this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRegisterWritten = function(framework, registerName, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefresh = function(framework, registerNames, onError, onSuccess) {
-        onSuccess();
-    };
     var findRangeRegisterRegex = new RegExp("AIN[0-9]{1,2}_RANGE");
     var findEFIndexRegister = new RegExp("AIN[0-9]{1,2}_EF_INDEX");
     var findOnlyActiveChannel = new RegExp("^AIN[0-9]{1,2}$");
@@ -1676,7 +1672,7 @@ function module() {
                 }
             });
             self.newBufferedValues.forEach(function eachNewBuffValue(value,name){
-                // if the new value that is read is not an analog input aka a 
+                // if the new value that is read is not an analog input aka a
                 // channel config option do some special DOM stuff
                 var buttonID;
                 var buttonEl;
@@ -1686,16 +1682,11 @@ function module() {
                         buttonID = '#' + name + '-SELECT';
                         buttonEl = $(buttonID);
                         selectEl = buttonEl.find('.currentValue');
-                        var parserFunc = self.regParser.get(name,{'value':-9999,'name':'N/A'});
+                        var parserFunc = self.regParserGet(name, value);
                         if(typeof(parserFunc) === 'undefined') {
                             // console.log('parserFunc not defined',typeof(parserFunc),name);
                         } else {
-                            var newText;
-                            try {
-                                newText = parserFunc(value);
-                            } catch(err) {
-                                newText = parserFunc;
-                            }
+                            var newText = parserFunc;
                             var stringVal = value.toString();
                             var newTitle = name + ' is set to ' + stringVal;
                             var rangeReg = findRangeRegisterRegex.exec(name);
@@ -1731,9 +1722,6 @@ function module() {
     };
     this.onCloseDevice = function(framework, device, onError, onSuccess) {
         self.clearCachedData();
-        onSuccess();
-    };
-    this.onUnloadModule = function(framework, onError, onSuccess) {
         onSuccess();
     };
     this.onLoadError = function(framework, description, onHandle) {

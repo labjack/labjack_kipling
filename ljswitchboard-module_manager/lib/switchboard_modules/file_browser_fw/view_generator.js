@@ -4,27 +4,10 @@
 
 // console.log('in device_selector view_generator.js');
 
-var package_loader;
-var q;
-var gns;
-var static_files;
-try {
-	package_loader = global.require.main.require('ljswitchboard-package_loader');
-	q = global.require.main.require('q');
-	gns = package_loader.getNameSpace();
-	static_files = global.require('ljswitchboard-static_files');
-} catch(err) {
-	package_loader = require.main.require('ljswitchboard-package_loader');
-	q = require.main.require('q');
-	gns = package_loader.getNameSpace();
-	static_files = require('ljswitchboard-static_files');
-}
-
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var handlebars = require('handlebars');
-var path = require('path');
-
+const EventEmitter = require('events').EventEmitter;
+const util = require('util');
+const handlebars = require('handlebars');
+const path = require('path');
 
 var createFileBrowserViewGenerator = function() {
 	var self = this;
@@ -133,7 +116,7 @@ var createFileBrowserViewGenerator = function() {
 		},
 		// Text bar that displays the devices cwd.
 		{'id': '#device_cwd', 'name': 'device_cwd'},
-		
+
 		// Button that initiates the downloading of the selected files.
 		{
 			'id': '#download_selected_files_button',
@@ -182,38 +165,36 @@ var createFileBrowserViewGenerator = function() {
 
 	var getSlideUpElement = function(ele) {
 		var slideUp = function() {
-			var defered = q.defer();
-			ele.slideUp(self.slideDuration, defered.resolve);
-			return defered.promise;
+			return new Promise(resolve => {
+				ele.slideUp(self.slideDuration, resolve);
+			});
 		};
 		return slideUp;
 	};
 	var getSlideDownElement = function(ele) {
 		var slideDown = function() {
-			var defered = q.defer();
-			ele.slideDown(self.slideDuration, defered.resolve);
-			return defered.promise;
+			return new Promise(resolve => {
+				ele.slideDown(self.slideDuration, resolve);
+			});
 		};
 		return slideDown;
 	};
 	var getEmptyElement = function(ele) {
 		var emptyElement = function() {
-			var defered = q.defer();
 			ele.empty();
-			defered.resolve();
-			return defered.promise;
+			return Promise.resolve();
 		};
 		return emptyElement;
 	};
 	var getFillElement = function(ele) {
 		var fillElement = function(data) {
-			var defered = q.defer();
-			ele.empty();
-			ele.ready(function() {
-				defered.resolve(data);
+			return new Promise(resolve => {
+				ele.empty();
+				ele.ready(function () {
+					resolve(data);
+				});
+				ele.append($(data));
 			});
-			ele.append($(data));
-			return defered.promise;
 		};
 		return fillElement;
 	};
@@ -225,7 +206,7 @@ var createFileBrowserViewGenerator = function() {
 	this.cachePageControlElements = function(moduleData) {
 		self.moduleData = moduleData;
 		var modulePath = moduleData.path;
-		
+
 		// Initialize various properties and compile templates.
 		self.fileImageTemplate = handlebars.compile(
 			moduleData.htmlFiles.file_image
@@ -268,30 +249,20 @@ var createFileBrowserViewGenerator = function() {
 		});
 	};
 
-	// This function.... not really needed??
-	this.saveDeviceControlFunctions = function(onConnect, onDisconnect) {
-		self.onConnect = onConnect;
-		self.onDisconnect = onDisconnect;
-	};
-
 	this.isFileListingDisplayed = false;
 	function innerDeclareFileListingDisplayed() {
-		var defered = q.defer();
 		self.isFileListingDisplayed = true;
 		self.emit(self.eventList.FILE_LISTING_DISPLAYED, {
 			isFileListingDisplayed: self.isFileListingDisplayed,
 		});
-		defered.resolve();
-		return defered.promise;
+		return Promise.resolve();
 	}
 	function innerDeclareFileListingHidden() {
-		var defered = q.defer();
 		self.isFileListingDisplayed = false;
 		self.emit(self.eventList.FILE_LISTING_HIDDEN, {
 			isFileListingDisplayed: self.isFileListingDisplayed,
 		});
-		defered.resolve();
-		return defered.promise;
+		return Promise.resolve();
 	}
 	// Start defining externally accessable page control methods.
 	// Function for displaying that file listing data is being queried aka
@@ -307,7 +278,7 @@ var createFileBrowserViewGenerator = function() {
 		// Hide the file listing table
 		promises.push(elements.file_listing_table.slideUp());
 
-		return q.allSettled(promises)
+		return Promise.allSettled(promises)
 
 		// Show the file listing refreshing loader
 		.then(elements.file_listing_refreshing.slideDown)
@@ -323,14 +294,14 @@ var createFileBrowserViewGenerator = function() {
 		// promises.push(elements.refresh_file_listing_button.slideUp());
 		// Show the file listing table.
 		promises.push(elements.file_listing_table.slideDown());
-		return q.allSettled(promises);
+		return Promise.allSettled(promises);
 	}
-	
+
 	// An example snippit of data to be rendered and displayed.
 	var testFileListingData = {
 		cwd: '/',
 		fileNames: [ 'log1.csv', 'JP2 period 2.txt' ],
-		files:[{ 
+		files:[{
 				name: 'log1.csv', ext: '.csv', img: 'csv',
 			path: '/log1.csv', pathInfo: {}, isDirectory: false,
 			isFile: true, size: 299, sizeStr: '299 B'
@@ -403,245 +374,11 @@ var createFileBrowserViewGenerator = function() {
 	this.displayDownloadFileToDir = function(renderedData) {
 		return elements.download_to_dir.fill(renderedData);
 	};
-	
+
 	// TODO: Stubbed out function for getting the list of selected files.
 	this.getSelectedFiles = function() {
 		return [];
 	};
-
-	// var enableModuleSwitching = function() {
-	// 	var defered = q.defer();
-		
-	// 	// Enable module-switching
-	// 	MODULE_CHROME.enableModuleLoading();
-
-	// 	defered.resolve();
-	// 	return defered.promise;
-	// };
-
-	// var attachClickListener = function(ele, device, connectionType) {
-	// 	var clickData = {
-	// 		'device': device,
-	// 		'connectionType': connectionType,
-	// 	};
-	// 	ele.one('click', clickData, openDeviceListener);
-	// 	/*
-	// 	ele.attr('disabled',true); // Disables the button
-
-	// 	// a jquery trick of:
-	// 	$( "#foo" ).on( "click", function( event ) {
-	// 		alert( "This will be displayed only once." );
-	// 		$( this ).off( event );
-	// 	});
-	// 	may be useful.
-	// 	api.jquery.com/one/
-	// 	*/
-	// };
-
-	// var attachConnectListeners = function(device) {
-	// 	var key = getDeviceControlKey(device);
-	// 	device.connectionTypes.forEach(function(connectionType) {
-	// 		var ctKey = connectionType.name;
-	// 		attachClickListener(
-	// 			self.deviceControlElements[key][ctKey].ele,
-	// 			device,
-	// 			connectionType
-	// 		);
-	// 	});
-	// };
-	// var removeConnectListeners = function(device) {
-	// 	var key = getDeviceControlKey(device);
-	// 	device.connectionTypes.forEach(function(connectionType) {
-	// 		var ctKey = connectionType.name;
-	// 		self.deviceControlElements[key][ctKey].ele.off('click');
-	// 	});
-	// };
-	// var attachDisconnectListener = function(device) {
-	// 	if(self.debug) {
-	// 		console.log('Attaching disconnect listener');
-	// 	}
-	// 	var key = getDeviceControlKey(device);
-	// 	var element = self.deviceControlElements[key].disconnectButton.ele;
-	// 	element.one('click', {'device': device}, closeDeviceListener);
-	// };
-	// var removeDisconnectListener = function(device) {
-	// 	var key = getDeviceControlKey(device);
-	// 	var element = self.deviceControlElements[key].disconnectButton.ele;
-	// 	element.off('click');
-	// };
-
-	// var createConnectButtonSelector = function(device, connectionType) {
-	// 	var selector = '';
-	// 	var dt = device.deviceTypeName.toString();
-	// 	dt = '.DEVICE_TYPE_' + dt;
-	// 	var sn = device.serialNumber.toString();
-	// 	sn = '.SERIAL_NUMBER_' + sn;
-	// 	var ct = connectionType.name.toString();
-	// 	ct = '.CONNECTION_TYPE_' + ct;
-
-	// 	selector = dt + ' ' + sn + ' ' + ct;
-	// 	return selector;
-	// };
-	// var createConnectionButtonsHolderSelector = function(device) {
-	// 	var selector = '';
-	// 	var dt = device.deviceTypeName.toString();
-	// 	dt = '.DEVICE_TYPE_' + dt;
-	// 	var sn = device.serialNumber.toString();
-	// 	sn = '.SERIAL_NUMBER_' + sn;
-	// 	var ctHolder = '.connect_buttons_class';
-
-	// 	selector = dt + ' ' + sn + ' ' + ctHolder;
-	// 	return selector;
-	// };
-	// var createDisconnectButtonSelector = function(device) {
-	// 	var selector = '';
-	// 	var dt = device.deviceTypeName.toString();
-	// 	dt = '.DEVICE_TYPE_' + dt;
-	// 	var sn = device.serialNumber.toString();
-	// 	sn = '.SERIAL_NUMBER_' + sn;
-	// 	var ctHolder = '.disconnect-button';
-
-	// 	selector = dt + ' ' + sn + ' ' + ctHolder;
-	// 	return selector;
-	// };
-	// var createDisconnectButtonHolderSelector = function(device) {
-	// 	var selector = '';
-	// 	var dt = device.deviceTypeName.toString();
-	// 	dt = '.DEVICE_TYPE_' + dt;
-	// 	var sn = device.serialNumber.toString();
-	// 	sn = '.SERIAL_NUMBER_' + sn;
-	// 	var ctHolder = '.disconnect_buttons_class';
-
-	// 	selector = dt + ' ' + sn + ' ' + ctHolder;
-	// 	return selector;
-	// };
-	// var getDeviceControlKey = function(device) {
-	// 	var dt = device.deviceTypeName.toString();
-	// 	var sn = device.serialNumber.toString();
-	// 	return [dt,sn].join('_');
-	// };
-	// this.cacheDeviceControlElements = function(scanResults) {
-	// 	var defered = q.defer();
-	// 	// Clear previous elements cache TODO: Disconnect from listeners
-	// 	self.deviceControlElements = {};
-
-	// 	if(self.debug) {
-	// 		console.log('Caching Device Control Elements');
-	// 	}
-	// 	// console.log('numDeviceTypes', scanResults.length);
-	// 	scanResults.forEach(function(deviceType) {
-	// 		// console.log('Data:', Object.keys(deviceType));
-	// 		deviceType.devices.forEach(function(device) {
-	// 			// console.log('Device Data', device);
-	// 			var key = getDeviceControlKey(device);
-	// 			self.deviceControlElements[key] = {};
-
-	// 			var cbhSelector = createConnectionButtonsHolderSelector(device);
-	// 			var cbhEle = $(cbhSelector);
-	// 			var dbhSelector = createDisconnectButtonHolderSelector(device);
-	// 			var dbhEle = $(dbhSelector);
-	// 			var dbSelector = createDisconnectButtonSelector(device);
-	// 			var dbEle = $(dbSelector);
-
-	// 			self.deviceControlElements[key] = {
-	// 				'connectButtonsHolder': {
-	// 					'id': cbhSelector,
-	// 					'ele': cbhEle,
-	// 					'slideUp': getSlideUpElement(cbhEle),
-	// 					'slideDown': getSlideDownElement(cbhEle),
-	// 				},
-	// 				'disconnectButtonHolder': {
-	// 					'id': dbhSelector,
-	// 					'ele': dbhEle,
-	// 					'slideUp': getSlideUpElement(dbhEle),
-	// 					'slideDown': getSlideDownElement(dbhEle),
-	// 				},
-	// 				'disconnectButton': {
-	// 					'id': dbSelector,
-	// 					'ele': dbEle,
-	// 					'slideUp': getSlideUpElement(dbEle),
-	// 					'slideDown': getSlideDownElement(dbEle),
-	// 				},
-	// 			};
-
-	// 			// Establish connection type listeners
-	// 			device.connectionTypes.forEach(function(connectionType) {
-	// 				var selector = createConnectButtonSelector(
-	// 					device,
-	// 					connectionType
-	// 				);
-	// 				var ctKey = connectionType.name;
-	// 				var ele = $(selector);
-	// 				self.deviceControlElements[key][ctKey] = {
-	// 					'id': selector,
-	// 					'ele': ele
-	// 				};
-	// 			});
-				
-	// 			if(!device.isActive) {
-	// 				// Attach connect button listeners
-	// 				attachConnectListeners(device);
-	// 			} else {
-	// 				// Attach disconnect button listeners
-	// 				attachDisconnectListener(device);
-	// 			}
-	// 		});
-	// 	});
-	// 	defered.resolve(scanResults);
-	// 	return defered.promise;
-	// };
-
-	
-	// var innerDisplayScanResults = function(scanResults) {
-
-	// 	var defered = q.defer();
-	// 	var data = '';
-	// 	try {
-	// 		if(scanResults.length === 0) {
-	// 			if(self.moduleData.htmlFiles.no_devices_found) {
-	// 				data = self.moduleData.htmlFiles.no_devices_found;
-	// 			}
-	// 			self.displayScanResultsPageData(data);
-	// 			defered.resolve(scanResults);
-	// 		} else {
-	// 			if(self.debug) {
-	// 				console.log('Displaying Data', scanResults.length);
-	// 			}
-	// 			// Display Data
-	// 			data += '<p>Found ';
-	// 			data += scanResults.length.toString();
-	// 			data += ' devices</p>';
-	// 			if(self.deviceListingTemplate) {
-	// 				data = self.deviceListingTemplate({
-	// 					'device_types': scanResults,
-	// 					'staticFiles': static_files.getDir(),
-	// 				});
-	// 			}
-	// 			self.displayScanResultsPageData(data)
-	// 			.then(function() {
-	// 				defered.resolve(scanResults);
-	// 			});
-	// 		}
-	// 	} catch(err) {
-	// 		data = '';
-	// 		data += '<p>Error Displaying Scan Results: ';
-	// 		data += JSON.stringify(err);
-	// 		data += '</p>';
-	// 		console.error('error displaying scan results');
-	// 		self.displayScanResultsPageData(data);
-	// 		defered.resolve([]);
-	// 	}
-	// 	return defered.promise;
-	// };
-	// this.displayScanResults = function(scanResults) {
-	// 	self.scanResultsCache = scanResults;
-	// 	return self.appendPageLogicToScanResults(
-	// 		scanResults,
-	// 		self.wifiImageTemplate
-	// 	)
-	// 	.then(innerDisplayScanResults)
-	// 	.then(self.cacheDeviceControlElements);
-	// };
 
 	this.test = function() {
 		self.displayScanResultsPageData('<p>Scan Finished!</p>');

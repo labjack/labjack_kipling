@@ -12,7 +12,7 @@ jobs:
     if: ${{ github.event.repository.full_name == 'labjack/labjack_kipling_private' }}
     strategy:
       matrix:
-        node-version: [8.9.4]
+        node-version: [12.16.3]
         platform: [self-hosted]
 
     runs-on: ${{ matrix.platform }}

@@ -9,7 +9,7 @@ var util = require('util');
 // to emmit an event:
 // module.exports.emit('ready');
 
-var q;
+const q = require('q');
 var dict;
 var async;
 var exposedLibs;
@@ -38,7 +38,7 @@ function createNewBuffer(initData) {
 	this.activeBuffer = 0;
 	this.inactiveBuffer = 1;
 
-	this.fileReferences = dict();
+	this.fileReferences = new Map();
 
 	var lastProcessTime = 0;
 	var getTimeDifference = function() {
@@ -111,7 +111,7 @@ function createNewBuffer(initData) {
 		newBufferInfo.numFilesCreated = 0;
 		self.bufferInfo = newBufferInfo;
 		self.dataBuffers = [[],[]];
-		self.fileReferences = dict();
+		self.fileReferences = new Map();
 
 		getTimeDifference();
 	};
@@ -603,7 +603,6 @@ exports.getTaskState = function() {
  */
 exports.includeTask = function(exposedLibs) {
 	exposedLibs = exposedLibs;
-	q = exposedLibs['q'];
 	dict = exposedLibs['dict'];
 	async = exposedLibs['async'];
 	task_manager = exposedLibs['task_manager'];
@@ -637,8 +636,8 @@ var initTask = function() {
 	updateIntervalHandler = undefined;
 	isStarted = false;
 	startDefered = undefined;
-	dataBuffersDict = dict();
-	activeDataBuffersDict = dict();
+	dataBuffersDict = new Map();
+	activeDataBuffersDict = new Map();
 	bufferModifications = [];
 
 	// Set state to 'initialized'

@@ -24,7 +24,7 @@ function getLogger(bool) {
 var debugCuratedDeviceReads = getLogger(DEBUG_CURATED_DEVICE_READS);
 
 function parseIPAddress(ipInt) {
-	var ipAddr = new Buffer(4);
+	var ipAddr = Buffer.alloc(4);
 	ipAddr.writeUInt32LE(ipInt, 0);
 	
 	var ipStr = "";

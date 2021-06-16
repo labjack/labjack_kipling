@@ -1,44 +1,20 @@
+'use strict';
 
-// process.on('unhandledRejection', function(reason, p) {
-//   console.log('io_delegator unhandledRejection:', p, reason);
-// });
-
-// process.on('uncaughtException', function(err) {
-//   console.log('io_delegator uncaughtException:', 'Caught exception: ', err);
-// });
-
-var dict = require('dict');
-var q = require('q');
-var constants = require('./common/constants');
-var io_endpoint_key = constants.io_manager_endpoint_key;
-var io_error_constants = require('./io_error_constants').errors;
-var process_manager = require('process_manager');
-var fs = require('fs');
-var path = require('path');
-var slave_process = process_manager.slave_process();
+const constants = require('./common/constants');
+const io_endpoint_key = constants.io_manager_endpoint_key;
+const process_manager = require('process_manager');
+const fs = require('fs');
+const path = require('path');
+const slave_process = process_manager.slave_process();
 
 // Include the io_managers
-var driver_manager;
-var device_manager;
-var logger_manager;
-var file_io_manager;
+const driver_manager = require('./managers/driver_manager');
+const device_manager = require('./managers/device_manager');
 
-try {
-	driver_manager = require('./managers/driver_manager');
-	device_manager = require('./managers/device_manager');
-	logger_manager = require('./managers/logger_manager');
-	file_io_manager = require('./managers/file_io_manager');
-} catch(err) {
-	console.error('io_delegator: Error Requiring Library:');
-	console.error(err);
-	process.exit(io_error_constants.REQUIRE_REF_OR_FFI_ERROR.code);
-}
-
-var DEBUG = true;
-var startupInfo = slave_process.getSlaveProcessInfo();
-var print = function(argA, argB) {
+const DEBUG = true;
+const print2 = (argA, argB) => {
     if(DEBUG) {
-        var msg = '* io_d:';
+        const msg = '* io_d:';
         if(argA) {
             if(argB) {
                 console.log(msg, argA, argB);
@@ -51,13 +27,6 @@ var print = function(argA, argB) {
     }
 };
 
-var receivers = [
-	'driver_manager',
-	'device_manager',
-	'logger_manager',
-	'file_io_manager'
-];
-
 function runGarbageCollector() {
 	if(global.gc) {
 		if(typeof(global.gc) === 'function') {
@@ -65,8 +34,8 @@ function runGarbageCollector() {
 		}
 	}
 }
-var outputCrashLogBuffer = [];
-var clearProcessTimers = function() {
+const outputCrashLogBuffer = [];
+const clearProcessTimers = () => {
 	if(io_delegator_gc) {
 		clearInterval(io_delegator_gc);
 	}
@@ -74,11 +43,11 @@ var clearProcessTimers = function() {
 		clearInterval(procesQuitChecker);
 	}
 };
-var io_delegator_sp_env = JSON.parse(process.env.slave_process_env);
+const io_delegator_sp_env = JSON.parse(process.env.slave_process_env);
 function detectIfProcessShouldQuit() {
-	var mp_pid = io_delegator_sp_env.masterPID;
-	var mp_running = false;
-	var killError = '';
+	const mp_pid = io_delegator_sp_env.masterPID;
+	let mp_running = false;
+	let killError = '';
 	try {
 		mp_running = process.kill(mp_pid, 0);
 	} catch(err) {
@@ -89,20 +58,20 @@ function detectIfProcessShouldQuit() {
 		clearProcessTimers();
 		try {
 			outputCrashLogBuffer.push(JSON.stringify({
-				'processSendType':typeof(process.send),
+				'processSendType': typeof(process.send),
 				'cwd': process.cwd(),
 				'pid': process.pid,
 				'slave_process_env_type': typeof(io_delegator_sp_env),
 				'slave_process_env': io_delegator_sp_env,
 				'masterPID': process.env.slave_process_env['masterPID\\'],
 				'mp_pid': mp_pid,
-				'mp_pid_type':typeof(mp_pid),
+				'mp_pid_type': typeof(mp_pid),
 				'mp_running': mp_running,
-				'killError':killError,
+				'killError': killError,
 			}));
-			var outputDir = path.join(process.cwd(),'outFile.txt');
-			var tempStr = '';
-			outputCrashLogBuffer.forEach(function(singleTempStr) {
+			const outputDir = path.join(process.cwd(),'outFile.txt');
+			let tempStr = '';
+			outputCrashLogBuffer.forEach((singleTempStr) => {
 				tempStr += singleTempStr + '\r\n';
 			});
 			fs.writeFileSync(outputDir, tempStr);
@@ -115,94 +84,87 @@ function detectIfProcessShouldQuit() {
 	// console.log('Typeof process.send', typeof(process.send));
 	// console.log('cwd', process.cwd());
 }
+
 detectIfProcessShouldQuit();
-var io_delegator_gc = setInterval(runGarbageCollector, 5000);
-var procesQuitChecker = setInterval(detectIfProcessShouldQuit, 5000);
+const io_delegator_gc = setInterval(runGarbageCollector, 5000);
+const procesQuitChecker = setInterval(detectIfProcessShouldQuit, 5000);
 slave_process.attachOnExitListener(clearProcessTimers);
 
-function createIODelegator(slave_process) {
-	this.sp = slave_process;
-	this.sp_event_emitter = null;
+class IODelegator {
 
-	// Define manager objects to be created during the init process
-	this.driver_manager = null;
-	this.device_manager = null;
-	this.logger_manager = null;
-	this.file_io_manager = null;
+	constructor(slave_process) {
+		this.sp = slave_process;
+		this.sp_event_emitter = null;
 
-	// Define the endpoints object to be used for routing messages by the
-	// messageDelegator
-	this.endpoints = {};
-	this.oneWayEndpoints = {};
+		// Define manager objects to be created during the init process
+		this.driver_manager = null;
+		this.device_manager = null;
+		this.logger_manager = null;
+		this.file_io_manager = null;
 
-	// Define function objects for sending internal messages 
-	var sendMessage = null;
-	var send = null;
+		// Define the endpoints object to be used for routing messages by the
+		// messageDelegator
+		this.endpoints = {};
+		this.oneWayEndpoints = {};
+
+		// Define function objects for sending internal messages
+		this.sendMessage = null;
+		this.send = null;
+
+		this.exposedFunctions = {
+			'getRegisteredEndpoints': () => this.getRegisteredEndpoints()
+		};
+	}
 
 	/**
 	 * A helper function for the messageDelegator that checks to see if the
 	 * messages endpoint is valid.
 	 */
-	var checkEndpoint = function(m) {
-		var defered = q.defer();
-		if(self.endpoints[m.endpoint]) {
-			m.isValidEndpoint = true;
-			defered.resolve(m);
-		} else {
-			print('sendReceive message sent to invalid endpoint', m.endpoint);
-			print('valid endpoints', self.endpoints);
-			defered.reject(m);
-		}
-		return defered.promise;
-	};
+	checkEndpoint(m) {
+		return new Promise((resolve, reject) => {
+			if (this.endpoints[m.endpoint]) {
+				m.isValidEndpoint = true;
+				resolve(m);
+			} else {
+				print2('sendReceive message sent to invalid endpoint', m.endpoint);
+				print2('valid endpoints', this.endpoints);
+				reject(m);
+			}
+		});
+	}
+
 	/**
 	 * A helper function for the messageDelegator that calls the endpoint's
 	 * function.
 	 */
-	var delegateMessage = function(m) {
-		return self.endpoints[m.endpoint](m.message);
-	};
+	delegateMessage(m) {
+		return this.endpoints[m.endpoint](m.message);
+	}
 
 	/**
 	 * The messageDelegator function handles all incomming messages sent by the
-	 * master_process.sendReceive function.  These messages are checked for 
+	 * master_process.sendReceive function.  These messages are checked for
 	 * valid endpoints and then delegated to the appropriate messageManager.
 	 * @type {[type]}
 	 */
-	this.messageDelegator = function(m) {
-		var defered = q.defer();
-		var errFunc = function(err) {
-			defered.reject(err);
-		};
-		// print('messageDelegator', m);
-		var message = {
+	messageDelegator(m) {
+		const message = {
 			'isValidEndpoint': false,
 			'message': m.data,
 			'endpoint': m.endpoint
 		};
-		checkEndpoint(message)
-		.then(delegateMessage, errFunc)
-		.then(defered.resolve, errFunc);
-		return defered.promise;
-	};
+		return this.checkEndpoint(message)
+			.then(m => this.delegateMessage(m));
+	}
 
 	// Define functions to initialize the manager objects
-	var createDriverManager = function() {
-		var key = constants.driver_endpoint_key;
-		self.driver_manager = new driver_manager.createNewDriverManager(self);
-	};
-	var createDeviceManager = function() {
-		var key = constants.device_endpoint_key;
-		self.device_manager = new device_manager.createNewDeviceManager(self);
-	};
-	var createLoggerManager = function() {
-		var key = constants.logger_endpoint_key;
-		self.logger_manager = new logger_manager.createNewLoggerManager(self);
-	};
-	var createFileIOManager = function() {
-		var key = constants.file_io_endpoint_key;
-		self.file_io_manager = new file_io_manager.createNewFileIOManager(self);
-	};
+	createDriverManager() {
+		this.driver_manager = new driver_manager.createNewDriverManager(this);
+	}
+
+	createDeviceManager() {
+		this.device_manager = new device_manager.createNewDeviceManager(this);
+	}
 
 	/**
 	 * The establishLink function gets called by a manager in order to connect
@@ -210,213 +172,159 @@ function createIODelegator(slave_process) {
 	 * functions and creates/shares functions to make communicating with their
 	 * counterparts in the master_process easier.
 	 */
-	this.establishLink = function(name, messageReceiver, listener) {
-		var elDefered = q.defer();
-		self.endpoints[name] = messageReceiver;
-		self.oneWayEndpoints[name] = listener;
-		var endpoint = name;
-		var createMessage = function(m) {
-			var cmDefered = q.defer();
-			var message = {
-				'endpoint': endpoint,
-				'data': m
-			};
-			cmDefered.resolve(message);
-			return cmDefered.promise;
-		};
-		var executeSendMessage = function(m) {
-			return self.sp.sendMessage(m);
-		};
-		var sendMessage = function(m) {
-			return createMessage(m)
-			.then(executeSendMessage);
-		};
-		var send = function(m) {
-			return self.sp.send(endpoint, m);
-		};
+	establishLink(endpoint, messageReceiver, listener) {
+		this.endpoints[endpoint] = (m) => messageReceiver(m);
+		this.oneWayEndpoints[endpoint] = (m) => listener(m);
+		const sendMessage = (data) => this.sp.sendMessage(data);
+		const send = (data) => this.sp.send(endpoint, data);
 
-		self.sp_event_emitter.on(name, listener);
-		var link = {
-			'sendMessage': sendMessage,
-			'send': send
-		};
-		elDefered.resolve(link);
-		return elDefered.promise;
-	};
+		this.sp_event_emitter.on(endpoint, listener);
+		const link = { sendMessage, send };
+		return Promise.resolve(link);
+	}
 
 	/**
-	 * The destroyLink function gets called by a manager in order to remove 
+	 * The destroyLink function gets called by a manager in order to remove
 	 * itself/a sub-function from the io_delegator.
 	 * @type {[type]}
 	 */
-	this.destroyLink = function(name) {
-		self.endpoints[name] = null;
-		self.endpoints[name] = undefined;
-		self.oneWayEndpoints[name] = null;
-		self.oneWayEndpoints[name] = undefined;
-		delete self.endpoints[name];
-		delete self.oneWayEndpoints[name];
-		self.sp_event_emitter.removeAllListeners(name);
-	};
+	destroyLink(name) {
+		this.endpoints[name] = null;
+		this.endpoints[name] = undefined;
+		delete this.endpoints[name];
+		this.oneWayEndpoints[name] = null;
+		this.oneWayEndpoints[name] = undefined;
+		delete this.oneWayEndpoints[name];
+		this.sp_event_emitter.removeAllListeners(name);
+	}
 
 	/**
 	 * the function "delegateOneWayMessage" directs incomming one-way messages
 	 * toward registered & valid endpoints.
 	 */
-	var delegateOneWayMessage = function(m) {
-		var defered = q.defer();
-		self.oneWayEndpoints[m.endpoint](m.message);
-		defered.resolve();
-		return defered.promise;
-		// return self.endpoints[m.endpoint](m.message);
-	};
+	delegateOneWayMessage(m) {
+		this.oneWayEndpoints[m.endpoint](m.message);
+		return Promise.resolve();
+	}
+
 	/**
 	 * A helper function for the messageDelegator that checks to see if the
 	 * messages endpoint is valid.
 	 */
-	var checkOneWayEndpoint = function(m) {
-		var defered = q.defer();
-		if(self.oneWayEndpoints[m.endpoint]) {
+	checkOneWayEndpoint(m) {
+		if (this.oneWayEndpoints[m.endpoint]) {
 			m.isValidEndpoint = true;
-			defered.resolve(m);
+			return Promise.resolve(m);
 		} else {
-			print('sendReceive message sent to invalid endpoint', m.endpoint);
-			print('valid endpoints', self.oneWayEndpoints);
-			defered.reject(m);
+			print2('sendReceive message sent to invalid endpoint', m.endpoint);
+			print2('valid endpoints', this.oneWayEndpoints);
+			return Promise.reject(m);
 		}
-		return defered.promise;
-	};
+	}
+
 	/**
 	 * The listener function handles one-way slave messages transfered by the
 	 * master_process.sendMessage function.
 	 */
-	this.listener = function(m) {
-		var defered = q.defer();
-		var errFunc = function(err) {
-			print('listener errFunc', err);
-			defered.reject(err);
+	listener(m) {
+		const errFunc = (err) => {
+			print2('listener errFunc', err);
+			throw err;
 		};
-		var message = {
+		const message = {
 			'isValidEndpoint': false,
 			'message': m.data,
 			'endpoint': m.endpoint
 		};
 
-		checkOneWayEndpoint(message)
-		.then(delegateOneWayMessage, errFunc)
-		.then(defered.resolve, errFunc);
-		return defered.promise;
-		
-	};
+		return this.checkOneWayEndpoint(message)
+			.then(m => this.delegateOneWayMessage(m), errFunc);
+	}
 
 	/**
 	 * The init function asynchronously initializes the io_delegator object and
 	 * any necessary message managers.
 	 */
-	this.init = function() {
-		var defered = q.defer();
-
+	init() {
 		// Clear the registered endpoints
-		self.endpoints = {};
-		self.oneWayEndpoints = {};
+		this.endpoints = {};
+		this.oneWayEndpoints = {};
 
-		// Register the messageDelegator as a 'q' function with the slave 
+		// Register the messageDelegator as a 'q' function with the slave
 		// process and save the returned event_emitter object
-		self.sp_event_emitter = self.sp.init({
+		this.sp_event_emitter = this.sp.init({
 			'type': 'q',
-			'func': self.messageDelegator
+			'func': (res) => this.messageDelegator(res)
 		});
 
 		// Register a listener to the 'message' event emitter
-		self.sp_event_emitter.on('message', self.listener);
+		this.sp_event_emitter.on('message', this.listener);
 
 		// Create Managers
-		createDriverManager();
-		createDeviceManager();
-		// createLoggerManager();
-		// createFileIOManager();
+		this.createDriverManager();
+		this.createDeviceManager();
 
-		initInternals()
-		.then(initManager(self.driver_manager, 'dm'))
-		.then(initManager(self.device_manager, 'de'))
-		.then(defered.resolve);
-		return defered.promise;
-	};
-	var pError = function(defered, name) {
-		return function(err) {
-			console.log('io_delegator init error', name);
-			defered.resolve();
-		};
-	};
-	var initManager = function(manager, name) {
-		return function() {
-			var defered = q.defer();
+		return this.initInternals()
+			.then(() => this.initManager(this.driver_manager, 'dm'))
+			.then(() => this.initManager(this.device_manager, 'de'));
+	}
+
+	pError(name) {
+		console.log('io_delegator init error', name);
+	}
+
+	initManager(manager, name) {
+		return new Promise((resolve) => {
 			try {
 				manager.init()
-				.then(
-					defered.resolve, 
-					pError(defered, name + '-1'), 
-					pError(defered, name + '-2')
-				);
+					.then(
+						resolve,
+						() => this.pError(name + '-1'),
+						() => this.pError(name + '-2')
+					);
 			} catch (err) {
-				pError(defered, name + '-3')(err);
+				this.pError(name + '-3');
 			}
+		});
+	}
 
-			return defered.promise;
-		};
-	};
+	getRegisteredEndpoints() {
+		return Promise.resolve(Object.keys(this.endpoints));
+	}
 
-	this.getRegisteredEndpoints = function(args) {
-		var defered = q.defer();
-		defered.resolve(Object.keys(self.endpoints));
-		return defered.promise;
-	};
-	var exposedFunctions = {
-		'getRegisteredEndpoints': this.getRegisteredEndpoints
-	};
-
-	var internalListener = function(m) {
+	internalListener(m) {
 		console.log('* io_delegator internalListener:', m);
-		send("Poke Response from io_delegator!");
-	};
-	var internalMessageReceiver = function(m) {
-		var defered = q.defer();
-		if(exposedFunctions[m.func]) {
-			exposedFunctions[m.func](m.args)
-			.then(defered.resolve, defered.reject);
+		this.send("Poke Response from io_delegator!");
+	}
+
+	internalMessageReceiver(m) {
+		if (this.exposedFunctions[m.func]) {
+			return this.exposedFunctions[m.func](m.args);
 		} else {
-			defered.reject('Invalid Function Called: ' + m.func);
+			return Promise.reject('Invalid Function Called: ' + m.func);
 		}
-		return defered.promise;
-	};
-	var saveLink = function(link) {
-		var defered = q.defer();
+	}
 
-		sendMessage = link.sendMessage;
-		send = link.send;
+	async saveLink(link) {
+		this.sendMessage = link.sendMessage;
+		this.send = link.send;
+	}
 
-		defered.resolve();
-		return defered.promise;
-	};
-	var initInternals = function() {
-		var defered = q.defer();
+	initInternals() {
+		return this.establishLink(io_endpoint_key, m => this.internalMessageReceiver(m), m => this.internalListener(m))
+			.then(link => this.saveLink(link));
+	}
 
-		self.establishLink(io_endpoint_key, internalMessageReceiver, internalListener)
-		.then(saveLink)
-		.then(defered.resolve);
-		return defered.promise;
-	};
-
-	var self = this;
 }
 
 // Create a new io_delegator object
-var io_delegator = new createIODelegator(slave_process);
+const io_delegator = new IODelegator(slave_process);
 
 // Initialize the io_delegator
 io_delegator.init()
-.then(function(res) {
-	return slave_process.finishedInit(slave_process.getSlaveProcessInfo());
-}).then(function() {
+	.then(() => {
+		return slave_process.finishedInit(slave_process.getSlaveProcessInfo());
+	})
+	.then(() => {
 	// print('Ready to do things....');
-});
+	});

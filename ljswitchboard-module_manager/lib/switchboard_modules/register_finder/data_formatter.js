@@ -3,9 +3,9 @@
 /* global ljmmm_parse, global, handlebars */
 /* exported dataTableDataFormatter */
 
+const ljmmm_parse = require('ljmmm-parse');
+
 function dataTableDataFormatter() {
-    var ljmmm_parse = global.require('ljmmm-parse');
-    
 	this.dataTableData = {
         'columns': [],
         'columnDefs': [],
@@ -234,8 +234,8 @@ function dataTableDataFormatter() {
         }
         return applies;
     };
-    /** 
-     * Loop through the minifiedConstants and generate the 
+    /**
+     * Loop through the minifiedConstants and generate the
      * cachedRegisterData array by using the registerMatrixDataFormatter.
      * Format into the form specified by datatables:
      * https://datatables.net/examples/data_sources/js_array.html
@@ -291,11 +291,11 @@ function dataTableDataFormatter() {
             //         }
             //     });
             //     self.cachedRegisterData.push(attributes);
-            //     
+            //
             //     // Increment the register index counter.
             //     registerIndex += 1;
             // });
-            
+
             // Adding only the minified registers.
             var attributes = [];
             registerMatrixDataFormatter.forEach(function(data) {

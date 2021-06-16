@@ -1,8 +1,10 @@
+const fs_facade = global.package_loader.getPackage('fs_facade');
+
 /**
  * Goals for the Lua Script Debugger module.
  * This is a Lua script intro-app that performs a minimal number of scripting
  * operations.  It is simply capable of detecting whether or not a Lua script
- * is running and then prints out the debugging log to the window.  
+ * is running and then prints out the debugging log to the window.
  *
  * @author Chris Johnson (LabJack Corp, 2013)
  *
@@ -14,7 +16,7 @@
  *     2. Read from "LUA_DEBUG_NUM_BYTES" register to determine how much data is
  *         available in the debugging info buffer.
  *     3. If there is data available in the debugging buffer then get it from
- *         the device. 
+ *         the device.
 **/
 
 // Constant that determines device polling rate.  Use an increased rate to aid
@@ -190,7 +192,7 @@ function module() {
         var moduleHeightExtra = 8;
         moduleHeightEl.height((newModuleHeight + moduleHeightExtra).toString()+'px');
 
-        var magicHeightVal = 193; 
+        var magicHeightVal = 193;
         var heightAdjust = magicHeightVal;
         if(self.areTableDescriptionsHidden) {
             heightAdjust -= 49;
@@ -271,7 +273,7 @@ function module() {
         );
     };
 
-    
+
 
     var setDeviceData = function(classStr, result) {
         // Initialize variables
@@ -358,8 +360,8 @@ function module() {
         var constants = self.luaVariables.runStatus;
         conditionalExecution(
             constants,
-            self.luaController.loadAndStartScript,
-            self.luaController.stopScript,
+            () => self.luaController.loadAndStartScript(),
+            () => self.luaController.stopScript(),
             self.handleIOSuccess(setActiveScriptInfo(continueFunc),'Configured LUA_RUN')
         );
     };
@@ -385,8 +387,8 @@ function module() {
         var constants = self.luaVariables.startupStatus;
         conditionalExecution(
             constants,
-            self.luaController.enableStartupLuaScript,
-            self.luaController.disableStartupLuaScript,
+            () => self.luaController.enableStartupLuaScript(),
+            () => self.luaController.disableStartupLuaScript(),
             self.handleIOSuccess(onSuccess,'Configured LUA_RUN_DEFAULT')
         );
     };
@@ -414,26 +416,24 @@ function module() {
         );
     };
 
-    var loadLuaFile = function(data, onSuccess) {
+    var loadLuaFile = async function(data, onSuccess) {
         self.printUserDebugInfo('Loading file....');
 
         try {
-            var eventStr = FILE_BROWSER.eventList.FILE_SELECTED;
-            FILE_BROWSER.removeAllListeners(eventStr);
-            FILE_BROWSER.once(eventStr, function loadSelectedLuaScriptFile(fileLoc) {
+            const fileLoc = await FILE_BROWSER.browseForFile({'filters':'lua'});
+            if (fileLoc) {
                 self.luaController.loadScriptFromFile(fileLoc)
-                .then(
-                    self.handleIOSuccess(
-                        setActiveScriptInfo(onSuccess),
-                        'Script File Loaded'
-                    ),
-                    self.handleIOError(
-                        setActiveScriptInfo(onSuccess),
-                        'Err: Script File Not Loaded'
-                    )
-                );
-            });
-            FILE_BROWSER.browseForFile({'filters':'.lua'});
+                    .then(
+                        self.handleIOSuccess(
+                            setActiveScriptInfo(() => onSuccess()),
+                            'Script File Loaded'
+                        ),
+                        self.handleIOError(
+                            setActiveScriptInfo(() => onSuccess()),
+                            'Err: Script File Not Loaded'
+                        )
+                    );
+            }
         } catch(err) {
             console.error('Error loadingLuaFile', err);
         }
@@ -455,7 +455,7 @@ function module() {
         var scriptInfo = self.getLuaScriptInfo(scriptName, 'name');
         self.printUserDebugInfo("Getting Script Info, loadLuaExample: ", scriptInfo);
         fileLocation = scriptInfo.scriptInfo.location;
-        
+
         self.luaController.loadExampleScript(fileLocation)
         .then(
             self.handleIOSuccess(
@@ -533,8 +533,10 @@ function module() {
                 'Active Script FilePath:',
                 self.luaController.curScriptFilePath
             );
-            $('#'+sdModule.scriptOptions.scriptTypeID).text(scriptType);
-            $('#'+sdModule.scriptOptions.scriptNameID).text(scriptName);
+            if (sdModule.scriptOptions) {
+                $('#'+sdModule.scriptOptions.scriptTypeID).text(scriptType);
+                $('#'+sdModule.scriptOptions.scriptNameID).text(scriptName);
+            }
             onSuccess();
         };
     };
@@ -664,14 +666,14 @@ function module() {
             deviceStatusEl.hide();
             luaBodyBarEl.addClass('deviceStatusBarHidden');
             luaBodyBarEl.removeClass('deviceStatusBarVisible');
-            
+
             setButtonIcon(self.viewConstants.deviceStatus, 0);
             self.isDeviceStatusBarHidden ^= true;
             self.refreshEditorHeights();
             onSuccess();
         }
 
-        
+
     };
     function manageResizeDraggableVisibility() {
         var ele = $('.draggable-divider-bar');
@@ -695,7 +697,7 @@ function module() {
             // Set button Icon & title
             setButtonIcon(self.viewConstants.luaEditor, 1);
 
-            // Toggle visibility status                
+            // Toggle visibility status
             self.isLuaEditorHidden ^= true;
             self.refreshEditorHeights();
             onSuccess();
@@ -729,7 +731,7 @@ function module() {
             // Set button Icon & title
             setButtonIcon(self.viewConstants.luaDebugger, 1);
 
-            // Toggle visibility status                
+            // Toggle visibility status
             self.isLuaDebuggerHidden ^= true;
             self.refreshEditorHeights();
             onSuccess();
@@ -762,7 +764,7 @@ function module() {
             // Set button Icon & title
             setButtonIcon(self.viewConstants.tableDescriptions, 1);
 
-            // Toggle visibility status                
+            // Toggle visibility status
             self.areTableDescriptionsHidden ^= true;
             self.refreshEditorHeights();
             onSuccess();
@@ -815,7 +817,7 @@ function module() {
 
     /**
      * Function is called several times giving the module a chance to verify its
-     * startupData.  Execute onError if it is not valid or onSuccess if it is 
+     * startupData.  Execute onError if it is not valid or onSuccess if it is
      * valid.
     **/
     this.verifyStartupData = function(framework, startupData, onError, onSuccess) {
@@ -892,7 +894,7 @@ function module() {
         self.isLuaEditorHidden = !self.constants.luaEditorShownAtStartup;
         self.isLuaDebuggerHidden = !self.constants.luaDebuggerShownAtStartup;
         self.areTableDescriptionsHidden = !self.constants.tableDescriptionsShownAtStartup;
-        
+
         // Save framework object reference
         self.framework = framework;
 
@@ -908,7 +910,7 @@ function module() {
         //     self.moduleWindowResizeListener
         // );
 
-        
+
 
         // Register the SaveButtonhandler function to capture 'save' keypresses
         self.registerSaveButtonHandler(saveButtonHandler);
@@ -1013,14 +1015,14 @@ function module() {
                 callback: clearConsoleTextWindow
             },
         ];
-        
+
 
         // Save the smartBindings to the framework instance.
         framework.putSmartBindings(smartBindings);
-        
+
         onSuccess();
     };
-    
+
     function getExampleScripts(framework, device) {
         var minFWVersions = framework.moduleConstants.min_names_fw_versions;
 
@@ -1046,7 +1048,7 @@ function module() {
         return activeScript;
     }
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -1110,13 +1112,13 @@ function module() {
         setViewData('luaEditor', self.constants.luaEditorShownAtStartup);
         setViewData('luaDebugger', self.constants.luaDebuggerShownAtStartup);
         setViewData('tableDescriptions', self.constants.tableDescriptionsShownAtStartup);
-        
+
         // Load default startup script & complete function
         var fileName;
         var fileLocation;
         var scripts = self.preBuiltScripts;
         var scriptInfo;
-        
+
         // scripts.some(function(script,index){
         //     if(script.name == fileName){
         //         fileLocation = script.location;
@@ -1424,21 +1426,21 @@ function module() {
         }
     };
     this.saveCurrentScriptNavigationHandler = function() {
-        var defered = q.defer();
-        var canSave = self.luaController.curScriptOptions.canSave;
-        if(canSave) {
-            console.info('Saving User Script b/c of nav');
-            saveCurrentLuaScript(defered.resolve);
-        } else {
-            defered.resolve();
-        }
-        return defered.promise;
+        return new Promise((resolve, reject) => {
+            var canSave = self.luaController.curScriptOptions.canSave;
+            if (canSave) {
+                console.info('Saving User Script b/c of nav');
+                saveCurrentLuaScript(resolve);
+            } else {
+                resolve();
+            }
+        });
     };
     this.onCloseDevice = function(framework, device, onError, onSuccess) {
         self.updateStartupData();
         self.removeResizedListener();
         self.removeEditorResizeDragListeners();
-        
+
         self.saveCurrentScriptNavigationHandler()
         .then(onSuccess);
     };
@@ -1465,9 +1467,8 @@ function module() {
         self.luaEditor = undefined;
         debuggingLog = undefined;
         self.debuggingLog = undefined;
-        
-        self.saveCurrentScriptNavigationHandler()
-        .then(onSuccess);
+
+        return self.saveCurrentScriptNavigationHandler();
     };
     this.onLoadError = function(framework, description, onHandle) {
         console.log('in onLoadError', description);
@@ -1617,81 +1618,76 @@ var readRomId = function(d, eioNum) {
     };
     var configOneWire = function(info) {
         return function() {
-            var ioDeferred = q.defer();
-            var addresses = [
-                'ONEWIRE_DQ_DIONUM',
-                'ONEWIRE_DPU_DIONUM',
-                'ONEWIRE_OPTIONS',
-                'ONEWIRE_FUNCTION',
-                'ONEWIRE_NUM_BYTES_TX',
-                'ONEWIRE_NUM_BYTES_RX',
-                'ONEWIRE_ROM_MATCH_H',
-                'ONEWIRE_ROM_MATCH_L',
-                'ONEWIRE_PATH_H',
-                'ONEWIRE_PATH_L'
-            ];
-            var values = [
-                info.dq,
-                info.dpu,
-                info.options,
-                info.func,
-                info.numTx,
-                info.numRx,
-                info.romH,
-                info.romL,
-                info.pathH,
-                info.pathL
-            ];
-            console.log('romH',info.romH,'romL',info.romL);
+            return new Promise((resolve, reject) => {
 
-            // perform IO
-            d.writeMany(addresses,values)
-            .then(function(data){
-                ioDeferred.resolve();
-            },function(err){
-                console.log('Error on config',err);
-                ioDeferred.reject();
+                var addresses = [
+                    'ONEWIRE_DQ_DIONUM',
+                    'ONEWIRE_DPU_DIONUM',
+                    'ONEWIRE_OPTIONS',
+                    'ONEWIRE_FUNCTION',
+                    'ONEWIRE_NUM_BYTES_TX',
+                    'ONEWIRE_NUM_BYTES_RX',
+                    'ONEWIRE_ROM_MATCH_H',
+                    'ONEWIRE_ROM_MATCH_L',
+                    'ONEWIRE_PATH_H',
+                    'ONEWIRE_PATH_L'
+                ];
+                var values = [
+                    info.dq,
+                    info.dpu,
+                    info.options,
+                    info.func,
+                    info.numTx,
+                    info.numRx,
+                    info.romH,
+                    info.romL,
+                    info.pathH,
+                    info.pathL
+                ];
+                console.log('romH', info.romH, 'romL', info.romL);
+
+                // perform IO
+                d.writeMany(addresses, values)
+                    .then(function (data) {
+                        resolve();
+                    }, function (err) {
+                        console.log('Error on config', err);
+                        reject();
+                    });
             });
-            return ioDeferred.promise;
         };
     };
     var oneWireGo = function() {
-        var ioDeferred = q.defer();
-        d.qWrite('ONEWIRE_GO',1)
-        .then(ioDeferred.resolve,ioDeferred.reject);
-        return ioDeferred.promise;
+        return d.qWrite('ONEWIRE_GO',1);
     };
     var getWriteDataFunc = function(info) {
         return function() {
-            var ioDeferred = q.defer();
-            if(info.numTx > 0) {
-                d.qWriteArray('ONEWIRE_DATA_TX',info.dataTx)
-                .then(ioDeferred.resolve,ioDeferred.reject);
+            if (info.numTx > 0) {
+                return d.qWriteArray('ONEWIRE_DATA_TX', info.dataTx);
             } else {
-                ioDeferred.resolve();
+                return Promise.resolve();
             }
-            return ioDeferred.promise;
         };
     };
     var readInfoFunc = function() {
-        var ioDeferred = q.defer();
-        var addresses = [
-            'ONEWIRE_ROM_BRANCHS_FOUND_H',
-            'ONEWIRE_ROM_BRANCHS_FOUND_L',
-            'ONEWIRE_SEARCH_RESULT_H',
-            'ONEWIRE_SEARCH_RESULT_L'
-        ];
-        d.readMany(addresses)
-        .then(
-            function(data){
-                ioDeferred.resolve(data);
-            },
-            function(err){
-                console.log('Error',err);
-                ioDeferred.reject();
-            }
-        );
-        return ioDeferred.promise;
+        return new Promise((resolve, reject) => {
+            var addresses = [
+                'ONEWIRE_ROM_BRANCHS_FOUND_H',
+                'ONEWIRE_ROM_BRANCHS_FOUND_L',
+                'ONEWIRE_SEARCH_RESULT_H',
+                'ONEWIRE_SEARCH_RESULT_L'
+            ];
+            d.readMany(addresses)
+                .then(
+                    function (data) {
+                        resolve(data);
+                    },
+                    function (err) {
+                        console.log('Error', err);
+                        reject();
+                    }
+                );
+        });
     };
 
     var configFunc = configOneWire(oneWireConfig);
@@ -1700,15 +1696,13 @@ var readRomId = function(d, eioNum) {
     var writeHighResProbeDataFunc = getWriteDataFunc(highResProbeConfig);
 
     var dispErrors = function(err) {
-        var errDeferred = q.defer();
         console.log('Error in 1-wire config',err);
         if(typeof(err) === 'number') {
             console.log(device_controller.ljm_driver.errToStrSync(err));
         } else {
             console.log('Typeof Err',typeof(err));
         }
-        errDeferred.reject();
-        return errDeferred.promise;
+        return Promise.reject();
     };
     configFunc()
     .then(writeDataFunc,dispErrors)
@@ -1716,7 +1710,6 @@ var readRomId = function(d, eioNum) {
     .then(readInfoFunc,dispErrors)
     .then(
         function(data) {
-            var ioDeferred = q.defer();
             console.log('Success!',data);
             var ramId = []
             ramId[0] = dec2hex((data[2]>>16)&0xFFFF);
@@ -1726,23 +1719,20 @@ var readRomId = function(d, eioNum) {
             highResProbeConfig.romH = data[2];
             highResProbeConfig.romL = data[3];
             console.log('Ram Id:',ramId);
-            ioDeferred.resolve();
-            return ioDeferred.promise;
+            return Promise.resolve();
         },
         function(err) {
-            var ioDeferred = q.defer();
             if(typeof(err) === 'number') {
                 console.log(device_controller.ljm_driver.errToStrSync(err));
             } else {
                 console.log('Typeof Err',typeof(err));
             }
             console.log('Failed',err);
-            ioDeferred.resolve();
-            return ioDeferred.promise;
+            return Promise.resolve();
         }
     )
     .then(configHighResProbeFunc,dispErrors)
     .then(writeHighResProbeDataFunc,dispErrors)
-    .then(oneWireGo,dispErrors)
+    .then(oneWireGo,dispErrors);
 };
 

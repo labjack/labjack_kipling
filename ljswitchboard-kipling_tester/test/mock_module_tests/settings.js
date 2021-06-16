@@ -1,55 +1,24 @@
-var assert = require('chai').assert;
+'use strict';
 
-// Generic Application Objects
-var package_loader;
-var gns;
-var gui;
-var window_manager;
+const package_loader = global.package_loader;
+const window_manager = package_loader.getPackage('window_manager');
 
 // Window Objects
-var testerWin;
-var kiplingWin;
+const kiplingWin;
 
 // Kipling Application Objects
-var kiplingWindow;
-var $;
-var MODULE_LOADER;
-var MODULE_CHROME;
-var io_manager;
-var io_interface;
-var deviceController;
+const kiplingWindow;
+const MODULE_LOADER;
 
-
-var mockDevices;
-try {
-	mockDevices = require('./mock_devices').mockDevices;
-} catch(err) {
-	mockDevices = [];
-}
-
-var deviceScannerConfigData = [];
-var excludeKeys = ['deviceConfig'];
-mockDevices.forEach(function(mockDevice) {
-	var deviceData = {};
-	var keys = Object.keys(mockDevice);
-	keys.forEach(function(key) {
-		if(excludeKeys.indexOf(key) < 0) {
-			deviceData[key] = mockDevice[key];
-		}
-	});
-	deviceScannerConfigData.push(deviceData);
-});
-
-var configureMockDevice = function(deviceIndex) {
-	var defered = q.defer();
-	var deviceData = {};
+const configureMockDevice = function(deviceIndex) {
+	const deviceData = {};
 	if(mockDevices[deviceIndex]) {
 		deviceData = mockDevices[deviceIndex];
 	}
-	var filters = {};
-	var filterKeys = ['serialNumber', 'deviceType', 'connectionType'];
-	var deviceConfig = {};
-	var keys = Object.keys(deviceData);
+	const filters = {};
+	const filterKeys = ['serialNumber', 'deviceType', 'connectionType'];
+	const deviceConfig = {};
+	const keys = Object.keys(deviceData);
 	keys.forEach(function(key) {
 		if(filterKeys.indexOf(key) >= 0) {
 			filters[key] = deviceData[key];
@@ -58,31 +27,16 @@ var configureMockDevice = function(deviceIndex) {
 			deviceConfig = deviceData.deviceConfig;
 		}
 	});
-	return defered.promise;
 };
 
 describe('test_device_info', function() {
 	it('initialize test', function (done) {
-		package_loader = global.require('ljswitchboard-package_loader');
-		gns = package_loader.getNameSpace();
-		gui = global[gns].gui;
-		window_manager = global.require('ljswitchboard-window_manager');
-
-		var managedTesterWindow = window_manager.windowManager.managedWindows.kipling_tester;
-		testerWin = managedTesterWindow.win;
-
-		var managedKiplingWindow = window_manager.windowManager.managedWindows.kipling;
+		const managedKiplingWindow = window_manager.windowManager.managedWindows.kipling;
 		kiplingWin = managedKiplingWindow.win;
 
 		kiplingWindow = kiplingWin.window;
-		$ = kiplingWindow.$;
 		MODULE_LOADER = kiplingWindow.MODULE_LOADER;
-		MODULE_CHROME = kiplingWindow.MODULE_CHROME;
 
-
-		io_manager = global.require('ljswitchboard-io_manager');
-		io_interface = io_manager.io_interface();
-		deviceController = io_interface.getDeviceController();
 		done();
 	});
 	it('reload device selector', function (done) {
@@ -90,7 +44,7 @@ describe('test_device_info', function() {
 			done();
 		});
 
-		var settingsTab = $('#settings-tab');
+		const settingsTab = $('#settings-tab');
 		settingsTab.trigger('click');
 		// MODULE_LOADER.loadModuleByName('device_selector')
 		// .then(function(res) {
@@ -107,8 +61,8 @@ describe('test_device_info', function() {
 	// 		});
 
 	// 	// Connect to the first found USB-T7
-	// 	var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_USB');
-	// 	var t7 = t7s.first();
+	// 	const t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_USB');
+	// 	const t7 = t7s.first();
 	// 	t7.trigger('click');
 	// },
 	// 'connect to T7 (Ethernet)': function(test) {
@@ -120,8 +74,8 @@ describe('test_device_info', function() {
 	// 		});
 
 	// 	// Connect to the second found Ethernet-T7
-	// 	var t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_Ethernet');
-	// 	var t7 = t7s.eq(1);
+	// 	const t7s = $('.DEVICE_TYPE_T7 .CONNECTION_TYPE_Ethernet');
+	// 	const t7 = t7s.eq(1);
 	// 	t7.trigger('click');
 	// },
 	// 'connect to Digit (USB)': function(test) {
@@ -133,17 +87,16 @@ describe('test_device_info', function() {
 	// 		});
 
 	// 	// Connect to the first found USB-Digit
-	// 	var t7s = $('.DEVICE_TYPE_Digit .CONNECTION_TYPE_USB');
-	// 	var t7 = t7s.first();
+	// 	const t7s = $('.DEVICE_TYPE_Digit .CONNECTION_TYPE_USB');
+	// 	const t7 = t7s.first();
 	// 	t7.trigger('click');
 	// },
 	// 'load device info': function(test) {
-	// 	kiplingWin.showDevTools();
 
 	// 	MODULE_LOADER.once('MODULE_READY', function(res) {
 	// 		done();
 	// 	});
-	// 	var deviceInfoTab = $('#device_info_fw-tab');
+	// 	const deviceInfoTab = $('#device_info_fw-tab');
 	// 	deviceInfoTab.trigger('click');
 	// 	// MODULE_LOADER.loadModuleByName('device_info_fw')
 	// 	// .then(function(res) {
@@ -160,8 +113,8 @@ describe('test_device_info', function() {
 	// 		});
 
 	// 	// Connect to the first found USB-T7
-	// 	var t7s = $('.DEVICE_TYPE_T7 .disconnect-button');
-	// 	var t7 = t7s.first();
+	// 	const t7s = $('.DEVICE_TYPE_T7 .disconnect-button');
+	// 	const t7 = t7s.first();
 	// 	t7.trigger('click');
 	// },
 });

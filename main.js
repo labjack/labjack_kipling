@@ -90,6 +90,4 @@ var processCli = function(yargs) {
         .argv;
 };
 
-if (typeof require != 'undefined' && require.main==module) {
-    var res = processCli(require('yargs'));
-}
+var res = processCli(require('yargs'));

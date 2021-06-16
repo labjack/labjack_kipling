@@ -2,7 +2,7 @@
  * Goals for the Lua Script Debugger module.
  * This is a Lua script intro-app that performs a minimal number of scripting
  * operations.  It is simply capable of detecting whether or not a Lua script
- * is running and then prints out the debugging log to the window.  
+ * is running and then prints out the debugging log to the window.
  *
  * @author Chris Johnson (LabJack Corp, 2014)
  *
@@ -14,7 +14,7 @@
  *     2. Read from "LUA_DEBUG_NUM_BYTES" register to determine how much data is
  *         available in the debugging info buffer.
  *     3. If there is data available in the debugging buffer then get it from
- *         the device. 
+ *         the device.
 **/
 
 // Constant that determines device polling rate.  Use an increased rate to aid
@@ -23,6 +23,8 @@ var MODULE_UPDATE_PERIOD_MS = 250;
 
 // Constant that can be set to disable auto-linking the module to the framework
 var DISABLE_AUTOMATIC_FRAMEWORK_LINKAGE = false;
+
+const sprintf = require('sprintf-js').sprintf;
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -34,10 +36,10 @@ function module() {
     this.moduleContext = {};
     this.activeDevice = undefined;
 
-    this.currentValues = dict();
-    this.bufferedValues = dict();
-    this.newBufferedValues = dict();
-    this.bufferedOutputValues = dict();
+    this.currentValues = new Map();
+    this.bufferedValues = new Map();
+    this.newBufferedValues = new Map();
+    this.bufferedOutputValues = new Map();
 
 
     this.hasChanges = false;
@@ -49,7 +51,7 @@ function module() {
     this.spinnerController = undefined;
     this.updateDOM = true;
 
-    
+
 
     /**
      * Function is called once every time the module tab is selected, loads the module.
@@ -83,10 +85,10 @@ function module() {
                 self.bufferedOutputValues.forEach(function(newVal,address){
                     self.writeReg(address,newVal);
                 });
-                self.bufferedOutputValues = dict();
+                self.bufferedOutputValues = new Map();
                 self.hasChanges = false;
             }else if(self.bufferedOutputValues.size > 0) {
-                self.bufferedOutputValues = dict();
+                self.bufferedOutputValues = new Map();
             }
             onSuccess();
         };
@@ -120,20 +122,16 @@ function module() {
         onSuccess();
     };
     this.writeReg = function(reg, val) {
-        var ioDeferred = q.defer();
-        self.activeDevice.qWrite(reg,val)
-        .then(function() {
-            self.currentValues.set(reg,val);
-            ioDeferred.resolve();
-        }, function(err) {
-            onsole.error('AnalogOutputs-writeReg',address,err);
-            ioDeferred.reject(err);
-        });
-        return ioDeferred.promise;
+        return self.activeDevice.qWrite(reg,val)
+            .then(function() {
+                self.currentValues.set(reg,val);
+            }, function(err) {
+                console.error('AnalogOutputs-writeReg',address,err);
+            });
     };
-    
+
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -177,7 +175,7 @@ function module() {
     };
 
     this.formatVoltageTooltip = function(value) {
-        return sprintf.sprintf("%.2f V", value);
+        return sprintf("%.2f V", value);
     };
     this.updateSpinnerVal = function(reg, val) {
         var spinner = $('#' + reg + '_input_spinner');
@@ -193,7 +191,7 @@ function module() {
         $('#' + reg + '_input_slider').slider('setValue', updateNum);
     };
     /**
-     * Function to handle definitive spinner-write events.  
+     * Function to handle definitive spinner-write events.
      *     The DAC channel SHOULD be updated
      * @param  {string} reg Device register to be written
      * @param  {number} val Value to be written to device register.
@@ -244,7 +242,7 @@ function module() {
         self.updateSpinnerVal(register, selectedVoltage);
         self.updateSliderVal(register, selectedVoltage);
     };
-    
+
     /**
      * Create the DAC / analog output controls.
     **/
@@ -275,20 +273,11 @@ function module() {
             var val = self.currentValues.get(register.register);
             self.writeDisplayedVoltage(register.register,val);
         });
-        
-        onSuccess();
-    };
-    this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRegisterWritten = function(framework, registerName, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefresh = function(framework, registerNames, onError, onSuccess) {
+
         onSuccess();
     };
     this.onRefreshed = function(framework, results, onError, onSuccess) {
-        // Loop through the new buffered values, save them, and display their 
+        // Loop through the new buffered values, save them, and display their
         // changes
         self.newBufferedValues.forEach(function(value,key){
             if(self.updateDOM) {
@@ -297,12 +286,6 @@ function module() {
             self.currentValues.set(key,value);
             self.newBufferedValues.delete(key);
         });
-        onSuccess();
-    };
-    this.onCloseDevice = function(framework, device, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onUnloadModule = function(framework, onError, onSuccess) {
         onSuccess();
     };
     this.onLoadError = function(framework, description, onHandle) {

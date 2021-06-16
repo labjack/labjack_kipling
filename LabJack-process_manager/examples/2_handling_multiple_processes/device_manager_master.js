@@ -1,12 +1,7 @@
-var dict = require('dict');
 var q = require('q');
-var async = require('async');
 
 var process_manager = require('LabJack-process_manager');
 var managedProcess;
-
-
-
 
 // function createNewDeviceManager() {
 //     var self = this;

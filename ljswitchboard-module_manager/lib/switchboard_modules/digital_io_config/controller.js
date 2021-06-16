@@ -4,12 +4,10 @@
  * @author A. Samuel Pottinger (LabJack Corp, 2013)
 **/
 
-var async = require('async');
-var dict = require('dict');
-var handlebars = require('handlebars');
-var q = require('q');
+const async = require('async');
 
-var fs_facade = require('./fs_facade');
+const package_loader = global.package_loader;
+const fs_facade = package_loader.getPackage('fs_facade');
 
 var IO_CONFIG_PANE_SELECTOR = '#io-config-pane';
 
@@ -18,17 +16,6 @@ var INDIVIDUAL_TEMPLATE_SRC = 'digital_io_config/individual_device_config.html';
 var MULTIPLE_TEMPLATE_SRC = 'digital_io_config/multiple_device_config.html';
 var LOADING_IMAGE_SRC = 'static/img/progress-indeterminate-ring-light.gif';
 var REFRESH_DELAY = 1000;
-
-var DEVICE_SELECT_ID_TEMPLATE_STR = '#{{serial}}-selector';
-var DISPLAY_SELECT_ID_TEMPLATE_STR = '#{{deviceType}}-{{serial}}-{{register}}';
-var OUTPUT_SWITCH_TEMPLATE_STR = '#{{register}}-output-switch';
-
-var DEVICE_SELECT_ID_TEMPLATE = handlebars.compile(
-    DEVICE_SELECT_ID_TEMPLATE_STR);
-var DISPLAY_SELECT_ID_TEMPLATE = handlebars.compile(
-    DISPLAY_SELECT_ID_TEMPLATE_STR);
-var OUTPUT_SWITCH_TEMPLATE = handlebars.compile(
-    OUTPUT_SWITCH_TEMPLATE_STR);
 
 var targetedDevices = [];
 
@@ -122,58 +109,51 @@ function renderManyDeviceControls(registers, devices, onSuccess)
  * Read the state of the digital (FIO) lines configured as input on the selected
  * devices. This function will update the view in the process.
  *
- * @return {q.promise} Promise that resolves after the read is complete.
+ * @return {Promise} Promise that resolves after the read is complete.
  *      Rejects on error and resolves to nothing.
 **/
 function readInputs ()
 {
-    var deferred = q.defer();
-    async.each(
-        targetedDevices,
-        function (device, callback) {
-            var regs = $('.direction-switch-check:not(:checked)').map(
-                function () { 
-                    return parseInt(this.id.replace('-switch', ''));
-                }
-            ).get();
-            var promise = device.readMany(regs, callback);
-            promise.then(
-                function (results) {
-                    var numRegs = regs.length;
-                    for (var i=0; i<numRegs; i++) {
-                        var value = results[i];
-                        var reg = regs[i];
-                        var targetID = DISPLAY_SELECT_ID_TEMPLATE(
-                            {
-                                'deviceType': device.getDeviceType(),
-                                'serial': device.getSerial(),
-                                'register': reg
-                            }
-                        );
-
-                        $(targetID).removeClass('inactive');
-                        $(targetID).removeClass('active');
-                        if (Math.abs(value - 1) < 0.1) {
-                            $(targetID).addClass('active');
-                        } else {
-                            $(targetID).addClass('inactive');
-                        }
+    return new Promise((resolve, reject) => {
+        async.each(
+            targetedDevices,
+            function (device, callback) {
+                var regs = $('.direction-switch-check:not(:checked)').map(
+                    function () {
+                        return parseInt(this.id.replace('-switch', ''));
                     }
-                    callback();
-                },
-                callback
-            );
-        },
-        function (err) {
-            if (err) {
-                deferred.reject(err);
-            } else {
-                deferred.resolve();
-            } 
-        }
-    );
+                ).get();
+                var promise = device.readMany(regs, callback);
+                promise.then(
+                    function (results) {
+                        var numRegs = regs.length;
+                        for (var i = 0; i < numRegs; i++) {
+                            var value = results[i];
+                            var reg = regs[i];
+                            const targetID = '#' + device.getDeviceType() + '-' + device.getSerial() + '-' + reg;
 
-    return deferred.promise;
+                            $(targetID).removeClass('inactive');
+                            $(targetID).removeClass('active');
+                            if (Math.abs(value - 1) < 0.1) {
+                                $(targetID).addClass('active');
+                            } else {
+                                $(targetID).addClass('inactive');
+                            }
+                        }
+                        callback();
+                    },
+                    callback
+                );
+            },
+            function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            }
+        );
+    });
 }
 
 
@@ -184,51 +164,48 @@ function readInputs ()
  * Sets of all of the digital (FIO) lines to the user selected state on all of
  * the currently selected devices.
  *
- * @return {q.promise} Promise that resolves (to nothing) after the device
+ * @return {Promise} Promise that resolves (to nothing) after the device
  *      write operations complete. Rejects on error.
 **/
 function writeOutputs ()
 {
-    var deferred = q.defer();
-    async.each(
-        targetedDevices,
-        function (device, callback) {
-            var regs = $('.direction-switch-check:checked').map(
-                function () { 
-                    return parseInt(this.id.replace('-switch', ''));
+    return new Promise((resolve, reject) => {
+        async.each(
+            targetedDevices,
+            function (device, callback) {
+                var regs = $('.direction-switch-check:checked').map(
+                    function () {
+                        return parseInt(this.id.replace('-switch', ''));
+                    }
+                ).get();
+                var numRegs = regs.length;
+                var addresses = [];
+                var values = [];
+                for (var i = 0; i < numRegs; i++) {
+                    var reg = regs[i];
+                    const targetID = '#' + reg + '-output-switch';
+                    if ($(targetID).is(":checked"))
+                        values.push(1);
+                    else
+                        values.push(0);
+                    addresses.push(reg);
                 }
-            ).get();
-            var numRegs = regs.length;
-            var addresses = [];
-            var values = [];
-            for (var i=0; i<numRegs; i++) {
-                var reg = regs[i];
-                var targetID = OUTPUT_SWITCH_TEMPLATE(
-                    {'register': reg}
-                );
-                if($(targetID).is(":checked"))
-                    values.push(1);
-                else
-                    values.push(0);
-                addresses.push(reg);
+                if (addresses.length == 0) {
+                    resolve();
+                } else {
+                    var promise = device.writeMany(addresses, values);
+                    promise.then(callback, callback);
+                }
+            },
+            function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
             }
-            if (addresses.length == 0) {
-                deferred.resolve();
-            } else {
-                var promise = device.writeMany(addresses, values);
-                promise.then(callback, callback);
-            }
-        },
-        function (err) {
-            if (err) {
-                deferred.reject(err);
-            } else {
-                deferred.resolve();
-            } 
-        }
-    );
-
-    return deferred.promise;
+        );
+    });
 }
 
 
@@ -274,7 +251,7 @@ function changeFIODir (event)
     var targetID = selectedSwitch.replace('-switch', '');
     var targetIndicators = '.state-indicator-' + targetID;
     var targetOutputSwitch = '#' + targetID + '-output-switch';
-    
+
     if ($(event.target).is(":checked")) {
         $(targetIndicators).slideUp(function () {
             $(targetOutputSwitch).parent().parent().slideDown();
@@ -319,7 +296,7 @@ function changeActiveDevices(registers)
             $('.direction-switch-check').change(changeFIODir);
             $('.output-switch-check').parent().parent().hide();
         };
-        
+
         if(devices.length == 1)
         {
             renderIndividualDeviceControls(registers, devices[0], onRender);
@@ -338,10 +315,8 @@ function changeActiveDevices(registers)
 $('#digital-io-configuration').ready(function(){
     var keeper = device_controller.getDeviceKeeper();
     var devices = keeper.getDevices();
-    var currentDeviceSelector = DEVICE_SELECT_ID_TEMPLATE(
-        {'serial': devices[0].getSerial()}
-    );
-    
+    const currentDeviceSelector = '#' + devices[0].getSerial() + '-selector';
+
     $(currentDeviceSelector).attr('checked', true);
 
     $(IO_CONFIG_PANE_SELECTOR).empty().append(
@@ -353,7 +328,7 @@ $('#digital-io-configuration').ready(function(){
         renderIndividualDeviceControls(
             registerData,
             devices[0],
-            function () { 
+            function () {
                 $('.direction-switch-check').change(changeFIODir);
                 $('.output-switch-check').parent().parent().hide();
             }

@@ -1,3 +1,5 @@
+'use strict';
+
 /*!
  * Nodeunit
  * Copyright (c) 2010 Caolan McMahon
@@ -8,28 +10,29 @@
  * Module dependencies
  */
 
-process.browser = 1; // Hack for old nw.js
-var Mocha = require('mocha');
-delete process.browser;
-var path = require('path');
-var AssertionError = require('assert').AssertionError;
+// process.browser = 1; // Hack for old nw.js
+const path = require('path');
+const Mocha = require('mocha');
+const util = require('util');
+const AssertionError = require('assert').AssertionError;
+const crypto = require('crypto');
 
-var betterErrors = function (assertion) {
-    return assertion;
+const betterErrors = function (assertion) {
+    // return assertion;
     if (!assertion.error) {
         return assertion;
     }
-    var e = assertion.error;
+    const e = assertion.error;
 
     if (typeof e.actual !== 'undefined' && typeof e.expected !== 'undefined') {
-        var actual = util.inspect(e.actual, false, 10).replace(/\n$/, '');
-        var expected = util.inspect(e.expected, false, 10).replace(/\n$/, '');
+        const actual = util.inspect(e.actual, false, 10).replace(/\n$/, '');
+        const expected = util.inspect(e.expected, false, 10).replace(/\n$/, '');
 
-        var multiline = (
+        const multiline = (
             actual.indexOf('\n') !== -1 ||
             expected.indexOf('\n') !== -1
         );
-        var spacing = (multiline ? '\n' : ' ');
+        const spacing = (multiline ? '\n' : ' ');
         e._message = e.message;
         e.stack = (
             e.name + ':' + spacing +
@@ -48,101 +51,77 @@ var betterErrors = function (assertion) {
 
 exports.info = "Report tests result as HTML";
 
-/**
- * Run all tests within each module, reporting the results to the command-line.
- *
- * @param {Array} files
- * @api public
- */
+class MyReporter extends Mocha.reporters.Base {
 
-var savedText = '';
-var tempText = '';
-var setTempText = function(str) {
-    tempText = str;
-};
-var appendText = function(str) {
-    savedText += str;
-};
-exports.getSavedText = function() {
-    return savedText + tempText;
-};
-exports.run = function (files, options, update, callback) {
-    savedText = '';
+    constructor(runner, opts) {
+        super(runner);
 
-    var start = new Date().getTime();
-    var paths = files.map(function (p) {
-        return path.resolve(p);
-    });
+        // console.log('opts', opts);
+        const {recorder} = opts.reporterOptions;
+        const callback = null;
 
-    // appendText('<html>');
-    // appendText('<head>');
-    // appendText('<title></title>');
-    // appendText('<style type="text/css">');
-    // appendText('body { font: 12px Helvetica Neue }');
-    // appendText('h2 { margin:0 ; padding:0 }');
-    // appendText('pre { font: 11px Andale Mono; margin-left: 1em; padding-left: 1em; margin-top:0; font-size:smaller;}');
-    // appendText('.assertion_message { margin-left: 1em; }');
-    // appendText('  ol {' +
-    // '	list-style: none;' +
-    // '	margin-left: 1em;' +
-    // '	padding-left: 1em;' +
-    // '	text-indent: -1em;' +
-    // '}');
-    // appendText('  ol li.pass:before { content: "\\2714 \\0020"; }');
-    // appendText('  ol li.fail:before { content: "\\2716 \\0020"; }');
-    // appendText('</style>');
-    // appendText('</head>');
-    // appendText('<body>');
+        const start = new Date().getTime();
 
-    appendText('<div id="mocha">');
-    appendText('<ul class="mocha-report">');
-
-    var mocha = new Mocha();
-
-    paths.forEach(function (path) {
-        mocha.addFile(path);
-    });
-
-    function MyReporter(runner) {
-        Mocha.reporters.Base.call(this, runner);
-        var passes = 0;
-        var failures = 0;
+        let passes = 0;
+        let failures = 0;
 
         runner.on('suite', function(suite) {
-            appendText('<li class="suite">');
-            appendText('<h1>' + suite.title + '</h1>');
-            appendText('<ul>');
+            console.log('Suite start', suite.title);
+
+            suite.ctx.reporterOptions = opts.reporterOptions;
+
+            recorder.addSuite({
+                suiteName: suite.title
+            });
         });
-        runner.on('suite end', function() {
-            appendText('</ul>');
-            appendText('</li>');
+        runner.on('suite end', function(suite) {
+            console.log('Suite end', suite.title);
         });
 
         runner.on('test', function(test) {
-            var indeterminateTxt = '<div class="progress progress-indeterminate"><div class="bar"></div></div>';
-            setTempText('<li class="active">' + test.title + indeterminateTxt + '</li>');
-            if(update) {
-                update();
-            }
+            console.log('Add test', test.file, test.title);
+
+            recorder.addTest({
+                suiteName: test.parent.title,
+                testFile: test.file,
+                title: test.title,
+            });
         });
 
         runner.on('pass', function(test) {
+            // console.log('mr3 pass', Object.keys(test.parent), test.parent.title);
+            console.log('Test pass', test.file, test.title, test.duration);
+
+            recorder.setProgress({
+                suiteName: test.parent.title,
+                testFile: test.file,
+                title: test.title,
+                duration: test.duration,
+                timedOut: test.timedOut,
+                passed: true
+            });
             passes++;
-            setTempText('');
-            appendText('<li class="test pass"><h2>' + test.fullTitle() + '</h2></li>');
-            if(update) {
-                update();
-            }
         });
 
         runner.on('fail', function(test, err) {
+            console.log('Test fail', test.file, test.title, test.duration, test.timedOut);
+
+            recorder.setProgress({
+                suiteName: test.parent.title,
+                testFile: test.file,
+                title: test.title,
+                duration: test.duration,
+                timedOut: test.timedOut,
+                err: test.err,
+                passed: false
+            });
             failures++;
-            setTempText('');
-                appendText('<li class="test fail"><h2>' + test.fullTitle() + '</h2>');
-            /*assertions.forEach(function (a) {
+/*
+            recorder.appendText('<li class="test fail"><h2>' + test.fullTitle() + '</h2>');
+            /!*assertions.forEach(function (a) {
                 if (a.failed()) {
                     a = betterErrors(a);
-                    // if(a.message) {
+                    // if (a.message) {
                     //     appendText('<br>' + a.message)
                     // }
                     if (a.error instanceof AssertionError && a.message) {
@@ -155,60 +134,90 @@ exports.run = function (files, options, update, callback) {
                     appendText(a.error.stack);
                     appendText('</pre>');
                 }
-            });*/
+            });*!/
 
-            appendText('<pre>');
-            appendText('Message: ' + err.message + '\r\n');
-            appendText(err.stack);
-            appendText('</pre>');
-
-            appendText('</li>');
-
-            if(update) {
-                update();
-            }
+*/
         });
 
         runner.on('end', function() {
-            var end = new Date().getTime();
-            var duration = end - start;
-/*
-            if (assertions.failures()) {
-                appendText(
-                    '<h3>FAILURES: '  + assertions.failures() +
-                    '/' + assertions.length + ' assertions failed (' +
-                    assertions.duration + 'ms)</h3>'
-                );
-            }
-            else {
-                appendText(
-                    '<h3>OK: ' + assertions.length +
-                    ' assertions (' + assertions.duration + 'ms)</h3>'
-                );
-            }
-*/
-            appendText('</ul>');
-            appendText('</div>');
-            // appendText('</body>');
-            // appendText('</html>');
-            if(update) {
-                update();
-            }
-            if (callback) callback(failures > 0 ? new Error('We have got test failures.') : undefined);
-            // if (callback) callback(assertions.failures() ? new Error('We have got test failures.') : undefined);
+            console.log('mr5 end');
+            const end = new Date().getTime();
+            const duration = end - start;
+            /*
+                        if (assertions.failures()) {
+                            appendText(
+                                '<h3>FAILURES: '  + assertions.failures() +
+                                '/' + assertions.length + ' assertions failed (' +
+                                assertions.duration + 'ms)</h3>'
+                            );
+                        }
+                        else {
+                            appendText(
+                                '<h3>OK: ' + assertions.length +
+                                ' assertions (' + assertions.duration + 'ms)</h3>'
+                            );
+                        }
+            */
+        });
+    }
+}
+
+class NodeUnitRecorder {
+    constructor(testerWindow) {
+        this.testerWindow = testerWindow;
+        this.savedText = '';
+        this.tempText = '';
+    }
+
+    clearReport() {
+        this.testerWindow.webContents.postMessage('postMessage', {
+            'channel': 'clearReport',
+            'payload': ''
         });
     }
 
-    mocha.reporter(MyReporter);
+    addSuite(opts) {
+        const suiteHash = crypto.createHash('md5');
+        const suiteId = suiteHash.update(opts.suiteName).digest('hex');
 
-    mocha.run(paths, {
-        testspec: options.testspec,
-        testFullSpec: options.testFullSpec,
-        testStart: function(name) {
+        this.testerWindow.webContents.postMessage('postMessage', {
+            'channel': 'addSuite',
+            'payload': Object.assign({}, opts, {
+                suiteId
+            })
+        });
+    }
 
-        },
-        testDone: function (name, assertions) {
-        }
-    });
+    addTest(opts) {
+        const hash = crypto.createHash('md5');
+        const data = hash.update(opts.testFile + opts.title);
+        const testId = data.digest('hex');
+        const suiteHash = crypto.createHash('md5');
+        const suiteId = suiteHash.update(opts.suiteName).digest('hex');
 
-};
+        this.testerWindow.webContents.postMessage('postMessage', {
+            'channel': 'addTest',
+            'payload': Object.assign({}, opts, {
+                testId, suiteId
+            })
+        });
+    }
+
+    setProgress(opts) {
+        const hash = crypto.createHash('md5');
+        const data = hash.update(opts.testFile + opts.title);
+        const testId = data.digest('hex');
+        const suiteHash = crypto.createHash('md5');
+        const suiteId = suiteHash.update(opts.suiteName).digest('hex');
+
+        this.testerWindow.webContents.postMessage('postMessage', {
+            'channel': 'setProgress',
+            'payload': Object.assign({}, opts, {
+                testId, suiteId
+            })
+        });
+    }
+}
+
+exports.MyReporter = MyReporter;
+exports.NodeUnitRecorder = NodeUnitRecorder;

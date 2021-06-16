@@ -1,6 +1,7 @@
 var assert = require('chai').assert;
 
-var package_loader = require('../lib/ljswitchboard-package_loader');
+const PackageLoader = require('../lib/ljswitchboard-package_loader').PackageLoader;
+const package_loader = new PackageLoader();
 
 var capturedEvents = [];
 
@@ -38,6 +39,7 @@ var currentTestStartTime;
 describe('multiple package', function() {
 	beforeEach(function (done) {
 		currentTestStartTime = new Date();
+		package_loader.reset();
 		done();
 	});
 	afterEach(function (done) {
@@ -62,7 +64,7 @@ describe('multiple package', function() {
 		done();
 	});
 
-	it('Initialize directory with two dependent packages', function (done) {
+	it('Initialize directory with two dependent packages', async function () {
 		// Erase the current data
 		cleanExtractionPath(directory);
 
@@ -70,60 +72,54 @@ describe('multiple package', function() {
 		capturedEvents = [];
 
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFiles);
+		await package_loader.loadPackage(testPackages.staticFiles);
 
 		// Also add the core package to the packageManager
-		package_loader.loadPackage(testPackages.core);
+		await package_loader.loadPackage(testPackages.core);
 
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-			];
-			var singleProcessEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UNINITIALIZED_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-			];
-			singleProcessEvents.forEach(function(singleEvent) {
-				requiredEvents.push(singleEvent);
-			});
-			singleProcessEvents.forEach(function(singleEvent) {
-				requiredEvents.push(singleEvent);
-			});
-
-			// Test first package being extracted properly
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'initialize',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
-
-			// Test second package being extracted properly
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'initialize',
-				'directory',
-				requiredEvents,
-				capturedEvents,
-				1
-			);
-			done();
-		}, function(err) {
-			assert.isOk(false, 'failed to run the packageManager');
-			done();
+		const updatedPackages = await package_loader.runPackageManager();
+		// Define the required event list
+		var requiredEvents = [
+		];
+		var singleProcessEvents = [
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.DETECTED_UNINITIALIZED_PACKAGE,
+			eventList.STARTING_EXTRACTION,
+			eventList.STARTING_DIRECTORY_EXTRACTION,
+			eventList.FINISHED_EXTRACTION,
+			eventList.FINISHED_DIRECTORY_EXTRACTION,
+			eventList.LOADED_PACKAGE,
+		];
+		singleProcessEvents.forEach(function(singleEvent) {
+			requiredEvents.push(singleEvent);
 		});
+		singleProcessEvents.forEach(function(singleEvent) {
+			requiredEvents.push(singleEvent);
+		});
+
+		// Test first package being extracted properly
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'initialize',
+			'directory',
+			requiredEvents,
+			capturedEvents
+		);
+
+		// Test second package being extracted properly
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'initialize',
+			'directory',
+			requiredEvents,
+			capturedEvents,
+			1
+		);
 	});
-	it('Initialize directory with two dependent packages, 2nd fails', function (done) {
+	it('Initialize directory with two dependent packages, 2nd fails', async function () {
 		// Erase the current data
 		cleanExtractionPath(directory);
 
@@ -131,57 +127,51 @@ describe('multiple package', function() {
 		capturedEvents = [];
 
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFiles);
+		await package_loader.loadPackage(testPackages.staticFiles);
 
 		// Also add the core package to the packageManager
-		package_loader.loadPackage(testPackages.invalidCore);
+		await package_loader.loadPackage(testPackages.invalidCore);
 
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UNINITIALIZED_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_DIRECTORY_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_DIRECTORY_EXTRACTION,
-				eventList.LOADED_PACKAGE,
+		const updatedPackages = await package_loader.runPackageManager();
+		// Define the required event list
+		var requiredEvents = [
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.DETECTED_UNINITIALIZED_PACKAGE,
+			eventList.STARTING_EXTRACTION,
+			eventList.STARTING_DIRECTORY_EXTRACTION,
+			eventList.FINISHED_EXTRACTION,
+			eventList.FINISHED_DIRECTORY_EXTRACTION,
+			eventList.LOADED_PACKAGE,
 
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.NO_VALID_UPGRADE_DETECTED,
-				eventList.SKIPPING_PACKAGE_RESET,
-				eventList.SKIPPING_PACKAGE_UPGRADE,
-				eventList.FAILED_TO_LOAD_MANAGED_PACKAGE,
-			];
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.NO_VALID_UPGRADE_DETECTED,
+			eventList.SKIPPING_PACKAGE_RESET,
+			eventList.SKIPPING_PACKAGE_UPGRADE,
+			eventList.FAILED_TO_LOAD_MANAGED_PACKAGE,
+		];
 
-			// Test first package being extracted properly
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'initialize',
-				'directory',
-				requiredEvents,
-				capturedEvents
-			);
+		// Test first package being extracted properly
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'initialize',
+			'directory',
+			requiredEvents,
+			capturedEvents
+		);
 
-			// Test second package being extracted properly
-			// console.log(updatedPackages['ljswitchboard-core']);
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'upgradeFailed',
-				'directory',
-				requiredEvents,
-				capturedEvents,
-				1
-			);
-			done();
-		}, function(err) {
-			assert.isOk(false, 'failed to run the packageManager');
-			done();
-		});
+		// Test second package being extracted properly
+		// console.log(updatedPackages['ljswitchboard-core']);
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'upgradeFailed',
+			'directory',
+			requiredEvents,
+			capturedEvents,
+			1
+		);
 	});
 
 	// Make tests where multiple packages are managed and one depends on a version

@@ -39,7 +39,6 @@ deviceScannerEventKeys.forEach(function(key) {
 	exports.deviceControllerEvents[key] = deviceScannerEvents[key];
 });
 
-
 // Define device errors
 var ljm_driver_constants = require('ljswitchboard-ljm_driver_constants');
 exports.deviceEvents = ljm_driver_constants.device_curator_constants;

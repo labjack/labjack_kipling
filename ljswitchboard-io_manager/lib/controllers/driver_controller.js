@@ -43,7 +43,7 @@ function createDriverController(io_interface) {
 	};
 	this.errToStr = function(errNum) {
 		var defered = q.defer();
-		// errToStr is a special function that should always resolve and not 
+		// errToStr is a special function that should always resolve and not
 		// reject because it is making sense of errors, not making errors out of
 		// errors.
 		callFunc('errToStr', [errNum])
@@ -119,7 +119,7 @@ function createDriverController(io_interface) {
 			return callFunc('specialAddressesGetDefaultFilePath');
 		},
 	};
-	
+
 	var self = this;
 }
 

@@ -1,14 +1,7 @@
-
-var ref;
-try {
-    ref = require('ref');       //Load variable type module
-} catch(err) {
-    ref = require('ref-napi');       //Load variable type module
-}
+const ref = require('ref-napi');       //Load variable type module
 var driver_const = require('ljswitchboard-ljm_driver_constants');
 
 var semver = require('semver');
-var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');
 
 var ljTypeMap = {
     // These argument types are basic data types and are the easiest to parse.
@@ -57,7 +50,7 @@ ljTypeOps.string = {
         return buffer;
     }
     // 'allocate': function(userData) {
-    //     var strBuffer = new Buffer(userData.length + 1);
+    //     var strBuffer = Buffer.alloc(userData.length + 1);
     //     strBuffer.fill(0);
     //     return strBuffer;
     // },
@@ -126,12 +119,7 @@ ljTypeOps.double = {
 };
 
 function allocBuffer(length) {
-    var buff;
-    if(USE_MODERN_BUFFER_ALLOC) {
-        buff = Buffer.alloc(length);
-    } else {
-        buff = new Buffer(length);
-    }
+    const buff = Buffer.alloc(length);
     buff.fill(0);
     return buff;
 }

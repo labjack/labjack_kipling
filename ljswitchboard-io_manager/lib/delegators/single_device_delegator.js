@@ -1,10 +1,7 @@
-
 console.log("in single_device_delegator.js");
 
-var dict = require('dict');
 var q = require('q');
 var constants = require('../common/constants');
-var io_endpoint_key = constants.io_manager_endpoint_key;
 
 var process_manager = require('process_manager');
 var slave_process = process_manager.slave_process();

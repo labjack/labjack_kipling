@@ -11,7 +11,6 @@ this.run = function() {
 
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var q = global.require('q');
 
 var eventList = {
 	'REFRESH_GRAPH_DATA': 'REFRESH_GRAPH_DATA',
@@ -34,11 +33,8 @@ try {
 }
 this.startTask = function(bundle) {
 	console.log('Starting simple_logger_collector task');
-	var defered = q.defer();
-	
 	collector.startVersionManager();
-	defered.resolve(bundle);
-	return defered.promise;
+	return Promise.resolve(bundle);
 };
 
 /**

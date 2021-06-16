@@ -1,6 +1,7 @@
 var assert = require('chai').assert;
 
-var package_loader = require('../lib/ljswitchboard-package_loader');
+const PackageLoader = require('../lib/ljswitchboard-package_loader').PackageLoader;
+const package_loader = new PackageLoader();
 
 var capturedEvents = [];
 
@@ -61,12 +62,12 @@ describe('bad zips', function() {
 		package_loader.setExtractionPath(directory);
 		done();
 	});
-	it('start extraction (corrupted .zip, first time)', function (done) {
+	it('start extraction (corrupted .zip, first time)', async function () {
 		// Clear the fired-events list
 		capturedEvents = [];
 
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFilesBadZip);
+		await package_loader.loadPackage(testPackages.staticFilesBadZip);
 
 		// Verify that the package was added to the managed packages list
 		assert.deepEqual(
@@ -74,33 +75,27 @@ describe('bad zips', function() {
 			[testPackages.staticFilesBadZip.name]
 		);
 
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UNINITIALIZED_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_ZIP_FILE_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_ZIP_FILE_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-			];
+		const updatedPackages = await package_loader.runPackageManager();
+		// Define the required event list
+		var requiredEvents = [
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.DETECTED_UNINITIALIZED_PACKAGE,
+			eventList.STARTING_EXTRACTION,
+			eventList.STARTING_ZIP_FILE_EXTRACTION,
+			eventList.FINISHED_EXTRACTION,
+			eventList.FINISHED_ZIP_FILE_EXTRACTION,
+			eventList.LOADED_PACKAGE,
+		];
 
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'initialize',
-				'.zip',
-				requiredEvents,
-				capturedEvents
-			);
-			done();
-		}, function(err) {
-			assert.isOk(false, 'failed to run the packageManager');
-			done();
-		});
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'initialize',
+			'.zip',
+			requiredEvents,
+			capturedEvents
+		);
 	});
 	it('configure the extraction path (second time)', function (done) {
 		directory = path.join(tmpDir, localFolder);
@@ -110,12 +105,13 @@ describe('bad zips', function() {
 		package_loader.setExtractionPath(directory);
 		done();
 	});
-	it('start extraction (corrupted .zip, second time)', function (done) {
+	it('start extraction (corrupted .zip, second time)', async function () {
 		// Clear the fired-events list
 		capturedEvents = [];
 
+		package_loader.reset();
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFilesBadZip);
+		await package_loader.loadPackage(testPackages.staticFilesBadZip);
 
 		// Verify that the package was added to the managed packages list
 		assert.deepEqual(
@@ -123,33 +119,27 @@ describe('bad zips', function() {
 			[testPackages.staticFilesBadZip.name]
 		);
 
-		package_loader.runPackageManager()
-		.then(function(updatedPackages) {
-			// Define the required event list
-			var requiredEvents = [
-				eventList.PACKAGE_MANAGEMENT_STARTED,
-				eventList.VALID_UPGRADE_DETECTED,
-				eventList.DETECTED_UNINITIALIZED_PACKAGE,
-				eventList.STARTING_EXTRACTION,
-				eventList.STARTING_ZIP_FILE_EXTRACTION,
-				eventList.FINISHED_EXTRACTION,
-				eventList.FINISHED_ZIP_FILE_EXTRACTION,
-				eventList.LOADED_PACKAGE,
-			];
+		const updatedPackages = await package_loader.runPackageManager();
+		// Define the required event list
+		var requiredEvents = [
+			eventList.PACKAGE_MANAGEMENT_STARTED,
+			eventList.VALID_UPGRADE_DETECTED,
+			eventList.DETECTED_UNINITIALIZED_PACKAGE,
+			eventList.STARTING_EXTRACTION,
+			eventList.STARTING_ZIP_FILE_EXTRACTION,
+			eventList.FINISHED_EXTRACTION,
+			eventList.FINISHED_ZIP_FILE_EXTRACTION,
+			eventList.LOADED_PACKAGE,
+		];
 
-			testSinglePackageUpdate(
-				assert,
-				updatedPackages,
-				'initialize',
-				'.zip',
-				requiredEvents,
-				capturedEvents
-			);
-			done();
-		}, function(err) {
-			assert.isOk(false, 'failed to run the packageManager');
-			done();
-		});
+		testSinglePackageUpdate(
+			assert,
+			updatedPackages,
+			'initialize',
+			'.zip',
+			requiredEvents,
+			capturedEvents
+		);
 	});
 	// Check to make sure that the NEWEST valid upgrade option is selected, not just 'the first found'
 	// Clear the saved files and do the same for .zip files

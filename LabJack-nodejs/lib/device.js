@@ -64,22 +64,6 @@ function DriverInterfaceError(description) {
 util.inherits(DriverInterfaceError, Error);
 DriverInterfaceError.prototype.name = 'Driver Interface Error - device';
 
-function buildAsyncError(code, message, errFrame) {
-    let errorInfo = ljm_mm.getErrorInfo(code);
-    let error = {
-        code: code,
-        string: errorInfo.string,
-        description: errorInfo.description,
-    };
-    if(typeof(message) !== 'undefined') {
-        this.message = message.toString();
-    }
-    if(typeof(errFrame) !== 'undefined') {
-        this.errFrame = errFrame;
-    }
-    return error;
-}
-
 // A numeric that keeps track of the number of devices that have been created;
 let numCreatedDevices = 0;
 exports.getNumCreatedDevices = function() {

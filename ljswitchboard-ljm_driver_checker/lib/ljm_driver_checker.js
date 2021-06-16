@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * The master_process is in charge of creating and destructing child
  * process and initiating any sendReceive type communication.
@@ -5,15 +7,13 @@
  * @author Chris Johnson (LabJack Corp.)
 **/
 
-var q = require('q');
-var async = require('async');
-var util = require('util');
-var fs = require('fs');
-var path = require('path');
+const async = require('async');
+const fs = require('fs');
+const path = require('path');
 
-var arch = process.arch;
-var platform = process.platform;
-var os = {
+const arch = process.arch;
+const platform = process.platform;
+const os = {
     'win32': 'win32',
     'darwin': 'darwin',
     'linux': 'linux',
@@ -21,29 +21,29 @@ var os = {
     'sunos': 'linux'
 }[platform];
 
-var SystemRoot;
-var HOME_DRIVE;
-var ALLUSERSPROFILE;
-var PROGRAMFILES;
-var PROGRAMFILES86;
-if(os === 'win32') {
-    if(process.env.SystemRoot) {
+let SystemRoot;
+let HOME_DRIVE;
+let ALLUSERSPROFILE;
+let PROGRAMFILES;
+let PROGRAMFILES86;
+if (os === 'win32') {
+    if (process.env.SystemRoot) {
         SystemRoot = process.env.SystemRoot;
     }
-    if(process.env.HOME_DRIVE) {
+    if (process.env.HOME_DRIVE) {
         HOME_DRIVE=process.env.HOME_DRIVE;
     }
-    if(process.env.ALLUSERSPROFILE) {
+    if (process.env.ALLUSERSPROFILE) {
         ALLUSERSPROFILE = process.env.ALLUSERSPROFILE;
     }
-    if(process.env.ProgramFiles) {
+    if (process.env.ProgramFiles) {
         PROGRAMFILES = process.env.ProgramFiles;
     }
-    if(process.env['ProgramFiles(x86)']) {
+    if (process.env['ProgramFiles(x86)']) {
         PROGRAMFILES86 = process.env['ProgramFiles(x86)'];
     }
 }
-var requirements = {
+const requirements = {
     'Driver': {
         'win32': {
             'ia32': [
@@ -166,7 +166,7 @@ var requirements = {
     },
 };
 
-var optionalRequirements = {
+const optionalRequirements = {
     'LJM header file': {
         'win32': {
             'ia32': [
@@ -251,23 +251,22 @@ var optionalRequirements = {
 
 
 
-var osRequirements = {};
-var osOptionalRequirements = {};
-var coreRequirements = {};
+const osRequirements = {};
+const osOptionalRequirements = {};
+const coreRequirements = {};
 
-var requirementKeys = Object.keys(requirements);
-var optionalRequirementKeys = Object.keys(optionalRequirements);
-var coreKeys = [
+const requirementKeys = Object.keys(requirements);
+const optionalRequirementKeys = Object.keys(optionalRequirements);
+const coreKeys = [
     'LabJack folder'
 ];
-
 
 // Add valid requirements to the osRequirements object
 requirementKeys.forEach(function(key) {
     // If the OS has that requirement
-    if(requirements[key][os]) {
+    if (requirements[key][os]) {
         // If the OS/arch pair has a requirement
-        if(requirements[key][os][arch]) {
+        if (requirements[key][os][arch]) {
             osRequirements[key] = requirements[key][os][arch];
         }
     }
@@ -276,9 +275,9 @@ requirementKeys.forEach(function(key) {
 // Add valid optional requirements to the osOptionalRequirements object
 optionalRequirementKeys.forEach(function(key) {
     // If the OS has that requirement
-    if(optionalRequirements[key][os]) {
+    if (optionalRequirements[key][os]) {
         // If the OS/arch pair has a requirement
-        if(optionalRequirements[key][os][arch]) {
+        if (optionalRequirements[key][os][arch]) {
             osOptionalRequirements[key] = optionalRequirements[key][os][arch];
         }
     }
@@ -287,199 +286,196 @@ optionalRequirementKeys.forEach(function(key) {
 // Copy over the core requirements to the coreRequirements object
 coreKeys.forEach(function(key) {
     // Switch on OS
-    if(requirements[key][os]) {
+    if (requirements[key][os]) {
         // Switch on OS/Arch pair
-        if(requirements[key][os][arch]) {
+        if (requirements[key][os][arch]) {
             coreRequirements[key] = requirements[key][os][arch];
         }
     }
 });
 
 
-var validDirectory = function(directories) {
-    var defered = q.defer();
-    var directoryExists = false;
-    var validDirectory = '';
-    var isFound = false;
-    async.each(
-        directories,
-        function (directory, callback) {
-            fs.exists(directory, function(exists) {
-                if(exists && !isFound) {
-                    isFound = true;
-                   directoryExists = true;
-                    validDirectory = directory;
+function validDirectory(directories) {
+    return new Promise((resolve, reject) => {
+        let directoryExists = false;
+        let validDirectory = '';
+        let isFound = false;
+        async.each(
+            directories,
+            function (directory, callback) {
+                fs.exists(directory, function (exists) {
+                    if (exists && !isFound) {
+                        isFound = true;
+                        directoryExists = true;
+                        validDirectory = directory;
+                    }
+                    callback();
+                });
+            }, function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    const retData = {};
+                    retData.exists = directoryExists;
+                    retData.path = validDirectory;
+                    if (!directoryExists) {
+                        retData.testedPaths = directories;
+                    }
+                    resolve(retData);
                 }
-                callback();
             });
-        }, function(err) {
+    });
+}
 
-            if(err) {
-                defered.reject(err);
-            } else {
-                var retData = {};
-                retData.exists = directoryExists;
-                retData.path = validDirectory;
-                if(!directoryExists) {
-                    retData.testedPaths = directories;
-                }
-                defered.resolve(retData);
-            }
-        });
-    return defered.promise;
-};
+const findVersionString = new RegExp("(?:(#define\\sLJM_VERSION\\s))[0-9]\\.[0-9]{1,}");
+const findVersionNum = new RegExp("[0-9]\\.[0-9]{1,}");
 
-var findVersionString = new RegExp("(?:(\\#define\\sLJM_VERSION\\s))[0-9]\\.[0-9]{1,}");
-var findVersionNum = new RegExp("[0-9]\\.[0-9]{1,}");
-var checkHeaderFile = function(directoryInfo) {
-    var defered = q.defer();
-    var finishFunc = function(data) {
-        try {
-            var versionString = findVersionString.exec(data);
-            if(versionString) {
-                versionString = versionString[0];
-                var versionNumStr = findVersionNum.exec(versionString);
-                if(versionNumStr) {
-                    versionNumStr = versionNumStr[0];
-                    directoryInfo.isValid = true;
-                    directoryInfo.version = versionNumStr;
-                    defered.resolve(directoryInfo);
+function checkHeaderFile(directoryInfo) {
+    return new Promise((resolve) => {
+        const finishFunc = function (data) {
+            try {
+                let versionString = findVersionString.exec(data);
+                if (versionString) {
+                    versionString = versionString[0];
+                    let versionNumStr = findVersionNum.exec(versionString);
+                    if (versionNumStr) {
+                        versionNumStr = versionNumStr[0];
+                        directoryInfo.isValid = true;
+                        directoryInfo.version = versionNumStr;
+                        resolve(directoryInfo);
+                    } else {
+                        directoryInfo.isValid = false;
+                        directoryInfo.error = 'Failed to find the LJM_VERSION string(2)';
+                        resolve(directoryInfo);
+                    }
+
                 } else {
                     directoryInfo.isValid = false;
-                    directoryInfo.error = 'Vailed to find the LJM_VERSION string(2)';
-                    defered.resolve(directoryInfo);
+                    directoryInfo.error = 'Failed to find the LJM_VERSION string';
+                    resolve(directoryInfo);
                 }
 
-            } else {
+            } catch (parseError) {
                 directoryInfo.isValid = false;
-                directoryInfo.error = 'Vailed to find the LJM_VERSION string';
-                defered.resolve(directoryInfo);
+                directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
+                resolve(directoryInfo);
             }
-
-        } catch (parseError) {
-            directoryInfo.isValid = false;
-            directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
-            defered.resolve(directoryInfo);
-        }
-    };
-    fs.readFile(directoryInfo.path, function(err, data) {
-        if(err) {
-            fs.readFile(directoryInfo.path, function(err, data) {
-                if(err) {
-                    fs.readFile(directoryInfo.path, function(err, data) {
-                        if(err) {
-                            directoryInfo.isValid = false;
-                            directoryInfo.error = 'Failed to read file: ' + err.toString();
-                            defered.resolve(directoryInfo);
-                        } else {
-                            finishFunc(data);
-                        }
-                    });
-                } else {
-                    finishFunc(data);
-                }
-            });
-        } else {
-            finishFunc(data);
-        }
+        };
+        fs.readFile(directoryInfo.path, function (err, data) {
+            if (err) {
+                fs.readFile(directoryInfo.path, function (err, data) {
+                    if (err) {
+                        fs.readFile(directoryInfo.path, function (err, data) {
+                            if (err) {
+                                directoryInfo.isValid = false;
+                                directoryInfo.error = 'Failed to read file: ' + err.toString();
+                                resolve(directoryInfo);
+                            } else {
+                                finishFunc(data);
+                            }
+                        });
+                    } else {
+                        finishFunc(data);
+                    }
+                });
+            } else {
+                finishFunc(data);
+            }
+        });
     });
-    return defered.promise;
-};
-var checkJSONFile = function(directoryInfo) {
-    var defered = q.defer();
-    var finishFunc = function(data) {
-        var jsonFile;
-        try {
-            jsonFile = JSON.parse(data);
-            directoryInfo.isValid = true;
-            defered.resolve(directoryInfo);
-        } catch (parseError) {
-            directoryInfo.isValid = false;
-            directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
-            defered.resolve(directoryInfo);
+}
+
+function checkJSONFile(directoryInfo) {
+    return new Promise((resolve) => {
+        function finishFunc(data) {
+            try {
+                JSON.parse(data);
+                directoryInfo.isValid = true;
+                resolve(directoryInfo);
+            } catch (parseError) {
+                directoryInfo.isValid = false;
+                directoryInfo.error = 'Failed to parse file: ' + parseError.toString();
+                resolve(directoryInfo);
+            }
         }
-    };
-    fs.readFile(directoryInfo.path, function(err, data) {
-        if(err) {
-            fs.readFile(directoryInfo.path, function(err, data) {
-                if(err) {
-                    fs.readFile(directoryInfo.path, function(err, data) {
-                        if(err) {
-                            directoryInfo.isValid = false;
-                            directoryInfo.error = 'Failed to read file: ' + err.toString();
-                            defered.resolve(directoryInfo);
-                        } else {
-                            finishFunc(data);
-                        }
-                    });
-                } else {
-                    finishFunc(data);
-                }
-            });
-        } else {
-            finishFunc(data);
-        }
+        fs.readFile(directoryInfo.path, function (err, data) {
+            if (err) {
+                fs.readFile(directoryInfo.path, function (err, data) {
+                    if (err) {
+                        fs.readFile(directoryInfo.path, function (err, data) {
+                            if (err) {
+                                directoryInfo.isValid = false;
+                                directoryInfo.error = 'Failed to read file: ' + err.toString();
+                                resolve(directoryInfo);
+                            } else {
+                                finishFunc(data);
+                            }
+                        });
+                    } else {
+                        finishFunc(data);
+                    }
+                });
+            } else {
+                finishFunc(data);
+            }
+        });
     });
-    return defered.promise;
-};
-var buildOperation = function(key, requirement, isRequired) {
-    var reqType = path.extname(requirement[0]);
+}
+const buildOperation = function(key, requirement, isRequired) {
+    const reqType = path.extname(requirement[0]);
 
-    var operation = function(bundle) {
-        var defered = q.defer();
+    return function (bundle) {
+        return new Promise((resolve) => {
+            if (reqType === '') {
+                validDirectory(requirement)
+                    .then(function (res) {
+                        bundle[key] = res;
+                        if (isRequired) {
+                            bundle.overallResult = bundle.overallResult && res.exists;
+                        }
+                        resolve(bundle);
+                    });
+            } else if (reqType === '.h') {
+                validDirectory(requirement)
+                    .then(checkHeaderFile)
+                    .then(function (res) {
+                        bundle[key] = res;
+                        if (isRequired) {
+                            bundle.overallResult = bundle.overallResult && res.isValid;
+                        }
+                        if (res.version) {
+                            bundle.ljmVersion = res.version;
+                        }
+                        resolve(bundle);
+                    });
+            } else if (reqType === '.json') {
+                validDirectory(requirement)
+                    .then(checkJSONFile)
+                    .then(function (res) {
+                        bundle[key] = res;
+                        if (isRequired) {
+                            bundle.overallResult = bundle.overallResult && res.isValid;
+                        }
 
-        if(reqType === '') {
-            validDirectory(requirement)
-            .then(function(res) {
-                bundle[key] = res;
-                if(isRequired) {
-                    bundle.overallResult = bundle.overallResult && res.exists;
-                }
-                defered.resolve(bundle);
-            });
-        } else if(reqType === '.h') {
-            validDirectory(requirement)
-            .then(checkHeaderFile)
-            .then(function(res) {
-                bundle[key] = res;
-                if(isRequired) {
-                    bundle.overallResult = bundle.overallResult && res.isValid;
-                }
-                if(res.version) {
-                    bundle.ljmVersion = res.version;
-                }
-                defered.resolve(bundle);
-            });
-        } else if(reqType === '.json') {
-            validDirectory(requirement)
-            .then(checkJSONFile)
-            .then(function(res) {
-                bundle[key] = res;
-                if(isRequired) {
-                    bundle.overallResult = bundle.overallResult && res.isValid;
-                }
-
-                defered.resolve(bundle);
-            });
-        } else {
-            validDirectory(requirement)
-            .then(function(res) {
-                bundle[key] = res;
-                if(isRequired) {
-                    bundle.overallResult = bundle.overallResult && res.exists;
-                }
-                defered.resolve(bundle);
-            });
-        }
-        return defered.promise;
+                        resolve(bundle);
+                    });
+            } else {
+                validDirectory(requirement)
+                    .then(function (res) {
+                        bundle[key] = res;
+                        if (isRequired) {
+                            bundle.overallResult = bundle.overallResult && res.exists;
+                        }
+                        resolve(bundle);
+                    });
+            }
+        });
     };
-
-    return operation;
 };
 
-var getOperations = function(requirements, isRequired) {
-    var operations = [];
-    var keys = Object.keys(requirements);
+const getOperations = function(requirements, isRequired) {
+    const operations = [];
+    const keys = Object.keys(requirements);
 
     keys.forEach(function(key) {
         operations.push(buildOperation(key, requirements[key], isRequired));
@@ -488,63 +484,60 @@ var getOperations = function(requirements, isRequired) {
     return operations;
 };
 
-var ops = getOperations(osRequirements, true);
-var nonReqOps = getOperations(osOptionalRequirements, false);
-ops = ops.concat(nonReqOps);
-
-
+const nonReqOps = getOperations(osOptionalRequirements, false);
+const ops = getOperations(osRequirements, true).concat(nonReqOps);
 
 exports.verifyLJMInstallation = function() {
-    var defered = q.defer();
+    return new Promise((resolve, reject) => {
 
-    var results = {'overallResult': true,'ljmVersion': ''};
+        const results = {'overallResult': true, 'ljmVersion': ''};
 
-    // Execute functions in parallel
-    var promises = [];
-    ops.forEach(function(op) {
-        promises.push(op(results));
+        // Execute functions in parallel
+        const promises = [];
+        ops.forEach(function (op) {
+            promises.push(op(results));
+        });
+
+        // Wait for all of the operations to complete
+        Promise.allSettled(promises)
+            .then(function (res) {
+                // console.log('Finished Test Res', results.overallResult);
+                if (results.overallResult) {
+                    resolve(results);
+                } else {
+                    reject(results);
+                }
+            }, function (err) {
+                console.error('Finished Test Err', err);
+                reject(results);
+            });
     });
-
-    // Wait for all of the operations to complete
-    q.allSettled(promises)
-    .then(function(res) {
-        // console.log('Finished Test Res', results.overallResult);
-        if(results.overallResult) {
-            defered.resolve(results);
-        } else {
-            defered.reject(results);
-        }
-    }, function(err) {
-        // console.log('Finished Test Err', err);
-        defered.reject(results);
-    });
-    return defered.promise;
 };
 
-var coreOps = getOperations(coreRequirements, true);
+const coreOps = getOperations(coreRequirements, true);
 exports.verifyCoreInstall = function() {
-    var defered = q.defer();
+    return new Promise((resolve, reject) => {
 
-    var results = {'overallResult': true};
+        const results = {'overallResult': true};
 
-    // Execute functions in parallel
-    var promises = [];
-    coreOps.forEach(function(op) {
-        promises.push(op(results));
+        // Execute functions in parallel
+        const promises = [];
+        coreOps.forEach(function (op) {
+            promises.push(op(results));
+        });
+
+        // Wait for all of the operations to complete
+        Promise.allSettled(promises)
+            .then(function () {
+                // console.log('Finished Test Res', results.overallResult);
+                if (results.overallResult) {
+                    resolve(results);
+                } else {
+                    reject(results);
+                }
+            }, function (err) {
+                console.error('Finished Test Err', err);
+                reject(results);
+            });
     });
-
-    // Wait for all of the operations to complete
-    q.allSettled(promises)
-    .then(function(res) {
-        // console.log('Finished Test Res', results.overallResult);
-        if(results.overallResult) {
-            defered.resolve(results);
-        } else {
-            defered.reject(results);
-        }
-    }, function(err) {
-        // console.log('Finished Test Err', err);
-        defered.reject(results);
-    });
-    return defered.promise;
 };

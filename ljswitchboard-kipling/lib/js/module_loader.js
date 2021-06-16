@@ -1,95 +1,81 @@
+'use strict';
 
-
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var path = require('path');
-var q = global.require('q');
-var handlebars = global.require('handlebars');
-var module_manager = require('ljswitchboard-module_manager');
-var fs = require('fs');
-var package_loader = require('ljswitchboard-package_loader');
-var gns = package_loader.getNameSpace();
-var static_files = require('ljswitchboard-static_files');
-var io_manager = require('ljswitchboard-io_manager');
-var modbus_map = require('ljswitchboard-modbus_map').getConstants();
+const path = require('path');
+const {EventEmitter} = require('events');
+const package_loader = global.package_loader;
+const static_files = package_loader.getPackage('static_files');
+const io_manager = package_loader.getPackage('io_manager');
+const module_manager = package_loader.getPackage('module_manager');
+const handleBarsService = package_loader.getPackage('handleBarsService');
 
 // Configure the module_manager persistent data path.
-var kiplingExtractionPath = package_loader.getExtractionPath();
-var moduleDataPath = path.normalize(path.join(
+const kiplingExtractionPath = package_loader.getExtractionPath();
+const moduleDataPath = path.normalize(path.join(
 	kiplingExtractionPath,
 	'module_data'
 ));
 module_manager.configurePersistentDataPath(moduleDataPath);
 module_manager.disableLinting();
 
+const MODULE_LOADER_CSS_DESTINATION_ID = 'module-chrome-loaded-module-css';
+const MODULE_LOADER_JS_DESTINATION_ID = 'module-chrome-loaded-module-js';
+const MODULE_LOADER_VIEW_DESTINATION_ID = 'module-chrome-loaded-module-view';
 
-function createModuleLoader() {
-	this.stats = {
-		'numLoaded': 0
-	};
-	this.current_module_data = {};
+const eventList = {
+	VIEW_READY: 'VIEW_READY',
+	UNLOAD_MODULE: 'UNLOAD_MODULE',
+	MODULE_READY: 'MODULE_READY',
+};
 
-	var eventList = {
-		VIEW_READY: 'VIEW_READY',
-		UNLOAD_MODULE: 'UNLOAD_MODULE',
-		MODULE_READY: 'MODULE_READY',
-	};
-	this.eventList = eventList;
+class ModuleLoader extends EventEmitter {
 
-	var MODULE_LOADER_CSS_DESTINATION_ID = 'module-chrome-loaded-module-css';
-	var MODULE_LOADER_JS_DESTINATION_ID = 'module-chrome-loaded-module-js';
-	var MODULE_LOADER_VIEW_DESTINATION_ID = 'module-chrome-loaded-module-view';
-	var MODULE_LOADER_VIEW_TEMPLATE_ARRAY = [
-		'<div id="module-chrome-current-module-{{numLoaded}}">',
-		'{{{viewData}}}',
-		'</div>'
-	];
-	var MODULE_LOADER_VIEW_TEMPLATE = handlebars.compile(
-		MODULE_LOADER_VIEW_TEMPLATE_ARRAY.join('')
-	);
-	var MODULE_LOADER_VIEW_ID_TEMPLATE = handlebars.compile([
-		'#module-chrome-current-module-{{numLoaded}}'
-	].join(''));
+	constructor() {
+		super();
+		this.stats = {
+			'numLoaded': 0
+		};
+		this.current_module_data = {};
 
-	
+		this.eventList = eventList;
 
-	var clearCurrentModule = function(newModule) {
-		var defered = q.defer();
+		this.precompileFunctions = [];
+		this.unloadModuleFunctions = [];
+	}
 
-		// Remove any current listeners from the VIEW_READY and UNLOAD_MODULE
-		// events.  They should only be listened to by the currently loaded
-		// module.
-		self.removeAllListeners(eventList.VIEW_READY);
-		self.removeAllListeners(eventList.UNLOAD_MODULE);
+	clearCurrentModule(newModule) {
+		return new Promise((resolve, reject) => {
+			// Remove any current listeners from the VIEW_READY and UNLOAD_MODULE
+			// events.  They should only be listened to by the currently loaded
+			// module.
+			this.removeAllListeners(eventList.VIEW_READY);
+			this.removeAllListeners(eventList.UNLOAD_MODULE);
 
-		// Clear the DOM elements
-		var locationKeys = Object.keys(newModule.outputLocation);
-		locationKeys.forEach(function(locationKey) {
-			newModule.outputLocation[locationKey].empty();
+			// Clear the DOM elements
+			const locationKeys = Object.keys(newModule.outputLocation);
+			locationKeys.forEach((locationKey) => {
+				newModule.outputLocation[locationKey].empty();
+			});
+			resolve(newModule);
 		});
-		defered.resolve(newModule);
-		return defered.promise;
-		// location.append($(compiledData));
-	};
+	}
 
-	var getCreatePageElement = function(newModule) {
-		var createPageElement = function(newFile) {
-			var defered = q.defer();
-			var results = {
+	getCreatePageElement(newModule) {
+		const createPageElement = (newFile) => {
+			return new Promise((resolve, reject) => {
+			const results = {
 				'name': newFile.fileName,
 			};
 			try {
-				var fileType = path.extname(newFile.fileName);
-				var newElement;
+				const fileType = path.extname(newFile.fileName);
 				if(fileType === '.css') {
-					newElement = document.createElement('style');
+					const newElement = document.createElement('style');
 					newElement.setAttribute('type', 'text/css');
 
-					newElement.onload = function() {
+					newElement.onload = () => {
 						// console.info('!!! '+fileType+' file loaded', newFile.fileName);
-						defered.resolve(results);
+						resolve(results);
 					};
-					newElement.onerror = function() {
+					newElement.onerror = () => {
 						console.error('Error in file' + fileType);
 					};
 
@@ -98,114 +84,100 @@ function createModuleLoader() {
 					newElement.appendChild(document.createTextNode(newFile.fileData));
 					newModule.outputLocation.css.append(newElement);
 				} else if(fileType === '.js') {
-					newElement = document.createElement('script');
+					const newElement = document.createElement('script');
 					newElement.setAttribute('type', 'text/javascript');
-					// 
-
-					// Isn't working for .js files :( idk why, it worked before.
-					// newElement.onload = function() {
-					// console.info('!!! '+fileType+' file loaded', newFile.fileName);
-					// defered.resolve(results);
-					// };
-					// newElement.setAttribute('src', newFile.filePath);
 
 					// Save the file's data
 					results.element = newElement;
-					newElement.appendChild(document.createTextNode(newFile.fileData));
+					let fileData = newFile.fileData;
+					fileData += '\n' + "//# sourceURL=" + newFile.filePath + ";";
+
+					newElement.appendChild(document.createTextNode(fileData));
 					newModule.outputLocation.js.append(newElement);
-					defered.resolve(results);
+					resolve(results);
 				} else {
 					console.error('Trying to load invalid fileType', fileType);
-					defered.resolve(results);
+					resolve(results);
 				}
 			} catch(err) {
 				console.error('Error Loading Element', err);
 				console.error(newFile.fileName);
 				results.element = undefined;
-				defered.resolve(results);
+				resolve(results);
 			}
-			
-			return defered.promise;
+
+			});
 		};
 		return createPageElement;
-	};
+	}
 
-	var loadCSSFiles = function(newModule) {
-		var defered = q.defer();
-		var promises = newModule.css.map(getCreatePageElement(newModule));
+	loadCSSFiles(newModule) {
+		return new Promise((resolve, reject) => {
+			const promises = newModule.css.map(this.getCreatePageElement(newModule));
 
-		q.allSettled(promises)
-		.then(function(results) {
-			defered.resolve(newModule);
-		}, function(err) {
-			console.error('Finished Loading Err', err);
-			defered.reject(newModule);
+			Promise.allSettled(promises)
+				.then((results) => {
+					resolve(newModule);
+				}, (err) => {
+					console.error('Finished Loading Err', err);
+					reject(newModule);
+				});
 		});
-		return defered.promise;
-	};
-	var loadJSFiles = function(newModule) {
-		var defered = q.defer();
-		var promises = newModule.js.map(getCreatePageElement(newModule));
+	}
 
-		q.allSettled(promises)
-		.then(function(results) {
-			defered.resolve(newModule);
-		}, function(err) {
-			console.error('Finished Loading Err', err);
-			defered.reject(newModule);
+	loadJSFiles(newModule) {
+		return new Promise((resolve, reject) => {
+			const promises = newModule.js.map(this.getCreatePageElement(newModule));
+
+			Promise.allSettled(promises)
+				.then((results) => {
+					resolve(newModule);
+				}, (err) => {
+					console.error('Finished Loading Err', err);
+					reject(newModule);
+				});
 		});
-		return defered.promise;
-	};
-	var precompileFunctions = [];
-	this.addPreloadStep = function(func) {
-		precompileFunctions.push(func);
-	};
+	}
 
-	var getModuleContext = function(newModule) {
-		var defered = q.defer();
-		var promises = [];
-		var i;
-		for(i = 0; i < precompileFunctions.length; i++) {
-			// console.info(
-			// 	'Executing precompile function',
-			// 	i,
-			// 	precompileFunctions.length
-			// );
-			promises.push(precompileFunctions[i](newModule));
-		}
-		q.allSettled(promises)
-		.then(function(results) {
-			// remove precompile functions
-			precompileFunctions = [];
-			defered.resolve(newModule);
-		}, function(err) {
+	addPreloadStep(func) {
+		this.precompileFunctions.push(func);
+	}
+
+	async getModuleContext(newModule) {
+		const promises = this.precompileFunctions.map(func => {
+			return new Promise((resolve1) => {
+				func(newModule).then(resolve1);
+			});
+		});
+
+		try {
+			await Promise.allSettled(promises);
+			this.precompileFunctions = [];
+		} catch (err) {
 			console.error('Finished pre-compilation steps', err);
-			defered.reject(newModule);
-		});
-		return defered.promise;
-	};
-
-	var getUpdatedDeviceListing = function(newModule) {
-		var defered = q.defer();
-		var io_interface = io_manager.io_interface();
-		var device_controller = io_interface.getDeviceController();
-
-		// Filter what devices are displayed
-		var filters;
-		if(newModule.data.supportedDevices) {
-			filters = newModule.data.supportedDevices;
 		}
-		device_controller.getDeviceListing(filters)
-		.then(function(deviceListing) {
-			newModule.context.devices = deviceListing;
-			defered.resolve(newModule);
+
+		return newModule;
+	}
+
+	getUpdatedDeviceListing(newModule) {
+		return new Promise((resolve, reject) => {
+			const io_interface = io_manager.io_interface();
+			const device_controller = io_interface.getDeviceController();
+
+			// Filter what devices are displayed
+			const filters = newModule.data.supportedDevices ? newModule.data.supportedDevices : null;
+			device_controller.getDeviceListing(filters)
+				.then((deviceListing) => {
+					newModule.context.devices = deviceListing;
+					resolve(newModule);
+				});
 		});
-		return defered.promise;
-	};
-	var loadHTMLFiles = function(newModule) {
-		var defered = q.defer();
+	}
+
+	async loadHTMLFiles(newModule) {
 		// console.log('loaded html files', newModule.htmlFiles);
-		var htmlFile = '<p>No view.html file loaded.</p>';
+		let htmlFile = '<p>No view.html file loaded.</p>';
 		// Check to see if a framework is being loaded:
 		if(newModule.data.framework) {
 			if(newModule.htmlFiles.framework_view) {
@@ -220,101 +192,66 @@ function createModuleLoader() {
 		}
 
 		// Compile & populate the view.html file
-		var template = handlebars.compile(htmlFile);
-		var data = template(newModule.context);
+		const data1 = await handleBarsService.renderHtmlTemplate(htmlFile, newModule.context);
 
 		// Append a header & footer onto the template.
-		data = MODULE_LOADER_VIEW_TEMPLATE({
-			'numLoaded': newModule.context.stats.numLoaded,
-			'viewData': data,
-		});
+		const data = '<div id="module-chrome-current-module-' + newModule.context.stats.numLoaded + '">' + data1 + '</div>';
 
 		// Add the page data to the dom.
 		newModule.outputLocation.view.append(data);
 
 		// Build the elementID string that was assigned to the element when
 		// compiling the "MODULE_LOADER_VIEW_TEMPLATE"
-		var elementID = MODULE_LOADER_VIEW_ID_TEMPLATE({
-			'numLoaded': newModule.context.stats.numLoaded,
-		});
 
-		// Attach to the .ready event of the element just created.
-		// Element must already be added because we use jquery to search for
-		// the element's ID to attach to the "ready" event.
-		$(elementID).ready(function() {
-			defered.resolve(newModule);
-			var loadedData = {
-				'name': newModule.name,
-				'id': elementID,
-				'data': newModule,
-				'humanName': newModule.data.humanName,
-			};
-			self.emit(eventList.VIEW_READY, loadedData);
-			self.current_module_data = null;
-			self.current_module_data = undefined;
-			self.current_module_data = loadedData;
-		});
-		return defered.promise;
-	};
-	var updateStatistics = function(newModule) {
-		var defered = q.defer();
-		self.stats.numLoaded += 1;
-		defered.resolve(newModule);
-		return defered.promise;
-	};
-	var runGC = function(data) {
-		var defered = q.defer();
-		var gcExecuted = false;
-		if(gc) {
-			if(gc.call) {
-				if(typeof(gc.call) === 'function') {
-					gc.call();
-					gcExecuted = true;
-				}
-			}
-		}
-		if(gcExecuted) {
-			// console.log('gc.call executed');
-		} else {
-			// console.log('gc.call not executed');
-		}
-		
-		defered.resolve(data);
-		return defered.promise;
-	};
+		const elementID = '#module-chrome-current-module-' + newModule.context.stats.numLoaded;
 
-	var unloadModuleFunctions = [];
-	this.addUnloadStep = function(func) {
-		unloadModuleFunctions.push(func);
-	};
-
-	var executeUnloadModuleFunctions = function(moduleData) {
-		var defered = q.defer();
-
-		if(unloadModuleFunctions.length > 0) {
-			var promises = [];
-			var i;
-			for(i = 0; i < unloadModuleFunctions.length; i++) {
-				promises.push(unloadModuleFunctions[i]());
-			}
-			q.allSettled(promises)
-			.then(function(results) {
-				unloadModuleFunctions = [];
-				defered.resolve(moduleData);
-			}, function(err) {
-				console.error('Finished unload-module steps', err);
-				defered.resolve(moduleData);
+		return new Promise((resolve) => {
+			// Attach to the .ready event of the element just created.
+			// Element must already be added because we use jquery to search for
+			// the element's ID to attach to the "ready" event.
+			$(elementID).ready(() => {
+				resolve(newModule);
+				const loadedData = {
+					'name': newModule.name,
+					'id': elementID,
+					'data': newModule,
+					'humanName': newModule.data.humanName,
+				};
+				this.emit(eventList.VIEW_READY, loadedData);
+				this.current_module_data = null;
+				this.current_module_data = undefined;
+				this.current_module_data = loadedData;
 			});
-		} else {
-			defered.resolve(moduleData);
-		}
+		});
+	}
 
-		return defered.promise;
-	};
-	var renderModule = function(moduleData) {
-		var defered = q.defer();
+	async updateStatistics() {
+		this.stats.numLoaded += 1;
+	}
+
+	addUnloadStep(func) {
+		this.unloadModuleFunctions.push(func);
+	}
+
+	async executeUnloadModuleFunctions() {
+		if (this.unloadModuleFunctions.length > 0) {
+			const promises = [];
+			for (let i = 0; i < this.unloadModuleFunctions.length; i++) {
+				promises.push(this.unloadModuleFunctions[i]());
+			}
+			try {
+				await Promise.allSettled(promises);
+				this.unloadModuleFunctions = [];
+				console.log('executeUnloadModuleFunctions executed');
+			} catch (err) {
+				console.error('Finished unload-module steps', err);
+			}
+		}
+	}
+
+	renderModule(moduleData) {
 		// Trigger any loaded module to halt its execution
-		self.emit(eventList.UNLOAD_MODULE, {
+		this.emit(eventList.UNLOAD_MODULE, {
 			'data': 'testData...'
 		});
 		moduleData.loadResults = {
@@ -323,11 +260,10 @@ function createModuleLoader() {
 			'js': [],
 			'html': [],
 		};
-		// coppied directory of the static_files project location.
-		var cpdDir = JSON.parse(JSON.stringify(static_files.getDir()));
-		// console.log('coppied directory', cpdDir);
+		// copied directory of the static_files project location.
+		const cpdDir = JSON.parse(JSON.stringify(static_files.getDir()));
 		moduleData.context = {
-			'stats': self.stats,
+			'stats': this.stats,
 			'staticFiles': cpdDir,
 			'devices': undefined,
 		};
@@ -336,38 +272,31 @@ function createModuleLoader() {
 			'js': $('#' + MODULE_LOADER_JS_DESTINATION_ID),
 			'view': $('#' + MODULE_LOADER_VIEW_DESTINATION_ID),
 		};
-		// moduleData.outputLocationID = MODULE_LOADER_DESTINATION_ID;
-		clearCurrentModule(moduleData)
-		.then(loadCSSFiles)
-		.then(loadJSFiles)
-		.then(getUpdatedDeviceListing)
-		.then(getModuleContext)
-		.then(loadHTMLFiles)
-		.then(updateStatistics)
-		.then(runGC)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
-	};
+		return this.clearCurrentModule(moduleData)
+			.then(moduleData => this.loadCSSFiles(moduleData))
+			.then(moduleData => this.loadJSFiles(moduleData))
+			.then(moduleData => this.getUpdatedDeviceListing(moduleData))
+			.then(moduleData => this.getModuleContext(moduleData))
+			.then(moduleData => this.loadHTMLFiles(moduleData))
+			.then(moduleData => this.updateStatistics());
+	}
 
-	this.loadModule = function(moduleObject) {
-		var defered = q.defer();
-		module_manager.loadModuleData(moduleObject)
-		.then(executeUnloadModuleFunctions)
-		.then(renderModule)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
-	};
+	async loadModule(moduleObject) {
+		try {
+			const moduleData = await module_manager.loadModuleData(moduleObject);
+			await this.executeUnloadModuleFunctions(moduleData);
+			await this.renderModule(moduleData);
+		} catch (err) {
+			console.error('Error in loadModule', err);
+		}
+	}
 
-	this.loadModuleByName = function(moduleName) {
-		var defered = q.defer();
-		module_manager.loadModuleDataByName(moduleName)
-		.then(executeUnloadModuleFunctions)
-		.then(renderModule)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
-	};
-	var self = this;
+	async loadModuleByName(moduleName) {
+		const moduleData = await module_manager.loadModuleDataByName(moduleName);
+		await this.executeUnloadModuleFunctions(moduleData);
+		await this.renderModule(moduleData);
+	}
+
 }
-util.inherits(createModuleLoader, EventEmitter);
 
-var MODULE_LOADER = new createModuleLoader();
+global.MODULE_LOADER = new ModuleLoader();

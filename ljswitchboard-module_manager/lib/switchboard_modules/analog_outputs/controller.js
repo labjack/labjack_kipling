@@ -4,23 +4,11 @@
  * @author A. Samuel Pottinger (LabJack Corp, 2013)
 **/
 
-var dict = require('dict');
-var handlebars = require('handlebars');
-var q = require('q');
 var sprintf = require('sprintf-js');
 
 var CONFIG_PANE_SELECTOR = '#configuration-pane';
 var OUTPUTS_TEMPLATE_SRC = 'analog_outputs/output_controls.html';
 var OUTPUTS_DATA_SRC = 'analog_outputs/outputs.json';
-
-var CONFIRMATION_DISPLAY_TEMPLATE_STR = '#{{register}}-confirmation-display';
-var DEVICE_SELECT_ID_TEMPLATE_STR = '#{{serial}}-selector';
-
-var CONFIRMATION_DISPLAY_TEMPLATE = handlebars.compile(
-    CONFIRMATION_DISPLAY_TEMPLATE_STR);
-
-var DEVICE_SELECT_ID_TEMPLATE = handlebars.compile(
-    DEVICE_SELECT_ID_TEMPLATE_STR);
 
 var devices;
 
@@ -33,7 +21,7 @@ var devices;
 **/
 function AnalogOutputDeviceController () {
     var connectedDevices = [];
-    var outputs = dict();
+    var outputs = new Map();
 
     /**
      * Configure the current selected devices to have certain DAC values.
@@ -41,56 +29,53 @@ function AnalogOutputDeviceController () {
      * Configure the currently selected devices to have pre-specified DAC
      * values.
      *
-     * @return {q.promise} Promise that resolves after the DACs have been
+     * @return {Promise} Promise that resolves after the DACs have been
      *      updated on the selected devices. Rejects on case of error.
     **/
     this.configureDACs = function () {
-        var deferred = q.defer();
+        return new Promise((resolve, reject) => {
+            var registers = [];
+            var values = [];
+            outputs.forEach(function (value, register) {
+                register = Number(register);
+                if (register !== 0) {
+                    registers.push(register);
+                    values.push(value);
+                }
+            });
 
-        var registers = [];
-        var values = [];
-        outputs.forEach(function (value, register) {
-            register = Number(register);
-            if (register !== 0) {
-                registers.push(register);
-                values.push(value);
-            }
-        });
-
-        var writeValueClosure = function (device) {
-            return function() {
-                return device.writeMany(registers, values);
+            var writeValueClosure = function (device) {
+                return function () {
+                    return device.writeMany(registers, values);
+                };
             };
-        };
 
-        var numDevices = connectedDevices.length;
-        var writeValueClosures = [];
-        for (var i=0; i<numDevices; i++)
-            writeValueClosures.push(writeValueClosure(connectedDevices[i]));
+            var numDevices = connectedDevices.length;
+            var writeValueClosures = [];
+            for (var i = 0; i < numDevices; i++)
+                writeValueClosures.push(writeValueClosure(connectedDevices[i]));
 
-        var numClosures = writeValueClosures.length;
-        if (numClosures == 0) { 
-            deferred.resolve(); 
-            return deferred.promise;
-        }
+            var numClosures = writeValueClosures.length;
+            if (numClosures == 0) {
+                return Promise.resolve();
+            }
 
-        var lastPromise = null;
-        for (var i=0; i<numClosures; i++) {
-            if (lastPromise === null)
-                lastPromise = writeValueClosures[i]();
-            else
-                lastPromise.then(
-                    writeValueClosures[i],
-                    deferred.reject
-                );
-        }
+            var lastPromise = null;
+            for (var i = 0; i < numClosures; i++) {
+                if (lastPromise === null)
+                    lastPromise = writeValueClosures[i]();
+                else
+                    lastPromise.then(
+                        writeValueClosures[i],
+                        reject
+                    );
+            }
 
-        lastPromise.then(
-            function () {deferred.resolve();},
-            deferred.reject
-        )
-
-        return deferred.promise;
+            lastPromise.then(
+                () => resolve(),
+                (err) => reject(err)
+            );
+        });
     };
 
     /**
@@ -98,7 +83,7 @@ function AnalogOutputDeviceController () {
      *
      * @param {Array} newConnectedDevices An array of device_controller.Device
      *      decorating the devices that this controller should operate on.
-     * @return {q.promise} Promise that resolves after the specified devices
+     * @return {Promise} Promise that resolves after the specified devices
      *      have their DAC values updated by this manager. Rejects on error.
     **/
     this.setConnectedDevices = function (newConnectedDevices) {
@@ -111,7 +96,7 @@ function AnalogOutputDeviceController () {
      *
      * @param {Number} register The register of the DAC to write.
      * @param {Number} value The value (volts) to write to the specified DAC.
-     * @return {q.promise} Promise that resolves after the specified devices
+     * @return {Promise} Promise that resolves after the specified devices
      *      have their DAC values updated by this manager. Rejects on error.
     **/
     this.setDAC = function (register, value) {
@@ -167,13 +152,11 @@ function formatVoltageTooltip(value)
 function onVoltageSelected(event)
 {
     var register = Number(event.target.id.replace('-control', ''));
-    
-    var confirmationSelector = CONFIRMATION_DISPLAY_TEMPLATE(
-        {register: register}
-    );
+
+    var confirmationSelector = '# ' + register + '-confirmation-display';
 
     var selectedVoltage = Number($('#'+event.target.id).val());
-    
+
     console.log($('#'+event.target.id).slider('getValue'));
     $(confirmationSelector).html(
         formatVoltageTooltip(selectedVoltage)
@@ -221,7 +204,7 @@ function changeActiveDevices()
     analogOutputDeviceController.setConnectedDevices(checkedDevices).fail(
         function (err) {showAlert(err.retError);});
     $('#configuration-pane-holder').hide();
-    
+
     if(checkedDevices.length != 0)
         $('#configuration-pane-holder').fadeIn();
 }
@@ -235,12 +218,10 @@ function loadCurrentDACSettings ()
     $('.slider').each(function () {
         var register = Number(this.id.replace('-control', ''));
         var selectedVoltage = analogOutputDeviceController.loadDAC(register);
-        
+
         $('#' + this.id).slider('setValue', selectedVoltage);
 
-        var confirmationSelector = CONFIRMATION_DISPLAY_TEMPLATE(
-            {register: register}
-        );
+        var confirmationSelector = '#' + register + '-confirmation-display';
         $(confirmationSelector).html(formatVoltageTooltip(selectedVoltage));
     });
 }
@@ -256,10 +237,8 @@ $('#analog-output-config').ready(function(){
     var keeper = device_controller.getDeviceKeeper();
     devices = keeper.getDevices();
 
-    var currentDeviceSelector = DEVICE_SELECT_ID_TEMPLATE(
-        {'serial': devices[0].getSerial()}
-    );
-    
+    var currentDeviceSelector = '#' + devices[0].getSerial() + '-selector';
+
     $(currentDeviceSelector).attr('checked', true);
     analogOutputDeviceController.setConnectedDevices([devices[0]]);
 

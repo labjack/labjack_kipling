@@ -1,8 +1,6 @@
+const EventEmitter = require('events').EventEmitter;
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-
-var eventList = {
+const eventList = {
 	LOADED: 'loaded',
 	CLOSE: 'close',
 	CLOSED: 'closed',
@@ -10,54 +8,56 @@ var eventList = {
 	SHOWN: 'shown'
 };
 
-var createNewWindow = function(options) {
-	this.title = '';
+class MockWindow extends EventEmitter {
+	constructor(options) {
+		super(options);
 
-	this.options = {};
-	this.isVisible = false;
-	if(typeof(options) !== 'undefined') {
-		if(typeof(options.show) !== 'undefined') {
-			this.options.show = options.show;
+		this.options = {};
+		this.isVisible = false;
+		if(typeof(options) !== 'undefined') {
+			if(typeof(options.show) !== 'undefined') {
+				this.options.show = options.show;
+			} else {
+				this.options.show = true;
+			}
 		} else {
 			this.options.show = true;
 		}
-	} else {
-		this.options.show = true;
+		this.isVisible = this.options.show;
 	}
-	this.isVisible = this.options.show;
 
-	this.hide = function() {
+	hide() {
 		// console.log('mock_window_hidden');
-		self.isVisible = false;
-		self.emit(eventList.HIDDEN);
-	};
-	this.show = function() {
+		this.isVisible = false;
+		this.emit(eventList.HIDDEN, this);
+	}
+
+	show() {
 		// console.lg('mock_window_shown');
-		self.isVisible = true;
-		self.emit(eventList.SHOWN);
-	};
-	this.close = function(closeWindow) {
+		this.isVisible = true;
+		this.emit(eventList.SHOWN, this);
+	}
+
+	close(closeWindow) {
 		if(closeWindow) {
-			setImmediate(function() {
-				self.emit(eventList.CLOSED);
+			setImmediate(() => {
+				this.emit(eventList.CLOSED, this);
 			});
 			
 		} else {
-			setImmediate(function() {
-				self.emit(eventList.CLOSE);
+			setImmediate(() => {
+				this.emit(eventList.CLOSE, this);
 			});
 		}
-	};
-	var self = this;
-};
-util.inherits(createNewWindow, EventEmitter);
+	}
+}
 
 exports.eventList = eventList;
 exports.open = function() {
-	var newWindow = new createNewWindow();
+	const newWindow = new MockWindow();
 	setTimeout(function() {
 		// console.log('firing loaded event');
-		newWindow.emit(eventList.LOADED);
+		newWindow.emit(eventList.LOADED, newWindow);
 	}, 200);
 	return newWindow;
 };

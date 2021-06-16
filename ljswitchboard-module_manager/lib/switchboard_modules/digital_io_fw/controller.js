@@ -387,7 +387,7 @@ function module() {
         var configDeviceGlobal = function(data, onSuccess) {
             var handleConfigError = function(err) {
                 console.log('configError',err,binding,value);
-                sdFramework.manageError(err);
+                showAlert('Error: '+err.toString());
                 onSuccess();
             }
             console.log(data.binding.bindingClass,'!event!');
@@ -598,23 +598,8 @@ function module() {
         framework.putConfigBindings(moduleBindings);
         onSuccess();
     };
-    this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRegisterWritten = function(framework, registerName, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefresh = function(framework, registerNames, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefreshed = function(framework, results, onError, onSuccess) {
-        onSuccess();
-    };
     this.onCloseDevice = function(framework, device, onError, onSuccess) {
         framework.clearConfigBindings();
-        onSuccess();
-    };
-    this.onUnloadModule = function(framework, onError, onSuccess) {
         onSuccess();
     };
     this.onLoadError = function(framework, description, onHandle) {

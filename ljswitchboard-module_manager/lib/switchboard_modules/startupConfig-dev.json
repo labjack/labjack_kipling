@@ -68,7 +68,6 @@
             "connectionType":"USB"
         }
     ],
-    "displayDevTools": false,
     "overrideAutoModuleLoad": true,
     "moduleName": "lua_script_debugger"
 }

@@ -1,10 +1,6 @@
-
-
 var async = require('async');
-var dict = require('dict');
 var q = require('q');
 var semver = require('semver');
-var USE_MODERN_BUFFER_ALLOC = semver.gt(process.version, '8.0.0');
 
 var driver_const = null;
 exports.setDriverConst = function(driver_constants) {
@@ -329,11 +325,7 @@ exports.writeFlash = function(device, startAddress, length, size, key, data) {
         bufferData = data;
     } else {
         // Assume the data object is an array of unsigned integer (uint32) sized numbers.
-        if(USE_MODERN_BUFFER_ALLOC) {
-            bufferData = Buffer.alloc(data.length*4);
-        } else {
-            bufferData = new Buffer(data.length*4);
-        }
+        bufferData = Buffer.alloc(data.length*4);
         var offset = 0;
         data.forEach(function(val) {
             bufferData.writeUInt32BE(val, offset);
@@ -405,7 +397,7 @@ function range(start, stop, step) {
  * @param {Number} startAddress The address to start erasing flash pages on.
  * @param {Number} numPages The number of pages to erase;
  * @param {Number} key Permissions key for that range.
- * @return {q.promise} Promise that resolves to the provided bundle after the
+ * @return {Promise} Promise that resolves to the provided bundle after the
  *      erase is complete.
 **/
 exports.eraseFlash = function(device, startAddress, numPages, key) {

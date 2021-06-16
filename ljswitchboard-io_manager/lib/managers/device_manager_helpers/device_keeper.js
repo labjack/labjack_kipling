@@ -1,5 +1,3 @@
-
-var process_manager = require('process_manager');
 var q = require('q');
 var async = require('async');
 
@@ -8,7 +6,6 @@ var constants = require('../../common/constants');
 // Save event emitter variables for easy access.
 var DEVICE_CONTROLLER_DEVICE_OPENED = constants.DEVICE_CONTROLLER_DEVICE_OPENED;
 var DEVICE_CONTROLLER_DEVICE_CLOSED = constants.DEVICE_CONTROLLER_DEVICE_CLOSED;
-
 
 // var device_interface = require('../../single_device_interface');
 // var device_delegator_path = './lib/delegators/single_device_delegator.js';
@@ -24,7 +21,6 @@ var modbus_map = require('ljswitchboard-modbus_map');
 var ljmConstants = modbus_map.getConstants();
 
 var simple_logger = require('ljswitchboard-simple_logger');
-
 
 var ENABLE_PRINTING = false;
 function print() {
@@ -62,20 +58,16 @@ function printNewData() {
 
 
 function createDeviceKeeper(io_delegator, link) {
-	var send = link.send;
-	var sendMessage = link.sendMessage;
-	// var deviceScanner = new device_scanner.deviceScanner();
 	var deviceScanner = device_scanner;
 
-
 	var deviceSendMessage = function(deviceKey, message) {
-		send({
+		link.send({
 			'deviceKey': deviceKey,
 			'message': message
 		});
 	};
 	var sendEvent = function(eventName, data) {
-		send({
+		link.send({
 			'eventName': eventName,
 			'data': data
 		});
@@ -123,7 +115,7 @@ function createDeviceKeeper(io_delegator, link) {
 
 	/********************* Exposed Functions **********************************/
 	/**
-	 *	Function that gets called to open a new device.  It uses the 
+	 *	Function that gets called to open a new device.  It uses the
 	 *	accessory device_generator.js file to create device objects and abstract
 	 *	the differences between devices opened in the same process vs opening
 	 *	them in a subprocess.
@@ -166,7 +158,7 @@ function createDeviceKeeper(io_delegator, link) {
 		}
 
 		var defered = q.defer();
-		
+
 		// Determine if we should be starting a sub-process
 		var spinupProcess = false;
 		if(newProcess) {
@@ -205,7 +197,7 @@ function createDeviceKeeper(io_delegator, link) {
 
 		// get the devices comm. key
 		var newKey = getDeviceKey();
-		
+
 		// Make sure that the new key is unique
 		while(self.devices[newKey]) {
 			console.log('Making another unique key');
@@ -234,7 +226,7 @@ function createDeviceKeeper(io_delegator, link) {
 	};
 
 	/**
-	 *	The close command in combination with the removeDeviceReference 
+	 *	The close command in combination with the removeDeviceReference
 	 * 	functions properly close devices and remove them from the local listing
 	 *	of devices.
 	 */
@@ -280,7 +272,7 @@ function createDeviceKeeper(io_delegator, link) {
 	};
 
 	/**
-	 * 	Close all devices that are in the self.devices object.  The 
+	 * 	Close all devices that are in the self.devices object.  The
 	 *	closeAllDevices function makes an array of closeOps that get called
 	 *	in parallel hence the necessity of the secondary createCloseOp function.
 	 */
@@ -313,7 +305,6 @@ function createDeviceKeeper(io_delegator, link) {
 	};
 	this.closeAllDevices = function() {
 		var defered = q.defer();
-		var numDevicesClosed = 0;
 
 		var comKeys = Object.keys(self.devices);
 
@@ -346,7 +337,7 @@ function createDeviceKeeper(io_delegator, link) {
 					defered.resolve(retData);
 				}
 			});
-		
+
 		return defered.promise;
 	};
 
@@ -355,12 +346,9 @@ function createDeviceKeeper(io_delegator, link) {
 	 *	managing.
 	 */
 	this.getNumDevices = function() {
-		var defered = q.defer();
-		var numDevices = Object.keys(self.devices).length;
-		defered.resolve(numDevices);
-		return defered.promise;
+		const numDevices = Object.keys(self.devices).length;
+		return Promise.resolve(numDevices);
 	};
-
 
 	/**
 	 * Accessory functions for getDeviceListing that filters out devices from the
@@ -538,7 +526,7 @@ function createDeviceKeeper(io_delegator, link) {
 				}
 			}
 
-			
+
 			var deviceKeys = Object.keys(self.devices);
 			deviceKeys.forEach(function(deviceKey) {
 				var added = false;
@@ -553,7 +541,7 @@ function createDeviceKeeper(io_delegator, link) {
 						} else if(typeof(curDevice[attribute]) !== 'undefined') {
 							devListing[attribute] = curDevice[attribute];
 							if(attribute === 'deviceErrors') {
-								
+
 							}
 						} else {
 							devListing[attribute] = 'N/A';
@@ -567,7 +555,7 @@ function createDeviceKeeper(io_delegator, link) {
 		} catch(err) {
 			console.log('Error in getDeviceListing', err, err.stack);
 		}
-		
+
 		return defered.promise;
 	};
 
@@ -622,7 +610,7 @@ function createDeviceKeeper(io_delegator, link) {
 		});
 		return defered.promise;
 	};
-	
+
 	this.listAllDevices = function(options) {
 		var defered = q.defer();
 
@@ -639,6 +627,7 @@ function createDeviceKeeper(io_delegator, link) {
 		.then(function(data) {
 			defered.resolve(data);
 		}, defered.reject);
+
 		return defered.promise;
 	};
 
@@ -650,21 +639,17 @@ function createDeviceKeeper(io_delegator, link) {
 	};
 
 	this.getCachedListAllDevices = function() {
-		var defered = q.defer();
-
 		// Build array of currently connected devices.
-		var currentDevices = [];
-		var keys = Object.keys(self.devices);
+		const currentDevices = [];
+		const keys = Object.keys(self.devices);
 		keys.forEach(function(key) {
-			var dev = self.devices[key].device;
+			const dev = self.devices[key].device;
 			currentDevices.push(dev);
 		});
-		
-		deviceScanner.getLastFoundDevices(currentDevices)
-		.then(defered.resolve, defered.reject);
-		return defered.promise;
+
+		return deviceScanner.getLastFoundDevices(currentDevices);
 	};
-	
+
 	this.enableMockDeviceScanning = function() {
 		var defered = q.defer();
 		deviceScanner.disableDeviceScanning()
@@ -686,6 +671,12 @@ function createDeviceKeeper(io_delegator, link) {
 	this.addMockDevice = function(deviceInfo) {
 		var defered = q.defer();
 		deviceScanner.addMockDevice(deviceInfo)
+		.then(defered.resolve, defered.reject);
+		return defered.promise;
+	};
+	this.removeAllMockDevices = function() {
+		var defered = q.defer();
+		deviceScanner.removeAllMockDevices()
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	};
@@ -798,7 +789,7 @@ function createDeviceKeeper(io_delegator, link) {
 		var defered = q.defer();
 
 		defered.resolve();
-		
+
 		return defered.promise;
 	};
 
@@ -807,13 +798,13 @@ function createDeviceKeeper(io_delegator, link) {
 	this.configLoggerWithBasicConfigs = function(cwd,name) {
 		debugLogger('--- In Func: configLoggerWithBasicConfigs', cwd);
 		var defered = q.defer();
-		
+
 		self.logConfigs = simple_logger.generateBasicConfig({
 			'same_vals_all_devices': true,
 			'registers': ['AIN0','AIN1'],
 			'update_rate_ms': 100,
 		},getLoggerCDeviceArray());
-		
+
 		// Over-write config object default name & file prefix.
 		self.logConfigs.logging_config.name = name;
 		self.logConfigs.logging_config.file_prefix = name;
@@ -851,7 +842,7 @@ function createDeviceKeeper(io_delegator, link) {
 		// 	defered.resolve();
 		// });
 		// self.simpleLogger.once(eventMap.STOPPED_LOGGER, onStoppedHandler);
-		
+
 
 		self.simpleLogger.startLogger()
 		.then(function succ() {

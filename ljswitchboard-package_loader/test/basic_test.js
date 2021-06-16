@@ -1,13 +1,15 @@
 var assert = require('chai').assert;
 
 var path = require('path');
-var package_loader = require('../lib/ljswitchboard-package_loader');
+
+const PackageLoader = require('../lib/ljswitchboard-package_loader').PackageLoader;
+const package_loader = new PackageLoader();
+
 var testPackages = require('./test_packages').testPackages;
 var testUtils = require('./test_utils');
 var cleanExtractionPath = testUtils.cleanExtractionPath;
 var testSinglePackageUpdate = testUtils.testSinglePackageUpdate;
 
-var gns = 'ljswitchboardData';
 var localFolder = 'test_extraction_folder';
 
 var fs = require('fs');
@@ -16,54 +18,37 @@ var tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'labjack-test-'));
 var directory = path.join(tmpDir, localFolder);
 
 describe('basic', function() {
-	it('load a library', function (done) {
-		assert.strictEqual(typeof(global.ljswitchboard), 'object');
-
-		var keys = Object.keys(global.ljswitchboard);
-		assert.deepEqual(keys, []);
-		// console.log('Global Scope', global.ljswitchboardData);
-		package_loader.loadPackage({
+	it('load a library', async function () {
+		await package_loader.loadPackage({
 			'name': 'mocha',
 			'loadMethod': 'require',
 			'location': 'mocha'
 		});
 
-		keys = Object.keys(global.ljswitchboard);
-		assert.deepEqual(keys, ['mocha']);
-		// console.log('Global Scope', global.ljswitchboardData);
-		done();
+		assert.equal(true, package_loader.hasPackage('mocha'));
 	});
-	it('change namespace', function (done) {
-		var keys = Object.keys(global.ljswitchboard);
-		assert.deepEqual(keys, ['mocha']);
-
-		// Change the global namespace being used
-		package_loader.setNameSpace(gns);
-
-		assert.strictEqual(typeof(global.ljswitchboard), 'undefined');
-		assert.strictEqual(typeof(global.ljswitchboardData), 'object');
-		keys = Object.keys(global.ljswitchboardData);
-		assert.deepEqual(keys, ['mocha']);
-		done();
-	});
-	it('add a managed package', function (done) {
+	it('add a managed package', async function () {
 		// add the staticFiles package to the packageManager
-		package_loader.loadPackage(testPackages.staticFiles);
-		package_loader.on(package_loader.eventList.OVERWRITING_MANAGED_PACKAGE, function(info) {
-			assert.strictEqual(info.name, 'ljswitchboard-static_files');
-			assert.deepEqual(package_loader.getManagedPackages(), [
-				'ljswitchboard-static_files',
-				'ljswitchboard-core'
+		package_loader.reset();
+		await package_loader.loadPackage(testPackages.staticFiles);
+
+		return new Promise(async (resolve) => {
+			package_loader.on(package_loader.eventList.OVERWRITING_MANAGED_PACKAGE, function(info) {
+				assert.strictEqual(info.name, 'ljswitchboard-static_files');
+				assert.deepEqual(package_loader.getManagedPackages(), [
+					'ljswitchboard-static_files',
+					'ljswitchboard-core'
 				]);
-			done();
+				resolve();
+			});
+
+			assert.deepEqual(package_loader.getDependencyList(), ['ljswitchboard-package_loader']);
+			assert.deepEqual(package_loader.getManagedPackages(), ['ljswitchboard-static_files']);
+			assert.deepEqual(Object.keys(package_loader.managedPackages), [testPackages.staticFiles.name]);
+
+			await package_loader.loadPackage(testPackages.core);
+			await package_loader.loadPackage(testPackages.staticFiles);
 		});
-
-		assert.deepEqual(package_loader.getDependencyList(), ['ljswitchboard-package_loader']);
-		assert.deepEqual(package_loader.getManagedPackages(), ['ljswitchboard-static_files']);
-		assert.deepEqual(Object.keys(global[gns]), ['mocha']);
-
-		package_loader.loadPackage(testPackages.core);
-		package_loader.loadPackage(testPackages.staticFiles);
 	});
 	it('run the package manager', function (done) {
 		cleanExtractionPath(directory);
@@ -85,7 +70,8 @@ describe('basic', function() {
 	});
 	it('test basic inclusion of packages', function (done) {
 		// Check global name space
-		assert.deepEqual(Object.keys(global[gns]), [
+
+		assert.deepEqual(Object.keys(package_loader._loadedPackages), [
 			'mocha',
 			'ljswitchboard-static_files',
 			'ljswitchboard-core'
@@ -117,7 +103,7 @@ describe('basic', function() {
 		package_loader.deleteManagedPackage('ljswitchboard-static_files');
 
 		// Check global name space
-		assert.deepEqual(Object.keys(global[gns]), [
+		assert.deepEqual(Object.keys(package_loader._loadedPackages), [
 			'mocha',
 			'ljswitchboard-core'
 		]);
@@ -136,7 +122,7 @@ describe('basic', function() {
 		// This method is just as frowned upon.
 		package_loader.deleteAllManagedPackages();
 		// Check global name space
-		assert.deepEqual(Object.keys(global[gns]), [
+		assert.deepEqual(Object.keys(package_loader._loadedPackages), [
 			'mocha',
 		]);
 
@@ -150,57 +136,51 @@ describe('basic', function() {
 		]);
 		done();
 	});
-	it('run the package manager several times', function (done) {
+	it('run the package manager several times', async function () {
 		cleanExtractionPath(directory);
-		package_loader.loadPackage(testPackages.core);
-		package_loader.loadPackage(testPackages.staticFiles);
-		package_loader.runPackageManager()
-		.then(function(res) {
-			// Make sure that both packages were included
-			var resKeys = Object.keys(res);
-			assert.strictEqual(resKeys.length, 2);
+		await package_loader.loadPackage(testPackages.core);
+		await package_loader.loadPackage(testPackages.staticFiles);
 
-			var numSuccess = 0;
-			resKeys.forEach(function(resKey) {
-				if(res[resKey].overallResult) {
-					numSuccess += 1;
-				}
-			});
-			assert.strictEqual(numSuccess, 1);
+		const res1 = await package_loader.runPackageManager();
+		// Make sure that both packages were included
+		var resKeys = Object.keys(res1);
+		assert.strictEqual(resKeys.length, 2);
 
-			// Check global name space
-			assert.deepEqual(Object.keys(global[gns]), [
-				'mocha',
-				'ljswitchboard-static_files'
-			]);
-
-			// Run a second time to make sure no packages get managed
-			package_loader.runPackageManager()
-			.then(function(res) {
-				// Make sure that both packages were included
-				assert.strictEqual(Object.keys(res).length, 1);
-
-				// Check global name space
-				assert.deepEqual(Object.keys(global[gns]), [
-					'mocha',
-					'ljswitchboard-static_files',
-					'ljswitchboard-core'
-				]);
-				// Run a second time to make sure no packages get managed
-				package_loader.runPackageManager()
-				.then(function(res) {
-					// Make sure that both packages were included
-					assert.strictEqual(Object.keys(res).length, 0);
-
-					// Check global name space
-					assert.deepEqual(Object.keys(global[gns]), [
-						'mocha',
-						'ljswitchboard-static_files',
-						'ljswitchboard-core'
-					]);
-					done();
-				});
-			});
+		var numSuccess = 0;
+		resKeys.forEach(function(resKey) {
+			if(res[resKey].overallResult) {
+				numSuccess += 1;
+			}
 		});
+		assert.strictEqual(numSuccess, 1);
+
+		// Check global name space
+		assert.deepEqual(Object.keys(package_loader._loadedPackages), [
+			'mocha',
+			'ljswitchboard-static_files'
+		]);
+
+		// Run a second time to make sure no packages get managed
+		const res2 = await package_loader.runPackageManager();
+		// Make sure that both packages were included
+		assert.strictEqual(Object.keys(res2).length, 1);
+
+		// Check global name space
+		assert.deepEqual(Object.keys(package_loader._loadedPackages), [
+			'mocha',
+			'ljswitchboard-static_files',
+			'ljswitchboard-core'
+		]);
+		// Run a second time to make sure no packages get managed
+		const res = await package_loader.runPackageManager();
+		// Make sure that both packages were included
+		assert.strictEqual(Object.keys(res).length, 0);
+
+		// Check global name space
+		assert.deepEqual(Object.keys(package_loader._loadedPackages), [
+			'mocha',
+			'ljswitchboard-static_files',
+			'ljswitchboard-core'
+		]);
 	});
 });

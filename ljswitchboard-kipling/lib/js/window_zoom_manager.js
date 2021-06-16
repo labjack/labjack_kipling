@@ -1,50 +1,41 @@
+'use strict';
 
+const {EventEmitter} = require('events');
 
-var q = require('q');
-var async = require('async');
+class WindowZoomManager extends EventEmitter {
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
+    constructor() {
+        super();
 
-// Define the window zoom manager
-function createWindowZoomManager() {
-    this.zoomLevel = 1;
-    this.zoomIncrement = 0.05;
+        this.zoomLevel = 1;
+        this.zoomIncrement = 0.05;
 
-    this.keyboardEventHandler = undefined;
+        this.keyboardEventHandler = undefined;
 
-    // Set the initial body zoom.
-    window.document.body.style.zoom = this.initialZoom;
-
-    function zoomIn() {
-        self.zoomLevel = self.zoomLevel + self.zoomIncrement;
-        window.document.body.style.zoom = self.zoomLevel;
-        self.emit('zoomIn', self.zoomLevel);
-        self.emit('zoom', self.zoomLevel);
+        // Set the initial body zoom.
+        window.document.body.style.zoom = this.initialZoom;
     }
-    
-    function zoomOut() {
-        self.zoomLevel = self.zoomLevel - self.zoomIncrement;
-        window.document.body.style.zoom = self.zoomLevel;
-        self.emit('zoomOut', self.zoomLevel);
-        self.emit('zoom', self.zoomLevel);
+
+    zoomIn() {
+        this.zoomLevel = this.zoomLevel + this.zoomIncrement;
+        window.document.body.style.zoom = this.zoomLevel;
+        this.emit('zoomIn', this.zoomLevel);
+        this.emit('zoom', this.zoomLevel);
     }
-    
 
-    this.zoomIn = zoomIn;
-    this.zoomOut = zoomOut;
+    zoomOut() {
+        this.zoomLevel = this.zoomLevel - this.zoomIncrement;
+        window.document.body.style.zoom = this.zoomLevel;
+        this.emit('zoomOut', this.zoomLevel);
+        this.emit('zoom', this.zoomLevel);
+    }
 
-    // The window zoom manager is initialized by the index.js file in the 
+    // The window zoom manager is initialized by the index.js file in the
     // Kipling application.
-    this.init = function(bundle) {
+    init(bundle) {
         // console.log('Initializing window zoom manager', bundle);
-        var defered = q.defer();
-
-        defered.resolve(bundle);
-        return defered.promise;
-    };
-    var self = this;
+        return Promise.resolve(bundle);
+    }
 }
-util.inherits(createWindowZoomManager, EventEmitter);
 
-var WINDOW_ZOOM_MANAGER = new createWindowZoomManager();
+global.WINDOW_ZOOM_MANAGER = new WindowZoomManager();

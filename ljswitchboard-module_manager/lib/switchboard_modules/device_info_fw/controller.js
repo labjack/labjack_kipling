@@ -1,5 +1,5 @@
 /* jshint undef: true, unused: true, undef: true */
-/* global handlebars, console, q, static_files, dict, $, showAlert, driver_const */
+/* global handlebars, console, q, dict, $, showAlert, driver_const */
 /**
  * Goals for the Device Info module.
  * This module displays basic device information about the Digit and T7 devices.
@@ -7,6 +7,8 @@
  * @author Chris Johnson (LabJack Corp, 2014)
 **/
 
+const q = require('q');
+const package_loader = global.package_loader;
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
 /**
@@ -15,7 +17,7 @@ var MODULE_UPDATE_PERIOD_MS = 1000;
  */
 function module() {
     this.MODULE_DEBUGGING = true;
-    this.MODULE_LOADING_STATE_DEBUGGING = false;
+    this.MODULE_LOADING_STATE_DEBUGGING = true;
     this.activeDevice = undefined;
     this.framework = undefined;
     this.moduleContext = {};
@@ -24,10 +26,11 @@ function module() {
     var savePeriodicRegisters = function(regInfo) {
         self.periodicRegisters[regInfo.name] = regInfo;
     };
-    this.currentValues = dict();
-    this.bufferedValues = dict();
-    this.newBufferedValues = dict();
+    this.currentValues = new Map();
+    this.bufferedValues = new Map();
+    this.newBufferedValues = new Map();
 
+    const static_files = package_loader.getPackage('static_files');
     var staticFilesDir = static_files.getDir();
 
     // var genericConfigCallback = function(data, onSuccess) {
@@ -92,9 +95,7 @@ function module() {
                 var workingDirPath = 'file:///' + posixPath;
                 var filePath = workingDirPath + path.posix.sep + cfgFileName;
                 console.log('HERE', data, progPath, posixPath, filePath);
-                if(typeof(gui) === 'undefined') {
-                    gui = require('nw.gui');
-                }
+                const gui = global.gui;
                 gui.Shell.openExternal(filePath);
             } catch(errA) {
                 console.log('error opening application', errA);
@@ -128,9 +129,7 @@ function module() {
             'LJLogM': "file:///C:/Program Files (x86)/LabJack/Applications/LJLogM.exe",
             'LJStreamM': "file:///C:/Program Files (x86)/LabJack/Applications/LJStreamM.exe"
         }[appName];
-        if(typeof(gui) === 'undefined') {
-            gui = require('nw.gui');
-        }
+        const gui = global.gui;
         gui.Shell.openExternal(appPath);
     }
     function configAndOpenApp(appName) {
@@ -163,7 +162,7 @@ function module() {
     function getConfigAndOpenInApplication(appName, ct) {
         return function configAndOpenInApplication(data, onSuccess) {
             console.log('Opening Application:', appName, ct);
-            
+
             var msgStr = 'Opening device in '+appName +' ';
             var preventCloseOpen = false;
             var ctToOpen;
@@ -174,7 +173,7 @@ function module() {
                 msgStr += 'over' + ct;
                 ctToOpen = driver_const.connectionTypes[ct.toUpperCase()];
             }
-            
+
             if(ctToOpen == driver_const.connectionTypes.USB) {
                 preventCloseOpen = false;
             } else if(ctToOpen == driver_const.connectionTypes.Ethernet) {
@@ -288,9 +287,9 @@ function module() {
         framework.putSmartBindings(customSmartBindings);
         onSuccess();
     };
-    
+
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -385,7 +384,7 @@ function module() {
             });
             onSuccess();
         };
-        
+
         if(device.savedAttributes.deviceTypeName === 'T7') {
             deviceTemplate = handlebars.compile(
                 framework.moduleData.htmlFiles.t7_template
@@ -416,7 +415,7 @@ function module() {
             promises.push(getExtraOperation(device,'sRead', 'WIFI_MAC'));
             // promises.push(getExtraOperation(device, 'getRecoveryFirmwareVersion'))
             promises.push(function getDeviceRecoveryFirmwareVersion() {
-                var defered = q.defer();   
+                var defered = q.defer();
                 device.getRecoveryFirmwareVersion()
                 .then(function(res) {
                     console.log('Get Device Recovery Firmware Version Result', res);
@@ -470,7 +469,7 @@ function module() {
                 return defered.promise;
             }());
             promises.push(function getAvailableConnectionTypes() {
-                var defered = q.defer();   
+                var defered = q.defer();
                 device.getAvailableConnectionTypes()
                 .then(function(result) {
                     console.log('Available connection types');
@@ -525,7 +524,8 @@ function module() {
                 // 'RTC_TIME_S', // Not available in T4 FW 0.202
                 // 'SNTP_UPDATE_INTERVAL', // Not available in T4 FW 0.202
             ];
-            
+
+
             // Not available in T4 FW 0.202
             var secondaryExtraRegisters = [
                 'TEMPERATURE_DEVICE_K',
@@ -535,7 +535,7 @@ function module() {
             promises.push(getExtraOperation(device,'sReadMany', secondaryExtraRegisters));
             promises.push(getExtraOperation(device,'sRead', 'ETHERNET_MAC'));
             promises.push(function getDeviceRecoveryFirmwareVersion() {
-                var defered = q.defer();   
+                var defered = q.defer();
                 device.getRecoveryFirmwareVersion()
                 .then(function(res) {
                     console.log('Get Device Recovery Firmware Version Result', res);
@@ -567,7 +567,7 @@ function module() {
                 return defered.promise;
             }());
             promises.push(function getDeviceAuthStatus() {
-                var defered = q.defer();   
+                var defered = q.defer();
                 device.isAuthorized()
                 .then(function(res) {
                     console.log('Device Auth Status', res);
@@ -589,7 +589,117 @@ function module() {
                 return defered.promise;
             }());
             promises.push(function getAvailableConnectionTypes() {
-                var defered = q.defer();   
+                var defered = q.defer();
+                device.getAvailableConnectionTypes()
+                .then(function(result) {
+                    console.log('Available connection types');
+                    var connections = result.connections;
+                    var isUSB = false;
+                    var isEth = false;
+                    var isWiFi = false;
+                    connections.forEach(function(connection) {
+                        if(connection.type === 'USB') {
+                            isUSB = connection.isAvailable;
+                        }
+                        if(connection.type === 'Ethernet') {
+                            isEth = connection.isAvailable;
+                        }
+                        if(connection.type === 'WiFi') {
+                            isWiFi = connection.isAvailable;
+                        }
+                    });
+                    defered.resolve({
+                        'val': result,
+                        'name': 'availableConnections',
+                        'isUSB': isUSB,
+                        'isEth': isEth,
+                        'isWiFi': isWiFi,
+                    });
+                }, function(err) {
+                    defered.reject(err);
+                });
+                return defered.promise;
+            }());
+            promises.push(getExtraOperation(device,'getLatestDeviceErrors'));
+        } else if(device.savedAttributes.deviceTypeName === 'T8') {
+            deviceTemplate = handlebars.compile(
+                framework.moduleData.htmlFiles.t8_template
+            );
+
+            // Extra required data for T4s
+            extraRegisters = [
+                'ETHERNET_IP',
+                'POWER_LED',
+                'WATCHDOG_ENABLE_DEFAULT',
+                'HARDWARE_VERSION',
+                // 'RTC_TIME_S', // Not available in T4 FW 0.202
+                // 'SNTP_UPDATE_INTERVAL', // Not available in T4 FW 0.202
+            ];
+
+            // Not available in T4 FW 0.202
+            var secondaryExtraRegisters = [
+                'TEMPERATURE_DEVICE_K',
+            ];
+            // var secondaryExtraRegisters = [];
+            promises.push(getExtraOperation(device,'sReadMany', extraRegisters));
+            promises.push(getExtraOperation(device,'sReadMany', secondaryExtraRegisters));
+            promises.push(getExtraOperation(device,'sRead', 'ETHERNET_MAC'));
+            promises.push(function getDeviceRecoveryFirmwareVersion() {
+                var defered = q.defer();
+                device.getRecoveryFirmwareVersion()
+                .then(function(res) {
+                    console.log('Get Device Recovery Firmware Version Result', res);
+                    defered.resolve({
+                        'val': res,
+                        'name': 'recoveryFirmwareVersion'
+                    });
+                }, function(err) {
+                    defered.reject(err);
+                });
+                return defered.promise;
+            }());
+            promises.push(function performCheckForHardwareIssues() {
+                var defered = q.defer();
+                device.checkForHardwareIssues()
+                .then(function(res) {
+                    console.log('HW Issues Results', res);
+                    var retData = JSON.parse(JSON.stringify(res));
+                    retData.name = 'hwIssues';
+                    retData.testResults = [];
+                    var tests = Object.keys(res.testResults);
+                    tests.forEach(function(key) {
+                        retData.testResults.push(res.testResults[key]);
+                    });
+                    defered.resolve(retData);
+                }, function(err) {
+                    defered.reject(err);
+                });
+                return defered.promise;
+            }());
+            promises.push(function getDeviceAuthStatus() {
+                var defered = q.defer();
+                device.isAuthorized()
+                .then(function(res) {
+                    console.log('Device Auth Status', res);
+                    var message = "Device is Authorized";
+                    var shortMessage = "Authorized";
+                    if(!res) {
+                        message = "Not authorized, please email support@labjack.com";
+                        shortMessage = "Not Authorized";
+                    }
+                    defered.resolve({
+                        'val': res,
+                        'name': 'isAuthorized',
+                        'message': message,
+                        'shortMessage': shortMessage,
+                    });
+                }, function(err) {
+                    defered.reject(err);
+                });
+                return defered.promise;
+            }());
+            promises.push(function getAvailableConnectionTypes() {
+                var defered = q.defer();
                 device.getAvailableConnectionTypes()
                 .then(function(result) {
                     console.log('Available connection types');
@@ -623,7 +733,7 @@ function module() {
             promises.push(getExtraOperation(device,'getLatestDeviceErrors'));
         }
 
-        q.allSettled(promises)
+        Promise.allSettled(promises)
         .then(function(results) {
             var data = {};
             results.forEach(function(result) {
@@ -648,9 +758,11 @@ function module() {
                 }
             });
             continueFramework(deviceTemplate, data);
+        }).catch(err => {
+            console.error(err);
         });
     };
-    
+
 
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
         if(self.MODULE_LOADING_STATE_DEBUGGING) {

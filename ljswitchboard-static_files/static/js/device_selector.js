@@ -8,33 +8,13 @@
  *      handlebars = require('handlebars');
  *      q = require('q');
  *      device_controller = require('./device_controller');
- *      gui = require('nw.gui');
 **/
-var handlebars = require('handlebars');
-var q = require('q');
-var device_controller;
-try {
-    device_controller = require('./device_controller');
-} catch(err) {
-    console.log('in device_selector.js, error requiring device_controller', err);
-}
-var gui;
-try {
-    gui = require('nw.gui');
-} catch(err) {
-    console.log('in device_selector.js, error requiring nw.gui');
-}
-
-var OPEN_FAIL_MESSAGE = handlebars.compile(
-    'Sorry. Failed to the open device. Please check the ' +
-    'physical connection and try again. ' +
-    'Driver error number: {{.}}');
-
-var CONNECTED_OVER_TEMPLATE = handlebars.compile('Connected over {{ . }}');
-
+const device_controller = require('./device_controller');
+const gui = global.gui;
+const package_loader = global.package_loader;
+const fs_facade = package_loader.getPackage('fs_facade');
 
 var resizeTimeout;
-
 
 /**
  * Event handler to hide the connect buttons for a device.
@@ -89,9 +69,8 @@ function connectNewDevice(event)
         device_controller.getDeviceKeeper().addDevice(device);
         showFinishButton();
         $('.connect-button').slideDown();
-        container.find('.current-connection-indicator').html(
-            CONNECTED_OVER_TEMPLATE(typeStr)
-        );
+
+        container.find('.current-connection-indicator').html('Connected over ' + typeStr);
         container.children('#disconnect-button-holder').slideDown();
     };
 
@@ -183,7 +162,6 @@ function moveToModules() {
     );
 }
 
-
 /**
  * Show an error message in an alert modal at the top of the screen.
  *
@@ -194,77 +172,55 @@ function moveToModules() {
  * @param {String} errorMessage The message to display.
 **/
 function showAlert(errorMessage) {
-    var message = OPEN_FAIL_MESSAGE(errorMessage);
+    var message = 'Sorry. Failed to the open device. Please check the ' +
+        'physical connection and try again. ' +
+        'Driver error number: ' + errorMessage;
     $('#error-display').html(message);
     $('.device-selector-holder').css('margin-top', '0px');
     $('#alert-message').fadeIn();
-}
-
-
-function refreshDevices() {
-    renderDeviceSelector();
 }
 
 function kiplingStartupManager() {
 
     var startupConfigData = [];
 
-
     var handleErrors = function() {
-        var innerDeferred = q.defer();
-        innerDeferred.reject();
-        return innerDeferred.promise;
+        return Promise.reject();
     };
 
     this.loadConfigData = function() {
-        var innerDeferred = q.defer();
-        var filePath = fs_facade.getExternalURI('startupConfig.json');
-        if (gui.App.manifest.enableStartupConfig) {
-            fs_facade.getJSON(
-                filePath,
-                function() {
-                    console.error('startupConfig.json, fileNotFound');
-                    innerDeferred.reject();
-                },
-                function(contents) {
-                    innerDeferred.resolve(contents);
-                }
-            );
-        } else {
-            innerDeferred.reject();
-        }
-        return innerDeferred.promise;
-    };
-    var loadConfigData = this.loadConfigData;
-
-    this.startDevTools = function(configData) {
-        var innerDeferred = q.defer();
-        if (typeof(configData.displayDevTools) === "boolean") {
-            if(configData.displayDevTools){
-                // Display Dev-tools window, code ref:
-                // https://github.com/rogerwang/node-webkit/wiki/Debugging-with-devtools
-                gui.Window.get().showDevTools();
+        return new Promise((resolve, reject) => {
+            var filePath = fs_facade.getExternalURI('startupConfig.json');
+            if (gui.appManifest.enableStartupConfig) {
+                fs_facade.getJSON(
+                    filePath,
+                    function() {
+                        console.error('startupConfig.json, fileNotFound');
+                        reject();
+                    },
+                    function(contents) {
+                        resolve(contents);
+                    }
+                );
+            } else {
+                reject();
             }
-        }
-        innerDeferred.resolve(configData);
-        return innerDeferred.promise;
+        });
     };
-    var startDevTools = this.startDevTools;
 
     this.checkIfAutoConfigure = function(configData) {
-        var innerDeferred = q.defer();
-        if (configData.autoConnectToDevices !== undefined) {
-            if (configData.autoConnectToDevices){
-                innerDeferred.resolve(configData);
+        return new Promise((resolve, reject) => {
+            if (configData.autoConnectToDevices !== undefined) {
+                if (configData.autoConnectToDevices){
+                    resolve(configData);
+                } else {
+                    reject();
+                }
             } else {
-                innerDeferred.reject();
+                reject();
             }
-        } else {
-            innerDeferred.reject();
-        }
-        return innerDeferred.promise;
+        });
     };
-    var checkIfAutoConfigure = this.checkIfAutoConfigure;
 
     this.getDeviceData = function() {
         var devices = [];
@@ -322,112 +278,95 @@ function kiplingStartupManager() {
         }
         return devices;
     };
-    var getDeviceData = getDeviceData;
 
     this.connectToDevices = function(configData) {
-        var innerDeferred = q.defer();
-        var foundDevices = self.getDeviceData();
-        var moveToModule = false;
-        var numDevicesConnected = 0;
-        var numDevicesToConnectTo = 0;
+        return new Promise((resolve, reject) => {
+            var foundDevices = self.getDeviceData();
+            var moveToModule = false;
+            var numDevicesConnected = 0;
+            var numDevicesToConnectTo = 0;
 
-        var openDevice = function(sn, ct, dt) {
-            if(ct === 'Wifi') {
-                ct = 'LJM_ctWIFI';
-            } else if(ct === 'Ethernet') {
-                ct = 'LJM_ctETHERNET';
-            } else if(ct === 'USB') {
-                ct = 'LJM_ctUSB';
-            }
-            device_controller.openDevice(
-                sn,
-                '',
-                ct,
-                dt,
-                function() {
-                    numDevicesConnected += 1;
-                    if(numDevicesConnected == numDevicesToConnectTo) {
-                        innerDeferred.resolve(configData);
-                    }
-                },
-                function(device) {
-                    numDevicesConnected += 1;
-                    device_controller.getDeviceKeeper().addDevice(device);
-                    if(numDevicesConnected == numDevicesToConnectTo) {
-                        innerDeferred.resolve(configData);
-                    }
+            var openDevice = function (sn, ct, dt) {
+                if (ct === 'Wifi') {
+                    ct = 'LJM_ctWIFI';
+                } else if (ct === 'Ethernet') {
+                    ct = 'LJM_ctETHERNET';
+                } else if (ct === 'USB') {
+                    ct = 'LJM_ctUSB';
                 }
-            );
-        };
-
-        configData.ljmDeviceParameters.forEach(function(reqDevice){
-            foundDevices.forEach(function(foundDevice) {
-                if(reqDevice.serialNumber === foundDevice.serialNumber) {
-                    foundDevice.connectionTypes.forEach(function(cType){
-                        if(reqDevice.connectionType === cType.type) {
-                            cType.button.click();
-                            // openDevice(
-                            //     foundDevice.serialNumber,
-                            //     cType.type,
-                            //     foundDevice.deviceType
-                            // );
-                            numDevicesToConnectTo += 1;
-                            moveToModule = true;
+                device_controller.openDevice(
+                    sn,
+                    '',
+                    ct,
+                    dt,
+                    function () {
+                        numDevicesConnected += 1;
+                        if (numDevicesConnected == numDevicesToConnectTo) {
+                            resolve(configData);
                         }
-                    });
-                }
+                    },
+                    function (device) {
+                        numDevicesConnected += 1;
+                        device_controller.getDeviceKeeper().addDevice(device);
+                        if (numDevicesConnected == numDevicesToConnectTo) {
+                            resolve(configData);
+                        }
+                    }
+                );
+            };
+
+            configData.ljmDeviceParameters.forEach(function (reqDevice) {
+                foundDevices.forEach(function (foundDevice) {
+                    if (reqDevice.serialNumber === foundDevice.serialNumber) {
+                        foundDevice.connectionTypes.forEach(function (cType) {
+                            if (reqDevice.connectionType === cType.type) {
+                                cType.button.click();
+                                // openDevice(
+                                //     foundDevice.serialNumber,
+                                //     cType.type,
+                                //     foundDevice.deviceType
+                                // );
+                                numDevicesToConnectTo += 1;
+                                moveToModule = true;
+                            }
+                        });
+                    }
+                });
             });
+            if (!moveToModule) {
+                reject();
+            } else {
+                resolve(configData);
+            }
         });
-        if(!moveToModule) {
-            innerDeferred.reject();
-        }
-        else {
-            innerDeferred.resolve(configData);
-        }
-        return innerDeferred.promise;
     };
-    var connectToDevices = this.connectToDevices;
 
     this.configureStartUpModule = function(configData) {
-        var innerDeferred = q.defer();
-
         if(configData.overrideAutoModuleLoad !== undefined) {
             if(configData.overrideAutoModuleLoad){
                 START_UP_MODULE_OVERRIDE = configData.overrideAutoModuleLoad;
                 START_UP_MODULE_NAME = configData.moduleName;
             }
         }
-
-        innerDeferred.resolve(configData);
-        return innerDeferred.promise;
+        return Promise.resolve(configData);
     };
-    var configureStartUpModule = this.configureStartUpModule;
     this.introduceDelay = function(configData) {
-        var innerDeferred = q.defer();
-        setTimeout(innerDeferred.resolve, 2000);
-        return innerDeferred.promise;
+        return new Promise(resolve => {
+            setTimeout(resolve, 2000);
+        });
     };
     this.clickFinishButton = function() {
-        var innerDeferred = q.defer();
         $('#finish-button').click();
-        innerDeferred.resolve();
-        return innerDeferred.promise;
+        return Promise.resolve();
     };
-    var clickFinishButton = this.clickFinishButton;
-
 
     this.autoStart = function() {
-        var deferred = q.defer();
-        self.loadConfigData()
-        .then(self.startDevTools, handleErrors)
-        .then(self.configureStartUpModule, handleErrors)
-        .then(self.checkIfAutoConfigure, handleErrors)
-        .then(self.connectToDevices, handleErrors)
-        .then(self.introduceDelay, handleErrors)
-        .then(self.clickFinishButton, handleErrors)
-        .then(deferred.resolve, deferred.reject);
-
-        return deferred.promise;
+        return self.loadConfigData()
+            .then(self.configureStartUpModule, handleErrors)
+            .then(self.checkIfAutoConfigure, handleErrors)
+            .then(self.connectToDevices, handleErrors)
+            .then(self.introduceDelay, handleErrors)
+            .then(self.clickFinishButton, handleErrors);
     };
 
     var self = this;
@@ -446,40 +385,11 @@ function onResized() {
     $('.device-pane').height((num-10).toString()+'px');
 }
 
-function attachUpgradeLinkListeners() {
-    console.log('HERE, device_selector.js');
-    $('.labjackVersions #showUpgradeLinks').unbind();
-    $('.labjackVersions #closeUpgradeLinkWindow').unbind();
-    $('.labjackVersions #showUpgradeLinks').bind('click',function() {
-        $('#versionNumbers').hide();
-        $('#lvm_upgrade_box').show();
-    });
-    $('.labjackVersions #closeUpgradeLinkWindow').bind('click',function() {
-        $('#lvm_upgrade_box').hide();
-        $('#versionNumbers').show();
-    });
-
-    $('.labjackVersions .upgradeButton').bind('click',function(event) {
-        console.log('Clicked!',event.toElement);
-
-        var href = event.toElement.attributes.href.value;
-        FILE_DOWNLOADER_UTILITY.downloadFile(href)
-        .then(function(info) {
-            console.log('success!',info);
-        }, function(error) {
-            console.log('Error :(',error);
-        });
-    });
-    
-
-}
-
 $('#device-selector-holder').ready(function(){
     onResized();
     $('.connect-button').click(connectNewDevice);
     $('.close-alert-button').click(closeAlert);
     $('.disconnect-button').click(disconnectDevice);
-    $('#refresh-button').click(refreshDevices);
     $('#finish-button').click(moveToModules);
 
     $( window ).resize(function () {
@@ -495,7 +405,6 @@ $('#device-selector-holder').ready(function(){
     var starter = new kiplingStartupManager();
     starter.autoStart();
 
-    // attachUpgradeLinkListeners();
     LABJACK_VERSION_MANAGER.initializeLVM({
         'versionNumbersID': 'versionNumbers',
         'showLinksButtonID': 'showUpgradeLinks',
@@ -503,6 +412,6 @@ $('#device-selector-holder').ready(function(){
         'linksListID': 'upgradeLinksList',
         'hideLinksButtonID': 'closeUpgradeLinkWindow',
         'ljmVersion': device_controller.ljm_driver.installedDriverVersion,
-        'kiplingVersion': gui.App.manifest.version
+        'kiplingVersion': gui.appManifest.version
     });
 });

@@ -1,5 +1,5 @@
 /* jshint undef: true, unused: true, undef: true */
-/* global handlebars, console, q, static_files, dict, $, showAlert */
+/* global handlebars, console, q, $ */
 /**
  * Goals for the Device Info module.
  * This module displays basic device information about the Digit and T7 devices.
@@ -8,6 +8,8 @@
 **/
 
 console.log('Loaded Module');
+const package_loader = global.package_loader;
+const static_files = package_loader.getPackage('static_files');
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
 /**
@@ -29,9 +31,9 @@ function module() {
     var savePeriodicRegisters = function(regInfo) {
         self.periodicRegisters[regInfo.name] = regInfo;
     };
-    this.currentValues = dict();
-    this.bufferedValues = dict();
-    this.newBufferedValues = dict();
+    this.currentValues = new Map();
+    this.bufferedValues = new Map();
+    this.newBufferedValues = new Map();
 
     this.viewGenerator = undefined;
 
@@ -57,7 +59,7 @@ function module() {
         }
         onSuccess();
     };
-    
+
     this.clickData = undefined;
     function startDownloadingFiles(data, onSuccess) {
         console.log('in startDownloadingFiles', data);
@@ -107,7 +109,7 @@ function module() {
 
     /**
      * Function is called several times giving the module a chance to verify its
-     * startupData.  Execute onError if it is not valid or onSuccess if it is 
+     * startupData.  Execute onError if it is not valid or onSuccess if it is
      * valid.
     **/
     this.verifyStartupData = function(framework, startupData, onError, onSuccess) {
@@ -156,15 +158,15 @@ function module() {
 
         // Create the view generator
         self.viewGenerator = new createFileBrowserViewGenerator();
-        
+
         // Share the compiled templates object with the view generator
         self.viewGenerator.saveTemplates(self.templates);
 
         onSuccess();
     };
-    
+
     /**
-     * Function is called once every time a user selects a new device.  
+     * Function is called once every time a user selects a new device.
      * @param  {[type]} framework   The active framework instance.
      * @param  {[type]} device      The active framework instance.
      * @param  {[type]} onError     Function to be called if an error occurs.
@@ -218,27 +220,29 @@ function module() {
         }
     }
     function getExtraOperationSaveOp(device, operation, input) {
-        var defered = q.defer();
-        function onSuccess(res) {
-            var data = {'func': operation};
-            Object.keys(res).forEach(function(key) {
-                data[key] = res[key];
-            });
-            defered.resolve(data);
-        }
-        function onError(res) {
-            var data = {'func': operation};
-            Object.keys(res).forEach(function(key) {
-                data[key] = res[key];
-            });
-            defered.resolve(data);
-        }
-        if(input) {
-            device[operation](input).then(onSuccess, onError);
-        } else {
-            device[operation]().then(onSuccess, onError);
-        }
-        return defered.promise;
+        return new Promise((resolve, reject) => {
+            function onSuccess(res) {
+                var data = {'func': operation};
+                Object.keys(res).forEach(function (key) {
+                    data[key] = res[key];
+                });
+                resolve(data);
+            }
+
+            function onError(res) {
+                var data = {'func': operation};
+                Object.keys(res).forEach(function (key) {
+                    data[key] = res[key];
+                });
+                resolve(data);
+            }
+
+            if (input) {
+                device[operation](input).then(onSuccess, onError);
+            } else {
+                device[operation]().then(onSuccess, onError);
+            }
+        });
     }
 
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
@@ -274,7 +278,7 @@ function module() {
                 customContext.download_controls = self.viewGenerator.getDownloadControlsRaw(context);
                 customContext.browser_controls = self.viewGenerator.getBrowserControlsRaw(context);
                 customContext.file_browser = self.viewGenerator.getFileBrowserRaw(context);
-                
+
             } catch(err) {
                 console.error('Error compiling template', err);
             }
@@ -307,7 +311,7 @@ function module() {
         }
 
         console.log('Waiting for extra device data');
-        q.allSettled(promises)
+        Promise.allSettled(promises)
         .then(function(results) {
             var data = {};
             results.forEach(function(result) {
@@ -330,7 +334,7 @@ function module() {
             continueFramework(data);
         });
     };
-    
+
     this.table = undefined;
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
         if(self.MODULE_LOADING_STATE_DEBUGGING) {

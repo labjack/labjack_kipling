@@ -85,8 +85,8 @@ var liblabjackm = ljm_ffi.loadSafe();
 var registerName = 'AIN0';
 
 // Code to create node.js buffer objects.
-var pAddress = new Buffer(4);
-var pType = new Buffer(4);
+var pAddress = Buffer.alloc(4);
+var pType = Buffer.alloc(4);
 
 // Call the LJM Function:
 var data = liblabjackm.LJM_NameToAddress(registerName, pAddress, pType);
@@ -109,8 +109,8 @@ var ffi_liblabjackm = ljm_ffi.loadRaw();
 var registerName = 'AIN0';
 
 // Code to create node.js buffer objects.
-var pAddress = new Buffer(4);
-var pType = new Buffer(4);
+var pAddress = Buffer.alloc(4);
+var pType = Buffer.alloc(4);
 
 // Call the LJM Function:
 var data = ffi_liblabjackm.LJM_NameToAddress(registerName, pAddress, pType);

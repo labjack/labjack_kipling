@@ -15,7 +15,7 @@
     "ljswitchboard-ljm_device_curator": "*",
     "ljswitchboard-device_scanner": "*",
     "ljswitchboard-ljm_driver_constants": "*",
-    "async": "1.5.2",
+    "async": "3.2.0",
     "q": "1.5.1"
   },
   "customDeps": {
@@ -26,7 +26,7 @@
   "devDependencies": {
     "diff": ">=3.5.0",
     "ljm-ffi": "*",
-    "mocha": "7.2.0",
+    "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },
   "repository": {

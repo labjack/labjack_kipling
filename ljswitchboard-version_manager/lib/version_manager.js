@@ -15,7 +15,6 @@ var util = require('util');
 var q = require('q');
 var fetch = require('node-fetch');
 var async = require('async');
-var dict = require('dict');
 var path = require('path');
 
 var cheerio = require('cheerio');
@@ -60,7 +59,7 @@ function labjackVersionManager() {
 
     // define dict object with various urls in it
     this.urlDict = {
-        "kipling": {
+        "kipling_old": {
             "type":"kipling",
             "upgradeReference": "https://labjack.com/support/software/installers/ljm",
             "platformDependent": true,
@@ -125,7 +124,6 @@ function labjackVersionManager() {
                 {"url": "https://labjack.com/support/firmware/t7", "type": "organizer-current"},
                 {"url": "https://labjack.com/support/firmware/t7", "type": "current"},
                 {"url": "https://labjack.com/support/firmware/t7/beta", "type": "beta"},
-                {"url": "https://labjack.com/support/firmware/t7/old", "type": "old"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -137,8 +135,7 @@ function labjackVersionManager() {
                 // {"url": "https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
                 {"url": "https://labjack.com/support/firmware/t4", "type": "organizer-current"},
                 {"url": "https://labjack.com/support/firmware/t4", "type": "current"},
-                {"url": "https://labjack.com/support/firmware/t4/beta", "type": "beta"},
-                {"url": "https://labjack.com/support/firmware/t4/old", "type": "old"},
+                // {"url": "https://labjack.com/support/firmware/t4/beta", "type": "beta"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -542,8 +539,8 @@ function labjackVersionManager() {
             return;
         },
     };
-    this.cachedDoms = dict();
-    this.pageCache = dict();
+    this.cachedDoms = new Map();
+    this.pageCache = new Map();
     this.infoCache = {};
     this.dataCache = {};
     this.isDataComplete = false;
@@ -567,12 +564,23 @@ function labjackVersionManager() {
             // for it
             if(!self.pageCache.has(url)) {
                 // Perform request to get pageData/body
-                fetch(url, {
-                    timeout: 20000
-                })
+                fetch(url, { timeout: 20000 })
                     .then(function (res) {
                         if (res.ok) {
                             return res.text();
+                        }
+
+                        if (res.status >= 400) {
+                            const err = {
+                                "num": -1,
+                                "str": res.statusText,
+                                "quit": true,
+                                "code": res.status,
+                                "url": url
+                            };
+                            self.reportError(err);
+                            // callback(err);
+                            return res.statusText;
                         }
 
                         var message = '';
@@ -622,11 +630,10 @@ function labjackVersionManager() {
                             console.error('Error calling strategy...', innerErr, name);
                         }
                         callback();
-
                     })
                     .catch(function (error) {
-                        console.error('fetch error', error.message);
-                        callback();
+                        console.error('fetch error', error);
+                        callback(error);
                     });
             } else {
                 // get pageData/body from cache
@@ -777,7 +784,7 @@ function labjackVersionManager() {
             if(typeof(strategy) !== 'undefined') {
                 // build an array of querys that need to be made to collect data
                 var prefetchQuerys = [];
-                var prefetchDict = dict();
+                var prefetchDict = new Map();
                 var querys  = [];
 
                 // Make an effort to minimize the number of requests
@@ -1223,7 +1230,6 @@ execStr += '/Users/chrisjohnson/Downloads/kipling_test_mac(2)/ '
 execStr += 'Kipling.app '
 execStr += '/Users/chrisjohnson/Downloads/kipling_test_mac(2)/Kipling.app/Contents/Resources/update_scripts'
 child_process.exec(formatPath(execStr));
-gui.App.quit();
 
 Script Arguments 1:
 /Applications/Kiplingv3

@@ -4,7 +4,11 @@
     "version": "0.0.1",
     "framework":"singleDevice",
     "third_party_code":[],
-    "supportedDevices": [{"type":"T7","subclass":["Pro",""],"minFW":"0.5"}, {"type":"T4","minFW":"0.1"}],
+    "supportedDevices": [
+        {"type":"T8","minFW":"0.1"},
+        {"type":"T7","minFW":"0.1", "subclass":["Pro",""]},
+        {"type":"T4","minFW":"0.1"}
+    ],
     "third_party_code_unload":[],
     "htmlFiles": [
         "ethernet_settings.html",

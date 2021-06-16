@@ -28,10 +28,6 @@ The other build scripts operate on the core modules (defined in `ljswitchboard-b
 
 Calls other npm scripts in the proper order to build a distributable Kipling bundle for the current OS.
 
-### quick_build_project
-
-TODO: Document.
-
 ### prepare_build
 
 Empties `output` build directory & copies NW files.
@@ -67,9 +63,7 @@ Same as `gather_project_files`, but also copies dirs defined in `ljswitchboard-b
 
 ### edit_k3_startup_settings
 
-Ensures that `ljswitchboard-splash_screen/package.json` is ready for release.
-
-For the keys and values in `ljswitchboard-builder/package.json['splash_screen_build_keys']`, sets the corresponding keys and values in `ljswitchboard-splash_screen/package.json`. E.g. if ljswitchboard-builder/package.json['splash_screen_build_keys']['test'] is false, sets `ljswitchboard-splash_screen/package.json['test']` to false.
+Ensures that `ljswitchboard-electron_main/package.json` is ready for release.
 
 ### install_production_dependencies
 

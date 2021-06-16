@@ -2,7 +2,6 @@
 /* global console, module_manager, dict, q, showAlert, modbus_map, $ */
 /* global ljmmm_parse, handlebars */
 
-/* global dataTableCreator */
 /* exported activeModule, module, MODULE_UPDATE_PERIOD_MS */
 
 /**
@@ -80,13 +79,10 @@ function module() {
     };
 
     this.hideSaveButtons = function() {
-        var defered = q.defer();
-
         // $('#saved-indicator').hide();
         $('#configure-button').slideUp();
         $('#saving-indicator').slideDown();
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     var TARGET_REGISTER = {
         factory: 'IO_CONFIG_SET_CURRENT_TO_FACTORY',
@@ -108,29 +104,20 @@ function module() {
         return configureDeviceStrategies[selectedVal](device);
     };
     this.configureSelectedDevices = function() {
-        var defered = q.defer();
         var promises = self.activeDevices.map(self.configureSelectedDevice);
-        q.allSettled(promises)
-        .then(function() {
-            defered.resolve();
-        });
-        return defered.promise;
+        return Promise.allSettled(promises);
     };
     this.showSaveButtons = function() {
-        var defered = q.defer();
         $('#saving-indicator').slideUp();
         // $('#saved-indicator').slideDown();
         $('#configure-button').slideDown();
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     this.attachListener = function() {
-        var defered = q.defer();
         var buttonEle = $('#configure-button');
         // buttonEle.off('click');
         buttonEle.one('click', self.configureDevice);
-        defered.resolve();
-        return defered.promise;
+        return Promise.resolve();
     };
     this.configureDevice = function() {
 
@@ -150,26 +137,11 @@ function module() {
         self.attachListener()
         .then(onSuccess);
     };
-    this.onRegisterWrite = function(framework, binding, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRegisterWritten = function(framework, registerName, value, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefresh = function(framework, registerNames, onError, onSuccess) {
-        onSuccess();
-    };
-    this.onRefreshed = function(framework, results, onError, onSuccess) {
-        onSuccess();
-    };
     this.onCloseDevice = function(framework, device, onError, onSuccess) {
         // self.saveModuleStartupData()
         // .then(onSuccess);
         var buttonEle = $('#configure-button');
         buttonEle.off('click');
-        onSuccess();
-    };
-    this.onUnloadModule = function(framework, onError, onSuccess) {
         onSuccess();
     };
     this.onLoadError = function(framework, description, onHandle) {

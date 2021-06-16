@@ -1,11 +1,10 @@
-var assert = require('chai').assert;
+const assert = require('chai').assert;
 
-var io_manager;
+const io_manager = require('ljswitchboard-io_manager');
 var io_interface;
 
 var initialize = function(done) {
 	// Require the io_manager library
-	io_manager = require.main.require('ljswitchboard-io_manager');
 
 	// Require the io_interface that gives access to the ljm driver,
 	// device controller, logger, and file_io_controller objects.
@@ -32,5 +31,3 @@ var destruct = function(done) {
 	}, 2);
 };
 exports.destruct = destruct;
-
-

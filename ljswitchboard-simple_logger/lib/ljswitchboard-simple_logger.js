@@ -58,20 +58,20 @@ function CREATE_SIMPLE_LOGGER () {
 	var eventMap = [
 		{from: 'CONFIGURATION_SUCCESSFUL', to: 'onConfigurationSuccessful'},
 		{from: 'CONFIGURATION_ERROR', to: 'onConfigurationError'},
-		
+
 		{from:'STARTED_LOGGER', to: 'onStartedLogger'},
 		{from: 'ERROR_STARTING_LOGGER', to: 'onErrorStartingLogger'},
-		
+
 		{from:'STOPPED_LOGGER', to: 'onStoppedLogger'},
 		{from: 'ERROR_STOPPING_LOGGER', to: 'onErrorStoppingLogger'},
-		
+
 		{from:'NEW_VIEW_DATA', to: 'onNewViewData'},
 
 		{from:'UPDATED_ACTIVE_FILES', to: 'onUpdatedActiveFiles'},
 	];
 
 	/*
-	 * Use the eventMap to define functions for each event that needs to get 
+	 * Use the eventMap to define functions for each event that needs to get
 	 * passed on.
 	 */
 	function createAndLinkEventListener(eventListing) {
@@ -112,14 +112,14 @@ function CREATE_SIMPLE_LOGGER () {
 		// make sure that the coordinator is unconfigured.
 		.then(self.coordinator.unconfigure)
 
-		// After stopping & clearing the coordinators config. 
+		// After stopping & clearing the coordinators config.
 		//update its device listing.
 		.then(self.coordinator.updateDeviceListing)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	}
 
-	
+
 
 	function handleLoadConfigFileSuccess(configData) {
 		var defered = q.defer();
@@ -140,7 +140,7 @@ function CREATE_SIMPLE_LOGGER () {
 	}
 	function loadConfigFile(filePath) {
 		var defered = q.defer();
-		
+
 		config_checker.verifyConfigFile(filePath)
 		.then(handleLoadConfigFileSuccess, handleLoadConfigFileError)
 		.then(defered.resolve, defered.reject);
@@ -438,7 +438,4 @@ exports.generateBasicConfig = function(basicData, devices) {
 	// 'same_vals_all_devices': true,
 	// 'registers': ['AIN0','AIN1'],
 	// 'update_rate_ms': 100,
-}
-
-
-
+};

@@ -233,7 +233,7 @@ function CREATE_COORDINATOR () {
 
 	var innerConfigureCoordinator = function(config) {
 		var defered = q.defer();
-		
+
 		if(self.state.configured) {
 			defered.resolve(config);
 			return defered.promise;
@@ -247,7 +247,7 @@ function CREATE_COORDINATOR () {
 			function onError(errBundle) {
 				self.state.configured = false;
 				// Don't emit a CONFIGURATION_ERROR event.  The caller needs to
-				// report the errors. 
+				// report the errors.
 				// self.emit(eventList.CONFIGURATION_ERROR, errBundle);
 				console.error('in innerConfigureCoordinator err', errBundle);
 				defered.reject(errBundle);
