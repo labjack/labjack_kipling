@@ -8,7 +8,6 @@ const package_loader = new PackageLoader();
 var testPackages = require('./test_packages').testPackages;
 var testUtils = require('./test_utils');
 var cleanExtractionPath = testUtils.cleanExtractionPath;
-var testSinglePackageUpdate = testUtils.testSinglePackageUpdate;
 
 var localFolder = 'test_extraction_folder';
 

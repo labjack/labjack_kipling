@@ -1,15 +1,14 @@
-var assert = require('chai').assert;
+'use strict';
 
-var fs = require('fs.extra');
-var path = require('path');
+const assert = require('chai').assert;
+
+const fs = require('fs.extra');
+const path = require('path');
 // Switch to using a local minified version of semver
-// var semver = require('semver');
-var semver = require('../lib/semver_min');
+// const semver = require('semver');
+const semver = require('../lib/semver_min');
 
-const PackageLoader = require('../lib/ljswitchboard-package_loader').PackageLoader;
-const package_loader = new PackageLoader();
-
-var cleanExtractionPath = function(directory) {
+const cleanExtractionPath = function(directory) {
 	try {
 		// Re-initialize directory
 		if(fs.existsSync(directory)) {
@@ -26,17 +25,14 @@ var cleanExtractionPath = function(directory) {
 };
 exports.cleanExtractionPath = cleanExtractionPath;
 
-var testSinglePackageUpdate = function(assert, updatedPackages, step, upgradeType, requiredEvents, capturedEvents, index) {
-	var i = 0;
-	if(typeof(index) !== 'undefined') {
-		i = index;
-	}
-	var packageKeys = Object.keys(updatedPackages);
-	var packageData = updatedPackages[packageKeys[i]];
-	var startingPackageInfo = packageData.currentPackage;
-	var chosenUpgrade = packageData.chosenUpgrade;
+const testSinglePackageUpdate = function(assert, package_loader, updatedPackages, step, upgradeType, requiredEvents, capturedEvents, index) {
+	const i = (typeof(index) !== 'undefined') ? index : 0;
+	const packageKeys = Object.keys(updatedPackages);
+	const packageData = updatedPackages[packageKeys[i]];
+	const startingPackageInfo = packageData.currentPackage;
+	const chosenUpgrade = packageData.chosenUpgrade;
 
-	var testConditions = {
+	const testConditions = {
 		'semverValidity': true,
 		'upgradeValidity': true,
 		'upgradeType': upgradeType,
@@ -61,7 +57,7 @@ var testSinglePackageUpdate = function(assert, updatedPackages, step, upgradeTyp
 		testConditions.shouldHaveFailed = true;
 	}
 
-	var isVersionValid;
+	let isVersionValid;
 	if(testConditions.semverValidity) {
 		// Verify that the packageInfo object has a valid semver version
 		isVersionValid = semver.valid(
@@ -105,15 +101,15 @@ var testSinglePackageUpdate = function(assert, updatedPackages, step, upgradeTyp
 		assert.isOk(packageData.overallResult, 'Should have passed');
 	}
 
-	var emittedEvents = [];
+	const emittedEvents = [];
 	capturedEvents.forEach(function(capturedEvent) {
 		emittedEvents.push(capturedEvent.eventName);
 	});
 
-	var msg = 'Required events not fired';
+	const msg = 'Required events not fired';
 	assert.deepEqual(emittedEvents, requiredEvents, msg);
 
-	var requiredLibKeys = [];
+	const requiredLibKeys = [];
 	if(!testConditions.shouldHaveFailed) {
 		requiredLibKeys.push('ljswitchboard-static_files');
 	}

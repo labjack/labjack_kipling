@@ -93,6 +93,7 @@ describe('extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'directory',
@@ -121,6 +122,7 @@ describe('extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'existingSkipUpgrade',
 			'directory',
@@ -148,6 +150,7 @@ describe('extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'existingSkipUpgrade',
 			'directory',
@@ -178,6 +181,7 @@ describe('extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'existingPerformUpgrade',
 			'directory',

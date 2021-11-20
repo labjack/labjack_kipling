@@ -62,6 +62,7 @@ async function reInitializeTest(assert) {
 
 	testSinglePackageUpdate(
 		assert,
+		package_loader,
 		updatedPackages,
 		'initialize',
 		'directory',
@@ -124,6 +125,7 @@ describe('advanced extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'existingPerformUpgrade',
 			'directory',
@@ -158,6 +160,7 @@ describe('advanced extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'existingPerformUpgrade',
 			'.zip',
@@ -190,6 +193,7 @@ describe('advanced extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'.zip',
@@ -217,6 +221,7 @@ describe('advanced extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'noUpgradeOptions',
 			'.zip',
@@ -244,6 +249,7 @@ describe('advanced extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'noUpgradeOptions',
 			'.zip',
@@ -271,6 +277,7 @@ describe('advanced extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'noUpgradeOptions',
 			'.zip',
@@ -300,6 +307,7 @@ describe('advanced extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'upgradeFailed',
 			'.zip',
@@ -331,6 +339,7 @@ describe('advanced extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'upgradeFailed',
 			'.zip',
@@ -360,6 +369,7 @@ describe('advanced extraction', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'upgradeFailed',
 			'.zip',

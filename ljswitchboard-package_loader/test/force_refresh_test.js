@@ -101,6 +101,7 @@ describe('force refresh', function() {
 		// Test to make sure the staticFiles were loaded
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'directory',
@@ -111,6 +112,7 @@ describe('force refresh', function() {
 		// Test to make sure the core library was loaded
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'directory',
@@ -150,6 +152,7 @@ describe('force refresh', function() {
 		try {
 			testSinglePackageUpdate(
 				assert,
+				package_loader,
 				updatedPackages,
 				'existingSkipUpgrade',
 				'directory',
@@ -158,6 +161,7 @@ describe('force refresh', function() {
 			);
 			testSinglePackageUpdate(
 				assert,
+				package_loader,
 				updatedPackages,
 				'existingPerformUpgrade',
 				'directory',

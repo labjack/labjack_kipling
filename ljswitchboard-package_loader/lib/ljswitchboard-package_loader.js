@@ -271,7 +271,7 @@ class PackageLoader extends EventEmitter {
 	deleteManagedPackage(name) {
 		if (this.managedPackages[name]) {
 			// Delete the item from the managedPackagesList
-			const newList = this.managedPackagesList.filter((item) => item.name !== name);
+			const newList = this.managedPackagesList.filter((item) => item !== name);
 			this.managedPackagesList = newList;
 
 			this.managedPackages[name] = null;

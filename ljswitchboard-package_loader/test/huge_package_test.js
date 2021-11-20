@@ -100,6 +100,7 @@ describe('huge package', function() {
 		// Test to make sure the staticFiles were loaded
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'directory',
@@ -110,6 +111,7 @@ describe('huge package', function() {
 		// Test to make sure the core library was loaded
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'directory',
@@ -148,6 +150,7 @@ describe('huge package', function() {
 		];
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'existingSkipUpgrade',
 			'directory',
@@ -156,6 +159,7 @@ describe('huge package', function() {
 		);
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'existingPerformUpgrade',
 			'directory',

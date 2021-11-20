@@ -90,6 +90,7 @@ describe('bad zips', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'.zip',
@@ -134,6 +135,7 @@ describe('bad zips', function() {
 
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'.zip',

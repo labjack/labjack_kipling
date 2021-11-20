@@ -101,6 +101,7 @@ describe('multiple package', function() {
 		// Test first package being extracted properly
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'directory',
@@ -111,6 +112,7 @@ describe('multiple package', function() {
 		// Test second package being extracted properly
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'directory',
@@ -154,6 +156,7 @@ describe('multiple package', function() {
 		// Test first package being extracted properly
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'initialize',
 			'directory',
@@ -165,6 +168,7 @@ describe('multiple package', function() {
 		// console.log(updatedPackages['ljswitchboard-core']);
 		testSinglePackageUpdate(
 			assert,
+			package_loader,
 			updatedPackages,
 			'upgradeFailed',
 			'directory',
