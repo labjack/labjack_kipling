@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         node-version: [12.16.3]
-        platform: [ubuntu-16.04, macos-latest, windows-latest]
+        platform: [ubuntu-18.04, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.platform }}
 
@@ -34,12 +34,12 @@ jobs:
           format: YYYY_MM_DD
           utcOffset: "+08:00"
       - name: Download ljm
-        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        if: ${{ matrix.platform == 'ubuntu-18.04' }}
         uses: wei/wget@v1
         with:
           args: -O labjack_ljm_software.tar.gz https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_07_16_x86_64.tar.gz
       - name: Install ljm
-        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        if: ${{ matrix.platform == 'ubuntu-18.04' }}
         run: tar xfz labjack_ljm_software.tar.gz && cd ./labjack_ljm_software_2019_07_16_x86_64 && sudo ./labjack_ljm_installer.run
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
@@ -59,7 +59,7 @@ jobs:
         env:
           OVERRIDE_BUILD_DATE: '${{ steps.date.outputs.formattedTime }}'
       - run: SKIP_HARDWARE_TEST=true npm run test
-        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        if: ${{ matrix.platform == 'ubuntu-18.04' }}
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
@@ -70,7 +70,7 @@ jobs:
           asset_path: ljswitchboard-builder/kipling.${{ steps.package-version.outputs.version }}.${{ steps.date.outputs.formattedTime }}_linux64.tar.gz
           asset_name: kipling.${{ steps.package-version.outputs.version }}.${{ steps.date.outputs.formattedTime }}_linux64.tar.gz
           asset_content_type: application/zip
-        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        if: ${{ matrix.platform == 'ubuntu-18.04' }}
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1

@@ -25,12 +25,12 @@ jobs:
           format: YYYY_MM_DD
           utcOffset: "+08:00"
       - name: Download ljm
-        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        if: ${{ matrix.platform == 'ubuntu-18.04' }}
         uses: wei/wget@v1
         with:
           args: -O labjack_ljm_software.tar.gz https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_07_16_x86_64.tar.gz
       - name: Install ljm
-        if: ${{ matrix.platform == 'ubuntu-16.04' }}
+        if: ${{ matrix.platform == 'ubuntu-18.04' }}
         run: tar xfz labjack_ljm_software.tar.gz && cd ./labjack_ljm_software_2019_07_16_x86_64 && sudo ./labjack_ljm_installer.run
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
