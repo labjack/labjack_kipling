@@ -57,7 +57,7 @@ class FileTransport {
         fs.mkdirSync(path.join(electron.app.getPath('userData'), 'logs'), {
             recursive: true
         });
-        this.filePath = path.join(electron.app.getPath('userData'), 'logs', now.toISOString()) + '.log';
+        this.filePath = path.join(electron.app.getPath('userData'), 'logs', now.toISOString().replace(/:/g, '-')) + '.log';
         this.handle = fs.openSync(this.filePath, 'a');
     }
 
