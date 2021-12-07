@@ -1,6 +1,6 @@
 global.customSpinners = function (owner, infoArray, writeFunc, updateFunc) {
-    var maxVal = 5.05;
-    var minVal = -0.05;
+    var maxVal = 10.5;
+    var minVal = -0.2;
 
     var dacListerners = {};
     infoArray.forEach(function(info){
