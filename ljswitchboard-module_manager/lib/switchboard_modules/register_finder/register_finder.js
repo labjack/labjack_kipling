@@ -40,7 +40,7 @@ this.table = undefined;
 var dataTableID = '#modbus_map_table';
 
 var initializeDataTable = function() {
-	self.tableManager = new dataTableCreator();
+	self.tableManager = new DataTableCreator();
 	
 	return Promise.resolve();
 };

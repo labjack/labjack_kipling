@@ -2918,7 +2918,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     setCustomContext(data) {
-        console.log('setCustomContext', data);
         this.moduleTemplateBindings.set('custom', fixElectron(data));
     }
 

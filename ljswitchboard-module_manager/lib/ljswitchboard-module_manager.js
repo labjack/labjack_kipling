@@ -212,44 +212,34 @@ var cachedReadFile = function(fileName) {
 };
 
 
-var innerCachedReadFile = function(filePath) {
-	return new Promise((resolve, reject) => {
-		cachedReadFile(filePath)
-			.then(file_linter.getLinter(filePath))
-			.then(function(lintData) {
-				var fileData = lintData.fileData;
+async function innerCachedReadFile(filePath) {
+	const data = await cachedReadFile(filePath);
+	const lintData = await file_linter.getLinter(filePath)(data);
+	let fileData = lintData.fileData;
 
-				if (filePath.endsWith('.js')) {
-					fileData += "\n//# sourceURL=" + filePath;
-				}
+	if (filePath.endsWith('.js')) {
+		fileData += "\n//# sourceURL=" + filePath;
+	}
 
-				resolve({
-					'fileName': path.basename(filePath),
-					'filePath': filePath,
-					'fileData': fileData,
-					'lintResult': lintData.lintResult
-				});
-			});
-	});
-};
-var cachedReadFiles = function(fileNames) {
-	return new Promise((resolve, reject) => {
-	var promises = [];
-	fileNames.forEach(function(fileName) {
+	return {
+		'fileName': path.basename(filePath),
+		'filePath': filePath,
+		'fileData': fileData,
+		'lintResult': lintData.lintResult
+	};
+}
+
+async function cachedReadFiles(fileNames) {
+	const promises = [];
+	for (const fileName of fileNames) {
 		promises.push(innerCachedReadFile(fileName));
-	});
+	}
 
 	// Wait for all of the operations to complete
-	Promise.allSettled(promises)
-	.then(function(results) {
-		var readFiles = [];
-		results.forEach(function(result) {
-			readFiles.push(result.value);
-		});
-		resolve(readFiles);
-	}, reject);
-	});
-};
+	const results = await Promise.allSettled(promises);
+	return results.map(result => result.value);
+}
+
 var parseJSONFile = function(fileData) {
 	return new Promise((resolve, reject) => {
 	var parsedData;
@@ -1022,7 +1012,7 @@ var saveModuleStartupData = function(moduleName, data) {
 		.then(writeAndValidateModuleDataFile)
 		.then(validateDesiredModule)
 		.then(writeAndValidateDataManagerFile)
-		.then(returnModuleName, returnModuleName)
+		.then(returnModuleName, returnModuleName);
 };
 exports.saveModuleStartupData = saveModuleStartupData;
 
@@ -1068,17 +1058,8 @@ var loadModuleCSS = function(data) {
 };
 
 
-var loadModuleJS = function(data) {
-	return new Promise((resolve, reject) => {
-
-	var requiredJSFiles;
-	if(data.baseData.isTask) {
-		requiredJSFiles = [];
-	} else {
-		requiredJSFiles = ['controller.js'];
-	}
-
-	requiredJSFiles = resolveModuleFilePaths(data.path, requiredJSFiles);
+async function loadModuleJS(data) {
+	let requiredJSFiles = resolveModuleFilePaths(data.path, data.baseData.isTask ? [] : ['controller.js']);
 
 	var thirdPartyJSFiles = [];
 	if(data.data.third_party_code) {
@@ -1111,26 +1092,27 @@ var loadModuleJS = function(data) {
 		);
 	}
 
-	var jsFiles = [];
+	const jsFiles = [];
 
-	var i;
-	for(i = 0; i < thirdPartyJSFiles.length; i++) {
+	for (let i = 0; i < thirdPartyJSFiles.length; i++) {
 		jsFiles.push(thirdPartyJSFiles[i]);
 	}
-	for(i = 0; i < jsLibFiles.length; i++) {
+	for (let i = 0; i < jsLibFiles.length; i++) {
 		jsFiles.push(jsLibFiles[i]);
 	}
-	for(i = 0; i < requiredJSFiles.length; i++) {
+	for (let i = 0; i < requiredJSFiles.length; i++) {
 		jsFiles.push(requiredJSFiles[i]);
 	}
 
-	cachedReadFiles(jsFiles)
-	.then(function(loadedFiles) {
-		data.js = loadedFiles;
-		resolve(data);
-	});
-	});
-};
+	try {
+		data.js = await cachedReadFiles(jsFiles);
+		return data;
+	} catch (err) {
+		console.error('loadModuleJS error', err);
+		throw err;
+	}
+}
+
 var loadModuleHTML = function(data) {
 	return new Promise((resolve, reject) => {
 
@@ -1142,7 +1124,6 @@ var loadModuleHTML = function(data) {
 	}
 
 	htmlFiles = resolveModuleFilePaths(data.path, htmlFiles);
-
 
 	// Perform logic for modules loading a framework
 	if(data.data.framework) {
@@ -1224,9 +1205,8 @@ var loadModuleJSON = function(data) {
 	});
 };
 
-var innerLoadModuleData = function(data) {
-	return new Promise((resolve, reject) => {
-	var promises = [
+async function innerLoadModuleData(data) {
+	const promises = [
 		loadModuleStartupData(data),
 		loadModuleCSS(data),
 		loadModuleJS(data),
@@ -1234,13 +1214,9 @@ var innerLoadModuleData = function(data) {
 		loadModuleJSON(data)
 	];
 	// Wait for all of the operations to complete
-	Promise.allSettled(promises)
-	.then(function(collectedData) {
-		resolve(data);
-	}, reject);
-	});
-};
-
+	await Promise.allSettled(promises);
+	return data;
+}
 
 /*
 The loadModuleDataByName function allows module data to be completely fetched
@@ -1278,9 +1254,9 @@ The loadModuleData function is an in-point to fetching a module's data one step
 further along than the loadModuleDataByName function requiring that a module's
 .json file has already been loaded.
 */
-var loadModuleData = function(moduleData) {
-	return new Promise((resolve, reject) => {
-	var collectedModuleData = {
+async function loadModuleData(moduleData) {
+	console.log('loadModuleData', moduleData.name);
+	const collectedModuleData = {
 		'name': moduleData.name,
 		'path': path.join(MODULES_DIR, moduleData.name),
 		'css': [],
@@ -1293,9 +1269,13 @@ var loadModuleData = function(moduleData) {
 		'baseData': {},
 		'startupData': {},
 	};
-	loadBaseData(collectedModuleData)
-	.then(innerLoadModuleData)
-	.then(resolve, reject);
-	});
-};
+	try {
+		const baseData = await loadBaseData(collectedModuleData);
+		return await innerLoadModuleData(baseData);
+	} catch (err) {
+		console.error(err);
+		throw err;
+	}
+}
+
 exports.loadModuleData = loadModuleData;

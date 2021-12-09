@@ -65,6 +65,17 @@ class ModuleInstance extends EventEmitter {
             console.info('initializing framework', moduleData.data);
         }
         try {
+            // Configure the module's name
+            let createdModuleName = '';
+            try {
+                createdModuleName += moduleData.name;
+                createdModuleName += '-';
+                createdModuleName += moduleData.context.stats.numLoaded.toString();
+            } catch(err) {
+                createdModuleName = '';
+            }
+            console.log('initializeModule', createdModuleName);
+
             // Create an instance of the sdFramework
             this.sdFramework = new global.PresenterFramework();
 
@@ -76,19 +87,11 @@ class ModuleInstance extends EventEmitter {
             // }
 
             // Create an instance of the user's module.
+            console.log('1111', module);
             sdModule = new module();
+            console.log('11112');
             global.sdModule = sdModule;
 
-            // Configure the module's name
-            let createdModuleName = '';
-            try {
-                createdModuleName += moduleData.name;
-                createdModuleName += '-';
-                createdModuleName += moduleData.context.stats.numLoaded.toString();
-            } catch(err) {
-                createdModuleName = '';
-            }
-            console.log('initializeModule', createdModuleName);
             this.sdFramework.numModuleReloads = 0;
             this.sdFramework.currentModuleName = moduleData.name;
             this.sdFramework.saveModuleName();

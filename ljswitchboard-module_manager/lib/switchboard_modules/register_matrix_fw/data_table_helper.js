@@ -1,13 +1,12 @@
+'use strict';
 
 /* jshint undef: true, unused: true, undef: true */
 /* global console, showAlert, modbus_map, $ */
 
 // Imported as an extra module file.
-/* global dataTableDataFormatter */
+/* global DataTableDataFormatter */
 
 /* exported DataTableCreator */
-
-const _ = require('underscore-min');
 
 const tableFiltersElementID = '#tableFilters';
 const ljmTagGroupMap = {
@@ -83,7 +82,7 @@ function getUndefinedControlFunction(name) {
 class DataTableCreator {
     constructor() {
         this.activeDevice = undefined;
-        this.dataTableFormatter = new dataTableDataFormatter();
+        this.dataTableFormatter = new DataTableDataFormatter();
 
         // Data references from the dataTableDataFormatter.
         this.cachedRegisterData = undefined;
@@ -160,9 +159,8 @@ class DataTableCreator {
 
         const childTableID = this.generateChildTableID(data);
 
-        const self = this;
-
         // Initialize the child's dataTable.
+        const self = this;
         const childTable = $('#' + childTableID)
             .on('error.dt', (e, settings, techNote, message) => {
                 const msg = 'An error has been reported by DataTables (child table ' + data[dataIndices.group] + ')';
@@ -195,7 +193,7 @@ class DataTableCreator {
 
                 // Striping
                 'stripeClasses': ['secondary_row odd', 'secondary_row even'],
-                'drawCallback': function () {
+                'drawCallback'() {
                     const api = this.api();
                     const rows = api.rows({page: 'current'});
                     const data = rows.data();
@@ -320,12 +318,12 @@ class DataTableCreator {
         }
     }
 
-    primaryTablePreDrawCallback(element) {
+    primaryTablePreDrawCallback(table) {
         // Clear the cache that holds special group data.
         this.groupsWithExtraData = [];
         this.recentlyUpdatedRows = [];
 
-        const api = element.api();
+        const api = table.api();
 
         // Using the rows modifier:
         // https://datatables.net/reference/type/selector-modifier
@@ -577,9 +575,9 @@ class DataTableCreator {
         });
     }
 
-    primaryTableDrawCallback(element) {
+    primaryTableDrawCallback(table) {
         // console.log('in primaryTableDrawCallback');
-        const api = element.api();
+        const api = table.api();
         const searchStr = api.search();
 
         // console.log('Special Groups:')
@@ -639,7 +637,7 @@ class DataTableCreator {
         }
 
         if (registerName) {
-            const tr = $(this).closest('tr');
+            const tr = $(element).closest('tr');
             // Get the closest register_matrix_child_row & then its parent via
             // getting the previous element.
             const matrix_row_div = tr.closest('.register_matrix_child_row');
@@ -731,8 +729,8 @@ class DataTableCreator {
         this.primaryTableHandleDetailsControlClick(tr, row);
     }
 
-    primaryTableInitComplete(element) {
-        const api = element.api();
+    primaryTableInitComplete(table) {
+        const api = table.api();
 
         const tableFiltersEle = $(tableFiltersElementID);
 
@@ -775,9 +773,6 @@ class DataTableCreator {
             tagsColumn.search(searchStr, true);
             this.table.draw();
         };
-        const debouncedOnTagSelectChange = _.debounce(
-            onTagSelectChange,
-            10);
 
         this.tempOption = '';
         const options = {
@@ -839,7 +834,7 @@ class DataTableCreator {
                     });
                 }
                 this.tempOption = option;
-                debouncedOnTagSelectChange();
+                onTagSelectChange();
             },
         };
         // Enable the element as a bootstrap-multiselect element
@@ -891,7 +886,7 @@ class DataTableCreator {
         // this.table.draw();
 
         const columns = api.columns();
-        columns.every(function () {
+        columns.every(() => {
             // const column = this;
             // console.log('primaryTableInitComplete - Columns...', column.header(), column.footer());
         });
@@ -946,7 +941,6 @@ class DataTableCreator {
         domLayout += '>';
 
         const self = this;
-
         this.table = tableElement.on('error.dt', (e, settings, techNote, message) => {
             console.error('An error has been reported by DataTables', message);
             showAlert('Data Tables reported an error');
@@ -992,12 +986,12 @@ class DataTableCreator {
                 'order': [[this.dataTableData.headers.address, 'asc']],
 
                 // Pre-Draw Callback
-                'preDrawCallback': function () {
+                'preDrawCallback'() {
                     return self.primaryTablePreDrawCallback(this);
                 },
 
                 // Row Callback
-                'rowCallback': function() {
+                'rowCallback'() {
                     return self.primaryTableRowCallback(...arguments);
                 },
 
@@ -1005,12 +999,12 @@ class DataTableCreator {
                 // 'createdRow': (row, data, dataIndex) => {},
 
                 // Draw Callback
-                'drawCallback': function () {
+                'drawCallback'() {
                     return self.primaryTableDrawCallback(this);
                 },
 
                 // Adding Tag-Filters
-                'initComplete': function () {
+                'initComplete'() {
                     return self.primaryTableInitComplete(this);
                 },
             });
@@ -1019,22 +1013,22 @@ class DataTableCreator {
         $(tableElementStr).on(
             'click',
             'td.ct-select-control',
-            function () {
-                return this.childTableSelectControlCallback(this);
+            (event) => {
+                return this.childTableSelectControlCallback(event.target);
             }
         );
         $(tableElementStr).on(
             'click',
             'td.select-control',
-            function () {
-                return self.primaryTableSelectControlCallback(this);
+            (event) => {
+                return this.primaryTableSelectControlCallback(event.target);
             }
         );
         $(tableElementStr).on(
             'click',
             'td.details-control',
-            function () {
-                return self.primaryTableDetailsControlCallback(this);
+            (event) => {
+                return this.primaryTableDetailsControlCallback(event.target);
             }
         );
     }

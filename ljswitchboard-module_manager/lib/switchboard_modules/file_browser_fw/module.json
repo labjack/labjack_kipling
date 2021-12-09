@@ -6,7 +6,6 @@
     "supportedDevices": [{"type":"T7"}],
     "jsFiles": [
         "view_generator.js",
-        "data_formatter.js",
         "data_table_helper.js",
         "browser_controls_manager.js",
         "download_controls_manager.js",
