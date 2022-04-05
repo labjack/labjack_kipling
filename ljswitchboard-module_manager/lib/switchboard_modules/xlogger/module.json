@@ -1,0 +1,17 @@
+{
+    "name": "xlogger",
+    "humanName": "Logger",
+    "version": "0.0.1",
+    "framework":"multipleDevices",
+    "framework_options": {
+    	"device_selection": false
+    },
+    "supportedDevices": [{"type":"T7"},{"type":"T4"}],
+    "jsFiles": [
+        "dave_test.js",
+        "Chart.js",
+        "xlogger_proto.js"
+    ],
+    "htmlFiles": [
+    ]
+}

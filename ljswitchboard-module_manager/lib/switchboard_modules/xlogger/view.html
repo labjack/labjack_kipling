@@ -1,0 +1,24 @@
+<div>
+  <table style="width:100%">
+  <col width="50%">
+  <col width="50%">
+  <tr>
+    <th style="text-align: left; vertical-align: text-top; width=50%;">
+      <p>Scan Rate = <input type="number" id="ScanRate" value="1000"></p>
+      <p>Num Chans. = <input type="number" id="NumChans" value="4"></p>
+      <p>X Scale (in seconds) = <input type="number" id="XScale" value="1.0"></p>
+      <p>FPS = <input type="number" id="FPS" value="10"></p>
+      <p><input type="checkbox" id="Decimate">Decimate<p>
+      <p>Samples Loop Size = <input type="number" id="SampLoopSize" value="1000"></p>
+      <button id="startCharting" class="btn" title="Start Charting">Start</button>
+      <button id="stopCharting" class="btn" title="Stop Charting">Stop</button>
+    </th>
+    <th style="text-align: left; vertical-align: text-top; width=50%;">
+        <p id="info">Info</p>
+        <p id="renderinfo">Render Info</p>
+        <div style="height:100px;"><p id="debug">Debug</p><div>
+    </th>
+  </tr>
+  </table>
+  <canvas id="myChart" width="700" height="400"></canvas>
+</div>
