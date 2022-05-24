@@ -56,5 +56,5 @@ Run `grunt` to lint Kipling's code, including labjack_kipling's code. **In progr
 To enter test mode, change `test` in labjack_kipling/ljswitchboard-splash_screen/package.json to true. This will:
  - Provide mock device connections
  - Disable the cache, so that essentially all you need to do make a change is to edit a file and reload the module by clicking on it again. (E.g. just click on the Settings module on the left side of the Kipling window.)
- - Uses the data folder `LabJack/K3_DEV` instead of `LabJack/K3`
+ - Uses the data folder `LabJack/K3_DEV` instead of `LabJack/K3`.
 
