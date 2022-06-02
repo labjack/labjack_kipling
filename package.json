@@ -1,6 +1,6 @@
 {
   "name": "labjack_kipling",
-  "version": "3.2.0",
+  "version": "3.3.1",
   "description": "LabJack Kipling device configuration and general I/O GUI program.",
   "scripts": {
     "build": "npm run build --prefix ljswitchboard-builder",
