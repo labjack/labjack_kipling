@@ -28,7 +28,7 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "async": "1.5.2",
+    "async": "3.2.2",
     "compute-gcd": "1.2.0",
     "fs-extra": "^0.18",
     "labjack-nodejs": "*",
