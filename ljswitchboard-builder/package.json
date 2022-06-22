@@ -13,7 +13,7 @@
 	"dependencies": {
 		"adm-zip": "0.4.13",
 		"archiver": "3.1.1",
-		"async": "3.1.0",
+		"async": "3.2.2",
 		"colors": "1.4.0",
 		"concat-stream": "1.5.2",
 		"decompress": "4.2.1",
