@@ -79,7 +79,7 @@ describe('device_data_collector', function() {
 		} catch(err) {
 			assert.isOk(false, 'error loading device_data_collector');
 		}
-		done();
+		// done();
 	});
 	it('Open Devices', function (done) {
 		mockDeviceManager.openDevices();

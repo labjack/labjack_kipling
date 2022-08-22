@@ -346,8 +346,8 @@ function DATA_COLLECTOR_TESTER () {
 var dataCollectorTester = new DATA_COLLECTOR_TESTER();
 
 describe('data_collector', function() {
-	return;
-	this.skip();
+	// return;
+	// this.skip();
 	it('Require data_collector', function (done) {
 		try {
 			data_collector = require('../../lib/data_collector');
@@ -453,7 +453,7 @@ describe('data_collector', function() {
 	it('configure and test data collector', function (done) {
 		// console.log('Configurations', configurations);
 
-		// q.longStackSupport = true;
+		q.longStackSupport = true;
 
 		async.eachSeries(
 			configurations,

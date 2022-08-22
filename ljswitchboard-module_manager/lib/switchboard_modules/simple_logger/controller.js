@@ -10,7 +10,7 @@
 
 // Constant that determines device polling rate.  Use an increased rate to aid
 // in user experience.
-var MODULE_UPDATE_PERIOD_MS = 1000;
+var MODULE_UPDATE_PERIOD_MS = 1000; 
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -38,7 +38,7 @@ function module() {
     this.onModuleLoaded = function(framework, onError, onSuccess) {
         self.startupData = framework.moduleData.startupData;
         self.moduleName = framework.moduleData.name;
-
+        console.error("onModuleLoaded")
         onSuccess();
     };
 
@@ -53,7 +53,7 @@ function module() {
         self.activeDevices = device;
         framework.clearConfigBindings();
         framework.setStartupMessage('Reading Device Configuration');
-        
+        console.error("onDeviceSelected")
         onSuccess();
     };
 
@@ -75,8 +75,10 @@ function module() {
 
         // Get the current mode,
         self.moduleContext.logger_mode = logger_modes.active;
+        // self.moduleContext.logger_mode = logger_modes.configure;
         
         framework.setCustomContext(self.moduleContext);
+        console.error("onDeviceConfigured")
         onSuccess();
     };
 

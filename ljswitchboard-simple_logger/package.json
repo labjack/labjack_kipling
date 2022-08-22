@@ -5,7 +5,7 @@
   "main": "./lib/ljswitchboard-simple_logger",
   "scripts": {
     "start": "node ./examples/hello_world.js",
-    "test": "mocha"
+    "test": "mocha --timeout 10000"
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-simple_logger",
   "repository": {
@@ -34,7 +34,7 @@
     "labjack-nodejs": "^2.0.1",
     "ljswitchboard-data_parser": "^1.0.2",
     "ljswitchboard-device_manager": "^1.0.1",
-    "ljswitchboard-ljm_device_curator": "^2.0.1",
+    "ljswitchboard-ljm_device_curator": "*",
     "ljswitchboard-ljm_driver_constants": "^1.0.5",
     "ljswitchboard-modbus_map": "^1.0.4",
     "q": "1.5.1"

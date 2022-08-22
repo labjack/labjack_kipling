@@ -51,10 +51,10 @@ function getTriggerLoggerTest(numReads, interval, dataToRead) {
 						cb();
 					}
 				});
-			},
-			function(err) {
-				done();
-			});
+			}) //,
+			// function(done) {
+			// 	done();
+			// });
 	};
 }
 

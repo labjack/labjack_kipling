@@ -138,7 +138,7 @@ function module() {
     function initializeFlotPlot() {
         // Initialize data
         self.displayData[0] = initializeRandomData(totalPoints);
-
+        console.error($)
         self.plot = $.plot("#placeholder", self.displayData, {
             series: {
                 shadowSize: 0   // Drawing is faster without shadows
