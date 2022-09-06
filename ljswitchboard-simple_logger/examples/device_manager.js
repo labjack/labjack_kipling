@@ -8,9 +8,9 @@ var eventList = require('./device_manager_events').events;
 var async = require('async');
 var q = require('q');
 var device_curator = require('ljswitchboard-ljm_device_curator');
-var ljm_ffi = require('ljm-ffi');
+var ljm_ffi = require('../../ljm-ffi');
 var ljm = ljm_ffi.load();
-var ljmb = require('ljswitchboard-modbus_map');
+var ljmb = require('../../ljswitchboard-modbus_map');
 var modbus_map = ljmb.getConstants();
 
 function CREATE_DEVICE_MANAGER() {

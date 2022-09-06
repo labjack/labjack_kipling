@@ -140,7 +140,7 @@ function CREATE_SIMPLE_LOGGER () {
 	}
 	function loadConfigFile(filePath) {
 		var defered = q.defer();
-
+		
 		config_checker.verifyConfigFile(filePath)
 		.then(handleLoadConfigFileSuccess, handleLoadConfigFileError)
 		.then(defered.resolve, defered.reject);
@@ -386,7 +386,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 			"logging_options": {
 				"write_to_file": true,
 				"file_prefix": "basic_group",
-				"max_samples_per_file": 3,
+				"max_samples_per_file": 65335,
 				"data_collector_config": {
 					"REPORT_DEVICE_IS_ACTIVE_VALUES": true,
 					"REPORT_DEFAULT_VALUES_WHEN_LATE": false

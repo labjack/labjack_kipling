@@ -18,7 +18,9 @@ console.log('');
 */
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
-var device_manager = require('ljswitchboard-device_manager');
+// var device_manager = require('./ljswitchboard-device_manager');
+var device_manager = require('../../ljswitchboard-device_manager/device_manager');
+// var device_curator = require('../../ljswitchboard-device_curator');
 var async = require('async');
 var q = require('q');
 var path = require('path');
@@ -30,8 +32,8 @@ var ignoreErrorsList = [
 	eventMap.CONFIGURATION_SUCCESSFUL,
 ];
 
-var ENABLE_DEBUG_LOG = true;
-var ENABLE_PRINTING = true;
+var ENABLE_DEBUG_LOG = false;
+var ENABLE_PRINTING = false;
 function print() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];

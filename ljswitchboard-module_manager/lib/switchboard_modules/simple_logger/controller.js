@@ -8,9 +8,70 @@
  * Goals for the Register Matrix module:
 **/
 
+const fs = require('fs')
+
+const device_manager = require('ljswitchboard-device_manager')
+
+
+
 // Constant that determines device polling rate.  Use an increased rate to aid
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000; 
+
+// var simple_logger = require("../../../../ljswitchboard-simple_logger/lib/ljswitchboard-simple_logger.js")
+// var logger = require("ljswitchboard-simple_logger");
+const { dirname } = require('path');
+
+function dispFile(contents) {
+    document.getElementById('contents').innerHTML="<pre>"+JSON.stringify(contents,undefined, 2) +"</pre>"
+}
+function openFile(func) {
+    readFile = function(e) {
+        // console.error(typeof(e), typeof(e.target), typeof(e.target.files), typeof(e.target.files[0]))
+        var file = e.target.files[0];
+        // console.error("File:", file, "\n targetFiles:", e.target.files[0])
+        if (!file) {
+            console.error("----- !file -----")
+            return;
+        }
+        filePath = e.target.files[0]["path"]
+        // console.error(filePath, typeof(filePath))
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var contents = e.target.result;
+            fileInput.func(contents)
+            document.body.removeChild(fileInput)
+        }
+        reader.readAsText(file)
+    }
+    fileInput = document.createElement("input")
+    fileInput.type='file'
+    fileInput.style.display='none'
+    fileInput.onchange=readFile
+    fileInput.func=func
+    fileInput.accept = ".json"
+    document.body.appendChild(fileInput)
+    fileInput.click()
+}
+
+$("#configView").on("click",function(){
+    // console.error("CLICKED CONFIG VIEW JASKJDLAKSJDLKAJSdlk")
+    $("#configForm").load("./templates/create_configuration.html");
+});
+
+// console.error("Starting Config Step")
+// let logConfigs = simple_logger.generateBasicConfig({
+//     'same_vals_all_devices': true,
+//     'registers': ['AIN0','AIN1'],
+//     'update_rate_ms': 100,
+// },device_manager.getDevices());
+
+// console.log("Done Creating Config")
+
+function loadConfigForm() {
+    // document.getElementById("configForm").innerHTML='<object type="text/html" data="./templates/create_configuration.html"></object>';
+    
+}
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -38,7 +99,7 @@ function module() {
     this.onModuleLoaded = function(framework, onError, onSuccess) {
         self.startupData = framework.moduleData.startupData;
         self.moduleName = framework.moduleData.name;
-        console.error("onModuleLoaded")
+        // console.error("onModuleLoaded")
         onSuccess();
     };
 
@@ -53,7 +114,7 @@ function module() {
         self.activeDevices = device;
         framework.clearConfigBindings();
         framework.setStartupMessage('Reading Device Configuration');
-        console.error("onDeviceSelected")
+        // console.error("onDeviceSelected")
         onSuccess();
     };
 
@@ -74,11 +135,11 @@ function module() {
         // });
 
         // Get the current mode,
-        self.moduleContext.logger_mode = logger_modes.active;
-        // self.moduleContext.logger_mode = logger_modes.configure;
+        // self.moduleContext.logger_mode = logger_modes.active;
+        self.moduleContext.logger_mode = logger_modes.configure;
         
         framework.setCustomContext(self.moduleContext);
-        console.error("onDeviceConfigured")
+        // console.error("onDeviceConfigured")
         onSuccess();
     };
 
@@ -97,3 +158,12 @@ function module() {
 
     var self = this;
 }
+
+// console.error("Starting Config Step")
+// let logConfigs = simple_logger.generateBasicConfig({
+//     'same_vals_all_devices': true,
+//     'registers': ['AIN0','AIN1'],
+//     'update_rate_ms': 100,
+// },deviceManager.getDevices());
+
+// console.log("Done Creating Config")
