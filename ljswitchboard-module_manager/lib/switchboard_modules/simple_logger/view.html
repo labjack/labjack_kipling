@@ -25,10 +25,17 @@
 
           <ul class="nav navbar-nav configure-log-controls">
             <li>
-              <button class="win-command" rel="tootlip" title="Create a new configuration">
+              <button class="win-command" href="#" id="newConfig" rel="tootlip" title="Create a new configuration">
                 <span class="win-commandicon win-commandring icon-file-4"></span>
                 <span class="win-label">New</span>
              </button>
+             <script>
+              $(document).ready( function() {
+               $("#newConfig").on("click", function() {
+                 $("#configFormDisplay").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/create_configuration.html");
+                 });
+             });
+            </script>
             </li>
             <li>
               <button class="win-command" rel="tootlip" title="Load a configuration" onClick="openFile(dispFile)">
@@ -58,7 +65,7 @@
              <script>
                $(document).ready( function() {
                 $("#configView").on("click", function() {
-                  $("#configFormDisplay").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/create_configuration.html");
+                  $("#configFormDisplay").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/view_current_configuration.html");
                   });
               });
              </script>
@@ -96,7 +103,7 @@
                 </div>
               </div> -->
             <!-- </div> -->
-            <div class="panel panel-default">
+            <!-- <div class="panel panel-default">
               <div class="panel-heading" role="button" id="configured-data-groups">
                 <h4 class="panel-title">
                   <a class="collapsed" role="button" data-toggle="collapse" href="#loggerDataGroupsCollapsible" aria-expanded="false" aria-controls="collapseThree">
@@ -112,7 +119,7 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> -->
             </tr>
           </table>
       </div>
