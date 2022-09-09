@@ -5,9 +5,10 @@
 /* exported activeModule, module, MODULE_UPDATE_PERIOD_MS */
 
 /**
- * Goals for the Register Matrix module:
+ * Goals for the Simple Logger module:
 **/
 
+const { time } = require('console');
 const fs = require('fs')
 
 const device_manager = require('ljswitchboard-device_manager')
@@ -18,28 +19,42 @@ const device_manager = require('ljswitchboard-device_manager')
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000; 
 
-// var simple_logger = require("../../../../ljswitchboard-simple_logger/lib/ljswitchboard-simple_logger.js")
-// var logger = require("ljswitchboard-simple_logger");
+var logger = require("ljswitchboard-simple_logger");
 const { dirname } = require('path');
 
 function dispFile(contents) {
-    document.getElementById('contents').innerHTML="<pre>"+JSON.stringify(contents,undefined, 2) +"</pre>"
+    $("#configView").click()
+    // $("#configForm").load("./templates/view_current_configuration.html");
+    document.getElementById('currentConfig').textContent=JSON.stringify(contents, undefined, 2)
 }
+
+/**  opens the file explorer to look for .json config files 
+*  all we really need is the file path, which is passed to the logger
+* but it can also be read to the view with FileReader() 
+*/
 function openFile(func) {
     readFile = function(e) {
-        // console.error(typeof(e), typeof(e.target), typeof(e.target.files), typeof(e.target.files[0]))
         var file = e.target.files[0];
-        // console.error("File:", file, "\n targetFiles:", e.target.files[0])
         if (!file) {
-            console.error("----- !file -----")
             return;
         }
         filePath = e.target.files[0]["path"]
-        // console.error(filePath, typeof(filePath))
+        verifyConfigFile(filePath)
+        // let json = JSON.stringify(filePath)
+
+        // var config_data = JSON.parse(fs.readFileSync(filePath))
+        // console.error("Config Data:", config_data)
+
+        var config_data = fs.readFileSync(filePath)
+        // let str = JSON.stringify(config_data, null, 4)
+        let obj = JSON.parse(config_data) 
+        dispFile(obj)
+        
+
         var reader = new FileReader();
         reader.onload = function(e) {
             var contents = e.target.result;
-            fileInput.func(contents)
+            // fileInput.func(contents)
             document.body.removeChild(fileInput)
         }
         reader.readAsText(file)
@@ -54,8 +69,18 @@ function openFile(func) {
     fileInput.click()
 }
 
+/** Call to simple logger module to verify an existing config json file
+*   returns a promise, when resolved it does nothing
+*   if the promise resolves to an error (invalid file or something)
+*   it displays an error window
+*/
+function verifyConfigFile(filepath) {
+    logger.verifyConfigFile(filepath)
+    .catch(err => alert("Invalid Logger Configuration File", err))
+
+}
+
 $("#configView").on("click",function(){
-    // console.error("CLICKED CONFIG VIEW JASKJDLAKSJDLKAJSdlk")
     $("#configForm").load("./templates/create_configuration.html");
 });
 

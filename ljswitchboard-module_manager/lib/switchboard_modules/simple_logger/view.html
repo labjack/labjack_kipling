@@ -65,7 +65,7 @@
              <script>
                $(document).ready( function() {
                 $("#configView").on("click", function() {
-                  $("#configFormDisplay").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/view_current_configuration.html");
+                  $("#config_view").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/view_current_configuration.html");
                   });
               });
              </script>
@@ -83,9 +83,10 @@
       </div>
     </div>
   </div><!-- /#logger_controls -->
+  ConfigView
   <div id="config_view" class="config-pannel">
-    <div id="config_forum">
-      <div class="panel-group">
+    <!-- <div id="config_forum"> -->
+      <!-- <div class="panel-group"> -->
             <!-- <div class="panel panel-default">
               <div class="panel-heading" role="button" id="configured-views">
                 <h4 class="panel-title"> -->
@@ -120,10 +121,10 @@
                 </div>
               </div>
             </div> -->
-            </tr>
+            <!-- </tr>
           </table>
       </div>
-    </div>
+    </div> -->
   </div>
   <!-- <div id="logger_view" class="logger-pannel">
     <p>This is the active logger view</p>
@@ -131,7 +132,10 @@
 </div> -->
 <!-- <button onclick="openFile(dispFile)">Open a logger config file (.json)</button> -->
 <!-- <pre id="contents"></pre> -->
-<div id="configFormDisplay"></div>
+<div>
+  Config Form
+  <pre id="configFormDisplay"></pre>
+</div>
 <!-- <div>
   <table style="width:100%">
   <col width="50%">
