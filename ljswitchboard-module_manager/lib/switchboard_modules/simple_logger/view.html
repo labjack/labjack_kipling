@@ -7,18 +7,18 @@
     <div id="navbar-example" class="navbar">
       <div class="navbar-inner">
         <div class="container">
-          <h2 class="brand active-log-controls">LJ</h2>
+          <!-- <h2 class="brand active-log-controls">LJ</h2> -->
           <ul class="nav navbar-nav active-log-controls">
             <li>
-              <button class="win-command green" rel="tootlip" title="Command with icon and label with border ring">
+              <button class="win-command green" rel="tootlip" title="Command with icon and label with border ring" onClick="userLoggerStart()">
                 <span class="win-commandicon win-commandring icon-play"></span>
-                <span class="win-label">Start</span>
+                <!-- <span class="win-label">Start</span> -->
              </button>
             </li>
             <li>
               <button class="win-command red" rel="tootlip" title="Command with icon and label with border ring">
                 <span class="win-commandicon win-commandring icon-stop"></span>
-                <span class="win-label">Stop</span>
+                <!-- <span class="win-label">Stop</span> -->
              </button>
             </li>
           </ul>
@@ -27,7 +27,7 @@
             <li>
               <button class="win-command" href="#" id="newConfig" rel="tootlip" title="Create a new configuration">
                 <span class="win-commandicon win-commandring icon-file-4"></span>
-                <span class="win-label">New</span>
+                <!-- <span class="win-label">New</span> -->
              </button>
              <script>
               $(document).ready( function() {
@@ -40,7 +40,7 @@
             <li>
               <button class="win-command" rel="tootlip" title="Load a configuration" onClick="openFile(dispFile)">
                 <span class="win-commandicon win-commandring icon-folder-open"></span>
-                <span class="win-label">Open</span>
+                <!-- <span class="win-label">Open</span> -->
              </button>
             </li>
             <li>
@@ -58,13 +58,13 @@
           </ul>
           <ul class="nav pull-right active-log-controls">
             <li>
-              <button class="win-command" href="#" id="configView" rel="tootlip" title="Configure">
+              <button class="win-command" href="#" id="configViewButton" rel="tootlip" title="Configure">
                 <span class="win-commandicon win-commandring icon-cog-4"></span>
-                <span class="win-label">Configure</span>
+                <!-- <span class="win-label">Configure</span> -->
              </button>
              <script>
                $(document).ready( function() {
-                $("#configView").on("click", function() {
+                $("#configViewButton").on("click", function() {
                   $("#config_view").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/view_current_configuration.html");
                   });
               });
@@ -75,7 +75,7 @@
             <li>
               <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
                 <span class="win-commandicon win-commandring  icon-statistics"></span>
-                <span class="win-label">Dashboard</span>
+                <!-- <span class="win-label">Dashboard</span> -->
              </button>
             </li>
           </ul>
@@ -83,8 +83,8 @@
       </div>
     </div>
   </div><!-- /#logger_controls -->
-  ConfigView
   <div id="config_view" class="config-pannel">
+    <pre id="currentConfigDisp" style="visibility: hidden;"></pre>
     <!-- <div id="config_forum"> -->
       <!-- <div class="panel-group"> -->
             <!-- <div class="panel panel-default">
@@ -130,11 +130,30 @@
     <p>This is the active logger view</p>
   </div>
 </div> -->
-<!-- <button onclick="openFile(dispFile)">Open a logger config file (.json)</button> -->
-<!-- <pre id="contents"></pre> -->
-<div>
-  Config Form
-  <pre id="configFormDisplay"></pre>
+<div id="configForm">
+  <table class="table table-non-striped configSettingsTable">
+    <thead>
+      <h4>New Logger Configuration</h4>
+      <th class="attribute">
+      <th class="input">
+      <th class="userFeedback">
+    </thead>
+    <tbody style="background-color:transparent">
+      <tr id="logName" class="">
+        <td>Logger Configuration Name:</td>
+        <td>
+          <input class="" type="text" name="Configuration Name" value="" placeholder="ex: AIN0_1_2 Log">
+        </td>
+      </tr>
+      <tr id="dataGroup" class="">
+        <td>Data Group Name:</td>
+        <td>
+          <input class="" type="text" name="" value="" placeholder ="ex: AIN Group">
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
 </div>
 <!-- <div>
   <table style="width:100%">

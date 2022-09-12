@@ -20,6 +20,34 @@
 	display:inline-block;
 }
 
+.win-commandicon {
+	background-color: rgb(220, 47, 255);
+}
+
+.win-commandicon:focus {
+	background-color: blue;
+}
+
+.win-commandicon:hover {
+	background-color: red;
+}
+.configSettingsTable {
+	width:350px;
+}
+.configSettingsTable .attribute {
+	width: 133px;
+}
+.configSettingsTable .input {
+	/*width:75%;*/
+}
+.configSettingsTable .userFeedback {
+	min-width: 30px;
+	width:30px;
+}
+
+/* .navbar .container {
+	display: table-cell;
+} */
 /*
 background-color: #d6e9c6
 background-color: #dff0d8
