@@ -13,6 +13,7 @@ const fs                 = require('fs')
 const device_manager     = require('ljswitchboard-device_manager')
 var CREATE_SIMPLE_LOGGER = require("ljswitchboard-simple_logger");
 const { dirname }        = require('path');
+var modbus_map           = require('ljswitchboard-modbus_map').getConstants();
 
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
@@ -30,12 +31,6 @@ var MODULE_UPDATE_PERIOD_MS = 1000;
 function userStartLogger() {
 
 }
-
-
-
-
-
-
 
 function dispFile(contents) {
     // $("#configViewButton").click()
@@ -182,25 +177,11 @@ function module() {
 
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
 
-        // self.getRegistersToDisplay()
-        // .then(self.getRegistersModbusInfo)
-        // .then(self.cachedRegistersToDisplay)
-        // .then(self.getInitialDeviceData)
-        // .then(function(registers) {
-        //     console.log('Registers to display:', registers);
-        //     self.moduleContext = {
-        //         'activeRegisters': self.getActiveRegistersData(registers)
-        //     };
-        //     framework.setCustomContext(self.moduleContext);
-        //     onSuccess();
-        // });
-
         // Get the current mode,
         // self.moduleContext.logger_mode = logger_modes.active;
         self.moduleContext.logger_mode = logger_modes.configure;
         
         framework.setCustomContext(self.moduleContext);
-        // console.error("onDeviceConfigured")
         onSuccess();
     };
 
@@ -251,7 +232,6 @@ function loggerApp() {
 				defered.resolve();
 			});
 		}, 5000);
-		
 		
 		return defered.promise;
 	};
@@ -329,11 +309,6 @@ function loggerApp() {
 				defered.resolve();
 			});
 		});
-
-		
-
-
-		
 		return defered.promise;
 	}
 	this.startLogger = function() {
