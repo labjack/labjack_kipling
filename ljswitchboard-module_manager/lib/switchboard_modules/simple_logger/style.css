@@ -57,3 +57,36 @@ background-color: #51a351
 background-color: #387038
 background-color: #3c763d;
 */
+
+.testBox{
+	display: flex;
+	flex-flow: row wrap;
+	
+	
+	
+	/*max-height: 200px;
+	flex-direction: row;
+	
+	flex-shrink: 3;
+	grid-row: 1/2;
+	flex: 2 0 21%;s
+	*/
+
+}
+
+.input-container {
+    display: flex;
+    width: 250px;
+    border: 1px solid #a9a9a9;
+    justify-content: space-between;
+}
+.input-container input:focus, .input-container input:active {
+    outline: none;
+}
+.input-container input {
+    border: none;
+}
+
+.disabled {
+	opacity: 0.33;
+}

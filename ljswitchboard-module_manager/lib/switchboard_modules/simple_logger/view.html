@@ -162,6 +162,53 @@
       </tr>
     </tbody>
   </table>
+  <button id="addButton"> click the button to add register</button>
+      <button id="removeButton"> click the button to remove register</button>
+        <div id="textboxContainer" class="testBox"></div>
+
+        <div class="input-container">
+          <input type="text" class="input-field"/>
+          <button class="input-button">Ok</button>
+        </div>
+
+          <script type="text/javascript">
+
+            $(document).ready(function(){
+              
+              var registerCount = 0;
+
+              $('#addButton').click(function () {
+                var input = document.createElement("input");
+                input.setAttribute("type", "text");
+                input.className = ("input-field");
+                input.id = ("nipit");
+                document.getElementById("textboxContainer").appendChild(input);
+                registerCount += 1;
+                checkRegisterCount()
+              })
+              
+              $('#removeButton').click(function () {
+                // $("textboxContainer").children().last().remove();
+                // registerCount -= 1
+                const list = document.getElementById("textboxContainer");
+                if (list.hasChildNodes()){
+                  list.removeChild(list.children[1]);
+                  registerCount -= 1;
+                  checkRegisterCount();
+                }
+              })
+
+              let checkRegisterCount = function () {
+                if (registerCount >= 8) {
+                  $('#addButton').prop("disabled", true).addClass("disabled")
+                }
+                else if (registerCount < 8 && $("addButton").disabled) {
+                  $('#addButton').prop("disabled", false)
+                }
+              }
+          })
+          </script>
+  <button class="btn btn-primary" type="submit">Verify and Load Configuration</button>
 </div>
 <!-- <div>
   <table style="width:100%">
