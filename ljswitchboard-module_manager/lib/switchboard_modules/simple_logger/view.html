@@ -46,7 +46,7 @@
             <li>
               <button class="win-command" rel="tootlip" title="Save configuration">
                 <span class="win-commandicon win-commandring icon-disk"></span>
-                <span class="win-label">Save</span>
+                <!-- <span class="win-label">Save</span> -->
              </button>
             </li>
             <!-- <li>
@@ -130,7 +130,7 @@
     <p>This is the active logger view</p>
   </div>
 </div> -->
-<div id="configForm">
+<!-- <div id="configForm">
   <table class="table table-non-striped configSettingsTable">
     <thead>
       <h4>New Logger Configuration</h4>
@@ -212,30 +212,121 @@
           })
           </script>
   <button class="btn btn-primary" type="submit">Verify and Load Configuration</button>
-</div>
-<!-- <div>
-  <table style="width:100%">
-  <col width="50%">
-  <col width="50%">
-  <tr>
-    <th style="text-align: left; vertical-align: text-top; width:50%;">
-      <p>Scan Rate = <input type="number" id="ScanRate" value="1000"></p>
-      <p>Num Chans. = <input type="number" id="NumChans" value="4"></p>
-      <p>X Scale (in seconds) = <input type="number" id="XScale" value="1.0"></p>
-      <p>FPS = <input type="number" id="FPS" value="10"></p>
-      <p><input type="checkbox" id="Decimate">Decimate<p>
-      <p>Samples Loop Size = <input type="number" id="SampLoopSize" value="1000"></p>
-      <button id="startCharting" class="btn" title="Start Charting">Start</button>
-      <button id="stopCharting" class="btn" title="Stop Charting">Stop</button>
-    </th>
-    <th style="text-align: left; vertical-align: text-top; width:50%;">
-        <p id="info">Info</p>
-        <p id="renderinfo">Render Info</p>
-        <div style="height:100px;"><p id="debug">Debug</p><div>
-    </th>
-  </tr>
-  </table>
 </div> -->
+
+<div class="container">
+  <div class="col-xs-4">
+      <form>
+          <div class="form-group">
+              <label for="logName">
+                  Log name:
+              </label>
+              <input type="text" name="logName" id="logName" class="form-control">
+              <h5 id="nameCheck" style="color: red;">
+                  Log Name is Missing
+              </h5>
+          </div>
+           
+          <div class="form-group">
+              <label for="dataGroupName">
+                  Data Group Name:
+              </label>
+              <input type="text" name="dataGroup" id="dataGroupName" required class="form-control">
+              <small id="groupCheck" class="form-text
+          text-muted invalid-feedback">
+                  Please name the data group.
+              </small>
+          </div>
+
+          <div class="form-group">
+            <label for="validationCustom05">
+              Register Name(s):
+          </label>
+            <div class="col-sm">
+              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <small id="regCheck" class="form-text
+                  text-muted invalid-feedback">
+                  Please Provide a Valid Register.
+              </small>
+            </div>
+            <div class="col-sm">
+              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <small id="regCheck" class="form-text
+                  text-muted invalid-feedback">
+                  Please Provide a Valid Register.
+              </small>
+            </div>
+            <div class="col-sm">
+              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <small id="regCheck" class="form-text
+                  text-muted invalid-feedback">
+                  Please Provide a Valid Register.
+              </small>
+            </div>
+            <div class="col-sm">
+              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <small id="regCheck" class="form-text
+                  text-muted invalid-feedback">
+                  Please Provide a Valid Register.
+              </small>
+            </div>
+
+          </div>
+          <div class="form-group">
+            <label for="filePath">
+              Log File Location:
+          </label>
+            <div class="col-sm">
+              <input type="file" class="form-control" id="filePath" required class="form-control">
+              <small id="pathCheck" class="form-text
+                  text-muted invalid-feedback">
+                  Please Provide a Valid File Path.
+              </small>
+            </div>
+          </div>
+
+          <input type="submit" id="submitbtn" value="Submit" class="btn btn-primary">
+      </form>
+      <script>
+        $(document).ready(function () {
+
+          function validateLogName(){
+            // TO-DO: make sure no spaces in log name
+            return true
+          }
+
+          function validateFilePath(){
+            // TO-DO: check file path for log-to-file is valid directory
+            return true
+          }
+
+          function validateRegisters(){
+            // TO-DO: check that all selected registers are valid for selected device and can be streamed
+            return true
+          }
+        // Submit button
+          $("#submitbtn").click(function () {
+            let ln = validateLogName();
+            let fp = validateFilePath();
+            let rg = validateRegisters();
+            if (
+              ln &&
+              fp &&
+              rg 
+            ) {
+              return true;
+            } else {
+              return false;
+            }
+          });
+        });
+      </script>
+  </div>
+</div>
+
+
+
+
 <!-- <pre class="selectableText">{{printContext}}</pre>
 {{/with}} -->
 
