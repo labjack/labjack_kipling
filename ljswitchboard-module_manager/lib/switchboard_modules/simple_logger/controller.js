@@ -10,7 +10,7 @@
 
 const { time }           = require('console');
 const fs                 = require('fs')
-const device_manager     = require('ljswitchboard-device_manager')
+var device_manager     = require('ljswitchboard-device_manager')
 var CREATE_SIMPLE_LOGGER = require("ljswitchboard-simple_logger");
 const { dirname }        = require('path');
 var modbus_map           = require('ljswitchboard-modbus_map').getConstants();
@@ -32,12 +32,28 @@ function userStartLogger() {
 
 }
 
-function dispFile(contents) {
+
+
+function loadConfigFile(config) {
     // $("#configViewButton").click()
     // $("#configForm").load("./templates/view_current_configuration.html");
-    document.getElementById("currentConfigDisp").style.visibility = "visible";
-    document.getElementById('currentConfigDisp').textContent=JSON.stringify(contents, undefined, 2)
+    // document.getElementById("currentConfigDisp").style.visibility = "visible";
+    // document.getElementById('currentConfigDisp').textContent=JSON.stringify(contents, undefined, 2)
 
+	$("#logName").val(config.logging_config.name)
+	let deviceManager = device_manager.create();
+	deviceManager.connectToDevices([{
+		dt:'LJM_dtANY',
+		ct:'LJM_ctANY',
+		id:'LJM_idANY',
+	}])
+	devices = deviceManager.getDevices()
+	let active = module.activeDevice
+	// devices.forEach(function(device) {
+	// 	var connected = 
+	// 	var sn = device.savedAttributes.serialNumber;
+	// 	validSN = sn;
+	console.error("Devices:", devices, active)
 }
 
 /**  opens the file explorer to look for .json config files 
@@ -60,8 +76,8 @@ function openFile(func) {
         var config_data = fs.readFileSync(filePath)
         // let str = JSON.stringify(config_data, null, 4)
         let obj = JSON.parse(config_data) 
-        dispFile(obj)
-        
+		console.error(obj)
+        loadConfigFile(obj)
 
         var reader = new FileReader();
         reader.onload = function(e) {
@@ -180,7 +196,6 @@ function module() {
         // Get the current mode,
         // self.moduleContext.logger_mode = logger_modes.active;
         self.moduleContext.logger_mode = logger_modes.configure;
-        
         framework.setCustomContext(self.moduleContext);
         onSuccess();
     };
@@ -349,6 +364,7 @@ function loggerApp() {
 		return defered.promise;
 	}
 	var self = this;
+
 }
 
 var loggerApp = new loggerApp()
