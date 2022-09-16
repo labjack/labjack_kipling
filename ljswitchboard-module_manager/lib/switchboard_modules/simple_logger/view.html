@@ -6,7 +6,7 @@
   <div id="logger_controls">
     <div id="navbar-example" class="navbar">
       <div class="navbar-inner">
-        <div class="container">
+        <div class="container1">
           <!-- <h2 class="brand active-log-controls">LJ</h2> -->
           <ul class="nav navbar-nav active-log-controls">
             <li>
@@ -63,20 +63,32 @@
                 <!-- <span class="win-label">Configure</span> -->
              </button>
              <script>
+              $("#configViewButton").click(function(){
+                $('.datviewContainer').hide();
+                $('#formContainer').show();
+              });
+             </script>
+             <!-- <script>
                $(document).ready( function() {
                 $("#configViewButton").on("click", function() {
                   $("#config_view").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/view_current_configuration.html");
                   });
               });
-             </script>
+             </script> -->
             </li>
           </ul>
           <ul class="nav pull-right configure-log-controls">
             <li>
               <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
-                <span class="win-commandicon win-commandring  icon-statistics"></span>
+                <span class="win-commandicon win-commandring  icon-statistics" id="toggle"></span>
                 <!-- <span class="win-label">Dashboard</span> -->
              </button>
+             <script>
+              $("#toggle").click(function(){
+              $('.container').hide();
+              $('#dataView').show();
+              });
+             </script>
             </li>
           </ul>
         </div><!-- /.container -->
@@ -214,7 +226,7 @@
   <button class="btn btn-primary" type="submit">Verify and Load Configuration</button>
 </div> -->
  Here you go Zander, Hope this one works.....
-<div class="container">
+<div class="container" id="formContainer">
   <div class="col-sm-7">
       <form>
           <div class="form-group">
@@ -361,6 +373,31 @@
       </script>
   </div>
 </div>
+</div>
+
+<div class="datviewContainer" id="dataView" >
+  it is alive
+  <div id="arrey">
+    some1
+
+  </div>
+  <div id="arrey">
+    some2
+
+  </div>
+
+  <script>
+    var arrayElements = document.getElementById("arrey");
+    var finalArray = jQuery.makeArray( arrayElements );
+    var res = finalArray.length;
+    for (var i = 0; i < 3; i++){
+      var $label = $("<label>").text('Date:');
+      //table.append(row);
+    }
+
+    finalArray.reverse();
+    $( finalArray ).appendTo( document.body );
+  </script>
 </div>
 
 

@@ -1,0 +1,20 @@
+{{#with custom}}
+<p></p>
+
+<div id="logger_module" class="{{logger_mode}}">
+    <ul class="nav pull-right active-log-controls">
+        <li>
+          <button class="win-command" href="#" id="configViewButton" rel="tootlip" title="Configure">
+            <span class="win-commandicon win-commandring icon-cog-4"></span>
+            <!-- <span class="win-label">Configure</span> -->
+         </button>
+         <script>
+           $(document).ready( function() {
+            $("#configViewButton").on("click", function() {
+              $("#config_view").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/view_current_configuration.html");
+              });
+          });
+         </script>
+        </li>
+      </ul>
+</div>
