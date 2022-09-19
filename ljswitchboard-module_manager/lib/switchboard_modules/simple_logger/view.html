@@ -49,12 +49,33 @@
                 <!-- <span class="win-label">Save</span> -->
              </button>
             </li>
-            <!-- <li>
-              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+            <li>
+              <button class="win-command" rel="tootlip" id="resetBtn" title="Command with icon and label with border ring">
                 <span class="win-commandicon win-commandring icon-code-3"></span>
-                <span class="win-label">Examples</span>
+                <!-- <span class="win-label">clear</span> -->
              </button>
-            </li> -->
+             <script>
+              $("#resetBtn").click(function(){
+                //window.confirm("Would you like to clear all of the fields? This will delete all form data!");
+                if (confirm("Would you like to clear all of the fields? This will delete all form data!")) {
+                  document.getElementById("logName").value = "";
+                  document.getElementById("devSN").value = "";
+                  document.getElementById("dataGroupName").value = "";
+                  //seperation of the top half and the lower half
+                  document.getElementById("validationCustom01").value = "";
+                  document.getElementById("validationCustom02").value = "";
+                  document.getElementById("validationCustom03").value = "";
+                  document.getElementById("validationCustom04").value = "";
+                  document.getElementById("validationCustom05").value = "";
+                  document.getElementById("validationCustom06").value = "";
+                  document.getElementById("validationCustom07").value = "";
+                  document.getElementById("validationCustom08").value = "";
+                } else {
+                  // nothing should happen
+                }
+              })
+             </script>
+            </li>
           </ul>
           <ul class="nav pull-right active-log-controls">
             <li>
@@ -81,12 +102,29 @@
             <li>
               <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
                 <span class="win-commandicon win-commandring  icon-statistics" id="toggle"></span>
-                <!-- <span class="win-label">Dashboard</span> -->
+                <span class="win-label">Dashboard</span>
              </button>
+             <!-- working here so i don't forget where i am -->
              <script>
               $("#toggle").click(function(){
-              $('.container').hide();
-              $('#dataView').show();
+                $('#formContainer').hide();
+                $('#dataView').show();
+                // var arr = new Array (2);
+                // arr[0] = document.getElementById('validationCustom05');
+                // document.write(arr);
+                // array to be displayed
+              var array = [];
+              array[0] = document.getElementById('validationCustom01').value;
+              array[1] = document.getElementById('validationCustom02').value;
+              array[2] = document.getElementById('validationCustom03').value;
+              array[3] = document.getElementById('validationCustom04').value;
+              array[4] = document.getElementById('validationCustom05').value;
+              array[5] = document.getElementById('validationCustom06').value;
+              array[6] = document.getElementById('validationCustom07').value;
+              array[7] = document.getElementById('validationCustom08').value;          
+              //displays the array seperated by a new line so latter down the
+              //line we can put the corisponding data next to it
+              document.getElementById("display-array").textContent = array.join('\r\n');
               });
              </script>
             </li>
@@ -225,12 +263,8 @@
           </script>
   <button class="btn btn-primary" type="submit">Verify and Load Configuration</button>
 </div> -->
-<<<<<<< HEAD
- Here you go Zander, Hope this one works.....
 <div class="container" id="formContainer">
-=======
 <div class="container">
->>>>>>> 9757926470c88463af4f3d38a8637a2a13e63975
   <div class="col-sm-7">
       <form>
           <div class="form-group">
@@ -275,7 +309,7 @@
                 text-muted invalid-feedback">
                 Register #1
               </small>
-              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom01" required class="form-control" name="array[]">
             </div>
 
             <div class="col-sm-6">
@@ -283,7 +317,7 @@
                 text-muted invalid-feedback">
                 Register #2
               </small>
-              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom02" required class="form-control" name="array[]">
             </div>
 
             <div class="col-sm-6">
@@ -291,7 +325,7 @@
                 text-muted invalid-feedback">
                 Register #3
               </small>
-              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom03" required class="form-control">
             </div>
 
             <div class="col-sm-6">
@@ -299,7 +333,7 @@
                 text-muted invalid-feedback">
                 Register #4
               </small>
-              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom04" required class="form-control">
             </div>
 
             <div class="col-sm-6">
@@ -315,7 +349,7 @@
                 text-muted invalid-feedback">
                 Register #6
               </small>
-              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom06" required class="form-control">
             </div>
 
             <div class="col-sm-6">
@@ -323,7 +357,7 @@
                 text-muted invalid-feedback">
                 Register #7
               </small>
-              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom07" required class="form-control">
             </div>
 
             <div class="col-sm-6">
@@ -331,8 +365,9 @@
                 text-muted invalid-feedback">
                 Register #8
               </small>
-              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom08" required class="form-control">
             </div>
+
             <!-- end of the refgisters -->
           </div>
         </div>
@@ -372,8 +407,14 @@
             },false);
 
           function validateLogName(){
-            // TO-DO: make sure no spaces in log name
-            return true
+            x = 2;
+            if( x == 1 ){
+              return true
+            }
+            else{
+              return false
+            }
+            //return true
           }
 
           function validateFilePath(){
@@ -388,7 +429,7 @@
         // Submit button
           $("#submitbtn").click(function () {
             return true
-            // let ln = validateLogName();
+            //let ln = validateLogName();
             // let fp = validateFilePath();
             // let rg = validateRegisters();
             // if (
@@ -408,15 +449,6 @@
 </div>
 
 <div class="datviewContainer" id="dataView" >
-  it is alive
-  <div id="arrey">
-    some1
-
-  </div>
-  <div id="arrey">
-    some2
-
-  </div>
 
   <script>
     var arrayElements = document.getElementById("arrey");
@@ -424,7 +456,7 @@
     var res = finalArray.length;
     for (var i = 0; i < 3; i++){
       var $label = $("<label>").text('Date:');
-      //table.append(row);
+      table.append(row);
     }
 
     finalArray.reverse();
@@ -432,6 +464,7 @@
   </script>
 </div>
 
+<div id="display-array"></div>
 
 
 <!-- <pre class="selectableText">{{printContext}}</pre>
