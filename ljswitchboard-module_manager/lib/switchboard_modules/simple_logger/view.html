@@ -38,7 +38,7 @@
             </script>
             </li>
             <li>
-              <button class="win-command" rel="tootlip" title="Load a configuration" onClick="openFile(dispFile)">
+              <button class="win-command" rel="tootlip" title="Load a configuration" onClick="openFile(loadConfigFile)">
                 <span class="win-commandicon win-commandring icon-folder-open"></span>
                 <!-- <span class="win-label">Open</span> -->
              </button>
@@ -225,8 +225,12 @@
           </script>
   <button class="btn btn-primary" type="submit">Verify and Load Configuration</button>
 </div> -->
+<<<<<<< HEAD
  Here you go Zander, Hope this one works.....
 <div class="container" id="formContainer">
+=======
+<div class="container">
+>>>>>>> 9757926470c88463af4f3d38a8637a2a13e63975
   <div class="col-sm-7">
       <form>
           <div class="form-group">
@@ -238,6 +242,16 @@
                   Log Name is Missing
               </h5>
           </div>
+
+          <div class="form-group">
+            <label for="devSN">
+                Device Serial Number:
+            </label>
+            <input type="text" name="devSN" id="devSN" class="form-control">
+            <h5 id="nameCheck" style="color: red;">
+                Device Serial Number is Missing
+            </h5>
+        </div>
            
           <div class="form-group">
               <label for="dataGroupName">
@@ -324,21 +338,38 @@
         </div>
           <div class="form-group">
             <label for="filePath">
-              Log File Location:
+              Log File(s) Save Location:
           </label>
-            <div class="col-sm">
-              <input type="file" class="form-control" id="filePath" required class="form-control">
+            <div class="col-lg">
+              <!-- <input type="file" class="form-control" id="selectDir" required class="form-control" webkitdirectory directory>
               <small id="pathCheck" class="form-text
                   text-muted invalid-feedback">
-                  Please Provide a Valid File Path.
-              </small>
+                  Please Provide a Valid Directory Path.
+              </small> -->
+              <!-- <div style="text-align:center;"> -->
+                <input type="text" placeholder="Please select a file" id="actual-file" disabled="disabled"/>
+                <input type="button" value="Choose a file" id="select-file"/>
+              <!-- </div> -->
             </div>
           </div>
 
-          <input type="submit" id="submitbtn" value="Submit" class="btn btn-primary">
+          <input type="submit" id="submitbtn" value="Verify and Load Configuration" class="btn btn-primary">
       </form>
       <script>
         $(document).ready(function () {
+          const { dialog } = require('electron').remote; 
+          // var dialog = require('electron').dialog;
+          var fs = require('fs');
+
+          document.getElementById('select-file').addEventListener('click',function(){
+                dialog.showOpenDialog({
+                  properties: ['openDirectory']
+                }).then((data) => {
+                  // alert(data.filePaths)
+                  // console.error(data)
+                  $("#actual-file").val(data.filePaths)
+                })
+            },false);
 
           function validateLogName(){
             // TO-DO: make sure no spaces in log name
@@ -356,18 +387,19 @@
           }
         // Submit button
           $("#submitbtn").click(function () {
-            let ln = validateLogName();
-            let fp = validateFilePath();
-            let rg = validateRegisters();
-            if (
-              ln &&
-              fp &&
-              rg 
-            ) {
-              return true;
-            } else {
-              return false;
-            }
+            return true
+            // let ln = validateLogName();
+            // let fp = validateFilePath();
+            // let rg = validateRegisters();
+            // if (
+            //   ln &&
+            //   fp &&
+            //   rg 
+            // ) {
+            //   return true;
+            // } else {
+            //   return false;
+            // }
           });
         });
       </script>
