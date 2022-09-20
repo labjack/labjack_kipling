@@ -1,6 +1,7 @@
 {{#with custom}}
 <p></p>
 
+
 <div id="logger_module" class="{{logger_mode}}">
 <!-- <div id="logger_module" class="dashboard_mode"> -->
   <div id="logger_controls">
@@ -35,29 +36,10 @@
                  $("#configFormDisplay").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/create_configuration.html");
                  });
              });
-            </script>
-            </li>
-            <li>
-              <button class="win-command" rel="tootlip" title="Load a configuration" onClick="openFile(loadConfigFile)">
-                <span class="win-commandicon win-commandring icon-folder-open"></span>
-                <!-- <span class="win-label">Open</span> -->
-             </button>
-            </li>
-            <li>
-              <button class="win-command" rel="tootlip" title="Save configuration">
-                <span class="win-commandicon win-commandring icon-disk"></span>
-                <!-- <span class="win-label">Save</span> -->
-             </button>
-            </li>
-            <li>
-              <button class="win-command" rel="tootlip" id="resetBtn" title="Command with icon and label with border ring">
-                <span class="win-commandicon win-commandring icon-code-3"></span>
-                <!-- <span class="win-label">clear</span> -->
-             </button>
-             <script>
-              $("#resetBtn").click(function(){
-                //window.confirm("Would you like to clear all of the fields? This will delete all form data!");
-                if (confirm("Would you like to clear all of the fields? This will delete all form data!")) {
+
+             $("#newConfig").click(function() {
+              //window.confirm("Would you like to clear all of the fields? This will delete all form data!");
+              if (confirm("Would you like to clear all of the fields? This will delete all form data!")) {
                   document.getElementById("logName").value = "";
                   document.getElementById("devSN").value = "";
                   document.getElementById("dataGroupName").value = "";
@@ -73,9 +55,32 @@
                 } else {
                   // nothing should happen
                 }
+             });
+            </script>
+            </li>
+            <li>
+              <button class="win-command" rel="tootlip" title="Load a configuration" onClick="openFile(loadConfigFile)">
+                <span class="win-commandicon win-commandring icon-folder-open"></span>
+                <!-- <span class="win-label">Open</span> -->
+             </button>
+            </li>
+            <li>
+              <button class="win-command" rel="tootlip" title="Save configuration">
+                <span class="win-commandicon win-commandring icon-disk"></span>
+                <!-- <span class="win-label">Save</span> -->
+             </button>
+            </li>
+            <!-- <li>
+              <button class="win-command" rel="tootlip" id="resetBtn" title="Command with icon and label with border ring">
+                <span class="win-commandicon win-commandring icon-code-3"></span>
+                <span class="win-label">clear</span> 
+             </button>
+             <script>
+              $("#resetBtn").click(function(){
+                
               })
              </script>
-            </li>
+            </li> -->
           </ul>
           <ul class="nav pull-right active-log-controls">
             <li>
@@ -101,30 +106,39 @@
           <ul class="nav pull-right configure-log-controls">
             <li>
               <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
-                <span class="win-commandicon win-commandring  icon-statistics" id="toggle"></span>
-                <span class="win-label">Dashboard</span>
+                <span class="win-commandicon win-commandring  icon-statistics" id="DataView"></span>
+                <!-- <span class="win-label">Dashboard</span> -->
              </button>
              <!-- working here so i don't forget where i am -->
              <script>
-              $("#toggle").click(function(){
+              $("#DataView").click(function(){
                 $('#formContainer').hide();
                 $('#dataView').show();
                 // var arr = new Array (2);
                 // arr[0] = document.getElementById('validationCustom05');
                 // document.write(arr);
                 // array to be displayed
-              var array = [];
-              array[0] = document.getElementById('validationCustom01').value;
-              array[1] = document.getElementById('validationCustom02').value;
-              array[2] = document.getElementById('validationCustom03').value;
-              array[3] = document.getElementById('validationCustom04').value;
-              array[4] = document.getElementById('validationCustom05').value;
-              array[5] = document.getElementById('validationCustom06').value;
-              array[6] = document.getElementById('validationCustom07').value;
-              array[7] = document.getElementById('validationCustom08').value;          
-              //displays the array seperated by a new line so latter down the
-              //line we can put the corisponding data next to it
-              document.getElementById("display-array").textContent = array.join('\r\n');
+                var array = [];
+                array[0] = document.getElementById('validationCustom01').value;
+                array[1] = document.getElementById('validationCustom02').value;
+                array[2] = document.getElementById('validationCustom03').value;
+                array[3] = document.getElementById('validationCustom04').value;
+                array[4] = document.getElementById('validationCustom05').value;
+                array[5] = document.getElementById('validationCustom06').value;
+                array[6] = document.getElementById('validationCustom07').value;
+                array[7] = document.getElementById('validationCustom08').value;
+                //displays the array seperated by a new line so latter down the
+                //line we can put the corisponding data next to it
+                //console.log(str.split(',').join("\r\n"));
+                //assigns the array elementto the div class
+                document.getElementById("display-array").textContent = array[0];
+                document.getElementById("display-array1").textContent = array[1];
+                document.getElementById("display-array2").textContent = array[2];
+                document.getElementById("display-array3").textContent = array[3];
+                document.getElementById("display-array4").textContent = array[4];
+                document.getElementById("display-array5").textContent = array[5];
+                document.getElementById("display-array6").textContent = array[6];
+                document.getElementById("display-array7").textContent = array[7];
               });
              </script>
             </li>
@@ -271,7 +285,7 @@
               <label for="logName">
                   Log name:
               </label>
-              <input type="text" name="logName" id="logName" class="form-control">
+              <input type="text" name="logName" id="logName" required class="form-control" class="form-control">
               <h5 id="nameCheck" style="color: red;">
                   Log Name is Missing
               </h5>
@@ -281,7 +295,7 @@
             <label for="devSN">
                 Device Serial Number:
             </label>
-            <input type="text" name="devSN" id="devSN" value = '' class="form-control">
+            <input type="text" name="devSN" id="devSN" value = '' required class="form-control" class="form-control">
             <h5 id="nameCheck" style="color: red;">
                 Device Serial Number is Missing
             </h5>
@@ -292,10 +306,9 @@
                   Data Group Name:
               </label>
               <input type="text" name="dataGroup" id="dataGroupName" required class="form-control">
-              <small id="groupCheck" class="form-text
-          text-muted invalid-feedback">
+              <h5 id="groupCheck" class="form-text text-muted invalid-feedback" style="color: red;">
                   Please name the data group.
-              </small>
+              </h5>
           </div>
 
           <div class="form-group">
@@ -309,15 +322,16 @@
                 text-muted invalid-feedback">
                 Register #1
               </small>
-              <input type="text" class="form-control" id="validationCustom01" required class="form-control" name="array[]">
+              <input type="text" class="form-control" id="validationCustom01" name="array[]" 
+              oninput="this.value = this.value.toUpperCase()">
             </div>
-
             <div class="col-sm-6">
               <small id="regCheck" class="form-text
                 text-muted invalid-feedback">
                 Register #2
               </small>
-              <input type="text" class="form-control" id="validationCustom02" required class="form-control" name="array[]">
+              <input type="text" class="form-control" id="validationCustom02" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
             </div>
 
             <div class="col-sm-6">
@@ -325,7 +339,8 @@
                 text-muted invalid-feedback">
                 Register #3
               </small>
-              <input type="text" class="form-control" id="validationCustom03" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom03" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
             </div>
 
             <div class="col-sm-6">
@@ -333,7 +348,8 @@
                 text-muted invalid-feedback">
                 Register #4
               </small>
-              <input type="text" class="form-control" id="validationCustom04" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom04" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
             </div>
 
             <div class="col-sm-6">
@@ -341,7 +357,8 @@
                 text-muted invalid-feedback">
                 Register #5
               </small>
-              <input type="text" class="form-control" id="validationCustom05" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom05" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
             </div>
 
             <div class="col-sm-6">
@@ -349,7 +366,8 @@
                 text-muted invalid-feedback">
                 Register #6
               </small>
-              <input type="text" class="form-control" id="validationCustom06" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom06" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
             </div>
 
             <div class="col-sm-6">
@@ -357,7 +375,8 @@
                 text-muted invalid-feedback">
                 Register #7
               </small>
-              <input type="text" class="form-control" id="validationCustom07" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom07" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
             </div>
 
             <div class="col-sm-6">
@@ -365,7 +384,8 @@
                 text-muted invalid-feedback">
                 Register #8
               </small>
-              <input type="text" class="form-control" id="validationCustom08" required class="form-control">
+              <input type="text" class="form-control" id="validationCustom08" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
             </div>
 
             <!-- end of the refgisters -->
@@ -383,15 +403,20 @@
               </small> -->
               <!-- <div style="text-align:center;"> -->
                 <input type="text" placeholder="Please select a file" id="actual-file" disabled="disabled"/>
-                <input type="button" value="Choose a file" id="select-file" class="btn btn-primary"/>
+                <input type="button" value="Choose a file" id="select-file" class="btnUpdate"/>
               <!-- </div> -->
             </div>
           </div>
+          <!-- btn btn-primary -->
 
-          <input type="submit" id="submitbtn" value="Verify and Load Configuration" class="btn btn-primary">
+          <input type="submit" id="submitbtn" value="Verify and Load Configuration" class="btnUpdate">
       </form>
       <script>
+
+
         $(document).ready(function () {
+          $('.datviewContainer').hide();
+          $('#formContainer').show();
           const { dialog } = require('electron').remote; 
           // var dialog = require('electron').dialog;
           var fs = require('fs');
@@ -407,14 +432,14 @@
             },false);
 
           function validateLogName(){
-            x = 2;
-            if( x == 1 ){
-              return true
-            }
-            else{
-              return false
-            }
-            //return true
+            // x = 2;
+            // if( x == 1 ){
+            //   return true
+            // }
+            // else{
+            //   return false
+            // }
+            return true
           }
 
           function validateFilePath(){
@@ -428,7 +453,37 @@
           }
         // Submit button
           $("#submitbtn").click(function () {
+            var arrays = [];
+            arrays[0] = document.getElementById('validationCustom01').value;
+            arrays[1] = document.getElementById('validationCustom02').value;
+            arrays[2] = document.getElementById('validationCustom03').value;
+            arrays[3] = document.getElementById('validationCustom04').value;
+            arrays[4] = document.getElementById('validationCustom05').value;
+            arrays[5] = document.getElementById('validationCustom06').value;
+            arrays[6] = document.getElementById('validationCustom07').value;
+            arrays[7] = document.getElementById('validationCustom08').value;
+
+
+
+            for(var i = 0; i < 8; i++){
+              //var registerCheck = document.getElementById("validationCustom01").value;
+              var registerCheck = arrays[i];
+              var searched = registerCheck.search(" "); // Returns the first index of the white space
+
+              if((searched !=null)&&(searched >0))
+              {
+                //should this be an alert or should this be litle icon that apprears when it's wrong
+                alert("Registers should not have a space in them");
+                break;
+              }
+              else
+              {}
+              //resets the counter of the scaces so we can be checking for all the registers.
+              searched = 0;
+              }
+            
             return true
+            //return true
             //let ln = validateLogName();
             // let fp = validateFilePath();
             // let rg = validateRegisters();
@@ -462,9 +517,18 @@
     finalArray.reverse();
     $( finalArray ).appendTo( document.body );
   </script>
+  <!-- whwere wea re actuly putting the varables -->
+  <div id="display-array" class="logerViewStyle"></div>
+  <div id="display-array1" class="logerViewStyle"></div>
+  <div id="display-array2" class="logerViewStyle"></div>
+  <div id="display-array3" class="logerViewStyle"></div>
+  <div id="display-array4" class="logerViewStyle"></div>
+  <div id="display-array5" class="logerViewStyle"></div>
+  <div id="display-array6" class="logerViewStyle"></div>
+  <div id="display-array7" class="logerViewStyle"></div>
 </div>
 
-<div id="display-array"></div>
+
 
 
 <!-- <pre class="selectableText">{{printContext}}</pre>

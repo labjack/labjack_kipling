@@ -86,3 +86,21 @@ background-color: #3c763d;
 .disabled {
 	opacity: 0.33;
 }
+
+.logerViewStyle {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.btnUpdate{
+	color: #FFF;
+    background-color: maroon !important;
+    border-color: transparent;
+    background-clip: border-box;
+}
+.btnUpdate:hover{
+	color: #FFF;
+    background-color: rgb(95, 0, 0) !important;
+    border-color: transparent;
+    background-clip: border-box;
+}
