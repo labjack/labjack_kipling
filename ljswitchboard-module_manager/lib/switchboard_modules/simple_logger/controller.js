@@ -10,10 +10,12 @@
 
 const { time }           = require('console');
 const fs                 = require('fs')
-var device_manager     = require('ljswitchboard-device_manager')
+var device_manager       = require('ljswitchboard-device_manager')
 var CREATE_SIMPLE_LOGGER = require("ljswitchboard-simple_logger");
 const { dirname }        = require('path');
+const { underscored } = require('underscore');
 var modbus_map           = require('ljswitchboard-modbus_map').getConstants();
+// var device_controller = require('./device_controller');
 
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
@@ -29,33 +31,29 @@ var MODULE_UPDATE_PERIOD_MS = 1000;
  * from the start button press, this is the @onClick method
  */
 function userStartLogger() {
-
+	// TO-DO:
+	/**
+	 * This will handle the user pressing the start button.
+	 * We need to create the logger object
+	 * start the event loop
+	 * and make sure everything is ready to begin logging to file
+	 */
 }
-
 
 
 function loadConfigFile(config) {
-    // $("#configViewButton").click()
-    // $("#configForm").load("./templates/view_current_configuration.html");
-    // document.getElementById("currentConfigDisp").style.visibility = "visible";
-    // document.getElementById('currentConfigDisp').textContent=JSON.stringify(contents, undefined, 2)
-
 	$("#logName").val(config.logging_config.name)
-	let deviceManager = device_manager.create();
-	deviceManager.connectToDevices([{
-		dt:'LJM_dtANY',
-		ct:'LJM_ctANY',
-		id:'LJM_idANY',
-	}])
-	devices = deviceManager.getDevices()
-	let active = module.activeDevice
-	// devices.forEach(function(device) {
-	// 	var connected = 
-	// 	var sn = device.savedAttributes.serialNumber;
-	// 	validSN = sn;
-	console.error("Devices:", devices, active)
+	// let deviceManager = device_manager.create();
+	// deviceManager.connectToDevices([{
+	// 	dt:'LJM_dtANY',
+	// 	ct:'LJM_ctANY',
+	// 	id:'LJM_idANY',
+	// }])
+	// devices = deviceManager.getDevices()
+	// var validSN = devices[0].savedAttributes.serialNumber
+	// $("#denSN").val(validSN)
+	// }
 }
-
 /**  opens the file explorer to look for .json config files 
 *  all we really need is the file path, which is passed to the logger
 * but it can also be read to the view with FileReader() 
@@ -76,7 +74,6 @@ function openFile(func) {
         var config_data = fs.readFileSync(filePath)
         // let str = JSON.stringify(config_data, null, 4)
         let obj = JSON.parse(config_data) 
-		console.error(obj)
         loadConfigFile(obj)
 
         var reader = new FileReader();
@@ -97,6 +94,55 @@ function openFile(func) {
     fileInput.click()
 }
 
+
+// console.error("Starting Config Step")
+// let logConfigs = simple_logger.generateBasicConfig({
+//     'same_vals_all_devices': true,
+//     'registers': ['AIN0','AIN1'],
+//     'update_rate_ms': 100,
+// },device_manager.getDevices());
+
+var configObj = {
+	"logging_config": {
+		"name": "",
+		"file_prefix": "",
+		"write_to_file": true,
+		"default_result_view": "0",
+		"default_result_file": "0"
+	},
+	"view_config": {
+		"update_rate_ms": 200
+	},
+	"views": [],
+
+	"data_groups": [],
+	"basic_data_group": {
+		"group_name": "Basic Data Group",
+		"group_period_ms": 500,
+		"is_stream": false,
+		// programaticaly define fill device_serial_numbers array and define device sn objects.
+		"device_serial_numbers": [],
+		"defined_user_values": [],
+		// programatically fill the defined_user_values array and populate the user_values object.  For now, just make them the register names...
+		"user_values": {},
+		"logging_options": {
+			"write_to_file": true,
+			"file_prefix": "basic_group",
+			"max_samples_per_file": 65335,
+			"data_collector_config": {
+				"REPORT_DEVICE_IS_ACTIVE_VALUES": true,
+				"REPORT_DEFAULT_VALUES_WHEN_LATE": false
+			}
+		}
+	},
+	// "stop_trigger": {
+	// 	"relation": "and",
+	// 	"triggers": [{
+	// 		"attr_type": "num_logged", "data_group": "basic_data_group", "val": 8
+	// 	}]
+	// }
+};
+
 /** Call to simple logger module to verify an existing config json file
 *   returns a promise, when resolved it does nothing
 *   if the promise resolves to an error (invalid file or something)
@@ -108,22 +154,14 @@ function verifyConfigFile(filepath) {
 
 }
 
-$("#configView").on("click",function(){
-    $("#configForm").load("./templates/create_configuration.html");
-});
-
-// console.error("Starting Config Step")
-// let logConfigs = simple_logger.generateBasicConfig({
-//     'same_vals_all_devices': true,
-//     'registers': ['AIN0','AIN1'],
-//     'update_rate_ms': 100,
-// },device_manager.getDevices());
-
-// console.log("Done Creating Config")
-
-function loadConfigForm() {
-    // document.getElementById("configForm").innerHTML='<object type="text/html" data="./templates/create_configuration.html"></object>';
-    
+function getRegisters()
+{
+	return new Promise((resolve) => {
+		var registerInfoSrc = fs_facade.getExternalURI(REGISTERS_DATA_SRC);
+		fs_facade.getJSON(registerInfoSrc, genericErrorHandler, function (info) {
+			resolve(info['registers']);
+		});
+	});
 }
 
 /**
@@ -132,11 +170,15 @@ function loadConfigForm() {
  */
 function module() {
     this.moduleConstants = {};
-
+	this.startupRegList = {};
+	this.interpretRegisters = {};
     this.startupData = {};
     this.moduleName = '';
     this.moduleContext = {};
     this.activeDevice = undefined;
+	this.deviceSN = '00000000';
+	this.device_controller = undefined;
+	this.driver_contoller = undefined;
 
     var logger_modes = {
         'active': 'dashboard_mode',
@@ -172,21 +214,24 @@ function module() {
         self.startupData = framework.moduleData.startupData;
         self.moduleName = framework.moduleData.name;
         // console.error("onModuleLoaded")
+		this.moduleConstants = framework.moduleConstants;
+		console.error("onModLoaded startupData", self.startupData)
         onSuccess();
     };
 
     /**
      * Function is called once every time a user selects a new device.  
      * @param  {[type]} framework   The active framework instance.
-     * @param  {[type]} device      The active framework instance.
+     * @param  {[type]} device      The active framework instance. 
      * @param  {[type]} onError     Function to be called if an error occurs.
      * @param  {[type]} onSuccess   Function to be called when complete.
     **/
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
-        self.activeDevices = device;
         framework.clearConfigBindings();
         framework.setStartupMessage('Reading Device Configuration');
         // console.error("onDeviceSelected")
+		console.error("line 220 on device selected", framework, "device", device)
+		this.device_controller = framework.device_controller
         onSuccess();
     };
 
@@ -195,7 +240,11 @@ function module() {
 
         // Get the current mode,
         // self.moduleContext.logger_mode = logger_modes.active;
+		self.activeDevice = device;
+		self.deviceSN = device[0].savedAttributes.serialNumber;
+		// console.error("onDeviceConfigured 230", device)
         self.moduleContext.logger_mode = logger_modes.configure;
+		self.moduleContext.deviceSN = self.deviceSN;
         framework.setCustomContext(self.moduleContext);
         onSuccess();
     };
