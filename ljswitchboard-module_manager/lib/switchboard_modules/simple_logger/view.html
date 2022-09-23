@@ -362,12 +362,12 @@
           }
 
           document.getElementById("configForm").addEventListener('submit', function() {
+            $(".register-input").setCustomValidity('');
             // this prevents the framework from handling the form submission
             // which for some reason clears the entire page and breaks Kipling
             event.preventDefault(); 
             validateForm();
             return false;
-
           });
 
 

@@ -13,12 +13,16 @@ const fs                 = require('fs')
 var device_manager       = require('ljswitchboard-device_manager')
 var CREATE_SIMPLE_LOGGER = require("ljswitchboard-simple_logger");
 const { dirname }        = require('path');
-const { underscored } = require('underscore');
-var modbus_map           = require('ljswitchboard-modbus_map').getConstants();
-// var device_controller = require('./device_controller');
+// const { underscored }    = require('underscore');
+var modbus_map           = require('ljswitchboard-modbus_map');
+// var register_matrix_fw   = require('GET MODBUS MAP AND GET STARTUP DATA HERE PLEASE')
+// var modbus_map = require('ljswitchboard-modbus_map').getConstants().constantsByName;
+const constants = modbus_map.getConstants().constantsByName;
+const registers = Object.getOwnPropertyNames(constants)
 
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
+
 
 var REGISTERS_DATA_SRC = 'simple_logger/ljm_constants.json';
 
@@ -92,6 +96,16 @@ function openFile(func) {
     fileInput.accept = ".json"
     document.body.appendChild(fileInput)
     fileInput.click()
+}
+
+function isValidRegister(reg) {
+	try {
+		let val = constants[reg]
+		return (val != undefined)
+	}
+	catch(e){
+		console.error("INVALID REGISTER", reg, e)
+	}
 }
 
 
