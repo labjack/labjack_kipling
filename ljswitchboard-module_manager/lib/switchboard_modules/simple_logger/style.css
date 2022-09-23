@@ -104,3 +104,59 @@ background-color: #3c763d;
     border-color: transparent;
     background-clip: border-box;
 }
+
+
+/* span.deleteicon {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+}
+span.deleteicon span {
+	position: absolute;
+	display: block;
+	right: 3px;
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+	color: #fff;
+	background-color: #ccc;
+	font: 13px monospace;
+	text-align: center;
+	line-height: 1em;
+	cursor: pointer;
+}
+span.deleteicon input {
+	padding-right: 18px;
+	box-sizing: border-box;
+} */
+
+div.col-sm-6 {
+	position: relative;
+	align-items: center;
+}
+
+div.col-sm-6 span{
+	position: absolute;
+	nav-down: 5px;
+	top: 27px;
+	right: 20px;
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+	color: #fff;
+	background-color: #ccc;
+	font: 13px monospace;
+	text-align: center;
+	line-height: 1em;
+	cursor: pointer;
+}
+
+div.col-sm-6 span:hover{
+	color: #fff;
+	background-color: rgb(134, 134, 134);
+}
+
+div.col-sm-6 input {
+	padding-right: 18px;
+	box-sizing: border-box;
+}
