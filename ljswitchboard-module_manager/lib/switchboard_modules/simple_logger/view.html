@@ -366,9 +366,9 @@
             if(!isValidRegister(input.val())) {
               input.addClass("invalid").removeClass("valid")
             }
-            else if (input.val()=='') {console.error("empty boiiii"); input.removeClass("invalid"); }
+            else if (input.val()=='') {input.removeClass("invalid"); }
             else {
-              input.removeClass("invalid").addClass("valid")
+              input.addClass("valid").removeClass("invalid")
             }
           });
 

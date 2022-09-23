@@ -198,25 +198,6 @@ function module() {
         'active': 'dashboard_mode',
         'configure': 'configure_mode',
     };
-
-    /**
-     * Get information about the registers that can be logged / watched.
-     *
-     * Load register information for all devices, a complete record of registers
-     * that can be logged or watched.
-     *
-     * @return {Promise} A promise that resolves to an Object with register
-     *      information. See the registers section of the ljm_constants JSON file.
-    **/
-    function getRegisters()
-    {
-        return new Promise((resolve) => {
-            var registerInfoSrc = fs_facade.getExternalURI(REGISTERS_DATA_SRC);
-            fs_facade.getJSON(registerInfoSrc, genericErrorHandler, function (info) {
-                resolve(info['registers']);
-            });
-        });
-    }
     
     /**
      * Function is called once every time the module tab is selected, loads the module.
@@ -229,7 +210,7 @@ function module() {
         self.moduleName = framework.moduleData.name;
         // console.error("onModuleLoaded")
 		this.moduleConstants = framework.moduleConstants;
-		console.error("onModLoaded startupData", self.startupData)
+		this.startupRegList = global.globalActiveRegisters;
         onSuccess();
     };
 
@@ -243,7 +224,6 @@ function module() {
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
         framework.clearConfigBindings();
         framework.setStartupMessage('Reading Device Configuration');
-        // console.error("onDeviceSelected")
 		console.error("line 220 on device selected", framework, "device", device)
 		this.device_controller = framework.device_controller
         onSuccess();
@@ -259,6 +239,7 @@ function module() {
 		// console.error("onDeviceConfigured 230", device)
         self.moduleContext.logger_mode = logger_modes.configure;
 		self.moduleContext.deviceSN = self.deviceSN;
+		self.moduleContext.startupRegisters = global.globalActiveRegisters;
         framework.setCustomContext(self.moduleContext);
         onSuccess();
     };
