@@ -160,3 +160,11 @@ div.col-sm-6 input {
 	padding-right: 18px;
 	box-sizing: border-box;
 }
+
+input.invalid {
+	border: 2px solid red;
+}
+
+input.valid {
+	border: 2px solid green;
+}

@@ -17,8 +17,7 @@ const { dirname }        = require('path');
 var modbus_map           = require('ljswitchboard-modbus_map');
 // var register_matrix_fw   = require('GET MODBUS MAP AND GET STARTUP DATA HERE PLEASE')
 // var modbus_map = require('ljswitchboard-modbus_map').getConstants().constantsByName;
-const constants = modbus_map.getConstants().constantsByName;
-const registers = Object.getOwnPropertyNames(constants)
+
 
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
@@ -98,10 +97,11 @@ function openFile(func) {
     fileInput.click()
 }
 
+const constants = modbus_map.getConstants().constantsByName;
+const registers = Object.getOwnPropertyNames(constants)
 function isValidRegister(reg) {
 	try {
-		let val = constants[reg]
-		return (val != undefined)
+		return registers.includes(reg)
 	}
 	catch(e){
 		console.error("INVALID REGISTER", reg, e)

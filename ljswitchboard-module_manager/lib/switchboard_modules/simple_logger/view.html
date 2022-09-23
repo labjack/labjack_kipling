@@ -204,9 +204,9 @@
                   Log name:
               </label>
               <input type="text" name="logName" id="logName" required class="form-control" class="form-control">
-              <h5 id="nameCheck" style="color: red;">
+              <!-- <h5 id="nameCheck" style="color: red;">
                   Log Name is Missing
-              </h5>
+              </h5> -->
           </div>
 
           <div class="form-group">
@@ -224,9 +224,9 @@
                   Data Group Name:
               </label>
               <input type="text" name="dataGroup" id="dataGroupName" required class="form-control">
-              <h5 id="groupCheck" class="form-text text-muted invalid-feedback" style="color: red;">
+              <!-- <h5 id="groupCheck" class="form-text text-muted invalid-feedback" style="color: red;">
                   Please name the data group.
-              </h5>
+              </h5> -->
           </div>
 
           <div class="form-group">
@@ -242,7 +242,7 @@
               </small>
               <input type="text" class="form-control register-input" id="validationCustom01" name="array[]" 
               oninput="this.value = this.value.toUpperCase()">
-              <span onclick="var input = this.previousElementSibling; input.value = ''; input.focus();">x</span>
+              <span class="clear-input">x</span>
             </div>
             <div class="col-sm-6">
               <small id="regCheck" class="form-text
@@ -251,7 +251,7 @@
               </small>
               <input type="text" class="form-control register-input" id="validationCustom02" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
-              <span onclick="var input = this.previousElementSibling; input.value = ''; input.focus();">x</span>
+              <span class = "clear-input">x</span>
             </div>
 
             <div class="col-sm-6">
@@ -261,7 +261,7 @@
               </small>
               <input type="text" class="form-control register-input" id="validationCustom03" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
-              <span onclick="var input = this.previousElementSibling; input.value = ''; input.focus();">x</span>
+              <span class = "clear-input">x</span>
             </div>
 
             <div class="col-sm-6">
@@ -271,7 +271,7 @@
               </small>
               <input type="text" class="form-control register-input" id="validationCustom04" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
-              <span onclick="var input = this.previousElementSibling; input.value = ''; input.focus();">x</span>
+              <span class = "clear-input">x</span>
             </div>
 
             <div class="col-sm-6">
@@ -281,7 +281,7 @@
               </small>
               <input type="text" class="form-control register-input" id="validationCustom05" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
-              <span onclick="var input = this.previousElementSibling; input.value = ''; input.focus();">x</span>
+              <span class = "clear-input">x</span>
             </div>
 
             <div class="col-sm-6">
@@ -291,7 +291,7 @@
               </small>
               <input type="text" class="form-control register-input" id="validationCustom06" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
-              <span onclick="var input = this.previousElementSibling; input.value = ''; input.focus();">x</span>
+              <span class = "clear-input">x</span>
             </div>
 
             <div class="col-sm-6">
@@ -301,7 +301,7 @@
               </small>
               <input type="text" class="form-control register-input" id="validationCustom07" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
-              <span onclick="var input = this.previousElementSibling; input.value = ''; input.focus();">x</span>
+              <span class = "clear-input">x</span>
             </div>
 
             <div class="col-sm-6">
@@ -311,7 +311,7 @@
               </small>
               <input type="text" class="form-control register-input" id="validationCustom08" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
-              <span onclick="var input = this.previousElementSibling; input.value = ''; input.focus();">x</span>
+              <span class = "clear-input">x</span>
             </div>
 
             <!-- end of the refgisters -->
@@ -342,105 +342,72 @@
 
       </form>
       <script>
+        /**
+         * All Form Validation Functionality
+         * */
         $(document).ready(function () {
           $('.datviewContainer').hide();
           $('#formContainer').show();
           const { dialog } = require('electron').remote; 
-          // var dialog = require('electron').dialog;
           var fs = require('fs');
 
           document.getElementById('select-file').addEventListener('click',function(){
                 dialog.showOpenDialog({
                   properties: ['openDirectory']
                 }).then((data) => {
-                  // alert(data.filePaths)
-                  // console.error(data)
                   $("#actual-file").val(data.filePaths)
                 })
             },false);
 
-          function validateLogName(){
-            return true
-          }
+          // Real Time Register Name Validation, 
+          // triggered everytime the input box loses focus (onChange listener with jQuery)
+          $(".register-input").change(function(){
+            var input = $(this)
+            if(!isValidRegister(input.val())) {
+              input.addClass("invalid").removeClass("valid")
+            }
+            else if (input.val()=='') {console.error("empty boiiii"); input.removeClass("invalid"); }
+            else {
+              input.removeClass("invalid").addClass("valid")
+            }
+          });
 
-          function validateFilePath(){
-            // TO-DO: check file path for log-to-file is valid directory
-            return true
-          }
 
-          function validateRegisters(){
-            // TO-DO: check that all selected registers are valid for selected device and can be streamed
-            return true
-          }
+          // listener for clearing of text box
+          // clears box, removes valid/invalid border box
+          // and refocuses cursor 
+          $(".clear-input").click(function(){
+            var input = $(this).prev(); 
+            input.val('')
+            input.removeClass("invalid").removeClass("valid")
+            input.focus();
+          });
+
 
           document.getElementById("configForm").addEventListener('submit', function() {
-            $(".register-input").setCustomValidity('');
-            // this prevents the framework from handling the form submission
-            // which for some reason clears the entire page and breaks Kipling
             event.preventDefault(); 
             validateForm();
             return false;
           });
 
-
-        // Submit buttonxs
-        //function
+          // Do we even need this anymore with real time validation?????
           function validateForm() {
-            const constants = require('ljswitchboard-modbus_map').getConstants().constantsByName; 
             var regArr = [];
             // uses jquery to loop through all register form entries
             $(".register-input").each(function(i, obj) {
-              //$(this).get(0).setCustomValidity('')
               let regVal = $(this).val()
-                  //alert(regVal)
-                  //$.getScript("controller.js", isValidRegister(regVal))
-
+                // If input box is not empty, validate register
                 if(regVal.length > 0) { 
-                  if(regVal == constants){
-                    $(this).get(0).setCustomValidity('something cool')
+                  if(isValidRegister(regVal)) {
+                    regArr.push(regVal);
+                    // $(this).get(0).setCustomValidity('something cool')
                   }
-                  regArr.push(regVal);
-                  x = true;
-                  //$(this).get(0).setCustomValidity("this should be working")
-                }
-                else {
+                  else {
                   // This line will give the small popup that a register is invalid
                   $(this).get(0).setCustomValidity('Invalid Register')
-              }
-              
-              var array = [];
-              array[0] = document.getElementById('validationCustom01').value;
-              array[1] = document.getElementById('validationCustom02').value;
-              array[2] = document.getElementById('validationCustom03').value;
-              array[3] = document.getElementById('validationCustom04').value;
-              if(array[4] != null){
-                array[4] = document.getElementById('validationCustom05').value;
-                array[5] = document.getElementById('validationCustom06').value;
-                array[6] = document.getElementById('validationCustom07').value;
-                array[7] = document.getElementById('validationCustom08').value;
-
-              }
-              else{
-                //return true;
-              }
-              
-                  
-              //$.getScript("controller.js", isValidRegister(regVal))
-            alert(array)
-
+                  }
+                }
             });
-
-            function findByName(name){
-            for (var i = 0; i < registers.length; i++){
-              if(registers[i].name === name){
-                $(this).get(0).setCustomValidity('working register')
-                return true;
-              }
-              else{
-                return false;
-              }
-            }
-          };
           }
           }
         );
@@ -451,7 +418,6 @@
 </div>
 
 <div class="datviewContainer" id="dataView" >
-d
   <script>
     var arrayElements = document.getElementById("arrey");
     var finalArray = jQuery.makeArray( arrayElements );
