@@ -40,21 +40,34 @@
              $("#newConfig").click(function() {
               //window.confirm("Would you like to clear all of the fields? This will delete all form data!");
               if (confirm("Would you like to clear all of the fields? This will delete all form data!")) {
-                  document.getElementById("logName").value = "";
-                  document.getElementById("devSN").value = "";
-                  document.getElementById("dataGroupName").value = "";
+                  // document.getElementById("logName").value = "";
+                  // document.getElementById("devSN").value = "";
+                  // document.getElementById("dataGroupName").value = "";
                   //seperation of the top half and the lower half
-                  document.getElementById("validationCustom01").value = "";
-                  document.getElementById("validationCustom02").value = "";
-                  document.getElementById("validationCustom03").value = "";
-                  document.getElementById("validationCustom04").value = "";
-                  document.getElementById("validationCustom05").value = "";
-                  document.getElementById("validationCustom06").value = "";
-                  document.getElementById("validationCustom07").value = "";
-                  document.getElementById("validationCustom08").value = "";
-                } else {
-                  // nothing should happen
-                }
+
+                  //clears all of the text boxes that are in the form and then re does the deviceSN
+                  //
+                  $('#configForm input[type="text"]').val('');
+                  document.getElementById("devSN").value = "{{ deviceSN }}"
+
+                  $(".register-input").each(function(){
+                    var input = $(this)
+                    input.removeClass("valid")
+                    input.removeClass("invalid")
+                  });
+
+                  // document.getElementById("validationCustom").value = "";
+                  // document.getElementById("validationCustom02").value = "";
+                  // document.getElementById("validationCustom03").value = "";
+                  // document.getElementById("validationCustom04").value = "";
+                  // document.getElementById("validationCustom05").value = "";
+                  // document.getElementById("validationCustom06").value = "";
+                  // document.getElementById("validationCustom07").value = "";
+                  // document.getElementById("validationCustom08").value = "";
+                } 
+                //else {
+                //   // nothing should happen
+                // }
              });
             </script>
             </li>
@@ -92,6 +105,7 @@
               $("#configViewButton").click(function(){
                 $('.datviewContainer').hide();
                 $('#formContainer').show();
+                document.getElementById("display-array").textContent = "";
               });
              </script>
              <!-- <script>
@@ -114,11 +128,14 @@
               $("#DataView").click(function(){
                 $('#formContainer').hide();
                 $('#dataView').show();
+                document.getElementById("display-array").textContent = "";
+                
                 // var arr = new Array (2);
                 // arr[0] = document.getElementById('validationCustom05');
                 // document.write(arr);
                 // array to be displayed
-                var array = [];
+                window.array = new Array();
+                
                 array[0] = document.getElementById('validationCustom01').value;
                 array[1] = document.getElementById('validationCustom02').value;
                 array[2] = document.getElementById('validationCustom03').value;
@@ -131,14 +148,19 @@
                 //line we can put the corisponding data next to it
                 //console.log(str.split(',').join("\r\n"));
                 //assigns the array elementto the div class
-                document.getElementById("display-array").textContent = array[0];
-                document.getElementById("display-array1").textContent = array[1];
-                document.getElementById("display-array2").textContent = array[2];
-                document.getElementById("display-array3").textContent = array[3];
-                document.getElementById("display-array4").textContent = array[4];
-                document.getElementById("display-array5").textContent = array[5];
-                document.getElementById("display-array6").textContent = array[6];
-                document.getElementById("display-array7").textContent = array[7];
+                //Inserts the values in the form to the logger view
+                $.each(array, function(index, val){
+                  $('div.logerViewStyle').append(this + '\n')
+                })
+                //document.getElementById("display-array").textContent = array[0];
+                //document.getElementById("display-array1").textContent = array[1];
+                // document.getElementById("display-array2").textContent = array[2];
+                // document.getElementById("display-array3").textContent = array[3];
+                // document.getElementById("display-array4").textContent = array[4];
+                // document.getElementById("display-array5").textContent = array[5];
+                // document.getElementById("display-array6").textContent = array[6];
+                // document.getElementById("display-array7").textContent = array[7];
+                
               });
              </script>
             </li>
@@ -313,7 +335,7 @@
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
             </div>
-
+            
             <!-- end of the refgisters -->
           </div>
         </div>
@@ -335,7 +357,8 @@
           </div>
           <!-- btn btn-primary -->
 
-          <button id="submitbtn" title="Verify and Load Configuration" class="btnUpdate" >
+          <!-- <button id="submitbtn" title="Verify and Load Configuration" class="btnUpdate" > -->
+          <input type="submit" value="Verify and Load Configuration" class="btnUpdate">
           <!-- <script src="/controller.js"></script> -->
 
           <!-- onClick="isValidRegister('this.value')" -->
@@ -391,26 +414,39 @@
           });
 
           // Do we even need this anymore with real time validation?????
-          function validateForm() {
-            var regArr = [];
-            // uses jquery to loop through all register form entries
-            $(".register-input").each(function(i, obj) {
-              let regVal = $(this).val()
-                // If input box is not empty, validate register
-                if(regVal.length > 0) { 
-                  if(isValidRegister(regVal)) {
-                    regArr.push(regVal);
-                    // $(this).get(0).setCustomValidity('something cool')
-                  }
-                  else {
-                  // This line will give the small popup that a register is invalid
-                  $(this).get(0).setCustomValidity('Invalid Register')
-                  }
-                }
-            });
-          }
+          // function validateForm() {
+          //   var regArr = [];
+          //   // uses jquery to loop through all register form entries
+          //   $(".register-input").each(function(i, obj) {
+          //     let regVal = $(this).val()
+          //       // If input box is not empty, validate register
+          //       if(regVal.length > 0) { 
+          //         if(isValidRegister(regVal)) {
+          //           regArr.push(regVal);
+          //           // $(this).get(0).setCustomValidity('something cool')
+          //         }
+          //         else {
+          //         // This line will give the small popup that a register is invalid
+          //         $(this).get(0).setCustomValidity('Invalid Register')
+          //         }
+          //       }
+          //   });
+          // }
           }
         );
+
+        let qText = "Would you like to apply the previously selected registers";
+        if(confirm(qText) == true){
+          //document.getElementById("display-array").textContent = "AIN2";
+          document.getElementById('validationCustom01').value = array[0];
+          document.getElementById('validationCustom02').value = array[1];
+          document.getElementById('validationCustom03').value = array[2];
+          document.getElementById('validationCustom04').value = array[3];
+          document.getElementById('validationCustom05').value = array[4];
+          document.getElementById('validationCustom06').value = array[5];
+          document.getElementById('validationCustom07').value = array[6];
+          document.getElementById('validationCustom08').value = array[7];
+        }
         
       </script>
   </div>
@@ -431,19 +467,20 @@
     $( finalArray ).appendTo( document.body );
   </script>
   <div id="display-array" class="logerViewStyle"></div>
-  <div id="display-array1" class="logerViewStyle"></div>
+  <!-- <div id="display-array1" class="logerViewStyle"></div>
   <div id="display-array2" class="logerViewStyle"></div>
   <div id="display-array3" class="logerViewStyle"></div>
   <div id="display-array4" class="logerViewStyle"></div>
   <div id="display-array5" class="logerViewStyle"></div>
   <div id="display-array6" class="logerViewStyle"></div>
-  <div id="display-array7" class="logerViewStyle"></div>
+  <div id="display-array7" class="logerViewStyle"></div> -->
 </div>
 
 
 
 
 <pre class="selectableText">{{printContext}}</pre>
+<!-- <pre class="selectableText">{{startupRegisters}}</pre> -->
 
-<div id="list pf reg"></div>
+<!-- <div id="list pf reg"></div> -->
 {{/with}}
