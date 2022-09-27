@@ -78,10 +78,33 @@
              </button>
             </li>
             <li>
-              <button class="win-command" rel="tootlip" title="Save configuration">
-                <span class="win-commandicon win-commandring icon-disk"></span>
+              <button class="win-command " rel="tootlip" title="Save configuration" >
+                <span class="win-commandicon win-commandring icon-disk saveConfig" ></span>
                 <!-- <span class="win-label">Save</span> -->
              </button>
+             <script>
+              //srarting to tru to get a .txt file to be downloaded to the computer to be able to
+              // later be able to grab it a put it back into the file.
+              $(".saveConfig").click(function(){
+                //alert("it is in")
+                // const fso = CreateObject("Scripting.FileSystemObject");  
+                // const s   = fso.CreateTextFile("D:/experiement/filename.txt", True);
+                // s.writeline("-----------------------------"); 
+                // s.Close();
+                // alert("gone through")
+                //D:\experiement
+                var retContent = [];
+                var retString = '';
+
+                var file = new Blob([retString], {type: 'text/plain'});
+                var btn = $('.saveConfig');
+                btn.attr("href", URL.createObjectURL(file));
+                btn.prop("download", "data.txt");
+                //alert("at the end")
+              })
+
+             </script>
+             
             </li>
             <!-- <li>
               <button class="win-command" rel="tootlip" id="resetBtn" title="Command with icon and label with border ring">
@@ -130,36 +153,26 @@
                 $('#dataView').show();
                 document.getElementById("display-array").textContent = "";
                 
-                // var arr = new Array (2);
-                // arr[0] = document.getElementById('validationCustom05');
-                // document.write(arr);
+                
                 // array to be displayed
                 window.array = new Array();
-                
-                array[0] = document.getElementById('validationCustom01').value;
-                array[1] = document.getElementById('validationCustom02').value;
-                array[2] = document.getElementById('validationCustom03').value;
-                array[3] = document.getElementById('validationCustom04').value;
-                array[4] = document.getElementById('validationCustom05').value;
-                array[5] = document.getElementById('validationCustom06').value;
-                array[6] = document.getElementById('validationCustom07').value;
-                array[7] = document.getElementById('validationCustom08').value;
+                $('.register-input').each(function(){
+                  array.push($(this).val());
+                })
+
                 //displays the array seperated by a new line so latter down the
                 //line we can put the corisponding data next to it
                 //console.log(str.split(',').join("\r\n"));
                 //assigns the array elementto the div class
                 //Inserts the values in the form to the logger view
+                
                 $.each(array, function(index, val){
-                  $('div.logerViewStyle').append(this + '\n')
+                  $('div.logerViewStyle').append(this + '\n' + '<div class="data">data</div>')
                 })
-                //document.getElementById("display-array").textContent = array[0];
-                //document.getElementById("display-array1").textContent = array[1];
-                // document.getElementById("display-array2").textContent = array[2];
-                // document.getElementById("display-array3").textContent = array[3];
-                // document.getElementById("display-array4").textContent = array[4];
-                // document.getElementById("display-array5").textContent = array[5];
-                // document.getElementById("display-array6").textContent = array[6];
-                // document.getElementById("display-array7").textContent = array[7];
+
+                // $('.info').each(function(){
+                //   $('div.info').change()
+                // })
                 
               });
              </script>
@@ -335,8 +348,19 @@
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
             </div>
+              <!-- end of the refgisters -->
+
+            <div class="col-sm-6">
+              <small >
+              Run Time in Seconds
+              </small>
+              <!-- <div </div> -->
+              <input type="number" class="form-control"
+              oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" />
+              <span class="clear-input">x</span>
+            </div>
             
-            <!-- end of the refgisters -->
+          
           </div>
         </div>
           <div class="form-group">
@@ -437,6 +461,12 @@
 
         let qText = "Would you like to apply the previously selected registers";
         if(confirm(qText) == true){
+          //$('#configForm input[type="text"]').val('');
+          // $.each(array, function(index, item){
+          //   $('input.validationCustom input[type="text"]').replaceWith("something cool");
+          // });
+
+
           //document.getElementById("display-array").textContent = "AIN2";
           document.getElementById('validationCustom01').value = array[0];
           document.getElementById('validationCustom02').value = array[1];
@@ -446,6 +476,7 @@
           document.getElementById('validationCustom06').value = array[5];
           document.getElementById('validationCustom07').value = array[6];
           document.getElementById('validationCustom08').value = array[7];
+          
         }
         
       </script>
@@ -467,7 +498,8 @@
     $( finalArray ).appendTo( document.body );
   </script>
   <div id="display-array" class="logerViewStyle"></div>
-  <!-- <div id="display-array1" class="logerViewStyle"></div>
+  <!-- <div id="dataview"> where the data tables will go</div>
+  <div id="display-array1" class="logerViewStyle"></div>
   <div id="display-array2" class="logerViewStyle"></div>
   <div id="display-array3" class="logerViewStyle"></div>
   <div id="display-array4" class="logerViewStyle"></div>

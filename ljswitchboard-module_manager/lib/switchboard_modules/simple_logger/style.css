@@ -168,3 +168,11 @@ input.invalid {
 input.valid {
 	border: 2px solid green;
 }
+
+.logerViewStyle{
+	width: 50px;
+}
+
+.data{
+	padding: 10px;
+}
