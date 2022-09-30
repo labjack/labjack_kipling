@@ -11,7 +11,7 @@
 const { time }           = require('console');
 const fs                 = require('fs')
 var device_manager       = require('ljswitchboard-device_manager')
-var CREATE_SIMPLE_LOGGER = require("ljswitchboard-simple_logger");
+var simple_logger = require("ljswitchboard-simple_logger").create();
 const { dirname }        = require('path');
 // const { underscored }    = require('underscore');
 var modbus_map           = require('ljswitchboard-modbus_map');
@@ -41,6 +41,11 @@ function userStartLogger() {
 	 * start the event loop
 	 * and make sure everything is ready to begin logging to file
 	 */
+}
+function logerCall() {
+	alert("somthing");
+	loggerApp.initializeLogger();
+	loggerApp.configureLogger();
 }
 
 
@@ -272,8 +277,12 @@ function loggerApp() {
 	this.simpleLogger;
 	this.deviceManager;
 	this.logConfigs;
+	alert("in the function1");
+	// const result = this.initializeLogger();
+
 
 	this.initializeLogger = function(){
+		alert("in the function2")
 		debugLog('--- In Func: initializeLogger');
 		var defered = q.defer();
 
@@ -328,7 +337,7 @@ function loggerApp() {
 		return defered.promise;
 	};
 	this.configureLogger = function() {
-		debugLog('--- In Func: configureLogger');
+		//debugLog('--- In Func: configureLogger');
 		var defered = q.defer();
 
 		/*
