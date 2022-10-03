@@ -496,4 +496,6 @@ function saveArraysInScope(){
 	document.getElementById('validationCustom08').value = array[7];
 }
 
+function saveRegisterMatrix(){}
+
 var loggerApp = new loggerApp()

@@ -156,7 +156,7 @@
               <button class="win-command" rel="tootlip" id="resetBtn" title="Command with icon and label with border ring">
                 <span class="win-commandicon win-commandring icon-code-3"></span>
                 <span class="win-label">clear</span> 
-             </button>
+             </button>DataView
              <script>
               $("#resetBtn").click(function(){
                 
@@ -322,7 +322,7 @@
                 text-muted invalid-feedback">
                 Register #1
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom01" name="array[]" required
+              <input type="text" class="form-control register-input" id="validationCustom01" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class="clear-input">x</span>
             </div>
@@ -434,8 +434,52 @@
 
           <!-- onClick="isValidRegister('this.value')" -->
 
+          <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                  <button type="button" class="close" data-dismiss="modal" >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  Would you like to add {{ startupRegisters }} to the form?
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
+                  <button type="button" class="btn btn-primary" id="yesbtn" data-dismiss="modal">Yes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
       </form>
+      
       <script>
+        
+        $("#yesbtn").click(function() {
+          let string = '{{startupRegisters}}';
+          let arr = string.split(',');
+          // var all = $(".register-input").map(function() {
+          //   return this.innerHTML;
+          // }).get();
+          var i, all = $(".register-input")
+          console.error(i, all)
+          // for(var i =0; i < arr.length; i++){
+          //   // all[i].val(arr[i]);
+          // }
+          // document.getElemetById("validationCustom01").value = arr[0];
+          // document.getElementById("validationCustom02").value = arr[1];
+          // document.getElementById("validationCustom03").value = arr[2];
+          // document.getElementById("validationCustom04").value = arr[3];
+          // document.getElementById("validationCustom05").value = arr[4];
+          // document.getElementById("validationCustom06").value = arr[5];
+          // document.getElementById("validationCustom07").value = arr[6];
+          // document.getElementById("validationCustom08").value = arr[7];
+          
+          $(".register-input").trigger("change");
+        })
         /**
          * All Form Validation Functionality
          * */
@@ -499,6 +543,12 @@
             return false;
           });
 
+
+
+          $("#confirmModal").modal({backdrop: "static"});
+          //saveArraysInScope();
+
+
           // Do we even need this anymore with real time validation?????
           // function validateForm() {
           //   var regArr = [];
@@ -522,18 +572,20 @@
           // if(array[0] == ""){
           //   alert("nothing");
           // }
-          let qText = "Would you like to apply the previously selected registers";
-          if(confirm(qText) == true){
-            saveArraysInScope();
-            $('.register-input').each(function(){
-              let val = $.trim($(this).val());
-              console.error("val:", val, val.length)
-              if(val.length > 0){
-                $(".register-input").trigger("change");
-                console.error("trigger", val)
-              }
-            })
-          }
+          // showAlertNoTimeout("something");
+          // let qText = "Would you like to apply the previously selected registers";
+          // if(confirm(qText) == true){
+
+          //   saveArraysInScope();
+          //   $('.register-input').each(function(){
+          //     let val = $.trim($(this).val());
+          //     console.error("val:", val, val.length)
+          //     if(val.length > 0){
+          //       $(".register-input").trigger("change");
+          //       console.error("trigger", val)
+          //     }
+          //   })
+          // }
             }
           );
 

@@ -134,6 +134,7 @@ function module() {
         var sn = self.activeDevice.savedAttributes.serialNumber;
 
         var displayMethod = self.startupData.display_method;
+        global.globalActiveRegisters = registerList;
         if(typeof(self.startupData.registers_by_sn) === 'undefined') {
             self.startupData.registers_by_sn = {};
             showAlert('startupData is corrupted');
