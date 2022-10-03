@@ -1,7 +1,5 @@
 {{#with custom}}
-<p></p>
-
-
+<!-- <p></p> -->
 <div id="logger_module" class="{{logger_mode}}">
 <!-- <div id="logger_module" class="dashboard_mode"> -->
   <div id="logger_controls">
@@ -25,10 +23,17 @@
              </script>
             </li>
             <li>
-              <button class="win-command red" rel="tootlip" title="Command with icon and label with border ring">
+              <button class="win-command red" id = "stopBtn" rel="tootlip" title="Command with icon and label with border ring">
                 <span class="win-commandicon win-commandring icon-stop"></span>
                 <!-- <span class="win-label">Stop</span> -->
              </button>
+             <script>
+              $("#stopBtn").click(function(){
+                //alert("the thing");
+                loggerStop();
+                //initializeLogger();
+              })
+             </script>
             </li>
           </ul>
 
@@ -201,7 +206,8 @@
                 
                 
                 // array to be displayed
-                window.array = new Array();
+                // window.array = new Array();
+                window.array = [];
                 $('.register-input').each(function(){
                   array.push($(this).val());
                 })
@@ -420,7 +426,7 @@
                   Please Provide a Valid Directory Path.
               </small> -->
               <!-- <div style="text-align:center;"> -->
-                <input type="text" placeholder="Please select a file" id="actual-file" disabled="disabled"/>
+                <input type="text"  id="actual-file" class="form-control" required disabled="disabled"/>
                 <input type="button" value="Choose a file" id="select-file" class="btnUpdate"/>
               <!-- </div> -->
             </div>
@@ -434,6 +440,7 @@
           <!-- onClick="isValidRegister('this.value')" -->
 
       </form>
+
       <script>
         /**
          * All Form Validation Functionality
@@ -459,7 +466,7 @@
             if(!isValidRegister(input.val())) {
               input.addClass("invalid").removeClass("valid")
             }
-            else if (input.val()=='') {input.removeClass("invalid"); }
+            else if (input.val()=='') { input.removeClass("invalid"); }
             else {
               input.addClass("valid").removeClass("invalid")
             }
@@ -479,9 +486,20 @@
 
           document.getElementById("configForm").addEventListener('submit', function() {
             event.preventDefault(); 
-            validateForm();
+            var valid = validateForm();
+            if(valid){
+              $("#configForm :input").prop("disabled", true)
+              showInfoMessage("Configuration Valid")
+            }
             return false;
           });
+
+          function validateForm() {
+            // To-Do: Do stuff here to check to make sure every form input is valid
+            // Mark things if they arent valid and need user attention
+            // Then disable everything and logger will be ready to start
+            return true
+          }
 
           // Do we even need this anymore with real time validation?????
           // function validateForm() {
@@ -507,6 +525,15 @@
 
         let qText = "Would you like to apply the previously selected registers";
         if(confirm(qText) == true){
+            saveArraysInScope();
+            $('.register-input').each(function(){
+              let val = $.trim($(this).val());
+              console.error("val:", val, val.length)
+              if(val.length > 0){
+                $(".register-input").trigger("change");
+              }
+            })
+          }
           //$('#configForm input[type="text"]').val('');
           // $.each(array, function(index, item){
           //   $('input.validationCustom input[type="text"]').replaceWith("something cool");
@@ -523,7 +550,7 @@
           document.getElementById('validationCustom07').value = array[6];
           document.getElementById('validationCustom08').value = array[7];
           
-        }
+        //}
         
       </script>
   </div>
@@ -532,7 +559,7 @@
 
 <div class="datviewContainer" id="dataView" >
   <script>
-    var arrayElements = document.getElementById("arrey");
+    var arrayElements = document.getElementById("array");
     var finalArray = jQuery.makeArray( arrayElements );
     var res = finalArray.length;
     for (var i = 0; i < 3; i++){

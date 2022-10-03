@@ -134,6 +134,9 @@ function module() {
         var sn = self.activeDevice.savedAttributes.serialNumber;
 
         var displayMethod = self.startupData.display_method;
+        // Saves active registers to global scope so they can be 
+        // used in simple logger module
+        global.globalActiveRegisters = registerList;
         if(typeof(self.startupData.registers_by_sn) === 'undefined') {
             self.startupData.registers_by_sn = {};
             showAlert('startupData is corrupted');
@@ -267,7 +270,7 @@ function module() {
     this.onModuleLoaded = function(framework, onError, onSuccess) {
         self.startupData = framework.startupData;
         self.moduleName = framework.moduleData.name;
-
+        console.error("onModLoaded startupData", self.startupData.registers_by_sn)
         // Compile required template files
         compileTemplates(framework);
 

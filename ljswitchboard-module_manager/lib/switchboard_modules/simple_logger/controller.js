@@ -8,22 +8,14 @@
  * Goals for the Simple Logger module:
 **/
 var q = require('q');
-var eventMap = require('../lib/events').events;
-var ignoreErrorsList = [
-	eventMap.STOPPED_LOGGER,
-	eventMap.CONFIGURATION_SUCCESSFUL,
-];
 
 const { time }           = require('console');
 const fs                 = require('fs')
 var device_manager       = require('ljswitchboard-device_manager')
-var simple_logger = require("ljswitchboard-simple_logger"); //.create();
+var simple_logger        = require("ljswitchboard-simple_logger"); //.create();
+var eventList            = require("ljswitchboard-simple_logger").eventList;
 const { dirname }        = require('path');
-// const { underscored }    = require('underscore');
 var modbus_map           = require('ljswitchboard-modbus_map');
-// var register_matrix_fw   = require('GET MODBUS MAP AND GET STARTUP DATA HERE PLEASE')
-// var modbus_map = require('ljswitchboard-modbus_map').getConstants().constantsByName;
-
 
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
@@ -34,6 +26,13 @@ var REGISTERS_DATA_SRC = 'simple_logger/ljm_constants.json';
 // Constant that determines device polling rate.  Use an increased rate to aid
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000; 
+
+var ignoreErrorsList = [
+	eventList.STOPPED_LOGGER,
+	eventList.CONFIGURATION_SUCCESSFUL
+	// eventMap.STOPPED_LOGGER,
+	// eventMap.CONFIGURATION_SUCCESSFUL,
+];
 
 /**
  * Handles the user signaling to start the simple logger
@@ -47,6 +46,41 @@ function userStartLogger() {
 	 * start the event loop
 	 * and make sure everything is ready to begin logging to file
 	 */
+	 var loggerAppSteps = [
+		'initializeLogger',				// Performed at start-up
+		// 'initializeDeviceManager',		// Performed at start-up
+		// 'updateDeviceListing',			// Performed when configuring logger
+		'configureLogger',				// Performed when configuring logger
+		'startLogger',					// Performed when starting logger
+		'waitForLoggerToRun',			// Allowing the logger to run...
+		'closeDevices',					
+		'finish',
+	];
+	loggerAppSteps.forEach(function(step) {
+		if(typeof(loggerApp[step]) != 'function') {
+			console.error('App Step', step, 'is not defined!');
+			process.exit();
+		}
+	});
+	
+	var isTerminated = false;
+	async.eachSeries(
+		loggerAppSteps,
+		function(step, cb) {
+			function onErr(err) {
+				isTerminated = true;
+				cb(err);
+			}
+			try {
+				loggerApp[step]().then(cb, onErr);
+			} catch(err) {
+				console.error('Error executing app step', step, err);
+			}
+		},
+		function(err) {
+			// console.log('This was the error...', err);
+		});
+
 }
 // 'initializeLogger',				// Performed at start-up
 // 	'initializeDeviceManager',		// Performed at start-up
@@ -57,14 +91,19 @@ function userStartLogger() {
 // 	'closeDevices',					
 // 	'finish',
 function logerCall() {
-	alert("start of logerCall");
+	// alert("start of logerCall");
 	loggerApp.initializeLogger();
 	loggerApp.updateDeviceListing();
 	loggerApp.configureLogger();
 	loggerApp.waitForLoggerToRun();
+	// loggerApp.closeDevices();
+	// loggerApp.finish();
+	// alert("finished the function")
+}
+
+function loggerStop() {
 	loggerApp.closeDevices();
 	loggerApp.finish();
-	alert("finished the function")
 }
 
 
@@ -302,7 +341,6 @@ function loggerApp() {
 	this.simpleLogger;
 	this.deviceManager;
 	this.logConfigs;
-	alert("in the function1");
 	// const result = this.initializeLogger();
 
 
@@ -362,7 +400,6 @@ function loggerApp() {
 		return defered.promise;
 	};
 	this.configureLogger = function() {
-		alert("in the function2")
 		//debugLog('--- In Func: configureLogger');
 		var defered = q.defer();
 
@@ -483,3 +520,37 @@ function attachListeners(loggerObject) {
 }
 
 var loggerApp = new loggerApp()
+
+var ENABLE_DEBUG_LOG = false;
+var ENABLE_PRINTING = false;
+function print() {
+	if(ENABLE_DEBUG_LOG) {
+		var dataToPrint = [];
+		dataToPrint.push('(hello_world.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+function debugLog() {
+	if(ENABLE_DEBUG_LOG) {
+		var dataToPrint = [];
+		dataToPrint.push('(hello_world.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
+var ENABLE_NEW_DATA_REPORTING = true;
+function printNewData() {
+	if(ENABLE_NEW_DATA_REPORTING) {
+		var dataToPrint = [];
+		dataToPrint.push('(hello_world.js)');
+		for(var i = 0; i < arguments.length; i++) {
+			dataToPrint.push(arguments[i]);
+		}
+		console.log.apply(console, dataToPrint);
+	}
+}
