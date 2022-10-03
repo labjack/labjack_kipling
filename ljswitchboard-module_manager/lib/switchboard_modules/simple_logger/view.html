@@ -11,10 +11,18 @@
           <!-- <h2 class="brand active-log-controls">LJ</h2> -->
           <ul class="nav navbar-nav active-log-controls">
             <li>
-              <button class="win-command green" rel="tootlip" title="Command with icon and label with border ring" onClick="userLoggerStart()">
+              <!-- onClick="userLoggerStart()" -->
+              <button class="win-command green" id="startBtn" rel="tootlip" title="Command with icon and label with border ring">
                 <span class="win-commandicon win-commandring icon-play"></span>
                 <!-- <span class="win-label">Start</span> -->
              </button>
+             <script>
+              $("#startBtn").click(function(){
+                //alert("the thing");
+                logerCall();
+                //initializeLogger();
+              })
+             </script>
             </li>
             <li>
               <button class="win-command red" rel="tootlip" title="Command with icon and label with border ring">
@@ -73,9 +81,16 @@
             </li>
             <li>
               <button class="win-command" rel="tootlip" title="Load a configuration" onClick="openFile(loadConfigFile)">
-                <span class="win-commandicon win-commandring icon-folder-open"></span>
+                <span class="win-commandicon win-commandring icon-folder-open openfile"></span>
                 <!-- <span class="win-label">Open</span> -->
              </button>
+             <script>
+              $(".openfile").click(function(){
+                sendXHR("GET", "../../D:/experiement/formData.txt", null, function(response) { // response contains the content of the description.txt file.
+                document.getElementById("configForm").innerHTML = response; // Use innerHTML to get or set the html content.
+              });
+              })
+             </script>
             </li>
             <li>
               <button class="win-command " rel="tootlip" title="Save configuration" >
@@ -86,22 +101,53 @@
               //srarting to tru to get a .txt file to be downloaded to the computer to be able to
               // later be able to grab it a put it back into the file.
               $(".saveConfig").click(function(){
-                //alert("it is in")
-                // const fso = CreateObject("Scripting.FileSystemObject");  
-                // const s   = fso.CreateTextFile("D:/experiement/filename.txt", True);
-                // s.writeline("-----------------------------"); 
-                // s.Close();
-                // alert("gone through")
-                //D:\experiement
-                var retContent = [];
-                var retString = '';
+                  //I know this works to save the data as a .txt file
+                  // Get the data from each element on the form.
+              //     const logName = document.getElementById('logName');
+              //     const dataGroupName = document.getElementById('dataGroupName');
+              //     const register1 = document.getElementById('validationCustom01');
+              //     const register2 = document.getElementById('validationCustom02');
+              //     const register3 = document.getElementById('validationCustom03');
+              //     const register4 = document.getElementById('validationCustom04');
+              //     const register5 = document.getElementById('validationCustom05');
+              //     const register6 = document.getElementById('validationCustom06');
+              //     const register7 = document.getElementById('validationCustom07');
+              //     const register8 = document.getElementById('validationCustom08');
+              //     const runTime = document.getElementById('runtimeSec');
 
-                var file = new Blob([retString], {type: 'text/plain'});
-                var btn = $('.saveConfig');
-                btn.attr("href", URL.createObjectURL(file));
-                btn.prop("download", "data.txt");
-                //alert("at the end")
-              })
+                  
+              //     // This variable stores all the data.
+              //     let data = 
+              //         '\r Log Name: ' +logName.value + ' \r\n ' +
+              //         'Data Group Name' +dataGroupName.value + ' \r\n ' +
+              //         'Register 1: ' + register1.value + ' \r\n ' +
+              //         'Register 2: ' +register2.value + ' \r\n ' + 
+              //         'Register 3: ' +register3.value + ' \r\n ' + 
+              //         'Register 4: ' +register4.value + ' \r\n ' + 
+              //         'Register 5: ' +register5.value + ' \r\n ' + 
+              //         'Register 6: ' +register6.value + ' \r\n ' + 
+              //         'Register 7: ' +register7.value + ' \r\n ' + 
+              //         'Register 8: ' +register8.value + ' \r\n ' +
+              //         'Run Time in Seconds: ' +runTime.value + ' \r\n ';
+                  
+              //     // Convert the text to BLOB.
+              //     const textToBLOB = new Blob([data], { type: 'text/plain' });
+              //     const sFileName = 'formData.jason';      // The file to save the data.
+
+              //     let newLink = document.createElement("a");
+              //     newLink.download = sFileName;
+
+              //     if (window.webkitURL != null) {
+              //         newLink.href = window.webkitURL.createObjectURL(textToBLOB);
+              //     }
+              //     else {
+              //         newLink.href = window.URL.createObjectURL(textToBLOB);
+              //         newLink.style.display = "none";
+              //         document.body.appendChild(newLink);
+              //     }
+
+              //     newLink.click(); 
+               })
 
              </script>
              
@@ -355,7 +401,7 @@
               Run Time in Seconds
               </small>
               <!-- <div </div> -->
-              <input type="number" class="form-control"
+              <input type="number" class="form-control" id="runtimeSec"
               oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" />
               <span class="clear-input">x</span>
             </div>
@@ -509,7 +555,20 @@
 </div>
 
 
-
+<script>
+  function sendXHR(type, url, data, callback) {
+    //alert("it is getting the function")
+    var newXHR = new XMLHttpRequest() || new window.ActiveXObject("Microsoft.XMLHTTP");
+    newXHR.open(type, url, true);
+    newXHR.send(data);
+    newXHR.onreadystatechange = function() {
+      if (this.status === 200 && this.readyState === 4) {
+        callback(this.response);
+        alert("This is not good")
+      }
+    };
+  }
+</script>
 
 <pre class="selectableText">{{printContext}}</pre>
 <!-- <pre class="selectableText">{{startupRegisters}}</pre> -->
