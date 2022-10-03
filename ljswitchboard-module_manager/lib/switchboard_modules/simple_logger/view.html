@@ -198,13 +198,14 @@
                 $('#formContainer').hide();
                 $('#dataView').show();
                 document.getElementById("display-array").textContent = "";
+                saveTheArray();
                 
                 
                 // array to be displayed
-                window.array = new Array();
-                $('.register-input').each(function(){
-                  array.push($(this).val());
-                })
+                // window.array = new Array();
+                // $('.register-input').each(function(){
+                //   array.push($(this).val());
+                // })
 
                 //displays the array seperated by a new line so latter down the
                 //line we can put the corisponding data next to it
@@ -321,7 +322,7 @@
                 text-muted invalid-feedback">
                 Register #1
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom01" name="array[]" 
+              <input type="text" class="form-control register-input" id="validationCustom01" name="array[]" required
               oninput="this.value = this.value.toUpperCase()">
               <span class="clear-input">x</span>
             </div>
@@ -452,17 +453,33 @@
                 })
             },false);
 
+          $(".register-input").trigger("change");
           // Real Time Register Name Validation, 
           // triggered everytime the input box loses focus (onChange listener with jQuery)
+          // $(".register-input").change(function(){
+          //   var input = $(this)
+          //   if(!isValidRegister(input.val())) {
+          //     input.addClass("invalid").removeClass("valid")
+          //   }
+          //   else if (input.val()=='') {input.removeClass("invalid"); }
+          //   else {
+          //     input.addClass("valid").removeClass("invalid")
+          //   }
+          //   saveTheArray();
+          // });
+
           $(".register-input").change(function(){
             var input = $(this)
-            if(!isValidRegister(input.val())) {
+            if(input.val().length == 0) {
+              input.removeClass("valid").removeClass("invalid")
+            }
+            else if (isValidRegister(input.val())) {
+              input.addClass("valid").removeClass("invalid"); 
+            }
+            else {
               input.addClass("invalid").removeClass("valid")
             }
-            else if (input.val()=='') {input.removeClass("invalid"); }
-            else {
-              input.addClass("valid").removeClass("invalid")
-            }
+            saveTheArray();
           });
 
 
@@ -473,7 +490,6 @@
             var input = $(this).prev(); 
             input.val('')
             input.removeClass("invalid").removeClass("valid")
-            input.focus();
           });
 
 
@@ -502,11 +518,36 @@
           //       }
           //   });
           // }
+          
+          // if(array[0] == ""){
+          //   alert("nothing");
+          // }
+          let qText = "Would you like to apply the previously selected registers";
+          if(confirm(qText) == true){
+            saveArraysInScope();
+            $('.register-input').each(function(){
+              let val = $.trim($(this).val());
+              console.error("val:", val, val.length)
+              if(val.length > 0){
+                $(".register-input").trigger("change");
+                console.error("trigger", val)
+              }
+            })
           }
-        );
+            }
+          );
 
-        let qText = "Would you like to apply the previously selected registers";
-        if(confirm(qText) == true){
+        // let qText = "Would you like to apply the previously selected registers";
+        // if(confirm(qText) == true){
+        //   saveArraysInScope();
+        //   $('.register-input').each(function(){
+        //     let val = $(this).val;
+        //     if(val.length > 0){
+        //       $(".register-input").trigger("change");
+        //     }
+        //   })
+        // }
+          //$(".register-input").trigger("change");
           //$('#configForm input[type="text"]').val('');
           // $.each(array, function(index, item){
           //   $('input.validationCustom input[type="text"]').replaceWith("something cool");
@@ -514,16 +555,16 @@
 
 
           //document.getElementById("display-array").textContent = "AIN2";
-          document.getElementById('validationCustom01').value = array[0];
-          document.getElementById('validationCustom02').value = array[1];
-          document.getElementById('validationCustom03').value = array[2];
-          document.getElementById('validationCustom04').value = array[3];
-          document.getElementById('validationCustom05').value = array[4];
-          document.getElementById('validationCustom06').value = array[5];
-          document.getElementById('validationCustom07').value = array[6];
-          document.getElementById('validationCustom08').value = array[7];
+          // document.getElementById('validationCustom01').value = array[0];
+          // document.getElementById('validationCustom02').value = array[1];
+          // document.getElementById('validationCustom03').value = array[2];
+          // document.getElementById('validationCustom04').value = array[3];
+          // document.getElementById('validationCustom05').value = array[4];
+          // document.getElementById('validationCustom06').value = array[5];
+          // document.getElementById('validationCustom07').value = array[6];
+          // document.getElementById('validationCustom08').value = array[7];
           
-        }
+        //}
         
       </script>
   </div>

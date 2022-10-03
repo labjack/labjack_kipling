@@ -8,11 +8,13 @@
  * Goals for the Simple Logger module:
 **/
 var q = require('q');
-var eventMap = require('../lib/events').events;
-var ignoreErrorsList = [
-	eventMap.STOPPED_LOGGER,
-	eventMap.CONFIGURATION_SUCCESSFUL,
-];
+// var eventMap = require('../lib/events').events;
+// var ignoreErrorsList = [
+// 	eventMap.STOPPED_LOGGER,
+// 	eventMap.CONFIGURATION_SUCCESSFUL,
+// ];
+
+//C:\Users\short\Labjack\labjack_kipling\ljswitchboard-simple_logger\lib\events.js
 
 const { time }           = require('console');
 const fs                 = require('fs')
@@ -57,14 +59,14 @@ function userStartLogger() {
 // 	'closeDevices',					
 // 	'finish',
 function logerCall() {
-	alert("start of logerCall");
+	// alert("start of logerCall");
 	loggerApp.initializeLogger();
 	loggerApp.updateDeviceListing();
 	loggerApp.configureLogger();
 	loggerApp.waitForLoggerToRun();
 	loggerApp.closeDevices();
 	loggerApp.finish();
-	alert("finished the function")
+	// alert("finished the function")
 }
 
 
@@ -296,7 +298,7 @@ function loggerApp() {
 	this.simpleLogger;
 	this.deviceManager;
 	this.logConfigs;
-	alert("in the function1");
+	// alert("in the function1");
 	// const result = this.initializeLogger();
 
 
@@ -356,7 +358,7 @@ function loggerApp() {
 		return defered.promise;
 	};
 	this.configureLogger = function() {
-		alert("in the function2")
+		// alert("in the function2")
 		//debugLog('--- In Func: configureLogger');
 		var defered = q.defer();
 
@@ -474,6 +476,24 @@ function attachListeners(loggerObject) {
 
 		});
 	});
+}
+
+function saveTheArray(){
+	window.array = new Array();
+    $('.register-input').each(function(){
+    array.push($(this).val());
+    })
+}
+
+function saveArraysInScope(){
+	document.getElementById('validationCustom01').value = array[0];
+    document.getElementById('validationCustom02').value = array[1];
+    document.getElementById('validationCustom03').value = array[2];
+    document.getElementById('validationCustom04').value = array[3];
+    document.getElementById('validationCustom05').value = array[4];
+    document.getElementById('validationCustom06').value = array[5];
+    document.getElementById('validationCustom07').value = array[6];
+	document.getElementById('validationCustom08').value = array[7];
 }
 
 var loggerApp = new loggerApp()
