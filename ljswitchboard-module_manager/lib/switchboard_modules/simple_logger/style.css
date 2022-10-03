@@ -176,3 +176,14 @@ input.valid {
 .data{
 	padding: 10px;
 }
+
+.modal{
+	background-color: transparent;
+}
+.modal-dialog {
+	width: 100%
+}
+.modal-backdrop{
+	z-index: -1;
+	opacity: 0.40;
+}
