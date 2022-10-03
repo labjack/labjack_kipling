@@ -7,11 +7,17 @@
 /**
  * Goals for the Simple Logger module:
 **/
+var q = require('q');
+var eventMap = require('../lib/events').events;
+var ignoreErrorsList = [
+	eventMap.STOPPED_LOGGER,
+	eventMap.CONFIGURATION_SUCCESSFUL,
+];
 
 const { time }           = require('console');
 const fs                 = require('fs')
 var device_manager       = require('ljswitchboard-device_manager')
-var simple_logger = require("ljswitchboard-simple_logger").create();
+var simple_logger = require("ljswitchboard-simple_logger"); //.create();
 const { dirname }        = require('path');
 // const { underscored }    = require('underscore');
 var modbus_map           = require('ljswitchboard-modbus_map');
@@ -42,10 +48,23 @@ function userStartLogger() {
 	 * and make sure everything is ready to begin logging to file
 	 */
 }
+// 'initializeLogger',				// Performed at start-up
+// 	'initializeDeviceManager',		// Performed at start-up
+// 	'updateDeviceListing',			// Performed when configuring logger
+// 	'configureLogger',				// Performed when configuring logger
+// 	'startLogger',					// Performed when starting logger
+// 	'waitForLoggerToRun',			// Allowing the logger to run...
+// 	'closeDevices',					
+// 	'finish',
 function logerCall() {
-	alert("somthing");
+	alert("start of logerCall");
 	loggerApp.initializeLogger();
+	loggerApp.updateDeviceListing();
 	loggerApp.configureLogger();
+	loggerApp.waitForLoggerToRun();
+	loggerApp.closeDevices();
+	loggerApp.finish();
+	alert("finished the function")
 }
 
 
@@ -282,8 +301,8 @@ function loggerApp() {
 
 
 	this.initializeLogger = function(){
-		alert("in the function2")
-		debugLog('--- In Func: initializeLogger');
+		
+		//debugLog('--- In Func: initializeLogger');
 		var defered = q.defer();
 
 		self.simpleLogger = simple_logger.create();
@@ -337,6 +356,7 @@ function loggerApp() {
 		return defered.promise;
 	};
 	this.configureLogger = function() {
+		alert("in the function2")
 		//debugLog('--- In Func: configureLogger');
 		var defered = q.defer();
 
@@ -418,6 +438,42 @@ function loggerApp() {
 	}
 	var self = this;
 
+}
+
+function attachListeners(loggerObject) {
+	var eventKeys = Object.keys(eventMap);
+	eventKeys.forEach(function(eventKey) {
+		var key = eventMap[eventKey];
+		loggerObject.on(key, function(data) {
+			if(ignoreErrorsList.indexOf(key) < 0) {
+				debugLog('Captured Event!!', key, data);
+			}
+			var handeledEvent = false;
+			// print('Captured Event', key, data, Object.keys(data));
+			if(key === 'NEW_VIEW_DATA') {
+				if(data.view_type === 'current_values') {
+					printNewData('New View Data', {
+						data: data.data_cache
+					});
+					handeledEvent = true;
+				} else if(data.view_type === 'basic_graph') {
+					printNewData('New Graph Data', {
+						numValsLogged: data.data_cache.length,
+						// vals: data.data_cache,
+					});
+					handeledEvent = true;
+				} else {
+					console.error('un-handled... data.view_type', data.view_type)
+				}
+			} else {
+				// console.log('un-handled... key', key)
+			}
+			if(!handeledEvent) {
+				printNewData('Captured Event', key, data);
+			}
+
+		});
+	});
 }
 
 var loggerApp = new loggerApp()
