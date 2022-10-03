@@ -46,16 +46,22 @@ function userStartLogger() {
 
 function loadConfigFile(config) {
 	$("#logName").val(config.logging_config.name)
-	// let deviceManager = device_manager.create();
-	// deviceManager.connectToDevices([{
-	// 	dt:'LJM_dtANY',
-	// 	ct:'LJM_ctANY',
-	// 	id:'LJM_idANY',
-	// }])
-	// devices = deviceManager.getDevices()
-	// var validSN = devices[0].savedAttributes.serialNumber
-	// $("#denSN").val(validSN)
-	// }
+	try {
+		console.error(config)
+		dev_sn = config.device_serial_numbers[0]
+		data_group = config.data_groups[0]
+		reg_list = config.dat_group.dev_sn.registers
+		console.error(dev_sn, data_group, reg_list);
+		let registers = []
+		for (const r of reg_list) {
+			registers.push(r.name)
+		}
+		alert("HERES WHAT WE GOT", registers);
+	}
+	catch(e) {
+		alert(e)
+		console.error(e)
+	}
 }
 /**  opens the file explorer to look for .json config files 
 *  all we really need is the file path, which is passed to the logger
