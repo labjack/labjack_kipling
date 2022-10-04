@@ -331,7 +331,7 @@
                 text-muted invalid-feedback">
                 Register #1
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom01" name="array[]"
+              <input type="text" class="form-control register-input" id="validationCustom00" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class="clear-input">x</span>
             </div>
@@ -340,7 +340,7 @@
                 text-muted invalid-feedback">
                 Register #2
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom02" name="array[]"
+              <input type="text" class="form-control register-input" id="validationCustom01" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
             </div>
@@ -350,7 +350,7 @@
                 text-muted invalid-feedback">
                 Register #3
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom03" name="array[]"
+              <input type="text" class="form-control register-input" id="validationCustom02" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
             </div>
@@ -360,7 +360,7 @@
                 text-muted invalid-feedback">
                 Register #4
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom04" name="array[]"
+              <input type="text" class="form-control register-input" id="validationCustom03" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
             </div>
@@ -370,7 +370,7 @@
                 text-muted invalid-feedback">
                 Register #5
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom05" name="array[]"
+              <input type="text" class="form-control register-input" id="validationCustom04" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
             </div>
@@ -380,7 +380,7 @@
                 text-muted invalid-feedback">
                 Register #6
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom06" name="array[]"
+              <input type="text" class="form-control register-input" id="validationCustom05" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
             </div>
@@ -390,7 +390,7 @@
                 text-muted invalid-feedback">
                 Register #7
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom07" name="array[]"
+              <input type="text" class="form-control register-input" id="validationCustom06" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
             </div>
@@ -400,7 +400,7 @@
                 text-muted invalid-feedback">
                 Register #8
               </small>
-              <input type="text" class="form-control register-input" id="validationCustom08" name="array[]"
+              <input type="text" class="form-control register-input" id="validationCustom07" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
             </div>
@@ -468,23 +468,27 @@
         
         $("#yesbtn").click(function() {
           let string = '{{startupRegisters}}';
-          let arr = string.split(',');
+          window.arr = string.split(',');
+          saveRegisterMatrix();
           // var all = $(".register-input").map(function() {
           //   return this.innerHTML;
           // }).get();
-          var i, all = $(".register-input")
-          console.error(i, all)
+          // var i, all = $(".register-input")
+          // console.error(i, all)
           // for(var i =0; i < arr.length; i++){
           //   // all[i].val(arr[i]);
           // }
-          // document.getElemetById("validationCustom01").value = arr[0];
-          // document.getElementById("validationCustom02").value = arr[1];
-          // document.getElementById("validationCustom03").value = arr[2];
-          // document.getElementById("validationCustom04").value = arr[3];
-          // document.getElementById("validationCustom05").value = arr[4];
-          // document.getElementById("validationCustom06").value = arr[5];
-          // document.getElementById("validationCustom07").value = arr[6];
-          // document.getElementById("validationCustom08").value = arr[7];
+          // for (var i = 0; i < arr.length; i++){
+          //   document.getElementById("validationCustom0" + i).value = arr[i];
+          // }
+          // document.getElementById("validationCustom00").value = arr[0];
+          // document.getElementById("validationCustom01").value = arr[1];
+          // document.getElementById("validationCustom02").value = arr[2];
+          // document.getElementById("validationCustom03").value = arr[3];
+          // document.getElementById("validationCustom04").value = arr[4];
+          // document.getElementById("validationCustom05").value = arr[5];
+          // document.getElementById("validationCustom06").value = arr[6];
+          // document.getElementById("validationCustom07").value = arr[7];
           
           $(".register-input").trigger("change");
         })
@@ -593,18 +597,12 @@
           // showAlertNoTimeout("something");
           // let qText = "Would you like to apply the previously selected registers";
           // if(confirm(qText) == true){
+            
 
-        let qText = "Would you like to apply the previously selected registers";
-        if(confirm(qText) == true){
-            saveArraysInScope();
-            $('.register-input').each(function(){
-              let val = $.trim($(this).val());
-              console.error("val:", val, val.length)
-              if(val.length > 0){
-                $(".register-input").trigger("change");
-              }
-            })
-          }
+        // let qText = "Would you like to apply the previously selected registers";
+        // if(confirm(qText) == true){
+        //     saveArraysInScope();
+        //   }
           //   saveArraysInScope();
           //   $('.register-input').each(function(){
           //     let val = $.trim($(this).val());
@@ -615,19 +613,9 @@
           //     }
           //   })
           // }
-            }
-          );
+        });
+        saveArraysInScope();
 
-        // let qText = "Would you like to apply the previously selected registers";
-        // if(confirm(qText) == true){
-        //   saveArraysInScope();
-        //   $('.register-input').each(function(){
-        //     let val = $(this).val;
-        //     if(val.length > 0){
-        //       $(".register-input").trigger("change");
-        //     }
-        //   })
-        // }
           //$(".register-input").trigger("change");
           //$('#configForm input[type="text"]').val('');
           // $.each(array, function(index, item){

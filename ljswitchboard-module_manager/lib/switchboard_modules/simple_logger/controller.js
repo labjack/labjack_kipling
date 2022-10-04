@@ -557,20 +557,29 @@ function printNewData() {
 function saveTheArray(){
 	window.array = new Array();
     $('.register-input').each(function(){
-    array.push($(this).val());
+    	array.push($(this).val());
     })
 }
 
 function saveArraysInScope(){
-	document.getElementById('validationCustom01').value = array[0];
-    document.getElementById('validationCustom02').value = array[1];
-    document.getElementById('validationCustom03').value = array[2];
-    document.getElementById('validationCustom04').value = array[3];
-    document.getElementById('validationCustom05').value = array[4];
-    document.getElementById('validationCustom06').value = array[5];
-    document.getElementById('validationCustom07').value = array[6];
-	document.getElementById('validationCustom08').value = array[7];
+	for (var i = 0; i < 8; i++){
+		document.getElementById("validationCustom0" + i).value = array[i];
+	}
+	$('.register-input').each(function(){
+		let val = $.trim($(this).val());
+		console.error("val:", val, val.length)
+		if(val.length > 0){
+		  $(".register-input").trigger("change");
+		}
+	  })
 }
 
-function saveRegisterMatrix(){}
+function saveRegisterMatrix(){
+	for (var i = 0; i < arr.length; i++){
+		if(document.getElementById("validationCustom0" + i).value.length > 0){
+			document.getElementById("validationCustom0" + (i + 1)).value = arr[i];
+		}
+		
+	  }
+}
 
