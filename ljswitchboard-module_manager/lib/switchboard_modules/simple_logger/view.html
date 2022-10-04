@@ -12,7 +12,16 @@
           </button>
         </div>
         <div class="modal-body">
-          Would you like to add {{ startupRegisters }} to the form?
+          <label>Would you like to add these registers to the Logger Configuration?</label>
+          </br>
+          <ul id="modal_register_list">
+            {{#each startupRegisters}}
+              <li>
+                <input type="checkbox" id="check{{@index}}" checked>
+                <label for="check{{@index}}">{{this}}</label><br>
+              </li>
+            {{/each}}
+          </ul>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
@@ -29,6 +38,13 @@
         }
         else { $("#confirmModal").modal("hide"); }
       });
+
+      $("#yesbtn").click(function() {
+          let string = '{{startupRegisters}}';
+          window.arr = string.split(',');
+          saveRegisterMatrix();
+          $(".register-input").trigger("change");
+        })
     </script>
   </div>
   <div id="logger_controls">
@@ -224,31 +240,6 @@
                 document.getElementById("display-array").textContent = "";
                 saveTheArray();
                 
-                
-                // array to be displayed
-                // window.array = new Array();
-                // window.array = [];
-                // $('.register-input').each(function(){
-                //   array.push($(this).val());
-                // })
-                // $('.register-input').each(function(){
-                //   array.push($(this).val());
-                // })
-
-                //displays the array seperated by a new line so latter down the
-                //line we can put the corisponding data next to it
-                //console.log(str.split(',').join("\r\n"));
-                //assigns the array elementto the div class
-                //Inserts the values in the form to the logger view
-                
-                $.each(array, function(index, val){
-                  $('div.logerViewStyle').append(this + '\n' + '<div class="data">data</div>')
-                })
-
-                // $('.info').each(function(){
-                //   $('div.info').change()
-                // })
-                
               });
              </script>
             </li>
@@ -345,6 +336,8 @@
           </label>
           <!-- start of the registers -->
           <div class="row">
+            <!-- To-Do: Create all of these input boxes with a loop, so we can easily control the number of registers available -->
+            <!-- Also, just to clean up the code a bit, its all the same anyways -->
             <div class="col-sm-6">
               <small id="regCheck" class="form-text
                 text-muted invalid-feedback">
@@ -465,12 +458,7 @@
       </form>
       <script>
         
-        $("#yesbtn").click(function() {
-          let string = '{{startupRegisters}}';
-          window.arr = string.split(',');
-          saveRegisterMatrix();
-          $(".register-input").trigger("change");
-        })
+
         /**
          * All Form Validation Functionality
          * */
@@ -553,55 +541,7 @@
             // Then disable everything and logger will be ready to start
             return true
           }
-
-
-          //saveArraysInScope();
-
-
-          // Do we even need this anymore with real time validation?????
-          // function validateForm() {
-          //   var regArr = [];
-          //   // uses jquery to loop through all register form entries
-          //   $(".register-input").each(function(i, obj) {
-          //     let regVal = $(this).val()
-          //       // If input box is not empty, validate register
-          //       if(regVal.length > 0) { 
-          //         if(isValidRegister(regVal)) {
-          //           regArr.push(regVal);
-          //           // $(this).get(0).setCustomValidity('something cool')
-          //         }
-          //         else {
-          //         // This line will give the small popup that a register is invalid
-          //         $(this).get(0).setCustomValidity('Invalid Register')
-          //         }
-          //       }
-          //   });
-          // }
-          
-          // if(array[0] == ""){
-          //   alert("nothing");
-          // }
-          // showAlertNoTimeout("something");
-          // let qText = "Would you like to apply the previously selected registers";
-          // if(confirm(qText) == true){
-            
-
-        // let qText = "Would you like to apply the previously selected registers";
-        // if(confirm(qText) == true){
-        //     saveArraysInScope();
-        //   }
-          //   saveArraysInScope();
-          //   $('.register-input').each(function(){
-          //     let val = $.trim($(this).val());
-          //     console.error("val:", val, val.length)
-          //     if(val.length > 0){
-          //       $(".register-input").trigger("change");
-          //       console.error("trigger", val)
-          //     }
-          //   })
-          // }
         });
-        saveArraysInScope();
         
       </script>
   </div>

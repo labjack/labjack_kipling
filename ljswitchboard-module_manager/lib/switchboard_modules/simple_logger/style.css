@@ -191,3 +191,9 @@ input.duplicate {
 	z-index: -1;
 	opacity: 0.40;
 }
+
+.modal ul {
+	margin: 0;
+	list-style: none;
+	float: left;
+}

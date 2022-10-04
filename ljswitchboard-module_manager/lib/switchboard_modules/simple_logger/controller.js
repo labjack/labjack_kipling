@@ -23,6 +23,10 @@ const fs_facade = package_loader.getPackage('fs_facade');
 
 var REGISTERS_DATA_SRC = 'simple_logger/ljm_constants.json';
 
+// The max number of registers to be used in the logger
+// This prevents importing too many selected registers from the RM module.
+const MAX_REGISTERS = 8;
+
 // Constant that determines device polling rate.  Use an increased rate to aid
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000; 
@@ -308,7 +312,10 @@ function module() {
 		// console.error("onDeviceConfigured 230", device)
         self.moduleContext.logger_mode = logger_modes.configure;
 		self.moduleContext.deviceSN = self.deviceSN;
-		self.moduleContext.startupRegisters = global.globalActiveRegisters;
+		var rm_registers = global.globalActiveRegisters;
+		if(rm_registers !== undefined) {
+			self.moduleContext.startupRegisters = Object.values(rm_registers).slice(0, MAX_REGISTERS);
+		}
         framework.setCustomContext(self.moduleContext);
         onSuccess();
     };
@@ -555,7 +562,7 @@ function printNewData() {
 	}
 }
 function saveTheArray(){
-	window.array = new Array();
+	var array = [];
     $('.register-input').each(function(){
     	array.push($(this).val());
     })
@@ -563,11 +570,11 @@ function saveTheArray(){
 
 function saveArraysInScope(){
 	for (var i = 0; i < 8; i++){
+		// This line is broken, array is undefined here, I stopped it from being called, please fix
 		document.getElementById("validationCustom0" + i).value = array[i];
 	}
 	$('.register-input').each(function(){
 		let val = $.trim($(this).val());
-		console.error("val:", val, val.length)
 		if(val.length > 0){
 		  $(".register-input").trigger("change");
 		}
