@@ -2,6 +2,35 @@
 <!-- <p></p> -->
 <div id="logger_module" class="{{logger_mode}}">
 <!-- <div id="logger_module" class="dashboard_mode"> -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Would you like to add {{ startupRegisters }} to the form?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
+          <button type="button" class="btn btn-primary" id="yesbtn" data-dismiss="modal">Yes</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      $(document).ready(function(){
+        var regs = "{{ startupRegisters }}"
+        if (regs.length > 0){
+          $("#confirmModal").modal("show");
+          $("#confirmModal").modal({backdrop: "static"});
+        }
+        else { $("#confirmModal").modal("hide"); }
+      });
+    </script>
+  </div>
   <div id="logger_controls">
     <div id="navbar-example" class="navbar">
       <div class="navbar-inner">
@@ -65,18 +94,8 @@
 
                   $(".register-input").each(function(){
                     var input = $(this)
-                    input.removeClass("valid")
-                    input.removeClass("invalid")
+                    input.removeClass("valid invalid")
                   });
-
-                  // document.getElementById("validationCustom").value = "";
-                  // document.getElementById("validationCustom02").value = "";
-                  // document.getElementById("validationCustom03").value = "";
-                  // document.getElementById("validationCustom04").value = "";
-                  // document.getElementById("validationCustom05").value = "";
-                  // document.getElementById("validationCustom06").value = "";
-                  // document.getElementById("validationCustom07").value = "";
-                  // document.getElementById("validationCustom08").value = "";
                 } 
                 //else {
                 //   // nothing should happen
@@ -443,26 +462,6 @@
 
           <!-- onClick="isValidRegister('this.value')" -->
 
-          <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                  <button type="button" class="close" data-dismiss="modal" >
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  Would you like to add {{ startupRegisters }} to the form?
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
-                  <button type="button" class="btn btn-primary" id="yesbtn" data-dismiss="modal">Yes</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
       </form>
       <script>
         
@@ -470,26 +469,6 @@
           let string = '{{startupRegisters}}';
           window.arr = string.split(',');
           saveRegisterMatrix();
-          // var all = $(".register-input").map(function() {
-          //   return this.innerHTML;
-          // }).get();
-          // var i, all = $(".register-input")
-          // console.error(i, all)
-          // for(var i =0; i < arr.length; i++){
-          //   // all[i].val(arr[i]);
-          // }
-          // for (var i = 0; i < arr.length; i++){
-          //   document.getElementById("validationCustom0" + i).value = arr[i];
-          // }
-          // document.getElementById("validationCustom00").value = arr[0];
-          // document.getElementById("validationCustom01").value = arr[1];
-          // document.getElementById("validationCustom02").value = arr[2];
-          // document.getElementById("validationCustom03").value = arr[3];
-          // document.getElementById("validationCustom04").value = arr[4];
-          // document.getElementById("validationCustom05").value = arr[5];
-          // document.getElementById("validationCustom06").value = arr[6];
-          // document.getElementById("validationCustom07").value = arr[7];
-          
           $(".register-input").trigger("change");
         })
         /**
@@ -500,6 +479,8 @@
           $('#formContainer').show();
           const { dialog } = require('electron').remote; 
           var fs = require('fs');
+
+          $("#confirmModal")
 
           document.getElementById('select-file').addEventListener('click',function(){
                 dialog.showOpenDialog({
@@ -512,40 +493,44 @@
           $(".register-input").trigger("change");
           // Real Time Register Name Validation, 
           // triggered everytime the input box loses focus (onChange listener with jQuery)
-          // $(".register-input").change(function(){
-          //   var input = $(this)
-          //   if(!isValidRegister(input.val())) {
-          //     input.addClass("invalid").removeClass("valid")
-          //   }
-          //   else if (input.val()=='') {input.removeClass("invalid"); }
-          //   else {
-          //     input.addClass("valid").removeClass("invalid")
-          //   }
-          //   saveTheArray();
-          // });
-
+          var activeRegisterInputs = [];
+          // To-Do: This takes too long to execute, need to make it async or speed it up
           $(".register-input").change(function(){
-            var input = $(this)
-            if(input.val().length == 0) {
-              input.removeClass("valid").removeClass("invalid")
+            var input    = $(this);
+            var inputVal = input.val();
+            if(inputVal.length == 0) {
+              input.removeClass("valid invalid");
             }
-            else if (isValidRegister(input.val())) {
-              input.addClass("valid").removeClass("invalid"); 
+            else if(isValidRegister(inputVal)) {
+              input.addClass("valid").removeClass("invalid");
             }
             else {
-              input.addClass("invalid").removeClass("valid")
+              input.addClass("invalid").removeClass("valid");
             }
             saveTheArray();
           });
 
+          // Not Used Right Now, Come back to this later if we want it
+          function markDuplicate() {
+            var regs = [];
+            $(".register-input").each(function(){
+              var val = $(this).val();
+              if( regs.indexOf(val) == -1 && val.length > 0 ) { regs.push(val); }
+              else { $(this).addClass("duplicate"); }
+            });
+          }
+
+          function isDuplicate(val) {
+            return activeRegisterInputs.indexOf(val) != -1;
+          }
+
 
           // listener for clearing of text box
           // clears box, removes valid/invalid border box
-          // and refocuses cursor 
           $(".clear-input").click(function(){
             var input = $(this).prev(); 
             input.val('')
-            input.removeClass("invalid").removeClass("valid")
+            input.removeClass("valid invalid");
           });
 
 
@@ -567,7 +552,6 @@
           }
 
 
-          $("#confirmModal").modal({backdrop: "static"});
           //saveArraysInScope();
 
 
@@ -615,25 +599,6 @@
           // }
         });
         saveArraysInScope();
-
-          //$(".register-input").trigger("change");
-          //$('#configForm input[type="text"]').val('');
-          // $.each(array, function(index, item){
-          //   $('input.validationCustom input[type="text"]').replaceWith("something cool");
-          // });
-
-
-          //document.getElementById("display-array").textContent = "AIN2";
-          // document.getElementById('validationCustom01').value = array[0];
-          // document.getElementById('validationCustom02').value = array[1];
-          // document.getElementById('validationCustom03').value = array[2];
-          // document.getElementById('validationCustom04').value = array[3];
-          // document.getElementById('validationCustom05').value = array[4];
-          // document.getElementById('validationCustom06').value = array[5];
-          // document.getElementById('validationCustom07').value = array[6];
-          // document.getElementById('validationCustom08').value = array[7];
-          
-        //}
         
       </script>
   </div>

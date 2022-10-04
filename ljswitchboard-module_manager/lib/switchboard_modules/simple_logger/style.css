@@ -169,6 +169,10 @@ input.valid {
 	border: 2px solid green;
 }
 
+input.duplicate {
+	border: 2px solid orange !important;
+}
+
 .logerViewStyle{
 	width: 50px;
 }
