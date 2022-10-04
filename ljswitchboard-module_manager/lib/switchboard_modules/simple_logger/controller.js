@@ -576,7 +576,9 @@ function saveArraysInScope(){
 
 function saveRegisterMatrix(){
 	var emptyInputs = $(".register-input").filter(function() { return this.value === ""; });
-	emptyInputs.each(function(i, e){
+	emptyInputs.each(function(i){
+		//base case for reaching end of imported registers
+		if(arr[i] === undefined) { return false; }
 		$(this).val(arr[i]);
 	});
 }

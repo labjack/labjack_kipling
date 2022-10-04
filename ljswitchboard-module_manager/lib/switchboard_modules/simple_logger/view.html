@@ -509,6 +509,9 @@
             }
             saveTheArray();
           });
+          function isDuplicate(val){
+            return (activeRegisterInputs.indexOf(val) != -1);
+          }
 
           // Not Used Right Now, Come back to this later if we want it
           function markDuplicate() {
