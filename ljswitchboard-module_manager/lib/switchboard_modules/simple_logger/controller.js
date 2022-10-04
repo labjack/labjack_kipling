@@ -575,11 +575,9 @@ function saveArraysInScope(){
 }
 
 function saveRegisterMatrix(){
-	for (var i = 0; i < arr.length; i++){
-		if(document.getElementById("validationCustom0" + i).value.length > 0){
-			document.getElementById("validationCustom0" + (i + 1)).value = arr[i];
-		}
-		
-	  }
+	var emptyInputs = $(".register-input").filter(function() { return this.value === ""; });
+	emptyInputs.each(function(i, e){
+		$(this).val(arr[i]);
+	});
 }
 

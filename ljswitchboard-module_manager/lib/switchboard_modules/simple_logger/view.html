@@ -456,8 +456,8 @@
                   Would you like to add {{ startupRegisters }} to the form?
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
-                  <button type="button" class="btn btn-primary" id="yesbtn" data-dismiss="modal">Yes</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">override</button>
+                  <button type="button" class="btn btn-primary" id="yesbtn" data-dismiss="modal">Append</button>
                 </div>
               </div>
             </div>
@@ -524,10 +524,25 @@
           //   saveTheArray();
           // });
 
+          //TO-Do: check for duplacate 
+          var activeRegisterInputs = [];
           $(".register-input").change(function(){
             var input = $(this)
+            // if(input.isValidRegister() && input.isDuplicate()){
+            //   input.addClass("valid warn");
+            // }
+            // else if(input.isValidRegister()){
+            //   input.addClass("valid").removeClass("invalid"); 
+            // }
+            // else if(input.val().length == 0) {
+            //   input.removeClass("valid invalid warn");
+            // }
+            // else{
+            //   input.addClass("invalid");
+            // }
+
             if(input.val().length == 0) {
-              input.removeClass("valid").removeClass("invalid")
+              input.removeClass("valid invalid warn");
             }
             else if (isValidRegister(input.val())) {
               input.addClass("valid").removeClass("invalid"); 
@@ -537,6 +552,9 @@
             }
             saveTheArray();
           });
+          function isDuplicate(val){
+            return (activeRegisterInputs.indexOf(val) != -1);
+          }
 
 
           // listener for clearing of text box
