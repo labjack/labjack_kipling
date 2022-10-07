@@ -82,10 +82,10 @@
         "active": false
     }, {
         "name": "simple_logger_flot",
-        "active": true
+        "active": false
     }, {
         "name": "simple_logger_epoch",
-        "active": true
+        "active": false
     }, {
         "name": "device_updater_service",
         "active": true,
