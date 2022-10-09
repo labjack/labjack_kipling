@@ -55,14 +55,15 @@
           <ul class="nav navbar-nav active-log-controls">
             <li>
               <!-- onClick="userLoggerStart()" -->
-              <button class="win-command green" id="startBtn" rel="tootlip" title="Command with icon and label with border ring">
+              <button class="win-command green" id="startBtn" rel="tootlip" title="Command with icon and label with border ring" disabled="True">
                 <span class="win-commandicon win-commandring icon-play"></span>
                 <!-- <span class="win-label">Start</span> -->
              </button>
              <script>
               $("#startBtn").click(function(){
                 //alert("the thing");
-                logerCall();
+                alert("starting logger")
+                userStartLogger();
                 //initializeLogger();
               })
              </script>
@@ -529,8 +530,9 @@
             event.preventDefault(); 
             var valid = validateForm();
             if(valid){
-              $("#configForm :input").prop("disabled", true)
-              showInfoMessage("Configuration Valid")
+              $("#configForm :input").prop("disabled", true);
+              showInfoMessage("Configuration Valid");
+              $("#startBtn").prop("disabled", false)
             }
             return false;
           });

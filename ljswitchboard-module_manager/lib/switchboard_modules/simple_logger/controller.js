@@ -14,12 +14,14 @@ const fs                 = require('fs')
 var device_manager       = require('ljswitchboard-device_manager')
 var simple_logger        = require("ljswitchboard-simple_logger"); //.create();
 var eventList            = require("ljswitchboard-simple_logger").eventList;
+var eventMap             = require("ljswitchboard-simple_logger").eventsMap;
 const { dirname }        = require('path');
 var modbus_map           = require('ljswitchboard-modbus_map');
 
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
 
+var async = require('async');
 
 var REGISTERS_DATA_SRC = 'simple_logger/ljm_constants.json';
 
@@ -61,6 +63,7 @@ function userStartLogger() {
 		'finish',
 	];
 	loggerAppSteps.forEach(function(step) {
+		console.error('App Step', step);
 		if(typeof(loggerApp[step]) != 'function') {
 			console.error('App Step', step, 'is not defined!');
 			process.exit();
@@ -76,6 +79,7 @@ function userStartLogger() {
 				cb(err);
 			}
 			try {
+				alert("Trying", step)
 				loggerApp[step]().then(cb, onErr);
 			} catch(err) {
 				console.error('Error executing app step', step, err);
@@ -94,16 +98,6 @@ function userStartLogger() {
 // 	'waitForLoggerToRun',			// Allowing the logger to run...
 // 	'closeDevices',					
 // 	'finish',
-function logerCall() {
-	// alert("start of logerCall");
-	loggerApp.initializeLogger();
-	loggerApp.updateDeviceListing();
-	loggerApp.configureLogger();
-	loggerApp.waitForLoggerToRun();
-	// loggerApp.closeDevices();
-	// loggerApp.finish();
-	// alert("finished the function")
-}
 
 function loggerStop() {
 	loggerApp.closeDevices();
@@ -115,15 +109,14 @@ function loadConfigFile(config) {
 	$("#logName").val(config.logging_config.name)
 	try {
 		console.error(config)
-		dev_sn = config.device_serial_numbers[0]
-		data_group = config.data_groups[0]
-		reg_list = config.dat_group.dev_sn.registers
-		console.error(dev_sn, data_group, reg_list);
+		let dev_sn = config.device_serial_numbers[0]
+		let data_group = config.data_groups[0]
+		let reg_list = config.dat_group.dev_sn.registers
 		let registers = []
 		for (const r of reg_list) {
 			registers.push(r.name)
 		}
-		alert("HERES WHAT WE GOT", registers);
+		alert("HERES WHAT WE GOT", dev_sn, data_group, registers);
 	}
 	catch(e) {
 		alert(e)
@@ -297,7 +290,7 @@ function module() {
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
         framework.clearConfigBindings();
         framework.setStartupMessage('Reading Device Configuration');
-		console.error("line 220 on device selected", framework, "device", device)
+		console.error("on device selected", framework, "device", device)
 		this.device_controller = framework.device_controller
         onSuccess();
     };
@@ -528,8 +521,8 @@ function attachListeners(loggerObject) {
 
 var loggerApp = new loggerApp()
 
-var ENABLE_DEBUG_LOG = false;
-var ENABLE_PRINTING = false;
+var ENABLE_DEBUG_LOG = true;
+var ENABLE_PRINTING = true;
 function print() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];

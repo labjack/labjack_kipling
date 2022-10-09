@@ -197,3 +197,10 @@ input.duplicate {
 	list-style: none;
 	float: left;
 }
+
+/* need a better way to show that start is disabled until loading config */
+button.win-command:disabled {
+	border: 1px solid #ff0000;
+	background-color: #cccccc;
+	color: #666666;
+}
