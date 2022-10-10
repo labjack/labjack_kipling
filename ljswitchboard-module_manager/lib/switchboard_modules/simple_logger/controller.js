@@ -304,7 +304,7 @@ function module() {
 		self.deviceSN = device[0].savedAttributes.serialNumber;
 		// console.error("onDeviceConfigured 230", device)
         self.moduleContext.logger_mode = logger_modes.configure;
-		self.moduleContext.deviceSN = self.deviceSN;
+		self.moduleContext.deviceSN = self.deviceSN;	
 		var rm_registers = global.globalActiveRegisters;
 		if(rm_registers !== undefined) {
 			self.moduleContext.startupRegisters = Object.values(rm_registers).slice(0, MAX_REGISTERS);

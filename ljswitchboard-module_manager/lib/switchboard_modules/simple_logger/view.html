@@ -14,11 +14,11 @@
         <div class="modal-body">
           <label>Would you like to add these registers to the Logger Configuration?</label>
           </br>
-          <ul id="modal_register_list">
+          <ul id="modal_register_list" class="boxes">
             {{#each startupRegisters}}
-              <li>
-                <input type="checkbox" id="check{{@index}}" checked>
-                <label for="check{{@index}}">{{this}}</label><br>
+              <li class="boxes1">
+                <input class="checekbx" type="checkbox" id="check{{@index}}" value="{{this}}" checked>
+                <label for="check{{@index}}" id="checkId{{@index}}">{{this}}</label><br>
               </li>
             {{/each}}
           </ul>
@@ -31,17 +31,26 @@
     </div>
     <script>
       $(document).ready(function(){
+        //$('input[class="checekbx"]').not(this).prop('checked', false);
         var regs = "{{ startupRegisters }}"
         if (regs.length > 0){
           $("#confirmModal").modal("show");
           $("#confirmModal").modal({backdrop: "static"});
         }
-        else { $("#confirmModal").modal("hide"); }
       });
 
       $("#yesbtn").click(function() {
-          let string = '{{startupRegisters}}';
-          window.arr = string.split(',');
+        // on the btn click looks through all of the rgistersfrom the register matrix that were selected and take the
+        // the ones with a check makrk next to them.
+        //TO-DO implement the append and the replay part of the function
+        // currently it is just replaceing the spots where the register are.
+        var arra = [];
+          $('input:checkbox[class="checekbx"]:checked').each(function(){    
+            arra.push($(this).val());    		
+          });
+        //let string = '{{startupRegisters}}';
+        window.arr = arra;
+
           saveRegisterMatrix();
           $(".register-input").trigger("change");
         })
@@ -336,9 +345,36 @@
               Register Name(s):
           </label>
           <!-- start of the registers -->
-          <div class="row">
+          <div class="row" id="regs">
             <!-- To-Do: Create all of these input boxes with a loop, so we can easily control the number of registers available -->
             <!-- Also, just to clean up the code a bit, its all the same anyways -->
+
+            <div id="something">
+
+            </div>
+            
+            <script>
+            
+              //alert( MAX_REGISTERS );
+              
+              for(var i = 0; i < "{{MAX_REGISTERS}}"; i++) {
+              var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i + 1} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+              $("#something").append(registerHTML);
+              }
+              //document.getElementById("something").innerHTML = registerHTML;
+              // $("#something").append(registerHTML);
+            </script>
+
+           <!-- {{#each startupRegisters}}
+              <div class="col-sm-6">
+                <small id="regCheck" class="form-text 
+                  text-muted invalid-feedback" value="">Register#{{@index }}</small>
+                <input type="text" class="form-control register-input" id="validationCustom0{{@index}}" name="array[]"
+                oninput="this.value = this.value.toUpperCase()">
+                <span class="clear-input">x</span>
+              </div>
+            {{/each}} -->
+
             <!-- <div class="col-sm-6">
               <small id="regCheck" class="form-text
                 text-muted invalid-feedback">
