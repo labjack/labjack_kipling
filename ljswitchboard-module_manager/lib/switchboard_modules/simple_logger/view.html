@@ -339,7 +339,7 @@
           <div class="row">
             <!-- To-Do: Create all of these input boxes with a loop, so we can easily control the number of registers available -->
             <!-- Also, just to clean up the code a bit, its all the same anyways -->
-            <div class="col-sm-6">
+            <!-- <div class="col-sm-6">
               <small id="regCheck" class="form-text
                 text-muted invalid-feedback">
                 Register #1
@@ -416,7 +416,7 @@
               <input type="text" class="form-control register-input" id="validationCustom07" name="array[]"
               oninput="this.value = this.value.toUpperCase()">
               <span class = "clear-input">x</span>
-            </div>
+            </div> -->
               <!-- end of the refgisters -->
 
             <div class="col-sm-6">
@@ -458,7 +458,30 @@
 
       </form>
       <script>
-        
+
+            // <div class="col-sm-6">
+            //   <small id="regCheck" class="form-text
+            //     text-muted invalid-feedback">
+            //     Register #7
+            //   </small>
+            //   <input type="text" class="form-control register-input" id="validationCustom06" name="array[]"
+            //   oninput="this.value = this.value.toUpperCase()">
+            //   <span class = "clear-input">x</span>
+            // </div>
+
+        // var container = $('<div />');
+        // for(var i = 1; i <= num; i++) {
+        //     container.append('<input id="id'+i+'" name="name'+i+'" />');
+        // }
+        // $('somewhere').html(container);
+
+
+        // var container = $('div />')
+        // var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+        for(var i = 0; i < "{{MAX_REGISTERS}}"; i++) {
+          var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+        }
+         
 
         /**
          * All Form Validation Functionality

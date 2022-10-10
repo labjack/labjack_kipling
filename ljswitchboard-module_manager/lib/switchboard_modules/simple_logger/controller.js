@@ -309,6 +309,7 @@ function module() {
 		if(rm_registers !== undefined) {
 			self.moduleContext.startupRegisters = Object.values(rm_registers).slice(0, MAX_REGISTERS);
 		}
+		self.moduleContext.MAX_REGISTERS = MAX_REGISTERS;
         framework.setCustomContext(self.moduleContext);
         onSuccess();
     };
