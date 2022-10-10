@@ -84,7 +84,7 @@ UPGRADE_TARGET_FLASH_INFO[driver_const.T8_TARGET.toString()] = {
     'imageKey': driver_const.T7_EFkey_ExtFirmwareImage,
     'imageAddress': driver_const.MZ_EFAdd_ExtFirmwareImage,
     'imageInfoKey': driver_const.T7_EFkey_ExtFirmwareImgInfo,
-    'imageInfoAddress': driver_const.MZ_EFAdd_ExtFirmwareImgInfo,
+    'imageInfoAddress': driver_const.T8_EFAdd_ExtFirmwareImgInfo, //driver_const.MZ_EFAdd_ExtFirmwareImgInfo,
     'imagePageSize': driver_const.MZ_IMG_FLASH_PAGE_ERASE,
     'verifyFirmwareVersion': true,
     'isRecoveryFW': false,
@@ -862,7 +862,7 @@ this.getInitialDeviceFWState = function(bundle) {
 **/
 this.eraseFlash = function(bundle, startAddress, numPages, key) {
     var deferred = q.defer();
-
+    
     var device = bundle.getDevice();
     var pages = range(numPages);
     async.eachSeries(
@@ -937,7 +937,7 @@ this.eraseImageInformation = function(bundle)
     tSeriesUpgrader.eraseFlash(
         bundle,
         info.imageInfoAddress,
-        driver_const.T7_HDR_FLASH_PAGE_ERASE,
+        driver_const.T7_HDR_FLASH_PAGE_ERASE, 
         info.imageInfoKey
     ).then(
         function(bundle) {

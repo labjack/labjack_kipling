@@ -142,6 +142,7 @@ exports.T4_RECOVERY_TARGET					= 100004021;
 // T8 targets
 exports.T8_TARGET 							= 100008001;
 exports.T8_RECOVERY_TARGET					= 100008021;
+exports.T8_EFAdd_ExtFirmwareImgInfo         = 0x680000;
 
 // Firmware Targets to required device types
 exports.TARGET_TO_REQ_DT = {};
