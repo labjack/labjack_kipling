@@ -28,7 +28,7 @@ const buildOpts = {
 if ('darwin' === buildOS) {
     buildOpts.mac = ['default'];
 } else if ('win32' === buildOS) {
-    buildOpts.win = ['default'];
+    //buildOpts.win = ['default'];
 } else {
     buildOpts.linux = ['default'];
 }
