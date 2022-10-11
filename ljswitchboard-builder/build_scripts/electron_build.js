@@ -29,7 +29,6 @@ if ('darwin' === buildOS) {
     buildOpts.mac = ['default'];
 } else if ('win32' === buildOS) {
     buildOpts.win = ['default'];
-    buildOpts.win.target = 'portable'
 } else {
     buildOpts.linux = ['default'];
 }

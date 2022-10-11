@@ -81,5 +81,8 @@
 	"scripts": {
 		"clean": "rimraf temp_project_files temp* output",
 		"build": "node ./build_scripts/build_project.js"
+	},
+	"win": {
+		"target": "portable"
 	}
 }
