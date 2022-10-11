@@ -70,6 +70,7 @@
 			"icon": "Kipling_128x128.png"
 		},
 		"win": {
+			"target": "portable",
 			"icon": "Kipling3.ico"
 		},
 		"asar": false,
@@ -81,8 +82,5 @@
 	"scripts": {
 		"clean": "rimraf temp_project_files temp* output",
 		"build": "node ./build_scripts/build_project.js"
-	},
-	"win": {
-		"target": "portable"
 	}
 }
