@@ -556,25 +556,24 @@ function printNewData() {
 	}
 }
 function saveTheArray(){
-	var array = [];
+	window.array = new Array();
     $('.register-input').each(function(){
     	array.push($(this).val());
     })
 }
-
 function saveArraysInScope(){
-	for (var i = 0; i < 8; i++){
-		// This line is broken, array is undefined here, I stopped it from being called, please fix
-		document.getElementById("validationCustom0" + i).value = array[i];
+	for (var i = 0; i < MAX_REGISTERS; ++i){
+		document.getElementById('validationCustom0' + i).value = array[i];
 	}
 	$('.register-input').each(function(){
 		let val = $.trim($(this).val());
+		console.error("val:", val, val.length)
 		if(val.length > 0){
 		  $(".register-input").trigger("change");
+		  console.error("trigger", val)
 		}
 	  })
 }
-
 function saveRegisterMatrix(){
 	var emptyInputs = $(".register-input").filter(function() { return this.value === ""; });
 	emptyInputs.each(function(i){

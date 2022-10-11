@@ -6,7 +6,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <!-- <h5 class="modal-title" id="exampleModalLabel">Modal title</h5> -->
           <button type="button" class="close" data-dismiss="modal" >
             <span aria-hidden="true">&times;</span>
           </button>
@@ -25,7 +25,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
-          <button type="button" class="btn btn-primary" id="yesbtn" data-dismiss="modal">Yes</button>
+          <button type="button" class="btn btn-primary btnUpdate" id="yesbtn" data-dismiss="modal">Yes</button>
         </div>
       </div>
     </div>
@@ -42,8 +42,6 @@
       $("#yesbtn").click(function() {
         // on the btn click looks through all of the rgistersfrom the register matrix that were selected and take the
         // the ones with a check makrk next to them.
-        //TO-DO implement the append and the replay part of the function
-        // currently it is just replaceing the spots where the register are.
         var arra = [];
           $('input:checkbox[class="checekbx"]:checked').each(function(){    
             arra.push($(this).val());    		
@@ -68,7 +66,14 @@
                 <span class="win-commandicon win-commandring icon-play"></span>
                 <!-- <span class="win-label">Start</span> -->
              </button>
+             
              <script>
+              $(".icon-play").each(function(){
+                    var span = $(this)
+                    span.addClass("disabled")
+                  });
+
+                  
               $("#startBtn").click(function(){
                 //alert("the thing");
                 alert("starting logger")
@@ -78,11 +83,15 @@
              </script>
             </li>
             <li>
-              <button class="win-command red" id = "stopBtn" rel="tootlip" title="Command with icon and label with border ring">
+              <button class="win-command red" id = "stopBtn" rel="tootlip" title="Command with icon and label with border ring" disabled="True">
                 <span class="win-commandicon win-commandring icon-stop"></span>
                 <!-- <span class="win-label">Stop</span> -->
              </button>
              <script>
+              $(".icon-stop").each(function(){
+                    var span = $(this)
+                    span.addClass("disabled")
+                  });
               $("#stopBtn").click(function(){
                 //alert("the thing");
                 loggerStop();
@@ -346,20 +355,13 @@
           </label>
           <!-- start of the registers -->
           <div class="row" id="regs">
-            <!-- To-Do: Create all of these input boxes with a loop, so we can easily control the number of registers available -->
-            <!-- Also, just to clean up the code a bit, its all the same anyways -->
 
-            <div id="something">
-
-            </div>
+            <div id="registerContaner"></div>
             
-            <script>
-            
-              //alert( MAX_REGISTERS );
-              
+            <script>              
               for(var i = 0; i < "{{MAX_REGISTERS}}"; i++) {
               var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i + 1} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
-              $("#something").append(registerHTML);
+              $("#registerContaner").append(registerHTML);
               }
               //document.getElementById("something").innerHTML = registerHTML;
               // $("#something").append(registerHTML);
@@ -527,7 +529,7 @@
           $('#formContainer').show();
           const { dialog } = require('electron').remote; 
           var fs = require('fs');
-
+          setTimeout(function(){ saveArraysInScope() }, 1);
           $("#confirmModal")
 
           document.getElementById('select-file').addEventListener('click',function(){
@@ -544,6 +546,7 @@
           var activeRegisterInputs = [];
           // To-Do: This takes too long to execute, need to make it async or speed it up
           $(".register-input").change(function(){
+            
             var input    = $(this);
             var inputVal = input.val();
             if(inputVal.length == 0) {
@@ -584,14 +587,34 @@
             input.removeClass("valid invalid");
           });
 
+          // This was the best way i could get it to work i will need to do some work with it to find out where the best place to call it is
+          // let qText = "Would you like to apply the previously selected registers";
+          // if(confirm(qText) == true){
+          //   saveArraysInScope();
+          // }
+
 
           document.getElementById("configForm").addEventListener('submit', function() {
             event.preventDefault(); 
             var valid = validateForm();
+            //<span class = "clear-input">x</span>
             if(valid){
+              $(".clear-input").each(function(){
+                    var span = $(this)
+                    span.remove();
+                  });
               $("#configForm :input").prop("disabled", true);
+              $(".clear-input").prop("disabled", true);
               showInfoMessage("Configuration Valid");
               $("#startBtn").prop("disabled", false)
+              $(".icon-stop").each(function(){
+                    var span = $(this)
+                    span.removeClass("disabled")
+                  });
+              $(".icon-play").each(function(){
+                    var span = $(this)
+                    span.removeClass("disabled")
+                  });
             }
             return false;
           });
@@ -600,6 +623,15 @@
             // To-Do: Do stuff here to check to make sure every form input is valid
             // Mark things if they arent valid and need user attention
             // Then disable everything and logger will be ready to start
+            //when there is a non valid register in the scope then it will not run orrectly
+            const targetElement = document.querySelector('.invalid');
+            if(targetElement){
+              showInfoMessage("A register is invalid");
+              return false
+            }
+            else{
+              //nothing will hapen untill the end of the loop where it will slet the form be done
+            }
             return true
           }
         });
