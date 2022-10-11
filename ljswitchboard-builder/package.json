@@ -70,7 +70,7 @@
 			"icon": "Kipling_128x128.png"
 		},
 		"win": {
-			"target": "7z",
+			"target": "portable",
 			"icon": "Kipling3.ico"
 		},
 		"asar": false,
