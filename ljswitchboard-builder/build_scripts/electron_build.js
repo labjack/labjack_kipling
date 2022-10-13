@@ -30,7 +30,7 @@ if ('darwin' === buildOS) {
 } else if ('win32' === buildOS) {
     //buildOpts.win = ['default'];
 } else {
-    buildOpts.linux = ['default'];
+    //buildOpts.linux = ['default'];
 }
 
 async function fixSnapName() {

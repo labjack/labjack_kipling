@@ -67,7 +67,9 @@
 			"category": "public.app-category.utilities"
 		},
 		"linux": {
-			"icon": "Kipling_128x128.png"
+			"icon": "Kipling_128x128.png",
+			"arch": ["x64", "ia32"],
+			"target": "AppImage"
 		},
 		"win": {
 			"target": "portable",
