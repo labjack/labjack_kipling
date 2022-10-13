@@ -68,7 +68,6 @@
 		},
 		"linux": {
 			"icon": "Kipling_128x128.png",
-			"arch": ["x64", "ia32"],
 			"target": "AppImage"
 		},
 		"win": {
