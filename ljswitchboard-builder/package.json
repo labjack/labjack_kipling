@@ -68,7 +68,7 @@
 		},
 		"linux": {
 			"icon": "Kipling_128x128.png",
-			"target": "AppImage"
+			"target": "dir"
 		},
 		"win": {
 			"target": "portable",
