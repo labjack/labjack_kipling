@@ -43,7 +43,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: my-artifact
-          path: ${{ github.workspace }}/build/output/dist/kipling*
+          path: ${{ github.workspace }}/build/output/dist/*
 
 
 
