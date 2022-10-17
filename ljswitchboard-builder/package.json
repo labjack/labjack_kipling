@@ -68,7 +68,7 @@
 		},
 		"linux": {
 			"icon": "Kipling_128x128.png",
-			"target": "flatpak"
+			"target": "tar.xz"
 		},
 		"win": {
 			"target": "portable",
