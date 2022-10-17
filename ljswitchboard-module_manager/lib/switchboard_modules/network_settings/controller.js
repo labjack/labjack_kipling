@@ -942,7 +942,7 @@ function module() {
     this.ethernetHelpButton = function(data, onSuccess) {
         console.log('in wifiHelpButton listener');
         // gui.Shell.openExternal("https://labjack.com/support/app-notes/basic-networking-troubleshooting");
-        gui.Shell.openExternal("https://labjack.com/support/app-notes/wifi-and-ethernet-t7-t4-t7-pro");
+        gui.Shell.openExternal("https://labjack.com/pages/support/labjack-t4?doc=/app-notes/networking/setup-wifi-and-ethernet-for-the-t7t4t7-pro-app-note");
         onSuccess();
     };
     this.updateActiveEthernetSettings = function() {
