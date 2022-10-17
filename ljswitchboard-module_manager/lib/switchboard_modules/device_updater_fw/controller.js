@@ -184,7 +184,7 @@ function module() {
             'changeLogLink': 'https://labjack.com/support/firmware/t7',
         },
         'T8': {
-            'changeLogLink': 'https://labjack.com/support/firmware',
+            'changeLogLink': 'https://labjack.com/support/firmware/t8',
         },
     };
     this.onDeviceConfigured = function(framework, devices, setupBindings, onError, onSuccess) {
