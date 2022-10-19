@@ -64,7 +64,8 @@
 		"appId": "com.labjack/kipling",
 		"mac": {
 			"icon": "Kipling3.icns",
-			"category": "public.app-category.utilities"
+			"category": "public.app-category.utilities",
+			"target": "dmg"
 		},
 		"linux": {
 			"icon": "Kipling_128x128.png",
