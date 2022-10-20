@@ -61,7 +61,7 @@
 	},
 	"build": {
 		"productName": "kipling",
-		"appId": "com.labjack/kipling",
+		"appId": "com.labjack.kipling",
 		"mac": {
 			"icon": "Kipling3.icns",
 			"category": "public.app-category.utilities",
