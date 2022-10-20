@@ -75,7 +75,7 @@
 			"target": "portable",
 			"icon": "Kipling3.ico"
 		},
-		"asar": true,
+		"asar": false,
 		"npmArgs": [
 			"--force"
 		]
