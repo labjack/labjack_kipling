@@ -8,6 +8,7 @@ on: workflow_dispatch
 
 jobs:
   build:
+    environment: kipling_env
 
     strategy:
       matrix:
@@ -18,7 +19,6 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
-      - environment: kipling_env
 #      - name: Download ljm
 #        uses: wei/wget@v1
 #        with:
