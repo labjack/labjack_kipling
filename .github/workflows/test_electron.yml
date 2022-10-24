@@ -18,6 +18,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
 
     steps:
+      - environment: kipling_env
 #      - name: Download ljm
 #        uses: wei/wget@v1
 #        with:
