@@ -34,13 +34,14 @@ jobs:
       - run: npm run setup_ci
       #- name: Fix lerna mess
         #run: node ./scripts/fix_lerna_backup.js
+      - run: ls ${{ github.workspace }}/build/output/dist
       - run: npm run build
         env:
           CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
           CSC_LINK: ${{ secrets.CERTIFICATE_P12 }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
-      - run: ls ${{ github.workspace }}/build/output/dist
+      
 
       - uses: actions/upload-artifact@v2
         with:
