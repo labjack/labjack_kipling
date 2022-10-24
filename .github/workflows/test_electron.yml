@@ -40,7 +40,7 @@ jobs:
           CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
-      - run: npm run build
+        run: npm run build
       - run: ls ${{ github.workspace }}/build/output/dist
 
       - uses: actions/upload-artifact@v2
