@@ -65,7 +65,7 @@
 		"mac": {
 			"icon": "Kipling3.icns",
 			"category": "public.app-category.utilities",
-			"target": "dir, pkg, dmg"
+			"target": ["dir, pkg, dmg"]
 		},
 		"linux": {
 			"icon": "Kipling_128x128.png",
