@@ -34,13 +34,19 @@ jobs:
       - run: npm run setup_ci
       #- name: Fix lerna mess
         #run: node ./scripts/fix_lerna_backup.js
-      - name: Build and Sign
+      - name: Check ENV
         with:
           CSC_LINK: ${{ secrets.CERTIFICATE_P12 }}
           CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
         run: echo "$GITHUB_CONTEXT"
+      - name: Build and Sign
+        with:
+          CSC_LINK: ${{ secrets.CERTIFICATE_P12 }}
+          CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
+          BUILD_DIR: ${{ github.workspace }}/build
+          USE_HARD_LINKS: "false"
         run: npm run build
       - run: ls ${{ github.workspace }}/build/output/dist
 
