@@ -65,7 +65,7 @@
 		"mac": {
 			"icon": "Kipling3.icns",
 			"category": "public.app-category.utilities",
-			"target": "dir"
+			"target": "dir, pkg, dmg"
 		},
 		"linux": {
 			"icon": "Kipling_128x128.png",
@@ -75,7 +75,7 @@
 			"target": "portable",
 			"icon": "Kipling3.ico"
 		},
-		"asar": true,
+		"asar": false,
 		"npmArgs": [
 			"--force"
 		]
