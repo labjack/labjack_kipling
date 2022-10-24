@@ -35,11 +35,12 @@ jobs:
       #- name: Fix lerna mess
         #run: node ./scripts/fix_lerna_backup.js
       - name: Build and Sign
-        env:
+        with:
           CSC_LINK: ${{ secrets.CERTIFICATE_P12 }}
           CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
+        run: echo "$GITHUB_CONTEXT"
         run: npm run build
       - run: ls ${{ github.workspace }}/build/output/dist
 
