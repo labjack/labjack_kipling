@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-kipling_tester",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "private": true,
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
@@ -27,9 +27,9 @@
   },
   "dependencies": {
     "async": "3.2.0",
-    "chai": "^4.2.0",
     "diff": ">=3.5.0",
-    "mocha": "^8.2.1"
+    "mocha": "^8.2.1",
+    "chai": "^4.2.0"
   },
   "devDependencies": {
     "q": "1.5.1"
