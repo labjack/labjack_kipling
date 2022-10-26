@@ -67,7 +67,7 @@ builder
         return fixSnapName();
     })
     .catch((err) => {
-        console.error(err);
+        console.error("Electron Builder Error: ", err);
         // handle error
         process.exit(1);
     });

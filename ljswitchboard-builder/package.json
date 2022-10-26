@@ -60,12 +60,14 @@
 		"buildResources": "branding_files"
 	},
 	"build": {
-		"productName": "kipling",
+		"productName": "Kipling",
 		"appId": "com.labjack.kipling",
 		"mac": {
 			"icon": "Kipling3.icns",
 			"category": "public.app-category.utilities",
-			"target": "dir"
+			"target": "dir",
+			"hardenedRuntime": true,
+			"gatekeeperAssess": true
 		},
 		"linux": {
 			"icon": "Kipling_128x128.png",

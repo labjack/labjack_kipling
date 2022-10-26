@@ -294,6 +294,8 @@ class IOInterface extends EventEmitter {
 
 			const exists = fs.existsSync(nodeBinaryPath);
 			retData.exists = exists;
+			console.error("======== EXISTS?:", exists)
+			console.error("========== Ret Data ===========", retData, "\n=====Errors:", errors);
 			if (exists) {
 				if (isOkToRun) {
 					resolve(retData);
@@ -509,7 +511,7 @@ class IOInterface extends EventEmitter {
 			}
 		} catch (err) {
 			console.error('io_interface error', err);
-			process.exit();
+			// process.exit();
 			throw err;
 		}
 	}
