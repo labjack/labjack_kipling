@@ -253,7 +253,7 @@ class IOInterface extends EventEmitter {
 			// version = '0_10_35';
 			const version = {
 				'win32': '8_9_4',
-				'darwin': '8_9_4',
+				'darwin': '12_16_3',
 				'linux': '8_9_4',
 			}[os];
 
