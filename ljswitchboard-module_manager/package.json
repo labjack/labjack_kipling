@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "sprintf-js": "1.1.2",
-    "handlebars": "4.7.6"
+    "handlebars": "4.7.7"
   },
   "bugs": {
     "url": "https://github.com/labjack/labjack_kipling/issues"
@@ -37,7 +37,7 @@
     "jshint": "2.10.2",
     "html5-lint": "0.3.0",
     "rewire": "4.0.1",
-    "handlebars": "4.7.6",
+    "handlebars": "4.7.7",
     "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },
