@@ -54,7 +54,7 @@ async function loadResources(win, static_files) {
         'libs/DataTables-1.10.6/extensions/Plugins/integration/bootstrap/3/dataTables.bootstrap.css',
 
         // CSS for epoch graphing library
-        '/libs/epoch-0.6.0/epoch.min.css',
+        // '/libs/epoch-0.6.0/epoch.min.css',
 
         // CSS for fixes to bootmetro & bootstrap
         'css/bootmetro.fix.css',

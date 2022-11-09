@@ -8,11 +8,12 @@ on: workflow_dispatch
 
 jobs:
   build:
+    environment: kipling_env
 
     strategy:
       matrix:
         node-version: [12.16.3]
-        platform: [ubuntu-18.04, windows-latest]
+        platform: [macos-latest]
         #platform: [ubuntu-18.04, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.platform }}
@@ -34,10 +35,20 @@ jobs:
       - run: npm run setup_ci
       #- name: Fix lerna mess
         #run: node ./scripts/fix_lerna_backup.js
-      - run: npm run build
+      # - name: Check ENV
+      #   env:
+      #     CSC_LINK: ${{ secrets.CERTIFICATE_P12 }}
+      #     CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
+      #     BUILD_DIR: ${{ github.workspace }}/build
+      #     USE_HARD_LINKS: "false"
+      #   run: echo "$GITHUB_CONTEXT"
+      - name: Build and Sign
         env:
+          CSC_LINK: ${{ secrets.CERTIFICATE_P12 }}
+          CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
+        run: npm run build
       - run: ls ${{ github.workspace }}/build/output/dist
 
       - uses: actions/upload-artifact@v2

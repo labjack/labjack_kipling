@@ -1,7 +1,5 @@
 require('./utils/error_catcher');
 
-console.log('sign_mac_build_before_compression');
-
 var path = require('path');
 var async = require('async');
 var child_process = require('child_process');
@@ -18,6 +16,20 @@ if(typeof(buildOS) === 'undefined') {
 
 var curVersion = process.versions.node.split('.').join('_');
 
+// All known node binary .exe files
+// Each file needs to be signed individually for Mac OS Notarizing Service to Pass
+// List Updated for Kipling 3.3.2 - October 2022
+const listOfNodeBinaries = [
+	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-kipling_tester/node_modules/fsevents/fsevents.node",
+	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/node_modules/ref-napi/prebuilds/darwin-x64/electron.napi.node",
+	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/node_modules/ref-napi/prebuilds/darwin-x64/node.napi.node",
+	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/prebuilds/darwin-x64/node.napi.uv1.node",
+	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/ref-napi/prebuilds/darwin-x64/electron.napi.node",
+	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/ref-napi/prebuilds/darwin-x64/node.napi.node",
+	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/fsevents/fsevents.node"
+	]
+
+// node binary used by io_manager
 var pathToBinaryPartials = [
 	getBuildDirectory(),
 	'temp_project_files',
@@ -29,20 +41,68 @@ var pathToBinaryPartials = [
 	'node'
 ].join(path.sep);
 
-var pathToRefBindingNode = [
+// kipling_tester fsevents
+var testFseventsNode = [
+	getBuildDirectory(),
+	'temp_project_files',
+	'ljswitchboard-kipling_tester',
+	'node_modules',
+	'fsevents',
+	'fsevents.node'
+].join(path.sep)
+
+//io_manager fsevents
+var fseventsNode = [
 	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
-	'ref','build','Release','binding.node'
+	'fsevents', 'fsevents.node'
+].join(path.sep)
+
+// ffi node api for electron
+var electronNodeApi_ffi = [
+	getBuildDirectory(),
+	'temp_project_files',
+	'ljswitchboard-io_manager',
+	'node_modules',
+	'ffi-napi','node_modules','ref-napi','prebuilds', 'darwin-x64', 'electron.napi.node'
 ].join(path.sep);
 
-var pathToFFIBindingNode = [
+/// ref node api for electron
+var electronNodeApi_ref = [
 	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
-	'ffi','build','Release','ffi_bindings.node'
+	'ref-napi','prebuilds', 'darwin-x64', 'electron.napi.node'
+].join(path.sep);
+
+// ffi node api
+var nodeApi_ffi = [
+	getBuildDirectory(),
+	'temp_project_files',
+	'ljswitchboard-io_manager',
+	'node_modules',
+	'ffi-napi','node_modules','ref-napi','prebuilds', 'darwin-x64', 'node.napi.node'
+].join(path.sep);
+
+// ref node api
+var nodeApi_ref = [
+	getBuildDirectory(),
+	'temp_project_files',
+	'ljswitchboard-io_manager',
+	'node_modules',
+	'ref-napi','prebuilds', 'darwin-x64', 'node.napi.node'
+].join(path.sep);
+
+// uv1 node api
+var nodeApi_uv1 = [
+	getBuildDirectory(),
+	'temp_project_files',
+	'ljswitchboard-io_manager',
+	'node_modules',
+	'ffi-napi','prebuilds', 'darwin-x64', 'node.napi.uv1.node'
 ].join(path.sep);
 
 var pathToParentPListPartials = [
@@ -59,14 +119,24 @@ var pathToChildPListPartials = [
 	'kipling_child.plist'
 ].join(path.sep);
 
-var nodePath = path.resolve(path.join(pathToBinaryPartials));
-var refBindingPath = path.resolve(path.join(pathToRefBindingNode));
-var ffiBindingPath = path.resolve(path.join(pathToFFIBindingNode));
+var nodePath                  = path.resolve(path.join(pathToBinaryPartials));
+var pathToTestFsevents        = path.resolve(path.join(testFseventsNode));
+var pathToFsevents            = path.resolve(path.join(fseventsNode));
+var pathToElectronNodeApi_ffi = path.resolve(path.join(electronNodeApi_ffi));
+var pathToElectronNodeApi_ref = path.resolve(path.join(electronNodeApi_ref));
+var pathToNodeApi_ffi         = path.resolve(path.join(nodeApi_ffi));
+var pathToNodeApi_ref         = path.resolve(path.join(nodeApi_ref));
+var pathToNodeApi_uv1         = path.resolve(path.join(nodeApi_uv1));
+
 var pathToParentPList = path.resolve(path.join(pathToParentPListPartials))
 var pathToChildPList = path.resolve(path.join(pathToChildPListPartials))
 
+// var refBindingPath = path.resolve(path.join(pathToRefBindingNode));
+// var ffiBindingPath = path.resolve(path.join(pathToFFIBindingNode));
 
 
+// Not really sure what this does, but not getting rid of it
+// Was part of old Kipling framework
 if(typeof(process.argv) !== 'undefined') {
 	var cliArgs = process.argv;
 	if(process.argv.length == 4) {
@@ -77,26 +147,67 @@ if(typeof(process.argv) !== 'undefined') {
 	}
 }
 
-
-console.log('nodePath', nodePath);
 var buildScripts = [{
 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + nodePath + '"'].join(' '),
+	'--deep --entitlements "'+pathToParentPList+'"',
+	'"' + nodePath + '"'].join(' '),
 	'text': 'Signing Node.exe',
-}, {
+	},{
 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + refBindingPath + '"'].join(' '),
-	'text': 'Signing ref: binding.node',
-}, {
+	'--deep --entitlements "'+pathToParentPList+'"',
+	'"' + pathToTestFsevents + '"'].join(' '),
+	'text': 'Signing kipling_tester: fsevents.node',
+	},{
 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + ffiBindingPath + '"'].join(' '),
-	'text': 'Signing ffi: ffi_binding.node',
-}];
+	'--deep --entitlements "'+pathToParentPList+'"',
+	'"' + pathToFsevents + '"'].join(' '),
+	'text': 'Signing io_manager: fsevents.node',
+	},{
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'--deep --entitlements "'+pathToParentPList+'"',
+	'"' + pathToElectronNodeApi_ffi + '"'].join(' '),
+	'text': 'Signing Electron ffi: electron.napi.node',
+	},{
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'--deep --entitlements "'+pathToParentPList+'"',
+	'"' + pathToElectronNodeApi_ref + '"'].join(' '),
+	'text': 'Signing Electron ref: electron.napi.node',
+	},{
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'--deep --entitlements "'+pathToParentPList+'"',
+	'"' + pathToNodeApi_ffi + '"'].join(' '),
+	'text': 'Signing Node ffi: node.napi.node',
+	},{
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'--deep --entitlements "'+pathToParentPList+'"',
+	'"' + pathToNodeApi_ref + '"'].join(' '),
+	'text': 'Signing Node ref: node.napi.node',
+	},{
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'--deep --entitlements "'+pathToParentPList+'"',
+	'"' + pathToNodeApi_uv1 + '"'].join(' '),
+	'text': 'Signing Node uv1: node.napi.uv1.node',
+	}]
 
 
+// var buildScripts = [{
+// 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+// 		'--deep --entitlements "'+pathToParentPList+'"',
+// 		'"' + nodePath + '"'].join(' '),
+// 	'text': 'Signing Node.exe',
+// }, 
+// // {
+// 	// 'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+// 	// 	'--deep --entitlements "'+pathToParentPList+'"',
+// 	// 	'"' + refBindingPath + '"'].join(' '),
+// 	// 'text': 'Signing ref: binding.node',
+// // }, 
+// {
+// 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+// 		'--deep --entitlements "'+pathToParentPList+'"',
+// 		'"' + ffiBindingPath + '"'].join(' '),
+// 	'text': 'Signing ffi: ffi_binding.node',
+// }];
 
 buildScripts.forEach(function(buildScript) {
 	buildScript.cmd = buildScript.script;

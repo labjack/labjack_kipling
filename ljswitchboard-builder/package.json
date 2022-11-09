@@ -1,7 +1,7 @@
 {
 	"name": "ljswitchboard-builder",
 	"description": "Building and packing for the ljswitchboard program.",
-	"version": "3.0.8",
+	"version": "3.0.7",
 	"private": true,
 	"homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-builder",
 	"repository": {
@@ -53,22 +53,24 @@
 	"devDependencies": {
 		"chai": "^4.2.0",
 		"diff": ">=3.5.0",
-		"electron-builder": "22.9.1",
-		"mocha": "^8.2.1"
+		"mocha": "^8.2.1",
+		"electron-builder": "22.9.1"
 	},
 	"directories": {
 		"buildResources": "branding_files"
 	},
 	"build": {
-		"productName": "kipling",
-		"appId": "com.labjack/kipling",
+		"productName": "Kipling",
+		"appId": "com.labjack.kipling",
 		"mac": {
 			"icon": "Kipling3.icns",
-			"category": "public.app-category.utilities"
+			"category": "public.app-category.utilities",
+			"target": "pkg"
+
 		},
 		"linux": {
 			"icon": "Kipling_128x128.png",
-			"target": "dir"
+			"target": "tar.xz"
 		},
 		"win": {
 			"target": "portable",
