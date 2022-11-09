@@ -5,19 +5,19 @@
 
 
 .dashboard_mode .configure-log-controls {
-	display:none;
+	display:inline-block;
 }
 
 .configure_mode .active-log-controls {
-	display:none;
+	display:inline-block;
 }
 
 .dashboard_mode .config-pannel {
-	display:none;
+	display:inline-block;
 }
 
 .configure_mode .logger-pannel {
-	display:none;
+	display:inline-block;
 }
 
 /*

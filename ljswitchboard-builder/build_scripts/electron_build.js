@@ -26,7 +26,7 @@ const buildOpts = {
 };
 
 if ('darwin' === buildOS) {
-    buildOpts.mac = ['default'];
+    //buildOpts.mac = ['default'];
 } else if ('win32' === buildOS) {
     //buildOpts.win = ['default'];
 } else {
@@ -67,7 +67,7 @@ builder
         return fixSnapName();
     })
     .catch((err) => {
-        console.error(err);
+        console.error("Electron Builder Error: ", err);
         // handle error
         process.exit(1);
     });
