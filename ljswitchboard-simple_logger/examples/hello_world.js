@@ -30,8 +30,8 @@ var ignoreErrorsList = [
 	eventMap.CONFIGURATION_SUCCESSFUL,
 ];
 
-var ENABLE_DEBUG_LOG = false;
-var ENABLE_PRINTING = false;
+var ENABLE_DEBUG_LOG = true;
+var ENABLE_PRINTING = true;
 function print() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];
