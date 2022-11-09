@@ -176,7 +176,7 @@ var buildScripts = [{
 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToNodeApi_ffi + '"'].join(' '),
-	'text': 'Signing Node ffi node.napi.node',
+	'text': 'Signing Node ffi: node.napi.node',
 	},{
 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
