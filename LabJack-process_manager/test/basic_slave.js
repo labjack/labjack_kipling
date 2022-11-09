@@ -29,7 +29,7 @@ var qListener = function(message) {
 		retData = undefined;
 	} else if (message.dataMessage === 'returnBuffer') {
 		var data = [0xD, 0xE, 0xA, 0xD, 0xB, 0xE, 0xE, 0xF];
-		var retBuffer = new Buffer.alloc(data.length);	// to create a hex 0xDEADBEEF
+		var retBuffer = Buffer.alloc(data.length);	// to create a hex 0xDEADBEEF
 		data.forEach(function(val, i) {
 			retBuffer.writeUInt8(val, i);
 		});
