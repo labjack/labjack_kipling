@@ -1,10 +1,11 @@
 name: Electron build
 
-on: workflow_dispatch
+# use this to trigger specific builds
+# on: workflow_dispatch
 
-#on:
-#  push: # pull_request:
-#    branches: [ electron ] # master
+on:
+ push: # pull_request:
+   branches: [ electron ] # master
 
 jobs:
   build:

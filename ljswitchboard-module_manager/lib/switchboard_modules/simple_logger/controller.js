@@ -38,7 +38,7 @@ function module() {
     this.onModuleLoaded = function(framework, onError, onSuccess) {
         self.startupData = framework.moduleData.startupData;
         self.moduleName = framework.moduleData.name;
-        console.error("onModuleLoaded")
+
         onSuccess();
     };
 
@@ -53,7 +53,7 @@ function module() {
         self.activeDevices = device;
         framework.clearConfigBindings();
         framework.setStartupMessage('Reading Device Configuration');
-        console.error("onDeviceSelected")
+
         onSuccess();
     };
 
@@ -78,7 +78,6 @@ function module() {
         // self.moduleContext.logger_mode = logger_modes.configure;
         
         framework.setCustomContext(self.moduleContext);
-        console.error("onDeviceConfigured")
         onSuccess();
     };
 
