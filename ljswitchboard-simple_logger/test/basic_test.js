@@ -44,6 +44,7 @@ var ignoreErrorsList = [
 	eventMap.CONFIGURATION_SUCCESSFUL,
 ];
 
+//Changed to true - Jimmy
 var ENABLE_DEBUG_LOG = false;
 function debugLog() {
 	if(ENABLE_DEBUG_LOG) {
@@ -72,8 +73,8 @@ function attachListeners(loggerObject) {
 
 /* Define Test Cases */
 describe('basic_test', function() {
-	return;
-	this.skip();
+	// return;
+	// this.skip();
 	it('Starting Basic Test', function (done) {
 		console.log('');
 		console.log('*** Starting Basic Test ***');
@@ -125,6 +126,8 @@ describe('basic_test', function() {
 		done();
 
 	});
+	// This test tends to run a bit longer than mocha's timeout of 2000ms
+	// so in package.json I pass a timeout of 10000ms - 10s to allow the logger to start
 	it('Run Logger', function (done) {
 		simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
 			debugLog('Logger Stopped');
