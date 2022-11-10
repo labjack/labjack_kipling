@@ -61,7 +61,7 @@ function labjackVersionManager() {
     this.urlDict = {
         "kipling_old": {
             "type":"kipling",
-            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
+            "upgradeReference": "https://old3.labjack.com/support/software/installers/ljm",
             "platformDependent": true,
             "types": ['current','beta','test'],
             "urls":[
@@ -94,59 +94,59 @@ function labjackVersionManager() {
         // Re-define the Kipling tag to point to new downloads page
         "kipling": {
             "type":"kiplingDownloadsPage",
-            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
+            "upgradeReference": "https://old3.labjack.com/support/software/installers/ljm",
             "platformDependent": true,
             "types": ['current'],
             "urls":[
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_win"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_mac"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux32"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux64"}
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_win"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_mac"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux32"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux64"}
             ]
         },
         "ljm": {
             "type":"ljmDownloadsPage",
-            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
+            "upgradeReference": "https://old3.labjack.com/support/software/installers/ljm",
             "platformDependent": true,
             "types": ['current'],
             "urls":[
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_win"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_mac"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux32"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux64"}
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_win"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_mac"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux32"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux64"}
             ]
         },
         "t7": {
             "type":"t7FirmwarePage",
-            "upgradeReference": "https://labjack.com/support/firmware/t7",
+            "upgradeReference": "https://old3.labjack.com/support/firmware/t7",
             "platformDependent": false,
             "urls":[
-                {"url": "https://labjack.com/support/firmware/t7", "type": "organizer-current"},
-                {"url": "https://labjack.com/support/firmware/t7", "type": "current"},
-                {"url": "https://labjack.com/support/firmware/t7/beta", "type": "beta"},
+                {"url": "https://old3.labjack.com/support/firmware/t7", "type": "organizer-current"},
+                {"url": "https://old3.labjack.com/support/firmware/t7", "type": "current"},
+                {"url": "https://old3.labjack.com/support/firmware/t7/beta", "type": "beta"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
         "t4": {
             "type":"t4FirmwarePage",
-            "upgradeReference": "https://labjack.com/support/firmware/t4",
+            "upgradeReference": "https://old3.labjack.com/support/firmware/t4",
             "platformDependent": false,
             "urls":[
                 // {"url": "https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
-                {"url": "https://labjack.com/support/firmware/t4", "type": "organizer-current"},
-                {"url": "https://labjack.com/support/firmware/t4", "type": "current"},
+                {"url": "https://old3.labjack.com/support/firmware/t4", "type": "organizer-current"},
+                {"url": "https://old3.labjack.com/support/firmware/t4", "type": "current"},
                 // {"url": "https://labjack.com/support/firmware/t4/beta", "type": "beta"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
         "digit": {
             "type":"digitFirmwarePage",
-            "upgradeReference": "https://labjack.com/support/firmware/digit",
+            "upgradeReference": "https://old3.labjack.com/support/firmware/digit",
             "platformDependent": false,
             "urls":[
-                {"url": "https://labjack.com/support/firmware/digit", "type": "current"},
-                {"url": "https://labjack.com/support/firmware/digit/beta", "type": "beta"},
-                {"url": "https://labjack.com/support/firmware/digit/old", "type": "old"},
+                {"url": "https://old3.labjack.com/support/firmware/digit", "type": "current"},
+                {"url": "https://old3.labjack.com/support/firmware/digit/beta", "type": "beta"},
+                {"url": "https://old3.labjack.com/support/firmware/digit/old", "type": "old"},
             ]
         }
     };
