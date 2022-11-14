@@ -3,6 +3,58 @@
 
 <div id="logger_module" class="{{logger_mode}}">
 <!-- <div id="logger_module" class="dashboard_mode"> -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <!-- <h5 class="modal-title" id="exampleModalLabel">Modal title</h5> -->
+          <button type="button" class="close" data-dismiss="modal" >
+          <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <label>Would you like to add these registers to the Logger Configuration?</label>
+          </br>
+          <ul id="modal_register_list" class="boxes">
+            {{#each startupRegisters}}
+              <li class="boxes1">
+                <input class="checekbx" type="checkbox" id="check{{@index}}" value="{{this}}" checked>
+                <label for="check{{@index}}" id="checkId{{@index}}">{{this}}</label><br>
+              </li>
+            {{/each}}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
+          <button type="button" class="btn btn-primary btnUpdate" id="yesbtn" data-dismiss="modal">Yes</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      $(document).ready(function(){
+        //$('input[class="checekbx"]').not(this).prop('checked', false);
+        var regs = "{{ startupRegisters }}"
+        if (regs.length > 0){
+          $("#confirmModal").modal("show");
+          $("#confirmModal").modal({backdrop: "static"});
+        }
+      });
+
+      $("#yesbtn").click(function() {
+        // on the btn click looks through all of the rgistersfrom the register matrix that were selected and take the
+        // the ones with a check makrk next to them.
+        var arra = [];
+          $('input:checkbox[class="checekbx"]:checked').each(function(){    
+            arra.push($(this).val());    		
+          });
+        //let string = '{{startupRegisters}}';
+        window.arr = arra;
+
+          saveRegisterMatrix();
+          $(".register-input").trigger("change");
+        })
+    </script>
+  </div>
   <div id="logger_controls">
     <div id="navbar-example" class="navbar">
       <div class="navbar-inner">
@@ -111,6 +163,331 @@
   </div>
   <div id="logger_view" class="logger-pannel">
     <p>This is the active logger view</p>
+  </div>
+</div> -->
+
+<div class="container" id="formContainer">
+<div class="container">
+  <div class="col-sm-7">
+      <form id = "configForm" class="needs-validation" >
+          <div class="form-group">
+              <label for="logName">
+                  Log name:
+              </label>
+              <input type="text" name="logName" id="logName" required class="form-control" class="form-control">
+              <!-- <h5 id="nameCheck" style="color: red;">
+                  Log Name is Missing
+              </h5> -->
+          </div>
+
+          <div class="form-group">
+            <label for="devSN">
+                Device Serial Number:
+            </label>
+            <input type="text" name="devSN" id="devSN" value = "{{ deviceSN }}" required class="form-control" class="form-control" disabled>
+            <!-- <h5 id="nameCheck" style="color: red;">
+                Device Serial Number is Missing
+            </h5> -->
+            
+        </div>
+          <div class="form-group">
+              <label for="dataGroupName">
+                  Data Group Name:
+              </label>
+              <input type="text" name="dataGroup" id="dataGroupName" required class="form-control">
+              <!-- <h5 id="groupCheck" class="form-text text-muted invalid-feedback" style="color: red;">
+                  Please name the data group.
+              </h5> -->
+          </div>
+
+          <div class="form-group">
+            <label for="validationCustom05">
+              Register Name(s):
+          </label>
+          <!-- start of the registers -->
+          <div class="row" id="regs">
+
+            <div id="registerContaner"></div>
+            
+            <script>              
+              for(var i = 0; i < "{{MAX_REGISTERS}}"; i++) {
+              var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i + 1} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+              $("#registerContaner").append(registerHTML);
+              }
+              //document.getElementById("something").innerHTML = registerHTML;
+              // $("#something").append(registerHTML);
+            </script>
+
+           <!-- {{#each startupRegisters}}
+              <div class="col-sm-6">
+                <small id="regCheck" class="form-text 
+                  text-muted invalid-feedback" value="">Register#{{@index }}</small>
+                <input type="text" class="form-control register-input" id="validationCustom0{{@index}}" name="array[]"
+                oninput="this.value = this.value.toUpperCase()">
+                <span class="clear-input">x</span>
+              </div>
+            {{/each}} -->
+
+            <!-- <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #1
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom00" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class="clear-input">x</span>
+            </div>
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #2
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom01" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #3
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom02" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #4
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom03" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #5
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom04" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #6
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom05" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #7
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom06" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #8
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom07" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div> -->
+              <!-- end of the refgisters -->
+
+            <div class="col-sm-6">
+              <small >
+              Run Time in Seconds
+              </small>
+              <!-- <div </div> -->
+              <input type="number" class="form-control" id="runtimeSec"
+              oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" />
+              <span class="clear-input">x</span>
+            </div>
+            
+          
+          </div>
+        </div>
+          <div class="form-group">
+            <label for="filePath">
+              Log File(s) Save Location:
+          </label>
+            <div class="col-lg">
+              <!-- <input type="file" class="form-control" id="selectDir" required class="form-control" webkitdirectory directory>
+              <small id="pathCheck" class="form-text
+                  text-muted invalid-feedback">
+                  Please Provide a Valid Directory Path.
+              </small> -->
+              <!-- <div style="text-align:center;"> -->
+                <input type="text"  id="actual-file" class="form-control" required disabled="disabled"/>
+                <input type="button" value="Choose a file" id="select-file" class="btnUpdate"/>
+              <!-- </div> -->
+            </div>
+          </div>
+          <!-- btn btn-primary -->
+
+          <!-- <button id="submitbtn" title="Verify and Load Configuration" class="btnUpdate" > -->
+          <input type="submit" value="Verify and Load Configuration" class="btnUpdate">
+          <!-- <script src="/controller.js"></script> -->
+
+          <!-- onClick="isValidRegister('this.value')" -->
+
+      </form>
+      <script>
+
+            // <div class="col-sm-6">
+            //   <small id="regCheck" class="form-text
+            //     text-muted invalid-feedback">
+            //     Register #7
+            //   </small>
+            //   <input type="text" class="form-control register-input" id="validationCustom06" name="array[]"
+            //   oninput="this.value = this.value.toUpperCase()">
+            //   <span class = "clear-input">x</span>
+            // </div>
+
+        // var container = $('<div />');
+        // for(var i = 1; i <= num; i++) {
+        //     container.append('<input id="id'+i+'" name="name'+i+'" />');
+        // }
+        // $('somewhere').html(container);
+
+
+        // var container = $('div />')
+        // var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+        for(var i = 0; i < "{{MAX_REGISTERS}}"; i++) {
+          var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+        }
+         
+
+        /**
+         * All Form Validation Functionality
+         * */
+        $(document).ready(function () {
+          $('.datviewContainer').hide();
+          $('#formContainer').show();
+          const { dialog } = require('electron').remote; 
+          var fs = require('fs');
+          setTimeout(function(){ saveArraysInScope() }, 1);
+          $("#confirmModal")
+
+          document.getElementById('select-file').addEventListener('click',function(){
+                dialog.showOpenDialog({
+                  properties: ['openDirectory']
+                }).then((data) => {
+                  $("#actual-file").val(data.filePaths)
+                })
+            },false);
+
+          $(".register-input").trigger("change");
+          // Real Time Register Name Validation, 
+          // triggered everytime the input box loses focus (onChange listener with jQuery)
+          var activeRegisterInputs = [];
+          // To-Do: This takes too long to execute, need to make it async or speed it up
+          $(".register-input").change(function(){
+            
+            var input    = $(this);
+            var inputVal = input.val();
+            if(inputVal.length == 0) {
+              input.removeClass("valid invalid");
+            }
+            else if(isValidRegister(inputVal)) {
+              input.addClass("valid").removeClass("invalid");
+            }
+            else {
+              input.addClass("invalid").removeClass("valid");
+            }
+            saveTheArray();
+          });
+          function isDuplicate(val){
+            return (activeRegisterInputs.indexOf(val) != -1);
+          }
+
+          // Not Used Right Now, Come back to this later if we want it
+          function markDuplicate() {
+            var regs = [];
+            $(".register-input").each(function(){
+              var val = $(this).val();
+              if( regs.indexOf(val) == -1 && val.length > 0 ) { regs.push(val); }
+              else { $(this).addClass("duplicate"); }
+            });
+          }
+
+          function isDuplicate(val) {
+            return activeRegisterInputs.indexOf(val) != -1;
+          }
+
+
+          // listener for clearing of text box
+          // clears box, removes valid/invalid border box
+          $(".clear-input").click(function(){
+            var input = $(this).prev(); 
+            input.val('')
+            input.removeClass("valid invalid");
+          });
+
+          // This was the best way i could get it to work i will need to do some work with it to find out where the best place to call it is
+          // let qText = "Would you like to apply the previously selected registers";
+          // if(confirm(qText) == true){
+          //   saveArraysInScope();
+          // }
+
+
+          document.getElementById("configForm").addEventListener('submit', function() {
+            event.preventDefault(); 
+            var valid = validateForm();
+            //<span class = "clear-input">x</span>
+            if(valid){
+              $(".clear-input").each(function(){
+                    var span = $(this)
+                    span.remove();
+                  });
+              $("#configForm :input").prop("disabled", true);
+              $(".clear-input").prop("disabled", true);
+              showInfoMessage("Configuration Valid");
+              $("#startBtn").prop("disabled", false)
+              $(".icon-stop").each(function(){
+                    var span = $(this)
+                    span.removeClass("disabled")
+                  });
+              $(".icon-play").each(function(){
+                    var span = $(this)
+                    span.removeClass("disabled")
+                  });
+            }
+            return false;
+          });
+
+          function validateForm() {
+            // To-Do: Do stuff here to check to make sure every form input is valid
+            // Mark things if they arent valid and need user attention
+            // Then disable everything and logger will be ready to start
+            //when there is a non valid register in the scope then it will not run correctly
+            const targetElement = document.querySelector('.invalid');
+            if(targetElement){
+              showInfoMessage("A register is invalid where value is " + targetElement.value);
+              return false
+            }
+            else{
+              //nothing will hapen untill the end of the loop where it will slet the form be done
+            }
+            return true
+          }
+        });
+        
+      </script>
   </div>
 </div>
 <pre class="selectableText">{{printContext}}</pre>

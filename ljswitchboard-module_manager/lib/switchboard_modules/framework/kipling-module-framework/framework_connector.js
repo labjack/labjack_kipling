@@ -1,10 +1,14 @@
 'use strict';
 
+
+// import 'ljswitchboard-module_manager\lib\switchboard_modules\framework\kipling-module-framework\presenter_framework.js';
 // Define a placeholder for the user's module object.
 var sdModule;
+// global.sdModule;
 const package_loader = global.package_loader;
 const handleBarsService = package_loader.getPackage('handleBarsService');
 const path = require('path');
+// const { getSystemErrorMap } = require('util');
 const EventEmitter = require('events').EventEmitter;
 const modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
@@ -248,6 +252,7 @@ class ModuleInstance extends EventEmitter {
 
         // Start the framework.....
         await this.initializeModule(moduleData.data);
+        // this line below had "await" at the start of the declaration
         await this.linkModule(moduleData);
         await this.loadModule(moduleData);
         await this.runModule(moduleData);

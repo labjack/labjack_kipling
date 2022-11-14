@@ -631,8 +631,12 @@ class DataTableCreator {
             registerName = td.text();
         } else if (td.hasClass('ct-address-header')) {
             registerName = td.prev().text();
+        } else if(td.hasClass('state-indicator')){
+            //if it is the span icon then it will step out to the parent then go to the text element witch is the area with the
+            // register name
+            registerName = td.parent().next().text();
         } else {
-            console.warn('child-table clicked... element saved as this.ctClickData');
+            console.warn('child-table clicked... element saved as this.ctClickData this is the place');
             this.ctClickData = td;
         }
 

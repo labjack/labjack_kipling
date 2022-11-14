@@ -108,17 +108,27 @@ function module() {
     var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
 
     // Define support analog input ef-types
+    var ain_ef_types = globalDeviceConstants.t8DeviceConstants.ainEFTypeOptions;
+    var ain_ef_type_map = globalDeviceConstants.t8DeviceConstants.ainEFTypeMap;
+    // this.ain_ef_type_map = ain_ef_type_map;
+
     var ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
     var ain_ef_type_map = globalDeviceConstants.t7DeviceConstants.ainEFTypeMap;
     this.ain_ef_type_map = ain_ef_type_map;
 
     // Supported analog input range options.
+    var ainRangeOptions = globalDeviceConstants.t8DeviceConstants.ainRangeOptions;
+
     var ainRangeOptions = globalDeviceConstants.t7DeviceConstants.ainRangeOptions;
 
     // Supported analog input resolution options.
+    var ainResolutionOptions = globalDeviceConstants.t8DeviceConstants.ainResolutionOptions;
+
     var ainResolutionOptions = globalDeviceConstants.t7DeviceConstants.ainResolutionOptions;
 
     // Supported analog input resolution options.
+    var ainSettlingOptions = globalDeviceConstants.t8DeviceConstants.ainSettlingOptions;
+
     var ainSettlingOptions = globalDeviceConstants.t7DeviceConstants.ainSettlingOptions;
 
     // efTypeName template
@@ -201,6 +211,8 @@ function module() {
 
     // Supported extra options
     var extraAllAinOptions = globalDeviceConstants.t7DeviceConstants.extraAllAinOptions;
+
+    var extraAllAinOptions = globalDeviceConstants.t8DeviceConstants.extraAllAinOptions;
 
     this.efTypeDict = new Map();
     this.rangeOptionsDict = new Map();
@@ -1111,6 +1123,7 @@ function module() {
             var title = configReg.description;
             var defaultVal = configReg.defaultVal;
             var curVal = self.getCurrentBufferedVal(regName, defaultVal);
+            // console.warn(configReg.defaultVal);
 
             var newEFConfigData = {
                 'humanName': humanName,
@@ -1484,9 +1497,44 @@ function module() {
         }
     };
     this.getD3GraphWidth = function (value, range) {
+        // the extra values tat are below are there for the T8 some of the values will need to be motifyed and with that being
+        // said this does work for the time being.
         var val;
         switch (range) {
+            case 11:
+                val = value / (range + 0.5);
+                break
             case 10:
+                val = value / (range + 0.8);
+                break;
+            case 9.7:
+                val = value / (range + 0.8);
+                break;
+            case 4.8:
+                val = value / (range + 0.8);
+                break;
+            case 2.4:
+                val = value / (range + 0.8);
+                break;
+            case 1.2:
+                val = value / (range + 0.8);
+                break;
+            case 0.6:
+                val = value / (range + 0.8);
+                break;
+            case 0.3:
+                val = value / (range + 0.8);
+                break;
+            case 0.15:
+                val = value / (range + 0.8);
+                break;
+            case 0.75:
+                val = value / (range + 0.8);
+                break;
+            case 0.36:
+                val = value / (range + 0.8);
+                break;
+            case 0.18:
                 val = value / (range + 0.8);
                 break;
             case 1:
@@ -1518,11 +1566,14 @@ function module() {
         return function() {
             var width;
             if(val > 0) {
-                width = 50;
+                width = val;
             } else {
                 width = 50-self.getD3GraphWidth(val,range)/2;
             }
-            return 'margin-left:'+width.toString() + '%;';
+
+            // console.warn(width);
+            width = width + 3;
+            return 'margin-left:' + width.toString() + '%;';
         };
     };
     this.getFillColor = function(val) {
@@ -1564,7 +1615,7 @@ function module() {
             .enter()                                                            // for each data point....
             .append('rect')                                                     // Draw a rectangle 'rect'
             .attr('width', function (data) {
-                return self.getD3GraphWidth(curVal,curRange).toString() + '%';
+                return 50 + '%';
             })
             .attr('height', '5')
             .attr('fill', self.getFillColor(curVal))
@@ -1573,11 +1624,13 @@ function module() {
 
         // Display the graphs
         $('.graphSlider').removeClass('uninitialized');
+        // $('.graphSlider').
         if(typeof(onSuccess) !== 'undefined') {
             onSuccess();
         }
     };
     this.updateD3Graph = function(name,curVal) {
+        // console.warn("some");
         var curRange = self.currentValues.get(name + '_RANGE');
         var svgID = '#' + name + '-graph';
         var ainGraph = d3.select(svgID)
@@ -1589,6 +1642,7 @@ function module() {
             var str = self.getD3GraphWidth(curVal,curRange).toString();
             if(str === 'NaN') {
                 str = '0';
+                str = 1;
             }
             return str + '%';
         });

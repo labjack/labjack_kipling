@@ -10,6 +10,8 @@
 const q = require('q');
 const package_loader = global.package_loader;
 var MODULE_UPDATE_PERIOD_MS = 1000;
+var driver_const = require('ljswitchboard-ljm_driver_constants');
+var driver_wrapper = rewire('../lib/driver_wrapper');
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -159,20 +161,40 @@ function module() {
             onSuccess();
         });
     }
+    // This function should be used to open both of the aplications (LJLogM and LJStreamM)
     function getConfigAndOpenInApplication(appName, ct) {
         return function configAndOpenInApplication(data, onSuccess) {
             console.log('Opening Application:', appName, ct);
-
             var msgStr = 'Opening device in '+appName +' ';
             var preventCloseOpen = false;
-            var ctToOpen;
-            if(ct === 'current') {
-                ctToOpen = driver_const.connectionTypes[self.activeDevice.savedAttributes.connectionTypeName];
-                msgStr += 'over' + ctToOpen;
-            } else {
-                msgStr += 'over' + ct;
-                ctToOpen = driver_const.connectionTypes[ct.toUpperCase()];
+            
+            // this is just here to help clean the code up to maake sure we are not having two difrent buttons
+            // lead to the same exact place
+            if(appName === 'LJStreamM'){
+                console.log('preventCloseOpen ' + preventCloseOpen);
+                if(ct === 'current') {
+                    ctToOpen = driver_const.connectionTypes[self.activeDevice.savedAttributes.connectionTypeName];
+                    msgStr += 'over' + ctToOpen;
+                    console.log("this is the stream btn presses.");
+                } else {
+                    msgStr += 'over' + ct;
+                    ctToOpen = driver_const.connectionTypes[ct.toUpperCase()];
+                    console.log("this is the else statment")
+                }
             }
+            else if(appName === 'LJLogM'){
+                console.log('preventCloseOpen ' + preventCloseOpen);
+                if(ct === 'current') {
+                    console.log('the first statment to be working')
+                    ctToOpen = driver_const.connectionTypes[self.activeDevice.savedAttributes.connectionTypeName];
+                    msgStr += 'over' + ctToOpen;
+                } else {
+                    console.log('the else statment for the log');
+                    msgStr += 'over' + ct;
+                    ctToOpen = driver_const.connectionTypes[ct.toUpperCase()];
+                }
+            }
+            
 
             if(ctToOpen == driver_const.connectionTypes.USB) {
                 preventCloseOpen = false;

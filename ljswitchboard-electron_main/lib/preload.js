@@ -8,7 +8,7 @@ const Flatted = require('./Flatted');
 
 process.argv.forEach(arg => {
     if (arg.startsWith('--packageName=')) {
-        global.packageName = arg.substr('--packageName='.length);
+        global.packageName = arg.substring('--packageName='.length);
     }
 });
 
