@@ -564,7 +564,7 @@ function labjackVersionManager() {
             // for it
             if(!self.pageCache.has(url)) {
                 // Perform request to get pageData/body
-                fetch(url, { timeout: 20000 })
+                const response = fetch(url, { timeout: 20000 })
                     .then(function (res) {
                         if (res.ok) {
                             return res.text();
@@ -632,7 +632,26 @@ function labjackVersionManager() {
                         callback();
                     })
                     .catch(function (error) {
-                        console.error('fetch error', error);
+                        // console.error('fetch error', error);
+                        // console.log('!!! request page ERROR!!!', error);
+                        // Report a TCP Level error likely means computer is not
+                        // connected to the internet.
+                        if (error.code === 'ENOTFOUND') {
+                            message = "TCP Error, computer not connected to network: ";
+                        } else if(error.code === 'ETIMEDOUT') {
+                            message = "TCP Error, no internet connection: ";
+                        } else {
+                            message = "Unknown TCP Error: ";
+                        }
+                        err = {
+                            "num": -1,
+                            "str": message + error.toString(),
+                            "quit": true,
+                            "code": error.code,
+                            "url": url
+                        };
+                        self.reportError(err);
+                        // callback(err);
                         callback(error);
                     });
             } else {
@@ -969,7 +988,7 @@ function labjackVersionManager() {
             'type': 'error',
             'data': data
         });
-        console.warn(JSON.stringify(data, null, 2));
+        console.warn("version_manager reportError(): ", JSON.stringify(data, null, 2));
     };
     this.getIssue = function() {
         var issue;
