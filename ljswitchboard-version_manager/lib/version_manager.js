@@ -59,7 +59,7 @@ function labjackVersionManager() {
 
     // define dict object with various urls in it
     this.urlDict = {
-        "kipling_old": {
+        "kipling": {
             "type":"kipling",
             "upgradeReference": "https://old3.labjack.com/support/software/installers/ljm",
             "platformDependent": true,
@@ -92,7 +92,7 @@ function labjackVersionManager() {
             ]
         },
         // Re-define the Kipling tag to point to new downloads page
-        "kipling": {
+        "kipling_new": {
             "type":"kiplingDownloadsPage",
             "upgradeReference": "https://old3.labjack.com/support/software/installers/ljm",
             "platformDependent": true,
@@ -102,6 +102,18 @@ function labjackVersionManager() {
                 {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_mac"},
                 {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux32"},
                 {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux64"}
+            ]
+        },
+        "ljm_old": {
+            "type":"ljmDownloadsPage",
+            "upgradeReference": "https://old3.labjack.com/support/software/installers/ljm",
+            "platformDependent": true,
+            "types": ['current'],
+            "urls":[
+                {"url": "https://files.labjack.com/versions/ljrob/win32/ljm/current.txt", "type": "current_win"},
+                {"url": "https://files.labjack.com/versions/ljrob/mac/ljm/current.txt", "type": "current_mac"},
+                {"url": "https://files.labjack.com/versions/ljrob/linux32/ljm/edge.txt", "type": "current_linux32"},
+                // {"url": "https://files.labjack.com/versions/ljrob/linux64/ljm/edge.txt", "type": "current_linux64"}
             ]
         },
         "ljm": {
