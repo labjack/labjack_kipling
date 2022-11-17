@@ -165,6 +165,9 @@ class KiplingUpdaterService {
 				}
 			}
 		}
+		if(isOld){
+			console.warn("KIPLING IS OLD - checkKiplingIsOld()");
+		}
 		return isOld;
 	}
 
@@ -182,6 +185,9 @@ class KiplingUpdaterService {
 					}
 				}
 			}
+		}
+		if(isOld){
+			console.warn("LJM IS OLD - checkLJMIsOld()");
 		}
 		return isOld;
 	}

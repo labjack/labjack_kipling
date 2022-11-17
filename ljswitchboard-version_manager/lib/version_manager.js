@@ -98,10 +98,10 @@ function labjackVersionManager() {
             "platformDependent": true,
             "types": ['current'],
             "urls":[
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_win"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_mac"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux32"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux64"}
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_win"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_mac"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux32"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux64"}
             ]
         },
         "ljm": {
@@ -110,10 +110,10 @@ function labjackVersionManager() {
             "platformDependent": true,
             "types": ['current'],
             "urls":[
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_win"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_mac"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux32"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux64"}
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_win"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_mac"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux32"},
+                {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux64"}
             ]
         },
         "t7": {
@@ -121,9 +121,9 @@ function labjackVersionManager() {
             "upgradeReference": "https://labjack.com/support/firmware/t7",
             "platformDependent": false,
             "urls":[
-                {"url": "https://labjack.com/support/firmware/t7", "type": "organizer-current"},
-                {"url": "https://labjack.com/support/firmware/t7", "type": "current"},
-                {"url": "https://labjack.com/support/firmware/t7/beta", "type": "beta"},
+                {"url": "https://old3.labjack.com/support/firmware/t7", "type": "organizer-current"},
+                {"url": "https://old3.labjack.com/support/firmware/t7", "type": "current"},
+                {"url": "https://old3.labjack.com/support/firmware/t7/beta", "type": "beta"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -133,8 +133,8 @@ function labjackVersionManager() {
             "platformDependent": false,
             "urls":[
                 // {"url": "https://labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
-                {"url": "https://labjack.com/support/firmware/t4", "type": "organizer-current"},
-                {"url": "https://labjack.com/support/firmware/t4", "type": "current"},
+                {"url": "https://old3.labjack.com/support/firmware/t4", "type": "organizer-current"},
+                {"url": "https://old3.labjack.com/support/firmware/t4", "type": "current"},
                 // {"url": "https://labjack.com/support/firmware/t4/beta", "type": "beta"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
@@ -144,9 +144,9 @@ function labjackVersionManager() {
             "upgradeReference": "https://labjack.com/support/firmware/digit",
             "platformDependent": false,
             "urls":[
-                {"url": "https://labjack.com/support/firmware/digit", "type": "current"},
-                {"url": "https://labjack.com/support/firmware/digit/beta", "type": "beta"},
-                {"url": "https://labjack.com/support/firmware/digit/old", "type": "old"},
+                {"url": "https://old3.labjack.com/support/firmware/digit", "type": "current"},
+                {"url": "https://old3.labjack.com/support/firmware/digit/beta", "type": "beta"},
+                {"url": "https://old3.labjack.com/support/firmware/digit/old", "type": "old"},
             ]
         }
     };
@@ -564,7 +564,7 @@ function labjackVersionManager() {
             // for it
             if(!self.pageCache.has(url)) {
                 // Perform request to get pageData/body
-                fetch(url, { timeout: 20000 })
+                const response = fetch(url, { timeout: 20000 })
                     .then(function (res) {
                         if (res.ok) {
                             return res.text();
@@ -632,7 +632,26 @@ function labjackVersionManager() {
                         callback();
                     })
                     .catch(function (error) {
-                        console.error('fetch error', error);
+                        // console.error('fetch error', error);
+                        // console.log('!!! request page ERROR!!!', error);
+                        // Report a TCP Level error likely means computer is not
+                        // connected to the internet.
+                        if (error.code === 'ENOTFOUND') {
+                            message = "TCP Error, computer not connected to network: ";
+                        } else if(error.code === 'ETIMEDOUT') {
+                            message = "TCP Error, no internet connection: ";
+                        } else {
+                            message = "Unknown TCP Error: ";
+                        }
+                        err = {
+                            "num": -1,
+                            "str": message + error.toString(),
+                            "quit": true,
+                            "code": error.code,
+                            "url": url
+                        };
+                        self.reportError(err);
+                        // callback(err);
                         callback(error);
                     });
             } else {
@@ -969,7 +988,7 @@ function labjackVersionManager() {
             'type': 'error',
             'data': data
         });
-        console.warn(JSON.stringify(data, null, 2));
+        console.warn("version_manager reportError(): ", JSON.stringify(data, null, 2));
     };
     this.getIssue = function() {
         var issue;
