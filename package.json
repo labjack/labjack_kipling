@@ -11,8 +11,8 @@
     "lint_imports": "eslint .",
     "list_submodules": "node main.js list",
     "run_built_k3": "node scripts/run_built_k3.js",
-    "setup": "lerna bootstrap --hoist",
-    "setup_ci": "lerna bootstrap --hoist --no-ci",
+    "setup": "lerna bootstrap",
+    "setup_ci": "lerna bootstrap --no-ci",
     "start": "cross-env NODE_ENV=development npm run start --prefix ljswitchboard-electron_main",
     "test": "lerna exec --ignore ljswitchboard-ljm_special_addresses -- npm test --if-present"
   },
@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/labjack/labjack_kipling",
   "dependencies": {
-    "async": "3.2.0",
+    "async": "^3.2.4",
     "fs-extra": "^9.0.1",
     "q": "^1.5.1"
   },
@@ -36,9 +36,10 @@
     "eslint": "^5.16.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-standard": "^4.0.1",
-    "grunt": "^1.0.2",
+    "grunt": "^1.5.3",
     "grunt-contrib-jshint": "^1.1.0",
-    "lerna": "^3.20.2"
+    "lerna": "^3.20.2",
+    "lerna-audit": "^1.3.3"
   },
   "keywords": [
     "labjack"
