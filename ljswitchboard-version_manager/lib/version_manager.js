@@ -104,7 +104,7 @@ function labjackVersionManager() {
                 {"url": "https://old3.labjack.com/support/software/installers/ljm", "type": "current_linux64"}
             ]
         },
-        "ljm_old": {
+        "ljm": {
             "type":"ljmDownloadsPage",
             "upgradeReference": "https://old3.labjack.com/support/software/installers/ljm",
             "platformDependent": true,
@@ -116,7 +116,7 @@ function labjackVersionManager() {
                 // {"url": "https://files.labjack.com/versions/ljrob/linux64/ljm/edge.txt", "type": "current_linux64"}
             ]
         },
-        "ljm": {
+        "ljm_new": {
             "type":"ljmDownloadsPage",
             "upgradeReference": "https://old3.labjack.com/support/software/installers/ljm",
             "platformDependent": true,
