@@ -32,13 +32,13 @@
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_special_addresses",
   "dependencies": {
-    "q": "1.5.1",
+    "q": "^1.5.1",
     "ljm-ffi": "*",
     "javascript-natural-sort": "0.x.x",
     "fs-extra": "^9.0.1"
   },
   "devDependencies": {
-    "diff": ">=3.5.0",
+    "diff": "^4.0.1",
     "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },

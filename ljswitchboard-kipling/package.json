@@ -28,10 +28,10 @@
   "dependencies": {
     "ljswitchboard-ljm_driver_constants": "*",
     "ljswitchboard-modbus_map": "*",
-    "q": "1.5.1"
+    "q": "^1.5.1"
   },
   "devDependencies": {
-    "diff": ">=3.5.0",
+    "diff": "^4.0.1",
     "csslint": "1.0.5",
     "mocha": "^8.2.1",
     "chai": "^4.2.0"

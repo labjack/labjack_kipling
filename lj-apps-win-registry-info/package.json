@@ -24,11 +24,11 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "async": "3.2.0",
+    "async": "^3.2.4",
     "winreg": "1.2.4"
   },
   "devDependencies": {
-    "diff": ">=3.5.0",
+    "diff": "^4.0.1",
     "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },

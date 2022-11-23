@@ -26,7 +26,7 @@
     "test": "mocha"
   },
   "devDependencies": {
-    "diff": ">=3.5.0",
+    "diff": "^4.0.1",
     "mocha": "^8.2.1",
     "chai": "^4.2.0",
     "rekuire": "0.1.9"

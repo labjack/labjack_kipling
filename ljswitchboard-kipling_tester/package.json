@@ -26,13 +26,13 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "async": "3.2.0",
-    "diff": ">=3.5.0",
+    "async": "^3.2.4",
+    "diff": "^4.0.1",
     "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },
   "devDependencies": {
-    "q": "1.5.1"
+    "q": "^1.5.1"
   },
   "directories": {
     "lib": "./lib"
