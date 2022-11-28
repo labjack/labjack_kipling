@@ -381,6 +381,9 @@ function module() {
             case 0.01:
                 ainReading = ainReading * 1000;
                 break;
+            case 0.001:
+                ainReading = ainReading * 10000;
+                break;
             default:
                 break;
         }
@@ -403,7 +406,7 @@ function module() {
         var name = data.binding.binding;
         var value = data.value;
         if(name.indexOf('_RANGE') !== -1) {
-            value = Math.round(value * 100)/100;
+            value = Math.round(value * 1000)/1000;
         }
         self.currentValues.set(name,value);
         self.isValueNew.set(name,false);
@@ -413,7 +416,7 @@ function module() {
         var name = data.binding.binding;
         var value = data.value;
         if(name.indexOf('_RANGE') !== -1) {
-            value = Math.round(value * 100)/100;
+            value = Math.round(value * 1000)/1000;
         }
         var oldValue = self.currentValues.get(name);
         if(oldValue != value) {
@@ -1489,11 +1492,38 @@ function module() {
             case 10:
                 val = value / (range + 0.8);
                 break;
-            case 1:
-                val = value / (range + 0.052);
+            case 9.7:
+                val = value / (range + 0.8);
                 break;
-            case 0.1:
-                val = value / (range + 0.0051);
+            case 4.8:
+                val = value / (range + 0.8);
+                break;
+            case 2.4:
+                val = value / (range + 0.8);
+                break;
+            case 1.2:
+                val = value / (range + 0.8);
+                break;
+            case 0.6:
+                val = value / (range + 0.8);
+                break;
+            case 0.3:
+                val = value / (range + 0.8);
+                break;
+            case 0.15:
+                val = value / (range + 0.8);
+                break;
+            case 0.75:
+                val = value / (range + 0.8);
+                break;
+            case 0.36:
+                val = value / (range + 0.8);
+                break;
+            case 0.18:
+                val = value / (range + 0.8);
+                break;
+            case 0.018:
+                val = value / (range + 0.0003);
                 break;
             case 0.01:
                 val = value / (range + 0.0003);
@@ -1522,7 +1552,10 @@ function module() {
             } else {
                 width = 50-self.getD3GraphWidth(val,range)/2;
             }
-            return 'margin-left:'+width.toString() + '%;';
+
+            // console.warn(width);
+            width = width + 3;
+            return 'margin-left:' + width.toString() + '%;';
         };
     };
     this.getFillColor = function(val) {
@@ -1579,6 +1612,15 @@ function module() {
     };
     this.updateD3Graph = function(name,curVal) {
         var curRange = self.currentValues.get(name + '_RANGE');
+        if(curRange == 0.08){
+            curRange = 0.075;
+        }
+        else if(curRange == 0.04){
+            curRange = 0.036;
+        }
+        else if(curRange == 0.02){
+            curRange = 0.018;
+        }
         var svgID = '#' + name + '-graph';
         var ainGraph = d3.select(svgID)
         .attr('width', self.getSVGWidth(curVal))
@@ -1590,7 +1632,7 @@ function module() {
             if(str === 'NaN') {
                 str = '0';
             }
-            return str + '%';
+            return (str) + '%';
         });
 
     };
