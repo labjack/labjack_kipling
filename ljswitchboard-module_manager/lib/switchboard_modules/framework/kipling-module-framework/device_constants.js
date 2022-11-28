@@ -1484,16 +1484,16 @@ global.globalDeviceConstants = {
             // i am not actuly sure what the cause is but i am waiting to get a refrence or more data about it from steeve at a later date. 
             // but for now this does work for what we need it to be doing.
             {"name": "-11 to 11V","value": 11,"timeMultiplier":1}, 
-            // {"name": "-9.7 to 9.7V","value": 9.7,"timeMultiplier":1.25}, 
+            {"name": "-9.6 to 9.6V","value": 9.6,"timeMultiplier":1.25}, 
             {"name": "-4.8 to 4.8V","value": 4.8,"timeMultiplier":1.5}, 
             {"name": "-2.4 to 2.4V","value": 2.4,"timeMultiplier":1.5}, 
             {"name": "-1.2 to 1.2V","value": 1.2,"timeMultiplier":1.5}, 
             {"name": "-0.6 to 0.6V","value": 0.6,"timeMultiplier":1.5}, 
             {"name": "-0.3 to 0.3V","value": 0.3,"timeMultiplier":1.5}, 
-            {"name": "-0.15 to 0.15V","value": 0.15,"timeMultiplier":1.5}//, 
-        //     {"name": "-0.75 to 0.75V","value": 0.75,"timeMultiplier":1.5}, 
-        //     {"name": "-0.36 to 0.36V","value": 0.36,"timeMultiplier":1.5}, 
-        //     {"name": "-0.18 to 0.18V","value": 0.18,"timeMultiplier":1.5}
+            {"name": "-0.15 to 0.15V","value": 0.15,"timeMultiplier":1.5}, 
+            {"name": "-0.075 to 0.075V","value": 0.075,"timeMultiplier":1.5}, 
+            {"name": "-0.036 to 0.036V","value": 0.036,"timeMultiplier":1.5}, 
+            {"name": "-0.018 to 0.018V","value": 0.018,"timeMultiplier":1.5}
         ], 
         ainResolutionOptions: [ 
             {"name": "Auto","value": 0,"acquisitionTime": 50}, 
@@ -1527,12 +1527,10 @@ global.globalDeviceConstants = {
                 if(val === 0) { 
                     return {value: val,name: 'Auto'}; 
                 } else if ((val < 1000)&&(val > -1)) { 
-                    console.warn("the next statment" + val);
                     return {value: val,name: val.toString()+"us"}; 
                 } else if ((val > -1)&&(val < 1000000)){ 
                     return {value: val,name: (val/1000).toString()+"ms"}; 
                 } else { 
-                    console.warn("this is being called withn the first statment of the t8");
                     return {value: -9999, name: "Select"}; 
                 } 
             }, 
@@ -2500,10 +2498,8 @@ global.globalDeviceConstants = {
                 "format": function(data) { 
                     var value = Number(data.value); 
                     if(value !== -9999) { 
-                        console.warn("this is being called withn the first statment of the t8"); 
                         return localSprintf('%.2f',value); 
                     } else { 
-                        console.warn("within the else statment of t8");
                         return "N/A"; 
                     } 
                 }, 
