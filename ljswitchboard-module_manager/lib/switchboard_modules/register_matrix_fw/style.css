@@ -210,6 +210,9 @@ th.details-control.sorting_disabled {
 	display:none;
 }
 
-.numbtns{
-	font-size: 10px !important;
+.varBox {
+	width: 100px;
+	height: 30px;
+	font-size: 14px;
+	color: #000000;
 }
