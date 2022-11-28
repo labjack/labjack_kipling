@@ -1,4 +1,5 @@
 const electron = require('electron');
+// const {electron, app, BrowserWindow } = require('electron');
 const path = require('path');
 const url = require('url');
 
@@ -12,6 +13,16 @@ const app = electron.app;
 const packageData = require('./package.json');
 const {SplashScreenUpdater} = require('./lib/splash');
 const {loadProgramPackages} = require('./lib/packages-load');
+// const { remote } = require('electron');
+
+// initalize the electron remote process, required for @electron/remote module in Electron 12+
+// the remote module is no more, all hail @electron/remote
+const remoteMain = require('@electron/remote/main')
+remoteMain.initialize()
+// require('@electron/remote/main').initialize()
+
+//did globals become globalThis at some point in node or electron?????
+global = globalThis
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -44,11 +55,13 @@ const gui = {
         preload: `${__dirname}/lib/preload.js`,
         nodeIntegration: true,
         enableRemoteModule: true,
-        worldSafeExecuteJavaScript: true
+        contextIsolation: false
       })
     });
 
     const window = new electron.BrowserWindow(options);
+    // change for Electron 14+, enable webContents for the framework
+    remoteMain.enable(window.webContents);
     await window.loadURL(url);
 
     return window;

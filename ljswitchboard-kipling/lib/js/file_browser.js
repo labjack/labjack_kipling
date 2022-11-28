@@ -1,10 +1,11 @@
 'use strict';
 
 const electron = require('electron');
+const remote = require('@electron/remote')
 const {EventEmitter} = require('events');
 const path = require('path');
 
-const dialog = electron.remote.dialog;
+const dialog = remote.dialog;
 const package_loader = global.package_loader;
 const fs_facade = package_loader.getPackage('fs_facade');
 
