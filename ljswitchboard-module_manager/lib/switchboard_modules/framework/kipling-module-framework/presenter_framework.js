@@ -2487,9 +2487,11 @@ class PresenterFramework extends EventEmitter {
         const formats = [];
         const customFormatFuncs = [];
         const bindings = [];
+        const value = [];
 
         // Loop through all registered bindings and determine what should be
         // done.
+        // console.error(readBindings);
         this.readBindings.forEach((value, key) => {
             // For each binding check to see if it should be executed by
             // checking its currentDelay.  If it equals zero than it needs
@@ -2519,6 +2521,9 @@ class PresenterFramework extends EventEmitter {
                 this.readBindings.set(key, value);
             }
         });
+        // this is here to forse delay one to not happen(it is a supper hacky fix)
+        var dummy_value_for_dummies = 10;
+        addresses.push(dummy_value_for_dummies);
         if (addresses.length > 0) {
             return {
                 addresses: addresses,
@@ -2527,7 +2532,7 @@ class PresenterFramework extends EventEmitter {
                 bindings: bindings
             };
         } else {
-            // console.warn("-------- Throwing Delay1 error presenter_framework.js line 2529------");
+             // console.warn("-------- Throwing Delay1 error presenter_framework.js line 2529------");
             throw 'delay1';
         }
     }
