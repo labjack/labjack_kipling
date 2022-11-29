@@ -13,7 +13,8 @@ const app = electron.app;
 const packageData = require('./package.json');
 const {SplashScreenUpdater} = require('./lib/splash');
 const {loadProgramPackages} = require('./lib/packages-load');
-// const { remote } = require('electron');
+
+// const { remote } = require('electron'); //OLD STUFF, REMOTE is deprecated
 
 // initalize the electron remote process, required for @electron/remote module in Electron 12+
 // the remote module is no more, all hail @electron/remote
