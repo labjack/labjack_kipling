@@ -27,7 +27,7 @@
     "async": "^3.2.4",
     "cheerio": "^1.0.0-rc.5",
     "q": "^1.5.1",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "diff": "^4.0.1",
