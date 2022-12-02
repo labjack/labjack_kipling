@@ -2527,8 +2527,7 @@ class PresenterFramework extends EventEmitter {
                 bindings: bindings
             };
         } else {
-            // console.warn("-------- Throwing Delay1 error presenter_framework.js line 2529------");
-            throw 'delay1';
+            throw 'delay';
         }
     }
 
@@ -2723,13 +2722,13 @@ class PresenterFramework extends EventEmitter {
         // Make sure that this framework instance is active.
         if (!this.frameworkActive) {
             this.isDAQLoopActive = false;
-            throw 'stoppingLoop0';
+            throw 'stoppingLoop';
         }
 
         // Make sure that the loop should be executing.
         if (!this.runLoop) {
             this.isDAQLoopActive = false;
-            throw 'stoppingLoop1';
+            throw 'stoppingLoop';
         }
     }
 
@@ -2769,7 +2768,7 @@ class PresenterFramework extends EventEmitter {
                 await this.verifyFrameworkIsActive();
 
              } catch (err) {
-                console.error("\n==== Presenter Framework innerRunDAQLoop caught error ====\n", "Error: ", err, "\nreadBindings: ", this.readBindings, "\nbindingsInfo: ", bindingsInfo,"\n===================\n")
+                // console.error("\n==== Presenter Framework innerRunDAQLoop caught error ====\n", "Error: ", err, "\nreadBindings: ", this.readBindings, "\nbindingsInfo: ", bindingsInfo,"\n===================\n")
                 if (err !== 'delay') {
                     if (err === 'stoppingLoop') {
                         return Promise.reject(err);
@@ -2789,9 +2788,9 @@ class PresenterFramework extends EventEmitter {
                                             'onRefreshError b/c loopIteration.reportError',
                                             err
                                         );
-                                        reject(new Error('delay2'));
+                                        reject(new Error('delay'));
                                     } else {
-                                        reject(new Error('stoppingLoop2'));
+                                        reject(new Error('stoppingLoop'));
                                     }
                                 }
                             );
