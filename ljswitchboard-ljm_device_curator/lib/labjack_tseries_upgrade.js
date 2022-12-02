@@ -19,7 +19,7 @@ var driver_const = labjack_nodejs.driver_const;
 
 var DEBUG_CHECK_ERASE = false;
 var DEBUG_CHECK_WRITE = false;
-var DEBUG_FIRMWARE_UPGRADE_PROCESS = false;
+var DEBUG_FIRMWARE_UPGRADE_PROCESS = true;
 var DEBUG_RECONNECT_TO_DEVICE_STEP = false;
 
 // Define a list of compatable device types that this upgrader supports.
@@ -89,6 +89,8 @@ UPGRADE_TARGET_FLASH_INFO[driver_const.T8_TARGET.toString()] = {
     'verifyFirmwareVersion': true,
     'isRecoveryFW': false,
 };
+
+//To-Do: Add recovery FW for T8
 
 var DEFAULT_UPGRADE_TARGET_FLASH_INFO = {
     'imageKey': driver_const.T7_EFkey_ExtFirmwareImage,
