@@ -92,7 +92,7 @@ function labjackVersionManager() {
             ]
         },
         // Re-define the Kipling tag to point to new downloads page
-        "kipling": {
+        "kipling_older": {
             "type":"kiplingDownloadsPage",
             "upgradeReference": "https://labjack.com/support/software/installers/ljm",
             "platformDependent": true,
@@ -104,7 +104,7 @@ function labjackVersionManager() {
                 {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux64"}
             ]
         },
-        "ljm": {
+        "ljm_old": {
             "type":"ljmDownloadsPage",
             "upgradeReference": "https://labjack.com/support/software/installers/ljm",
             "platformDependent": true,
@@ -118,16 +118,16 @@ function labjackVersionManager() {
         },
         "t7": {
             "type":"t7FirmwarePage",
-            "upgradeReference": "https://labjack.com/support/firmware/t7",
+            "upgradeReference": "https://labjack.com/pages/support?doc=/firmware/t7-firmware",
             "platformDependent": false,
             "urls":[
-                {"url": "https://labjack.com/support/firmware/t7", "type": "organizer-current"},
-                {"url": "https://labjack.com/support/firmware/t7", "type": "current"},
-                {"url": "https://labjack.com/support/firmware/t7/beta", "type": "beta"},
+                {"url": "https://labjack.com/pages/support?doc=/firmware/t7-firmware", "type": "organizer-current"},
+                {"url": "https://labjack.com/pages/support?doc=/firmware/t7-firmware", "type": "current"},
+                // {"url": "https://labjack.com/support/firmware/t7/beta", "type": "beta"},
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
-        "t4": {
+        "t4_old": {
             "type":"t4FirmwarePage",
             "upgradeReference": "https://labjack.com/support/firmware/t4",
             "platformDependent": false,
@@ -139,7 +139,7 @@ function labjackVersionManager() {
                 // {"url": "https://labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
-        "digit": {
+        "digit_old": {
             "type":"digitFirmwarePage",
             "upgradeReference": "https://labjack.com/support/firmware/digit",
             "platformDependent": false,
@@ -153,6 +153,7 @@ function labjackVersionManager() {
 
 
     this.innerAdvancedPageParser = function(options, retData) {
+        // console.error("------- Options -------\n", options)
         var url = options.url;              // Page URL to use for caching
         var pageType = options.pageType;    // Either 'software' or 'firmware'
         var releaseType = options.releaseType;  // Either 'stable' or 'beta'
@@ -160,13 +161,14 @@ function labjackVersionManager() {
         var programName = options.programName;  // A program name to look for
 
         var $;
+        // console.error(url, self.cachedDoms);
         if(self.cachedDoms.has(url)) {
             $ = self.cachedDoms.get(url);
         } else {
             try {
                 $ = cheerio.load(options.pageData);
             } catch(err) {
-                console.log('Error loading page (cheerio)...', err);
+                console.error('Error loading page (cheerio)...', err);
             }
             self.cachedDoms.set(url, $);
         }
@@ -236,9 +238,11 @@ function labjackVersionManager() {
                 }
             }
         } else if(pageType === 'firmware') {
-            currentNode = $('.node-firmware-section');
+            // currentNode = $('.node-firmware-section');
+            currentNode = $('.group-stable')
             isValid = (currentNode.length >= 0);
 
+            // console.error("current node isValid", isValid, currentNode.length, currentNode)
              // Limit by group
             if(isValid) {
                 var groupSelector = {
@@ -440,7 +444,9 @@ function labjackVersionManager() {
          * https://labjack.com/sites/default/files/2014/05/T7firmware_010100_2014-05-12.bin
         **/
         t7FirmwarePage: function(listingArray, pageData, urlInfo, name) {
+            // console.error("urlInfo type???", urlInfo.type, urlInfo)
             if(urlInfo.type === 'organizer-current') {
+                // console.error("--- IN IF ---")
                 var parsedData = self.advancedPageParser({
                     'url': urlInfo.url,
                     'pageData': pageData,
@@ -470,6 +476,8 @@ function labjackVersionManager() {
                 }
                 // console.log('!!! T7 organizer-current'.green, listingArray.length);
             } else {
+                // console.error("---In Else---")
+                // console.error("T7 pageData", pageData)
                 // var FIRMWARE_LINK_REGEX = /<a.*href\=\"http.*T7firmware\_([\d\-]+)\_([\d\-]+)\.bin".*>.*<\/a>/g;
                 // var match = FIRMWARE_LINK_REGEX.exec(pageData);
                 var $ = cheerio.load(pageData);
@@ -494,7 +502,7 @@ function labjackVersionManager() {
                             "key":urlInfo.type + '-' + version
                         });
                     } else {
-                        // console.log('Invalid URL', targetURL, targetURL.length);
+                        console.warn('Invalid URL', targetURL, targetURL.length);
                     }
                     // console.log('T7 FW Versions', version);
                     // console.log('Type....', urlInfo.type);
@@ -560,12 +568,15 @@ function labjackVersionManager() {
     this.buildQuery = function(savedData, strategy, urlInfo, name) {
         var dataQuery = function(callback) {
             var url = urlInfo.url;
+            console.warn("Build Query for URL:", url)
             // Check to see if the page has been cached, if it is don't query
             // for it
-            if(!self.pageCache.has(url)) {
+            if(!self.pageCache.has(url) || true) {
                 // Perform request to get pageData/body
+                // console.warn("fetching url " + url)
                 fetch(url, { timeout: 20000 })
                     .then(function (res) {
+                        // console.error("fetch res:", res)
                         if (res.ok) {
                             return res.text();
                         }
@@ -625,6 +636,7 @@ function labjackVersionManager() {
                     .then(function (body) {
                         self.pageCache.set(url, body);
                         try {
+                            // console.warn("trying the strategy now")
                             strategy(savedData, body, urlInfo, name);
                         } catch(innerErr) {
                             console.error('Error calling strategy...', innerErr, name);
@@ -637,6 +649,7 @@ function labjackVersionManager() {
                     });
             } else {
                 // get pageData/body from cache
+                // console.error("~~~~~~getting page data from cache~~~~~~")
                 var pageData = self.pageCache.get(url);
                 strategy(savedData, pageData, urlInfo, name);
                 callback();
@@ -652,6 +665,7 @@ function labjackVersionManager() {
         var infos = [];
         var numCurrent = 0;
         rawInfos.forEach(function(info) {
+            // console.error("INFO:", info)
             if(info.type.indexOf('organizer') >= 0) {
                 organizer = info;
             } else {
@@ -663,15 +677,16 @@ function labjackVersionManager() {
         });
 
         if(organizer) {
+            // console.warn("LINE 672", numCurrent, organizer.isValid)
             if((numCurrent == 1) && (organizer.isValid == false)) {
-                console.log('Defaulting to the current-version');
+                console.warn('Defaulting to the current-version');
                 infos.forEach(function(info) {
                     if(info.type.indexOf('current') >= 0) {
                         organizer = info;
                     }
                 });
             } else if(organizer.isValid == false) {
-                console.log('!! Using default fw version as current');
+                console.warn('!! Using default fw version as current');
             }
             // Determine versioning scheme, is the version a number?
             if(semver.valid(organizer.version)) {
