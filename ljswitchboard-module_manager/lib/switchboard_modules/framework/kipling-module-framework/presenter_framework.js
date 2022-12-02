@@ -2487,6 +2487,9 @@ class PresenterFramework extends EventEmitter {
         const formats = [];
         const customFormatFuncs = [];
         const bindings = [];
+        // keeping theys arrays just in case we need them later down the line.
+        // const value = [];
+        // const key = [];
 
         // Loop through all registered bindings and determine what should be
         // done.
@@ -2526,7 +2529,7 @@ class PresenterFramework extends EventEmitter {
                 bindings: bindings
             };
         } else {
-            throw 'delay1';
+            throw 'delay';
         }
     }
 

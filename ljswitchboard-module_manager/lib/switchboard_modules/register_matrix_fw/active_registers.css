@@ -92,3 +92,7 @@
 .direction-control-disabled .register-value {
     padding-left: 28px;
 }
+
+.register-matrix-secondary-heading{
+    margin: 5px;
+}

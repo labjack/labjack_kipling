@@ -761,7 +761,6 @@ function module() {
         var data = {};
         try {
             results.forEach(function(result) {
-                // console.log('Updating Result...', result);
 
                 if(result.res === null) {
                     result.res = 0;
@@ -790,9 +789,30 @@ function module() {
                 if(showValInTitle) {
                     titleText += ' (' + result.val.toString() + ')';
                 }
+                // logic for changing what the values in register matrix format is (decimal, hex, binary)
+                if(window.drop_case_num_val == 1){
+                    // This should do nothing to make sure that this gets to the default value for the decimal
+                }
+                else if(window.drop_case_num_val == 2){
+                    // parse to the float to make sure it can be converted to a hex number
+                    chosenVal = parseFloat(chosenVal);
+				    chosenVal = chosenVal.toString(16);
+                }
+                else if(window.drop_case_num_val == 3){
+                    // parse the float so the number can be converted into it's decimal form.
+                    chosenVal = parseFloat(chosenVal);
+					chosenVal = Number(chosenVal).toString(2);
+                }
+                // for debuging purposes
+                else{
+                    console.error("*** Selected value type has not been handled correctly ***")
+                }
+
                 destination.text(chosenVal);
                 destination.attr('title', titleText);
                 inputBox.val(result.val);
+               
+                //here
             });
         } catch(err) {
             console.error('Error updating data', err);

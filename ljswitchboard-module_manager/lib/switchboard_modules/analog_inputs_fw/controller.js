@@ -1257,7 +1257,7 @@ function module() {
                 };
                 newBinding.periodicCallback = getCallback(menuOptions);
             } else {
-                efControlsData +=  '<p>Undefined inputType' +regname+'</p>';
+                efControlsData +=  '<p>Undefined inputType' +regName+'</p>';
             }
 
             // Add config register to bindings list

@@ -7,6 +7,7 @@
 					<th>Remove</th>
 					<th>Name</th>
 					<th>Value</th>
+					<h4 class="register-matrix-secondary-heading" >Value type</h4>
 					<select type="Text" id="dropBox" class="varBox">
 						<option value="1">Decimal</option>
 						<option value="2">Hex</option>
@@ -14,44 +15,25 @@
 					</select>
 				</tr>
 				<script>
-
-					// this function is there to get the values from the regster and put them in an array to be able to make changes to them
-					let data = $('td').children('div.value-display').children('span.register-value').map(function() {
-						return $(this).text();
-					}).get();
+					window.drop_case_num_val = 1;
 					$(function () {
+						// this is here so i am able to just go back to it
 						$("#dropBox").on("change", function () {
 							switch ($(this).val()) {
 								// case 1 is the default and will have all of the varbles be in there decimal form
+								// this logic will be handled within the controler of active_registers
 								case "1":
-								var i = 0;
-								document.querySelectorAll("#some").forEach(hexVal => {
-									hexVal.innerText = data[i];
-									i = i + 1;
-									// valueType.myGlobal = 1;
-								})
+									window.drop_case_num_val = 1;
 									break;
 								// case 2 is where the values wil be converted into there hexidecimal form
+								// this logic will be handled within the controler of active_registers
 								case "2":
-								var i = 0;
-								document.querySelectorAll("#some").forEach(hexVal => {
-									hexVall = parseFloat(data[i]);
-									hexVall = hexVall.toString(16);
-									i = i + 1;
-									hexVal.innerText = hexVall;
-									// valueType.myGlobal = 2;
-								})
+									window.drop_case_num_val = 2;
 									break;
 								//case 3 is where the values of each register are converted into there binary form
+								// this logic will be handled within the controler of active_registers
 								case "3":
-								var i = 0;
-								document.querySelectorAll("#some").forEach(hexVal => {
-									decVal = parseFloat(data[i]);
-									decVal = Number(decVal).toString(2);
-									i = i + 1;
-									hexVal.innerText = decVal;
-									// valueType.myGlobal = 3;
-								})
+									window.drop_case_num_val = 3;
 									break;
 							}
 						});
