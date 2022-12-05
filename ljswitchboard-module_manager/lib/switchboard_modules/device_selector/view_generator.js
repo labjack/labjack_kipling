@@ -329,6 +329,12 @@ var createDeviceSelectorViewGenerator = function() {
 				if (self.debug || true) {
 					console.log('Open Error', onConnectResult.reason);
 				}
+				if (typeof (device.errorCode) != 'undefined') {
+					console.warn('Returning early due to error case...', device);
+					console.log('IsFound', isFound, selectedScanResult, errorResult);
+					return;
+				}
+				// getting the data about the device
 				data = onConnectResult.reason;
 				key = getDeviceControlKey(data.device);
 				elements = self.deviceControlElements[key];
@@ -364,7 +370,7 @@ var createDeviceSelectorViewGenerator = function() {
 					.then(function () {
 						self.emit(self.eventList.DEVICE_OPENED, data);
 						resolve(results);
-					});
+					});	
 			}
 		});
 	};
@@ -378,7 +384,7 @@ var createDeviceSelectorViewGenerator = function() {
 		if(self.debug || true) {
 			console.log('Open button clicked', eventData.data);
 		}
-		console.log('Open button clicked', eventData.data);
+		// console.log('Open button clicked', eventData.data);
 		// Remove remaining open button listners
 		removeConnectListeners(eventData.data.device);
 
