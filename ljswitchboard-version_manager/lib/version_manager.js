@@ -61,7 +61,7 @@ function labjackVersionManager() {
     this.urlDict = {
         "kipling": {
             "type":"kipling",
-            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
+            "upgradeReference": "https://old3.labjack.com/support/software/installers/ljm",
             "platformDependent": true,
             "types": ['current','beta','test'],
             "urls":[
@@ -80,15 +80,15 @@ function labjackVersionManager() {
                 {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/beta.txt", "type": "beta_linux32"},
                 {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/beta.txt", "type": "beta_linux64"},
 
-                // {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/beta.txt", "type": "test_win"},
-                // {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/beta.txt", "type": "test_mac"},
-                // {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/beta.txt", "type": "test_linux32"},
-                // {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/beta.txt", "type": "test_linux64"},
+                // // {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/beta.txt", "type": "test_win"},
+                // // {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/beta.txt", "type": "test_mac"},
+                // // {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/beta.txt", "type": "test_linux32"},
+                // // {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/beta.txt", "type": "test_linux64"},
 
-                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/test.txt", "type": "test_win"},
-                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/test.txt", "type": "test_mac"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/test.txt", "type": "test_linux32"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/test.txt", "type": "test_linux64"}
+                // {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/test.txt", "type": "test_win"},
+                // {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/test.txt", "type": "test_mac"},
+                // {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/test.txt", "type": "test_linux32"},
+                // {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/test.txt", "type": "test_linux64"}
             ]
         },
         // Re-define the Kipling tag to point to new downloads page
@@ -118,11 +118,11 @@ function labjackVersionManager() {
         },
         "t7": {
             "type":"t7FirmwarePage",
-            "upgradeReference": "https://labjack.com/pages/support?doc=/firmware/t7-firmware",
+            "upgradeReference": "https://old3.labjack.com/support/firmware/t7",
             "platformDependent": false,
             "urls":[
-                {"url": "https://old3.labjack.com/pages/support?doc=/firmware/t7-firmware", "type": "organizer-current"},
-                {"url": "https://old3.labjack.com/pages/support?doc=/firmware/t7-firmware", "type": "current"},
+                {"url": "https://old3.labjack.com/support/firmware/t7", "type": "organizer-current"},
+                {"url": "https://old3.labjack.com/support/firmware/t7", "type": "current"},
                 {"url": "https://old3.labjack.com/support/firmware/t7/beta", "type": "beta"},
                 {"url": "https://old3.labjack.com/support/firmware/t7", "type": "all"},
             ],
@@ -238,8 +238,7 @@ function labjackVersionManager() {
                 }
             }
         } else if(pageType === 'firmware') {
-            // currentNode = $('.node-firmware-section');
-            currentNode = $('.group-stable')
+            currentNode = $('.node-firmware-section');
             isValid = (currentNode.length >= 0);
 
             // console.error("current node isValid", isValid, currentNode.length, currentNode)
@@ -571,7 +570,7 @@ function labjackVersionManager() {
             console.warn("Build Query for URL:", url)
             // Check to see if the page has been cached, if it is don't query
             // for it
-            if(!self.pageCache.has(url) || true) {
+            if(!self.pageCache.has(url)) {
                 // Perform request to get pageData/body
                 // console.warn("fetching url " + url)
                 let response = await fetch(url, { timeout: 20000 })
@@ -789,7 +788,7 @@ function labjackVersionManager() {
     };
     this.queryForVersions = function(name) {
         var defered = q.defer();
-        var info = self.urlDict[name];
+        var info = self.urlDict[name]; // info is the url dict with files.labjack.com links
         var queriedData = [];
 
         if(typeof(info) !== 'undefined') {
