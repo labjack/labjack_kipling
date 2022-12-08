@@ -41,6 +41,7 @@
   "scripts": {
     "test": "mocha",
     "get_t7": "node ./node_modules/nodeunit/bin/nodeunit ./test/report/t7.js",
-    "get_t4": "node ./node_modules/nodeunit/bin/nodeunit ./test/report/t4.js"
+    "get_t4": "node ./node_modules/nodeunit/bin/nodeunit ./test/report/t4.js",
+    "start": "node ./lib/new_version_manager.js"
   }
 }
