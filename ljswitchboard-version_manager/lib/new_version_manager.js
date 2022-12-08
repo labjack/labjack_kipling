@@ -26,6 +26,9 @@ const UPGRADE_LINK = "https://files.labjack.com/firmware/T8/"
 class labjackVersionManager extends EventEmitter {
     constructor() {
 
+        // You gotta super the inherited class to use this.
+        super();
+
         this.cachedDoms = new Map();
         this.pageCache = new Map();
         this.infoCache = {};
