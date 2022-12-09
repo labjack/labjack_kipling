@@ -19,6 +19,7 @@ var path = require('path');
 
 var cheerio = require('cheerio');
 var semver = require('./semver_min');
+const { defer } = require('q');
 
 const UPGRADE_LINK = "https://files.labjack.com/firmware/T8/"
 
@@ -49,6 +50,20 @@ class labjackVersionManager extends EventEmitter {
 
         // define dict object with various urls in it
     this.urlDict = {
+        "theGoldStandard": {
+            "type":"justATestBro",
+            "upgradeReference": "https://www.dontworryaboutit.com",
+            "platformDependent": false,
+            "urls":[
+                // {"url": "https://files.labjack.com/firmware/T8/", "type": "organizer-current"},
+                // {"url": "https://files.labjack.com/firmware/T8/release", "type": "current"},
+                // {"url": "https://files.labjack.com/firmware/T8/beta/current", "type": "beta-current"},
+                {"url": "https://files.labjack.com/firmware/T8/release", "type": "organizer-current"},
+                {"url": "https://files.labjack.com/firmware/T8/beta/current", "type": "organizer-current"},
+                {"url": "https://files.labjack.com/firmware/T8/beta", "type": "beta"},
+                {"url": "https://files.labjack.com/firmware/T8/", "type": "old"},
+            ],
+        },
         "t8": {
             "type":"t8FirmwarePage",
             "upgradeReference": "https://files.labjack.com/firmware/T8/",
@@ -401,6 +416,85 @@ class labjackVersionManager extends EventEmitter {
             return defered.promise;
         };
 
+        this.getAllVersions = function() {
+            // Re-set constants
+            self.infoCache = {};
+            self.dataCache = {};
+            self.infoCache.warning = false;
+            self.infoCache.warnings = [];
+            self.isDataComplete = false;
+            self.isError = false;
+            self.infoCache.isError = false;
+            self.infoCache.errors = [];
+            var errorFunc = function(err) {
+                var errDefered = q.defer();
+                if(err) {
+                    if(err.quit) {
+                        self.isError = true;
+                        self.errorInfo = err;
+                        defered.reject(err);
+                        errDefered.reject();
+                    } else {
+                        errDefered.resolve();
+                    }
+                    console.error('Error Querying LabJack cersion', err);
+                }
+                return errDefered.promise;
+            };
+            var defered = q.defer();
+
+            // start getting all versions
+            self.getT8FirmwareVersions()
+            .then(self.getT7FirmwareVersions, errorFunc)
+            .then(function(){
+                self.isDataComplete = true;
+                defered.resolve(self.infoCache)
+            }, errorFunc);
+            return defered.promise;
+        };
+
+        this.waitForData = function() {
+            var defered = q.defer();
+            var checkInterval = 100;
+            var iteration = 0;
+            var maxCheck = 100;
+
+            // Define a function that can delays & re-calls itself until it errors
+            // out or resolves to the defered q object.
+            var isComplete = function() {
+                return !(self.isDataComplete || self.isError);
+            };
+
+            var finishFunc = function() {
+                console.log('version_manager.js - Num Iteration', iteration);
+                if(self.isError) {
+                    defered.reject(self.errorInfo);
+                } else {
+                    defered.resolve(self.infoCache)
+                }
+            };
+            var waitFunc = function() {
+                if(isComplete()) {
+                    if(iteration < maxCheck) {
+                        iteration += 1;
+                        setTimeout(waitFunc, checkInterval);
+                    } else {
+                        defered.reject('Max Retries Exceeded');
+                    }
+                } else {
+                    finishFunc();
+                }
+            };
+
+            // if the data isn't complete then
+            if(isComplete()) {
+                setTimeout(waitFunc,checkInterval);
+            } else {
+                finishFunc();
+            }
+            return defered.promise;
+        };
+
         this.getInfoCache = function() {
             return JSON.parse(JSON.stringify(self.infoCache));
         };
@@ -466,6 +560,14 @@ class labjackVersionManager extends EventEmitter {
             return ljSystemType;
         };
 
+        this.isIssue = function() {
+            if(self.isDataComplete) {
+                return self.infoCache.warning || self.infoCache.isError;
+            } else {
+                return true
+            }
+        };
+
         this.reportWarning = function(data) {
             self.infoCache.warning = true;
             self.infoCache.warnings.push(data);
@@ -488,16 +590,68 @@ class labjackVersionManager extends EventEmitter {
     }
 }
 
-// replaced the depricated util.inherits with class labjackVersionManager extends EventEmitter at the declaration
-// util.inherits(labjackVersionManager, EventEmitter);
 var LABJACK_VERSION_MANAGER = new labjackVersionManager();
 
-// For Testing....
-var LVM = LABJACK_VERSION_MANAGER;
+exports.lvm = LABJACK_VERSION_MANAGER;
+exports.initalize = function() {
+    var defered = q.defer();
 
-LVM.getT8FirmwareVersions()
-.then(LVM.getT7FirmwareVersions())
-.then(console.log("Info cache:", LVM.getInfoCache()))
+    LABJACK_VERSION_MANAGER.getAllVersions();
+    LABJACK_VERSION_MANAGER.waitForData()
+    .then(function(data) {
+        console.log('LVM dataCache:',LABJACK_VERSION_MANAGER.dataCache);
+        if(LABJACK_VERSION_MANAGER.isIssue()) {
+            var issue = LABJACK_VERSION_MANAGER.getIssue();
+            console.error('LVM Warning', issue);
+        } 
+        defered.resolve(data);
+    }, function(err) {
+        if(LABJACK_VERSION_MANAGER.isIssue()) {
+            var issue = LABJACK_VERSION_MANAGER.getIssue();
+            console.error('LVM Error', issue, "Error: ", err);
+            defered.reject(issue);
+        } else {
+            defered.reject();
+        }
+    });
+
+    return defered.promise;
+}
+
+exports.getAllVersions = LABJACK_VERSION_MANAGER.getAllVersions;
+
+// For Testing....
+// var LVM = LABJACK_VERSION_MANAGER;
+
+// LVM.getT8FirmwareVersions()
+// .then(LVM.getT7FirmwareVersions())
+// .then(console.log("Info cache:", LVM.getInfoCache()))
+
+// function testThisBitch() {
+//     var defered = q.defer();
+
+//     LABJACK_VERSION_MANAGER.getAllVersions();
+//     LABJACK_VERSION_MANAGER.waitForData()
+//     .then(function(data) {
+//         console.log('LVM dataCache:',LABJACK_VERSION_MANAGER.dataCache);
+//         if(LABJACK_VERSION_MANAGER.isIssue()) {
+//             var issue = LABJACK_VERSION_MANAGER.getIssue();
+//             console.error('LVM Warning', issue);
+//         } 
+//         defered.resolve(data);
+//     }, function(err) {
+//         if(LABJACK_VERSION_MANAGER.isIssue()) {
+//             var issue = LABJACK_VERSION_MANAGER.getIssue();
+//             console.error('LVM Error', issue, "Error: ", err);
+//             defered.reject(issue);
+//         } else {
+//             defered.reject();
+//         }
+//     });
+
+//     return defered.promise;
+// }
+
 
 
 // For Testing....

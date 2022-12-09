@@ -48,6 +48,11 @@ function module() {
         console.error('Error parsing file', err);
     }
     try {
+        this.t8VersionData = deviceUpdaterService.getCachedT8Versions();
+    } catch(err) {
+        console.error('Error getting cached T8 versions');
+    }
+    try {
         this.t7VersionData = deviceUpdaterService.getCachedT7Versions();
     } catch(err) {
         console.error('Error getting cached T7 versions');
@@ -65,13 +70,14 @@ function module() {
         'isValid': false
     };
 
+    this.moduleContext.t8VersionData = this.t8VersionData;
     this.moduleContext.t7VersionData = this.t7VersionData;
     this.moduleContext.t4VersionData = this.t4VersionData;
 
     this.availableVersionData = {
         'T4': this.t4VersionData,
         'T7': this.t7VersionData,
-        'T8': defaultVersionData,
+        'T8': defaultVersionData, //To-Do add T8 data!!!!!!
     };
     this.currentDTVersionData = {};
     this.selectedDT = '';
