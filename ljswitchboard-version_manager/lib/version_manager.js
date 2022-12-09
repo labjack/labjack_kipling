@@ -86,13 +86,13 @@ class labjackVersionManager extends EventEmitter {
         },
         "t4": {
             "type":"t4FirmwarePage",
-            "upgradeReference": "https://labjack.com/support/firmware/t4",
+            "upgradeReference": "https://files.labjack.com/firmware/T4/",
             "platformDependent": false,
             "urls":[
                 // {"url": "https://old3.labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
-                {"url": "https://old3.labjack.com/support/firmware/t4", "type": "organizer-current"},
-                {"url": "https://old3.labjack.com/support/firmware/t4", "type": "current"},
-                {"url": "https://old3.labjack.com/support/firmware/t4/beta", "type": "beta"},
+                // {"url": "https://old3.labjack.com/support/firmware/t4", "type": "organizer-current"},
+                {"url": "https://files.labjack.com/firmware/T4/Current", "type": "current"},
+                {"url": "https://files.labjack.com/firmware/T4/Beta", "type": "beta"},
                 // {"url": "https://old3.labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -503,7 +503,7 @@ class labjackVersionManager extends EventEmitter {
             var t8Data = {};
             if(typeof(self.infoCache.t8) !== 'undefined') {
                 t8Data = JSON.parse(JSON.stringify(self.infoCache.t8));
-                // populateMissingKeys(t7Data, ['beta', 'current', 'old']);
+                // populateMissingKeys(t8Data, ['beta', 'current', 'old']);
                 t8Data.isValid = true;
             } else {
                 t8Data.current = [];

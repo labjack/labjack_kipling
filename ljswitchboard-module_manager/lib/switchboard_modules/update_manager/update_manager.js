@@ -48,6 +48,9 @@ function versionManager() {
 	this.getCachedT4Versions = function() {
 		return self.version_manager.lvm.getCachedT4Versions();
 	};
+	this.getCachedT8Versions = function() {
+		return self.version_manager.lvm.getCachedT8Versions();
+	};
 	this.getCachedDigitVersions = function() {
 		return self.version_manager.lvm.getCachedDigitVersions();
 	};
