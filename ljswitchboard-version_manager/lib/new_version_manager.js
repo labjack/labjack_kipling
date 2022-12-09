@@ -129,12 +129,13 @@ class labjackVersionManager extends EventEmitter {
                     var isValidFWLink = FIRMWARE_FILE_REGEX.test(targetURL);
                     if(isValidFWLink) {
                         var fileName = path.basename(targetURL);
+                        var targetFileURL = new URL(fileName, urlInfo.url).href; // Combine filename with base url to give a downloadable link
                         var splitFileName = fileName.split(/[_.]/);
                         var version = (parseFloat(splitFileName[1])/10000).toFixed(4);
                         var date = splitFileName[2];
 
                         listingArray.push({
-                            "upgradeLink":targetURL,
+                            "upgradeLink":targetFileURL,
                             "version":version,
                             "date":date,
                             "type":urlInfo.type,
@@ -159,12 +160,13 @@ class labjackVersionManager extends EventEmitter {
                     var isValidFWLink = FIRMWARE_FILE_REGEX.test(targetURL);
                     if(isValidFWLink) {
                         var fileName = path.basename(targetURL);
+                        var targetFileURL = new URL(fileName, urlInfo.url).href; // Combine filename with base url to give a downloadable link
                         var splitFileName = fileName.split(/[_.]/);
                         var version = (parseFloat(splitFileName[1])/10000).toFixed(4);
                         var date = splitFileName[2];
 
                         listingArray.push({
-                            "upgradeLink":targetURL,
+                            "upgradeLink":targetFileURL,
                             "version":version,
                             "date":date,
                             "type":urlInfo.type,
@@ -183,7 +185,7 @@ class labjackVersionManager extends EventEmitter {
         this.buildQuery = function(savedData, strategy, urlInfo, name) {
             var dataQuery = function(callback) {
                 var url = urlInfo.url
-                console.warn("Build Query for URL:", url)
+                // console.warn("Build Query for URL:", url)
                 let response = fetch(url, { timeout: 20000 })
                     .then(function (res) {
                         if (res.ok) {
@@ -220,7 +222,6 @@ class labjackVersionManager extends EventEmitter {
             var numCurrent = 0;
 
             rawInfos.forEach(function(info) {
-                console.error("Info:", info);
                 if(info.type.indexOf('organizer') >= 0) {
                     organizer = info;
                 } else {
@@ -230,9 +231,10 @@ class labjackVersionManager extends EventEmitter {
                     infos.push(info);
                 }
             });
+            console.log("Num current:", numCurrent);
 
             if(organizer) {
-                console.error("Organizer current info found")
+                console.error("Organizer current info found");
             }
 
             // console.log(' - name:',name);
@@ -399,6 +401,40 @@ class labjackVersionManager extends EventEmitter {
             return defered.promise;
         };
 
+        this.getInfoCache = function() {
+            return JSON.parse(JSON.stringify(self.infoCache));
+        };
+
+        this.getCachedT8Versions = function() {
+            var t8Data = {};
+            if(typeof(self.infoCache.t8) !== 'undefined') {
+                t8Data = JSON.parse(JSON.stringify(self.infoCache.t8));
+                // populateMissingKeys(t7Data, ['beta', 'current', 'old']);
+                t8Data.isValid = true;
+            } else {
+                t8Data.current = [];
+                t8Data.beta = [];
+                t8Data.old = [];
+                t8Data.isValid = false;
+            }
+            return t8Data;
+        };
+    
+        this.getCachedT7Versions = function() {
+            var t7Data = {};
+            if(typeof(self.infoCache.t7) !== 'undefined') {
+                t7Data = JSON.parse(JSON.stringify(self.infoCache.t7));
+                // populateMissingKeys(t7Data, ['beta', 'current', 'old']);
+                t7Data.isValid = true;
+            } else {
+                t7Data.current = [];
+                t7Data.beta = [];
+                t7Data.old = [];
+                t7Data.isValid = false;
+            }
+            return t7Data;
+        };
+
         this.getLabjackSystemType = function() {
             var ljSystemType = '';
             var ljPlatformClass = {
@@ -460,7 +496,8 @@ var LABJACK_VERSION_MANAGER = new labjackVersionManager();
 var LVM = LABJACK_VERSION_MANAGER;
 
 LVM.getT8FirmwareVersions()
-.then(LVM.getT7FirmwareVersions());
+.then(LVM.getT7FirmwareVersions())
+.then(console.log("Info cache:", LVM.getInfoCache()))
 
 
 // For Testing....
