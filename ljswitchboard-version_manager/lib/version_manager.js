@@ -80,7 +80,7 @@ class labjackVersionManager extends EventEmitter {
             "urls":[
                 // {"url": "https://old3.labjack.com/support/firmware/t7", "type": "organizer-current"},
                 {"url": "https://files.labjack.com/firmware/T7/", "type": "current"},
-                {"url": "https://files.labjack.com/firmware/T7/Beta", "type": "beta"},
+                {"url": "https://files.labjack.com/firmware/T7/Beta/", "type": "beta"},
                 // {"url": "https://old3.labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -91,8 +91,8 @@ class labjackVersionManager extends EventEmitter {
             "urls":[
                 // {"url": "https://old3.labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
                 // {"url": "https://old3.labjack.com/support/firmware/t4", "type": "organizer-current"},
-                {"url": "https://files.labjack.com/firmware/T4/Current", "type": "current"},
-                {"url": "https://files.labjack.com/firmware/T4/Beta", "type": "beta"},
+                {"url": "https://files.labjack.com/firmware/T4/Current/", "type": "current"},
+                {"url": "https://files.labjack.com/firmware/T4/Beta/", "type": "beta"},
                 // {"url": "https://old3.labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -176,6 +176,38 @@ class labjackVersionManager extends EventEmitter {
                     if(isValidFWLink) {
                         var fileName = path.basename(targetURL);
                         var targetFileURL = new URL(fileName, urlInfo.url).href; // Combine filename with base url to give a downloadable link
+                        var splitFileName = fileName.split(/[_.]/);
+                        var version = (parseFloat(splitFileName[1])/10000).toFixed(4);
+                        var date = splitFileName[2];
+
+                        listingArray.push({
+                            "upgradeLink":targetFileURL,
+                            "version":version,
+                            "date":date,
+                            "type":urlInfo.type,
+                            "key":urlInfo.type + '-' + version
+                        });
+                    } else {
+                        // there are lots of invalid URLs on file.labjack.com/fimrware/T7 page
+                        // for now I will supress these warnings
+                        // console.warn("Invalid URL for T7 firmware", targetURL, targetURL.length)
+                    }
+                });
+                return;
+            },
+            t4FirmwarePage: function(listingArray, pageData, urlInfo, name){
+                console.warn("Running T4 Firmware Strategy");
+                var $ = cheerio.load(pageData);
+                var linkElements = $('a');
+                linkElements.each(function(i, linkElement){
+                    var ele = $(linkElement);
+                    var targetURL = ele.attr('href');
+                    var FIRMWARE_FILE_REGEX = /T4firmware\_([\d\-]+).*\.bin/g;
+                    var isValidFWLink = FIRMWARE_FILE_REGEX.test(targetURL);
+                    if(isValidFWLink) {
+                        var fileName = path.basename(targetURL);
+                        var targetFileURL = new URL(fileName, urlInfo.url).href; // Combine filename with base url to give a downloadable link
+                        console.warn("targetFileURL", targetFileURL);
                         var splitFileName = fileName.split(/[_.]/);
                         var version = (parseFloat(splitFileName[1])/10000).toFixed(4);
                         var date = splitFileName[2];
@@ -415,6 +447,12 @@ class labjackVersionManager extends EventEmitter {
             .then(defered.resolve,defered.reject);
             return defered.promise;
         };
+        this.getT4FirmwareVersions = function() {
+            var defered = q.defer();
+            self.queryForVersions('t4')
+            .then(defered.resolve,defered.reject);
+            return defered.promise;
+        };
 
         this.getAllVersions = function() {
             // Re-set constants
@@ -446,12 +484,18 @@ class labjackVersionManager extends EventEmitter {
             // start getting all versions
             self.getT8FirmwareVersions()
             .then(self.getT7FirmwareVersions, errorFunc)
+            .then(self.getT4FirmwareVersions, errorFunc)
             .then(function(){
                 self.isDataComplete = true;
                 defered.resolve(self.infoCache)
             }, errorFunc);
             return defered.promise;
         };
+
+        this.clearPageCache = function() {
+            self.pageCache.clear();
+            self.cachedDoms.clear();
+        }
 
         this.waitForData = function() {
             var defered = q.defer();
@@ -528,6 +572,21 @@ class labjackVersionManager extends EventEmitter {
             }
             return t7Data;
         };
+
+        this.getCachedT4Versions = function() {
+            var t4Data = {};
+            if(typeof(self.infoCache.t4) !== 'undefined') {
+                t4Data = JSON.parse(JSON.stringify(self.infoCache.t4));
+                // populateMissingKeys(t4Data, ['beta', 'current', 'old']);
+                t4Data.isValid = true;
+            } else {
+                t4Data.current = [];
+                t4Data.beta = [];
+                t4Data.old = [];
+                t4Data.isValid = false;
+            }
+            return t4Data;
+        }
 
         this.getLabjackSystemType = function() {
             var ljSystemType = '';

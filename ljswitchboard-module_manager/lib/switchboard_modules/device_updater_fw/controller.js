@@ -60,7 +60,7 @@ function module() {
     try {
         this.t4VersionData = deviceUpdaterService.getCachedT4Versions();
     } catch(err) {
-        console.error('Error getting cached T4 versions');
+        console.error('Error getting cached T4 versions', err);
     }
 
     const defaultVersionData = {
@@ -70,14 +70,14 @@ function module() {
         'isValid': false
     };
 
-    this.moduleContext.t8VersionData = this.t8VersionData;
-    this.moduleContext.t7VersionData = this.t7VersionData;
     this.moduleContext.t4VersionData = this.t4VersionData;
+    this.moduleContext.t7VersionData = this.t7VersionData;
+    this.moduleContext.t8VersionData = this.t8VersionData;
 
     this.availableVersionData = {
         'T4': this.t4VersionData,
         'T7': this.t7VersionData,
-        'T8': defaultVersionData, //To-Do add T8 data!!!!!!
+        'T8': this.t8VersionData,
     };
     this.currentDTVersionData = {};
     this.selectedDT = '';
@@ -102,6 +102,8 @@ function module() {
         currentFWs.forEach(function(currentFW) {
             const versionStr = currentFW.version;
             const version = parseFloat(versionStr, 10);
+            // this is where the program is seeing if the selected version is 
+            // larger than the curent version
             if(version > selectedVersion) {
                 selectedVersion = version;
                 selectedFW = currentFW;
