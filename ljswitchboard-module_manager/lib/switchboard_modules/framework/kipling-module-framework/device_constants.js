@@ -5,7 +5,7 @@ global.globalDeviceConstantsSwitch = {
     "T4":"t4DeviceConstants",
     "T7":"t7DeviceConstants ",
     "T7Pro":"t7ProDeviceConstants",
-    "T7-Pro":"t7ProDeviceConstants"
+    "T8":"t8DeviceConstants"
 };
 var globalDoubleRegExStringPattern = "(^\-?[0-9]{1,}$)|(^\-?[0-9]{1,}\\.$)|(^\-?[0-9]{1,}\\.[0-9]{1,}$)|(^\-?\\.[0-9]{1,}$)";
 var globalIntegerRegExStringPattern = "(^[0-9]{1,}$)";
