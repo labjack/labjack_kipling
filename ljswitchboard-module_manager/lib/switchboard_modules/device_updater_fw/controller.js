@@ -13,6 +13,7 @@
 const handlebars = require('handlebars');
 const path = require('path');
 const fs = require('fs');
+// eslint-disable-next-line import/no-unresolved
 const firmware_verifier = require('ljswitchboard-firmware_verifier');
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -112,6 +113,26 @@ function module() {
         selectedFW.latest = true;
         self.userSelectedFW = selectedFW;
     };
+    this.selectNewestBetaFirmware = function() {
+        let selectedFW = {};
+        let selectedVersion = 0;
+        let betaFWs;
+        let beta = 'beta';
+
+        if(self.currentDTVersionData[beta]) {
+            betaFWs = self.currentDTVersionData[beta]
+            // Select the highest FW version.
+            betaFWs.forEach(function(betaFW) {
+                const versionStr = betaFW.version;
+                const version = parseFloat(versionStr, 10);
+                if(version > selectedVersion) {
+                    selectedVersion = version;
+                    selectedFW = betaFW;
+                }
+            });
+            selectedFW.latest = true;
+        }
+    };
     this.getSelectedFirmwareData = function(key) {
         let selectedFW;
 
@@ -184,6 +205,8 @@ function module() {
         onSuccess();
     };
 
+
+    // To-Do: Update changeLogLinks!!!!
     const deviceSpecificInfo = {
         'T4': {
             'changeLogLink': 'https://labjack.com/support/firmware/t4',
@@ -256,6 +279,9 @@ function module() {
 
             // Select a firmware version to use by default.
             self.selectNewestCurrentFirmware();
+
+            // Mark the current beta as well.
+            self.selectNewestBetaFirmware();
 
             // Execute other FW file selecting functions.
             self.moduleContext.selectedFW = self.templates.selected_firmware(

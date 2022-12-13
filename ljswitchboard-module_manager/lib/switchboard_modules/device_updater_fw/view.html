@@ -45,7 +45,7 @@
                   <a tabindex="-1">Beta</a>
                   <ul class="dropdown-menu">
                     {{#each beta}}
-                    <li><a class="firmware-selection-link" id="{{key}}">{{version}} -{{type}}</a></li>
+                    <li><a class="firmware-selection-link" id="{{key}}">{{version}} -{{type}} {{#if latest}}(latest){{/if}}</a></li>
                     {{/each}}
                   </ul>
                 </li>

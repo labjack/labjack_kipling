@@ -93,6 +93,7 @@ class labjackVersionManager extends EventEmitter {
                 // {"url": "https://old3.labjack.com/support/firmware/t4", "type": "organizer-current"},
                 {"url": "https://files.labjack.com/firmware/T4/Current/", "type": "current"},
                 {"url": "https://files.labjack.com/firmware/T4/Beta/", "type": "beta"},
+                {"url": "https://files.labjack.com/firmware/T4/Old/", "type": "old"},
                 // {"url": "https://old3.labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
