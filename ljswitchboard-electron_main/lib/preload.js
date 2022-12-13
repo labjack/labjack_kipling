@@ -1,6 +1,7 @@
 console.info('preload start');
 
 const electron = require('electron');
+const remote = require('@electron/remote')
 
 console.log('NODE_PATH', process.env.NODE_PATH);
 require('module').Module._initPaths(); // Fix node_modules path
@@ -8,17 +9,17 @@ const Flatted = require('./Flatted');
 
 process.argv.forEach(arg => {
     if (arg.startsWith('--packageName=')) {
-        global.packageName = arg.substr('--packageName='.length);
+        global.packageName = arg.substring('--packageName='.length);
     }
 });
 
-console.log("global.packageName:", global.packageName);
+// console.log("global.packageName:", global.packageName);
 
 for (const level of ['log', 'error', 'warn', 'info', 'verbose', 'debug', 'silly']) {
     global.console['_' + level] = global.console[level];
     global.console[level] = (...args) => {
         global.console['_' + level](...args);
-        const mainLogger = electron.remote.getGlobal('mainLogger');
+        const mainLogger = remote.getGlobal('mainLogger');
         const now = new Date();
 
         let initiator = '';
@@ -97,7 +98,7 @@ for (const level of ['log', 'error', 'warn', 'info', 'verbose', 'debug', 'silly'
     };
 }
 
-const package_loader = electron.remote.getGlobal('package_loader');
+const package_loader = remote.getGlobal('package_loader');
 global.package_loader = package_loader;
 global.gui = package_loader.getPackage('gui');
 

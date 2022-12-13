@@ -19,14 +19,14 @@
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljm-shell_logger",
   "dependencies": {
-    "async": "3.2.0",
+    "async": "^3.2.4",
     "chalk": "1.1.x",
-    "q": "1.5.1",
+    "q": "^1.5.1",
     "shell": "0.3.x",
     "terminal-control": "0.0.4"
   },
   "devDependencies": {
-    "diff": ">=3.5.0",
+    "diff": "^4.0.1",
     "mocha": "^8.2.1",
     "chai": "^4.2.0",
     "supports-color": "3.1.0"

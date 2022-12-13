@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_device_curator",
   "dependencies": {
-    "async": "3.2.0",
+    "async": "^3.2.4",
     "compute-gcd": "1.2.0",
     "dns-chk-https-get": "^1.0.0",
     "labjack-nodejs": "*",
@@ -44,7 +44,7 @@
     "ljswitchboard-data_parser": "*",
     "ljswitchboard-ljm_driver_constants": "*",
     "ljswitchboard-modbus_map": "*",
-    "q": "1.5.1",
+    "q": "^1.5.1",
     "semver": "^7.1.1",
     "stats-lite": "2.2.0"
   },
@@ -58,7 +58,7 @@
   },
   "devDependencies": {
     "colors": "1.4.0",
-    "diff": ">=3.5.0",
+    "diff": "^4.0.1",
     "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },

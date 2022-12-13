@@ -34,9 +34,9 @@
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-io_manager",
   "dependencies": {
-    "async": "3.2.0",
+    "async": "^3.2.4",
     "comment-json": "2.x.x",
-    "handlebars": "4.7.6",
+    "handlebars": "^4.7.7",
     "json-parser": "^3.1.2",
     "labjack-nodejs": "*",
     "ljm-ffi": "*",
@@ -53,11 +53,11 @@
     "ljswitchboard-version_manager": "*",
     "lodash": "^4.17.15",
     "process_manager": "*",
-    "q": "1.5.1"
+    "q": "^1.5.1"
   },
   "devDependencies": {
     "colors": "1.4.0",
-    "diff": ">=3.5.0",
+    "diff": "^4.0.1",
     "fs-extra": "^9.0.1",
     "mocha": "^8.2.1",
     "chai": "^4.2.0"

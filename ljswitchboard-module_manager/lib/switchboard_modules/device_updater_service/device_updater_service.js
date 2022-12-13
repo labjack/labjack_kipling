@@ -23,10 +23,14 @@ function createDeviceUpdaterService() {
 	this.getCachedT4Versions = function() {
 		return update_manager_vm.getCachedT4Versions();
 	};
+	this.getCachedT8Versions = function() {
+		return update_manager_vm.getCachedT8Versions();
+	};
 
 	var supportedDevices = [
 		't7',
 		't4',
+		't8',
 		// 'digit',
 	];
 	this.getLatestCurrentFwForDevice = function(deviceType) {

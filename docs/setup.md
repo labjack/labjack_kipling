@@ -3,7 +3,7 @@
 ## Prerequisites
 
  - Install the [LJM library](https://labjack.com/support/software/installers/ljm).
- - Install Node 12.16.3.
+ - Install Node 16.15.0.
      - This version is likely to change. Use `nave` or `nvm` to manage node versions.
  - Install git
 

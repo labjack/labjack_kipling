@@ -29,18 +29,18 @@
     ],
     "dependencies": {
         "allocate_buffer": "^1.0.0",
-        "async": "3.2.0",
+        "async": "^3.2.4",
         "diff": "^4.0.1",
         "ljm-ffi": "*",
         "ljswitchboard-ljm_driver_constants": "*",
         "ljswitchboard-modbus_map": "*",
-        "q": "1.5.1",
+        "q": "^1.5.1",
         "ref-napi": "^3.0.1"
     },
     "devDependencies": {
         "deep-eql": "^4.0.0",
         "rewire": "4.0.1",
-        "diff": ">=3.5.0",
+        "diff": "^4.0.1",
         "mocha": "^8.2.1",
         "chai": "^4.2.0"
     },

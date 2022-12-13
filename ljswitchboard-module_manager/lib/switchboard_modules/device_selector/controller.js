@@ -394,7 +394,7 @@ class ModuleInstance extends EventEmitter {
 
 					if(typeof(err) === 'number') {
 						// Handle LJM Error codes.
-						console.log('HERE', modbus_map, modbus_map.getErrorInfo);
+						// console.log('HERE', modbus_map, modbus_map.getErrorInfo.val);
 						const errorInfo = modbus_map.getErrorInfo(err);
 						const numStr = errorInfo.error.toString();
 						let errorText = 'Failed to connect to the selected device';

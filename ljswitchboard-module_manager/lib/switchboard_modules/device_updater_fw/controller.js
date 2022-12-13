@@ -13,6 +13,7 @@
 const handlebars = require('handlebars');
 const path = require('path');
 const fs = require('fs');
+// eslint-disable-next-line import/no-unresolved
 const firmware_verifier = require('ljswitchboard-firmware_verifier');
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -48,6 +49,11 @@ function module() {
         console.error('Error parsing file', err);
     }
     try {
+        this.t8VersionData = deviceUpdaterService.getCachedT8Versions();
+    } catch(err) {
+        console.error('Error getting cached T8 versions');
+    }
+    try {
         this.t7VersionData = deviceUpdaterService.getCachedT7Versions();
     } catch(err) {
         console.error('Error getting cached T7 versions');
@@ -55,7 +61,7 @@ function module() {
     try {
         this.t4VersionData = deviceUpdaterService.getCachedT4Versions();
     } catch(err) {
-        console.error('Error getting cached T4 versions');
+        console.error('Error getting cached T4 versions', err);
     }
 
     const defaultVersionData = {
@@ -65,13 +71,14 @@ function module() {
         'isValid': false
     };
 
-    this.moduleContext.t7VersionData = this.t7VersionData;
     this.moduleContext.t4VersionData = this.t4VersionData;
+    this.moduleContext.t7VersionData = this.t7VersionData;
+    this.moduleContext.t8VersionData = this.t8VersionData;
 
     this.availableVersionData = {
         'T4': this.t4VersionData,
         'T7': this.t7VersionData,
-        'T8': defaultVersionData,
+        'T8': this.t8VersionData,
     };
     this.currentDTVersionData = {};
     this.selectedDT = '';
@@ -96,6 +103,8 @@ function module() {
         currentFWs.forEach(function(currentFW) {
             const versionStr = currentFW.version;
             const version = parseFloat(versionStr, 10);
+            // this is where the program is seeing if the selected version is 
+            // larger than the curent version
             if(version > selectedVersion) {
                 selectedVersion = version;
                 selectedFW = currentFW;
@@ -103,6 +112,26 @@ function module() {
         });
         selectedFW.latest = true;
         self.userSelectedFW = selectedFW;
+    };
+    this.selectNewestBetaFirmware = function() {
+        let selectedFW = {};
+        let selectedVersion = 0;
+        let betaFWs;
+        let beta = 'beta';
+
+        if(self.currentDTVersionData[beta]) {
+            betaFWs = self.currentDTVersionData[beta]
+            // Select the highest FW version.
+            betaFWs.forEach(function(betaFW) {
+                const versionStr = betaFW.version;
+                const version = parseFloat(versionStr, 10);
+                if(version > selectedVersion) {
+                    selectedVersion = version;
+                    selectedFW = betaFW;
+                }
+            });
+            selectedFW.latest = true;
+        }
     };
     this.getSelectedFirmwareData = function(key) {
         let selectedFW;
@@ -176,6 +205,8 @@ function module() {
         onSuccess();
     };
 
+
+    // To-Do: Update changeLogLinks!!!!
     const deviceSpecificInfo = {
         'T4': {
             'changeLogLink': 'https://labjack.com/support/firmware/t4',
@@ -248,6 +279,9 @@ function module() {
 
             // Select a firmware version to use by default.
             self.selectNewestCurrentFirmware();
+
+            // Mark the current beta as well.
+            self.selectNewestBetaFirmware();
 
             // Execute other FW file selecting functions.
             self.moduleContext.selectedFW = self.templates.selected_firmware(

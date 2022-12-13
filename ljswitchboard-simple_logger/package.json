@@ -28,7 +28,7 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "async": "3.2.0",
+    "async": "^3.2.4",
     "compute-gcd": "1.2.0",
     "fs-extra": "^9.0.1",
     "labjack-nodejs": "*",
@@ -37,10 +37,10 @@
     "ljswitchboard-ljm_device_curator": "*",
     "ljswitchboard-ljm_driver_constants": "*",
     "ljswitchboard-modbus_map": "*",
-    "q": "1.5.1"
+    "q": "^1.5.1"
   },
   "devDependencies": {
-    "diff": ">=3.5.0",
+    "diff": "^4.0.1",
     "mocha": "^8.2.1",
     "chai": "^4.2.0"
   },
