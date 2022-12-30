@@ -91,6 +91,7 @@ class ModuleInstance extends EventEmitter {
             sdModule = new module();
             console.log('11112');
             global.sdModule = sdModule;
+            console.warn(this.sdFramework)
 
             this.sdFramework.numModuleReloads = 0;
             this.sdFramework.currentModuleName = moduleData.name;
@@ -164,10 +165,20 @@ class ModuleInstance extends EventEmitter {
         }
     }
 
+    saveFormData(moduleData) {
+        this.sdFramework.saveModuleInfo(
+            moduleData.data,
+            moduleData.data.json.moduleConstants,
+            sdModule,
+            moduleData
+        );
+    }
+
     loadModule(moduleData) {
         if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('loading framework module', moduleData.data);
         }
+        console.warn("moduleData", moduleData)
         return new Promise((resolve) => {
             try {
                 //Configure framework's update frequency
@@ -179,8 +190,6 @@ class ModuleInstance extends EventEmitter {
                     this.sdFramework.setRefreshRate(1000);
                 }
 
-                console.log('moduleData', moduleData);
-
                 const moduleViewPath = path.join(moduleData.data.path, 'view.html');
                 const moduleDataPath = path.join(moduleData.data.path, 'moduleData.json');
 
@@ -189,13 +198,8 @@ class ModuleInstance extends EventEmitter {
                 this.sdFramework.configFramework(moduleViewPath);
                 this.sdFramework.configureFrameworkData([moduleDataPath]);
 
-                //Save loaded module data to the framework instance
-                this.sdFramework.saveModuleInfo(
-                    moduleData.data,
-                    moduleData.data.json.moduleConstants,
-                    sdModule,
-                    moduleData
-                );
+                // saves the module data into data.json
+                this.saveFormData(moduleData);
 
                 this.sdFramework.ljmDriver = new FakeDriver();
 

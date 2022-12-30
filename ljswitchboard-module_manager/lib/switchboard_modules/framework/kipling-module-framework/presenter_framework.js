@@ -2815,6 +2815,7 @@ class PresenterFramework extends EventEmitter {
         }
     }
 
+    // TO-DO may need to be async - jimmy
     configureLoopTimer() {
         this.frameworkLoopProcessing = false;
         this.frameworkLoopReference = setTimeout(
