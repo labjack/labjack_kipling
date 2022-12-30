@@ -89,13 +89,6 @@ const localK3FilesPath = {
   darwin: '/usr/local/share/LabJack/K3',
   linux:  '/usr/local/share/LabJack/K3',
 }[buildOS];
-// console.warn("buildOS", buildOS)
-// console.warn("localK3FilesPath", localK3FilesPath);
-// let filepath = {"localK3FilesPath":localK3FilesPath};
-// global.filepath = filepath;
-// global.localK3FilesPath = localK3FilesPath;
-// global.localK3FilesPath = 123
-// console.warn("global.localK3FilesPath", global.localK3FilesPath)
 
 
 const np_sep = (process.platform === 'win32') ? ';' : ':';
@@ -106,7 +99,6 @@ process.env.NODE_PATH = path.join(__dirname, 'node_modules') + np_sep +
 require('module').Module._initPaths();
 
 const package_loader = new PackageLoader();
-global.localK3FilesPath = localK3FilesPath;
 global.package_loader = package_loader;
 
 const window_manager = new WindowManager();

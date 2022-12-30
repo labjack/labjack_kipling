@@ -102,6 +102,21 @@ const package_loader = remote.getGlobal('package_loader');
 global.package_loader = package_loader;
 global.gui = package_loader.getPackage('gui');
 
+
+// Allow access to Local K3 File Path From Any Module
+const buildOS = {
+    'darwin': 'darwin',
+    'win32': 'win32'
+  }[process.platform] || 'linux';
+  
+const localK3FilesPath = {
+    win32: 'C:\\ProgramData\\LabJack\\K3',
+    darwin: '/usr/local/share/LabJack/K3',
+    linux:  '/usr/local/share/LabJack/K3',
+}[buildOS];
+
+global.localK3FilesPath = localK3FilesPath;
+
 if (-1 === ['ljswitchboard-electron_splash_screen'].indexOf(global.packageName)) {
     global.handlebars = require('handlebars');
     global.ljmmm_parse = require('ljmmm-parse');

@@ -6,7 +6,7 @@
 const { file } = require('grunt');
 var path = require('path');
 
-
+const localK3FilesPath = global.localK3FilesPath;
 /* exported activeModule, module, MODULE_UPDATE_PERIOD_MS */
 
 /**
@@ -120,7 +120,7 @@ function module() {
             console.warn("err", err)
         }
         console.warn(global)
-        console.warn(global.localK3FilesPath)
+        console.warn(global.K3FilesPath)
         const theThingIHope = require('../../ljswitchboard-module_manager/lib/ljswitchboard-module_manager.js')
         let {dummyFunction} = theThingIHope
         
