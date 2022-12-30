@@ -111,45 +111,10 @@ function module() {
     };
     this.saveRegisterWatchStatus = function(registerName, newState) {
         self.initializeTableWatchRegisterCacheVal(registerName, newState);
-        try{
-            // var some = $.getScript('../../ljswitchboard-module_manager/lib/ljswitchboard-module_manager.js');
-            // const theThingIHope = require('../../ljswitchboard-module_manager/lib/ljswitchboard-module_manager.js')
-            // let { data } = theThingIHope
-            // console.warn("data", data);
-        }catch(err){
-            console.warn("err", err)
-        }
-        console.warn(global)
-        console.warn(global.K3FilesPath)
-        const theThingIHope = require('../../ljswitchboard-module_manager/lib/ljswitchboard-module_manager.js')
-        let {dummyFunction} = theThingIHope
-        
-        var x = theThingIHope.dummyFunction;
-        console.warn("X", x)
-        var MODULES_DIR_NAME = 'switchboard_modules';
-        // var dataManager = {};
-        var cwd = path.dirname('data-tester.json');
-        var MODULES_DIR = path.join(cwd, MODULES_DIR_NAME);
-        var MODULE_PERSISTENT_DATA_FILE_NAME = 'data-tester.json';
-        var MODULES_PERSISTENT_DATA_PATH = MODULES_DIR;
-        console.warn(MODULES_PERSISTENT_DATA_PATH);
-        console.warn("module.filename", module.filename);
-
-        var moduleDataDir = path.normalize(path.join(
-            MODULES_PERSISTENT_DATA_PATH,
-            'register_matrix_fw'
-        ));
-        var filePathToUse = path.normalize(path.join(moduleDataDir, MODULE_PERSISTENT_DATA_FILE_NAME));
-        console.warn(filePathToUse)
-        console.warn(cwd)
-
-        // TO-DO add the implementation thats at the end of the file here to be able to remove 
-        // what is needed to be removed - Zander
         const fs = require('fs');
         var registerNum = self.activeDevice.savedAttributes.serialNumber;
         // the const so we have the file path to add the data
-        const filePath = ("../../../../../../../../ProgramData/LabJack/K3/module_data/register_matrix_fw/data-tester.json");
-        // console.warn(filePath);
+        const filePath = path.join(global.localK3FilesPath, "/module_data/register_matrix_fw/data.json");
         const data = JSON.parse(fs.readFileSync(filePath));
 
         if(newState) {
@@ -214,7 +179,6 @@ function module() {
     });
 
     this.saveActiveRegisters = function() {
-        // this could still be a posability
         var registerList = [];
         var keys = Object.keys(self.tableWatchRegisterCache);
         keys.forEach(function(key) {
@@ -358,7 +322,6 @@ function module() {
     this.onModuleLoaded = function(framework, onError, onSuccess) {
         self.startupData = framework.startupData;
         self.moduleName = framework.moduleData.name;
-        console.warn("framework", framework)
 
         // Compile required template files
         compileTemplates(framework);
@@ -494,8 +457,6 @@ function module() {
             registerList.push(register.name);
         });
 
-        // Zander!!! This might be the spot
-        console.warn(registerList)
         self.displayedRegisters = registerList;
         dbgIDR('In cachedRegistersToDisplay, updated self.displayedRegisters to:', registerList);
         dbgIDR('In cachedRegistersToDisplay, resolving to:', registers);
