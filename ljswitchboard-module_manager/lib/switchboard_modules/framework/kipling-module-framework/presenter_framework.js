@@ -2487,6 +2487,7 @@ class PresenterFramework extends EventEmitter {
         const formats = [];
         const customFormatFuncs = [];
         const bindings = [];
+        const value = [];
 
         // Loop through all registered bindings and determine what should be
         // done.
@@ -2510,6 +2511,7 @@ class PresenterFramework extends EventEmitter {
                 bindings.push(value);
 
                 // Re-set the binding's delay with the new delay
+                // console.error("value:", value, "current delay:", value.currentDelay, "iteration delay:", value.iterationDelay)
                 value.currentDelay = value.iterationDelay;
                 this.readBindings.set(key, value);
             } else {
@@ -2526,7 +2528,7 @@ class PresenterFramework extends EventEmitter {
                 bindings: bindings
             };
         } else {
-            throw 'delay1';
+            throw 'delay';
         }
     }
 
@@ -2721,13 +2723,13 @@ class PresenterFramework extends EventEmitter {
         // Make sure that this framework instance is active.
         if (!this.frameworkActive) {
             this.isDAQLoopActive = false;
-            throw 'stoppingLoop0';
+            throw 'stoppingLoop';
         }
 
         // Make sure that the loop should be executing.
         if (!this.runLoop) {
             this.isDAQLoopActive = false;
-            throw 'stoppingLoop1';
+            throw 'stoppingLoop';
         }
     }
 
@@ -2767,6 +2769,7 @@ class PresenterFramework extends EventEmitter {
                 await this.verifyFrameworkIsActive();
 
              } catch (err) {
+                // console.error("\n==== Presenter Framework innerRunDAQLoop caught error ====\n", "Error: ", err, "\nreadBindings: ", this.readBindings, "\nbindingsInfo: ", bindingsInfo,"\n===================\n")
                 if (err !== 'delay') {
                     if (err === 'stoppingLoop') {
                         return Promise.reject(err);
@@ -2786,9 +2789,9 @@ class PresenterFramework extends EventEmitter {
                                             'onRefreshError b/c loopIteration.reportError',
                                             err
                                         );
-                                        reject(new Error('delay2'));
+                                        reject(new Error('delay'));
                                     } else {
-                                        reject(new Error('stoppingLoop2'));
+                                        reject(new Error('stoppingLoop'));
                                     }
                                 }
                             );

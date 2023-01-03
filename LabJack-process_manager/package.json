@@ -1,6 +1,6 @@
 {
     "name": "process_manager",
-    "version": "0.0.18",
+    "version": "0.0.17",
     "author": {
         "name": "Chris Johnson",
         "url": "https://labjack.com"
@@ -24,16 +24,16 @@
         "node_modules"
     ],
     "dependencies": {
-        "async": "3.2.0",
-        "q": "1.5.1"
+        "async": "^3.2.4",
+        "q": "^1.5.1"
     },
     "scripts": {
         "test": "mocha test/**/*test.js"
     },
     "devDependencies": {
-        "chai": "^4.2.0",
-        "diff": ">=3.5.0",
-        "mocha": "^8.2.1"
+        "diff": "^4.0.1",
+        "mocha": "^8.2.1",
+        "chai": "^4.2.0"
     },
     "directories": {
         "lib": "./lib",

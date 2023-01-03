@@ -1,6 +1,6 @@
 {
     "name": "ljswitchboard-ljm_driver_constants",
-    "version": "1.0.5",
+    "version": "1.0.4",
     "description": "Library dedicated only to storing important LJM constants",
     "author": {
         "name": "Chris Johnson",
@@ -27,10 +27,11 @@
     "files": [
         "lib"
     ],
+    "dependencies": {},
     "devDependencies": {
-        "chai": "^4.2.0",
-        "diff": ">=3.5.0",
-        "mocha": "^8.2.1"
+        "diff": "^4.0.1",
+        "mocha": "^8.2.1",
+        "chai": "^4.2.0"
     },
     "scripts": {
         "test": "mocha"

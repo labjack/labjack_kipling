@@ -56,43 +56,43 @@ function printVersions(versionData) {
 }
 describe('t4_test', function() {
 	return;
-	this.skip();
-	it('require version_manager', function (done) {
+	it('require version_manager', function(done) {
 		version_manager = require('../lib/version_manager');
 		done();
 	});
-	// 'get initial T4 Versions': function(test) {
+	// it('get initial T4 Versions', function(done) {
 	// 	var data = version_manager.lvm.getCachedT4Versions();
+	// 	console.log(JSON.stringify(data));
 	// 	assert.isOk(!data.isValid, 'T4 Firmware data should not be valid yet');
 	// 	done();
-	// },
-	it('initialize version_manager', function (done) {
+	// });
+	it('initialize version_manager', function(done) {
 		var startTime = new Date();
 		version_manager.getAllVersions()
 		.then(function(data) {
 			var endTime = new Date();
 			addExecutionTime('Initialization', startTime, endTime);
 			assert.isOk(true);
-			versionData = data;
-			validateVersionData(assert, data, false);
+			// versionData = data;
+			// validateVersionData(test, data, true);
 			done();
 		}, function(err) {
 			assert.isOk(false, 'Error initializing version_manager');
 			done();
 		});
 	});
-	it('get T4 Versions', function (done) {
+	it('get T4 Versions', function(done) {
 		var data = version_manager.lvm.getCachedT4Versions();
 		assert.isOk(data.isValid, 'T4 Firmware data should be valid');
 		var requiredKeys = [
 			'current',
-			// 'old',
-			// 'beta'
+			'old',
+			'beta'
 		];
 
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
-		// printVersions(data);
+		printVersions(data);
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;

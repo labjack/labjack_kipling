@@ -26,11 +26,11 @@ const buildOpts = {
 };
 
 if ('darwin' === buildOS) {
-    buildOpts.mac = ['default'];
+    //buildOpts.mac = ['default'];
 } else if ('win32' === buildOS) {
-    buildOpts.win = ['default'];
+    //buildOpts.win = ['default'];
 } else {
-    buildOpts.linux = ['default'];
+    //buildOpts.linux = ['default'];
 }
 
 async function fixSnapName() {
@@ -67,7 +67,7 @@ builder
         return fixSnapName();
     })
     .catch((err) => {
-        console.error(err);
+        console.error("Electron Builder Error: ", err);
         // handle error
         process.exit(1);
     });

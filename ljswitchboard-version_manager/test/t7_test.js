@@ -56,32 +56,31 @@ function printVersions(versionData) {
 }
 describe('t7_test', function() {
 	return;
-	this.skip();
-	it('require version_manager', function (done) {
+	it('require version_manager', function(done) {
 		version_manager = require('../lib/version_manager');
 		done();
 	});
-	// 'get initial T7 Versions': function(test) {
+	// it('get initial T7 Versions', function(done) {
 	// 	var data = version_manager.lvm.getCachedT7Versions();
 	// 	assert.isOk(!data.isValid, 'T7 Firmware data should not be valid yet');
 	// 	done();
-	// },
-	it('initialize version_manager', function (done) {
+	// });
+	it('initialize version_manager', function(done) {
 		var startTime = new Date();
 		version_manager.getAllVersions()
 		.then(function(data) {
 			var endTime = new Date();
 			addExecutionTime('Initialization', startTime, endTime);
 			assert.isOk(true);
-			versionData = data;
-			validateVersionData(test, data, false);
+			// versionData = data;
+			// validateVersionData(test, data, true);
 			done();
 		}, function(err) {
 			assert.isOk(false, 'Error initializing version_manager');
 			done();
 		});
 	});
-	it('get T7 Versions', function (done) {
+	it('get T7 Versions', function(done) {
 		var data = version_manager.lvm.getCachedT7Versions();
 		assert.isOk(data.isValid, 'T7 Firmware data should be valid');
 		var requiredKeys = [
@@ -92,7 +91,7 @@ describe('t7_test', function() {
 
 		// Print out data
 		// console.log(' - Test Output:', JSON.stringify(data, null, 2));
-		// printVersions(data);
+		printVersions(data);
 		var givenKeys = Object.keys(data);
 		requiredKeys.forEach(function(reqKey) {
 			var isOk = false;

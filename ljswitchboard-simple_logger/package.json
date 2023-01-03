@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-simple_logger",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "A simple data logger for LabJack devices.",
   "main": "./lib/ljswitchboard-simple_logger",
   "scripts": {
@@ -28,21 +28,21 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "async": "3.2.0",
+    "async": "^3.2.4",
     "compute-gcd": "1.2.0",
     "fs-extra": "^9.0.1",
-    "labjack-nodejs": "^2.0.1",
-    "ljswitchboard-data_parser": "^1.0.2",
-    "ljswitchboard-device_manager": "^1.0.1",
+    "labjack-nodejs": "*",
+    "ljswitchboard-data_parser": "*",
+    "ljswitchboard-device_manager": "*",
     "ljswitchboard-ljm_device_curator": "*",
-    "ljswitchboard-ljm_driver_constants": "^1.0.5",
-    "ljswitchboard-modbus_map": "^1.0.4",
-    "q": "1.5.1"
+    "ljswitchboard-ljm_driver_constants": "*",
+    "ljswitchboard-modbus_map": "*",
+    "q": "^1.5.1"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "diff": ">=3.5.0",
-    "mocha": "^8.2.1"
+    "diff": "^4.0.1",
+    "mocha": "^8.2.1",
+    "chai": "^4.2.0"
   },
   "directories": {
     "lib": "./lib"
