@@ -75,7 +75,7 @@
     }, {
         "name": "simple_logger",
         "description": "A starting point for the device logger.",
-        "active": false
+        "active": true
     }, {
         "name": "file_browser_fw",
         "description":"A SD Card file browser for the T7.",
