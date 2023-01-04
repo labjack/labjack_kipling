@@ -17,8 +17,8 @@
           <ul id="modal_register_list" class="boxes">
             {{#each startupRegisters}}
               <li class="boxes1">
-                <input class="checekbx" type="checkbox" id="check{{@index}}" value="{{this}}" checked>
-                <label for="check{{@index}}" id="checkId{{@index}}">{{this}}</label><br>
+                <input class="checkbox" type="checkbox" id="check{{@index}}"" value="{{this}}" checked>
+                <label for="check{{@index}}" id="checkId{{@index}}"">{{this}}</label><br>
               </li>
             {{/each}}
           </ul>
@@ -254,10 +254,12 @@
              </script>
             </li>
           </ul>
-        </div><!-- /.container -->
+        </div> 
+        <!-- /.container -->
       </div>
     </div>
-  </div><!-- /#logger_controls -->
+  </div>
+  <!-- /#logger_controls -->
   <!-- <div id="config_view" class="config-pannel">
     <pre id="currentConfigDisp" style="visibility: hidden;"></pre> -->
     <!-- <div id="config_forum"> -->
@@ -358,7 +360,7 @@
               //alert( MAX_REGISTERS );
               
               for(var i = 0; i < "{{MAX_REGISTERS}}"; i++) {
-              var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i + 1} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+              var registerHTML = "<div class='col-sm-6'> <small id='regCheck' class='form-text text-muted invalid-feedback'> Register #${i + 1} </small> <input type='text' class='form-control register-input' id='validationCustom0${i}' name='array[]' oninput='this.value = this.value.toUpperCase()'> <span class = 'clear-input'>x</span> </div>"
               $("#something").append(registerHTML);
               }
               //document.getElementById("something").innerHTML = registerHTML;
@@ -525,7 +527,7 @@
         $(document).ready(function () {
           $('.datviewContainer').hide();
           $('#formContainer').show();
-          const { dialog } = require('electron').remote; 
+          const { dialog } = require('@electron/remote')
           var fs = require('fs');
 
           $("#confirmModal")
