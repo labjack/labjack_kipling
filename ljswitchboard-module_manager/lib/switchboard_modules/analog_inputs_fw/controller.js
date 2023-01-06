@@ -114,6 +114,9 @@ function module() {
 
     var ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
     var ain_ef_type_map = globalDeviceConstants.t7DeviceConstants.ainEFTypeMap;
+
+    var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
+    var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
     this.ain_ef_type_map = ain_ef_type_map;
 
     // Supported analog input range options.
@@ -121,15 +124,21 @@ function module() {
 
     var ainRangeOptions = globalDeviceConstants.t7DeviceConstants.ainRangeOptions;
 
+    var ainRangeOptions = globalDeviceConstants.t4DeviceConstants.ainRangeOptions;
+
     // Supported analog input resolution options.
     var ainResolutionOptions = globalDeviceConstants.t8DeviceConstants.ainResolutionOptions;
 
     var ainResolutionOptions = globalDeviceConstants.t7DeviceConstants.ainResolutionOptions;
 
+    var ainResolutionOptions = globalDeviceConstants.t4DeviceConstants.ainResolutionOptions;
+
     // Supported analog input resolution options.
     var ainSettlingOptions = globalDeviceConstants.t8DeviceConstants.ainSettlingOptions;
 
     var ainSettlingOptions = globalDeviceConstants.t7DeviceConstants.ainSettlingOptions;
+
+    var ainSettlingOptions = globalDeviceConstants.t4DeviceConstants.ainSettlingOptions;
 
     // efTypeName template
     var ainEFTypeNameTemplate;
@@ -210,6 +219,8 @@ function module() {
     };
 
     // Supported extra options
+    var extraAllAinOptions = globalDeviceConstants.t4DeviceConstants.extraAllAinOptions;
+
     var extraAllAinOptions = globalDeviceConstants.t7DeviceConstants.extraAllAinOptions;
 
     var extraAllAinOptions = globalDeviceConstants.t8DeviceConstants.extraAllAinOptions;
@@ -462,7 +473,9 @@ function module() {
         onSuccess();
     };
     this.genericDropdownClickHandler = function(data, onSuccess) {
-        var rootEl = data.eventData.toElement;
+        var rootEl = data.eventData.target;
+        // console.warn("1", data.eventData)
+        // it was toElement
         var className = rootEl.className;
         var buttonEl;
         var buttonID = '';
@@ -475,11 +488,13 @@ function module() {
 
         if(className === 'menuOption') {
             self.bufferedOutputValues.set(FORCE_AIN_VAL_REFRESH,1);
+            console.warn("rootEl before", rootEl)
             buttonEl = rootEl.parentElement.parentElement.parentElement;
             buttonID = buttonEl.id;
             selectEl = buttonEl.children[0].children[0];
             register = buttonID.split('-SELECT')[0];
             value = Number(rootEl.getAttribute('value'));
+            console.warn("rootEl", buttonEl)
             newText = rootEl.text;
             newTitle = register + ' is set to ' + value.toString();
 
@@ -795,6 +810,7 @@ function module() {
     };
 
     this.getCurrentBufferedVal = function(key,defaultVal) {
+        console.warn("getCurrentbufferVal")
         if(self.bufferedOutputValues.has(key)) {
             return self.bufferedOutputValues.get(key);
         } else {
@@ -1256,7 +1272,7 @@ function module() {
                 };
                 newBinding.periodicCallback = getCallback(menuOptions);
             } else {
-                efControlsData +=  '<p>Undefined inputType' +regname+'</p>';
+                efControlsData +=  '<p>Undefined inputType' +regName+'</p>';
             }
 
             // Add config register to bindings list
@@ -1470,15 +1486,18 @@ function module() {
                             var rangeStr = newData.value.toString();
                             ainInfo.rangeVal = newData.value;
                             ainInfo.rangeStr = name + ' is set to ' + rangeStr;
+                            console.warn("ainInfo.rangeStr", ainInfo.rangeStr )
                         }
                         ainInfo.optionsDict.set(name, menuOptions);
                     } else {
                         var roundedRes = value.toFixed(self.ANALOG_INPUT_PRECISION);
+                        console.warn("value", value)
                         ainInfo.value = value;
                         ainInfo.strVal = roundedRes + ' V';
                     }
 
                     // Update saved values
+                    console.warn("ainInfo", ainInfo)
                     self.analogInputsDict.set('AIN'+index.toString(), ainInfo);
                 }
             }
@@ -1520,26 +1539,29 @@ function module() {
             case 1.2:
                 val = value / (range + 0.8);
                 break;
-            case 0.6:
-                val = value / (range + 0.8);
-                break;
-            case 0.3:
-                val = value / (range + 0.8);
-                break;
-            case 0.15:
-                val = value / (range + 0.8);
+            case 1:
+                val = value / (range + 0.052);
                 break;
             case 0.75:
+                val = value / (range + 0.8);
+                break;
+            case 0.6:
                 val = value / (range + 0.8);
                 break;
             case 0.36:
                 val = value / (range + 0.8);
                 break;
+            case 0.3:
+                val = value / (range + 0.8);
+                break;
             case 0.18:
                 val = value / (range + 0.8);
                 break;
-            case 1:
-                val = value / (range + 0.052);
+            case 0.15:
+                val = value / (range + 0.8);
+                break;
+            case 0.13:
+                val = value / (range + 0.5);
                 break;
             case 0.1:
                 val = value / (range + 0.0051);
@@ -1630,6 +1652,7 @@ function module() {
         }
     };
     this.updateD3Graph = function(name,curVal) {
+        console.warn("update3Dgraphs")
         var curRange = self.currentValues.get(name + '_RANGE');
         if(curRange == 0.08){
             curRange = 0.075;
@@ -1722,6 +1745,7 @@ function module() {
         try {
             var clearCurAINREadings = false;
             self.bufferedOutputValues.forEach(function(value,name){
+                console.warn(name)
                 if(name === FORCE_AIN_VAL_REFRESH) {
                     baseRegisters.forEach(function(baseRegister) {
                         var oldVal = self.currentValues.get(baseRegister);
@@ -1746,7 +1770,7 @@ function module() {
                         selectEl = buttonEl.find('.currentValue');
                         var parserFunc = self.regParserGet(name, value);
                         if(typeof(parserFunc) === 'undefined') {
-                            // console.log('parserFunc not defined',typeof(parserFunc),name);
+                            console.warn('parserFunc not defined',typeof(parserFunc),name);
                         } else {
                             var newText = parserFunc;
                             var stringVal = value.toString();
