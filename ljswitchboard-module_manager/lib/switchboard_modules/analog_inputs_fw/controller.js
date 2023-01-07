@@ -44,6 +44,7 @@ function module() {
     this.moduleConstants = {};
     this.moduleContext = {};
     this.activeDevice = undefined;
+    this.activeDeviceType = undefined;
     this.framework = undefined;
     this.defineDebuggingArrays = true;
 
@@ -100,45 +101,40 @@ function module() {
     //Define nop (do-nothing) function
     var nop = function(){};
 
-    // Base-Register Variable for Configuring multiple thermocouples.
-    var baseReg = 'AIN#(0:13)';
+    // var baseReg = 'AIN#(0:13)';
+    // var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
 
-    // Expand baseReg & create baseRegister list using ljmmm.
-    // ex: ['AIN0', 'AIN1', ... 'AIN13']
-    var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
 
-    // Define support analog input ef-types
-    var ain_ef_types = globalDeviceConstants.t8DeviceConstants.ainEFTypeOptions;
-    var ain_ef_type_map = globalDeviceConstants.t8DeviceConstants.ainEFTypeMap;
-    // this.ain_ef_type_map = ain_ef_type_map;
-
-    var ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
-    var ain_ef_type_map = globalDeviceConstants.t7DeviceConstants.ainEFTypeMap;
-
-    var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
-    var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
-    this.ain_ef_type_map = ain_ef_type_map;
-
-    // Supported analog input range options.
-    var ainRangeOptions = globalDeviceConstants.t8DeviceConstants.ainRangeOptions;
-
-    var ainRangeOptions = globalDeviceConstants.t7DeviceConstants.ainRangeOptions;
-
-    var ainRangeOptions = globalDeviceConstants.t4DeviceConstants.ainRangeOptions;
-
-    // Supported analog input resolution options.
-    var ainResolutionOptions = globalDeviceConstants.t8DeviceConstants.ainResolutionOptions;
-
-    var ainResolutionOptions = globalDeviceConstants.t7DeviceConstants.ainResolutionOptions;
-
-    var ainResolutionOptions = globalDeviceConstants.t4DeviceConstants.ainResolutionOptions;
-
-    // Supported analog input resolution options.
-    var ainSettlingOptions = globalDeviceConstants.t8DeviceConstants.ainSettlingOptions;
-
-    var ainSettlingOptions = globalDeviceConstants.t7DeviceConstants.ainSettlingOptions;
-
-    var ainSettlingOptions = globalDeviceConstants.t4DeviceConstants.ainSettlingOptions;
+    // console.warn("active device", self.activeDeviceType);
+    // switch (self.activeDeviceType) {
+    //     case 'T8':
+    //         // Base-Register Variable for Configuring multiple thermocouples.
+    //         var baseReg = 'AIN#(0:7)';
+    //         // Expand baseReg & create baseRegister list using ljmmm.
+    //         var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+    //         this.ain_ef_types = globalDeviceConstants.t8DeviceConstants.ainEFTypeOptions;
+    //         var ain_ef_type_map = globalDeviceConstants.t8DeviceConstants.ainEFTypeMap;
+    //         this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+    //         break;
+    //     case 'T7':
+    //         // Base-Register Variable for Configuring multiple thermocouples.
+    //         var baseReg = 'AIN#(0:13)';
+    //         // Expand baseReg & create baseRegister list using ljmmm.
+    //         var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+    //         this.ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
+    //         var ain_ef_type_map = globalDeviceConstants.t7DeviceConstants.ainEFTypeMap;
+    //         this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+    //         break;
+    //     case 'T4':
+    //         // Base-Register Variable for Configuring multiple thermocouples.
+    //         var baseReg = 'AIN#(0:11)';
+    //         // Expand baseReg & create baseRegister list using ljmmm.
+    //         this.baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+    //         this.ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
+    //         var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
+    //         this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+    //         break;
+    // }
 
     // efTypeName template
     var ainEFTypeNameTemplate;
@@ -217,13 +213,6 @@ function module() {
             ];
         }
     };
-
-    // Supported extra options
-    var extraAllAinOptions = globalDeviceConstants.t4DeviceConstants.extraAllAinOptions;
-
-    var extraAllAinOptions = globalDeviceConstants.t7DeviceConstants.extraAllAinOptions;
-
-    var extraAllAinOptions = globalDeviceConstants.t8DeviceConstants.extraAllAinOptions;
 
     this.efTypeDict = new Map();
     this.rangeOptionsDict = new Map();
@@ -488,13 +477,11 @@ function module() {
 
         if(className === 'menuOption') {
             self.bufferedOutputValues.set(FORCE_AIN_VAL_REFRESH,1);
-            console.warn("rootEl before", rootEl)
             buttonEl = rootEl.parentElement.parentElement.parentElement;
             buttonID = buttonEl.id;
             selectEl = buttonEl.children[0].children[0];
             register = buttonID.split('-SELECT')[0];
             value = Number(rootEl.getAttribute('value'));
-            console.warn("rootEl", buttonEl)
             newText = rootEl.text;
             newTitle = register + ' is set to ' + value.toString();
 
@@ -576,7 +563,8 @@ function module() {
             };
 
             if(register.indexOf('AIN_ALL') === 0) {
-                baseRegisters.forEach(function(baseRegister) {
+                console.error("569 base registers used here \n\n")
+                self.baseRegisters.forEach(function(baseRegister) {
                     var reg = baseRegister + register.split('AIN_ALL')[1];
                     self.bufferedOutputValues.set(reg,value);
                 });
@@ -667,6 +655,7 @@ function module() {
     };
 
     this.configureModule = function(onSuccess) {
+        console.error('configureModule\n\n\n')
         var devConstStr;
         var productType;
         var baseReg;
@@ -810,7 +799,6 @@ function module() {
     };
 
     this.getCurrentBufferedVal = function(key,defaultVal) {
-        console.warn("getCurrentbufferVal")
         if(self.bufferedOutputValues.has(key)) {
             return self.bufferedOutputValues.get(key);
         } else {
@@ -860,7 +848,6 @@ function module() {
             var isValid;
 
             if(className === 'menuOption') {
-                console.log('menuClickHandler');
                 self.lastMenuClickEvent = event;
                 buttonEl = rootEl.parentElement.parentElement.parentElement;
                 buttonID = buttonEl.id;
@@ -1324,6 +1311,31 @@ function module() {
         });
     };
 
+    this.configureBaseRegisters = function(deviceTypeName) {
+        console.error("configuring base registers for device type " + deviceTypeName)
+        switch (deviceTypeName) {
+            case 'T8':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                var baseReg = 'AIN#(0:7)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                self.baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                break;
+            case 'T7':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                var baseReg = 'AIN#(0:13)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                self.baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                break;
+            case 'T4':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                var baseReg = 'AIN#(0:11)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                return baseRegisters;
+                break;
+        }
+    }
+
     /**
      * Function is called once every time the module tab is selected, loads the module.
      * @param  {[type]} framework   The active framework instance.
@@ -1331,6 +1343,7 @@ function module() {
      * @param  {[type]} onSuccess   Function to be called when complete.
     **/
     this.onModuleLoaded = function(framework, onError, onSuccess) {
+        console.error('onModuleLoaded\n\n\n\n');
         self.framework = framework;
         compileTemplates(framework);
 
@@ -1358,6 +1371,8 @@ function module() {
         self.resolutionOptionsDict = new Map();
         self.settlingOptionsDict = new Map();
         self.negativeChannelDict = new Map();
+        // we need to delete this but not at this time find a better place to do it. it breaks it
+        // self.baseRegisters = undefined;
     };
     /**
      * Function is called once every time a user selects a new device.
@@ -1367,8 +1382,11 @@ function module() {
      * @param  {[type]} onSuccess   Function to be called when complete.
     **/
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
+        console.error("onDeviceSelected\n\n")
         self.activeDevice = device;
-
+        self.activeDeviceType = device.savedAttributes.deviceTypeName;
+        // self.configureBaseRegisters(self.activeDeviceType);
+        // console.error(self.baseRegisters);
         self.clearCachedData();
 
         framework.clearConfigBindings();
@@ -1378,12 +1396,15 @@ function module() {
 
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
         // Initialize variable where module config data will go.
+        console.error("onDeviceConfigured\n\n");
         self.moduleContext = {};
         self.analogInputsDict.clear();
         if(self.defineDebuggingArrays){
             var analogInputs = [];
         }
-        baseRegisters.forEach(function(reg,index){
+        self.baseRegisters = self.configureBaseRegisters(device.savedAttributes.deviceTypeName);
+        console.error("1378 base registers used here too")
+        self.baseRegisters.forEach(function(reg,index){
             var ainChannel = {
                 "name":reg,
                 "value":null,
@@ -1449,7 +1470,7 @@ function module() {
 
         self.moduleContext.allEFTypeVal = null;
         self.moduleContext.allEFTypesSame = true;
-        self.moduleContext.allEFTypeOptions = ain_ef_types;
+        self.moduleContext.allEFTypeOptions = this.ain_ef_types;
 
         self.currentValues.forEach(function(value,name){
             var dataObj = {};
@@ -1486,18 +1507,15 @@ function module() {
                             var rangeStr = newData.value.toString();
                             ainInfo.rangeVal = newData.value;
                             ainInfo.rangeStr = name + ' is set to ' + rangeStr;
-                            console.warn("ainInfo.rangeStr", ainInfo.rangeStr )
                         }
                         ainInfo.optionsDict.set(name, menuOptions);
                     } else {
                         var roundedRes = value.toFixed(self.ANALOG_INPUT_PRECISION);
-                        console.warn("value", value)
                         ainInfo.value = value;
                         ainInfo.strVal = roundedRes + ' V';
                     }
 
                     // Update saved values
-                    console.warn("ainInfo", ainInfo)
                     self.analogInputsDict.set('AIN'+index.toString(), ainInfo);
                 }
             }
@@ -1652,7 +1670,6 @@ function module() {
         }
     };
     this.updateD3Graph = function(name,curVal) {
-        console.warn("update3Dgraphs")
         var curRange = self.currentValues.get(name + '_RANGE');
         if(curRange == 0.08){
             curRange = 0.075;
@@ -1687,6 +1704,7 @@ function module() {
     };
 
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
+        console.error('onTemplateLoaded\n\n')
         self.clearTempData();
         // Populated list of missing registers
         var missingRegs = [];
@@ -1745,9 +1763,9 @@ function module() {
         try {
             var clearCurAINREadings = false;
             self.bufferedOutputValues.forEach(function(value,name){
-                console.warn(name)
                 if(name === FORCE_AIN_VAL_REFRESH) {
-                    baseRegisters.forEach(function(baseRegister) {
+                    console.error("1765 base registers \n")
+                    self.baseRegisters.forEach(function(baseRegister) {
                         var oldVal = self.currentValues.get(baseRegister);
                         self.newBufferedValues.set(baseRegister,oldVal);
                     });
