@@ -91,9 +91,9 @@ class ModuleInstance extends EventEmitter {
             // }
 
             // Create an instance of the user's module.
-            console.log('1111', module);
+            // console.log('1111', module);
             sdModule = new module();
-            console.log('11112');
+            // console.log('11112');
             global.sdModule = sdModule;
 
             this.sdFramework.numModuleReloads = 0;

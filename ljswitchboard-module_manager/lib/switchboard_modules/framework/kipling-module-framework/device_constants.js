@@ -96,23 +96,20 @@ global.globalDeviceConstants = {
     "t4DeviceConstants": { 
         hasEFSystem: true, 
         ainBitsPrecision: 6, 
-        // the line below within the parenthicis is 0:13
-        // the reason that it has a value of 0:7 because any higher then the program will through an error and not read anything from 
-        // any of the register, the reason i have no idea.
-        ainChannelNames: "AIN#(0:3)", 
+        ainChannelNames: "AIN#(0:11)", 
         allConfigRegisters: [ 
-            {"name":"Range",                    "cssClass":"range",             "register":"AIN_ALL_RANGE",                 "options":"ainRangeOptions",                    "manual":false}, 
+            // {"name":"Range",                    "cssClass":"range",             "register":"AIN_ALL_RANGE",                 "options":"ainRangeOptions",                    "manual":false}, // The T4 does not support AIN_ALL_RANGE, it has constant range values
             {"name":"Resolution Index",         "cssClass":"resolution",        "register":"AIN_ALL_RESOLUTION_INDEX",      "options":"ainResolutionOptions",               "manual":false}, 
             {"name":"Settling (us)",            "cssClass":"settling",          "register":"AIN_ALL_SETTLING_US",           "options":"func","func":"ainSettlingOptions",   "manual":false}, 
             {"name":"Negative Channel",         "cssClass":"negativeChannel",   "register":"AIN_ALL_NEGATIVE_CH",           "options":"func","func":"ainNegativeCHOptions", "manual":false}, 
-            // {"name":"Extended Features (EF)",   "cssClass":"efSystem",          "register":"{{ainChannelNames}}_EF_INDEX",  "options":"ainEFTypeOptions",                   "manual":true} 
+            {"name":"Extended Features (EF)",   "cssClass":"efSystem",          "register":"{{ainChannelNames}}_EF_INDEX",  "options":"ainEFTypeOptions",                   "manual":true} 
         ], 
         configRegisters: [ 
             {"name":"Range",                    "cssClass":"range",             "register":"{{ainChannelNames}}_RANGE",            "options":"ainRangeOptions"}, 
             {"name":"Resolution Index",         "cssClass":"resolution",        "register":"{{ainChannelNames}}_RESOLUTION_INDEX", "options":"ainResolutionOptions"}, 
             {"name":"Settling (us)",            "cssClass":"settling",          "register":"{{ainChannelNames}}_SETTLING_US",      "options":"func","func":"ainSettlingOptions"}, 
             {"name":"Negative Channel",         "cssClass":"negativeChannel",   "register":"{{ainChannelNames}}_NEGATIVE_CH",      "options":"func","func":"ainNegativeCHOptions"}, 
-            // {"name":"Extended Feature (EF)",    "cssClass":"efSystem",          "register":"{{ainChannelNames}}_EF_INDEX",         "options":"ainEFTypeOptions"} 
+            {"name":"Extended Feature (EF)",    "cssClass":"efSystem",          "register":"{{ainChannelNames}}_EF_INDEX",         "options":"ainEFTypeOptions"} 
         ], 
         extraAllAinOptions: [ 
             {"name": "Select","value": -9999}, 
@@ -153,8 +150,8 @@ global.globalDeviceConstants = {
             "ainEFTypeOptions" 
         ], 
         ainRangeOptions: [ 
-            {"name": "-0.13 to 0.13V","value": 0.13,"timeMultiplier":1},
-            {"name": "-0.13 to 0.13V","value": 0.13,"timeMultiplier":1}
+            {"name": "-10.0 to 10.0V","value": 10.0,"timeMultiplier":1},
+            {"name": "0 to 2.5V","value": 2.5,"timeMultiplier":1}
         ], 
         ainResolutionOptions: [ 
             {"name": "Auto","value": 0,"acquisitionTime": 50}, 
@@ -163,9 +160,6 @@ global.globalDeviceConstants = {
             {"name": "3","value": 3, "acquisitionTime": 50}, 
             {"name": "4","value": 4, "acquisitionTime": 50}, 
             {"name": "5","value": 5, "acquisitionTime": 50}, 
-            {"name": "6","value": 6, "acquisitionTime": 50}, 
-            {"name": "7","value": 7, "acquisitionTime": 50}, 
-            {"name": "8","value": 8, "acquisitionTime": 50} 
         ], 
         ainSettlingOptions_RAW: [ 
             {"name": "Auto",    "value": 0}, 
@@ -192,7 +186,6 @@ global.globalDeviceConstants = {
                 } else if ((val > -1)&&(val < 1000000)){ 
                     return {value: val,name: (val/1000).toString()+"ms"}; 
                 } else { 
-                    console.warn("this is being called withn the first statment of the t4");
                     return {value: -9999, name: "Select"}; 
                 } 
             }, 
@@ -228,14 +221,14 @@ global.globalDeviceConstants = {
             10: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[5];}, 
             11: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[6];}, 
 
-            // Thermocouples 
-            20: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[7];}, 
-            21: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[8];}, 
-            22: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[9];}, 
-            23: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[10];}, 
-            24: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[11];}, 
-            25: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[12];},
-            30: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[13];}, 
+            // Thermocouples not available for T4 devices
+            // 20: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[7];}, 
+            // 21: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[8];}, 
+            // 22: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[9];}, 
+            // 23: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[10];}, 
+            // 24: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[11];}, 
+            // 25: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[12];},
+            // 30: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[13];}, 
             40: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[14];}, 
             41: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[15];}, 
             42: function() {return globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions[16];}, 
@@ -338,90 +331,90 @@ global.globalDeviceConstants = {
             //         return globalDeviceConstants.t4DeviceConstants.efConfigOptions.flexRMS; 
             //     } 
             // }, 
-            {"name": "TypeE Thermocouple","value": 20, 
-                "getConfigRoutine": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
-                }, 
-                "getReadRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
-                }, 
-                "getConfigRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
-                }, 
-                url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
-            }, 
-            {"name": "TypeJ Thermocouple","value": 21, 
-                "getConfigRoutine": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
-                }, 
-                "getReadRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
-                }, 
-                "getConfigRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
-                }, 
-                url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
-            }, 
-            {"name": "TypeK Thermocouple","value": 22, 
-                "getConfigRoutine": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
-                }, 
-                "getReadRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
-                }, 
-                "getConfigRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
-                }, 
-                url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
-            }, 
-            {"name": "TypeR Thermocouple","value": 23, 
-                "getConfigRoutine": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
-                }, 
-                "getReadRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
-                }, 
-                "getConfigRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
-                }, 
-                url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
-            }, 
-            {"name": "TypeT Thermocouple","value": 24, 
-                "getConfigRoutine": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
-                }, 
-                "getReadRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
-                }, 
-                "getConfigRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
-                }, 
-                url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
-            }, 
-            {"name": "TypeS Thermocouple","value": 25, 
-                "getConfigRoutine": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
-                }, 
-                "getReadRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
-                }, 
-                "getConfigRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
-                }, 
-                url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
-            }, 
-            {"name": "TypeC Thermocouple","value": 30, 
-                "getConfigRoutine": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
-                }, 
-                "getReadRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
-                }, 
-                "getConfigRegs": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
-                }, 
-                url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
-            }, 
+            // {"name": "TypeE Thermocouple","value": 20, 
+            //     "getConfigRoutine": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
+            //     }, 
+            //     "getReadRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
+            //     }, 
+            //     "getConfigRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
+            //     }, 
+            //     url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
+            // }, 
+            // {"name": "TypeJ Thermocouple","value": 21, 
+            //     "getConfigRoutine": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
+            //     }, 
+            //     "getReadRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
+            //     }, 
+            //     "getConfigRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
+            //     }, 
+            //     url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
+            // }, 
+            // {"name": "TypeK Thermocouple","value": 22, 
+            //     "getConfigRoutine": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
+            //     }, 
+            //     "getReadRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
+            //     }, 
+            //     "getConfigRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
+            //     }, 
+            //     url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
+            // }, 
+            // {"name": "TypeR Thermocouple","value": 23, 
+            //     "getConfigRoutine": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
+            //     }, 
+            //     "getReadRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
+            //     }, 
+            //     "getConfigRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
+            //     }, 
+            //     url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
+            // }, 
+            // {"name": "TypeT Thermocouple","value": 24, 
+            //     "getConfigRoutine": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
+            //     }, 
+            //     "getReadRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
+            //     }, 
+            //     "getConfigRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
+            //     }, 
+            //     url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
+            // }, 
+            // {"name": "TypeS Thermocouple","value": 25, 
+            //     "getConfigRoutine": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
+            //     }, 
+            //     "getReadRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
+            //     }, 
+            //     "getConfigRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
+            //     }, 
+            //     url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
+            // }, 
+            // {"name": "TypeC Thermocouple","value": 30, 
+            //     "getConfigRoutine": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.thermocouples; 
+            //     }, 
+            //     "getReadRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efReadOptions.thermocouples; 
+            //     }, 
+            //     "getConfigRegs": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.efConfigOptions.thermocouples; 
+            //     }, 
+            //     url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple", 
+            // }, 
             {"name": "RTD PT100","value": 40, 
                 "getConfigRoutine": function() { 
                     return globalDeviceConstants.t4DeviceConstants.efConfigRoutine.rtd; 
@@ -794,28 +787,28 @@ global.globalDeviceConstants = {
                     return retVal; 
                 } 
             }], 
-            thermocouples: [{ 
-                "configReg": "_EF_CONFIG_A", 
-                "description": "Bitmask to configure temperature metric", 
-                "humanName": "Metric", 
-                "type": "select", 
-                "defaultVal": 0, 
-                "cssClass": "ainEFConfigA", 
-                "format": function(data) { 
-                    var value = Number(data.value); 
-                    var options = globalDeviceConstants.t4DeviceConstants.thermocoupleTemperatureMetrics; 
-                    var unitStr = ''; 
-                    options.forEach(function(option) { 
-                        if(option.value === value) { 
-                            unitStr = option.name; 
-                        } 
-                    }); 
-                    return unitStr; 
-                }, 
-                "getOptions": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.thermocoupleTemperatureMetrics; 
-                } 
-            }, 
+            // thermocouples: [{ 
+            //     "configReg": "_EF_CONFIG_A", 
+            //     "description": "Bitmask to configure temperature metric", 
+            //     "humanName": "Metric", 
+            //     "type": "select", 
+            //     "defaultVal": 0, 
+            //     "cssClass": "ainEFConfigA", 
+            //     "format": function(data) { 
+            //         var value = Number(data.value); 
+            //         var options = globalDeviceConstants.t4DeviceConstants.thermocoupleTemperatureMetrics; 
+            //         var unitStr = ''; 
+            //         options.forEach(function(option) { 
+            //             if(option.value === value) { 
+            //                 unitStr = option.name; 
+            //             } 
+            //         }); 
+            //         return unitStr; 
+            //     }, 
+            //     "getOptions": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.thermocoupleTemperatureMetrics; 
+            //     } 
+            // }, 
             // { 
             //     // "configReg": "_EF_CONFIG_B", 
             //     // "description": "Modbus address read to acquire CJC reading.  Default is 60052.", 
@@ -855,72 +848,72 @@ global.globalDeviceConstants = {
             //         return globalDeviceConstants.t4DeviceConstants.thermocoupleCJCRegisters; 
             //     } 
             // }, 
-            { 
-                "configReg": "_EF_CONFIG_B", 
-                "description": "Modbus address read to acquire CJC reading.  Default is 60052.  CJC Temp must be reported in degrees K", 
-                "humanName": "CJC Modbus Address", 
-                "type": "modbusRegister", 
-                "defaultVal": 60052, 
-                // "format": "%d", 
-                // "format": function(data) { 
-                //     console.log('In Format Func', data); 
-                //     return '0'; 
-                // }, 
-                "format": function(data) { 
-                    var value = Number(data.value); 
-                    var addressInfo = modbus_map.getAddressInfo(value, 'R'); 
-                    var options = globalDeviceConstants.t4DeviceConstants.thermocoupleCJCRegisters; 
-                    var unitStr = ''; 
-                    if(addressInfo.directionValid) { 
-                        unitStr = addressInfo.data.name; 
-                    } else { 
-                        unitStr = addressInfo.data.name + 'is invalid'; 
-                    } 
-                    return unitStr; 
-                }, 
-                "pattern": globalModbusRegExStringPattern, 
-                "hint": "Modbus Address to read for CJC val in deg K", 
-                "getValidator": function() { 
-                    var isValid = function(value) { 
-                        console.log('In Validator', value); 
-                        return true; 
-                    }; 
-                    return isValid; 
-                }, 
-                "getOptions": function() { 
-                    return globalDeviceConstants.t4DeviceConstants.thermocoupleCJCRegisters; 
-                } 
-            }, { 
-                "configReg": "_EF_CONFIG_D", 
-                "description": "Custom slope to be applied to CJC reading (55.56 for LM34)", 
-                "humanName": "CJC Slope (K/Volt)", 
-                "type": "value", 
-                "defaultVal": 1, 
-                "format": "%.6f", 
-                "pattern": globalDoubleRegExStringPattern, 
-                "hint": "Slope", 
-                "getValidator": function() { 
-                    var isValid = function(value) { 
-                        return true; 
-                    }; 
-                    return isValid; 
-                } 
-            }, { 
-                "configReg": "_EF_CONFIG_E", 
-                "description": "Custom offset to be applied to CJC reading (255.37 for LM34)", 
-                "humanName": "CJC Offset (K)", 
-                "type": "value", 
-                "defaultVal": 0, 
-                "format": "%.6f", 
-                "pattern": globalDoubleRegExStringPattern, 
-                "hint": "Offset", 
-                "getValidator": function() { 
-                    var isValid = function(value) { 
-                        return true; 
-                    }; 
-                    return isValid; 
-                } 
-            }], 
+            // { 
+            //     "configReg": "_EF_CONFIG_B", 
+            //     "description": "Modbus address read to acquire CJC reading.  Default is 60052.  CJC Temp must be reported in degrees K", 
+            //     "humanName": "CJC Modbus Address", 
+            //     "type": "modbusRegister", 
+            //     "defaultVal": 60052, 
+            //     // "format": "%d", 
+            //     // "format": function(data) { 
+            //     //     console.log('In Format Func', data); 
+            //     //     return '0'; 
+            //     // }, 
+            //     "format": function(data) { 
+            //         var value = Number(data.value); 
+            //         var addressInfo = modbus_map.getAddressInfo(value, 'R'); 
+            //         var options = globalDeviceConstants.t4DeviceConstants.thermocoupleCJCRegisters; 
+            //         var unitStr = ''; 
+            //         if(addressInfo.directionValid) { 
+            //             unitStr = addressInfo.data.name; 
+            //         } else { 
+            //             unitStr = addressInfo.data.name + 'is invalid'; 
+            //         } 
+            //         return unitStr; 
+            //     }, 
+            //     "pattern": globalModbusRegExStringPattern, 
+            //     "hint": "Modbus Address to read for CJC val in deg K", 
+            //     "getValidator": function() { 
+            //         var isValid = function(value) { 
+            //             console.log('In Validator', value); 
+            //             return true; 
+            //         }; 
+            //         return isValid; 
+            //     }, 
+            //     "getOptions": function() { 
+            //         return globalDeviceConstants.t4DeviceConstants.thermocoupleCJCRegisters; 
+            //     } 
+            // }, { 
+            //     "configReg": "_EF_CONFIG_D", 
+            //     "description": "Custom slope to be applied to CJC reading (55.56 for LM34)", 
+            //     "humanName": "CJC Slope (K/Volt)", 
+            //     "type": "value", 
+            //     "defaultVal": 1, 
+            //     "format": "%.6f", 
+            //     "pattern": globalDoubleRegExStringPattern, 
+            //     "hint": "Slope", 
+            //     "getValidator": function() { 
+            //         var isValid = function(value) { 
+            //             return true; 
+            //         }; 
+            //         return isValid; 
+            //     } 
+            // }, { 
+            //     "configReg": "_EF_CONFIG_E", 
+            //     "description": "Custom offset to be applied to CJC reading (255.37 for LM34)", 
+            //     "humanName": "CJC Offset (K)", 
+            //     "type": "value", 
+            //     "defaultVal": 0, 
+            //     "format": "%.6f", 
+            //     "pattern": globalDoubleRegExStringPattern, 
+            //     "hint": "Offset", 
+            //     "getValidator": function() { 
+            //         var isValid = function(value) { 
+            //             return true; 
+            //         }; 
+            //         return isValid; 
+            //     } 
+            // }], 
             rtd: [{ 
                 "configReg": "_EF_CONFIG_A", 
                 "description": "Bitmask to configure temperature metric", 
@@ -1136,98 +1129,98 @@ global.globalDeviceConstants = {
                 "description": "Period (seconds)", 
                 "unit": "s", 
             }], 
-            thermocouples: [{ 
-                "readReg": "_EF_READ_A", 
-                "location": "primary", 
-                // "humanName": "Temp.", 
-                "humanNameReg": "_EF_INDEX", 
-                "getHumanName": function(efValue) { 
-                    var options = globalDeviceConstants.t4DeviceConstants.thermocoupleTypes; 
-                    var nameStr = 'N/A'; 
-                    options.forEach(function(option) { 
-                        if(option.value === efValue) { 
-                            nameStr = option.name; 
-                        } 
-                    }); 
-                    return nameStr; 
-                }, 
-                "description": "Calculated Temperature", 
-                "format": function(data) { 
-                    var value = Number(data.value); 
-                    if(value !== -9999) { 
-                        console.warn("this is being called withn the first statment of the t8"); 
-                        return localSprintf('%.2f',value); 
-                    } else { 
-                        console.warn("within the else statment of t8");
-                        return "N/A"; 
-                    } 
-                }, 
-                "unitReg": "_EF_CONFIG_A", 
-                "getUnit": function(value) { 
-                    var options = globalDeviceConstants.t4DeviceConstants.thermocoupleTemperatureMetrics; 
-                    var unitStr = ''; 
-                    options.forEach(function(option) { 
-                        if(option.value === value) { 
-                            unitStr = option.name; 
-                        } 
-                    }); 
-                    return unitStr; 
-                } 
-            }, { 
-                "readReg": "_EF_READ_B", 
-                "location": "secondary", 
-                "humanName": "Final Voltage", 
-                "description": "Final voltage used to calculate Temperature", 
-                "unit": "V", 
-                "format": function(data) { 
-                    var value = Number(data.value); 
-                    if(value !== -9999) { 
-                        return localSprintf('%.6f',value); 
-                    } else { 
-                        return "N/A"; 
-                    } 
-                } 
-            }, { 
-                "readReg": "_EF_READ_C", 
-                "location": "secondary", 
-                "humanName": "CJC Temperature", 
-                "description": "CJC temperature in degrees K", 
-                "format": function(data) { 
-                    var value = Number(data.value); 
-                    if(value !== -9999) { 
-                        return localSprintf('%.6f',value); 
-                    } else { 
-                        return "N/A"; 
-                    } 
-                }, 
-                "unitReg": "_EF_CONFIG_A", 
-                "getUnit": function(value) { 
-                    // Force value to reflect degrees K 
-                    // value = 0; 
-                    var options = globalDeviceConstants.t4DeviceConstants.thermocoupleTemperatureMetrics; 
-                    var unitStr = ''; 
-                    options.forEach(function(option) { 
-                        if(option.value === value) { 
-                            unitStr = option.name; 
-                        } 
-                    }); 
-                    return unitStr; 
-                } 
-            }, { 
-                "readReg": "_EF_READ_D", 
-                "location": "secondary", 
-                "humanName": "CJC Voltage", 
-                "description": "Thermocouple voltage calculated for CJC temperature", 
-                "unit": "V", 
-                "format": function(data) { 
-                    var value = Number(data.value); 
-                    if(value !== -9999) { 
-                        return localSprintf('%.6f',value); 
-                    } else { 
-                        return "N/A"; 
-                    } 
-                } 
-            }], 
+            // thermocouples: [{ 
+            //     "readReg": "_EF_READ_A", 
+            //     "location": "primary", 
+            //     // "humanName": "Temp.", 
+            //     "humanNameReg": "_EF_INDEX", 
+            //     "getHumanName": function(efValue) { 
+            //         var options = globalDeviceConstants.t4DeviceConstants.thermocoupleTypes; 
+            //         var nameStr = 'N/A'; 
+            //         options.forEach(function(option) { 
+            //             if(option.value === efValue) { 
+            //                 nameStr = option.name; 
+            //             } 
+            //         }); 
+            //         return nameStr; 
+            //     }, 
+            //     "description": "Calculated Temperature", 
+            //     "format": function(data) { 
+            //         var value = Number(data.value); 
+            //         if(value !== -9999) { 
+            //             console.warn("this is being called withn the first statment of the t8"); 
+            //             return localSprintf('%.2f',value); 
+            //         } else { 
+            //             console.warn("within the else statment of t8");
+            //             return "N/A"; 
+            //         } 
+            //     }, 
+            //     "unitReg": "_EF_CONFIG_A", 
+            //     "getUnit": function(value) { 
+            //         var options = globalDeviceConstants.t4DeviceConstants.thermocoupleTemperatureMetrics; 
+            //         var unitStr = ''; 
+            //         options.forEach(function(option) { 
+            //             if(option.value === value) { 
+            //                 unitStr = option.name; 
+            //             } 
+            //         }); 
+            //         return unitStr; 
+            //     } 
+            // }, { 
+            //     "readReg": "_EF_READ_B", 
+            //     "location": "secondary", 
+            //     "humanName": "Final Voltage", 
+            //     "description": "Final voltage used to calculate Temperature", 
+            //     "unit": "V", 
+            //     "format": function(data) { 
+            //         var value = Number(data.value); 
+            //         if(value !== -9999) { 
+            //             return localSprintf('%.6f',value); 
+            //         } else { 
+            //             return "N/A"; 
+            //         } 
+            //     } 
+            // }, { 
+            //     "readReg": "_EF_READ_C", 
+            //     "location": "secondary", 
+            //     "humanName": "CJC Temperature", 
+            //     "description": "CJC temperature in degrees K", 
+            //     "format": function(data) { 
+            //         var value = Number(data.value); 
+            //         if(value !== -9999) { 
+            //             return localSprintf('%.6f',value); 
+            //         } else { 
+            //             return "N/A"; 
+            //         } 
+            //     }, 
+            //     "unitReg": "_EF_CONFIG_A", 
+            //     "getUnit": function(value) { 
+            //         // Force value to reflect degrees K 
+            //         // value = 0; 
+            //         var options = globalDeviceConstants.t4DeviceConstants.thermocoupleTemperatureMetrics; 
+            //         var unitStr = ''; 
+            //         options.forEach(function(option) { 
+            //             if(option.value === value) { 
+            //                 unitStr = option.name; 
+            //             } 
+            //         }); 
+            //         return unitStr; 
+            //     } 
+            // }, { 
+            //     "readReg": "_EF_READ_D", 
+            //     "location": "secondary", 
+            //     "humanName": "CJC Voltage", 
+            //     "description": "Thermocouple voltage calculated for CJC temperature", 
+            //     "unit": "V", 
+            //     "format": function(data) { 
+            //         var value = Number(data.value); 
+            //         if(value !== -9999) { 
+            //             return localSprintf('%.6f',value); 
+            //         } else { 
+            //             return "N/A"; 
+            //         } 
+            //     } 
+            // }], 
             rtd: [{ 
                 "readReg": "_EF_READ_A", 
                 "location": "primary", 
@@ -1378,36 +1371,36 @@ global.globalDeviceConstants = {
             "titleAppend":", specify R2 ohms and AIN# to measure Vexc voltage" 
         }], 
 
-        thermocoupleTypes: [ 
-            {"name": "TypeE","value": 20}, 
-            {"name": "TypeJ","value": 21}, 
-            {"name": "TypeK","value": 22}, 
-            {"name": "TypeR","value": 23}, 
-            {"name": "TypeT","value": 24}, 
-            {"name": "TypeS","value": 25}, 
-            {"name": "TypeC","value": 30} 
-        ], 
+        // thermocoupleTypes: [ 
+        //     {"name": "TypeE","value": 20}, 
+        //     {"name": "TypeJ","value": 21}, 
+        //     {"name": "TypeK","value": 22}, 
+        //     {"name": "TypeR","value": 23}, 
+        //     {"name": "TypeT","value": 24}, 
+        //     {"name": "TypeS","value": 25}, 
+        //     {"name": "TypeC","value": 30} 
+        // ], 
 
-        thermocoupleTemperatureMetrics: [ 
-            {"name": "K","value": 0}, 
-            {"name": "C","value": 1}, 
-            {"name": "F","value": 2} 
-        ], 
+        // thermocoupleTemperatureMetrics: [ 
+        //     {"name": "K","value": 0}, 
+        //     {"name": "C","value": 1}, 
+        //     {"name": "F","value": 2} 
+        // ], 
 
-        thermocoupleCJCRegisters: [{ 
-            "name": "T8 Screw Terminals (AIN0-3)", 
-            "value": 60052, 
-            "titleAppend":", TEMPERATURE_DEVICE_K" 
-        },{ 
-            "name": "CB37 Screw Terminals (AIN0-13)", 
-            "value": 60050, 
-            "titleAppend":", TEMPERATURE_AIR_K" 
-        },{ 
-            "name": "External Sensor on AIN12", 
-            "value": 24,// Modbus register for AIN12 
-            "titleAppend":", Voltage on AIN12, Req Slope: 55.56, Offset: 255.37" 
+        // thermocoupleCJCRegisters: [{ 
+        //     "name": "T8 Screw Terminals (AIN0-3)", 
+        //     "value": 60052, 
+        //     "titleAppend":", TEMPERATURE_DEVICE_K" 
+        // },{ 
+        //     "name": "CB37 Screw Terminals (AIN0-13)", 
+        //     "value": 60050, 
+        //     "titleAppend":", TEMPERATURE_AIR_K" 
+        // },{ 
+        //     "name": "External Sensor on AIN12", 
+        //     "value": 24,// Modbus register for AIN12 
+        //     "titleAppend":", Voltage on AIN12, Req Slope: 55.56, Offset: 255.37" 
 
-        }], 
+        // }], 
 
         rtdTypes: [ 
             {"name": "PT100","value": 40}, 

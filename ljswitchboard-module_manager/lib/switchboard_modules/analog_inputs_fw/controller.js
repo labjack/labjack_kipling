@@ -101,8 +101,13 @@ function module() {
     //Define nop (do-nothing) function
     var nop = function(){};
 
-    // var baseReg = 'AIN#(0:13)';
-    // var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+    // T4 ONLY NEED TO MAKE THIS CHANGE BASED ON DEVICE TYPE --------------
+    var baseReg = 'AIN#(0:11)';
+    var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+
+    var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
+    var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
+    this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
 
 
     // console.warn("active device", self.activeDeviceType);
@@ -372,7 +377,9 @@ function module() {
         var maxRangeText = $(maxValIdName).text();
         var tStr;
 
-        tStr = (-1 * rangeVal).toString();
+        if (rangeVal == 2.5) { tStr = "0"; } //case for T4 AIN4-11 which are 0-2.5V
+        else { tStr = (-1 * rangeVal).toString(); }
+
         if (minRangeText !== tStr) {
             $(minValIdName).text(tStr);
         }
@@ -1402,9 +1409,9 @@ function module() {
         if(self.defineDebuggingArrays){
             var analogInputs = [];
         }
-        self.baseRegisters = self.configureBaseRegisters(device.savedAttributes.deviceTypeName);
+        // self.baseRegisters = self.configureBaseRegisters(device.savedAttributes.deviceTypeName);
         console.error("1378 base registers used here too")
-        self.baseRegisters.forEach(function(reg,index){
+        baseRegisters.forEach(function(reg,index){
             var ainChannel = {
                 "name":reg,
                 "value":null,
@@ -1506,6 +1513,7 @@ function module() {
                         if(name.indexOf('_RANGE') !== -1) {
                             var rangeStr = newData.value.toString();
                             ainInfo.rangeVal = newData.value;
+                            if (newData.value == 2.4) { ainInfo.minRangeVal = 0; } else { ainInfo.minRangeVal = newData.value; } // case for T4 AIN4-11 which has the range 0-2.5V
                             ainInfo.rangeStr = name + ' is set to ' + rangeStr;
                         }
                         ainInfo.optionsDict.set(name, menuOptions);
@@ -1549,6 +1557,10 @@ function module() {
                 val = value / (range + 0.8);
                 break;
             case 4.8:
+                val = value / (range + 0.8);
+                break;
+            case 2.5:
+                console.error("-------- 2.5 ---------")
                 val = value / (range + 0.8);
                 break;
             case 2.4:
@@ -1607,13 +1619,13 @@ function module() {
         return function() {
             var width;
             if(val > 0) {
-                width = val;
+                width = 50;
             } else {
                 width = 50-self.getD3GraphWidth(val,range)/2;
             }
 
             // console.warn(width);
-            width = width + 3;
+            // width = width + 3;
             return 'margin-left:' + width.toString() + '%;';
         };
     };
@@ -1656,7 +1668,9 @@ function module() {
             .enter()                                                            // for each data point....
             .append('rect')                                                     // Draw a rectangle 'rect'
             .attr('width', function (data) {
-                return 50 + '%';
+                 // this was 50 could be an issue but I changed it back
+                 // not sure when it was changed to 50 but that is returned by this function anyways
+                return self.getD3GraphWidth(curVal,curRange).toString() + '%';
             })
             .attr('height', '5')
             .attr('fill', self.getFillColor(curVal))
@@ -1671,6 +1685,7 @@ function module() {
     };
     this.updateD3Graph = function(name,curVal) {
         var curRange = self.currentValues.get(name + '_RANGE');
+        // what is this for T8 only???
         if(curRange == 0.08){
             curRange = 0.075;
         }
@@ -1690,7 +1705,7 @@ function module() {
             var str = self.getD3GraphWidth(curVal,curRange).toString();
             if(str === 'NaN') {
                 str = '0';
-                str = 1;
+                // str = 1; // why is this here????
             }
             return (str) + '%';
         });
