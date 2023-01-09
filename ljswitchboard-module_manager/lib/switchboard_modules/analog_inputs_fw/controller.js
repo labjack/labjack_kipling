@@ -102,15 +102,17 @@ function module() {
     var nop = function(){};
 
     // T4 ONLY NEED TO MAKE THIS CHANGE BASED ON DEVICE TYPE --------------
-    var baseReg = 'AIN#(0:11)';
-    var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+    // var baseReg = 'AIN#(0:11)';
+    // var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
 
-    var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
-    var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
-    this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+    // var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
+    // var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
+    // this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
 
 
-    // console.warn("active device", self.activeDeviceType);
+    console.warn("???????????????????????????")
+    // this.onDeviceSelected;
+    // console.warn("active device", self.onDeviceSelected);
     // switch (self.activeDeviceType) {
     //     case 'T8':
     //         // Base-Register Variable for Configuring multiple thermocouples.
@@ -1024,7 +1026,7 @@ function module() {
     this.addAinEFInfo = function(chNum, efType) {
         var chName = 'AIN' + chNum.toString();
         var baseID = '#' + chName + '-table-data';
-        var efData = ain_ef_type_map[efType];
+        var efData = self.ain_ef_type_map[efType];
         if(typeof(efData) !== 'undefined') {
             efData = efData();
         } else {
@@ -1404,6 +1406,44 @@ function module() {
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
         // Initialize variable where module config data will go.
         console.error("onDeviceConfigured\n\n");
+
+        var baseReg = 'AIN#(0:11)';
+        var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+        console.warn("active device", self.activeDeviceType);
+        // var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
+        // var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
+        // this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+        switch (self.activeDeviceType) {
+            case 'T8':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                baseReg = 'AIN#(0:7)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                this.ain_ef_types = globalDeviceConstants.t8DeviceConstants.ainEFTypeOptions;
+                var ain_ef_type_map = globalDeviceConstants.t8DeviceConstants.ainEFTypeMap;
+                this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+                break;
+            case 'T7':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                baseReg = 'AIN#(0:13)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                this.ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
+                var ain_ef_type_map = globalDeviceConstants.t7DeviceConstants.ainEFTypeMap;
+                this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+                break;
+            case 'T4':
+                console.warn("case fo the T4")
+                // Base-Register Variable for Configuring multiple thermocouples.
+                baseReg = 'AIN#(0:11)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                this.baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                this.ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
+                var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
+                this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+                
+        }
+
         self.moduleContext = {};
         self.analogInputsDict.clear();
         if(self.defineDebuggingArrays){
@@ -1545,65 +1585,84 @@ function module() {
     };
     this.getD3GraphWidth = function (value, range) {
         var val;
+        var widthMultiplyer;
         switch (range) {
             // default for the t8
             case 11:
-                val = value / (range + 0.5);
+                val = value / (range + 0.1);
+                widthMultiplyer = 90;
                 break
             case 10:
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
             case 9.7:
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
             case 4.8:
                 val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 2.5:
                 console.error("-------- 2.5 ---------")
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
             case 2.4:
                 val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 1.2:
                 val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 1:
                 val = value / (range + 0.052);
+                widthMultiplyer = 100;
                 break;
             case 0.75:
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
             case 0.6:
                 val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 0.36:
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
             case 0.3:
                 val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 0.18:
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
             case 0.15:
                 val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 0.13:
                 val = value / (range + 0.5);
+                widthMultiplyer = 100;
                 break;
             case 0.1:
                 val = value / (range + 0.0051);
+                widthMultiplyer = 100;
                 break;
             case 0.01:
                 val = value / (range + 0.0003);
+                widthMultiplyer = 100;
                 break;
             default:
                 val = 0;
+                widthMultiplyer = 100;
                 break;
         }
-        val = (Math.abs(val) * 100);
+        val = (Math.abs(val) * widthMultiplyer);
         return val;
     };
     this.getSVGWidth = function(val) {
@@ -1670,6 +1729,7 @@ function module() {
             .attr('width', function (data) {
                  // this was 50 could be an issue but I changed it back
                  // not sure when it was changed to 50 but that is returned by this function anyways
+                 console.warn("currRange", curRange)
                 return self.getD3GraphWidth(curVal,curRange).toString() + '%';
             })
             .attr('height', '5')
@@ -1729,7 +1789,7 @@ function module() {
                 var chName = findActiveChannel.exec(key);
                 var chNum = findActiveChannelNum.exec(key);
                 refreshEFData.push({'chNum':chNum,'efType':curVal});
-                var efData = ain_ef_type_map[curVal];
+                var efData = self.ain_ef_type_map[curVal];
                 if(typeof(efData) !== 'undefined') {
                     efData = efData();
                     if(typeof(efData.getReadRegs) !== 'undefined') {
