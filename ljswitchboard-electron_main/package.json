@@ -37,7 +37,6 @@
     "show": true,
     "resizable": false,
     "webPreferences": {
-      "nativeWindowOpen": true,
       "nodeIntegration": true,
       "nodeIntegrationInSubFrames": true,
       "contextIsolation": false

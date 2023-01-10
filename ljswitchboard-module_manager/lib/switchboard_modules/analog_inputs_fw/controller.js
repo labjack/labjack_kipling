@@ -603,7 +603,7 @@ function module() {
 
             // Switch based on what type of register is being configured. (check for _EF_TYPE or _EF_INDEX)
             if (isIndex || isType) {
-                var getCurEFInfo = ain_ef_type_map[value];
+                var getCurEFInfo = self.ain_ef_type_map[value];
                 if(typeof(getCurEFInfo) !== 'undefined') {
                     var curEFInfo = getCurEFInfo();
                     if (typeof(curEFInfo) !== 'undefined') {
@@ -867,7 +867,7 @@ function module() {
             }
         };
         var menuClickHandler = function(event) {
-            var rootEl = event.toElement;
+            var rootEl = event.target;
             var className = rootEl.className;
             var buttonEl;
             var buttonID = '';
@@ -898,7 +898,7 @@ function module() {
 
         };
         var modbusRegOptionsMenuClickHandler = function(event) {
-            var rootEl = event.toElement;
+            var rootEl = event.target;
             var className = rootEl.className;
             var buttonEl;
             var buttonID = '';
@@ -966,10 +966,9 @@ function module() {
         };
         var inputGoHandler = function(event) {
             self.lastInputGoEvent = event;
-            var toElement = event.toElement;
+            var toElement = event.target;
             var rootEl;
             var valEL;
-
             if(toElement.tagName === 'SPAN') {
                 rootEl = toElement.parentElement;
                 valEl = rootEl.parentElement.children[0];
@@ -1019,7 +1018,7 @@ function module() {
         function helpTextURLClickHandler(event) {
             const gui = global.gui;
             // gui.Shell.openExternal(linkToBindTo.url);
-            var url = $(event.toElement).attr('url');
+            var url = $(event.target).attr('url');
             console.log('Opening link...', url);
             gui.Shell.openExternal(url);
         }
