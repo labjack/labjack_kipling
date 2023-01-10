@@ -563,7 +563,7 @@ function module() {
     };
     var saveLoadedScriptToFile = function(data, onSuccess) {
         self.printUserDebugInfo('saveLoadedScriptToFile button pressed');
-        var buttonType = data.eventData.toElement.id;
+        var buttonType = data.eventData.target.id;
 
         var saveButtonIDs = [
             'save-button',

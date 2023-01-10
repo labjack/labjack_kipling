@@ -819,12 +819,13 @@ function module() {
     };
     this.ethernetDHCPSelect = function(data, onSuccess) {
         // console.log('in ethernetDHCPSelect listener',data.eventData);
-        var dhcpOption = data.eventData.toElement.id;
+        // console.log("data.eventData", data.eventData);
+        var dhcpOption = data.eventData.target.id;
         var dhcpTextId;
         var dhcpTextEl;
 
         if (dhcpOption === 'Ethernet_DHCP_Auto') {
-            dhcpTextId = data.eventData.toElement.parentElement.parentElement.parentElement.id;
+            dhcpTextId = data.eventData.target.parentElement.parentElement.parentElement.id;
             dhcpTextEl = $('#'+dhcpTextId+' .btnText');
             self.showAutoEthernetSettings();
             if(self.currentValues.get('ETHERNET_DHCP_ENABLE_DEFAULT').val === 0) {
@@ -836,7 +837,7 @@ function module() {
             }
             self.updateValidationStatus(true,'ethernet_settings','ethernetApplyButton');
         } else if (dhcpOption === 'Ethernet_DHCP_Manual') {
-            dhcpTextId = data.eventData.toElement.parentElement.parentElement.parentElement.id;
+            dhcpTextId = data.eventData.target.parentElement.parentElement.parentElement.id;
             dhcpTextEl = $('#'+dhcpTextId+' .btnText');
             self.showManualEthernetSettings();
             if(self.currentValues.get('ETHERNET_DHCP_ENABLE_DEFAULT').val === 0) {
@@ -1119,12 +1120,12 @@ function module() {
     };
     this.wifiDHCPSelect = function(data, onSuccess) {
         // console.log('in wifiDHCPSelect listener');
-        var dhcpOption = data.eventData.toElement.id;
+        var dhcpOption = data.eventData.target.id;
         var dhcpTextId;
         var dhcpTextEl;
 
         if (dhcpOption === 'WiFi_DHCP_Auto') {
-            dhcpTextId = data.eventData.toElement.parentElement.parentElement.parentElement.id;
+            dhcpTextId = data.eventData.target.parentElement.parentElement.parentElement.id;
             dhcpTextEl = $('#'+dhcpTextId+' .btnText');
             self.showAutoWifiSettings();
             if(self.currentValues.get('WIFI_DHCP_ENABLE_DEFAULT').val === 0) {
@@ -1135,7 +1136,7 @@ function module() {
                 dhcpTextEl.removeClass('inputVerified');
             }
         } else if (dhcpOption === 'WiFi_DHCP_Manual') {
-            dhcpTextId = data.eventData.toElement.parentElement.parentElement.parentElement.id;
+            dhcpTextId = data.eventData.target.parentElement.parentElement.parentElement.id;
             dhcpTextEl = $('#'+dhcpTextId+' .btnText');
             self.showManualWifiSettings();
             if(self.currentValues.get('WIFI_DHCP_ENABLE_DEFAULT').val === 0) {

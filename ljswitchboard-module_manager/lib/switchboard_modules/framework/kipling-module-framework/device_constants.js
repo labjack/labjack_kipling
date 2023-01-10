@@ -5,6 +5,7 @@ global.globalDeviceConstantsSwitch = {
     "T4":"t4DeviceConstants",
     "T7":"t7DeviceConstants",
     "T7Pro":"t7ProDeviceConstants",
+    "T7-Pro":"t7ProDeviceConstants",
     "T8":"t8DeviceConstants"
 };
 var globalDoubleRegExStringPattern = "(^\-?[0-9]{1,}$)|(^\-?[0-9]{1,}\\.$)|(^\-?[0-9]{1,}\\.[0-9]{1,}$)|(^\-?\\.[0-9]{1,}$)";
@@ -1420,7 +1421,6 @@ global.globalDeviceConstants = {
         hasEFSystem: true,
         ainBitsPrecision: 6,
         ainChannelNames: "AIN#(0:13)",
-        // ainChannelNames: "AIN#(48:127)",
         allConfigRegisters: [
             {"name":"Range",                    "cssClass":"range",             "register":"AIN_ALL_RANGE",                 "options":"ainRangeOptions",                    "manual":false},
             {"name":"Resolution Index",         "cssClass":"resolution",        "register":"AIN_ALL_RESOLUTION_INDEX",      "options":"ainResolutionOptions",               "manual":false},

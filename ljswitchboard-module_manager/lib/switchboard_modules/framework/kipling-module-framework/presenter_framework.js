@@ -2121,7 +2121,7 @@ class PresenterFramework extends EventEmitter {
                             this.reportSyntaxError(
                                 {
                                     'location': '_writeToDevice.performCallbacks',
-                                    data: {binding: bindingInfo, eventData: eventData}
+                                    data: {binding: bindingInfo, eventData: eventData, e: e}
                                 }, e);
                             resolve(true);
                         }
