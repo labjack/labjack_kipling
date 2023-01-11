@@ -1644,8 +1644,7 @@ function module() {
                 widthMultiplyer = 90;
                 break;
             case 2.5:
-                // for both the T4
-                console.error("-------- 2.5 ---------")
+                // for the T4
                 val = value / (range + 0.8);
                 widthMultiplyer = 100;
                 break;

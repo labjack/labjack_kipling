@@ -106,7 +106,8 @@ global.globalDeviceConstants = {
             {"name":"Extended Features (EF)",   "cssClass":"efSystem",          "register":"{{ainChannelNames}}_EF_INDEX",  "options":"ainEFTypeOptions",                   "manual":true} 
         ], 
         configRegisters: [ 
-            {"name":"Range",                    "cssClass":"range",             "register":"{{ainChannelNames}}_RANGE",            "options":"ainRangeOptions"}, 
+            // {"name":"Range",                    "cssClass":"range",             "register":"{{ainChannelNames}}_RANGE",            "options":"ainRangeOptions"},
+            {"name":"Range",                    "cssClass":"range",             "register":"{{ainChannelNames}}_RANGE",            "options":"func", "func":"ainRangeOptions"}, 
             {"name":"Resolution Index",         "cssClass":"resolution",        "register":"{{ainChannelNames}}_RESOLUTION_INDEX", "options":"ainResolutionOptions"}, 
             {"name":"Settling (us)",            "cssClass":"settling",          "register":"{{ainChannelNames}}_SETTLING_US",      "options":"func","func":"ainSettlingOptions"}, 
             {"name":"Negative Channel",         "cssClass":"negativeChannel",   "register":"{{ainChannelNames}}_NEGATIVE_CH",      "options":"func","func":"ainNegativeCHOptions"}, 
@@ -150,10 +151,38 @@ global.globalDeviceConstants = {
             "ainNegativeCHOptions", 
             "ainEFTypeOptions" 
         ], 
-        ainRangeOptions: [ 
-            {"name": "-10.0 to 10.0V","value": 10.0,"timeMultiplier":1},
-            {"name": "0 to 2.5V","value": 2.5,"timeMultiplier":1}
-        ], 
+        // ainRangeOptions: [ 
+        //     {"name": "-10.0 to 10.0V","value": 10.0,"timeMultiplier":1},
+        //     {"name": "0 to 2.5V","value": 2.5,"timeMultiplier":1}
+        // ],
+        ainRangeOptions: {
+            // "numbers": ["AIN0", "AIN1", "AIN2", "AIN3", "AIN4", "AIN5", "AIN6", "AIN7", "AIN8", "AIN9", "AIN10", "AIN11"],
+            "numbers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            func: function(val) {
+                // case for AIN#(0:3) else case for AIN#(4:11)
+                // the logic is backwards.. AIN > 3 should return the wrong values (-10, 10) (no I dont know how or why but it works)....
+                if (val >= 3) {
+                    opts = {"name": "-10.0 to 10.0V",value: 10.0,"timeMultiplier":1};
+                    return opts;
+                }
+                else { 
+                    opts = {"name": "0 to 2.5V",value: 2.5,"timeMultiplier":1};
+                    return opts;
+                }
+            },
+            filter: function(val) {
+                // filter populates the dropdown menu
+                // case for AIN#(0:3) else case for AIN#(4:11)
+                if (val <= 3) {
+                    opts = [{"name": "-10.0 to 10.0V",value: 10.0,"timeMultiplier":1}];
+                    return opts;
+                }
+                else { 
+                    opts = [{"name": "0 to 2.5V",value: 2.5,"timeMultiplier":1}];
+                    return opts;
+                }
+            }
+        }, 
         ainResolutionOptions: [ 
             {"name": "Auto","value": 0,"acquisitionTime": 50}, 
             {"name": "1","value": 1, "acquisitionTime": 50}, 
