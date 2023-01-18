@@ -53,8 +53,8 @@
     "devDependencies": {
       "chai": "^4.2.0",
       "diff": "^4.0.1",
-      "mocha": "^8.2.1",
-      "electron-builder": "22.9.1"
+      "electron-builder": "^20.44.4",
+      "mocha": "^8.2.1"
     },
     "directories": {
       "buildResources": "branding_files"
