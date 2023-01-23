@@ -223,8 +223,10 @@ function CREATE_DATA_LOGGER() {
 			// Add device serial number/register data.
 			var serial_numbers = dataGroup.device_serial_numbers;
 			serial_numbers.forEach(function(serial_number) {
+				console.error("serialNumber3", serial_number)
 				logStatus[serial_number] = {};
-				var serialNumber = dataGroup[serial_number];
+				var serialNumber = dataGroup.device_serial_numbers[0];
+				console.error("dataGroup2", dataGroup)
 				var addedSerialNumber = false;
 
 				// Add the device serial number to the data category array
@@ -233,8 +235,15 @@ function CREATE_DATA_LOGGER() {
 				// Add the time header.
 				dataNames.push('time');
 
+				// add the error code header
+				dataCategories.push('');
+				dataNames.push('error code');
+
 				// Add each required registers & align the data category array.
-				serialNumber.registers.forEach(function(register) {
+				dataGroup.defined_user_values.forEach(function(register){
+					// console.error("this is within the first spot for the", register)
+					
+					// serialNumber.registers.forEach(function(register) {
 					// Save the enabled/disabled logging state.
 					logStatus[serial_number][register.name] = register.enable_logging;
 
@@ -242,13 +251,16 @@ function CREATE_DATA_LOGGER() {
 					if(register.enable_logging) {
 						// Align the device serial number to its data
 						dataCategories.push('');
-						dataNames.push(register.name);
+						dataNames.push(register);
+					}
+					else{
+						dataCategories.push('');
+						dataNames.push(register);
 					}
 				});
 
 				// Add the error code header & align the data category.
-				dataCategories.push('');
-				dataNames.push('error code');
+				
 			});
 
 			if(dataGroup.defined_user_values) {
@@ -412,6 +424,7 @@ function CREATE_DATA_LOGGER() {
 
 	function initializeFileWriteStream(filePath) {
 		var defered = q.defer();
+		console.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		debugSavingData('Creating file', filePath);
 		var file = fs.createWriteStream(filePath);
 		file.on('open', function(fd) {

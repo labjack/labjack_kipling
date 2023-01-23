@@ -99,6 +99,7 @@ function debugDataAcquisition() {
 }
 
 function CREATE_DATA_COLLECTOR() {
+	// theys are not actuly beingused
 	this.devices = undefined;
 	this.config = undefined;
 
@@ -607,13 +608,25 @@ function CREATE_DATA_COLLECTOR() {
 
 					var deviceDataIDs = Object.keys(reqDeviceData);
 					deviceDataIDs.forEach(function(deviceDataID) {
+						console.error("deviceDataID", deviceDataID)
+						console.warn("reqDeviceData", reqDeviceData)
 						var reqReg = reqDeviceData[deviceDataID];
-						var regName = reqReg.name;
+						// the change here is waht is changing the log from
+						// 'undefined -> '[object Object}']
+						console.warn("reqReg", reqReg)
+						var regName = reqReg;
+						console.warn("regName", regName)
 						var regValue;
 						var formattedValue;
 
 						// Get the required data point & save it to the regValue
 						// variable.
+						console.error("regValue", regValue)
+						console.warn("newDeviceData", newDeviceData)
+						console.warn("deviceDataID", deviceDataID)
+						console.warn("reqDeviceData",  reqDeviceData[deviceDataID])
+						console.warn("reqReg", reqReg)
+
 						regValue = newDeviceData[regName];
 
 						// Save the initial index value.
@@ -621,11 +634,15 @@ function CREATE_DATA_COLLECTOR() {
 						if(index < 0) {
 							saveDeviceData = true;
 						}
+						// console.warn("resalt", result)
+						// regValue.result = 10
+						console.warn("regValue1", regValue)
 						if(regValue.index < index) {
 							saveDeviceData = true;
 						}
 
 						if(saveDeviceData) {
+							console.warn("if(saveDeviceData) {", organizedDeviceData, "regValue", regValue)
 							index = regValue.index;
 							organizedDeviceData.errorCode = regValue.errorCode;
 							organizedDeviceData.time = regValue.time;
@@ -637,12 +654,15 @@ function CREATE_DATA_COLLECTOR() {
 
 						// Apply formatting to acquired data
 						formattedValue = regValue;
+						// console.error("reqReg", reg)
 						if(reqReg.formatFunc) {
 							formattedValue.result = reqReg.formatFunc(regValue.result);
 						}
+						console.error("formattedValue", formattedValue)
 
 						// Organize the collected data.
 						organizedDeviceData.results[regName] = formattedValue;
+						console.warn("organizedDeviceData1", organizedDeviceData)
 					});
 					organizedGroupData[serialNumber] = organizedDeviceData;
 				});
@@ -678,20 +698,27 @@ function CREATE_DATA_COLLECTOR() {
 				}
 
 				debugLog('Waiting for reportCollectedData promises');
+				console.warn("Waiting for reportCollectedData promises")
 				q.allSettled(promises)
+				// this is the function resposable for setting the data to right i belive
 				.then(function(results) {
 					debugLog('Completed for reportCollectedData promises', results);
+					console.warn("Completed for reportCollectedData promises", results[0])
 					if(results) {
 						// Save the returned results into the organizedGroupData object.
 						// If there was an error use the default value of zero.
 						results.forEach(function(result, i) {
-							var valueKey = userValueKeys[i];
+							var valueKey = userValueKeys[i];					
 							if(result.state === 'fulfilled') {
+								// Zander we need to check more of thew stuff that is here
+								// this might be a place where we can find the informatioin and
+								// ba able to read the data
 								organizedGroupData.userValues[valueKey] = result.value;
 							} else {
 								var defaultVal = 0;
 								var userValue = activeGroupObj.user_values[valueKey];
 								if(userValue.default_value) {
+									
 									defaultVal = userValue.default_value;
 								}
 								organizedGroupData.userValues[valueKey] = defaultVal;

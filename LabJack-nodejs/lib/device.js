@@ -2596,7 +2596,7 @@ exports.labjack = function (ljmOverride) {
 					throw new DriverInterfaceError("Device Never Opened");
 					return true;
 				} else {
-					onError("Device Never Opened");
+					onError("Device Never Opened111121111");
 					return true;
 				}
 			} else {

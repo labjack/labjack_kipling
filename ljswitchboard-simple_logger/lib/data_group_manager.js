@@ -57,27 +57,31 @@ function CREATE_DATA_GROUP_MANAGER(options, config) {
 	}
 
 	var getId = function(deviceSerialNumber, registerName) {
+		console.error("deviceSerialNumber", registerName)
 		return deviceSerialNumber.toString() + '_' + registerName.toString();
 	};
 
 	var serialNumbers = options.device_serial_numbers;
+	console.warn("options", options)
 	for(var i = 0; i < serialNumbers.length; i++) {
-		var sn = serialNumbers[i];
+		var sn = serialNumbers[0];
+		console.error("sn", sn)
 		
 		this.data[sn] = [];
 		this.completeData[sn] = {};
 
-		var registers = options[sn].registers;
-		for(var j = 0; j < registers.length; j++) {
-			var registerID = getId(sn, registers[j].name);
+		var registers = options.defined_user_values;
+		for(var j = 0; j < registers.length; ++j) {
+			console.warn("registers", registers[j])
+			var registerID = getId(sn, registers[j]);
 			this.completeData[sn][registerID] = JSON.parse(JSON.stringify(
 				registers[j]
 			));
 			if(registers[j].format_func) {
-				this.completeData[sn][registerID].formatFunc = createFormattingFunction(registers[j].format_func, {'sn': sn, 'reg': registers[j].name});
+				this.completeData[sn][registerID].formatFunc = createFormattingFunction(registers[j].format_func, {'sn': sn, 'reg': registers[j]});
 			}
-			if(this.data[sn].indexOf(registers[j].name) < 0) {
-				this.data[sn].push(registers[j].name);
+			if(this.data[sn].indexOf(registers[j]) < 0) {
+				this.data[sn].push(registers[j]);
 			}
 		}
 	}

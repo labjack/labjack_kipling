@@ -12,7 +12,7 @@ var async = require('async');
 // var driver_const = require('ljswitchboard-ljm_driver_constants');
 // var driver = ljm.driver();
 // var data_parser = require('ljswitchboard-data_parser');
-// var curatedDevice = require('ljswitchboard-ljm_device_curator');
+var curatedDevice = require('ljswitchboard-ljm_device_curator');
 // var modbus_map = require('ljswitchboard-modbus_map');
 // var constants = modbus_map.getConstants();
 
@@ -100,6 +100,7 @@ function CREATE_SIMPLE_LOGGER () {
 	}
 
 	function innerUpdateDeviceListing(devices) {
+		console.error("innerUpdateDeviceListing(devices)", devices)
 		var defered = q.defer();
 
 		self.devices = undefined;
@@ -307,6 +308,7 @@ function CREATE_SIMPLE_LOGGER () {
 		return innerInitialize(bundle);
 	};
 	this.updateDeviceListing = function(devices) {
+		console.error("updateDeviceListing's devices", devices)
 		return innerUpdateDeviceListing(devices);
 	};
 	this.configureLogger = function(loggerConfig) {
@@ -345,6 +347,7 @@ exports.verifyConfigObject = function(dataObject) {
 };
 
 exports.generateBasicConfig = function(basicData, devices) {
+	console.warn("generateBasicConfig's devises", basicData, devices)
 	var configObj = {
 		"logging_config": {
 			"name": "Basic Config Auto-Template",
@@ -403,13 +406,22 @@ exports.generateBasicConfig = function(basicData, devices) {
 
 	var validSN;
 	if(basicData.same_vals_all_devices) {
+		console.error("not sure where this is", curatedDevice, "devices", devices)
 		devices.forEach(function(device) {
 			var sn = device.savedAttributes.serialNumber;
-			validSN = sn;
-			configObj.basic_data_group.device_serial_numbers.push(sn);
+			console.warn("serialNumber", device.savedAttributes)
+			console.warn("device", device.savedAttributes)
+			console.warn("configObj", configObj)
+			// validSN = sn;
+			validSN = 470015117;
+			somethung = 470015117
+			configObj.basic_data_group.device_serial_numbers.push(somethung);
+			// configObj.basic_data_group.device_serial_numbers.push(sn);
+			console.warn("configObj", configObj)
 			configObj.basic_data_group[sn] = {
 				'registers': []
 			};
+			console.warn("configObj", configObj)
 			basicData.registers.forEach(function(register) {
 				configObj.basic_data_group[sn].registers.push({
 					name: register,
@@ -422,7 +434,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		});
 
 		basicData.registers.forEach(function(register) {
-			var valName = 'custom-'+register;
+			var valName = register;
 			configObj.basic_data_group.defined_user_values.push(valName);
 			configObj.basic_data_group.user_values[valName] = {
 				'name': valName,

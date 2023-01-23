@@ -7,5 +7,5 @@ exports.run = function(newVal) {
 
 exports.getTemp = function(data) {
 	// console.log('in file.js getTemp');
-	return 273.15 + data['1'].results.AIN0.result;
+	return 273.15 + data['1'].results.AIN0;
 };

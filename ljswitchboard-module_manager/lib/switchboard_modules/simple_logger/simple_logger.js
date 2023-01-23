@@ -120,7 +120,7 @@ function loggerApp() {
 			debugLog('Logger Started');
 		}, function err() {
 			
-			debugLog('Logger Started');
+			debugLog('Logger Started with error');
 		});
 		return defered.promise;
 	}

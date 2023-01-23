@@ -65,7 +65,7 @@
 				"exec_method": "sync",
 				"func": " val = 273.15 + data['1'].results.AIN0.result; // Fill the 'val' variable with the calculated value",
 				"func": "val = require('./file.js').getTemp(data); // Fill the 'val' variable with the calculated value",
-				"func": "val = data['1'].results.AIN0.result; // Fill the 'val' variable with the calculated values",
+				"func": "val = data['1'].results.AIN0; // Fill the 'val' variable with the calculated values",
 				"enable_logging": true,
 				"enable_view": true
 			},
@@ -74,7 +74,7 @@
 				"human_name": "RH %",
 				"exec_method": "async",
 				"func": "require('./sub_dir/sub_file.js').getHumidity(data, cb); // finish by calling the cb function.",
-				"func": "cb(data['1'].results.AIN0.result); // finish by calling the cb function.",
+				"func": "cb(data['1'].results.AIN0); // finish by calling the cb function2.",
 				"enable_logging": true,
 				"enable_view": true
 			},
@@ -82,7 +82,7 @@
 				"name": "promiseVal",
 				"human_name": "Arbitrary Promise",
 				"exec_method": "q",
-				"func": "defered.resolve(data['1'].results.AIN0.result);",
+				"func": "defered.resolve(data['1'].results.AIN0);",
 				"enable_logging": true,
 				"enable_view": true
 			}

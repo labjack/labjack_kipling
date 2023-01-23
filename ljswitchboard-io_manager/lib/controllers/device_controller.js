@@ -251,6 +251,7 @@ class DeviceController extends EventEmitter {
 	}
 
 	getDeviceObjects(deviceAttributes) {
+		console.warn("getDeviceObjects")
 		return new Promise((resolve) => {
 			const keys = Object.keys(deviceAttributes);
 
@@ -525,6 +526,7 @@ class DeviceController extends EventEmitter {
 		});
 	}
 
+	// closeing the device refrence?
 	closeDeviceRef(device) {
 		const comKey = device.savedAttributes.device_comm_key;
 		return this.closeDevice(comKey);

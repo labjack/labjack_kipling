@@ -538,6 +538,7 @@ var deviceScanner = function() {
 		return defered.promise;
 	};
 	var collectDeviceData = function(data) {
+		console.error("does this function even happen?")
 		var defered = q.defer();
 		var parseResults = function(results) {
 			// console.log('!! Collected Info !!', data.scanResult.serialNumber, data.openParameters.ct);

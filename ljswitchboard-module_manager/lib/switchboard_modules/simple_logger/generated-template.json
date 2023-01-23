@@ -36,13 +36,6 @@
           "format": "default",
           "enable_logging": true,
           "enable_view": true
-        },
-        {
-          "name": "AIN1",
-          "human_name": "AIN1",
-          "format": "default",
-          "enable_logging": true,
-          "enable_view": true
         }
       ]
     },
@@ -52,28 +45,6 @@
     "device_serial_numbers": [
       470028120
     ],
-    "defined_user_values": [
-      "custom-AIN0",
-      "custom-AIN1"
-    ],
-    "user_values": {
-      "custom-AIN0": {
-        "name": "custom-AIN0",
-        "human_name": "custom-AIN0",
-        "exec_method": "sync",
-        "func": "val = data['470028120'].results.AIN0.result",
-        "enable_logging": false,
-        "enable_view": true
-      },
-      "custom-AIN1": {
-        "name": "custom-AIN1",
-        "human_name": "custom-AIN1",
-        "exec_method": "sync",
-        "func": "val = data['470028120'].results.AIN1.result",
-        "enable_logging": false,
-        "enable_view": true
-      }
-    },
     "logging_options": {
       "write_to_file": true,
       "file_prefix": "basic_group",

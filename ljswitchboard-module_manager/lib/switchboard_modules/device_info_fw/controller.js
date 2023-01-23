@@ -76,6 +76,7 @@ function module() {
     };
     function setRTCTimeToSystemTime(data, onSuccess) {
         var systemTime = (new Date()).getTime()/1000;
+        console.error("self.activeDevice?", self.activeDevice)
         self.activeDevice.write('RTC_SET_TIME_S',systemTime)
         .then(function() {
             onSuccess();

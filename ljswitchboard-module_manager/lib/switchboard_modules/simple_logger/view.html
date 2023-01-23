@@ -360,7 +360,7 @@
               //alert( MAX_REGISTERS );
               
               for(var i = 0; i < "{{MAX_REGISTERS}}"; i++) {
-              var registerHTML = "<div class='col-sm-6'> <small id='regCheck' class='form-text text-muted invalid-feedback'> Register #${i + 1} </small> <input type='text' class='form-control register-input' id='validationCustom0${i}' name='array[]' oninput='this.value = this.value.toUpperCase()'> <span class = 'clear-input'>x</span> </div>"
+                var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i + 1} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
               $("#something").append(registerHTML);
               }
               //document.getElementById("something").innerHTML = registerHTML;

@@ -12,6 +12,7 @@
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
+
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
  * When using the 'singleDevice' framework it is instantiated as sdModule.
@@ -136,7 +137,10 @@ function module() {
         var displayMethod = self.startupData.display_method;
         // Saves active registers to global scope so they can be 
         // used in simple logger module
+        // const filePath = path.join(global.localK3FilesPath, "/module_data/register_matrix_fw/data.json");
+        // console.warn("filePath", filePath)
         global.globalActiveRegisters = registerList;
+        console.warn("registerList", registerList)
         if(typeof(self.startupData.registers_by_sn) === 'undefined') {
             self.startupData.registers_by_sn = {};
             showAlert('startupData is corrupted');
@@ -411,7 +415,8 @@ function module() {
         return Promise.resolve(registers);
     };
     this.getInitialDeviceData = function(registers) {
-        dbgIDR('In getInitialDeviceData, getting data for:', self.displayedRegisters);
+        dbgIDR('In getInitialDeviceData, getting data for:', registers);
+        console.error("thisWillNeverWork", registers);
 
         var registersToRead = [];
         registers.forEach(function(register) {
@@ -434,12 +439,14 @@ function module() {
             });
             return index;
         }
+        console.error("self.activeDevice", this.activeDevice)
         return self.activeDevice.sReadMultiple(registersToRead)
         .then(function(results) {
             results.forEach(function(result, i) {
                 dbgIDR('Initial Read RESULT:', result);
                 var index = getRegIndexFromResult(result);
                 registers[index].result = result.data;
+                console.error("registers[index].result", registers[index].result )
             });
 
             dbgIDR('In getInitialDeviceData, resolving to:', registers);
@@ -761,6 +768,7 @@ function module() {
         onSuccess();
     };
     this.updateActiveRegisterValues = function(results) {
+        console.error("register matrix resalts", results)
         var data = {};
         try {
             results.forEach(function(result) {
