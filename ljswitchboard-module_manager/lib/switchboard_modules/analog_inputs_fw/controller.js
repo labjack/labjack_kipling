@@ -103,47 +103,6 @@ function module() {
     //Define nop (do-nothing) function
     var nop = function(){};
 
-    // T4 ONLY NEED TO MAKE THIS CHANGE BASED ON DEVICE TYPE --------------
-    // var baseReg = 'AIN#(0:11)';
-    // var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
-
-    // var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
-    // var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
-    // this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
-
-
-    // this.onDeviceSelected;
-    // console.warn("active device", self.onDeviceSelected);
-    // switch (self.activeDeviceType) {
-    //     case 'T8':
-    //         // Base-Register Variable for Configuring multiple thermocouples.
-    //         var baseReg = 'AIN#(0:7)';
-    //         // Expand baseReg & create baseRegister list using ljmmm.
-    //         var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
-    //         this.ain_ef_types = globalDeviceConstants.t8DeviceConstants.ainEFTypeOptions;
-    //         var ain_ef_type_map = globalDeviceConstants.t8DeviceConstants.ainEFTypeMap;
-    //         this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
-    //         break;
-    //     case 'T7':
-    //         // Base-Register Variable for Configuring multiple thermocouples.
-    //         var baseReg = 'AIN#(0:13)';
-    //         // Expand baseReg & create baseRegister list using ljmmm.
-    //         var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
-    //         this.ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
-    //         var ain_ef_type_map = globalDeviceConstants.t7DeviceConstants.ainEFTypeMap;
-    //         this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
-    //         break;
-    //     case 'T4':
-    //         // Base-Register Variable for Configuring multiple thermocouples.
-    //         var baseReg = 'AIN#(0:11)';
-    //         // Expand baseReg & create baseRegister list using ljmmm.
-    //         this.baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
-    //         this.ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
-    //         var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
-    //         this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
-    //         break;
-    // }
-
     // efTypeName template
     var ainEFTypeNameTemplate;
 
@@ -594,7 +553,6 @@ function module() {
             }
 
             if(register.indexOf('AIN_ALL') === 0) {
-                console.error("569 base registers used here \n\n")
                 baseRegisters.forEach(function(baseRegister) {
                     var reg = baseRegister + register.split('AIN_ALL')[1];
                     self.bufferedOutputValues.set(reg,value);
@@ -686,7 +644,6 @@ function module() {
     };
 
     this.configureModule = function(onSuccess) {
-        console.error('configureModule\n\n\n')
         var devConstStr;
         var productType;
         var baseReg;
@@ -1343,7 +1300,6 @@ function module() {
     };
 
     this.configureBaseRegisters = function(deviceTypeName) {
-        console.error("configuring base registers for device type " + deviceTypeName)
         switch (deviceTypeName) {
             case 'T8':
                 // Base-Register Variable for Configuring multiple thermocouples.
@@ -1380,7 +1336,6 @@ function module() {
      * @param  {[type]} onSuccess   Function to be called when complete.
     **/
     this.onModuleLoaded = function(framework, onError, onSuccess) {
-        console.error('onModuleLoaded\n\n\n\n');
         self.framework = framework;
         compileTemplates(framework);
 
@@ -1419,11 +1374,8 @@ function module() {
      * @param  {[type]} onSuccess   Function to be called when complete.
     **/
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
-        console.error("onDeviceSelected\n\n")
         self.activeDevice = device;
         self.activeDeviceType = device.savedAttributes.deviceTypeName;
-        // self.configureBaseRegisters(self.activeDeviceType);
-        // console.error(self.baseRegisters);
         self.clearCachedData();
 
         framework.clearConfigBindings();
@@ -1437,9 +1389,6 @@ function module() {
 
         var baseReg = 'AIN#(0:11)';
         var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
-        // var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
-        // var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
-        // this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
         switch (self.activeDeviceType) {
             case 'T8':
                 // Base-Register Variable for Configuring multiple thermocouples.
@@ -1485,7 +1434,6 @@ function module() {
             var analogInputs = [];
         }
         // self.baseRegisters = self.configureBaseRegisters(device.savedAttributes.deviceTypeName);
-        console.error("1378 base registers used here too")
         baseRegisters.forEach(function(reg,index){
             var ainChannel = {
                 "name":reg,
@@ -1826,7 +1774,6 @@ function module() {
     };
 
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
-        console.error('onTemplateLoaded\n\n')
         self.clearTempData();
         // Populated list of missing registers
         var missingRegs = [];
@@ -1907,7 +1854,6 @@ function module() {
             var clearCurAINREadings = false;
             self.bufferedOutputValues.forEach(function(value,name){
                 if(name === FORCE_AIN_VAL_REFRESH) {
-                    console.error("1765 base registers \n")
                     baseRegisters.forEach(function(baseRegister) {
                         var oldVal = self.currentValues.get(baseRegister);
                         self.newBufferedValues.set(baseRegister,oldVal);
