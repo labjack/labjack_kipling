@@ -8,7 +8,6 @@
  * Goals for the Simple Logger module:
 **/
 var q = require('q');
-var path = require('path');
 
 const { time }           = require('console');
 const fs                 = require('fs')
@@ -60,16 +59,16 @@ function userStartLogger() {
 		'configureLogger',				// Performed when configuring logger
 		'startLogger',					// Performed when starting logger
 		'waitForLoggerToRun',			// Allowing the logger to run...
-		'closeDevices',					
+		// 'closeDevices',					
 		'finish',
 	];
-	loggerAppSteps.forEach(function(step) {
-		console.error('App Step', step);
-		if(typeof(loggerApp[step]) != 'function') {
-			console.error('App Step', step, 'is not defined!');
-			process.exit();
-		}
-	});
+	// loggerAppSteps.forEach(function(step) {
+	// 	console.error('App Step', step);
+	// 	if(typeof(loggerApp[step]) != 'function') {
+	// 		console.error('App Step', step, 'is not defined!');
+	// 		process.exit();
+	// 	}
+	// });
 	
 	var isTerminated = false;
 	async.eachSeries(
@@ -80,9 +79,7 @@ function userStartLogger() {
 				cb(err);
 			}
 			try {
-				// Zander - remember to take this out when we figure this out
-				alert("Trying", step)
-				console.error("Trying", step)
+				console.log("Trying", step)
 				loggerApp[step]().then(cb, onErr);
 			} catch(err) {
 				console.error('Error executing app step', step, err);
@@ -295,7 +292,6 @@ function module() {
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
         framework.clearConfigBindings();
         framework.setStartupMessage('Reading Device Configuration');
-		console.error("on device selected", device[0].serialNumber)
 		this.device_controller = framework.device_controller
         onSuccess();
     };
@@ -307,7 +303,6 @@ function module() {
 
         // Get the current mode,
         // self.moduleContext.logger_mode = logger_modes.active;
-		console.error("device", device1[0].savedAttributes.serialNumber)
 		self.activeDevice = device1;
 		self.deviceSN = device1[0].savedAttributes.serialNumber;
 		// console.error("onDeviceConfigured 230", device)
@@ -338,6 +333,7 @@ function module() {
     var self = this;
 }
 
+// Zander - ToDo - logegr config file location
 var template_logger_config_file = 'D:/somethingCool/Untitled-1.json';
 // var cwd = process.cwd();
 
@@ -358,6 +354,7 @@ function loggerApp() {
 	this.simpleLogger;
 	this.deviceManager;
 	this.logConfigs;
+	
 	// const result = this.initializeLogger();
 
 
@@ -374,8 +371,6 @@ function loggerApp() {
 		setTimeout(function() {
 			self.simpleLogger.initialize()
 			.then(function(res) {
-				// var res = 1235;
-				console.error("derfered", defered)
 				debugLog('--- App Initialized');
 				defered.resolve();
 			}, function(err) {
@@ -390,30 +385,11 @@ function loggerApp() {
 		debugLog('--- In Func: initializeDeviceManager');
 		var defered = q.defer();
 
-		// zander - don't lose this spot it might come in handy later.
 		self.deviceManager = device_manager.create();
-		console.warn("self.devicemanager15", self.deviceManager)
 		// self.deviceManager.devices[0].savedAttributes = global.device[0].savedAttributes;
-		console.warn("self.devicemanager2", self.deviceManager.devices[0])
 		if(self.deviceManager.deviceConnected != true){
-			// console.warn()
 			// self.deviceManager.deviceConnected = true;
 		}
-		// ct: 'LJM_ctUSB'
-		// dt: 'LJM_dtT7'
-		// id: '470015117
-
-		// dt:'LJM_dtANY',
-		// ct:'LJM_ctANY',
-		// id:'LJM_idANY',
-		// while(self.deviceManager.deviceConnected != true){
-		// 	// console.warn("within whe while loop")
-		// 	self.deviceManager.connectToDevices([{
-		// 		dt:'LJM_ctUSB',
-		// 		ct:'LJM_dtT7',
-		// 		id:'470015117',
-		// }])}
-		// cursorTaskComplete()
 
 		self.deviceManager.connectToDevices([{
 			dt:'LJM_dtANY',
@@ -427,12 +403,6 @@ function loggerApp() {
 			console.error('Failed to connect to devices',err);
 			defered.resolve();
 		});
-		console.warn("self.devicemanager25", self.deviceManager)
-		// while(self.deviceManager.deviceConnected == false)
-		// {
-		// 	console.log("tring to conect to the device")
-		// 	self.deviceManager.connectToDevices();
-		// }
 		return defered.promise;
 	};
 
@@ -440,10 +410,9 @@ function loggerApp() {
 		debugLog('--- In Func: updateDeviceListing');
 		debugLog('Connected Devices', self.deviceManager.getDevices());
 		var defered = q.defer();
-		self.simpleLogger.updateDeviceListing(self.deviceManager.getDevices())
+		self.simpleLogger.updateDeviceListing(frameworkDevices[0])
 		.then(function(res) {
 			debugLog('Device listing has been passwd to the logger',res);
-			console.warn('Device listing has been passwd to the logger',res);
 			defered.resolve();
 		}, function(err) {
 			console.error('Failed to save the device listing to the logger',err);
@@ -464,17 +433,12 @@ function loggerApp() {
 		*/
 		this.updateDeviceListing();
 
-		console.warn("devicemanager", this)
-		console.warn("this is the self thing", self)
-		console.warn("self.activedevice", self.activeDevice)
-		console.warn("simmple_logger", simple_logger)
 		self.logConfigs = simple_logger.generateBasicConfig({
 			'same_vals_all_devices': true,
 			'registers': ['AIN0','AIN1'],
 			'update_rate_ms': 100,
 		}, self.deviceManager.getDevices());
-		console.warn("self.logConfig", self.logConfigs)
-		// self.deviceManager.getDevices()
+		self.deviceManager.getDevices()
 
 		var fs = require('fs');
 		fs.writeFile(template_logger_config_file,JSON.stringify(self.logConfigs),function(err) {
@@ -483,7 +447,6 @@ function loggerApp() {
 			} else {
 				debugLog('Data was appended to the config file.');
 			}
-			console.error("what is self.logConfigs", self.logConfigs)
 			self.simpleLogger.configureLogger({
 				'configType': 'filePath',
 				'filePath': template_logger_config_file,
@@ -498,7 +461,7 @@ function loggerApp() {
 				debugLog('Logger has been configured.',res)
 				defered.resolve();
 			}, function(err) {
-				console.error('Logger failed to be configured.1111',err)
+				console.error('Logger failed to be configured.',err)
 				defered.resolve();
 			});
 		});
@@ -515,25 +478,20 @@ function loggerApp() {
 		self.simpleLogger.startLogger()
 		.then(function succ() {
 			
-			debugLog('Logger Started1');
-			console.warn("right after loggerStarted1")
+			debugLog('Logger Started');
 			return defered.promise;
 		}, function err() {
-			
-			debugLog('Logger Started2');
+			debugLog('Logger Started');
 		});
-		console.error("at the end of the start logger")
 		return defered.promise;
 	}
 	this.waitForLoggerToRun = function() {
 		debugLog('--- In Func: waitForLoggerToRun');
-		console.warn("waitForLoggerToRun")
 		var defered = q.defer();
 		defered.resolve();
 		return defered.promise;
 	}
 	this.closeDevices = function() {
-		console.error("this is the close function")
 		var defered = q.defer();
 		self.deviceManager.closeDevices()
 		.then(defered.resolve, defered.reject);
@@ -550,6 +508,9 @@ function loggerApp() {
 		var defered = q.defer();
 		// setTimeout(defered.resolve, 1000);
 		defered.resolve();
+		// Zander - should there be information when the logger has finished?
+		alert("Logging as completed.")
+		console.log("Finished Logging")
 		return defered.promise;
 	}
 	var self = this;
@@ -562,23 +523,22 @@ function attachListeners(loggerObject) {
 		var key = eventMap[eventKey];
 		loggerObject.on(key, function(data) {
 			if(ignoreErrorsList.indexOf(key) < 0) {
-				debugLog('Captured Event!!', key, data);
+				// debugLog('Captured Event!!', key, data);
 			}
 			var handeledEvent = false;
 			// print('Captured Event', key, data, Object.keys(data));
-			console.error("key??", key, "data??", data)
 			if(key === 'NEW_VIEW_DATA') {
 				if(data.view_type === 'current_values') {
-					printNewData('New View Data', {
-						data: data.data_cache
-						// vals: data.data_cache,
-					});
+					// printNewData('New View Data', {
+					// 	data: data.data_cache
+					// 	// vals: data.data_cache,
+					// });
 					handeledEvent = true;
 				} else if(data.view_type === 'basic_graph') {
-					printNewData('New Graph Data', {
-						numValsLogged: data.data_cache.length,
-						// vals: data.data_cache,
-					});
+					// printNewData('New Graph Data', {
+					// 	numValsLogged: data.data_cache.length,
+					// 	// vals: data.data_cache,
+					// });
 					handeledEvent = true;
 				} else {
 					console.error('un-handled... data.view_type', data.view_type)
@@ -587,7 +547,7 @@ function attachListeners(loggerObject) {
 				// console.log('un-handled... key', key)
 			}
 			if(!handeledEvent) {
-				printNewData('Captured Event???????????????????', key, data);
+				printNewData('Captured Event', key, data);
 			}
 
 		});

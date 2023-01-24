@@ -57,22 +57,18 @@ function CREATE_DATA_GROUP_MANAGER(options, config) {
 	}
 
 	var getId = function(deviceSerialNumber, registerName) {
-		console.error("deviceSerialNumber", registerName)
 		return deviceSerialNumber.toString() + '_' + registerName.toString();
 	};
 
 	var serialNumbers = options.device_serial_numbers;
-	console.warn("options", options)
 	for(var i = 0; i < serialNumbers.length; i++) {
 		var sn = serialNumbers[0];
-		console.error("sn", sn)
 		
 		this.data[sn] = [];
 		this.completeData[sn] = {};
 
 		var registers = options.defined_user_values;
 		for(var j = 0; j < registers.length; ++j) {
-			console.warn("registers", registers[j])
 			var registerID = getId(sn, registers[j]);
 			this.completeData[sn][registerID] = JSON.parse(JSON.stringify(
 				registers[j]

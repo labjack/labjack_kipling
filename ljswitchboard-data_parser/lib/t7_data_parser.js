@@ -65,7 +65,6 @@ var T7_LIST = {
 
 			var convertSigFigs = false;
 			// Decide whether or not to convert units for sigfig reasons.
-			console.warn("am i able to see if this is ever grabed?")
 			if((-0.1 < val) && (val < 0.1) && convertSigFigs) {
 				var rVal = val * 1000;
 				res.unit = 'mV';

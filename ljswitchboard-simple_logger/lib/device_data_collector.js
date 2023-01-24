@@ -78,13 +78,18 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 
 		// Loop through the devices object and try to link to the device with
 		// the desired serial number.
-		var isFound = self.devices.some(function(device) {
-			if(device.savedAttributes.serialNumber == serialNum) {
-				self.isValidDevice = true;
-				self.device = device;
-				return true;
-			}
-		});
+		// var isFound = self.devices(function(device) {
+		// 	if(device.savedAttributes.serialNumber == serialNum) {
+		// 		self.isValidDevice = true;
+		// 		self.device = device;
+		// 		return true;
+		// 	}
+		// });
+		if(self.devices.savedAttributes.serialNumber == serialNum) {
+			self.isValidDevice = true;
+			self.devices = self.devices;
+			return true;
+		}
 
 		defered.resolve();
 		return defered.promise;
@@ -249,7 +254,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// self.options.REPORT_DEFAULT_VALUES_WHEN_LATE
 
 				// If an IO is not currently pending then start a new read.
-				self.device.readMany(registerList)
+				self.devices.readMany(registerList)
 				.then(function(results) {
 					// console.log('readMany Results', registerList, results);
 

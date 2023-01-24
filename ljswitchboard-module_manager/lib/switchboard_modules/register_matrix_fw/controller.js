@@ -140,7 +140,6 @@ function module() {
         // const filePath = path.join(global.localK3FilesPath, "/module_data/register_matrix_fw/data.json");
         // console.warn("filePath", filePath)
         global.globalActiveRegisters = registerList;
-        console.warn("registerList", registerList)
         if(typeof(self.startupData.registers_by_sn) === 'undefined') {
             self.startupData.registers_by_sn = {};
             showAlert('startupData is corrupted');
@@ -274,7 +273,7 @@ function module() {
     this.onModuleLoaded = function(framework, onError, onSuccess) {
         self.startupData = framework.startupData;
         self.moduleName = framework.moduleData.name;
-        console.error("onModLoaded startupData", self.startupData.registers_by_sn)
+        // console.error("onModLoaded startupData", self.startupData.registers_by_sn)
         // Compile required template files
         compileTemplates(framework);
 
@@ -416,7 +415,6 @@ function module() {
     };
     this.getInitialDeviceData = function(registers) {
         dbgIDR('In getInitialDeviceData, getting data for:', registers);
-        console.error("thisWillNeverWork", registers);
 
         var registersToRead = [];
         registers.forEach(function(register) {
@@ -439,14 +437,12 @@ function module() {
             });
             return index;
         }
-        console.error("self.activeDevice", this.activeDevice)
         return self.activeDevice.sReadMultiple(registersToRead)
         .then(function(results) {
             results.forEach(function(result, i) {
                 dbgIDR('Initial Read RESULT:', result);
                 var index = getRegIndexFromResult(result);
                 registers[index].result = result.data;
-                console.error("registers[index].result", registers[index].result )
             });
 
             dbgIDR('In getInitialDeviceData, resolving to:', registers);
@@ -768,7 +764,6 @@ function module() {
         onSuccess();
     };
     this.updateActiveRegisterValues = function(results) {
-        console.error("register matrix resalts", results)
         var data = {};
         try {
             results.forEach(function(result) {

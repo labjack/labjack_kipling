@@ -34,16 +34,11 @@ const DEVICE_VIEW_TARGET = '#device-view';
 const CALLBACK_STRING_CONST = '-callback';
 
 function fixElectron(data) {
-    console.warn("fixElectron's data varables", data.deviceSN)
-    console.warn("fixElectron's data varables", data.deviceSN)
     for (let k in data) {
         let v = data[k];
-        console.error("this is 1 within fixelectron", typeof v)
         if (v instanceof Map) { // Electron fix
-            console.error("this is 2 within fixelectron")
             const obj = {};
             v.forEach((value, name) => {
-                console.warn("fixElectron's values", value)
                 obj[name] = fixElectron(value);
             });
             data[k] = obj;
@@ -369,7 +364,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     _SetSelectedDevices(newSelectedDevices) {
-        console.warn("_SetSelectedDevices1", newSelectedDevices[0].savedAttributes.serialNumber)
         // Initialize the selectedDevices array
         this.selectedDevices = [];
         newSelectedDevices.forEach((device) => {
@@ -377,7 +371,6 @@ class PresenterFramework extends EventEmitter {
             if (savedAttributes['isSelected-CheckBox']) {
                 this.selectedDevices.push(device);
             }
-        console.warn("_SetSelectedDevices2", newSelectedDevices[0].savedAttributes.serialNumber)
         });
     }
 
@@ -718,7 +711,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     attachDeviceStatusListeners() {
-        console.warn("attachDeviceStatusListeners", this.activeDevices[0].savedAttributes.serialNumber)
         for (const device of this.activeDevices) {
             device.on('DEVICE_DISCONNECTED', data => this.deviceDisconnectedEventListener(data));
             device.on('DEVICE_RECONNECTED', data => this.deviceReconnectedEventListener(data));
@@ -744,7 +736,6 @@ class PresenterFramework extends EventEmitter {
     }
     
     detachDeviceStatusListeners() {
-        console.warn("detachDeviceStatusListeners", this.activeDevices[0].savedAttributes.serialNumber)
         for (const device of this.activeDevices) {
             device.removeListener('DEVICE_DISCONNECTED', data => this.deviceDisconnectedEventListener(data));
             device.removeListener('DEVICE_RECONNECTED', data => this.deviceReconnectedEventListener(data));
@@ -767,7 +758,6 @@ class PresenterFramework extends EventEmitter {
 
     _SetActiveDevices(newActiveDevices) {
         this.activeDevices = newActiveDevices;
-        console.warn("_SetActiveDevices1", newActiveDevices[0].savedAttributes.identifierString)
 
         // Initialize a new error-log
         this.deviceErrorLog = {};
@@ -786,7 +776,6 @@ class PresenterFramework extends EventEmitter {
             };
         }
 
-        console.warn("_SetActiveDevices2", newActiveDevices[0].savedAttributes.identifierString)
         // Attach Device Listeners
         this.attachDeviceStatusListeners();
     }
@@ -962,7 +951,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     convertBindingsToDict() {
-        console.warn("when is this happening")
         return this.moduleTemplateBindings;
     }
 
@@ -1216,7 +1204,6 @@ class PresenterFramework extends EventEmitter {
 
     qExecOnCloseDevice() {
         const device = this.smartGetSelectedDevices();
-        console.warn("qExecOnCloseDevice")
         // Detach device event emitters
         this.detachDeviceStatusListeners();
         if (this.isDeviceOpen) {
@@ -1340,7 +1327,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     qRenderModuleTemplate() {
-        console.warn("qRenderModuleTemplate")
         return this.setDeviceView(
             this.userViewFile,
             this.moduleJsonFiles,
@@ -1349,7 +1335,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     getDeviceSelectorClass() {
-        console.warn("getDeviceSelectorClass")
         if (this.frameworkType === 'singleDevice') {
             return '.device-selection-radio';
         } else if (this.frameworkType === 'multipleDevices') {
@@ -1364,7 +1349,6 @@ class PresenterFramework extends EventEmitter {
             'deviceListing': await this.device_controller.getDeviceListing(this.moduleData.data.supportedDevices),
             'activeDevices': await this.device_controller.getDevices(this.moduleData.data.supportedDevices),
         };
-        console.warn("qUpdateActiveDevice1125", data.activeDevices[0].savedAttributes.serialNumber)
 
         // Save device references
         this._SetActiveDevices(data.activeDevices);
@@ -1392,7 +1376,6 @@ class PresenterFramework extends EventEmitter {
         // End of sloppy code warning...
         if (!foundActiveDevice) {
             // Did not find an active device
-            console.warn("this.frameworkType", this.frameworkType)
             if (this.frameworkType !== 'multipleDevices') {
                 const activeDev = devs.eq(0);
                 // Marking first found device
@@ -1417,7 +1400,7 @@ class PresenterFramework extends EventEmitter {
                     console.error(err);
                 }
             } else {
-                console.warn('Not sure what to do... presenter_framework.js - updateSelectedDeviceList');
+                console.log('presenter_framework.js - updateSelectedDeviceList');
             }
         }
 
@@ -2017,7 +2000,6 @@ class PresenterFramework extends EventEmitter {
         this.setupBindings.forEach((binding) => {
             executionQueue.push(async () => {
                 //Create execution queue
-                console.warn("executeSetupBindings")
                 const device = this.getSelectedDevice();
                 // console.log('Executing IO Operation', binding.binding);
                 //Link various function calls based off read/write property
@@ -2104,7 +2086,6 @@ class PresenterFramework extends EventEmitter {
     async _writeToDevice(bindingInfo, eventData) {
         const jquerySelector = '#' + bindingInfo.template;
         const newVal = this.jquery.val(jquerySelector);
-        console.warn("_writeToDevice")
 
         // Alert to module that a write is about to happen
         const skipWrite = await new Promise((resolve, reject) => {
@@ -2263,7 +2244,6 @@ class PresenterFramework extends EventEmitter {
 
     // this happens twice? when a moduule is opened
     clearConfigBindings() {
-        console.error("clearConfigBindings")
         this.bindings.clear();
         this.readBindings.clear();
         this.writeBindings.clear();
@@ -2432,13 +2412,12 @@ class PresenterFramework extends EventEmitter {
      *
      * @return {presenter.Device} The device selected as the "active" device.
     **/
+    // Zander - this is the functrion that we need to get for the funconality of the program
     getSelectedDevice() {
         return this.activeDevice;
     }
 
     getSelectedDevices() {
-        console.warn("getSelectedDevices this.selectedDevices", this.selectedDevices[0].savedAttributes.serialNumber)
-        console.warn("getSelectedDevices this.activeDevice", this.activeDevice.savedAttributes.serialNumber)
         if (this.frameworkType === 'singleDevice') {
             return [this.activeDevice];
         } else if (this.frameworkType === 'multipleDevices') {
@@ -2508,7 +2487,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     async getNeededAddresses() {
-        // console.warn("getNeededAddresses")
         this.daqLoopStatus = 'getNeededAddresses';
         const addresses = [];
         const formats = [];
@@ -2518,9 +2496,7 @@ class PresenterFramework extends EventEmitter {
 
         // Loop through all registered bindings and determine what should be
         // done.
-        // console.warn("getNeededAddresses1", this.readBindings)
         this.readBindings.forEach((value, key) => {
-            console.warn("getNeededAddresses2")
             // For each binding check to see if it should be executed by
             // checking its currentDelay.  If it equals zero than it needs
             // to be executed.
@@ -2549,7 +2525,6 @@ class PresenterFramework extends EventEmitter {
                 this.readBindings.set(key, value);
             }
         });
-        // console.warn("addresses", value)
         if (addresses.length > 0) {
             return {
                 addresses: addresses,
@@ -2563,7 +2538,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     triggerModuleOnRefresh(bindingsInfo) {
-        console.warn("triggerModuleOnRefresh")
         return new Promise((resolve, reject) => {
             this.daqLoopStatus = 'triggerModuleOnRefresh';
             this.fire(
@@ -2582,7 +2556,6 @@ class PresenterFramework extends EventEmitter {
     // this might be something to look into in the future because this may not be being called to do the thing
     requestDeviceValues(bindingsInfo) {
         this.daqLoopStatus = 'requestDeviceValues';
-        console.warn("requestDeviceValues")
         if (bindingsInfo.addresses.length === 0) {
             return Promise.resolve({
                 values: [],
@@ -2607,7 +2580,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     processDeviceValues(valuesInfo) {
-        console.warn("processingDeviceValues")
         this.daqLoopStatus = 'processDeviceValues';
         const values = valuesInfo.values;
         const addresses = valuesInfo.addresses;
@@ -2740,7 +2712,7 @@ class PresenterFramework extends EventEmitter {
 
     triggerModuleOnRefreshed(valuesDict) { // Probably not user anywhere
         return new Promise((resolve, reject) => {
-            this.daqLoopStatus = 'triggerModuleOnRefreshed';
+            // this.daqLoopStatus = 'triggerModuleOnRefreshed';
             this.fire(
                 'onRefreshed',
                 [valuesDict],
@@ -2767,8 +2739,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     async innerRunDAQLoop(deviceAttributes) {
-        // console.warn("innerRunDAQLoop", deviceAttributes)
-        // const valuesInfo = await this.requestDeviceValues(bindingsInfo);
         if (deviceAttributes.isConnected) {
 
             this.daqLoopFinished = false;
@@ -2776,20 +2746,11 @@ class PresenterFramework extends EventEmitter {
 
             // Get the current list of bindings
             try {
-                // console.warn("1")
-                // check back here
                 const bindingsInfo = await this.getNeededAddresses(); // throws 'delay'
-                // console.warn("2")
                 await this.verifyFrameworkIsActive(); // throws stoppingLoop
-                // console.warn("3")
-                // Inform the active module that data is being refreshed
-                // await this.triggerModuleOnRefresh(bindingsInfo); // NOT USED?
-                // await this.verifyFrameworkIsActive();
 
                 // Collect data from the active device
                 const valuesInfo = await this.requestDeviceValues(bindingsInfo);
-                // console.warn("4")
-                // console.warn("valuesInfo", valuesInfo)
                 await this.verifyFrameworkIsActive();
 
                 // Process the collected device data
@@ -2807,8 +2768,6 @@ class PresenterFramework extends EventEmitter {
                 await this.verifyFrameworkIsActive();
 
              } catch (err) {
-                // console.warn("what the fuck!", err)
-                // console.error("\n==== Presenter Framework innerRunDAQLoop caught error ====\n", "Error: ", err, "\nreadBindings: ", this.readBindings, "\nbindingsInfo: ", bindingsInfo,"\n===================\n")
                 if (err !== 'delay') {
                     if (err === 'stoppingLoop') {
                         return Promise.reject(err);
@@ -2962,7 +2921,6 @@ class PresenterFramework extends EventEmitter {
     }
 
     setCustomContext(data) {
-        console.error("the data that is in the presenter framework", data.deviceSN)
         this.moduleTemplateBindings.set('custom', fixElectron(data));
     }
 
@@ -3082,7 +3040,6 @@ class PresenterFramework extends EventEmitter {
         this.startupData = undefined;
         this.isStartupDataValid = false;
 
-        console.warn("infoObj", infoObj)
         this.frameworkType = infoObj.data.framework;
 
         try {

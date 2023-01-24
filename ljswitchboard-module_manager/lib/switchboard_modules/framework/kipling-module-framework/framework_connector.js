@@ -273,7 +273,6 @@ class ModuleInstance extends EventEmitter {
             console.info('In PRE-LOAD STEP', newModule);
         }
         // For each device, build a deviceErrorMessages object
-        console.warn("newModule.context.devices in frame work conector", newModule.context.devices[0].serialNumber)
 
         const devices = newModule.context.devices;
         for(let i = 0; i < devices.length; i++) {

@@ -79,7 +79,6 @@ function CREATE_COORDINATOR () {
 	this.initializeStats = function() {
 		// Initialize the num_collected variable.
 		self.stats.num_collected = {};
-		console.warn("this should be print ing out", self)
 		print('initializing stats',self.config);
 		self.config.data_groups.forEach(function(data_group) {
 			self.stats.num_collected[data_group] = 0;
@@ -233,7 +232,6 @@ function CREATE_COORDINATOR () {
 	};
 
 	var innerConfigureCoordinator = function(config) {
-		console.warn("config", config)
 		var defered = q.defer();
 
 		if(self.state.configured) {
@@ -358,7 +356,6 @@ function CREATE_COORDINATOR () {
 		return innerInitializeCoordinator(bundle);
 	};
 	this.updateDeviceListing = function(bundle) {
-		console.error("bundle", bundle)
 		return innerUpdateDeviceListing(bundle);
 	};
 	this.configure = function(bundle) {

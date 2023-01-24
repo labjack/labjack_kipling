@@ -100,7 +100,6 @@ function CREATE_SIMPLE_LOGGER () {
 	}
 
 	function innerUpdateDeviceListing(devices) {
-		console.error("innerUpdateDeviceListing(devices)", devices)
 		var defered = q.defer();
 
 		self.devices = undefined;
@@ -308,7 +307,6 @@ function CREATE_SIMPLE_LOGGER () {
 		return innerInitialize(bundle);
 	};
 	this.updateDeviceListing = function(devices) {
-		console.error("updateDeviceListing's devices", devices)
 		return innerUpdateDeviceListing(devices);
 	};
 	this.configureLogger = function(loggerConfig) {
@@ -347,7 +345,6 @@ exports.verifyConfigObject = function(dataObject) {
 };
 
 exports.generateBasicConfig = function(basicData, devices) {
-	console.warn("generateBasicConfig's devises", basicData, devices)
 	var configObj = {
 		"logging_config": {
 			"name": "Basic Config Auto-Template",
@@ -396,6 +393,16 @@ exports.generateBasicConfig = function(basicData, devices) {
 				}
 			}
 		},
+		"stop_trigger": {
+			"relation": "and",
+			"triggers": [
+			  {
+				"attr_type": "num_logged",
+				"data_group": "basic_data_group",
+				"val": 8
+			  }
+			]
+		  }
 		// "stop_trigger": {
 		// 	"relation": "and",
 		// 	"triggers": [{
@@ -406,22 +413,14 @@ exports.generateBasicConfig = function(basicData, devices) {
 
 	var validSN;
 	if(basicData.same_vals_all_devices) {
-		console.error("not sure where this is", curatedDevice, "devices", devices)
 		devices.forEach(function(device) {
 			var sn = device.savedAttributes.serialNumber;
-			console.warn("serialNumber", device.savedAttributes)
-			console.warn("device", device.savedAttributes)
-			console.warn("configObj", configObj)
-			// validSN = sn;
-			validSN = 470015117;
-			somethung = 470015117
-			configObj.basic_data_group.device_serial_numbers.push(somethung);
+			validSN = sn;
+			configObj.basic_data_group.device_serial_numbers.push(validSN);
 			// configObj.basic_data_group.device_serial_numbers.push(sn);
-			console.warn("configObj", configObj)
 			configObj.basic_data_group[sn] = {
 				'registers': []
 			};
-			console.warn("configObj", configObj)
 			basicData.registers.forEach(function(register) {
 				configObj.basic_data_group[sn].registers.push({
 					name: register,
