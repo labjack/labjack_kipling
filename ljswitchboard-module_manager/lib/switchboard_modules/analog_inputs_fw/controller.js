@@ -1536,7 +1536,7 @@ function module() {
                         if(name.indexOf('_RANGE') !== -1) {
                             var rangeStr = newData.value.toString();
                             ainInfo.rangeVal = newData.value;
-                            if (newData.value == 2.4) { ainInfo.minRangeVal = 0; } else { ainInfo.minRangeVal = newData.value; } // case for T4 AIN4-11 which has the range 0-2.5V
+                            if (newData.value == 2.5) { ainInfo.minRangeVal = 0; } else { ainInfo.minRangeVal = newData.value; } // case for T4 AIN4-11 which has the range 0-2.5V
                             ainInfo.rangeStr = name + ' is set to ' + rangeStr;
                         }
                         ainInfo.optionsDict.set(name, menuOptions);
