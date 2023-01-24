@@ -2121,7 +2121,7 @@ class PresenterFramework extends EventEmitter {
                             this.reportSyntaxError(
                                 {
                                     'location': '_writeToDevice.performCallbacks',
-                                    data: {binding: bindingInfo, eventData: eventData}
+                                    data: {binding: bindingInfo, eventData: eventData, e: e}
                                 }, e);
                             resolve(true);
                         }
@@ -2815,6 +2815,7 @@ class PresenterFramework extends EventEmitter {
         }
     }
 
+    // TO-DO may need to be async - jimmy
     configureLoopTimer() {
         this.frameworkLoopProcessing = false;
         this.frameworkLoopReference = setTimeout(

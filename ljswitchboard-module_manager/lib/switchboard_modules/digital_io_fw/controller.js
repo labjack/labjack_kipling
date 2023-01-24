@@ -48,17 +48,25 @@ function module() {
     // ex: ['AIN0', 'AIN1', ... 'AIN13']
     var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
 
-    // Define support analog input ef-types
+    // Define support analog input ef-types t4DeviceConstants
+    var ain_ef_types = t8DeviceConstants.ainEFTypeOptions;
     var ain_ef_types = t7DeviceConstants.ainEFTypeOptions;
+    var ain_ef_types = t8DeviceConstants.ainEFTypeOptions;
 
     // Supported analog input range options.
+    var ainRangeOptions = t8DeviceConstants.ainRangeOptions;
     var ainRangeOptions = t7DeviceConstants.ainRangeOptions;
+    var ainRangeOptions = t8DeviceConstants.ainRangeOptions;
 
     // Supported analog input resolution options.
+    var ainResolutionOptions = t8DeviceConstants.ainResolutionOptions;
     var ainResolutionOptions = t7DeviceConstants.ainResolutionOptions;
+    var ainResolutionOptions = t8DeviceConstants.ainResolutionOptions;
 
     // Supported analog input resolution options.
+    var ainSettlingOptions = t8DeviceConstants.ainSettlingOptions;
     var ainSettlingOptions = t7DeviceConstants.ainSettlingOptions;
+    var ainSettlingOptions = t8DeviceConstants.ainSettlingOptions;
 
     // Supported analog input negative channel options
     var ainNegativeCHOptions = [{

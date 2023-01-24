@@ -51,14 +51,20 @@ function module() {
     // ex: ['AIN0', 'AIN1', ... 'AIN13']
     var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
 
+    var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
     var ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
+    var ain_ef_types = globalDeviceConstants.t8DeviceConstants.ainEFTypeOptions;
 
     // Supported thermocouple types & associated constants.
+    var thermocoupleTypes = globalDeviceConstants.t4DeviceConstants.thermocoupleTypes;
     var thermocoupleTypes = globalDeviceConstants.t7DeviceConstants.thermocoupleTypes;
+    var thermocoupleTypes = globalDeviceConstants.t8DeviceConstants.thermocoupleTypes;
     this.thermocoupleTypes = thermocoupleTypes;
 
     // Supported thermocouple temperature metrics & associated constants.
+    var tcTemperatureMetrics = globalDeviceConstants.t4DeviceConstants.thermocoupleTemperatureMetrics;
     var tcTemperatureMetrics = globalDeviceConstants.t7DeviceConstants.thermocoupleTemperatureMetrics;
+    var tcTemperatureMetrics = globalDeviceConstants.t8DeviceConstants.thermocoupleTemperatureMetrics;
     this.tcTemperatureMetrics = tcTemperatureMetrics;
 
     var INITIALIZED_CLICK_HANDLERS = false;

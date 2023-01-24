@@ -193,8 +193,8 @@ function module() {
     /**
      * Function to handle definitive spinner-write events.
      *     The DAC channel SHOULD be updated
-     * @param  {string} reg Device register to be written
-     * @param  {number} val Value to be written to device register.
+     * @param  {string} reg Device register to be written           (register)
+     * @param  {number} val Value to be written to device register. (selected voltage)
     **/
     this.spinnerWriteEventHandler = function(reg, val) {
         self.hasChanges = false;
@@ -202,7 +202,7 @@ function module() {
         self.updateSliderVal(reg,val);
         self.writeReg(reg,val)
         .then(function() {
-            self.writeDisplayedVoltage(register,selectedVoltage);
+            self.writeDisplayedVoltage(reg,val);
             self.updateDOM = true;
         });
     };

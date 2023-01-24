@@ -1,10 +1,14 @@
 'use strict';
 
+
+// import 'ljswitchboard-module_manager\lib\switchboard_modules\framework\kipling-module-framework\presenter_framework.js';
 // Define a placeholder for the user's module object.
 var sdModule;
+// global.sdModule;
 const package_loader = global.package_loader;
 const handleBarsService = package_loader.getPackage('handleBarsService');
 const path = require('path');
+// const { getSystemErrorMap } = require('util');
 const EventEmitter = require('events').EventEmitter;
 const modbus_map = require('ljswitchboard-modbus_map').getConstants();
 
@@ -87,9 +91,9 @@ class ModuleInstance extends EventEmitter {
             // }
 
             // Create an instance of the user's module.
-            console.log('1111', module);
+            // console.log('1111', module);
             sdModule = new module();
-            console.log('11112');
+            // console.log('11112');
             global.sdModule = sdModule;
 
             this.sdFramework.numModuleReloads = 0;
@@ -164,6 +168,15 @@ class ModuleInstance extends EventEmitter {
         }
     }
 
+    saveFormData(moduleData) {
+        this.sdFramework.saveModuleInfo(
+            moduleData.data,
+            moduleData.data.json.moduleConstants,
+            sdModule,
+            moduleData
+        );
+    }
+
     loadModule(moduleData) {
         if(this.DEBUG_FRAMEWORK_CONNECTOR) {
             console.info('loading framework module', moduleData.data);
@@ -179,8 +192,6 @@ class ModuleInstance extends EventEmitter {
                     this.sdFramework.setRefreshRate(1000);
                 }
 
-                console.log('moduleData', moduleData);
-
                 const moduleViewPath = path.join(moduleData.data.path, 'view.html');
                 const moduleDataPath = path.join(moduleData.data.path, 'moduleData.json');
 
@@ -189,13 +200,8 @@ class ModuleInstance extends EventEmitter {
                 this.sdFramework.configFramework(moduleViewPath);
                 this.sdFramework.configureFrameworkData([moduleDataPath]);
 
-                //Save loaded module data to the framework instance
-                this.sdFramework.saveModuleInfo(
-                    moduleData.data,
-                    moduleData.data.json.moduleConstants,
-                    sdModule,
-                    moduleData
-                );
+                // saves the module data into data.json
+                this.saveFormData(moduleData);
 
                 this.sdFramework.ljmDriver = new FakeDriver();
 
@@ -248,6 +254,7 @@ class ModuleInstance extends EventEmitter {
 
         // Start the framework.....
         await this.initializeModule(moduleData.data);
+        // this line below had "await" at the start of the declaration
         await this.linkModule(moduleData);
         await this.loadModule(moduleData);
         await this.runModule(moduleData);

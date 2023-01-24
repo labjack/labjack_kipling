@@ -44,8 +44,11 @@ function module() {
     this.moduleConstants = {};
     this.moduleContext = {};
     this.activeDevice = undefined;
+    this.activeDeviceType = undefined;
     this.framework = undefined;
     this.defineDebuggingArrays = true;
+    this.baseRegisters = undefined;
+    this.ain_ef_type_map = undefined;
 
     // String key to trigger a clearing of current values
     var FORCE_AIN_VAL_REFRESH = 'FORCE_AIN_VAL_REFRESH';
@@ -99,37 +102,6 @@ function module() {
 
     //Define nop (do-nothing) function
     var nop = function(){};
-
-    // Base-Register Variable for Configuring multiple thermocouples.
-    var baseReg = 'AIN#(0:13)';
-
-    // Expand baseReg & create baseRegister list using ljmmm.
-    // ex: ['AIN0', 'AIN1', ... 'AIN13']
-    var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
-
-    // Define support analog input ef-types
-    var ain_ef_types = globalDeviceConstants.t8DeviceConstants.ainEFTypeOptions;
-    var ain_ef_type_map = globalDeviceConstants.t8DeviceConstants.ainEFTypeMap;
-    // this.ain_ef_type_map = ain_ef_type_map;
-
-    var ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
-    var ain_ef_type_map = globalDeviceConstants.t7DeviceConstants.ainEFTypeMap;
-    this.ain_ef_type_map = ain_ef_type_map;
-
-    // Supported analog input range options.
-    var ainRangeOptions = globalDeviceConstants.t8DeviceConstants.ainRangeOptions;
-
-    var ainRangeOptions = globalDeviceConstants.t7DeviceConstants.ainRangeOptions;
-
-    // Supported analog input resolution options.
-    var ainResolutionOptions = globalDeviceConstants.t8DeviceConstants.ainResolutionOptions;
-
-    var ainResolutionOptions = globalDeviceConstants.t7DeviceConstants.ainResolutionOptions;
-
-    // Supported analog input resolution options.
-    var ainSettlingOptions = globalDeviceConstants.t8DeviceConstants.ainSettlingOptions;
-
-    var ainSettlingOptions = globalDeviceConstants.t7DeviceConstants.ainSettlingOptions;
 
     // efTypeName template
     var ainEFTypeNameTemplate;
@@ -208,11 +180,6 @@ function module() {
             ];
         }
     };
-
-    // Supported extra options
-    var extraAllAinOptions = globalDeviceConstants.t7DeviceConstants.extraAllAinOptions;
-
-    var extraAllAinOptions = globalDeviceConstants.t8DeviceConstants.extraAllAinOptions;
 
     this.efTypeDict = new Map();
     this.rangeOptionsDict = new Map();
@@ -372,7 +339,9 @@ function module() {
         var maxRangeText = $(maxValIdName).text();
         var tStr;
 
-        tStr = (-1 * rangeVal).toString();
+        if (rangeVal == 2.5) { tStr = "0"; } //case for T4 AIN4-11 which are 0-2.5V
+        else { tStr = (-1 * rangeVal).toString(); }
+
         if (minRangeText !== tStr) {
             $(minValIdName).text(tStr);
         }
@@ -462,7 +431,9 @@ function module() {
         onSuccess();
     };
     this.genericDropdownClickHandler = function(data, onSuccess) {
-        var rootEl = data.eventData.toElement;
+        var rootEl = data.eventData.target;
+        // console.warn("1", data.eventData)
+        // it was toElement
         var className = rootEl.className;
         var buttonEl;
         var buttonID = '';
@@ -559,6 +530,27 @@ function module() {
                     });
                 });
             };
+            var baseReg = 'AIN#(0:13)'
+            var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+            switch (self.activeDeviceType) {
+                case 'T8':
+                    baseReg = 'AIN#(0:7)'
+                    baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                    break;
+                case 'T7':
+                    baseReg = 'AIN#(0:13)';
+                    baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                    break;
+                case 'T7-Pro':
+                    baseReg = 'AIN#(0:13)';
+                    baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                    break;
+                case 'T4':
+                    baseReg = 'AIN#(0:11)';
+                    baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                    break;
+
+            }
 
             if(register.indexOf('AIN_ALL') === 0) {
                 baseRegisters.forEach(function(baseRegister) {
@@ -844,7 +836,6 @@ function module() {
             var isValid;
 
             if(className === 'menuOption') {
-                console.log('menuClickHandler');
                 self.lastMenuClickEvent = event;
                 buttonEl = rootEl.parentElement.parentElement.parentElement;
                 buttonID = buttonEl.id;
@@ -1014,7 +1005,7 @@ function module() {
     this.addAinEFInfo = function(chNum, efType) {
         var chName = 'AIN' + chNum.toString();
         var baseID = '#' + chName + '-table-data';
-        var efData = ain_ef_type_map[efType];
+        var efData = self.ain_ef_type_map[efType];
         if(typeof(efData) !== 'undefined') {
             efData = efData();
         } else {
@@ -1256,7 +1247,7 @@ function module() {
                 };
                 newBinding.periodicCallback = getCallback(menuOptions);
             } else {
-                efControlsData +=  '<p>Undefined inputType' +regname+'</p>';
+                efControlsData +=  '<p>Undefined inputType' +regName+'</p>';
             }
 
             // Add config register to bindings list
@@ -1308,6 +1299,36 @@ function module() {
         });
     };
 
+    this.configureBaseRegisters = function(deviceTypeName) {
+        switch (deviceTypeName) {
+            case 'T8':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                var baseReg = 'AIN#(0:7)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                self.baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                break;
+            case 'T7':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                var baseReg = 'AIN#(0:13)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                self.baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                break;
+            case 'T7-Pro':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                var baseReg = 'AIN#(0:13)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                self.baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                break;
+            case 'T4':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                var baseReg = 'AIN#(0:11)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                return baseRegisters;
+                break;
+        }
+    }
+
     /**
      * Function is called once every time the module tab is selected, loads the module.
      * @param  {[type]} framework   The active framework instance.
@@ -1342,6 +1363,8 @@ function module() {
         self.resolutionOptionsDict = new Map();
         self.settlingOptionsDict = new Map();
         self.negativeChannelDict = new Map();
+        // we need to delete this but not at this time find a better place to do it. it breaks it
+        // self.baseRegisters = undefined;
     };
     /**
      * Function is called once every time a user selects a new device.
@@ -1352,7 +1375,7 @@ function module() {
     **/
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
         self.activeDevice = device;
-
+        self.activeDeviceType = device.savedAttributes.deviceTypeName;
         self.clearCachedData();
 
         framework.clearConfigBindings();
@@ -1362,11 +1385,55 @@ function module() {
 
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
         // Initialize variable where module config data will go.
+        console.error("onDeviceConfigured\n\n");
+
+        var baseReg = 'AIN#(0:11)';
+        var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+        switch (self.activeDeviceType) {
+            case 'T8':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                baseReg = 'AIN#(0:7)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                this.ain_ef_types = globalDeviceConstants.t8DeviceConstants.ainEFTypeOptions;
+                var ain_ef_type_map = globalDeviceConstants.t8DeviceConstants.ainEFTypeMap;
+                this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+                break;
+            case 'T7':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                baseReg = 'AIN#(0:13)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                this.ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
+                var ain_ef_type_map = globalDeviceConstants.t7DeviceConstants.ainEFTypeMap;
+                this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+                break;
+            case 'T7-Pro':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                baseReg = 'AIN#(0:13)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                this.ain_ef_types = globalDeviceConstants.t7ProDeviceConstants.ainEFTypeOptions;
+                var ain_ef_type_map = globalDeviceConstants.t7ProDeviceConstants.ainEFTypeMap;
+                this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+                break;
+            case 'T4':
+                // Base-Register Variable for Configuring multiple thermocouples.
+                baseReg = 'AIN#(0:11)';
+                // Expand baseReg & create baseRegister list using ljmmm.
+                this.baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                this.ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
+                var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
+                this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
+                
+        }
+
         self.moduleContext = {};
         self.analogInputsDict.clear();
         if(self.defineDebuggingArrays){
             var analogInputs = [];
         }
+        // self.baseRegisters = self.configureBaseRegisters(device.savedAttributes.deviceTypeName);
         baseRegisters.forEach(function(reg,index){
             var ainChannel = {
                 "name":reg,
@@ -1433,7 +1500,7 @@ function module() {
 
         self.moduleContext.allEFTypeVal = null;
         self.moduleContext.allEFTypesSame = true;
-        self.moduleContext.allEFTypeOptions = ain_ef_types;
+        self.moduleContext.allEFTypeOptions = this.ain_ef_types;
 
         self.currentValues.forEach(function(value,name){
             var dataObj = {};
@@ -1469,6 +1536,7 @@ function module() {
                         if(name.indexOf('_RANGE') !== -1) {
                             var rangeStr = newData.value.toString();
                             ainInfo.rangeVal = newData.value;
+                            if (newData.value == 2.4) { ainInfo.minRangeVal = 0; } else { ainInfo.minRangeVal = newData.value; } // case for T4 AIN4-11 which has the range 0-2.5V
                             ainInfo.rangeStr = name + ' is set to ' + rangeStr;
                         }
                         ainInfo.optionsDict.set(name, menuOptions);
@@ -1500,58 +1568,97 @@ function module() {
     };
     this.getD3GraphWidth = function (value, range) {
         var val;
+        var widthMultiplyer;
         switch (range) {
             // default for the t8
             case 11:
-                val = value / (range + 0.5);
+                // T8 exclusive range
+                val = value / (range + 0.1);
+                widthMultiplyer = 90;
                 break
             case 10:
+                // for both the T4 and the T7
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
             case 9.7:
+                // for both tthe T4 and T7
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
             case 4.8:
+                // T8 exclusive range
                 val = value / (range + 0.8);
+                widthMultiplyer = 90;
+                break;
+            case 2.5:
+                // for the T4
+                val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
             case 2.4:
+                // T8 exclusinve range
                 val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 1.2:
+                // T8 exclusive range
                 val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
-            case 0.6:
-                val = value / (range + 0.8);
-                break;
-            case 0.3:
-                val = value / (range + 0.8);
-                break;
-            case 0.15:
-                val = value / (range + 0.8);
+            case 1:
+                // for both the T4 and the T7
+                val = value / (range + 0.052);
+                widthMultiplyer = 100;
                 break;
             case 0.75:
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
+                break;
+            case 0.6:
+                // T8 exclusive range
+                val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 0.36:
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
+                break;
+            case 0.3:
+                // T8 exclusive range
+                val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 0.18:
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
                 break;
-            case 1:
-                val = value / (range + 0.052);
+            case 0.15:
+                // T8 exclusive range
+                val = value / (range + 0.8);
+                widthMultiplyer = 90;
+                break;
+            case 0.13:
+                // for both the T4 and the T7
+                val = value / (range + 0.5);
+                widthMultiplyer = 100;
                 break;
             case 0.1:
+                // for both the T4 and the T7
                 val = value / (range + 0.0051);
+                widthMultiplyer = 100;
                 break;
             case 0.01:
+                // for both the T4 and the T7
                 val = value / (range + 0.0003);
+                widthMultiplyer = 100;
                 break;
             default:
                 val = 0;
+                widthMultiplyer = 100;
                 break;
         }
-        val = (Math.abs(val) * 100);
+        val = (Math.abs(val) * widthMultiplyer);
         return val;
     };
     this.getSVGWidth = function(val) {
@@ -1567,13 +1674,13 @@ function module() {
         return function() {
             var width;
             if(val > 0) {
-                width = val;
+                width = 50;
             } else {
                 width = 50-self.getD3GraphWidth(val,range)/2;
             }
 
             // console.warn(width);
-            width = width + 3;
+            // width = width + 3;
             return 'margin-left:' + width.toString() + '%;';
         };
     };
@@ -1616,7 +1723,9 @@ function module() {
             .enter()                                                            // for each data point....
             .append('rect')                                                     // Draw a rectangle 'rect'
             .attr('width', function (data) {
-                return 50 + '%';
+                 // this was 50 could be an issue but I changed it back
+                 // not sure when it was changed to 50 but that is returned by this function anyways
+                return self.getD3GraphWidth(curVal,curRange).toString() + '%';
             })
             .attr('height', '5')
             .attr('fill', self.getFillColor(curVal))
@@ -1631,6 +1740,7 @@ function module() {
     };
     this.updateD3Graph = function(name,curVal) {
         var curRange = self.currentValues.get(name + '_RANGE');
+        // what is this for T8 only???
         if(curRange == 0.08){
             curRange = 0.075;
         }
@@ -1650,7 +1760,7 @@ function module() {
             var str = self.getD3GraphWidth(curVal,curRange).toString();
             if(str === 'NaN') {
                 str = '0';
-                str = 1;
+                // str = 1; // why is this here????
             }
             return (str) + '%';
         });
@@ -1673,7 +1783,7 @@ function module() {
                 var chName = findActiveChannel.exec(key);
                 var chNum = findActiveChannelNum.exec(key);
                 refreshEFData.push({'chNum':chNum,'efType':curVal});
-                var efData = ain_ef_type_map[curVal];
+                var efData = self.ain_ef_type_map[curVal];
                 if(typeof(efData) !== 'undefined') {
                     efData = efData();
                     if(typeof(efData.getReadRegs) !== 'undefined') {
@@ -1719,6 +1829,27 @@ function module() {
     var findActiveChannelNum = new RegExp("[0-9]{1,2}");
     this.lastRefreshError = null;
     this.onRefreshed = function onRefreshed(framework, results, onError, onSuccess) {
+        var baseReg = 'AIN#(0:13)'
+        var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+        switch (self.activeDeviceType) {
+            case 'T8':
+                baseReg = 'AIN#(0:7)'
+                baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                break;
+            case 'T7':
+                baseReg = 'AIN#(0:13)';
+                baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                break;
+            case 'T7-Pro':
+                baseReg = 'AIN#(0:13)';
+                baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                break;
+            case 'T4':
+                baseReg = 'AIN#(0:11)';
+                baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+                break;
+
+        }
         try {
             var clearCurAINREadings = false;
             self.bufferedOutputValues.forEach(function(value,name){
@@ -1746,7 +1877,7 @@ function module() {
                         selectEl = buttonEl.find('.currentValue');
                         var parserFunc = self.regParserGet(name, value);
                         if(typeof(parserFunc) === 'undefined') {
-                            // console.log('parserFunc not defined',typeof(parserFunc),name);
+                            console.warn('parserFunc not defined',typeof(parserFunc),name);
                         } else {
                             var newText = parserFunc;
                             var stringVal = value.toString();
@@ -1761,6 +1892,8 @@ function module() {
                             selectEl.attr('title',newTitle);
                         }
                     } else {
+                        // the possability for this is that the voltage is wron for the t7 and with that it might be screwing up how everything is bing updated.
+                        // the salution could be to make sure that ranges are correct?
                         // if is an AINx channel
                         self.updateD3Graph(name,value);
                     }

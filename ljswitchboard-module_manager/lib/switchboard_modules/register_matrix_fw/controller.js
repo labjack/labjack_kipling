@@ -2,6 +2,11 @@
 /* global console, module_manager, dict, q, showAlert, modbus_map, $ */
 /* global ljmmm_parse, handlebars */
 
+// import cwd from './ljswitchboard-module_manager.js'
+const { file } = require('grunt');
+var path = require('path');
+
+const localK3FilesPath = global.localK3FilesPath;
 /* exported activeModule, module, MODULE_UPDATE_PERIOD_MS */
 
 /**
@@ -106,10 +111,60 @@ function module() {
     };
     this.saveRegisterWatchStatus = function(registerName, newState) {
         self.initializeTableWatchRegisterCacheVal(registerName, newState);
+        const fs = require('fs');
+        var registerNum = self.activeDevice.savedAttributes.serialNumber;
+        // the const so we have the file path to add the data
+        const filePath = path.join(global.localK3FilesPath, "/module_data/register_matrix_fw/data.json");
+        const data = JSON.parse(fs.readFileSync(filePath));
 
         if(newState) {
+            // gets the json file so we are able to make chanes to the file
+            $.getJSON(filePath, function(){
+                // uses the try catch to be able to grab the data from the file and make the needed changed
+                // to then inturn rewrite to the file
+                try{
+                    data.registers_by_sn[registerNum].push(registerName);
+                    fs.writeFile(filePath, JSON.stringify(data, null, 2), function(err) {
+                        if (err){
+                            console.error(err)
+                        }
+                        else{
+                            console.log("Data written to file")
+                        }
+                    })
+                }
+                catch(err){
+                    console.error(err)
+                }
+                
+            })
             self.addRegisterToActiveRegistersTable(registerName);
         } else {
+            // gets the json file so we are able to make chanes to the file
+            $.getJSON(filePath, function(){
+                try{
+                    // goes through the array for the device and with that it will remove the item
+                    // that matches the one the user has selected.
+                    lengthOfRegisters = data.registers_by_sn[440017663].length;
+                    for(var i = 0; i < lengthOfRegisters; ++i){
+                        if(data.registers_by_sn[registerNum][i] == registerName){
+                            data.registers_by_sn[registerNum].splice(i, 1);
+                        }
+                    }
+                    fs.writeFile(filePath, JSON.stringify(data, null, 2), function(err) {
+                        if (err){
+                            console.error(err)
+                        }
+                        else{
+                            console.log("Register has been removed from the file.")
+                        }
+                    })
+                }
+                catch(err){
+                    console.error(err)
+                }
+                
+            })
             self.removeActiveRegisterByName(registerName);
         }
         // console.log('Saving register watch status', registerName, newState);
@@ -605,14 +660,15 @@ function module() {
         var dataToDisplay = self.getActiveRegisterData(registerDetails);
 
         self.pageElements.activeRegistersList.ele.append(dataToDisplay);
-        self.updateActiveRegistersTableVisibility();
+        self.updateActiveRegistersTableVisibility(registerName);
     };
-    this.updateActiveRegistersTableVisibility = function() {
+    this.updateActiveRegistersTableVisibility = function(registers) {
         if(self.getNumberOfActiveRegisters() === 0) {
             self.pageElements.activeRegisters.ele.addClass('no-registers');
         } else {
             self.pageElements.activeRegisters.ele.removeClass('no-registers');
         }
+        // self.saveActiveRegisters();
     };
     this.editRegisterButtonListener = function() {
         var buttonEle = $(this);
@@ -810,6 +866,7 @@ function module() {
         } else {
             onSuccess();
         }
+        // self.saveActiveRegisters()
     };
     this.onCloseDevice = function(framework, device, onError, onSuccess) {
         self.saveActiveRegisters()
