@@ -45,8 +45,8 @@ jobs:
       #   run: echo "$GITHUB_CONTEXT"
       - name: Build and Sign
         env:
-          # CSC_LINK: ${{ secrets.CERTIFICATE_P12 }}
-          # CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
+          CSC_LINK: ${{ secrets.CERTIFICATE_P12 }}
+          CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
         run: npm run build
