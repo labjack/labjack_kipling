@@ -1,7 +1,7 @@
 name: Electron build
 
 on:
-  workflow_dispatch # use this to trigger specific builds
+  workflow_dispatch: # use this to trigger specific builds
   push: 
    branches: [ main, development ] 
 
