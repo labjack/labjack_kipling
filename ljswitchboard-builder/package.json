@@ -51,6 +51,7 @@
   ],
   "kipling_primary_dependency": "ljswitchboard-electron_main",
   "devDependencies": {
+    "@electron/notarize": "^1.2.3",
     "chai": "^4.2.0",
     "diff": "^4.0.1",
     "electron-builder": "^22.14.13",
@@ -62,6 +63,7 @@
   "build": {
     "productName": "Kipling",
     "appId": "com.labjack.kipling",
+    "afterSign": "build_scripts/notarize_project.js",
     "mac": {
       "icon": "Kipling3.icns",
       "category": "public.app-category.utilities",
