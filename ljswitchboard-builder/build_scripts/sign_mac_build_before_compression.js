@@ -147,12 +147,14 @@ if(typeof(process.argv) !== 'undefined') {
 	}
 }
 
-var buildScripts = [{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	'--deep --entitlements "'+pathToParentPList+'"',
-	'"' + nodePath + '"'].join(' '),
-	'text': 'Signing Node.exe',
-	},{
+var buildScripts = [
+	// {
+	// 'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	// '--deep --entitlements "'+pathToParentPList+'"',
+	// '"' + nodePath + '"'].join(' '),
+	// 'text': 'Signing Node.exe',
+	// },
+	{
 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToTestFsevents + '"'].join(' '),
