@@ -24,9 +24,9 @@ jobs:
 #          args: -O labjack_ljm_software.tar.gz https://labjack.com/sites/default/files/software/labjack_ljm_software_2019_07_16_x86_64.tar.gz
 #      - name: Install ljm
 #        run: tar xfz labjack_ljm_software.tar.gz && cd ./labjack_ljm_software_2019_07_16_x86_64 && sudo ./labjack_ljm_installer.run
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
       #- run: npm ci # doesn't work with node8
@@ -52,7 +52,7 @@ jobs:
         run: npm run build
       - run: ls ${{ github.workspace }}/build/output/dist
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v2
         with:
           name: my-artifact
           path: ${{ github.workspace }}/build/output/dist/*
