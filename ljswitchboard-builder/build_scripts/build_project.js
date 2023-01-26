@@ -46,7 +46,7 @@ const buildOS = {
 }[process.platform] || 'linux';
 
 // const mac_notarize = process.argv.some(() => {return process.argv.indexOf('mac_sign') > 0;});
-const mac_notarize = true
+const mac_notarize = false
 // The LabJack macOS installer builder signs Kipling files, so we actually don't
 // want to sign here.
 if (mac_notarize) {
