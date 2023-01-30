@@ -1,6 +1,6 @@
 function loggerApp() {
 	this.simpleLogger;
-	this.deviceManager;
+	// this.deviceManager;
 	this.logConfigs;
 
 	this.initializeLogger = function(){
@@ -28,27 +28,28 @@ function loggerApp() {
 	this.initializeDeviceManager = function() {
 		debugLog('--- In Func: initializeDeviceManager');
 		var defered = q.defer();
-		self.deviceManager = device_manager.create();
+		defered.resolve();
+		// self.deviceManager = device_manager.create();
 
-		self.deviceManager.connectToDevices([{
-			dt:'LJM_dtANY',
-			ct:'LJM_ctANY',
-			id:'LJM_idANY',
-		}])
-		.then(function(res) {
-			debugLog('--- Connected to devices!',res);
-			defered.resolve();
-		}, function(err) {
-			console.error('Failed to connect to devices',err);
-			defered.resolve();
-		});
+		// self.deviceManager.connectToDevices([{
+		// 	dt:'LJM_dtANY',
+		// 	ct:'LJM_ctANY',
+		// 	id:'LJM_idANY',
+		// }])
+		// .then(function(res) {
+		// 	debugLog('--- Connected to devices!',res);
+		// 	defered.resolve();
+		// }, function(err) {
+		// 	console.error('Failed to connect to devices',err);
+		// 	defered.resolve();
+		// });
 		return defered.promise;
 	};
 	this.updateDeviceListing = function() {
 		debugLog('--- In Func: updateDeviceListing');
-		debugLog('Connected Devices', self.deviceManager.getDevices());
+		// debugLog('Connected Devices', self.deviceManager.getDevices());
 		var defered = q.defer();
-		self.simpleLogger.updateDeviceListing(self.deviceManager.getDevices())
+		self.simpleLogger.updateDeviceListing(this.device_controller.devices[0])
 		.then(function(res) {
 			debugLog('Device listing has been passwd to the logger',res);
 			defered.resolve();
@@ -73,7 +74,7 @@ function loggerApp() {
 			'same_vals_all_devices': true,
 			'registers': ['AIN0','AIN1'],
 			'update_rate_ms': 100,
-		},self.deviceManager.getDevices());
+		},this.device_controller.devices);
 
 		var fs = require('fs');
 		fs.writeFile(template_logger_config_file,JSON.stringify(self.logConfigs,null,2),function(err) {
@@ -132,7 +133,7 @@ function loggerApp() {
 	}
 	this.closeDevices = function() {
 		var defered = q.defer();
-		self.deviceManager.closeDevices()
+		this.device_controller.closeDeviceFunc()
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	}

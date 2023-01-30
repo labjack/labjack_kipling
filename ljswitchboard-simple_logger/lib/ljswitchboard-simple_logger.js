@@ -284,6 +284,10 @@ function CREATE_SIMPLE_LOGGER () {
 		.done();
 		return defered.promise;
 	}
+	function innerstopRunning(stopige){
+		self.coordinator.stopRunning(stopige);
+		return stopige;
+	}
 	function innerStopLogger(stopData) {
 		var defered = q.defer();
 
@@ -320,6 +324,9 @@ function CREATE_SIMPLE_LOGGER () {
 	};
 	this.stopLogger = function(stopData) {
 		return innerStopLogger(stopData);
+	};
+	this.stopRunning = function(stopige){
+		return innerstopRunning(stopige);
 	};
 
 
@@ -376,7 +383,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		],
 		"basic_data_group": {
 			"group_name": "Basic Data Group",
-			"group_period_ms": 500,
+			"group_period_ms": 100,
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
@@ -399,7 +406,8 @@ exports.generateBasicConfig = function(basicData, devices) {
 			  {
 				"attr_type": "num_logged",
 				"data_group": "basic_data_group",
-				"val": 8
+				"val": 10,
+				// for: "00:00:10",
 			  }
 			]
 		  }
@@ -412,9 +420,9 @@ exports.generateBasicConfig = function(basicData, devices) {
 	};
 
 	var validSN;
+	console.error("devices", devices)
 	if(basicData.same_vals_all_devices) {
-		devices.forEach(function(device) {
-			var sn = device.savedAttributes.serialNumber;
+		var sn = devices[0].savedAttributes.serialNumber;
 			validSN = sn;
 			configObj.basic_data_group.device_serial_numbers.push(validSN);
 			// configObj.basic_data_group.device_serial_numbers.push(sn);
@@ -430,7 +438,24 @@ exports.generateBasicConfig = function(basicData, devices) {
 					enable_view: true,
 				});
 			});
-		});
+		// devices.forEach(function(device) {
+		// 	var sn = device.savedAttributes.serialNumber;
+		// 	validSN = sn;
+		// 	configObj.basic_data_group.device_serial_numbers.push(validSN);
+		// 	// configObj.basic_data_group.device_serial_numbers.push(sn);
+		// 	configObj.basic_data_group[sn] = {
+		// 		'registers': []
+		// 	};
+		// 	basicData.registers.forEach(function(register) {
+		// 		configObj.basic_data_group[sn].registers.push({
+		// 			name: register,
+		// 			human_name: register,
+		// 			format:"default",
+		// 			enable_logging: true,
+		// 			enable_view: true,
+		// 		});
+		// 	});
+		// });
 
 		basicData.registers.forEach(function(register) {
 			var valName = register;

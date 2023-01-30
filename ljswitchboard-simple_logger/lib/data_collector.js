@@ -132,7 +132,8 @@ function CREATE_DATA_COLLECTOR() {
 
 		// Report that the devices listing has changed.
 		self.emit(self.eventList.DEVICE_LISTING_CHANGED, {
-			'numDevices': self.devices.length,
+			// 'numDevices': self.devices.length,
+			'numDevices': 0
 		});
 
 		defered.resolve(devices);

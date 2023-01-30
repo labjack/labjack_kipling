@@ -354,6 +354,7 @@ var createDeviceSelectorViewGenerator = function() {
 					});
 			} else {
 				// Device opened successfully.
+				// Zander - this is actuly where the device is opened.
 				if (self.debug || true) {
 					console.log('Open Success', onConnectResult.value);
 				}

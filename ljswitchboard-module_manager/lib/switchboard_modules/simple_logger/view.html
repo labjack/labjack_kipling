@@ -462,9 +462,17 @@
               Run Time in Seconds
               </small>
               <!-- <div </div> -->
-              <input type="number" class="form-control" id="runtimeSec"
+              <input type="number" class="form-control runtimeSec" id="runtimeSec"
               oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" />
               <span class="clear-input">x</span>
+              <script>
+                
+                 $(".runtimeSec").change(function(){
+                  var logLengthTime    = $(this.value);
+                  logLengthTime = logLengthTime.selector;
+                  console.warn("warning!", logLengthTime);
+                });
+              </script>
             </div>
             
           

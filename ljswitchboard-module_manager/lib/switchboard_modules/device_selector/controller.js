@@ -375,6 +375,7 @@ class ModuleInstance extends EventEmitter {
 			}
 
 			if(this.allowDeviceControl) {
+				// Zander - this is a posability
 				console.log('Opening Device...', openParams);
 				this.device_controller.openDevice(openParams)
 				.then((res) => {

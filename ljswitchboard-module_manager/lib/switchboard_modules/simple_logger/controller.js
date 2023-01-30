@@ -13,6 +13,7 @@ const { time }           = require('console');
 const fs                 = require('fs')
 var device_manager       = require('ljswitchboard-device_manager')
 var simple_logger        = require("ljswitchboard-simple_logger"); //.create();
+// var device_selector		 = require("ljswitchboard-module_manager");
 var eventList            = require("ljswitchboard-simple_logger").eventList;
 var eventMap             = require("ljswitchboard-simple_logger").eventsMap;
 const { dirname }        = require('path');
@@ -32,6 +33,18 @@ const MAX_REGISTERS = 8;
 // Constant that determines device polling rate.  Use an increased rate to aid
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000; 
+// i belive to get the device
+const io_manager 		 = package_loader.getPackage('io_manager');
+const io_interface		 = io_manager.io_interface();
+const driver_controller  = io_interface.getDriverController();
+const device_controller  = io_interface.getDeviceController();
+this.getListAllDevicesErrors = device_controller.getListAllDevicesErrors;
+this.getCachedListAllDevices = device_controller.getCachedListAllDevices;
+this.listAllDevices = device_controller.listAllDevices;
+this.device_controller = device_controller;
+this.driver_controller = driver_controller;
+console.error("this.device_controller", this.device_controller)
+// console.error("device_manager", device_manager.create())
 
 var ignoreErrorsList = [
 	eventList.STOPPED_LOGGER,
@@ -54,7 +67,7 @@ function userStartLogger() {
 	 */
 	 var loggerAppSteps = [
 		'initializeLogger',				// Performed at start-up
-		'initializeDeviceManager',		// Performed at start-up
+		// 'initializeDeviceManager',		// Performed at start-up
 		'updateDeviceListing',			// Performed when configuring logger
 		'configureLogger',				// Performed when configuring logger
 		'startLogger',					// Performed when starting logger
@@ -81,6 +94,7 @@ function userStartLogger() {
 			try {
 				console.log("Trying", step)
 				loggerApp[step]().then(cb, onErr);
+				// console.warn("what exactly is this?", loggerApp[step])
 			} catch(err) {
 				console.error('Error executing app step', step, err);
 			}
@@ -101,8 +115,13 @@ function userStartLogger() {
 
 function loggerStop() {
 	console.log("logger has stoped")
-	loggerApp.closeDevices();
-	loggerApp.finish();
+	self.simpleLogger = simple_logger.create();
+	self.simpleLogger.initialize()
+	self.simpleLogger.stopRunning(true)
+	// this.stopTheLogger = true;
+	// loggerApp.closeDevices();
+	// loggerApp.finish();
+	// return;
 }
 
 
@@ -352,8 +371,22 @@ var template_logger_config_file = 'D:/somethingCool/Untitled-1.json';
 // console.log("Done Creating Config")
 function loggerApp() {
 	this.simpleLogger;
-	this.deviceManager;
+	// this.deviceManager;
 	this.logConfigs;
+
+	const io_manager 		 = package_loader.getPackage('io_manager');
+	const io_interface		 = io_manager.io_interface();
+	const driver_controller  = io_interface.getDriverController();
+	const device_controller  = io_interface.getDeviceController();
+	this.getListAllDevicesErrors = device_controller.getListAllDevicesErrors;
+	this.getCachedListAllDevices = device_controller.getCachedListAllDevices;
+	this.listAllDevices = device_controller.listAllDevices;
+	this.device_controller = device_controller;
+	this.driver_controller = driver_controller;
+	console.error("this.device_controller", this.device_controller)
+	
+
+	console.error("this.device_controller", this.device_controller)
 	
 	// const result = this.initializeLogger();
 
@@ -361,10 +394,15 @@ function loggerApp() {
 	this.initializeLogger = function(){
 		
 		debugLog('--- In Func: initializeLogger1');
+		// self.device_selector = device_selector.create();
+		// console.warn("device_selector", device_selector)
 		
 		var defered = q.defer();
 
 		self.simpleLogger = simple_logger.create();
+		self.simpleLogger.initialize()
+		self.simpleLogger.stopRunning(false)
+		// console.warn("self.simplelogger", self.simpleLogger.stopRunning(false))
 		attachListeners(self.simpleLogger);
 
 		// Intentionally delay to allow user to read start-up message.
@@ -381,36 +419,47 @@ function loggerApp() {
 		
 		return defered.promise;
 	};
+	// getting the conection - newname
 	this.initializeDeviceManager = function() {
 		debugLog('--- In Func: initializeDeviceManager');
 		var defered = q.defer();
 
-		self.deviceManager = device_manager.create();
+		// self.deviceManager = device_manager.create();
 		// self.deviceManager.devices[0].savedAttributes = global.device[0].savedAttributes;
-		if(self.deviceManager.deviceConnected != true){
-			// self.deviceManager.deviceConnected = true;
-		}
+		// if(self.deviceManager.deviceConnected != true){
+		// 	// self.deviceManager.deviceConnected = true;
+		console.error("this.device_controller", this.device_controller)
+		// }
 
-		self.deviceManager.connectToDevices([{
-			dt:'LJM_dtANY',
-			ct:'LJM_ctANY',
-			id:'LJM_idANY'
-		}])
-		.then(function(res) {
-			debugLog('--- Connected to devices!',res);
-			defered.resolve();
-		}, function(err) {
-			console.error('Failed to connect to devices',err);
-			defered.resolve();
-		});
+		// self.deviceManager.connectToDevices([{
+		// 	dt:'LJM_dtANY',
+		// 	ct:'LJM_ctANY',
+		// 	id:'LJM_idANY'
+		// }])
+		// or this.device_controller.savedAttributes.openParameters
+		// [{
+		// 	dt: this.device_controller.devices[0].savedAttributes.deviceTypeString,
+		// 	ct: this.device_controller.devices[0].savedAttributes.connectionTypeString,
+		// 	id: this.device_controller.devices[0].savedAttributes.serialNumber
+		// }]
+		// his.device_controller.devices[0].savedAttributes.openParameters()
+		defered.resolve();
+		// .then(function(res) {
+		// 	debugLog('--- Connected to devices!',res);
+		// 	console.error("res", res)
+		// 	defered.resolve();
+		// }, function(err) {
+		// 	console.error('Failed to connect to devices',err);
+		// 	defered.resolve();
+		// });
 		return defered.promise;
 	};
 
 	this.updateDeviceListing = function() {
 		debugLog('--- In Func: updateDeviceListing');
-		debugLog('Connected Devices', self.deviceManager.getDevices());
+		// debugLog('Connected Devices', self.deviceManager.getDevices());
 		var defered = q.defer();
-		self.simpleLogger.updateDeviceListing(frameworkDevices[0])
+		self.simpleLogger.updateDeviceListing(this.device_controller.devices[0])
 		.then(function(res) {
 			debugLog('Device listing has been passwd to the logger',res);
 			defered.resolve();
@@ -432,13 +481,18 @@ function loggerApp() {
 		}
 		*/
 		this.updateDeviceListing();
+		// Zander ToDo - registers
+		// so we are able to get the registers that the user wants to log
+		// this is what register matix uses to get the acrive register that are in use
+		// global.globalActiveRegisters
+		var registersToLog = ['AIN0'];
 
 		self.logConfigs = simple_logger.generateBasicConfig({
 			'same_vals_all_devices': true,
-			'registers': ['AIN0','AIN1'],
+			'registers': registersToLog,
 			'update_rate_ms': 100,
-		}, self.deviceManager.getDevices());
-		self.deviceManager.getDevices()
+		}, this.device_controller.devices);
+		// self.deviceManager.getDevices()
 
 		var fs = require('fs');
 		fs.writeFile(template_logger_config_file,JSON.stringify(self.logConfigs),function(err) {
@@ -493,7 +547,8 @@ function loggerApp() {
 	}
 	this.closeDevices = function() {
 		var defered = q.defer();
-		self.deviceManager.closeDevices()
+		// self.deviceManager.closeDevices()
+		this.device_controller.closeDevice()
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	}
@@ -504,7 +559,7 @@ function loggerApp() {
 	// 	return defered.promise;
 	// }
 	this.finish = function() {
-		debugLog('--- In Func: finish');
+		debugLog('--- In Func: finish1');
 		var defered = q.defer();
 		// setTimeout(defered.resolve, 1000);
 		defered.resolve();
@@ -513,12 +568,16 @@ function loggerApp() {
 		console.log("Finished Logging")
 		return defered.promise;
 	}
-	var self = this;
+	// Zander - what is the point of this?
+	// var self = this;
 
 }
 
 function attachListeners(loggerObject) {
 	var eventKeys = Object.keys(eventMap);
+	if(this.stopTheLogger){
+		return;
+	}
 	eventKeys.forEach(function(eventKey) {
 		var key = eventMap[eventKey];
 		loggerObject.on(key, function(data) {
@@ -529,16 +588,16 @@ function attachListeners(loggerObject) {
 			// print('Captured Event', key, data, Object.keys(data));
 			if(key === 'NEW_VIEW_DATA') {
 				if(data.view_type === 'current_values') {
-					// printNewData('New View Data', {
-					// 	data: data.data_cache
-					// 	// vals: data.data_cache,
-					// });
+					printNewData('New View Data', {
+						data: data.data_cache
+						// vals: data.data_cache,
+					});
 					handeledEvent = true;
 				} else if(data.view_type === 'basic_graph') {
-					// printNewData('New Graph Data', {
-					// 	numValsLogged: data.data_cache.length,
-					// 	// vals: data.data_cache,
-					// });
+					printNewData('New Graph Data112', {
+						numValsLogged: data.data_cache.length,
+						// vals: data.data_cache,
+					});
 					handeledEvent = true;
 				} else {
 					console.error('un-handled... data.view_type', data.view_type)
