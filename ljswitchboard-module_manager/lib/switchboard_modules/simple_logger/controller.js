@@ -352,7 +352,7 @@ function module() {
     var self = this;
 }
 
-// Zander - ToDo - logegr config file location
+// Zander - ToDo - logegr config file location This will need to be removed later and taken care of
 var template_logger_config_file = 'D:/somethingCool/Untitled-1.json';
 // var cwd = process.cwd();
 
@@ -481,15 +481,23 @@ function loggerApp() {
 		}
 		*/
 		this.updateDeviceListing();
-		// Zander ToDo - registers
-		// so we are able to get the registers that the user wants to log
-		// this is what register matix uses to get the acrive register that are in use
-		// global.globalActiveRegisters
-		var registersToLog = ['AIN0'];
+		registersToRead = [];
+		for (i = 0; i < MAX_REGISTERS; i++){
+			var zipElement = document.getElementById("validationCustom0" + i).value;
+			if (zipElement == ''){}
+			else{
+				registersToRead.push(zipElement)
+		}
+		}
+		
+		// This is the bace case If this is ever used at all(It should not)
+		if(registersToRead.length <= 0){
+			registersToRead.push('AIN0')
+		}
 
 		self.logConfigs = simple_logger.generateBasicConfig({
 			'same_vals_all_devices': true,
-			'registers': registersToLog,
+			'registers': registersToRead,
 			'update_rate_ms': 100,
 		}, this.device_controller.devices);
 		// self.deviceManager.getDevices()
