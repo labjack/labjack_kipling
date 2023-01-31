@@ -10,6 +10,9 @@ const builder = require('electron-builder');
 const {editPackageKeys} = require("./utils/edit_package_keys");
 const Platform = builder.Platform;
 
+// use dotenv for codesigning stuff, see .env file
+require('dotenv').config()
+
 const config = require('../package.json').build;
 
 const OUTPUT_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'output');
