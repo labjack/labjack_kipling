@@ -407,7 +407,7 @@ function checkJSONFile(directoryInfo) {
     return new Promise((resolve) => {
         function finishFunc(data) {
             try {
-                JSON.parse(data);
+                JSON.parse(JSON.stringify(data));
                 directoryInfo.isValid = true;
                 resolve(directoryInfo);
             } catch (parseError) {
