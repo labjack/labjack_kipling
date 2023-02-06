@@ -22,10 +22,10 @@ var convertToFFIType = type_helpers.convertToFFIType;
 
 var path = require('path');
 
-var DEBUG_LJM_LIBRARY_LOCATION_SELECTION = false;
-var DEBUG_SEARCHING_FOR_LJM_LIB_LOCATIONS = false;
-var DEBUG_LOAD_CUSTOM_LJM = false;
-var VERBOSE_LJM_FUNCTION_LINKING = false;
+var DEBUG_LJM_LIBRARY_LOCATION_SELECTION = true;
+var DEBUG_SEARCHING_FOR_LJM_LIB_LOCATIONS = true;
+var DEBUG_LOAD_CUSTOM_LJM = true;
+var VERBOSE_LJM_FUNCTION_LINKING = true;
 var SILENT_LJM_FUNCTION_LINKING = true;
 
 function convertLJFunctionInfoToFFI(functionInfo) {
@@ -98,6 +98,7 @@ var defaultLinuxLibraryLoc = {
 var defaultMacLibraryLoc = {
     'ia32': function() {return ['/usr/local/lib'];},
     'x64': function() {return ['/usr/local/lib'];},
+    'arm64': function() {return ['/usr/local/lib'];},
 };
 var defaultWindowsLibraryLoc = {
     'ia32': function() {return [
@@ -830,6 +831,7 @@ function createSafeSyncFunction(functionName, functionInfo) {
 // Define a function that creates functions that can call LJM asynchronously.
 function createAsyncFunction(functionName, functionInfo) {
     if (!functionInfo || !functionInfo.args) {
+        console.error("functionInfo:", functionInfo, "\t functionInfo.args", functionInfo.args);
         throw new Error('functionInfo for "' + functionName + '" without args');
     }
 

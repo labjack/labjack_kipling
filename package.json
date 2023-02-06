@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
+    "depcheck": "^1.4.3",
     "eslint": "^5.16.0",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-standard": "^4.0.1",

@@ -549,7 +549,8 @@ class labjackVersionManager extends EventEmitter {
             var ljPlatformClass = {
                 'ia32': '32',
                 'x64': '64',
-                'arm': 'arm'
+                'arm': 'arm',
+                'arm64': 'arm64'
             }[process.arch];
             var ljPlatform = {
                 'linux': 'linux',

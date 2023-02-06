@@ -432,7 +432,8 @@ exports.ARCH_DOUBLE_NUM_BYTES = 8;
 exports.ARCH_POINTER_SIZE = {
     'ia32': 4,
     'x64': 8,
-    'arm': 4
+    'arm': 4,
+	'arm64': 8
 }[process.arch];
 exports.LIST_ALL_EXTENDED_MAX_NUM_TO_FIND = 128;
 

@@ -64,7 +64,7 @@ function librarySorter(a, b) {
 class KiplingUpdaterService {
 
 	constructor() {
-		console.log('Available tasks', Object.keys(TASK_LOADER.tasks));
+		console.log('Kipling Updater Service - Available tasks', Object.keys(TASK_LOADER.tasks));
 		this.tab_notification_manager = TASK_LOADER.tasks.tab_notification_manager;
 		this.update_manager = TASK_LOADER.tasks.update_manager;
 		this.update_manager_events = this.update_manager.eventList;
@@ -95,7 +95,7 @@ class KiplingUpdaterService {
 			const bitType = {
 				'x64': '64',
 				'ia32': '32',
-				'arm': 'arm'
+				'arm': 'arm',
 			}[process.arch];
 			return 'linux' + bitType;
 		}

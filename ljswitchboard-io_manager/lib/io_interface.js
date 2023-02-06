@@ -48,7 +48,7 @@ class IOInterface extends EventEmitter {
 		this.device_controller = null;
 		this.file_io_controller = null;
 
-		this.DEBUG_SUBPROCESS_START = false;
+		this.DEBUG_SUBPROCESS_START = true;
 
 		this.eventList = {
 			'PROCESS_ERROR': 'PROCESS_ERROR',
@@ -251,9 +251,10 @@ class IOInterface extends EventEmitter {
 			// const version = '0_10_33';
 			// Force execution of node 0_10_35
 			// version = '0_10_35';
+			//To-Do: FIX THIS ADD NEW NODE BINARIES -- Jimmy
 			const version = {
 				'win32': '8_9_4',
-				'darwin': '12_16_3',
+				'darwin': '16_15_0',
 				'linux': '8_9_4',
 			}[os];
 
@@ -373,7 +374,7 @@ class IOInterface extends EventEmitter {
 			'execPath': info.path,
 			'cwd': info.cwd,
 			'spawnChildProcess': false,
-			'debug_mode': false,
+			'debug_mode': true,
 			'execArgv': ['-expose-gc'],
 			'masterPID': process.pid,
 			'callStack': new Error().stack,
