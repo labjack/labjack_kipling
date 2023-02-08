@@ -35,7 +35,7 @@ var logger_config_file_path = path.normalize(path.join(
 	LOGGER_FILES_DIR,
 	logger_config_file
 ));
-
+console.error("err", cwd, LOGGER_FILES_DIR, logger_config_file)
 var eventMap = require('../lib/events').events;
 eventMap = simple_logger.eventList;
 
@@ -141,6 +141,7 @@ describe('basic_test', function() {
 			assert.isOk(false, 'Logger should have started');
 			debugLog('Logger Started');
 		});
+		done();
 	});
 	it('Verify Configuration', function (done) {
 		done();

@@ -143,6 +143,7 @@ function debugSavingData() {
 
 function CREATE_DATA_LOGGER() {
 	// Default Root Directory
+	// Zander i need to be able to put the value of the path here
 	this.rootDirectory = DEFAULTS.ROOT_DIRECTORY;
 
 	this.state = {
@@ -165,9 +166,15 @@ function CREATE_DATA_LOGGER() {
 	function initializeStats() {
 		// Initialize the num_collected variable.
 		self.stats.num_collected = {};
+		console.warn("self.config", self.config)
 		self.config.data_groups.forEach(function(data_group) {
 			self.stats.num_collected[data_group] = 0;
 		});
+		self.stats.num_collected["basic_data_group"] = 0;
+		// var data_groups = self.config.data_groups;
+		// data_groups.forEach(function(data_group) {
+		// 	self.stats.num_collected[data_group] = 0;
+		// });
 
 		// Initialize the starting time of the log.
 		self.stats.start_time = new Date();
@@ -238,7 +245,8 @@ function CREATE_DATA_LOGGER() {
 				dataNames.push('error code');
 
 				// Add each required registers & align the data category array.
-				dataGroup.defined_user_values.forEach(function(register){					
+				dataGroup.defined_user_values.forEach(function(register){	
+					// console.warn("forEach(function(register)", register)				
 					// serialNumber.registers.forEach(function(register) {
 					// Save the enabled/disabled logging state.
 					logStatus[serial_number][register.name] = register.enable_logging;
@@ -402,6 +410,7 @@ function CREATE_DATA_LOGGER() {
 
 	function initializeDirectory(dir) {
 		var defered = q.defer();
+		// console.error("dir", dir)
 		fse.ensureDir(dir, function(err) {
 			if(err) {
 				fse.ensureDir(dir, function(err) {
@@ -833,14 +842,17 @@ function CREATE_DATA_LOGGER() {
 
 			var resultKeys = Object.keys(deviceData.results);
 			resultKeys.forEach(function(resultKey) {
+				// console.error("resultKey", deviceData)
 				// Determine if the result should be logged.
 				var logData = groupData.logStatus[serialNumber][resultKey];
 
 				var result = deviceData.results[resultKey];
 				debugDataSaving('Result', serialNumber, result, logData);
 				// If the result should be logged then save the result to the
+				// console.warn("logdata", groupData.logStatus)
 				// string to be written.
 				if(logData) {
+					// console.error("...");
 					if(result.str) {
 						dataToWrite += result.str + value_separator;
 					} else {
@@ -858,6 +870,8 @@ function CREATE_DATA_LOGGER() {
 			userValueKeys.forEach(function(userValueKey) {
 				debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
 				dataToWrite += userValues[userValueKey] + value_separator;
+				checkThing = userValues[userValueKey];
+				// console.error("dataToWritte", userValues[userValueKey])
 			});
 		}
 		// Add the line ending text.
@@ -895,7 +909,9 @@ function CREATE_DATA_LOGGER() {
 		debugDataSaving('Writing data', isData, ok, isActive);
 		while((isData) && (ok) && (isActive)) {
 			// un-shift one line of data.
+			// console.error("hold on", file_stream_buffer)
 			var dataToWrite = file_stream_buffer.shift(1);
+			// console.error("does this actualy happen?", dataToWrite)
 
 			ok = fileStream.write(dataToWrite);
 
@@ -956,6 +972,7 @@ function CREATE_DATA_LOGGER() {
 		return innerUnconfigureDataLogger(bundle);
 	};
 	this.start = function(bundle) {
+		// console.warn("when?")
 		return innerStartDataLogger(bundle);
 	};
 	this.stop = function(bundle) {

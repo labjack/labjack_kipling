@@ -2,6 +2,7 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
+const { Console } = require('console');
 
 var EVENT_LIST = {
 	DATA: 'DATA',
@@ -119,6 +120,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	};
 
 	this.getDefaultRegisterValues = function(registerList) {
+		// to my knolage there is no time that this happens - Z
 		var dummyData = [];
 		registerList.forEach(function(register, i) {
 			dummyData.push(self.getDefaultRegisterValue(register));
@@ -157,8 +159,11 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 			'interval': self.getIntervalTimer(intervalTimerKey),
 			'index': index,
 		};
+		
 
 		if(errorCode === errorCodes.VALUE_WAS_DELAYED) {
+			console.error("...", errorCode)
+			// alert("this is happening")
 			var reportDefaultVal = self.options.REPORT_DEFAULT_VALUES_WHEN_LATE;
 			if(reportDefaultVal) {
 				retData.results = self.getDefaultRegisterValues(registerList);
@@ -214,6 +219,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	Function that gets called by the data_collector when new data should be
 	collected from the managed device.
 	*/
+	var numerrors = 0;
 	this.startNewRead = function(registerList, index) {
 		// console.log('Starting New Read', self.isActive, index);
 		var defered = q.defer();
@@ -230,7 +236,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				return a dummy value.
 				*/
 				// Report that the next value is a late-value.
-				self.isValueLate = true;
+				this.isValueLate = true;
 
 				// Check to see if these values should be reported or if the
 				// data collector should simply wait for new data.
@@ -246,6 +252,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				}
 				defered.resolve();
 			} else {
+				// console.warn("within self.isActive = false", self)
 				// Declare device to be actively reading data
 				self.isActive = true;
 
@@ -254,11 +261,13 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// self.options.REPORT_DEFAULT_VALUES_WHEN_LATE
 
 				// If an IO is not currently pending then start a new read.
+				// console.warn("numerrors", registerList)
 				self.devices.readMany(registerList)
 				.then(function(results) {
 					// console.log('readMany Results', registerList, results);
-
-					if(self.isValueLate) {
+					// console.warn("results", results)
+					if(this.isValueLate) {
+						numerrors = numerrors + 1;
 						self.reportCollectedData(
 							registerList,
 							results,
@@ -267,7 +276,14 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 							timerKey,
 							index
 						);
+						console.warn("value was late!", self, registerList,
+						results,
+						errorCodes.VALUE_WAS_DELAYED,
+						intervalTimerKey,
+						timerKey,
+						index)
 					} else {
+						// console.log("this should happen all the time")
 						self.reportCollectedData(
 							registerList,
 							results,

@@ -354,6 +354,7 @@ function module() {
 
 // Zander - ToDo - logegr config file location This will need to be removed later and taken care of
 var template_logger_config_file = 'D:/somethingCool/Untitled-1.json';
+// var logger_config_file = 'basic_config.json';
 // var cwd = process.cwd();
 
 // var template_logger_config_file = path.normalize(path.join(
@@ -400,8 +401,13 @@ function loggerApp() {
 		var defered = q.defer();
 
 		self.simpleLogger = simple_logger.create();
+		// console.warn("self.simplelogger", self.simpleLogger)
+		var placeToSaveFile = document.getElementById("actual-file").value;
+		// console.error("placeToSaveFile", placeToSaveFile)
+		self.simpleLogger.setFilePath(placeToSaveFile)
 		self.simpleLogger.initialize()
 		self.simpleLogger.stopRunning(false)
+		// Zander - should be able to assign the value 
 		// console.warn("self.simplelogger", self.simpleLogger.stopRunning(false))
 		attachListeners(self.simpleLogger);
 
@@ -427,9 +433,7 @@ function loggerApp() {
 		// self.deviceManager = device_manager.create();
 		// self.deviceManager.devices[0].savedAttributes = global.device[0].savedAttributes;
 		// if(self.deviceManager.deviceConnected != true){
-		// 	// self.deviceManager.deviceConnected = true;
-		console.error("this.device_controller", this.device_controller)
-		// }
+		// 	// self.deviceManager.deviceConnected = true;		// }
 
 		// self.deviceManager.connectToDevices([{
 		// 	dt:'LJM_dtANY',
@@ -466,7 +470,7 @@ function loggerApp() {
 		}, function(err) {
 			console.error('Failed to save the device listing to the logger',err);
 			defered.resolve();
-		});
+		}); 
 		return defered.promise;
 	};
 	this.configureLogger = function() {
@@ -481,6 +485,8 @@ function loggerApp() {
 		}
 		*/
 		this.updateDeviceListing();
+		var timeToLog = document.getElementById("runtimeSec").value;
+		if(timeToLog <= 0){}
 		registersToRead = [];
 		for (i = 0; i < MAX_REGISTERS; i++){
 			var zipElement = document.getElementById("validationCustom0" + i).value;
@@ -499,6 +505,7 @@ function loggerApp() {
 			'same_vals_all_devices': true,
 			'registers': registersToRead,
 			'update_rate_ms': 100,
+			'logTime': timeToLog,
 		}, this.device_controller.devices);
 		// self.deviceManager.getDevices()
 
@@ -542,8 +549,8 @@ function loggerApp() {
 			
 			debugLog('Logger Started');
 			return defered.promise;
-		}, function err() {
-			debugLog('Logger Started');
+		}, function err(err) {
+			debugLog('Logger Started with error', err);
 		});
 		return defered.promise;
 	}
@@ -573,7 +580,12 @@ function loggerApp() {
 		defered.resolve();
 		// Zander - should there be information when the logger has finished?
 		alert("Logging as completed.")
+		$('.module-chrome-tab').each(function(){
+			$(this).css("background-color", "#E0E0E0;");
+			$(this).css("color", "black")
+		  })
 		console.log("Finished Logging")
+		MODULE_CHROME.enableModuleLoading();
 		return defered.promise;
 	}
 	// Zander - what is the point of this?
@@ -596,16 +608,17 @@ function attachListeners(loggerObject) {
 			// print('Captured Event', key, data, Object.keys(data));
 			if(key === 'NEW_VIEW_DATA') {
 				if(data.view_type === 'current_values') {
-					printNewData('New View Data', {
-						data: data.data_cache
-						// vals: data.data_cache,
-					});
+					// console.warn("data", data)
+					// printNewData('New View Data', {
+					// 	data: data.data_cache
+					// 	// vals: data.data_cache,
+					// });
 					handeledEvent = true;
 				} else if(data.view_type === 'basic_graph') {
-					printNewData('New Graph Data112', {
-						numValsLogged: data.data_cache.length,
-						// vals: data.data_cache,
-					});
+					// printNewData('New Graph Data112', {
+					// 	numValsLogged: data.data_cache.length,
+					// 	// vals: data.data_cache,
+					// });
 					handeledEvent = true;
 				} else {
 					console.error('un-handled... data.view_type', data.view_type)
@@ -614,7 +627,7 @@ function attachListeners(loggerObject) {
 				// console.log('un-handled... key', key)
 			}
 			if(!handeledEvent) {
-				printNewData('Captured Event', key, data);
+				// printNewData('Captured Event', key, data);
 			}
 
 		});

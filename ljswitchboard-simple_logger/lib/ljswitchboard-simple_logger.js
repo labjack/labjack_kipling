@@ -88,6 +88,8 @@ function CREATE_SIMPLE_LOGGER () {
 
 		// Create a new coordinator instance.
 		self.coordinator = log_coordinator.create();
+		// console.error("self.coordinator", self.coordinator)
+		self.coordinator.setFileLocation(self.filepath)
 
 		// Link to all of the events that it will emit.
 		eventMap.forEach(createAndLinkEventListener);
@@ -212,6 +214,7 @@ function CREATE_SIMPLE_LOGGER () {
 		return defered.promise;
 	}
 	function innerConfigureLogger(loggerConfig) {
+		console.warn("loggerConfig", loggerConfig)
 		var defered = q.defer();
 		var configData = {
 			'configType': CONFIG_TYPES.OBJECT,
@@ -328,6 +331,9 @@ function CREATE_SIMPLE_LOGGER () {
 	this.stopRunning = function(stopige){
 		return innerstopRunning(stopige);
 	};
+	this.setFilePath = function(FilePath){
+		this.filepath = FilePath;
+	};
 
 
 
@@ -383,7 +389,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		],
 		"basic_data_group": {
 			"group_name": "Basic Data Group",
-			"group_period_ms": 100,
+			"group_period_ms": 10,
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
@@ -406,7 +412,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 			  {
 				"attr_type": "num_logged",
 				"data_group": "basic_data_group",
-				"val": 10,
+				"val": 0
 				// for: "00:00:10",
 			  }
 			]
@@ -420,24 +426,29 @@ exports.generateBasicConfig = function(basicData, devices) {
 	};
 
 	var validSN;
-	console.error("devices", devices)
+	// for the value of how long it runs it is as follows
+	// configObj.stop_trigger.trigers[0].val
 	if(basicData.same_vals_all_devices) {
-		var sn = devices[0].savedAttributes.serialNumber;
-			validSN = sn;
-			configObj.basic_data_group.device_serial_numbers.push(validSN);
-			// configObj.basic_data_group.device_serial_numbers.push(sn);
-			configObj.basic_data_group[sn] = {
-				'registers': []
-			};
-			basicData.registers.forEach(function(register) {
-				configObj.basic_data_group[sn].registers.push({
-					name: register,
-					human_name: register,
-					format:"default",
-					enable_logging: true,
-					enable_view: true,
-				});
+		configObj.stop_trigger.triggers[0].val = basicData.logTime;
+		// Zander this is for a prouf oc concepts
+		// var sn = devices[0].savedAttributes .serialNumber;
+		var sn = 470015117;
+		validSN = sn;
+		configObj.basic_data_group.device_serial_numbers.push(validSN);
+		// configObj.basic_data_group.device_serial_numbers.push(sn);
+		// console.warn("registers1", registers)
+		configObj.basic_data_group[sn] = {
+			'registers': []
+		};
+		basicData.registers.forEach(function(register) {
+			configObj.basic_data_group[sn].registers.push({
+				name: register,
+				human_name: register,
+				format:"default",
+				enable_logging: true,
+				enable_view: true,
 			});
+		});
 		// devices.forEach(function(device) {
 		// 	var sn = device.savedAttributes.serialNumber;
 		// 	validSN = sn;
@@ -459,6 +470,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 
 		basicData.registers.forEach(function(register) {
 			var valName = register;
+			console.warn("register", register)
 			configObj.basic_data_group.defined_user_values.push(valName);
 			configObj.basic_data_group.user_values[valName] = {
 				'name': valName,
@@ -470,6 +482,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 			}
 		});
 	}
+	console.warn("configObj", configObj)
 	return configObj
 	// 'same_vals_all_devices': true,
 	// 'registers': ['AIN0','AIN1'],

@@ -567,7 +567,12 @@ function CREATE_DATA_COLLECTOR() {
 		instructed to read new data so that it has a chance to report error
 		data.
 		*/
-		var oldData = JSON.parse(JSON.stringify(self.activeDataStore));
+		// var oldData = JSON.parse(JSON.stringify(self.activeDataStore));
+		var oldData = JSON.parse(JSON.stringify(self.activeDataStore, (key, value) =>
+			typeof value === 'bigint'
+				? value.toString()
+				: value //return everything else unchanged
+		));
 
 		// Clear the activeDataStore
 		serialNumbers.forEach(function(serialNumber) {

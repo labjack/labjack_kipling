@@ -72,6 +72,14 @@
               $("#startBtn").click(function(){
                 //alert("the thing");
                 alert("starting logger")
+                MODULE_CHROME.disableModuleLoading('Please wait for logger to finish.');
+                console.warn("module-chrome-tab-holder", document.getElementById("body_tabs"))
+                $('.module-chrome-tab').each(function(){
+                  // Zander - not sure about this collor scheme
+                  $(this).css("background-color", "#999999;");
+                  $(this).css("color", "white")
+                })
+
                 userStartLogger();
                 //initializeLogger();
               })
@@ -468,14 +476,24 @@
               </small>
               <!-- <div </div> -->
               <input type="number" class="form-control runtimeSec" id="runtimeSec"
-              oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" />
+              oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" required="" />
               <span class="clear-input">x</span>
               <script>
                 
                  $(".runtimeSec").change(function(){
+                  var input    = $(this);
+                  var inputVal = input.val();
+                  if(inputVal.length == 0) {
+                    input.removeClass("valid invalid");
+                  }
+                  else if(inputVal > 0) {
+                    input.addClass("valid").removeClass("invalid");
+                  }
+                  else {
+                    input.addClass("invalid").removeClass("valid");
+                  }
                   var logLengthTime    = $(this.value);
                   logLengthTime = logLengthTime.selector;
-                  console.warn("warning!", logLengthTime);
                 });
               </script>
             </div>
@@ -546,12 +564,12 @@
           $("#confirmModal")
 
           document.getElementById('select-file').addEventListener('click',function(){
-                dialog.showOpenDialog({
-                  properties: ['openDirectory']
-                }).then((data) => {
-                  $("#actual-file").val(data.filePaths)
-                })
-            },false);
+            dialog.showOpenDialog({
+              properties: ['openDirectory']
+            }).then((data) => {
+              $("#actual-file").val(data.filePaths)
+            })
+          },false);
 
           $(".register-input").trigger("change");
           // Real Time Register Name Validation, 
@@ -612,7 +630,24 @@
           });
 
           function validateForm() {
-            // To-Do: Do stuff here to check to make sure every form input is valid
+            // ToDo Zander - add form validation
+            // Makign sure that all of the registers are valid registers befor starting to log.
+
+            // devices[0].savedAttributes.isConnected
+            for (i = 0; i < "{{MAX_REGISTERS}}"; i++){
+              var registerElement = document.getElementById("validationCustom0" + i);
+              if($(registerElement).hasClass("invalid")){
+                showInfoMessage("Make sure that all registers are valid.");
+                return false;
+              }
+              else if($(registerElement).hasClass("valid")){
+              }
+            }
+            var timeToLog = document.getElementById("runtimeSec");
+		        if(timeToLog.value <= 0 || $(timeToLog).hasClass("invalid")){
+              showInfoMessage("Make sure that you set how long you would like the logger to run");
+              return false
+            }
             // Mark things if they arent valid and need user attention
             // Then disable everything and logger will be ready to start
             return true

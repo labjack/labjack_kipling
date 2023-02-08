@@ -1,9 +1,9 @@
-console.log('');
-console.log('***************************');
-console.log('This example requires there to be atleast 1 LJ device available (ANY,ANY,ANY).');
-console.log('This example will run for 5 seconds');
-console.log('***************************');
-console.log('');
+// console.log('');
+// console.log('***************************');
+// console.log('This example requires there to be atleast 1 LJ device available (ANY,ANY,ANY).');
+// console.log('This example will run for 5 seconds');
+// console.log('***************************');
+// console.log('');
 
 /*
  * This is a hello world application for the simple_logger node.js app.
@@ -38,7 +38,7 @@ function getPrinter(enable) {
 			for(var i = 0; i < arguments.length; i++) {
 				dataToPrint.push(arguments[i]);
 			}
-			console.log.apply(console, dataToPrint);
+			// console.log.apply(console, dataToPrint);
 		}
 	};
 }
@@ -76,8 +76,8 @@ var template_logger_config_file = path.normalize(path.join(
 	cwd,
 	TEMPLATE_LOGGER_CONFIG_FILE
 ));
-console.log('--- Application CWD:',cwd);
-console.log('--- Logger config file path:',logger_config_file_path);
+// console.log('--- Application CWD:',cwd);
+// console.log('--- Logger config file path:',logger_config_file_path);
 
 function attachListeners(loggerObject) {
 	var eventKeys = Object.keys(eventMap);

@@ -121,7 +121,7 @@ function CREATE_COORDINATOR () {
 			// as long as the stop button is not presset it will run normaly
 			if(!shouldStopLogging){
 				if(trigger.attr_type === 'num_logged') {
-					console.error("iteration", iteration)
+					// console.error("iteration", self)
 					// var groupKey = trigger.data_group;
 					var numRequired = trigger.val;
 					// var numCollected = self.stats.num_collected[groupKey];
@@ -190,6 +190,9 @@ function CREATE_COORDINATOR () {
 		print('in onDataCollectorError', data);
 		self.emit(eventList.DATA_COLLECTOR_ERROR, data);
 	};
+	this.setFileLocation = function(filePath){
+		self.filepathToSet = filePath;
+	}
 	this.onDataLoggerStateUpdate = function(data) {
 		print('in onDataLoggerStateUpdate', data);
 		self.emit(eventList.DATA_LOGGER_STATE_UPDATE, data);
@@ -229,7 +232,13 @@ function CREATE_COORDINATOR () {
 		DATA_COLLECTOR_EVENTS_MAP.forEach(getAttachListener(self.dataCollector));
 
 		// Initialize the dataLogger object.
+		// console.warn("This should happen befor the thing")
 		self.dataLogger = data_logger.create();
+
+		// console.error("dataLoggerEvents", self.dataLogger)
+		
+		self.dataLogger.rootDirectory = self.filepathToSet
+		// console.error("dataLoggerEvents", self.dataLogger)
 
 		// Attach listeners to the dataLogger object.
 		DATA_LOGGER_EVENTS_MAP.forEach(getAttachListener(self.dataLogger));
@@ -315,7 +324,8 @@ function CREATE_COORDINATOR () {
 	var innerStartCoordinator = function(bundle) {
 		var defered = q.defer();
 
-		if(self.state.running) {
+		// if(self.state.running) {
+		if(true) {
 			defered.resolve(bundle);
 			return defered.promise;
 		} else {
