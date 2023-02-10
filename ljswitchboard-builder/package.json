@@ -64,6 +64,7 @@
   "build": {
     "productName": "Kipling",
     "appId": "com.labjack.kipling",
+    "buildDependenciesFromSource": true,
     "mac": {
       "icon": "Kipling3.icns",
       "category": "public.app-category.utilities",
