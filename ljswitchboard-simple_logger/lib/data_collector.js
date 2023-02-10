@@ -370,6 +370,7 @@ function CREATE_DATA_COLLECTOR() {
 	var updateDeviceDataCollectorDeviceListings = function(bundle) {
 		stepDebug('in updateDeviceDataCollectorDeviceListings');
 		var defered = q.defer();
+		console.warn("updateDeviceDataCollectorDeviceListings", self.devices)
 
 		var keys = Object.keys(self.deviceDataCollectors);
 		var promises = keys.map(function(key) {
@@ -391,6 +392,7 @@ function CREATE_DATA_COLLECTOR() {
 
 	var linkDeviceDataCollectorsToDevices = function(bundle) {
 		stepDebug('in linkDeviceDataCollectorsToDevices');
+		console.warn("linkDeviceDataCollectorsToDevices")
 		var defered = q.defer();
 
 		var serialNumbers = Object.keys(self.deviceDataCollectors);

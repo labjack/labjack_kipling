@@ -124,6 +124,7 @@ function loggerApp() {
 		var defered = q.defer();
 		self.simpleLogger = simple_logger.create();
 		attachListeners(self.simpleLogger);
+		console.warn("self.simplelogger", self.simpleLogger)
 
 		self.simpleLogger.initialize()
 		.then(function(res) {
@@ -152,10 +153,12 @@ function loggerApp() {
 			console.error('Failed to connect to devices',err);
 			defered.resolve();
 		});
+		some = self.deviceManager.getDevices();
+		console.warn("what about this", some)
 		return defered.promise;
-	}
+	};
 	this.updateDeviceListing = function() {
-		debugLog('--- In Func: updateDeviceListing');
+		debugLog('--- In Func: updateDeviceListing1121');
 		debugLog('Connected Devices', self.deviceManager.getDevices());
 		var defered = q.defer();
 		self.simpleLogger.updateDeviceListing(self.deviceManager.getDevices())
@@ -167,7 +170,7 @@ function loggerApp() {
 			defered.resolve();
 		});
 		return defered.promise;
-	}
+	};
 	this.configureLogger = function() {
 		debugLog('--- In Func: configureLogger');
 		var defered = q.defer();

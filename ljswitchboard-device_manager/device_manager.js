@@ -18,6 +18,7 @@ function CREATE_DEVICE_MANAGER() {
 	this.devices = [];
 
 	this.connectToDevices = function(deviceInfoss) {
+		console.warn("deviceInfoss", deviceInfoss)
 
 		var defered = q.defer();
 		
@@ -27,10 +28,11 @@ function CREATE_DEVICE_MANAGER() {
 				var device = new device_curator.device();
 				self.devices.push(device);
 				
+				console.log("self.devices in conect to device function", device)
 				device.open(deviceInfo.dt, deviceInfo.ct, deviceInfo.id)
 				.then(function(res) {
 					self.deviceConnected = true;
-					// console.log('in device_manager.js, openDevice', res);
+					console.log('in device_manager.js, openDevice', res);
 					
 					cb();
 				}, function(err) {
@@ -60,7 +62,8 @@ function CREATE_DEVICE_MANAGER() {
 				// 	console.error('Error opening a device1', err);
 				// 	cb();
 				// });
-				cb();
+				console.log("right befor the call back")
+				// cb();
 			},
 			function(err) {
 				defered.resolve();

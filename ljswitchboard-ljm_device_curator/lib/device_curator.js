@@ -84,6 +84,11 @@ function device(useMockDevice) {
 
 	this.cachedValues = {};
 
+	this.printTheThing = function() {
+		console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+		return "???????????????????????????"
+	}
+
 	this.getDeviceErrors = function() {
 		var defered = q.defer();
 		defered.resolve(self.deviceErrors);
@@ -154,7 +159,7 @@ function device(useMockDevice) {
 	};
 
 	this.connectionCheckInterval = 1000;
-	this.verifiedDeviceConnection = false;
+	this.verifiedDeviceConnection = true;
 	var connectionManagerSuccess = function(res) {
 		if(self.allowConnectionManager) {
 			startConnectionManager();
@@ -210,6 +215,7 @@ function device(useMockDevice) {
 		if(self.deviceConnectionSuspended) {
 			allowLJMFunctionExecution = false;
 		}
+		global.selfthing = self.savedAttributes;
 		return allowLJMFunctionExecution;
 	};
 
@@ -3094,3 +3100,7 @@ function device(useMockDevice) {
 util.inherits(device, EventEmitter);
 
 exports.device = device;
+exports.create = function() {
+	return new device();
+};
+

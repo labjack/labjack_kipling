@@ -4,6 +4,11 @@ var util = require('util');
 var q = require('q');
 const { Console } = require('console');
 
+// ljswitchboard-ljm_device_curator\lib\device_curator.js
+// C:\Users\short\Labjack\labjack_kipling\ljswitchboard-ljm_device_curator\lib\device_curator.js
+// C:\Users\short\Labjack\labjack_kipling\ljswitchboard-simple_logger\lib\device_data_collector.js
+var deviceCurator = require('ljswitchboard-ljm_device_curator/lib/device_curator')
+
 var EVENT_LIST = {
 	DATA: 'DATA',
 	ERROR: 'ERROR',
@@ -59,6 +64,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	*/
 	this.updateDeviceListing = function(devices) {
 		var defered = q.defer();
+		console.warn("updateDeviceListing", devices)
 		self.devices = devices;
 		defered.resolve(devices);
 		return defered.promise;
@@ -70,6 +76,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	to be logged from and properly return errors.
 	*/
 	this.linkToDevice = function(deviceSerialNumber) {
+		console.log("Link to device")
 		var defered = q.defer();
 
 		var serialNum = parseInt(deviceSerialNumber);
@@ -89,6 +96,8 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		// Loop through the devices object and try to link to the device with
 		// the desired serial number.
 		for (const device of self.devices){
+			console.warn("whya re you not working", device)
+			console.warn("serialNum", serialNum)
 			if(device.savedAttributes.serialNumber == serialNum) {
 				self.isValidDevice = true;
 				self.device = device;
@@ -120,6 +129,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	*/
 	this.getDefaultRegisterValue = function(registerName) {
 		var val = 0;
+		console.error("registername", registerName)
 
 		return val;
 	};
@@ -236,10 +246,14 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		var intervalTimerKey = 'readMany';
 		var timerKey = intervalTimerKey;
 		timerKey = self.startTimer(timerKey);
+		console.error("is it because it is not seeing it as a valid device?")
+		console.error("deviceCurator", registerList)
 
 		if(self.isValidDevice) {
 			// Check to see if a device IO is currently pending.
-			if(self.isActive) {
+			// if(self.isActive) {
+				if(self.isActive) {
+				console.warn("the thing a ma jig")
 				/*
 				If an IO is currently pending, don't start a new read and
 				return a dummy value.
@@ -325,6 +339,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 			The device data collector isn't linked to a real device.  Return a
 			dummy value.
 			*/
+			console.error("right befor the error data.")
 			self.reportDefaultRegisterData(
 				registerList,
 				errorCodes.DEVICE_NOT_VALID,

@@ -294,6 +294,7 @@ function CREATE_COORDINATOR () {
 			}
 
 			// Configure dataCollector object
+			console.warn("theConFigThing", config)
 			print('Configuring the datacollector, data logger, and viewDataReporter');
 			self.dataCollector.configureDataCollector(config)
 			.then(self.dataLogger.configure, onError)

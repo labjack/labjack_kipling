@@ -433,7 +433,8 @@ exports.generateBasicConfig = function(basicData, devices) {
 		configObj.stop_trigger.triggers[0].val = basicData.logTime;
 		// Zander this is for a prouf oc concepts
 		// var sn = devices[0].savedAttributes.serialNumber;
-		var sn = "470010175";
+		// var sn = "470010175";
+		var sn = "470016039";
 		validSN = sn;
 		configObj.basic_data_group.device_serial_numbers.push(validSN);
 		// configObj.basic_data_group.device_serial_numbers.push(sn);

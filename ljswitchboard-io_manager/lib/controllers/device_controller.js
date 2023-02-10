@@ -292,6 +292,8 @@ class DeviceController extends EventEmitter {
 		const selectType = 'isSelected-Radio';
 		const deviceKeys = Object.keys(this.devices);
 
+		console.warn("this.devices", this.devices)
+
 		deviceKeys.forEach((deviceKey) => {
 			const attributes = this.devices[deviceKey].savedAttributes;
 			const serialNumber = attributes.serialNumber;
