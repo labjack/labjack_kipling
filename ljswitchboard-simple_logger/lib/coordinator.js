@@ -42,7 +42,7 @@ var VIEW_DATA_REPORTER_EVENTS_MAP = [
 ];
 
 var eventList = require('./events').events;
-var ENABLE_PRINT_OUTPUT = false;
+var ENABLE_PRINT_OUTPUT = true;
 function print() {
 	if(ENABLE_PRINT_OUTPUT) {
 		var dataToPrint = [];
@@ -323,9 +323,9 @@ function CREATE_COORDINATOR () {
 
 	var innerStartCoordinator = function(bundle) {
 		var defered = q.defer();
-
-		// if(self.state.running) {
-		if(true) {
+		console.error("Running????? --- ", self.state.running);
+		if(self.state.running) {
+		// if(true) {
 			defered.resolve(bundle);
 			return defered.promise;
 		} else {
@@ -336,8 +336,8 @@ function CREATE_COORDINATOR () {
 			}
 			function onError(errBundle) {
 				self.state.running = false;
-				self.emit(eventList.ERROR_STARTING_LOGGER, resBundle);
-				defered.reject(resBundle);
+				self.emit(eventList.ERROR_STARTING_LOGGER, errBundle);
+				defered.reject(errBundle);
 			}
 
 			// Initialize the log stats tracker object.

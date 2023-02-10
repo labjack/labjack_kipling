@@ -1,9 +1,9 @@
-// console.log('');
-// console.log('***************************');
-// console.log('This example requires there to be atleast 1 LJ device available (ANY,ANY,ANY).');
-// console.log('This example will run for 5 seconds');
-// console.log('***************************');
-// console.log('');
+console.log('');
+console.log('***************************');
+console.log('This example requires there to be atleast 1 LJ device available (ANY,ANY,ANY).');
+console.log('This example will run for 5 seconds');
+console.log('***************************');
+console.log('');
 
 /*
  * This is a hello world application for the simple_logger node.js app.
@@ -17,7 +17,7 @@
 */
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
-var device_manager = require('./device_manager');
+var device_manager = require('../../ljswitchboard-device_manager/device_manager');
 var async = require('async');
 var q = require('q');
 var path = require('path');
@@ -38,14 +38,14 @@ function getPrinter(enable) {
 			for(var i = 0; i < arguments.length; i++) {
 				dataToPrint.push(arguments[i]);
 			}
-			// console.log.apply(console, dataToPrint);
+			console.log.apply(console, dataToPrint);
 		}
 	};
 }
 
-var ENABLE_PRINTING = false;
-var ENABLE_DEBUG_LOG = false;
-var ENABLE_NEW_DATA_REPORTING = false;
+var ENABLE_PRINTING = true;
+var ENABLE_DEBUG_LOG = true;
+var ENABLE_NEW_DATA_REPORTING = true;
 var ENABLE_PRINT_CUR_VALS_DATA = true;
 
 var print = getPrinter(ENABLE_PRINTING);
@@ -76,8 +76,8 @@ var template_logger_config_file = path.normalize(path.join(
 	cwd,
 	TEMPLATE_LOGGER_CONFIG_FILE
 ));
-// console.log('--- Application CWD:',cwd);
-// console.log('--- Logger config file path:',logger_config_file_path);
+console.log('--- Application CWD:',cwd);
+console.log('--- Logger config file path:',logger_config_file_path);
 
 function attachListeners(loggerObject) {
 	var eventKeys = Object.keys(eventMap);
@@ -225,7 +225,7 @@ function loggerApp() {
 			debugLog('Logger Started');
 			defered.resolve();
 		}, function err() {
-			debugLog('Logger Started');
+			debugLog('err Logger Started');
 			defered.resolve();
 		});
 		return defered.promise;

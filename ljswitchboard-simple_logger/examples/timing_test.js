@@ -62,7 +62,7 @@ function printNewData(){
 
 var logger_config_file = 'basic_config.json';
 var LOGGER_FILES_DIR = '/test/logger_config_files';
-var TEMPLATE_LOGGER_CONFIG_FILE = 'D:/somethingCool/Untitled-1.json';;
+var TEMPLATE_LOGGER_CONFIG_FILE = '/examples/generated-template.json';
 var cwd = process.cwd();
 var splitCWD = cwd.split(path.sep);
 if(splitCWD.indexOf('examples') >= 0){
@@ -150,24 +150,24 @@ function loggerApp() {
 	this.initializeLogger = function(){
 		debugLog('--- In Func: initializeLogger1');
 		console.log("wot")
-		this.placeToSaveFile = 'D:/irellydontcare'
+		this.placeToSaveFile = '/Users/jimmy/labjack_data_logger'
 		// self.device_selector = device_selector.create();
 		// console.warn("device_selector", device_selector)
 		
 		var defered = q.defer();
 
-		this.simpleLogger = simple_logger.create();
+		self.simpleLogger = simple_logger.create();
 		console.log("this", this.simpleLogger)
 		// console.warn("self.simplelogger", self.simpleLogger)
 		
 		// console.error("placeToSaveFile", placeToSaveFile)
-		this.simpleLogger.setFilePath(this.placeToSaveFile)
+		self.simpleLogger.setFilePath(this.placeToSaveFile)
 		// this.simpleLogger.initialize()
 		// this.simpleLogger.stopRunning(false)
 		// Zander - should be able to assign the value 
 		// console.warn("self.simplelogger", self.simpleLogger.stopRunning(false))
 		attachListeners(this.simpleLogger);
-		this.simpleLogger.initialize()
+		self.simpleLogger.initialize()
 		// Intentionally delay to allow user to read start-up message.
 		setTimeout(function() {
 			defered.resolve();
@@ -189,9 +189,9 @@ function loggerApp() {
 		debugLog('--- In Func: initializeDeviceManager');
 		var defered = q.defer();
 
-		this.deviceManager = device_manager.create();
+		self.deviceManager = device_manager.create();
 
-		this.deviceManager.connectToDevices([{
+		self.deviceManager.connectToDevices([{
 			dt:'LJM_dtANY',
 			ct:'LJM_ctANY',
 			id:'LJM_idANY',
@@ -209,9 +209,9 @@ function loggerApp() {
 
 	this.updateDeviceListing = function() {
 		debugLog('--- In Func: updateDeviceListing');
-		// debugLog('Connected Devices', this.deviceManager.getDevices());
+		debugLog('Connected Devices', this.deviceManager.getDevices());
 		var defered = q.defer();
-		this.simpleLogger.updateDeviceListing(this.deviceManager.getDevices())
+		self.simpleLogger.updateDeviceListing(self.deviceManager.getDevices())
 		.then(function(res) {
 			// debugLog('Device listing has been passwd to the logger',res);
 			defered.resolve();
@@ -266,7 +266,11 @@ function loggerApp() {
 		// self.deviceManager.getDevices()
 
 
-		var template_logger_config_file = 'D:/somethingCool/Untitled-1.json';
+		// var template_logger_config_file = 'D:/somethingCool/Untitled-1.json';
+		var template_logger_config_file = path.normalize(path.join(
+			cwd,
+			TEMPLATE_LOGGER_CONFIG_FILE
+		));
 
 		this.simpleLogger.configureLogger({
 			'configType': 'filePath',
@@ -310,11 +314,11 @@ function loggerApp() {
 	this.startLogger = function() {
 		debugLog('--- In Func: startLogger');
 		var defered = q.defer();
-		this.simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
-			debugLog('Logger Stopped');
-			// console.log('(hello_world.js) Logger has stopped!!')
-			defered.resolve();
-		});
+		// this.simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
+		// 	debugLog('Logger Stopped');
+		// 	// console.log('(hello_world.js) Logger has stopped!!')
+		// 	defered.resolve();
+		// });
 		this.simpleLogger.startLogger()
 		.then(function succ() {
 			
@@ -328,6 +332,10 @@ function loggerApp() {
 	this.waitForLoggerToRun = function() {
 		debugLog('--- In Func: waitForLoggerToRun');
 		var defered = q.defer();
+		this.simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
+			debugLog('Logger Stopped');
+			// console.log('(hello_world.js) Logger has stopped!!')
+		});
 		defered.resolve();
 		return defered.promise;
 	}
@@ -349,18 +357,10 @@ function loggerApp() {
 		var defered = q.defer();
 		// setTimeout(defered.resolve, 1000);
 		defered.resolve();
-		// Zander - should there be information when the logger has finished?
-		alert("Logging as completed.")
-		$('.module-chrome-tab').each(function(){
-			$(this).css("background-color", "#E0E0E0;");
-			$(this).css("color", "black")
-		  })
-		console.log("Finished Logging")
-		MODULE_CHROME.enableModuleLoading();
 		return defered.promise;
 	}
 	// Zander - what is the point of this?
-	// var self = this;
+	var self = this;
 }
 var app = new loggerApp();
 
@@ -371,7 +371,7 @@ var loggerAppSteps = [
     'configureLogger',				// Performed when configuring logger
     'startLogger',					// Performed when starting logger
     'waitForLoggerToRun',			// Allowing the logger to run...
-    // 'closeDevices',					
+    'closeDevices',					
     'finish',
 ];
 

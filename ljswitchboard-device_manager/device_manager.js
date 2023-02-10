@@ -23,11 +23,25 @@ function CREATE_DEVICE_MANAGER() {
 		
 		async.each(deviceInfoss,
 			function(deviceInfo, cb) {
+				// STARTED USING THE OLD WAYS FOR THE SCRIPT - Jimmy
 				var device = new device_curator.device();
+				self.devices.push(device);
+				
+				device.open(deviceInfo.dt, deviceInfo.ct, deviceInfo.id)
+				.then(function(res) {
+					self.deviceConnected = true;
+					// console.log('in device_manager.js, openDevice', res);
+					
+					cb();
+				}, function(err) {
+					console.error('Error opening a device', err);
+					cb();
+				});
 				// Gets the device information from the preenter framework
-				this.sdFramework = new global.PresenterFramework();
-				frameworkDevices = this.sdFramework.device_controller.devices
-				self.devices.push(frameworkDevices[0]);
+				// DO NOT CREATE A NEW presenter_framework, just use the global one, why do we need 2 of the same thing??
+				// this.sdFramework = new global.PresenterFramework();
+				// frameworkDevices = this.sdFramework.device_controller.devices
+				// self.devices.push(frameworkDevices[0]);
 
 				// var deviceType = frameworkDevices[0].savedAttributes.deviceType
 				// var deviceConectionType = frameworkDevices[0].savedAttributes.connectionType

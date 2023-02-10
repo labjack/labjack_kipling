@@ -86,11 +86,20 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		// 		return true;
 		// 	}
 		// });
-		if(self.devices.savedAttributes.serialNumber == serialNum) {
-			self.isValidDevice = true;
-			self.devices = self.devices;
-			return true;
+		// Loop through the devices object and try to link to the device with
+		// the desired serial number.
+		for (const device of self.devices){
+			if(device.savedAttributes.serialNumber == serialNum) {
+				self.isValidDevice = true;
+				self.device = device;
+				return true;
+			}
 		}
+		// if(self.devices.savedAttributes.serialNumber == serialNum) {
+		// 	self.isValidDevice = true;
+		// 	self.devices = self.devices;
+		// 	return true;
+		// }
 
 		defered.resolve();
 		return defered.promise;
@@ -236,7 +245,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				return a dummy value.
 				*/
 				// Report that the next value is a late-value.
-				this.isValueLate = true;
+				self.isValueLate = true;
 
 				// Check to see if these values should be reported or if the
 				// data collector should simply wait for new data.
@@ -252,7 +261,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				}
 				defered.resolve();
 			} else {
-				// console.warn("within self.isActive = false", self)
+				console.warn("within self.isActive = false", self)
 				// Declare device to be actively reading data
 				self.isActive = true;
 
@@ -261,7 +270,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// self.options.REPORT_DEFAULT_VALUES_WHEN_LATE
 
 				// If an IO is not currently pending then start a new read.
-				// console.warn("numerrors", registerList)
+				console.warn("numerrors", registerList)
 				self.devices.readMany(registerList)
 				.then(function(results) {
 					// console.log('readMany Results', registerList, results);

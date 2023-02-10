@@ -129,7 +129,7 @@ function debugDataSaving() {
 	}
 }
 
-var DEBUG_SAVING_DATA = false;
+var DEBUG_SAVING_DATA = true;
 function debugSavingData() {
 	if(DEBUG_SAVING_DATA) {
 		var dataToPrint = [];
@@ -232,10 +232,12 @@ function CREATE_DATA_LOGGER() {
 			serial_numbers.forEach(function(serial_number) {
 				logStatus[serial_number] = {};
 				var serialNumber = dataGroup.device_serial_numbers[0];
+				// var serialNumber = dataGroup[serial_number];
 				var addedSerialNumber = false;
 
 				// Add the device serial number to the data category array
 				dataCategories.push('SN: ' + serial_number.toString());
+				// dataCategories.push('SN: ' + serial_number);
 
 				// Add the time header.
 				dataNames.push('time');
@@ -245,23 +247,24 @@ function CREATE_DATA_LOGGER() {
 				dataNames.push('error code');
 
 				// Add each required registers & align the data category array.
-				dataGroup.defined_user_values.forEach(function(register){	
-					// console.warn("forEach(function(register)", register)				
-					// serialNumber.registers.forEach(function(register) {
-					// Save the enabled/disabled logging state.
-					logStatus[serial_number][register.name] = register.enable_logging;
+				// dataGroup.defined_user_values.forEach(function(register){	
+				// console.warn("forEach(function(register)", register)	
+				// console.warn(serialNumber)			
+				// serialNumber.registers.forEach(function(register) {
+				// 	// Save the enabled/disabled logging state.
+				// 	logStatus[serial_number][register.name] = register.enable_logging;
 
-					// Check to see if the register is enabled for logging
-					if(register.enable_logging) {
-						// Align the device serial number to its data
-						dataCategories.push('');
-						dataNames.push(register);
-					}
-					else{
-						dataCategories.push('');
-						dataNames.push(register);
-					}
-				});
+				// 	// Check to see if the register is enabled for logging
+				// 	if(register.enable_logging) {
+				// 		// Align the device serial number to its data
+				// 		dataCategories.push('');
+				// 		dataNames.push(register.name);
+				// 	}
+				// 	else{
+				// 		dataCategories.push('');
+				// 		dataNames.push(register);
+				// 	}
+				// });
 
 				// Add the error code header & align the data category.
 				
@@ -835,6 +838,8 @@ function CREATE_DATA_LOGGER() {
 		});
 		serialNumbers.forEach(function(serialNumber) {
 			var deviceData = dataGroups[serialNumber];
+			console.log(serialNumber)
+			console.log(deviceData)
 
 			// Get and format the time stamp
 			var time = formatTimeStamp(deviceData.time);
@@ -870,7 +875,7 @@ function CREATE_DATA_LOGGER() {
 			userValueKeys.forEach(function(userValueKey) {
 				debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
 				dataToWrite += userValues[userValueKey] + value_separator;
-				checkThing = userValues[userValueKey];
+				// checkThing = userValues[userValueKey];
 				// console.error("dataToWritte", userValues[userValueKey])
 			});
 		}

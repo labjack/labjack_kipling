@@ -63,7 +63,7 @@ var DATA_COLLECTOR_EVENTS = {
 var data_group_manager = require('./data_group_manager');
 var device_data_collector = require('./device_data_collector');
 
-var ENABLE_DEBUG_LOG = false;
+var ENABLE_DEBUG_LOG = true;
 function debugLog() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];
@@ -74,7 +74,7 @@ function debugLog() {
 		console.log.apply(console, dataToPrint);
 	}
 }
-var ENABLE_INITIALIZATION_STEP_DEBUGGING = false;
+var ENABLE_INITIALIZATION_STEP_DEBUGGING = true;
 function stepDebug() {
 	if(ENABLE_INITIALIZATION_STEP_DEBUGGING) {
 		var dataToPrint = [];
@@ -86,7 +86,7 @@ function stepDebug() {
 	}
 }
 
-var DEBUG_DATA_ACQISITION = false;
+var DEBUG_DATA_ACQISITION = true;
 function debugDataAcquisition() {
 	if(DEBUG_DATA_ACQISITION) {
 		var dataToPrint = [];

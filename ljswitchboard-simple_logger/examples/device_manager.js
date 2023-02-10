@@ -27,7 +27,7 @@ function CREATE_DEVICE_MANAGER() {
 				device.open(deviceInfo.dt, deviceInfo.ct, deviceInfo.id)
 				.then(function(res) {
 					self.deviceConnected = true;
-					// console.log('in device_manager.js, openDevice', res);
+					console.log('in device_manager.js, openDevice', res);
 					
 					cb();
 				}, function(err) {

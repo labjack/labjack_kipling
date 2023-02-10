@@ -32,7 +32,7 @@ var ignoreErrorsList = [
 	eventMap.CONFIGURATION_SUCCESSFUL,
 ];
 
-var ENABLE_DEBUG_LOG = false;
+var ENABLE_DEBUG_LOG = true;
 var ENABLE_PRINTING = false;
 function print() {
 	if(ENABLE_DEBUG_LOG) {

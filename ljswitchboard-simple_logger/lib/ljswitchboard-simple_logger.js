@@ -12,7 +12,7 @@ var async = require('async');
 // var driver_const = require('ljswitchboard-ljm_driver_constants');
 // var driver = ljm.driver();
 // var data_parser = require('ljswitchboard-data_parser');
-var curatedDevice = require('ljswitchboard-ljm_device_curator');
+// var curatedDevice = require('ljswitchboard-ljm_device_curator');
 // var modbus_map = require('ljswitchboard-modbus_map');
 // var constants = modbus_map.getConstants();
 
@@ -24,7 +24,7 @@ var config_checker = require('./config_checker');
 // Code that coordinates the data collection & reporting efforts.
 var log_coordinator = require('./coordinator');
 
-var ENABLE_DEBUG_LOG = false;
+var ENABLE_DEBUG_LOG = true;
 function debugLog() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];
@@ -58,20 +58,20 @@ function CREATE_SIMPLE_LOGGER () {
 	var eventMap = [
 		{from: 'CONFIGURATION_SUCCESSFUL', to: 'onConfigurationSuccessful'},
 		{from: 'CONFIGURATION_ERROR', to: 'onConfigurationError'},
-
+  
 		{from:'STARTED_LOGGER', to: 'onStartedLogger'},
 		{from: 'ERROR_STARTING_LOGGER', to: 'onErrorStartingLogger'},
-
+  
 		{from:'STOPPED_LOGGER', to: 'onStoppedLogger'},
 		{from: 'ERROR_STOPPING_LOGGER', to: 'onErrorStoppingLogger'},
-
+  
 		{from:'NEW_VIEW_DATA', to: 'onNewViewData'},
 
 		{from:'UPDATED_ACTIVE_FILES', to: 'onUpdatedActiveFiles'},
 	];
 
 	/*
-	 * Use the eventMap to define functions for each event that needs to get
+	 * Use the eventMap to define functions for each event that needs to get 
 	 * passed on.
 	 */
 	function createAndLinkEventListener(eventListing) {
@@ -89,7 +89,8 @@ function CREATE_SIMPLE_LOGGER () {
 		// Create a new coordinator instance.
 		self.coordinator = log_coordinator.create();
 		// console.error("self.coordinator", self.coordinator)
-		self.coordinator.setFileLocation(self.filepath)
+		// console.error("========== ", self.filePath, "================================")
+		// self.coordinator.setFileLocation(self.filepath)
 
 		// Link to all of the events that it will emit.
 		eventMap.forEach(createAndLinkEventListener);
@@ -114,14 +115,14 @@ function CREATE_SIMPLE_LOGGER () {
 		// make sure that the coordinator is unconfigured.
 		.then(self.coordinator.unconfigure)
 
-		// After stopping & clearing the coordinators config.
+		// After stopping & clearing the coordinators config. 
 		//update its device listing.
 		.then(self.coordinator.updateDeviceListing)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	}
 
-
+ 
 
 	function handleLoadConfigFileSuccess(configData) {
 		var defered = q.defer();
@@ -214,7 +215,7 @@ function CREATE_SIMPLE_LOGGER () {
 		return defered.promise;
 	}
 	function innerConfigureLogger(loggerConfig) {
-		console.warn("loggerConfig", loggerConfig)
+		// console.warn("loggerConfig", loggerConfig)
 		var defered = q.defer();
 		var configData = {
 			'configType': CONFIG_TYPES.OBJECT,
@@ -389,7 +390,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		],
 		"basic_data_group": {
 			"group_name": "Basic Data Group",
-			"group_period_ms": 10,
+			"group_period_ms": 500,
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
@@ -402,7 +403,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 				"max_samples_per_file": 65335,
 				"data_collector_config": {
 					"REPORT_DEVICE_IS_ACTIVE_VALUES": true,
-					"REPORT_DEFAULT_VALUES_WHEN_LATE": false
+					"REPORT_DEFAULT_VALUES_WHEN_LATE": true
 				}
 			}
 		},
@@ -431,8 +432,8 @@ exports.generateBasicConfig = function(basicData, devices) {
 	if(basicData.same_vals_all_devices) {
 		configObj.stop_trigger.triggers[0].val = basicData.logTime;
 		// Zander this is for a prouf oc concepts
-		// var sn = devices[0].savedAttributes .serialNumber;
-		var sn = 470015117;
+		// var sn = devices[0].savedAttributes.serialNumber;
+		var sn = "470010175";
 		validSN = sn;
 		configObj.basic_data_group.device_serial_numbers.push(validSN);
 		// configObj.basic_data_group.device_serial_numbers.push(sn);
@@ -452,8 +453,9 @@ exports.generateBasicConfig = function(basicData, devices) {
 		// devices.forEach(function(device) {
 		// 	var sn = device.savedAttributes.serialNumber;
 		// 	validSN = sn;
-		// 	configObj.basic_data_group.device_serial_numbers.push(validSN);
-		// 	// configObj.basic_data_group.device_serial_numbers.push(sn);
+		// 	console.error("============", device)
+		// 	// configObj.basic_data_group.device_serial_numbers.push(validSN);
+		// 	configObj.basic_data_group.device_serial_numbers.push(sn);
 		// 	configObj.basic_data_group[sn] = {
 		// 		'registers': []
 		// 	};
@@ -470,6 +472,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 
 		basicData.registers.forEach(function(register) {
 			var valName = register;
+			// var valName = 'custom-'+register;
 			console.warn("register", register)
 			configObj.basic_data_group.defined_user_values.push(valName);
 			configObj.basic_data_group.user_values[valName] = {

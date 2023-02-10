@@ -12,7 +12,7 @@ var view_type_manager = require('./view_type_manager');
 
 var events = {};
 exports.events = events;
-var ENABLE_PRINT_OUTPUT = false;
+var ENABLE_PRINT_OUTPUT = true;
 function print() {
 	if(ENABLE_PRINT_OUTPUT) {
 		var dataToPrint = [];

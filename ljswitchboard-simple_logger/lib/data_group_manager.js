@@ -57,7 +57,7 @@ function CREATE_DATA_GROUP_MANAGER(options, config) {
 	}
 
 	var getId = function(deviceSerialNumber, registerName) {
-		return deviceSerialNumber.toString() + '_' + registerName.toString();
+		return deviceSerialNumber + '_' + registerName;
 	};
 
 	var serialNumbers = options.device_serial_numbers;
