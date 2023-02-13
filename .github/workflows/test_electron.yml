@@ -48,16 +48,19 @@ jobs:
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           CSC_LINK: ${{ secrets.CERTIFICATE_P12 }}
           CSC_KEY_PASSWORD: ${{ secrets.CERTIFICATE_P12_PASSWORD }}
-          # MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_KEYCHAIN_PWD }}
+          MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_KEYCHAIN_PWD }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
         run: 
+          # Turn our base64-encoded certificate back to a regular .p12 file
+          echo $CSC_LINK | base64 --decode > certificate.p12
+
           # Setup Keychain for MacOS codesigning
-          # security create-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain 
-          # security default-keychain -s build.keychain
-          # security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
-          # security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
-          # security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          security create-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain 
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
 
           # Build Project
           npm run build
