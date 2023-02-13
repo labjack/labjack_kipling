@@ -72,8 +72,7 @@
         "target": "pkg",
         "arch": [
           "arm64"
-        ],
-        "buildDependenciesFromSource": true
+        ]
       }
     },
     "linux": {
