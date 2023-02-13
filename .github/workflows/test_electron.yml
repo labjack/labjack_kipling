@@ -51,7 +51,7 @@ jobs:
           MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_KEYCHAIN_PWD }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
-        run: 
+        run: |
           # Turn our base64-encoded certificate back to a regular .p12 file
           echo $CSC_LINK | base64 --decode > certificate.p12
 
