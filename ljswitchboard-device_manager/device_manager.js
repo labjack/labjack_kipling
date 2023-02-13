@@ -28,7 +28,7 @@ function CREATE_DEVICE_MANAGER() {
 				var device = new device_curator.device();
 				self.devices.push(device);
 				
-				console.log("self.devices in conect to device function", device)
+				// console.log("self.devices in conect to device function", device)
 				device.open(deviceInfo.dt, deviceInfo.ct, deviceInfo.id)
 				.then(function(res) {
 					self.deviceConnected = true;

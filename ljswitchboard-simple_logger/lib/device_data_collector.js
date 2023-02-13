@@ -64,7 +64,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	*/
 	this.updateDeviceListing = function(devices) {
 		var defered = q.defer();
-		console.warn("updateDeviceListing", devices)
+		// console.warn("updateDeviceListing", devices)
 		self.devices = devices;
 		defered.resolve(devices);
 		return defered.promise;
@@ -250,9 +250,9 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		console.error("deviceCurator", registerList)
 
 		if(self.isValidDevice) {
+			// console.log("this is a valid device")
 			// Check to see if a device IO is currently pending.
-			// if(self.isActive) {
-				if(self.isActive) {
+			if(self.isActive) {
 				console.warn("the thing a ma jig")
 				/*
 				If an IO is currently pending, don't start a new read and
@@ -275,7 +275,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				}
 				defered.resolve();
 			} else {
-				console.warn("within self.isActive = false", self)
+				// console.warn("within self.isActive = false", self)
 				// Declare device to be actively reading data
 				self.isActive = true;
 
@@ -284,9 +284,13 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// self.options.REPORT_DEFAULT_VALUES_WHEN_LATE
 
 				// If an IO is not currently pending then start a new read.
-				console.warn("numerrors", registerList)
-				self.devices.readMany(registerList)
+				// console.warn("numerrors", self.devices)
+				// console.log("registerList", registerList)
+				// var deviceCurator1 = new deviceCurator
+				// console.log("deviceCurator", deviceCurator.readMany())
+				self.device.readMany(registerList)
 				.then(function(results) {
+					// console.log("results", results)
 					// console.log('readMany Results', registerList, results);
 					// console.warn("results", results)
 					if(this.isValueLate) {
@@ -330,7 +334,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 					);
 
 					// Declare device to be inactive.
-					self.isActive = false;
+					self.isActive = true;
 				});
 				defered.resolve();
 			}

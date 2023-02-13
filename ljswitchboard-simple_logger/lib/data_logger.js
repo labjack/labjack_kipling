@@ -446,6 +446,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function finalizeFileWriteStream(fileStream) {
+		console.log("fileStream", fileStream)
 		var defered = q.defer();
 		fileStream.once('finish', function() {
 			defered.resolve(fileStream);
@@ -625,9 +626,11 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function getCreateLogFileWriteStream(objToUpdate) {
+		console.warn("objToUpdate", objToUpdate)
 		return function createLogFileWriteStream(filePath) {
 			var defered = q.defer();
 			function onSuccess(fileStream) {
+				console.log("")
 				// Make sure that the file stream is not yet active as the heder
 				// data still needs to be written.
 				objToUpdate.file_stream_active = false;
@@ -648,6 +651,7 @@ function CREATE_DATA_LOGGER() {
 
 
 	function initializeLogFile(data_group) {
+		console.warn("initializeLogFile")
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
@@ -691,6 +695,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function initializeLogFileHeader(data_group) {
+		console.log("initializeLogFileHeader")
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
@@ -744,11 +749,14 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function finalizeLogFile(data_group) {
+		console.log("data_group", data_group)
+		console.log("self.logdata", self.logData)
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
 		var groupName = dataGroup.group_name;
 		var fileStream = dataGroup.file_stream;
+		console.log("filestream", dataGroup)
 
 		function onSuccess() {
 			debugLogFiles('Successfully Finalized log file', groupName);
@@ -796,6 +804,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function innerStopDataLogger(bundle) {
+		console.log("innerStopDataLogger", bundle)
 		var defered = q.defer();
 
 		// Finalize the data logger's statistics object.
@@ -981,6 +990,7 @@ function CREATE_DATA_LOGGER() {
 		return innerStartDataLogger(bundle);
 	};
 	this.stop = function(bundle) {
+		console.log(".stop", bundle)
 		return innerStopDataLogger(bundle);
 	};
 

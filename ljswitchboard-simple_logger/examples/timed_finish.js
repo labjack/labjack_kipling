@@ -154,7 +154,6 @@ function loggerApp() {
 			defered.resolve();
 		});
 		some = self.deviceManager.getDevices();
-		console.warn("what about this", some)
 		return defered.promise;
 	};
 	this.updateDeviceListing = function() {
