@@ -178,61 +178,61 @@ if(typeof(process.argv) !== 'undefined') {
 
 var buildScripts = [
 	// {
-	// 'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	// 'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	// '--deep --entitlements "'+pathToParentPList+'"',
 	// '"' + nodePath + '"'].join(' '),
 	// 'text': 'Signing Node.exe',
 	// },
 	{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToTestFsevents + '"'].join(' '),
 	'text': 'Signing kipling_tester: fsevents.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToFsevents + '"'].join(' '),
 	'text': 'Signing io_manager: fsevents.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToElectronNodeApi_ffi + '"'].join(' '),
 	'text': 'Signing Electron ffi: electron.napi.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToElectronNodeApi_ref + '"'].join(' '),
 	'text': 'Signing Electron ref: electron.napi.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToNodeApi_ffi + '"'].join(' '),
 	'text': 'Signing Node ffi: node.napi.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToNodeApi_ref + '"'].join(' '),
 	'text': 'Signing Node ref: node.napi.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToNodeApi_uv1 + '"'].join(' '),
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
 	{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + refBindingPath + '"'].join(' '),
 	'text': 'Signing ref: binding.node',
 	}, 
 	{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + ffiBindingPath + '"'].join(' '),
 	'text': 'Signing ffi: ffi_binding.node',
 	},
 	{
-	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + refFFIBindingPath + '"'].join(' '),
 	'text': 'Signing ref+ffi: binding.node',
@@ -241,19 +241,19 @@ var buildScripts = [
 
 
 // var buildScripts = [{
-// 	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+// 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 // 		'--deep --entitlements "'+pathToParentPList+'"',
 // 		'"' + nodePath + '"'].join(' '),
 // 	'text': 'Signing Node.exe',
 // }, 
 // // {
-// 	// 'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+// 	// 'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 // 	// 	'--deep --entitlements "'+pathToParentPList+'"',
 // 	// 	'"' + refBindingPath + '"'].join(' '),
 // 	// 'text': 'Signing ref: binding.node',
 // // }, 
 // {
-// 	'script': ['codesign --sign "LabJack Corporation (HESU4UBGJK)" --force --timestamp --options runtime',
+// 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 // 		'--deep --entitlements "'+pathToParentPList+'"',
 // 		'"' + ffiBindingPath + '"'].join(' '),
 // 	'text': 'Signing ffi: ffi_binding.node',
