@@ -46,7 +46,7 @@ const buildOS = {
 }[process.platform] || 'linux';
 
 // const mac_notarize = process.argv.some(() => {return process.argv.indexOf('mac_sign') > 0;});
-const mac_notarize = true
+const mac_notarize = true;
 // The LabJack macOS installer builder signs Kipling files, so we actually don't
 // want to sign here.
 if (mac_notarize) {
@@ -79,13 +79,13 @@ if (mac_notarize) {
 		await runScript({'script': 'electron_build', 'text': 'Run electron-builder'});
 		// await runScript({'script': 'brand_project', 'text': 'Branding Project Files'});
 		return;
-		await runScript({'script': 'compress_output', 'text': 'Compressing Output and renaming'});
+		// await runScript({'script': 'compress_output', 'text': 'Compressing Output and renaming'});
 
-		if((buildOS === 'darwin') && mac_notarize) {
-			await runScript({'script': 'sign_mac_build_after_compression', 'text': 'Signing Mac OS Build.'});
-		}
+		// if((buildOS === 'darwin') && mac_notarize) {
+		// 	await runScript({'script': 'sign_mac_build_after_compression', 'text': 'Signing Mac OS Build.'});
+		// }
 
-		await runScript({'script': 'compress_output', 'text': 'Compressing Output and renaming'});
+		// await runScript({'script': 'compress_output', 'text': 'Compressing Output and renaming'});
 	} catch (err) {
 		process.exit(1);
 	}

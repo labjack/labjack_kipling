@@ -11,7 +11,7 @@ const {editPackageKeys} = require("./utils/edit_package_keys");
 const Platform = builder.Platform;
 
 // use dotenv for codesigning stuff, see .env file
-require('dotenv').config()
+require('dotenv').config();
 
 const config = require('../package.json').build;
 

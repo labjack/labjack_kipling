@@ -265,34 +265,34 @@ buildScripts.forEach(function(buildScript) {
 	buildScript.isSuccessful = false;
 });
 
-async.eachSeries(
-	buildScripts,
-	function(buildScript, cb) {
-		console.log('Starting Step:', buildScript.text, "\n Script:", buildScript.script);
-		child_process.exec(buildScript.cmd, function(error, stdout, stderr) {
-			if (error) {
-				console.error('Error Executing', error);
-				console.error(buildScript.script, buildScript.text);
-				cb(error);
-			}
-			console.log('stdout: ',stdout);
-			console.log('stderr: ',stderr);
-			cb();
-		})
-	},
-	function(err) {
-		if(err) {
-			console.log('Error Executing Build Scripts...', err);
-			process.exit(1);
-		}
-	});
-// buildScripts.forEach(function(buildScript) {
-// 	try {
-// 		console.log('Starting Step:', buildScript.text);
-// 		var execOutput = child_process.execSync(buildScript.cmd);
-// 		console.log('execOutput: ' , execOutput.toString());
-// 	} catch(err) {
-
-// 		process.exit(1);
-// 	}
-// });
+// async.eachSeries(
+// 	buildScripts,
+// 	function(buildScript, cb) {
+// 		console.log('Starting Step:', buildScript.text, "\n Script:", buildScript.script);
+// 		child_process.exec(buildScript.cmd, function(error, stdout, stderr) {
+// 			if (error) {
+// 				console.error('Error Executing', error);
+// 				console.error(buildScript.script, buildScript.text);
+// 				cb(error);
+// 			}
+// 			console.log('stdout: ',stdout);
+// 			console.log('stderr: ',stderr);
+// 			cb();
+// 		})
+// 	},
+// 	function(err) {
+// 		if(err) {
+// 			console.log('Error Executing Build Scripts...', err);
+// 			process.exit(1);
+// 		}
+// 	});
+buildScripts.forEach(function(buildScript) {
+	try {
+		console.log('Starting Step:', buildScript.text);
+		var execOutput = child_process.execSync(buildScript.cmd);
+		console.log('execOutput: ' , execOutput.toString());
+	} catch(err) {
+		console.warn("Err:", err)
+		process.exit(1);
+	}
+});
