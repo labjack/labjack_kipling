@@ -268,7 +268,7 @@ buildScripts.forEach(function(buildScript) {
 async.eachSeries(
 	buildScripts,
 	function(buildScript, cb) {
-		console.log('Starting Step:', buildScript.text);
+		console.log('Starting Step:', buildScript.text, "\n Script:", buildScript.script);
 		child_process.exec(buildScript.cmd, function(error, stdout, stderr) {
 			if (error) {
 				console.error('Error Executing', error);
