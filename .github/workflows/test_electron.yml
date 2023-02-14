@@ -42,6 +42,35 @@ jobs:
       #     BUILD_DIR: ${{ github.workspace }}/build
       #     USE_HARD_LINKS: "false"
       #   run: echo "$GITHUB_CONTEXT"
+
+      - name: Install Apple Certificate and Create Keychain
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_P12 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.PROD_MACOS_KEYCHAIN_PWD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          # echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # apply provisioning profile
+          # mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          # cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
       - name: Build and Sign
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -53,14 +82,14 @@ jobs:
           USE_HARD_LINKS: "false"
         run: |
           # Turn our base64-encoded certificate back to a regular .p12 file
-          echo $CSC_LINK | base64 --decode > certificate.p12
+          # echo $CSC_LINK | base64 --decode > certificate.p12
 
-          # Setup Keychain for MacOS codesigning
-          security create-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain 
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
-          security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          # # Setup Keychain for MacOS codesigning
+          # security create-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain 
+          # security default-keychain -s build.keychain
+          # security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          # security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
+          # security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
           
 
           security find-identity -v
