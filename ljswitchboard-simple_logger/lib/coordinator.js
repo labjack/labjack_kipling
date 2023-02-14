@@ -168,7 +168,7 @@ function CREATE_COORDINATOR () {
 		self.emit(eventList.STOPPED_LOGGER, data);
 	};
 	this.onDataCollectorGroupData = function(data) {
-		print('in onDataCollectorGroupData', Object.keys(data), Object.keys(data.data));
+		// print('in onDataCollectorGroupData', Object.keys(data), Object.keys(data.data));
 		self.updateStats(data);
 
 		// Send data to the dataLogger and dataReporter.
@@ -200,8 +200,8 @@ function CREATE_COORDINATOR () {
 
 	// Events that get linked to the dataReporter object.
 	this.onDataReporterViewData = function(data) {
-		print('in onDataReporterViewData', data);
-		self.emit(eventList.NEW_VIEW_DATA, data);
+		// print('in onDataReporterViewData', data);
+		// self.emit(eventList.NEW_VIEW_DATA, data);
 	};
 
 	function getAttachListener(emitter) {
@@ -294,7 +294,7 @@ function CREATE_COORDINATOR () {
 			}
 
 			// Configure dataCollector object
-			console.warn("theConFigThing", config)
+			// console.warn("theConFigThing", config)
 			print('Configuring the datacollector, data logger, and viewDataReporter');
 			self.dataCollector.configureDataCollector(config)
 			.then(self.dataLogger.configure, onError)

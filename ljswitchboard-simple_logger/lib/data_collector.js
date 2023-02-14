@@ -169,7 +169,7 @@ function CREATE_DATA_COLLECTOR() {
 		if(execMethod === 'sync') {
 			timeoutMS = 50;
 		}
-		stepDebug('in createUserValueFunction', self.config);
+		// stepDebug('in createUserValueFunction', self.config);
 		var executor = new user_code_executor.create(
 			self.config.config_file_path,
 			funcText,
@@ -370,7 +370,7 @@ function CREATE_DATA_COLLECTOR() {
 	var updateDeviceDataCollectorDeviceListings = function(bundle) {
 		stepDebug('in updateDeviceDataCollectorDeviceListings');
 		var defered = q.defer();
-		console.warn("updateDeviceDataCollectorDeviceListings", self.devices)
+		// console.warn("updateDeviceDataCollectorDeviceListings", self.devices)
 
 		var keys = Object.keys(self.deviceDataCollectors);
 		var promises = keys.map(function(key) {
@@ -481,8 +481,8 @@ function CREATE_DATA_COLLECTOR() {
 	this.deviceDataCollectorDataListener = function(data) {
 		if(self.isActive) {
 			var deviceData = data.results;
-			debugDataAcquisition('Acquired New Data', data);
-			debugLog('Acquired Data from deviceDataCollector', data.serialNumber, deviceData.registers);
+			// debugDataAcquisition('Acquired New Data', data);
+			// debugLog('Acquired Data from deviceDataCollector', data.serialNumber, deviceData.registers);
 			var sn = data.serialNumber.toString();
 			if(self.activeDataStore[sn]) {
 			} else {
@@ -501,7 +501,7 @@ function CREATE_DATA_COLLECTOR() {
 				};
 			});
 		} else {
-			debugLog('Acquired late data', data.serialNumber, data.results.registers);
+			// debugLog('Acquired late data', data.serialNumber, data.results.registers);
 		}
 	};
 	this.initializeDataStoreValues = function(index, sn, registers) {
@@ -688,11 +688,11 @@ function CREATE_DATA_COLLECTOR() {
 					});
 				}
 
-				debugLog('Waiting for reportCollectedData promises');
+				// debugLog('Waiting for reportCollectedData promises');
 				q.allSettled(promises)
 				// this is the function resposable for setting the data to right i belive
 				.then(function(results) {
-					debugLog('Completed for reportCollectedData promises', results);
+					// debugLog('Completed for reportCollectedData promises', results);
 					if(results) {
 						// Save the returned results into the organizedGroupData object.
 						// If there was an error use the default value of zero.
@@ -801,12 +801,12 @@ function CREATE_DATA_COLLECTOR() {
 
 			var deviceDataCollector = self.deviceDataCollectors[serialNumber];
 			var dataToRead = requiredData[serialNumber];
-			debugDataAcquisition(
-				'Starting a new read',
-				self.dataCollectionCounter,
-				serialNumber,
-				dataToRead
-			);
+			// debugDataAcquisition(
+			// 	'Starting a new read',
+			// 	self.dataCollectionCounter,
+			// 	serialNumber,
+			// 	dataToRead
+			// );
 			// Make room in the data store for the values trying to be read.
 			self.initializeDataStoreValues(
 				self.dataCollectionCounter,
@@ -826,15 +826,15 @@ function CREATE_DATA_COLLECTOR() {
 			'serialNumbers': serialNumbers,
 		};
 
-		debugLog('Waiting for read promises');
+		// debugLog('Waiting for read promises');
 		q.allSettled(promises)
 		.then(function() {
-			debugLog('Completed read promises');
+			// debugLog('Completed read promises');
 			if(self.isFirstDataCollectionIteration) {
 				self.isFirstDataCollectionIteration = false;
 			} else {
 				try {
-					debugLog('Executing reportCollectedData');
+					// debugLog('Executing reportCollectedData');
 					self.reportCollectedData(dataCollectionObj);
 				} catch(err) {
 					console.log('Error reporting collected data', err, err.stack);

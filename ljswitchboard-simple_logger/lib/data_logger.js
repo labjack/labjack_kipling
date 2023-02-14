@@ -245,6 +245,14 @@ function CREATE_DATA_LOGGER() {
 				// add the error code header
 				dataCategories.push('');
 				dataNames.push('error code');
+				// ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3']
+				dataNames.push("CORE_TIMER");
+				dataNames.push("AIN0");
+				dataNames.push("AIN1");
+				dataNames.push("AIN2");
+				dataNames.push("AIN3");
+				dataNames.push("AIN4");
+				
 
 				// Add each required registers & align the data category array.
 				// dataGroup.defined_user_values.forEach(function(register){	
@@ -446,7 +454,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function finalizeFileWriteStream(fileStream) {
-		console.log("fileStream", fileStream)
+		// console.log("fileStream", fileStream)
 		var defered = q.defer();
 		fileStream.once('finish', function() {
 			defered.resolve(fileStream);
@@ -756,7 +764,7 @@ function CREATE_DATA_LOGGER() {
 		var dataGroup = self.logData[data_group];
 		var groupName = dataGroup.group_name;
 		var fileStream = dataGroup.file_stream;
-		console.log("filestream", dataGroup)
+		// console.log("filestream", dataGroup)
 
 		function onSuccess() {
 			debugLogFiles('Successfully Finalized log file', groupName);
@@ -847,8 +855,8 @@ function CREATE_DATA_LOGGER() {
 		});
 		serialNumbers.forEach(function(serialNumber) {
 			var deviceData = dataGroups[serialNumber];
-			console.log(serialNumber)
-			console.log(deviceData)
+			// console.log(serialNumber)
+			// console.log(deviceData)
 
 			// Get and format the time stamp
 			var time = formatTimeStamp(deviceData.time);
@@ -895,8 +903,8 @@ function CREATE_DATA_LOGGER() {
 		groupData.file_stream_buffer.push(dataToWrite);
 	}
 	function saveNewData(data) {
-		debugSavingData('saving data, group:', data.groupKey,'numWrittenLines:', self.logData[data.groupKey].num_written_lines);
-		debugDataSaving('Saving Data!!', data.groupKey, self.logData[data.groupKey].num_written_lines);
+		// debugSavingData('saving data, group:', data.groupKey,'numWrittenLines:', self.logData[data.groupKey].num_written_lines);
+		// debugDataSaving('Saving Data!!', data.groupKey, self.logData[data.groupKey].num_written_lines);
 
 		// Format data & add it to the file_stream_buffer
 		try {

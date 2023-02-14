@@ -96,8 +96,8 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		// Loop through the devices object and try to link to the device with
 		// the desired serial number.
 		for (const device of self.devices){
-			console.warn("whya re you not working", device)
-			console.warn("serialNum", serialNum)
+			// console.warn("whya re you not working", device)
+			// console.warn("serialNum", serialNum)
 			if(device.savedAttributes.serialNumber == serialNum) {
 				self.isValidDevice = true;
 				self.device = device;
@@ -129,7 +129,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	*/
 	this.getDefaultRegisterValue = function(registerName) {
 		var val = 0;
-		console.error("registername", registerName)
+		// console.error("registername", registerName)
 
 		return val;
 	};
@@ -246,14 +246,14 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		var intervalTimerKey = 'readMany';
 		var timerKey = intervalTimerKey;
 		timerKey = self.startTimer(timerKey);
-		console.error("is it because it is not seeing it as a valid device?")
-		console.error("deviceCurator", registerList)
+		// console.error("is it because it is not seeing it as a valid device?")
+		// console.error("devic eCurator", registerList)
 
 		if(self.isValidDevice) {
 			// console.log("this is a valid device")
 			// Check to see if a device IO is currently pending.
 			if(self.isActive) {
-				console.warn("the thing a ma jig")
+				// console.warn("the thing a ma jig")
 				/*
 				If an IO is currently pending, don't start a new read and
 				return a dummy value.

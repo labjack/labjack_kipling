@@ -26,16 +26,18 @@ function CREATE_DEVICE_MANAGER() {
 			function(deviceInfo, cb) {
 				// STARTED USING THE OLD WAYS FOR THE SCRIPT - Jimmy
 				var device = new device_curator.device();
+				// console.log("device_curator", device)
 				self.devices.push(device);
 				
-				// console.log("self.devices in conect to device function", device)
+				// console.log("self.devices in conect to device function", self.devices)
 				device.open(deviceInfo.dt, deviceInfo.ct, deviceInfo.id)
 				.then(function(res) {
 					self.deviceConnected = true;
-					console.log('in device_manager.js, openDevice', res);
+					// console.log('in device_manager.js, openDevice', res);
 					
 					cb();
 				}, function(err) {
+					device.open(deviceInfo.dt, deviceInfo.ct, deviceInfo.id)
 					console.error('Error opening a device', err);
 					cb();
 				});
@@ -62,7 +64,7 @@ function CREATE_DEVICE_MANAGER() {
 				// 	console.error('Error opening a device1', err);
 				// 	cb();
 				// });
-				console.log("right befor the call back")
+				// console.log("right befor the call back")
 				// cb();
 			},
 			function(err) {

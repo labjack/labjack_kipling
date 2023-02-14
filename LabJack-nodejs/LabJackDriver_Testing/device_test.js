@@ -668,8 +668,8 @@ module.exports = {
 				var i,j;
 				var offsetSync = 1;
 
-				console.log("Functions Called",funcs);
-				console.log("Results",results);
+				// console.log("Functions Called",funcs);
+				// console.log("Results",results);
 
 				//Figure out how many function calls should have been made:
 				var numDriverCalls = testList.length * 2;

@@ -2,22 +2,22 @@ console.log('timing_test.js!!');
 console.log('');
 console.log('***************************');
 console.log('This example requires there to be atleast 1 LJ device available (ANY,ANY,ANY).');
-console.log('This example will run FOREVER (until killed)');
+console.log('This example will run for 5 mins or until killed');
 console.log('***************************');
 console.log('');
 
 // const {PackageLoader} = require('../../ljswitchboard-package_loader/lib/ljswitchboard-package_loader.js');
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
 var device_manager = require('../../ljswitchboard-device_manager/device_manager');
-var  async = require('async');
+var async = require('async');
 var path = require('path');
 var q = require('q');
 
 var eventMap = require('../lib/events').events;
-var eventList            = require("../lib/ljswitchboard-simple_logger").eventList;
+// var eventList            = require("../lib/ljswitchboard-simple_logger").eventList;
 var ignoreErrorsList = [
-    eventList.STOPPED_LOGGER,
-    eventList.CONFIGURATION_SUCCESSFUL,
+    eventMap.STOPPED_LOGGER,
+    eventMap.CONFIGURATION_SUCCESSFUL,
 ];
 
 // const package_loader = new PackageLoader();
@@ -27,7 +27,7 @@ var ignoreErrorsList = [
 // package_loader = global.package_loader;
 
 var ENABLE_DEBUG_LOG = true;
-var ENABLE_PRINTING = false;
+var ENABLE_PRINTING = true;
 function print() {
     if(ENABLE_DEBUG_LOG){
         var dataToPrint = [];
@@ -65,7 +65,7 @@ var LOGGER_FILES_DIR = '/test/logger_config_files';
 var TEMPLATE_LOGGER_CONFIG_FILE = '/examples/generated-template.json';
 var cwd = process.cwd();
 var splitCWD = cwd.split(path.sep);
-if(splitCWD.indexOf('examples') >= 0){
+if(splitCWD.indexOf('examples') >= 0) {
     splitCWD.splice(splitCWD.indexOf('examples'), 1);
     cwd = path.join.apply(path, splitCWD);
 }
@@ -95,15 +95,15 @@ function attachListeners(loggerObject){
         var key = eventMap[eventKey];
         loggerObject.on(key, function(data){
             if(ignoreErrorsList.indexOf(key) < 0){
-                debugLog('captured Event!', key, data);
+                // debugLog('captured Event!', key, data);
             }
             var handeledEvent = false;
             // !The caps might become an issue later!
             if(key === 'NEW_VIEW_DATA'){
                 if(data.view_type === 'current_values'){
-                    printNewData('New view Data', {
-                        data: data.data_cache
-                    });
+                    // printNewData('New view Data', {
+                    //     data: data.data_cache
+                    // });
                     handeledEvent = true;
 				} else if(data.view_type === 'basic_graph') {
 					printNewData('New Graph Data', {
@@ -149,38 +149,42 @@ function loggerApp() {
 
 	this.initializeLogger = function(){
 		debugLog('--- In Func: initializeLogger1');
-		console.log("wot")
-		this.placeToSaveFile = '/Users/jimmy/labjack_data_logger'
-		// self.device_selector = device_selector.create();
-		// console.warn("device_selector", device_selector)
-		
 		var defered = q.defer();
-
 		self.simpleLogger = simple_logger.create();
-		console.log("this", this.simpleLogger)
+		
+		this.placeToSaveFile = 'C:/Users/short/Documents/File testings'
+		self.simpleLogger.setFilePath(this.placeToSaveFile)
+		attachListeners(self.simpleLogger);
+		// this.placeToSaveFile = "D:/throw away files"; 
+		
+		// console.log("this", this.simpleLogger)
 		// console.warn("self.simplelogger", self.simpleLogger)
 		
 		// console.error("placeToSaveFile", placeToSaveFile)
-		self.simpleLogger.setFilePath(this.placeToSaveFile)
+		// self.simpleLogger.setFilePath(this.placeToSaveFile)
 		// this.simpleLogger.initialize()
 		// this.simpleLogger.stopRunning(false)
 		// Zander - should be able to assign the value 
 		// console.warn("self.simplelogger", self.simpleLogger.stopRunning(false))
-		attachListeners(this.simpleLogger);
+		// attachListeners(this.simpleLogger);
 		self.simpleLogger.initialize()
-		// Intentionally delay to allow user to read start-up message.
-		setTimeout(function() {
+		.then(function(res) {
+			debugLog('--- App Initialized',res);
 			defered.resolve();
-			// console.log("this", this.simpleLogger)
-			
-			// .then(function(res) {
-			// 	debugLog('--- App Initialized');
-			// 	defered.resolve();
-			// }, function(err) {
-			// 	console.error('Failed to initialize the logger',err);
-			// 	defered.resolve();
-			// });
-		}, 5000);
+		}, function(err) {
+			console.error('Failed to initialize the logger',err);
+			defered.resolve();
+		});
+		// Intentionally delay to allow user to read start-up message.
+		// setTimeout(function() {
+		// 	self.simpleLogger.stopLogger()
+		// 	.then(function succ() {
+		// 		debugLog('Logger Stopped-succ');
+		// 		defered.resolve();
+		// 	}, function err() {
+		// 		debugLog('Logger Stopped-err');
+		// 	});
+		// }, 50);
 		
 		return defered.promise;
 	};
@@ -188,7 +192,6 @@ function loggerApp() {
 	this.initializeDeviceManager = function() {
 		debugLog('--- In Func: initializeDeviceManager');
 		var defered = q.defer();
-
 		self.deviceManager = device_manager.create();
 
 		self.deviceManager.connectToDevices([{
@@ -203,13 +206,14 @@ function loggerApp() {
 			console.error('Failed to connect to devices',err);
 			defered.resolve();
 		});
-		console.warn("sdfsfsfsfsF")
+		some = self.deviceManager.getDevices();
+		// console.warn("sdfsfsfsfsF")
 		return defered.promise;
 	};
 
 	this.updateDeviceListing = function() {
 		debugLog('--- In Func: updateDeviceListing');
-		debugLog('Connected Devices', this.deviceManager.getDevices());
+		// debugLog('Connected Devices', self.deviceManager.getDevices());
 		var defered = q.defer();
 		self.simpleLogger.updateDeviceListing(self.deviceManager.getDevices())
 		.then(function(res) {
@@ -232,111 +236,78 @@ function loggerApp() {
 			'filePath': logger_config_file_path
 		}
 		*/
-		// this.updateDeviceListing();
-		var timeToLog = 5 ;
-		// if(timeToLog <= 0){}
-		// registersToRead = [];
-		// for (i = 0; i < 8; i++){
-		// 	var zipElement = document.getElementById("validationCustom0" + i).value;
-		// 	if (zipElement == ''){}
-		// 	else{
-		// 		registersToRead.push(zipElement)
-		// }
-		// }
-		
-		// // This is the bace case If this is ever used at all(It should not)
-		// if(registersToRead.length <= 0){
-		// 	registersToRead.push('AIN0')
-		// }
-
-		// same_vals_all_devices': true,
-		// 	'registers': registersToRead,
-		// 	'update_rate_ms': 100,
-		// 	'logTime': timeToLog,
-		var some = this.deviceManager.getDevices();
-
-		console.warn("this.device manager", some)
-		this.logConfigs = simple_logger.generateBasicConfig({
+		self.logConfigs = simple_logger.generateBasicConfig({
 			'same_vals_all_devices': true,
-			'registers': ['AIN0','AIN1'],
-			'update_rate_ms': 100,
-			'logTime': timeToLog,
-		},this.deviceManager.getDevices());
-		// 470015117
-		// self.deviceManager.getDevices()
-
-
-		// var template_logger_config_file = 'D:/somethingCool/Untitled-1.json';
-		var template_logger_config_file = path.normalize(path.join(
-			cwd,
-			TEMPLATE_LOGGER_CONFIG_FILE
-		));
-
-		this.simpleLogger.configureLogger({
-			'configType': 'filePath',
-			'filePath': template_logger_config_file,
-			isValid: true
-		})
+			'registers': ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3','AIN4'],
+			// update here to be safe
+			'update_rate_ms': 10,
+		},self.deviceManager.getDevices());
 
 		var fs = require('fs');
-		fs.writeFile(template_logger_config_file,JSON.stringify(this.logConfigs,null,2),function(err) {
+		fs.writeFile(template_logger_config_file,JSON.stringify(self.logConfigs,null,2),function(err) {
 			if(err) {
 				console.error('Error saving generated configs');
 			} else {
 				debugLog('Data was appended to the config file.');
 			}
-			console.error("self.simplelogger", this)
-			// this.simpleLogger.configureLogger({
-			// 	'configType': 'filePath',
-			// 	'filePath': template_logger_config_file
-			// })
+			self.simpleLogger.configureLogger({
+				'configType': 'filePath',
+				'filePath': template_logger_config_file
+			})
 			// self.simpleLogger.configureLogger({
 			// 	configType: 'object',
 			// 	configData: self.logConfigs,
 			// 	filePath: cwd
-			defered.resolve();
 			// })
-			// .then(function(res) {
-			// 	debugLog('Logger has been configured.',res)
-			// 	defered.resolve();
-			// }, function(err) {
-			// 	console.error('Logger failed to be configured.',err)
-			// 	defered.resolve();
-			// });
+			.then(function(res) {
+				debugLog('Logger has been configured.',res)
+				defered.resolve();
+			}, function(err) {
+				console.error('Logger failed to be configured.',err)
+				defered.resolve();
+			});
 		});
-
-		
-
-
-		
 		return defered.promise;
 	}
 	this.startLogger = function() {
 		debugLog('--- In Func: startLogger');
 		var defered = q.defer();
-		// this.simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
+		// self.simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
 		// 	debugLog('Logger Stopped');
-		// 	// console.log('(hello_world.js) Logger has stopped!!')
+		// // 	// console.log('(hello_world.js) Logger has stopped!!')
 		// 	defered.resolve();
 		// });
-		this.simpleLogger.startLogger()
+		self.simpleLogger.startLogger()
 		.then(function succ() {
-			
 			debugLog('Logger Started');
-			return defered.promise;
+			defered.resolve();
+			
 		}, function err(err) {
 			debugLog('Logger Started with error', err);
+			defered.resolve();
 		});
+		// console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		return defered.promise;
 	}
 	this.waitForLoggerToRun = function() {
 		debugLog('--- In Func: waitForLoggerToRun');
 		var defered = q.defer();
-		this.simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
-			debugLog('Logger Stopped');
+		self.simpleLogger.once(eventMap.STOPPED_LOGGER, function(stopData) {
+			debugLog('Logger Stopped-evt');
 			// console.log('(hello_world.js) Logger has stopped!!')
+			
 		});
-		defered.resolve();
+
+		setTimeout(function() {
+			self.simpleLogger.stopLogger()
+			.then(function succ() {
+				debugLog('Logger Stopped-succ');
+				defered.resolve();
+			}, function err() {
+				debugLog('Logger Stopped-err');
+			});
+			// this will make it fun for 5 mins
+		}, 300000);
 		return defered.promise;
 	}
 	this.closeDevices = function() {
@@ -392,7 +363,6 @@ async.eachSeries(
 		}
 		try {
 			app[step]().then(cb, onErr);
-            // process.exit();
 		} catch(err) {
 			console.error('Error executing app step', step, err);
 		}

@@ -90,7 +90,7 @@ function CREATE_SIMPLE_LOGGER () {
 		self.coordinator = log_coordinator.create();
 		// console.error("self.coordinator", self.coordinator)
 		// console.error("========== ", self.filePath, "================================")
-		// self.coordinator.setFileLocation(self.filepath)
+		self.coordinator.setFileLocation(self.filepath)
 
 		// Link to all of the events that it will emit.
 		eventMap.forEach(createAndLinkEventListener);
@@ -390,7 +390,8 @@ exports.generateBasicConfig = function(basicData, devices) {
 		],
 		"basic_data_group": {
 			"group_name": "Basic Data Group",
-			"group_period_ms": 500,
+			// this should be the rate at wich the logger runs
+			"group_period_ms": 10,
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
@@ -403,7 +404,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 				"max_samples_per_file": 65335,
 				"data_collector_config": {
 					"REPORT_DEVICE_IS_ACTIVE_VALUES": true,
-					"REPORT_DEFAULT_VALUES_WHEN_LATE": true
+					"REPORT_DEFAULT_VALUES_WHEN_LATE": false
 				}
 			}
 		},
@@ -434,6 +435,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		// Zander this is for a prouf oc concepts
 		// var sn = devices[0].savedAttributes.serialNumber;
 		// var sn = "470010175";
+		// var sn = "440017663"
 		var sn = "470016039";
 		validSN = sn;
 		configObj.basic_data_group.device_serial_numbers.push(validSN);
@@ -474,7 +476,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		basicData.registers.forEach(function(register) {
 			var valName = register;
 			// var valName = 'custom-'+register;
-			console.warn("register", register)
+			// console.warn("register", register)
 			configObj.basic_data_group.defined_user_values.push(valName);
 			configObj.basic_data_group.user_values[valName] = {
 				'name': valName,
@@ -486,7 +488,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 			}
 		});
 	}
-	console.warn("configObj", configObj)
+	// console.warn("configObj", configObj)
 	return configObj
 	// 'same_vals_all_devices': true,
 	// 'registers': ['AIN0','AIN1'],

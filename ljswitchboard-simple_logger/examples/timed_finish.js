@@ -123,6 +123,8 @@ function loggerApp() {
 		debugLog('--- In Func: initializeLogger');
 		var defered = q.defer();
 		self.simpleLogger = simple_logger.create();
+		this.placeToSaveFile = "D:/throw away files";
+		self.simpleLogger.setFilePath(this.placeToSaveFile)
 		attachListeners(self.simpleLogger);
 		console.warn("self.simplelogger", self.simpleLogger)
 
@@ -154,6 +156,7 @@ function loggerApp() {
 			defered.resolve();
 		});
 		some = self.deviceManager.getDevices();
+		// console.warn("what about this", some)
 		return defered.promise;
 	};
 	this.updateDeviceListing = function() {
@@ -249,7 +252,7 @@ function loggerApp() {
 			}, function err() {
 				debugLog('Logger Stopped-err');
 			});
-		}, 5000);
+		}, 1000);
 		return defered.promise;
 	}
 	this.closeDevices = function() {
