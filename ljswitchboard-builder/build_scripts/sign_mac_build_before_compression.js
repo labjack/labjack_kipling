@@ -27,7 +27,7 @@ const listOfNodeBinaries = [
 	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/ref-napi/prebuilds/darwin-x64/electron.napi.node",
 	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/ref-napi/prebuilds/darwin-x64/node.napi.node",
 	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/fsevents/fsevents.node"
-	]
+	];
 
 // node binary used by io_manager
 var pathToBinaryPartials = [
@@ -49,7 +49,7 @@ var testFseventsNode = [
 	'node_modules',
 	'fsevents',
 	'fsevents.node'
-].join(path.sep)
+].join(path.sep);
 
 //io_manager fsevents
 var fseventsNode = [
@@ -58,7 +58,7 @@ var fseventsNode = [
 	'ljswitchboard-io_manager',
 	'node_modules',
 	'fsevents', 'fsevents.node'
-].join(path.sep)
+].join(path.sep);
 
 // ffi node api for electron
 var electronNodeApi_ffi = [
@@ -138,7 +138,7 @@ var pathToParentPListPartials = [
 	'..',
 	'branding_files',
 	'kipling_parent.plist'
-].join(path.sep)
+].join(path.sep);
 
 var pathToChildPListPartials = [
 	__dirname,
@@ -156,8 +156,8 @@ var pathToNodeApi_ffi         = path.resolve(path.join(nodeApi_ffi));
 var pathToNodeApi_ref         = path.resolve(path.join(nodeApi_ref));
 var pathToNodeApi_uv1         = path.resolve(path.join(nodeApi_uv1));
 
-var pathToParentPList = path.resolve(path.join(pathToParentPListPartials))
-var pathToChildPList = path.resolve(path.join(pathToChildPListPartials))
+var pathToParentPList = path.resolve(path.join(pathToParentPListPartials));
+var pathToChildPList = path.resolve(path.join(pathToChildPListPartials));
 
 var refBindingPath = path.resolve(path.join(pathToRefBindingNode));
 var ffiBindingPath = path.resolve(path.join(pathToFFIBindingNode));
@@ -236,8 +236,7 @@ var buildScripts = [
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + refFFIBindingPath + '"'].join(' '),
 	'text': 'Signing ref+ffi: binding.node',
-	}
-	]
+	}];
 
 
 // var buildScripts = [{
@@ -278,7 +277,7 @@ buildScripts.forEach(function(buildScript) {
 // 			console.log('stdout: ',stdout);
 // 			console.log('stderr: ',stderr);
 // 			cb();
-// 		})
+// 		});
 // 	},
 // 	function(err) {
 // 		if(err) {

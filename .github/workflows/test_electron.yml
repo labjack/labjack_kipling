@@ -61,7 +61,11 @@ jobs:
           security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
           security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign:, -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
-          echo "KeyChain Created???"
+          
+
+          security find-identity
+          security list-keychains
+
           # Build Project
           npm run build
       - run: ls ${{ github.workspace }}/build/output/dist
