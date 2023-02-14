@@ -60,14 +60,18 @@ jobs:
           security default-keychain -s build.keychain
           security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
           security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign:, -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
           
 
-          security find-identity
-          security list-keychains
+          security find-identity -v
 
           # Build Project
           npm run build
+
+          #try codesign 
+
+          /usr/bin/codesign --force -s "LabJack Corporation (HESU4UBGJK)" ${{ github.workspace }}/build/output/dist/Kipling-3.3.3-beta.0.pkg
+          
       - run: ls ${{ github.workspace }}/build/output/dist
 
       - uses: actions/upload-artifact@v3
