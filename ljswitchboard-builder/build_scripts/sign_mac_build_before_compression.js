@@ -178,61 +178,61 @@ if(typeof(process.argv) !== 'undefined') {
 
 var buildScripts = [
 	// {
-	// 'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	// '--deep --entitlements "'+pathToParentPList+'"',
 	// '"' + nodePath + '"'].join(' '),
 	// 'text': 'Signing Node.exe',
 	// },
 	{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToTestFsevents + '"'].join(' '),
 	'text': 'Signing kipling_tester: fsevents.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToFsevents + '"'].join(' '),
 	'text': 'Signing io_manager: fsevents.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToElectronNodeApi_ffi + '"'].join(' '),
 	'text': 'Signing Electron ffi: electron.napi.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToElectronNodeApi_ref + '"'].join(' '),
 	'text': 'Signing Electron ref: electron.napi.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToNodeApi_ffi + '"'].join(' '),
 	'text': 'Signing Node ffi: node.napi.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToNodeApi_ref + '"'].join(' '),
 	'text': 'Signing Node ref: node.napi.node',
 	},{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	'--deep --entitlements "'+pathToParentPList+'"',
 	'"' + pathToNodeApi_uv1 + '"'].join(' '),
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
 	{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + refBindingPath + '"'].join(' '),
 	'text': 'Signing ref: binding.node',
 	}, 
 	{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + ffiBindingPath + '"'].join(' '),
 	'text': 'Signing ffi: ffi_binding.node',
 	},
 	{
-	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + refFFIBindingPath + '"'].join(' '),
 	'text': 'Signing ref+ffi: binding.node',
@@ -240,19 +240,19 @@ var buildScripts = [
 
 
 // var buildScripts = [{
-// 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+// 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 // 		'--deep --entitlements "'+pathToParentPList+'"',
 // 		'"' + nodePath + '"'].join(' '),
 // 	'text': 'Signing Node.exe',
 // }, 
 // // {
-// 	// 'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+// 	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 // 	// 	'--deep --entitlements "'+pathToParentPList+'"',
 // 	// 	'"' + refBindingPath + '"'].join(' '),
 // 	// 'text': 'Signing ref: binding.node',
 // // }, 
 // {
-// 	'script': ['codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+// 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 // 		'--deep --entitlements "'+pathToParentPList+'"',
 // 		'"' + ffiBindingPath + '"'].join(' '),
 // 	'text': 'Signing ffi: ffi_binding.node',
@@ -264,34 +264,34 @@ buildScripts.forEach(function(buildScript) {
 	buildScript.isSuccessful = false;
 });
 
-// async.eachSeries(
-// 	buildScripts,
-// 	function(buildScript, cb) {
-// 		console.log('Starting Step:', buildScript.text, "\n Script:", buildScript.script);
-// 		child_process.exec(buildScript.cmd, function(error, stdout, stderr) {
-// 			if (error) {
-// 				console.error('Error Executing', error);
-// 				console.error(buildScript.script, buildScript.text);
-// 				cb(error);
-// 			}
-// 			console.log('stdout: ',stdout);
-// 			console.log('stderr: ',stderr);
-// 			cb();
-// 		});
-// 	},
-// 	function(err) {
-// 		if(err) {
-// 			console.log('Error Executing Build Scripts...', err);
-// 			process.exit(1);
-// 		}
-// 	});
-buildScripts.forEach(function(buildScript) {
-	try {
-		console.log('Starting Step:', buildScript.text);
-		var execOutput = child_process.execSync(buildScript.cmd);
-		console.log('execOutput: ' , execOutput.toString());
-	} catch(err) {
-		console.warn("Err:", err)
-		process.exit(1);
-	}
-});
+async.eachSeries(
+	buildScripts,
+	function(buildScript, cb) {
+		console.log('Starting Step:', buildScript.text, "\n Script:", buildScript.script);
+		child_process.exec(buildScript.cmd, function(error, stdout, stderr) {
+			if (error) {
+				console.error('Error Executing', error);
+				console.error(buildScript.script, buildScript.text);
+				cb(error);
+			}
+			console.log('stdout: ',stdout);
+			console.log('stderr: ',stderr);
+			cb();
+		});
+	},
+	function(err) {
+		if(err) {
+			console.log('Error Executing Build Scripts...', err);
+			process.exit(1);
+		}
+	});
+// buildScripts.forEach(function(buildScript) {
+// 	try {
+// 		console.log('Starting Step:', buildScript.text);
+// 		var execOutput = child_process.execSync(buildScript.cmd);
+// 		console.log('execOutput: ' , execOutput.toString());
+// 	} catch(err) {
+// 		console.warn("Err:", err)
+// 		process.exit(1);
+// 	}
+// });
