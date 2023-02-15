@@ -115,6 +115,9 @@ jobs:
           #try codesign 
 
           /usr/bin/codesign --force -s "LabJack Corporation (HESU4UBGJK)" ${{ github.workspace }}/build/output/dist/Kipling-3.3.3-beta.0.pkg
+          /usr/bin/codesign --force -s "LabJack Corporation" ${{ github.workspace }}/build/output/dist/Kipling-3.3.3-beta.0.pkg
+
+          /usr/bin/codesign -dv --verbose=4 /Path/To/Application.app ${{ github.workspace }}/build/output/dist/Kipling-3.3.3-beta.0.pkg
           
       - run: ls ${{ github.workspace }}/build/output/dist
 
