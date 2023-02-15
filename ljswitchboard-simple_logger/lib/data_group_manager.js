@@ -67,7 +67,8 @@ function CREATE_DATA_GROUP_MANAGER(options, config) {
 		this.data[sn] = [];
 		this.completeData[sn] = {};
 
-		var registers = options.defined_user_values;
+		// var registers = options.defined_user_values;
+		var registers = ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3','AIN4'];
 		for(var j = 0; j < registers.length; ++j) {
 			var registerID = getId(sn, registers[j]);
 			this.completeData[sn][registerID] = JSON.parse(JSON.stringify(

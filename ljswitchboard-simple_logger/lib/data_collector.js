@@ -250,14 +250,16 @@ function CREATE_DATA_COLLECTOR() {
 
 			// For each custom register check to see if there are any functions
 			// that need to be created.
+			console.log("this is happening?")
 			if(data_group.defined_user_values) {
 				var user_value_keys = data_group.defined_user_values;
 				user_value_keys.forEach(function(user_value_key) {
 					var userValue = data_group.user_values[user_value_key];
-					var execMethod = userValue.exec_method;
+					// var execMethod = userValue.exec_method;
 					var func = userValue.func;
-					stepDebug('executing createUserValueFunction',execMethod, func, errors);
-					userValue.userFunc = createUserValueFunction(execMethod, func, errors);
+					// console.log("execMethod", execMethod)
+					// stepDebug('executing createUserValueFunction',execMethod, func, errors);
+					userValue.userFunc = createUserValueFunction('sync', func, errors);
 				});
 			}
 		});

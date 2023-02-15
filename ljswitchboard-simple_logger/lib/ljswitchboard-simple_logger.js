@@ -472,17 +472,27 @@ exports.generateBasicConfig = function(basicData, devices) {
 		// 		});
 		// 	});
 		// });
-
+		// 'CORE_TIMER','AIN0','AIN1','AIN2','AIN3','AIN4'
+		configObj.basic_data_group.defined_user_values.push('CORE_TIMER');
+		configObj.basic_data_group.defined_user_values.push('AIN0');
+		configObj.basic_data_group.defined_user_values.push('AIN1');
+		configObj.basic_data_group.defined_user_values.push('AIN2');
+		configObj.basic_data_group.defined_user_values.push('AIN3');
+		configObj.basic_data_group.defined_user_values.push('AIN4');
+		
 		basicData.registers.forEach(function(register) {
-			var valName = register;
+			console.log("increment")
+			// var valName = register;
 			// var valName = 'custom-'+register;
 			// console.warn("register", register)
-			configObj.basic_data_group.defined_user_values.push(valName);
-			configObj.basic_data_group.user_values[valName] = {
-				'name': valName,
-				'human_name': valName,
+			// console.log("valName", valName)
+			
+			
+			configObj.basic_data_group.user_values[register] = {
+				'name': register,
+				'human_name': register,
 				"exec_method": "sync",
-				"func": "val = data['"+validSN.toString()+"'].results."+register+".result",
+				"func": "val = data['"+'470016039'+"'].results."+register+".result",
 				"enable_logging": false,
 				"enable_view": true
 			}

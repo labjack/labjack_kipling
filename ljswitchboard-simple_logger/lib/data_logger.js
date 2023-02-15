@@ -195,7 +195,9 @@ function CREATE_DATA_LOGGER() {
 		var logging_config = self.config.logging_config;
 
 		// Determine if the logger should actually save data.
+		// ZANDER - the issue is here
 		self.state.enabled = logging_config.write_to_file;
+		// self.state.enabled = false;
 
 		// Establish the logger's name.
 		var nameType = typeof(logging_config.name);
@@ -739,6 +741,7 @@ function CREATE_DATA_LOGGER() {
 		}
 
 		debugLogFiles('Initializing log file header', groupName);
+		// Zander - This is where the file is being writen from!!!!
 		fileStream.write(fileData, onSuccess);
 		return defered.promise;
 	}
@@ -847,6 +850,7 @@ function CREATE_DATA_LOGGER() {
 		var userValues;
 		var groupKeys = Object.keys(dataGroups);
 		groupKeys.forEach(function(groupKey) {
+			console.log("groupkey", groupKey)
 			if(groupKey !== 'userValues') {
 				serialNumbers.push(groupKey);
 			} else {
@@ -864,38 +868,51 @@ function CREATE_DATA_LOGGER() {
 
 			var resultKeys = Object.keys(deviceData.results);
 			resultKeys.forEach(function(resultKey) {
-				// console.error("resultKey", deviceData)
+				console.error("resultKey", resultKey)
 				// Determine if the result should be logged.
 				var logData = groupData.logStatus[serialNumber][resultKey];
 
 				var result = deviceData.results[resultKey];
-				debugDataSaving('Result', serialNumber, result, logData);
+				// debugDataSaving('Result', serialNumber, result, logData);
 				// If the result should be logged then save the result to the
 				// console.warn("logdata", groupData.logStatus)
 				// string to be written.
-				if(logData) {
-					// console.error("...");
-					if(result.str) {
-						dataToWrite += result.str + value_separator;
-					} else {
-						dataToWrite += result.result.toString() + value_separator;
-					}
-				}
+				// if(logData) {
+				// 	console.error("...");
+				// 	if(result.str) {
+				// 		dataToWrite += result.str + value_separator;
+				// 	} else {
+				// 		dataToWrite += result.result.toString() + value_separator;
+				// 	}
+				// }
 			});
 
 			dataToWrite += deviceData.errorCode.toString() + value_separator;
 		});
 
-		if(userValues) {
-			var userValueKeys = Object.keys(userValues);
-			debugDataSaving('Saving User Values', userValueKeys)
-			userValueKeys.forEach(function(userValueKey) {
-				debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
-				dataToWrite += userValues[userValueKey] + value_separator;
-				// checkThing = userValues[userValueKey];
-				// console.error("dataToWritte", userValues[userValueKey])
-			});
-		}
+		console.log("userValues", userValues)
+		// this is where the data is getting ready to be written
+		console.log("...")
+		var userValueKeys = Object.keys(userValues);
+		debugDataSaving('Saving User Values', userValueKeys)
+		userValueKeys.forEach(function(userValueKey) {
+			debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
+			dataToWrite += userValues[userValueKey] + value_separator;
+			// checkThing = userValues[userValueKey];
+			// console.error("dataToWritte", userValues[userValueKey])
+		});
+		// this if statment is not sufull at all.
+		// if(userValues) {
+		// 	console.log("...")
+		// 	var userValueKeys = Object.keys(userValues);
+		// 	debugDataSaving('Saving User Values', userValueKeys)
+		// 	userValueKeys.forEach(function(userValueKey) {
+		// 		debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
+		// 		dataToWrite += userValues[userValueKey] + value_separator;
+		// 		// checkThing = userValues[userValueKey];
+		// 		// console.error("dataToWritte", userValues[userValueKey])
+		// 	});
+		// }
 		// Add the line ending text.
 		dataToWrite += line_ending;
 
@@ -914,12 +931,12 @@ function CREATE_DATA_LOGGER() {
 		}
 
 		var groupKey = data.groupKey;
-		var groupData = self.logData[data.groupKey];
+		var groupData = self.logData[groupKey];
 		var file_stream_buffer = groupData.file_stream_buffer;
 		var fileStream = groupData.file_stream;
 		var isActive = groupData.file_stream_active;
 		var ok = true;
-		var isData = file_stream_buffer.length > 0;
+		var isData = file_stream_buffer.length > 25;
 		var initializeNewFile = false;
 		/*
 		 * 1. While there is data to be written.
@@ -929,13 +946,16 @@ function CREATE_DATA_LOGGER() {
 		 *
 		 */
 		debugDataSaving('Writing data', isData, ok, isActive);
+		// console.log("how often?", isData, ok, isActive)
 		while((isData) && (ok) && (isActive)) {
+			// console.log("how often is it in this")
 			// un-shift one line of data.
 			// console.error("hold on", file_stream_buffer)
 			var dataToWrite = file_stream_buffer.shift(1);
-			// console.error("does this actualy happen?", dataToWrite)
+			console.error("does this actualy happen?", dataToWrite)
 
-			ok = fileStream.write(dataToWrite);
+			// ZANDER - this doesnot even write to the file
+			// ok = fileStream.write(dataToWrite);
 
 			// Update necessary values.
 			isData = file_stream_buffer > 0;
@@ -950,6 +970,8 @@ function CREATE_DATA_LOGGER() {
 				// Indicate that we need to switch to a new file.
 				initializeNewFile = true;
 			}
+			console.log("file_stream_buffer", file_stream_buffer)
+			// file_stream_buffer.length = 0;
 		}
 
 		if(initializeNewFile) {
