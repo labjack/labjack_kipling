@@ -18,7 +18,7 @@ var curVersion = process.versions.node.split('.').join('_');
 
 // All known node binary .exe files
 // Each file needs to be signed individually for Mac OS Notarizing Service to Pass
-// List Updated for Kipling 3.3.2 - October 2022
+// List Updated for Kipling 3.3.3 - Feb. 2023
 const listOfNodeBinaries = [
 	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-kipling_tester/node_modules/fsevents/fsevents.node",
 	"labjack_kipling/ljswitchboard-builder/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/node_modules/ref-napi/prebuilds/darwin-x64/electron.napi.node",
@@ -111,7 +111,7 @@ var pathToRefBindingNode = [
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
-	'ref-napi','build','Release','binding.node'
+	'ref-napi','prebuilds','darwin-x64','binding.node'
 ].join(path.sep);
 
 var pathToFFIBindingNode = [
@@ -219,24 +219,25 @@ var buildScripts = [
 	'"' + pathToNodeApi_uv1 + '"'].join(' '),
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + refBindingPath + '"'].join(' '),
-	'text': 'Signing ref: binding.node',
-	}, 
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + ffiBindingPath + '"'].join(' '),
-	'text': 'Signing ffi: ffi_binding.node',
-	},
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + refFFIBindingPath + '"'].join(' '),
-	'text': 'Signing ref+ffi: binding.node',
-	}];
+	// {
+	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	// 	'--deep --entitlements "'+pathToParentPList+'"',
+	// 	'"' + refBindingPath + '"'].join(' '),
+	// 'text': 'Signing ref: binding.node',
+	// }, 
+	// {
+	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	// 	'--deep --entitlements "'+pathToParentPList+'"',
+	// 	'"' + ffiBindingPath + '"'].join(' '),
+	// 'text': 'Signing ffi: ffi_binding.node',
+	// },
+	// {
+	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	// 	'--deep --entitlements "'+pathToParentPList+'"',
+	// 	'"' + refFFIBindingPath + '"'].join(' '),
+	// 'text': 'Signing ref+ffi: binding.node',
+	// }
+];
 
 
 // var buildScripts = [{
