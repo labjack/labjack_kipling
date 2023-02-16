@@ -237,18 +237,18 @@ var buildScripts = [
 	// 	'"' + refBindingPath + '"'].join(' '),
 	// 'text': 'Signing ref: binding.node',
 	// }, 
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + ffiBindingPath + '"'].join(' '),
-	'text': 'Signing ffi: ffi_binding.node',
-	},
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + refFFIBindingPath + '"'].join(' '),
-	'text': 'Signing ref+ffi: binding.node',
-	}
+	// {
+	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	// 	'--deep --entitlements "'+pathToParentPList+'"',
+	// 	'"' + ffiBindingPath + '"'].join(' '),
+	// 'text': 'Signing ffi: ffi_binding.node',
+	// },
+	// {
+	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	// 	'--deep --entitlements "'+pathToParentPList+'"',
+	// 	'"' + refFFIBindingPath + '"'].join(' '),
+	// 'text': 'Signing ref+ffi: binding.node',
+	// }
 ];
 
 
