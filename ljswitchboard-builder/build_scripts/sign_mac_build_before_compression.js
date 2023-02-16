@@ -133,6 +133,16 @@ var pathToFFIRefBindingNode = [
 	'ref-napi', 'build','Release','binding.node'
 ].join(path.sep);
 
+var pathToFFInapiPython3 = [
+	__dirname,
+	'..',
+	'temp_project_files',
+	'ljswitchboard-io_manager',
+	'node_modules',
+	'ffi-napi','build','node_gyp_bins','python3'
+].join(path.sep);
+
+
 var pathToParentPListPartials = [
 	__dirname,
 	'..',
@@ -155,6 +165,7 @@ var pathToElectronNodeApi_ref = path.resolve(path.join(electronNodeApi_ref));
 var pathToNodeApi_ffi         = path.resolve(path.join(nodeApi_ffi));
 var pathToNodeApi_ref         = path.resolve(path.join(nodeApi_ref));
 var pathToNodeApi_uv1         = path.resolve(path.join(nodeApi_uv1));
+var pathToPython3             = path.resolve(path.join(pathToFFInapiPython3));
 
 var pathToParentPList = path.resolve(path.join(pathToParentPListPartials));
 var pathToChildPList = path.resolve(path.join(pathToChildPListPartials));
@@ -225,12 +236,18 @@ var buildScripts = [
 	// 	'"' + refBindingPath + '"'].join(' '),
 	// 'text': 'Signing ref: binding.node',
 	// }, 
-	// {
-	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	// 	'--deep --entitlements "'+pathToParentPList+'"',
-	// 	'"' + ffiBindingPath + '"'].join(' '),
-	// 'text': 'Signing ffi: ffi_binding.node',
-	// },
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + ffiBindingPath + '"'].join(' '),
+	'text': 'Signing ffi: ffi_binding.node',
+	},
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + pathToPython3 + '"'].join(' '),
+	'text': 'Signing ffi-napi python3',
+	},
 	// {
 	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 	// 	'--deep --entitlements "'+pathToParentPList+'"',
