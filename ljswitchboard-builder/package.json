@@ -73,9 +73,7 @@
       "category": "public.app-category.utilities",
       "target": {
         "target": "pkg",
-        "arch": [
-          "arm64"
-        ]
+        "arch": "x64"
       }
     },
     "linux": {
