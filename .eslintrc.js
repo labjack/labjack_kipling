@@ -8,6 +8,7 @@ module.exports = {
         "es6": true,
         "node": true,
     },
+    "parser": "@typescript-eslint/parser",
     "plugins": ["eslint-plugin-import"],
 
     // "extends": "eslint:recommended",
