@@ -5,7 +5,7 @@
   ],
   "command": {
     "bootstrap": {
-      "npmClientArgs": ["--no-package-lock", "-f"]
+      "npmClientArgs": ["--no-package-lock", "-f", "--build-from-resource"]
     }
   },
   "version": "independent",
