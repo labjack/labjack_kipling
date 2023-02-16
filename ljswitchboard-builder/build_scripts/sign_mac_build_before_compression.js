@@ -111,7 +111,8 @@ var pathToRefBindingNode = [
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
-	'ref-napi','prebuilds','darwin-x64','binding.node'
+	'ref-napi','build','Release','binding.node'
+	// 'ref-napi','prebuilds','darwin-x64','binding.node'
 ].join(path.sep);
 
 var pathToFFIBindingNode = [
@@ -219,24 +220,24 @@ var buildScripts = [
 	'"' + pathToNodeApi_uv1 + '"'].join(' '),
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
-	// {
-	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	// 	'--deep --entitlements "'+pathToParentPList+'"',
-	// 	'"' + refBindingPath + '"'].join(' '),
-	// 'text': 'Signing ref: binding.node',
-	// }, 
-	// {
-	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	// 	'--deep --entitlements "'+pathToParentPList+'"',
-	// 	'"' + ffiBindingPath + '"'].join(' '),
-	// 'text': 'Signing ffi: ffi_binding.node',
-	// },
-	// {
-	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	// 	'--deep --entitlements "'+pathToParentPList+'"',
-	// 	'"' + refFFIBindingPath + '"'].join(' '),
-	// 'text': 'Signing ref+ffi: binding.node',
-	// }
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + refBindingPath + '"'].join(' '),
+	'text': 'Signing ref: binding.node',
+	}, 
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + ffiBindingPath + '"'].join(' '),
+	'text': 'Signing ffi: ffi_binding.node',
+	},
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + refFFIBindingPath + '"'].join(' '),
+	'text': 'Signing ref+ffi: binding.node',
+	}
 ];
 
 
