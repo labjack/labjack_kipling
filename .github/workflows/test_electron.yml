@@ -81,6 +81,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
         run: |
+          /usr/bin/codesign --force -s --timestamp "LabJack Corporation" ${{ github.workspace }}/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release/ffi_bindings.node
           npm run build
           ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release
           
