@@ -111,7 +111,8 @@ var pathToRefBindingNode = [
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
-	'ref-napi','prebuilds','darwin-x64','binding.node'
+	'ref-napi','build','Release','binding.node'
+	// 'ref-napi','prebuilds','darwin-x64','binding.node'
 ].join(path.sep);
 
 var pathToFFIBindingNode = [
@@ -233,15 +234,15 @@ var buildScripts = [
 	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + refBindingPath + '"'].join(' '),
-	'text': 'Signing ref: binding.node',
-	}, 
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + ffiBindingPath + '"'].join(' '),
 	'text': 'Signing ffi: ffi_binding.node',
 	},
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + refBindingPath + '"'].join(' '),
+	'text': 'Signing ref: binding.node',
+	}, 
 	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
@@ -286,15 +287,17 @@ async.eachSeries(
 				console.error(buildScript.script, buildScript.text);
 				cb(error);
 			}
-			console.log('stdout: ',stdout);
-			console.log('stderr: ',stderr);
-			cb();
+			else{
+				console.log('stdout: ',stdout);
+				console.log('stderr: ',stderr);
+				cb();
+			}
 		});
 	},
 	function(err) {
 		if(err) {
-			console.log('Error Executing Build Scripts...', err);
-			process.exit(1);
+			// console.log('Error Executing Build Scripts...', err);
+			console.error("----- Signing Script Failed -----\n", err);
 		}
 	});
 // buildScripts.forEach(function(buildScript) {
