@@ -232,17 +232,17 @@ var buildScripts = [
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
 	{
+		'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+			'--deep --entitlements "'+pathToParentPList+'"',
+			'"' + ffiBindingPath + '"'].join(' '),
+		'text': 'Signing ffi: ffi_binding.node',
+		},
+	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + refBindingPath + '"'].join(' '),
 	'text': 'Signing ref: binding.node',
 	}, 
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + ffiBindingPath + '"'].join(' '),
-	'text': 'Signing ffi: ffi_binding.node',
-	},
 	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
