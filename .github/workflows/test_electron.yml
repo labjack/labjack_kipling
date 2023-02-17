@@ -83,8 +83,8 @@ jobs:
         run: |
           ls -la ${{ github.workspace }}
           ls -la ${{ github.workspace }}/ljswitchboard-io_manager
-          # ls -la ${{ github.workspace }}
-          # ls -la ${{ github.workspace }}
+          # ls -la ${{ github.workspace }}/ljswitchboard-io_manager/node_modules
+          # ls -la ${{ github.workspace }}/ljswitchboard-io_manager/node_modules/ffi-napi
           /usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime --deep ${{ github.workspace }}/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release/ffi_bindings.node
           npm run build
           ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release
