@@ -81,9 +81,7 @@ jobs:
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
         run: |
-
-          security find-identity -v
-
+           
           # Build Project
           npm run build
 
@@ -92,7 +90,7 @@ jobs:
           # /usr/bin/codesign --force -s "LabJack Corporation (HESU4UBGJK)" ${{ github.workspace }}/build/output/dist/Kipling-3.3.3-beta.0.pkg
           # /usr/bin/codesign --force -s "LabJack Corporation" ${{ github.workspace }}/build/output/dist/Kipling-3.3.3-beta.0.pkg
 
-          /usr/bin/codesign -dv --verbose=4 ${{ github.workspace }}/build/output/dist/Kipling-3.3.3-beta.0.pkg
+          # /usr/bin/codesign --force --timestamp --options runtime ${{ github.workspace }}/build/output/dist/mac-arm64/Kipling.app/Contents/Resources/app/ljswitchboard-io_manager.zip/node_modules/ffi-napi/build/Release/ffi_bindings.node
           
       - run: ls ${{ github.workspace }}/build/output/dist
 
