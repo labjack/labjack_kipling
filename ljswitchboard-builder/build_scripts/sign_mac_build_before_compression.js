@@ -231,24 +231,24 @@ var buildScripts = [
 	'"' + pathToNodeApi_uv1 + '"'].join(' '),
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
-	// {
-	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	// 	'--deep --entitlements "'+pathToParentPList+'"',
-	// 	'"' + refBindingPath + '"'].join(' '),
-	// 'text': 'Signing ref: binding.node',
-	// }, 
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + refBindingPath + '"'].join(' '),
+	'text': 'Signing ref: binding.node',
+	}, 
 	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--deep --entitlements "'+pathToParentPList+'"',
 		'"' + ffiBindingPath + '"'].join(' '),
 	'text': 'Signing ffi: ffi_binding.node',
 	},
-	// {
-	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	// 	'--deep --entitlements "'+pathToParentPList+'"',
-	// 	'"' + refFFIBindingPath + '"'].join(' '),
-	// 'text': 'Signing ref+ffi: binding.node',
-	// }
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--deep --entitlements "'+pathToParentPList+'"',
+		'"' + refFFIBindingPath + '"'].join(' '),
+	'text': 'Signing ref+ffi: binding.node',
+	}
 ];
 
 
@@ -287,15 +287,17 @@ async.eachSeries(
 				console.error(buildScript.script, buildScript.text);
 				cb(error);
 			}
-			console.log('stdout: ',stdout);
-			console.log('stderr: ',stderr);
-			cb();
+			else{
+				console.log('stdout: ',stdout);
+				console.log('stderr: ',stderr);
+				cb();
+			}
 		});
 	},
 	function(err) {
 		if(err) {
-			console.log('Error Executing Build Scripts...', err);
-			process.exit(1);
+			// console.log('Error Executing Build Scripts...', err);
+			console.error("----- Signing Script Failed -----\n", err);
 		}
 	});
 // buildScripts.forEach(function(buildScript) {
