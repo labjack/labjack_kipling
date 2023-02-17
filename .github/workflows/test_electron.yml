@@ -80,7 +80,9 @@ jobs:
           MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_KEYCHAIN_PWD }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
-        run: npm run build
+        run: |
+          npm run build
+          ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release
           
       - run: ls ${{ github.workspace }}/build/output/dist
 
