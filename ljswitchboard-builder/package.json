@@ -65,15 +65,12 @@
     "productName": "Kipling",
     "appId": "com.labjack.kipling",
     "afterSign": "build_scripts/notarize_project.js",
-    "buildDependenciesFromSource": true,
     "mac": {
       "icon": "Kipling3.icns",
       "category": "public.app-category.utilities",
       "target": {
         "target": "pkg",
-        "arch": [
-          "x64"
-        ]
+        "arch": "x64"
       }
     },
     "linux": {
