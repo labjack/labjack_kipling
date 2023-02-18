@@ -196,12 +196,6 @@ var buildScripts = [
 	// 'text': 'Signing Node.exe',
 	// },
 	{
-		'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-			'--entitlements "'+pathToParentPList+'"',
-			'"' + ffiBindingPath + '"'].join(' '),
-		'text': 'Signing ffi: ffi_binding.node',
-		},
-	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--entitlements "'+pathToParentPList+'"',
 		'"' + pathToTestFsevents + '"'].join(' '),
@@ -248,7 +242,13 @@ var buildScripts = [
 		'--entitlements "'+pathToParentPList+'"',
 		'"' + refFFIBindingPath + '"'].join(' '),
 	'text': 'Signing ref+ffi: binding.node',
-	}
+	},
+	{
+		'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+			'--entitlements "'+pathToParentPList+'"',
+			'"' + ffiBindingPath + '"'].join(' '),
+		'text': 'Signing ffi: ffi_binding.node',
+	},
 ];
 
 
