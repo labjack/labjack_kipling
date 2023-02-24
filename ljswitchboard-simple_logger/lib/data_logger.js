@@ -877,14 +877,14 @@ function CREATE_DATA_LOGGER() {
 				// If the result should be logged then save the result to the
 				// console.warn("logdata", groupData.logStatus)
 				// string to be written.
-				// if(logData) {
-				// 	console.error("...");
-				// 	if(result.str) {
-				// 		dataToWrite += result.str + value_separator;
-				// 	} else {
-				// 		dataToWrite += result.result.toString() + value_separator;
-				// 	}
-				// }
+				if(logData) {
+					console.error("...");
+					if(result.str) {
+						dataToWrite += result.str + value_separator;
+					} else {
+						dataToWrite += result.result.toString() + value_separator;
+					}
+				}
 			});
 
 			dataToWrite += deviceData.errorCode.toString() + value_separator;
@@ -920,6 +920,7 @@ function CREATE_DATA_LOGGER() {
 		groupData.file_stream_buffer.push(dataToWrite);
 	}
 	function saveNewData(data) {
+		console.log("this is data in the save new data function: ", data)
 		// debugSavingData('saving data, group:', data.groupKey,'numWrittenLines:', self.logData[data.groupKey].num_written_lines);
 		// debugDataSaving('Saving Data!!', data.groupKey, self.logData[data.groupKey].num_written_lines);
 
@@ -950,12 +951,17 @@ function CREATE_DATA_LOGGER() {
 		while((isData) && (ok) && (isActive)) {
 			// console.log("how often is it in this")
 			// un-shift one line of data.
-			// console.error("hold on", file_stream_buffer)
+			console.error("groupData.numDataPoints", groupData.numDataPoints)
 			var dataToWrite = file_stream_buffer.shift(1);
-			console.error("does this actualy happen?", dataToWrite)
+			console.error("does this actualy happen?",typeof(dataToWrite))
+			var testingWrite = [];
 
-			// ZANDER - this doesnot even write to the file
+			// ZANDER - This is the exact function that when un comented will alow data to be writen to the file
 			// ok = fileStream.write(dataToWrite);
+
+			testingWrite.push(dataToWrite);
+			
+			ok = fileStream.write(testingWrite[0]);
 
 			// Update necessary values.
 			isData = file_stream_buffer > 0;
@@ -987,6 +993,7 @@ function CREATE_DATA_LOGGER() {
 	}
 	/* Externally Accessable functions */
 	this.onNewData = function(data) {
+		console.log("this is the data in on")
 		var saveData = false;
 		// Check to see if the logger is enabled.
 		if(self.state.enabled) {
