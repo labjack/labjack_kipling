@@ -1350,7 +1350,6 @@ function module() {
     };
 
     this.configureBaseRegisters = function(deviceTypeName) {
-        console.error("configuring base registers for device type " + deviceTypeName)
         switch (deviceTypeName) {
             case 'T8':
                 // Base-Register Variable for Configuring multiple thermocouples.
@@ -1429,8 +1428,6 @@ function module() {
         // console.error("onDeviceSelected\n\n")
         self.activeDevice = device;
         self.activeDeviceType = device.savedAttributes.deviceTypeName;
-        // self.configureBaseRegisters(self.activeDeviceType);
-        // console.error(self.baseRegisters);
         self.clearCachedData();
 
         framework.clearConfigBindings();
@@ -1444,9 +1441,6 @@ function module() {
 
         var baseReg = 'AIN#(0:11)';
         var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
-        // var ain_ef_types = globalDeviceConstants.t4DeviceConstants.ainEFTypeOptions;
-        // var ain_ef_type_map = globalDeviceConstants.t4DeviceConstants.ainEFTypeMap;
-        // this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
         switch (self.activeDeviceType) {
             case 'T8':
                 // Base-Register Variable for Configuring multiple thermocouples.
@@ -1651,8 +1645,7 @@ function module() {
                 widthMultiplyer = 90;
                 break;
             case 2.5:
-                // for both the T4
-                console.error("-------- 2.5 ---------")
+                // for the T4
                 val = value / (range + 0.8);
                 widthMultiplyer = 100;
                 break;
@@ -1915,7 +1908,6 @@ function module() {
             var clearCurAINREadings = false;
             self.bufferedOutputValues.forEach(function(value,name){
                 if(name === FORCE_AIN_VAL_REFRESH) {
-                    console.error("1765 base registers \n")
                     baseRegisters.forEach(function(baseRegister) {
                         var oldVal = self.currentValues.get(baseRegister);
                         self.newBufferedValues.set(baseRegister,oldVal);
