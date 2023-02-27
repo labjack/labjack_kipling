@@ -197,58 +197,58 @@ var buildScripts = [
 	// },
 	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	'--deep --entitlements "'+pathToParentPList+'"',
-	'"' + pathToTestFsevents + '"'].join(' '),
+		'--entitlements "'+pathToParentPList+'"',
+		'"' + pathToTestFsevents + '"'].join(' '),
 	'text': 'Signing kipling_tester: fsevents.node',
 	},{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	'--deep --entitlements "'+pathToParentPList+'"',
-	'"' + pathToFsevents + '"'].join(' '),
+		'--entitlements "'+pathToParentPList+'"',
+		'"' + pathToFsevents + '"'].join(' '),
 	'text': 'Signing io_manager: fsevents.node',
 	},{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	'--deep --entitlements "'+pathToParentPList+'"',
-	'"' + pathToElectronNodeApi_ffi + '"'].join(' '),
+		'--entitlements "'+pathToParentPList+'"',
+		'"' + pathToElectronNodeApi_ffi + '"'].join(' '),
 	'text': 'Signing Electron ffi: electron.napi.node',
 	},{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	'--deep --entitlements "'+pathToParentPList+'"',
-	'"' + pathToElectronNodeApi_ref + '"'].join(' '),
+		'--entitlements "'+pathToParentPList+'"',
+		'"' + pathToElectronNodeApi_ref + '"'].join(' '),
 	'text': 'Signing Electron ref: electron.napi.node',
 	},{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	'--deep --entitlements "'+pathToParentPList+'"',
-	'"' + pathToNodeApi_ffi + '"'].join(' '),
+		'--entitlements "'+pathToParentPList+'"',
+		'"' + pathToNodeApi_ffi + '"'].join(' '),
 	'text': 'Signing Node ffi: node.napi.node',
 	},{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	'--deep --entitlements "'+pathToParentPList+'"',
-	'"' + pathToNodeApi_ref + '"'].join(' '),
+		'--entitlements "'+pathToParentPList+'"',
+		'"' + pathToNodeApi_ref + '"'].join(' '),
 	'text': 'Signing Node ref: node.napi.node',
 	},{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	'--deep --entitlements "'+pathToParentPList+'"',
-	'"' + pathToNodeApi_uv1 + '"'].join(' '),
+		'--entitlements "'+pathToParentPList+'"',
+		'"' + pathToNodeApi_uv1 + '"'].join(' '),
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
 	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
-		'"' + ffiBindingPath + '"'].join(' '),
-	'text': 'Signing ffi: ffi_binding.node',
-	},
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
+		'--entitlements "'+pathToParentPList+'"',
 		'"' + refBindingPath + '"'].join(' '),
 	'text': 'Signing ref: binding.node',
 	}, 
 	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--deep --entitlements "'+pathToParentPList+'"',
+		'--entitlements "'+pathToParentPList+'"',
 		'"' + refFFIBindingPath + '"'].join(' '),
 	'text': 'Signing ref+ffi: binding.node',
-	}
+	},
+	{
+		'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+			'--entitlements "'+pathToParentPList+'"',
+			'"' + ffiBindingPath + '"'].join(' '),
+		'text': 'Signing ffi: ffi_binding.node',
+	},
 ];
 
 
