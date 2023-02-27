@@ -19,7 +19,11 @@ var sn = "470016039";
  
 // delay between each log in milla seconds
 var msDelay = 10;
-var max_logs_per_file = 5;
+var max_logs_per_file = 65335;
+
+// settting the length of how long the file will log
+secondsdelay = 300;
+// secondsdelay = 3;
 
 // setting the file name & location
 var fileName = "testthing"
@@ -53,53 +57,48 @@ initializeLogFile(registers, conectedFile)
 // this should be trigering the file loging
 ititalTempTime = process.hrtime();
 msDelay = msDelay * 1000000
+var elseCounter = 1;
 
-
-console.log("ititalTempTime", ititalTempTime)
+// setting up all of the timings
+var startOfLogger = process.hrtime();
+// console.log("start of logger", startOfLogger)
+startOfLogger[0] = startOfLogger[0] + secondsdelay; 
 ititalTempTime[1] = ititalTempTime[1] + msDelay;
 var duration = ititalTempTime;
-console.log("duration", duration)
-while(tempCounter < 2000){
-    // console.log("enter here?")
-        tempTime = process.hrtime();
-        // tempTime = (process.hrtime()[0]*1000) + (process.hrtime()[1] / 1000000)
-        console.log("tempTime", tempTime)
-        // console.log("", tempTime >= duration)
-        if(tempTime >= duration){
-            // console.log("process.hrtime(): ", process.hrtime())
-            tempCounter += 1;
-            console.log("hit")
-            var registers = ['CORE_TIMER', 'AIN0', 'AIN1'];
 
-            if(numberOfLoged < max_logs_per_file){
-                logTofile(registers, conectedFile);
-                numberOfLoged += 1;
-            }
-            else{
-                // console.log("this is the else statment", fs.readdirSync(usableFilepath))
-                // conectedFile.end();
-                console.log("folderFilePath", )
-                // usableFilepath.end();
-                // console.log("this is the else statment", fs.readdirSync(folderFilePath))
-                // fs.close(fd, function (err) {
-                //     // handle error
-                //     console.log("ERROR:", err)
-                // });
-                console.log("conectedFile befor", conectedFile.path)
-                console.log(fs.existsSync(conectedFile.path))
-                conectedFile = astablishConectionToFile(usableFilepath)
-                console.log("conectedFile fter", conectedFile.path)
-                numberOfLoged = 0
-            }
-            
-            tempTime[1] = tempTime[1] + msDelay;
-            var duration = tempTime;
+while(startOfLogger > process.hrtime()){
+
+    tempTime = process.hrtime();
+    // tempTime = (process.hrtime()[0]*1000) + (process.hrtime()[1] / 1000000)
+    console.log("tempTime", tempTime)
+    // console.log("", tempTime >= duration)
+    if(tempTime >= duration){
+        // console.log("process.hrtime(): ", process.hrtime())
+        // tempCounter += 1;
+        // console.log("hit")/
+        var registers = ['CORE_TIMER', 'AIN0', 'AIN1'];
+
+        if(numberOfLoged < max_logs_per_file){
+            logTofile(registers, conectedFile);
+            numberOfLoged += 1;
         }
-        // else{
-        //     tempCounter += 1;
-        //     console.log("miss")
-        // }
-    tempCounter += 1;
+        else{
+            // when ever we need to switch to a new file this will trigger
+            // console.log(fs.existsSync(conectedFile.path))
+            conectedFile = fs.createWriteStream(usableFilepath + "-" + elseCounter + ".csv");
+            initializeLogFiles(registers, conectedFile, elseCounter)
+            elseCounter++;
+            numberOfLoged = 0
+        }
+            
+        tempTime[1] = tempTime[1] + msDelay;
+        var duration = tempTime;
+    }
+    // else{
+    //     tempCounter += 1;
+    //     console.log("miss")
+    // }
+    // tempCounter += 1;
     // console.log("at the end of the while loop", tempCounter)
 }
 
@@ -111,9 +110,9 @@ function openDevice(device, cb){
             'LJM_ctANY',
             'LJM_idANY',
         );
-        console.log('AIN1:', device.readSync('AIN1'));
-        console.log('AIN1:', device.readSync('AIN1'));
-        console.log("device name", device.readSync('DEVICE_NAME_DEFAULT'))
+        // console.log('AIN1:', device.readSync('AIN1'));
+        // console.log('AIN1:', device.readSync('AIN1'));
+        // console.log("device name", device.readSync('DEVICE_NAME_DEFAULT'))
         return true;
     }
     catch(err){
@@ -123,7 +122,7 @@ function openDevice(device, cb){
 }
 // file.end();
 // Close the device
-console.log("close the Device?")
+// console.log("close the Device?")
 try{
 // device.closeSync();
 device.close(
@@ -131,6 +130,7 @@ device.close(
         console.log('Err:', res);
     },
     function(res){
+        // console.log("ending time", process.hrtime())
         console.log('closed successfully');
     });
 }
@@ -141,16 +141,17 @@ catch(err){
 // asstablishing the conection to be able to save the value information
 function astablishConectionToFile(usableFilepath){
     try{
-        console.log("outside the file path", usableFilepath, ":")
-        console.log(usableFilepath + '.csv' + ':')
-        console.log("fs.existsSync(usableFilepath + '.csv')", fs.existsSync(usableFilepath + '.csv'))
+        // console.log("outside the file path", usableFilepath, ":")
+        // console.log(usableFilepath + '.csv' + ':')
+        // console.log("fs.existsSync(usableFilepath + '.csv')", fs.existsSync(usableFilepath + '.csv'))
+        // console.log("this is me tr5ing to",usableFilepath.fileExists)
         for(var i = 1; fs.existsSync(usableFilepath + '.csv') == true; ++i){
-            console.log("in the file path")
+            // console.log("in the file path")
             if(fs.existsSync(usableFilepath + '.csv') == false){
                 usableFilepath = usableFilepath;
             }
             else if(fs.existsSync(usableFilepath + '.csv') == true && fs.existsSync(usableFilepath + "_" + i + '.csv') != true){
-                console.log("i: ", i)
+                // console.log("i: ", i)
                 usableFilepath = usableFilepath + "_" + i;
             }
         }
@@ -161,7 +162,7 @@ function astablishConectionToFile(usableFilepath){
         usableFilepath += '.csv'
     }
     var file = fs.createWriteStream(usableFilepath);
-    console.log("file.on(open)", file)
+    // console.log("file.on(open)", file)
     return file;
 }
 
@@ -174,7 +175,7 @@ function createFolderForLofFile(filepath){
                 filepath = filepath;
             }
             else if(fs.existsSync(filepath) == true && fs.existsSync(filepath + "_" + i) != true){
-                console.log("i: ", i)
+                // console.log("i: ", i)
                 filepath = filepath + "_" + i;
             }
         }
@@ -190,6 +191,13 @@ function initializeLogFile(registerName, file){
     file.write(fileName+"\n");
     file.write("SN: " + sn + "\n")
     file.write("Time" + ', ')
+    file.write(registerName+"hrtime seconds"+"hrtime nanoseconds"+"\n")
+}
+
+function initializeLogFiles(registerName, file, iteration){
+    file.write(fileName+"-"+iteration+"\n");
+    file.write("SN: " + sn + "\n")
+    file.write("Time" + ', ')
     file.write(registerName+"\n")
 }
 
@@ -197,17 +205,19 @@ function initializeLogFile(registerName, file){
 // this is for the date time thing
 // Date().toLocaleString() +', ' + 
 function logTofile(registerName, file) {
-    console.log("process.hrtime(): ", process.hrtime())
-    console.log("registername", registerName[0]) 
+    // console.log("process.hrtime(): ", process.hrtime())
+    // console.log("registername", registerName[0]) 
     var writeData = [Date().toLocaleString()];
     // writeData.push(registerName);
     registerName.forEach(function(key) {
-        console.log("key", key)
+        // console.log("key", key)
         writeData.push(device.readSync(key));
         // console.log("wtf", writeData)
         // fileData = JSON.stringify(writeData, null, 2);
         
     });
+    writeData.push(process.hrtime()[0])
+    writeData.push(process.hrtime()[1])
     file.write(writeData+"\n")
     return true
     // filePath.write(fileData, onSuccess);
