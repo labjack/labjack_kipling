@@ -104,6 +104,13 @@ function module() {
     var nop = function(){};
 
     // T4 ONLY NEED TO MAKE THIS CHANGE BASED ON DEVICE TYPE --------------
+     // Base-Register Variable for Configuring multiple thermocouples.
+     var baseReg = 'AIN#(0:13)';
+     // Expand baseReg & create baseRegister list using ljmmm.
+     var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
+     this.ain_ef_types = globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions;
+     var ain_ef_type_map = globalDeviceConstants.t7DeviceConstants.ainEFTypeMap;
+     this.ain_ef_type_map = ain_ef_type_map; // this seems to be the only one used for now.
     // var baseReg = 'AIN#(0:11)';
     // var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
 
@@ -594,7 +601,7 @@ function module() {
             }
 
             if(register.indexOf('AIN_ALL') === 0) {
-                console.error("569 base registers used here \n\n")
+                // console.error("569 base registers used here \n\n")
                 baseRegisters.forEach(function(baseRegister) {
                     var reg = baseRegister + register.split('AIN_ALL')[1];
                     self.bufferedOutputValues.set(reg,value);
@@ -603,7 +610,7 @@ function module() {
 
             // Switch based on what type of register is being configured. (check for _EF_TYPE or _EF_INDEX)
             if (isIndex || isType) {
-                var getCurEFInfo = ain_ef_type_map[value];
+                var getCurEFInfo = self.ain_ef_type_map[value];
                 if(typeof(getCurEFInfo) !== 'undefined') {
                     var curEFInfo = getCurEFInfo();
                     if (typeof(curEFInfo) !== 'undefined') {
@@ -686,7 +693,7 @@ function module() {
     };
 
     this.configureModule = function(onSuccess) {
-        console.error('configureModule\n\n\n')
+        // console.error('configureModule\n\n\n')
         var devConstStr;
         var productType;
         var baseReg;
@@ -1019,7 +1026,7 @@ function module() {
         function helpTextURLClickHandler(event) {
             const gui = global.gui;
             // gui.Shell.openExternal(linkToBindTo.url);
-            var url = $(event.toElement).attr('url');
+            var url = $(event.currentTarget).attr('url');
             console.log('Opening link...', url);
             gui.Shell.openExternal(url);
         }
@@ -1380,7 +1387,7 @@ function module() {
      * @param  {[type]} onSuccess   Function to be called when complete.
     **/
     this.onModuleLoaded = function(framework, onError, onSuccess) {
-        console.error('onModuleLoaded\n\n\n\n');
+        // console.error('onModuleLoaded\n\n\n\n');
         self.framework = framework;
         compileTemplates(framework);
 
@@ -1419,7 +1426,7 @@ function module() {
      * @param  {[type]} onSuccess   Function to be called when complete.
     **/
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
-        console.error("onDeviceSelected\n\n")
+        // console.error("onDeviceSelected\n\n")
         self.activeDevice = device;
         self.activeDeviceType = device.savedAttributes.deviceTypeName;
         // self.configureBaseRegisters(self.activeDeviceType);
@@ -1433,7 +1440,7 @@ function module() {
 
     this.onDeviceConfigured = function(framework, device, setupBindings, onError, onSuccess) {
         // Initialize variable where module config data will go.
-        console.error("onDeviceConfigured\n\n");
+        // console.error("onDeviceConfigured\n\n");
 
         var baseReg = 'AIN#(0:11)';
         var baseRegisters = ljmmm_parse.expandLJMMMName(baseReg);
@@ -1485,7 +1492,7 @@ function module() {
             var analogInputs = [];
         }
         // self.baseRegisters = self.configureBaseRegisters(device.savedAttributes.deviceTypeName);
-        console.error("1378 base registers used here too")
+        // console.error("1378 base registers used here too")
         baseRegisters.forEach(function(reg,index){
             var ainChannel = {
                 "name":reg,
@@ -1827,7 +1834,7 @@ function module() {
     };
 
     this.onTemplateLoaded = function(framework, onError, onSuccess) {
-        console.error('onTemplateLoaded\n\n')
+        // console.error('onTemplateLoaded\n\n')
         self.clearTempData();
         // Populated list of missing registers
         var missingRegs = [];

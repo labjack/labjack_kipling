@@ -1556,14 +1556,15 @@ global.globalDeviceConstants = {
             23: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[10];},
             24: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[11];},
             25: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[12];},
-            30: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[13];},
+            28: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[13];},
+            30: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[14];},
 
-            40: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[14];},
-            41: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[15];},
-            42: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[16];},
+            40: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[15];},
+            41: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[16];},
+            42: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[17];},
 
-            50: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[17];},
-            51: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[18];},
+            50: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[18];},
+            51: function() {return globalDeviceConstants.t7DeviceConstants.ainEFTypeOptions[19];},
         },
         ainEFTypeOptions:[
             {"name": "Disabled", "value": 0,
@@ -1721,6 +1722,18 @@ global.globalDeviceConstants = {
                 url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple",
             },
             {"name": "TypeS Thermocouple","value": 25,
+                "getConfigRoutine": function() {
+                    return globalDeviceConstants.t7DeviceConstants.efConfigRoutine.thermocouples;
+                },
+                "getReadRegs": function() {
+                    return globalDeviceConstants.t7DeviceConstants.efReadOptions.thermocouples;
+                },
+                "getConfigRegs": function() {
+                    return globalDeviceConstants.t7DeviceConstants.efConfigOptions.thermocouples;
+                },
+                url: "https://labjack.com/support/datasheets/t-series/ain/extended-features/thermocouple",
+            },
+            {"name": "TypeB Thermocouple","value": 28,
                 "getConfigRoutine": function() {
                     return globalDeviceConstants.t7DeviceConstants.efConfigRoutine.thermocouples;
                 },
@@ -2701,6 +2714,7 @@ global.globalDeviceConstants = {
             {"name": "TypeR","value": 23},
             {"name": "TypeT","value": 24},
             {"name": "TypeS","value": 25},
+            {"name": "TypeB","value": 28},
             {"name": "TypeC","value": 30}
         ],
         thermocoupleTemperatureMetrics: [
