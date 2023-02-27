@@ -1,0 +1,49 @@
+{
+    "name": "ljswitchboard-simple_logger",
+    "version": "2.0.0",
+    "description": "A simple data logger for LabJack devices.",
+    "main": "./lib/ljswitchboard-simple_logger",
+    "scripts": {
+      "start": "node ./examples/hello_world.js",
+      "test": "mocha --timeout 10000"
+    },
+    "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-simple_logger",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/labjack/labjack_kipling.git",
+      "directory": "ljswitchboard-simple_logger"
+    },
+    "keywords": [
+      "LabJack",
+      "LJM",
+      "T7",
+      "ljswitchboard"
+    ],
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/labjack/labjack_kipling/issues"
+    },
+    "dependencies": {
+      "async": "^3.2.4",
+      "compute-gcd": "1.2.0",
+      "fs-extra": "^9.0.1",
+      "labjack-nodejs": "*",
+      "ljswitchboard-data_parser": "*",
+      "ljswitchboard-device_manager": "*",
+      "ljswitchboard-ljm_device_curator": "*",
+      "ljswitchboard-ljm_driver_constants": "*",
+      "ljswitchboard-modbus_map": "*",
+      "q": "^1.5.1"
+    },
+    "devDependencies": {
+      "diff": "^4.0.1",
+      "mocha": "^8.2.1",
+      "chai": "^4.2.0"
+    },
+    "directories": {
+      "lib": "./lib"
+    },
+    "engines": {
+      "node": ">=6.0.0"
+    }
+  }
