@@ -7,7 +7,7 @@
           This example requires firmware 1.0282 (T7) or 1.0023 (T4)
 --]]
 
-print ("SPI Example. Jumper FIO2 (MISO) and FIO3 (MOSI) together (FIO4 and FIO5 on T4)")
+print ("SPI Example. Jumper FIO2 (MISO) and FIO3 (MOSI) together (FIO6 and FIO7 on T4)")
 -- Configure the SPI pins
 local devtype = MB.readName("PRODUCT_ID")
 -- If using a T7
