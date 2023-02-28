@@ -1,7 +1,15 @@
+console.log('logger.js!!');
+console.log('');
+console.log('***************************');
+console.log('This example requires there to be atleast 1 LJ device available (ANY,ANY,ANY).');
+console.log('***************************');
+console.log('');
+
 //Require LabJack-nodejs
 var ljn = require('labjack-nodejs');
 var fs = require('fs');
 var path = require('path');
+var q = require('q');
  
 //Device object (to control a LabJack device)c
 var createDeviceObject = ljn.getDevice();
@@ -13,37 +21,65 @@ var device = new createDeviceObject();
 // Open a device
 // device.closeSync();
 // Zander - TODO - this will need to be looked at when there is no other decieces on the internet.
-openDevice(device);
-var sn = "470016039";
-// console.log("device")
- 
-// delay between each log in milla seconds
-var msDelay = 10;
-var max_logs_per_file = 65335;
+this.device = openDevice(device);
 
-// settting the length of how long the file will log
-secondsdelay = 300;
-// secondsdelay = 3;
+// use this vv when or if this is implemented - Zander
+// var sn = devices[0].savedAttributes.serialNumber;
+var sn = "470016039";
+var savedData = [];
 
 // setting the file name & location
-var fileName = "testthing"
+var fileName = "testThing"
 var selectedFilePath = 'D:/labjack/newLoggerTesting/';
+ 
+// settting the length of how long the file will log
+var runTime = 5;
+
+// setting the registers that we will be using
+var registers = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5']
+
+// declare out config for the logging
+var configObj = {
+    "logging_config": {
+        "name": "Basic Config Auto-Template",
+        "file_prefix": "basic_config Auto-Template",
+        "write_to_file": true,
+        "default_result_view": "0",
+        "default_result_file": "0",
+        "runtimeInSeconds": runTime,
+    },
+    "view_config": {
+        "update_rate_ms": 10
+    },
+    "basic_data_group": {
+        // this should be the rate at wich the logger runs
+        "device_serial_numbers": [],
+        "logging_options": {
+            "write_to_file": true,
+            "file_prefix": fileName,
+            "max_samples_per_file": 65335,
+            "data_collector_config": {
+                "REPORT_DEVICE_IS_ACTIVE_VALUES": true,
+                "REPORT_DEFAULT_VALUES_WHEN_LATE": false
+            }
+        }
+    },
+};
+
+
 selectedFilePath = createFolderForLofFile(selectedFilePath);
 var folderFilePath = selectedFilePath;
 // fs.mkdir('D:/labjack/newLoggerTesting/basic_config Auto-Template',function(){
 // });
 
-// setting the registers that we will be using
-var registers = ['CORE_TIMER', 'AIN0', 'AIN1']
-
 // file checking
-const filePath = selectedFilePath + fileName;
+const filePath = selectedFilePath + configObj.basic_data_group.logging_options.file_prefix;
 var usableFilepath = filePath;
 
-console.log("does the file exist", fs.existsSync(usableFilepath))
+// console.log("does the file exist", fs.existsSync(usableFilepath))
 var conectedFile = astablishConectionToFile(usableFilepath)
 
-var tempTime = 0;
+var tempTime;
 var tempCounter = 0;
 var numberOfLoged = 0;
 
@@ -56,29 +92,36 @@ initializeLogFile(registers, conectedFile)
 
 // this should be trigering the file loging
 ititalTempTime = process.hrtime();
-msDelay = msDelay * 1000000
+configObj.view_config.update_rate_ms = configObj.view_config.update_rate_ms * 1000000
+const stayHere = configObj.view_config.update_rate_ms
 var elseCounter = 1;
 
 // setting up all of the timings
 var startOfLogger = process.hrtime();
-// console.log("start of logger", startOfLogger)
-startOfLogger[0] = startOfLogger[0] + secondsdelay; 
-ititalTempTime[1] = ititalTempTime[1] + msDelay;
-var duration = ititalTempTime;
+console.log("start of logger", configObj.view_config.update_rate_ms)
 
+startOfLogger[0] = startOfLogger[0] + configObj.logging_config.runtimeInSeconds; 
+ititalTempTime[1] = ititalTempTime[1] + configObj.view_config.update_rate_ms;
+var duration = ititalTempTime;
+var testiter = true;
+
+console.log("logger has started")
+console.log("this should be the config", configObj)
 while(startOfLogger > process.hrtime()){
 
     tempTime = process.hrtime();
     // tempTime = (process.hrtime()[0]*1000) + (process.hrtime()[1] / 1000000)
-    console.log("tempTime", tempTime)
-    // console.log("", tempTime >= duration)
-    if(tempTime >= duration){
-        // console.log("process.hrtime(): ", process.hrtime())
-        // tempCounter += 1;
-        // console.log("hit")/
-        var registers = ['CORE_TIMER', 'AIN0', 'AIN1'];
+    // var posibleThing = duration;
+    // posibleThing[1] = posibleThing[1] - 1000000
 
-        if(numberOfLoged < max_logs_per_file){
+    if(tempTime >= duration){
+        // console.log("hit")
+        var registers = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5'];
+          
+        // console.log("q")
+        if(numberOfLoged < configObj.basic_data_group.logging_options.max_samples_per_file){            
+
+            // console.log("device", device)
             logTofile(registers, conectedFile);
             numberOfLoged += 1;
         }
@@ -90,8 +133,9 @@ while(startOfLogger > process.hrtime()){
             elseCounter++;
             numberOfLoged = 0
         }
-            
-        tempTime[1] = tempTime[1] + msDelay;
+
+        // console.log("hrtime 6", process.hrtime());
+        tempTime[1] = tempTime[1] + configObj.view_config.update_rate_ms;
         var duration = tempTime;
     }
     // else{
@@ -101,6 +145,7 @@ while(startOfLogger > process.hrtime()){
     // tempCounter += 1;
     // console.log("at the end of the while loop", tempCounter)
 }
+console.log("ended the while")
 
 // opening the device
 function openDevice(device, cb){
@@ -110,29 +155,28 @@ function openDevice(device, cb){
             'LJM_ctANY',
             'LJM_idANY',
         );
-        // console.log('AIN1:', device.readSync('AIN1'));
-        // console.log('AIN1:', device.readSync('AIN1'));
-        // console.log("device name", device.readSync('DEVICE_NAME_DEFAULT'))
+        console.log("opened successfully")
         return true;
     }
     catch(err){
         console.log("err:", err)
         cd;
     }
+    return device
 }
 // file.end();
 // Close the device
 // console.log("close the Device?")
 try{
 // device.closeSync();
-device.close(
-    function(res){
-        console.log('Err:', res);
-    },
-    function(res){
-        // console.log("ending time", process.hrtime())
-        console.log('closed successfully');
-    });
+    device.close(
+        function(res){
+            console.log('Err:', res);
+        },
+        function(res){
+            // console.log("ending time", process.hrtime())
+            console.log('closed successfully');
+        });
 }
 catch(err){
     console.log("did not close correctly", err)
@@ -141,17 +185,11 @@ catch(err){
 // asstablishing the conection to be able to save the value information
 function astablishConectionToFile(usableFilepath){
     try{
-        // console.log("outside the file path", usableFilepath, ":")
-        // console.log(usableFilepath + '.csv' + ':')
-        // console.log("fs.existsSync(usableFilepath + '.csv')", fs.existsSync(usableFilepath + '.csv'))
-        // console.log("this is me tr5ing to",usableFilepath.fileExists)
         for(var i = 1; fs.existsSync(usableFilepath + '.csv') == true; ++i){
-            // console.log("in the file path")
             if(fs.existsSync(usableFilepath + '.csv') == false){
                 usableFilepath = usableFilepath;
             }
             else if(fs.existsSync(usableFilepath + '.csv') == true && fs.existsSync(usableFilepath + "_" + i + '.csv') != true){
-                // console.log("i: ", i)
                 usableFilepath = usableFilepath + "_" + i;
             }
         }
@@ -169,18 +207,17 @@ function astablishConectionToFile(usableFilepath){
 // This will be used to create the forlder inwich all of the csv files will be saved
 function createFolderForLofFile(filepath){
     try{
-        filepath = filepath + 'basic_config Auto-Template';
+        filepath = filepath + configObj.logging_config.name;
         for(var i = 1; fs.existsSync(filepath) == true; ++i){
             if(fs.existsSync(filepath) == false){
                 filepath = filepath;
             }
             else if(fs.existsSync(filepath) == true && fs.existsSync(filepath + "_" + i) != true){
-                // console.log("i: ", i)
                 filepath = filepath + "_" + i;
             }
         }
     } catch(err){
-        console.error("unable to creat the file")
+        console.error("unable to creat the file", err)
     }
     fs.mkdir(filepath,function(){});
     return filepath + "/";
@@ -188,38 +225,87 @@ function createFolderForLofFile(filepath){
 
 // setting up the heder for the file
 function initializeLogFile(registerName, file){
-    file.write(fileName+"\n");
+    file.write(configObj.basic_data_group.logging_options.file_prefix + "\n");
     file.write("SN: " + sn + "\n")
     file.write("Time" + ', ')
-    file.write(registerName+"hrtime seconds"+"hrtime nanoseconds"+"\n")
+    file.write(registerName + "," + "hrtime seconds" + "," + "hrtime nanoseconds" + "\n")
 }
 
 function initializeLogFiles(registerName, file, iteration){
-    file.write(fileName+"-"+iteration+"\n");
+    file.write(configObj.basic_data_group.logging_options.file_prefix + "-" + iteration + "\n");
     file.write("SN: " + sn + "\n")
     file.write("Time" + ', ')
-    file.write(registerName+"\n")
+    file.write(registerName + "\n")
 }
 
 // store time and see how many nano seconds
 // this is for the date time thing
 // Date().toLocaleString() +', ' + 
 function logTofile(registerName, file) {
-    // console.log("process.hrtime(): ", process.hrtime())
-    // console.log("registername", registerName[0]) 
-    var writeData = [Date().toLocaleString()];
-    // writeData.push(registerName);
-    registerName.forEach(function(key) {
-        // console.log("key", key)
-        writeData.push(device.readSync(key));
-        // console.log("wtf", writeData)
-        // fileData = JSON.stringify(writeData, null, 2);
-        
+    var defered = q.defer();
+    // console.log("hrtime 7", process.hrtime());
+    var writeData = [getDateFormatted()];
+    // console.log("hrtime 7.5", process.hrtime())
+    // registerName.forEach(function(key) {
+    //     writeData.push(device.readSync(key));        
+    // });
+    // console.log(device.readMan ySync(['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5']))
+    // console.log("dev", device.readMany())
+    var hrtime1 = process.hrtime()
+    device.readMany(['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5'])
+    .then(function(results) {
+        results.forEach(function(result) {
+            writeData.push(result);
+        });
+        defered.resolve();
+    }, function(err) {
+        retInfo.isError = true;
+        defered.reject();
     });
+    // device.readMany(['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5'])
+    // var val = device.readManySync(['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5', 'AIN6'])
+    // console.log("hrtime 2", process.hrtime())
+    var hrtime2 = process.hrtime()
+    // writeData.push(val);
+    // var hrtime3 = process.hrtime()
+    // console.log("hrtime 3", process.hrtime())
+    
+
     writeData.push(process.hrtime()[0])
     writeData.push(process.hrtime()[1])
+    // console.log("writeData")
+    // console.log(writeData)
+    // console.log(writeData)
+    console.log("hrtime1", hrtime1[1] - hrtime2[1])
     file.write(writeData+"\n")
+
     return true
     // filePath.write(fileData, onSuccess);
     // fs.write(filePath, writeData);
+}
+
+
+function getDateFormatted(){
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1;
+    var yyyy = today.getFullYear();
+    var h = today.getHours();
+    var min = today.getMinutes();
+    var s = today.getSeconds();
+    var ms = today.getMilliseconds();
+
+    // format all the times so they are consitent between lines.
+    if (dd < 10) {dd = '0' + dd}
+    if (mm < 10) {mm = '0' + mm}
+    if (h < 10) { h = '0' + h }
+    if (min < 10) { min = '0' + min }
+    if (s < 10) { s = '0' + s }
+
+    if(ms < 10) {ms = '00' + ms}
+    else if (ms < 100) {ms = '0' + ms}
+
+    var curtime = yyyy + '-' + mm + '-' + dd + ' ' + h + ':' + min + ':' + s + ':' + ms;
+
+    return curtime.toString();
 }
