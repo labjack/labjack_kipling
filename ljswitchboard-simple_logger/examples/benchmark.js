@@ -10,10 +10,10 @@ var ljn = require('labjack-nodejs');
 var fs = require('fs');
 var path = require('path');
 var q = require('q');
- 
+
 //Device object (to control a LabJack device)c
 var createDeviceObject = ljn.getDevice();
- 
+
 //Device object (to control a LabJack device)
 var device = new createDeviceObject();
 
@@ -26,15 +26,16 @@ this.activeDevice = openDevice(device);
 // use this vv when or if this is implemented - Zander
 // var sn = devices[0].savedAttributes.serialNumber;
 // var sn = "470016039"; // Zander T7?
+var sn = "440017663"; // Zander T4
 // var sn = "470010175" // Jimmy T7-Pro
-var sn = "440011301" // Jimmy T4
+// var sn = "440011301" // Jimmy T4
 var savedData = [];
 
 // setting the file name & location
 var fileName = "testThing"
-// var selectedFilePath = 'D:/labjack/newLoggerTesting/'; // Zander File Path for Testing
-var selectedFilePath = '/Users/jimmy/labjack_data_logger/'; // Jimmy File Path for Testing
- 
+var selectedFilePath = 'D:/labjack/newLoggerTesting/'; // Zander File Path for Testing
+// var selectedFilePath = '/Users/jimmy/labjack_data_logger/'; // Jimmy File Path for Testing
+
 // settting the length of how long the file will log
 var runTime = 5;
 
@@ -97,15 +98,36 @@ let totalTimings = [];
 let intervalTimings = [];
 // let registerList = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5', 'AIN6']
 
-let registerList = ['CORE_TIMER', 'DAC0']
+let registerList = ['AIN0', 'AIN1', 'AIN2', 'AIN3']
 const INTERVAL_TIME = 5; // ms
 const INTERVAL_TIME_NS = INTERVAL_TIME * 1000000
 const MAX_LOG_NUM = 1000;
 
+var hrIntStart = process.hrtime();
+while (numLogged < 1000) {
+    let hrIntervalTime = process.hrtime(hrIntStart);
+    let s_ms = (hrIntervalTime[0] * 1000000000 + hrIntervalTime[1]) / 1000000;
+    intervalTimings.push(s_ms);
+    let exTime = logTofile(device, registerList, connectedFile);
+    readTimings.push(exTime[0]);
+    writeTimings.push(exTime[1]);
+    totalTimings.push(exTime[0] + exTime[1])
+    hrIntStart = process.hrtime() // reset interval clock timer
+    numLogged += 1
+}
+console.log("Done...Stats")
+calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings);
+// closeDevice(device)
+numLogged = 0;
+readTimings = [];
+writeTimings = [];
+totalTimings = [];
+intervalTimings = [];
 
 standardInterval();
 
 function standardInterval() {
+    lineseperatoe("Starting the Standard Interval", connectedFile)
     console.log("\n------------- Starting the Standard Interval -------------\n")
     let hrIntStart = process.hrtime();
     const interval = setInterval(function() {
@@ -135,6 +157,7 @@ function standardInterval() {
 
 
 function customInterval() {
+    lineseperatoe("Starting the Custom Interval", connectedFile)
     //To-Do: Implemet a custom setInterval timing function
     // There are some issues with the accuracy of the JS built-in setInterval
     // Do we need to have a variable refresh rate here?
@@ -142,7 +165,7 @@ function customInterval() {
     const hr_ms = hr => (hr[0] * 1000000000 + hr[1]) / 1000000; // convert hr time to total ms
     function adjust_hr(hr) {
         let max_ns = 1000000000
-        let s =  hr[0];
+        let s = hr[0];
         let ns = hr[1];
         let adj_ns = ns + INTERVAL_TIME_NS;
         let adj_s = s + Math.floor(adj_ns / max_ns);
@@ -175,9 +198,14 @@ function customInterval() {
             totalTimings.push(exTime[0] + exTime[1])
 
             adj_hr = adjust_hr(expected)
+            console.log("adj_hr", adj_hr)
             expected = adj_hr
+            console.log("hr_ms(dt):", hr_ms(dt))
+            console.log("INTERVAL_TIME", INTERVAL_TIME)
             let drift = INTERVAL_TIME  - hr_ms(dt)
+            console.log("drift", drift)
             driftAdjustment = Math.max(0, drift) // either dont adjust (executing on schedule), or setInterval to adjust for time drift
+            console.log("driftAdjustment", Math.max(0, drift))
             setTimeout(step, driftAdjustment) // execute step again, delay adjusted for the time drift
         } else {
             calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings);
@@ -232,12 +260,12 @@ function openDevice(device){
         console.log("err:", err);
         return null;
     }
-    
+
 }
 // Close the device
 function closeDevice(device){
     try{
-    // device.closeSync();
+        // device.closeSync();
         device.close(
             function(res){
                 console.log('Err:', res);
@@ -311,15 +339,21 @@ function initializeLogFiles(registerName, file, iteration){
 function logTofile(device, registers, file) {
     // var defered = q.defer();
     var writeData = [];
+    var hrtime2 = process.hrtime()
     var hrReadStart = process.hrtime();
-    let readData = device.readManySync(registers);
+    let readData = [getDateFormatted()];
+    let res = device.readManySync(registers);
+    readData.push(res);
+
+    readData.push(process.hrtime()[0])
+    readData.push(process.hrtime()[1])
     // device.readMany(registerList)
     // .then(function(results) {
     //     console.log('readMany Results', registerList, results);
     // }, function(err) {
     //     console.log('readMany Error', err);
     // });
-	// defered.resolve();
+    // defered.resolve();
     var hrReadEnd = process.hrtime(hrReadStart);
     // console.info('Read Registers Execution time (hr): %ds %dms', hrReadEnd[0], hrReadEnd[1] / 1000000);
 
@@ -332,4 +366,35 @@ function logTofile(device, registers, file) {
     return [(hrReadEnd[1] / 1000000), (hrWriteEnd[1] / 1000000)];
     return null;
     return defered.promise;
+}
+
+function lineseperatoe(statment, file){
+    file.write('\n');
+    file.write(statment+'\n');
+    file.write('\n');
+}
+
+function getDateFormatted(){
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1;
+    var yyyy = today.getFullYear();
+    var h = today.getHours();
+    var min = today.getMinutes();
+    var s = today.getSeconds();
+    var ms = today.getMilliseconds();
+
+    // format all the times so they are consitent between lines.
+    if (dd < 10) {dd = '0' + dd}
+    if (mm < 10) {mm = '0' + mm}
+    if (h < 10) { h = '0' + h }
+    if (min < 10) { min = '0' + min }
+    if (s < 10) { s = '0' + s }
+
+    if(ms < 10) {ms = '00' + ms}
+    else if (ms < 100) {ms = '0' + ms}
+
+    var curtime = yyyy + '-' + mm + '-' + dd + ' ' + h + ':' + min + ':' + s + ':' + ms;
+
+    return curtime.toString();
 }
