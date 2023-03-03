@@ -4,7 +4,7 @@
   "description": "A simple data logger for LabJack devices.",
   "main": "./lib/ljswitchboard-simple_logger",
   "scripts": {
-    "start": "node ./examples/logger.js",
+    "start": "node ./examples/benchmark.js",
     "test": "mocha --timeout 10000"
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-simple_logger",
