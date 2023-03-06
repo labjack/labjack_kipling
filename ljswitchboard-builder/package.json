@@ -72,7 +72,7 @@
         "target": "pkg",
         "arch": "x64"
       },
-      "afterSign": "build_scripts/notarize_project.js",
+      "afterSign": "build_scripts/notarize_project.js"
     },
     "linux": {
       "icon": "Kipling_128x128.png",
