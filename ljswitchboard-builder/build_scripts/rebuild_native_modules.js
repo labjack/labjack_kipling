@@ -33,7 +33,7 @@ buildScripts.forEach(function(buildScript) {
 		'win32': [
 			'node-gyp',
 			'configure',
-			'--msvs_version=2022',
+			'--msvs_version=2015',
 			'--arch=' + process.arch,
 			'--target=' + process.versions.node
 		],

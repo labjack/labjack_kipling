@@ -127,7 +127,7 @@ async function installSubDeps(dependencies, directory) {
 				await promiseExecute(`npm install -f --production ${dependencyTar}`, directory, path.join(directory, 'debug.log'));
 			} catch (e) {
 				const debugLog = fs.readFileSync(path.join(directory, 'debug.log'));
-				console.log('debugLog:', debugLog.toString());
+				console.log('debugLog:', debugLog);
 			}
 			alreadyInstalled[directory + dependencyTar] = true;
 		}
@@ -187,7 +187,7 @@ function installLocalProductionDependencies(name, directory) {
 					await promiseExecute(`npm install -f --production ${dependencyTar}`, directory, path.join(directory, 'debug.log'));
 				} catch (err) {
 					const debugLog = fs.readFileSync(path.join(directory, 'debug.log'));
-					console.log('debugLog:', debugLog.toString());
+					console.log('debugLog:', debugLog);
 				}
 			}
 		}
@@ -200,7 +200,7 @@ async function innerInstallProductionDependency(name, directory) {
 		await promiseExecute(`npm install -f --production`, directory, path.join(directory, 'debug.log'));
 	} catch (err) {
 		const debugLog = fs.readFileSync(path.join(directory, 'debug.log'));
-		console.log('debugLog:', debugLog.toString());
+		console.log('debugLog:', debugLog);
 	}
 }
 

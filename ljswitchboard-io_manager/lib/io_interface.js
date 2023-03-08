@@ -252,9 +252,9 @@ class IOInterface extends EventEmitter {
 			// Force execution of node 0_10_35
 			// version = '0_10_35';
 			const version = {
-				'win32': '8_9_4',
-				'darwin': '12_16_3',
-				'linux': '8_9_4',
+				'win32': '16_15_0',
+				'darwin': '16_15_0',
+				'linux': '16_15_0',
 			}[os];
 
 			// If the labjack-nodejs lib`rary isn't built for the version defined
