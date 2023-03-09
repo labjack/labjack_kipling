@@ -12,9 +12,9 @@ jobs:
     strategy:
       matrix:
         node-version: [16.15.0]
-        platform: [macos-latest]
+        # platform: [macos-latest]
         # platform: [windows-latest]
-       # platform: [ubuntu-latest, macos-latest, windows-latest]
+       platform: [ubuntu-latest, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.platform }}
 
@@ -88,7 +88,7 @@ jobs:
           # ls -la ${{ github.workspace }}/ljm-ffi/node_modules/ffi-napi
           # ls -la ${{ github.workspace }}/ljm-ffi/node_modules/ffi-napi/build
           # ls -la ${{ github.workspace }}/ljm-ffi/node_modules/ffi-napi/build/Release
-          /usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime ${{ github.workspace }}/ljm-ffi/node_modules/ffi-napi/build/Release/ffi_bindings.node
+          # /usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime ${{ github.workspace }}/ljm-ffi/node_modules/ffi-napi/build/Release/ffi_bindings.node
           npm run build
           # ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release
           # readlink -f ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release/ffi_bindings.node 
