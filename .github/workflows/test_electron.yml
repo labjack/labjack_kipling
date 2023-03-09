@@ -84,7 +84,7 @@ jobs:
         run: |
           # ls -la ${{ github.workspace }}
           # ls -la ${{ github.workspace }}/ljswitchboard-io_manager
-          ls -la ${{ github.workspace }}/ljswitchboard-io_manager/node_modules
+          # ls -la ${{ github.workspace }}/ljswitchboard-io_manager/node_modules
           ls -la ${{ github.workspace }}/ljswitchboard-io_manager/node_modules/ffi-napi
           ls -la ${{ github.workspace }}/ljswitchboard-io_manager/node_modules/ffi-napi/build
           ls -la ${{ github.workspace }}/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release
