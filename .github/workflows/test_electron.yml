@@ -81,23 +81,7 @@ jobs:
           MACOS_CI_KEYCHAIN_PWD: ${{ secrets.PROD_MACOS_KEYCHAIN_PWD }}
           BUILD_DIR: ${{ github.workspace }}/build
           USE_HARD_LINKS: "false"
-        run: |
-          # ls -la ${{ github.workspace }}
-          # ls -la ${{ github.workspace }}/ljswitchboard-io_manager
-          # ls -la ${{ github.workspace }}/ljswitchboard-io_manager/node_modules
-          # ls -la ${{ github.workspace }}/ljm-ffi/node_modules/ffi-napi
-          # ls -la ${{ github.workspace }}/ljm-ffi/node_modules/ffi-napi/build
-          # ls -la ${{ github.workspace }}/ljm-ffi/node_modules/ffi-napi/build/Release
-          # /usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime ${{ github.workspace }}/ljm-ffi/node_modules/ffi-napi/build/Release/ffi_bindings.node
-          npm run build
-          #ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release
-          # readlink -f ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release/ffi_bindings.node 
-      - name: Check Build Folder for Files
-        run: |
-          ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi
-          ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build
-          ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release
-
+        run: npm run build
       - run: ls ${{ github.workspace }}/build/output/dist
 
       - uses: actions/upload-artifact@v3
