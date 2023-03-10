@@ -742,7 +742,12 @@ function CREATE_DATA_LOGGER() {
 
 		debugLogFiles('Initializing log file header', groupName);
 		// Zander - This is where the file is being writen from!!!!
+		var hrWriteStart = process.hrtime();
 		fileStream.write(fileData, onSuccess);
+		var hrWriteEnd = process.hrtime(hrWriteStart);
+		
+		// console.warn("hr start time")
+		console.warn("hr end time", hrWriteEnd)
 		return defered.promise;
 	}
 	function initializeLogFileHeaders(bundle) {
@@ -850,7 +855,7 @@ function CREATE_DATA_LOGGER() {
 		var userValues;
 		var groupKeys = Object.keys(dataGroups);
 		groupKeys.forEach(function(groupKey) {
-			console.log("groupkey", groupKey)
+			// console.log("groupkey", groupKey)
 			if(groupKey !== 'userValues') {
 				serialNumbers.push(groupKey);
 			} else {
@@ -868,7 +873,7 @@ function CREATE_DATA_LOGGER() {
 
 			var resultKeys = Object.keys(deviceData.results);
 			resultKeys.forEach(function(resultKey) {
-				console.error("resultKey", resultKey)
+				// console.error("resultKey", resultKey)
 				// Determine if the result should be logged.
 				var logData = groupData.logStatus[serialNumber][resultKey];
 
@@ -890,9 +895,9 @@ function CREATE_DATA_LOGGER() {
 			dataToWrite += deviceData.errorCode.toString() + value_separator;
 		});
 
-		console.log("userValues", userValues)
+		// console.log("userValues", userValues)
 		// this is where the data is getting ready to be written
-		console.log("...")
+		// console.log("...")
 		var userValueKeys = Object.keys(userValues);
 		debugDataSaving('Saving User Values', userValueKeys)
 		userValueKeys.forEach(function(userValueKey) {
@@ -920,7 +925,7 @@ function CREATE_DATA_LOGGER() {
 		groupData.file_stream_buffer.push(dataToWrite);
 	}
 	function saveNewData(data) {
-		console.log("this is data in the save new data function: ", data)
+		// console.log("this is data in the save new data function: ", data)
 		// debugSavingData('saving data, group:', data.groupKey,'numWrittenLines:', self.logData[data.groupKey].num_written_lines);
 		// debugDataSaving('Saving Data!!', data.groupKey, self.logData[data.groupKey].num_written_lines);
 
@@ -930,7 +935,7 @@ function CREATE_DATA_LOGGER() {
 		} catch(err) {
 			console.error('(data_logger.js) Error executing saveNewDataToBuffer', err);
 		}
-
+		
 		var groupKey = data.groupKey;
 		var groupData = self.logData[groupKey];
 		var file_stream_buffer = groupData.file_stream_buffer;
@@ -951,9 +956,9 @@ function CREATE_DATA_LOGGER() {
 		while((isData) && (ok) && (isActive)) {
 			// console.log("how often is it in this")
 			// un-shift one line of data.
-			console.error("groupData.numDataPoints", groupData.numDataPoints)
+			// console.error("groupData.numDataPoints", groupData.numDataPoints)
 			var dataToWrite = file_stream_buffer.shift(1);
-			console.error("does this actualy happen?",typeof(dataToWrite))
+			// console.error("does this actualy happen?",typeof(dataToWrite))
 			var testingWrite = [];
 
 			// ZANDER - This is the exact function that when un comented will alow data to be writen to the file
@@ -961,7 +966,13 @@ function CREATE_DATA_LOGGER() {
 
 			testingWrite.push(dataToWrite);
 			
+			var curtime = new Date();
+			// console.warn("curtime write time", testingWrite)
+			var hrWriteStart = process.hrtime();
 			ok = fileStream.write(testingWrite[0]);
+			var hrWriteEnd = process.hrtime(hrWriteStart);
+			
+			console.warn("the end writing data", hrWriteEnd)
 
 			// Update necessary values.
 			isData = file_stream_buffer > 0;
@@ -976,7 +987,7 @@ function CREATE_DATA_LOGGER() {
 				// Indicate that we need to switch to a new file.
 				initializeNewFile = true;
 			}
-			console.log("file_stream_buffer", file_stream_buffer)
+			// console.log("file_stream_buffer", file_stream_buffer)
 			// file_stream_buffer.length = 0;
 		}
 
@@ -993,7 +1004,7 @@ function CREATE_DATA_LOGGER() {
 	}
 	/* Externally Accessable functions */
 	this.onNewData = function(data) {
-		console.log("this is the data in on")
+		// console.log("this is the data in on")
 		var saveData = false;
 		// Check to see if the logger is enabled.
 		if(self.state.enabled) {

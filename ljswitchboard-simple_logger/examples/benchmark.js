@@ -179,6 +179,7 @@ function customInterval() {
     let hrStepStartMs = hr_ms(hrStepStart) + INTERVAL_TIME;
     let adjHrStepStart = adjust_hr(hrStepStart); //[hrStepStart[0], hrStepStart[1] + INTERVAL_TIME_NS]
     var expected = adjHrStepStart;
+    let negDrift = 0;
     setTimeout(step, INTERVAL_TIME); // First iteration, with delay of INTERVAL_TIME ms
     // The custom implementation of setInterval (recursive function)
     function step() {
@@ -298,6 +299,7 @@ function calculateTimerData(readTimings, writeTimings, totalTimings, intervalTim
 
     // console.log(intervalTimings)
     let intervalDelta = delta(intervalTimings)
+    console.log(intervalDelta)
     let avgIntervalDelta = average(intervalDelta[0]).toFixed(4);
     let avgIntervalDeltaHz = toHz(avgIntervalDelta).toFixed(4);
     let totalIntervalTime = intervalDelta[1];

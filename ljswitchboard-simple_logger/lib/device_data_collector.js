@@ -95,10 +95,11 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		// });
 		// Loop through the devices object and try to link to the device with
 		// the desired serial number.
-		for (const device of self.devices){
+		console.warn("self.saved atributes", self.devices)
+		for (const device of Object.keys(self.devices)){
 			// console.warn("whya re you not working", device)
 			// console.warn("serialNum", serialNum)
-			if(device.savedAttributes.serialNumber == serialNum) {
+			if(self.devices.savedAttributes.serialNumber == serialNum) {
 				self.isValidDevice = true;
 				self.device = device;
 				return true;
@@ -288,7 +289,8 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// console.log("registerList", registerList)
 				// var deviceCurator1 = new deviceCurator
 				// console.log("deviceCurator", deviceCurator.readMany())
-				self.device.readMany(registerList)
+				console.log("self", self)
+				devices.cReadMany(registerList)
 				.then(function(results) {
 					// console.log("results", results)
 					// console.log('readMany Results', registerList, results);

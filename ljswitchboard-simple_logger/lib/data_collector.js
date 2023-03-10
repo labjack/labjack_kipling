@@ -256,6 +256,9 @@ function CREATE_DATA_COLLECTOR() {
 				user_value_keys.forEach(function(user_value_key) {
 					var userValue = data_group.user_values[user_value_key];
 					// var execMethod = userValue.exec_method;
+					// console.log("user_value_key", user_value_key)
+					// console.log("the thing", data_group)
+					// console.log("userValue", userValue)
 					var func = userValue.func;
 					// console.log("execMethod", execMethod)
 					// stepDebug('executing createUserValueFunction',execMethod, func, errors);
@@ -864,6 +867,7 @@ function CREATE_DATA_COLLECTOR() {
 				'error': err,
 			});
 		}
+
 	};
 
 	var clearDataCollectionVariables = function() {

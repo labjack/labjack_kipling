@@ -436,7 +436,8 @@ exports.generateBasicConfig = function(basicData, devices) {
 		// var sn = devices[0].savedAttributes.serialNumber;
 		// var sn = "470010175";
 		// var sn = "440017663"
-		var sn = "470016039";
+		// var sn = "470016039";
+		var sn = "440010762"; // zander T4
 		validSN = sn;
 		configObj.basic_data_group.device_serial_numbers.push(validSN);
 		// configObj.basic_data_group.device_serial_numbers.push(sn);
@@ -492,7 +493,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 				'name': register,
 				'human_name': register,
 				"exec_method": "sync",
-				"func": "val = data['"+'470016039'+"'].results."+register+".result",
+				"func": "val = data['"+'440010762'+"'].results."+register+".result",
 				"enable_logging": false,
 				"enable_view": true
 			}
