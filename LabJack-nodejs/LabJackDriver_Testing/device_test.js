@@ -14,7 +14,7 @@
 
 var rewire = require('rewire');
 var q = require('q');
-var ref = require('ref');
+var ref = require('ref-napi');
 var fakeDriver = require('./TestObjects/test_driver_wrapper');
 var fakeLJM = new fakeDriver.getDriver();
 

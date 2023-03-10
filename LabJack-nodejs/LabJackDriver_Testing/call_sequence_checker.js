@@ -1,4 +1,4 @@
-var ref = require('ref');
+var ref = require('ref-napi');
 
 AVAILABLE_FUNCTIONS = {
 	'LJM_eWriteAddressesAsync':

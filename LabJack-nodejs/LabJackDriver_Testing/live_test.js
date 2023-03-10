@@ -13,7 +13,7 @@ var dev = new deviceManager.labjack();
 var driver = new driverManager.ljmDriver();
 
 var q = require('q');
-var ref = require('ref');
+var ref = require('ref-napi');
 module.exports = {
 	setUp: function(callback) {
 		callback();
