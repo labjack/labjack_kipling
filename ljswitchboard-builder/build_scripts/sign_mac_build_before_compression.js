@@ -116,8 +116,7 @@ var nodeApi_uv1 = [
 // ].join(path.sep);
 
 var pathToFFIBindingNode = [
-	__dirname,
-	'..',
+	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
