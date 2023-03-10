@@ -96,7 +96,7 @@ jobs:
         run: |
           ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi
           ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build
-          ls -lad ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release
+          ls -la ${{ github.workspace }}/build/temp_project_files/ljswitchboard-io_manager/node_modules/ffi-napi/build/Release
 
       - run: ls ${{ github.workspace }}/build/output/dist
 
