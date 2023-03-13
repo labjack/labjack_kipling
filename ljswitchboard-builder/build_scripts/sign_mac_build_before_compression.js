@@ -106,8 +106,7 @@ var nodeApi_uv1 = [
 ].join(path.sep); 
 
 var pathToRefBindingNode = [
-	__dirname,
-	'..',
+	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
@@ -116,8 +115,7 @@ var pathToRefBindingNode = [
 ].join(path.sep);
 
 var pathToFFIBindingNode = [
-	__dirname,
-	'..',
+	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
@@ -125,8 +123,7 @@ var pathToFFIBindingNode = [
 ].join(path.sep); 
 
 var pathToFFIRefBindingNode = [
-	__dirname,
-	'..',
+	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
@@ -135,8 +132,7 @@ var pathToFFIRefBindingNode = [
 ].join(path.sep);
 
 var pathToFFInapiPython3 = [
-	__dirname,
-	'..',
+	getBuildDirectory(),
 	'temp_project_files',
 	'ljswitchboard-io_manager',
 	'node_modules',
