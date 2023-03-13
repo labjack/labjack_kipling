@@ -105,15 +105,15 @@ var nodeApi_uv1 = [
 	'ffi-napi','prebuilds', 'darwin-x64', 'node.napi.uv1.node'
 ].join(path.sep); 
 
-// var pathToRefBindingNode = [
-// 	__dirname,
-// 	'..',
-// 	'temp_project_files',
-// 	'ljswitchboard-io_manager',
-// 	'node_modules',
-// 	// 'ref-napi','build','Release','binding.node'
-// 	'ref-napi','prebuilds','darwin-x64','binding.node'
-// ].join(path.sep);
+var pathToRefBindingNode = [
+	__dirname,
+	'..',
+	'temp_project_files',
+	'ljswitchboard-io_manager',
+	'node_modules',
+	'ref-napi','build','Release','binding.node'
+	// 'ref-napi','prebuilds','darwin-x64','binding.node'
+].join(path.sep);
 
 var pathToFFIBindingNode = [
 	__dirname,
@@ -124,15 +124,15 @@ var pathToFFIBindingNode = [
 	'ffi-napi','build','Release','ffi_bindings.node'
 ].join(path.sep); 
 
-// var pathToFFIRefBindingNode = [
-// 	__dirname,
-// 	'..',
-// 	'temp_project_files',
-// 	'ljswitchboard-io_manager',
-// 	'node_modules',
-// 	'ffi-napi','node_modules',
-// 	'ref-napi', 'build','Release','binding.node'
-// ].join(path.sep);
+var pathToFFIRefBindingNode = [
+	__dirname,
+	'..',
+	'temp_project_files',
+	'ljswitchboard-io_manager',
+	'node_modules',
+	'ffi-napi','node_modules',
+	'ref-napi', 'build','Release','binding.node'
+].join(path.sep);
 
 var pathToFFInapiPython3 = [
 	__dirname,
@@ -171,9 +171,9 @@ var pathToPython3             = path.resolve(path.join(pathToFFInapiPython3));
 var pathToParentPList = path.resolve(path.join(pathToParentPListPartials));
 var pathToChildPList = path.resolve(path.join(pathToChildPListPartials));
 
-// var refBindingPath = path.resolve(path.join(pathToRefBindingNode));
+var refBindingPath = path.resolve(path.join(pathToRefBindingNode)); //needed for mac arm64
 var ffiBindingPath = path.resolve(path.join(pathToFFIBindingNode));
-// var refFFIBindingPath = path.resolve(path.join(pathToFFIRefBindingNode));
+var refFFIBindingPath = path.resolve(path.join(pathToFFIRefBindingNode)); //needed for mac arm64
 
 
 // Not really sure what this does, but not getting rid of it
@@ -231,18 +231,18 @@ var buildScripts = [
 		'"' + pathToNodeApi_uv1 + '"'].join(' '),
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
-	// {
-	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	// 	'--entitlements "'+pathToParentPList+'"',
-	// 	'"' + refBindingPath + '"'].join(' '),
-	// 'text': 'Signing ref: binding.node',
-	// }, 
-	// {
-	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-	// 	'--entitlements "'+pathToParentPList+'"',
-	// 	'"' + refFFIBindingPath + '"'].join(' '),
-	// 'text': 'Signing ref+ffi: binding.node',
-	// },
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--entitlements "'+pathToParentPList+'"',
+		'"' + refBindingPath + '"'].join(' '),
+	'text': 'Signing ref: binding.node',
+	}, 
+	{
+	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+		'--entitlements "'+pathToParentPList+'"',
+		'"' + refFFIBindingPath + '"'].join(' '),
+	'text': 'Signing ref+ffi: binding.node',
+	},
 	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--entitlements "'+pathToParentPList+'"',
