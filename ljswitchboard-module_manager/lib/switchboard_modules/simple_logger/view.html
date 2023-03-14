@@ -116,14 +116,11 @@
              $("#newConfig").click(function() {
               //window.confirm("Would you like to clear all of the fields? This will delete all form data!");
               if (confirm("Would you like to clear all of the fields? This will delete all form data!")) {
-                  // document.getElementById("logName").value = "";
-                  // document.getElementById("devSN").value = "";
-                  // document.getElementById("dataGroupName").value = "";
-                  //seperation of the top half and the lower half
 
                   //clears all of the text boxes that are in the form and then re does the deviceSN
-                  //
                   $('#configForm input[type="text"]').val('');
+                  $('#configForm input[type="number"]').val('');
+                  $('#configForm input[type="number"]').removeClass("valid invalid")
                   document.getElementById("devSN").value = "{{ deviceSN }}"
 
                   $(".register-input").each(function(){
@@ -131,22 +128,53 @@
                     input.removeClass("valid invalid")
                   });
                 } 
-                //else {
-                //   // nothing should happen
-                // }
              });
             </script>
             </li>
             <li>
-              <button class="win-command" rel="tootlip" title="Load a configuration" onClick="openFile(loadConfigFile)">
-                <span class="win-commandicon win-commandring icon-folder-open openfile"></span>
+              <button class="win-command" rel="tootlip" title="Load a configuration">
+                <span class="win-commandicon win-commandring icon-folder-open openfile" type="file" id="file"></span>
                 <!-- <span class="win-label">Open</span> -->
              </button>
              <script>
+              const fs = require('fs')
+              const { dialog } = require('@electron/remote')
               $(".openfile").click(function(){
-                sendXHR("GET", "../../D:/experiement/formData.txt", null, function(response) { // response contains the content of the description.txt file.
-                document.getElementById("configForm").innerHTML = response; // Use innerHTML to get or set the html content.
-              });
+
+                // this is what is bring up the file path
+                dialog.showOpenDialog({
+                  properties: ['openFile'],
+                  filters: [ {name: 'JSON', extensions: ['JSON']} ]
+                })
+                .then((data) =>  {
+                  var filePath = data.filePaths[0];
+                  var config_data = fs.readFileSync(filePath)
+                  let obj = JSON.parse(config_data)
+
+                  const logName = document.getElementById('logName');
+                  const dataGroupName = document.getElementById('dataGroupName');
+                  const runTime = document.getElementById('runtimeSec');
+
+                  // making sure that the file is actuly what we are looking for
+                  if(obj.registers === undefined || obj.Log_name === undefined || obj.Data_group_name === undefined || obj.run_Time_In_Seconds === undefined){
+                    alert("Please enter a valid configuration file")
+                    return;
+                  }
+
+                  // loading the register into the logger page
+                  for(var i = 0; i < "{{MAX_REGISTERS}}"; i++){
+                    if(obj.registers[i] === undefined){}
+                    else{
+                      document.getElementById('validationCustom0' + i).value = obj.registers[i];
+                      $(".register-input").trigger("change");
+                    }
+                  }
+
+                  logName.value = obj.Log_name;
+                  dataGroupName.value = obj.Data_group_name;
+                  runTime.value = obj.run_Time_In_Seconds;
+                  $(".runtimeSec").trigger("change");
+                })
               })
              </script>
             </li>
@@ -156,55 +184,32 @@
                 <!-- <span class="win-label">Save</span> -->
              </button>
              <script>
-              //srarting to tru to get a .txt file to be downloaded to the computer to be able to
-              // later be able to grab it a put it back into the file.
-              $(".saveConfig").click(function(){
-                  //I know this works to save the data as a .txt file
-                  // Get the data from each element on the form.
-              //     const logName = document.getElementById('logName');
-              //     const dataGroupName = document.getElementById('dataGroupName');
-              //     const register1 = document.getElementById('validationCustom01');
-              //     const register2 = document.getElementById('validationCustom02');
-              //     const register3 = document.getElementById('validationCustom03');
-              //     const register4 = document.getElementById('validationCustom04');
-              //     const register5 = document.getElementById('validationCustom05');
-              //     const register6 = document.getElementById('validationCustom06');
-              //     const register7 = document.getElementById('validationCustom07');
-              //     const register8 = document.getElementById('validationCustom08');
-              //     const runTime = document.getElementById('runtimeSec');
+              $(".saveConfig").click(function(){                  
+                  // This variable stores all the data.
+                  var data = {
+                    "Log_name": document.getElementById('logName').value,
+                    "Data_group_name": document.getElementById('dataGroupName').value,
+                    "registers": [],
+                    "run_Time_In_Seconds": document.getElementById('runtimeSec').value,
+                    // "device_serial_numbers": [440017328],
+                  }
 
-                  
-              //     // This variable stores all the data.
-              //     let data = 
-              //         '\r Log Name: ' +logName.value + ' \r\n ' +
-              //         'Data Group Name' +dataGroupName.value + ' \r\n ' +
-              //         'Register 1: ' + register1.value + ' \r\n ' +
-              //         'Register 2: ' +register2.value + ' \r\n ' + 
-              //         'Register 3: ' +register3.value + ' \r\n ' + 
-              //         'Register 4: ' +register4.value + ' \r\n ' + 
-              //         'Register 5: ' +register5.value + ' \r\n ' + 
-              //         'Register 6: ' +register6.value + ' \r\n ' + 
-              //         'Register 7: ' +register7.value + ' \r\n ' + 
-              //         'Register 8: ' +register8.value + ' \r\n ' +
-              //         'Run Time in Seconds: ' +runTime.value + ' \r\n ';
-                  
-              //     // Convert the text to BLOB.
-              //     const textToBLOB = new Blob([data], { type: 'text/plain' });
-              //     const sFileName = 'formData.jason';      // The file to save the data.
+                  // loads the config array with the registers from the form
+                  for(var i =  0; i < "{{MAX_REGISTERS}}"; ++i){
+                    if(document.getElementById('validationCustom0' + i).value === ''){}
+                    else{
+                      data.registers.push(document.getElementById('validationCustom0' + i).value)
+                    }
+                  }
 
-              //     let newLink = document.createElement("a");
-              //     newLink.download = sFileName;
+                  const sFileName = 'formData.JSON';      // this is how wer are saving the file to file designated by the user
 
-              //     if (window.webkitURL != null) {
-              //         newLink.href = window.webkitURL.createObjectURL(textToBLOB);
-              //     }
-              //     else {
-              //         newLink.href = window.URL.createObjectURL(textToBLOB);
-              //         newLink.style.display = "none";
-              //         document.body.appendChild(newLink);
-              //     }
-
-              //     newLink.click(); 
+                  // create the link to where the file needs to be downloaded to.
+                  let newLink = document.createElement("a");
+                  newLink.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2)));
+                  newLink.setAttribute('download', 'myfile');
+                  newLink.download = sFileName;
+                  newLink.click(); 
                })
 
              </script>
@@ -564,6 +569,7 @@
           $("#confirmModal")
 
           document.getElementById('select-file').addEventListener('click',function(){
+            // console.error("!!!!!!!!!!!!!!!!!!!!!!")
             dialog.showOpenDialog({
               properties: ['openDirectory']
             }).then((data) => {
@@ -629,7 +635,7 @@
             return false;
           });
 
-          function validateForm() {
+          function validateForm() {openFile
             // ToDo Zander - add form validation
             // Makign sure that all of the registers are valid registers befor starting to log.
 
