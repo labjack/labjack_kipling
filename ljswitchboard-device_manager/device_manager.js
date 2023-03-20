@@ -7,10 +7,10 @@ var eventList = require('./device_manager_events').events;
 
 var async = require('async');
 var q = require('q');
-var device_curator = require('ljswitchboard-ljm_device_curator');
-var ljm_ffi = require('ljm-ffi');
+var device_curator = require('../ljswitchboard-ljm_device_curator');
+var ljm_ffi = require('../ljm-ffi');
 var ljm = ljm_ffi.load();
-var ljmb = require('ljswitchboard-modbus_map');
+var ljmb = require('../ljswitchboard-modbus_map');
 var modbus_map = ljmb.getConstants();
 
 function CREATE_DEVICE_MANAGER() {
@@ -18,12 +18,18 @@ function CREATE_DEVICE_MANAGER() {
 	this.devices = [];
 
 	this.connectToDevices = function(deviceInfoss) {
+		console.warn("deviceInfoss", deviceInfoss)
+
 		var defered = q.defer();
+		
 		async.each(deviceInfoss,
 			function(deviceInfo, cb) {
+				// STARTED USING THE OLD WAYS FOR THE SCRIPT - Jimmy
 				var device = new device_curator.device();
+				// console.log("device_curator", device)
 				self.devices.push(device);
 				
+				// console.log("self.devices in conect to device function", self.devices)
 				device.open(deviceInfo.dt, deviceInfo.ct, deviceInfo.id)
 				.then(function(res) {
 					self.deviceConnected = true;
@@ -31,9 +37,35 @@ function CREATE_DEVICE_MANAGER() {
 					
 					cb();
 				}, function(err) {
+					device.open(deviceInfo.dt, deviceInfo.ct, deviceInfo.id)
 					console.error('Error opening a device', err);
 					cb();
 				});
+				// Gets the device information from the preenter framework
+				// DO NOT CREATE A NEW presenter_framework, just use the global one, why do we need 2 of the same thing??
+				// this.sdFramework = new global.PresenterFramework();
+				// frameworkDevices = this.sdFramework.device_controller.devices
+				// self.devices.push(frameworkDevices[0]);
+
+				// var deviceType = frameworkDevices[0].savedAttributes.deviceType
+				// var deviceConectionType = frameworkDevices[0].savedAttributes.connectionType
+				// var deviceIdentifyer = frameworkDevices[0].savedAttributes.identifierString
+				
+				// device.open(deviceInfo.dt, deviceInfo.ct, deviceInfo.id)
+				// device.open(deviceType, deviceConectionType, deviceIdentifyer)
+				// .then(function(res) {
+				// 	self.deviceConnected = true;
+				// 	// console.log('in device_manager.js, openDevice', res);
+					
+				// 	cb();
+				// }, function(err) {
+				// 	// make it so that it will check if there is a device that is conected
+				// 	// self.deviceConnected = true;
+				// 	console.error('Error opening a device1', err);
+				// 	cb();
+				// });
+				// console.log("right befor the call back")
+				// cb();
 			},
 			function(err) {
 				defered.resolve();

@@ -20,6 +20,30 @@
 	display:inline-block;
 }
 
+.win-commandicon:focus {
+	background-color: blue;
+}
+
+.win-commandicon:hover {
+	background-color: red;
+}
+.configSettingsTable {
+	width:350px;
+}
+.configSettingsTable .attribute {
+	width: 133px;
+}
+.configSettingsTable .input {
+	/*width:75%;*/
+}
+.configSettingsTable .userFeedback {
+	min-width: 30px;
+	width:30px;
+}
+
+/* .navbar .container {
+	display: table-cell;
+} */
 /*
 background-color: #d6e9c6
 background-color: #dff0d8
@@ -29,3 +53,162 @@ background-color: #51a351
 background-color: #387038
 background-color: #3c763d;
 */
+
+.testBox{
+	display: flex;
+	flex-flow: row wrap;
+	
+	
+	
+	/*max-height: 200px;
+	flex-direction: row;
+	
+	flex-shrink: 3;
+	grid-row: 1/2;
+	flex: 2 0 21%;s
+	*/
+
+}
+
+.input-container {
+    display: flex;
+    width: 250px;
+    border: 1px solid #a9a9a9;
+    justify-content: space-between;
+}
+.input-container input:focus, .input-container input:active {
+    outline: none;
+}
+.input-container input {
+    border: none;
+}
+
+.disabled {
+	opacity: 0.33;
+}
+
+.logerViewStyle {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.btnUpdate{
+	color: #FFF;
+    background-color: maroon !important;
+    border-color: transparent;
+    background-clip: border-box;
+}
+.btnUpdate:hover{
+	color: #FFF;
+    background-color: rgb(95, 0, 0) !important;
+    border-color: transparent;
+    background-clip: border-box;
+}
+
+
+/* span.deleteicon {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+}
+span.deleteicon span {
+	position: absolute;
+	display: block;
+	right: 3px;
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+	color: #fff;
+	background-color: #ccc;
+	font: 13px monospace;
+	text-align: center;
+	line-height: 1em;
+	cursor: pointer;
+}
+span.deleteicon input {
+	padding-right: 18px;
+	box-sizing: border-box;
+} */
+
+div.col-sm-6 {
+	position: relative;
+	align-items: center;
+}
+
+div.col-sm-6 span{
+	position: absolute;
+	nav-down: 5px;
+	top: 27px;
+	right: 20px;
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+	color: #fff;
+	background-color: #ccc;
+	font: 13px monospace;
+	text-align: center;
+	line-height: 1em;
+	cursor: pointer;
+}
+
+div.col-sm-6 span:hover{
+	color: #fff;
+	background-color: rgb(134, 134, 134);
+}
+
+div.col-sm-6 input {
+	padding-right: 18px;
+	box-sizing: border-box;
+}
+
+input.invalid {
+	border: 2px solid red;
+}
+
+input.valid {
+	border: 2px solid green;
+}
+
+input.duplicate {
+	border: 2px solid orange !important;
+}
+
+.logerViewStyle{
+	width: 50px;
+}
+
+.data{
+	padding: 10px;
+}
+
+.modal{
+	background-color: transparent;
+}
+.modal-dialog {
+	width: 100%
+}
+.modal-backdrop{
+	z-index: -1;
+	opacity: 0.40;
+}
+
+.modal ul {
+	margin: 0;
+	list-style: none;
+	float: left;
+}
+
+/* need a better way to show that start is disabled until loading config */
+button.win-command:disabled {
+	border: 1px solid #ff0000;
+	background-color: #cccccc;
+	color: #666666;
+}
+
+.boxes{
+	display: inline-block;
+	display: flex;
+}
+.boxes1{
+	padding: 17px;
+}

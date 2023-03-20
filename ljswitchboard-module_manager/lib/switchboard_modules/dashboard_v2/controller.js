@@ -324,8 +324,8 @@ class DashboardController {
         console.log('in ioChangeListener');
 
         // Initialize a few variables.
-        const className = event.target.className;
-        const baseEl = event.target;
+        const className = event.toElement.className;
+        const baseEl = event.toElement;
 
         console.log('className', className, 'baseEl', baseEl);
 
@@ -599,8 +599,7 @@ class DashboardController {
                 // We clicked a menu option...
                 // console.log('We Clicked a menu option');
                 // Get the IO Control Type
-                // console.warn("event", event)
-                ioEventType = event.target.parentElement.parentElement.parentElement.parentElement.className;
+                ioEventType = event.toElement.parentElement.parentElement.parentElement.parentElement.className;
                 isFlexIO = false;
                 if (ioEventType === 'digitalControlObject') {
                     isFlexIO = true;
@@ -611,7 +610,7 @@ class DashboardController {
             } else if (event.target.className === "btn currentValue toggleButton") {
                 // console.log('We clicked a toggle button');
                 // Get the IO Control Type (DIO or Flex).
-                ioEventType = event.target.parentElement.parentElement.parentElement.parentElement.className;
+                ioEventType = event.toElement.parentElement.parentElement.parentElement.parentElement.className;
                 isFlexIO = false;
                 if (ioEventType === 'digitalControlObject') {
                     isFlexIO = true;

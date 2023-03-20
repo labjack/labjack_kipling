@@ -1,118 +1,712 @@
 {{#with custom}}
-<p></p>
-
+<!-- <p></p> -->
 <div id="logger_module" class="{{logger_mode}}">
 <!-- <div id="logger_module" class="dashboard_mode"> -->
+  <div class="modal fade" id="confirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <label>Would you like to add these registers to the Logger Configuration?</label>
+          </br>
+          <ul id="modal_register_list" class="boxes">
+            {{#each startupRegisters}}
+              <li class="boxes1">
+                <input class="checkbox" type="checkbox" id="check{{@index}}" value="{{this}}" checked>
+                <label for="check{{@index}}" id="checkId{{@index}}">{{this}}</label><br>
+              </li>
+            {{/each}}
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">NO</button>
+          <button type="button" class="btn btn-primary" id="yesbtn" data-dismiss="modal">Yes</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      $(document).ready(function(){
+        //$('input[class="checekbx"]').not(this).prop('checked', false);
+        var regs = "{{ startupRegisters }}"
+        if (regs.length > 0){
+          $("#confirmModal").modal("show");
+          $("#confirmModal").modal({backdrop: "static"});
+        }
+      });
+
+      $("#yesbtn").click(function() {
+        // on the btn click looks through all of the rgistersfrom the register matrix that were selected and take the
+        // the ones with a check makrk next to them.
+        //TO-DO implement the append and the replay part of the function
+        // currently it is just replaceing the spots where the register are.
+        var arra = [];
+          $('input:checkbox[class="checkbox"]:checked').each(function(){    
+            arra.push($(this).val());    		
+          });
+        //let string = '{{startupRegisters}}';
+        window.arr = arra;
+
+          saveRegisterMatrix();
+          $(".register-input").trigger("change");
+        })
+    </script>
+  </div>
   <div id="logger_controls">
     <div id="navbar-example" class="navbar">
       <div class="navbar-inner">
-        <div class="container">
-          <h2 class="brand active-log-controls">Log Name...</h2>
+        <div class="container1">
+          <!-- <h2 class="brand active-log-controls">LJ</h2> -->
           <ul class="nav navbar-nav active-log-controls">
             <li>
-              <button class="win-command green" rel="tootlip" title="Command with icon and label with border ring">
+              <!-- onClick="userLoggerStart()" -->
+              <button class="win-command green" id="startBtn" rel="tootlip" title="Command with icon and label with border ring" disabled="True">
                 <span class="win-commandicon win-commandring icon-play"></span>
-                <span class="win-label">Start</span>
+                <!-- <span class="win-label">Start</span> -->
              </button>
+             <script>
+              $("#startBtn").click(function(){
+                //alert("the thing");
+                alert("starting logger")
+                MODULE_CHROME.disableModuleLoading('Please wait for logger to finish.');
+                console.warn("module-chrome-tab-holder", document.getElementById("body_tabs"))
+                $('.module-chrome-tab').each(function(){
+                  // Zander - not sure about this collor scheme
+                  $(this).css("background-color", "#999999;");
+                  $(this).css("color", "white")
+                })
+
+                userStartLogger();
+                //initializeLogger();
+              })
+             </script>
             </li>
             <li>
-              <button class="win-command red" rel="tootlip" title="Command with icon and label with border ring">
+              <button class="win-command red" id = "stopBtn" rel="tootlip" title="Command with icon and label with border ring">
                 <span class="win-commandicon win-commandring icon-stop"></span>
-                <span class="win-label">Stop</span>
+                <!-- <span class="win-label">Stop</span> -->
              </button>
+             <script>
+              $("#stopBtn").click(function(){
+                //alert("the thing");
+                loggerStop();
+                //initializeLogger();
+              })
+             </script>
             </li>
           </ul>
 
           <ul class="nav navbar-nav configure-log-controls">
             <li>
-              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+              <button class="win-command" href="#" id="newConfig" rel="tootlip" title="Create a new configuration">
                 <span class="win-commandicon win-commandring icon-file-4"></span>
-                <span class="win-label">New</span>
+                <!-- <span class="win-label">New</span> -->
              </button>
+             <script>
+              $(document).ready( function() {
+               $("#newConfig").on("click", function() {
+                 $("#configFormDisplay").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/create_configuration.html");
+                 });
+             });
+
+             $("#newConfig").click(function() {
+              //window.confirm("Would you like to clear all of the fields? This will delete all form data!");
+              if (confirm("Would you like to clear all of the fields? This will delete all form data!")) {
+
+                  //clears all of the text boxes that are in the form and then re does the deviceSN
+                  $('#configForm input[type="text"]').val('');
+                  $('#configForm input[type="number"]').val('');
+                  $('#configForm input[type="number"]').removeClass("valid invalid")
+                  document.getElementById("devSN").value = "{{ deviceSN }}"
+
+                  $(".register-input").each(function(){
+                    var input = $(this)
+                    input.removeClass("valid invalid")
+                  });
+                } 
+             });
+            </script>
             </li>
             <li>
-              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
-                <span class="win-commandicon win-commandring icon-folder-open"></span>
-                <span class="win-label">Open</span>
+              <button class="win-command" rel="tootlip" title="Load a configuration">
+                <span class="win-commandicon win-commandring icon-folder-open openfile" type="file" id="file"></span>
+                <!-- <span class="win-label">Open</span> -->
              </button>
+             <script>
+              const fs = require('fs')
+              const { dialog } = require('@electron/remote')
+              $(".openfile").click(function(){
+
+                // this is what is bring up the file path
+                dialog.showOpenDialog({
+                  properties: ['openFile'],
+                  filters: [ {name: 'JSON', extensions: ['JSON']} ]
+                })
+                .then((data) =>  {
+                  var filePath = data.filePaths[0];
+                  var config_data = fs.readFileSync(filePath)
+                  let obj = JSON.parse(config_data)
+
+                  const logName = document.getElementById('logName');
+                  const dataGroupName = document.getElementById('dataGroupName');
+                  const runTime = document.getElementById('runtimeSec');
+
+                  // making sure that the file is actuly what we are looking for
+                  if(obj.registers === undefined || obj.Log_name === undefined || obj.Data_group_name === undefined || obj.run_Time_In_Seconds === undefined){
+                    alert("Please enter a valid configuration file")
+                    return;
+                  }
+
+                  // loading the register into the logger page
+                  for(var i = 0; i < "{{MAX_REGISTERS}}"; i++){
+                    if(obj.registers[i] === undefined){}
+                    else{
+                      document.getElementById('validationCustom0' + i).value = obj.registers[i];
+                      $(".register-input").trigger("change");
+                    }
+                  }
+
+                  logName.value = obj.Log_name;
+                  dataGroupName.value = obj.Data_group_name;
+                  runTime.value = obj.run_Time_In_Seconds;
+                  $(".runtimeSec").trigger("change");
+                })
+              })
+             </script>
             </li>
             <li>
-              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
-                <span class="win-commandicon win-commandring icon-disk"></span>
-                <span class="win-label">Save</span>
+              <button class="win-command " rel="tootlip" title="Save configuration" >
+                <span class="win-commandicon win-commandring icon-disk saveConfig" ></span>
+                <!-- <span class="win-label">Save</span> -->
              </button>
+             <script>
+              $(".saveConfig").click(function(){                  
+                  // This variable stores all the data.
+                  var data = {
+                    "Log_name": document.getElementById('logName').value,
+                    "Data_group_name": document.getElementById('dataGroupName').value,
+                    "registers": [],
+                    "run_Time_In_Seconds": document.getElementById('runtimeSec').value,
+                    // "device_serial_numbers": [440017328],
+                  }
+
+                  // loads the config array with the registers from the form
+                  for(var i =  0; i < "{{MAX_REGISTERS}}"; ++i){
+                    if(document.getElementById('validationCustom0' + i).value === ''){}
+                    else{
+                      data.registers.push(document.getElementById('validationCustom0' + i).value)
+                    }
+                  }
+
+                  const sFileName = 'formData.JSON';      // this is how wer are saving the file to file designated by the user
+
+                  // create the link to where the file needs to be downloaded to.
+                  let newLink = document.createElement("a");
+                  newLink.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2)));
+                  newLink.setAttribute('download', 'myfile');
+                  newLink.download = sFileName;
+                  newLink.click(); 
+               })
+
+             </script>
+             
             </li>
-            <li>
-              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+            <!-- <li>
+              <button class="win-command" rel="tootlip" id="resetBtn" title="Command with icon and label with border ring">
                 <span class="win-commandicon win-commandring icon-code-3"></span>
-                <span class="win-label">Examples</span>
-             </button>
-            </li>
+                <span class="win-label">clear</span> 
+             </button>DataView
+             <script>
+              $("#resetBtn").click(function(){
+                
+              })
+             </script>
+            </li> -->
           </ul>
           <ul class="nav pull-right active-log-controls">
             <li>
-              <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
+              <button class="win-command" href="#" id="configViewButton" rel="tootlip" title="Configure">
                 <span class="win-commandicon win-commandring icon-cog-4"></span>
-                <span class="win-label">Configure</span>
+                <!-- <span class="win-label">Configure</span> -->
              </button>
+             <script>
+              $("#configViewButton").click(function(){
+                $('.datviewContainer').hide();
+                $('#formContainer').show();
+                document.getElementById("display-array").textContent = "";
+              });
+             </script>
+             <!-- <script>
+               $(document).ready( function() {
+                $("#configViewButton").on("click", function() {
+                  $("#config_view").load("../../ljswitchboard-module_manager/lib/switchboard_modules/simple_logger/templates/view_current_configuration.html");
+                  });
+              });
+             </script> -->
             </li>
           </ul>
           <ul class="nav pull-right configure-log-controls">
             <li>
               <button class="win-command" rel="tootlip" title="Command with icon and label with border ring">
-                <span class="win-commandicon win-commandring  icon-statistics"></span>
-                <span class="win-label">Dashboard</span>
+                <span class="win-commandicon win-commandring  icon-statistics" id="DataView"></span>
+                <!-- <span class="win-label">Dashboard</span> -->
              </button>
+             <!-- working here so i don't forget where i am -->
+             <script>
+              $("#DataView").click(function(){
+                $('#formContainer').hide();
+                $('#dataView').show();
+                document.getElementById("display-array").textContent = "";
+                saveTheArray();
+                
+              });
+             </script>
             </li>
           </ul>
-        </div><!-- /.container -->
-      </div>
-    </div>
-  </div><!-- /#logger_controls -->
-  <div id="config_view" class="config-pannel">
-    <div id="config_forum">
-      <div class="panel-group">
-        <div class="panel panel-default">
-          <div class="panel-heading" role="button" id="configured-views">
-            <h4 class="panel-title">
-              <a class="collapsed" role="button" data-toggle="collapse" href="#loggerViewsCollapsible" aria-expanded="false" aria-controls="collapseOne">
-                Configured Views
-                <span class="badge">0</span>
-              </a>
-            </h4>
-          </div>
-          <div id="loggerViewsCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="configured-views">
-            <div class="panel-body">
-              <div>
-                <p>This is where the configured views will be displayed</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="panel panel-default">
-          <div class="panel-heading" role="button" id="configured-data-groups">
-            <h4 class="panel-title">
-              <a class="collapsed" role="button" data-toggle="collapse" href="#loggerDataGroupsCollapsible" aria-expanded="false" aria-controls="collapseThree">
-                Defined Data Groups
-                <span class="badge">0</span>
-              </a>
-            </h4>
-          </div>
-          <div id="loggerDataGroupsCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="configured-data-groups">
-            <div class="panel-body">
-              <div>
-                <p>This is where the configured data groups will be displayed.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        </div> 
+        <!-- /.container -->
       </div>
     </div>
   </div>
-  <div id="logger_view" class="logger-pannel">
+  <!-- /#logger_controls -->
+  <!-- <div id="config_view" class="config-pannel">
+    <pre id="currentConfigDisp" style="visibility: hidden;"></pre> -->
+    <!-- <div id="config_forum"> -->
+      <!-- <div class="panel-group"> -->
+            <!-- <div class="panel panel-default">
+              <div class="panel-heading" role="button" id="configured-views">
+                <h4 class="panel-title"> -->
+                  <!-- <a class="collapsed" role="button" data-toggle="collapse" href="#loggerViewsCollapsible" aria-expanded="false" aria-controls="collapseOne">
+                    Configured Views
+                    <span class="badge">0</span>
+                  </a> -->
+                <!-- </h4>
+              </div> -->
+              <!-- <div id="loggerViewsCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="configured-views">
+                <div class="panel-body">
+                  <div>
+                    <p>This is where the configured views will be displayed</p>
+                  </div>
+                </div>
+              </div> -->
+            <!-- </div> -->
+            <!-- <div class="panel panel-default">
+              <div class="panel-heading" role="button" id="configured-data-groups">
+                <h4 class="panel-title">
+                  <a class="collapsed" role="button" data-toggle="collapse" href="#loggerDataGroupsCollapsible" aria-expanded="false" aria-controls="collapseThree">
+                    Defined Data Groups
+                    <span class="badge">0</span>
+                  </a>
+                </h4>
+              </div>
+              <div id="loggerDataGroupsCollapsible" class="panel-collapse collapse" role="tabpanel" aria-labelledby="configured-data-groups">
+                <div class="panel-body">
+                  <div>
+                    <p>This is where the configured data groups will be displayed.</p>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+            <!-- </tr>
+          </table>
+      </div>
+    </div> -->
+  <!-- </div> -->
+  <!-- <div id="logger_view" class="logger-pannel">
     <p>This is the active logger view</p>
   </div>
-</div>
-<pre class="selectableText">{{printContext}}</pre>
-{{/with}}
+</div> -->
 
+<div class="container" id="formContainer">
+<div class="container">
+  <div class="col-sm-7">
+      <form id = "configForm" class="needs-validation" >
+          <div class="form-group">
+              <label for="logName">
+                  Log name:
+              </label>
+              <input type="text" name="logName" id="logName" required class="form-control" class="form-control">
+              <!-- <h5 id="nameCheck" style="color: red;">
+                  Log Name is Missing
+              </h5> -->
+          </div>
+
+          <div class="form-group">
+            <label for="devSN">
+                Device Serial Number:
+            </label>
+            <input type="text" name="devSN" id="devSN" value = "{{ deviceSN }}" required class="form-control" class="form-control" disabled>
+            <!-- <h5 id="nameCheck" style="color: red;">
+                Device Serial Number is Missing
+            </h5> -->
+            
+        </div>
+          <div class="form-group">
+              <label for="dataGroupName">
+                  Data Group Name:
+              </label>
+              <input type="text" name="dataGroup" id="dataGroupName" required class="form-control">
+              <!-- <h5 id="groupCheck" class="form-text text-muted invalid-feedback" style="color: red;">
+                  Please name the data group.
+              </h5> -->
+          </div>
+
+          <div class="form-group">
+            <label for="validationCustom05">
+              Register Name(s):
+          </label>
+          <!-- start of the registers -->
+          <div class="row" id="regs">
+            <!-- To-Do: Create all of these input boxes with a loop, so we can easily control the number of registers available -->
+            <!-- Also, just to clean up the code a bit, its all the same anyways -->
+
+            <div id="something">
+
+            </div>
+            
+            <script>
+            
+              //alert( MAX_REGISTERS );
+              
+              for(var i = 0; i < "{{MAX_REGISTERS}}"; i++) {
+                if(i == 0){
+                  var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i + 1} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()" required class="form-control"> <span class = "clear-input">x</span> </div>`
+                }
+                else{
+                  var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i + 1} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+                }
+              $("#something").append(registerHTML);
+              }
+              //document.getElementById("something").innerHTML = registerHTML;
+              // $("#something").append(registerHTML);
+            </script>
+
+           <!-- {{#each startupRegisters}}
+              <div class="col-sm-6">
+                <small id="regCheck" class="form-text 
+                  text-muted invalid-feedback" value="">Register#{{@index }}</small>
+                <input type="text" class="form-control register-input" id="validationCustom0{{@index}}" name="array[]"
+                oninput="this.value = this.value.toUpperCase()">
+                <span class="clear-input">x</span>
+              </div>
+            {{/each}} -->
+
+            <!-- <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #1
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom00" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class="clear-input">x</span>
+            </div>
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #2
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom01" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #3
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom02" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #4
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom03" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #5
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom04" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #6
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom05" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #7
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom06" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div>
+
+            <div class="col-sm-6">
+              <small id="regCheck" class="form-text
+                text-muted invalid-feedback">
+                Register #8
+              </small>
+              <input type="text" class="form-control register-input" id="validationCustom07" name="array[]"
+              oninput="this.value = this.value.toUpperCase()">
+              <span class = "clear-input">x</span>
+            </div> -->
+              <!-- end of the refgisters -->
+
+            <div class="col-sm-6">
+              <small >
+              Run Time in Seconds
+              </small>
+              <!-- <div </div> -->
+              <input type="number" class="form-control runtimeSec" id="runtimeSec"
+              oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" required="" />
+              <span class="clear-input">x</span>
+              <script>
+                
+                 $(".runtimeSec").change(function(){
+                  var input    = $(this);
+                  var inputVal = input.val();
+                  if(inputVal.length == 0) {
+                    input.removeClass("valid invalid");
+                  }
+                  else if(inputVal > 0) {
+                    input.addClass("valid").removeClass("invalid");
+                  }
+                  else {
+                    input.addClass("invalid").removeClass("valid");
+                  }
+                  var logLengthTime    = $(this.value);
+                  logLengthTime = logLengthTime.selector;
+                });
+              </script>
+            </div>
+            
+          
+          </div>
+        </div>
+          <div class="form-group">
+            <label for="filePath">
+              Log File(s) Save Location:
+          </label>
+            <div class="col-lg">
+              <!-- <input type="file" class="form-control" id="selectDir" required class="form-control" webkitdirectory directory>
+              <small id="pathCheck" class="form-text
+                  text-muted invalid-feedback">
+                  Please Provide a Valid Directory Path.
+              </small> -->
+              <!-- <div style="text-align:center;"> -->
+                <input type="text"  id="actual-file" class="form-control" required disabled="disabled"/>
+                <input type="button" value="Choose a file" id="select-file" class="btnUpdate"/>
+              <!-- </div> -->
+            </div>
+          </div>
+          <!-- btn btn-primary -->
+
+          <!-- <button id="submitbtn" title="Verify and Load Configuration" class="btnUpdate" > -->
+          <input type="submit" value="Verify and Load Configuration" class="btnUpdate">
+          <!-- <script src="/controller.js"></script> -->
+
+          <!-- onClick="isValidRegister('this.value')" -->
+
+      </form>
+      <script>
+
+            // <div class="col-sm-6">
+            //   <small id="regCheck" class="form-text
+            //     text-muted invalid-feedback">
+            //     Register #7
+            //   </small>
+            //   <input type="text" class="form-control register-input" id="validationCustom06" name="array[]"
+            //   oninput="this.value = this.value.toUpperCase()">
+            //   <span class = "clear-input">x</span>
+            // </div>
+
+        // var container = $('<div />');
+        // for(var i = 1; i <= num; i++) {
+        //     container.append('<input id="id'+i+'" name="name'+i+'" />');
+        // }
+        // $('somewhere').html(container);
+
+
+        // var container = $('div />')
+        // var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+        for(var i = 0; i < "{{MAX_REGISTERS}}"; i++) {
+          var registerHTML = `<div class="col-sm-6"> <small id="regCheck" class="form-text text-muted invalid-feedback"> Register #${i} </small> <input type="text" class="form-control register-input" id="validationCustom0${i}" name="array[]" oninput="this.value = this.value.toUpperCase()"> <span class = "clear-input">x</span> </div>`
+        }
+         
+
+        /**
+         * All Form Validation Functionality
+         * */
+        $(document).ready(function () {
+          $('.datviewContainer').hide();
+          $('#formContainer').show();
+          const { dialog } = require('@electron/remote')
+          var fs = require('fs');
+
+          $("#confirmModal")
+
+          document.getElementById('select-file').addEventListener('click',function(){
+            // console.error("!!!!!!!!!!!!!!!!!!!!!!")
+            dialog.showOpenDialog({
+              properties: ['openDirectory']
+            }).then((data) => {
+              $("#actual-file").val(data.filePaths)
+            })
+          },false);
+
+          $(".register-input").trigger("change");
+          // Real Time Register Name Validation, 
+          // triggered everytime the input box loses focus (onChange listener with jQuery)
+          var activeRegisterInputs = [];
+          // To-Do: This takes too long to execute, need to make it async or speed it up
+          $(".register-input").change(function(){
+            var input    = $(this);
+            var inputVal = input.val();
+            if(inputVal.length == 0) {
+              input.removeClass("valid invalid");
+            }
+            else if(isValidRegister(inputVal)) {
+              input.addClass("valid").removeClass("invalid");
+            }
+            else {
+              input.addClass("invalid").removeClass("valid");
+            }
+            saveTheArray();
+          });
+          function isDuplicate(val){
+            return (activeRegisterInputs.indexOf(val) != -1);
+          }
+
+          // Not Used Right Now, Come back to this later if we want it
+          function markDuplicate() {
+            var regs = [];
+            $(".register-input").each(function(){
+              var val = $(this).val();
+              if( regs.indexOf(val) == -1 && val.length > 0 ) { regs.push(val); }
+              else { $(this).addClass("duplicate"); }
+            });
+          }
+
+          function isDuplicate(val) {
+            return activeRegisterInputs.indexOf(val) != -1;
+          }
+
+
+          // listener for clearing of text box
+          // clears box, removes valid/invalid border box
+          $(".clear-input").click(function(){
+            var input = $(this).prev(); 
+            input.val('')
+            input.removeClass("valid invalid");
+          });
+
+
+          document.getElementById("configForm").addEventListener('submit', function() {
+            event.preventDefault(); 
+            var valid = validateForm();
+            if(valid){
+              $("#configForm :input").prop("disabled", true);
+              showInfoMessage("Configuration Valid");
+              $("#startBtn").prop("disabled", false)
+            }
+            return false;
+          });
+
+          function validateForm() {openFile
+            // ToDo Zander - add form validation
+            // Makign sure that all of the registers are valid registers befor starting to log.
+
+            // devices[0].savedAttributes.isConnected
+            for (i = 0; i < "{{MAX_REGISTERS}}"; i++){
+              var registerElement = document.getElementById("validationCustom0" + i);
+              if($(registerElement).hasClass("invalid")){
+                showInfoMessage("Make sure that all registers are valid.");
+                return false;
+              }
+              else if($(registerElement).hasClass("valid")){
+              }
+            }
+            var timeToLog = document.getElementById("runtimeSec");
+		        if(timeToLog.value <= 0 || $(timeToLog).hasClass("invalid")){
+              showInfoMessage("Make sure that you set how long you would like the logger to run");
+              return false
+            }
+            // Mark things if they arent valid and need user attention
+            // Then disable everything and logger will be ready to start
+            return true
+          }
+        });
+        
+      </script>
+  </div>
+</div>
+</div>
+
+<div class="datviewContainer" id="dataView" >
+  <script>
+    var arrayElements = document.getElementById("array");
+    var finalArray = jQuery.makeArray( arrayElements );
+    var res = finalArray.length;
+    for (var i = 0; i < 3; i++){
+      var $label = $("<label>").text('Date:');
+      // table.append(row);
+    }
+
+    finalArray.reverse();
+    $( finalArray ).appendTo( document.body );
+  </script>
+  <div id="display-array" class="logerViewStyle"></div>
+  <!-- <div id="dataview"> where the data tables will go</div>
+  <div id="display-array1" class="logerViewStyle"></div>
+  <div id="display-array2" class="logerViewStyle"></div>
+  <div id="display-array3" class="logerViewStyle"></div>
+  <div id="display-array4" class="logerViewStyle"></div>
+  <div id="display-array5" class="logerViewStyle"></div>
+  <div id="display-array6" class="logerViewStyle"></div>
+  <div id="display-array7" class="logerViewStyle"></div> -->
+</div>
+
+
+<script>
+  function sendXHR(type, url, data, callback) {
+    //alert("it is getting the function")
+    var newXHR = new XMLHttpRequest() || new window.ActiveXObject("Microsoft.XMLHTTP");
+    newXHR.open(type, url, true);
+    newXHR.send(data);
+    newXHR.onreadystatechange = function() {
+      if (this.status === 200 && this.readyState === 4) {
+        callback(this.response);
+        alert("This is not good")
+      }
+    };
+  }
+</script>
+
+<pre class="selectableText">{{printContext}}</pre>
+<!-- <pre class="selectableText">{{startupRegisters}}</pre> -->
+
+<!-- <div id="list pf reg"></div> -->
+{{/with}}

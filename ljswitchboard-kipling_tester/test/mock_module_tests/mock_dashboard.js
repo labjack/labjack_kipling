@@ -1,6 +1,6 @@
 'use strict';
 
-const {remote} = require('electron');
+const remote = require('@electron/remote')
 const {testClick} = require('../ui');
 const package_loader = global.package_loader;
 const window_manager = package_loader.getPackage('window_manager');

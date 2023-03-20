@@ -154,7 +154,7 @@ function device(useMockDevice) {
 	};
 
 	this.connectionCheckInterval = 1000;
-	this.verifiedDeviceConnection = false;
+	this.verifiedDeviceConnection = true;
 	var connectionManagerSuccess = function(res) {
 		if(self.allowConnectionManager) {
 			startConnectionManager();
@@ -210,6 +210,7 @@ function device(useMockDevice) {
 		if(self.deviceConnectionSuspended) {
 			allowLJMFunctionExecution = false;
 		}
+		global.selfthing = self.savedAttributes;
 		return allowLJMFunctionExecution;
 	};
 

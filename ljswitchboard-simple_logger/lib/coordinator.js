@@ -6,6 +6,8 @@ var q = require('q');
 var async = require('async');
 
 // Code that collects data from devices.
+// ljswitchboard-module_manager\lib\switchboard_modules\simple_logger\controller.js
+// ljswitchboard-simple_logger\lib\coordinator.js
 var data_collector = require('./data_collector');
 var dataCollectorEvents = data_collector.eventList;
 var DATA_COLLECTOR_EVENTS_MAP = [
@@ -40,7 +42,7 @@ var VIEW_DATA_REPORTER_EVENTS_MAP = [
 ];
 
 var eventList = require('./events').events;
-var ENABLE_PRINT_OUTPUT = false;
+var ENABLE_PRINT_OUTPUT = true;
 function print() {
 	if(ENABLE_PRINT_OUTPUT) {
 		var dataToPrint = [];
@@ -77,6 +79,7 @@ function CREATE_COORDINATOR () {
 		'stop_time': undefined,
 	};
 	this.initializeStats = function() {
+		this.shouldStopLogging = false;
 		// Initialize the num_collected variable.
 		self.stats.num_collected = {};
 		print('initializing stats',self.config);
@@ -94,22 +97,49 @@ function CREATE_COORDINATOR () {
 		self.stats.stop_time = new Date();
 	};
 
+	// this.shouldStopLogging = false;
+	this.stopRunning = function(value) {
+		shouldStopLogging = value
+		this.shouldStopLogging = value;
+	};
+	
+	var iteration = 0;
 	this.shouldStop = function() {
 		var relation = self.config.stop_trigger.relation;
+		// this is the place where the logger is being stoped baced off of the numbers of logs
 		var triggers = self.config.stop_trigger.triggers;
 
 		var shouldStop = false;
-		if(relation === 'and') {
-			shouldStop = true;
-		}
+		// if(relation === 'and') {
+		// 	shouldStop = true;
+		// }
+		var curDate = new Date();
+		curDate.getHours();
+		curDate.getMinutes();
+		curDate.getSeconds(); 
 		triggers.forEach(function(trigger){
-			if(trigger.attr_type === 'num_logged') {
-				var groupKey = trigger.data_group;
-				var numRequired = trigger.val;
-				var numCollected = self.stats.num_collected[groupKey];
-				if(numCollected < numRequired) {
-					shouldStop &= false;
+			// as long as the stop button is not presset it will run normaly
+			if(!shouldStopLogging){
+				if(trigger.attr_type === 'num_logged') {
+					// console.error("iteration", self)
+					// var groupKey = trigger.data_group;
+					var numRequired = trigger.val;
+					// var numCollected = self.stats.num_collected[groupKey];
+					if(iteration == 0){
+						this.iterationTime = new Date(new Date().getTime() + numRequired*1000).toLocaleTimeString();
+					}
+
+					if(this.iterationTime != curDate.toLocaleTimeString()) {
+						shouldStop &= false;
+					}else{
+						shouldStop = true;
+						return
+					}
+					iteration = iteration + 1;
 				}
+			}else{
+				shouldStop = true;
+				return;
 			}
 		});
 
@@ -138,7 +168,8 @@ function CREATE_COORDINATOR () {
 		self.emit(eventList.STOPPED_LOGGER, data);
 	};
 	this.onDataCollectorGroupData = function(data) {
-		print('in onDataCollectorGroupData', Object.keys(data), Object.keys(data.data));
+		// print('in onDataCollectorGroupData', Object.keys(data), Object.keys(data.data));
+		console.log("onDataCollectorGroupData data varable: ", data)
 		self.updateStats(data);
 
 		// Send data to the dataLogger and dataReporter.
@@ -146,6 +177,7 @@ function CREATE_COORDINATOR () {
 		self.viewDataReporter.onNewData(data);
 
 		// Determine if the logger should stop based on the config file's
+		// console.warn("self.config", self.config.stop_trigger)
 		// "stop_trigger" attribute.
 		if(self.config.stop_trigger) {
 			if(self.shouldStop()) {
@@ -159,6 +191,9 @@ function CREATE_COORDINATOR () {
 		print('in onDataCollectorError', data);
 		self.emit(eventList.DATA_COLLECTOR_ERROR, data);
 	};
+	this.setFileLocation = function(filePath){
+		self.filepathToSet = filePath;
+	}
 	this.onDataLoggerStateUpdate = function(data) {
 		print('in onDataLoggerStateUpdate', data);
 		self.emit(eventList.DATA_LOGGER_STATE_UPDATE, data);
@@ -166,8 +201,8 @@ function CREATE_COORDINATOR () {
 
 	// Events that get linked to the dataReporter object.
 	this.onDataReporterViewData = function(data) {
-		print('in onDataReporterViewData', data);
-		self.emit(eventList.NEW_VIEW_DATA, data);
+		// print('in onDataReporterViewData', data);
+		// self.emit(eventList.NEW_VIEW_DATA, data);
 	};
 
 	function getAttachListener(emitter) {
@@ -198,7 +233,13 @@ function CREATE_COORDINATOR () {
 		DATA_COLLECTOR_EVENTS_MAP.forEach(getAttachListener(self.dataCollector));
 
 		// Initialize the dataLogger object.
+		// console.warn("This should happen befor the thing")
 		self.dataLogger = data_logger.create();
+
+		// console.error("dataLoggerEvents", self.dataLogger)
+		
+		self.dataLogger.rootDirectory = self.filepathToSet
+		// console.error("dataLoggerEvents", self.dataLogger)
 
 		// Attach listeners to the dataLogger object.
 		DATA_LOGGER_EVENTS_MAP.forEach(getAttachListener(self.dataLogger));
@@ -254,6 +295,7 @@ function CREATE_COORDINATOR () {
 			}
 
 			// Configure dataCollector object
+			// console.warn("theConFigThing", config)
 			print('Configuring the datacollector, data logger, and viewDataReporter');
 			self.dataCollector.configureDataCollector(config)
 			.then(self.dataLogger.configure, onError)
@@ -283,8 +325,9 @@ function CREATE_COORDINATOR () {
 
 	var innerStartCoordinator = function(bundle) {
 		var defered = q.defer();
-
+		console.error("Running????? --- ", self.state.running);
 		if(self.state.running) {
+		// if(true) {
 			defered.resolve(bundle);
 			return defered.promise;
 		} else {
@@ -295,8 +338,8 @@ function CREATE_COORDINATOR () {
 			}
 			function onError(errBundle) {
 				self.state.running = false;
-				self.emit(eventList.ERROR_STARTING_LOGGER, resBundle);
-				defered.reject(resBundle);
+				self.emit(eventList.ERROR_STARTING_LOGGER, errBundle);
+				defered.reject(errBundle);
 			}
 
 			// Initialize the log stats tracker object.

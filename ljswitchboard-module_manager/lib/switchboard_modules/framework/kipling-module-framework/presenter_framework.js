@@ -1974,7 +1974,7 @@ class PresenterFramework extends EventEmitter {
                         module: this.module,
                         device: this.getSelectedDevice(),
                         binding: binding,
-                        value: result.result,
+                        value: result,
                         result: result
                     },
                     () => {
@@ -2121,7 +2121,7 @@ class PresenterFramework extends EventEmitter {
                             this.reportSyntaxError(
                                 {
                                     'location': '_writeToDevice.performCallbacks',
-                                    data: {binding: bindingInfo, eventData: eventData, e: e}
+                                    data: {binding: bindingInfo, eventData: eventData}
                                 }, e);
                             resolve(true);
                         }
@@ -2707,7 +2707,7 @@ class PresenterFramework extends EventEmitter {
 
     triggerModuleOnRefreshed(valuesDict) { // Probably not user anywhere
         return new Promise((resolve, reject) => {
-            this.daqLoopStatus = 'triggerModuleOnRefreshed';
+            // this.daqLoopStatus = 'triggerModuleOnRefreshed';
             this.fire(
                 'onRefreshed',
                 [valuesDict],

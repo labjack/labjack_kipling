@@ -2,6 +2,12 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var q = require('q');
+const { Console } = require('console');
+
+// ljswitchboard-ljm_device_curator\lib\device_curator.js
+// C:\Users\short\Labjack\labjack_kipling\ljswitchboard-ljm_device_curator\lib\device_curator.js
+// C:\Users\short\Labjack\labjack_kipling\ljswitchboard-simple_logger\lib\device_data_collector.js
+var deviceCurator = require('ljswitchboard-ljm_device_curator/lib/device_curator')
 
 var EVENT_LIST = {
 	DATA: 'DATA',
@@ -58,6 +64,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	*/
 	this.updateDeviceListing = function(devices) {
 		var defered = q.defer();
+		// console.warn("updateDeviceListing", devices)
 		self.devices = devices;
 		defered.resolve(devices);
 		return defered.promise;
@@ -69,6 +76,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	to be logged from and properly return errors.
 	*/
 	this.linkToDevice = function(deviceSerialNumber) {
+		console.log("Link to device")
 		var defered = q.defer();
 
 		var serialNum = parseInt(deviceSerialNumber);
@@ -78,13 +86,30 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 
 		// Loop through the devices object and try to link to the device with
 		// the desired serial number.
-		var isFound = self.devices.some(function(device) {
-			if(device.savedAttributes.serialNumber == serialNum) {
+		// var isFound = self.devices(function(device) {
+		// 	if(device.savedAttributes.serialNumber == serialNum) {
+		// 		self.isValidDevice = true;
+		// 		self.device = device;
+		// 		return true;
+		// 	}
+		// });
+		// Loop through the devices object and try to link to the device with
+		// the desired serial number.
+		console.warn("self.saved atributes", self.devices)
+		for (const device of Object.keys(self.devices)){
+			// console.warn("whya re you not working", device)
+			// console.warn("serialNum", serialNum)
+			if(self.devices.savedAttributes.serialNumber == serialNum) {
 				self.isValidDevice = true;
 				self.device = device;
 				return true;
 			}
-		});
+		}
+		// if(self.devices.savedAttributes.serialNumber == serialNum) {
+		// 	self.isValidDevice = true;
+		// 	self.devices = self.devices;
+		// 	return true;
+		// }
 
 		defered.resolve();
 		return defered.promise;
@@ -105,6 +130,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	*/
 	this.getDefaultRegisterValue = function(registerName) {
 		var val = 0;
+		// console.error("registername", registerName)
 
 		return val;
 	};
@@ -114,6 +140,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	};
 
 	this.getDefaultRegisterValues = function(registerList) {
+		// to my knolage there is no time that this happens - Z
 		var dummyData = [];
 		registerList.forEach(function(register, i) {
 			dummyData.push(self.getDefaultRegisterValue(register));
@@ -152,8 +179,11 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 			'interval': self.getIntervalTimer(intervalTimerKey),
 			'index': index,
 		};
+		
 
 		if(errorCode === errorCodes.VALUE_WAS_DELAYED) {
+			console.error("...", errorCode)
+			// alert("this is happening")
 			var reportDefaultVal = self.options.REPORT_DEFAULT_VALUES_WHEN_LATE;
 			if(reportDefaultVal) {
 				retData.results = self.getDefaultRegisterValues(registerList);
@@ -209,6 +239,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	Function that gets called by the data_collector when new data should be
 	collected from the managed device.
 	*/
+	var numerrors = 0;
 	this.startNewRead = function(registerList, index) {
 		// console.log('Starting New Read', self.isActive, index);
 		var defered = q.defer();
@@ -216,10 +247,14 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		var intervalTimerKey = 'readMany';
 		var timerKey = intervalTimerKey;
 		timerKey = self.startTimer(timerKey);
+		// console.error("is it because it is not seeing it as a valid device?")
+		// console.error("devic eCurator", registerList)
 
 		if(self.isValidDevice) {
+			// console.log("this is a valid device")
 			// Check to see if a device IO is currently pending.
 			if(self.isActive) {
+				// console.warn("the thing a ma jig")
 				/*
 				If an IO is currently pending, don't start a new read and
 				return a dummy value.
@@ -241,6 +276,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				}
 				defered.resolve();
 			} else {
+				// console.warn("within self.isActive = false", self)
 				// Declare device to be actively reading data
 				self.isActive = true;
 
@@ -249,11 +285,18 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// self.options.REPORT_DEFAULT_VALUES_WHEN_LATE
 
 				// If an IO is not currently pending then start a new read.
-				self.device.readMany(registerList)
+				// console.warn("numerrors", self.devices)
+				// console.log("registerList", registerList)
+				// var deviceCurator1 = new deviceCurator
+				// console.log("deviceCurator", deviceCurator.readMany())
+				console.log("self", self)
+				devices.cReadMany(registerList)
 				.then(function(results) {
+					// console.log("results", results)
 					// console.log('readMany Results', registerList, results);
-
-					if(self.isValueLate) {
+					// console.warn("results", results)
+					if(this.isValueLate) {
+						numerrors = numerrors + 1;
 						self.reportCollectedData(
 							registerList,
 							results,
@@ -262,7 +305,14 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 							timerKey,
 							index
 						);
+						console.warn("value was late!", self, registerList,
+						results,
+						errorCodes.VALUE_WAS_DELAYED,
+						intervalTimerKey,
+						timerKey,
+						index)
 					} else {
+						// console.log("this should happen all the time")
 						self.reportCollectedData(
 							registerList,
 							results,
@@ -286,7 +336,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 					);
 
 					// Declare device to be inactive.
-					self.isActive = false;
+					self.isActive = true;
 				});
 				defered.resolve();
 			}
@@ -295,6 +345,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 			The device data collector isn't linked to a real device.  Return a
 			dummy value.
 			*/
+			console.error("right befor the error data.")
 			self.reportDefaultRegisterData(
 				registerList,
 				errorCodes.DEVICE_NOT_VALID,

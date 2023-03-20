@@ -16,7 +16,6 @@ var MODULE_UPDATE_PERIOD_MS = 1000;
  * When using the 'singleDevice' framework it is instantiated as sdModule.
  */
 function module() {
-    var driver_const = require('ljswitchboard-ljm_driver_constants');
     this.MODULE_DEBUGGING = true;
     this.MODULE_LOADING_STATE_DEBUGGING = true;
     this.activeDevice = undefined;

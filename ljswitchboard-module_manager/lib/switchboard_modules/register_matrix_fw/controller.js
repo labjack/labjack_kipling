@@ -17,6 +17,7 @@ const localK3FilesPath = global.localK3FilesPath;
 // in user experience.
 var MODULE_UPDATE_PERIOD_MS = 1000;
 
+
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
  * When using the 'singleDevice' framework it is instantiated as sdModule.
@@ -189,6 +190,12 @@ function module() {
         var sn = self.activeDevice.savedAttributes.serialNumber;
 
         var displayMethod = self.startupData.display_method;
+        // Saves active registers to global scope so they can be 
+        // used in simple logger module
+        // const filePath = path.join(global.localK3FilesPath, "/module_data/register_matrix_fw/data.json");
+        // console.warn("filePath", filePath)
+        // Zander TODO - later we can make this use the data.json with the register list
+        global.globalActiveRegisters = registerList;
         if(typeof(self.startupData.registers_by_sn) === 'undefined') {
             self.startupData.registers_by_sn = {};
             showAlert('startupData is corrupted');
@@ -668,7 +675,7 @@ function module() {
         } else {
             self.pageElements.activeRegisters.ele.removeClass('no-registers');
         }
-        // self.saveActiveRegisters();
+        self.saveActiveRegisters();
     };
     this.editRegisterButtonListener = function() {
         var buttonEle = $(this);

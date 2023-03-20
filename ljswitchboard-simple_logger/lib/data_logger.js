@@ -129,7 +129,7 @@ function debugDataSaving() {
 	}
 }
 
-var DEBUG_SAVING_DATA = false;
+var DEBUG_SAVING_DATA = true;
 function debugSavingData() {
 	if(DEBUG_SAVING_DATA) {
 		var dataToPrint = [];
@@ -143,6 +143,7 @@ function debugSavingData() {
 
 function CREATE_DATA_LOGGER() {
 	// Default Root Directory
+	// Zander i need to be able to put the value of the path here
 	this.rootDirectory = DEFAULTS.ROOT_DIRECTORY;
 
 	this.state = {
@@ -165,9 +166,15 @@ function CREATE_DATA_LOGGER() {
 	function initializeStats() {
 		// Initialize the num_collected variable.
 		self.stats.num_collected = {};
+		console.warn("self.config", self.config)
 		self.config.data_groups.forEach(function(data_group) {
 			self.stats.num_collected[data_group] = 0;
 		});
+		self.stats.num_collected["basic_data_group"] = 0;
+		// var data_groups = self.config.data_groups;
+		// data_groups.forEach(function(data_group) {
+		// 	self.stats.num_collected[data_group] = 0;
+		// });
 
 		// Initialize the starting time of the log.
 		self.stats.start_time = new Date();
@@ -188,7 +195,9 @@ function CREATE_DATA_LOGGER() {
 		var logging_config = self.config.logging_config;
 
 		// Determine if the logger should actually save data.
+		// ZANDER - the issue is here
 		self.state.enabled = logging_config.write_to_file;
+		// self.state.enabled = false;
 
 		// Establish the logger's name.
 		var nameType = typeof(logging_config.name);
@@ -224,31 +233,51 @@ function CREATE_DATA_LOGGER() {
 			var serial_numbers = dataGroup.device_serial_numbers;
 			serial_numbers.forEach(function(serial_number) {
 				logStatus[serial_number] = {};
-				var serialNumber = dataGroup[serial_number];
+				var serialNumber = dataGroup.device_serial_numbers[0];
+				// var serialNumber = dataGroup[serial_number];
 				var addedSerialNumber = false;
 
 				// Add the device serial number to the data category array
 				dataCategories.push('SN: ' + serial_number.toString());
+				// dataCategories.push('SN: ' + serial_number);
 
 				// Add the time header.
 				dataNames.push('time');
 
-				// Add each required registers & align the data category array.
-				serialNumber.registers.forEach(function(register) {
-					// Save the enabled/disabled logging state.
-					logStatus[serial_number][register.name] = register.enable_logging;
-
-					// Check to see if the register is enabled for logging
-					if(register.enable_logging) {
-						// Align the device serial number to its data
-						dataCategories.push('');
-						dataNames.push(register.name);
-					}
-				});
-
-				// Add the error code header & align the data category.
+				// add the error code header
 				dataCategories.push('');
 				dataNames.push('error code');
+				// ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3']
+				dataNames.push("CORE_TIMER");
+				dataNames.push("AIN0");
+				dataNames.push("AIN1");
+				dataNames.push("AIN2");
+				// dataNames.push("AIN3");
+				// dataNames.push("AIN4");
+				
+
+				// Add each required registers & align the data category array.
+				// dataGroup.defined_user_values.forEach(function(register){	
+				// console.warn("forEach(function(register)", register)	
+				// console.warn(serialNumber)			
+				// serialNumber.registers.forEach(function(register) {
+				// 	// Save the enabled/disabled logging state.
+				// 	logStatus[serial_number][register.name] = register.enable_logging;
+
+				// 	// Check to see if the register is enabled for logging
+				// 	if(register.enable_logging) {
+				// 		// Align the device serial number to its data
+				// 		dataCategories.push('');
+				// 		dataNames.push(register.name);
+				// 	}
+				// 	else{
+				// 		dataCategories.push('');
+				// 		dataNames.push(register);
+				// 	}
+				// });
+
+				// Add the error code header & align the data category.
+				
 			});
 
 			if(dataGroup.defined_user_values) {
@@ -394,6 +423,7 @@ function CREATE_DATA_LOGGER() {
 
 	function initializeDirectory(dir) {
 		var defered = q.defer();
+		// console.error("dir", dir)
 		fse.ensureDir(dir, function(err) {
 			if(err) {
 				fse.ensureDir(dir, function(err) {
@@ -426,6 +456,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function finalizeFileWriteStream(fileStream) {
+		// console.log("fileStream", fileStream)
 		var defered = q.defer();
 		fileStream.once('finish', function() {
 			defered.resolve(fileStream);
@@ -605,9 +636,11 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function getCreateLogFileWriteStream(objToUpdate) {
+		console.warn("objToUpdate", objToUpdate)
 		return function createLogFileWriteStream(filePath) {
 			var defered = q.defer();
 			function onSuccess(fileStream) {
+				console.log("")
 				// Make sure that the file stream is not yet active as the heder
 				// data still needs to be written.
 				objToUpdate.file_stream_active = false;
@@ -628,6 +661,7 @@ function CREATE_DATA_LOGGER() {
 
 
 	function initializeLogFile(data_group) {
+		console.warn("initializeLogFile")
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
@@ -671,6 +705,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function initializeLogFileHeader(data_group) {
+		console.log("initializeLogFileHeader")
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
@@ -706,7 +741,13 @@ function CREATE_DATA_LOGGER() {
 		}
 
 		debugLogFiles('Initializing log file header', groupName);
+		// Zander - This is where the file is being writen from!!!!
+		var hrWriteStart = process.hrtime();
 		fileStream.write(fileData, onSuccess);
+		var hrWriteEnd = process.hrtime(hrWriteStart);
+		
+		// console.warn("hr start time")
+		console.warn("hr end time", hrWriteEnd)
 		return defered.promise;
 	}
 	function initializeLogFileHeaders(bundle) {
@@ -724,11 +765,14 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function finalizeLogFile(data_group) {
+		console.log("data_group", data_group)
+		console.log("self.logdata", self.logData)
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
 		var groupName = dataGroup.group_name;
 		var fileStream = dataGroup.file_stream;
+		// console.log("filestream", dataGroup)
 
 		function onSuccess() {
 			debugLogFiles('Successfully Finalized log file', groupName);
@@ -776,6 +820,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function innerStopDataLogger(bundle) {
+		console.log("innerStopDataLogger", bundle)
 		var defered = q.defer();
 
 		// Finalize the data logger's statistics object.
@@ -810,6 +855,7 @@ function CREATE_DATA_LOGGER() {
 		var userValues;
 		var groupKeys = Object.keys(dataGroups);
 		groupKeys.forEach(function(groupKey) {
+			// console.log("groupkey", groupKey)
 			if(groupKey !== 'userValues') {
 				serialNumbers.push(groupKey);
 			} else {
@@ -818,6 +864,8 @@ function CREATE_DATA_LOGGER() {
 		});
 		serialNumbers.forEach(function(serialNumber) {
 			var deviceData = dataGroups[serialNumber];
+			// console.log(serialNumber)
+			// console.log(deviceData)
 
 			// Get and format the time stamp
 			var time = formatTimeStamp(deviceData.time);
@@ -825,14 +873,17 @@ function CREATE_DATA_LOGGER() {
 
 			var resultKeys = Object.keys(deviceData.results);
 			resultKeys.forEach(function(resultKey) {
+				// console.error("resultKey", resultKey)
 				// Determine if the result should be logged.
 				var logData = groupData.logStatus[serialNumber][resultKey];
 
 				var result = deviceData.results[resultKey];
-				debugDataSaving('Result', serialNumber, result, logData);
+				// debugDataSaving('Result', serialNumber, result, logData);
 				// If the result should be logged then save the result to the
+				// console.warn("logdata", groupData.logStatus)
 				// string to be written.
 				if(logData) {
+					console.error("...");
 					if(result.str) {
 						dataToWrite += result.str + value_separator;
 					} else {
@@ -844,14 +895,29 @@ function CREATE_DATA_LOGGER() {
 			dataToWrite += deviceData.errorCode.toString() + value_separator;
 		});
 
-		if(userValues) {
-			var userValueKeys = Object.keys(userValues);
-			debugDataSaving('Saving User Values', userValueKeys)
-			userValueKeys.forEach(function(userValueKey) {
-				debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
-				dataToWrite += userValues[userValueKey] + value_separator;
-			});
-		}
+		// console.log("userValues", userValues)
+		// this is where the data is getting ready to be written
+		// console.log("...")
+		var userValueKeys = Object.keys(userValues);
+		debugDataSaving('Saving User Values', userValueKeys)
+		userValueKeys.forEach(function(userValueKey) {
+			debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
+			dataToWrite += userValues[userValueKey] + value_separator;
+			// checkThing = userValues[userValueKey];
+			// console.error("dataToWritte", userValues[userValueKey])
+		});
+		// this if statment is not sufull at all.
+		// if(userValues) {
+		// 	console.log("...")
+		// 	var userValueKeys = Object.keys(userValues);
+		// 	debugDataSaving('Saving User Values', userValueKeys)
+		// 	userValueKeys.forEach(function(userValueKey) {
+		// 		debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
+		// 		dataToWrite += userValues[userValueKey] + value_separator;
+		// 		// checkThing = userValues[userValueKey];
+		// 		// console.error("dataToWritte", userValues[userValueKey])
+		// 	});
+		// }
 		// Add the line ending text.
 		dataToWrite += line_ending;
 
@@ -859,8 +925,9 @@ function CREATE_DATA_LOGGER() {
 		groupData.file_stream_buffer.push(dataToWrite);
 	}
 	function saveNewData(data) {
-		debugSavingData('saving data, group:', data.groupKey,'numWrittenLines:', self.logData[data.groupKey].num_written_lines);
-		debugDataSaving('Saving Data!!', data.groupKey, self.logData[data.groupKey].num_written_lines);
+		// console.log("this is data in the save new data function: ", data)
+		// debugSavingData('saving data, group:', data.groupKey,'numWrittenLines:', self.logData[data.groupKey].num_written_lines);
+		// debugDataSaving('Saving Data!!', data.groupKey, self.logData[data.groupKey].num_written_lines);
 
 		// Format data & add it to the file_stream_buffer
 		try {
@@ -868,14 +935,14 @@ function CREATE_DATA_LOGGER() {
 		} catch(err) {
 			console.error('(data_logger.js) Error executing saveNewDataToBuffer', err);
 		}
-
+		
 		var groupKey = data.groupKey;
-		var groupData = self.logData[data.groupKey];
+		var groupData = self.logData[groupKey];
 		var file_stream_buffer = groupData.file_stream_buffer;
 		var fileStream = groupData.file_stream;
 		var isActive = groupData.file_stream_active;
 		var ok = true;
-		var isData = file_stream_buffer.length > 0;
+		var isData = file_stream_buffer.length > 25;
 		var initializeNewFile = false;
 		/*
 		 * 1. While there is data to be written.
@@ -885,11 +952,27 @@ function CREATE_DATA_LOGGER() {
 		 *
 		 */
 		debugDataSaving('Writing data', isData, ok, isActive);
+		// console.log("how often?", isData, ok, isActive)
 		while((isData) && (ok) && (isActive)) {
+			// console.log("how often is it in this")
 			// un-shift one line of data.
+			// console.error("groupData.numDataPoints", groupData.numDataPoints)
 			var dataToWrite = file_stream_buffer.shift(1);
+			// console.error("does this actualy happen?",typeof(dataToWrite))
+			var testingWrite = [];
 
-			ok = fileStream.write(dataToWrite);
+			// ZANDER - This is the exact function that when un comented will alow data to be writen to the file
+			// ok = fileStream.write(dataToWrite);
+
+			testingWrite.push(dataToWrite);
+			
+			var curtime = new Date();
+			// console.warn("curtime write time", testingWrite)
+			var hrWriteStart = process.hrtime();
+			ok = fileStream.write(testingWrite[0]);
+			var hrWriteEnd = process.hrtime(hrWriteStart);
+			
+			console.warn("the end writing data", hrWriteEnd)
 
 			// Update necessary values.
 			isData = file_stream_buffer > 0;
@@ -904,6 +987,8 @@ function CREATE_DATA_LOGGER() {
 				// Indicate that we need to switch to a new file.
 				initializeNewFile = true;
 			}
+			// console.log("file_stream_buffer", file_stream_buffer)
+			// file_stream_buffer.length = 0;
 		}
 
 		if(initializeNewFile) {
@@ -919,6 +1004,7 @@ function CREATE_DATA_LOGGER() {
 	}
 	/* Externally Accessable functions */
 	this.onNewData = function(data) {
+		// console.log("this is the data in on")
 		var saveData = false;
 		// Check to see if the logger is enabled.
 		if(self.state.enabled) {
@@ -948,9 +1034,11 @@ function CREATE_DATA_LOGGER() {
 		return innerUnconfigureDataLogger(bundle);
 	};
 	this.start = function(bundle) {
+		// console.warn("when?")
 		return innerStartDataLogger(bundle);
 	};
 	this.stop = function(bundle) {
+		console.log(".stop", bundle)
 		return innerStopDataLogger(bundle);
 	};
 

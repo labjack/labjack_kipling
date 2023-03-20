@@ -81,6 +81,7 @@ class labjackVersionManager extends EventEmitter {
                 // {"url": "https://old3.labjack.com/support/firmware/t7", "type": "organizer-current"},
                 {"url": "https://files.labjack.com/firmware/T7/", "type": "current"},
                 {"url": "https://files.labjack.com/firmware/T7/Beta/", "type": "beta"},
+                {"url": "https://files.labjack.com/firmware/T7/Old/", "type": "old"},
                 // {"url": "https://old3.labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
@@ -100,42 +101,8 @@ class labjackVersionManager extends EventEmitter {
 
     };
 
-
-        this.innerAdvancedPageParser = function(options) {
-
-        };
-
-        this.advancedPageParser = function(options) {
-            var runParser = true;
-    
-            var keys = Object.keys(options);
-            var requiredKeys = ['url', 'pageData', 'pageType'];
-            requiredKeys.forEach(function(key) {
-                if(keys.indexOf(key) < 0) {
-                    runParser = false;
-                    console.error('Not running parser, missing key', key);
-                }
-            });
-            var retData = {
-                'isValid': false,
-                'upgradeLink': '',
-                'version': '',
-            };
-            if(runParser) {
-                try {
-                    return self.innerAdvancedPageParser(options, retData);
-                } catch(err) {
-                    console.log('Error...', err);
-                    return retData;
-                }
-            } else {
-                return retData;
-            }
-        };
-
         this.strategies = {
             t8FirmwarePage: function(listingArray, pageData, urlInfo, name) {
-                console.warn("Running T8 Firmware Strategy");
                 var $ = cheerio.load(pageData);
                 var linkElements = $('a');
                 linkElements.each(function(i, linkElement){
@@ -166,7 +133,6 @@ class labjackVersionManager extends EventEmitter {
                 return;
             },
             t7FirmwarePage: function(listingArray, pageData, urlInfo, name) {
-                console.warn("Running T7 Firmware Strategy");
                 var $ = cheerio.load(pageData);
                 var linkElements = $('a');
                 linkElements.each(function(i, linkElement){
@@ -197,7 +163,6 @@ class labjackVersionManager extends EventEmitter {
                 return;
             },
             t4FirmwarePage: function(listingArray, pageData, urlInfo, name){
-                console.warn("Running T4 Firmware Strategy");
                 var $ = cheerio.load(pageData);
                 var linkElements = $('a');
                 linkElements.each(function(i, linkElement){
@@ -208,7 +173,6 @@ class labjackVersionManager extends EventEmitter {
                     if(isValidFWLink) {
                         var fileName = path.basename(targetURL);
                         var targetFileURL = new URL(fileName, urlInfo.url).href; // Combine filename with base url to give a downloadable link
-                        console.warn("targetFileURL", targetFileURL);
                         var splitFileName = fileName.split(/[_.]/);
                         var version = (parseFloat(splitFileName[1])/10000).toFixed(4);
                         var date = splitFileName[2];
@@ -233,7 +197,6 @@ class labjackVersionManager extends EventEmitter {
         this.buildQuery = function(savedData, strategy, urlInfo, name) {
             var dataQuery = function(callback) {
                 var url = urlInfo.url
-                // console.warn("Build Query for URL:", url)
                 let response = fetch(url, { timeout: 20000 })
                     .then(function (res) {
                         if (res.ok) {
@@ -279,11 +242,10 @@ class labjackVersionManager extends EventEmitter {
                     infos.push(info);
                 }
             });
-            console.log("Num current:", numCurrent);
 
-            if(organizer) {
-                console.error("Organizer current info found");
-            }
+            // if(organizer) {
+            //     console.error("Organizer current info found");
+            // }
 
             // console.log(' - name:',name);
             // console.log(' - is dependent:',platformDependent);
@@ -328,7 +290,6 @@ class labjackVersionManager extends EventEmitter {
                         var isCurSys = info.type.search(systemType) > 0;
                         var curType = info.type.split('_' + systemType)[0]
                         if(isCurSys) {
-                            console.log('Current Type', info.type);
                             if(typeof(self.dataCache[name][curType]) === 'undefined') {
                                 self.dataCache[name][curType] = [];
                             }
@@ -348,8 +309,6 @@ class labjackVersionManager extends EventEmitter {
             var defered = q.defer();
             var info = self.urlDict[name]; // info is the url dict with files.labjack.com links
             var queriedData = [];
-
-            console.log("INFO:", info)
 
             if(typeof(info) !== 'undefined') {
                 // Get the stratigy function
@@ -511,7 +470,6 @@ class labjackVersionManager extends EventEmitter {
             };
 
             var finishFunc = function() {
-                console.log('version_manager.js - Num Iteration', iteration);
                 if(self.isError) {
                     defered.reject(self.errorInfo);
                 } else {
@@ -659,7 +617,6 @@ exports.initalize = function() {
     LABJACK_VERSION_MANAGER.getAllVersions();
     LABJACK_VERSION_MANAGER.waitForData()
     .then(function(data) {
-        console.log('LVM dataCache:',LABJACK_VERSION_MANAGER.dataCache);
         if(LABJACK_VERSION_MANAGER.isIssue()) {
             var issue = LABJACK_VERSION_MANAGER.getIssue();
             console.error('LVM Warning', issue);

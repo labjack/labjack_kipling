@@ -24,7 +24,7 @@ var config_checker = require('./config_checker');
 // Code that coordinates the data collection & reporting efforts.
 var log_coordinator = require('./coordinator');
 
-var ENABLE_DEBUG_LOG = false;
+var ENABLE_DEBUG_LOG = true;
 function debugLog() {
 	if(ENABLE_DEBUG_LOG) {
 		var dataToPrint = [];
@@ -58,20 +58,20 @@ function CREATE_SIMPLE_LOGGER () {
 	var eventMap = [
 		{from: 'CONFIGURATION_SUCCESSFUL', to: 'onConfigurationSuccessful'},
 		{from: 'CONFIGURATION_ERROR', to: 'onConfigurationError'},
-
+  
 		{from:'STARTED_LOGGER', to: 'onStartedLogger'},
 		{from: 'ERROR_STARTING_LOGGER', to: 'onErrorStartingLogger'},
-
+  
 		{from:'STOPPED_LOGGER', to: 'onStoppedLogger'},
 		{from: 'ERROR_STOPPING_LOGGER', to: 'onErrorStoppingLogger'},
-
+  
 		{from:'NEW_VIEW_DATA', to: 'onNewViewData'},
 
 		{from:'UPDATED_ACTIVE_FILES', to: 'onUpdatedActiveFiles'},
 	];
 
 	/*
-	 * Use the eventMap to define functions for each event that needs to get
+	 * Use the eventMap to define functions for each event that needs to get 
 	 * passed on.
 	 */
 	function createAndLinkEventListener(eventListing) {
@@ -88,6 +88,9 @@ function CREATE_SIMPLE_LOGGER () {
 
 		// Create a new coordinator instance.
 		self.coordinator = log_coordinator.create();
+		// console.error("self.coordinator", self.coordinator)
+		// console.error("========== ", self.filePath, "================================")
+		self.coordinator.setFileLocation(self.filepath)
 
 		// Link to all of the events that it will emit.
 		eventMap.forEach(createAndLinkEventListener);
@@ -112,14 +115,14 @@ function CREATE_SIMPLE_LOGGER () {
 		// make sure that the coordinator is unconfigured.
 		.then(self.coordinator.unconfigure)
 
-		// After stopping & clearing the coordinators config.
+		// After stopping & clearing the coordinators config. 
 		//update its device listing.
 		.then(self.coordinator.updateDeviceListing)
 		.then(defered.resolve, defered.reject);
 		return defered.promise;
 	}
 
-
+ 
 
 	function handleLoadConfigFileSuccess(configData) {
 		var defered = q.defer();
@@ -212,6 +215,7 @@ function CREATE_SIMPLE_LOGGER () {
 		return defered.promise;
 	}
 	function innerConfigureLogger(loggerConfig) {
+		// console.warn("loggerConfig", loggerConfig)
 		var defered = q.defer();
 		var configData = {
 			'configType': CONFIG_TYPES.OBJECT,
@@ -284,6 +288,10 @@ function CREATE_SIMPLE_LOGGER () {
 		.done();
 		return defered.promise;
 	}
+	function innerstopRunning(stopige){
+		self.coordinator.stopRunning(stopige);
+		return stopige;
+	}
 	function innerStopLogger(stopData) {
 		var defered = q.defer();
 
@@ -320,6 +328,12 @@ function CREATE_SIMPLE_LOGGER () {
 	};
 	this.stopLogger = function(stopData) {
 		return innerStopLogger(stopData);
+	};
+	this.stopRunning = function(stopige){
+		return innerstopRunning(stopige);
+	};
+	this.setFilePath = function(FilePath){
+		this.filepath = FilePath;
 	};
 
 
@@ -376,7 +390,8 @@ exports.generateBasicConfig = function(basicData, devices) {
 		],
 		"basic_data_group": {
 			"group_name": "Basic Data Group",
-			"group_period_ms": 500,
+			// this should be the rate at wich the logger runs
+			"group_period_ms": 10,
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
@@ -386,13 +401,24 @@ exports.generateBasicConfig = function(basicData, devices) {
 			"logging_options": {
 				"write_to_file": true,
 				"file_prefix": "basic_group",
-				"max_samples_per_file": 3,
+				"max_samples_per_file": 65335,
 				"data_collector_config": {
 					"REPORT_DEVICE_IS_ACTIVE_VALUES": true,
 					"REPORT_DEFAULT_VALUES_WHEN_LATE": false
 				}
 			}
 		},
+		"stop_trigger": {
+			"relation": "and",
+			"triggers": [
+			  {
+				"attr_type": "num_logged",
+				"data_group": "basic_data_group",
+				"val": 0
+				// for: "00:00:10",
+			  }
+			]
+		  }
 		// "stop_trigger": {
 		// 	"relation": "and",
 		// 	"triggers": [{
@@ -402,40 +428,104 @@ exports.generateBasicConfig = function(basicData, devices) {
 	};
 
 	var validSN;
+	// for the value of how long it runs it is as follows
+	// configObj.stop_trigger.trigers[0].val
 	if(basicData.same_vals_all_devices) {
-		devices.forEach(function(device) {
-			var sn = device.savedAttributes.serialNumber;
-			validSN = sn;
-			configObj.basic_data_group.device_serial_numbers.push(sn);
-			configObj.basic_data_group[sn] = {
-				'registers': []
-			};
-			basicData.registers.forEach(function(register) {
-				configObj.basic_data_group[sn].registers.push({
-					name: register,
-					human_name: register,
-					format:"default",
-					enable_logging: true,
-					enable_view: true,
-				});
+		configObj.stop_trigger.triggers[0].val = basicData.logTime;
+		// Zander this is for a prouf oc concepts
+		// var sn = devices[0].savedAttributes.serialNumber;
+		// var sn = "470010175";
+		// var sn = "440017663"
+		// var sn = "470016039";
+		var sn = "440010762"; // zander T4
+		validSN = sn;
+		configObj.basic_data_group.device_serial_numbers.push(validSN);
+		// configObj.basic_data_group.device_serial_numbers.push(sn);
+		// console.warn("registers1", registers)
+		configObj.basic_data_group[sn] = {
+			'registers': []
+		};
+		basicData.registers.forEach(function(register) {
+			configObj.basic_data_group[sn].registers.push({
+				name: register,
+				human_name: register,
+				format:"default",
+				enable_logging: true,
+				enable_view: true,
 			});
 		});
-
+		// devices.forEach(function(device) {
+		// 	var sn = device.savedAttributes.serialNumber;
+		// 	validSN = sn;
+		// 	console.error("============", device)
+		// 	// configObj.basic_data_group.device_serial_numbers.push(validSN);
+		// 	configObj.basic_data_group.device_serial_numbers.push(sn);
+		// 	configObj.basic_data_group[sn] = {
+		// 		'registers': []
+		// 	};
+		// 	basicData.registers.forEach(function(register) {
+		// 		configObj.basic_data_group[sn].registers.push({
+		// 			name: register,
+		// 			human_name: register,
+		// 			format:"default",
+		// 			enable_logging: true,
+		// 			enable_view: true,
+		// 		});
+		// 	});
+		// });
+		// 'CORE_TIMER','AIN0','AIN1','AIN2','AIN3','AIN4'
+		configObj.basic_data_group.defined_user_values.push('CORE_TIMER');
+		configObj.basic_data_group.defined_user_values.push('AIN0');
+		configObj.basic_data_group.defined_user_values.push('AIN1');
+		configObj.basic_data_group.defined_user_values.push('AIN2');
+		// configObj.basic_data_group.defined_user_values.push('AIN3');
+		// configObj.basic_data_group.defined_user_values.push('AIN4');
+		
 		basicData.registers.forEach(function(register) {
-			var valName = 'custom-'+register;
-			configObj.basic_data_group.defined_user_values.push(valName);
-			configObj.basic_data_group.user_values[valName] = {
-				'name': valName,
-				'human_name': valName,
+			console.log("increment")
+			// var valName = register;
+			// var valName = 'custom-'+register;
+			// console.warn("register", register)
+			// console.log("valName", valName)
+			
+			
+			configObj.basic_data_group.user_values[register] = {
+				'name': register,
+				'human_name': register,
 				"exec_method": "sync",
-				"func": "val = data['"+validSN.toString()+"'].results."+register+".result",
+				"func": "val = data['"+'440010762'+"'].results."+register+".result",
 				"enable_logging": false,
 				"enable_view": true
 			}
 		});
 	}
+	// console.warn("configObj", configObj)
 	return configObj
 	// 'same_vals_all_devices': true,
 	// 'registers': ['AIN0','AIN1'],
 	// 'update_rate_ms': 100,
+};
+
+exports.eventsMap = {
+	
+	/* Events regarding logger configurtation */
+	'CONFIGURATION_SUCCESSFUL': 'CONFIGURATION_SUCCESSFUL',
+	'CONFIGURATION_ERROR': 'CONFIGURATION_ERROR',
+
+	/* Events regarding starting logger */
+	'STARTED_LOGGER': 'STARTED_LOGGER',
+	'ERROR_STARTING_LOGGER': 'ERROR_STARTING_LOGGER',
+
+	/* Events regarding stopping logger */
+	'STOPPED_LOGGER': 'STOPPED_LOGGER',
+	'ERROR_STOPPING_LOGGER': 'ERROR_STOPPING_LOGGER',
+
+	/* Events regarding data collection & reporting */
+	'NEW_VIEW_DATA': 'NEW_VIEW_DATA',
+
+	/* Events regarding the status of log-files */
+	'UPDATED_ACTIVE_FILES': 'UPDATED_ACTIVE_FILES',
+
+	/* Logging Errors */
+	'DATA_COLLECTOR_ERROR': 'DATA_COLLECTOR_ERROR',
 };
