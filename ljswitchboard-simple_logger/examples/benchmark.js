@@ -99,7 +99,7 @@ let intervalTimings = [];
 // let registerList = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5', 'AIN6']
 
 let registerList = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3']
-const INTERVAL_TIME = 10; // ms
+const INTERVAL_TIME = 5; // ms
 const INTERVAL_TIME_NS = INTERVAL_TIME * 1000000
 const MAX_LOG_NUM = 6000;
 
@@ -122,8 +122,8 @@ const MAX_LOG_NUM = 6000;
 // writeTimings = [];
 // totalTimings = [];
 // intervalTimings = [];
-standardInterval();
-// customInterval();
+// standardInterval();
+customInterval();
 // performanceInterval();
 
 function standardInterval() {
@@ -151,7 +151,7 @@ function standardInterval() {
             writeTimings = [];
             totalTimings = [];
             intervalTimings = [];
-            customInterval();
+            // customInterval();
             // closeDevice(device);
         }
     }, INTERVAL_TIME);
@@ -220,7 +220,7 @@ function customInterval() {
             totalTimings = [];
             intervalTimings = [];
             // setTimeout(performanceInterval, 5000);
-            performanceInterval();
+            // performanceInterval();
             // closeDevice(device);
         }
     }
@@ -297,14 +297,31 @@ function calculateTimerData(readTimings, writeTimings, totalTimings, intervalTim
     let targetms = INTERVAL_TIME
     let targethz = toHz(INTERVAL_TIME).toFixed(4);
 
-    // console.log(intervalTimings)
+
+    // this is for the timing thing
     let intervalDelta = delta(intervalTimings)
-    console.log(intervalDelta)
+    console.log("intervalDelta", intervalDelta)
     let avgIntervalDelta = average(intervalDelta[0]).toFixed(4);
     let avgIntervalDeltaHz = toHz(avgIntervalDelta).toFixed(4);
     let totalIntervalTime = intervalDelta[1];
 
     let intervalAccuracy = (average(intervalDelta[0])/(INTERVAL_TIME * 1.0)*100).toFixed(4);
+
+    var thing = intervalDelta[0];
+    var var1 = 0;
+    for(var i = 0; i < thing.length; ++i){
+        var1 = var1 + (thing[i] - avgIntervalDelta);
+    }
+
+    var1 = var1 / (thing.length - 1);
+
+    var std = 0;
+    std = Math.sqrt(Math.abs(var1));
+    
+
+    console.log("The mean delta of CORE_TIMER:\t\t %d ms", avgIntervalDelta);
+    console.log("The Variance of the core timer:\t\t %d ms", Math.abs(var1));
+    console.log("The Standard Deviation of core timer:\t %d ms", std);
 
     console.log("Target Refresh Rate:\t\t %d ms %d hz", targetms, targethz);
     console.log("Interval Delta:\t\t\t %d ms %d hz", avgIntervalDelta, avgIntervalDeltaHz);
