@@ -4,7 +4,7 @@ var q = require('q');
 var async = require('async');
 var gcd = require('compute-gcd');
 var vm = require('vm');
-var user_code_executor = require('./user_code_executor');
+// var user_code_executor = require('./user_code_executor'); // We do not want to execute user code on registers FOR NOW
 var errorCodes = require('./error_codes').errorCodes;
 
 // Constants
@@ -85,9 +85,9 @@ function stepDebug() {
     }
 }
 
-var DEBUG_DATA_ACQISITION = false;
+var DEBUG_DATA_ACQUISITION = false;
 function debugDataAcquisition() {
-    if(DEBUG_DATA_ACQISITION) {
+    if(DEBUG_DATA_ACQUISITION) {
         var dataToPrint = [];
         dataToPrint.push('(data_collector.js)');
         for(var i = 0; i < arguments.length; i++){
@@ -104,15 +104,15 @@ function CREATE_DATA_COLLECTOR() {
     this.status = {
         'mode': COLLECTOR_MODES.IDLE,
     };
-    this.isActice = false;
+    this.isActive = false;
 
-    // variables that are used for the data collection timer.
+    // Variables that are used for the data collection timer.
     this.daqTimer = undefined;
 
     // Object that stores device_data_collector objects that be indexed by their serial number.
     this.deviceDataCollector = [];
 
-    // Zander - do we need this function it is just checking to make sure the is no updats with the device
+    // Zander - do we need this function it is just checking to make sure the is no updates with the device
     this.updateDeviceObjects = function(devices) {
         var defered = q.defer();
 
@@ -150,7 +150,7 @@ function CREATE_DATA_COLLECTOR() {
             });
         });
     };
-
+    // Jimmy - We don't need this here, not creating user functions
     function createUserValueFunction(execMethod, funcText, errors) {
         var sandbox = {
             val: 0,
@@ -178,9 +178,13 @@ function CREATE_DATA_COLLECTOR() {
             try {
                 executor.sandbox.data = groupData;
                 if(execMethod === 'sync') {
+                    // Enforce formatting scripts to finish in less than 50ms.
+					// script.runInContext(context, {timeout: 50});
                     executor.run();
                     defered.resolve(sandbox.val);
                 } else if(execMethod === 'async') {
+                    // Enforce formatting scripts to finish in less than 50ms.
+					// script.runInContext(context, {timeout: 5000});
                     executor.sandbox.cb = onSuccess;
                     executor.run();
                 } else if(execMethod === 'q') {
@@ -197,15 +201,32 @@ function CREATE_DATA_COLLECTOR() {
         }
         return executeUserFunc;
     }
-
+    // Jimmy - We don't need this either
     function initializeUserFunctions() {
-        stepDebug('in initializeUserfunctions');
+        stepDebug('in initializeUserFunctions');
         var errors = [];
         var data_group_keys = this.config.data_groups;
         
         data_group_keys.forEach(function(data_group_key) {
             var data_group = this.config[data_group_key];
 
+            // For each serial number, check each required register for any
+			// formatting functions that need to be created.
+			// var serial_numbers = data_group.device_serial_numbers;
+			// serial_numbers.forEach(function(serial_number) {
+			// 	var registers = data_group[serial_number].registers;
+			// 	registers.forEach(function(reg) {
+			// 		if(reg.format_func) {
+			// 			reg.formatFunc = createFormattingFunction(reg.format_func, errors);
+
+			// 			// Example to execute format function
+			// 			// var newVal = reg.formatFunc(12);
+			// 		}
+			// 	});
+			// });
+
+			// For each custom register check to see if there are any functions
+			// that need to be created.
             if(data_group.defined_user_values) {
                 var user_value_keys = data_group.defined_user_values;
                 user_value_keys.forEach(function(user_value_key) {
@@ -228,7 +249,7 @@ function CREATE_DATA_COLLECTOR() {
         // Remove old reference
         this.config = undefined;
 
-        // Set new refrence
+        // Set new reference
         this.config = JSON.parse(JSON.stringify(config));
 
         // Start parsing the config file.
@@ -263,10 +284,10 @@ function CREATE_DATA_COLLECTOR() {
 
         // Calculate GCD
         if(periods.length > 1) {
-            // if there is multiple periods calculate therir greatest common denominator.
+            // If there are multiple periods calculate their greatest common denominator.
             this.config.core_period = gcd(periods);
         } else {
-            // If there is only one period than use that period;
+            // If there is only one period than use that period.
             this.config.core_period = periods[0];
         }
 
@@ -309,7 +330,7 @@ function CREATE_DATA_COLLECTOR() {
         this.deviceDataCollector = undefined;
         this.deviceDataCollector = {};
 
-        // Create one device_data_coillector object for each required device.
+        // Create one device_data_collector object for each required device.
         this.requireDeviceSerialNumbers.forEach(function(sn) {
             var newCollector = device_data_collector.createDeviceDataCollector();
             this.deviceDataCollector[sn] = newCollector;
@@ -359,7 +380,7 @@ function CREATE_DATA_COLLECTOR() {
                 var isFound = deviceDataCollector.isValidDevice;
                 if(!isFound) {
                     this.emit(eventName, {
-                        'mesage': 'Required device is not found',
+                        'message': 'Required device is not found',
                         'deviceSerialNumber': deviceDataCollector.deviceSerialNumber,
                         'isFound': isFound,
                     });
@@ -380,7 +401,7 @@ function CREATE_DATA_COLLECTOR() {
         var defered = q.defer();
         var keys = Object.keys(this.deviceDataCollectors);
         keys.forEach(function(key) {
-            // Attach to the new data event of each of the devicedataCollector.
+            // Attach to the new data event of each of the deviceDataCollector.
             var newDataEvent = device_data_collector.EVENT_LIST.DATA;
             var  deviceDataCollector = this.deviceDataCollectors[key];
             deviceDataCollector.on(
@@ -423,7 +444,7 @@ function CREATE_DATA_COLLECTOR() {
     this.activeDataStore = {};
     this.orderActiveDataStore = {};
     this.deviceDataCollectorDataListener = function(data) {
-        if(self.isActice) {
+        if(self.isActive) {
             var deviceData = data.results;
             debugDataAcquisition('Acquired New Data', data);
             debugLog('Acquired Data from deviceDataCollector', data.serialNumber, deviceData.registers);
@@ -451,7 +472,7 @@ function CREATE_DATA_COLLECTOR() {
 
     // This is important for ordering the queried device data.
     this.initializeDataStoreValues = function(index, sn, registers) {
-        // If the index dosen't already exist, add it
+        // If the index doesn't already exist, add it
         if(typeof(this.orderActiveDataStore[sn][index] === 'undefined')) {
             this.orderActiveDataStore[sn] = {};
         }
@@ -473,8 +494,8 @@ function CREATE_DATA_COLLECTOR() {
 					'duration': 0,
 					'interval': 0,
 					'index': 0,
-					'queriedIndex': index,
-					'resultIndex': 0,
+					'queriedIndex': index, // When was the value requested?
+					'resultIndex': 0, // When was the value received?
 					'numDependent': 1,
                 };
             } else {
@@ -537,7 +558,7 @@ function CREATE_DATA_COLLECTOR() {
                     var organizedDeviceData = {};
                     var index = -1;
 
-                    // Get the device data.
+                    // Get the devices data.
                     var newDeviceData = oldData[serialNumber];
 
                     // Save timing data & error codes.
@@ -546,7 +567,7 @@ function CREATE_DATA_COLLECTOR() {
                     organizedDeviceData.duration = newDeviceData.duration;
                     organizedDeviceData.interval = newDeviceData.interval;
 
-                    // Make room for aquired device data
+                    // Make room for acquired device data
                     organizedDeviceData.results = {};
 
                     var reqDeviceData = activeGroup[serialNumber];
@@ -557,7 +578,7 @@ function CREATE_DATA_COLLECTOR() {
                         var regValue;
                         var formattedValue;
 
-                        // Get the required datapoint & save it to the regValue varable.
+                        // Get the required data point & save it to the regValue variable.
                         regValue = newDeviceData[regName];
 
                         // Save the initial index value.
@@ -575,6 +596,8 @@ function CREATE_DATA_COLLECTOR() {
                             organizedDeviceData.duration = regValue.duration;
                             organizedDeviceData.interval = regValue.interval;
                         }
+                        
+                        // console.log('Req Data', activeGroupKey, serialNumber, regName, regValue);
 
                         // Apply formatting to acquired data.
                         formattedValue = regValue;
@@ -596,7 +619,7 @@ function CREATE_DATA_COLLECTOR() {
                         'userFunction': activeGroupObj.defined_user_values,
                     });
 
-                    // Execute user function & make room int eh orgaizedGroupData object for user values.
+                    // Execute user function & make room int eh organizedGroupData object for user values.
                     organizedGroupData.userValues = {};
                     var user_value_keys = activeGroupObj.defined_user_values;
                     var userValueKeys = [];
@@ -615,7 +638,7 @@ function CREATE_DATA_COLLECTOR() {
                 debugLog('Waiting for reportCollectedData promises');
                 q.allSettled(promises)
                 .then(function(results) {
-                    // Zander - do we really need all of theys debugLog's?
+                    // Zander - do we really need all of these debugLog's?
                     debugLog('completed for reportCollectedData promises', results);
                     if(results){
                         // Save the returned results into the organizedGroupData object.
@@ -624,7 +647,7 @@ function CREATE_DATA_COLLECTOR() {
                             if(result.state === 'fulfilled') {
                                 organizedGroupData.userValues[valueKey] = result.value;
                             } else {
-                                // If there wwas an error use the default value of zero
+                                // If there was an error use the default value of zero
                                 var defaultVal = 0;
                                 var userValue = activeGroupObj.user_values[valueKey];
                                 if(userValue.default_value) {
@@ -662,7 +685,7 @@ function CREATE_DATA_COLLECTOR() {
             if(reqData) {
                 var registers = reqData.registers;
                 var serialNumbers = Object.keys(registers);
-                // Zander - I feel as if this can be simplifyed so run more erfishently and take sell time
+                // Zander - I feel as if this can be simplified so run more efficiently and take sell time
                 serialNumbers.forEach(function(sn) {
                     if(requiredData[sn]) {
                         registers[sn].forEach(function(reqReg) {
@@ -681,7 +704,7 @@ function CREATE_DATA_COLLECTOR() {
             }
         });
 
-        // Report what data groups are sctive
+        // Report what data groups are active
         this.emit(this.eventList.COLLECTING_GROUP_DATA, {
             'data': Object.keys(activeGroups),
         });
@@ -732,7 +755,7 @@ function CREATE_DATA_COLLECTOR() {
                     debugLog('Executing reportCollectedData');
                     this.reportCollectedData(dataCollectionObj);
                 } catch(err) {
-                    console.log('Error reportin collected data', err, err.stack);
+                    console.log('Error reporting collected data', err, err.stack);
                 }
             }
             // Increment the counter
@@ -740,13 +763,13 @@ function CREATE_DATA_COLLECTOR() {
         });
     };
 
-    this.preformDataCollection = function() {
+    this.performDataCollection = function() {
         try {
             innerPerformDataCollection();
         } catch(err) {
-            console.log('Error preforming data collection', err);
+            console.log('Error performing data collection', err);
             this.emit(this.eventList.COLLECTOR_ERROR, {
-                'message': 'Error preforming data collection',
+                'message': 'Error performing data collection',
                 'error': err,
             });
         }
@@ -772,9 +795,10 @@ function CREATE_DATA_COLLECTOR() {
         debugLog('Starting Data Collector', this.config.core_period);
         this.isActive = true;
         this.isFirstDataCollectionIteration = true;
+        // Jimmy - We are replacing setInterval with setTimeout and managing the clock
         this.daqTimer = setInterval(
-            this.preformDataCollection,
-            this.self.config.core_period,
+            this.performDataCollection,
+            this.self.config.core_period
         );
 
         // Report that the data collector has been started.
@@ -784,7 +808,7 @@ function CREATE_DATA_COLLECTOR() {
         return defered.promise;
     };
 
-    // Zander - should change some naming conventions? it may make it esier to read.
+    // Zander - should change some naming conventions? it may make it easier to read.
     this.stopDataCollector = function(bundle) {
         return innerStopLoggingSession(bundle);
     };
@@ -795,7 +819,7 @@ function CREATE_DATA_COLLECTOR() {
         clearInterval(this.daqTimer);
         this.daqTimer = undefined;
 
-        // Report that the data collector has been stoped.
+        // Report that the data collector has been stopped.
         this.emit(this.eventList.COLLECTOR_STOPPED, {});
 
         defered.resolve(bundle);
