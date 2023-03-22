@@ -29,7 +29,7 @@ function CREATE_DATA_COLLECTOR(){
         REPORT_DEVICE_IS_ACTIVE_VALUES: true,
 
         /*
-		If enabled the data colelctor will report register default values 
+		If enabled the data collector will report register default values 
 		instead of the actually collected value for values that get returned 
 		later than they were supposed to.
 		*/
@@ -66,10 +66,10 @@ function CREATE_DATA_COLLECTOR(){
         var defered = q.defer();
         var serialNum = parseInt(deviceSerialNumber);
 
-        // save a refrence to the device serial number
+        // save a reference to the device serial number
         this.deviceSerialNumber = serialNum;
 
-        // this should liik to make sure that the device that is conected it the one that is being used
+        // this should like to make sure that the device that is connected it the one that is being used
         // Zander - make sure this is working when everything is in place
         if(device.savedAttributes.serialNumber == serialNum) {
             this.isValidDevice = true;
@@ -94,8 +94,10 @@ function CREATE_DATA_COLLECTOR(){
         return val;
     }
 
-    // ZANDER - MAKE SURE THAT WE USE HR TIME WHEN THIS IS CALLED
+    // Zander - MAKE SURE THAT WE USE HR TIME WHEN THIS IS CALLED
+    // Jimmy - I am going to also use performance.now time for testing
     this.getCurrentTime = function() {
+        // return performance.now();
         return process.hrtime();
     }
 
@@ -167,8 +169,8 @@ function CREATE_DATA_COLLECTOR(){
             self.startTimes[timerKey] = undefined;
         }
 
-        // this will convert hrtime to millaseconds
-        var duration = diff[0] * 1000 + diff[1]/1000000;
+        // this will convert hrtime to milliseconds
+        var duration = (diff[0] * 1000000000 + diff[1])/1000000;
         return duration;
     }
 
@@ -181,8 +183,8 @@ function CREATE_DATA_COLLECTOR(){
         }
         self.callIntervals[timerKey] = process.hrtime();
 
-        // this will convert hrtime to millaseconds
-        var duration = diff[0] * 1000 + diff[1]/1000000;
+        // this will convert hrtime to milliseconds
+        var duration = (diff[0] * 1000000000 + diff[1])/1000000;
         return duration;
     }
 
@@ -199,7 +201,7 @@ function CREATE_DATA_COLLECTOR(){
                 // if an IO is pending don't start new read and return a dummy value & report
                 // that the next value is a late value.
                 self.isActive = true
-                // check to see if theys calues should be reported of if the data should wait for new data
+                // check to see if these values should be reported of if the data should wait for new data
                 if(this.options.REPORT_DEFAULT_VALUES_WHEN_LATE) {
                     // this is when the device is still active somewhere else.
                     self.reportDefaultRegisterData(
@@ -256,7 +258,7 @@ function CREATE_DATA_COLLECTOR(){
                 defered.resolve();
             }
         } else {
-            // The device data collector isn't linked to a real device. retun a dummy value.
+            // The device data collector isn't linked to a real device. return a dummy value.
             self.reportDefaultRegisterData(
                 registerList,
                 errorCodes.DEVICE_NOT_VALID,
