@@ -6,15 +6,15 @@ function innerLoadConfigFile (bundle) {
     var defered = q.defer();
     var filePath = bundle.filePath;
     var errorsToRetry = [ /* 'ENOENT' // file does not exist error.*/]
-    var preformRead = true;
+    var performRead = true;
 
     if(bundle.err){
         // if an error occurs then check to see if it is in the list of errors
         // that should be re-tried.
-        preformRead = errorsToRetry.indexOf(bundle.err.code) >= 0;
+        performRead = errorsToRetry.indexOf(bundle.err.code) >= 0;
     }
 
-    if(preformRead) {
+    if(performRead) {
         fs.readFile(filePath, function(err, data){
             if(err){
                 bundle.err = err;
@@ -70,7 +70,7 @@ function loadConfigFile(filePath) {
         })
         .then(succFunc, innerLoadConfigFile)
         .then(succFunc, errorFunc);
-        // if this doesn't work repete this three times
+        // if this doesn't work repeat this three times
     } else {
         result.errorMessage = "config file must be a .json file. Tried to load file: ";
         result.errorMessage += path.basename(filePath);
