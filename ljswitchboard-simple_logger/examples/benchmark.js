@@ -26,15 +26,15 @@ this.activeDevice = openDevice(device);
 // use this vv when or if this is implemented - Zander
 // var sn = devices[0].savedAttributes.serialNumber;
 // var sn = "470016039"; // Zander T7?
-var sn = "440017663"; // Zander T4
+// var sn = "440017663"; // Zander T4
 // var sn = "470010175" // Jimmy T7-Pro
-// var sn = "440011301" // Jimmy T4
+var sn = "440011301" // Jimmy T4
 var savedData = [];
 
 // setting the file name & location
 var fileName = "testThing"
-var selectedFilePath = 'D:/labjack/newLoggerTesting/'; // Zander File Path for Testing
-// var selectedFilePath = '/Users/jimmy/labjack_data_logger/'; // Jimmy File Path for Testing
+// var selectedFilePath = 'D:/labjack/newLoggerTesting/'; // Zander File Path for Testing
+var selectedFilePath = '/Users/jimmy/labjack_data_logger/'; // Jimmy File Path for Testing
 
 // settting the length of how long the file will log
 var runTime = 5;
@@ -99,9 +99,12 @@ let intervalTimings = [];
 // let registerList = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5', 'AIN6']
 
 let registerList = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3']
-const INTERVAL_TIME = 10; // ms
+const INTERVAL_TIME = 5; // ms
 const INTERVAL_TIME_NS = INTERVAL_TIME * 1000000
-const MAX_LOG_NUM = 6000;
+const MAX_LOG_NUM = 1000;
+
+let exTime = (INTERVAL_TIME * MAX_LOG_NUM)/1000;
+console.log ("Each Interval Will Run " + MAX_LOG_NUM + " samples at " + INTERVAL_TIME + " ms sample rate for " + exTime + " seconds");
 
 // console.log("\n------------- Starting the While Interval -------------\n")
 // let hrIntStart = process.hrtime();
@@ -129,23 +132,52 @@ standardInterval();
 function standardInterval() {
     lineseperatoe("Starting the Standard Interval", connectedFile)
     console.log("\n------------- Starting the Standard Interval -------------\n")
+    const hr_ms = hr => (hr[0] * 1000000000 + hr[1]) / 1000000; // convert hr time to total ms
+    function adjust_hr(hr) {
+        let max_ns = 1000000000
+        let s = hr[0];
+        let ns = hr[1];
+        let adj_ns = ns + INTERVAL_TIME_NS;
+        let adj_s = s + Math.floor(adj_ns / max_ns);
+        adj_ns = adj_ns % max_ns;
+        return [adj_s, adj_ns]
+    }
     let hrIntStart = process.hrtime();
+    let adjHrStepStart = adjust_hr(hrIntStart);
+    var expected = adjHrStepStart;
+    var negDrift = 0;
+    var prevTime = process.hrtime();
+    var jitterTime = [];
     const interval = setInterval(function() {
-        // Call the LogToFile function
+        var dt = process.hrtime(expected)
+
         let hrIntervalTime = process.hrtime(hrIntStart);
-        let s_ms = (hrIntervalTime[0] * 1000000000 + hrIntervalTime[1]) / 1000000;
+        let s_ms = hr_ms(hrIntervalTime);
         intervalTimings.push(s_ms);
         let exTime = logTofile(device, registerList, connectedFile);
+
+        var reportedTime = process.hrtime();
+        var diff = process.hrtime(prevTime);
+        prevTime = reportedTime;
+        diff = hr_ms(diff)
+        jitterTime.push(diff);
+
         readTimings.push(exTime[0]);
         writeTimings.push(exTime[1]);
         totalTimings.push(exTime[0] + exTime[1])
 
+        adj_hr = adjust_hr(expected); //Expected execution time for next iteration
+        expected = adj_hr;
+        let drift = INTERVAL_TIME  - hr_ms(dt); // difference between interval time and actual execution time.
+        driftAdjustment = Math.max(0, drift)
+        if(drift <= 0){
+            negDrift += 1;
+        }
         numLogged += 1;
         if(numLogged >= MAX_LOG_NUM){
             clearInterval(interval);
-            console.log("Final Time:", s_ms)
-            console.log("Num Logged:", numLogged)
-            calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings);
+            const average = array => array.reduce((a, b) => a + b) / array.length;
+            calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings, jitterTime, negDrift);
             numLogged = 0;
             readTimings = [];
             writeTimings = [];
@@ -159,9 +191,6 @@ function standardInterval() {
 
 function customInterval() {
     lineseperatoe("Starting the Custom Interval", connectedFile)
-    //To-Do: Implemet a custom setInterval timing function
-    // There are some issues with the accuracy of the JS built-in setInterval
-    // Do we need to have a variable refresh rate here?
     console.log("\n------------- Starting the Custom Interval -------------\n")
     const hr_ms = hr => (hr[0] * 1000000000 + hr[1]) / 1000000; // convert hr time to total ms
     function adjust_hr(hr) {
@@ -179,7 +208,9 @@ function customInterval() {
     let hrStepStartMs = hr_ms(hrStepStart) + INTERVAL_TIME;
     let adjHrStepStart = adjust_hr(hrStepStart); //[hrStepStart[0], hrStepStart[1] + INTERVAL_TIME_NS]
     var expected = adjHrStepStart;
-    let negDrift = 0;
+    var negDrift = 0;
+    var prevTime = process.hrtime();
+    var jitterTime = [];
     setTimeout(step, INTERVAL_TIME); // First iteration, with delay of INTERVAL_TIME ms
     // The custom implementation of setInterval (recursive function)
     function step() {
@@ -196,24 +227,31 @@ function customInterval() {
             intervalTimings.push(s_ms);
             // console.log("dt time", hr_ms(dt))
             let exTime = logTofile(device, registerList, connectedFile);
+
+            var reportedTime = process.hrtime();
+            var diff = process.hrtime(prevTime);
+            prevTime = reportedTime;
+            diff = hr_ms(diff)
+            jitterTime.push(diff);
+
             readTimings.push(exTime[0]);
             writeTimings.push(exTime[1]);
             totalTimings.push(exTime[0] + exTime[1]);
 
-
-
             adj_hr = adjust_hr(expected); //Expected execution time for next iteration
             expected = adj_hr;
             let drift = INTERVAL_TIME  - hr_ms(dt); // difference between interval time and actual execution time.
-            // console.log("Drift: " + drift)
             driftAdjustment = Math.max(0, drift) // either dont adjust (executing on schedule), or setInterval to adjust for time drift
-            // console.log("Adjusted Timeout: ", driftAdjustment)
-            // console.log("----------------")
             numLogged += 1;
-            setTimeout(step, driftAdjustment); // execute step again, delay adjusted for the time drift
+            if (drift <= 0){
+                negDrift++;
+                setImmediate(step);
+            }
+            else{
+                setTimeout(step, driftAdjustment);
+            } // execute step again, delay adjusted for the time drift
         } else {
-            console.log("numLogged", numLogged)
-            calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings);
+            calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings, jitterTime, negDrift);
             numLogged = 0;
             readTimings = [];
             writeTimings = [];
@@ -227,9 +265,6 @@ function customInterval() {
 }
 
 function performanceInterval() {
-    //To-Do: Implemet a custom setInterval timing function
-    // There are some issues with the accuracy of the JS built-in setInterval
-    // Do we need to have a variable refresh rate here?
     console.log("\n------------- Starting the Performance Interval -------------\n")
     const hr_ms = hr => (hr[0] * 1000000000 + hr[1]) / 1000000; // convert hr time to total ms
     function adjust_hr(hr) {
@@ -240,17 +275,18 @@ function performanceInterval() {
     let perStepStart = performance.now();
     let adjPerStepStart = perStepStart + INTERVAL_TIME;
     var expected = adjPerStepStart;
-
-
+    var negDrift = 0;
+    var prevTime = performance.now();
+    var jitterTime = [];
     setTimeout(step, INTERVAL_TIME); // First iteration, with delay of INTERVAL_TIME ms
     // The custom implementation of setInterval (recursive function)
     function step() {
-        numLogged += 1;
         if (numLogged <= MAX_LOG_NUM){
 
             var per_now = performance.now();
             var now = per_now - perStepStart;
             var dt = per_now - expected;
+            // console.log("Now:", now, "\tdt", dt);
             // console.log("Interval Time", hr_ms(dt))
             // if (hr_ms(dt) > INTERVAL_TIME) {
             //     // If the function executed later then the defined interval 
@@ -260,6 +296,10 @@ function performanceInterval() {
             // let s_ms = hr_ms(hrIntervalTime);
             intervalTimings.push(perIntervalTime);
             let exTime = logTofile(device, registerList, connectedFile);
+            var reportedTime = performance.now();
+            var diff = reportedTime - prevTime;
+            prevTime = reportedTime;
+            jitterTime.push(diff);
             readTimings.push(exTime[0]);
             writeTimings.push(exTime[1]);
             totalTimings.push(exTime[0] + exTime[1]);
@@ -271,17 +311,72 @@ function performanceInterval() {
             let drift = INTERVAL_TIME  - dt // difference between interval time and actual execution time.
             // console.log("Drift: " + drift)
             driftAdjustment = Math.max(0, drift) // either dont adjust (executing on schedule), or setInterval to adjust for time drift
-            // console.log("Adjusted Timeout: " + driftAdjustment)
-            setTimeout(step, driftAdjustment); // execute step again, delay adjusted for the time drift
+            numLogged += 1;
+            if (drift <= 0){
+                negDrift++;
+                setImmediate(step);
+            }
+            else{
+                setTimeout(step, driftAdjustment);
+            }
         } else {
-            calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings);
+            calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings, jitterTime, negDrift);
             closeDevice(device);
         }
     }
 }
 
+function calculateVariance(values) {
+    // Calculate the average of all the numbers
+    const calculateMean = (values) => {
+        const mean = (values.reduce((sum, current) => sum + current)) / values.length;
+        return mean;
+    };
+    // Calculate variance
+    const calculateVariance = (values) => {
+        const average = calculateMean(values);
+        const squareDiffs = values.map((value) => {
+            const diff = value - average;
+            return diff * diff;
+        });
+        const variance = calculateMean(squareDiffs);
+        return variance;
+    };
 
-function calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings){
+    // Calculate stand deviation
+    const calculateSD = (variance) => {
+        return Math.sqrt(variance);
+    };
+
+    // Test our function
+    const variance = calculateVariance(values);
+    const sd = calculateSD(variance);
+    console.log(`Variance: ${variance}`);
+    console.log(`Standard Deviation: ${sd}`);
+}
+
+
+function calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings, jitterTime, negDrift){
+    // Calculate the average of all the numbers
+    const calculateMean = (values) => {
+        const mean = (values.reduce((sum, current) => sum + current)) / values.length;
+        return mean;
+    };
+    // Calculate variance
+    const calculateVariance = (values) => {
+        const average = calculateMean(values);
+        const squareDiffs = values.map((value) => {
+            const diff = value - average;
+            return diff * diff;
+        });
+        const variance = calculateMean(squareDiffs);
+        return variance;
+    };
+
+    // Calculate stand deviation
+    const calculateSD = (variance) => {
+        return Math.sqrt(variance);
+    };
     const average = array => array.reduce((a, b) => a + b) / array.length;
     const toHz = ms => ((1/ms) * 1000);
     const delta = ([x,...xs]) =>
@@ -297,9 +392,11 @@ function calculateTimerData(readTimings, writeTimings, totalTimings, intervalTim
     let targetms = INTERVAL_TIME
     let targethz = toHz(INTERVAL_TIME).toFixed(4);
 
+    let jitterVariance = calculateVariance(jitterTime);
+    let jitterSD = calculateSD(jitterVariance)
+
     // console.log(intervalTimings)
     let intervalDelta = delta(intervalTimings)
-    console.log(intervalDelta)
     let avgIntervalDelta = average(intervalDelta[0]).toFixed(4);
     let avgIntervalDeltaHz = toHz(avgIntervalDelta).toFixed(4);
     let totalIntervalTime = intervalDelta[1];
@@ -309,6 +406,9 @@ function calculateTimerData(readTimings, writeTimings, totalTimings, intervalTim
     console.log("Target Refresh Rate:\t\t %d ms %d hz", targetms, targethz);
     console.log("Interval Delta:\t\t\t %d ms %d hz", avgIntervalDelta, avgIntervalDeltaHz);
     console.log("Interval Accuracy:\t\t %d%", intervalAccuracy);
+    console.log("Interval Average Jitter:\t", average(jitterTime).toFixed(6));
+    console.log("Interval Jitter Variance:\t", jitterVariance.toFixed(6));
+    console.log("Interval Jitter Std Dev:\t", jitterSD.toFixed(6));
     console.log("Average LJM Call Time:\t\t %d ms %d hz", readms, readhz);
     console.log("Average File Write Time:\t %d ms %d hz", writems, writehz);
     console.log("Average Total Execution Time:\t %d ms %d hz", totalms, totalhz);
@@ -322,7 +422,7 @@ function openDevice(device){
             'LJM_ctANY',
             'LJM_idANY',
         );
-        console.log("Device Opened Successfully");
+        console.log("\n------------- Device Opened Successfully -------------\n");
         return device;
     }
     catch(err){
@@ -341,7 +441,7 @@ function closeDevice(device){
             },
             function(res){
                 // console.log("ending time", process.hrtime())
-                console.log('Device Closed Successfully');
+                console.log('\n------------- Device Closed Successfully -------------\n');
             });
     }
     catch(err){
@@ -433,8 +533,6 @@ function logTofile(device, registers, file) {
 
     let exTime = ((hrReadEnd[1] + hrWriteEnd[1]) / 1000000);
     return [(hrReadEnd[1] / 1000000), (hrWriteEnd[1] / 1000000)];
-    return null;
-    return defered.promise;
 }
 
 function lineseperatoe(statment, file){
