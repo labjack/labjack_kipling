@@ -71,6 +71,9 @@ const requirements = {
             ],
             'x64': [
                 '/usr/local/lib/libLabJackM.dylib'
+            ],
+            'arm64': [
+                '/usr/local/lib/libLabJackM.dylib'
             ]
         }
     },
@@ -100,6 +103,9 @@ const requirements = {
                 '/usr/local/share/LabJack'
             ],
             'x64': [
+                '/usr/local/share/LabJack'
+            ],
+            'arm64': [
                 '/usr/local/share/LabJack'
             ]
         }
@@ -131,6 +137,9 @@ const requirements = {
             ],
             'x64': [
                 '/usr/local/share/LabJack/LJM'
+            ],
+            'arm64': [
+                '/usr/local/share/LabJack/LJM'
             ]
         }
     },
@@ -160,6 +169,9 @@ const requirements = {
                 '/usr/local/share/LabJack/LJM/ljm_constants.json'
             ],
             'x64': [
+                '/usr/local/share/LabJack/LJM/ljm_constants.json'
+            ],
+            'arm64': [
                 '/usr/local/share/LabJack/LJM/ljm_constants.json'
             ]
         }
@@ -196,6 +208,9 @@ const optionalRequirements = {
                 '/usr/local/include/LabJackM.h'
             ],
             'x64': [
+                '/usr/local/include/LabJackM.h'
+            ],
+            'arm64': [
                 '/usr/local/include/LabJackM.h'
             ]
         }
@@ -243,6 +258,9 @@ const optionalRequirements = {
                 '/usr/local/share/LabJack/LJM/ljm_startup_configs.json'
             ],
             'x64': [
+                '/usr/local/share/LabJack/LJM/ljm_startup_configs.json'
+            ],
+            'arm64': [
                 '/usr/local/share/LabJack/LJM/ljm_startup_configs.json'
             ]
         }
@@ -389,7 +407,7 @@ function checkJSONFile(directoryInfo) {
     return new Promise((resolve) => {
         function finishFunc(data) {
             try {
-                JSON.parse(data);
+                JSON.parse(JSON.stringify(data));
                 directoryInfo.isValid = true;
                 resolve(directoryInfo);
             } catch (parseError) {

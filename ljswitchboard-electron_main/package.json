@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-electron_main",
-  "version": "3.3.1",
+  "version": "3.3.3-beta.0",
   "private": true,
   "description": "The primary loading file for LabJack's Kipling program.",
   "author": {
@@ -61,7 +61,7 @@
     "yauzl": "2.10.0"
   },
   "devDependencies": {
-    "electron": "^20.3.7"
+    "electron": "20.3.7"
   },
   "script_notes": "to run a script w/o using npm test, use npm run [script name]",
   "scripts": {

@@ -56,8 +56,6 @@ class labjackVersionManager extends EventEmitter {
             "platformDependent": false,
             "urls":[
                 // {"url": "https://files.labjack.com/firmware/T8/", "type": "organizer-current"},
-                // {"url": "https://files.labjack.com/firmware/T8/release", "type": "current"},
-                // {"url": "https://files.labjack.com/firmware/T8/beta/current", "type": "beta-current"},
                 {"url": "https://files.labjack.com/firmware/T8/release", "type": "organizer-current"},
                 {"url": "https://files.labjack.com/firmware/T8/beta/current", "type": "organizer-current"},
                 {"url": "https://files.labjack.com/firmware/T8/beta", "type": "beta"},
@@ -71,6 +69,8 @@ class labjackVersionManager extends EventEmitter {
             "urls":[
                 // {"url": "https://files.labjack.com/firmware/T8/", "type": "organizer-current"},
                 {"url": "https://files.labjack.com/firmware/T8/", "type": "current"},
+                {"url": "https://files.labjack.com/firmware/T8/Beta/", "type": "beta"},
+                {"url": "https://files.labjack.com/firmware/T8/Old/", "type": "old"},
             ],
         },
         "t7": {
@@ -82,7 +82,6 @@ class labjackVersionManager extends EventEmitter {
                 {"url": "https://files.labjack.com/firmware/T7/", "type": "current"},
                 {"url": "https://files.labjack.com/firmware/T7/Beta/", "type": "beta"},
                 {"url": "https://files.labjack.com/firmware/T7/Old/", "type": "old"},
-                // {"url": "https://old3.labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
         "t4": {
@@ -90,12 +89,10 @@ class labjackVersionManager extends EventEmitter {
             "upgradeReference": "https://files.labjack.com/firmware/T4/",
             "platformDependent": false,
             "urls":[
-                // {"url": "https://old3.labjack.com/sites/default/files/organized/special_firmware/T4/alpha_fw/t4_alpha_versions.json", "type": "static-t4-alpha-organizer"},
                 // {"url": "https://old3.labjack.com/support/firmware/t4", "type": "organizer-current"},
-                {"url": "https://files.labjack.com/firmware/T4/Current/", "type": "current"},
+                {"url": "https://files.labjack.com/firmware/T4/", "type": "current"},
                 {"url": "https://files.labjack.com/firmware/T4/Beta/", "type": "beta"},
                 {"url": "https://files.labjack.com/firmware/T4/Old/", "type": "old"},
-                // {"url": "https://old3.labjack.com/support/firmware/t7", "type": "all"},
             ],
         },
 
@@ -435,7 +432,7 @@ class labjackVersionManager extends EventEmitter {
                     } else {
                         errDefered.resolve();
                     }
-                    console.error('Error Querying LabJack cersion', err);
+                    console.error('Error Querying LabJack version', err);
                 }
                 return errDefered.promise;
             };
