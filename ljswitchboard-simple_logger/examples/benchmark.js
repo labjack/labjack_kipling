@@ -125,8 +125,8 @@ console.log ("Each Interval Will Run " + MAX_LOG_NUM + " samples at " + INTERVAL
 // writeTimings = [];
 // totalTimings = [];
 // intervalTimings = [];
-standardInterval();
-// customInterval();
+// standardInterval();
+customInterval();
 // performanceInterval();
 
 function standardInterval() {
@@ -183,7 +183,7 @@ function standardInterval() {
             writeTimings = [];
             totalTimings = [];
             intervalTimings = [];
-            customInterval();
+            // customInterval();
             // closeDevice(device);
         }
     }, INTERVAL_TIME);
@@ -258,7 +258,7 @@ function customInterval() {
             totalTimings = [];
             intervalTimings = [];
             // setTimeout(performanceInterval, 5000);
-            performanceInterval();
+            // performanceInterval();
             // closeDevice(device);
         }
     }
@@ -402,6 +402,22 @@ function calculateTimerData(readTimings, writeTimings, totalTimings, intervalTim
     let totalIntervalTime = intervalDelta[1];
 
     let intervalAccuracy = (average(intervalDelta[0])/(INTERVAL_TIME * 1.0)*100).toFixed(4);
+
+    var thing = intervalDelta[0];
+    var var1 = 0;
+    for(var i = 0; i < thing.length; ++i){
+        var1 = var1 + (thing[i] - avgIntervalDelta);
+    }
+
+    var1 = var1 / (thing.length - 1);
+
+    var std = 0;
+    std = Math.sqrt(Math.abs(var1));
+    
+
+    console.log("The mean delta of CORE_TIMER:\t\t %d ms", avgIntervalDelta);
+    console.log("The Variance of the core timer:\t\t %d ms", Math.abs(var1));
+    console.log("The Standard Deviation of core timer:\t %d ms", std);
 
     console.log("Target Refresh Rate:\t\t %d ms %d hz", targetms, targethz);
     console.log("Interval Delta:\t\t\t %d ms %d hz", avgIntervalDelta, avgIntervalDeltaHz);
