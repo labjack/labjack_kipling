@@ -95,13 +95,12 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		// });
 		// Loop through the devices object and try to link to the device with
 		// the desired serial number.
-		console.warn("self.saved atributes", self.devices)
 		for (const device of Object.keys(self.devices)){
 			// console.warn("whya re you not working", device)
 			// console.warn("serialNum", serialNum)
-			if(self.devices.savedAttributes.serialNumber == serialNum) {
+			if(self.devices[device].savedAttributes.serialNumber == serialNum) {
 				self.isValidDevice = true;
-				self.device = device;
+				self.device = self.devices[device];
 				return true;
 			}
 		}
@@ -254,7 +253,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 			// console.log("this is a valid device")
 			// Check to see if a device IO is currently pending.
 			if(self.isActive) {
-				// console.warn("the thing a ma jig")
+				// console.warn("The Device is Still Active")
 				/*
 				If an IO is currently pending, don't start a new read and
 				return a dummy value.
@@ -276,7 +275,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				}
 				defered.resolve();
 			} else {
-				// console.warn("within self.isActive = false", self)
+				// console.warn("within self.isActive = false", self.isActive)
 				// Declare device to be actively reading data
 				self.isActive = true;
 
@@ -289,8 +288,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// console.log("registerList", registerList)
 				// var deviceCurator1 = new deviceCurator
 				// console.log("deviceCurator", deviceCurator.readMany())
-				console.log("self", self)
-				devices.cReadMany(registerList)
+				self.device.cReadMany(registerList)
 				.then(function(results) {
 					// console.log("results", results)
 					// console.log('readMany Results', registerList, results);
@@ -336,7 +334,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 					);
 
 					// Declare device to be inactive.
-					self.isActive = true;
+					self.isActive = false;
 				});
 				defered.resolve();
 			}

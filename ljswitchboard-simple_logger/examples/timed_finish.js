@@ -17,7 +17,7 @@ console.log('');
 */
 
 var simple_logger = require('../lib/ljswitchboard-simple_logger');
-var device_manager = require('./device_manager');
+var device_manager = require('ljswitchboard-device_manager');
 var async = require('async');
 var q = require('q');
 var path = require('path');
@@ -87,7 +87,7 @@ function attachListeners(loggerObject) {
 			if(ignoreErrorsList.indexOf(key) < 0) {
 				debugLog('Captured Event!!', key, data);
 			}
-			var handeledEvent = false
+			var handeledEvent = false;
 			// print('Captured Event', key, data, Object.keys(data));
 			if(key === 'NEW_VIEW_DATA') {
 				if(data.view_type === 'current_values') {
@@ -122,17 +122,23 @@ function loggerApp() {
 	this.initializeLogger = function(){
 		debugLog('--- In Func: initializeLogger');
 		var defered = q.defer();
+
 		self.simpleLogger = simple_logger.create();
 		attachListeners(self.simpleLogger);
 
-		self.simpleLogger.initialize()
-		.then(function(res) {
-			debugLog('--- App Initialized',res);
-			defered.resolve();
-		}, function(err) {
-			console.error('Failed to initialize the logger',err);
-			defered.resolve();
-		});
+		// Intentionally delay to allow user to read start-up message.
+		setTimeout(function() {
+			self.simpleLogger.initialize()
+			.then(function(res) {
+				debugLog('--- App Initialized',res);
+				defered.resolve();
+			}, function(err) {
+				console.error('Failed to initialize the logger',err);
+				defered.resolve();
+			});
+		}, 5000);
+
+
 		return defered.promise;
 	};
 	this.initializeDeviceManager = function() {
@@ -153,7 +159,7 @@ function loggerApp() {
 			defered.resolve();
 		});
 		return defered.promise;
-	}
+	};
 	this.updateDeviceListing = function() {
 		debugLog('--- In Func: updateDeviceListing');
 		debugLog('Connected Devices', self.deviceManager.getDevices());
@@ -163,11 +169,11 @@ function loggerApp() {
 			debugLog('Device listing has been passwd to the logger',res);
 			defered.resolve();
 		}, function(err) {
-			console.error('Failed to save the device listing to the logger',err)
+			console.error('Failed to save the device listing to the logger',err);
 			defered.resolve();
 		});
 		return defered.promise;
-	}
+	};
 	this.configureLogger = function() {
 		debugLog('--- In Func: configureLogger');
 		var defered = q.defer();
@@ -182,7 +188,7 @@ function loggerApp() {
 		self.logConfigs = simple_logger.generateBasicConfig({
 			'same_vals_all_devices': true,
 			'registers': ['AIN0','AIN1'],
-			'update_rate_ms': 1000,
+			'update_rate_ms': 5000,
 		},self.deviceManager.getDevices());
 
 		var fs = require('fs');
@@ -247,7 +253,7 @@ function loggerApp() {
 			}, function err() {
 				debugLog('Logger Stopped-err');
 			});
-		}, 5000);
+		}, 1000);
 		return defered.promise;
 	}
 	this.closeDevices = function() {
@@ -283,7 +289,7 @@ loggerAppSteps.forEach(function(step) {
 		console.error('App Step', step, 'is not defined!');
 		process.exit();
 	}
-})
+});
 
 var isTerminated = false;
 async.eachSeries(

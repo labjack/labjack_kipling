@@ -74,23 +74,19 @@ if(splitCWD.indexOf('examples') >= 0) {
 	cwd = path.join.apply(path, splitCWD);
 }
 
-
 var example_path = path.normalize(path.join(
 	cwd,
 	'examples'
 ));
-
 var logger_config_file_path = path.normalize(path.join(
 	cwd,
 	LOGGER_FILES_DIR,
 	logger_config_file
 ));
-
 var template_logger_config_file = path.normalize(path.join(
 	cwd,
 	TEMPLATE_LOGGER_CONFIG_FILE
 ));
-
 console.log('--- Application CWD:',cwd);
 console.log('--- Logger config file path:',logger_config_file_path);
 
@@ -259,6 +255,15 @@ function loggerApp() {
 	this.waitForLoggerToRun = function() {
 		debugLog('--- In Func: waitForLoggerToRun');
 		var defered = q.defer();
+		setTimeout(function() {
+			self.simpleLogger.stopLogger()
+			.then(function succ() {
+				debugLog('Logger Stopped-succ');
+				defered.resolve();
+			}, function err() {
+				debugLog('Logger Stopped-err');
+			});
+		}, 1000);
 		defered.resolve();
 		return defered.promise;
 	}

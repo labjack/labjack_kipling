@@ -248,10 +248,10 @@ function CREATE_DATA_LOGGER() {
 				dataCategories.push('');
 				dataNames.push('error code');
 				// ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3']
-				dataNames.push("CORE_TIMER");
+				// dataNames.push("CORE_TIMER");
 				dataNames.push("AIN0");
 				dataNames.push("AIN1");
-				dataNames.push("AIN2");
+				// dataNames.push("AIN2");
 				// dataNames.push("AIN3");
 				// dataNames.push("AIN4");
 				
