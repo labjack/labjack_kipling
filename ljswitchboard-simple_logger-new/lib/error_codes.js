@@ -1,4 +1,7 @@
 exports.errorCodes = {
+
+	// Zander - I know theys are the ones that are documented and known but do we want to 
+	// change theys because this caused some confushion when it came to debugging?
 	/*
 	This error code defines LJM's error code:
 	LJME_DEVICE_NOT_OPEN: 1224, The requested handle did not refer to an

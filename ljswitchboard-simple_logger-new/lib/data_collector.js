@@ -42,6 +42,7 @@ var DATA_COLLECTOR_EVENTS = {
 
 	/*
 	Events indicating when the data collector is executing user defined functions.
+    Zander - do we need this a a declaration or is this used somewhere else
 	*/
 	EXECUTING_USER_FUNCTIONS: 'EXECUTING_USER_FUNCTIONS',
 	EXECUTING_USER_FUNCTION: 'EXECUTING_USER_FUNCTION',
@@ -124,7 +125,7 @@ function CREATE_DATA_COLLECTOR() {
 
         // Report that the devices listing has changed.
         this.emit(this.eventList.DEVICE_LISTING_CHANGED, {
-            'numDevices': self.devices.length,
+            'numDevices': this.devices.length,
         });
         
         defered.resolve(devices);
@@ -202,6 +203,9 @@ function CREATE_DATA_COLLECTOR() {
         return executeUserFunc;
     }
     // Jimmy - We don't need this either
+    // Zander - this definitly does not need to be here right?
+	// does it also seem that we need to transfer some of the values from this to somewhere else?
+	// such as the data_group_keys
     function initializeUserFunctions() {
         stepDebug('in initializeUserFunctions');
         var errors = [];
@@ -257,6 +261,7 @@ function CREATE_DATA_COLLECTOR() {
         saveRequiredDeviceSerialNumbers();
 
         // Create user functions.
+        // Zander - this will not need to be called because we are avoiding to user the userfunction
         var initErrors = initializeUserFunctions();
         if(initErrors.length > 0) {
             console.log('There were errors initializing user function!');
@@ -426,7 +431,10 @@ function CREATE_DATA_COLLECTOR() {
 
     this.configureDataCollector = function(config) {
         debugLog('in configureDataCollector');
-        return innerStopLoggingSession(config)
+        // return innerStopLoggingSession(config)
+        // Zander this should do the same thing am i wrong or will this take longer
+        // might also need to make sure that i don't need the self=this function to make some of theys not a class function
+        return this.stopDataCollector(config)
         .then(saveLoggerConfigReference)
         .then(calculateTimerData)
         .then(createDataGroupManagers)
@@ -444,7 +452,7 @@ function CREATE_DATA_COLLECTOR() {
     this.activeDataStore = {};
     this.orderActiveDataStore = {};
     this.deviceDataCollectorDataListener = function(data) {
-        if(self.isActive) {
+        if(this.isActive) {
             var deviceData = data.results;
             debugDataAcquisition('Acquired New Data', data);
             debugLog('Acquired Data from deviceDataCollector', data.serialNumber, deviceData.registers);
@@ -494,8 +502,8 @@ function CREATE_DATA_COLLECTOR() {
 					'duration': 0,
 					'interval': 0,
 					'index': 0,
-					'queriedIndex': index, // When was the value requested?
-					'resultIndex': 0, // When was the value received?
+					// 'queriedIndex': index, // When was the value requested? Must have been intended for something but is never used so this is not needed.
+					// 'resultIndex': 0, // When was the value received? Must have been intended for something but is never used so this is not needed.
 					'numDependent': 1,
                 };
             } else {
@@ -506,7 +514,7 @@ function CREATE_DATA_COLLECTOR() {
     };
 
     this.clearDataStoreValue = function(sn, register) {
-		self.activeDataStore[sn][register] = {
+		this.activeDataStore[sn][register] = {
 			'register': register,
 			'result': -9999,
 			'errorCode': errorCodes.VALUE_INITIALIZED,
@@ -514,6 +522,7 @@ function CREATE_DATA_COLLECTOR() {
 			'duration': 0,
 			'interval': 0,
 			'index': 0,
+            // 'numDependent': 1, // do we need "numDepedent" in this area?
 		};
 	};
 
@@ -612,6 +621,7 @@ function CREATE_DATA_COLLECTOR() {
                 });
                 var promises = [];
                 var activeGroupObj = this.config[activeGroupKey];
+                // Zander - will we need this if statment beceaseu we are not ising any user values?
                 if(activeGroupObj.defined_user_values) {
                     // Report that we are executing user functions.
                     this.emit(this.eventList.EXECUTING_USER_FUNCTION, {
@@ -796,10 +806,15 @@ function CREATE_DATA_COLLECTOR() {
         this.isActive = true;
         this.isFirstDataCollectionIteration = true;
         // Jimmy - We are replacing setInterval with setTimeout and managing the clock
-        this.daqTimer = setInterval(
+        // this.daqTimer = setInterval(
+        //     this.performDataCollection,
+        //     this.config.core_period
+        // );
+        // Zander - this should be the correct whay that we need to do this.
+        this.daqTimer = setTimeout(
             this.performDataCollection,
-            this.self.config.core_period
-        );
+            this.config.core_period,
+        )
 
         // Report that the data collector has been started.
         this.emit(this.eventList.COLLECTOR_STARTED, {});
@@ -809,7 +824,7 @@ function CREATE_DATA_COLLECTOR() {
     };
 
     // Zander - should change some naming conventions? it may make it easier to read.
-    this.stopDataCollector = function(bundle) {
+    tshis.stopDataCollector = function(bundle) {
         return innerStopLoggingSession(bundle);
     };
 
@@ -829,6 +844,7 @@ function CREATE_DATA_COLLECTOR() {
 }
 
 // The data collector is an event-emitter.
+// Zander - is there a difrent way that we can do this because VSCode is saying that this is not the best idea.
 util.inherits(CREATE_DATA_COLLECTOR, EventEmitter);
 exports.create = function() {
     return new CREATE_DATA_COLLECTOR();

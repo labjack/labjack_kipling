@@ -336,6 +336,7 @@ exports.verifyConfigObject = function(dataObject) {
 exports.generateBasicConfig = function(basicData, devices) {
 	var configObj = {
 		"logging_config": {
+            // Zander - do we need both of theys because we are plannign to just make the file within one folder not two
 			"name": "Basic Config Auto-Template",
 			"file_prefix": "basic_config Auto-Template",
 			"write_to_file": true,
@@ -351,12 +352,11 @@ exports.generateBasicConfig = function(basicData, devices) {
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
-			"defined_user_values": [],
+			"defined_user_values": [],  // this should not be needed because we will never use this
 			// programatically fill the defined_user_values array and populate the user_values object.  For now, just make them the register names...
 			"logging_options": {
 				"write_to_file": true,
-				"file_prefix": "basic_group",
-				"max_samples_per_file": 65535,
+				"file_prefix": "basic_group", // Zander - do we want to keep this as is or do we want to make it empty because we are requiring the user to enter a name/fileprefix?				"max_samples_per_file": 65535,
 				"data_collector_config": {
 					"REPORT_DEVICE_IS_ACTIVE_VALUES": true,
 					"REPORT_DEFAULT_VALUES_WHEN_LATE": false
