@@ -249,10 +249,12 @@ function CREATE_DATA_LOGGER() {
 				dataNames.push('error code');
 				// ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3']
 				dataNames.push("CORE_TIMER");
+				// dataNames.push("DAC0");
+				// dataNames.push("DAC1");
 				dataNames.push("AIN0");
 				dataNames.push("AIN1");
 				dataNames.push("AIN2");
-				// dataNames.push("AIN3");
+				dataNames.push("AIN3");
 				// dataNames.push("AIN4");
 				
 
@@ -855,57 +857,85 @@ function CREATE_DATA_LOGGER() {
 		var userValues;
 		var groupKeys = Object.keys(dataGroups);
 		groupKeys.forEach(function(groupKey) {
-			// console.log("groupkey", groupKey)
+			// console.warn("groupkey", groupKey)
 			if(groupKey !== 'userValues') {
 				serialNumbers.push(groupKey);
 			} else {
 				userValues = dataGroups[groupKey];
 			}
 		});
+		// console.warn("serialNumbers", serialNumbers)
+		// Zander TODO - we relisticaly don't need this to be a for each because there is only ever going to be one device
 		serialNumbers.forEach(function(serialNumber) {
 			var deviceData = dataGroups[serialNumber];
 			// console.log(serialNumber)
-			// console.log(deviceData)
+			// console.log("deviceData", deviceData)
 
 			// Get and format the time stamp
 			var time = formatTimeStamp(deviceData.time);
 			dataToWrite += time + value_separator;
 
 			var resultKeys = Object.keys(deviceData.results);
+			// console.error("resultKeys", resultKeys)
+			dataToWrite += deviceData.errorCode.toString() + value_separator;
+			// var thisShit = self.devices.readManySync(registerList)
+			// console.error("thisShit", thisShit)
 			resultKeys.forEach(function(resultKey) {
 				// console.error("resultKey", resultKey)
 				// Determine if the result should be logged.
-				var logData = groupData.logStatus[serialNumber][resultKey];
+				var logData = groupData.enabled;
 
 				var result = deviceData.results[resultKey];
+				// console.error("results", result)
+				// console.error("logData", logData)
+				// console.warn("groupData", groupData)
 				// debugDataSaving('Result', serialNumber, result, logData);
 				// If the result should be logged then save the result to the
 				// console.warn("logdata", groupData.logStatus)
 				// string to be written.
+
+				// this works for the readMany
 				if(logData) {
-					console.error("...");
+					// console.error("...", result);
 					if(result.str) {
-						dataToWrite += result.str + value_separator;
+						dataToWrite += result.result + value_separator +  result.interval + value_separator;
+					} else if(result.result == 0) {
+						dataToWrite += result.result + value_separator + result.interval + value_separator;
 					} else {
-						dataToWrite += result.result.toString() + value_separator;
+						// console.log("result", result)
+						dataToWrite += result.result + value_separator + result.interval + value_separator;
 					}
 				}
+				
+				// this works for the cReadMany
+				// if(logData) {
+				// 	console.error("...");
+				// 	if(result.str) {
+				// 		dataToWrite += result.result + value_separator;
+				// 	} else if(result.result == 0) {
+				// 		dataToWrite += result.result + value_separator;
+				// 	} else {
+				// 		console.log("result", result)
+				// 		dataToWrite += result.result.val.toString() + value_separator;
+				// 	}
+				// }
 			});
 
-			dataToWrite += deviceData.errorCode.toString() + value_separator;
+			// dataToWrite += result.interval + value_separator;
 		});
 
 		// console.log("userValues", userValues)
 		// this is where the data is getting ready to be written
 		// console.log("...")
-		var userValueKeys = Object.keys(userValues);
-		debugDataSaving('Saving User Values', userValueKeys)
-		userValueKeys.forEach(function(userValueKey) {
-			debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
-			dataToWrite += userValues[userValueKey] + value_separator;
-			// checkThing = userValues[userValueKey];
+		// var userValueKeys = Object.keys(userValues);
+		// debugDataSaving('Saving User Values', userValueKeys)
+		// userValueKeys.forEach(function(userValueKey) {
+		// 	debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
+		// 	// console.error("userValues", userValues)
+		// 	dataToWrite += userValues[userValueKey].val + value_separator;
+		// 	// checkThing = userValues[userValueKey];
 			// console.error("dataToWritte", userValues[userValueKey])
-		});
+		// });
 		// this if statment is not sufull at all.
 		// if(userValues) {
 		// 	console.log("...")
@@ -936,7 +966,9 @@ function CREATE_DATA_LOGGER() {
 			console.error('(data_logger.js) Error executing saveNewDataToBuffer', err);
 		}
 		
+		// console.warn("data", data)
 		var groupKey = data.groupKey;
+		// console.error("self.logData", self.logData)
 		var groupData = self.logData[groupKey];
 		var file_stream_buffer = groupData.file_stream_buffer;
 		var fileStream = groupData.file_stream;
@@ -957,22 +989,25 @@ function CREATE_DATA_LOGGER() {
 			// console.log("how often is it in this")
 			// un-shift one line of data.
 			// console.error("groupData.numDataPoints", groupData.numDataPoints)
+			// console.warn("file_stream_buffer", file_stream_buffer)
+			// Zander TODO - this is where we need to make sure we are passign the data to write from the collector
 			var dataToWrite = file_stream_buffer.shift(1);
 			// console.error("does this actualy happen?",typeof(dataToWrite))
 			var testingWrite = [];
 
 			// ZANDER - This is the exact function that when un comented will alow data to be writen to the file
-			// ok = fileStream.write(dataToWrite);
+			// console.error("dataToWrite", dataToWrite)
+			ok = fileStream.write(dataToWrite);
 
 			testingWrite.push(dataToWrite);
 			
 			var curtime = new Date();
 			// console.warn("curtime write time", testingWrite)
 			var hrWriteStart = process.hrtime();
-			ok = fileStream.write(testingWrite[0]);
+			// ok = fileStream.write(testingWrite[0]);
 			var hrWriteEnd = process.hrtime(hrWriteStart);
 			
-			console.warn("the end writing data", hrWriteEnd)
+			// console.warn("the end writing data", hrWriteEnd)
 
 			// Update necessary values.
 			isData = file_stream_buffer > 0;
