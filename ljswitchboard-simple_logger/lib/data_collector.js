@@ -608,7 +608,7 @@ function CREATE_DATA_COLLECTOR() {
 
 					// Get the devices data
 					var newDeviceData = oldData[serialNumber];
-					console.log("newDeviceData: ", newDeviceData)
+					// console.log("newDeviceData: ", newDeviceData)
 
 					// Save timing data & error code.
 					organizedDeviceData.errorCode = newDeviceData.errorCode;
@@ -749,7 +749,7 @@ function CREATE_DATA_COLLECTOR() {
 					// console.log('  - index', organizedGroupData['1'].results.AIN1.index);
 					// console.log('  - result', organizedGroupData['1'].results.AIN1.result);
 					// Report the collected group data
-					console.log("organizedGroupData: ", organizedGroupData)
+					// console.log("organizedGroupData: ", organizedGroupData)
 					self.emit(self.eventList.COLLECTOR_GROUP_DATA, {
 						'groupKey': activeGroupKey,
 						'data': organizedGroupData

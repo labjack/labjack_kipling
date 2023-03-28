@@ -67,8 +67,14 @@ function CREATE_DATA_GROUP_MANAGER(options, config) {
 		this.data[sn] = [];
 		this.completeData[sn] = {};
 
-		// var registers = options.defined_user_values;
-		var registers = ['CORE_TIMER','AIN0','AIN1','AIN2', 'AIN3'];
+		var registers = [];
+		for(var i = 0; i < 8; i++){
+			if(document.getElementById('validationCustom0' + i).value != ''){
+				registers.push(document.getElementById('validationCustom0' + i).value)
+			}
+			
+		}
+		// var registers = ['CORE_TIMER','AIN0','AIN1','AIN2', 'AIN3'];
 		// var registers = ['CORE_TIMER']
 		for(var j = 0; j < registers.length; ++j) {
 			var registerID = getId(sn, registers[j]);

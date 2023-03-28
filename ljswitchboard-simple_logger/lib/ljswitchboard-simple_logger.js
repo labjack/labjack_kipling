@@ -362,7 +362,8 @@ exports.generateBasicConfig = function(basicData, devices) {
 	var configObj = {
 		"logging_config": {
 			"name": "Basic Config Auto-Template",
-			"file_prefix": "basic_config Auto-Template",
+			// Zander Simplelogger - this is the one that holds the folder that holds the log/csv file
+			"file_prefix": document.getElementById('logName').value,
 			"write_to_file": true,
 			"default_result_view": "0",
 			"default_result_file": "0"
@@ -391,7 +392,9 @@ exports.generateBasicConfig = function(basicData, devices) {
 		"basic_data_group": {
 			"group_name": "Basic Data Group",
 			// this should be the rate at wich the logger runs
-			"group_period_ms": 5,
+			"group_period_ms": 5, // this was the old way this was done where we just set what it is
+			// this will alow the users to set the interval timings
+			// "group_period_ms": document.getElementById('intervalTiming').value,
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
@@ -400,6 +403,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 			"user_values": {},
 			"logging_options": {
 				"write_to_file": true,
+				// Zander Simplelogger - this is the folder that holds the file
 				"file_prefix": "basic_group",
 				"max_samples_per_file": 65335,
 				"data_collector_config": {
@@ -437,7 +441,8 @@ exports.generateBasicConfig = function(basicData, devices) {
 		// var sn = "470010175";
 		// var sn = "440017663"
 		// var sn = "470016039";
-		var sn = "440010762"; // zander T4
+		// var sn = "440010762"; // zander T4
+		var sn = document.getElementById('devSN').value;
 		validSN = sn;
 		configObj.basic_data_group.device_serial_numbers.push(validSN);
 		// configObj.basic_data_group.device_serial_numbers.push(sn);
@@ -482,21 +487,21 @@ exports.generateBasicConfig = function(basicData, devices) {
 		// configObj.basic_data_group.defined_user_values.push('AIN4');
 		
 		basicData.registers.forEach(function(register) {
-			console.log("increment")
+			// console.log("increment")
 			// var valName = register;
 			// var valName = 'custom-'+register;
 			// console.warn("register", register)
 			// console.log("valName", valName)
 			
 			
-			configObj.basic_data_group.user_values[register] = {
-				'name': register,
-				'human_name': register,
-				"exec_method": "sync",
-				"func": "val = data['"+'440010762'+"'].results."+register+".result",
-				"enable_logging": false,
-				"enable_view": true
-			}
+			// configObj.basic_data_group.user_values[register] = {
+			// 	'name': register,
+			// 	'human_name': register,
+			// 	"exec_method": "sync",
+			// 	"func": "val = data['"+'4400107623'+"'].results."+register+".result",
+			// 	"enable_logging": false,
+			// 	"enable_view": true
+			// }
 		});
 	}
 	// console.warn("configObj", configObj)
