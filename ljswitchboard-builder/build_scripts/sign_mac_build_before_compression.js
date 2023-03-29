@@ -227,18 +227,18 @@ var buildScripts = [
 		'"' + pathToNodeApi_uv1 + '"'].join(' '),
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--entitlements "'+pathToParentPList+'"',
-		'"' + refBindingPath + '"'].join(' '),
-	'text': 'Signing ref: binding.node',
-	}, 
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--entitlements "'+pathToParentPList+'"',
-		'"' + refFFIBindingPath + '"'].join(' '),
-	'text': 'Signing ref+ffi: binding.node',
-	},
+	// {
+	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	// 	'--entitlements "'+pathToParentPList+'"',
+	// 	'"' + refBindingPath + '"'].join(' '),
+	// 'text': 'Signing ref: binding.node',
+	// }, 
+	// {
+	// 'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+	// 	'--entitlements "'+pathToParentPList+'"',
+	// 	'"' + refFFIBindingPath + '"'].join(' '),
+	// 'text': 'Signing ref+ffi: binding.node',
+	// },
 	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--entitlements "'+pathToParentPList+'"',
