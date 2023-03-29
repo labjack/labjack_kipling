@@ -12,9 +12,9 @@ jobs:
     strategy:
       matrix:
         node-version: [16.15.0]
-        platform: [macos-latest]
+        # platform: [macos-latest]
         # platform: [windows-latest]
-        # platform: [ubuntu-latest, macos-latest, windows-latest]
+        platform: [ubuntu-latest, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.platform }}
 
@@ -86,7 +86,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: my-artifact
+          name: my-artifact_${{runner.os}}
           path: ${{ github.workspace }}/build/output/dist/*
 
 
