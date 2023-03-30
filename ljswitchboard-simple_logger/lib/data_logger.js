@@ -166,7 +166,7 @@ function CREATE_DATA_LOGGER() {
 	function initializeStats() {
 		// Initialize the num_collected variable.
 		self.stats.num_collected = {};
-		console.warn("self.config", self.config)
+		// console.warn("self.config", self.config)
 		self.config.data_groups.forEach(function(data_group) {
 			self.stats.num_collected[data_group] = 0;
 		});
@@ -193,6 +193,7 @@ function CREATE_DATA_LOGGER() {
 
 	function initializeLogData() {
 		var logging_config = self.config.logging_config;
+		console.error("logging_config", logging_config)
 
 		// Determine if the logger should actually save data.
 		// ZANDER - the issue is here
@@ -202,8 +203,10 @@ function CREATE_DATA_LOGGER() {
 		// Establish the logger's name.
 		var nameType = typeof(logging_config.name);
 		var filePrefixType = typeof(logging_config.file_prefix);
+		console.error("logging_config.file_prefix", logging_config.file_prefix)
 		if(filePrefixType === 'string') {
 			self.state.name = logging_config.file_prefix;
+			console.error("selfthing", self)
 		} else if(nameType === 'string') {
 			self.state.name = logging_config.name;
 		} else {
@@ -247,10 +250,17 @@ function CREATE_DATA_LOGGER() {
 				// add the error code header
 				dataCategories.push('');
 				dataNames.push('error code');
-				// ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3']
+				for(var i = 0; i < 8; i++){
+					if(document.getElementById('validationCustom0' + i).value != ''){
+						dataNames.push(document.getElementById('validationCustom0' + i).value)
+					}
+					
+				}
 				// dataNames.push("CORE_TIMER");
-				dataNames.push("AIN0");
-				dataNames.push("AIN1");
+				// dataNames.push("DAC0");
+				// dataNames.push("DAC1");
+				// dataNames.push("AIN0");
+				// dataNames.push("AIN1");
 				// dataNames.push("AIN2");
 				// dataNames.push("AIN3");
 				// dataNames.push("AIN4");
@@ -309,6 +319,7 @@ function CREATE_DATA_LOGGER() {
 			var groupName = '';
 			var groupFilePrefixType = typeof(logging_options.file_prefix);
 			var groupNameType = typeof(dataGroup.group_name);
+			
 			if(groupFilePrefixType === 'string') {
 				groupName = logging_options.file_prefix;
 			} else if(groupNameType === 'string') {
@@ -317,6 +328,8 @@ function CREATE_DATA_LOGGER() {
 				// Default to the data group's key.
 				groupName = data_group;
 			}
+
+			console.error("groupName", groupName)
 
 			var options = {
 				numDataPoints: DEFAULTS.MAX_SAMPLES_PER_FILE,
@@ -444,6 +457,7 @@ function CREATE_DATA_LOGGER() {
 		var defered = q.defer();
 		debugSavingData('Creating file', filePath);
 		var file = fs.createWriteStream(filePath);
+		console.error("file", file)
 		file.on('open', function(fd) {
 			debugLogFiles('Initialized file write stream');
 			defered.resolve(file);
@@ -517,6 +531,7 @@ function CREATE_DATA_LOGGER() {
 		var extName = path.extname(baseDir);
 		var fileName = baseName.slice(0, baseName.length - extName.length);
 
+		console.error("baseDir", baseDir)
 		var directoryName = path.dirname(baseDir);
 		var files = fs.readdirSync(directoryName);
 		var fileList = [];
@@ -541,6 +556,7 @@ function CREATE_DATA_LOGGER() {
 			}
 		}
 		var uniqueFilePath = path.join(directoryName, uniqueName);
+		console.error("This thing", directoryName)
 		defered.resolve(uniqueFilePath);
 		return defered.promise;
 	}
@@ -549,6 +565,7 @@ function CREATE_DATA_LOGGER() {
 		return function createDirectory(dirToCreate) {
 			var defered = q.defer();
 			function onSuccess() {
+				console.error("objToUpdate", objToUpdate)
 				objToUpdate.dir = dirToCreate;
 				defered.resolve(dirToCreate);
 			}
@@ -564,7 +581,11 @@ function CREATE_DATA_LOGGER() {
 	}
 	function initializeLoggerDirectory(bundle) {
 		var defered = q.defer();
+		console.warn("this should be the thing right?", self.rootDirectory)
 		var loggerDir = path.join(self.rootDirectory,self.state.name);
+		// var loggerDir = path.join(self.rootDirectory );
+		console.error("loggerDir", self.state.name)
+		console.warn("loggerDir", loggerDir)
 
 		function onSuccess() {
 			defered.resolve(bundle);
@@ -586,6 +607,28 @@ function CREATE_DATA_LOGGER() {
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
+		// This variable stores all the data.
+        var data = {
+        	"Log_name": document.getElementById('logName').value,
+            "Data_group_name": document.getElementById('dataGroupName').value,
+            "registers": [],
+            "run_Time_In_Seconds": document.getElementById('runtimeSec').value,
+            "interval": document.getElementById("intervalTiming").value,
+            // "device_serial_numbers": [440017328],
+        }
+
+        // loads the config array with the registers from the form
+        for(var i =  0; i < 8; ++i){
+            if(document.getElementById('validationCustom0' + i).value === ''){}
+            else{
+                data.registers.push(document.getElementById('validationCustom0' + i).value)
+            }
+        }
+
+        const sFileName = 'formData.JSON';
+		var file = fs.createWriteStream(path.join(self.state.dir, sFileName));
+		file.write(JSON.stringify(data));	
+
 		var groupDir = path.join(self.state.dir, dataGroup.group_name);
 		function onSuccess() {
 			defered.resolve(data_group);
@@ -636,7 +679,7 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function getCreateLogFileWriteStream(objToUpdate) {
-		console.warn("objToUpdate", objToUpdate)
+		// console.warn("objToUpdate", objToUpdate)
 		return function createLogFileWriteStream(filePath) {
 			var defered = q.defer();
 			function onSuccess(fileStream) {
@@ -651,6 +694,7 @@ function CREATE_DATA_LOGGER() {
 			function onError(err) {
 				defered.reject(err);
 			}
+			console.error("filePath", filePath)
 			initializeFileWriteStream(filePath)
 			.then(onSuccess, onError)
 			.catch(onError)
@@ -661,19 +705,24 @@ function CREATE_DATA_LOGGER() {
 
 
 	function initializeLogFile(data_group) {
-		console.warn("initializeLogFile")
+		console.log("initializeLogFile")
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
+		console.warn("self.logdata", self.logData)
 		var groupDir = dataGroup.dir;
+		console.warn("dataGroup", dataGroup)
 
 		var logName = self.state.name;
 		var groupName = dataGroup.group_name;
 		var logFileAppendText = dataGroup.file_name_ending;
 		var fileExtensionType = dataGroup.file_extension;
 
-		var logFileName = logName + '-' + groupName + logFileAppendText + fileExtensionType;
+		// var logFileName = logName + '-' + groupName + logFileAppendText + fileExtensionType;
+		// Zander Simplelogger - this is where we are setting the files name
+		var logFileName = document.getElementById('dataGroupName').value + fileExtensionType;
 		var filePath = path.join(groupDir, logFileName);
+		console.warn("groupDir", groupDir)
 
 		function onSuccess() {
 			debugLogFiles('Successfully initialized log file', groupName);
@@ -855,57 +904,98 @@ function CREATE_DATA_LOGGER() {
 		var userValues;
 		var groupKeys = Object.keys(dataGroups);
 		groupKeys.forEach(function(groupKey) {
-			// console.log("groupkey", groupKey)
+			// console.warn("groupkey", groupKey)
 			if(groupKey !== 'userValues') {
 				serialNumbers.push(groupKey);
 			} else {
 				userValues = dataGroups[groupKey];
 			}
 		});
+		// console.warn("serialNumbers", serialNumbers)
+		// Zander TODO - we relisticaly don't need this to be a for each because there is only ever going to be one device
 		serialNumbers.forEach(function(serialNumber) {
 			var deviceData = dataGroups[serialNumber];
 			// console.log(serialNumber)
-			// console.log(deviceData)
+			// console.log("deviceData", deviceData)
 
 			// Get and format the time stamp
 			var time = formatTimeStamp(deviceData.time);
 			dataToWrite += time + value_separator;
 
 			var resultKeys = Object.keys(deviceData.results);
+			// console.error("resultKeys", resultKeys)
+			dataToWrite += deviceData.errorCode.toString() + value_separator;
+			// var thisShit = self.devices.readManySync(registerList)
+			// console.error("thisShit", thisShit)
 			resultKeys.forEach(function(resultKey) {
 				// console.error("resultKey", resultKey)
 				// Determine if the result should be logged.
-				var logData = groupData.logStatus[serialNumber][resultKey];
+				var logData = groupData.enabled;
 
 				var result = deviceData.results[resultKey];
+				// console.error("results", result)
+				// console.error("logData", logData)
+				// console.warn("groupData", groupData)
 				// debugDataSaving('Result', serialNumber, result, logData);
 				// If the result should be logged then save the result to the
 				// console.warn("logdata", groupData.logStatus)
 				// string to be written.
+
+				// this works for the readMany
+				// theys are aso here so we are able to see the interval between each of the log
+				// if(logData) {
+				// 	// console.error("...", result);
+				// 	if(result.str) {
+				// 		dataToWrite += result.result + value_separator +  result.interval + value_separator;
+				// 	} else if(result.result == 0) {
+				// 		dataToWrite += result.result + value_separator + result.interval + value_separator;
+				// 	} else {
+				// 		// console.log("result", result)
+				// 		dataToWrite += result.result + value_separator + result.interval + value_separator;
+				// 	}
+				// }
+
 				if(logData) {
-					console.error("...");
+					// console.error("...", result);
 					if(result.str) {
-						dataToWrite += result.str + value_separator;
+						dataToWrite += result.result + value_separator;
+					} else if(result.result == 0) {
+						dataToWrite += result.result + value_separator;
 					} else {
-						dataToWrite += result.result.toString() + value_separator;
+						// console.log("result", result)
+						dataToWrite += result.result + value_separator;
 					}
 				}
+				
+				// this works for the cReadMany
+				// if(logData) {
+				// 	console.error("...");
+				// 	if(result.str) {
+				// 		dataToWrite += result.result + value_separator;
+				// 	} else if(result.result == 0) {
+				// 		dataToWrite += result.result + value_separator;
+				// 	} else {
+				// 		console.log("result", result)
+				// 		dataToWrite += result.result.val.toString() + value_separator;
+				// 	}
+				// }
 			});
 
-			dataToWrite += deviceData.errorCode.toString() + value_separator;
+			// dataToWrite += result.interval + value_separator;
 		});
 
 		// console.log("userValues", userValues)
 		// this is where the data is getting ready to be written
 		// console.log("...")
-		var userValueKeys = Object.keys(userValues);
-		debugDataSaving('Saving User Values', userValueKeys)
-		userValueKeys.forEach(function(userValueKey) {
-			debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
-			dataToWrite += userValues[userValueKey] + value_separator;
-			// checkThing = userValues[userValueKey];
+		// var userValueKeys = Object.keys(userValues);
+		// debugDataSaving('Saving User Values', userValueKeys)
+		// userValueKeys.forEach(function(userValueKey) {
+		// 	debugDataSaving('User Val', userValueKey, userValues[userValueKey]);
+		// 	// console.error("userValues", userValues)
+		// 	dataToWrite += userValues[userValueKey].val + value_separator;
+		// 	// checkThing = userValues[userValueKey];
 			// console.error("dataToWritte", userValues[userValueKey])
-		});
+		// });
 		// this if statment is not sufull at all.
 		// if(userValues) {
 		// 	console.log("...")
@@ -936,7 +1026,9 @@ function CREATE_DATA_LOGGER() {
 			console.error('(data_logger.js) Error executing saveNewDataToBuffer', err);
 		}
 		
+		// console.warn("data", data)
 		var groupKey = data.groupKey;
+		// console.error("self.logData", self.logData)
 		var groupData = self.logData[groupKey];
 		var file_stream_buffer = groupData.file_stream_buffer;
 		var fileStream = groupData.file_stream;
@@ -957,22 +1049,25 @@ function CREATE_DATA_LOGGER() {
 			// console.log("how often is it in this")
 			// un-shift one line of data.
 			// console.error("groupData.numDataPoints", groupData.numDataPoints)
+			// console.warn("file_stream_buffer", file_stream_buffer)
+			// Zander TODO - this is where we need to make sure we are passign the data to write from the collector
 			var dataToWrite = file_stream_buffer.shift(1);
 			// console.error("does this actualy happen?",typeof(dataToWrite))
 			var testingWrite = [];
 
 			// ZANDER - This is the exact function that when un comented will alow data to be writen to the file
-			// ok = fileStream.write(dataToWrite);
+			// console.error("dataToWrite", dataToWrite)
+			ok = fileStream.write(dataToWrite);
 
 			testingWrite.push(dataToWrite);
 			
 			var curtime = new Date();
 			// console.warn("curtime write time", testingWrite)
 			var hrWriteStart = process.hrtime();
-			ok = fileStream.write(testingWrite[0]);
+			// ok = fileStream.write(testingWrite[0]);
 			var hrWriteEnd = process.hrtime(hrWriteStart);
 			
-			console.warn("the end writing data", hrWriteEnd)
+			// console.warn("the end writing data", hrWriteEnd)
 
 			// Update necessary values.
 			isData = file_stream_buffer > 0;

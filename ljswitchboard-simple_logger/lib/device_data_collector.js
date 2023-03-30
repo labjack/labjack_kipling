@@ -95,6 +95,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		// });
 		// Loop through the devices object and try to link to the device with
 		// the desired serial number.
+		// console.warn("self.saved atributes", self.devices)
 		for (const device of Object.keys(self.devices)){
 			// console.warn("whya re you not working", device)
 			// console.warn("serialNum", serialNum)
@@ -118,6 +119,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	Function that reports collected via emitting a data event.
 	*/
 	this.reportResults = function(results) {
+		// console.error("res", results)
 		self.emit(EVENT_LIST.DATA, {
 			'serialNumber': self.deviceSerialNumber,
 			'results': results,
@@ -181,7 +183,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		
 
 		if(errorCode === errorCodes.VALUE_WAS_DELAYED) {
-			console.error("...", errorCode)
+			// console.error("...", errorCode)
 			// alert("this is happening")
 			var reportDefaultVal = self.options.REPORT_DEFAULT_VALUES_WHEN_LATE;
 			if(reportDefaultVal) {
@@ -239,8 +241,8 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 	collected from the managed device.
 	*/
 	var numerrors = 0;
-	this.startNewRead = function(registerList, index) {
-		// console.log('Starting New Read', self.isActive, index);
+	this.startNewRead = function(registerList, index, callback) {
+		// console.log('Starting New Read', self.isValidDevice, self.isActive, index, registerList);
 		var defered = q.defer();
 
 		var intervalTimerKey = 'readMany';
@@ -249,11 +251,13 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		// console.error("is it because it is not seeing it as a valid device?")
 		// console.error("devic eCurator", registerList)
 
+		// this is always true - i think we need to keep this just incase
 		if(self.isValidDevice) {
 			// console.log("this is a valid device")
 			// Check to see if a device IO is currently pending.
 			if(self.isActive) {
-				// console.warn("The Device is Still Active")
+				// callback()
+				// console.warn("the thing a ma jig")
 				/*
 				If an IO is currently pending, don't start a new read and
 				return a dummy value.
@@ -275,7 +279,8 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				}
 				defered.resolve();
 			} else {
-				// console.warn("within self.isActive = false", self.isActive)
+				// console.warn("within self.isActive = false", self)
+				// console.warn("within", device)
 				// Declare device to be actively reading data
 				self.isActive = true;
 
@@ -288,9 +293,11 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// console.log("registerList", registerList)
 				// var deviceCurator1 = new deviceCurator
 				// console.log("deviceCurator", deviceCurator.readMany())
-				self.device.cReadMany(registerList)
+				// console.log("self", this)
+				self.devices.readMany(registerList)
+				// self.devices.readMany(registerList)
 				.then(function(results) {
-					// console.log("results", results)
+					// console.error("1213", results[1].val)
 					// console.log('readMany Results', registerList, results);
 					// console.warn("results", results)
 					if(this.isValueLate) {
@@ -310,7 +317,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 						timerKey,
 						index)
 					} else {
-						// console.log("this should happen all the time")
+						// console.warn("this should happen all the time", results)
 						self.reportCollectedData(
 							registerList,
 							results,
@@ -322,6 +329,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 					}
 
 					// Declare device to be inactive.
+					// console.error("this should set to false")
 					self.isActive = false;
 				}, function(err) {
 					console.log('readMany Error', err);
@@ -336,6 +344,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 					// Declare device to be inactive.
 					self.isActive = false;
 				});
+				// self.isActive = false;
 				defered.resolve();
 			}
 		} else {
@@ -343,7 +352,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 			The device data collector isn't linked to a real device.  Return a
 			dummy value.
 			*/
-			console.error("right befor the error data.")
+			// console.error("right befor the error data.")
 			self.reportDefaultRegisterData(
 				registerList,
 				errorCodes.DEVICE_NOT_VALID,

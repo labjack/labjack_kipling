@@ -154,6 +154,7 @@
                   const logName = document.getElementById('logName');
                   const dataGroupName = document.getElementById('dataGroupName');
                   const runTime = document.getElementById('runtimeSec');
+                  const intervalT = document.getElementById('intervalTiming');
 
                   // making sure that the file is actuly what we are looking for
                   if(obj.registers === undefined || obj.Log_name === undefined || obj.Data_group_name === undefined || obj.run_Time_In_Seconds === undefined){
@@ -173,7 +174,9 @@
                   logName.value = obj.Log_name;
                   dataGroupName.value = obj.Data_group_name;
                   runTime.value = obj.run_Time_In_Seconds;
+                  intervalT.value = obj.interval;
                   $(".runtimeSec").trigger("change");
+                  $(".intervalTiming").trigger("change");
                 })
               })
              </script>
@@ -191,6 +194,7 @@
                     "Data_group_name": document.getElementById('dataGroupName').value,
                     "registers": [],
                     "run_Time_In_Seconds": document.getElementById('runtimeSec').value,
+                    "interval": document.getElementById("intervalTiming").value,
                     // "device_serial_numbers": [440017328],
                   }
 
@@ -486,6 +490,33 @@
               <script>
                 
                  $(".runtimeSec").change(function(){
+                  var input    = $(this);
+                  var inputVal = input.val();
+                  if(inputVal.length == 0) {
+                    input.removeClass("valid invalid");
+                  }
+                  else if(inputVal > 0) {
+                    input.addClass("valid").removeClass("invalid");
+                  }
+                  else {
+                    input.addClass("invalid").removeClass("valid");
+                  }
+                  var logLengthTime    = $(this.value);
+                  logLengthTime = logLengthTime.selector;
+                });
+              </script>
+            </div>
+
+            <div class="col-sm-6">
+              <small >
+              Interval (Ms)
+              </small>
+              <input type="number" class="form-control intervalTiming" id="intervalTiming"
+              oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" required="" />
+              <span class="clear-input">x</span>
+              <script>
+                
+                 $(".intervalTiming").change(function(){
                   var input    = $(this);
                   var inputVal = input.val();
                   if(inputVal.length == 0) {
