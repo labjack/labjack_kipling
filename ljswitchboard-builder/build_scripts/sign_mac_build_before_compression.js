@@ -167,8 +167,8 @@ var pathToPython3             = path.resolve(path.join(pathToFFInapiPython3));
 var pathToParentPList = path.resolve(path.join(pathToParentPListPartials));
 var pathToChildPList = path.resolve(path.join(pathToChildPListPartials));
 
-var refBindingPath = path.resolve(path.join(pathToRefBindingNode)); //needed for mac arm64
 var ffiBindingPath = path.resolve(path.join(pathToFFIBindingNode));
+var refBindingPath = path.resolve(path.join(pathToRefBindingNode)); //needed for mac arm64
 var refFFIBindingPath = path.resolve(path.join(pathToFFIRefBindingNode)); //needed for mac arm64
 
 
@@ -228,6 +228,12 @@ var buildScripts = [
 	'text': 'Signing Node uv1: node.napi.uv1.node',
 	},
 	{
+		'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
+			'--entitlements "'+pathToParentPList+'"',
+			'"' + ffiBindingPath + '"'].join(' '),
+		'text': 'Signing ffi: ffi_bindings.node',
+	},
+	{
 	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
 		'--entitlements "'+pathToParentPList+'"',
 		'"' + refBindingPath + '"'].join(' '),
@@ -238,13 +244,7 @@ var buildScripts = [
 		'--entitlements "'+pathToParentPList+'"',
 		'"' + refFFIBindingPath + '"'].join(' '),
 	'text': 'Signing ref+ffi: binding.node',
-	},
-	{
-	'script': ['/usr/bin/codesign --sign "LabJack Corporation" --force --timestamp --options runtime',
-		'--entitlements "'+pathToParentPList+'"',
-		'"' + ffiBindingPath + '"'].join(' '),
-	'text': 'Signing ffi: ffi_bindings.node',
-	},
+	}
 ];
 
 
