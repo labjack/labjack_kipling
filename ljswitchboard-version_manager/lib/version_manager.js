@@ -48,6 +48,24 @@ class labjackVersionManager extends EventEmitter {
             return version;
         };
 
+        this.kiplingUpdateLinks = {
+            "current_win":      "https://s3.amazonaws.com/ljrob/win32/kipling/kipling_win.zip",
+            "beta_win":         "https://s3.amazonaws.com/ljrob/win32/kipling/beta/kipling_beta_win.zip",
+            "test_win":         "https://s3.amazonaws.com/ljrob/win32/kipling/test/kipling_test_win.zip",
+    
+            "current_mac":      "https://s3.amazonaws.com/ljrob/mac/kipling/kipling_mac.zip",
+            "beta_mac":         "https://s3.amazonaws.com/ljrob/mac/kipling/beta/kipling_beta_mac.zip",
+            "test_mac":         "https://s3.amazonaws.com/ljrob/mac/kipling/test/kipling_test_mac.zip",
+    
+            "current_linux32":  "https://s3.amazonaws.com/ljrob/linux32/kipling/kipling_lin32.zip",
+            "beta_linux32":     "https://s3.amazonaws.com/ljrob/linux32/kipling/beta/kipling_beta_lin32.zip",
+            "test_linux32":     "https://s3.amazonaws.com/ljrob/linux32/kipling/test/kipling_test_lin32.zip",
+    
+            "current_linux64":  "https://s3.amazonaws.com/ljrob/linux64/kipling/kipling_lin64.zip",
+            "beta_linux64":     "https://s3.amazonaws.com/ljrob/linux64/kipling/beta/kipling_beta_lin64.zip",
+            "test_linux64":     "https://s3.amazonaws.com/ljrob/linux64/kipling/test/kipling_test_lin64.zip"
+        };
+
         // define dict object with various urls in it
     this.urlDict = {
         "theGoldStandard": {
@@ -95,10 +113,55 @@ class labjackVersionManager extends EventEmitter {
                 {"url": "https://files.labjack.com/firmware/T4/Old/", "type": "old"},
             ],
         },
+        "kipling": {
+            "type":"kipling",
+            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
+            "platformDependent": true,
+            "types": ['current','beta','test'],
+            "urls":[
+                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "current_win"},
+                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "current_mac"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "current_linux32"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "current_linux64"},
+
+                // {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "test_win"},
+                // {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "test_mac"},
+                // {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "test_linux32"},
+                // {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "test_linux64"},
+
+                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/beta.txt", "type": "beta_win"},
+                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/beta.txt", "type": "beta_mac"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/beta.txt", "type": "beta_linux32"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/beta.txt", "type": "beta_linux64"},
+            ]
+        },
+        "kipling_new": {
+            "type":"kiplingDownloadsPage",
+            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
+            "platformDependent": true,
+            "types": ['current'],
+            "urls":[
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_win"},
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_mac"},
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux32"},
+                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux64"}
+            ]
+        }
 
     };
 
         this.strategies = {
+            kipling: function(listingArray, pageData, urlInfo, name) {
+                console.log("running kipling strategy: " + name);
+                console.log(pageData);
+                listingArray.push({
+                    "upgradeLink":self.kiplingUpdateLinks[urlInfo.type],
+                    "version":pageData,
+                    "type":urlInfo.type,
+                    "key":urlInfo.type + '-' + pageData
+                });
+                return;
+            },
             t8FirmwarePage: function(listingArray, pageData, urlInfo, name) {
                 var $ = cheerio.load(pageData);
                 var linkElements = $('a');
@@ -392,6 +455,13 @@ class labjackVersionManager extends EventEmitter {
          *
          * @return {[type]} [description]
         **/
+        this.getKiplingVersions = function() {
+            var defered = q.defer();
+            console.log('getKiplingVersions');
+            self.queryForVersions('kipling')
+            .then(defered.promise.resolve,defered.reject);
+            return defered.promise;
+        };
         this.getT8FirmwareVersions = function() {
             var defered = q.defer();
             self.queryForVersions('t8')
@@ -439,7 +509,8 @@ class labjackVersionManager extends EventEmitter {
             var defered = q.defer();
 
             // start getting all versions
-            self.getT8FirmwareVersions()
+            self.getKiplingVersions()
+            .then(self.getT8FirmwareVersions, errorFunc)
             .then(self.getT7FirmwareVersions, errorFunc)
             .then(self.getT4FirmwareVersions, errorFunc)
             .then(function(){
@@ -499,6 +570,19 @@ class labjackVersionManager extends EventEmitter {
             return JSON.parse(JSON.stringify(self.infoCache));
         };
 
+        this.getCachedKiplingVersions = function() {
+            var kiplingData = {};
+            if(typeof(self.infoCache.kipling) !== 'undefined') {
+                kiplingData = JSON.parse(JSON.stringify(self.infoCache.kipling));
+                // populateMissingKeys(t8Data, ['beta', 'current', 'old']);
+                kiplingData.isValid = true;
+            } else {
+                kiplingData.current = [];
+                kiplingData.beta = [];
+                kiplingData.isValid = false;
+            }
+            return kiplingData;
+        };
         this.getCachedT8Versions = function() {
             var t8Data = {};
             if(typeof(self.infoCache.t8) !== 'undefined') {
@@ -635,36 +719,39 @@ exports.initalize = function() {
 exports.getAllVersions = LABJACK_VERSION_MANAGER.getAllVersions;
 
 // For Testing....
-// var LVM = LABJACK_VERSION_MANAGER;
+var LVM = LABJACK_VERSION_MANAGER;
+
+LVM.getKiplingVersions()
+.then(console.log("Info cache:", LVM.getInfoCache()))
 
 // LVM.getT8FirmwareVersions()
 // .then(LVM.getT7FirmwareVersions())
 // .then(console.log("Info cache:", LVM.getInfoCache()))
 
-// function testThisBitch() {
-//     var defered = q.defer();
+function testThisBitch() {
+    var defered = q.defer();
 
-//     LABJACK_VERSION_MANAGER.getAllVersions();
-//     LABJACK_VERSION_MANAGER.waitForData()
-//     .then(function(data) {
-//         console.log('LVM dataCache:',LABJACK_VERSION_MANAGER.dataCache);
-//         if(LABJACK_VERSION_MANAGER.isIssue()) {
-//             var issue = LABJACK_VERSION_MANAGER.getIssue();
-//             console.error('LVM Warning', issue);
-//         } 
-//         defered.resolve(data);
-//     }, function(err) {
-//         if(LABJACK_VERSION_MANAGER.isIssue()) {
-//             var issue = LABJACK_VERSION_MANAGER.getIssue();
-//             console.error('LVM Error', issue, "Error: ", err);
-//             defered.reject(issue);
-//         } else {
-//             defered.reject();
-//         }
-//     });
+    LABJACK_VERSION_MANAGER.getKiplingVersions();
+    LABJACK_VERSION_MANAGER.waitForData()
+    .then(function(data) {
+        console.log('LVM dataCache:',LABJACK_VERSION_MANAGER.dataCache);
+        if(LABJACK_VERSION_MANAGER.isIssue()) {
+            var issue = LABJACK_VERSION_MANAGER.getIssue();
+            console.error('LVM Warning', issue);
+        } 
+        defered.resolve(data);
+    }, function(err) {
+        if(LABJACK_VERSION_MANAGER.isIssue()) {
+            var issue = LABJACK_VERSION_MANAGER.getIssue();
+            console.error('LVM Error', issue, "Error: ", err);
+            defered.reject(issue);
+        } else {
+            defered.reject();
+        }
+    });
 
-//     return defered.promise;
-// }
+    return defered.promise;
+}
 
 
 
