@@ -169,7 +169,7 @@ function CREATE_COORDINATOR () {
 	};
 	this.onDataCollectorGroupData = function(data) {
 		// print('in onDataCollectorGroupData', Object.keys(data), Object.keys(data.data));
-		console.log("onDataCollectorGroupData data varable: ", data)
+		// console.log("onDataCollectorGroupData data varable: ", data)
 		self.updateStats(data);
 
 		// Send data to the dataLogger and dataReporter.

@@ -355,8 +355,7 @@ function module() {
     var self = this;
 }
 
-// Zander - ToDo - logegr config file location This will need to be removed later and taken care of
-var template_logger_config_file = 'D:/somethingCool/Untitled-1.json';
+var template_logger_config_file = 'loggerScript.json'
 // var logger_config_file = 'basic_config.json';
 // var cwd = process.cwd();
 
@@ -583,10 +582,30 @@ function loggerApp() {
 		defered.resolve();
 		// Zander - should there be information when the logger has finished?
 		alert("Logging as completed.")
+
+		// gets the tabs be re enabled both visualy and functonaly
 		$('.module-chrome-tab').each(function(){
-			$(this).css("background-color", "#E0E0E0;");
-			$(this).css("color", "black")
-		  })
+			$(this).prop("disabled", false)
+			$(this).removeClass('disbaledTabs');
+		})
+
+		// reenables the form data so changes can be made befor the next logging session
+		$('.form-control').each(function(){
+			$(this).prop("disabled", false)
+		})
+
+		// $('.configure-log-controls').prop("disabled", false);
+        // $('.configure-log-controls').removeClass('disbaledTabs');
+		
+		// enables the checking of configuration and selecting file path
+		$(".btnUpdate").prop("disabled", false);
+		$("#select-file").prop("disabled", false);
+
+		// disables all the things that need to be disabled (start btn, device serial number, file location)
+		$("#devSN").prop("disabled", true);
+		$("#startBtn").prop("disabled", true);
+		$("#actual-file").prop("disabled", true);
+
 		console.log("Finished Logging")
 		MODULE_CHROME.enableModuleLoading();
 		return defered.promise;

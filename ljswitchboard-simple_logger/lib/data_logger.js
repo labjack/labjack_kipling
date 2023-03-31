@@ -581,7 +581,7 @@ function CREATE_DATA_LOGGER() {
 	}
 	function initializeLoggerDirectory(bundle) {
 		var defered = q.defer();
-		console.warn("this should be the thing right?", self.rootDirectory)
+		// console.warn("this should be the thing right?", self.rootDirectory)
 		var loggerDir = path.join(self.rootDirectory,self.state.name);
 		// var loggerDir = path.join(self.rootDirectory );
 		console.error("loggerDir", self.state.name)
@@ -720,7 +720,7 @@ function CREATE_DATA_LOGGER() {
 
 		// var logFileName = logName + '-' + groupName + logFileAppendText + fileExtensionType;
 		// Zander Simplelogger - this is where we are setting the files name
-		var logFileName = document.getElementById('dataGroupName').value + fileExtensionType;
+		var logFileName = document.getElementById('logName').value + fileExtensionType;
 		var filePath = path.join(groupDir, logFileName);
 		console.warn("groupDir", groupDir)
 
@@ -943,29 +943,29 @@ function CREATE_DATA_LOGGER() {
 
 				// this works for the readMany
 				// theys are aso here so we are able to see the interval between each of the log
-				// if(logData) {
-				// 	// console.error("...", result);
-				// 	if(result.str) {
-				// 		dataToWrite += result.result + value_separator +  result.interval + value_separator;
-				// 	} else if(result.result == 0) {
-				// 		dataToWrite += result.result + value_separator + result.interval + value_separator;
-				// 	} else {
-				// 		// console.log("result", result)
-				// 		dataToWrite += result.result + value_separator + result.interval + value_separator;
-				// 	}
-				// }
-
 				if(logData) {
 					// console.error("...", result);
 					if(result.str) {
-						dataToWrite += result.result + value_separator;
+						dataToWrite += result.result + value_separator +  result.interval + value_separator;
 					} else if(result.result == 0) {
-						dataToWrite += result.result + value_separator;
+						dataToWrite += result.result + value_separator + result.interval + value_separator;
 					} else {
 						// console.log("result", result)
-						dataToWrite += result.result + value_separator;
+						dataToWrite += result.result + value_separator + result.interval + value_separator;
 					}
 				}
+
+				// if(logData) {
+				// 	// console.error("...", result);
+				// 	if(result.str) {
+				// 		dataToWrite += result.result + value_separator;
+				// 	} else if(result.result == 0) {
+				// 		dataToWrite += result.result + value_separator;
+				// 	} else {
+				// 		// console.log("result", result)
+				// 		dataToWrite += result.result + value_separator;
+				// 	}
+				// }
 				
 				// this works for the cReadMany
 				// if(logData) {

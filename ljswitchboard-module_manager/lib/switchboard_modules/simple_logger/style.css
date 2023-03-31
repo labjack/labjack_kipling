@@ -212,3 +212,9 @@ button.win-command:disabled {
 .boxes1{
 	padding: 17px;
 }
+
+/* Zander - not too sure about the collors */
+.disbaledTabs{
+	background-color: #999999 !important; 
+	color: white !important;
+}

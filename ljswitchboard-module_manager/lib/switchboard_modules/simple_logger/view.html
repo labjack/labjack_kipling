@@ -73,12 +73,15 @@
                 //alert("the thing");
                 alert("starting logger")
                 MODULE_CHROME.disableModuleLoading('Please wait for logger to finish.');
-                console.warn("module-chrome-tab-holder", document.getElementById("body_tabs"))
+                // enableModuleLoading
+                // console.warn("module-chrome-tab-holder", document.getElementById("body_tabs"))
                 $('.module-chrome-tab').each(function(){
-                  // Zander - not sure about this collor scheme
-                  $(this).css("background-color", "#999999;");
-                  $(this).css("color", "white")
+                  $(this).prop("disabled", true)
+                  $(this).addClass('disbaledTabs');
                 })
+
+                // $('.configure-log-controls').prop("disabled", true);
+                // $('.configure-log-controls').addClass('disbaledTabs');
 
                 userStartLogger();
                 //initializeLogger();

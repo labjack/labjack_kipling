@@ -363,7 +363,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		"logging_config": {
 			"name": "Basic Config Auto-Template",
 			// Zander Simplelogger - this is the one that holds the folder that holds the log/csv file
-			"file_prefix": document.getElementById('logName').value,
+			"file_prefix": document.getElementById('dataGroupName').value,
 			"write_to_file": true,
 			"default_result_view": "0",
 			"default_result_file": "0"
@@ -392,9 +392,9 @@ exports.generateBasicConfig = function(basicData, devices) {
 		"basic_data_group": {
 			"group_name": "Basic Data Group",
 			// this should be the rate at wich the logger runs
-			"group_period_ms": 5, // this was the old way this was done where we just set what it is
+			// "group_period_ms": 5, // this was the old way this was done where we just set what it is
 			// this will alow the users to set the interval timings
-			// "group_period_ms": document.getElementById('intervalTiming').value,
+			"group_period_ms": document.getElementById('intervalTiming').value,
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
