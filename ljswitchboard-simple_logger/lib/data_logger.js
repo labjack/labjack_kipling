@@ -193,7 +193,7 @@ function CREATE_DATA_LOGGER() {
 
 	function initializeLogData() {
 		var logging_config = self.config.logging_config;
-		console.error("logging_config", logging_config)
+		// console.error("logging_config", logging_config)
 
 		// Determine if the logger should actually save data.
 		// ZANDER - the issue is here
@@ -203,10 +203,9 @@ function CREATE_DATA_LOGGER() {
 		// Establish the logger's name.
 		var nameType = typeof(logging_config.name);
 		var filePrefixType = typeof(logging_config.file_prefix);
-		console.error("logging_config.file_prefix", logging_config.file_prefix)
+		// console.error("logging_config.file_prefix", logging_config.file_prefix)
 		if(filePrefixType === 'string') {
 			self.state.name = logging_config.file_prefix;
-			console.error("selfthing", self)
 		} else if(nameType === 'string') {
 			self.state.name = logging_config.name;
 		} else {
@@ -245,7 +244,7 @@ function CREATE_DATA_LOGGER() {
 				// dataCategories.push('SN: ' + serial_number);
 
 				// Add the time header.
-				dataNames.push('time');
+				dataNames.push('Time');
 
 				// add the error code header
 				dataCategories.push('');
@@ -329,7 +328,7 @@ function CREATE_DATA_LOGGER() {
 				groupName = data_group;
 			}
 
-			console.error("groupName", groupName)
+			// console.error("groupName", groupName)
 
 			var options = {
 				numDataPoints: DEFAULTS.MAX_SAMPLES_PER_FILE,
@@ -457,7 +456,6 @@ function CREATE_DATA_LOGGER() {
 		var defered = q.defer();
 		debugSavingData('Creating file', filePath);
 		var file = fs.createWriteStream(filePath);
-		console.error("file", file)
 		file.on('open', function(fd) {
 			debugLogFiles('Initialized file write stream');
 			defered.resolve(file);
@@ -531,7 +529,7 @@ function CREATE_DATA_LOGGER() {
 		var extName = path.extname(baseDir);
 		var fileName = baseName.slice(0, baseName.length - extName.length);
 
-		console.error("baseDir", baseDir)
+		// console.error("baseDir", baseDir)
 		var directoryName = path.dirname(baseDir);
 		var files = fs.readdirSync(directoryName);
 		var fileList = [];
@@ -556,7 +554,6 @@ function CREATE_DATA_LOGGER() {
 			}
 		}
 		var uniqueFilePath = path.join(directoryName, uniqueName);
-		console.error("This thing", directoryName)
 		defered.resolve(uniqueFilePath);
 		return defered.promise;
 	}
@@ -565,7 +562,6 @@ function CREATE_DATA_LOGGER() {
 		return function createDirectory(dirToCreate) {
 			var defered = q.defer();
 			function onSuccess() {
-				console.error("objToUpdate", objToUpdate)
 				objToUpdate.dir = dirToCreate;
 				defered.resolve(dirToCreate);
 			}
@@ -584,8 +580,8 @@ function CREATE_DATA_LOGGER() {
 		// console.warn("this should be the thing right?", self.rootDirectory)
 		var loggerDir = path.join(self.rootDirectory,self.state.name);
 		// var loggerDir = path.join(self.rootDirectory );
-		console.error("loggerDir", self.state.name)
-		console.warn("loggerDir", loggerDir)
+		// console.error("loggerDir", self.state.name)
+		// console.warn("loggerDir", loggerDir)
 
 		function onSuccess() {
 			defered.resolve(bundle);
@@ -683,7 +679,6 @@ function CREATE_DATA_LOGGER() {
 		return function createLogFileWriteStream(filePath) {
 			var defered = q.defer();
 			function onSuccess(fileStream) {
-				console.log("")
 				// Make sure that the file stream is not yet active as the heder
 				// data still needs to be written.
 				objToUpdate.file_stream_active = false;
@@ -694,7 +689,7 @@ function CREATE_DATA_LOGGER() {
 			function onError(err) {
 				defered.reject(err);
 			}
-			console.error("filePath", filePath)
+			// console.error("filePath", filePath)
 			initializeFileWriteStream(filePath)
 			.then(onSuccess, onError)
 			.catch(onError)
@@ -709,9 +704,9 @@ function CREATE_DATA_LOGGER() {
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
-		console.warn("self.logdata", self.logData)
+		// console.warn("self.logdata", self.logData)
 		var groupDir = dataGroup.dir;
-		console.warn("dataGroup", dataGroup)
+		// console.warn("dataGroup", dataGroup)
 
 		var logName = self.state.name;
 		var groupName = dataGroup.group_name;
@@ -722,7 +717,7 @@ function CREATE_DATA_LOGGER() {
 		// Zander Simplelogger - this is where we are setting the files name
 		var logFileName = document.getElementById('logName').value + fileExtensionType;
 		var filePath = path.join(groupDir, logFileName);
-		console.warn("groupDir", groupDir)
+		// console.warn("groupDir", groupDir)
 
 		function onSuccess() {
 			debugLogFiles('Successfully initialized log file', groupName);
@@ -814,8 +809,8 @@ function CREATE_DATA_LOGGER() {
 	}
 
 	function finalizeLogFile(data_group) {
-		console.log("data_group", data_group)
-		console.log("self.logdata", self.logData)
+		// console.log("data_group", data_group)
+		// console.log("self.logdata", self.logData)
 		var defered = q.defer();
 
 		var dataGroup = self.logData[data_group];
@@ -1133,7 +1128,7 @@ function CREATE_DATA_LOGGER() {
 		return innerStartDataLogger(bundle);
 	};
 	this.stop = function(bundle) {
-		console.log(".stop", bundle)
+		// console.log(".stop", bundle)
 		return innerStopDataLogger(bundle);
 	};
 

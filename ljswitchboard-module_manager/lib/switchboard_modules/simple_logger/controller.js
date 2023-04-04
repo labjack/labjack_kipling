@@ -43,7 +43,7 @@ this.getCachedListAllDevices = device_controller.getCachedListAllDevices;
 this.listAllDevices = device_controller.listAllDevices;
 this.device_controller = device_controller;
 this.driver_controller = driver_controller;
-console.error("this.device_controller", this.device_controller)
+// console.error("this.device_controller", this.device_controller)
 // console.error("device_manager", device_manager.create())
 
 var ignoreErrorsList = [
@@ -128,7 +128,7 @@ function loggerStop() {
 function loadConfigFile(config) {
 	$("#logName").val(config.logging_config.name)
 	try {
-		console.error(config)
+		// console.error(config)
 		let dev_sn = config.device_serial_numbers[0]
 		let data_group = config.data_groups[0]
 		let reg_list = config.dat_group.dev_sn.registers
@@ -328,12 +328,12 @@ function module() {
         self.moduleContext.logger_mode = logger_modes.configure;
 		self.moduleContext.deviceSN = self.deviceSN;	
 		var rm_registers = global.globalActiveRegisters;
-        console.error("Rm_registers", rm_registers)
+        // console.error("Rm_registers", rm_registers)
 		if(rm_registers !== undefined) {
-            console.warn("this is within the on device confugureed")
+            // console.warn("this is within the on device confugureed")
 			self.moduleContext.startupRegisters = Object.values(rm_registers).slice(0, MAX_REGISTERS);
 		}
-        console.error("Rm_registers", self.moduleContext)
+        // console.error("Rm_registers", self.moduleContext)
 		self.moduleContext.MAX_REGISTERS = MAX_REGISTERS;
         framework.setCustomContext(self.moduleContext);
         onSuccess();
@@ -386,10 +386,10 @@ function loggerApp() {
 	this.listAllDevices = device_controller.listAllDevices;
 	this.device_controller = device_controller;
 	this.driver_controller = driver_controller;
-	console.error("this.device_controller", this.device_controller)
+	// console.error("this.device_controller", this.device_controller)
 	
 
-	console.error("this.device_controller", this.device_controller)
+	// console.error("this.device_controller", this.device_controller)
 	
 	// const result = this.initializeLogger();
 
@@ -600,6 +600,11 @@ function loggerApp() {
 		// enables the checking of configuration and selecting file path
 		$(".btnUpdate").prop("disabled", false);
 		$("#select-file").prop("disabled", false);
+
+		// Enable the buttons at the top of the logger
+		$('#newConfig').prop("disabled", false);
+        $('#loadConfiguration').prop("disabled", false);
+        $('#saveConfiguration').prop("disabled", false);
 
 		// disables all the things that need to be disabled (start btn, device serial number, file location)
 		$("#devSN").prop("disabled", true);

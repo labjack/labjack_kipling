@@ -325,7 +325,7 @@ function CREATE_COORDINATOR () {
 
 	var innerStartCoordinator = function(bundle) {
 		var defered = q.defer();
-		console.error("Running????? --- ", self.state.running);
+		// console.error("Running????? --- ", self.state.running);
 		if(self.state.running) {
 		// if(true) {
 			defered.resolve(bundle);

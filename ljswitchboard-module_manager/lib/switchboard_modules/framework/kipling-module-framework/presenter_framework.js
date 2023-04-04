@@ -1400,7 +1400,7 @@ class PresenterFramework extends EventEmitter {
                     console.error(err);
                 }
             } else {
-                console.warn('Not sure what to do... presenter_framework.js - updateSelectedDeviceList');
+                // console.warn('Not sure what to do... presenter_framework.js - updateSelectedDeviceList');
             }
         }
 

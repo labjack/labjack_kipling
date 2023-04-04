@@ -250,7 +250,6 @@ function CREATE_DATA_COLLECTOR() {
 
 			// For each custom register check to see if there are any functions
 			// that need to be created.
-			console.log("this is happening?")
 			if(data_group.defined_user_values) {
 				var user_value_keys = data_group.defined_user_values;
 				user_value_keys.forEach(function(user_value_key) {
@@ -398,7 +397,7 @@ function CREATE_DATA_COLLECTOR() {
 
 	var linkDeviceDataCollectorsToDevices = function(bundle) {
 		stepDebug('in linkDeviceDataCollectorsToDevices');
-		console.warn("linkDeviceDataCollectorsToDevices")
+		// console.warn("linkDeviceDataCollectorsToDevices")
 		var defered = q.defer();
 
 		var serialNumbers = Object.keys(self.deviceDataCollectors);
@@ -710,10 +709,8 @@ function CREATE_DATA_COLLECTOR() {
 								// Zander we need to check more of thew stuff that is here
 								// this might be a place where we can find the informatioin and
 								// ba able to read the data
-								console.log("within the if statment");
 								organizedGroupData.userValues[valueKey] = result.value;
 							} else {
-								console.log("within the else block")
 								var defaultVal = 25;
 								var userValue = activeGroupObj.user_values[valueKey];
 								if(userValue.default_value) {

@@ -135,7 +135,7 @@
             </script>
             </li>
             <li>
-              <button class="win-command" rel="tootlip" title="Load a configuration">
+              <button class="win-command" rel="tootlip" title="Load a configuration" id='loadConfiguration'>
                 <span class="win-commandicon win-commandring icon-folder-open openfile" type="file" id="file"></span>
                 <!-- <span class="win-label">Open</span> -->
              </button>
@@ -143,80 +143,85 @@
               const fs = require('fs')
               const { dialog } = require('@electron/remote')
               $(".openfile").click(function(){
-
                 // this is what is bring up the file path
-                dialog.showOpenDialog({
-                  properties: ['openFile'],
-                  filters: [ {name: 'JSON', extensions: ['JSON']} ]
-                })
-                .then((data) =>  {
-                  var filePath = data.filePaths[0];
-                  var config_data = fs.readFileSync(filePath)
-                  let obj = JSON.parse(config_data)
+                if($("#loadConfiguration")[0].disabled == false){
+                  dialog.showOpenDialog({
+                    properties: ['openFile'],
+                    filters: [ {name: 'JSON', extensions: ['JSON']} ]
+                  })
+                  .then((data) =>  {
+                    var filePath = data.filePaths[0];
+                    var config_data = fs.readFileSync(filePath)
+                    let obj = JSON.parse(config_data)
 
-                  const logName = document.getElementById('logName');
-                  const dataGroupName = document.getElementById('dataGroupName');
-                  const runTime = document.getElementById('runtimeSec');
-                  const intervalT = document.getElementById('intervalTiming');
+                    const logName = document.getElementById('logName');
+                    const dataGroupName = document.getElementById('dataGroupName');
+                    const runTime = document.getElementById('runtimeSec');
+                    const intervalT = document.getElementById('intervalTiming');
 
-                  // making sure that the file is actuly what we are looking for
-                  if(obj.registers === undefined || obj.Log_name === undefined || obj.Data_group_name === undefined || obj.run_Time_In_Seconds === undefined){
-                    alert("Please enter a valid configuration file")
-                    return;
-                  }
-
-                  // loading the register into the logger page
-                  for(var i = 0; i < "{{MAX_REGISTERS}}"; i++){
-                    if(obj.registers[i] === undefined){}
-                    else{
-                      document.getElementById('validationCustom0' + i).value = obj.registers[i];
-                      $(".register-input").trigger("change");
+                    // making sure that the file is actuly what we are looking for
+                    if(obj.registers === undefined || obj.Log_name === undefined || obj.Data_group_name === undefined || obj.run_Time_In_Seconds === undefined){
+                      alert("Please enter a valid configuration file")
+                      return;
                     }
-                  }
 
-                  logName.value = obj.Log_name;
-                  dataGroupName.value = obj.Data_group_name;
-                  runTime.value = obj.run_Time_In_Seconds;
-                  intervalT.value = obj.interval;
-                  $(".runtimeSec").trigger("change");
-                  $(".intervalTiming").trigger("change");
-                })
+                    // loading the register into the logger page
+                    for(var i = 0; i < "{{MAX_REGISTERS}}"; i++){
+                      if(obj.registers[i] === undefined){}
+                      else{
+                        document.getElementById('validationCustom0' + i).value = obj.registers[i];
+                        $(".register-input").trigger("change");
+                      }
+                    }
+
+                    logName.value = obj.Log_name;
+                    dataGroupName.value = obj.Data_group_name;
+                    runTime.value = obj.run_Time_In_Seconds;
+                    intervalT.value = obj.interval;
+                    $(".runtimeSec").trigger("change");
+                    $(".intervalTiming").trigger("change");
+                  })
+                }
+              else{}
               })
              </script>
             </li>
             <li>
-              <button class="win-command " rel="tootlip" title="Save configuration" >
+              <button class="win-command " rel="tootlip" title="Save configuration" id="saveConfiguration">
                 <span class="win-commandicon win-commandring icon-disk saveConfig" ></span>
                 <!-- <span class="win-label">Save</span> -->
              </button>
              <script>
-              $(".saveConfig").click(function(){                  
+              $(".saveConfig").click(function(){     
                   // This variable stores all the data.
-                  var data = {
-                    "Log_name": document.getElementById('logName').value,
-                    "Data_group_name": document.getElementById('dataGroupName').value,
-                    "registers": [],
-                    "run_Time_In_Seconds": document.getElementById('runtimeSec').value,
-                    "interval": document.getElementById("intervalTiming").value,
-                    // "device_serial_numbers": [440017328],
-                  }
-
-                  // loads the config array with the registers from the form
-                  for(var i =  0; i < "{{MAX_REGISTERS}}"; ++i){
-                    if(document.getElementById('validationCustom0' + i).value === ''){}
-                    else{
-                      data.registers.push(document.getElementById('validationCustom0' + i).value)
+                  if($("#saveConfiguration")[0].disabled == false){
+                    var data = {
+                      "Log_name": document.getElementById('logName').value,
+                      "Data_group_name": document.getElementById('dataGroupName').value,
+                      "registers": [],
+                      "run_Time_In_Seconds": document.getElementById('runtimeSec').value,
+                      "interval": document.getElementById("intervalTiming").value,
+                      // "device_serial_numbers": [440017328],
                     }
-                  }
 
-                  const sFileName = 'formData.JSON';      // this is how wer are saving the file to file designated by the user
+                    // loads the config array with the registers from the form
+                    for(var i =  0; i < "{{MAX_REGISTERS}}"; ++i){
+                      if(document.getElementById('validationCustom0' + i).value === ''){}
+                      else{
+                        data.registers.push(document.getElementById('validationCustom0' + i).value)
+                      }
+                    }
 
-                  // create the link to where the file needs to be downloaded to.
-                  let newLink = document.createElement("a");
-                  newLink.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2)));
-                  newLink.setAttribute('download', 'myfile');
-                  newLink.download = sFileName;
-                  newLink.click(); 
+                    const sFileName = 'formData.JSON';      // this is how wer are saving the file to file designated by the user
+
+                    // create the link to where the file needs to be downloaded to.
+                    let newLink = document.createElement("a");
+                    newLink.setAttribute('href', 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2)));
+                    newLink.setAttribute('download', 'myfile');
+                    newLink.download = sFileName;
+                    newLink.click(); 
+                }
+                else{}
                })
 
              </script>
@@ -566,7 +571,6 @@
 
       </form>
       <script>
-
             // <div class="col-sm-6">
             //   <small id="regCheck" class="form-text
             //     text-muted invalid-feedback">
@@ -603,7 +607,6 @@
           $("#confirmModal")
 
           document.getElementById('select-file').addEventListener('click',function(){
-            // console.error("!!!!!!!!!!!!!!!!!!!!!!")
             dialog.showOpenDialog({
               properties: ['openDirectory']
             }).then((data) => {
@@ -663,8 +666,12 @@
             var valid = validateForm();
             if(valid){
               $("#configForm :input").prop("disabled", true);
+              // his
               showInfoMessage("Configuration Valid");
-              $("#startBtn").prop("disabled", false)
+              $("#startBtn").prop("disabled", false);
+              $('#newConfig').prop("disabled", true);
+              $('#loadConfiguration').prop("disabled", true);
+              $('#saveConfiguration').prop("disabled", true);
             }
             return false;
           });
