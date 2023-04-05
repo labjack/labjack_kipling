@@ -68,8 +68,8 @@
       "icon": "Kipling3.icns",
       "category": "public.app-category.utilities",
       "target": {
-        "target": "pkg",
-        "arch": ["arm64"]
+        "target": "zip",
+        "arch": ["x64", "arm64"]
       }
     },
     "linux": {
