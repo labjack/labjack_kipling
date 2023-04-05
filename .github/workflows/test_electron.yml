@@ -26,6 +26,7 @@ jobs:
 #      - name: Install ljm
 #        run: tar xfz labjack_ljm_software.tar.gz && cd ./labjack_ljm_software_2019_07_16_x86_64 && sudo ./labjack_ljm_installer.run
       - uses: actions/checkout@v3
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
@@ -85,9 +86,17 @@ jobs:
       - run: ls ${{ github.workspace }}/build/output/dist
 
       - uses: actions/upload-artifact@v3
+        name: Upload Artifacts (not MacOS)
+        if: runner.os != 'macOS'
         with:
-          name: my-artifact_${{runner.os}}
+          name: KIPLING_${{runner.os}}
           path: ${{ github.workspace }}/build/output/dist/*
 
+      - uses: actions/upload-artifact@v3
+        name: Upload Artifacts (MacOS)
+        if: runner.os == 'macOS'
+        with:
+          name: KIPLING_${{runner.os}}
+          path: ${{ github.workspace }}/build/output/dist/*.zip
 
 
