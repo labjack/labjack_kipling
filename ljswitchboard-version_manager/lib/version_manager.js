@@ -21,9 +21,6 @@ var cheerio = require('cheerio');
 var semver = require('./semver_min');
 const { defer } = require('q');
 
-const UPGRADE_LINK = "https://files.labjack.com/firmware/T8/"
-
-
 class labjackVersionManager extends EventEmitter {
     constructor() {
 
@@ -66,6 +63,8 @@ class labjackVersionManager extends EventEmitter {
             "test_linux64":     "https://s3.amazonaws.com/ljrob/linux64/kipling/test/kipling_test_lin64.zip"
         };
 
+        this.ljmUpdateLink = "https://labjack.com/support/software/installers/ljm"
+
         // define dict object with various urls in it
     this.urlDict = {
         "theGoldStandard": {
@@ -79,6 +78,40 @@ class labjackVersionManager extends EventEmitter {
                 {"url": "https://files.labjack.com/firmware/T8/beta", "type": "beta"},
                 {"url": "https://files.labjack.com/firmware/T8/", "type": "old"},
             ],
+        },
+        "kipling": {
+            "type":"kipling",
+            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
+            "platformDependent": true,
+            "types": ['current','beta','test'],
+            "urls":[
+                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "current_win"},
+                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "current_mac"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "current_linux32"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "current_linux64"},
+
+                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "test_win"},
+                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "test_mac"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "test_linux32"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "test_linux64"},
+
+                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/beta.txt", "type": "beta_win"},
+                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/beta.txt", "type": "beta_mac"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/beta.txt", "type": "beta_linux32"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/beta.txt", "type": "beta_linux64"},
+            ]
+        },
+        "ljm": {
+            "type":"ljm",
+            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
+            "platformDependent": true,
+            "types": ['current'],
+            "urls":[
+                {"url": "https://files.labjack.com/versions/ljrob/win32/ljm/current.txt", "type": "current_win"},
+                {"url": "https://files.labjack.com/versions/ljrob/mac/ljm/current.txt", "type": "current_mac"},
+                {"url": "https://files.labjack.com/versions/ljrob/linux32/ljm/current.txt", "type": "current_linux32"},
+                {"url": "https://files.labjack.com/versions/ljrob/linux64/ljm/current.txt", "type": "current_linux64"}
+            ]
         },
         "t8": {
             "type":"t8FirmwarePage",
@@ -113,28 +146,6 @@ class labjackVersionManager extends EventEmitter {
                 {"url": "https://files.labjack.com/firmware/T4/Old/", "type": "old"},
             ],
         },
-        "kipling": {
-            "type":"kipling",
-            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
-            "platformDependent": true,
-            "types": ['current','beta','test'],
-            "urls":[
-                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "current_win"},
-                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "current_mac"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "current_linux32"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "current_linux64"},
-
-                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "test_win"},
-                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "test_mac"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "test_linux32"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "test_linux64"},
-
-                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/beta.txt", "type": "beta_win"},
-                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/beta.txt", "type": "beta_mac"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/beta.txt", "type": "beta_linux32"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/beta.txt", "type": "beta_linux64"},
-            ]
-        },
         "kipling_new": {
             "type":"kiplingDownloadsPage",
             "upgradeReference": "https://labjack.com/support/software/installers/ljm",
@@ -154,6 +165,15 @@ class labjackVersionManager extends EventEmitter {
             kipling: function(listingArray, pageData, urlInfo, name) {
                 listingArray.push({
                     "upgradeLink":self.kiplingUpdateLinks[urlInfo.type],
+                    "version":pageData,
+                    "type":urlInfo.type,
+                    "key":urlInfo.type + '-' + pageData
+                });
+                return;
+            },
+            ljm: function(listingArray, pageData, urlInfo, name) {
+                listingArray.push({
+                    "upgradeLink":self.ljmUpdateLink,
                     "version":pageData,
                     "type":urlInfo.type,
                     "key":urlInfo.type + '-' + pageData
@@ -459,6 +479,12 @@ class labjackVersionManager extends EventEmitter {
             .then(defered.resolve,defered.reject);
             return defered.promise;
         };
+        this.getLJMVersions = function() {
+            var defered = q.defer();
+            self.queryForVersions('ljm')
+            .then(defered.resolve,defered.reject);
+            return defered.promise;
+        };
         this.getT8FirmwareVersions = function() {
             var defered = q.defer();
             self.queryForVersions('t8')
@@ -507,6 +533,7 @@ class labjackVersionManager extends EventEmitter {
 
             // start getting all versions
             self.getKiplingVersions()
+            .then(self.getLJMVersions, errorFunc)
             .then(self.getT8FirmwareVersions, errorFunc)
             .then(self.getT7FirmwareVersions, errorFunc)
             .then(self.getT4FirmwareVersions, errorFunc)
@@ -571,7 +598,6 @@ class labjackVersionManager extends EventEmitter {
             var kiplingData = {};
             if(typeof(self.infoCache.kipling) !== 'undefined') {
                 kiplingData = JSON.parse(JSON.stringify(self.infoCache.kipling));
-                // populateMissingKeys(t8Data, ['beta', 'current', 'old']);
                 kiplingData.isValid = true;
             } else {
                 kiplingData.current = [];
@@ -579,6 +605,17 @@ class labjackVersionManager extends EventEmitter {
                 kiplingData.isValid = false;
             }
             return kiplingData;
+        };
+        this.getCachedLJMVersions = function() {
+            var ljmData = {};
+            if(typeof(self.infoCache.ljm) !== 'undefined') {
+                ljmData = JSON.parse(JSON.stringify(self.infoCache.ljm));
+                ljmData.isValid = true;
+            } else {
+                ljmData.current = [];
+                ljmData.isValid = false;
+            }
+            return ljmData;
         };
         this.getCachedT8Versions = function() {
             var t8Data = {};
