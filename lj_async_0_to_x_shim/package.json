@@ -1,6 +1,6 @@
 {
   "name": "lj_async_0_to_x_shim",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "A repository to make it easier to switch from async 0 to async 2,3 ++",
   "main": "lj_async_shim.js",
@@ -16,9 +16,9 @@
   "author": "Chris Johnson",
   "license": "MIT",
   "devDependencies": {
+    "chai": "^4.2.0",
     "diff": "^4.0.1",
-    "mocha": "^8.2.1",
-    "chai": "^4.2.0"
+    "mocha": "^8.2.1"
   },
   "dependencies": {
     "async": "^3.2.4"

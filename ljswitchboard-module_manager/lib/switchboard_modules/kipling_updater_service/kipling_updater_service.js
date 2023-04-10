@@ -230,7 +230,6 @@ class KiplingUpdaterService {
 
 	updatedVersionData(versionData) {
 		try {
-			console.log('in kipling_updater_service updatedVersionData', versionData, this.currentVersionData);
 			this.cachedVersionData = versionData;
 			this.refreshKiplingUpdaterModuleStatus();
 			this.updateKiplingWindowTitle();

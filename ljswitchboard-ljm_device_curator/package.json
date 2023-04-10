@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_device_curator",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A promise based ljm wrapper with expanded device functionality for the ljswitchboard project",
   "main": "./lib/device_curator.js",
   "scripts": {
@@ -57,10 +57,10 @@
     "dont delete": "do not delete"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
     "colors": "1.4.0",
     "diff": "^4.0.1",
-    "mocha": "^8.2.1",
-    "chai": "^4.2.0"
+    "mocha": "^8.2.1"
   },
   "directories": {
     "lib": "./lib"

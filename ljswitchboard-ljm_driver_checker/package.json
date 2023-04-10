@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_driver_checker",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "Chris Johnson",
     "url": "https://labjack.com"
@@ -28,9 +28,9 @@
     "test": "mocha"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
     "diff": "^4.0.1",
-    "mocha": "^8.2.1",
-    "chai": "^4.2.0"
+    "mocha": "^8.2.1"
   },
   "directories": {
     "lib": "./lib"
