@@ -1,6 +1,6 @@
 /**
  * version_manager.js for LabJack Switchboard.  Provides Kipling with the ability
- * to query for various versions of LabJack software versions, firmeware
+ * to query for various versions of LabJack software versions, firmware
  * versions, and drivers
  *
  * @author Jimmy Brant (LabJack, 2022)
@@ -124,10 +124,10 @@ class labjackVersionManager extends EventEmitter {
                 {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "current_linux32"},
                 {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "current_linux64"},
 
-                // {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "test_win"},
-                // {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "test_mac"},
-                // {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "test_linux32"},
-                // {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "test_linux64"},
+                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "test_win"},
+                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "test_mac"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "test_linux32"},
+                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "test_linux64"},
 
                 {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/beta.txt", "type": "beta_win"},
                 {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/beta.txt", "type": "beta_mac"},
@@ -152,8 +152,6 @@ class labjackVersionManager extends EventEmitter {
 
         this.strategies = {
             kipling: function(listingArray, pageData, urlInfo, name) {
-                console.log("running kipling strategy: " + name);
-                console.log(pageData);
                 listingArray.push({
                     "upgradeLink":self.kiplingUpdateLinks[urlInfo.type],
                     "version":pageData,
@@ -185,8 +183,8 @@ class labjackVersionManager extends EventEmitter {
                             "key":urlInfo.type + '-' + version
                         });
                     } else {
-                        // there are lots of invalid URLs on file.labjack.com/fimrware/T8 page
-                        // for now I will supress these warnings
+                        // there are lots of invalid URLs on file.labjack.com/firmware/T8 page
+                        // for now I will suppress these warnings
                         // console.warn("Invalid URL for T8 firmware", targetURL, targetURL.length)
                     }
                 });
@@ -215,8 +213,8 @@ class labjackVersionManager extends EventEmitter {
                             "key":urlInfo.type + '-' + version
                         });
                     } else {
-                        // there are lots of invalid URLs on file.labjack.com/fimrware/T7 page
-                        // for now I will supress these warnings
+                        // there are lots of invalid URLs on file.labjack.com/firmware/T7 page
+                        // for now I will suppress these warnings
                         // console.warn("Invalid URL for T7 firmware", targetURL, targetURL.length)
                     }
                 });
@@ -245,9 +243,9 @@ class labjackVersionManager extends EventEmitter {
                             "key":urlInfo.type + '-' + version
                         });
                     } else {
-                        // there are lots of invalid URLs on file.labjack.com/fimrware/T7 page
-                        // for now I will supress these warnings
-                        // console.warn("Invalid URL for T7 firmware", targetURL, targetURL.length)
+                        // there are lots of invalid URLs on file.labjack.com/firmware/T7 page
+                        // for now I will suppress these warnings
+                        // console.warn("Invalid URL for T4 firmware", targetURL, targetURL.length)
                     }
                 });
                 return;
@@ -343,7 +341,7 @@ class labjackVersionManager extends EventEmitter {
                     }
                 }); 
 
-                // If the ndoe should be added, add it.
+                // If the node should be added, add it.
                 if(addToCache) {
                     self.infoCache[name][info.type].push(data);
                     if(platformDependent) {
@@ -371,7 +369,7 @@ class labjackVersionManager extends EventEmitter {
             var queriedData = [];
 
             if(typeof(info) !== 'undefined') {
-                // Get the stratigy function
+                // Get the strategy function
                 var strategyType = info.type;
                 var strategy = self.strategies[strategyType];
 
@@ -457,9 +455,8 @@ class labjackVersionManager extends EventEmitter {
         **/
         this.getKiplingVersions = function() {
             var defered = q.defer();
-            console.log('getKiplingVersions');
             self.queryForVersions('kipling')
-            .then(defered.promise.resolve,defered.reject);
+            .then(defered.resolve,defered.reject);
             return defered.promise;
         };
         this.getT8FirmwareVersions = function() {
@@ -684,6 +681,19 @@ class labjackVersionManager extends EventEmitter {
             });
             console.warn(JSON.stringify(data, null, 2));
         };
+        this.getIssue = function() {
+            var issue;
+            if(self.isIssue()) {
+                if(self.infoCache.isError) {
+                    issue = {"type": "error","data":self.infoCache.errors};
+                } else {
+                    issue = {"type": "warning","data":self.infoCache.warnings};
+                }
+            } else {
+                issue = {"type": "none","data":null};
+            }
+            return issue;
+        };
     
         var self = this;
     }
@@ -692,9 +702,8 @@ class labjackVersionManager extends EventEmitter {
 var LABJACK_VERSION_MANAGER = new labjackVersionManager();
 
 exports.lvm = LABJACK_VERSION_MANAGER;
-exports.initalize = function() {
+exports.initialize = function() {
     var defered = q.defer();
-
     LABJACK_VERSION_MANAGER.getAllVersions();
     LABJACK_VERSION_MANAGER.waitForData()
     .then(function(data) {
@@ -719,40 +728,42 @@ exports.initalize = function() {
 exports.getAllVersions = LABJACK_VERSION_MANAGER.getAllVersions;
 
 // For Testing....
-var LVM = LABJACK_VERSION_MANAGER;
+// var LVM = LABJACK_VERSION_MANAGER;
 
-LVM.getKiplingVersions()
-.then(console.log("Info cache:", LVM.getInfoCache()))
+// LVM.getKiplingVersions();
+// LVM.waitForData()
+// .then(console.log("Info cache:", LVM.getInfoCache()))
 
 // LVM.getT8FirmwareVersions()
 // .then(LVM.getT7FirmwareVersions())
 // .then(console.log("Info cache:", LVM.getInfoCache()))
 
-function testThisBitch() {
-    var defered = q.defer();
+// function testLabjackVersionManger() {
+//     var defered = q.defer();
+//     console.log("Testing the Version Manager");
+//     LABJACK_VERSION_MANAGER.getAllVersions();
+//     LABJACK_VERSION_MANAGER.waitForData()
+//     .then(function(data) {
+//         console.log('LVM dataCache:',LABJACK_VERSION_MANAGER.dataCache);
+//         if(LABJACK_VERSION_MANAGER.isIssue()) {
+//             var issue = LABJACK_VERSION_MANAGER.getIssue();
+//             console.error('LVM Warning', issue);
+//         } 
+//         defered.resolve(data);
+//     }, function(err) {
+//         if(LABJACK_VERSION_MANAGER.isIssue()) {
+//             var issue = LABJACK_VERSION_MANAGER.getIssue();
+//             console.error('LVM Error', issue, "Error: ", err);
+//             defered.reject(issue);
+//         } else {
+//             defered.reject();
+//         }
+//     });
 
-    LABJACK_VERSION_MANAGER.getKiplingVersions();
-    LABJACK_VERSION_MANAGER.waitForData()
-    .then(function(data) {
-        console.log('LVM dataCache:',LABJACK_VERSION_MANAGER.dataCache);
-        if(LABJACK_VERSION_MANAGER.isIssue()) {
-            var issue = LABJACK_VERSION_MANAGER.getIssue();
-            console.error('LVM Warning', issue);
-        } 
-        defered.resolve(data);
-    }, function(err) {
-        if(LABJACK_VERSION_MANAGER.isIssue()) {
-            var issue = LABJACK_VERSION_MANAGER.getIssue();
-            console.error('LVM Error', issue, "Error: ", err);
-            defered.reject(issue);
-        } else {
-            defered.reject();
-        }
-    });
+//     return defered.promise;
+// }
 
-    return defered.promise;
-}
-
+// testLabjackVersionManger();
 
 
 // For Testing....
