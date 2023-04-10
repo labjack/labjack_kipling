@@ -209,15 +209,24 @@ function CREATE_VIEW_DATA_REPORTER() {
 
 		dataMap.map(function(data_info) {
 			var currentData = data[data_info.key];
+			// console.error("data_info", data_info.key)
 			var data_type = data_info.type;
 			var val_key = data_info.val_key;
+			// time: '2023-04-10T20:14:06.045Z',
+			// duration: 3.4546,
+			// interval: 0,
+			// index: 
 			var newVal = 0;
-			if(data_type === 'dev_val') {
-				var valObj = currentData.results[val_key];
-				newVal = valObj.result
-			} else if(data_type === 'user_val') {
-				newVal = currentData[val_key]
-			}
+			// console.log("current daata", currentData.results)
+			var valObj = currentData.results;
+			console.log("valObj", valObj);
+			newVal = valObj.result;
+			// if(data_type === 'dev_val') {
+			// 	var valObj = currentData.results[val_key];
+			// 	newVal = valObj.result
+			// } else if(data_type === 'user_val') {
+			// 	newVal = currentData[val_key]
+			// }
 
 			dataArray.push(newVal);
 			if(dataKeyValueStore[data_info.key]) {
@@ -283,6 +292,7 @@ function CREATE_VIEW_DATA_REPORTER() {
 
 			debugDataReporting('Check to see if we need to report data...');
 			var curTime = new Date();
+			// Zander TODO - this might be a thing that we need to look into later
 			var minUpdateRate = 50;
 			var timeElapsed;
 			if(self.config.view_config.update_rate_ms) {
@@ -308,6 +318,7 @@ function CREATE_VIEW_DATA_REPORTER() {
 		
 	}
 	/* Externally Accessable functions */
+	// Zander TODO - this is the new data that is being read from the device when we are using the hello_world scripr
 	this.onNewData = function(data) {
 		// print('New Data');
 		// Determine if the data group key is one that should be managed.

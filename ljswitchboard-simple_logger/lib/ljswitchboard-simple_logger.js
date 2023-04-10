@@ -89,7 +89,8 @@ function CREATE_SIMPLE_LOGGER () {
 		// Create a new coordinator instance.
 		self.coordinator = log_coordinator.create();
 		// console.error("self.coordinator", self.coordinator)
-		// console.error("========== ", self.filePath, "================================")
+		// self.filePath = 'D:/Script testing thing/'
+		console.error("========== ", self.filePath, "================================")
 		self.coordinator.setFileLocation(self.filepath)
 
 		// Link to all of the events that it will emit.
@@ -391,7 +392,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		"basic_data_group": {
 			"group_name": "Basic Data Group",
 			// this should be the rate at wich the logger runs
-			"group_period_ms": 10,
+			"group_period_ms": 100,
 			"is_stream": false,
 			// programaticaly define fill device_serial_numbers array and define device sn objects.
 			"device_serial_numbers": [],
@@ -476,10 +477,10 @@ exports.generateBasicConfig = function(basicData, devices) {
 		// 'CORE_TIMER','AIN0','AIN1','AIN2','AIN3','AIN4'
 		configObj.basic_data_group.defined_user_values.push('CORE_TIMER');
 		configObj.basic_data_group.defined_user_values.push('AIN0');
-		configObj.basic_data_group.defined_user_values.push('AIN1');
-		configObj.basic_data_group.defined_user_values.push('AIN2');
-		configObj.basic_data_group.defined_user_values.push('AIN3');
-		configObj.basic_data_group.defined_user_values.push('AIN4');
+		// configObj.basic_data_group.defined_user_values.push('AIN1');
+		// configObj.basic_data_group.defined_user_values.push('AIN2');
+		// configObj.basic_data_group.defined_user_values.push('AIN3');
+		// configObj.basic_data_group.defined_user_values.push('AIN4');
 		
 		basicData.registers.forEach(function(register) {
 			console.log("increment")

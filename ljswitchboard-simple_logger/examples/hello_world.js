@@ -102,7 +102,7 @@ function attachListeners(loggerObject) {
 		var key = eventMap[eventKey];
 		loggerObject.on(key, function(data) {
 			if(ignoreErrorsList.indexOf(key) < 0) {
-				debugLog('Captured Event!!', key, data);
+				// debugLog('Captured Event!!', key, data);
 			}
 			var handeledEvent = false;
 			// print('Captured Event', key, data, Object.keys(data));
@@ -125,7 +125,7 @@ function attachListeners(loggerObject) {
 				// console.log('un-handled... key', key)
 			}
 			if(!handeledEvent) {
-				printNewData('Captured Event', key, data);
+				// printNewData('Captured Event', key, data);
 			}
 
 		});
@@ -180,11 +180,11 @@ function loggerApp() {
 	};
 	this.updateDeviceListing = function() {
 		debugLog('--- In Func: updateDeviceListing');
-		debugLog('Connected Devices', self.deviceManager.getDevices());
+		debugLog('Connected Devices'); //, self.deviceManager.getDevices()
 		var defered = q.defer();
 		self.simpleLogger.updateDeviceListing(self.deviceManager.getDevices())
 		.then(function(res) {
-			debugLog('Device listing has been passwd to the logger',res);
+			debugLog('Device listing has been passwd to the logger'); //,res
 			defered.resolve();
 		}, function(err) {
 			console.error('Failed to save the device listing to the logger',err);
@@ -210,12 +210,14 @@ function loggerApp() {
 		},self.deviceManager.getDevices());
 
 		var fs = require('fs');
+		console.error("template_logger_config_file,JSON.stringify(self.logConfigs,null,2)", template_logger_config_file,JSON.stringify(self.logConfigs,null,2))
 		fs.writeFile(template_logger_config_file,JSON.stringify(self.logConfigs,null,2),function(err) {
 			if(err) {
 				console.error('Error saving generated configs');
 			} else {
-				debugLog('Data was appended to the config file.');
+				debugLog('Data was appended to the config file.11212123123');
 			}
+			console.log("!!!", template_logger_config_file)
 			self.simpleLogger.configureLogger({
 				'configType': 'filePath',
 				'filePath': template_logger_config_file
@@ -226,7 +228,7 @@ function loggerApp() {
 			// 	filePath: cwd
 			// })
 			.then(function(res) {
-				debugLog('Logger has been configured.',res)
+				debugLog('Logger has been configured.', res) //,res
 				defered.resolve();
 			}, function(err) {
 				console.error('Logger failed to be configured.',err)
@@ -251,10 +253,10 @@ function loggerApp() {
 		self.simpleLogger.startLogger()
 		.then(function succ() {
 			
-			debugLog('Logger Started');
-		}, function err() {
+			debugLog('Logger Started1');
+		}, function err(err) {
 			
-			debugLog('Logger Started');
+			debugLog('Logger Started with error', err);
 		});
 		return defered.promise;
 	}

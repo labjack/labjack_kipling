@@ -82,7 +82,7 @@ function CREATE_COORDINATOR () {
 		this.shouldStopLogging = false;
 		// Initialize the num_collected variable.
 		self.stats.num_collected = {};
-		print('initializing stats',self.config);
+		print('initializing stats'); //,self.config
 		self.config.data_groups.forEach(function(data_group) {
 			self.stats.num_collected[data_group] = 0;
 		});
@@ -169,7 +169,7 @@ function CREATE_COORDINATOR () {
 	};
 	this.onDataCollectorGroupData = function(data) {
 		// print('in onDataCollectorGroupData', Object.keys(data), Object.keys(data.data));
-		console.log("onDataCollectorGroupData data varable: ", data)
+		// console.log("onDataCollectorGroupData data varable: ", data)
 		self.updateStats(data);
 
 		// Send data to the dataLogger and dataReporter.

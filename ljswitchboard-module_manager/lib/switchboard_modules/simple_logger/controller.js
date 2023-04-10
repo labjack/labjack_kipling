@@ -402,7 +402,8 @@ function loggerApp() {
 
 		self.simpleLogger = simple_logger.create();
 		// console.warn("self.simplelogger", self.simpleLogger)
-		var placeToSaveFile = document.getElementById("actual-file").value;
+		var placeToSaveFile = 'D:/Script testing thing'
+		// var placeToSaveFile = document.getElementById("actual-file").value;
 		// console.error("placeToSaveFile", placeToSaveFile)
 		self.simpleLogger.setFilePath(placeToSaveFile)
 		self.simpleLogger.initialize()

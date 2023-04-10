@@ -36,7 +36,8 @@ var selectedFilePath = 'D:/labjack/newLoggerTesting/';
 var runTime = 5;
 
 // setting the registers that we will be using
-var registers = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5']
+// var registers = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5']
+var registers = ['CORE_TIMER', 'AIN0']
 
 // declare out config for the logging
 var configObj = {
@@ -116,7 +117,8 @@ while(startOfLogger > process.hrtime()){
 
     if(tempTime >= duration){
         // console.log("hit")
-        var registers = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5'];
+        // var registers = ['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5'];
+        var registers = ['CORE_TIMER', 'AIN0']
           
         // console.log("q")
         if(numberOfLoged < configObj.basic_data_group.logging_options.max_samples_per_file){            
@@ -252,7 +254,8 @@ function logTofile(registerName, file) {
     // console.log(device.readMan ySync(['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5']))
     // console.log("dev", device.readMany())
     var hrtime1 = process.hrtime()
-    device.readMany(['CORE_TIMER', 'AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5'])
+    // device.readMany(['CORE_TIMER', 'AIN0', 'AIN1',  'AIN2', 'AIN3', 'AIN4', 'AIN5'])
+    device.readMany(['CORE_TIMER', 'AIN0'])
     .then(function(results) {
         results.forEach(function(result) {
             writeData.push(result);

@@ -251,20 +251,20 @@ function CREATE_DATA_COLLECTOR() {
 			// For each custom register check to see if there are any functions
 			// that need to be created.
 			console.log("this is happening?")
-			if(data_group.defined_user_values) {
-				var user_value_keys = data_group.defined_user_values;
-				user_value_keys.forEach(function(user_value_key) {
-					var userValue = data_group.user_values[user_value_key];
-					// var execMethod = userValue.exec_method;
-					// console.log("user_value_key", user_value_key)
-					// console.log("the thing", data_group)
-					// console.log("userValue", userValue)
-					var func = userValue.func;
-					// console.log("execMethod", execMethod)
-					// stepDebug('executing createUserValueFunction',execMethod, func, errors);
-					userValue.userFunc = createUserValueFunction('sync', func, errors);
-				});
-			}
+			// if(data_group.defined_user_values) {
+			// 	var user_value_keys = data_group.defined_user_values;
+			// 	user_value_keys.forEach(function(user_value_key) {
+			// 		var userValue = data_group.user_values[user_value_key];
+			// 		// var execMethod = userValue.exec_method;
+			// 		// console.log("user_value_key", user_value_key)
+			// 		// console.log("the thing", data_group)
+			// 		console.log("userValue", userValue)
+			// 		var func = userValue.func;
+			// 		// console.log("execMethod", execMethod)
+			// 		// stepDebug('executing createUserValueFunction',execMethod, func, errors);
+			// 		userValue.userFunc = createUserValueFunction('sync', func, errors);
+			// 	});
+			// }
 		});
 		return errors;
 	}
@@ -607,7 +607,7 @@ function CREATE_DATA_COLLECTOR() {
 
 					// Get the devices data
 					var newDeviceData = oldData[serialNumber];
-					console.log("newDeviceData: ", newDeviceData)
+					// console.log("newDeviceData: ", newDeviceData)
 
 					// Save timing data & error code.
 					organizedDeviceData.errorCode = newDeviceData.errorCode;
@@ -624,6 +624,7 @@ function CREATE_DATA_COLLECTOR() {
 					var deviceDataIDs = Object.keys(reqDeviceData);
 					deviceDataIDs.forEach(function(deviceDataID) {
 						var reqReg = reqDeviceData[deviceDataID];
+						console.log("reqReg", reqReg)
 						// the change here is waht is changing the log from
 						// 'undefined -> '[object Object}']
 						var regName = reqReg;
@@ -635,6 +636,8 @@ function CREATE_DATA_COLLECTOR() {
 						regValue = newDeviceData[regName];
 
 						// Save the initial index value.
+						console.error("regvalue", regValue.index)
+						
 						var saveDeviceData = false;
 						if(index < 0) {
 							saveDeviceData = true;
@@ -678,21 +681,21 @@ function CREATE_DATA_COLLECTOR() {
 	
 					// Execute user functions
 					// Make room in the organizedGroupData object for user values.
-					organizedGroupData.userValues = {};
+					// organizedGroupData.userValues = {};
 					
-					var user_value_keys = activeGroupObj.defined_user_values;
-					var userValueKeys = [];
+					// var user_value_keys = activeGroupObj.defined_user_values;
+					// var userValueKeys = [];
 					
-					user_value_keys.forEach(function(user_value_key) {
-						var userValue = activeGroupObj.user_values[user_value_key];
+					// user_value_keys.forEach(function(user_value_key) {
+					// 	var userValue = activeGroupObj.user_values[user_value_key];
 						
-						// Report that we are executing the user funciton.
-						self.emit(self.eventList.EXECUTING_USER_FUNCTION, {
-							'functionName': userValue.name
-						});
-						userValueKeys.push(user_value_key);
-						promises.push(userValue.userFunc(organizedGroupData));
-					});
+					// 	// Report that we are executing the user funciton.
+					// 	self.emit(self.eventList.EXECUTING_USER_FUNCTION, {
+					// 		'functionName': userValue.name
+					// 	});
+					// 	userValueKeys.push(user_value_key);
+					// 	promises.push(userValue.userFunc(organizedGroupData));
+					// });
 				}
 
 				// debugLog('Waiting for reportCollectedData promises');
@@ -748,7 +751,7 @@ function CREATE_DATA_COLLECTOR() {
 					// console.log('  - index', organizedGroupData['1'].results.AIN1.index);
 					// console.log('  - result', organizedGroupData['1'].results.AIN1.result);
 					// Report the collected group data
-					console.log("organizedGroupData: ", organizedGroupData)
+					// console.log("organizedGroupData: ", organizedGroupData)
 					self.emit(self.eventList.COLLECTOR_GROUP_DATA, {
 						'groupKey': activeGroupKey,
 						'data': organizedGroupData

@@ -95,15 +95,19 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 		// });
 		// Loop through the devices object and try to link to the device with
 		// the desired serial number.
-		console.warn("self.saved atributes", self.devices)
+		// console.warn("self.saved atributes", self.devices)
 		for (const device of Object.keys(self.devices)){
 			// console.warn("whya re you not working", device)
 			// console.warn("serialNum", serialNum)
-			if(self.devices.savedAttributes.serialNumber == serialNum) {
-				self.isValidDevice = true;
-				self.device = device;
-				return true;
-			}
+			self.isValidDevice = true;
+			console.log("self.device1", self.device)
+			self.device = device;
+			console.log("self.device2", self.device)
+			// if(self.devices.savedAttributes.serialNumber == serialNum) {
+			// 	self.isValidDevice = true;
+			// 	self.device = device;
+			// 	return true;
+			// }
 		}
 		// if(self.devices.savedAttributes.serialNumber == serialNum) {
 		// 	self.isValidDevice = true;
@@ -289,10 +293,14 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// console.log("registerList", registerList)
 				// var deviceCurator1 = new deviceCurator
 				// console.log("deviceCurator", deviceCurator.readMany())
-				console.log("self", self)
-				devices.cReadMany(registerList)
+				console.log("self", self.device)
+				// console.log("self", devices)
+				registerList = [ 'CORE_TIMER', 'AIN0']
+				console.log("registerList", registerList)
+				// TODO - make it one device so we don't have to use the index
+				self.devices[0].readMany(registerList)
 				.then(function(results) {
-					// console.log("results", results)
+					console.log("results", results)
 					// console.log('readMany Results', registerList, results);
 					// console.warn("results", results)
 					if(this.isValueLate) {

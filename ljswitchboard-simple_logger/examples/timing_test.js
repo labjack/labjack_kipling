@@ -238,7 +238,7 @@ function loggerApp() {
 		*/
 		self.logConfigs = simple_logger.generateBasicConfig({
 			'same_vals_all_devices': true,
-			'registers': ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3','AIN4'],
+			'registers': ['CORE_TIMER','AIN0'],
 			// update here to be safe
 			'update_rate_ms': 10,
 		},self.deviceManager.getDevices());
