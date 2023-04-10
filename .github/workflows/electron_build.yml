@@ -85,9 +85,18 @@ jobs:
       - run: ls ${{ github.workspace }}/build/output/dist
 
       - uses: actions/upload-artifact@v3
+        name: Upload Artifacts (not MacOS)
+        if: runner.os != 'macOS'
         with:
-          name: my-artifact_${{runner.os}}
+          name: KIPLING_${{runner.os}}
           path: ${{ github.workspace }}/build/output/dist/*
+
+      - uses: actions/upload-artifact@v3
+        name: Upload Artifacts (MacOS)
+        if: runner.os == 'macOS'
+        with:
+          name: KIPLING_${{runner.os}}
+          path: ${{ github.workspace }}/build/output/dist/*.zip
 
 
 
