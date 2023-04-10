@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-ljm_special_addresses",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "This module allows Kipling to interface with LJM's special address/specific ip feature.",
   "main": "lib/ljm_special_addresses.js",
   "scripts": {
@@ -32,15 +32,15 @@
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-ljm_special_addresses",
   "dependencies": {
-    "q": "^1.5.1",
-    "ljm-ffi": "*",
+    "fs-extra": "^9.0.1",
     "javascript-natural-sort": "0.x.x",
-    "fs-extra": "^9.0.1"
+    "ljm-ffi": "^2.0.1",
+    "q": "^1.5.1"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
     "diff": "^4.0.1",
-    "mocha": "^8.2.1",
-    "chai": "^4.2.0"
+    "mocha": "^8.2.1"
   },
   "engines": {
     "node": ">=6.0.0"

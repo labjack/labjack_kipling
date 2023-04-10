@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-device_scanner",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A node project dedicated to finding ALL LabJack devices that are able to be connected to.",
   "main": "./lib/ljswitchboard-device_scanner",
   "scripts": {
@@ -33,20 +33,20 @@
   },
   "dependencies": {
     "async": "^3.2.4",
-    "labjack-nodejs": "*",
-    "ljm-ffi": "*",
-    "ljswitchboard-data_parser": "*",
-    "ljswitchboard-ljm_device_curator": "*",
-    "ljswitchboard-ljm_driver_constants": "*",
-    "ljswitchboard-modbus_map": "*",
+    "labjack-nodejs": "^2.0.1",
+    "ljm-ffi": "^2.0.1",
+    "ljswitchboard-data_parser": "^1.0.2",
+    "ljswitchboard-ljm_device_curator": "^2.0.1",
+    "ljswitchboard-ljm_driver_constants": "^1.0.5",
+    "ljswitchboard-modbus_map": "^1.0.4",
     "q": "^1.5.1"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
     "colors": "1.4.0",
     "diff": "^4.0.1",
-    "rewire": "4.0.1",
     "mocha": "^8.2.1",
-    "chai": "^4.2.0"
+    "rewire": "4.0.1"
   },
   "directories": {
     "lib": "./lib"
