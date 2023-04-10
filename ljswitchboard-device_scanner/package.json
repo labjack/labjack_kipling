@@ -33,12 +33,12 @@
   },
   "dependencies": {
     "async": "^3.2.4",
-    "labjack-nodejs": "^2.0.1",
-    "ljm-ffi": "^2.0.1",
-    "ljswitchboard-data_parser": "^1.0.2",
-    "ljswitchboard-ljm_device_curator": "^2.0.1",
-    "ljswitchboard-ljm_driver_constants": "^1.0.5",
-    "ljswitchboard-modbus_map": "^1.0.4",
+    "labjack-nodejs": "*",
+    "ljm-ffi": "*",
+    "ljswitchboard-data_parser": "*",
+    "ljswitchboard-ljm_device_curator": "*",
+    "ljswitchboard-ljm_driver_constants": "*",
+    "ljswitchboard-modbus_map": "*",
     "q": "^1.5.1"
   },
   "devDependencies": {

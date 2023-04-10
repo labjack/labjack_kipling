@@ -31,9 +31,9 @@
         "allocate_buffer": "^1.0.0",
         "async": "^3.2.4",
         "diff": "^4.0.1",
-        "ljm-ffi": "^2.0.1",
-        "ljswitchboard-ljm_driver_constants": "^1.0.5",
-        "ljswitchboard-modbus_map": "^1.0.4",
+        "ljm-ffi": "*",
+        "ljswitchboard-ljm_driver_constants": "*",
+        "ljswitchboard-modbus_map": "*",
         "q": "^1.5.1",
         "ref-napi": "^3.0.1"
     },

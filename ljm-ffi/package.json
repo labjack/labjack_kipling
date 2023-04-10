@@ -27,8 +27,8 @@
         "async": "^3.2.4",
         "ffi-napi": "4.0.2",
         "fsevents": "^2.3.1",
-        "ljswitchboard-ljm_driver_constants": "^1.0.5",
-        "ljswitchboard-modbus_map": "^1.0.4",
+        "ljswitchboard-ljm_driver_constants": "*",
+        "ljswitchboard-modbus_map": "*",
         "q": "^1.5.1",
         "ref-napi": "^3.0.1",
         "semver": "^7.1.1"

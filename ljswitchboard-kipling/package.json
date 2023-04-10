@@ -26,8 +26,8 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "ljswitchboard-ljm_driver_constants": "^1.0.5",
-    "ljswitchboard-modbus_map": "^1.0.4",
+    "ljswitchboard-ljm_driver_constants": "*",
+    "ljswitchboard-modbus_map": "*",
     "q": "^1.5.1"
   },
   "devDependencies": {

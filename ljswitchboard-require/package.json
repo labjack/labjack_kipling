@@ -21,6 +21,7 @@
   "files": [
     "lib"
   ],
+  "dependencies": {},
   "scripts": {
     "test": "mocha"
   },
