@@ -106,7 +106,6 @@ async function loadProgramPackages(package_loader) {
     await package_loader.setExtractionPath(appDataPath);
 
     const startDir = info.startDir;
-    console.warn("==== Start Directory =====", info, info.startDir);
 
     await package_loader.loadPackage({
         'name': 'static_files',
@@ -115,7 +114,7 @@ async function loadProgramPackages(package_loader) {
         'forceRefresh': false,
         'directLoad': true,
         'locations': [
-            // Add path to files for development purposes, out of a repo. These are local repo file changes
+            // Add path to files for development purposes, out of a repo.
             path.join(__dirname, '..', '..', 'ljswitchboard-static_files'),
 
             // If those files aren't found, check the node_modules directory of
@@ -196,7 +195,7 @@ async function loadProgramPackages(package_loader) {
 
             // If those files aren't found, check the node_modules directory of
             // the current application for upgrades.
-            path.join(startDir, 'node_modules', 'ljswitchboard-kipling'),
+            // path.join(startDir, 'node_modules', 'ljswitchboard-kipling'),
 
             // For non-development use, check the LabJack folder/K3/downloads
             // file for upgrades.

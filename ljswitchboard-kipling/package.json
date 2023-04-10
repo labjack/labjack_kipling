@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-kipling",
-  "version": "3.3.3",
+  "version": "3.3.3-beta.0",
   "private": true,
   "description": "One of the nw applications that gets launched by ljswitchboard",
   "author": {
@@ -31,10 +31,10 @@
     "q": "^1.5.1"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "csslint": "1.0.5",
     "diff": "^4.0.1",
-    "mocha": "^8.2.1"
+    "csslint": "1.0.5",
+    "mocha": "^8.2.1",
+    "chai": "^4.2.0"
   },
   "directories": {
     "lib": "./lib"

@@ -1,6 +1,6 @@
 {
   "name": "ljswitchboard-require",
-  "version": "0.0.6",
+  "version": "0.0.5",
   "author": {
     "name": "Chris Johnson",
     "url": "https://labjack.com"
@@ -26,9 +26,9 @@
     "test": "mocha"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
     "diff": "^4.0.1",
     "mocha": "^8.2.1",
+    "chai": "^4.2.0",
     "rekuire": "0.1.9"
   }
 }

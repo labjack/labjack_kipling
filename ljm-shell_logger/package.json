@@ -1,6 +1,6 @@
 {
   "name": "ljm-shell_logger",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "private": true,
   "description": "A logger program with a cmd shell interface to assist in the creation of the logger module in Kipling.",
   "main": "./lib/shell_logger.js",
@@ -26,9 +26,9 @@
     "terminal-control": "0.0.4"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
     "diff": "^4.0.1",
     "mocha": "^8.2.1",
+    "chai": "^4.2.0",
     "supports-color": "3.1.0"
   },
   "directories": {

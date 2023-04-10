@@ -9,7 +9,7 @@ const TEMP_PROJECT_FILES_PATH = path.join(getBuildDirectory(), 'temp_project_fil
 
 const builder_package_data = require('../package.json');
 
-const enableDebugging = true;
+const enableDebugging = false;
 function debugLog() {
 	if(enableDebugging) {
 		console.log.apply(console, arguments);

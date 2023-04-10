@@ -1,4 +1,4 @@
-print ("SPI Example. Jumper FIO2 (MISO) and FIO3 (MOSI) together (FIO6 and FIO7 on T4)")
+print ("SPI Example. Jumper FIO2 (MISO) and FIO3 (MOSI) together (FIO4 and FIO5 on T4)")
 --This example sends out a packet of data over SPI and reads it back.
 --If the packet recieved matches the packet sent, SPI is working properly.
 --Otherwise, there may be some issues with the SPI circuitry

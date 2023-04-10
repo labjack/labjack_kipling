@@ -1,6 +1,6 @@
 /**
  * version_manager.js for LabJack Switchboard.  Provides Kipling with the ability
- * to query for various versions of LabJack software versions, firmware
+ * to query for various versions of LabJack software versions, firmeware
  * versions, and drivers
  *
  * @author Jimmy Brant (LabJack, 2022)
@@ -20,6 +20,9 @@ var path = require('path');
 var cheerio = require('cheerio');
 var semver = require('./semver_min');
 const { defer } = require('q');
+
+const UPGRADE_LINK = "https://files.labjack.com/firmware/T8/"
+
 
 class labjackVersionManager extends EventEmitter {
     constructor() {
@@ -45,26 +48,6 @@ class labjackVersionManager extends EventEmitter {
             return version;
         };
 
-        this.kiplingUpdateLinks = {
-            "current_win":      "https://s3.amazonaws.com/ljrob/win32/kipling/kipling_win.zip",
-            "beta_win":         "https://s3.amazonaws.com/ljrob/win32/kipling/beta/kipling_beta_win.zip",
-            "test_win":         "https://s3.amazonaws.com/ljrob/win32/kipling/test/kipling_test_win.zip",
-    
-            "current_mac":      "https://s3.amazonaws.com/ljrob/mac/kipling/kipling_mac.zip",
-            "beta_mac":         "https://s3.amazonaws.com/ljrob/mac/kipling/beta/kipling_beta_mac.zip",
-            "test_mac":         "https://s3.amazonaws.com/ljrob/mac/kipling/test/kipling_test_mac.zip",
-    
-            "current_linux32":  "https://s3.amazonaws.com/ljrob/linux32/kipling/kipling_lin32.zip",
-            "beta_linux32":     "https://s3.amazonaws.com/ljrob/linux32/kipling/beta/kipling_beta_lin32.zip",
-            "test_linux32":     "https://s3.amazonaws.com/ljrob/linux32/kipling/test/kipling_test_lin32.zip",
-    
-            "current_linux64":  "https://s3.amazonaws.com/ljrob/linux64/kipling/kipling_lin64.zip",
-            "beta_linux64":     "https://s3.amazonaws.com/ljrob/linux64/kipling/beta/kipling_beta_lin64.zip",
-            "test_linux64":     "https://s3.amazonaws.com/ljrob/linux64/kipling/test/kipling_test_lin64.zip"
-        };
-
-        this.ljmUpdateLink = "https://labjack.com/support/software/installers/ljm"
-
         // define dict object with various urls in it
     this.urlDict = {
         "theGoldStandard": {
@@ -78,40 +61,6 @@ class labjackVersionManager extends EventEmitter {
                 {"url": "https://files.labjack.com/firmware/T8/beta", "type": "beta"},
                 {"url": "https://files.labjack.com/firmware/T8/", "type": "old"},
             ],
-        },
-        "kipling": {
-            "type":"kipling",
-            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
-            "platformDependent": true,
-            "types": ['current','beta','test'],
-            "urls":[
-                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "current_win"},
-                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "current_mac"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "current_linux32"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "current_linux64"},
-
-                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/current.txt", "type": "test_win"},
-                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/current.txt", "type": "test_mac"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/current.txt", "type": "test_linux32"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/current.txt", "type": "test_linux64"},
-
-                {"url": "http://files.labjack.com/versions/ljrob/win32/kipling/beta.txt", "type": "beta_win"},
-                {"url": "http://files.labjack.com/versions/ljrob/mac/kipling/beta.txt", "type": "beta_mac"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux32/kipling/beta.txt", "type": "beta_linux32"},
-                {"url": "http://files.labjack.com/versions/ljrob/linux64/kipling/beta.txt", "type": "beta_linux64"},
-            ]
-        },
-        "ljm": {
-            "type":"ljm",
-            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
-            "platformDependent": true,
-            "types": ['current'],
-            "urls":[
-                {"url": "https://files.labjack.com/versions/ljrob/win32/ljm/current.txt", "type": "current_win"},
-                {"url": "https://files.labjack.com/versions/ljrob/mac/ljm/current.txt", "type": "current_mac"},
-                {"url": "https://files.labjack.com/versions/ljrob/linux32/ljm/current.txt", "type": "current_linux32"},
-                {"url": "https://files.labjack.com/versions/ljrob/linux64/ljm/current.txt", "type": "current_linux64"}
-            ]
         },
         "t8": {
             "type":"t8FirmwarePage",
@@ -146,40 +95,10 @@ class labjackVersionManager extends EventEmitter {
                 {"url": "https://files.labjack.com/firmware/T4/Old/", "type": "old"},
             ],
         },
-        "kipling_new": {
-            "type":"kiplingDownloadsPage",
-            "upgradeReference": "https://labjack.com/support/software/installers/ljm",
-            "platformDependent": true,
-            "types": ['current'],
-            "urls":[
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_win"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_mac"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux32"},
-                {"url": "https://labjack.com/support/software/installers/ljm", "type": "current_linux64"}
-            ]
-        }
 
     };
 
         this.strategies = {
-            kipling: function(listingArray, pageData, urlInfo, name) {
-                listingArray.push({
-                    "upgradeLink":self.kiplingUpdateLinks[urlInfo.type],
-                    "version":pageData,
-                    "type":urlInfo.type,
-                    "key":urlInfo.type + '-' + pageData
-                });
-                return;
-            },
-            ljm: function(listingArray, pageData, urlInfo, name) {
-                listingArray.push({
-                    "upgradeLink":self.ljmUpdateLink,
-                    "version":pageData,
-                    "type":urlInfo.type,
-                    "key":urlInfo.type + '-' + pageData
-                });
-                return;
-            },
             t8FirmwarePage: function(listingArray, pageData, urlInfo, name) {
                 var $ = cheerio.load(pageData);
                 var linkElements = $('a');
@@ -203,8 +122,8 @@ class labjackVersionManager extends EventEmitter {
                             "key":urlInfo.type + '-' + version
                         });
                     } else {
-                        // there are lots of invalid URLs on file.labjack.com/firmware/T8 page
-                        // for now I will suppress these warnings
+                        // there are lots of invalid URLs on file.labjack.com/fimrware/T8 page
+                        // for now I will supress these warnings
                         // console.warn("Invalid URL for T8 firmware", targetURL, targetURL.length)
                     }
                 });
@@ -233,8 +152,8 @@ class labjackVersionManager extends EventEmitter {
                             "key":urlInfo.type + '-' + version
                         });
                     } else {
-                        // there are lots of invalid URLs on file.labjack.com/firmware/T7 page
-                        // for now I will suppress these warnings
+                        // there are lots of invalid URLs on file.labjack.com/fimrware/T7 page
+                        // for now I will supress these warnings
                         // console.warn("Invalid URL for T7 firmware", targetURL, targetURL.length)
                     }
                 });
@@ -263,9 +182,9 @@ class labjackVersionManager extends EventEmitter {
                             "key":urlInfo.type + '-' + version
                         });
                     } else {
-                        // there are lots of invalid URLs on file.labjack.com/firmware/T7 page
-                        // for now I will suppress these warnings
-                        // console.warn("Invalid URL for T4 firmware", targetURL, targetURL.length)
+                        // there are lots of invalid URLs on file.labjack.com/fimrware/T7 page
+                        // for now I will supress these warnings
+                        // console.warn("Invalid URL for T7 firmware", targetURL, targetURL.length)
                     }
                 });
                 return;
@@ -361,7 +280,7 @@ class labjackVersionManager extends EventEmitter {
                     }
                 }); 
 
-                // If the node should be added, add it.
+                // If the ndoe should be added, add it.
                 if(addToCache) {
                     self.infoCache[name][info.type].push(data);
                     if(platformDependent) {
@@ -389,7 +308,7 @@ class labjackVersionManager extends EventEmitter {
             var queriedData = [];
 
             if(typeof(info) !== 'undefined') {
-                // Get the strategy function
+                // Get the stratigy function
                 var strategyType = info.type;
                 var strategy = self.strategies[strategyType];
 
@@ -473,18 +392,6 @@ class labjackVersionManager extends EventEmitter {
          *
          * @return {[type]} [description]
         **/
-        this.getKiplingVersions = function() {
-            var defered = q.defer();
-            self.queryForVersions('kipling')
-            .then(defered.resolve,defered.reject);
-            return defered.promise;
-        };
-        this.getLJMVersions = function() {
-            var defered = q.defer();
-            self.queryForVersions('ljm')
-            .then(defered.resolve,defered.reject);
-            return defered.promise;
-        };
         this.getT8FirmwareVersions = function() {
             var defered = q.defer();
             self.queryForVersions('t8')
@@ -532,9 +439,7 @@ class labjackVersionManager extends EventEmitter {
             var defered = q.defer();
 
             // start getting all versions
-            self.getKiplingVersions()
-            .then(self.getLJMVersions, errorFunc)
-            .then(self.getT8FirmwareVersions, errorFunc)
+            self.getT8FirmwareVersions()
             .then(self.getT7FirmwareVersions, errorFunc)
             .then(self.getT4FirmwareVersions, errorFunc)
             .then(function(){
@@ -594,29 +499,6 @@ class labjackVersionManager extends EventEmitter {
             return JSON.parse(JSON.stringify(self.infoCache));
         };
 
-        this.getCachedKiplingVersions = function() {
-            var kiplingData = {};
-            if(typeof(self.infoCache.kipling) !== 'undefined') {
-                kiplingData = JSON.parse(JSON.stringify(self.infoCache.kipling));
-                kiplingData.isValid = true;
-            } else {
-                kiplingData.current = [];
-                kiplingData.beta = [];
-                kiplingData.isValid = false;
-            }
-            return kiplingData;
-        };
-        this.getCachedLJMVersions = function() {
-            var ljmData = {};
-            if(typeof(self.infoCache.ljm) !== 'undefined') {
-                ljmData = JSON.parse(JSON.stringify(self.infoCache.ljm));
-                ljmData.isValid = true;
-            } else {
-                ljmData.current = [];
-                ljmData.isValid = false;
-            }
-            return ljmData;
-        };
         this.getCachedT8Versions = function() {
             var t8Data = {};
             if(typeof(self.infoCache.t8) !== 'undefined') {
@@ -718,19 +600,6 @@ class labjackVersionManager extends EventEmitter {
             });
             console.warn(JSON.stringify(data, null, 2));
         };
-        this.getIssue = function() {
-            var issue;
-            if(self.isIssue()) {
-                if(self.infoCache.isError) {
-                    issue = {"type": "error","data":self.infoCache.errors};
-                } else {
-                    issue = {"type": "warning","data":self.infoCache.warnings};
-                }
-            } else {
-                issue = {"type": "none","data":null};
-            }
-            return issue;
-        };
     
         var self = this;
     }
@@ -739,8 +608,9 @@ class labjackVersionManager extends EventEmitter {
 var LABJACK_VERSION_MANAGER = new labjackVersionManager();
 
 exports.lvm = LABJACK_VERSION_MANAGER;
-exports.initialize = function() {
+exports.initalize = function() {
     var defered = q.defer();
+
     LABJACK_VERSION_MANAGER.getAllVersions();
     LABJACK_VERSION_MANAGER.waitForData()
     .then(function(data) {
@@ -767,17 +637,13 @@ exports.getAllVersions = LABJACK_VERSION_MANAGER.getAllVersions;
 // For Testing....
 // var LVM = LABJACK_VERSION_MANAGER;
 
-// LVM.getKiplingVersions();
-// LVM.waitForData()
-// .then(console.log("Info cache:", LVM.getInfoCache()))
-
 // LVM.getT8FirmwareVersions()
 // .then(LVM.getT7FirmwareVersions())
 // .then(console.log("Info cache:", LVM.getInfoCache()))
 
-// function testLabjackVersionManger() {
+// function testThisBitch() {
 //     var defered = q.defer();
-//     console.log("Testing the Version Manager");
+
 //     LABJACK_VERSION_MANAGER.getAllVersions();
 //     LABJACK_VERSION_MANAGER.waitForData()
 //     .then(function(data) {
@@ -800,7 +666,6 @@ exports.getAllVersions = LABJACK_VERSION_MANAGER.getAllVersions;
 //     return defered.promise;
 // }
 
-// testLabjackVersionManger();
 
 
 // For Testing....

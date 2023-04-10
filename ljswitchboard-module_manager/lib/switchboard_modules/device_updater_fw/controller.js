@@ -209,13 +209,13 @@ function module() {
     // To-Do: Update changeLogLinks!!!!
     const deviceSpecificInfo = {
         'T4': {
-            'changeLogLink': 'https://labjack.com/support/firmware/t4/',
+            'changeLogLink': 'https://labjack.com/support/firmware/t4-firmware',
         },
         'T7': {
-            'changeLogLink': 'https://labjack.com/support/firmware/t7/',
+            'changeLogLink': 'https://labjack.com/support/firmware/t7-firmware',
         },
         'T8': {
-            'changeLogLink': 'https://labjack.com/support/firmware/t8/',
+            'changeLogLink': 'https://labjack.com/support/firmware/t8-firmware',
         },
     };
     this.onDeviceConfigured = function(framework, devices, setupBindings, onError, onSuccess) {

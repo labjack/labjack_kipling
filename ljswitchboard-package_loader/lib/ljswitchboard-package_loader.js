@@ -206,7 +206,7 @@ class PackageLoader extends EventEmitter {
 			this.emit(EVENTS.OVERWRITING_MANAGED_PACKAGE, packageInfo);
 		} else {
 			this.managedPackagesList.push(name);
-			console.log('Adding a managed package', name);
+			// console.log('Adding a managed package', name);
 		}
 		this.managedPackages[name] = packageInfo;
 		this.managedPackages[name].version = '';
@@ -219,7 +219,6 @@ class PackageLoader extends EventEmitter {
 	 * async loading requirements.
 	 */
 	async loadPackage(packageInfo) {
-		console.log('Loading package', packageInfo);
 		try {
 			const method = packageInfo.loadMethod ? packageInfo.loadMethod : 'require';
 
@@ -233,13 +232,11 @@ class PackageLoader extends EventEmitter {
 
 					const dirToCheck = path.join(this.extractionPath, packageInfo.folderName);
 					const currentPackage = await checkForValidPackage(dirToCheck);
-					console.log("currentPackage: " + JSON.stringify(currentPackage))
 					if (currentPackage.exists) {
 						return;
 					}
 
 					const availableUpgrades = await this.checkForUpgradeOptions(packageInfo.locations);
-					console.warn("availableUpgrades: " + availableUpgrades);
 					if (availableUpgrades.length === 0) {
 						throw 'Package \'' + packageInfo.name + '\' not installed and upgrade options not found: ' + JSON.stringify(packageInfo.locations);
 					}
@@ -429,6 +426,7 @@ class PackageLoader extends EventEmitter {
 		// Wait for all of the operations to complete
 		const upgradeOptions = await Promise.allSettled(checkDirOps);
 		const validUpgrades = [];
+
 		// Loop through and pick out the valid upgrades
 		for (const upgradeOption of upgradeOptions) {
 			if (upgradeOption.value) {

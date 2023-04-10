@@ -1,6 +1,6 @@
 {
   "name": "ljmmm-parse",
-  "version": "0.2.5",
+  "version": "0.2.4",
   "description": "Library for parsing LabJack Modbus Map Markup documents.",
   "scripts": {
     "test": "mocha"
@@ -10,9 +10,9 @@
     "sprintf-js": "1.1.2"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
     "diff": "^4.0.1",
     "mocha": "^8.2.1",
+    "chai": "^4.2.0",
     "rewire": "4.0.1"
   },
   "author": {

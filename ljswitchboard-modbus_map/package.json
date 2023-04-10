@@ -1,6 +1,6 @@
 {
     "name": "ljswitchboard-modbus_map",
-    "version": "1.0.4",
+    "version": "1.0.3",
     "description": "Library that allows easy parsing of the LabJack modbus map",
     "author": {
         "name": "Chris Johnson",
@@ -29,9 +29,9 @@
         "ljswitchboard-ljm_driver_constants": "*"
     },
     "devDependencies": {
-        "chai": "^4.2.0",
         "diff": "^4.0.1",
-        "mocha": "^8.2.1"
+        "mocha": "^8.2.1",
+        "chai": "^4.2.0"
     },
     "scripts": {
         "test": "mocha"
