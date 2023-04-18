@@ -124,6 +124,7 @@ function loggerApp() {
 		var defered = q.defer();
 		self.simpleLogger = simple_logger.create();
 		attachListeners(self.simpleLogger);
+		// console.warn("self.simplelogger", self.simpleLogger)
 
 		self.simpleLogger.initialize()
 		.then(function(res) {
@@ -155,12 +156,12 @@ function loggerApp() {
 		return defered.promise;
 	}
 	this.updateDeviceListing = function() {
-		debugLog('--- In Func: updateDeviceListing');
-		debugLog('Connected Devices', self.deviceManager.getDevices());
+		debugLog('--- In Func: updateDeviceListing1121');
+		debugLog('Connected Devices'); //, self.deviceManager.getDevices()
 		var defered = q.defer();
 		self.simpleLogger.updateDeviceListing(self.deviceManager.getDevices())
 		.then(function(res) {
-			debugLog('Device listing has been passwd to the logger',res);
+			debugLog('Device listing has been passwd to the logger'); //,res
 			defered.resolve();
 		}, function(err) {
 			console.error('Failed to save the device listing to the logger',err)
@@ -247,7 +248,7 @@ function loggerApp() {
 			}, function err() {
 				debugLog('Logger Stopped-err');
 			});
-		}, 5000);
+		}, 100000);
 		return defered.promise;
 	}
 	this.closeDevices = function() {

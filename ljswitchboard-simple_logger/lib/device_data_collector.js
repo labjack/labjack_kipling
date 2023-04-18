@@ -293,11 +293,14 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// console.log("registerList", registerList)
 				// var deviceCurator1 = new deviceCurator
 				// console.log("deviceCurator", deviceCurator.readMany())
-				// console.log("self", this)
-				self.devices.readMany(registerList)
-				// self.devices.readMany(registerList)
+				// console.log("self", self.device)
+				// console.log("self", devices)
+				registerList = [ 'CORE_TIMER']
+				// console.log("registerList", registerList)
+				// TODO - make it one device so we don't have to use the index
+				self.devices[0].readMany(registerList)
 				.then(function(results) {
-					// console.error("1213", results[1].val)
+					// console.log("results", results)
 					// console.log('readMany Results', registerList, results);
 					// console.warn("results", results)
 					if(this.isValueLate) {

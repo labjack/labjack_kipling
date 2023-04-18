@@ -369,7 +369,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 			"default_result_file": "0"
 		},
 		"view_config": {
-			"update_rate_ms": 200
+			"update_rate_ms": 10
 		},
 		"views": [
 			"basic_view",
@@ -435,6 +435,57 @@ exports.generateBasicConfig = function(basicData, devices) {
 	// for the value of how long it runs it is as follows
 	// configObj.stop_trigger.trigers[0].val
 	if(basicData.same_vals_all_devices) {
+		configObj.stop_trigger.triggers[0].val = basicData.logTime;
+		// Zander this is for a prouf oc concepts
+		// var sn = devices[0].savedAttributes.serialNumber;
+		// var sn = "470010175";
+		// var sn = "440017663"
+		// var sn = "470016039";
+		// var sn = "440010762"; // zander T4
+		var sn = "470012223"; // zander T7
+		validSN = sn;
+		configObj.basic_data_group.device_serial_numbers.push(validSN);
+		// configObj.basic_data_group.device_serial_numbers.push(sn);
+		// console.warn("registers1", registers)
+		configObj.basic_data_group[sn] = {
+			'registers': []
+		};
+		basicData.registers.forEach(function(register) {
+			configObj.basic_data_group[sn].registers.push({
+				name: register,
+				human_name: register,
+				format:"default",
+				enable_logging: true,
+				enable_view: true,
+			});
+		});
+		// devices.forEach(function(device) {
+		// 	var sn = device.savedAttributes.serialNumber;
+		// 	validSN = sn;
+		// 	console.error("============", device)
+		// 	// configObj.basic_data_group.device_serial_numbers.push(validSN);
+		// 	configObj.basic_data_group.device_serial_numbers.push(sn);
+		// 	configObj.basic_data_group[sn] = {
+		// 		'registers': []
+		// 	};
+		// 	basicData.registers.forEach(function(register) {
+		// 		configObj.basic_data_group[sn].registers.push({
+		// 			name: register,
+		// 			human_name: register,
+		// 			format:"default",
+		// 			enable_logging: true,
+		// 			enable_view: true,
+		// 		});
+		// 	});
+		// });
+		// 'CORE_TIMER','AIN0','AIN1','AIN2','AIN3','AIN4'
+		configObj.basic_data_group.defined_user_values.push('CORE_TIMER');
+		// configObj.basic_data_group.defined_user_values.push('AIN0');
+		// configObj.basic_data_group.defined_user_values.push('AIN1');
+		// configObj.basic_data_group.defined_user_values.push('AIN2');
+		// configObj.basic_data_group.defined_user_values.push('AIN3');
+		// configObj.basic_data_group.defined_user_values.push('AIN4');
+		
 		configObj.stop_trigger.triggers[0].val = basicData.logTime;
 		// Zander this is for a prouf oc concepts
 		// var sn = devices[0].savedAttributes.serialNumber;

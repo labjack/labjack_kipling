@@ -343,7 +343,9 @@ function CREATE_COORDINATOR () {
 			}
 
 			// Initialize the log stats tracker object.
+			defered.resolve(bundle);
 			self.initializeStats();
+			// console.log("resBundle", resBundle)
 
 			// Start the dataLogger, viewDataReporter, and dataCollector.
 			self.dataLogger.start(bundle)

@@ -249,6 +249,31 @@ function CREATE_DATA_LOGGER() {
 				// add the error code header
 				dataCategories.push('');
 				dataNames.push('error code');
+				// ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3']
+				dataNames.push("CORE_TIMER");
+				// dataNames.push("AIN0");
+				// dataNames.push("AIN1");
+				// dataNames.push("AIN2");
+				// dataNames.push("AIN3");
+				// dataNames.push("AIN4");
+				
+
+				// Add each required registers & align the data category array.
+				serialNumber.registers.forEach(function(register) {
+					// Save the enabled/disabled logging state.
+					logStatus[serial_number][register.name] = register.enable_logging;
+
+					// Check to see if the register is enabled for logging
+					if(register.enable_logging) {
+						// Align the device serial number to its data
+						dataCategories.push('');
+						dataNames.push(register.name);
+					}
+				});
+
+				// Add the error code header & align the data category.
+				dataCategories.push('');
+				dataNames.push('error code');
 				for(var i = 0; i < 8; i++){
 					if(document.getElementById('validationCustom0' + i).value != ''){
 						dataNames.push(document.getElementById('validationCustom0' + i).value)
@@ -1053,6 +1078,16 @@ function CREATE_DATA_LOGGER() {
 			// ZANDER - This is the exact function that when un comented will alow data to be writen to the file
 			// console.error("dataToWrite", dataToWrite)
 			ok = fileStream.write(dataToWrite);
+
+			testingWrite.push(dataToWrite);
+			
+			var curtime = new Date();
+			// console.warn("curtime write time", testingWrite)
+			var hrWriteStart = process.hrtime();
+			// ok = fileStream.write(testingWrite[0]);
+			var hrWriteEnd = process.hrtime(hrWriteStart);
+			
+			// console.warn("the end writing data", hrWriteEnd)
 
 			testingWrite.push(dataToWrite);
 			
