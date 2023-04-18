@@ -188,6 +188,7 @@ input.duplicate {
 	width: 100%
 }
 .modal-backdrop{
+	height: 100% !important;
 	z-index: -1;
 	opacity: 0.40;
 }

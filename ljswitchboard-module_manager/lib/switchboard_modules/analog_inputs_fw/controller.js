@@ -229,6 +229,11 @@ function module() {
         }
     };
 
+    // Supported extra options
+    var extraAllAinOptions = globalDeviceConstants.t7DeviceConstants.extraAllAinOptions;
+
+    var extraAllAinOptions = globalDeviceConstants.t8DeviceConstants.extraAllAinOptions;
+
     this.efTypeDict = new Map();
     this.rangeOptionsDict = new Map();
     this.resolutionOptionsDict = new Map();
@@ -1166,6 +1171,7 @@ function module() {
             var title = configReg.description;
             var defaultVal = configReg.defaultVal;
             var curVal = self.getCurrentBufferedVal(regName, defaultVal);
+            // console.warn(configReg.defaultVal);
 
             var newEFConfigData = {
                 'humanName': humanName,
@@ -1619,6 +1625,8 @@ function module() {
         }
     };
     this.getD3GraphWidth = function (value, range) {
+        // the extra values tat are below are there for the T8 some of the values will need to be motifyed and with that being
+        // said this does work for the time being.
         var val;
         var widthMultiplyer;
         switch (range) {
@@ -1631,32 +1639,6 @@ function module() {
             case 10:
                 // for both the T4 and the T7
                 val = value / (range + 0.8);
-                widthMultiplyer = 100;
-                break;
-            case 9.7:
-                // for both tthe T4 and T7
-                val = value / (range + 0.8);
-                widthMultiplyer = 100;
-                break;
-            case 4.8:
-                // T8 exclusive range
-                val = value / (range + 0.8);
-                widthMultiplyer = 90;
-                break;
-            case 2.5:
-                // for the T4
-                val = value / (range + 0.8);
-                widthMultiplyer = 100;
-                break;
-            case 2.4:
-                // T8 exclusinve range
-                val = value / (range + 0.8);
-                widthMultiplyer = 90;
-                break;
-            case 1.2:
-                // T8 exclusive range
-                val = value / (range + 0.8);
-                widthMultiplyer = 90;
                 break;
             case 1:
                 // for both the T4 and the T7
@@ -1726,7 +1708,7 @@ function module() {
         return function() {
             var width;
             if(val > 0) {
-                width = 50;
+                width = val;
             } else {
                 width = 50-self.getD3GraphWidth(val,range)/2;
             }
@@ -1786,12 +1768,13 @@ function module() {
 
         // Display the graphs
         $('.graphSlider').removeClass('uninitialized');
-        $('.graphSlider');
+        // $('.graphSlider').
         if(typeof(onSuccess) !== 'undefined') {
             onSuccess();
         }
     };
     this.updateD3Graph = function(name,curVal) {
+        // console.warn("some");
         var curRange = self.currentValues.get(name + '_RANGE');
         // what is this for T8 only???
         if(curRange == 0.08){

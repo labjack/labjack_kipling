@@ -6,7 +6,7 @@
     "framework_options": {
     	"device_selection": false
     },
-    "supportedDevices": [{"type":"T7"},{"type":"T4"}, {"type":"T8"}],
+    "supportedDevices": [{"type":"T7"},{"type":"T4"}, {"type":"T8","minFW":"0.1"}],
     "jsFiles": [
     ],
     "htmlFiles": [

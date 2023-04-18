@@ -1,10 +1,11 @@
 <div id="defaults-holder">
     {{#if devices.length}}
     <div class="section">
+        <p class="option-description">WARNING: Go through the configure defaults before saving the defaults to a file. .</p>
         <h3>Introduction</h3>
         <div>
             <p>
-                Control how the device is configured after any reboot, power-up, or reset condition.  This uses the device's I/O configuration system to configure registers including but not limited to:
+                This module will control how the device is configured after any reboot, power-up, or reset condition. This will use the device’s I/O configuration system to configure the registers including but not limited to: 
             </p>
             <ul>
                 <li>Digital I/O directions and states</li>
@@ -12,8 +13,13 @@
                 <li>Analog input extended features (AINx_EF)</li>
                 <li>Analog output (DAC) channel values</li>
             </ul>
-            <p>Refer to the <a class="lj-link-holder" id="io-config-datasheet-link">"IO Config" section of the datasheet</a> for more information.</p>
+            <p>For more information refer to the <a class="lj-link-holder" id="io-config-datasheet-link">"IO Config" section of the datasheet</a> .</p>
             <script>
+                //this is there to warn the user abiut the configuration
+                $(document).ready(function(){
+                    var warning = "Go through the configure defaults before saving the defaults to a file.";
+                    showInfoMessageNoTimeout(warning);
+                })
                 $('#io-config-datasheet-link').unbind();
                 $('#io-config-datasheet-link').bind('click',function(){
                     const gui = global.gui;
@@ -183,6 +189,10 @@
                         <span id="current-directory-display" class="selectableText">{{#if custom.selected_output_directory}}{{custom.selected_output_directory}}{{else}}No directory selected. Please browse for an output directory.{{/if}}</span><button id="browse-for-output-directory-button" class="icon-pencil btn btn-link" title="Edit Device Name"></button>
                     </div>
                 </div>
+                
+            </div>
+            <h3>3. Save Defaults</h3>
+            <div class="primary-step-content">
                 <table>
                     <tr><td>
                         <label class="checkbox" style="display:block">
