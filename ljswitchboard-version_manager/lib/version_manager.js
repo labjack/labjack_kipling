@@ -442,7 +442,8 @@ class labjackVersionManager extends EventEmitter {
             var defered = q.defer();
 
             // start getting all versions
-            self.getT8FirmwareVersions()
+            self.getKiplingVersions()
+            .then(self.getT8FirmwareVersions, errorFunc)
             .then(self.getT7FirmwareVersions, errorFunc)
             .then(self.getT4FirmwareVersions, errorFunc)
             .then(function(){
