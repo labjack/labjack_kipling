@@ -479,9 +479,8 @@ function module() {
         onSuccess();
     };
     this.genericDropdownClickHandler = function(data, onSuccess) {
-        var rootEl = data.eventData.target;
-        // console.warn("1", data.eventData)
-        // it was toElement
+        var rootEl = data.eventData.toElement;
+        // console.warn("",data)
         var className = rootEl.className;
         var buttonEl;
         var buttonID = '';

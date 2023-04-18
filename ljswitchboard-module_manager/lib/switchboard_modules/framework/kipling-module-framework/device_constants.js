@@ -97,21 +97,23 @@ global.globalDeviceConstants = {
     "t4DeviceConstants": { 
         hasEFSystem: true, 
         ainBitsPrecision: 6, 
-        ainChannelNames: "AIN#(0:11)", 
+        // the line below within the parenthicis is 0:13
+        // the reason that it has a value of 0:7 because any higher then the program will through an error and not read anything from 
+        // any of the register, the reason i have no idea.
+        ainChannelNames: "AIN#(0:3)", 
         allConfigRegisters: [ 
-            // {"name":"Range",                    "cssClass":"range",             "register":"AIN_ALL_RANGE",                 "options":"ainRangeOptions",                    "manual":false}, // The T4 does not support AIN_ALL_RANGE, it has constant range values
+            {"name":"Range",                    "cssClass":"range",             "register":"AIN_ALL_RANGE",                 "options":"ainRangeOptions",                    "manual":false}, 
             {"name":"Resolution Index",         "cssClass":"resolution",        "register":"AIN_ALL_RESOLUTION_INDEX",      "options":"ainResolutionOptions",               "manual":false}, 
             {"name":"Settling (us)",            "cssClass":"settling",          "register":"AIN_ALL_SETTLING_US",           "options":"func","func":"ainSettlingOptions",   "manual":false}, 
             {"name":"Negative Channel",         "cssClass":"negativeChannel",   "register":"AIN_ALL_NEGATIVE_CH",           "options":"func","func":"ainNegativeCHOptions", "manual":false}, 
-            {"name":"Extended Features (EF)",   "cssClass":"efSystem",          "register":"{{ainChannelNames}}_EF_INDEX",  "options":"ainEFTypeOptions",                   "manual":true} 
+            // {"name":"Extended Features (EF)",   "cssClass":"efSystem",          "register":"{{ainChannelNames}}_EF_INDEX",  "options":"ainEFTypeOptions",                   "manual":true} 
         ], 
         configRegisters: [ 
-            // {"name":"Range",                    "cssClass":"range",             "register":"{{ainChannelNames}}_RANGE",            "options":"ainRangeOptions"},
-            {"name":"Range",                    "cssClass":"range",             "register":"{{ainChannelNames}}_RANGE",            "options":"func", "func":"ainRangeOptions"}, 
+            {"name":"Range",                    "cssClass":"range",             "register":"{{ainChannelNames}}_RANGE",            "options":"ainRangeOptions"}, 
             {"name":"Resolution Index",         "cssClass":"resolution",        "register":"{{ainChannelNames}}_RESOLUTION_INDEX", "options":"ainResolutionOptions"}, 
             {"name":"Settling (us)",            "cssClass":"settling",          "register":"{{ainChannelNames}}_SETTLING_US",      "options":"func","func":"ainSettlingOptions"}, 
             {"name":"Negative Channel",         "cssClass":"negativeChannel",   "register":"{{ainChannelNames}}_NEGATIVE_CH",      "options":"func","func":"ainNegativeCHOptions"}, 
-            {"name":"Extended Feature (EF)",    "cssClass":"efSystem",          "register":"{{ainChannelNames}}_EF_INDEX",         "options":"ainEFTypeOptions"} 
+            // {"name":"Extended Feature (EF)",    "cssClass":"efSystem",          "register":"{{ainChannelNames}}_EF_INDEX",         "options":"ainEFTypeOptions"} 
         ], 
         extraAllAinOptions: [ 
             {"name": "Select","value": -9999}, 
@@ -190,6 +192,9 @@ global.globalDeviceConstants = {
             {"name": "3","value": 3, "acquisitionTime": 50}, 
             {"name": "4","value": 4, "acquisitionTime": 50}, 
             {"name": "5","value": 5, "acquisitionTime": 50}, 
+            {"name": "6","value": 6, "acquisitionTime": 50}, 
+            {"name": "7","value": 7, "acquisitionTime": 50}, 
+            {"name": "8","value": 8, "acquisitionTime": 50} 
         ], 
         ainSettlingOptions_RAW: [ 
             {"name": "Auto",    "value": 0}, 
@@ -1450,6 +1455,7 @@ global.globalDeviceConstants = {
         hasEFSystem: true,
         ainBitsPrecision: 6,
         ainChannelNames: "AIN#(0:13)",
+        // ainChannelNames: "AIN#(48:127)",
         allConfigRegisters: [
             {"name":"Range",                    "cssClass":"range",             "register":"AIN_ALL_RANGE",                 "options":"ainRangeOptions",                    "manual":false},
             {"name":"Resolution Index",         "cssClass":"resolution",        "register":"AIN_ALL_RESOLUTION_INDEX",      "options":"ainResolutionOptions",               "manual":false},
