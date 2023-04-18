@@ -684,6 +684,7 @@ function CREATE_DATA_COLLECTOR() {
 					organizedGroupData.userValues = {};
 					
 					var user_value_keys = activeGroupObj.defined_user_values;
+					// console.log("user_log_key", user_value_keys)
 					var userValueKeys = [];
 					
 					user_value_keys.forEach(function(user_value_key) {
@@ -712,6 +713,7 @@ function CREATE_DATA_COLLECTOR() {
 								// Zander we need to check more of thew stuff that is here
 								// this might be a place where we can find the informatioin and
 								// ba able to read the data
+								// console.log("within the if statment");
 								organizedGroupData.userValues[valueKey] = result.value;
 							} else {
 								var defaultVal = 25;
@@ -773,7 +775,9 @@ function CREATE_DATA_COLLECTOR() {
 		var organizedData = {};
 
 		self.dataGroupManagers.forEach(function(manager) {
+			console.error("manager", manager)
 			var reqData = manager.getRequiredData();
+			console.error("reqData", reqData)
 			if(reqData) {
 				var registers = reqData.registers;
 				var serialNumbers = Object.keys(registers);
@@ -893,10 +897,12 @@ function CREATE_DATA_COLLECTOR() {
 		debugLog('Starting Data Collector', self.config.core_period);
 		self.isActive = true;
 		self.isFirstDataCollectionIteration = true;
+		console.warn("what the fuck is happening here")
 		self.daqTimer = setInterval(
 			self.performDataCollection,
 			self.config.core_period
 		);
+		console.log("self.daqTimer", self.daqTimer)
 
 		// Report that the data collector has been started.
 		self.emit(self.eventList.COLLECTOR_STARTED, {});

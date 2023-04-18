@@ -545,14 +545,14 @@ exports.generateBasicConfig = function(basicData, devices) {
 			// console.log("valName", valName)
 			
 			
-			// configObj.basic_data_group.user_values[register] = {
-			// 	'name': register,
-			// 	'human_name': register,
-			// 	"exec_method": "sync",
-			// 	"func": "val = data['"+'4400107623'+"'].results."+register+".result",
-			// 	"enable_logging": false,
-			// 	"enable_view": true
-			// }
+			configObj.basic_data_group.user_values[register] = {
+				'name': register,
+				'human_name': register,
+				"exec_method": "sync",
+				"func": "val = data['"+'440010762'+"'].results."+register+".result",
+				"enable_logging": false,
+				"enable_view": true
+			}
 		});
 	}
 	// console.warn("configObj", configObj)

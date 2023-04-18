@@ -112,19 +112,20 @@ const MAX_LOG_NUM = 6000;
 //     let exTime = logTofile(device, registerList, connectedFile);
 //     readTimings.push(exTime[0]);
 //     writeTimings.push(exTime[1]);
-//     totalTimings.push(exTime[0] + exTime[1]);
-//     numLogged += 1;
-//     hrIntStart = process.hrtime();
+//     totalTimings.push(exTime[0] + exTime[1])
+//     hrIntStart = process.hrtime() // reset interval clock timer
+//     numLogged += 1
 // }
+// console.log("Done...Stats")
 // calculateTimerData(readTimings, writeTimings, totalTimings, intervalTimings);
-// numLogged = 0;
-// readTimings = [];
-// writeTimings = [];
-// totalTimings = [];
-// intervalTimings = [];
+// closeDevice(device)
+numLogged = 0;
+readTimings = [];
+writeTimings = [];
+totalTimings = [];
+intervalTimings = [];
+
 // standardInterval();
-customInterval();
-// performanceInterval();
 
 function standardInterval() {
     lineseperatoe("Starting the Standard Interval", connectedFile)
@@ -157,6 +158,7 @@ function standardInterval() {
     }, INTERVAL_TIME);
 }
 
+customInterval();
 function customInterval() {
     lineseperatoe("Starting the Custom Interval", connectedFile)
     //To-Do: Implemet a custom setInterval timing function
