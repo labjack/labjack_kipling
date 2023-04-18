@@ -41,6 +41,7 @@ function module() {
         var value = data.value;
         if(self.currentValues.has(name)) {
             var oldValue = self.currentValues.get(name);
+            // Zander - this is a place that i am getting an error
             if(oldValue.res != value.res) {
                 // console.log('New Value!', name, value);
                 self.newBufferedValues.set(name,value);
@@ -316,11 +317,11 @@ function module() {
             smartBindings.push(binding);
             self.deviceBindings.push(regInfo.name);
         };
-        var deviceTypeName = device.savedAttributes.deviceTypeName;
-        if(self.moduleConstants[deviceTypeName]) {
-            self.moduleConstants[deviceTypeName].forEach(addSmartBinding);
-            self.moduleConstants[deviceTypeName].forEach(savePeriodicRegisters);
-        }
+            var deviceTypeName = device.savedAttributes.deviceTypeName;
+            if(self.moduleConstants[deviceTypeName]) {
+                self.moduleConstants[deviceTypeName].forEach(addSmartBinding);
+                self.moduleConstants[deviceTypeName].forEach(savePeriodicRegisters);
+            }
         // Save the smartBindings to the framework instance.
         framework.putSmartBindings(smartBindings);
 
@@ -385,6 +386,8 @@ function module() {
             onSuccess();
         };
 
+        // Zander - this is for each of the devices and seems to be working as intended
+        // Zander - this might be ehat we need to be doign for here but not sure yet
         if(device.savedAttributes.deviceTypeName === 'T7') {
             deviceTemplate = handlebars.compile(
                 framework.moduleData.htmlFiles.t7_template
@@ -501,6 +504,7 @@ function module() {
                 return defered.promise;
             }());
             promises.push(getExtraOperation(device,'getLatestDeviceErrors'));
+        // Zander - do we want to keep this in? because we no loger do/use the diget?
         } else if(device.savedAttributes.deviceTypeName === 'Digit') {
             deviceTemplate = handlebars.compile(
                 framework.moduleData.htmlFiles.digit_template
@@ -626,17 +630,16 @@ function module() {
                 framework.moduleData.htmlFiles.t8_template
             );
 
-            // Extra required data for T4s
+            // Extra required data for T8s
             extraRegisters = [
                 'ETHERNET_IP',
                 'POWER_LED',
                 'WATCHDOG_ENABLE_DEFAULT',
                 'HARDWARE_VERSION',
-                // 'RTC_TIME_S', // Not available in T4 FW 0.202
-                // 'SNTP_UPDATE_INTERVAL', // Not available in T4 FW 0.202
+                // 'RTC_TIME_S', // Not available in T8 FW 0.202
+                // 'SNTP_UPDATE_INTERVAL', // Not available in T8 FW 0.202
             ];
 
-            // Not available in T4 FW 0.202
             var secondaryExtraRegisters = [
                 'TEMPERATURE_DEVICE_K',
             ];
@@ -793,6 +796,7 @@ function module() {
                         if(dataKey == 'rtcTime') {
                             // var eleA = $('#' + 'rtc-device-time');
                             // var eleB = $('#' + 'rtc-system-time');
+                            // Zander - This has nothing to do with the 
                             eleA.text(value.t7TimeStr);
                             eleB.text(value.pcTimeStr);
                         } else if(dataKey !== '') {
