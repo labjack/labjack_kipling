@@ -775,9 +775,9 @@ function CREATE_DATA_COLLECTOR() {
 		var organizedData = {};
 
 		self.dataGroupManagers.forEach(function(manager) {
-			console.error("manager", manager)
+			// console.error("manager", manager)
 			var reqData = manager.getRequiredData();
-			console.error("reqData", reqData)
+			// console.error("reqData", reqData)
 			if(reqData) {
 				var registers = reqData.registers;
 				var serialNumbers = Object.keys(registers);
@@ -897,7 +897,6 @@ function CREATE_DATA_COLLECTOR() {
 		debugLog('Starting Data Collector', self.config.core_period);
 		self.isActive = true;
 		self.isFirstDataCollectionIteration = true;
-		console.warn("what the fuck is happening here")
 		self.daqTimer = setInterval(
 			self.performDataCollection,
 			self.config.core_period

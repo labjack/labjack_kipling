@@ -10,14 +10,13 @@
 const q = require('q');
 const package_loader = global.package_loader;
 var MODULE_UPDATE_PERIOD_MS = 1000;
-var driver_const = require('ljswitchboard-ljm_driver_constants');
-var driver_wrapper = rewire('../lib/driver_wrapper');
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
  * When using the 'singleDevice' framework it is instantiated as sdModule.
  */
 function module() {
+    var driver_const = require('ljswitchboard-ljm_driver_constants');
     this.MODULE_DEBUGGING = true;
     this.MODULE_LOADING_STATE_DEBUGGING = true;
     this.activeDevice = undefined;
@@ -168,11 +167,7 @@ function module() {
             console.log('Opening Application:', appName, ct);
             var msgStr = 'Opening device in '+appName +' ';
             var preventCloseOpen = false;
-            
-            // this is just here to help clean the code up to maake sure we are not having two difrent buttons
-            // lead to the same exact place
-            if(appName === 'LJStreamM'){
-                console.log('preventCloseOpen ' + preventCloseOpen);
+            var ctToOpen;
                 if(ct === 'current') {
                     ctToOpen = driver_const.connectionTypes[self.activeDevice.savedAttributes.connectionTypeName];
                     msgStr += 'over' + ctToOpen;
@@ -182,20 +177,6 @@ function module() {
                     ctToOpen = driver_const.connectionTypes[ct.toUpperCase()];
                     console.log("this is the else statment")
                 }
-            }
-            else if(appName === 'LJLogM'){
-                console.log('preventCloseOpen ' + preventCloseOpen);
-                if(ct === 'current') {
-                    console.log('the first statment to be working')
-                    ctToOpen = driver_const.connectionTypes[self.activeDevice.savedAttributes.connectionTypeName];
-                    msgStr += 'over' + ctToOpen;
-                } else {
-                    console.log('the else statment for the log');
-                    msgStr += 'over' + ct;
-                    ctToOpen = driver_const.connectionTypes[ct.toUpperCase()];
-                }
-            }
-            
 
             if(ctToOpen == driver_const.connectionTypes.USB) {
                 preventCloseOpen = false;
@@ -340,17 +321,10 @@ function module() {
             self.deviceBindings.push(regInfo.name);
         };
             var deviceTypeName = device.savedAttributes.deviceTypeName;
-        device.then(function(device) {
-            console.warn("devicetype name", device)
-            console.warn("self.moduleconstants", self.moduleConstants)
-            var deviceTypeName = device[0].savedAttributes.deviceTypeName;
-        
-            console.log("deviceTypeName", deviceTypeName)
             if(self.moduleConstants[deviceTypeName]) {
                 self.moduleConstants[deviceTypeName].forEach(addSmartBinding);
                 self.moduleConstants[deviceTypeName].forEach(savePeriodicRegisters);
             }
-        })
         // Save the smartBindings to the framework instance.
         framework.putSmartBindings(smartBindings);
 
@@ -391,7 +365,6 @@ function module() {
             }
 
             try {
-                console.warn("device", device)
                 keys = Object.keys(device.savedAttributes);
                 keys.forEach(function(key) {
                     context[key] = device.savedAttributes[key];
@@ -416,16 +389,7 @@ function module() {
             onSuccess();
         };
 
-        // Zander - this is for each of the devices and seems to be working as intended
-        // Zander - this might be ehat we need to be doign for here but not sure yet
-        var devicee
-        console.warn("device.savedAttributes.deviceTypeName", device)
-        device.then(function(device) {
-            // here you can use the result of promiseB
-        
-        // console.warn("framework.moduleData", framework.moduleData)
         if(device.savedAttributes.deviceTypeName === 'T7') {
-            console.warn("we do get into the if")
             deviceTemplate = handlebars.compile(
                 framework.moduleData.htmlFiles.t7_template
             );
@@ -773,7 +737,6 @@ function module() {
             }());
             promises.push(getExtraOperation(device,'getLatestDeviceErrors'));
         }
-    });
 
         Promise.allSettled(promises)
         .then(function(results) {
@@ -886,6 +849,7 @@ function module() {
     };
     this.onRefresh = function(framework, registerNames, onError, onSuccess) {
         if(self.MODULE_LOADING_STATE_DEBUGGING) {
+            // TODO - do we really need to be loging everytime we refresh?
             console.log('in onRefresh');
         }
         onSuccess();

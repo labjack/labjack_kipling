@@ -293,8 +293,8 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// console.log("registerList", registerList)
 				// var deviceCurator1 = new deviceCurator
 				// console.log("deviceCurator", deviceCurator.readMany())
-				console.log("self", self)
-				devices.cReadMany(registerList)
+				// console.log("self", self)
+				self.devices.readMany(registerList)
 				.then(function(results) {
 					// console.log("results", results)
 					// console.log('readMany Results', registerList, results);

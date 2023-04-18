@@ -65,7 +65,7 @@
   },
   "script_notes": "to run a script w/o using npm test, use npm run [script name]",
   "scripts": {
-    "start": "node_modules\\.bin\\electron .",
+    "start": "./node_modules/.bin/electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder"
   },

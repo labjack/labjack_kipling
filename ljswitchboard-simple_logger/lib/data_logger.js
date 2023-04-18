@@ -232,8 +232,8 @@ function CREATE_DATA_LOGGER() {
 			var dataNames = [];
 
 			// Add device serial number/register data.
-			var serial_numbers = dataGroup.device_serial_numbers;
-			serial_numbers.forEach(function(serial_number) {
+			var serial_number = dataGroup.device_serial_numbers[0];
+			// serial_numbers.forEach(function(serial_number) {
 				logStatus[serial_number] = {};
 				var serialNumber = dataGroup.device_serial_numbers[0];
 				// var serialNumber = dataGroup[serial_number];
@@ -247,10 +247,8 @@ function CREATE_DATA_LOGGER() {
 				dataNames.push('Time');
 
 				// add the error code header
-				dataCategories.push('');
-				dataNames.push('error code');
 				// ['CORE_TIMER','AIN0','AIN1','AIN2','AIN3']
-				dataNames.push("CORE_TIMER");
+				// dataNames.push("CORE_TIMER");
 				// dataNames.push("AIN0");
 				// dataNames.push("AIN1");
 				// dataNames.push("AIN2");
@@ -259,17 +257,18 @@ function CREATE_DATA_LOGGER() {
 				
 
 				// Add each required registers & align the data category array.
-				serialNumber.registers.forEach(function(register) {
-					// Save the enabled/disabled logging state.
-					logStatus[serial_number][register.name] = register.enable_logging;
+				// console.warn("serialnumber", serialNumber)
+				// serialNumber.registers.forEach(function(register) {
+				// 	// Save the enabled/disabled logging state.
+				// 	logStatus[serial_number][register.name] = register.enable_logging;
 
-					// Check to see if the register is enabled for logging
-					if(register.enable_logging) {
-						// Align the device serial number to its data
-						dataCategories.push('');
-						dataNames.push(register.name);
-					}
-				});
+				// 	// Check to see if the register is enabled for logging
+				// 	if(register.enable_logging) {
+				// 		// Align the device serial number to its data
+				// 		dataCategories.push('');
+				// 		dataNames.push(register.name);
+				// 	}
+				// });
 
 				// Add the error code header & align the data category.
 				dataCategories.push('');
@@ -312,7 +311,7 @@ function CREATE_DATA_LOGGER() {
 
 				// Add the error code header & align the data category.
 				
-			});
+			// });
 
 			if(dataGroup.defined_user_values) {
 				var addedUserValueCategory = false;
@@ -963,29 +962,29 @@ function CREATE_DATA_LOGGER() {
 
 				// this works for the readMany
 				// theys are aso here so we are able to see the interval between each of the log
-				if(logData) {
-					// console.error("...", result);
-					if(result.str) {
-						dataToWrite += result.result + value_separator +  result.interval + value_separator;
-					} else if(result.result == 0) {
-						dataToWrite += result.result + value_separator + result.interval + value_separator;
-					} else {
-						// console.log("result", result)
-						dataToWrite += result.result + value_separator + result.interval + value_separator;
-					}
-				}
-
 				// if(logData) {
 				// 	// console.error("...", result);
 				// 	if(result.str) {
-				// 		dataToWrite += result.result + value_separator;
+				// 		dataToWrite += result.result + value_separator +  result.interval + value_separator;
 				// 	} else if(result.result == 0) {
-				// 		dataToWrite += result.result + value_separator;
+				// 		dataToWrite += result.result + value_separator + result.interval + value_separator;
 				// 	} else {
 				// 		// console.log("result", result)
-				// 		dataToWrite += result.result + value_separator;
+				// 		dataToWrite += result.result + value_separator + result.interval + value_separator;
 				// 	}
 				// }
+
+				if(logData) {
+					// console.error("...", result);
+					if(result.str) {
+						dataToWrite += result.result + value_separator;
+					} else if(result.result == 0) {
+						dataToWrite += result.result + value_separator;
+					} else {
+						// console.log("result", result)
+						dataToWrite += result.result + value_separator;
+					}
+				}
 				
 				// this works for the cReadMany
 				// if(logData) {
@@ -1078,16 +1077,6 @@ function CREATE_DATA_LOGGER() {
 			// ZANDER - This is the exact function that when un comented will alow data to be writen to the file
 			// console.error("dataToWrite", dataToWrite)
 			ok = fileStream.write(dataToWrite);
-
-			testingWrite.push(dataToWrite);
-			
-			var curtime = new Date();
-			// console.warn("curtime write time", testingWrite)
-			var hrWriteStart = process.hrtime();
-			// ok = fileStream.write(testingWrite[0]);
-			var hrWriteEnd = process.hrtime(hrWriteStart);
-			
-			// console.warn("the end writing data", hrWriteEnd)
 
 			testingWrite.push(dataToWrite);
 			

@@ -230,9 +230,10 @@ function module() {
     };
 
     // Supported extra options
+    // TODO - do we want/need the extra options for the T8
     var extraAllAinOptions = globalDeviceConstants.t7DeviceConstants.extraAllAinOptions;
 
-    var extraAllAinOptions = globalDeviceConstants.t8DeviceConstants.extraAllAinOptions;
+    // var extraAllAinOptions = globalDeviceConstants.t8DeviceConstants.extraAllAinOptions;
 
     this.efTypeDict = new Map();
     this.rangeOptionsDict = new Map();
@@ -705,6 +706,8 @@ function module() {
             productType = self.activeDevice.savedAttributes.productType;
             devConstStr = globalDeviceConstantsSwitch[productType];
             self.deviceConstants = globalDeviceConstants[devConstStr];
+            console.warn("self", self)
+            console.warn("globalDeviceConstants", globalDeviceConstants)
             baseReg = self.deviceConstants.ainChannelNames;
             if(typeof(self.deviceConstants)==='undefined'){
                 console.error('Selected Device is not defined!!');
@@ -1594,7 +1597,7 @@ function module() {
                         if(name.indexOf('_RANGE') !== -1) {
                             var rangeStr = newData.value.toString();
                             ainInfo.rangeVal = newData.value;
-                            if (newData.value == 2.4) { ainInfo.minRangeVal = 0; } else { ainInfo.minRangeVal = newData.value; } // case for T4 AIN4-11 which has the range 0-2.5V
+                            if (newData.value == 2.5) { ainInfo.minRangeVal = 0; } else { ainInfo.minRangeVal = newData.value; } // case for T4 AIN4-11 which has the range 0-2.5V
                             ainInfo.rangeStr = name + ' is set to ' + rangeStr;
                         }
                         ainInfo.optionsDict.set(name, menuOptions);
@@ -1639,6 +1642,32 @@ function module() {
             case 10:
                 // for both the T4 and the T7
                 val = value / (range + 0.8);
+                widthMultiplyer = 100;
+                break;
+            case 9.7:
+                // for both tthe T4 and T7
+                val = value / (range + 0.8);
+                widthMultiplyer = 100;
+                break;
+            case 4.8:
+                // T8 exclusive range
+                val = value / (range + 0.8);
+                widthMultiplyer = 90;
+                break;
+            case 2.5:
+                // for the T4
+                val = value / (range + 0.8);
+                widthMultiplyer = 100;
+                break;
+            case 2.4:
+                // T8 exclusinve range
+                val = value / (range + 0.8);
+                widthMultiplyer = 90;
+                break;
+            case 1.2:
+                // T8 exclusive range
+                val = value / (range + 0.8);
+                widthMultiplyer = 90;
                 break;
             case 1:
                 // for both the T4 and the T7

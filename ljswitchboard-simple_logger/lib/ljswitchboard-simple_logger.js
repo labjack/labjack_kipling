@@ -437,12 +437,13 @@ exports.generateBasicConfig = function(basicData, devices) {
 	if(basicData.same_vals_all_devices) {
 		configObj.stop_trigger.triggers[0].val = basicData.logTime;
 		// Zander this is for a prouf oc concepts
-		// var sn = devices[0].savedAttributes.serialNumber;
+		var sn = devices[0].savedAttributes.serialNumber;
+		// below are difrent serial numbers that need to be set when running the logger script
 		// var sn = "470010175";
 		// var sn = "440017663"
 		// var sn = "470016039";
 		// var sn = "440010762"; // zander T4
-		var sn = "470012223"; // zander T7
+		// var sn = "470012223"; // zander T7
 		validSN = sn;
 		configObj.basic_data_group.device_serial_numbers.push(validSN);
 		// configObj.basic_data_group.device_serial_numbers.push(sn);
@@ -479,7 +480,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 		// 	});
 		// });
 		// 'CORE_TIMER','AIN0','AIN1','AIN2','AIN3','AIN4'
-		configObj.basic_data_group.defined_user_values.push('CORE_TIMER');
+		// configObj.basic_data_group.defined_user_values.push('CORE_TIMER');
 		// configObj.basic_data_group.defined_user_values.push('AIN0');
 		// configObj.basic_data_group.defined_user_values.push('AIN1');
 		// configObj.basic_data_group.defined_user_values.push('AIN2');
@@ -549,7 +550,7 @@ exports.generateBasicConfig = function(basicData, devices) {
 				'name': register,
 				'human_name': register,
 				"exec_method": "sync",
-				"func": "val = data['"+'440010762'+"'].results."+register+".result",
+				"func": "val = data['"+validSN.toString()+"'].results."+register+".result",
 				"enable_logging": false,
 				"enable_view": true
 			}

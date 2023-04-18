@@ -218,20 +218,20 @@ function CREATE_VIEW_DATA_REPORTER() {
 			var valObj = currentData.results;
 			// console.log("val_key", val_key)
 			// console.log("valObj", valObj.AIN0);
-			if(val_key = 'AIN0'){
-				newVal = valObj.AIN0.result;
-			}
-			if(val_key = 'CORE_TIMER'){
-				newVal = valObj.CORE_TIMER.result;
-			}
+			// if(val_key = 'AIN0'){
+			// 	newVal = valObj.AIN0.result;
+			// }
+			// if(val_key = 'CORE_TIMER'){
+			// 	newVal = valObj.CORE_TIMER.result;
+			// }
 			// newVal = valObj[val_key].result;
 
-			// if(data_type === 'dev_val') {
-			// 	var valObj = currentData.results[val_key];
-			// 	newVal = valObj.result
-			// } else if(data_type === 'user_val') {
-			// 	newVal = currentData[val_key]
-			// }
+			if(data_type === 'dev_val') {
+				var valObj = currentData.results[val_key];
+				newVal = valObj.result
+			} else if(data_type === 'user_val') {
+				newVal = currentData[val_key]
+			}
 
 			dataArray.push(newVal);
 			if(dataKeyValueStore[data_info.key]) {
