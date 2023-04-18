@@ -318,10 +318,17 @@ function module() {
             self.deviceBindings.push(regInfo.name);
         };
             var deviceTypeName = device.savedAttributes.deviceTypeName;
+        device.then(function(device) {
+            console.warn("devicetype name", device)
+            console.warn("self.moduleconstants", self.moduleConstants)
+            var deviceTypeName = device[0].savedAttributes.deviceTypeName;
+        
+            console.log("deviceTypeName", deviceTypeName)
             if(self.moduleConstants[deviceTypeName]) {
                 self.moduleConstants[deviceTypeName].forEach(addSmartBinding);
                 self.moduleConstants[deviceTypeName].forEach(savePeriodicRegisters);
             }
+        })
         // Save the smartBindings to the framework instance.
         framework.putSmartBindings(smartBindings);
 
@@ -362,6 +369,7 @@ function module() {
             }
 
             try {
+                console.warn("device", device)
                 keys = Object.keys(device.savedAttributes);
                 keys.forEach(function(key) {
                     context[key] = device.savedAttributes[key];
@@ -388,7 +396,14 @@ function module() {
 
         // Zander - this is for each of the devices and seems to be working as intended
         // Zander - this might be ehat we need to be doign for here but not sure yet
+        var devicee
+        console.warn("device.savedAttributes.deviceTypeName", device)
+        device.then(function(device) {
+            // here you can use the result of promiseB
+        
+        // console.warn("framework.moduleData", framework.moduleData)
         if(device.savedAttributes.deviceTypeName === 'T7') {
+            console.warn("we do get into the if")
             deviceTemplate = handlebars.compile(
                 framework.moduleData.htmlFiles.t7_template
             );
@@ -515,6 +530,7 @@ function module() {
             promises.push(getExtraOperation(device,'sReadMany', extraRegisters));
             promises.push(getExtraOperation(device,'getLatestDeviceErrors'));
         } else if(device.savedAttributes.deviceTypeName === 'T4') {
+            console.warn("so we see it as a t4 corret????")
             deviceTemplate = handlebars.compile(
                 framework.moduleData.htmlFiles.t4_template
             );
@@ -735,6 +751,7 @@ function module() {
             }());
             promises.push(getExtraOperation(device,'getLatestDeviceErrors'));
         }
+    });
 
         Promise.allSettled(promises)
         .then(function(results) {

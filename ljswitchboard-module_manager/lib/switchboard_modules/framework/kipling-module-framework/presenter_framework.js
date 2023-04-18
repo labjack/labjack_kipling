@@ -365,13 +365,28 @@ class PresenterFramework extends EventEmitter {
 
     _SetSelectedDevices(newSelectedDevices) {
         // Initialize the selectedDevices array
-        this.selectedDevices = [];
-        newSelectedDevices.forEach((device) => {
-            const savedAttributes = device.savedAttributes;
+        self.selectedDevices = [];
+        console.warn("B1")
+        console.error("newSelectedDevices", newSelectedDevices)
+        newSelectedDevices.then(function(device) {
+            console.log("hello!!")
+            console.log("device", device[0].savedAttributes)
+            // onsole.warn("B2", device)
+            const savedAttributes = device[0].savedAttributes;
+            console.warn("B3")
             if (savedAttributes['isSelected-CheckBox']) {
-                this.selectedDevices.push(device);
+                self.selectedDevices.push(device[0]);
             }
-        });
+        })
+        console.warn("B11")
+        // newSelectedDevices.forEach((device) => {
+        //     console.warn("B2", device)
+        //     const savedAttributes = device.savedAttributes;
+        //     console.warn("B3")
+        //     if (savedAttributes['isSelected-CheckBox']) {
+        //         this.selectedDevices.push(device);
+        //     }
+        // });
     }
 
     getConnectedDeviceInfoJquerySelector(serialNumber, extra) {
@@ -757,7 +772,8 @@ class PresenterFramework extends EventEmitter {
     }
 
     _SetActiveDevices(newActiveDevices) {
-        this.activeDevices = newActiveDevices;
+        // console.log("it is going in herer", newActiveDevices)
+        // this.activeDevices = newActiveDevices;
 
         // Initialize a new error-log
         this.deviceErrorLog = {};
@@ -1134,8 +1150,11 @@ class PresenterFramework extends EventEmitter {
     }
 
     qExecOnDeviceConfigured(data) {
+        console.warn("we are now looking here")
+        console.warn("allowModuleExecution", this.allowModuleExecution)
         return new Promise((resolve, reject) => {
             if (this.allowModuleExecution) {
+                console.warn("this is true")
                 this.fire(
                     'onDeviceConfigured',
                     [this.smartGetSelectedDevices(), data],
@@ -1143,6 +1162,7 @@ class PresenterFramework extends EventEmitter {
                     (res) => resolve(res)
                 );
             } else {
+                console.warn("this is false")
                 return this.qExecOnCloseDevice()
                     .then(() => this.qExecOnUnloadModule(), () => this.qExecOnUnloadModule());
             }
@@ -1257,6 +1277,7 @@ class PresenterFramework extends EventEmitter {
     qExecOnLoadError(err) {
         if (this.allowModuleExecution) {
             return new Promise((resolve) => {
+                console.warn("here?")
                 this.fire(
                     'onLoadError',
                     [
@@ -1327,9 +1348,11 @@ class PresenterFramework extends EventEmitter {
     }
 
     qRenderModuleTemplate() {
+        console.error("herer?")
+        console.warn("this objects", this)
         return this.setDeviceView(
             this.userViewFile,
-            this.moduleJsonFiles,
+            this.moduleJsonFiles[0],
             this.convertBindingsToDict()
         );
     }
@@ -1344,10 +1367,11 @@ class PresenterFramework extends EventEmitter {
     }
 
     async qUpdateActiveDevice() {
+        // This is exactly where the error is happening so i need to trace it back to the source
         const data = {
-            'activeDevice': await this.device_controller.getSelectedDevice(),
-            'deviceListing': await this.device_controller.getDeviceListing(this.moduleData.data.supportedDevices),
-            'activeDevices': await this.device_controller.getDevices(this.moduleData.data.supportedDevices),
+            'activeDevice': this.device_controller.getSelectedDevice(),
+            'deviceListing': this.device_controller.getDeviceListing(this.moduleData.data.supportedDevices),
+            'activeDevices': this.device_controller.getDevices(this.moduleData.data.supportedDevices),
         };
 
         // Save device references
@@ -1397,7 +1421,7 @@ class PresenterFramework extends EventEmitter {
                     console.log('Repeating Execution of getting active device info...');
                     await this.qUpdateActiveDevice();
                 } catch (err) {
-                    console.error(err);
+                    console.error("what is this error", err);
                 }
             } else {
                 // console.warn('Not sure what to do... presenter_framework.js - updateSelectedDeviceList');
@@ -2972,41 +2996,54 @@ class PresenterFramework extends EventEmitter {
 
         try {
             // Update the currently-active device (This will force a valid device to be selected).
+            console.error("1")
+            // Zander - so it will not even get past the first function
             await this.qUpdateActiveDevice();
 
             // Report that a new device has been selected
+            console.error("2")
             await this.qExecOnDeviceSelected();
 
             // Clear all config-bindings (if not disabled)
+            console.error("2")
             this.clearConfigBindings();
 
             // Re-configure any smartBindings
+            console.error("3")
             this.smartBindings.forEach((smartBinding) => {
                 this.putSmartBinding(smartBinding);
             });
 
             // Configure the device
+            console.error("4")
             const results = await this.executeSetupBindings();
 
             // Report that the device has been configured
+            console.error("5")
             await this.qExecOnDeviceConfigured(results);
 
             // Render the module's template
+            console.error("6")
             await this.qRenderModuleTemplate();
 
             // Connect connect any established writeBindings to jquery events
+            console.error("7")
             this.establishWriteBindings(this.writeBindings);
 
             // Report that the module's template has been loaded
+            console.error("8")
             await this.qExecOnTemplateLoaded();
 
             // Start the DAQ loop
+            console.error("9")
             this.startLoop();
 
             // Display the module's template
+            console.error("10")
             await this.qShowUserTemplate();
 
             // Report that the module's template has been displayed
+            console.error("11")
             await this.qExecOnTemplateDisplayed();
         } catch (err) {
             await this.qExecOnLoadError(err);
