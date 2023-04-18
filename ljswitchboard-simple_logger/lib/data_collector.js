@@ -624,6 +624,7 @@ function CREATE_DATA_COLLECTOR() {
 					var deviceDataIDs = Object.keys(reqDeviceData);
 					deviceDataIDs.forEach(function(deviceDataID) {
 						var reqReg = reqDeviceData[deviceDataID];
+						// console.log("reqReg", reqReg)
 						// the change here is waht is changing the log from
 						// 'undefined -> '[object Object}']
 						var regName = reqReg;
@@ -635,6 +636,8 @@ function CREATE_DATA_COLLECTOR() {
 						regValue = newDeviceData[regName];
 
 						// Save the initial index value.
+						// console.error("regvalue", regValue.index)
+						
 						var saveDeviceData = false;
 						if(index < 0) {
 							saveDeviceData = true;

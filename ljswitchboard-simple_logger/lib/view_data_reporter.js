@@ -154,6 +154,7 @@ function CREATE_VIEW_DATA_REPORTER() {
 			var user_values = groupData.defined_user_values;
 			user_values.forEach(function(user_value_key) {
 				var userValue = groupData.user_values[user_value_key];
+				// console.log("uservalue", groupData.user_values)
 				var isEnabled = userValue.enable_view;
 				if(isEnabled) {
 					self.dataMap[group_key].push({
@@ -208,6 +209,7 @@ function CREATE_VIEW_DATA_REPORTER() {
 		var dataKeyValueStore = {};
 
 		dataMap.map(function(data_info) {
+			// console.log("data_info", data_info)
 			var currentData = data[data_info.key];
 			var data_type = data_info.type;
 			var val_key = data_info.val_key;
@@ -307,6 +309,8 @@ function CREATE_VIEW_DATA_REPORTER() {
 				minUpdateRate = minUpdateRate;
 			}
 			// -10 is to account for jitter...
+			// console.log(curTime - view.lastTimeUpdated)
+			// console.log(timeElapsed)
 			if(curTime - view.lastTimeUpdated >= timeElapsed-10) {
 				debugDataReporting('Reporting data!');
 				view.lastTimeUpdated = curTime;
@@ -323,6 +327,7 @@ function CREATE_VIEW_DATA_REPORTER() {
 	this.onNewData = function(data) {
 		// print('New Data');
 		// Determine if the data group key is one that should be managed.
+		// console.log("data", data)
 		var dataGroupKey = data.groupKey
 		if(self.groupEndpoints[data.groupKey]) {
 			try {

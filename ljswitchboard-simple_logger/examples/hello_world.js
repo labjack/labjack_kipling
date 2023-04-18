@@ -144,6 +144,7 @@ function loggerApp() {
 
 		// Intentionally delay to allow user to read start-up message.
 		setTimeout(function() {
+			console.log("should be right befor")
 			self.simpleLogger.initialize()
 			.then(function(res) {
 				debugLog('--- App Initialized',res);
@@ -203,7 +204,7 @@ function loggerApp() {
 		*/
 		self.logConfigs = simple_logger.generateBasicConfig({
 			'same_vals_all_devices': true,
-			'registers': ['AIN0','AIN1'],
+			'registers': ['CORE_TIMER','AIN0'],
 			'update_rate_ms': 100,
 		},self.deviceManager.getDevices());
 

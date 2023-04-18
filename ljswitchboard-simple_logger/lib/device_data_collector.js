@@ -295,7 +295,7 @@ function CREATE_DEVICE_DATA_COLLECTOR () {
 				// console.log("deviceCurator", deviceCurator.readMany())
 				// console.log("self", self.device)
 				// console.log("self", devices)
-				registerList = [ 'CORE_TIMER']
+				registerList = [ 'CORE_TIMER', 'AIN0']
 				// console.log("registerList", registerList)
 				// TODO - make it one device so we don't have to use the index
 				self.devices[0].readMany(registerList)
