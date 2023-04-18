@@ -1786,6 +1786,7 @@ function module() {
 
         // Display the graphs
         $('.graphSlider').removeClass('uninitialized');
+        $('.graphSlider');
         if(typeof(onSuccess) !== 'undefined') {
             onSuccess();
         }

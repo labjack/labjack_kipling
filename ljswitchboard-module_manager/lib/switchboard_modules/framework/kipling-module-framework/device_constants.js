@@ -2788,7 +2788,7 @@ global.globalDeviceConstants = {
         // the line below within the parenthicis is 0:13
         // the reason that it has a value of 0:7 because any higher then the program will through an error and not read anything from 
         // any of the register, the reason i have no idea.
-        ainChannelNames: "AIN#(0:7)", 
+        ainChannelNames: "AIN#(0:1)", 
         allConfigRegisters: [ 
             {"name":"Range",                    "cssClass":"range",             "register":"AIN_ALL_RANGE",                 "options":"ainRangeOptions",                    "manual":false}, 
             {"name":"Resolution Index",         "cssClass":"resolution",        "register":"AIN_ALL_RESOLUTION_INDEX",      "options":"ainResolutionOptions",               "manual":false}, 
@@ -2845,17 +2845,18 @@ global.globalDeviceConstants = {
             // Any of the regesters that are comented out do not work in the current scope because the ranges are too exact or something 
             // i am not actuly sure what the cause is but i am waiting to get a refrence or more data about it from steeve at a later date. 
             // but for now this does work for what we need it to be doing.
-            {"name": "-11 to 11V","value": 11,"timeMultiplier":1}, 
-            // {"name": "-9.7 to 9.7V","value": 9.7,"timeMultiplier":1.25}, 
+            //  11.0, 9.6, 4.8, 2.4, 1.2, 0.6, 0.3, 0.15, 0.075, 0.036, 0.018
+            {"name": "-11.0 to 11.0V","value": 11.0,"timeMultiplier":1}, 
+            // {"name": "-9.7 to 9.7V","value": 9.6,"timeMultiplier":1.25}, 
             {"name": "-4.8 to 4.8V","value": 4.8,"timeMultiplier":1.5}, 
             {"name": "-2.4 to 2.4V","value": 2.4,"timeMultiplier":1.5}, 
             {"name": "-1.2 to 1.2V","value": 1.2,"timeMultiplier":1.5}, 
             {"name": "-0.6 to 0.6V","value": 0.6,"timeMultiplier":1.5}, 
             {"name": "-0.3 to 0.3V","value": 0.3,"timeMultiplier":1.5}, 
             {"name": "-0.15 to 0.15V","value": 0.15,"timeMultiplier":1.5}//, 
-        //     {"name": "-0.75 to 0.75V","value": 0.75,"timeMultiplier":1.5}, 
-        //     {"name": "-0.36 to 0.36V","value": 0.36,"timeMultiplier":1.5}, 
-        //     {"name": "-0.18 to 0.18V","value": 0.18,"timeMultiplier":1.5}
+            // {"name": "-0.75 to 0.75V","value": 0.075,"timeMultiplier":1.5}, 
+            // {"name": "-0.36 to 0.36V","value": 0.036,"timeMultiplier":1.5}, 
+            // {"name": "-0.18 to 0.18V","value": 0.018,"timeMultiplier":1.5}
         ], 
         ainResolutionOptions: [ 
             {"name": "Auto","value": 0,"acquisitionTime": 50}, 

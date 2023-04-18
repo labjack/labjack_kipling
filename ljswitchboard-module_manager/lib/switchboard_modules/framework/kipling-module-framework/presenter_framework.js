@@ -2793,7 +2793,7 @@ class PresenterFramework extends EventEmitter {
                 await this.verifyFrameworkIsActive();
 
              } catch (err) {
-                // console.error("\n==== Presenter Framework innerRunDAQLoop caught error ====\n", "Error: ", err, "\nreadBindings: ", this.readBindings, "\nbindingsInfo: ", bindingsInfo,"\n===================\n")
+                console.warn("\n==== Presenter Framework innerRunDAQLoop caught error ====\n", "Error: ", err, "\nreadBindings: ", this.readBindings, "\nbindingsInfo: ", bindingsInfo,"\n===================\n")
                 if (err !== 'delay') {
                     if (err === 'stoppingLoop') {
                         return Promise.reject(err);
