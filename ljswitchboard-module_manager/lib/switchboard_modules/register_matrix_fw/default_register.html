@@ -8,8 +8,51 @@
     <td class="register-value-obj {{disableControls}} {{registerMode}}">
         <div class="value-display">
             <span title="enter write mode" class="icon-pencil edit-register-button"></span>
-            <span class="register-value selectableText">{{result.str}}</span>
+            <span class="register-value selectableText" >{{result.str}}</span>
+            <!-- <button class="numbtns" onclick="getClickedID(this.id)" id="hex">Hex</button>
+            <button class="numbtns" onclick="getClickedID(this.id)" id="binary">Binary</button>
+            <button class="numbtns" onclick="getClickedID(this.id)" id="dec">Des</button> -->
         </div>
+        <!-- <script>
+            var origonalVal
+            $(document).ready(function(){
+                // saves the origonal value for latter use, this is not a perminate
+                origonalVal = document.getElementById("some1").innerText;
+            })
+            function getClickedID(clickedId) {
+                // it will rest the visable number to be a hexadecimal number when thar spacific number is pressed.
+                if(clickedId == "hex"){
+                    var resetNum = document.getElementById("some1");
+                    var binrayOutput = parseInt(origonalVal);
+                    var hex = binrayOutput.toString(16);                 
+                    resetNum.innerHTML = hex;
+                }
+                // if the buttion for binar it will convert the number to a binary number
+                else if(clickedId == "binary"){
+                    var binrayOutput = document.getElementById("some1");
+
+                    let decimal = origonalVal;
+                    decimal = decimal.replace(".", "");
+                    let binary = "";
+                    while (decimal > 0) {
+                        if (decimal & 1) {
+                            binary = "1" + binary;
+                        } else {
+                            binary = "0" + binary;
+                        }
+                        decimal = decimal >> 1;
+                    }
+                    binrayOutput.innerHTML = binary;
+                    }
+                // if the button that is press is for the decimal it will set it back to what the origonal was
+                else if(clickedId == "dec"){
+                    var resetNum = document.getElementById("some1");
+                    resetNum.innerHTML = origonalVal;
+                }
+                    
+            }
+
+        </script> -->
         <div class="value-edit-controls">
             <div class="value-edit-object close-value-editor-button">
                 <span class="value-editor-button">
