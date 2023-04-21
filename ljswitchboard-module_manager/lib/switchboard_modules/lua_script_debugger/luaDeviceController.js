@@ -14,7 +14,7 @@ const modbus_map = require('ljswitchboard-modbus_map');
 class luaDeviceController {
 
     constructor() {
-        this.device = null;
+        self.device = null;
         this.codeEditor = null;
         this.codeEditorSession = null;
         this.codeEditorDoc = null;
@@ -48,7 +48,7 @@ class luaDeviceController {
     }
 
     printInfo() {
-        console.log('Device Name', this.device.cachedName);
+        console.log('Device Name', self.device.cachedName);
         console.log('Num Lines', this.codeEditorDoc.getLength());
         console.log('Num Bytes', this.codeEditorDoc.getValue().length);
     }
@@ -163,14 +163,14 @@ class luaDeviceController {
 
     async stopLuaScript() {
         this.print('disabling LUA_RUN');
-        await this.device.qWrite('LUA_RUN', 0);
+        await self.device.qWrite('LUA_RUN', 0);
         // Wait for the LUA_RUN register to be read-back as the appropriate val.
         return this.getWaitForLuaRunStateChange(0);
     }
 
     async enableLuaScript() {
         this.print('enabling LUA_RUN');
-        await this.device.qWrite('LUA_RUN', 1);
+        await self.device.qWrite('LUA_RUN', 1);
         // Wait for the LUA_RUN register to be read-back as the appropriate val.
         return this.getWaitForLuaRunStateChange(1);
     }
@@ -178,7 +178,7 @@ class luaDeviceController {
     writeLuaSourceSize() {
         this.print('setting LUA_SOURCE_SIZE');
         const sourceSize = this.codeEditorDoc.getValue().length + 3; // Add space for 3 null characters.
-        return this.device.qWrite('LUA_SOURCE_SIZE', sourceSize);
+        return self.device.qWrite('LUA_SOURCE_SIZE', sourceSize);
     }
     
     writeLuaScript() {
@@ -204,7 +204,7 @@ class luaDeviceController {
 
             // Perform Device IO
             console.log('Writing Data', luaDataArray.length);
-            this.device
+            self.device
                 .writeArray('LUA_SOURCE_WRITE',luaDataArray)
                 .then(
                     (data) => {
@@ -233,7 +233,7 @@ class luaDeviceController {
             of data are read at any given time unless there is only 1 remaining
             byte.
             */
-            this.device.readArray('LUA_DEBUG_DATA', numBytes)
+            self.device.readArray('LUA_DEBUG_DATA', numBytes)
                 .then(
                     // Handle successful reads
                     (data) => {
@@ -272,12 +272,12 @@ class luaDeviceController {
 
     enableLuaDebugging() {
         this.print('enabling LUA_DEBUG_ENABLE');
-        return this.device.qWrite('LUA_DEBUG_ENABLE',1);
+        return self.device.qWrite('LUA_DEBUG_ENABLE',1);
     }
 
     enableLuaDebuggingDefault() {
         this.print('enabling LUA_DEBUG_ENABLE_DEFAULT');
-        return this.device.qWrite('LUA_DEBUG_ENABLE_DEFAULT',1);
+        return self.device.qWrite('LUA_DEBUG_ENABLE_DEFAULT',1);
     }
     
     handleNoScriptError(err) {
@@ -290,30 +290,33 @@ class luaDeviceController {
 
         return new Promise(resolve => {
             // Perform Device IO
-            this.device.qWrite('LUA_RUN_DEFAULT',1)
+            self.device.qWrite('LUA_RUN_DEFAULT',1)
                 .then(() => resolve(), this.handleNoScriptError);
         });
     }
 
     disableLuaRunDefault() {
-        this.print('disabling LUA_RUN_DEFAULT');
+        // TODO - this might become an issue becseu nothing in this function is working correctly
+        console.error("self", self)
+        console.error("this", this)
+        self.print('disabling LUA_RUN_DEFAULT');
 
         // Perform Device IO
-        return this.device.qWrite('LUA_RUN_DEFAULT',0);
+        return self.device.qWrite('LUA_RUN_DEFAULT',0);
     }
 
     rebootDevice() {
         this.print('rebooting device LUA_RUN_DEFAULT');
 
         // Perform Device IO
-        return this.device.qWrite('SYSTEM_REBOOT',0x4C4A0002);
+        return self.device.qWrite('SYSTEM_REBOOT',0x4C4A0002);
     }
 
     saveEnableLuaSaveToFlash() {
         this.print('saving LUA_SAVE_TO_FLASH');
 
         // Perform Device IO
-        return this.device.qWrite('LUA_SAVE_TO_FLASH',1);
+        return self.device.qWrite('LUA_SAVE_TO_FLASH',1);
     }
 
     checkForCodeErrors() {
@@ -333,7 +336,7 @@ class luaDeviceController {
 
                 reject();
             } else {
-                const compat = this.codeEditor.checkScriptFWCompatibility(this.device);
+                const compat = this.codeEditor.checkScriptFWCompatibility(self.device);
                 if (compat.isError) {
                     global.showAlert('FW Compatibility error detected, not running script.');
                     this.debuggingLog.setValue(compat.message);
@@ -672,7 +675,7 @@ class luaDeviceController {
     }
 
     setDevice(device) {
-        this.device = device;
+        self.device = device;
     }
 
     setCodeEditor(codeEditor) {
