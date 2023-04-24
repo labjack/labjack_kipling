@@ -145,14 +145,14 @@ function module(){
                   
                   var data = [trace1, trace2];
                   
-                // Plotly.newPlot('myDiv', data);
+                Plotly.newPlot('myDiv', data);
                 self.addData(data)
                 // var newData = getRandomData(self.numDataPointsPerUpdate);
                 // self.plot.setData([newData]);
 
                 // Since the axes don't change, we don't need to call plot.setupGrid()
 
-                self.plot.draw();
+                // self.plot.draw();
 
                 setTimeout(update, self.chartUpdateInterval);
             }
@@ -160,6 +160,40 @@ function module(){
 
         update();
     };
+
+    // this is suposuvly a better way of tring to get d3.js to working order
+    var api = 'https://api.coindesk.com/v1/bpi/historical/close.json?start=2017-12-31&end=2018-04-01';
+    document.addEventListener("DOMContentLoaded", function(event) {
+        fetch(api)
+        .then(function(response){
+            return response.json();
+        })
+        .then(function(data){
+            // WILL DO SOMETHING WITH THE DATA
+        })
+        .then(function(data){
+            var parsedData = parseData(data);
+            drawChart(parsedData);
+        })
+    })
+
+    function parseData(data) {
+        var arr = [];
+        for(var i in data.bpi) {
+            arr.push({
+                date: new Date(i), // date
+                value: +data.bpi[i] // used to convert the string to a number
+            });
+        }
+        return arr;
+    }
+
+    // function drawChart(data) {
+    //     var svgWidth = 600, svgHeight = 400;
+    //     var margin = Margin = {
+    //         top: 20
+    //     }
+    // }
 
     // Constructor(public chartElem: ElementRef){}
     // this is the d3.js testing thing    
