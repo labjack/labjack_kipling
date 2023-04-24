@@ -1,15 +1,30 @@
 <p>Simple Logger</p>
 
 <div id="content">
+	<!-- this is the container that will be used to show the datapoints. -->
 	<div class="demo-container">
-		<div id="area" class="epoch category10" style="height: 200px;"></div>
+		<link rel="styleSheet" herf="style.css">
+		<svg></svg>
+		<script scr="./d3.v4.min.js"></script>
 	</div>
 	<p>Periodically getting real-time data... yay?</p>
-	<p>Time between updates: <input id="updateInterval" type="text" value="" style="text-align: right; width:5em"> milliseconds</p>
+	<p>Time between updates: <input id="updateInterval" type="text" value="10" style="text-align: right; width:5em"> milliseconds</p>
 </div>
 
 <div id="logger-footer"></div>
 
 <script>
+	// import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 	$('#logger-footer').prepend('Flot ' + $.plot.version + ' &ndash; ');
 </script>
+
+
+<!-- <html>  
+	<head>    
+		<link rel="stylesheet" href="index.css">  
+	</head>  
+	<body>    
+		<svg></svg>    
+		<script src="https://d3js.org/d3.v4.min.js"></script>  
+	</body>
+</html> -->

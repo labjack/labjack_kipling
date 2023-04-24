@@ -3,6 +3,7 @@
 	margin: 0 auto;
 	padding: 10px;
 }
+/* the demo container is the css for the graphing thing */
 .demo-container {
 	box-sizing: border-box;
 	width: 850px;

@@ -10,7 +10,12 @@
 
 // Constant that determines device polling rate.  Use an increased rate to aid
 // in user experience.
-var MODULE_UPDATE_PERIOD_MS = 1000;
+const { file } = require('grunt');
+var path = require('path');
+const fs = require('fs');
+
+var MODULE_UPDATE_PERIOD_MS = 100;
+this.yaxisSize = 100
 
 /**
  * Module object that gets automatically instantiated & linked to the appropriate framework.
@@ -18,6 +23,7 @@ var MODULE_UPDATE_PERIOD_MS = 1000;
  */
 function module() {
     this.moduleConstants = {};
+    
 
     this.startupData = {};
     this.moduleName = '';
@@ -29,7 +35,7 @@ function module() {
     this.graphData = [];
     this.displayData = [];
     var totalPoints = 3000;
-
+ 
     this.allowUpdate = false;
     this.getDataSize = function() {
         return self.graphData.length;
@@ -38,6 +44,11 @@ function module() {
         return self.displayData.length;
     };
 
+    const filePath = "C:/ProgramData/LabJack/K3/module_data/register_matrix_fw/data.json"
+    const data = JSON.parse(fs.readFileSync(filePath));
+    console.error("data", data)
+    console.error("serial number?", '{{serialNumber}}')
+    console.warn("this", this)
 
     function getRandomNumber(previousVal) {
         var newVal = previousVal + Math.random() * 10 - 5;
@@ -46,6 +57,15 @@ function module() {
         } else if(newVal > 100) {
             newVal = 100;
         }
+        // soemVal = soemVal + 0.5;
+        // newVal = soemVal + 0.5;
+        // // console.log("someval", soemVal)
+        // if(soemVal >= 950){
+        //     soemVal = 0;
+        // }
+        // console.warn("yaxis", this.yaxisSize)
+        // this.yaxisSize = this.yaxisSize + 1;
+        // initializeFlotPlot();
         return newVal;
     }
     function initializeRandomData(length) {
@@ -77,7 +97,7 @@ function module() {
         }
     }
 
-    this.chartUpdateInterval = 10;
+    this.chartUpdateInterval = 10000;
     this.numDataPointsPerUpdate = 500;
     this.intervalHandle = undefined;
     this.isUpdating = false;
@@ -144,7 +164,7 @@ function module() {
             },
             yaxis: {
                 min: 0,
-                max: 100
+                max: this.yaxisSize
             },
             xaxis: {
                 show: false
@@ -172,7 +192,9 @@ function module() {
      * @param  {[type]} onSuccess   Function to be called when complete.
     **/
     this.onDeviceSelected = function(framework, device, onError, onSuccess) {
-        self.activeDevices = device;
+        this.activeDevices = device;
+        console.error("!!!", device[0].savedAttributes.serialNumber)
+        this.serialNumber = device[0].savedAttributes.serialNumber
         framework.clearConfigBindings();
         framework.setStartupMessage('Reading Device Configuration');
         
@@ -191,7 +213,10 @@ function module() {
         initializeUpdater();
 
         console.log('Template has loaded!!');
+        console.warn("framework", framework)
+        console.warn("io_manager", io_manager)
         var ioi = io_manager.io_interface();
+        console.warn("ioi", ioi)
         var lc = ioi.getLoggerController();
         console.log('We got the logger controller',lc);
         onSuccess();

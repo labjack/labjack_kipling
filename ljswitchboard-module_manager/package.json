@@ -23,6 +23,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "d3": "^7.8.4",
     "handlebars": "4.7.7",
     "sprintf-js": "1.1.2"
   },
