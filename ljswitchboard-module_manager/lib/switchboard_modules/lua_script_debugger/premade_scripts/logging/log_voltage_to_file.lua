@@ -27,7 +27,7 @@ end
 if(passed == 0) then
   print("This Lua script requires an RTC module and a microSD card, but one or both are not detected. These features are only preinstalled on the T7-Pro. Script Stopping")
   -- Writing a 0 to LUA_RUN stops the script
-  MB.W("LUA_RUN", 0)
+  MB.writeName("LUA_RUN", 0)
 end
 
 local filename = "/log1.csv"
@@ -90,4 +90,4 @@ local line = file:read("*all")
 file:close()
 print(line)
 print("Finished Script")
-MB.W(6000, 1, 0);
+MB.writeName("LUA_RUN", 0)
