@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/labjack/labjack_kipling/tree/master/ljswitchboard-io_manager",
   "dependencies": {
-    "async": "1.5.2",
+    "async": "3.2.2",
     "comment-json": "2.x.x",
     "dict": "1.4.0",
     "ffi": "2.3.0",

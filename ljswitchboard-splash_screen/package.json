@@ -39,7 +39,7 @@
   },
   "nodejs": true,
   "dependencies": {
-    "async": "1.5.2",
+    "async": "3.2.2",
     "co": "^4.6.0",
     "concat-stream": "1.5.2",
     "decache": "^4.5.0",

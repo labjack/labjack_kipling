@@ -24,7 +24,7 @@
     "url": "https://github.com/labjack/labjack_kipling/issues"
   },
   "dependencies": {
-    "async": "1.5.2",
+    "async": "3.2.2",
     "cheerio": "1.0.0-rc.3",
     "dict": "1.4.0",
     "q": "1.5.1",

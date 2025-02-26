@@ -21,7 +21,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "async": "1.5.2",
+    "async": "3.2.2",
     "q": "1.5.1"
   },
   "scripts": {
